@@ -1,0 +1,12 @@
+const base=import.meta.env.BASE_URL;
+export default function DynamicSystem(){return <div className="w-screen h-screen overflow-hidden relative bg-primary text-white font-body px-[5vw] py-[5vh]">
+<header className="flex justify-between items-center"><p className="text-[calc(1.5*var(--slide-vw))] font-semibold tracking-[.13em]">SYSTEM DYNAMICS / 22</p><img src={base+"images/logo-white.svg"} crossOrigin="anonymous" alt="Cognirise" className="w-[10vw]"/></header>
+<div className="grid grid-cols-[42vw_1fr] gap-[5vw] mt-[4vh]"><div><h1 className="font-display text-[calc(4.8*var(--slide-vw))] tracking-[-.06em] leading-[1]">Capacity compounds—<span className="text-[#f59ac9]">or collapses.</span></h1><p className="text-[calc(2*var(--slide-vw))] text-[#dce4f0] mt-[4vh]">The same operating system can create a reinforcing learning loop or a firefighting spiral.</p><p className="text-[calc(2*var(--slide-vw))] mt-[5vh] border-l-[.4vw] border-accent pl-[1.5vw]"><b>Action:</b> protect learning capacity before adding demand.</p></div>
+<svg viewBox="0 0 500 500" className="w-[41vw] h-[65vh]" role="img" aria-label="Reinforcing loop from standards to reuse to capacity to learning">
+<defs><marker id="dsArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#db509e"/></marker></defs>
+<circle cx="250" cy="250" r="83" fill="#db509e"/><text x="250" y="238" textAnchor="middle" fill="white" fontSize="24" fontWeight="700">REINFORCING</text><text x="250" y="270" textAnchor="middle" fill="white" fontSize="24" fontWeight="700">LOOP</text>
+<circle cx="250" cy="60" r="58" fill="#f8f7f4"/><text x="250" y="69" textAnchor="middle" fill="#102957" fontSize="22">Standards</text>
+<circle cx="440" cy="250" r="58" fill="#f8f7f4"/><text x="440" y="259" textAnchor="middle" fill="#102957" fontSize="22">Reuse</text>
+<circle cx="250" cy="440" r="58" fill="#f8f7f4"/><text x="250" y="449" textAnchor="middle" fill="#102957" fontSize="22">Capacity</text>
+<circle cx="60" cy="250" r="58" fill="#f8f7f4"/><text x="60" y="259" textAnchor="middle" fill="#102957" fontSize="22">Learning</text>
+<path d="M305 78 Q405 105 427 193 M422 305 Q395 400 307 427 M193 422 Q98 395 78 307 M78 193 Q105 98 193 78" fill="none" stroke="#db509e" strokeWidth="7" markerEnd="url(#dsArrow)"/></svg></div></div>}

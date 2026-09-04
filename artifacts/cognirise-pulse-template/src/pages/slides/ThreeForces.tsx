@@ -1,9 +1,9 @@
 const base=import.meta.env.BASE_URL;
 export default function ThreeForces(){return <div className="w-screen h-screen overflow-hidden relative bg-bg text-text font-body px-[5vw] py-[5vh]">
-<div className="flex justify-between items-center"><p className="text-[1.5vw] tracking-[.13em] font-semibold">OPERATING MODEL / 04</p><img src={base+"images/logo-blue.svg"} crossOrigin="anonymous" alt="Cognirise" className="w-[10vw]"/></div>
-<h1 className="font-display text-[5.2vw] tracking-[-.075em] leading-[.98] mt-[6vh]">Three forces. <span className="text-accent">One accountable team.</span></h1>
+<div className="flex justify-between items-center"><p className="text-[calc(1.5*var(--slide-vw))] tracking-[.13em] font-semibold">OPERATING MODEL / 04</p><img src={base+"images/logo-blue.svg"} crossOrigin="anonymous" alt="Cognirise" className="w-[10vw]"/></div>
+<h1 className="font-display text-[calc(5.2*var(--slide-vw))] tracking-[-.075em] leading-[.98] mt-[6vh]">Three forces. <span className="text-accent">One accountable team.</span></h1>
 <div className="grid grid-cols-3 mt-[8vh] border-y-[.15vw] border-primary">
-<div className="py-[5vh] pr-[2.5vw] border-r border-[#cbd3e1]"><p className="text-[1.5vw] tracking-[.12em] text-muted">01 / HUMAN JUDGMENT</p><h2 className="font-display text-[3.1vw] leading-[1.05] mt-[3vh]">Senior operators make the call</h2></div>
-<div className="py-[5vh] px-[2.5vw] border-r border-[#cbd3e1]"><p className="text-[1.5vw] tracking-[.12em] text-muted">02 / ENGINEERING</p><h2 className="font-display text-[3.1vw] leading-[1.05] mt-[3vh]">Forward-deployed engineers build the system</h2></div>
-<div className="py-[5vh] pl-[2.5vw]"><p className="text-[1.5vw] tracking-[.12em] text-muted">03 / AGENTIC CAPACITY</p><h2 className="font-display text-[3.1vw] leading-[1.05] mt-[3vh]">Governed agents move the work</h2></div></div>
-<p className="text-[2vw] leading-[1.45] mt-[5vh] w-[80vw]">Human judgment sets direction. Engineering makes it real. Agents extend capacity.</p></div>}
+<div className="py-[5vh] pr-[2.5vw] border-r border-[#cbd3e1]"><p className="text-[calc(1.5*var(--slide-vw))] tracking-[.12em] text-muted">01 / HUMAN JUDGMENT</p><h2 className="font-display text-[calc(3.1*var(--slide-vw))] leading-[1.05] mt-[3vh]">Senior operators make the call</h2></div>
+<div className="py-[5vh] px-[2.5vw] border-r border-[#cbd3e1]"><p className="text-[calc(1.5*var(--slide-vw))] tracking-[.12em] text-muted">02 / ENGINEERING</p><h2 className="font-display text-[calc(3.1*var(--slide-vw))] leading-[1.05] mt-[3vh]">Forward-deployed engineers build the system</h2></div>
+<div className="py-[5vh] pl-[2.5vw]"><p className="text-[calc(1.5*var(--slide-vw))] tracking-[.12em] text-muted">03 / AGENTIC CAPACITY</p><h2 className="font-display text-[calc(3.1*var(--slide-vw))] leading-[1.05] mt-[3vh]">Governed agents move the work</h2></div></div>
+<p className="text-[calc(2*var(--slide-vw))] leading-[1.45] mt-[5vh] w-[80vw]">Human judgment sets direction. Engineering makes it real. Agents extend capacity.</p></div>}

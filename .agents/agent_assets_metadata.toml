@@ -29,3 +29,17 @@ mtime_ms = 1788536598448
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b1dfe669-6da3-490a-b000-7e75d6de8b8b/fd22791d-6cd8-49f2-9ddd-2c992efe0798"
 storage_version_token = "1788536599371763"
 content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+
+[[outputs]]
+id = "vYBd6HWtLZ6NFNMKqudNc"
+uri = "file://.local/outputs/Cognirise-Pulse-Consulting-Slide-Library.pptx"
+type = "slides"
+title = "Cognirise Pulse Consulting Slide Library (PPTX)"
+description = "Fresh 61-slide PowerPoint export of the redesigned Cognirise Pulse consulting template, including analytics, strategy, delivery, and canonical consulting frameworks."
+logical_id = "18118b26-f368-411a-8ae3-54a076db96d1"
+content_hash = "sha256:cd3604b11aaab2e12ff4d2a7cd648ac740c86be193a073184056d70fc6e113cc"
+size = 29647279
+mtime_ms = 1788546256784
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/18118b26-f368-411a-8ae3-54a076db96d1/41a6eaf7-d3a9-43dc-a340-fb740793f9cc"
+storage_version_token = "1788546370750864"
+content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"

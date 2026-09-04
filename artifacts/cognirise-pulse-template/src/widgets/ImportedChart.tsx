@@ -46,15 +46,15 @@ interface ImportedChartModel {
 }
 
 const palette = [
-  '#5470C6',
-  '#91CC75',
-  '#FAC858',
-  '#EE6666',
-  '#73C0DE',
-  '#3BA272',
-  '#FC8452',
-  '#9A60B4',
-  '#EA7CCC',
+  '#102957',
+  '#7659DF',
+  '#DB509E',
+  '#FF775D',
+  '#60708D',
+  '#40587E',
+  '#B9A9F2',
+  '#F1A4C9',
+  '#FFC1B5',
 ];
 
 function seriesKey(index: number): string {
@@ -71,8 +71,8 @@ function chartRows(chart: ImportedChartModel) {
 
   return categories.map((category, index) => {
     const values = chart.series.map((series) => series.values[index] ?? null);
-    const total = values.reduce(
-      (sum: number, value) => sum + Math.abs(value ?? 0),
+    const total = values.reduce<number>(
+      (sum, value) => sum + Math.abs(value ?? 0),
       0,
     );
     const scale = percent && total > 0 ? 100 / total : 1;
@@ -299,7 +299,7 @@ export default function ImportedChart({
       style={{
         width: '100%',
         height: '100%',
-        fontFamily: 'Inter, system-ui, sans-serif',
+        fontFamily: 'Inter, Aptos, Arial, sans-serif',
       }}
     >
       {chart.title ? (

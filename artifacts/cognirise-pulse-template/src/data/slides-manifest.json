@@ -142,5 +142,349 @@
     "title": "Bring one process. Leave with a route.",
     "description": "Image-led closing action",
     "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000019",
+    "position": 19,
+    "filepath": "src/pages/slides/Columns5.tsx",
+    "title": "Five levers unlock service capacity.",
+    "description": "Five-column capability layout",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000020",
+    "position": 20,
+    "filepath": "src/pages/slides/Columns6.tsx",
+    "title": "Six moves create a credible delivery rhythm.",
+    "description": "Six-column sequenced layout",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000021",
+    "position": 21,
+    "filepath": "src/pages/slides/BoxGrid4.tsx",
+    "title": "Four choices define the operating model.",
+    "description": "Four-box equal-priority grid",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000022",
+    "position": 22,
+    "filepath": "src/pages/slides/BoxGrid6.tsx",
+    "title": "Six capabilities move in three connected groups.",
+    "description": "Six-box grouped capability grid",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000023",
+    "position": 23,
+    "filepath": "src/pages/slides/ValueChain.tsx",
+    "title": "Value compounds across the full chain.",
+    "description": "Directional value-chain diagram",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000024",
+    "position": 24,
+    "filepath": "src/pages/slides/DynamicSystem.tsx",
+    "title": "Three feedback loops determine adoption.",
+    "description": "Dynamic system with reinforcing feedback",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000025",
+    "position": 25,
+    "filepath": "src/pages/slides/DataFlow.tsx",
+    "title": "Directional data flow",
+    "description": "Directional data-flow diagram",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000026",
+    "position": 26,
+    "filepath": "src/pages/slides/Circular3.tsx",
+    "title": "3-element circular framework",
+    "description": "Three-element circular framework",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000027",
+    "position": 27,
+    "filepath": "src/pages/slides/Circular4.tsx",
+    "title": "4-element circular framework",
+    "description": "Four-element circular framework",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000028",
+    "position": 28,
+    "filepath": "src/pages/slides/Circular5.tsx",
+    "title": "5-element circular framework",
+    "description": "Five-element circular framework",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000029",
+    "position": 29,
+    "filepath": "src/pages/slides/Circular6.tsx",
+    "title": "6-element circular framework",
+    "description": "Six-element circular framework",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000030",
+    "position": 30,
+    "filepath": "src/pages/slides/ArchitectureL123.tsx",
+    "title": "L1 / L2 / L3 system architecture",
+    "description": "Three-level L1 L2 L3 architecture",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000031",
+    "position": 31,
+    "filepath": "src/pages/slides/RadarAssessment.tsx",
+    "title": "Radar assessment with target benchmark",
+    "description": "Radar assessment with target benchmark",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000032",
+    "position": 32,
+    "filepath": "src/pages/slides/KpiScorecard.tsx",
+    "title": "Executive KPI scorecard",
+    "description": "KPI cards and scorecard",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000033",
+    "position": 33,
+    "filepath": "src/pages/slides/BarComparison.tsx",
+    "title": "Bar comparison analysis",
+    "description": "Bar comparison with direct labels",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000034",
+    "position": 34,
+    "filepath": "src/pages/slides/TrendLine.tsx",
+    "title": "Trend-line analysis",
+    "description": "Trend line with target context",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000035",
+    "position": 35,
+    "filepath": "src/pages/slides/DoughnutComposition.tsx",
+    "title": "Doughnut composition analysis",
+    "description": "Doughnut composition chart",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000036",
+    "position": 36,
+    "filepath": "src/pages/slides/BulletProgress.tsx",
+    "title": "Bullet and progress measures",
+    "description": "Bullet and progress view",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000037",
+    "position": 37,
+    "filepath": "src/pages/slides/ExecutiveDashboard.tsx",
+    "title": "Mixed executive dashboard",
+    "description": "Mixed executive dashboard",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000038",
+    "position": 38,
+    "filepath": "src/pages/slides/StrategyOnPage.tsx",
+    "title": "Vision, mission and strategic pillars",
+    "description": "Vision mission and strategic pillars",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000039",
+    "position": 39,
+    "filepath": "src/pages/slides/PhasedRoadmap.tsx",
+    "title": "Phased roadmap with dependencies",
+    "description": "Phased roadmap with milestones and dependencies",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000040",
+    "position": 40,
+    "filepath": "src/pages/slides/ProjectCharter.tsx",
+    "title": "One-page project charter",
+    "description": "One-page executive project charter",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000041",
+    "position": 41,
+    "filepath": "src/pages/slides/ExecutiveRecommendation.tsx",
+    "title": "Executive recommendation and decision ask",
+    "description": "Executive recommendation and decision ask",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000042",
+    "position": 42,
+    "filepath": "src/pages/slides/CurrentToTarget.tsx",
+    "title": "Current-state to target-state transformation",
+    "description": "Current-state to target-state transformation",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000043",
+    "position": 43,
+    "filepath": "src/pages/slides/OutcomeCaseStudy.tsx",
+    "title": "Outcome-led case study",
+    "description": "Outcome-led case study",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000044",
+    "position": 44,
+    "filepath": "src/pages/slides/PrioritizationMatrix.tsx",
+    "title": "Initiative prioritization matrix",
+    "description": "Prioritization matrix",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000045",
+    "position": 45,
+    "filepath": "src/pages/slides/OptionsEvaluation.tsx",
+    "title": "Options evaluation",
+    "description": "Weighted options evaluation",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000046",
+    "position": 46,
+    "filepath": "src/pages/slides/IntegratedWorkstreamPlan.tsx",
+    "title": "Integrated workstream plan",
+    "description": "Integrated workstream plan",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000047",
+    "position": 47,
+    "filepath": "src/pages/slides/RaidRegister.tsx",
+    "title": "RAID and risk register",
+    "description": "RAID and risk register",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000048",
+    "position": 48,
+    "filepath": "src/pages/slides/StakeholderImpact.tsx",
+    "title": "Stakeholder and change-impact map",
+    "description": "Stakeholder and change-impact map",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000049",
+    "position": 49,
+    "filepath": "src/pages/slides/GovernanceRaci.tsx",
+    "title": "Governance and RACI",
+    "description": "Governance and RACI matrix",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000050",
+    "position": 50,
+    "filepath": "src/pages/slides/WorkshopReadout.tsx",
+    "title": "Workshop agenda and readout",
+    "description": "Workshop agenda and readout",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000051",
+    "position": 51,
+    "filepath": "src/pages/slides/MethodologySources.tsx",
+    "title": "Methodology and sources",
+    "description": "Appendix methodology and sources",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000052",
+    "position": 52,
+    "filepath": "src/pages/slides/KanbanBoard.tsx",
+    "title": "Kanban board",
+    "description": "Kanban board",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000053",
+    "position": 53,
+    "filepath": "src/pages/slides/PortersFiveForces.tsx",
+    "title": "Porter's Five Forces",
+    "description": "Porter's Five Forces",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000054",
+    "position": 54,
+    "filepath": "src/pages/slides/SwotAnalysis.tsx",
+    "title": "SWOT analysis",
+    "description": "SWOT analysis",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000055",
+    "position": 55,
+    "filepath": "src/pages/slides/PestleAnalysis.tsx",
+    "title": "PESTLE analysis",
+    "description": "PESTLE analysis",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000056",
+    "position": 56,
+    "filepath": "src/pages/slides/Matrix2x2.tsx",
+    "title": "2 × 2 prioritization matrix",
+    "description": "Two-by-two decision matrix",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000057",
+    "position": 57,
+    "filepath": "src/pages/slides/IssueTree.tsx",
+    "title": "Issue and hypothesis tree",
+    "description": "Issue and hypothesis tree",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000058",
+    "position": 58,
+    "filepath": "src/pages/slides/FishboneAnalysis.tsx",
+    "title": "Fishbone root-cause analysis",
+    "description": "Fishbone root-cause analysis",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000059",
+    "position": 59,
+    "filepath": "src/pages/slides/MaturityModel.tsx",
+    "title": "Capability maturity model",
+    "description": "Capability maturity model",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000060",
+    "position": 60,
+    "filepath": "src/pages/slides/BusinessModelCanvas.tsx",
+    "title": "Business model canvas",
+    "description": "Business model canvas",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000061",
+    "position": 61,
+    "filepath": "src/pages/slides/ForceFieldAnalysis.tsx",
+    "title": "Force-field analysis",
+    "description": "Force-field analysis",
+    "speakerNotes": ""
   }
 ]

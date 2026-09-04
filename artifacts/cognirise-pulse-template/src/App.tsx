@@ -12,7 +12,7 @@
  * check" if this file has been hand-edited and needs repair.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { slides } from '@/slideLoader';
 import type { Action } from '@/.sdm/core/schema';
 import {
@@ -205,6 +205,17 @@ function SlideEditor() {
   );
 }
 
+function prepareExportSlide(node: HTMLDivElement | null) {
+  const slideRoot = node?.firstElementChild;
+  if (!(slideRoot instanceof HTMLElement)) return;
+  slideRoot.style.setProperty('--slide-vw', '19.2px');
+  slideRoot.style.setProperty(
+    '--font-display-family',
+    "'Arial Rounded MT Bold', Arial, sans-serif",
+  );
+  slideRoot.style.setProperty('--font-body-family', 'Aptos, Arial, sans-serif');
+}
+
 // Do not rewrite this component. Each slide must remain wrapped in
 // `<div className="slide">` sized 1920×1080 — the class name and
 // dimensions are part of the platform contract. See the file-level
@@ -217,9 +228,18 @@ function AllSlides() {
           key={slide.id}
           data-slide-id={slide.id}
           className="slide relative aspect-video overflow-hidden"
-          style={{ width: '1920px', height: '1080px' }}
+          style={
+            {
+              width: '1920px',
+              height: '1080px',
+              '--slide-vw': '19.2px',
+            } as CSSProperties
+          }
         >
-          <div className="h-full w-full [&_.h-screen]:!h-full [&_.w-screen]:!w-full">
+          <div
+            ref={prepareExportSlide}
+            className="h-full w-full [&_.h-screen]:!h-full [&_.w-screen]:!w-full"
+          >
             <slide.Component />
           </div>
         </div>
