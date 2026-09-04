@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: enquiries
+    description: Website enquiry and subscription operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,46 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /enquiries:
+    post:
+      operationId: submitEnquiry
+      tags: [enquiries]
+      summary: Submit a Cognirise website enquiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnquiryInput"
+      responses:
+        "201":
+          description: Enquiry accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnquiryReceipt"
+        "400":
+          description: Invalid enquiry
+  /newsletter-subscriptions:
+    post:
+      operationId: subscribeNewsletter
+      tags: [enquiries]
+      summary: Subscribe to Cognirise field notes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsletterSubscriptionInput"
+      responses:
+        "201":
+          description: Subscription accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionReceipt"
+        "400":
+          description: Invalid subscription
 components:
   schemas:
     HealthStatus:
@@ -33,4 +75,100 @@ components:
           type: string
       required:
         - status
+    EnquiryInput:
+      type: object
+      required:
+        - name
+        - email
+        - organization
+        - market
+        - processArea
+        - challenge
+        - consent
+        - sourcePage
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        email:
+          type: string
+          pattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+          maxLength: 254
+        organization:
+          type: string
+          minLength: 2
+          maxLength: 160
+        role:
+          type: string
+          maxLength: 120
+        market:
+          type: string
+          enum: [uae, ksa, turkiye, europe]
+        processArea:
+          type: string
+          maxLength: 120
+        challenge:
+          type: string
+          minLength: 20
+          maxLength: 2000
+        consent:
+          type: boolean
+          const: true
+        sourcePage:
+          type: string
+          minLength: 1
+          maxLength: 200
+        website:
+          type: string
+          maxLength: 0
+          description: Honeypot field that must remain empty.
+    EnquiryReceipt:
+      type: object
+      required: [id, status, createdAt]
+      properties:
+        id:
+          type: string
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+        status:
+          type: string
+          enum: [received]
+        createdAt:
+          type: string
+          format: date-time
+    NewsletterSubscriptionInput:
+      type: object
+      required: [email, market, consent, sourcePage]
+      properties:
+        email:
+          type: string
+          pattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+          maxLength: 254
+        market:
+          type: string
+          enum: [uae, ksa, turkiye, europe]
+        consent:
+          type: boolean
+          const: true
+        sourcePage:
+          type: string
+          minLength: 1
+          maxLength: 200
+        website:
+          type: string
+          maxLength: 0
+          description: Honeypot field that must remain empty.
+    SubscriptionReceipt:
+      type: object
+      required: [id, status, createdAt]
+      properties:
+        id:
+          type: string
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+        status:
+          type: string
+          enum: [subscribed]
+        createdAt:
+          type: string
+          format: date-time
 

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Cognirise Website"
+description = "The production Cognirise marketing website: a responsive UAE-first experience for executive, technology, operations, and public-sector leaders exploring AI-native advisory, engineering, platforms, work, insights, and the Value Scan."
+version = "1.0.0"
+id = "artifacts/cognirise-website"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18741
+
+[services.development]
+run = "pnpm --filter @workspace/cognirise-website run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cognirise-website", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/cognirise-website/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18741"
+BASE_PATH = "/"
