@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "H76o4_LnMGg9VaAN1VCjQ"
+uri = "file://deliverables/cognirise-website-redesign-plan.md"
+type = "text"
+title = "Cognirise Website Redesign Plan"
+description = "Detailed strategy covering research principles, design language, design system, homepage and navigation, CMS and technical architecture, phased delivery, and measurement."
+logical_id = "8816e93f-c489-4078-ab9a-a6f358a8a612"
+content_hash = "sha256:46e5b0c3ef86b21d626d4ba568408842dce6741cae55054b28edae2b4871c0d4"
+size = 25924
+mtime_ms = 1788533038873
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/conversation:3df0fdac-83a6-4108-80cb-b86408996136/8816e93f-c489-4078-ab9a-a6f358a8a612/b5ddb2e3-4fe9-4cd1-b93b-cf78b0b0f534"
+storage_version_token = "1788533040326886"
+content_type = "text/markdown"

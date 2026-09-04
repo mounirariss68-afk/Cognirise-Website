@@ -1,0 +1,1 @@
+- [Market content architecture](market-content-architecture.md) — UAE launches first; other markets use governed content overrides, explicit fallbacks, and independent publishing.
