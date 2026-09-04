@@ -63,20 +63,36 @@ export default function InsightsEditorial() {
   ];
 
   const articles = [
-    { number: "02", title: "The hidden constraints in AI engineering.", copy: "Why prototypes stall before production.", topic: "engineering", url: "/insights/hidden-constraints" },
-    { number: "03", title: "Sovereign control in the public sector.", copy: "Accountability without compromising momentum.", topic: "governance", url: "/insights/sovereign-control" },
-    { number: "04", title: "When systems learn to route work.", copy: "How agents alter the operating flow.", topic: "operations", url: "/insights/systems-routing-work" },
-    { number: "05", title: "The new data baseline.", copy: "Preparing unstructured information for active use.", topic: "engineering", url: "/insights/new-data-baseline" },
-    { number: "06", title: "Investing in capacity, not tools.", copy: "The shift in enterprise technology capital.", topic: "strategy", url: "/insights/investing-capacity" }
+    {
+      number: "01",
+      title: "AI should move the business—not just assist it.",
+      copy: "Redesigning priority work around people, data, controls and intelligent execution.",
+      topics: ["strategy"],
+      url: "/insights/ai-should-move-the-business"
+    },
+    {
+      number: "02",
+      title: "The conditions for AI that can hold up in production.",
+      copy: "Why data, security, governance and architecture are part of the work.",
+      topics: ["engineering"],
+      url: "/insights/foundations-for-production"
+    },
+    {
+      number: "03",
+      title: "From agent experiments to a governed digital workforce.",
+      copy: "Deploying agents with people accountable at every decision point.",
+      topics: ["governance", "operations"],
+      url: "/insights/governed-digital-workforce"
+    }
   ];
 
-  const filteredArticles = activeTopic === "all" ? articles : articles.filter(a => a.topic === activeTopic);
+  const filteredArticles = activeTopic === "all" ? articles : articles.filter(a => a.topics.includes(activeTopic));
 
   const handleTopicSelect = (topicId: string) => {
     if (topicId === "all") {
-      setLocation(location);
+      setLocation("/insights");
     } else {
-      setLocation(`${location}?topic=${topicId}`);
+      setLocation(`/insights?topic=${topicId}`);
     }
   };
 
@@ -310,14 +326,14 @@ export default function InsightsEditorial() {
         </div>
         <div className="ie-route-list">
           {[
-            ["01","Banking & financial services","Build intelligence into the work without compromising control."],
-            ["02","Government & public sector","Sovereign capability for services with public consequence."],
-            ["03","Telecoms","Turn complex operations into a stronger service engine."],
-            ["04","Travel & hospitality","Make service moments more responsive, not more remote."],
-            ["05","Energy & resources","Apply intelligence where safety, scale and continuity meet."],
-            ["06","Manufacturing & conglomerates","Connect the operating picture across the enterprise."]
-          ].map(([number,title,copy]) => (
-            <Link href={`/insights?topic=${encodeURIComponent(title)}`} className="ie-route" key={title}>
+            ["01","Banking & financial services","Build intelligence into the work without compromising control.","governance"],
+            ["02","Government & public sector","Sovereign capability for services with public consequence.","governance"],
+            ["03","Telecoms","Turn complex operations into a stronger service engine.","operations"],
+            ["04","Travel & hospitality","Make service moments more responsive, not more remote.","operations"],
+            ["05","Energy & resources","Apply intelligence where safety, scale and continuity meet.","operations"],
+            ["06","Manufacturing & conglomerates","Connect the operating picture across the enterprise.","operations"]
+          ].map(([number,title,copy,topic]) => (
+            <Link href={`/insights?topic=${topic}`} className="ie-route" key={title}>
               <span>{number}</span>
               <h3>{title}</h3>
               <p>{copy}</p>
