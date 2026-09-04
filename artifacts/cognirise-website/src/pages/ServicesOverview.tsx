@@ -40,9 +40,7 @@ export default function ServicesOverview() {
               Cognirise brings senior operators, engineers and governed agents to the work that needs to change—then remains accountable for making it real.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <Link href="/what-we-do/agentic-enterprise-transformation">
-                <BrandButton>Explore flagship service</BrandButton>
-              </Link>
+              <BrandButton href="/what-we-do/agentic-enterprise-transformation">Explore flagship service</BrandButton>
             </div>
           </div>
           
@@ -151,49 +149,67 @@ export default function ServicesOverview() {
           </p>
         </div>
 
-        <div className="border-t border-foreground">
+        <div className="mt-12 bg-[hsl(var(--brand-deep))] min-h-[600px] lg:h-[700px] flex flex-col lg:flex-row gap-0 lg:gap-1 p-0 lg:p-1 clip-diagonal-top-right">
           {services.map((service, i) => (
-            <div key={service.title}>
-              <button 
-                className={`w-full group flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 px-4 py-6 border-b border-border cursor-pointer transition-all duration-300 hover:bg-[hsl(var(--brand-violet))/5] hover:pl-8 text-left ${openService === i ? 'bg-[hsl(var(--brand-violet))/5] pl-8' : ''}`}
-                onClick={() => setOpenService(openService === i ? -1 : i)}
-              >
-                <span className="text-[10px] font-semibold tracking-widest text-muted-foreground lg:w-16">
+            <button
+              key={service.no}
+              onClick={() => setOpenService(i)}
+              className={`relative overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] flex flex-col justify-between text-left border-0 border-b border-white/10 lg:border lg:border-transparent ${
+                openService === i 
+                  ? 'flex-[3] lg:flex-[4] bg-white/[0.06] lg:bg-white/10 lg:border-white/20' 
+                  : 'flex-[1] lg:flex-[1] bg-white/5 hover:bg-white/10'
+              }`}
+            >
+              {/* Background gradient signal for active */}
+              <div 
+                className={`absolute inset-0 bg-gradient-to-br from-[hsl(var(--brand-violet))/40] via-transparent to-transparent opacity-0 transition-opacity duration-700 ${openService === i ? 'opacity-100' : ''}`} 
+              />
+              
+              <div className="relative z-10 flex items-center justify-between w-full p-4 lg:p-6">
+                <span className={`font-bold font-display transition-all duration-500 ${openService === i ? 'text-4xl lg:text-5xl text-white' : 'text-2xl lg:text-3xl text-white/40'}`}>
                   {service.no}
                 </span>
-                <h3 className="text-2xl md:text-3xl font-semibold flex-1 group-hover:text-[hsl(var(--brand-pink))] transition-colors">
+                {openService !== i && (
+                  <Plus className="w-5 h-5 text-white/40" />
+                )}
+              </div>
+
+              <div className="relative z-10 p-4 lg:p-6 mt-auto">
+                <h3 className={`font-semibold transition-all duration-500 mb-4 ${openService === i ? 'text-3xl lg:text-4xl text-white' : 'text-lg text-white/70 lg:whitespace-nowrap lg:-rotate-90 lg:origin-bottom-left lg:absolute lg:bottom-6 lg:left-8'}`}>
                   {service.title}
                 </h3>
-                <p className="text-sm text-muted-foreground max-w-[300px] hidden lg:block">
-                  {service.short}
-                </p>
-                <div className="hidden lg:flex w-10 justify-end">
-                  {openService === i ? (
-                    <Minus className="h-5 w-5 text-[hsl(var(--brand-pink))]" />
-                  ) : (
-                    <Plus className="h-5 w-5 text-foreground group-hover:text-[hsl(var(--brand-pink))]" />
-                  )}
-                </div>
-              </button>
-              
-              {openService === i && (
-                <div className="bg-[hsl(var(--brand-violet))/5] border-b border-border px-6 py-8 lg:pl-[100px] lg:pr-24 grid grid-cols-1 md:grid-cols-2 gap-8 -mt-[1px]">
-                  <div>
-                    <strong className="block text-[10px] uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-3">How we help</strong>
-                    <p className="text-sm leading-relaxed text-foreground/80">{service.copy}</p>
+                
+                <div 
+                  className={`transition-all duration-700 overflow-hidden ${
+                    openService === i ? 'max-h-[500px] opacity-100 delay-200' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <p className="text-white/80 text-lg leading-relaxed mb-8 max-w-[500px]">
+                    {service.copy}
+                  </p>
+                  <div className="border-t border-white/20 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <strong className="block text-[10px] uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-2">Outcome</strong>
+                      <p className="text-sm text-white font-semibold">{service.outcome}</p>
+                    </div>
+                    <div className="flex md:justify-end items-end">
+                      <BrandButton 
+                        href={
+                          i === 0 ? "/what-we-do/agentic-enterprise-transformation" : 
+                          i === 1 ? "/what-we-do/data-ai-foundations" : 
+                          i === 2 ? "/what-we-do/engineering-with-ai" : 
+                          i === 3 ? "/what-we-do/sovereign-regulated-ai" : 
+                          "/what-we-do/digital-ai-workforce"
+                        } 
+                        variant="inverse"
+                      >
+                        Explore service
+                      </BrandButton>
+                    </div>
                   </div>
-                  <div>
-                    <strong className="block text-[10px] uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-3">The difference</strong>
-                    <p className="text-sm leading-relaxed text-foreground/80">{service.outcome}</p>
-                    {i === 0 && (
-                      <Link href="/what-we-do/agentic-enterprise-transformation" className="inline-block mt-4 text-xs font-bold border-b border-foreground pb-1 hover:text-[hsl(var(--brand-pink))] hover:border-[hsl(var(--brand-pink))]">
-                        Read more →
-                      </Link>
-                    )}
-                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            </button>
           ))}
         </div>
       </section>
@@ -261,14 +277,9 @@ export default function ServicesOverview() {
           <p className="text-lg text-white/80 max-w-[510px] mb-12">
             Start with a process where urgency, complexity and value have already collided. In a focused working session, we will surface the opportunity, constraints and practical route to production.
           </p>
-          <Link href="/value-scan">
-            <button className="group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] pl-5 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[6px_6px_0px_#fff]">
-              <span className="relative z-10">Book a value scan</span>
-              <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-transparent transition-transform duration-300 group-hover:translate-x-1">
-                <ArrowRight className="h-4 w-4" />
-              </div>
-            </button>
-          </Link>
+          <BrandButton href="/value-scan" variant="submit">
+            Book a value scan
+          </BrandButton>
         </div>
       </section>
     </div>

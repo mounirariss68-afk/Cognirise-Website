@@ -15,16 +15,16 @@ export default function CogniOSPlatform() {
     "London · Europe";
 
   const layers = [
-    ["06", "Experience layer", "Bilingual human and agent interactions, designed for real operational context."],
+    ["06", "Experience layer", "Human and agent interactions designed for the operating context."],
     ["05", "Agent layer", "CogniAgents coordinate governed tasks, decisions and specialist actions."],
     ["04", "Knowledge layer", "CogniDocs turns enterprise knowledge into controlled, retrievable context."],
     ["03", "Intelligence layer", "Models, prompts and orchestration selected for the work at hand."],
     ["02", "Integration layer", "Connects the systems where work, data and decisions already live."],
-    ["01", "Foundation layer", "Sovereign infrastructure, data and identity controls beneath every deployment."]
+    ["01", "Foundation layer", "Infrastructure, data and identity controls shaped around the deployment context."]
   ];
 
   const products = [
-    ["01", "CogniTalk", "A bilingual conversational layer for meaningful work between people and enterprise intelligence."],
+    ["01", "CogniTalk", "A conversational layer for meaningful work between people and enterprise intelligence."],
     ["02", "CogniAgents", "Governed agents that coordinate specialist tasks in defined operational environments."],
     ["03", "CogniDocs", "Knowledge made available with the context, access and control the work requires."],
     ["04", "CogniWare", "Composable intelligence capabilities connected to the systems that run the enterprise."]
@@ -47,16 +47,9 @@ export default function CogniOSPlatform() {
               CogniOS connects people, agents, knowledge and enterprise systems so AI can move consequential work—without surrendering control.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <button 
-                onClick={() => document.getElementById("architecture")?.scrollIntoView({ behavior: "smooth" })}
-                className="group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden border border-foreground bg-foreground pl-4 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[4px_4px_0px_hsl(var(--brand-coral))]"
-              >
-                <div className="absolute inset-0 z-0 bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <span className="relative z-10">Read the architecture</span>
-                <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-white text-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:bg-[hsl(var(--brand-coral))] group-hover:text-white">
-                  <ArrowRight className="h-4 w-4" />
-                </div>
-              </button>
+              <BrandButton onClick={() => document.getElementById("architecture")?.scrollIntoView({ behavior: "smooth" })}>
+                Read the architecture
+              </BrandButton>
               <button 
                 onClick={() => document.getElementById("principles")?.scrollIntoView({ behavior: "smooth" })}
                 className="group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]"
@@ -95,7 +88,7 @@ export default function CogniOSPlatform() {
           </div>
           <div className="border-b lg:border-b-0 lg:border-r border-border p-5 lg:p-6">
             <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Language</span>
-            <strong className="text-sm font-semibold text-foreground">Arabic and English, in context</strong>
+            <strong className="text-sm font-semibold text-foreground">People and agents, in context</strong>
           </div>
           <div className="border-r border-border p-5 lg:p-6">
             <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Control</span>
@@ -103,7 +96,7 @@ export default function CogniOSPlatform() {
           </div>
           <div className="p-5 lg:p-6">
             <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Deployment</span>
-            <strong className="text-sm font-semibold text-foreground">Sovereign and regulated environments</strong>
+            <strong className="text-sm font-semibold text-foreground">Boundaries defined for the environment</strong>
           </div>
         </div>
       </section>
@@ -124,7 +117,7 @@ export default function CogniOSPlatform() {
               CogniOS is the connective architecture for enterprise intelligence. It gives the work a governed route from data and systems through agents and knowledge, to the people making consequential decisions.
             </p>
             <p className="mt-8 text-sm leading-relaxed text-muted-foreground max-w-[480px]">
-              It is designed for the conditions that define UAE-first delivery: bilingual operations, sovereignty, organisational context and visible human authority.
+              It is designed around the conditions that define the work: organisational context, visible human authority and clear operating boundaries.
             </p>
           </div>
         </div>
@@ -264,35 +257,150 @@ export default function CogniOSPlatform() {
         </div>
       </section>
 
-      <section className="px-6 md:px-12 py-24 md:py-32 max-w-[1440px] mx-auto w-full">
-        <div className="border-t border-foreground pt-8 flex flex-col lg:flex-row justify-between gap-8 lg:items-end mb-16">
-          <div>
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-4">
-              A connected product family
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-[72px] leading-[0.97] font-semibold max-w-[680px]">
-              Specialist capabilities. A shared operating system.
-            </h2>
+      <section id="architecture" className="mt-20 lg:mt-32 border-y border-foreground mx-6 md:mx-12 max-w-[1440px] xl:mx-auto pt-24 pb-8 relative bg-[hsl(var(--brand-deep))] text-white overflow-hidden clip-diagonal-top-right">
+        {/* Deep space ambient lights */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#070f20] via-[hsl(var(--brand-deep))] to-[#0e162b] z-0" />
+        
+        {/* Core luminous glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[hsl(var(--brand-pink))] rounded-full blur-[180px] opacity-10 pointer-events-none z-0" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[hsl(var(--brand-violet))] rounded-full blur-[100px] opacity-20 pointer-events-none z-0" />
+        
+        {/* Grid lines */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_10%,transparent_100%)] z-0" />
+
+        <div className="relative z-10 px-6 lg:px-12 flex flex-col items-center text-center mb-16">
+          <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-coral))] mb-6">
+            <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
+            A connected product family
           </div>
-          <p className="text-base text-muted-foreground max-w-[300px]">
+          <h2 className="text-4xl md:text-5xl lg:text-[72px] leading-[0.97] font-semibold max-w-[880px] mb-6">
+            Specialist capabilities.<br />
+            A shared operating system.
+          </h2>
+          <p className="text-lg text-white/70 max-w-[500px]">
             CogniOS is the architecture that lets each capability contribute to a governed whole.
           </p>
         </div>
 
-        <div className="border-t border-border">
+        {/* Spatial Architecture Field */}
+        <div className="relative z-10 h-[800px] lg:h-[800px] w-full max-w-[1000px] mx-auto hidden md:block">
+          
+          {/* Signal paths (svg) */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.2))' }}>
+            {/* Lines connecting nodes to center */}
+            <path d="M200,200 Q300,200 500,400" fill="none" stroke="url(#pink-violet)" strokeWidth="1" strokeDasharray="4 4" className="motion-safe:animate-pulse" />
+            <path d="M800,200 Q700,200 500,400" fill="none" stroke="url(#violet-coral)" strokeWidth="1" strokeDasharray="4 4" className="motion-safe:animate-pulse" />
+            <path d="M200,600 Q300,600 500,400" fill="none" stroke="url(#coral-pink)" strokeWidth="1" strokeDasharray="4 4" className="motion-safe:animate-pulse" />
+            <path d="M800,600 Q700,600 500,400" fill="none" stroke="url(#pink-violet)" strokeWidth="1" strokeDasharray="4 4" className="motion-safe:animate-pulse" />
+            
+            {/* Animated signal dots traveling along paths */}
+            <circle r="2" fill="#fff" opacity="0.8" className="motion-reduce:hidden">
+              <animateMotion dur="3s" repeatCount="indefinite" path="M200,200 Q300,200 500,400" />
+            </circle>
+            <circle r="2" fill="#fff" opacity="0.8" className="motion-reduce:hidden">
+              <animateMotion dur="4s" repeatCount="indefinite" path="M800,200 Q700,200 500,400" />
+            </circle>
+            <circle r="2" fill="#fff" opacity="0.8" className="motion-reduce:hidden">
+              <animateMotion dur="3.5s" repeatCount="indefinite" path="M200,600 Q300,600 500,400" />
+            </circle>
+            <circle r="2" fill="#fff" opacity="0.8" className="motion-reduce:hidden">
+              <animateMotion dur="4.5s" repeatCount="indefinite" path="M800,600 Q700,600 500,400" />
+            </circle>
+
+            <defs>
+              <linearGradient id="pink-violet" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="hsl(var(--brand-pink))" />
+                <stop offset="100%" stopColor="hsl(var(--brand-violet))" />
+              </linearGradient>
+              <linearGradient id="violet-coral" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="hsl(var(--brand-violet))" />
+                <stop offset="100%" stopColor="hsl(var(--brand-coral))" />
+              </linearGradient>
+              <linearGradient id="coral-pink" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="hsl(var(--brand-coral))" />
+                <stop offset="100%" stopColor="hsl(var(--brand-pink))" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          {/* Central Core: CogniOS */}
+          <div className="absolute top-[400px] left-[500px] -translate-x-1/2 -translate-y-1/2 w-[180px] h-[180px] flex flex-col items-center justify-center group z-20">
+            <div className="absolute inset-0 bg-white/5 border border-white/20 rotate-45 transition-all duration-700 group-hover:rotate-90 group-hover:bg-white/10 group-hover:border-[hsl(var(--brand-pink))] shadow-[0_0_40px_rgba(255,255,255,0.1)]" />
+            <div className="absolute inset-2 bg-gradient-to-br from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-pink))] opacity-20 rotate-12 transition-all duration-1000 group-hover:rotate-45" />
+            <h3 className="relative z-10 text-2xl font-bold tracking-tight text-white mb-1">CogniOS</h3>
+            <span className="relative z-10 text-[9px] uppercase tracking-widest text-white/70">Orchestration</span>
+          </div>
+
+          {/* Satellite: CogniTalk (Top Left) */}
+          <div className="absolute top-[200px] left-[200px] -translate-x-1/2 -translate-y-1/2 w-[240px] group cursor-pointer">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center group-hover:border-[hsl(var(--brand-coral))] group-hover:bg-[hsl(var(--brand-coral))/10] transition-colors">
+                <span className="text-[10px] font-bold text-[hsl(var(--brand-coral))]">01</span>
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2 group-hover:text-[hsl(var(--brand-coral))] transition-colors">CogniTalk</h4>
+                <p className="text-xs text-white/60 leading-relaxed">Conversational layer for meaningful work between people and intelligence.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Satellite: CogniAgents (Top Right) */}
+          <div className="absolute top-[200px] left-[800px] -translate-x-1/2 -translate-y-1/2 w-[240px] group cursor-pointer text-right">
+            <div className="flex items-start gap-4 flex-row-reverse">
+              <div className="w-10 h-10 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center group-hover:border-[hsl(var(--brand-pink))] group-hover:bg-[hsl(var(--brand-pink))/10] transition-colors">
+                <span className="text-[10px] font-bold text-[hsl(var(--brand-pink))]">02</span>
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2 group-hover:text-[hsl(var(--brand-pink))] transition-colors">CogniAgents</h4>
+                <p className="text-xs text-white/60 leading-relaxed">Governed agents that coordinate specialist tasks in defined environments.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Satellite: CogniDocs (Bottom Left) */}
+          <div className="absolute top-[600px] left-[200px] -translate-x-1/2 -translate-y-1/2 w-[240px] group cursor-pointer">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center group-hover:border-[hsl(var(--brand-violet))] group-hover:bg-[hsl(var(--brand-violet))/10] transition-colors">
+                <span className="text-[10px] font-bold text-[hsl(var(--brand-violet))]">03</span>
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2 group-hover:text-[hsl(var(--brand-violet))] transition-colors">CogniDocs</h4>
+                <p className="text-xs text-white/60 leading-relaxed">Knowledge made available with context, access and control the work requires.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Satellite: CogniWare (Bottom Right) */}
+          <div className="absolute top-[600px] left-[800px] -translate-x-1/2 -translate-y-1/2 w-[240px] group cursor-pointer text-right">
+            <div className="flex items-start gap-4 flex-row-reverse">
+              <div className="w-10 h-10 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center group-hover:border-[hsl(var(--brand-coral))] group-hover:bg-[hsl(var(--brand-coral))/10] transition-colors">
+                <span className="text-[10px] font-bold text-[hsl(var(--brand-coral))]">04</span>
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2 group-hover:text-[hsl(var(--brand-coral))] transition-colors">CogniWare</h4>
+                <p className="text-xs text-white/60 leading-relaxed">Composable capabilities connected to the systems that run the enterprise.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile fallback layout */}
+        <div className="relative z-10 flex flex-col gap-6 px-6 pb-12 md:hidden">
+          <div className="w-full flex items-center justify-center p-8 bg-white/5 border border-[hsl(var(--brand-pink))] shadow-[0_0_20px_rgba(255,255,255,0.1)] mb-4">
+            <div className="text-center">
+              <h3 className="text-2xl font-bold tracking-tight text-white mb-1">CogniOS</h3>
+              <span className="text-[9px] uppercase tracking-widest text-white/70">Orchestration Core</span>
+            </div>
+          </div>
+          
           {products.map(([n, t, c]) => (
-            <div key={t} className="group flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 px-4 py-6 border-b border-border transition-colors hover:bg-[hsl(var(--secondary))] cursor-pointer">
-              <span className="text-[10px] font-semibold tracking-widest text-[hsl(var(--brand-pink))] lg:w-16">
-                {n}
-              </span>
-              <h3 className="text-2xl md:text-3xl font-semibold flex-1">
-                {t}
-              </h3>
-              <p className="text-sm text-muted-foreground max-w-[380px] hidden lg:block">
-                {c}
-              </p>
-              <div className="hidden lg:flex w-10 justify-end">
-                <ArrowRight className="h-5 w-5 text-[hsl(var(--brand-coral))] transition-transform group-hover:translate-x-1" />
+            <div key={t} className="bg-white/5 border border-white/10 p-6 flex items-start gap-4">
+              <div className="w-8 h-8 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center">
+                <span className="text-[10px] font-bold text-[hsl(var(--brand-pink))]">{n}</span>
+              </div>
+              <div>
+                <h4 className="text-lg font-bold mb-2 text-white">{t}</h4>
+                <p className="text-xs text-white/60 leading-relaxed">{c}</p>
               </div>
             </div>
           ))}
@@ -313,18 +421,18 @@ export default function CogniOSPlatform() {
               Intelligence with a clear line of <em className="not-italic text-[hsl(var(--brand-pink))]">authority.</em>
             </h2>
             <p className="text-lg text-white/80 max-w-[430px]">
-              CogniOS is designed to support human decisions, not obscure them. It creates a usable platform for teams operating where language, trust and local control cannot be treated as edge cases.
+               CogniOS is designed to support human decisions, not obscure them. It creates a usable platform for teams operating where context, trust and control cannot be treated as edge cases.
             </p>
           </div>
           
           <div className="border-t border-white/30 lg:self-end">
             <div className="py-4 border-b border-white/20 text-lg font-semibold flex items-center">
               <span className="text-[10px] font-normal tracking-widest text-[hsl(var(--brand-coral))] mr-4 w-6">01</span>
-              Bilingual by design
+               Context designed around the work
             </div>
             <div className="py-4 border-b border-white/20 text-lg font-semibold flex items-center">
               <span className="text-[10px] font-normal tracking-widest text-[hsl(var(--brand-coral))] mr-4 w-6">02</span>
-              Sovereign where it matters
+               Boundaries made explicit
             </div>
             <div className="py-4 border-b border-white/20 text-lg font-semibold flex items-center">
               <span className="text-[10px] font-normal tracking-widest text-[hsl(var(--brand-coral))] mr-4 w-6">03</span>
@@ -336,14 +444,9 @@ export default function CogniOSPlatform() {
             </div>
             
             <div className="mt-12">
-              <Link href="/value-scan">
-                <button className="group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] pl-5 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[6px_6px_0px_#fff]">
-                  <span className="relative z-10">Bring us one process</span>
-                  <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-transparent transition-transform duration-300 group-hover:translate-x-1">
-                    <ArrowRight className="h-4 w-4" />
-                  </div>
-                </button>
-              </Link>
+              <BrandButton href="/value-scan" variant="submit">
+                Bring us one process
+              </BrandButton>
             </div>
           </div>
         </div>

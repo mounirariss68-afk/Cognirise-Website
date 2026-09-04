@@ -29,22 +29,12 @@ export default function AboutPeople() {
               It is the staffing model. Cognirise brings senior advisors, operators and engineers into the work from the first consequential decision.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <button 
-                onClick={() => document.getElementById("model")?.scrollIntoView({ behavior: "smooth" })}
-                className="group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden border border-foreground bg-foreground pl-4 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[4px_4px_0px_hsl(var(--brand-coral))]"
-              >
-                <div className="absolute inset-0 z-0 bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <span className="relative z-10">See the operating model</span>
-                <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-white text-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:bg-[hsl(var(--brand-coral))] group-hover:text-white">
-                  <ArrowRight className="h-4 w-4" />
-                </div>
-              </button>
-              <button 
-                onClick={() => document.getElementById("field")?.scrollIntoView({ behavior: "smooth" })}
-                className="group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]"
-              >
-                Meet the model <ArrowDown className="h-4 w-4" />
-              </button>
+              <BrandButton onClick={() => document.getElementById("model")?.scrollIntoView({ behavior: "smooth" })}>
+                See the operating model
+              </BrandButton>
+              <BrandButton onClick={() => document.getElementById("field")?.scrollIntoView({ behavior: "smooth" })} variant="editorial" icon={<ArrowDown className="h-4 w-4" />}>
+                Meet the model
+              </BrandButton>
             </div>
           </div>
           
@@ -295,14 +285,9 @@ export default function AboutPeople() {
           <p className="text-lg text-white/80 max-w-[500px] mb-12">
             Start with a process where urgency, complexity and value have already collided. We will bring the right people to help surface the opportunity, constraints and practical route forward.
           </p>
-          <Link href="/value-scan">
-            <button className="group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] pl-5 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[6px_6px_0px_#fff]">
-              <span className="relative z-10">Book a value scan</span>
-              <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-transparent transition-transform duration-300 group-hover:translate-x-1">
-                <ArrowRight className="h-4 w-4" />
-              </div>
-            </button>
-          </Link>
+          <BrandButton href="/value-scan" variant="submit">
+            Book a value scan
+          </BrandButton>
         </div>
       </section>
     </div>

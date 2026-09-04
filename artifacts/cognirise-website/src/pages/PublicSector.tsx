@@ -38,9 +38,7 @@ export default function PublicSector() {
               For public-sector work where every decision carries weight: intelligence that is governed, grounded in context and built to serve the people behind the process.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <Link href="/value-scan">
-                <BrandButton>Bring us one process</BrandButton>
-              </Link>
+              <BrandButton href="/value-scan">Bring us one process</BrandButton>
               <button 
                 onClick={() => document.getElementById("plays")?.scrollIntoView({ behavior: "smooth" })}
                 className="group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]"
@@ -79,11 +77,11 @@ export default function PublicSector() {
           </div>
           <div className="border-b lg:border-b-0 lg:border-r border-border p-5 lg:p-6">
             <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Deployment</span>
-            <strong className="text-sm font-semibold text-foreground">Cloud, on-premise or offline</strong>
+            <strong className="text-sm font-semibold text-foreground">Chosen against the mandate</strong>
           </div>
           <div className="border-r border-border p-5 lg:p-6">
             <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Context</span>
-            <strong className="text-sm font-semibold text-foreground">Arabic and English workflows</strong>
+            <strong className="text-sm font-semibold text-foreground">Public work and local realities</strong>
           </div>
           <div className="p-5 lg:p-6">
             <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Model</span>
@@ -124,13 +122,13 @@ export default function PublicSector() {
         
         <div className="absolute bottom-12 lg:bottom-24 left-6 lg:left-16 max-w-[615px] z-10">
           <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/70 mb-4">
-            Sovereignty by design
+            Boundaries by design
           </div>
           <h2 className="text-4xl md:text-5xl lg:text-[80px] font-semibold text-white leading-tight mb-6">
             Control stays in the route.
           </h2>
           <p className="text-white/80 text-base md:text-lg max-w-[450px] leading-relaxed">
-            Where deployment constraints demand it, we can work toward offline and on-premise possibilities—so the operating environment, not an abstract model, sets the boundaries.
+             We make deployment constraints visible before a route is chosen, so the operating environment—not an abstract model—sets the boundaries.
           </p>
         </div>
         
@@ -155,32 +153,32 @@ export default function PublicSector() {
           </p>
         </div>
 
-        <div className="border-t border-foreground">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 h-auto mt-12 bg-border border border-border">
           {plays.map(([num, title, copy], i) => (
-            <div key={title}>
-              <button 
-                className={`w-full group flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 px-4 py-6 border-b border-border cursor-pointer transition-all duration-300 hover:bg-[hsl(var(--brand-violet))/5] hover:pl-8 text-left ${open === i ? 'bg-[hsl(var(--brand-violet))/5] pl-8' : ''}`}
-                onClick={() => setOpen(open === i ? -1 : i)}
-              >
-                <span className="text-[10px] font-semibold tracking-widest text-muted-foreground lg:w-16">
-                  {num}
+            <div 
+              key={title} 
+              className={`group relative bg-white p-8 lg:p-10 flex flex-col justify-between overflow-hidden min-h-[360px] ${i === 2 ? 'md:col-span-2 lg:col-span-1' : ''}`}
+            >
+              {/* Background interaction field */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--brand-violet))/5] via-[hsl(var(--brand-pink))/5] to-[hsl(var(--brand-coral))/5] opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
+              
+              <div className="relative z-10 flex items-center justify-between mb-8">
+                <span className="text-[10px] font-bold tracking-widest text-muted-foreground group-hover:text-[hsl(var(--brand-pink))] transition-colors">
+                  PLAY {num}
                 </span>
-                <h3 className="text-2xl md:text-3xl font-semibold flex-1 group-hover:text-[hsl(var(--brand-pink))] transition-colors">
+                <div className="w-8 h-8 rounded-full border border-border flex items-center justify-center opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 group-hover:border-[hsl(var(--brand-pink))] group-hover:bg-[hsl(var(--brand-pink))] group-hover:text-white transition-all duration-300">
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+              </div>
+              
+              <div className="relative z-10 mt-auto">
+                <h3 className="text-2xl font-semibold mb-4 leading-tight group-hover:text-[hsl(var(--brand-pink))] transition-colors">
                   {title}
                 </h3>
-                <p className="text-sm text-muted-foreground max-w-[320px] hidden lg:block">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {copy}
                 </p>
-                <div className="hidden lg:flex w-10 justify-end">
-                  <Plus className={`h-5 w-5 transition-colors ${open === i ? 'text-[hsl(var(--brand-pink))]' : 'text-foreground group-hover:text-[hsl(var(--brand-pink))]'}`} />
-                </div>
-              </button>
-              
-              {open === i && (
-                <div className="bg-[hsl(var(--brand-violet))/5] border-b border-border px-6 py-8 lg:hidden -mt-[1px]">
-                  <p className="text-sm leading-relaxed text-foreground/80">{copy}</p>
-                </div>
-              )}
+              </div>
             </div>
           ))}
         </div>
@@ -211,7 +209,7 @@ export default function PublicSector() {
               </div>
               <div className="flex items-center border-b border-border pb-4 text-sm font-semibold">
                 <span className="text-[hsl(var(--brand-pink))] text-[10px] tracking-widest w-14">03</span>
-                Work across bilingual knowledge environments
+                Work across complex knowledge environments
               </div>
             </div>
           </div>
@@ -288,14 +286,9 @@ export default function PublicSector() {
           <p className="text-lg text-white/80 max-w-[510px] mb-12">
             Start with a process where public value, complexity and urgency have already converged. In a focused working session, we will surface the operating constraints and a practical route to a governed build.
           </p>
-          <Link href="/value-scan">
-            <button className="group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] pl-5 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[6px_6px_0px_#fff]">
-              <span className="relative z-10">Start a working session</span>
-              <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-transparent transition-transform duration-300 group-hover:translate-x-1">
-                <ArrowRight className="h-4 w-4" />
-              </div>
-            </button>
-          </Link>
+          <BrandButton href="/value-scan" variant="submit">
+            Start a working session
+          </BrandButton>
         </div>
       </section>
     </div>

@@ -25,25 +25,27 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="px-6 md:px-12 pt-8 md:pt-12 max-w-[1440px] mx-auto w-full">
-        <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
+      <section className="px-6 md:px-12 pt-6 md:pt-8 max-w-[1440px] mx-auto w-full relative">
+        <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">
           <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
           {marketLocation} / AI-native advisory & engineering
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-12 lg:gap-16 items-end pb-12 min-h-[60vh] lg:min-h-[70vh]">
-          <div className="pb-4 relative z-10">
-            <h1 className="text-5xl md:text-7xl lg:text-[100px] leading-[0.9] font-semibold mb-8 max-w-[700px]">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.83fr_1.17fr] gap-8 lg:gap-[36px] items-end pb-8 lg:min-h-[690px]">
+          <div className="relative z-10 pb-4">
+            <h1 className="text-[3rem] md:text-7xl lg:text-[6.25vw] xl:text-[100px] leading-[0.94] tracking-[-0.075em] font-semibold mt-7 mb-7 max-w-[690px]">
               Intelligence becomes <em className="not-italic text-[hsl(var(--brand-pink))]">momentum.</em>
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-[480px] mb-10 leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground max-w-[450px] mb-8 leading-relaxed">
               Senior operators, forward-deployed engineers and governed agents moving priority work from ambition into production.
             </p>
-            <div className="flex flex-wrap items-center gap-6">
-              <BrandButton href="/value-scan">Bring us one process</BrandButton>
+            <div className="flex flex-wrap items-center gap-5">
+              <BrandButton href="/value-scan" variant="submit">
+                Bring us one process
+              </BrandButton>
               <BrandButton href="/what-we-do" variant="editorial" icon={<ArrowDown className="h-4 w-4" />}>
                   See how we work
-                </BrandButton>
+              </BrandButton>
             </div>
           </div>
           
@@ -56,11 +58,11 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--brand-deep))] via-transparent to-transparent opacity-60" />
             <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))] via-transparent to-transparent opacity-80" />
             
-            <div className="absolute right-0 top-12 z-10 text-[100px] lg:text-[150px] font-display font-semibold leading-none text-white opacity-15 mix-blend-overlay tracking-tight pointer-events-none">
+            <div className="absolute right-[-10px] top-[50px] z-10 text-[60px] md:text-[100px] lg:text-[150px] font-display font-semibold leading-[0.8] tracking-[-0.1em] text-white opacity-[0.87] mix-blend-overlay pointer-events-none">
               move
             </div>
             
-            <div className="absolute bottom-8 left-8 z-20 text-[10px] uppercase tracking-widest text-white">
+            <div className="absolute bottom-7 left-8 z-20 text-[10px] uppercase tracking-widest text-white">
               <span className="mb-2 block opacity-75">01 / living intelligence</span>
               Not another AI pilot
             </div>
@@ -156,28 +158,59 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="border-t border-foreground">
-          {services.map((service, i) => (
-            <Link key={service.no} href={i === 0 ? "/what-we-do/agentic-enterprise-transformation" : "/what-we-do"}>
-              <div 
-                className={`group flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 px-4 py-8 border-b border-border cursor-pointer transition-all duration-300 hover:bg-[hsl(var(--brand-violet))/5] hover:pl-8 ${openService === i ? 'bg-[hsl(var(--brand-violet))/5] pl-8' : ''}`}
-                onMouseEnter={() => setOpenService(i)}
-              >
-                <span className="text-[10px] font-semibold tracking-widest text-muted-foreground lg:w-16">
-                  {service.no}
+        <div className="mt-12 bg-[hsl(var(--brand-deep))] text-white relative overflow-hidden clip-diagonal-top-right">
+          {/* Ambient Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--brand-deep))] via-[#0a152e] to-[#121c33] z-0" />
+          <div className="absolute top-0 left-1/4 w-[1px] h-full bg-gradient-to-b from-transparent via-[hsl(var(--brand-violet))/30] to-transparent z-0 hidden lg:block" />
+          <div className="absolute top-0 right-1/4 w-[1px] h-full bg-gradient-to-b from-transparent via-[hsl(var(--brand-pink))/30] to-transparent z-0 hidden lg:block" />
+          
+          <div className="relative z-10 p-8 md:p-16 lg:p-24 grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-16">
+            <div className="col-span-1 lg:col-span-2 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-white/10 pb-8 mb-4">
+              <div>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-pink))] block mb-4">
+                  The Route
                 </span>
-                <h3 className="text-2xl md:text-3xl font-semibold flex-1 group-hover:text-[hsl(var(--brand-pink))] transition-colors">
-                  {service.title}
+                <h3 className="text-3xl lg:text-5xl font-semibold leading-tight max-w-[500px]">
+                  From problem to production.
                 </h3>
-                <p className="text-sm text-muted-foreground max-w-[320px] hidden lg:block">
-                  {service.copy}
-                </p>
-                <div className="hidden lg:flex w-10 justify-end">
-                  <Plus className={`h-5 w-5 transition-colors ${openService === i ? 'text-[hsl(var(--brand-pink))]' : 'text-foreground'}`} />
-                </div>
               </div>
-            </Link>
-          ))}
+              <BrandButton href="/what-we-do" variant="inverse" className="mt-6 md:mt-0">
+                Explore all services
+              </BrandButton>
+            </div>
+
+            {[
+              { no: "01", title: "Agentic enterprise transformation", url: "/what-we-do/agentic-enterprise-transformation", desc: "Find the work worth changing. Rebuild it around intelligence.", pos: "lg:pr-12" },
+              { no: "02", title: "Data & AI foundations", url: "/what-we-do/data-ai-foundations", desc: "Make data, controls and architecture ready for what comes next.", pos: "lg:mt-32 lg:pl-12" },
+              { no: "03", title: "Engineering with AI", url: "/what-we-do/engineering-with-ai", desc: "Ship production systems with forward-deployed engineering teams.", pos: "lg:pr-12" },
+              { no: "04", title: "Sovereign & regulated AI", url: "/what-we-do/sovereign-regulated-ai", desc: "Build local control, security and explainability into the work.", pos: "lg:mt-32 lg:pl-12" },
+              { no: "05", title: "Digital AI workforce", url: "/what-we-do/digital-ai-workforce", desc: "Deploy governed agents into real operating environments.", pos: "lg:col-span-2 lg:mx-auto lg:text-center lg:w-1/2 lg:mt-16" }
+            ].map((service) => (
+              <Link key={service.no} href={service.url}>
+                <div className={`group relative block cursor-pointer transition-all duration-500 ${service.pos}`}>
+                  {/* Signal line connector - visible on hover */}
+                  <div className="absolute left-[-20px] top-4 w-[2px] h-0 bg-gradient-to-b from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))] transition-all duration-500 group-hover:h-full lg:hidden" />
+                  
+                  {/* Giant ambient number */}
+                  <div className="absolute -top-10 -left-6 text-[100px] lg:text-[140px] font-display font-bold leading-none text-white/5 transition-colors duration-500 group-hover:text-[hsl(var(--brand-pink))/10] pointer-events-none select-none z-0">
+                    {service.no}
+                  </div>
+                  
+                  <div className="relative z-10 pl-6 lg:pl-0 border-l lg:border-l-0 border-white/10 lg:border-transparent group-hover:border-white/30 transition-colors">
+                    <span className="text-[10px] font-semibold tracking-widest text-[hsl(var(--brand-coral))] block mb-3 opacity-0 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
+                      Explore Service <ArrowRight className="inline-block w-3 h-3 ml-1" />
+                    </span>
+                    <h4 className="text-2xl md:text-3xl font-semibold mb-4 transition-transform duration-500 group-hover:translate-x-2">
+                      {service.title}
+                    </h4>
+                    <p className="text-sm md:text-base text-white/60 max-w-[340px] leading-relaxed transition-colors group-hover:text-white/90 lg:mx-auto">
+                      {service.desc}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -242,15 +275,22 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 border-t border-border">
-          {["Banking & financial services", "Government & public sector", "Telecoms", "Travel & hospitality", "Energy & resources", "Manufacturing & conglomerates"].map((ind, i) => (
-            <Link key={ind} href={ind === "Government & public sector" ? "/industries/public-sector" : "/industries"}>
+          {[
+            { title: "Banking & financial services", url: "/industries/banking" },
+            { title: "Government & public sector", url: "/industries/public-sector" },
+            { title: "Telecoms", url: "/industries/telecoms" },
+            { title: "Travel & hospitality", url: "/industries/travel" },
+            { title: "Energy & resources", url: "/industries/energy" },
+            { title: "Manufacturing & conglomerates", url: "/industries/manufacturing" }
+          ].map((ind, i) => (
+            <Link key={ind.title} href={ind.url}>
               <div className={`group flex items-center justify-between p-6 border-b border-border cursor-pointer transition-colors hover:bg-[hsl(var(--secondary))] ${i % 2 === 0 ? 'md:border-r' : ''}`}>
                 <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-semibold tracking-widest text-muted-foreground">
+                  <span className="text-[10px] font-semibold tracking-widest text-muted-foreground group-hover:text-[hsl(var(--brand-pink))] transition-colors">
                     0{i + 1}
                   </span>
-                  <h3 className="text-lg md:text-xl font-semibold">
-                    {ind}
+                  <h3 className="text-lg md:text-xl font-semibold group-hover:text-[hsl(var(--brand-pink))] transition-colors">
+                    {ind.title}
                   </h3>
                 </div>
                 <ArrowRight className="h-5 w-5 text-[hsl(var(--brand-coral))] transition-transform group-hover:translate-x-1" />
@@ -277,14 +317,9 @@ export default function Home() {
           <p className="text-lg text-white/80 max-w-[500px] mb-12">
             Start with a process where urgency, complexity and value have already collided. In one focused working session, we will surface the opportunity, constraints and practical route to production.
           </p>
-          <Link href="/value-scan">
-            <button className="group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] pl-5 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[6px_6px_0px_#fff]">
-              <span className="relative z-10">Book a value scan</span>
-              <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-transparent transition-transform duration-300 group-hover:translate-x-1">
-                <ArrowRight className="h-4 w-4" />
-              </div>
-            </button>
-          </Link>
+          <BrandButton href="/value-scan" variant="submit">
+            Book a value scan
+          </BrandButton>
         </div>
       </section>
     </div>

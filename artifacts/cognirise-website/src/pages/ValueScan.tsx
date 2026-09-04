@@ -3,6 +3,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { useSubmitEnquiry } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMarketStore } from "@/store/market";
+import { BrandButton } from "@/components/ui/brand-button";
 
 export default function ValueScan() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -13,7 +14,9 @@ export default function ValueScan() {
     company: "",
     role: "",
     processArea: "",
-    processContext: "",
+    operatingContext: "",
+    stakeholders: "",
+    intendedDecision: "",
     consent: false,
     website: "",
   });
@@ -38,6 +41,8 @@ export default function ValueScan() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    const challengeContext = `Context: ${formData.operatingContext}\nStakeholders: ${formData.stakeholders}\nIntended Decision: ${formData.intendedDecision}`;
+
     // Check required fields
     if (
       !formData.firstName ||
@@ -45,12 +50,12 @@ export default function ValueScan() {
       !formData.email ||
       !formData.company ||
       !formData.processArea ||
-      formData.processContext.trim().length < 20 ||
+      !formData.operatingContext ||
       !formData.consent
     ) {
       toast({
         title: "Required fields missing",
-        description: "Complete the required fields, add at least 20 characters of context, and confirm consent.",
+        description: "Complete the required fields and confirm consent.",
         variant: "destructive"
       });
       return;
@@ -64,7 +69,7 @@ export default function ValueScan() {
         role: formData.role || undefined,
         market,
         processArea: formData.processArea,
-        challenge: formData.processContext,
+        challenge: challengeContext,
         consent: true,
         sourcePage: window.location.pathname,
         website: formData.website,
@@ -208,23 +213,52 @@ export default function ValueScan() {
                     </select>
                   </div>
 
-                  <div className="space-y-3">
-                    <label htmlFor="processContext" className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block flex justify-between">
-                      <span>The process under pressure <span className="text-[hsl(var(--brand-pink))]">*</span></span>
-                      <span className="font-normal opacity-50 lowercase tracking-normal">20–2,000 characters</span>
-                    </label>
-                    <textarea 
-                      id="processContext"
-                      name="processContext"
-                      value={formData.processContext}
-                      onChange={handleChange}
-                      rows={4}
-                      minLength={20}
-                      maxLength={2000}
-                      required
-                      className="w-full bg-[hsl(var(--secondary))] border border-border p-4 outline-none focus:border-foreground transition-colors text-sm resize-none"
-                      placeholder="Where does the work get stuck? What decisions, data or hand-offs are constraining the outcome?"
-                    />
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <label htmlFor="operatingContext" className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block flex justify-between">
+                        <span>Operating Context <span className="text-[hsl(var(--brand-pink))]">*</span></span>
+                      </label>
+                      <textarea 
+                        id="operatingContext"
+                        name="operatingContext"
+                        value={formData.operatingContext}
+                        onChange={handleChange}
+                        rows={2}
+                        required
+                        className="w-full bg-[hsl(var(--secondary))] border border-border p-4 outline-none focus:border-foreground transition-colors text-sm resize-none"
+                        placeholder="Where does the work get stuck? What decisions, data or hand-offs are constraining the outcome?"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <label htmlFor="stakeholders" className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block flex justify-between">
+                        <span>Stakeholders (Optional)</span>
+                      </label>
+                      <input 
+                        type="text"
+                        id="stakeholders"
+                        name="stakeholders"
+                        value={formData.stakeholders}
+                        onChange={handleChange}
+                        className="w-full h-12 bg-transparent border-b border-border outline-none focus:border-foreground transition-colors text-sm px-0 rounded-none placeholder:text-muted-foreground/50"
+                        placeholder="Who holds accountability for this process today?"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <label htmlFor="intendedDecision" className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block flex justify-between">
+                        <span>Intended Decision (Optional)</span>
+                      </label>
+                      <input 
+                        type="text"
+                        id="intendedDecision"
+                        name="intendedDecision"
+                        value={formData.intendedDecision}
+                        onChange={handleChange}
+                        className="w-full h-12 bg-transparent border-b border-border outline-none focus:border-foreground transition-colors text-sm px-0 rounded-none placeholder:text-muted-foreground/50"
+                        placeholder="What specific outcome or decision are you trying to accelerate?"
+                      />
+                    </div>
                   </div>
 
                   <div className="pt-6">
@@ -253,18 +287,14 @@ export default function ValueScan() {
                       aria-hidden="true"
                       className="absolute left-[-9999px]"
                     />
-                    <button 
+                    <BrandButton 
                       type="submit"
-                      disabled={submitEnquiry.isPending}
-                      className="group relative inline-flex min-h-[50px] w-full md:w-auto items-center justify-between md:justify-start gap-8 overflow-hidden bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] pl-6 pr-2 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[6px_6px_0px_hsl(var(--brand-deep))]"
+                      variant="submit"
+                      isLoading={submitEnquiry.isPending}
+                      className="w-full md:w-auto min-h-[50px] justify-between md:justify-start"
                     >
-                      <span className="relative z-10">
-                        {submitEnquiry.isPending ? "Submitting..." : "Submit request"}
-                      </span>
-                      <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-white/20 transition-transform duration-300 group-hover:bg-white group-hover:text-foreground">
-                        <ArrowRight className="h-4 w-4" />
-                      </div>
-                    </button>
+                      {submitEnquiry.isPending ? "Submitting..." : "Submit request"}
+                    </BrandButton>
                   </div>
                 </form>
               </>

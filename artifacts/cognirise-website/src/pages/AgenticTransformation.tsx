@@ -38,9 +38,7 @@ export default function AgenticTransformation() {
               Agentic Enterprise Transformation brings senior operators, forward-deployed engineers and governed agents together around the processes that matter most.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <Link href="/value-scan">
-                <BrandButton>Bring us one process</BrandButton>
-              </Link>
+              <BrandButton href="/value-scan">Bring us one process</BrandButton>
               <button 
                 onClick={() => document.getElementById("model")?.scrollIntoView({ behavior: "smooth" })}
                 className="group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]"
@@ -154,38 +152,39 @@ export default function AgenticTransformation() {
           </p>
         </div>
 
-        <div className="border-t border-foreground">
-          {journey.map(([num, title, copy], i) => (
-            <div key={title}>
-              <button 
-                className={`w-full group flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 px-4 py-6 border-b border-border cursor-pointer transition-all duration-300 hover:bg-[hsl(var(--brand-violet))/5] hover:pl-8 text-left ${openStep === i ? 'bg-[hsl(var(--brand-violet))/5] pl-8' : ''}`}
-                onClick={() => setOpenStep(openStep === i ? -1 : i)}
+        <div className="mt-16 pb-12">
+          {/* Spatial Route Map */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-auto lg:h-[450px]">
+            {journey.map(([num, title, copy], i) => (
+              <div 
+                key={title} 
+                className="group relative bg-[hsl(var(--brand-deep))] text-white p-8 overflow-hidden flex flex-col justify-end min-h-[300px]"
               >
-                <span className="text-[10px] font-semibold tracking-widest text-muted-foreground lg:w-16">
+                {/* Gradient background reveal */}
+                <div className={`absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-700 group-hover:opacity-100 ${
+                  i === 0 ? 'from-[hsl(var(--brand-violet))/40] to-transparent' :
+                  i === 1 ? 'from-[hsl(var(--brand-violet))/30] via-[hsl(var(--brand-pink))/20] to-transparent' :
+                  i === 2 ? 'from-[hsl(var(--brand-pink))/40] to-transparent' :
+                  'from-[hsl(var(--brand-pink))/30] via-[hsl(var(--brand-coral))/20] to-transparent'
+                }`} />
+                
+                {/* Spatial number */}
+                <div className="absolute top-4 right-4 text-[100px] font-display font-bold leading-none text-white/5 group-hover:text-white/10 transition-colors duration-500 pointer-events-none select-none z-0">
                   {num}
-                </span>
-                <h3 className="text-2xl md:text-3xl font-semibold flex-1 group-hover:text-[hsl(var(--brand-pink))] transition-colors">
-                  {title}
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-[335px] hidden lg:block">
-                  {copy}
-                </p>
-                <div className="hidden lg:flex w-10 justify-end">
-                  {openStep === i ? (
-                    <Minus className="h-5 w-5 text-[hsl(var(--brand-pink))]" />
-                  ) : (
-                    <Plus className="h-5 w-5 text-foreground group-hover:text-[hsl(var(--brand-pink))]" />
-                  )}
                 </div>
-              </button>
-              
-              {openStep === i && (
-                <div className="bg-[hsl(var(--brand-violet))/5] border-b border-border px-6 py-8 lg:hidden -mt-[1px]">
-                  <p className="text-sm leading-relaxed text-foreground/80">{copy}</p>
+                
+                <div className="relative z-10 border-l border-[hsl(var(--brand-pink))] pl-6 mt-12 transition-transform duration-500 group-hover:translate-x-2">
+                  <span className="text-[10px] font-bold tracking-widest text-[hsl(var(--brand-pink))] mb-4 block uppercase">Phase {num}</span>
+                  <h3 className="text-xl md:text-2xl font-semibold mb-4 leading-tight">
+                    {title}
+                  </h3>
+                  <p className="text-sm text-white/70 leading-relaxed max-w-[280px]">
+                    {copy}
+                  </p>
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -291,14 +290,9 @@ export default function AgenticTransformation() {
           <p className="text-lg text-white/80 max-w-[515px] mb-12">
             Start with the work where urgency, complexity and value have already collided. In a focused working session, we surface the opportunity, constraints and a practical route to production.
           </p>
-          <Link href="/value-scan">
-            <button className="group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] pl-5 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[6px_6px_0px_#fff]">
-              <span className="relative z-10">Book a value scan</span>
-              <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-transparent transition-transform duration-300 group-hover:translate-x-1">
-                <ArrowRight className="h-4 w-4" />
-              </div>
-            </button>
-          </Link>
+          <BrandButton href="/value-scan" variant="submit">
+            Book a value scan
+          </BrandButton>
         </div>
       </section>
     </div>

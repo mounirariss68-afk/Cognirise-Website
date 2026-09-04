@@ -145,43 +145,74 @@ export default function IndustriesOverview() {
           </p>
         </div>
 
-        <div className="border-t border-foreground">
-          {sectors.map(([num, title, view, copy], i) => (
-            <div key={title}>
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8 lg:gap-16 border-t border-border pt-12">
+          {/* Sector Selector */}
+          <div className="flex flex-col gap-2">
+            {[
+              { num: "01", title: "Banking & financial services", url: "/industries/banking" },
+              { num: "02", title: "Government & public sector", url: "/industries/public-sector" },
+              { num: "03", title: "Telecoms", url: "/industries/telecoms" },
+              { num: "04", title: "Travel & hospitality", url: "/industries/travel" },
+              { num: "05", title: "Energy & resources", url: "/industries/energy" },
+              { num: "06", title: "Manufacturing", url: "/industries/manufacturing" }
+            ].map((sector, i) => (
               <button 
-                className={`w-full group flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 px-4 py-6 border-b border-border cursor-pointer transition-all duration-300 hover:bg-[hsl(var(--brand-violet))/5] hover:pl-8 text-left ${active === i ? 'bg-[hsl(var(--brand-violet))/5] pl-8' : ''}`}
-                onClick={() => setActive(active === i ? -1 : i)}
+                key={sector.title}
+                onClick={() => setActive(i)}
+                className={`group flex items-center justify-between p-4 border transition-all text-left ${active === i ? 'bg-[hsl(var(--brand-deep))] text-white border-[hsl(var(--brand-deep))]' : 'border-transparent hover:border-border hover:bg-muted/30'}`}
               >
-                <span className="text-[10px] font-semibold tracking-widest text-muted-foreground lg:w-16">
-                  {num}
-                </span>
-                <h3 className="text-2xl md:text-3xl font-semibold flex-1 group-hover:text-[hsl(var(--brand-pink))] transition-colors">
-                  {title}
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-[320px] hidden lg:block">
-                  {active === i ? copy : view}
-                </p>
-                <div className="hidden lg:flex w-10 justify-end">
-                  {active === i ? (
-                    <Plus className="h-5 w-5 text-[hsl(var(--brand-pink))]" />
-                  ) : (
-                    <ArrowRight className="h-5 w-5 text-foreground group-hover:text-[hsl(var(--brand-pink))]" />
-                  )}
+                <div className="flex items-center gap-3">
+                  <span className={`text-[10px] font-semibold tracking-widest ${active === i ? 'text-[hsl(var(--brand-pink))]' : 'text-muted-foreground'}`}>
+                    {sector.num}
+                  </span>
+                  <span className="font-semibold text-sm">{sector.title}</span>
                 </div>
+                {active === i && <ArrowRight className="h-4 w-4 text-[hsl(var(--brand-coral))]" />}
               </button>
-              
-              {active === i && (
-                <div className="bg-[hsl(var(--brand-violet))/5] border-b border-border px-6 py-8 lg:hidden -mt-[1px]">
-                  <p className="text-sm leading-relaxed text-foreground/80 mb-4">{view}</p>
-                  <p className="text-sm leading-relaxed text-foreground/80">{copy}</p>
-                  
-                  {i === 1 && (
-                    <BrandButton href="/industries/public-sector" variant="editorial" className="mt-6">Explore Public Sector</BrandButton>
-                  )}
+            ))}
+          </div>
+
+          {/* Value Leak Map */}
+          <div className="bg-[hsl(var(--brand-deep))] text-white p-8 lg:p-12 relative overflow-hidden group min-h-[500px]">
+            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--brand-violet))/20] to-[hsl(var(--brand-coral))/20] opacity-50 transition-opacity duration-700 group-hover:opacity-100 pointer-events-none" />
+            <div className="absolute inset-0 bg-[url('/images/cognirise/site-insights.jpg')] bg-cover bg-center mix-blend-overlay opacity-20 pointer-events-none" />
+            
+            <div className="relative z-10 flex flex-col h-full justify-between gap-12">
+              <div>
+                <h3 className="text-3xl lg:text-5xl font-semibold mb-8 tracking-tight">
+                  {sectors[active][1]}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mt-8">
+                  <div>
+                    <h4 className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-3">Operating Pressure</h4>
+                    <p className="text-sm leading-relaxed text-white/80">{sectors[active][2]}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-3">The Agentic Route</h4>
+                    <p className="text-sm leading-relaxed text-white/80">{sectors[active][3]}</p>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mt-12 border-t border-white/20 pt-8">
+                <BrandButton 
+                  href={
+                    active === 0 ? "/industries/banking" : 
+                    active === 1 ? "/industries/public-sector" : 
+                    active === 2 ? "/industries/telecoms" : 
+                    active === 3 ? "/industries/travel" : 
+                    active === 4 ? "/industries/energy" : "/industries/manufacturing"
+                  } 
+                  variant="inverse"
+                >
+                  Explore {sectors[active][1]}
+                </BrandButton>
+                <BrandButton href="/value-scan" variant="editorial" className="text-white border-white/40 hover:text-[hsl(var(--brand-pink))] hover:border-[hsl(var(--brand-pink))]">
+                  Identify value leaks
+                </BrandButton>
+              </div>
             </div>
-          ))}
+          </div>
         </div>
       </section>
 
@@ -244,14 +275,9 @@ export default function IndustriesOverview() {
           <p className="text-lg text-white/80 max-w-[500px] mb-12">
             Start with a process where urgency, complexity and value have already collided. In one focused working session, we will surface the opportunity, constraints and practical route to production.
           </p>
-          <Link href="/value-scan">
-            <button className="group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] pl-5 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[6px_6px_0px_#fff]">
-              <span className="relative z-10">Book a value scan</span>
-              <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-transparent transition-transform duration-300 group-hover:translate-x-1">
-                <ArrowRight className="h-4 w-4" />
-              </div>
-            </button>
-          </Link>
+          <BrandButton href="/value-scan" variant="submit">
+            Book a value scan
+          </BrandButton>
         </div>
       </section>
     </div>

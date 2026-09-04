@@ -57,18 +57,18 @@ const articles = {
           The hardest part of AI isn't the model. It's the environment around the model. When a promising prototype fails to reach production, it is rarely because the intelligence wasn't good enough. It fails because the enterprise wasn't ready to support it.
         </p>
         <p>
-          Production demands a different set of conditions: deterministic access control, sovereign data boundaries, real-time observability, and a robust integration layer. You cannot paste a conversational interface onto a fragmented data estate and call it a platform.
+          Production demands a different set of questions: who may access what, where data may move, what the operating team can observe, and how the system connects to the wider estate. A conversational interface alone does not answer them.
         </p>
         <h3>The integration reality</h3>
         <p>
           AI needs a place to operate. It needs a structured route to enterprise knowledge. If your documentation is a mess of conflicting versions, an LLM will simply hallucinate at scale. The foundation of any AI transformation is data hygiene and semantic architecture.
         </p>
         <p>
-          The CogniOS architecture approaches this systematically. Before we orchestrate agents, we ensure the knowledge layer (CogniDocs) provides controlled, retrievable context. The integration layer must connect securely to the systems of record.
+          The CogniOS architecture approaches this systematically. Before agents are orchestrated, the knowledge layer and integration route need to be designed around controlled context and the systems of record.
         </p>
-        <h3>Sovereignty by design</h3>
+        <h3>Boundaries by design</h3>
         <p>
-          For public sector and regulated industries in the UAE, the rules of engagement are clear. Data cannot leak. Control must remain local. The foundation layer must enforce these boundaries mathematically, not just by policy. When the foundations are solid, intelligence can scale safely.
+          For public-sector and regulated work, the relevant boundaries must be made explicit before architecture choices are made. Data location, access, authority and evidence requirements should shape the foundation rather than appear as a policy note at the end.
         </p>
       </>
     )
@@ -96,7 +96,7 @@ const articles = {
           Agents do not replace human authority; they require it to be more precise. A governed digital workforce operates within strict, declarative boundaries. An agent might have the authority to process an invoice up to $10,000 if it matches a purchase order, but it must flag anything anomalous to a human operator.
         </p>
         <p>
-          This is where the Experience Layer of CogniOS becomes critical. The interface between human and agent must be bilingual, context-aware, and designed to present the information necessary for a human to make a rapid, informed judgment. 
+          This is where the Experience Layer of CogniOS becomes critical. The interface between human and agent must fit the operating context and present the information necessary for a person to make an informed judgment. 
         </p>
         <p>
           The digital workforce is not an IT project. It is a new way of organizing the enterprise. Start with one process, define the boundaries, and build the controls before you scale.
@@ -151,9 +151,7 @@ export default function InsightArticle() {
             <p className="text-muted-foreground mb-8 max-w-[400px]">
               Start with one process under pressure. In a focused working session, we surface the opportunity and practical route to production.
             </p>
-            <Link href="/value-scan">
-              <BrandButton>Book a value scan</BrandButton>
-            </Link>
+            <BrandButton href="/value-scan">Book a value scan</BrandButton>
           </div>
         </div>
       </article>

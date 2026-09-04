@@ -211,12 +211,35 @@ export function Shell({ children }: { children: React.ReactNode }) {
     
     document.title = meta.title;
     
-    const setMeta = (selector: string, attribute: string, value: string) => {
-      const node = document.head.querySelector<HTMLMetaElement>(selector);
+    const setMeta = (selector: string, attribute: string, value: string, createIfMissing: boolean = false) => {
+      let node = document.head.querySelector<HTMLMetaElement>(selector);
+      if (!node && createIfMissing) {
+        node = document.createElement("meta");
+        const match = selector.match(/\[([a-zA-Z-]+)="([^"]+)"\]/);
+        if (match) {
+          node.setAttribute(match[1], match[2]);
+        }
+        document.head.appendChild(node);
+      }
       if (node) node.setAttribute(attribute, value);
     };
 
-    setMeta('meta[name="description"]', "content", meta.description);
+    const setLink = (rel: string, href: string) => {
+      let node = document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+      if (!node) {
+        node = document.createElement("link");
+        node.setAttribute("rel", rel);
+        document.head.appendChild(node);
+      }
+      node.setAttribute("href", href);
+    };
+
+    setMeta('meta[name="description"]', "content", meta.description, true);
+    setMeta('meta[property="og:title"]', "content", meta.title, true);
+    setMeta('meta[property="og:description"]', "content", meta.description, true);
+    setMeta('meta[name="twitter:title"]', "content", meta.title, true);
+    setMeta('meta[name="twitter:description"]', "content", meta.description, true);
+    setLink("canonical", window.location.origin + location);
   }, [location]);
 
   useEffect(() => {
@@ -245,16 +268,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-[100dvh] flex-col">
       <header
-        className={`fixed top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur transition-all duration-300 ${
-          scrolled ? "py-3" : "py-5"
-        }`}
+        className={`fixed top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur transition-colors duration-300 flex items-center h-[72px] md:h-[82px]`}
       >
         <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-6 md:px-12">
-          <Link href="/" className="z-50 relative flex items-center h-full">
+          <Link href="/" className="z-50 relative flex items-center h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2">
             <img
               src="/images/cognirise/logo-blue.svg"
               alt="Cognirise"
-              className={`object-contain origin-left transition-all duration-300 ${scrolled ? "h-6 md:h-7" : "h-8 md:h-10"}`}
+              className="object-contain origin-left w-[108px] md:w-[116px] lg:w-[124px] xl:w-[128px]"
             />
           </Link>
 
@@ -266,6 +287,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   className="relative h-full flex items-center px-4"
                   onMouseEnter={() => item.items ? handleMouseEnter(item.label) : handleMouseLeave()}
                   onMouseLeave={handleMouseLeave}
+                  onFocus={() => item.items && handleMouseEnter(item.label)}
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                      handleMouseLeave();
+                    }
+                  }}
                 >
                   <Link href={item.href} className="group py-2 flex items-center gap-1.5 focus-visible:outline-none">
                     <span
@@ -317,7 +344,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 <div key={m} className="flex items-center gap-2">
                   <button 
                     onClick={() => setMarket(m as any)} 
-                    className={`transition-colors hover:text-[hsl(var(--brand-pink))] ${market === m ? "text-[hsl(var(--brand-deep))]" : ""}`}
+                    className={`transition-colors hover:text-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:text-[hsl(var(--brand-pink))] ${market === m ? "text-[hsl(var(--brand-deep))]" : ""}`}
                   >
                     {m === 'turkiye' ? 'TR' : m === 'europe' ? 'EU' : m.toUpperCase()}
                   </button>
@@ -340,10 +367,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main content offset so it doesn't hide behind fixed header */}
-      <div className="h-[70px] md:h-[85px] shrink-0" />
+      <div className="h-[72px] md:h-[82px] shrink-0" />
 
       {isOpen && (
-        <div className="fixed inset-0 top-[70px] md:top-[85px] z-40 bg-white px-6 py-8 overflow-y-auto xl:hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 top-[72px] md:top-[82px] z-40 bg-white px-6 py-8 overflow-y-auto xl:hidden animate-in fade-in duration-200">
           <nav className="flex flex-col gap-2 pb-12">
             {navigation.map((item) => (
               <div key={item.href} className="flex flex-col border-b border-border last:border-0">

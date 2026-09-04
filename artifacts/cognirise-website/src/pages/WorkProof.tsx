@@ -29,21 +29,12 @@ export default function WorkProof() {
               From a priority mandate through the constraints, the build and governed production—we document what changes when intelligence moves real work.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <button 
-                onClick={() => document.getElementById("proof")?.scrollIntoView({ behavior: "smooth" })}
-                className="group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden border border-foreground bg-foreground pl-4 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[4px_4px_0px_hsl(var(--brand-coral))]"
-              >
-                <div className="absolute inset-0 z-0 bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <span className="relative z-10">See the proof model</span>
-                <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-white text-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:bg-[hsl(var(--brand-coral))] group-hover:text-white">
-                  <ArrowDown className="h-4 w-4" />
-                </div>
-              </button>
-              <Link href="/value-scan">
-                <button className="group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]">
-                  Bring one process <ArrowRight className="h-4 w-4" />
-                </button>
-              </Link>
+              <BrandButton onClick={() => document.getElementById("proof")?.scrollIntoView({ behavior: "smooth" })}>
+                See the proof model
+              </BrandButton>
+              <BrandButton href="/value-scan" variant="editorial">
+                Bring one process
+              </BrandButton>
             </div>
           </div>
           
@@ -152,27 +143,29 @@ export default function WorkProof() {
           </p>
         </div>
 
-        <div className="border-t border-foreground">
+        <div className="grid grid-cols-1 md:grid-cols-4 border-t border-foreground pt-12 gap-8">
           {[
             ["01", "Mandate", "The priority work, the sponsor question and what a useful change needs to achieve."],
             ["02", "Constraints", "The data, architecture, security, sovereignty and operating realities that define the possible."],
             ["03", "Build", "Forward-deployed operators and engineers turn the route into a working system with the people who will run it."],
             ["04", "Governed production", "Controls, ownership and accountability are embedded where the work happens—not added at the end."]
-          ].map(([n, title, copy]) => (
-            <div key={n} className="flex flex-col md:flex-row gap-4 md:gap-8 px-4 py-8 border-b border-border transition-colors hover:bg-[hsl(var(--brand-violet))/5]">
-              <span className="text-[10px] font-semibold tracking-widest text-muted-foreground md:w-16 pt-2">
+          ].map(([n, title, copy], i) => (
+            <div key={n} className="flex flex-col relative group">
+              {/* Animated connector line */}
+              {i < 3 && (
+                <div className="hidden md:block absolute top-6 left-12 w-[calc(100%-3rem)] h-[1px] bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-pink))] opacity-20 group-hover:opacity-100 transition-opacity duration-500" />
+              )}
+              
+              <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-[10px] font-bold tracking-widest text-muted-foreground mb-8 bg-white z-10 transition-all duration-300 group-hover:border-[hsl(var(--brand-pink))] group-hover:text-[hsl(var(--brand-pink))] group-hover:shadow-[0_0_0_4px_rgba(255,255,255,1)]">
                 {n}
-              </span>
-              <div className="flex-1 md:pr-12">
-                <h3 className="text-2xl md:text-3xl font-semibold mb-2">
-                  {title}
-                </h3>
               </div>
-              <div className="md:w-1/2 lg:w-[1.1fr]">
-                <p className="text-sm leading-relaxed text-muted-foreground max-w-[410px]">
-                  {copy}
-                </p>
-              </div>
+              
+              <h3 className="text-xl md:text-2xl font-semibold mb-4 transition-colors group-hover:text-[hsl(var(--brand-pink))]">
+                {title}
+              </h3>
+              <p className="text-sm leading-relaxed text-muted-foreground max-w-[280px]">
+                {copy}
+              </p>
             </div>
           ))}
         </div>
@@ -280,14 +273,9 @@ export default function WorkProof() {
           <p className="text-lg text-white/80 max-w-[500px] mb-12">
             Start with work where urgency, complexity and value have already collided. Together we can surface the mandate, constraints and practical route to production.
           </p>
-          <Link href="/value-scan">
-            <button className="group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] pl-5 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[6px_6px_0px_#fff]">
-              <span className="relative z-10">Book a value scan</span>
-              <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-transparent transition-transform duration-300 group-hover:translate-x-1">
-                <ArrowRight className="h-4 w-4" />
-              </div>
-            </button>
-          </Link>
+          <BrandButton href="/value-scan" variant="submit">
+            Book a value scan
+          </BrandButton>
         </div>
       </section>
     </div>

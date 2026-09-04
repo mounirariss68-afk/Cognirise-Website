@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useSearch, useLocation } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useState } from "react";
@@ -11,6 +11,11 @@ export default function InsightsEditorial() {
   const subscribeNewsletter = useSubscribeNewsletter();
   const { toast } = useToast();
   const { market } = useMarketStore();
+  const searchString = useSearch();
+  const [location, setLocation] = useLocation();
+  
+  const searchParams = new URLSearchParams(searchString);
+  const activeTopic = searchParams.get("topic") || "all";
   
   const marketLocation = 
     market === "uae" ? "Dubai · United Arab Emirates" :
@@ -48,6 +53,32 @@ export default function InsightsEditorial() {
   };
 
   const isSubscribed = subscribeNewsletter.isSuccess;
+
+  const topics = [
+    { id: "all", label: "All Insights" },
+    { id: "engineering", label: "Engineering" },
+    { id: "governance", label: "Governance" },
+    { id: "operations", label: "Operating Models" },
+    { id: "strategy", label: "Strategy" }
+  ];
+
+  const articles = [
+    { number: "02", title: "The hidden constraints in AI engineering.", copy: "Why prototypes stall before production.", topic: "engineering", url: "/insights/hidden-constraints" },
+    { number: "03", title: "Sovereign control in the public sector.", copy: "Accountability without compromising momentum.", topic: "governance", url: "/insights/sovereign-control" },
+    { number: "04", title: "When systems learn to route work.", copy: "How agents alter the operating flow.", topic: "operations", url: "/insights/systems-routing-work" },
+    { number: "05", title: "The new data baseline.", copy: "Preparing unstructured information for active use.", topic: "engineering", url: "/insights/new-data-baseline" },
+    { number: "06", title: "Investing in capacity, not tools.", copy: "The shift in enterprise technology capital.", topic: "strategy", url: "/insights/investing-capacity" }
+  ];
+
+  const filteredArticles = activeTopic === "all" ? articles : articles.filter(a => a.topic === activeTopic);
+
+  const handleTopicSelect = (topicId: string) => {
+    if (topicId === "all") {
+      setLocation(location);
+    } else {
+      setLocation(`${location}?topic=${topicId}`);
+    }
+  };
 
   return (
     <div className="flex flex-col">
@@ -89,13 +120,55 @@ export default function InsightsEditorial() {
             <p className="text-base md:text-lg text-muted-foreground max-w-[430px] mb-8">
               AI transformation is not a portfolio of pilots. It is a decision to redesign priority work around people, data, controls and intelligent execution.
             </p>
-            <Link href="/insights/ai-should-move-the-business">
-              <button className="inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]">
-                Read the point of view <ArrowRight className="h-4 w-4" />
-              </button>
-            </Link>
+            <BrandButton href="/insights/ai-should-move-the-business" variant="editorial">
+              Read the point of view
+            </BrandButton>
           </div>
         </article>
+      </section>
+
+      <section className="px-6 md:px-12 pt-20 pb-12 md:py-28 max-w-[1440px] mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-12 lg:gap-24">
+          <aside className="border-t border-border pt-6">
+            <h2 className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">Topic filter</h2>
+            <div className="flex flex-row flex-wrap lg:flex-col gap-4">
+              {topics.map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => handleTopicSelect(t.id)}
+                  className={`text-sm font-semibold text-left transition-colors ${activeTopic === t.id ? 'text-[hsl(var(--brand-pink))]' : 'text-foreground/70 hover:text-foreground'}`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </aside>
+          
+          <div className="flex flex-col border-t border-foreground pt-4 min-h-[400px]">
+            {filteredArticles.length === 0 ? (
+              <p className="text-muted-foreground pt-8">No articles found for this topic.</p>
+            ) : (
+              filteredArticles.map(({ number, title, copy, url }) => (
+                <Link key={number} href={url}>
+                  <div className="group flex flex-col md:flex-row md:items-center gap-4 md:gap-6 px-4 py-6 border-b border-border transition-colors hover:bg-[hsl(var(--brand-violet))/10] cursor-pointer">
+                    <span className="text-[10px] font-semibold tracking-widest text-muted-foreground md:w-10">
+                      {number}
+                    </span>
+                    <h3 className="text-xl md:text-2xl lg:text-[30px] font-semibold flex-1 leading-tight group-hover:text-[hsl(var(--brand-pink))] transition-colors">
+                      {title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-[300px] hidden md:block">
+                      {copy}
+                    </p>
+                    <div className="hidden md:flex w-8 justify-end">
+                      <ArrowRight className="h-5 w-5 text-[hsl(var(--brand-coral))] transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
       </section>
 
       <section className="border-y border-foreground mx-6 md:mx-12 max-w-[1440px] xl:mx-auto my-8">
