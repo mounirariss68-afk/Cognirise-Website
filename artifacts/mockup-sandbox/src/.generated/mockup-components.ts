@@ -2,6 +2,7 @@
 type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
 export const modules: ModuleMap = {
   "./components/mockups/cognirise-directions/AgenticSurge.tsx": () => import("../components/mockups/cognirise-directions/AgenticSurge.tsx"),
+  "./components/mockups/cognirise-directions/CognirisePulse.tsx": () => import("../components/mockups/cognirise-directions/CognirisePulse.tsx"),
   "./components/mockups/cognirise-directions/ExecutiveFieldManual.tsx": () => import("../components/mockups/cognirise-directions/ExecutiveFieldManual.tsx"),
   "./components/mockups/cognirise-directions/GradientEngine.tsx": () => import("../components/mockups/cognirise-directions/GradientEngine.tsx"),
   "./components/mockups/cognirise-directions/LivingArchitecture.tsx": () => import("../components/mockups/cognirise-directions/LivingArchitecture.tsx"),
