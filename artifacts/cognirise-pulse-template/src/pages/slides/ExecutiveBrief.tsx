@@ -1,0 +1,9 @@
+const base=import.meta.env.BASE_URL;
+export default function ExecutiveBrief(){return <div className="w-screen h-screen overflow-hidden relative bg-bg text-text font-body px-[5vw] py-[5vh]">
+<div className="flex items-center justify-between"><p className="text-[1.5vw] tracking-[.13em] font-semibold">EXECUTIVE BRIEF / 01</p><img src={base+"images/logo-blue.svg"} crossOrigin="anonymous" alt="Cognirise" className="w-[10vw]"/></div>
+<h1 className="font-display text-[5vw] leading-[.98] tracking-[-.07em] mt-[8vh]">The executive <span className="text-accent">brief</span></h1>
+<div className="grid grid-cols-2 mt-[9vh] border-t-[.15vw] border-primary">
+<div className="py-[3.8vh] pr-[3vw] border-r border-[#cbd3e1]"><p className="text-[1.5vw] tracking-[.11em] font-semibold text-muted">01 / THE MANDATE</p><p className="font-display text-[2.6vw] leading-[1.2] mt-[2vh]">move one consequential process into production</p></div>
+<div className="py-[3.8vh] pl-[3vw]"><p className="text-[1.5vw] tracking-[.11em] font-semibold text-muted">02 / THE CONSTRAINT</p><p className="font-display text-[2.6vw] leading-[1.2] mt-[2vh]">speed matters; control is non-negotiable</p></div>
+<div className="py-[3.8vh] pr-[3vw] border-r border-t border-[#cbd3e1]"><p className="text-[1.5vw] tracking-[.11em] font-semibold text-muted">03 / THE MODEL</p><p className="font-display text-[2.6vw] leading-[1.2] mt-[2vh]">senior operators + forward-deployed engineers + governed agents</p></div>
+<div className="py-[3.8vh] pl-[3vw] border-t border-[#cbd3e1]"><p className="text-[1.5vw] tracking-[.11em] font-semibold text-muted">04 / THE OUTCOME</p><p className="font-display text-[2.6vw] leading-[1.2] mt-[2vh]">lower cost, more capacity, shorter time, visible risk</p></div></div></div>}

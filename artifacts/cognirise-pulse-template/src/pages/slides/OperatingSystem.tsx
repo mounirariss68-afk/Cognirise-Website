@@ -1,0 +1,11 @@
+const base=import.meta.env.BASE_URL;
+export default function OperatingSystem(){return <div className="w-screen h-screen overflow-hidden relative bg-bg text-text font-body px-[5vw] py-[5vh]">
+<div className="flex justify-between items-center"><p className="text-[1.5vw] tracking-[.13em] font-semibold">COGNIOS / 07</p><img src={base+"images/logo-blue.svg"} crossOrigin="anonymous" alt="Cognirise" className="w-[10vw]"/></div>
+<h1 className="font-display text-[4.9vw] tracking-[-.075em] leading-[.98] mt-[4vh] w-[78vw]">The operating system for <span className="text-accent">governed intelligence.</span></h1>
+<div className="mt-[5vh] grid grid-cols-[1fr_2.5fr] gap-[3vw]"><div className="pt-[3vh] border-t border-primary"><p className="text-[1.8vw] leading-[1.45]">Six layers connect people, agents, knowledge and enterprise systems.</p></div><div className="space-y-[1vh]">
+<div className="grid grid-cols-[1.2fr_2fr] bg-primary text-white px-[2vw] py-[1.2vh]"><b className="text-[2vw]">Experience</b><span className="text-[2vw]">one front door for people and channels</span></div>
+<div className="grid grid-cols-[1.2fr_2fr] bg-[#253f6b] text-white px-[2vw] py-[1.2vh]"><b className="text-[2vw]">Intelligence</b><span className="text-[2vw]">governed agents and decision support</span></div>
+<div className="grid grid-cols-[1.2fr_2fr] bg-[#40587e] text-white px-[2vw] py-[1.2vh]"><b className="text-[2vw]">Process</b><span className="text-[2vw]">orchestration, authority and exception handling</span></div>
+<div className="grid grid-cols-[1.2fr_2fr] bg-[#e6dfef] px-[2vw] py-[1.2vh]"><b className="text-[2vw]">Knowledge</b><span className="text-[2vw]">grounded organisational context</span></div>
+<div className="grid grid-cols-[1.2fr_2fr] bg-[#f1d7e5] px-[2vw] py-[1.2vh]"><b className="text-[2vw]">Integration</b><span className="text-[2vw]">enterprise systems and deterministic execution</span></div>
+<div className="grid grid-cols-[1.2fr_2fr] bg-[#ffd8cf] px-[2vw] py-[1.2vh]"><b className="text-[2vw]">Foundation</b><span className="text-[2vw]">identity, security, audit and memory</span></div></div></div></div>}

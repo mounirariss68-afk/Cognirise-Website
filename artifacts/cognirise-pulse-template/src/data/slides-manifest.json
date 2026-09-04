@@ -1,0 +1,146 @@
+[
+  {
+    "id": "0c5c1880-88db-4b58-bce0-34ba8ca794cc",
+    "position": 1,
+    "filepath": "src/pages/slides/Cover.tsx",
+    "title": "Intelligence becomes momentum.",
+    "description": "Image-led title layout",
+    "speakerNotes": ""
+  },
+  {
+    "id": "2466fa9f-ca0e-467b-81f0-2b7cf8d3b8d3",
+    "position": 2,
+    "filepath": "src/pages/slides/SectionDivider.tsx",
+    "title": "From ambition to production.",
+    "description": "Dark chapter divider",
+    "speakerNotes": ""
+  },
+  {
+    "id": "734a2300-e44f-4fb1-b52c-58378c2f2c15",
+    "position": 3,
+    "filepath": "src/pages/slides/ExecutiveBrief.tsx",
+    "title": "The executive brief",
+    "description": "Four-part executive summary",
+    "speakerNotes": ""
+  },
+  {
+    "id": "669ea4eb-83d0-43c5-b656-cf853617624f",
+    "position": 4,
+    "filepath": "src/pages/slides/PointOfView.tsx",
+    "title": "AI should move the business—not just assist it.",
+    "description": "Bold point-of-view statement",
+    "speakerNotes": ""
+  },
+  {
+    "id": "02344dc7-aff0-4461-a3d7-39c1d9f0388b",
+    "position": 5,
+    "filepath": "src/pages/slides/Problem.tsx",
+    "title": "AI spend is rising. Too little work is changing.",
+    "description": "Problem framing with image",
+    "speakerNotes": ""
+  },
+  {
+    "id": "0a868e84-bde7-4b16-ba38-85b5b15370e0",
+    "position": 6,
+    "filepath": "src/pages/slides/ThreeForces.tsx",
+    "title": "Three forces. One accountable team.",
+    "description": "Three-column operating model",
+    "speakerNotes": ""
+  },
+  {
+    "id": "37c89572-71bf-446c-acf8-02d9c0fba117",
+    "position": 7,
+    "filepath": "src/pages/slides/Journey.tsx",
+    "title": "Stay with the work.",
+    "description": "Five-stage process timeline",
+    "speakerNotes": ""
+  },
+  {
+    "id": "bd8105a6-9919-4457-8b1f-e87404aa4db1",
+    "position": 8,
+    "filepath": "src/pages/slides/TwoPaths.tsx",
+    "title": "One decision. Two paths.",
+    "description": "Two-path comparison",
+    "speakerNotes": ""
+  },
+  {
+    "id": "086a3306-b7e4-4d49-b7f9-0995213f6fde",
+    "position": 9,
+    "filepath": "src/pages/slides/OperatingSystem.tsx",
+    "title": "The operating system for governed intelligence.",
+    "description": "Six-layer architecture",
+    "speakerNotes": ""
+  },
+  {
+    "id": "573618c8-8918-4ada-9c08-289c70b78250",
+    "position": 10,
+    "filepath": "src/pages/slides/FourEngines.tsx",
+    "title": "One architecture. Four engines.",
+    "description": "Dark platform showcase",
+    "speakerNotes": ""
+  },
+  {
+    "id": "0cbef53d-9522-47f4-a48e-d975587fdc9d",
+    "position": 11,
+    "filepath": "src/pages/slides/ProcessCase.tsx",
+    "title": "Bring one priority process.",
+    "description": "Engagement case structure",
+    "speakerNotes": ""
+  },
+  {
+    "id": "225bcfa7-947a-4d34-9426-c1585ad85f68",
+    "position": 12,
+    "filepath": "src/pages/slides/FourOutcomes.tsx",
+    "title": "The work changes four things.",
+    "description": "Four-outcome framework",
+    "speakerNotes": ""
+  },
+  {
+    "id": "90e0bb54-3be4-41dc-a1ed-f4ed8b93218c",
+    "position": 13,
+    "filepath": "src/pages/slides/Measures.tsx",
+    "title": "Measure movement, not activity.",
+    "description": "Metrics and progress bars",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f92625a9-48f3-4b02-bdee-2484eae51643",
+    "position": 14,
+    "filepath": "src/pages/slides/IndustryPressure.tsx",
+    "title": "Where operating pressure is real.",
+    "description": "Three-sector image layout",
+    "speakerNotes": ""
+  },
+  {
+    "id": "5d3df0f0-8973-413f-a187-2028b5d4e908",
+    "position": 15,
+    "filepath": "src/pages/slides/SeniorLed.tsx",
+    "title": "Senior-led is not a slogan. It is the staffing model.",
+    "description": "People and staffing model",
+    "speakerNotes": ""
+  },
+  {
+    "id": "0a5d9328-f302-416e-889a-c3b78dae03cb",
+    "position": 16,
+    "filepath": "src/pages/slides/AccountabilityChoices.tsx",
+    "title": "The choices that keep intelligence accountable",
+    "description": "Five governance choices",
+    "speakerNotes": ""
+  },
+  {
+    "id": "c9cde637-417d-4a8e-b8dc-b293ef2d0016",
+    "position": 17,
+    "filepath": "src/pages/slides/Roadmap.tsx",
+    "title": "A practical route to production",
+    "description": "Four-stage roadmap",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b2e7477e-7ebd-43c2-b4d6-b1357853a914",
+    "position": 18,
+    "filepath": "src/pages/slides/Closing.tsx",
+    "title": "Bring one process. Leave with a route.",
+    "description": "Image-led closing action",
+    "speakerNotes": ""
+  }
+]

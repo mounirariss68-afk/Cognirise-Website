@@ -15,3 +15,17 @@ storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/conversation:3df0fdac-
 storage_version_token = "1788533040326886"
 content_type = "text/markdown"
 source_uri = "file://deliverables/cognirise-website-redesign-plan.md"
+
+[[outputs]]
+id = "wSBKnawYcHLeW2DCeJGmZ"
+uri = "file://.local/outputs/Cognirise-Pulse-PowerPoint-Template.pptx"
+type = "slides"
+title = "Cognirise Pulse PowerPoint Template (PPTX)"
+description = "Reusable 18-layout PowerPoint template in the approved Cognirise Pulse design system."
+logical_id = "b1dfe669-6da3-490a-b000-7e75d6de8b8b"
+content_hash = "sha256:33429e5f75bbc70c6c58c511b9610b6ff7385fb9bd4eb572eefd3adf04cc018e"
+size = 20066739
+mtime_ms = 1788536598448
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b1dfe669-6da3-490a-b000-7e75d6de8b8b/fd22791d-6cd8-49f2-9ddd-2c992efe0798"
+storage_version_token = "1788536599371763"
+content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"

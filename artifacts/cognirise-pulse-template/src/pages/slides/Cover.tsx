@@ -1,0 +1,7 @@
+const base=import.meta.env.BASE_URL;
+export default function Cover(){return <div className="w-screen h-screen overflow-hidden relative bg-bg text-text font-body">
+<img src={base+"images/pulse-hero.jpg"} crossOrigin="anonymous" alt="Living intelligence moving through architecture" className="absolute right-0 top-0 h-full w-[57vw] object-cover"/>
+<div className="absolute inset-0 bg-[linear-gradient(90deg,#f8f7f4_0%,#f8f7f4_43%,rgba(248,247,244,.92)_54%,rgba(248,247,244,0)_72%)]"/>
+<div className="absolute left-[5vw] top-[5vh] flex items-center gap-[2vw]"><img src={base+"images/logo-blue.svg"} crossOrigin="anonymous" alt="Cognirise" className="w-[11vw]"/><span className="text-[1.5vw] tracking-[.12em] uppercase font-semibold">Pulse / presentation system</span></div>
+<div className="absolute left-[5vw] top-[25vh] w-[52vw]"><h1 className="font-display font-semibold text-[6.2vw] leading-[.95] tracking-[-.08em]">Intelligence becomes <span className="text-accent">momentum.</span></h1><div className="mt-[7vh] text-[2vw] leading-[1.45]"><p>Cognirise Pulse presentation template</p><p>AI-native advisory &amp; engineering</p><p>Dubai · United Arab Emirates</p></div></div>
+<div className="absolute right-[4vw] bottom-[4vh] bg-primary text-white px-[2vw] py-[1.8vh] text-[1.5vw] font-semibold">01 / LIVING INTELLIGENCE</div></div>}

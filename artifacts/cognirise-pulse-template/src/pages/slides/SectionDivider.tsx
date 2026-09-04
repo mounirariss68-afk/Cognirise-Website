@@ -1,0 +1,6 @@
+const base=import.meta.env.BASE_URL;
+export default function SectionDivider(){return <div className="w-screen h-screen overflow-hidden relative bg-[#071936] text-white font-body">
+<img src={base+"images/pulse-breakthrough.jpg"} crossOrigin="anonymous" alt="Gradient intelligence field moving through architecture" className="absolute right-0 top-0 h-full w-[58vw] object-cover opacity-80"/><div className="absolute inset-0 bg-[linear-gradient(90deg,#071936_0%,#071936_45%,rgba(7,25,54,.55)_72%,rgba(7,25,54,.12)_100%)]"/>
+<img src={base+"images/logo-white.svg"} crossOrigin="anonymous" alt="Cognirise" className="absolute left-[5vw] top-[5vh] w-[11vw]"/>
+<div className="absolute left-[5vw] top-[25vh] w-[56vw]"><p className="text-[1.5vw] tracking-[.14em] font-semibold">SECTION 01 / THE MANDATE</p><h1 className="font-display text-[6.5vw] leading-[.94] tracking-[-.08em] mt-[4vh]">From ambition to <span className="text-[#ff7a63]">production.</span></h1><p className="text-[2vw] leading-[1.45] mt-[7vh] w-[45vw] text-[#dbe3f0]">A high-impact divider for major chapters, strategic themes, and meeting transitions.</p></div>
+<div className="absolute bottom-[5vh] left-[5vw] h-[.5vh] w-[30vw] bg-[linear-gradient(90deg,#7659df,#db509e,#ff775d)]"/></div>}

@@ -1,0 +1,28 @@
+kind = "slides"
+previewPath = "/cognirise-pulse-template/"
+title = "Cognirise Pulse PowerPoint Template"
+description = "An 18-layout presentation system translating the Cognirise Pulse website language into reusable executive, technical, transformation, proof, industry, and closing slides."
+version = "1.0.0"
+id = "artifacts/cognirise-pulse-template"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/cognirise-pulse-template/" ]
+localPort = 26081
+
+[services.development]
+run = "pnpm --filter @workspace/cognirise-pulse-template run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cognirise-pulse-template", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/cognirise-pulse-template/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26081"
+BASE_PATH = "/cognirise-pulse-template/"

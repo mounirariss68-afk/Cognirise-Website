@@ -1,1 +1,2 @@
 - [Market content architecture](market-content-architecture.md) — UAE launches first; other markets use governed content overrides, explicit fallbacks, and independent publishing.
+- [Cognirise Pulse direction](cognirise-pulse-direction.md) — Approved brand system for future Cognirise website, presentation, and campaign design.

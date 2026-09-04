@@ -1,0 +1,6 @@
+const base=import.meta.env.BASE_URL;
+export default function PointOfView(){return <div className="w-screen h-screen overflow-hidden relative bg-bg text-text font-body">
+<img src={base+"images/pulse-breakthrough.jpg"} crossOrigin="anonymous" alt="A bold intelligence field breaking through constraints" className="absolute right-0 top-0 h-full w-[34vw] object-cover"/>
+<div className="absolute left-[5vw] top-[5vh] flex items-center gap-[2vw]"><img src={base+"images/logo-blue.svg"} crossOrigin="anonymous" alt="Cognirise" className="w-[10vw]"/><span className="text-[1.5vw] tracking-[.13em] font-semibold">POINT OF VIEW / 02</span></div>
+<div className="absolute left-[5vw] top-[23vh] w-[68vw]"><h1 className="font-display text-[6.2vw] leading-[.96] tracking-[-.08em]">AI should move the business—not just <span className="text-accent">assist it.</span></h1><p className="text-[2.1vw] leading-[1.45] mt-[8vh] w-[54vw]">Use one short supporting line only: transformation begins when the work changes.</p></div>
+<div className="absolute left-[5vw] bottom-[6vh] w-[25vw] h-[1.2vh] bg-[linear-gradient(90deg,#7659df,#db509e,#ff775d)]"/></div>}
