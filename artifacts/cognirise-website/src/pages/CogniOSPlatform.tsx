@@ -1,8 +1,8 @@
 import { Link } from "wouter";
 import { ArrowDown, ArrowRight, Plus, Minus } from "lucide-react";
-import { BrandButton } from "@/components/ui/brand-button";
 import { useState } from "react";
 import { useMarketStore } from "@/store/market";
+import { assetUrl } from "@/lib/assets";
 
 export default function CogniOSPlatform() {
   const [active, setActive] = useState<number>(0);
@@ -30,423 +30,161 @@ export default function CogniOSPlatform() {
     ["04", "CogniWare", "Composable intelligence capabilities connected to the systems that run the enterprise."]
   ];
 
+  const scroll = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
   return (
-    <div className="flex flex-col">
-      <section className="px-6 md:px-12 pt-8 md:pt-12 max-w-[1440px] mx-auto w-full">
-        <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
-          <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-          {marketLocation} / Platforms
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-[0.84fr_1.16fr] gap-12 lg:gap-16 items-end pb-12 min-h-[60vh]">
-          <div className="pb-4 relative z-10">
-            <h1 className="text-5xl md:text-6xl lg:text-[100px] leading-[0.94] font-semibold mb-8 max-w-[700px]">
-              The operating system for <em className="not-italic text-[hsl(var(--brand-pink))]">governed intelligence.</em>
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-[440px] mb-10 leading-relaxed">
-              CogniOS connects people, agents, knowledge and enterprise systems so AI can move consequential work—without surrendering control.
-            </p>
-            <div className="flex flex-wrap items-center gap-6">
-              <BrandButton onClick={() => document.getElementById("architecture")?.scrollIntoView({ behavior: "smooth" })}>
-                Read the architecture
-              </BrandButton>
-              <button 
-                onClick={() => document.getElementById("principles")?.scrollIntoView({ behavior: "smooth" })}
-                className="group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]"
-              >
-                See the principles <ArrowDown className="h-4 w-4" />
-              </button>
+    <div className="co">
+      <style>{`
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+.co{--ink:#102957;--deep:#071936;--paper:#fdfcfb;--mist:#eef1f6;--line:#cbd3e1;--violet:#7659df;--pink:#db509e;--coral:#ff775d;background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;overflow:hidden}.co *{box-sizing:border-box}.co button,.co a{font:inherit;text-decoration:none;}.co :focus-visible{outline:3px solid var(--coral);outline-offset:4px}
+.co-primary{border:1px solid var(--ink);cursor:pointer;color:#fff;background:var(--ink);font-weight:700;font-size:12px;padding:4px 4px 4px 17px;min-height:46px;display:inline-flex;align-items:center;gap:15px;position:relative;isolation:isolate;overflow:hidden;transition:transform .24s,box-shadow .24s}.co-primary:before{content:"";position:absolute;z-index:-2;inset:-1px;background:linear-gradient(105deg,var(--violet),var(--pink),var(--coral));opacity:0;transition:opacity .24s}.co-primary:after{content:"";position:absolute;z-index:-1;inset:1px;background:var(--ink);transition:background .24s}.co-primary svg{width:36px;height:36px;padding:10px;background:#fff;color:var(--ink);transition:transform .24s,background .24s,color .24s}.co-primary:hover{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--coral)}.co-primary:hover:before{opacity:1}.co-primary:hover:after{background:rgba(7,25,54,.94)}.co-primary:hover svg{transform:translate(3px,-3px);background:var(--coral);color:#fff}
+.co-kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;display:flex;align-items:center;gap:10px}.co-kicker:before{content:"";width:23px;height:1px;background:linear-gradient(90deg,var(--violet),var(--coral))}.co-hero{padding:22px 4.8vw 0}.co-hero-grid{min-height:680px;display:grid;grid-template-columns:.84fr 1.16fr;gap:40px;align-items:end;padding-bottom:35px}.co-hero-copy{padding-bottom:17px;position:relative;z-index:2}.co h1,.co h2,.co h3{font-family:Comfortaa,sans-serif}.co h1{font-size:clamp(50px,6.35vw,100px);font-weight:600;line-height:.94;letter-spacing:-.08em;margin:31px 0 27px}.co h1 em,.co h2 em{font-style:normal;color:var(--pink)}.co-hero p{color:#42587b;font-size:16px;line-height:1.6;max-width:440px;margin:0 0 29px}.co-actions{display:flex;align-items:center;gap:18px}.co-under{border:0;border-bottom:1px solid var(--ink);background:transparent;color:var(--ink);padding:8px 0;display:inline-flex;gap:9px;align-items:center;font-size:12px;font-weight:700;cursor:pointer}.co-under:hover{color:var(--pink);border-color:var(--pink)}.co-hero-art{height:630px;overflow:hidden;position:relative;background:var(--deep);clip-path:polygon(11% 0,100% 0,100% 91%,0 100%,0 12%)}.co-hero-art img{width:100%;height:100%;object-fit:cover;animation:coIn 1.35s both}.co-hero-art:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.2),transparent 48%),linear-gradient(0deg,rgba(7,25,54,.57),transparent 32%)}.co-word{position:absolute;z-index:1;right:-11px;top:55px;color:#fff;font:600 clamp(55px,9vw,146px)/.8 Comfortaa;letter-spacing:-.1em;mix-blend-mode:overlay}.co-caption{position:absolute;z-index:2;bottom:28px;left:34px;color:#fff;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.co-caption span{opacity:.72;display:block;margin-bottom:7px}.co-proof{margin:0 4.8vw;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);display:grid;grid-template-columns:repeat(4,1fr)}.co-proof div{padding:18px 20px;border-right:1px solid var(--line);font-size:12px;line-height:1.4}.co-proof div:last-child{border:0}.co-proof b{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;margin-bottom:8px;color:#687895}.co-proof strong{font-weight:600}
+.co-intro{padding:145px 4.8vw 112px;display:grid;grid-template-columns:1fr 1.12fr;gap:8vw}.co-intro h2,.co-architecture h2,.co-spines h2{font-size:clamp(42px,5vw,76px);font-weight:600;line-height:.98;letter-spacing:-.08em;margin:24px 0 0}.co-intro-copy{align-self:end;border-top:1px solid var(--line);padding-top:22px;color:#30486d;font-size:20px;line-height:1.46;max-width:535px}.co-intro-copy small{font-size:14px;display:block;line-height:1.55;margin-top:22px;color:#647491}.co-wide{margin:0 4.8vw;height:min(610px,48vw);min-height:455px;position:relative;overflow:hidden;background:var(--deep)}.co-wide img{width:100%;height:100%;object-fit:cover;animation:coBreath 9s ease-in-out infinite alternate}.co-wide:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.82),transparent 72%)}.co-wide-copy{position:absolute;z-index:2;left:6%;bottom:11%;color:#fff;max-width:570px}.co-wide h2{font:600 clamp(43px,5.2vw,78px)/.97 Comfortaa;letter-spacing:-.08em;margin:17px 0}.co-wide p{font-size:15px;line-height:1.6;color:#dbe4f0;max-width:410px}
+.co-architecture{padding:124px 4.8vw 80px}.co-arch-head{display:grid;grid-template-columns:1fr .9fr;gap:50px;align-items:end}.co-arch-head p{font-size:16px;line-height:1.55;color:#42587b;max-width:410px;margin:0}.co-layers{border-top:1px solid var(--ink);margin-top:63px}.co-layer{width:100%;display:grid;grid-template-columns:70px 1fr 1fr 35px;gap:20px;align-items:center;text-align:left;border:0;border-bottom:1px solid var(--line);padding:22px 9px;background:transparent;color:var(--ink);cursor:pointer;transition:padding .25s,background .25s}.co-layer:hover,.co-layer.active{padding-left:22px;background:#f0effa}.co-layer span{font-size:10px;letter-spacing:.1em;color:#687895}.co-layer h3{font-size:clamp(19px,2.3vw,31px);line-height:1.05;letter-spacing:-.06em;margin:0;font-weight:600}.co-layer p{font-size:13px;line-height:1.45;color:#536887;max-width:330px;margin:0}.co-layer svg{justify-self:end}.co-layer.active svg{color:var(--pink)}
+.co-spines{padding:54px 4.8vw 122px;background:var(--mist)}.co-spines-head{border-top:1px solid var(--ink);padding-top:25px;display:flex;align-items:end;justify-content:space-between;gap:30px}.co-spines-head p{font-size:14px;line-height:1.5;max-width:300px;color:#536887}.co-spine-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:46px}.co-spine{min-height:420px;background:var(--deep);position:relative;overflow:hidden;padding:31px;color:#fff}.co-spine img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.58;transition:transform .7s}.co-spine:hover img{transform:scale(1.06)}.co-spine:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(7,25,54,.93),rgba(7,25,54,.1))}.co-spine-content{position:absolute;z-index:1;bottom:28px;left:29px;right:28px}.co-spine strong{font:600 clamp(26px,3vw,43px)/1 Comfortaa;letter-spacing:-.07em}.co-spine p{font-size:14px;line-height:1.5;max-width:390px;color:#dce4f1}.co-spine small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+.co-products{padding:124px 4.8vw}.co-product-head{display:flex;justify-content:space-between;gap:40px;align-items:end;border-top:1px solid var(--ink);padding-top:25px}.co-product-head h2{font-size:clamp(41px,4.9vw,72px);line-height:.97;letter-spacing:-.08em;margin:17px 0 0;font-weight:600;max-width:680px}.co-product-head p{max-width:300px;font-size:14px;line-height:1.5;color:#536887}.co-products-list{margin-top:58px;border-top:1px solid var(--line)}.co-product{display:grid;grid-template-columns:90px 1fr 1fr 35px;align-items:center;gap:20px;border-bottom:1px solid var(--line);padding:22px 8px}.co-product span{font-size:10px;letter-spacing:.1em;color:var(--pink)}.co-product h3{margin:0;font-size:clamp(21px,2.4vw,34px);letter-spacing:-.06em}.co-product p{font-size:13px;line-height:1.5;color:#536887;max-width:380px}.co-product svg{justify-self:end;color:var(--coral)}
+.co-principles{background:var(--deep);color:#fff;padding:112px 4.8vw 100px;position:relative}.co-principles:before{content:"CONTROL";position:absolute;right:-15px;top:24px;color:rgba(255,255,255,.055);font:600 17vw/.8 Comfortaa;letter-spacing:-.1em}.co-principles-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:8vw}.co-principles h2{font:600 clamp(45px,5.7vw,85px)/.94 Comfortaa;letter-spacing:-.08em;margin:21px 0}.co-principles p{max-width:430px;color:#d6deed;font-size:16px;line-height:1.6}.co-principle-list{border-top:1px solid rgba(255,255,255,.36);align-self:end;margin-bottom:48px;}.co-principle-list div{padding:18px 0;border-bottom:1px solid rgba(255,255,255,.27);font:600 18px Comfortaa;letter-spacing:-.04em}.co-principle-list span{font:500 10px Inter;letter-spacing:.12em;color:#ff907b;margin-right:16px}
+@keyframes coIn{from{clip-path:inset(0 100% 0 0);transform:scale(1.12)}to{clip-path:inset(0);transform:scale(1)}}@keyframes coBreath{to{transform:scale(1.075) translateX(-1%)}}@media(prefers-reduced-motion:reduce){.co *,.co *:before,.co *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(max-width:760px){.co-hero{padding:33px 21px 0}.co-hero-grid{display:flex;flex-direction:column;min-height:0;gap:33px;padding-bottom:25px}.co h1{font-size:53px;margin:25px 0 22px}.co-hero-art{height:440px}.co-word{font-size:71px}.co-proof{margin:0 21px;grid-template-columns:1fr 1fr}.co-proof div{padding:16px 12px}.co-proof div:nth-child(2){border-right:0}.co-proof div:nth-child(-n+2){border-bottom:1px solid var(--line)}.co-intro{padding:84px 21px 73px;display:block}.co-intro h2,.co-architecture h2,.co-spines h2{font-size:42px}.co-intro-copy{font-size:18px;margin-top:43px}.co-wide{margin:0;height:510px;min-height:0}.co-wide-copy{left:23px;right:23px;bottom:28px}.co-wide h2{font-size:41px}.co-architecture{padding:80px 21px}.co-arch-head{display:block}.co-arch-head p{margin-top:28px}.co-layers{margin-top:41px}.co-layer{grid-template-columns:35px 1fr 24px;gap:12px;padding:20px 0}.co-layer p{display:none}.co-layer.active p{display:block;grid-column:2/4;grid-row:2;margin-top:2px}.co-layer svg{grid-column:3;grid-row:1}.co-layer h3{font-size:20px}.co-spines{padding:54px 21px 80px}.co-spines-head,.co-product-head{display:block}.co-spines-head p,.co-product-head p{margin-top:25px}.co-spine-grid{grid-template-columns:1fr;margin-top:33px}.co-spine{min-height:350px}.co-products{padding:80px 21px}.co-product-head h2{font-size:41px}.co-products-list{margin-top:40px}.co-product{grid-template-columns:46px 1fr 24px;gap:12px;padding:20px 0}.co-product p{display:none}.co-product h3{font-size:21px}.co-principles{padding:76px 21px 76px}.co-principles-inner{display:block}.co-principles h2{font-size:54px}.co-principle-list{margin-top:38px}}
+      `}</style>
+      <section className="co-hero">
+        <div className="co-kicker">{marketLocation} / Platforms</div>
+        <div className="co-hero-grid">
+          <div className="co-hero-copy">
+            <h1>The operating system for <em>governed intelligence.</em></h1>
+            <p>CogniOS connects people, agents, knowledge and enterprise systems so AI can move consequential work—without surrendering control.</p>
+            <div className="co-actions">
+              <button className="co-primary" onClick={() => scroll("architecture")}>Read the architecture <ArrowRight /></button>
+              <button className="co-under" onClick={() => scroll("principles")}>See the principles <ArrowDown size={15} /></button>
             </div>
           </div>
-          
-          <div className="relative h-[440px] lg:h-[630px] clip-diagonal-left bg-[hsl(var(--brand-deep))]">
-            <img 
-              src="/images/cognirise/site-cognios.jpg" 
-              alt="Six luminous architectural layers connected by a central intelligence flow." 
-              className="absolute inset-0 h-full w-full object-cover opacity-90 scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--brand-deep))] via-transparent to-transparent opacity-60" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))] via-transparent to-transparent opacity-80" />
-            
-            <div className="absolute right-0 top-12 z-10 text-[100px] lg:text-[145px] font-display font-semibold leading-none text-white opacity-20 mix-blend-overlay tracking-tight pointer-events-none">
-              system
-            </div>
-            
-            <div className="absolute bottom-8 left-8 z-20 text-[10px] uppercase tracking-widest text-white">
-              <span className="mb-2 block opacity-75">CogniOS / platform overview</span>
-              Built to make intelligence accountable
+          <div className="co-hero-art">
+            <img src={assetUrl("/images/cognirise/site-cognios.jpg")} alt="Six luminous architectural layers connected by a central intelligence flow." />
+            <div className="co-word">system</div>
+            <div className="co-caption">
+              <span>CogniOS / platform overview</span>Built to make intelligence accountable
             </div>
           </div>
         </div>
       </section>
+      
+      <section className="co-proof" aria-label="CogniOS platform qualities">
+        <div><b>Designed for</b><strong>UAE enterprise and government</strong></div>
+        <div><b>Language</b><strong>People and agents, in context</strong></div>
+        <div><b>Control</b><strong>Human authority remains explicit</strong></div>
+        <div><b>Deployment</b><strong>Boundaries defined for the environment</strong></div>
+      </section>
 
-      <section className="border-y border-foreground mx-6 md:mx-12 max-w-[1440px] xl:mx-auto">
-        <div className="grid grid-cols-2 lg:grid-cols-4">
-          <div className="border-b lg:border-b-0 lg:border-r border-border p-5 lg:p-6">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Designed for</span>
-            <strong className="text-sm font-semibold text-foreground">UAE enterprise and government</strong>
-          </div>
-          <div className="border-b lg:border-b-0 lg:border-r border-border p-5 lg:p-6">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Language</span>
-            <strong className="text-sm font-semibold text-foreground">People and agents, in context</strong>
-          </div>
-          <div className="border-r border-border p-5 lg:p-6">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Control</span>
-            <strong className="text-sm font-semibold text-foreground">Human authority remains explicit</strong>
-          </div>
-          <div className="p-5 lg:p-6">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Deployment</span>
-            <strong className="text-sm font-semibold text-foreground">Boundaries defined for the environment</strong>
-          </div>
+      <section className="co-intro">
+        <div>
+          <div className="co-kicker">One architecture, not another tool</div>
+          <h2>AI needs a place to <em>operate.</em></h2>
+        </div>
+        <div className="co-intro-copy">
+          CogniOS is the connective architecture for enterprise intelligence. It gives the work a governed route from data and systems through agents and knowledge, to the people making consequential decisions.
+          <small>It is designed around the conditions that define the work: organisational context, visible human authority and clear operating boundaries.</small>
         </div>
       </section>
 
-      <section className="px-6 md:px-12 py-24 md:py-36 max-w-[1440px] mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.12fr] gap-12 lg:gap-[8vw]">
+      <section className="co-wide">
+        <img src={assetUrl("/images/cognirise/pulse-convergence.jpg")} alt="A luminous architectural environment where human presence and intelligent systems meet." />
+        <div className="co-wide-copy">
+          <div className="co-kicker">The platform in practice</div>
+          <h2>Build the route.<br/>Keep the authority.</h2>
+          <p>CogniOS brings the structures around intelligence into the same operating environment, rather than asking teams to govern them after the fact.</p>
+        </div>
+      </section>
+
+      <section className="co-architecture" id="architecture">
+        <div className="co-arch-head">
           <div>
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">
-              <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-              One architecture, not another tool
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-[76px] leading-[0.98] font-semibold">
-              AI needs a place to <em className="not-italic text-[hsl(var(--brand-coral))]">operate.</em>
-            </h2>
+            <div className="co-kicker">Reference architecture</div>
+            <h2>Six layers.<br/>One controlled flow.</h2>
           </div>
-          <div className="lg:self-end border-t border-border pt-8">
-            <p className="text-xl md:text-2xl leading-relaxed text-foreground/80 max-w-[535px]">
-              CogniOS is the connective architecture for enterprise intelligence. It gives the work a governed route from data and systems through agents and knowledge, to the people making consequential decisions.
-            </p>
-            <p className="mt-8 text-sm leading-relaxed text-muted-foreground max-w-[480px]">
-              It is designed around the conditions that define the work: organisational context, visible human authority and clear operating boundaries.
-            </p>
-          </div>
+          <p>Each layer has a distinct responsibility. Together they give teams a practical way to deploy intelligence into the work, not beside it.</p>
         </div>
-      </section>
-
-      <section className="mx-0 md:mx-12 max-w-[1440px] xl:mx-auto h-[500px] md:h-[610px] relative bg-[hsl(var(--brand-deep))] overflow-hidden">
-        <img 
-          src="/images/cognirise/pulse-convergence.jpg" 
-          alt="A luminous architectural environment where human presence and intelligent systems meet."
-          className="absolute inset-0 h-full w-full object-cover opacity-90 scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--brand-deep))] to-transparent opacity-90 lg:opacity-100 lg:from-70%" />
-        
-        <div className="absolute bottom-12 lg:bottom-24 left-6 lg:left-16 max-w-[570px] z-10">
-          <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/70 mb-4">
-            The platform in practice
-          </div>
-          <h2 className="text-4xl md:text-5xl lg:text-7xl font-semibold text-white leading-tight mb-6">
-            Build the route.<br/>Keep the authority.
-          </h2>
-          <p className="text-white/80 text-base md:text-lg max-w-[410px] leading-relaxed">
-            CogniOS brings the structures around intelligence into the same operating environment, rather than asking teams to govern them after the fact.
-          </p>
-        </div>
-      </section>
-
-      <section id="architecture" className="px-6 md:px-12 py-24 md:py-32 max-w-[1440px] mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-end mb-16">
-          <div>
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">
-              <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-              Reference architecture
-            </div>
-            <h2 className="text-4xl md:text-6xl lg:text-[76px] leading-[0.98] font-semibold">
-              Six layers.<br/>One controlled flow.
-            </h2>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-[410px]">
-            Each layer has a distinct responsibility. Together they give teams a practical way to deploy intelligence into the work, not beside it.
-          </p>
-        </div>
-
-        <div className="border-t border-foreground">
+        <div className="co-layers">
           {layers.map(([num, title, copy], i) => (
-            <div key={title}>
-              <button 
-                className={`w-full group flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 px-4 py-6 border-b border-border cursor-pointer transition-all duration-300 hover:bg-[hsl(var(--brand-violet))/5] hover:pl-8 text-left ${active === i ? 'bg-[hsl(var(--brand-violet))/5] pl-8' : ''}`}
-                onClick={() => setActive(active === i ? -1 : i)}
-              >
-                <span className="text-[10px] font-semibold tracking-widest text-muted-foreground lg:w-16">
-                  {num}
-                </span>
-                <h3 className="text-2xl md:text-3xl font-semibold flex-1 group-hover:text-[hsl(var(--brand-pink))] transition-colors">
-                  {title}
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-[330px] hidden lg:block">
-                  {copy}
-                </p>
-                <div className="hidden lg:flex w-10 justify-end">
-                  {active === i ? (
-                    <Minus className="h-5 w-5 text-[hsl(var(--brand-pink))]" />
-                  ) : (
-                    <Plus className="h-5 w-5 text-foreground group-hover:text-[hsl(var(--brand-pink))]" />
-                  )}
-                </div>
-              </button>
-              
-              {active === i && (
-                <div className="bg-[hsl(var(--brand-violet))/5] border-b border-border px-6 py-8 lg:hidden -mt-[1px]">
-                  <p className="text-sm leading-relaxed text-foreground/80">{copy}</p>
-                </div>
-              )}
-            </div>
+            <button
+              className={`co-layer ${active === i ? "active" : ""}`}
+              key={title}
+              onClick={() => setActive(i)}
+              aria-expanded={active === i}
+              aria-controls={`co-layer-panel-${i}`}
+            >
+              <span>{num}</span>
+              <h3>{title}</h3>
+              <p id={`co-layer-panel-${i}`}>{copy}</p>
+              {active === i ? <Minus size={18} /> : <Plus size={18} />}
+            </button>
           ))}
         </div>
       </section>
 
-      <section className="bg-[hsl(var(--secondary))] px-6 md:px-12 py-24 w-full">
-        <div className="max-w-[1440px] mx-auto">
-          <div className="border-t border-foreground pt-8 flex flex-col lg:flex-row justify-between gap-8 lg:items-end mb-12">
-            <div>
-              <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-4">
-                Through every layer
-              </div>
-              <h2 className="text-4xl md:text-5xl lg:text-[76px] leading-[0.98] font-semibold">
-                Two spines keep the platform honest.
-              </h2>
-            </div>
-            <p className="text-base text-muted-foreground max-w-[300px]">
-              They are not a review gate at the end. They run through the architecture, from first decision to live operation.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="group relative min-h-[350px] lg:min-h-[420px] bg-[hsl(var(--brand-deep))] overflow-hidden p-8 text-white cursor-pointer">
-              <img 
-                src="/images/cognirise/cognirise-pulse-governance.jpg" 
-                alt="A violet route moving through a series of controlled architectural gateways."
-                className="absolute inset-0 h-full w-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))] to-[hsl(var(--brand-deep))/10]" />
-              
-              <div className="absolute bottom-8 left-8 right-8 z-10">
-                <span className="block text-[10px] uppercase tracking-widest text-white/70 mb-3">
-                  Spine 01 / AI governance & assurance
-                </span>
-                <h3 className="text-3xl md:text-4xl font-semibold mb-4 leading-none">
-                  Control in the flow.
-                </h3>
-                <p className="text-white/80 text-sm max-w-[390px] leading-relaxed">
-                  Policies, approvals, traceability and assurance remain visible wherever intelligence is used.
-                </p>
-              </div>
-            </div>
-
-            <div className="group relative min-h-[350px] lg:min-h-[420px] bg-[hsl(var(--brand-deep))] overflow-hidden p-8 text-white cursor-pointer">
-              <img 
-                src="/images/cognirise/pulse-convergence.jpg" 
-                alt="An abstract operational space showing systems converging."
-                className="absolute inset-0 h-full w-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))] to-[hsl(var(--brand-deep))/10]" />
-              
-              <div className="absolute bottom-8 left-8 right-8 z-10">
-                <span className="block text-[10px] uppercase tracking-widest text-white/70 mb-3">
-                  Spine 02 / platform engineering & ops
-                </span>
-                <h3 className="text-3xl md:text-4xl font-semibold mb-4 leading-none">
-                  Built to stay in motion.
-                </h3>
-                <p className="text-white/80 text-sm max-w-[390px] leading-relaxed">
-                  Integration, observability and platform operations turn a deployment into an operating capability.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="architecture" className="mt-20 lg:mt-32 border-y border-foreground mx-6 md:mx-12 max-w-[1440px] xl:mx-auto pt-24 pb-8 relative bg-[hsl(var(--brand-deep))] text-white overflow-hidden clip-diagonal-top-right">
-        {/* Deep space ambient lights */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#070f20] via-[hsl(var(--brand-deep))] to-[#0e162b] z-0" />
-        
-        {/* Core luminous glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[hsl(var(--brand-pink))] rounded-full blur-[180px] opacity-10 pointer-events-none z-0" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[hsl(var(--brand-violet))] rounded-full blur-[100px] opacity-20 pointer-events-none z-0" />
-        
-        {/* Grid lines */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_10%,transparent_100%)] z-0" />
-
-        <div className="relative z-10 px-6 lg:px-12 flex flex-col items-center text-center mb-16">
-          <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-coral))] mb-6">
-            <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-            A connected product family
-          </div>
-          <h2 className="text-4xl md:text-5xl lg:text-[72px] leading-[0.97] font-semibold max-w-[880px] mb-6">
-            Specialist capabilities.<br />
-            A shared operating system.
-          </h2>
-          <p className="text-lg text-white/70 max-w-[500px]">
-            CogniOS is the architecture that lets each capability contribute to a governed whole.
-          </p>
-        </div>
-
-        {/* Spatial Architecture Field */}
-        <div className="relative z-10 h-[800px] lg:h-[800px] w-full max-w-[1000px] mx-auto hidden md:block">
-          
-          {/* Signal paths (svg) */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.2))' }}>
-            {/* Lines connecting nodes to center */}
-            <path d="M200,200 Q300,200 500,400" fill="none" stroke="url(#pink-violet)" strokeWidth="1" strokeDasharray="4 4" className="motion-safe:animate-pulse" />
-            <path d="M800,200 Q700,200 500,400" fill="none" stroke="url(#violet-coral)" strokeWidth="1" strokeDasharray="4 4" className="motion-safe:animate-pulse" />
-            <path d="M200,600 Q300,600 500,400" fill="none" stroke="url(#coral-pink)" strokeWidth="1" strokeDasharray="4 4" className="motion-safe:animate-pulse" />
-            <path d="M800,600 Q700,600 500,400" fill="none" stroke="url(#pink-violet)" strokeWidth="1" strokeDasharray="4 4" className="motion-safe:animate-pulse" />
-            
-            {/* Animated signal dots traveling along paths */}
-            <circle r="2" fill="#fff" opacity="0.8" className="motion-reduce:hidden">
-              <animateMotion dur="3s" repeatCount="indefinite" path="M200,200 Q300,200 500,400" />
-            </circle>
-            <circle r="2" fill="#fff" opacity="0.8" className="motion-reduce:hidden">
-              <animateMotion dur="4s" repeatCount="indefinite" path="M800,200 Q700,200 500,400" />
-            </circle>
-            <circle r="2" fill="#fff" opacity="0.8" className="motion-reduce:hidden">
-              <animateMotion dur="3.5s" repeatCount="indefinite" path="M200,600 Q300,600 500,400" />
-            </circle>
-            <circle r="2" fill="#fff" opacity="0.8" className="motion-reduce:hidden">
-              <animateMotion dur="4.5s" repeatCount="indefinite" path="M800,600 Q700,600 500,400" />
-            </circle>
-
-            <defs>
-              <linearGradient id="pink-violet" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="hsl(var(--brand-pink))" />
-                <stop offset="100%" stopColor="hsl(var(--brand-violet))" />
-              </linearGradient>
-              <linearGradient id="violet-coral" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="hsl(var(--brand-violet))" />
-                <stop offset="100%" stopColor="hsl(var(--brand-coral))" />
-              </linearGradient>
-              <linearGradient id="coral-pink" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="hsl(var(--brand-coral))" />
-                <stop offset="100%" stopColor="hsl(var(--brand-pink))" />
-              </linearGradient>
-            </defs>
-          </svg>
-
-          {/* Central Core: CogniOS */}
-          <div className="absolute top-[400px] left-[500px] -translate-x-1/2 -translate-y-1/2 w-[180px] h-[180px] flex flex-col items-center justify-center group z-20">
-            <div className="absolute inset-0 bg-white/5 border border-white/20 rotate-45 transition-all duration-700 group-hover:rotate-90 group-hover:bg-white/10 group-hover:border-[hsl(var(--brand-pink))] shadow-[0_0_40px_rgba(255,255,255,0.1)]" />
-            <div className="absolute inset-2 bg-gradient-to-br from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-pink))] opacity-20 rotate-12 transition-all duration-1000 group-hover:rotate-45" />
-            <h3 className="relative z-10 text-2xl font-bold tracking-tight text-white mb-1">CogniOS</h3>
-            <span className="relative z-10 text-[9px] uppercase tracking-widest text-white/70">Orchestration</span>
-          </div>
-
-          {/* Satellite: CogniTalk (Top Left) */}
-          <div className="absolute top-[200px] left-[200px] -translate-x-1/2 -translate-y-1/2 w-[240px] group cursor-pointer">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center group-hover:border-[hsl(var(--brand-coral))] group-hover:bg-[hsl(var(--brand-coral))/10] transition-colors">
-                <span className="text-[10px] font-bold text-[hsl(var(--brand-coral))]">01</span>
-              </div>
-              <div>
-                <h4 className="text-xl font-bold mb-2 group-hover:text-[hsl(var(--brand-coral))] transition-colors">CogniTalk</h4>
-                <p className="text-xs text-white/60 leading-relaxed">Conversational layer for meaningful work between people and intelligence.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Satellite: CogniAgents (Top Right) */}
-          <div className="absolute top-[200px] left-[800px] -translate-x-1/2 -translate-y-1/2 w-[240px] group cursor-pointer text-right">
-            <div className="flex items-start gap-4 flex-row-reverse">
-              <div className="w-10 h-10 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center group-hover:border-[hsl(var(--brand-pink))] group-hover:bg-[hsl(var(--brand-pink))/10] transition-colors">
-                <span className="text-[10px] font-bold text-[hsl(var(--brand-pink))]">02</span>
-              </div>
-              <div>
-                <h4 className="text-xl font-bold mb-2 group-hover:text-[hsl(var(--brand-pink))] transition-colors">CogniAgents</h4>
-                <p className="text-xs text-white/60 leading-relaxed">Governed agents that coordinate specialist tasks in defined environments.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Satellite: CogniDocs (Bottom Left) */}
-          <div className="absolute top-[600px] left-[200px] -translate-x-1/2 -translate-y-1/2 w-[240px] group cursor-pointer">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center group-hover:border-[hsl(var(--brand-violet))] group-hover:bg-[hsl(var(--brand-violet))/10] transition-colors">
-                <span className="text-[10px] font-bold text-[hsl(var(--brand-violet))]">03</span>
-              </div>
-              <div>
-                <h4 className="text-xl font-bold mb-2 group-hover:text-[hsl(var(--brand-violet))] transition-colors">CogniDocs</h4>
-                <p className="text-xs text-white/60 leading-relaxed">Knowledge made available with context, access and control the work requires.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Satellite: CogniWare (Bottom Right) */}
-          <div className="absolute top-[600px] left-[800px] -translate-x-1/2 -translate-y-1/2 w-[240px] group cursor-pointer text-right">
-            <div className="flex items-start gap-4 flex-row-reverse">
-              <div className="w-10 h-10 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center group-hover:border-[hsl(var(--brand-coral))] group-hover:bg-[hsl(var(--brand-coral))/10] transition-colors">
-                <span className="text-[10px] font-bold text-[hsl(var(--brand-coral))]">04</span>
-              </div>
-              <div>
-                <h4 className="text-xl font-bold mb-2 group-hover:text-[hsl(var(--brand-coral))] transition-colors">CogniWare</h4>
-                <p className="text-xs text-white/60 leading-relaxed">Composable capabilities connected to the systems that run the enterprise.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile fallback layout */}
-        <div className="relative z-10 flex flex-col gap-6 px-6 pb-12 md:hidden">
-          <div className="w-full flex items-center justify-center p-8 bg-white/5 border border-[hsl(var(--brand-pink))] shadow-[0_0_20px_rgba(255,255,255,0.1)] mb-4">
-            <div className="text-center">
-              <h3 className="text-2xl font-bold tracking-tight text-white mb-1">CogniOS</h3>
-              <span className="text-[9px] uppercase tracking-widest text-white/70">Orchestration Core</span>
-            </div>
-          </div>
-          
-          {products.map(([n, t, c]) => (
-            <div key={t} className="bg-white/5 border border-white/10 p-6 flex items-start gap-4">
-              <div className="w-8 h-8 shrink-0 bg-white/5 border border-white/20 flex items-center justify-center">
-                <span className="text-[10px] font-bold text-[hsl(var(--brand-pink))]">{n}</span>
-              </div>
-              <div>
-                <h4 className="text-lg font-bold mb-2 text-white">{t}</h4>
-                <p className="text-xs text-white/60 leading-relaxed">{c}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section id="principles" className="bg-foreground text-white px-6 md:px-12 py-24 relative overflow-hidden">
-        <div className="absolute right-0 top-[10%] text-[17vw] leading-[0.8] font-display font-semibold tracking-tighter text-white/5 pointer-events-none">
-          CONTROL
-        </div>
-        <div className="max-w-[1440px] mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-[8vw]">
+      <section className="co-spines">
+        <div className="co-spines-head">
           <div>
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/60 mb-6">
-              <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-              The non-negotiables
-            </div>
-            <h2 className="text-4xl md:text-6xl lg:text-[85px] leading-[0.94] font-semibold tracking-tight mb-8">
-              Intelligence with a clear line of <em className="not-italic text-[hsl(var(--brand-pink))]">authority.</em>
-            </h2>
-            <p className="text-lg text-white/80 max-w-[430px]">
-               CogniOS is designed to support human decisions, not obscure them. It creates a usable platform for teams operating where context, trust and control cannot be treated as edge cases.
-            </p>
+            <div className="co-kicker">Through every layer</div>
+            <h2>Two spines keep the platform honest.</h2>
           </div>
-          
-          <div className="border-t border-white/30 lg:self-end">
-            <div className="py-4 border-b border-white/20 text-lg font-semibold flex items-center">
-              <span className="text-[10px] font-normal tracking-widest text-[hsl(var(--brand-coral))] mr-4 w-6">01</span>
-               Context designed around the work
+          <p>They are not a review gate at the end. They run through the architecture, from first decision to live operation.</p>
+        </div>
+        <div className="co-spine-grid">
+          <article className="co-spine">
+            <img src={assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")} alt="A violet route moving through a series of controlled architectural gateways." />
+            <div className="co-spine-content">
+              <small>Spine 01 / AI governance & assurance</small>
+              <strong>Control in the flow.</strong>
+              <p>Policies, approvals, traceability and assurance remain visible wherever intelligence is used.</p>
             </div>
-            <div className="py-4 border-b border-white/20 text-lg font-semibold flex items-center">
-              <span className="text-[10px] font-normal tracking-widest text-[hsl(var(--brand-coral))] mr-4 w-6">02</span>
-               Boundaries made explicit
+          </article>
+          <article className="co-spine">
+            <img src={assetUrl("/images/cognirise/pulse-convergence.jpg")} alt="An abstract operational space showing systems converging." />
+            <div className="co-spine-content">
+              <small>Spine 02 / platform engineering & ops</small>
+              <strong>Built to stay in motion.</strong>
+              <p>Integration, observability and platform operations turn a deployment into an operating capability.</p>
             </div>
-            <div className="py-4 border-b border-white/20 text-lg font-semibold flex items-center">
-              <span className="text-[10px] font-normal tracking-widest text-[hsl(var(--brand-coral))] mr-4 w-6">03</span>
-              Human authority stays visible
+          </article>
+        </div>
+      </section>
+
+      <section className="co-products">
+        <div className="co-product-head">
+          <div>
+            <div className="co-kicker">A connected product family</div>
+            <h2>Specialist capabilities. A shared operating system.</h2>
+          </div>
+          <p>CogniOS is the architecture that lets each capability contribute to a governed whole.</p>
+        </div>
+        <div className="co-products-list">
+          {products.map(([n, t, c]) => (
+            <article className="co-product" key={t}>
+              <span>{n}</span>
+              <h3>{t}</h3>
+              <p>{c}</p>
+              <ArrowRight size={17}/>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="co-principles" id="principles">
+        <div className="co-principles-inner">
+          <div>
+            <div className="co-kicker">The non-negotiables</div>
+            <h2>Intelligence with a clear line of <em>authority.</em></h2>
+            <p>CogniOS is designed to support human decisions, not obscure them. It creates a usable platform for teams operating where context, trust and control cannot be treated as edge cases.</p>
+          </div>
+          <div className="flex flex-col">
+            <div className="co-principle-list">
+              <div><span>01</span>Context designed around the work</div>
+              <div><span>02</span>Boundaries made explicit</div>
+              <div><span>03</span>Human authority stays visible</div>
+              <div><span>04</span>Governance travels with the work</div>
             </div>
-            <div className="py-4 border-b border-white/20 text-lg font-semibold flex items-center">
-              <span className="text-[10px] font-normal tracking-widest text-[hsl(var(--brand-coral))] mr-4 w-6">04</span>
-              Governance travels with the work
-            </div>
-            
-            <div className="mt-12">
-              <BrandButton href="/value-scan" variant="submit">
-                Bring us one process
-              </BrandButton>
+            <div>
+              <Link href="/value-scan" className="co-primary">Bring us one process <ArrowRight /></Link>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { ArrowDown } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
+import { assetUrl } from "@/lib/assets";
 
 export default function SovereignRegulatedAI() {
   const { market } = useMarketStore();
@@ -19,7 +20,7 @@ export default function SovereignRegulatedAI() {
           What we do / {marketLocation}
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-[0.86fr_1.14fr] gap-12 lg:gap-16 items-end pb-12 min-h-[60vh]">
+        <div className="grid grid-cols-1 items-end gap-12 pb-12 lg:grid-cols-[0.86fr_1.14fr] lg:gap-16">
           <div className="pb-4 relative z-10">
             <h1 className="text-5xl md:text-6xl lg:text-[93px] leading-[0.94] font-semibold mb-8 max-w-[660px]">
               Control is not <em className="not-italic text-[hsl(var(--brand-pink))]">optional.</em>
@@ -40,7 +41,7 @@ export default function SovereignRegulatedAI() {
           
           <div className="relative h-[400px] lg:h-[640px] clip-diagonal-bottom bg-[hsl(var(--brand-deep))]">
             <img 
-              src="/images/cognirise/site-government.jpg" 
+              src={assetUrl("/images/cognirise/site-government.jpg")}
               alt="A protected, glowing enclave within a larger civic structure." 
               className="absolute inset-0 h-full w-full object-cover opacity-90 scale-105"
             />

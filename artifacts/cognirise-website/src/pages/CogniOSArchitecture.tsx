@@ -3,6 +3,7 @@ import { ArrowRight, Activity, Database, Key, CheckCircle, Search, Terminal } fr
 import { BrandButton } from "@/components/ui/brand-button";
 import { useState } from "react";
 import { useMarketStore } from "@/store/market";
+import { assetUrl } from "@/lib/assets";
 
 export default function CogniOSArchitecture() {
   const { market } = useMarketStore();
@@ -182,7 +183,7 @@ export default function CogniOSArchitecture() {
           
           <div className="relative h-[400px] lg:h-[570px] lg:-mt-10 clip-diagonal-bottom">
             <img 
-              src="/images/cognirise/cognirise-pulse-outcomes.jpg" 
+              src={assetUrl("/images/cognirise/cognirise-pulse-outcomes.jpg")}
               alt="Data pathways moving through an architectural framework." 
               className="absolute inset-0 h-full w-full object-cover"
             />

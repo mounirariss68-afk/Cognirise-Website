@@ -14,6 +14,12 @@ interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 
 export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, BrandButtonProps & React.AnchorHTMLAttributes<HTMLAnchorElement>>(
   ({ children, variant = "primary", className, icon, href, isLoading, disabled, ...props }, ref) => {
+    const forcedTextColor =
+      variant === "primary" || variant === "submit"
+        ? "#ffffff"
+        : variant === "inverse"
+          ? "hsl(var(--brand-deep))"
+          : undefined;
     
     // Core styling logic
     const renderContent = () => {
@@ -79,7 +85,12 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
 
     if (href) {
       return (
-        <Link href={href} className={getClasses()} onClick={props.onClick as any}>
+        <Link
+          href={href}
+          className={getClasses()}
+          onClick={props.onClick as any}
+          style={{ ...props.style, color: forcedTextColor }}
+        >
           {renderContent()}
         </Link>
       );
@@ -91,6 +102,7 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
         className={getClasses()}
         disabled={disabled || isLoading}
         {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+        style={{ ...props.style, color: forcedTextColor }}
       >
         {renderContent()}
       </button>

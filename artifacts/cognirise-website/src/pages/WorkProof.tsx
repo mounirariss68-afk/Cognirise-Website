@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { ArrowDown, ArrowRight } from "lucide-react";
-import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
+import { assetUrl } from "@/lib/assets";
 
 export default function WorkProof() {
   const { market } = useMarketStore();
@@ -12,272 +12,259 @@ export default function WorkProof() {
     market === "turkiye" ? "Istanbul · Türkiye" :
     "London · Europe";
 
+  const goTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
   return (
-    <div className="flex flex-col">
-      <section className="px-6 md:px-12 pt-8 md:pt-12 max-w-[1440px] mx-auto w-full">
-        <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
-          <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-          {marketLocation} / Work & proof
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-[0.82fr_1.18fr] gap-12 lg:gap-16 items-end pb-12 min-h-[60vh]">
-          <div className="pb-4 relative z-10">
-            <h1 className="text-5xl md:text-6xl lg:text-[101px] leading-[0.93] font-semibold mb-8 max-w-[700px]">
-              Proof lives in the <em className="not-italic text-[hsl(var(--brand-pink))]">work.</em>
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-[440px] mb-10 leading-relaxed">
-              From a priority mandate through the constraints, the build and governed production—we document what changes when intelligence moves real work.
-            </p>
-            <div className="flex flex-wrap items-center gap-6">
-              <BrandButton onClick={() => document.getElementById("proof")?.scrollIntoView({ behavior: "smooth" })}>
-                See the proof model
-              </BrandButton>
-              <BrandButton href="/value-scan" variant="editorial">
-                Bring one process
-              </BrandButton>
-            </div>
+    <main className="wp">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+        .wp{--ink:#102957;--deep:#071936;--paper:#fdfcfb;--mist:#f0f2f6;--line:#cbd3e1;--violet:#7659df;--pink:#db509e;--coral:#ff775d;background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;overflow:hidden}
+        .wp *{box-sizing:border-box}
+        .wp button{font:inherit}
+        .wp a{color:inherit;text-decoration:none}
+        .wp :focus-visible{outline:3px solid var(--coral);outline-offset:4px}
+        .wp-primary{border:1px solid var(--ink);cursor:pointer;color:#fff;background:var(--ink);font-weight:700;font-size:12px;padding:4px 4px 4px 17px;min-height:46px;display:inline-flex;align-items:center;gap:15px;position:relative;isolation:isolate;overflow:hidden;transition:transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s}
+        .wp-primary:before{content:"";position:absolute;z-index:-2;inset:-1px;background:linear-gradient(105deg,var(--violet),var(--pink),var(--coral));opacity:0;transition:opacity .24s}
+        .wp-primary:after{content:"";position:absolute;z-index:-1;inset:1px;background:var(--ink);transition:background .24s}
+        .wp-primary svg{width:36px;height:36px;padding:10px;background:#fff;color:var(--ink);transition:transform .24s,background .24s,color .24s}
+        .wp-primary:hover{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--coral)}
+        .wp-primary:hover:before{opacity:1}
+        .wp-primary:hover svg{transform:translate(3px,-3px);background:var(--coral);color:#fff}
+        .wp-kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;display:flex;gap:10px;align-items:center}
+        .wp-kicker:before{content:"";width:23px;height:1px;background:linear-gradient(90deg,var(--violet),var(--coral))}
+        .wp-hero{padding:23px 4.8vw 0}
+        .wp-hero-grid{min-height:685px;display:grid;grid-template-columns:.82fr 1.18fr;gap:36px;align-items:end;padding-bottom:34px}
+        .wp-hero-copy{padding-bottom:25px;position:relative;z-index:2}
+        .wp h1,.wp h2,.wp h3{font-family:Comfortaa,sans-serif}
+        .wp h1{font-size:clamp(50px,6.6vw,101px);letter-spacing:-.08em;line-height:.93;font-weight:600;margin:31px 0 28px;max-width:700px}
+        .wp h1 em,.wp h2 em{font-style:normal;color:var(--pink)}
+        .wp-hero-copy p{max-width:440px;font-size:16px;line-height:1.62;color:#415779;margin:0 0 30px}
+        .wp-under{border:0;border-bottom:1px solid var(--ink);padding:8px 0;background:none;color:var(--ink);font-weight:700;font-size:12px;display:inline-flex;gap:9px;align-items:center;margin-left:17px;cursor:pointer}
+        .wp-under:hover{color:var(--pink);border-color:var(--pink)}
+        .wp-hero-art{height:638px;overflow:hidden;position:relative;background:var(--deep);clip-path:polygon(10% 0,100% 0,100% 91%,0 100%,0 12%)}
+        .wp-hero-art img{width:100%;height:100%;object-fit:cover}
+        .wp-hero-art:after{content:"";inset:0;position:absolute;background:linear-gradient(90deg,rgba(7,25,54,.4),transparent 54%),linear-gradient(0deg,rgba(7,25,54,.5),transparent 40%)}
+        .wp-hero-word{position:absolute;z-index:1;right:-6px;top:50px;color:#fff;font:600 clamp(61px,9.5vw,155px)/.8 Comfortaa,sans-serif;letter-spacing:-.11em;mix-blend-mode:overlay}
+        .wp-caption{position:absolute;z-index:1;bottom:29px;left:34px;color:white;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+        .wp-caption span{display:block;opacity:.72;margin-bottom:8px}
+        .wp-proof{margin:0 4.8vw;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);display:grid;grid-template-columns:repeat(4,1fr)}
+        .wp-proof div{padding:18px 20px;border-right:1px solid var(--line);font-size:12px;line-height:1.4}
+        .wp-proof div:last-child{border:0}
+        .wp-proof b{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:#6a7891;margin-bottom:8px}
+        .wp-intro{padding:145px 4.8vw 105px;display:grid;grid-template-columns:1fr 1.1fr;gap:7vw}
+        .wp-intro h2,.wp-outcome h2{font-size:clamp(42px,5.1vw,78px);line-height:.98;letter-spacing:-.08em;font-weight:600;margin:23px 0 0}
+        .wp-intro-copy{align-self:end;border-top:1px solid var(--line);padding-top:22px;font-size:21px;line-height:1.46;color:#30486d;max-width:540px}
+        .wp-intro-copy small{display:block;margin-top:23px;color:#647491;font-size:12px;line-height:1.55}
+        .wp-image-break{margin:0 4.8vw;height:min(620px,48vw);min-height:470px;position:relative;overflow:hidden;background:var(--deep)}
+        .wp-image-break img{width:100%;height:100%;object-fit:cover}
+        .wp-image-break:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.85),rgba(7,25,54,.06) 74%)}
+        .wp-break-copy{position:absolute;z-index:1;left:6%;bottom:11%;color:white;max-width:620px}
+        .wp-break-copy h2{font-size:clamp(42px,5.1vw,76px);line-height:.97;letter-spacing:-.08em;font-weight:600;margin:18px 0}
+        .wp-break-copy p{line-height:1.6;color:#dce4f0;max-width:470px}
+        .wp-break-no{position:absolute;z-index:2;right:4%;top:34px;color:#fff;font-size:10px;letter-spacing:.12em;writing-mode:vertical-rl}
+        .wp-ledger{padding:124px 4.8vw}
+        .wp-ledger-head{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:end}
+        .wp-ledger h2{font-size:clamp(42px,5vw,73px);line-height:.98;letter-spacing:-.08em;font-weight:600;margin:20px 0 0}
+        .wp-ledger-lead{font-size:16px;line-height:1.58;max-width:410px;color:#42587b;margin:0}
+        .wp-stages{margin-top:63px;border-top:1px solid var(--ink)}
+        .wp-stage{display:grid;grid-template-columns:70px 1fr 1.1fr;gap:20px;align-items:start;padding:25px 8px;border-bottom:1px solid var(--line)}
+        .wp-stage:hover{background:#f2eff9}
+        .wp-stage span{font-size:10px;letter-spacing:.1em;color:#697a96;padding-top:7px}
+        .wp-stage h3{font-weight:600;font-size:clamp(22px,2.4vw,34px);letter-spacing:-.065em;line-height:1.05;margin:0}
+        .wp-stage p{font-size:14px;line-height:1.52;color:#536887;margin:0;max-width:410px}
+        .wp-outcome{background:var(--mist);padding:0 4.8vw 115px}
+        .wp-outcome-wrap{display:grid;grid-template-columns:1fr 1fr;gap:5vw;min-height:560px}
+        .wp-outcome-copy{padding:88px 0 45px}
+        .wp-outcome-copy p{color:#3e567b;max-width:400px;font-size:16px;line-height:1.6}
+        .wp-outcome-image{margin-top:-42px;clip-path:polygon(0 8%,100% 0,100% 100%,9% 92%);overflow:hidden}
+        .wp-outcome-image img{width:100%;height:100%;object-fit:cover}
+        .wp-outcome-grid{margin-top:38px;border-top:1px solid var(--ink);display:grid;grid-template-columns:1fr 1fr}
+        .wp-outcome-grid div{padding:15px 10px;border-bottom:1px solid var(--line);font-size:15px;font-weight:600}
+        .wp-outcome-grid div:nth-child(odd){border-right:1px solid var(--line)}
+        .wp-outcome-grid span{display:block;color:var(--pink);font-size:10px;letter-spacing:.1em;margin-bottom:7px}
+        .wp-note{padding:115px 4.8vw 132px}
+        .wp-note-head{border-top:1px solid var(--ink);padding-top:25px;display:flex;justify-content:space-between;gap:30px;align-items:end}
+        .wp-note h2{font-size:clamp(41px,5vw,72px);line-height:.98;letter-spacing:-.08em;font-weight:600;margin:13px 0 0;max-width:730px}
+        .wp-note-head p{max-width:300px;font-size:14px;line-height:1.55;color:#536887}
+        .wp-note-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:13px;margin-top:48px}
+        .wp-note-image{height:460px;overflow:hidden;position:relative;background:var(--deep)}
+        .wp-note-image img{width:100%;height:100%;object-fit:cover;transition:transform .7s}
+        .wp-note-image:hover img{transform:scale(1.05)}
+        .wp-note-image:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(7,25,54,.72),transparent 55%)}
+        .wp-note-image figcaption{position:absolute;z-index:1;bottom:22px;left:24px;color:#fff}
+        .wp-note-image span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:8px}
+        .wp-note-image strong{font:600 clamp(24px,3vw,43px)/1 Comfortaa,sans-serif;letter-spacing:-.06em}
+        .wp-pattern{background:var(--deep);color:#fff;padding:43px 38px;display:flex;flex-direction:column;justify-content:space-between}
+        .wp-pattern p{font:600 31px/1.1 Comfortaa,sans-serif;letter-spacing:-.06em;margin:25px 0}
+        .wp-pattern small{color:#b9c6da;line-height:1.55;font-size:12px}
+        .wp-start{background:var(--ink);color:#fff;padding:103px 4.8vw 28px;position:relative}
+        .wp-start:before{content:"WORK";position:absolute;right:-10px;bottom:-18px;font:600 19vw/.7 Comfortaa,sans-serif;letter-spacing:-.11em;color:rgba(255,255,255,.06)}
+        .wp-start-in{position:relative;z-index:1;max-width:970px}
+        .wp-start h2{font-size:clamp(52px,7.5vw,112px);font-weight:600;letter-spacing:-.095em;line-height:.88;margin:26px 0}
+        .wp-start p{font-size:17px;line-height:1.55;max-width:500px;color:#d6deed}
+        .wp-start .wp-primary{margin-top:20px;background:linear-gradient(100deg,var(--violet),var(--pink),var(--coral));border:0}
+        .wp-start .wp-primary:after{background:transparent}
+        @media(max-width:760px){
+          .wp-hero{padding:33px 21px 0}
+          .wp-hero-grid{display:flex;flex-direction:column;min-height:0;gap:32px;padding-bottom:25px}
+          .wp h1{font-size:54px}
+          .wp-hero-art{height:440px}
+          .wp-hero-word{font-size:71px}
+          .wp-proof{margin:0 21px;grid-template-columns:1fr 1fr}
+          .wp-proof div{padding:16px 12px}
+          .wp-proof div:nth-child(2){border-right:0}
+          .wp-proof div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+          .wp-intro{padding:86px 21px 73px;display:block}
+          .wp-intro h2,.wp-outcome h2{font-size:42px}
+          .wp-intro-copy{margin-top:43px;font-size:18px}
+          .wp-image-break{height:520px;min-height:0;margin:0}
+          .wp-break-copy{left:23px;right:23px;bottom:28px}
+          .wp-break-copy h2{font-size:42px}
+          .wp-ledger{padding:82px 21px}
+          .wp-ledger-head{display:block}
+          .wp-ledger h2{font-size:43px}
+          .wp-ledger-lead{margin-top:29px}
+          .wp-stages{margin-top:42px}
+          .wp-stage{grid-template-columns:35px 1fr;padding:20px 0}
+          .wp-stage p{grid-column:2;font-size:13px}
+          .wp-stage h3{font-size:22px}
+          .wp-outcome{padding:0 21px 80px}
+          .wp-outcome-wrap{display:flex;flex-direction:column;min-height:0}
+          .wp-outcome-copy{padding:76px 0 42px}
+          .wp-outcome-image{height:390px;margin:0}
+          .wp-note{padding:0 21px 82px}
+          .wp-note-head{display:block}
+          .wp-note h2{font-size:42px}
+          .wp-note-grid{grid-template-columns:1fr;margin-top:36px}
+          .wp-note-image{height:350px}
+          .wp-pattern{min-height:270px}
+          .wp-start{padding:77px 21px 22px}
+          .wp-start h2{font-size:58px}
+        }
+      `}</style>
+      
+      <section className="wp-hero">
+        <div className="wp-kicker">{marketLocation} / Work & proof</div>
+        <div className="wp-hero-grid">
+          <div className="wp-hero-copy">
+            <h1>Proof lives in the <em>work.</em></h1>
+            <p>From a priority mandate through the constraints, the build and governed production—we document what changes when intelligence moves real work.</p>
+            <button className="wp-primary" onClick={() => goTo("proof")}>See the proof model <ArrowDown size={15} /></button>
+            <Link href="/value-scan" className="wp-under">Bring one process <ArrowRight size={15} /></Link>
           </div>
-          
-          <div className="relative h-[440px] lg:h-[638px] clip-diagonal-bottom bg-[hsl(var(--brand-deep))]">
-            <img 
-              src="/images/cognirise/site-work-proof.jpg" 
-              alt="A vivid violet-to-coral route moving through a white architectural model." 
-              className="absolute inset-0 h-full w-full object-cover opacity-90 scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--brand-deep))] via-transparent to-transparent opacity-60" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))] via-transparent to-transparent opacity-70" />
-            
-            <div className="absolute right-0 top-12 z-10 text-[100px] lg:text-[155px] font-display font-semibold leading-none text-white opacity-20 mix-blend-overlay tracking-tight pointer-events-none">
-              proof
-            </div>
-            
-            <div className="absolute bottom-8 left-8 z-20 text-[10px] uppercase tracking-widest text-white">
-              <span className="mb-2 block opacity-75">01 / work in motion</span>
-              From mandate to governed production
-            </div>
+          <div className="wp-hero-art">
+            <img src={assetUrl('/images/cognirise/site-work-proof.jpg')} alt="A vivid violet-to-coral route moving through a white architectural model." />
+            <div className="wp-hero-word">proof</div>
+            <div className="wp-caption"><span>01 / work in motion</span>From mandate to governed production</div>
           </div>
         </div>
       </section>
-
-      <section className="border-y border-foreground mx-6 md:mx-12 max-w-[1440px] xl:mx-auto">
-        <div className="grid grid-cols-2 lg:grid-cols-4">
-          <div className="border-b lg:border-b-0 lg:border-r border-border p-5 lg:p-6">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Starting point</span>
-            <strong className="text-sm font-semibold text-foreground">One consequential process</strong>
-          </div>
-          <div className="border-b lg:border-b-0 lg:border-r border-border p-5 lg:p-6">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">What we surface</span>
-            <strong className="text-sm font-semibold text-foreground">Constraints before the build</strong>
-          </div>
-          <div className="border-r border-border p-5 lg:p-6">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">What changes</span>
-            <strong className="text-sm font-semibold text-foreground">Working systems, not slides</strong>
-          </div>
-          <div className="p-5 lg:p-6">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">How it lasts</span>
-            <strong className="text-sm font-semibold text-foreground">Governance in the flow</strong>
-          </div>
+      
+      <section className="wp-proof" aria-label="Proof principles">
+        <div><b>Starting point</b><strong>One consequential process</strong></div>
+        <div><b>What we surface</b><strong>Constraints before the build</strong></div>
+        <div><b>What changes</b><strong>Working systems, not slides</strong></div>
+        <div><b>How it lasts</b><strong>Governance in the flow</strong></div>
+      </section>
+      
+      <section className="wp-intro" id="proof">
+        <div>
+          <div className="wp-kicker">Evidence, not theatre</div>
+          <h2>Change is only useful when it can be <em>shown.</em></h2>
+        </div>
+        <div className="wp-intro-copy">
+          Every engagement begins with the work under pressure: the decision, process, data and control environment that must move together.
+          <small>Where client details cannot be public, we describe the operating pattern clearly and label it as anonymized. We do not invent names, metrics or results.</small>
         </div>
       </section>
-
-      <section id="proof" className="px-6 md:px-12 py-24 md:py-32 max-w-[1440px] mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-[7vw]">
+      
+      <section className="wp-image-break">
+        <img src={assetUrl('/images/cognirise/pulse-breakthrough.jpg')} alt="A violet and coral current cutting through an architectural maze." />
+        <div className="wp-break-copy">
+          <div className="wp-kicker">The proof route</div>
+          <h2>Constraints are part of the brief.</h2>
+          <p>Security, sovereignty, integration, accountability and adoption are not a postscript. They shape the route from the first working session through to production.</p>
+        </div>
+        <div className="wp-break-no">02 / documented delivery</div>
+      </section>
+      
+      <section className="wp-ledger">
+        <div className="wp-ledger-head">
           <div>
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">
-              <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-              Evidence, not theatre
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-[78px] leading-[0.98] font-semibold">
-              Change is only useful when it can be <em className="not-italic text-[hsl(var(--brand-coral))]">shown.</em>
-            </h2>
+            <div className="wp-kicker">How work is evidenced</div>
+            <h2>The delivery record, not the highlight reel.</h2>
           </div>
-          <div className="lg:self-end border-t border-border pt-8">
-            <p className="text-xl md:text-2xl leading-relaxed text-foreground/80 max-w-[540px]">
-              Every engagement begins with the work under pressure: the decision, process, data and control environment that must move together.
-            </p>
-            <p className="mt-8 text-sm leading-relaxed text-muted-foreground max-w-[480px]">
-              Where client details cannot be public, we describe the operating pattern clearly and label it as anonymized. We do not invent names, metrics or results.
-            </p>
-          </div>
+          <p className="wp-ledger-lead">A useful proof story makes its context, choices and operating controls visible—so leaders can judge what it took to make progress stick.</p>
         </div>
-      </section>
-
-      <section className="mx-0 md:mx-12 max-w-[1440px] xl:mx-auto h-[500px] md:h-[620px] relative bg-[hsl(var(--brand-deep))] overflow-hidden">
-        <img 
-          src="/images/cognirise/pulse-breakthrough.jpg" 
-          alt="A violet and coral current cutting through an architectural maze."
-          className="absolute inset-0 h-full w-full object-cover opacity-90 scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--brand-deep))] to-transparent opacity-90 lg:opacity-100 lg:from-70%" />
-        
-        <div className="absolute bottom-12 lg:bottom-24 left-6 lg:left-16 max-w-[620px] z-10">
-          <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/70 mb-4">
-            The proof route
-          </div>
-          <h2 className="text-4xl md:text-5xl lg:text-[76px] font-semibold text-white leading-tight mb-6">
-            Constraints are part of the brief.
-          </h2>
-          <p className="text-white/80 text-base md:text-lg max-w-[470px] leading-relaxed">
-            Security, sovereignty, integration, accountability and adoption are not a postscript. They shape the route from the first working session through to production.
-          </p>
-        </div>
-        
-        <div className="absolute top-12 right-6 lg:right-12 text-[10px] uppercase tracking-widest text-white/60 writing-vertical-rl rotate-180">
-          02 / documented delivery
-        </div>
-      </section>
-
-      <section className="px-6 md:px-12 py-24 md:py-32 max-w-[1440px] mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-end mb-16">
-          <div>
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">
-              <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-              How work is evidenced
-            </div>
-            <h2 className="text-4xl md:text-6xl lg:text-[73px] leading-[0.98] font-semibold">
-              The delivery record, not the highlight reel.
-            </h2>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-[410px]">
-            A useful proof story makes its context, choices and operating controls visible—so leaders can judge what it took to make progress stick.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 border-t border-foreground pt-12 gap-8">
+        <div className="wp-stages">
           {[
-            ["01", "Mandate", "The priority work, the sponsor question and what a useful change needs to achieve."],
-            ["02", "Constraints", "The data, architecture, security, sovereignty and operating realities that define the possible."],
-            ["03", "Build", "Forward-deployed operators and engineers turn the route into a working system with the people who will run it."],
-            ["04", "Governed production", "Controls, ownership and accountability are embedded where the work happens—not added at the end."]
-          ].map(([n, title, copy], i) => (
-            <div key={n} className="flex flex-col relative group">
-              {/* Animated connector line */}
-              {i < 3 && (
-                <div className="hidden md:block absolute top-6 left-12 w-[calc(100%-3rem)] h-[1px] bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-pink))] opacity-20 group-hover:opacity-100 transition-opacity duration-500" />
-              )}
-              
-              <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-[10px] font-bold tracking-widest text-muted-foreground mb-8 bg-white z-10 transition-all duration-300 group-hover:border-[hsl(var(--brand-pink))] group-hover:text-[hsl(var(--brand-pink))] group-hover:shadow-[0_0_0_4px_rgba(255,255,255,1)]">
-                {n}
-              </div>
-              
-              <h3 className="text-xl md:text-2xl font-semibold mb-4 transition-colors group-hover:text-[hsl(var(--brand-pink))]">
-                {title}
-              </h3>
-              <p className="text-sm leading-relaxed text-muted-foreground max-w-[280px]">
-                {copy}
-              </p>
-            </div>
+            ["01","Mandate","The priority work, the sponsor question and what a useful change needs to achieve."],
+            ["02","Constraints","The data, architecture, security, sovereignty and operating realities that define the possible."],
+            ["03","Build","Forward-deployed operators and engineers turn the route into a working system with the people who will run it."],
+            ["04","Governed production","Controls, ownership and accountability are embedded where the work happens—not added at the end."]
+          ].map(([n,title,copy]) => (
+            <article className="wp-stage" key={n}>
+              <span>{n}</span>
+              <h3>{title}</h3>
+              <p>{copy}</p>
+            </article>
           ))}
         </div>
       </section>
-
-      <section className="bg-[hsl(var(--secondary))] px-6 md:px-12 py-24 w-full">
-        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-[5vw]">
-          <div className="lg:py-16">
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">
-              <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-              Four ways work moves
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-[70px] leading-[0.97] font-semibold mb-8">
-              Outcomes with operating consequences.
-            </h2>
-            <p className="text-lg text-foreground/70 max-w-[400px] mb-12">
-              We look for measurable movement in the forces that matter to an enterprise: cost, capacity, speed and risk. The right evidence depends on the mandate—not a predetermined dashboard.
-            </p>
-            
-            <div className="grid grid-cols-2 border-t border-foreground mt-8">
-              <div className="border-r border-b border-border p-4">
-                <span className="text-[hsl(var(--brand-pink))] text-[10px] tracking-widest block mb-2">01</span>
-                <span className="font-semibold text-sm">Cost</span>
-              </div>
-              <div className="border-b border-border p-4">
-                <span className="text-[hsl(var(--brand-pink))] text-[10px] tracking-widest block mb-2">02</span>
-                <span className="font-semibold text-sm">Capacity</span>
-              </div>
-              <div className="border-r border-b border-border p-4">
-                <span className="text-[hsl(var(--brand-pink))] text-[10px] tracking-widest block mb-2">03</span>
-                <span className="font-semibold text-sm">Speed</span>
-              </div>
-              <div className="border-b border-border p-4">
-                <span className="text-[hsl(var(--brand-pink))] text-[10px] tracking-widest block mb-2">04</span>
-                <span className="font-semibold text-sm">Risk</span>
-              </div>
+      
+      <section className="wp-outcome">
+        <div className="wp-outcome-wrap">
+          <div className="wp-outcome-copy">
+            <div className="wp-kicker">Four ways work moves</div>
+            <h2>Outcomes with operating consequences.</h2>
+            <p>We look for measurable movement in the forces that matter to an enterprise: cost, capacity, speed and risk. The right evidence depends on the mandate—not a predetermined dashboard.</p>
+            <div className="wp-outcome-grid">
+              <div><span>01</span>Cost</div>
+              <div><span>02</span>Capacity</div>
+              <div><span>03</span>Speed</div>
+              <div><span>04</span>Risk</div>
             </div>
           </div>
-          
-          <div className="relative h-[400px] lg:h-auto lg:-mt-10 clip-diagonal-bottom">
-            <img 
-              src="/images/cognirise/cognirise-pulse-outcomes.jpg" 
-              alt="A coral route passing through a violet arch and a navy structure." 
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+          <div className="wp-outcome-image">
+            <img src={assetUrl('/images/cognirise/cognirise-pulse-outcomes.jpg')} alt="A coral route passing through a violet arch and a navy structure." />
           </div>
         </div>
       </section>
-
-      <section className="px-6 md:px-12 py-24 md:py-32 max-w-[1440px] mx-auto w-full">
-        <div className="border-t border-foreground pt-8 flex flex-col lg:flex-row justify-between gap-8 lg:items-end mb-12">
+      
+      <section className="wp-note">
+        <div className="wp-note-head">
           <div>
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-4">
-              Patterns, clearly labeled
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-[72px] leading-[0.98] font-semibold max-w-[730px]">
-              Some work must remain private. The method does not.
-            </h2>
+            <div className="wp-kicker">Patterns, clearly labeled</div>
+            <h2>Some work must remain private. The method does not.</h2>
           </div>
-          <p className="text-base text-muted-foreground max-w-[300px]">
-            These are anonymized engagement patterns—not named case studies or claimed performance figures.
-          </p>
+          <p>These are anonymized engagement patterns—not named case studies or claimed performance figures.</p>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-4 mt-12">
-          <figure className="relative bg-[hsl(var(--brand-deep))] overflow-hidden group h-[350px] lg:h-[460px]">
-            <img src="/images/cognirise/site-work-proof.jpg" alt="An architectural route joining different operating environments." className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))] to-transparent opacity-80" />
-            <figcaption className="absolute bottom-6 left-6 z-10 text-white">
-              <span className="block text-[10px] uppercase tracking-widest opacity-70 mb-2">Anonymized engagement pattern</span>
-              <strong className="text-2xl md:text-4xl font-semibold">One process under pressure.</strong>
+        <div className="wp-note-grid">
+          <figure className="wp-note-image">
+            <img src={assetUrl('/images/cognirise/site-work-proof.jpg')} alt="An architectural route joining different operating environments." />
+            <figcaption>
+              <span>Anonymized engagement pattern</span>
+              <strong>One process under pressure.</strong>
             </figcaption>
           </figure>
-          
-          <aside className="bg-[hsl(var(--brand-deep))] text-white p-8 md:p-10 flex flex-col justify-between min-h-[270px]">
+          <aside className="wp-pattern">
             <div>
-              <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/60 mb-6">
-                <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-                What is documented
-              </div>
-              <p className="text-2xl md:text-[31px] leading-[1.1] font-semibold tracking-tight mb-8">
-                Where work gets stuck. What can change. What must stay controlled.
-              </p>
+              <div className="wp-kicker">What is documented</div>
+              <p>Where work gets stuck. What can change. What must stay controlled.</p>
             </div>
-            <small className="text-white/60 text-xs leading-relaxed block">
-              The record follows the mandate through constraints, build decisions, governed release and the outcome measures that the sponsor can stand behind.
-            </small>
+            <small>The record follows the mandate through constraints, build decisions, governed release and the outcome measures that the sponsor can stand behind.</small>
           </aside>
         </div>
       </section>
-
-      <section className="bg-foreground text-white px-6 md:px-12 py-24 relative overflow-hidden">
-        <div className="absolute right-0 bottom-[-5%] text-[20vw] leading-[0.7] font-display font-semibold tracking-tighter text-white/5 pointer-events-none">
-          WORK
-        </div>
-        <div className="max-w-[1440px] mx-auto relative z-10">
-          <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/60 mb-6">
-            <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-            The first move
-          </div>
-          <h2 className="text-5xl md:text-7xl lg:text-[112px] leading-[0.88] font-semibold tracking-tight mb-8">
-            Bring one process.<br />
-            <em className="not-italic text-[#ff8470]">Make the proof useful.</em>
-          </h2>
-          <p className="text-lg text-white/80 max-w-[500px] mb-12">
-            Start with work where urgency, complexity and value have already collided. Together we can surface the mandate, constraints and practical route to production.
-          </p>
-          <BrandButton href="/value-scan" variant="submit">
-            Book a value scan
-          </BrandButton>
+      
+      <section className="wp-start" id="start">
+        <div className="wp-start-in">
+          <div className="wp-kicker">The first move</div>
+          <h2>Bring one process.<br /><em>Make the proof useful.</em></h2>
+          <p>Start with work where urgency, complexity and value have already collided. Together we can surface the mandate, constraints and practical route to production.</p>
+          <Link href="/value-scan" className="wp-primary">Book a value scan <ArrowRight size={16} /></Link>
         </div>
       </section>
-    </div>
+    </main>
   );
 }

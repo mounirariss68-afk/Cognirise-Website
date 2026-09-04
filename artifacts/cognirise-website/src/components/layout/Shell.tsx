@@ -3,6 +3,7 @@ import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
+import { assetUrl } from "@/lib/assets";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/": {
@@ -268,14 +269,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-[100dvh] flex-col">
       <header
-        className={`fixed top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur transition-colors duration-300 flex items-center h-[72px] md:h-[82px]`}
+        className="fixed top-0 z-50 flex h-[72px] w-full items-center border-b border-border bg-white/95 backdrop-blur transition-colors duration-300 md:h-[82px]"
       >
         <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-6 md:px-12">
-          <Link href="/" className="z-50 relative flex items-center h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2">
+          <Link href="/" className="relative z-50 flex h-full shrink-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2">
             <img
-              src="/images/cognirise/logo-blue.svg"
+              src={assetUrl("images/cognirise/logo-blue.svg")}
               alt="Cognirise"
-              className="object-contain origin-left w-[108px] md:w-[116px] lg:w-[124px] xl:w-[128px]"
+              className="h-[48px] w-[170px] origin-left object-contain object-left md:h-[54px] md:w-[190px] xl:w-[205px]"
             />
           </Link>
 
@@ -447,9 +448,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <div className="flex flex-col gap-6">
               <Link href="/">
                 <img
-                  src="/images/cognirise/logo-white.svg"
+                  src={assetUrl("images/cognirise/logo-white.svg")}
                   alt="Cognirise"
-                  className="h-8 object-contain origin-left"
+                  className="h-12 w-[180px] origin-left object-contain object-left"
                 />
               </Link>
               <div className="text-sm text-white/70 max-w-[280px]">

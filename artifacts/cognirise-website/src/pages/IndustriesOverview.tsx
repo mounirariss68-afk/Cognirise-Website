@@ -1,8 +1,8 @@
 import { Link } from "wouter";
-import { ArrowDown, ArrowRight, Plus } from "lucide-react";
-import { BrandButton } from "@/components/ui/brand-button";
+import { ArrowRight, Plus } from "lucide-react";
 import { useState } from "react";
 import { useMarketStore } from "@/store/market";
+import { assetUrl } from "@/lib/assets";
 
 export default function IndustriesOverview() {
   const [active, setActive] = useState<number>(0);
@@ -15,269 +15,138 @@ export default function IndustriesOverview() {
     "London · Europe";
 
   const sectors = [
-    ["01", "Banking & financial services", "Trust is the operating system.", "Build intelligence into customer journeys, risk and operations without giving up the controls that make trust possible."],
-    ["02", "Government & public sector", "Public value needs a route to delivery.", "Move complex public services from policy to practical, governed execution—designed around citizens, teams and sovereign control."],
-    ["03", "Telecoms", "The network is only the beginning.", "Turn service, operations and enterprise data into a more responsive operating model for customers and the people who serve them."],
-    ["04", "Energy & resources", "Physical operations leave no room for theatre.", "Connect field reality, planning and assurance so critical work is safer, faster and visible at the point decisions are made."],
-    ["05", "Travel & hospitality", "Every moment of service is a decision.", "Design more useful experiences across the journey while giving frontline teams the intelligence to resolve what matters."],
-    ["06", "Manufacturing & conglomerates", "Complexity should not become inertia.", "Create a shared route through portfolios, plants and supply chains—where insight can become action across the enterprise."],
+    { num: "01", title: "Banking & financial services", url: "/industries/banking", view: "Trust is the operating system.", copy: "Build intelligence into customer journeys, risk and operations without giving up the controls that make trust possible." },
+    { num: "02", title: "Government & public sector", url: "/industries/public-sector", view: "Public value needs a route to delivery.", copy: "Move complex public services from policy to practical, governed execution—designed around citizens, teams and sovereign control." },
+    { num: "03", title: "Telecoms", url: "/industries/telecoms", view: "The network is only the beginning.", copy: "Turn service, operations and enterprise data into a more responsive operating model for customers and the people who serve them." },
+    { num: "04", title: "Energy & resources", url: "/industries/energy", view: "Physical operations leave no room for theatre.", copy: "Connect field reality, planning and assurance so critical work is safer, faster and visible at the point decisions are made." },
+    { num: "05", title: "Travel & hospitality", url: "/industries/travel", view: "Every moment of service is a decision.", copy: "Design more useful experiences across the journey while giving frontline teams the intelligence to resolve what matters." },
+    { num: "06", title: "Manufacturing", url: "/industries/manufacturing", view: "Complexity should not become inertia.", copy: "Create a shared route through portfolios, plants and supply chains—where insight can become action across the enterprise." },
   ];
 
   return (
-    <div className="flex flex-col">
-      <section className="px-6 md:px-12 pt-8 md:pt-12 max-w-[1440px] mx-auto w-full">
-        <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
-          <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-          {marketLocation} / Industries
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-[0.87fr_1.13fr] gap-12 lg:gap-[4vw] items-end pb-12 min-h-[60vh]">
-          <div className="pb-4 relative z-10">
-            <h1 className="text-5xl md:text-6xl lg:text-[101px] leading-[0.93] font-semibold mb-8 max-w-[700px]">
-              Pressure reveals where intelligence <em className="not-italic text-[hsl(var(--brand-pink))]">belongs.</em>
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-[435px] mb-10 leading-relaxed">
-              For organisations carrying consequential work: the places where speed matters, and control cannot be an afterthought.
-            </p>
-            <div className="flex flex-wrap items-center gap-6">
-              <BrandButton href="/value-scan">Bring us one process</BrandButton>
-            </div>
+    <div className="io">
+      <style>{`
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+.io{--ink:#102957;--ink2:#071936;--paper:#fdfcfb;--soft:#f1f3f7;--line:#cbd3e1;--violet:#7659df;--pink:#db509e;--coral:#ff775d;background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;overflow:hidden}.io *{box-sizing:border-box}.io button{font:inherit}.io button,.io a{color:inherit;text-decoration:none;}.io :focus-visible{outline:3px solid var(--coral);outline-offset:4px}.io h1,.io h2,.io h3{font-family:Comfortaa,sans-serif}
+.io-primary{border:1px solid var(--ink);cursor:pointer;color:#fff;background:var(--ink);font-weight:700;font-size:12px;padding:4px 4px 4px 17px;min-height:46px;display:inline-flex;align-items:center;gap:15px;position:relative;isolation:isolate;overflow:hidden;transition:transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s}.io-primary:before{content:"";position:absolute;z-index:-2;inset:-1px;background:linear-gradient(105deg,var(--violet),var(--pink),var(--coral));opacity:0;transition:opacity .24s}.io-primary:after{content:"";position:absolute;z-index:-1;inset:1px;background:var(--ink);transition:background .24s}.io-primary svg{width:36px;height:36px;padding:10px;background:#fff;color:var(--ink);transition:transform .24s,background .24s,color .24s}.io-primary:hover{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--coral)}.io-primary:hover:before{opacity:1}.io-primary:hover:after{background:rgba(7,25,54,.94)}.io-primary:hover svg{transform:translate(3px,-3px);background:var(--coral);color:#fff}
+.io-kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;display:flex;align-items:center;gap:10px}.io-kicker:before{content:"";width:23px;height:1px;background:linear-gradient(90deg,var(--violet),var(--coral))}
+.io-hero{padding:23px 4.8vw 0}.io-hero-grid{min-height:660px;display:grid;grid-template-columns:.87fr 1.13fr;gap:4vw;align-items:end;padding:0 0 34px}.io-hero-copy{padding:0 0 29px;position:relative;z-index:1}.io-hero h1{font-size:clamp(53px,6.5vw,101px);font-weight:600;line-height:.93;letter-spacing:-.082em;margin:31px 0 29px;max-width:700px}.io-hero h1 em{font-style:normal;color:var(--pink)}.io-hero p{font-size:16px;line-height:1.62;color:#415779;max-width:435px;margin:0}.io-hero-image{height:595px;position:relative;overflow:hidden;background:var(--ink2);clip-path:polygon(10% 0,100% 0,100% 91%,0 100%,0 13%)}.io-hero-image img{width:100%;height:100%;object-fit:cover;animation:ioReveal 1.25s cubic-bezier(.2,.7,.2,1) both}.io-hero-image:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.42),transparent 47%),linear-gradient(0deg,rgba(7,25,54,.55),transparent 42%)}.io-hero-word{position:absolute;z-index:1;top:49px;right:-8px;font:600 clamp(59px,9vw,142px)/.8 Comfortaa,sans-serif;letter-spacing:-.11em;color:#fff;opacity:.76;mix-blend-mode:overlay}.io-cap{position:absolute;z-index:1;left:34px;bottom:27px;color:#fff;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.io-cap span{display:block;opacity:.75;margin-bottom:8px}.io-rail{margin:0 4.8vw;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);display:grid;grid-template-columns:1.18fr 1fr 1fr}.io-rail div{padding:18px 20px;border-right:1px solid var(--line);font-size:12px;line-height:1.4}.io-rail div:last-child{border:0}.io-rail b{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;margin-bottom:8px;color:#6a7891}
+.io-intro{padding:148px 4.8vw 112px;display:grid;grid-template-columns:.95fr 1.15fr;gap:8vw}.io-intro h2,.io-sectors h2{font-size:clamp(43px,5vw,77px);font-weight:600;line-height:.97;letter-spacing:-.08em;margin:24px 0 0}.io-intro h2 em{font-style:normal;color:var(--coral)}.io-intro-copy{border-top:1px solid var(--line);padding-top:22px;align-self:end;font-size:21px;line-height:1.44;color:#30486d;max-width:540px}.io-intro-copy p{margin:0}.io-intro-copy small{display:block;margin-top:23px;font-size:14px;line-height:1.55;color:#647491}
+.io-chapter{margin:0 4.8vw;height:min(635px,51vw);min-height:480px;position:relative;overflow:hidden;background:var(--ink2)}.io-chapter img{height:100%;width:100%;object-fit:cover;animation:ioBreath 9s ease-in-out infinite alternate}.io-chapter:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.9),rgba(7,25,54,.04) 70%)}.io-chapter-copy{position:absolute;z-index:1;color:#fff;left:6%;bottom:11%;max-width:595px}.io-chapter h2{font-size:clamp(43px,5vw,78px);font-weight:600;letter-spacing:-.08em;line-height:.96;margin:16px 0}.io-chapter p{font-size:15px;line-height:1.58;color:#dce4f0;max-width:430px}.io-chapter-index{position:absolute;z-index:1;right:4%;top:34px;color:#fff;font-size:10px;letter-spacing:.12em;writing-mode:vertical-rl}
+.io-sectors{padding:125px 4.8vw 116px}.io-sector-head{display:grid;grid-template-columns:1fr .72fr;gap:40px;align-items:end}.io-sector-lead{font-size:16px;line-height:1.58;color:#42587b;max-width:395px;margin:0}.io-list{margin-top:64px;border-top:1px solid var(--ink)}.io-sector{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);text-align:left;padding:25px 8px;display:grid;grid-template-columns:68px 1.05fr .95fr 34px;gap:20px;align-items:center;cursor:pointer;transition:padding .25s,background .25s}.io-sector:hover,.io-sector.active{padding-left:21px;background:#f1effb}.io-sector>span{font-size:10px;letter-spacing:.1em;color:#71819a}.io-sector h3{margin:0;font-size:clamp(20px,2.2vw,31px);line-height:1.03;font-weight:600;letter-spacing:-.06em}.io-sector p{font-size:13px;line-height:1.48;margin:0;color:#536887;max-width:320px}.io-sector svg{justify-self:end}.io-sector.active svg{color:var(--pink)}
+.io-pair{background:#eef0f5;padding:0 4.8vw 121px}.io-pair-inner{display:grid;grid-template-columns:1fr 1fr;min-height:570px}.io-pair-copy{padding:90px 9% 55px 0}.io-pair h2{font-size:clamp(42px,5vw,75px);font-weight:600;line-height:.97;letter-spacing:-.08em;margin:20px 0 27px}.io-pair p{max-width:413px;font-size:16px;line-height:1.6;color:#3e567b}.io-points{margin-top:38px;border-top:1px solid var(--ink)}.io-points div{padding:12px 0;border-bottom:1px solid var(--line);font-size:13px;font-weight:600}.io-points span{display:inline-block;width:54px;color:var(--pink);font-size:10px;letter-spacing:.1em}.io-pair-image{margin-top:-44px;position:relative;overflow:hidden;clip-path:polygon(0 8%,100% 0,100% 100%,9% 92%)}.io-pair-image img{width:100%;height:100%;object-fit:cover}.io-pair-image:after{content:"interdependent systems";position:absolute;right:24px;bottom:23px;color:#fff;font-size:10px;letter-spacing:.11em;text-transform:uppercase}
+.io-view{padding:120px 4.8vw}.io-view-top{border-top:1px solid var(--ink);padding-top:25px;display:flex;justify-content:space-between;align-items:end;gap:30px}.io-view h2{font-size:clamp(40px,4.8vw,70px);font-weight:600;line-height:.98;letter-spacing:-.08em;margin:14px 0 0}.io-view-top p{max-width:330px;font-size:14px;line-height:1.55;color:#536887}.io-views{display:grid;grid-template-columns:1fr 1fr;margin-top:52px;border-top:1px solid var(--line)}.io-view-link{display:flex;align-items:center;gap:18px;padding:21px 10px;border-bottom:1px solid var(--line);font:600 17px Comfortaa,sans-serif;letter-spacing:-.04em;text-decoration:none;color:inherit}.io-view-link:nth-child(odd){border-right:1px solid var(--line)}.io-view-link span{font:10px Inter,sans-serif;letter-spacing:.1em;color:#77859c}.io-view-link svg{margin-left:auto;color:var(--coral)}.io-view-link:hover{color:var(--pink)}.io-view-link:hover svg{color:var(--pink)}
+.io-start{background:var(--ink);color:#fff;padding:104px 4.8vw 104px;position:relative}.io-start:before{content:"ROUTE";position:absolute;right:-10px;bottom:-18px;font:600 19vw/.7 Comfortaa,sans-serif;letter-spacing:-.11em;color:rgba(255,255,255,.06)}.io-start-inner{position:relative;z-index:1;max-width:970px}.io-start h2{font-size:clamp(52px,7.4vw,112px);font-weight:600;letter-spacing:-.095em;line-height:.88;margin:25px 0}.io-start h2 em{font-style:normal;color:#ff8470}.io-start p{font-size:17px;line-height:1.55;max-width:500px;color:#d6deed}.io-start .io-primary{border-color:transparent;background:linear-gradient(100deg,var(--violet),var(--pink),var(--coral));margin-top:20px;font-size:13px;padding-left:19px}.io-start .io-primary:before{background:#fff}.io-start .io-primary:after{background:transparent}.io-start .io-primary:hover{box-shadow:6px 6px 0 #fff}
+@keyframes ioReveal{from{clip-path:inset(0 100% 0 0);transform:scale(1.1)}to{clip-path:inset(0);transform:scale(1)}}@keyframes ioBreath{to{transform:scale(1.08) translateX(-1%)}}@media(prefers-reduced-motion:reduce){.io *,.io *:before,.io *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(max-width:760px){.io-hero{padding:33px 21px 0}.io-hero-grid{display:flex;flex-direction:column;min-height:0;align-items:stretch;gap:32px;padding-bottom:25px}.io-hero-copy{padding:0}.io-hero h1{font-size:54px;margin:25px 0 22px}.io-hero p{font-size:15px}.io-hero-image{height:440px}.io-hero-word{font-size:70px}.io-rail{margin:0 21px;grid-template-columns:1fr 1fr}.io-rail div{padding:16px 12px}.io-rail div:last-child{grid-column:span 2;border-top:1px solid var(--line)}.io-rail div:nth-child(2){border-right:0}.io-intro{padding:86px 21px 73px;display:block}.io-intro h2{font-size:42px}.io-intro-copy{margin-top:43px;font-size:18px}.io-chapter{margin:0;height:520px;min-height:0}.io-chapter-copy{left:23px;right:23px;bottom:29px}.io-chapter h2{font-size:42px}.io-sectors{padding:82px 21px}.io-sector-head{display:block}.io-sectors h2{font-size:43px}.io-sector-lead{margin-top:29px}.io-list{margin-top:42px}.io-sector{grid-template-columns:35px 1fr 25px;gap:12px;padding:20px 0}.io-sector p{display:none}.io-sector h3{font-size:21px}.io-pair{padding:0 21px 78px}.io-pair-inner{display:flex;flex-direction:column;min-height:0}.io-pair-copy{padding:76px 0 42px}.io-pair h2{font-size:43px}.io-pair-image{margin:0;height:390px}.io-view{padding:0 21px 81px}.io-view-top{display:block}.io-view h2{font-size:42px}.io-view-top p{margin-top:24px}.io-views{display:block;margin-top:36px}.io-view-link{font-size:16px}.io-view-link:nth-child(odd){border-right:0}.io-start{padding:77px 21px 77px}.io-start h2{font-size:57px}}
+      `}</style>
+
+      <section className="io-hero">
+        <div className="io-kicker">{marketLocation} / Industries</div>
+        <div className="io-hero-grid">
+          <div className="io-hero-copy">
+            <h1>Pressure reveals where intelligence <em>belongs.</em></h1>
+            <p>For organisations carrying consequential work: the places where speed matters, and control cannot be an afterthought.</p>
           </div>
-          
-          <div className="relative h-[440px] lg:h-[595px] clip-diagonal-bottom bg-[hsl(var(--brand-deep))]">
-            <img 
-              src="/images/cognirise/site-government.jpg" 
-              alt="A monumental civic district connected by a luminous flow of intelligence." 
-              className="absolute inset-0 h-full w-full object-cover opacity-90 scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--brand-deep))] via-transparent to-transparent opacity-60" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))] via-transparent to-transparent opacity-70" />
-            
-            <div className="absolute right-0 top-12 z-10 text-[100px] lg:text-[142px] font-display font-semibold leading-none text-white opacity-20 mix-blend-overlay tracking-tight pointer-events-none">
-              pressure
-            </div>
-            
-            <div className="absolute bottom-8 left-8 z-20 text-[10px] uppercase tracking-widest text-white">
-              <span className="mb-2 block opacity-75">01 / operating environments</span>
+          <div className="io-hero-image">
+            <img src={assetUrl("/images/cognirise/site-government.jpg")} alt="A monumental civic district connected by a luminous flow of intelligence." />
+            <div className="io-hero-word">pressure</div>
+            <div className="io-cap">
+              <span>01 / operating environments</span>
               Intelligence with a place to work
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-y border-foreground mx-6 md:mx-12 max-w-[1440px] xl:mx-auto">
-        <div className="grid grid-cols-2 lg:grid-cols-3">
-          <div className="border-b lg:border-b-0 lg:border-r border-border p-5 lg:p-6 lg:col-span-1 col-span-2">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Built for</span>
-            <strong className="text-sm font-semibold text-foreground">UAE enterprise and government</strong>
-          </div>
-          <div className="border-r border-border p-5 lg:p-6">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Working where</span>
-            <strong className="text-sm font-semibold text-foreground">Urgency meets scrutiny</strong>
-          </div>
-          <div className="p-5 lg:p-6">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Starting point</span>
-            <strong className="text-sm font-semibold text-foreground">One process under pressure</strong>
-          </div>
+      <section className="io-rail" aria-label="Industry focus">
+        <div><b>Built for</b><strong>UAE enterprise and government</strong></div>
+        <div><b>Working where</b><strong>Urgency meets scrutiny</strong></div>
+        <div><b>Starting point</b><strong>One process under pressure</strong></div>
+      </section>
+
+      <section className="io-intro">
+        <div>
+          <div className="io-kicker">The Cognirise point of view</div>
+          <h2>The sector is the context. The work is the <em>question.</em></h2>
+        </div>
+        <div className="io-intro-copy">
+          <p>Each industry carries its own obligations: trust, sovereignty, continuity, safety, service. We begin there—not with a generic AI pattern.</p>
+          <small>Our teams work with the constraints already shaping the operating environment, then build a governed route from priority problem to production value.</small>
         </div>
       </section>
 
-      <section className="px-6 md:px-12 py-24 md:py-36 max-w-[1440px] mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.15fr] gap-12 lg:gap-[8vw]">
+      <section className="io-chapter">
+        <img src={assetUrl("/images/cognirise/site-financial.jpg")} alt="A secure financial mechanism with a vivid intelligence route moving through it." />
+        <div className="io-chapter-copy">
+          <div className="io-kicker">Trust at speed</div>
+          <h2>Make controls part of the flow.</h2>
+          <p>In financial services and public institutions, intelligence only earns its place when it can work with the standards, data and accountability already in motion.</p>
+        </div>
+        <div className="io-chapter-index">02 / governed movement</div>
+      </section>
+
+      <section className="io-sectors" id="industries">
+        <div className="io-sector-head">
           <div>
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">
-              <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-              The Cognirise point of view
+            <div className="io-kicker">Industry points of view</div>
+            <h2>Different pressure. One accountable route.</h2>
+          </div>
+          <p className="io-sector-lead">Explore where the work is consequential—and where the right combination of people, systems and agents can shift it.</p>
+        </div>
+        <div className="io-list">
+          {sectors.map((s, index) => (
+            <button key={s.title} className={`io-sector ${active === index ? "active" : ""}`} onClick={() => setActive(index)} aria-expanded={active === index}>
+              <span>{s.num}</span>
+              <h3>{s.title}</h3>
+              <p>{active === index ? s.copy : s.view}</p>
+              {active === index ? <Plus size={18} /> : <ArrowRight size={18} />}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="io-pair">
+        <div className="io-pair-inner">
+          <div className="io-pair-copy">
+            <div className="io-kicker">Critical infrastructure</div>
+            <h2>Work that cannot pause needs intelligence that can hold.</h2>
+            <p>Across telecoms, energy, travel and complex enterprises, the systems that serve customers and communities are deeply interdependent. The route forward has to respect that reality.</p>
+            <div className="io-points">
+              <div><span>01</span>See the operational constraint</div>
+              <div><span>02</span>Design for the people in the work</div>
+              <div><span>03</span>Govern movement through the system</div>
             </div>
-            <h2 className="text-4xl md:text-5xl lg:text-[77px] leading-[0.97] font-semibold">
-              The sector is the context. The work is the <em className="not-italic text-[hsl(var(--brand-coral))]">question.</em>
-            </h2>
           </div>
-          <div className="lg:self-end border-t border-border pt-8">
-            <p className="text-xl md:text-2xl leading-relaxed text-foreground/80 max-w-[540px]">
-              Each industry carries its own obligations: trust, sovereignty, continuity, safety, service. We begin there—not with a generic AI pattern.
-            </p>
-            <p className="mt-8 text-sm leading-relaxed text-muted-foreground max-w-[480px]">
-              Our teams work with the constraints already shaping the operating environment, then build a governed route from priority problem to production value.
-            </p>
+          <div className="io-pair-image">
+            <img src={assetUrl("/images/cognirise/site-infrastructure.jpg")} alt="Connected infrastructure routes carrying luminous intelligence across a large operating landscape." />
           </div>
         </div>
       </section>
 
-      <section className="mx-0 md:mx-12 max-w-[1440px] xl:mx-auto h-[500px] md:h-[635px] relative bg-[hsl(var(--brand-deep))] overflow-hidden">
-        <img 
-          src="/images/cognirise/site-financial.jpg" 
-          alt="A secure financial mechanism with a vivid intelligence route moving through it."
-          className="absolute inset-0 h-full w-full object-cover opacity-90 scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--brand-deep))] to-transparent opacity-90 lg:opacity-100 lg:from-70%" />
-        
-        <div className="absolute bottom-12 lg:bottom-24 left-6 lg:left-16 max-w-[595px] z-10">
-          <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/70 mb-4">
-            Trust at speed
-          </div>
-          <h2 className="text-4xl md:text-5xl lg:text-[78px] font-semibold text-white leading-tight mb-6">
-            Make controls part of the flow.
-          </h2>
-          <p className="text-white/80 text-base md:text-lg max-w-[430px] leading-relaxed">
-            In financial services and public institutions, intelligence only earns its place when it can work with the standards, data and accountability already in motion.
-          </p>
-        </div>
-        
-        <div className="absolute top-12 right-6 lg:right-12 text-[10px] uppercase tracking-widest text-white/60 writing-vertical-rl rotate-180">
-          02 / governed movement
-        </div>
-      </section>
-
-      <section id="industries" className="px-6 md:px-12 py-24 md:py-32 max-w-[1440px] mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.72fr] gap-10 items-end mb-16">
+      <section className="io-view">
+        <div className="io-view-top">
           <div>
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">
-              <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-              Industry points of view
-            </div>
-            <h2 className="text-4xl md:text-6xl lg:text-[77px] leading-[0.97] font-semibold">
-              Different pressure. One accountable route.
-            </h2>
+            <div className="io-kicker">Find your operating context</div>
+            <h2>Begin where the pressure is already visible.</h2>
           </div>
-          <p className="text-lg text-muted-foreground max-w-[395px]">
-            Explore where the work is consequential—and where the right combination of people, systems and agents can shift it.
-          </p>
+          <p>We do not need a blank page. Bring the process, service or operating decision where value and complexity have already collided.</p>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8 lg:gap-16 border-t border-border pt-12">
-          {/* Sector Selector */}
-          <div className="flex flex-col gap-2">
-            {[
-              { num: "01", title: "Banking & financial services", url: "/industries/banking" },
-              { num: "02", title: "Government & public sector", url: "/industries/public-sector" },
-              { num: "03", title: "Telecoms", url: "/industries/telecoms" },
-              { num: "04", title: "Travel & hospitality", url: "/industries/travel" },
-              { num: "05", title: "Energy & resources", url: "/industries/energy" },
-              { num: "06", title: "Manufacturing", url: "/industries/manufacturing" }
-            ].map((sector, i) => (
-              <button 
-                key={sector.title}
-                onClick={() => setActive(i)}
-                className={`group flex items-center justify-between p-4 border transition-all text-left ${active === i ? 'bg-[hsl(var(--brand-deep))] text-white border-[hsl(var(--brand-deep))]' : 'border-transparent hover:border-border hover:bg-muted/30'}`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className={`text-[10px] font-semibold tracking-widest ${active === i ? 'text-[hsl(var(--brand-pink))]' : 'text-muted-foreground'}`}>
-                    {sector.num}
-                  </span>
-                  <span className="font-semibold text-sm">{sector.title}</span>
-                </div>
-                {active === i && <ArrowRight className="h-4 w-4 text-[hsl(var(--brand-coral))]" />}
-              </button>
-            ))}
-          </div>
-
-          {/* Value Leak Map */}
-          <div className="bg-[hsl(var(--brand-deep))] text-white p-8 lg:p-12 relative overflow-hidden group min-h-[500px]">
-            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--brand-violet))/20] to-[hsl(var(--brand-coral))/20] opacity-50 transition-opacity duration-700 group-hover:opacity-100 pointer-events-none" />
-            <div className="absolute inset-0 bg-[url('/images/cognirise/site-insights.jpg')] bg-cover bg-center mix-blend-overlay opacity-20 pointer-events-none" />
-            
-            <div className="relative z-10 flex flex-col h-full justify-between gap-12">
-              <div>
-                <h3 className="text-3xl lg:text-5xl font-semibold mb-8 tracking-tight">
-                  {sectors[active][1]}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mt-8">
-                  <div>
-                    <h4 className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-3">Operating Pressure</h4>
-                    <p className="text-sm leading-relaxed text-white/80">{sectors[active][2]}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-3">The Agentic Route</h4>
-                    <p className="text-sm leading-relaxed text-white/80">{sectors[active][3]}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mt-12 border-t border-white/20 pt-8">
-                <BrandButton 
-                  href={
-                    active === 0 ? "/industries/banking" : 
-                    active === 1 ? "/industries/public-sector" : 
-                    active === 2 ? "/industries/telecoms" : 
-                    active === 3 ? "/industries/travel" : 
-                    active === 4 ? "/industries/energy" : "/industries/manufacturing"
-                  } 
-                  variant="inverse"
-                >
-                  Explore {sectors[active][1]}
-                </BrandButton>
-                <BrandButton href="/value-scan" variant="editorial" className="text-white border-white/40 hover:text-[hsl(var(--brand-pink))] hover:border-[hsl(var(--brand-pink))]">
-                  Identify value leaks
-                </BrandButton>
-              </div>
-            </div>
-          </div>
+        <div className="io-views">
+          {sectors.map((s) => (
+            <Link className="io-view-link" href={s.url} key={s.title}>
+              <span>{s.num}</span>{s.title}<ArrowRight size={16} />
+            </Link>
+          ))}
         </div>
       </section>
 
-      <section className="bg-[hsl(var(--secondary))] px-6 md:px-12 py-24 w-full">
-        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:min-h-[570px]">
-          <div className="lg:pr-[9%] lg:py-16">
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">
-              <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-              Critical infrastructure
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-[75px] leading-[0.97] font-semibold mb-8">
-              Work that cannot pause needs intelligence that can hold.
-            </h2>
-            <p className="text-lg text-foreground/70 max-w-[413px] mb-12">
-              Across telecoms, energy, travel and complex enterprises, the systems that serve customers and communities are deeply interdependent. The route forward has to respect that reality.
-            </p>
-            
-            <div className="border-t border-foreground pt-4 flex flex-col gap-4">
-              <div className="flex items-center border-b border-border pb-4 text-sm font-semibold">
-                <span className="text-[hsl(var(--brand-pink))] text-[10px] tracking-widest w-14">01</span>
-                See the operational constraint
-              </div>
-              <div className="flex items-center border-b border-border pb-4 text-sm font-semibold">
-                <span className="text-[hsl(var(--brand-pink))] text-[10px] tracking-widest w-14">02</span>
-                Design for the people in the work
-              </div>
-              <div className="flex items-center border-b border-border pb-4 text-sm font-semibold">
-                <span className="text-[hsl(var(--brand-pink))] text-[10px] tracking-widest w-14">03</span>
-                Govern movement through the system
-              </div>
-            </div>
-          </div>
-          
-          <div className="relative h-[400px] lg:h-auto lg:-mt-12 clip-diagonal-bottom">
-            <img 
-              src="/images/cognirise/site-infrastructure.jpg" 
-              alt="Connected infrastructure routes carrying luminous intelligence across a large operating landscape." 
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute right-6 bottom-6 text-[10px] font-semibold uppercase tracking-widest text-white">
-              interdependent systems
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-foreground text-white px-6 md:px-12 py-24 relative overflow-hidden">
-        <div className="absolute right-0 bottom-[-5%] text-[20vw] leading-[0.7] font-display font-semibold tracking-tighter text-white/5 pointer-events-none">
-          ROUTE
-        </div>
-        <div className="max-w-[1440px] mx-auto relative z-10">
-          <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/60 mb-6">
-            <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-            The first move
-          </div>
-          <h2 className="text-5xl md:text-7xl lg:text-[112px] leading-[0.88] font-semibold tracking-tight mb-8">
-            Bring one process.<br />
-            <em className="not-italic text-[#ff8470]">Leave with a route.</em>
-          </h2>
-          <p className="text-lg text-white/80 max-w-[500px] mb-12">
-            Start with a process where urgency, complexity and value have already collided. In one focused working session, we will surface the opportunity, constraints and practical route to production.
-          </p>
-          <BrandButton href="/value-scan" variant="submit">
-            Book a value scan
-          </BrandButton>
+      <section className="io-start" id="start">
+        <div className="io-start-inner">
+          <div className="io-kicker">The first move</div>
+          <h2>Bring one process.<br /><em>Leave with a route.</em></h2>
+          <p>Start with a process where urgency, complexity and value have already collided. In one focused working session, we will surface the opportunity, constraints and practical route to production.</p>
+          <Link href="/value-scan" className="io-primary">Book a value scan <ArrowRight size={16} /></Link>
         </div>
       </section>
     </div>
