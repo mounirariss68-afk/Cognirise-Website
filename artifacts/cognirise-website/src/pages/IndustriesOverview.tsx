@@ -40,9 +40,7 @@ export default function IndustriesOverview() {
               For organisations carrying consequential work: the places where speed matters, and control cannot be an afterthought.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <Link href="/value-scan">
-                <BrandButton>Bring us one process</BrandButton>
-              </Link>
+              <BrandButton href="/value-scan">Bring us one process</BrandButton>
             </div>
           </div>
           
@@ -178,9 +176,7 @@ export default function IndustriesOverview() {
                   <p className="text-sm leading-relaxed text-foreground/80">{copy}</p>
                   
                   {i === 1 && (
-                    <Link href="/industries/public-sector">
-                      <BrandButton variant="underlined" className="mt-6">Explore Public Sector</BrandButton>
-                    </Link>
+                    <BrandButton href="/industries/public-sector" variant="editorial" className="mt-6">Explore Public Sector</BrandButton>
                   )}
                 </div>
               )}

@@ -40,14 +40,10 @@ export default function Home() {
               Senior operators, forward-deployed engineers and governed agents moving priority work from ambition into production.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <Link href="/value-scan">
-                <BrandButton>Bring us one process</BrandButton>
-              </Link>
-              <Link href="/what-we-do">
-                <BrandButton variant="underlined" icon={<ArrowDown className="h-4 w-4" />}>
+              <BrandButton href="/value-scan">Bring us one process</BrandButton>
+              <BrandButton href="/what-we-do" variant="editorial" icon={<ArrowDown className="h-4 w-4" />}>
                   See how we work
                 </BrandButton>
-              </Link>
             </div>
           </div>
           

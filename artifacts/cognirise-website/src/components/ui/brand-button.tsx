@@ -1,68 +1,93 @@
 import * as React from "react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link } from "wouter";
 
 interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  variant?: "primary" | "secondary" | "underlined";
+  variant?: "primary" | "secondary" | "editorial" | "inverse" | "submit";
   icon?: React.ReactNode;
+  href?: string;
+  className?: string;
 }
 
-export const BrandButton = React.forwardRef<HTMLButtonElement, BrandButtonProps>(
-  ({ children, variant = "primary", className, icon, ...props }, ref) => {
-    if (variant === "underlined") {
-      return (
-        <button
-          ref={ref}
-          className={cn(
-            "group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]",
-            className
-          )}
-          {...props}
-        >
-          {children}
-          {icon || <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
-        </button>
-      );
-    }
+export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, BrandButtonProps & React.AnchorHTMLAttributes<HTMLAnchorElement>>(
+  ({ children, variant = "primary", className, icon, href, ...props }, ref) => {
+    
+    // Core styling logic
+    const renderContent = () => {
+      if (variant === "editorial") {
+        return (
+          <>
+            {children}
+            <div className="text-[hsl(var(--brand-coral))] transition-transform group-hover:translate-x-1">
+              {icon || <ArrowRight className="h-4 w-4" />}
+            </div>
+          </>
+        );
+      }
 
-    if (variant === "secondary") {
       return (
-        <button
-          ref={ref}
-          className={cn(
-            "group inline-flex min-h-[46px] items-center gap-4 overflow-hidden border border-foreground bg-transparent pl-4 pr-1 text-sm font-bold text-foreground transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[4px_4px_0px_hsl(var(--brand-coral))]",
-            className
-          )}
-          {...props}
-        >
-          {children}
-          <div className="flex h-9 w-9 items-center justify-center bg-foreground text-background transition-colors group-hover:bg-[hsl(var(--brand-coral))] group-hover:text-white">
-            {icon || <ArrowRight className="h-4 w-4" />}
-          </div>
-        </button>
+        <>
+          {/* Signal Rail edge */}
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] z-0" />
+
+          {/* Hover surface layer */}
+          <div className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-0" />
+
+          <span className="relative z-10 flex items-center gap-4 transition-transform duration-300 group-hover:translate-x-1">
+            {children}
+            <span className="flex h-5 w-5 items-center justify-center transition-transform duration-300 group-hover:translate-x-1">
+              {icon || <ArrowRight className="h-4 w-4" />}
+            </span>
+          </span>
+        </>
+      );
+    };
+
+    const getClasses = () => {
+      if (variant === "editorial") {
+        return cn(
+          "group relative inline-flex items-center gap-3 border-b-2 border-foreground/20 pb-2 text-sm font-bold text-foreground transition-all hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:border-[hsl(var(--brand-pink))]",
+          className
+        );
+      }
+
+      const baseClass = "group relative inline-flex min-h-[46px] items-center overflow-hidden pl-6 pr-4 text-sm font-bold transition-all duration-300";
+      
+      const variantClasses = {
+        primary: "bg-[hsl(var(--brand-deep))] text-white border border-[hsl(var(--brand-deep))]",
+        inverse: "bg-white text-[hsl(var(--brand-deep))] border border-white",
+        secondary: "bg-transparent text-[hsl(var(--brand-deep))] border border-foreground/20",
+        submit: "bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] text-white border-none",
+        editorial: "" // Handled above
+      };
+
+      const variantClass = variantClasses[variant] || variantClasses.primary;
+
+      return cn(
+        baseClass,
+        variantClass,
+        "hover:-translate-y-[1px] hover:shadow-sm focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none",
+        className
+      );
+    };
+
+    if (href) {
+      return (
+        <Link href={href} className={getClasses()} onClick={props.onClick as any}>
+          {renderContent()}
+        </Link>
       );
     }
 
     return (
       <button
-        ref={ref}
-        className={cn(
-          "group relative inline-flex min-h-[46px] items-center gap-4 overflow-hidden border border-foreground bg-foreground pl-4 pr-1 text-sm font-bold text-white transition-all hover:-translate-y-[2px] hover:translate-x-[-2px] hover:shadow-[4px_4px_0px_hsl(var(--brand-coral))]",
-          className
-        )}
-        {...props}
+        ref={ref as React.ForwardedRef<HTMLButtonElement>}
+        className={getClasses()}
+        {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
       >
-        {/* Gradient hover background */}
-        <div className="absolute inset-0 z-0 bg-[linear-gradient(105deg,hsl(var(--brand-violet)),hsl(var(--brand-pink)),hsl(var(--brand-coral)))] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        
-        {/* Content wrapper to stay above gradient */}
-        <span className="relative z-10">{children}</span>
-        
-        {/* Icon tile */}
-        <div className="relative z-10 flex h-9 w-9 items-center justify-center bg-white text-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:bg-[hsl(var(--brand-coral))] group-hover:text-white">
-          {icon || <ArrowRight className="h-4 w-4" />}
-        </div>
+        {renderContent()}
       </button>
     );
   }
