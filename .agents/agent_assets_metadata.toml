@@ -71,3 +71,17 @@ mtime_ms = 1788633269007
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/0c372386-d8b0-431f-a861-f84da680e8cf/157034df-8f17-47b1-9eec-bcfcde849619"
 storage_version_token = "1788633720017787"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "QcD0EdOItrXO9E8mDLR8I"
+uri = "file://artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-pulse-image-led-edition.zip"
+type = "unspecified"
+title = "Cognirise Pulse LinkedIn — Image-led Edition"
+description = "Complete 21 MB bundle with six 1080×1350 post masters, three 1584×396 profile headers, self-contained editable SVGs, matching high-resolution PNGs, and usage guidance."
+logical_id = "d4c98226-2108-4728-b54b-384654d6fc43"
+content_hash = "sha256:29b7213201ed119ab26644ec113f73c3ba216c29befa579d81bbd757fdbedd53"
+size = 22007556
+mtime_ms = 1788634645906
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/d4c98226-2108-4728-b54b-384654d6fc43/1fbfe6f6-cbdc-4c7e-8bf1-807852c6c637"
+storage_version_token = "1788634771007098"
+content_type = "application/octet-stream"

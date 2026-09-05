@@ -2,3 +2,4 @@
 - [Cognirise Pulse direction](cognirise-pulse-direction.md) — Approved brand system for future Cognirise website, presentation, and campaign design.
 - [Slide export fidelity](slide-export-fidelity.md) — PowerPoint conversion isolates slide roots; preserve export-safe typography there and verify with a real renderer.
 - [CogniOS reference architecture](cognios-reference-architecture.md) — Preserve the six source layers and two spines; present components as a reference model, not shipped-product claims.
+- [Social asset self-containment](social-asset-self-containment.md) — Embed imagery in downloadable SVGs and visually verify matching PNG exports before delivery.
