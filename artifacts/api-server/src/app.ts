@@ -26,6 +26,12 @@ app.use(
   }),
 );
 app.use(cors());
+// This endpoint must see the exact bytes Sanity signed. Mount it before the
+// global JSON parser; the CMS router validates and parses it after HMAC checks.
+app.use(
+  "/api/cms/webhooks/publish",
+  express.raw({ type: "application/json", limit: "1mb" }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

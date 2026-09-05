@@ -5,11 +5,12 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { IsoDateTime } from './isoDateTime';
 import type { SubscriptionReceiptStatus } from './subscriptionReceiptStatus';
 
 export interface SubscriptionReceipt {
   /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$ */
   id: string;
   status: SubscriptionReceiptStatus;
-  createdAt: Date;
+  createdAt: IsoDateTime;
 }

@@ -20,9 +20,27 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CmsHealth,
+  CmsPageEnvelope,
+  CmsPreviewExchange,
+  CmsPreviewExchangeInput,
+  CmsPreviewTarget,
+  CmsPreviewToken,
+  CmsPublishWebhookPayload,
+  CmsWebhookAccepted,
+  CmsWebhookDuplicate,
+  CmsWorkflowAcceptedReceipt,
+  CmsWorkflowDueReceipt,
+  CmsWorkflowDuplicateReceipt,
+  CmsWorkflowRollbackInput,
+  CmsWorkflowTransitionInput,
+  CmsWorkflowTransitionReceipt,
   EnquiryInput,
   EnquiryReceipt,
+  ErrorResponse,
   HealthStatus,
+  InvalidCmsPageResponse,
+  InvalidPreviewTokenResponse,
   NewsletterSubscriptionInput,
   SubscriptionReceipt
 } from './api.schemas';
@@ -274,3 +292,666 @@ export const useSubscribeNewsletter = <TError = ErrorType<void>,
       return useMutation(getSubscribeNewsletterMutationOptions(options));
     }
 
+export const getGetCmsPublishedPageUrl = (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
+    slug: string,) => {
+
+
+
+
+  return `/api/cms/pages/${market}/${slug}`
+}
+
+/**
+ * @summary Read a published CMS page
+ */
+export const getCmsPublishedPage = async (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
+    slug: string, options?: Parameters<typeof customFetch>[1]): Promise<CmsPageEnvelope> => {
+
+  return customFetch<CmsPageEnvelope>(getGetCmsPublishedPageUrl(market,slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCmsPublishedPageQueryKey = (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
+    slug: string,) => {
+    return [
+    `/api/cms/pages/${market}/${slug}`
+    ] as const;
+    }
+
+
+export const getGetCmsPublishedPageQueryOptions = <TData = Awaited<ReturnType<typeof getCmsPublishedPage>>, TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>>(market: 'uae' | 'ksa' | 'turkiye' | 'europe',
+    slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsPublishedPage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCmsPublishedPageQueryKey(market,slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCmsPublishedPage>>> = ({ signal }) => getCmsPublishedPage(market,slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: market !== null && market !== undefined && slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCmsPublishedPage>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCmsPublishedPageQueryResult = NonNullable<Awaited<ReturnType<typeof getCmsPublishedPage>>>
+export type GetCmsPublishedPageQueryError = ErrorType<InvalidCmsPageResponse | ErrorResponse>
+
+
+/**
+ * @summary Read a published CMS page
+ */
+
+export function useGetCmsPublishedPage<TData = Awaited<ReturnType<typeof getCmsPublishedPage>>, TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>>(
+ market: 'uae' | 'ksa' | 'turkiye' | 'europe',
+    slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsPublishedPage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCmsPublishedPageQueryOptions(market,slug,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getExchangeCmsPreviewTokenUrl = () => {
+
+
+
+
+  return `/api/cms/preview/exchange`
+}
+
+/**
+ * @summary Exchange a signed one-time preview entry token for a private preview cookie
+ */
+export const exchangeCmsPreviewToken = async (cmsPreviewExchangeInput: CmsPreviewExchangeInput, options?: Parameters<typeof customFetch>[1]): Promise<CmsPreviewExchange> => {
+
+  return customFetch<CmsPreviewExchange>(getExchangeCmsPreviewTokenUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cmsPreviewExchangeInput)
+  }
+);}
+
+
+
+
+
+export const getExchangeCmsPreviewTokenMutationOptions = <TError = ErrorType<InvalidPreviewTokenResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof exchangeCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewExchangeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof exchangeCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewExchangeInput>}, TContext> => {
+
+const mutationKey = ['exchangeCmsPreviewToken'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof exchangeCmsPreviewToken>>, {data: BodyType<CmsPreviewExchangeInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  exchangeCmsPreviewToken(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ExchangeCmsPreviewTokenMutationResult = NonNullable<Awaited<ReturnType<typeof exchangeCmsPreviewToken>>>
+    export type ExchangeCmsPreviewTokenMutationBody = BodyType<CmsPreviewExchangeInput>
+    export type ExchangeCmsPreviewTokenMutationError = ErrorType<InvalidPreviewTokenResponse>
+
+    /**
+ * @summary Exchange a signed one-time preview entry token for a private preview cookie
+ */
+export const useExchangeCmsPreviewToken = <TError = ErrorType<InvalidPreviewTokenResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof exchangeCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewExchangeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof exchangeCmsPreviewToken>>,
+        TError,
+        {data: BodyType<CmsPreviewExchangeInput>},
+        TContext
+      > => {
+      return useMutation(getExchangeCmsPreviewTokenMutationOptions(options));
+    }
+
+export const getGetCmsPreviewPageUrl = (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
+    slug: string,) => {
+
+
+
+
+  return `/api/cms/preview/pages/${market}/${slug}`
+}
+
+/**
+ * @summary Read a CMS draft page authorized by the private preview cookie
+ */
+export const getCmsPreviewPage = async (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
+    slug: string, options?: Parameters<typeof customFetch>[1]): Promise<CmsPageEnvelope> => {
+
+  return customFetch<CmsPageEnvelope>(getGetCmsPreviewPageUrl(market,slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCmsPreviewPageQueryKey = (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
+    slug: string,) => {
+    return [
+    `/api/cms/preview/pages/${market}/${slug}`
+    ] as const;
+    }
+
+
+export const getGetCmsPreviewPageQueryOptions = <TData = Awaited<ReturnType<typeof getCmsPreviewPage>>, TError = ErrorType<ErrorResponse>>(market: 'uae' | 'ksa' | 'turkiye' | 'europe',
+    slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsPreviewPage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCmsPreviewPageQueryKey(market,slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCmsPreviewPage>>> = ({ signal }) => getCmsPreviewPage(market,slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: market !== null && market !== undefined && slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCmsPreviewPage>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCmsPreviewPageQueryResult = NonNullable<Awaited<ReturnType<typeof getCmsPreviewPage>>>
+export type GetCmsPreviewPageQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Read a CMS draft page authorized by the private preview cookie
+ */
+
+export function useGetCmsPreviewPage<TData = Awaited<ReturnType<typeof getCmsPreviewPage>>, TError = ErrorType<ErrorResponse>>(
+ market: 'uae' | 'ksa' | 'turkiye' | 'europe',
+    slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsPreviewPage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCmsPreviewPageQueryOptions(market,slug,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getIssueCmsPreviewTokenUrl = () => {
+
+
+
+
+  return `/api/cms/workflow/preview-tokens`
+}
+
+/**
+ * Requires an exact bearer service key for a principal declared in CMS_WORKFLOW_CREDENTIALS.
+ * @summary Issue a signed CMS preview entry token
+ */
+export const issueCmsPreviewToken = async (cmsPreviewTarget: CmsPreviewTarget, options?: Parameters<typeof customFetch>[1]): Promise<CmsPreviewToken> => {
+
+  return customFetch<CmsPreviewToken>(getIssueCmsPreviewTokenUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cmsPreviewTarget)
+  }
+);}
+
+
+
+
+
+export const getIssueCmsPreviewTokenMutationOptions = <TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof issueCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewTarget>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof issueCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewTarget>}, TContext> => {
+
+const mutationKey = ['issueCmsPreviewToken'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof issueCmsPreviewToken>>, {data: BodyType<CmsPreviewTarget>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  issueCmsPreviewToken(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type IssueCmsPreviewTokenMutationResult = NonNullable<Awaited<ReturnType<typeof issueCmsPreviewToken>>>
+    export type IssueCmsPreviewTokenMutationBody = BodyType<CmsPreviewTarget>
+    export type IssueCmsPreviewTokenMutationError = ErrorType<InvalidCmsPageResponse | ErrorResponse>
+
+    /**
+ * @summary Issue a signed CMS preview entry token
+ */
+export const useIssueCmsPreviewToken = <TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof issueCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewTarget>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof issueCmsPreviewToken>>,
+        TError,
+        {data: BodyType<CmsPreviewTarget>},
+        TContext
+      > => {
+      return useMutation(getIssueCmsPreviewTokenMutationOptions(options));
+    }
+
+export const getTransitionCmsWorkflowUrl = () => {
+
+
+
+
+  return `/api/cms/workflow/transitions`
+}
+
+/**
+ * The authenticated CMS_WORKFLOW_CREDENTIALS principal must be assigned to the request market. A reviewer, publisher, or administrator cannot approve or publish an edition they last requested or edited.
+ * @summary Apply an authorized market-edition workflow transition
+ */
+export const transitionCmsWorkflow = async (cmsWorkflowTransitionInput: CmsWorkflowTransitionInput, options?: Parameters<typeof customFetch>[1]): Promise<CmsWorkflowDuplicateReceipt | CmsWorkflowTransitionReceipt> => {
+
+  return customFetch<CmsWorkflowDuplicateReceipt | CmsWorkflowTransitionReceipt>(getTransitionCmsWorkflowUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cmsWorkflowTransitionInput)
+  }
+);}
+
+
+
+
+
+export const getTransitionCmsWorkflowMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof transitionCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowTransitionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof transitionCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowTransitionInput>}, TContext> => {
+
+const mutationKey = ['transitionCmsWorkflow'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof transitionCmsWorkflow>>, {data: BodyType<CmsWorkflowTransitionInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  transitionCmsWorkflow(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TransitionCmsWorkflowMutationResult = NonNullable<Awaited<ReturnType<typeof transitionCmsWorkflow>>>
+    export type TransitionCmsWorkflowMutationBody = BodyType<CmsWorkflowTransitionInput>
+    export type TransitionCmsWorkflowMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Apply an authorized market-edition workflow transition
+ */
+export const useTransitionCmsWorkflow = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof transitionCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowTransitionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof transitionCmsWorkflow>>,
+        TError,
+        {data: BodyType<CmsWorkflowTransitionInput>},
+        TContext
+      > => {
+      return useMutation(getTransitionCmsWorkflowMutationOptions(options));
+    }
+
+export const getRollbackCmsWorkflowUrl = () => {
+
+
+
+
+  return `/api/cms/workflow/rollbacks`
+}
+
+/**
+ * Rollback is permitted only for a CMS_WORKFLOW_CREDENTIALS administrator whose assigned markets value is `all`.
+ * @summary Restore an immutable page revision
+ */
+export const rollbackCmsWorkflow = async (cmsWorkflowRollbackInput: CmsWorkflowRollbackInput, options?: Parameters<typeof customFetch>[1]): Promise<CmsWorkflowDuplicateReceipt | CmsWorkflowAcceptedReceipt> => {
+
+  return customFetch<CmsWorkflowDuplicateReceipt | CmsWorkflowAcceptedReceipt>(getRollbackCmsWorkflowUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cmsWorkflowRollbackInput)
+  }
+);}
+
+
+
+
+
+export const getRollbackCmsWorkflowMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rollbackCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowRollbackInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof rollbackCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowRollbackInput>}, TContext> => {
+
+const mutationKey = ['rollbackCmsWorkflow'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rollbackCmsWorkflow>>, {data: BodyType<CmsWorkflowRollbackInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  rollbackCmsWorkflow(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RollbackCmsWorkflowMutationResult = NonNullable<Awaited<ReturnType<typeof rollbackCmsWorkflow>>>
+    export type RollbackCmsWorkflowMutationBody = BodyType<CmsWorkflowRollbackInput>
+    export type RollbackCmsWorkflowMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Restore an immutable page revision
+ */
+export const useRollbackCmsWorkflow = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rollbackCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowRollbackInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof rollbackCmsWorkflow>>,
+        TError,
+        {data: BodyType<CmsWorkflowRollbackInput>},
+        TContext
+      > => {
+      return useMutation(getRollbackCmsWorkflowMutationOptions(options));
+    }
+
+export const getProcessDueCmsWorkflowUrl = () => {
+
+
+
+
+  return `/api/cms/workflow/process-due`
+}
+
+/**
+ * @summary Publish scheduled editions and expire due published editions
+ */
+export const processDueCmsWorkflow = async ( options?: Parameters<typeof customFetch>[1]): Promise<CmsWorkflowDueReceipt> => {
+
+  return customFetch<CmsWorkflowDueReceipt>(getProcessDueCmsWorkflowUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getProcessDueCmsWorkflowMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof processDueCmsWorkflow>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof processDueCmsWorkflow>>, TError,void, TContext> => {
+
+const mutationKey = ['processDueCmsWorkflow'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof processDueCmsWorkflow>>, void> = () => {
+
+
+          return  processDueCmsWorkflow(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ProcessDueCmsWorkflowMutationResult = NonNullable<Awaited<ReturnType<typeof processDueCmsWorkflow>>>
+
+    export type ProcessDueCmsWorkflowMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Publish scheduled editions and expire due published editions
+ */
+export const useProcessDueCmsWorkflow = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof processDueCmsWorkflow>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof processDueCmsWorkflow>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getProcessDueCmsWorkflowMutationOptions(options));
+    }
+
+export const getReceiveCmsPublishWebhookUrl = () => {
+
+
+
+
+  return `/api/cms/webhooks/publish`
+}
+
+/**
+ * @summary Receive a signed Sanity publish webhook and invalidate published content
+ */
+export const receiveCmsPublishWebhook = async (cmsPublishWebhookPayload: CmsPublishWebhookPayload, options?: Parameters<typeof customFetch>[1]): Promise<CmsWebhookDuplicate | CmsWebhookAccepted> => {
+
+  return customFetch<CmsWebhookDuplicate | CmsWebhookAccepted>(getReceiveCmsPublishWebhookUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cmsPublishWebhookPayload)
+  }
+);}
+
+
+
+
+
+export const getReceiveCmsPublishWebhookMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveCmsPublishWebhook>>, TError,{data: BodyType<CmsPublishWebhookPayload>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof receiveCmsPublishWebhook>>, TError,{data: BodyType<CmsPublishWebhookPayload>}, TContext> => {
+
+const mutationKey = ['receiveCmsPublishWebhook'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveCmsPublishWebhook>>, {data: BodyType<CmsPublishWebhookPayload>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  receiveCmsPublishWebhook(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReceiveCmsPublishWebhookMutationResult = NonNullable<Awaited<ReturnType<typeof receiveCmsPublishWebhook>>>
+    export type ReceiveCmsPublishWebhookMutationBody = BodyType<CmsPublishWebhookPayload>
+    export type ReceiveCmsPublishWebhookMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Receive a signed Sanity publish webhook and invalidate published content
+ */
+export const useReceiveCmsPublishWebhook = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveCmsPublishWebhook>>, TError,{data: BodyType<CmsPublishWebhookPayload>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof receiveCmsPublishWebhook>>,
+        TError,
+        {data: BodyType<CmsPublishWebhookPayload>},
+        TContext
+      > => {
+      return useMutation(getReceiveCmsPublishWebhookMutationOptions(options));
+    }
+
+export const getGetCmsHealthUrl = () => {
+
+
+
+
+  return `/api/cms/health`
+}
+
+/**
+ * @summary Read CMS integration configuration status
+ */
+export const getCmsHealth = async ( options?: Parameters<typeof customFetch>[1]): Promise<CmsHealth> => {
+
+  return customFetch<CmsHealth>(getGetCmsHealthUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCmsHealthQueryKey = () => {
+    return [
+    `/api/cms/health`
+    ] as const;
+    }
+
+
+export const getGetCmsHealthQueryOptions = <TData = Awaited<ReturnType<typeof getCmsHealth>>, TError = ErrorType<CmsHealth>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsHealth>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCmsHealthQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCmsHealth>>> = ({ signal }) => getCmsHealth({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCmsHealth>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCmsHealthQueryResult = NonNullable<Awaited<ReturnType<typeof getCmsHealth>>>
+export type GetCmsHealthQueryError = ErrorType<CmsHealth>
+
+
+/**
+ * @summary Read CMS integration configuration status
+ */
+
+export function useGetCmsHealth<TData = Awaited<ReturnType<typeof getCmsHealth>>, TError = ErrorType<CmsHealth>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsHealth>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCmsHealthQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

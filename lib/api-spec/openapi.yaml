@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: enquiries
     description: Website enquiry and subscription operations
+  - name: cms
+    description: Published content, preview, and CMS workflow operations
 paths:
   /healthz:
     get:
@@ -66,8 +68,553 @@ paths:
                 $ref: "#/components/schemas/SubscriptionReceipt"
         "400":
           description: Invalid subscription
+  /cms/pages/{market}/{slug}:
+    get:
+      operationId: getCmsPublishedPage
+      tags: [cms]
+      summary: Read a published CMS page
+      parameters:
+        - $ref: "#/components/parameters/CmsMarket"
+        - $ref: "#/components/parameters/CmsSlug"
+      responses:
+        "200":
+          description: Published page or deterministic migration fallback envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsPageEnvelope"
+        "400":
+          $ref: "#/components/responses/InvalidCmsPage"
+        "503":
+          description: CMS published delivery is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /cms/preview/exchange:
+    post:
+      operationId: exchangeCmsPreviewToken
+      tags: [cms]
+      summary: Exchange a signed one-time preview entry token for a private preview cookie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CmsPreviewExchangeInput"
+      responses:
+        "200":
+          description: Preview cookie issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsPreviewExchange"
+        "401":
+          $ref: "#/components/responses/InvalidPreviewToken"
+  /cms/preview/pages/{market}/{slug}:
+    get:
+      operationId: getCmsPreviewPage
+      tags: [cms]
+      summary: Read a CMS draft page authorized by the private preview cookie
+      security:
+        - CmsPreviewCookie: []
+      parameters:
+        - $ref: "#/components/parameters/CmsMarket"
+        - $ref: "#/components/parameters/CmsSlug"
+      responses:
+        "200":
+          description: Draft page envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsPageEnvelope"
+        "401":
+          description: Preview cookie is missing, invalid, expired, or does not match the requested page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: CMS preview is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /cms/workflow/preview-tokens:
+    post:
+      operationId: issueCmsPreviewToken
+      tags: [cms]
+      summary: Issue a signed CMS preview entry token
+      description: Requires an exact bearer service key for a principal declared in CMS_WORKFLOW_CREDENTIALS.
+      security:
+        - CmsWorkflowBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CmsPreviewTarget"
+      responses:
+        "201":
+          description: Signed preview token issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsPreviewToken"
+        "400":
+          $ref: "#/components/responses/InvalidCmsPage"
+        "401":
+          description: Workflow authorization is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Authenticated workflow principal is not assigned to the requested market
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: CMS preview secrets or the trusted Sanity API token are not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /cms/workflow/transitions:
+    post:
+      operationId: transitionCmsWorkflow
+      tags: [cms]
+      summary: Apply an authorized market-edition workflow transition
+      description: The authenticated CMS_WORKFLOW_CREDENTIALS principal must be assigned to the request market. A reviewer, publisher, or administrator cannot approve or publish an edition they last requested or edited.
+      security:
+        - CmsWorkflowBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CmsWorkflowTransitionInput"
+      responses:
+        "200":
+          description: Request id was already processed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsWorkflowDuplicateReceipt"
+        "202":
+          description: Workflow transition accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsWorkflowTransitionReceipt"
+        "400":
+          description: Workflow transition input is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Workflow authorization is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Workflow state or governance conflict rejected the transition, including an unassigned market principal or separation-of-duties self-approval/self-publication denial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /cms/workflow/rollbacks:
+    post:
+      operationId: rollbackCmsWorkflow
+      tags: [cms]
+      summary: Restore an immutable page revision
+      description: Rollback is permitted only for a CMS_WORKFLOW_CREDENTIALS administrator whose assigned markets value is `all`.
+      security:
+        - CmsWorkflowBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CmsWorkflowRollbackInput"
+      responses:
+        "200":
+          description: Duplicate rollback request acknowledged without repeating the Sanity mutation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsWorkflowDuplicateReceipt"
+        "202":
+          description: Rollback accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsWorkflowAcceptedReceipt"
+        "400":
+          description: Rollback request body is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Workflow authorization is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Rollback input, all-market administrator authorization, revision, or idempotency requirement was rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /cms/workflow/process-due:
+    post:
+      operationId: processDueCmsWorkflow
+      tags: [cms]
+      summary: Publish scheduled editions and expire due published editions
+      security:
+        - CmsWorkflowBearer: []
+      responses:
+        "200":
+          description: Due workflow processing completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsWorkflowDueReceipt"
+        "401":
+          description: Publisher or administrator workflow authorization is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Due workflow discovery is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /cms/webhooks/publish:
+    post:
+      operationId: receiveCmsPublishWebhook
+      tags: [cms]
+      summary: Receive a signed Sanity publish webhook and invalidate published content
+      parameters:
+        - name: sanity-webhook-timestamp
+          in: header
+          required: true
+          schema: { type: string }
+        - name: sanity-webhook-signature
+          in: header
+          required: true
+          schema: { type: string }
+        - name: sanity-webhook-id
+          in: header
+          required: true
+          schema: { type: string, pattern: '^[A-Za-z0-9._:-]{8,200}$' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CmsPublishWebhookPayload"
+      responses:
+        "200":
+          description: Duplicate webhook acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsWebhookDuplicate"
+        "202":
+          description: Webhook accepted and cache invalidated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsWebhookAccepted"
+        "400":
+          description: Webhook JSON payload is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Webhook signature, timestamp, or event id is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Webhook event ID was previously accepted with a different payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "415":
+          description: Webhook must have an application/json body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: CMS webhook is not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /cms/health:
+    get:
+      operationId: getCmsHealth
+      tags: [cms, health]
+      summary: Read CMS integration configuration status
+      responses:
+        "200":
+          description: CMS integration is configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsHealth"
+        "503":
+          description: CMS integration is unconfigured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsHealth"
 components:
+  securitySchemes:
+    CmsWorkflowBearer:
+      type: http
+      scheme: bearer
+      description: 'Exact service key from a CMS_WORKFLOW_CREDENTIALS principal. Non-admin principals are restricted to their assigned markets; only an admin assigned markets "all" may roll back content.'
+    CmsPreviewCookie:
+      type: apiKey
+      in: cookie
+      name: cognirise_cms_preview
+      description: HttpOnly cookie issued only by preview token exchange.
+  parameters:
+    CmsMarket:
+      name: market
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/CmsMarket"
+    CmsSlug:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 120
+        pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+  responses:
+    InvalidCmsPage:
+      description: Market or page slug is invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InvalidPreviewToken:
+      description: Preview token is invalid or expired
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+    IsoDateTime:
+      type: string
+      description: RFC 3339 date-time serialized as an ISO JSON string.
+      pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$'
+    CmsMarket:
+      type: string
+      enum: [uae, ksa, turkiye, europe]
+    CmsPage:
+      type: object
+      required: [id, revision, slug, market, sections, updatedAt, publicationState]
+      properties:
+        id: { type: string }
+        revision: { type: string }
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 120
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        market: { $ref: "#/components/schemas/CmsMarket" }
+        title: { type: string }
+        summary: { type: string }
+        body:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        seo:
+          type: object
+          additionalProperties: true
+        sections:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        updatedAt: { $ref: "#/components/schemas/IsoDateTime" }
+        publicationState:
+          type: string
+          enum: [draft, review, approved, scheduled, published, expired, archived]
+        publishAt: { $ref: "#/components/schemas/IsoDateTime" }
+        expiresAt: { $ref: "#/components/schemas/IsoDateTime" }
+    CmsPageMeta:
+      type: object
+      required: [requestedMarket, resolvedMarket, marketFallback, deliveryMode, source, preview]
+      properties:
+        requestedMarket: { $ref: "#/components/schemas/CmsMarket" }
+        resolvedMarket:
+          anyOf:
+            - $ref: "#/components/schemas/CmsMarket"
+            - type: "null"
+        marketFallback: { type: boolean }
+        deliveryMode:
+          type: string
+          enum: [canonical, override, uaeFallback, unavailable]
+        requestedPublicationState:
+          type: string
+          enum: [draft, review, approved, scheduled, published, expired, archived]
+        resolvedPublicationState:
+          type: string
+          enum: [draft, review, approved, scheduled, published, expired, archived]
+        requestedPublishAt: { $ref: "#/components/schemas/IsoDateTime" }
+        requestedExpiresAt: { $ref: "#/components/schemas/IsoDateTime" }
+        publishAt: { $ref: "#/components/schemas/IsoDateTime" }
+        expiresAt: { $ref: "#/components/schemas/IsoDateTime" }
+        source:
+          type: string
+          enum: [sanity, cache, migration-fallback]
+        preview: { type: boolean }
+        fallbackVersion: { type: string }
+    CmsPageEnvelope:
+      type: object
+      required: [schemaVersion, page, meta]
+      properties:
+        schemaVersion: { type: number, const: 1 }
+        page:
+          anyOf:
+            - $ref: "#/components/schemas/CmsPage"
+            - type: "null"
+        meta: { $ref: "#/components/schemas/CmsPageMeta" }
+    CmsPreviewExchangeInput:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string, minLength: 1 }
+    CmsPublishWebhookPayload:
+      type: object
+      additionalProperties: true
+    CmsPreviewExchange:
+      type: object
+      required: [status, market, slug, expiresAt]
+      properties:
+        status: { type: string, enum: [ready] }
+        market: { $ref: "#/components/schemas/CmsMarket" }
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 120
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        expiresAt: { type: number, description: Unix epoch seconds }
+    CmsPreviewTarget:
+      type: object
+      required: [market, slug]
+      properties:
+        market: { $ref: "#/components/schemas/CmsMarket" }
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 120
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+    CmsPreviewToken:
+      allOf:
+        - $ref: "#/components/schemas/CmsPreviewTarget"
+        - type: object
+          required: [token]
+          properties:
+            token: { type: string }
+    CmsWorkflowState:
+      type: string
+      enum: [draft, review, approved, scheduled, published, expired, archived]
+    CmsWorkflowTransitionInput:
+      type: object
+      additionalProperties: false
+      required: [requestId, subjectId, market, toState]
+      properties:
+        requestId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }
+        subjectId: { type: string, minLength: 3, maxLength: 200, pattern: '^(?!drafts\.)[A-Za-z0-9._-]+$' }
+        market: { $ref: "#/components/schemas/CmsMarket" }
+        toState: { $ref: "#/components/schemas/CmsWorkflowState" }
+        publishAt: { $ref: "#/components/schemas/IsoDateTime" }
+        expiresAt: { $ref: "#/components/schemas/IsoDateTime" }
+    CmsWorkflowRollbackInput:
+      type: object
+      additionalProperties: false
+      required: [requestId, subjectId, revisionId]
+      properties:
+        requestId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }
+        subjectId: { type: string, minLength: 3, maxLength: 200, pattern: '^(?!drafts\.)[A-Za-z0-9._-]+$' }
+        revisionId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }
+    CmsWorkflowDuplicateReceipt:
+      type: object
+      required: [status, requestId]
+      properties:
+        status: { type: string, enum: [duplicate] }
+        requestId: { type: string }
+    CmsWorkflowAcceptedReceipt:
+      type: object
+      required: [status, requestId]
+      properties:
+        status: { type: string, enum: [accepted] }
+        requestId: { type: string }
+    CmsWorkflowTransitionReceipt:
+      allOf:
+        - $ref: "#/components/schemas/CmsWorkflowAcceptedReceipt"
+        - type: object
+          required: [fromState, toState]
+          properties:
+            fromState: { $ref: "#/components/schemas/CmsWorkflowState" }
+            toState: { $ref: "#/components/schemas/CmsWorkflowState" }
+    CmsWorkflowDueReceipt:
+      type: object
+      required: [status, discovered, processed]
+      properties:
+        status: { type: string, enum: [complete, partial] }
+        discovered: { type: number, minimum: 0 }
+        processed: { type: number, minimum: 0 }
+    CmsWebhookDuplicate:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [duplicate] }
+    CmsWebhookAccepted:
+      type: object
+      required: [status, invalidatedEntries]
+      properties:
+        status: { type: string, enum: [accepted] }
+        invalidatedEntries: { type: number, minimum: 0 }
+    CmsHealth:
+      type: object
+      required: [status, configured, previewConfigured, webhookConfigured, workflowConfigured, canonicalMarket]
+      properties:
+        status: { type: string, enum: [configured, unconfigured] }
+        configured: { type: boolean }
+        previewConfigured: { type: boolean }
+        webhookConfigured: { type: boolean }
+        workflowConfigured:
+          type: boolean
+          description: SANITY_API_TOKEN and at least one CMS_WORKFLOW_CREDENTIALS principal are configured.
+        canonicalMarket: { type: string, const: uae }
     HealthStatus:
       type: object
       properties:
@@ -134,8 +681,7 @@ components:
           type: string
           enum: [received]
         createdAt:
-          type: string
-          format: date-time
+          $ref: "#/components/schemas/IsoDateTime"
     NewsletterSubscriptionInput:
       type: object
       required: [email, market, consent, sourcePage]
@@ -169,6 +715,5 @@ components:
           type: string
           enum: [subscribed]
         createdAt:
-          type: string
-          format: date-time
+          $ref: "#/components/schemas/IsoDateTime"
 

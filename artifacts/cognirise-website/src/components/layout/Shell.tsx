@@ -5,6 +5,7 @@ import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
+import { CmsContentStatus } from "@/components/cms/CmsContentStatus";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/": {
@@ -215,6 +216,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, [location]);
 
   useEffect(() => {
+    const isPreviewRoute = location.startsWith("/preview/");
     const articleTitle = location.startsWith("/insights/") && "AI Transformation Perspective | Cognirise";
     const meta = pageMeta[location] ?? {
       title: articleTitle || "Page Not Found | Cognirise",
@@ -253,6 +255,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
     setMeta('meta[property="og:description"]', "content", meta.description, true);
     setMeta('meta[name="twitter:title"]', "content", meta.title, true);
     setMeta('meta[name="twitter:description"]', "content", meta.description, true);
+    if (isPreviewRoute) {
+      setMeta('meta[name="robots"]', "content", "noindex, nofollow", true);
+      document.head.querySelector('link[rel="canonical"]')?.remove();
+      return;
+    }
+    document.head.querySelector('meta[name="robots"]')?.remove();
     setLink("canonical", window.location.origin + location);
   }, [location]);
 
@@ -384,6 +392,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
       {/* Main content offset so it doesn't hide behind fixed header */}
       <div className="h-[72px] md:h-[82px] shrink-0" />
+       <CmsContentStatus pathname={location} />
 
       {isOpen && (
         <div className="fixed inset-0 top-[72px] md:top-[82px] z-40 bg-white px-6 py-8 overflow-y-auto xl:hidden animate-in fade-in duration-200">

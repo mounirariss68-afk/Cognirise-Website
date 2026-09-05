@@ -43,11 +43,13 @@ import Advisors from "@/pages/Advisors";
 import FAQ from "@/pages/FAQ";
 import Contact from "@/pages/Contact";
 import ValueScan from "@/pages/ValueScan";
+import CmsPreview from "@/pages/CmsPreview";
 
 function Router() {
   return (
     <Shell>
       <Switch>
+        <Route path="/preview/:market/:slug" component={CmsPreview} />
         <Route path="/" component={Home} />
         
         {/* Services */}

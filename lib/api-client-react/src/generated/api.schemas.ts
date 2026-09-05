@@ -5,6 +5,314 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface ErrorResponse {
+  error: string;
+}
+
+/**
+ * RFC 3339 date-time serialized as an ISO JSON string.
+ * @pattern ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$
+ */
+export type IsoDateTime = string;
+
+export type CmsMarket = typeof CmsMarket[keyof typeof CmsMarket];
+
+
+export const CmsMarket = {
+  uae: 'uae',
+  ksa: 'ksa',
+  turkiye: 'turkiye',
+  europe: 'europe',
+} as const;
+
+export type CmsPageBodyItem = { [key: string]: unknown };
+
+export type CmsPageSeo = { [key: string]: unknown };
+
+export type CmsPageSectionsItem = { [key: string]: unknown };
+
+export type CmsPagePublicationState = typeof CmsPagePublicationState[keyof typeof CmsPagePublicationState];
+
+
+export const CmsPagePublicationState = {
+  draft: 'draft',
+  review: 'review',
+  approved: 'approved',
+  scheduled: 'scheduled',
+  published: 'published',
+  expired: 'expired',
+  archived: 'archived',
+} as const;
+
+export interface CmsPage {
+  id: string;
+  revision: string;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+     */
+  slug: string;
+  market: CmsMarket;
+  title?: string;
+  summary?: string;
+  body?: CmsPageBodyItem[];
+  seo?: CmsPageSeo;
+  sections: CmsPageSectionsItem[];
+  updatedAt: IsoDateTime;
+  publicationState: CmsPagePublicationState;
+  publishAt?: IsoDateTime;
+  expiresAt?: IsoDateTime;
+}
+
+export type CmsPageMetaDeliveryMode = typeof CmsPageMetaDeliveryMode[keyof typeof CmsPageMetaDeliveryMode];
+
+
+export const CmsPageMetaDeliveryMode = {
+  canonical: 'canonical',
+  override: 'override',
+  uaeFallback: 'uaeFallback',
+  unavailable: 'unavailable',
+} as const;
+
+export type CmsPageMetaRequestedPublicationState = typeof CmsPageMetaRequestedPublicationState[keyof typeof CmsPageMetaRequestedPublicationState];
+
+
+export const CmsPageMetaRequestedPublicationState = {
+  draft: 'draft',
+  review: 'review',
+  approved: 'approved',
+  scheduled: 'scheduled',
+  published: 'published',
+  expired: 'expired',
+  archived: 'archived',
+} as const;
+
+export type CmsPageMetaResolvedPublicationState = typeof CmsPageMetaResolvedPublicationState[keyof typeof CmsPageMetaResolvedPublicationState];
+
+
+export const CmsPageMetaResolvedPublicationState = {
+  draft: 'draft',
+  review: 'review',
+  approved: 'approved',
+  scheduled: 'scheduled',
+  published: 'published',
+  expired: 'expired',
+  archived: 'archived',
+} as const;
+
+export type CmsPageMetaSource = typeof CmsPageMetaSource[keyof typeof CmsPageMetaSource];
+
+
+export const CmsPageMetaSource = {
+  sanity: 'sanity',
+  cache: 'cache',
+  'migration-fallback': 'migration-fallback',
+} as const;
+
+export interface CmsPageMeta {
+  requestedMarket: CmsMarket;
+  resolvedMarket: CmsMarket | null;
+  marketFallback: boolean;
+  deliveryMode: CmsPageMetaDeliveryMode;
+  requestedPublicationState?: CmsPageMetaRequestedPublicationState;
+  resolvedPublicationState?: CmsPageMetaResolvedPublicationState;
+  requestedPublishAt?: IsoDateTime;
+  requestedExpiresAt?: IsoDateTime;
+  publishAt?: IsoDateTime;
+  expiresAt?: IsoDateTime;
+  source: CmsPageMetaSource;
+  preview: boolean;
+  fallbackVersion?: string;
+}
+
+export interface CmsPageEnvelope {
+  schemaVersion: 1;
+  page: CmsPage | null;
+  meta: CmsPageMeta;
+}
+
+export interface CmsPreviewExchangeInput {
+  /** @minLength 1 */
+  token: string;
+}
+
+export interface CmsPublishWebhookPayload { [key: string]: unknown }
+
+export type CmsPreviewExchangeStatus = typeof CmsPreviewExchangeStatus[keyof typeof CmsPreviewExchangeStatus];
+
+
+export const CmsPreviewExchangeStatus = {
+  ready: 'ready',
+} as const;
+
+export interface CmsPreviewExchange {
+  status: CmsPreviewExchangeStatus;
+  market: CmsMarket;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+     */
+  slug: string;
+  /** Unix epoch seconds */
+  expiresAt: number;
+}
+
+export interface CmsPreviewTarget {
+  market: CmsMarket;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+     */
+  slug: string;
+}
+
+export type CmsPreviewToken = CmsPreviewTarget & {
+  token: string;
+};
+
+export type CmsWorkflowState = typeof CmsWorkflowState[keyof typeof CmsWorkflowState];
+
+
+export const CmsWorkflowState = {
+  draft: 'draft',
+  review: 'review',
+  approved: 'approved',
+  scheduled: 'scheduled',
+  published: 'published',
+  expired: 'expired',
+  archived: 'archived',
+} as const;
+
+export interface CmsWorkflowTransitionInput {
+  /**
+     * @minLength 8
+     * @maxLength 120
+     * @pattern ^[A-Za-z0-9_-]+$
+     */
+  requestId: string;
+  /**
+     * @minLength 3
+     * @maxLength 200
+     * @pattern ^(?!drafts\.)[A-Za-z0-9._-]+$
+     */
+  subjectId: string;
+  market: CmsMarket;
+  toState: CmsWorkflowState;
+  publishAt?: IsoDateTime;
+  expiresAt?: IsoDateTime;
+}
+
+export interface CmsWorkflowRollbackInput {
+  /**
+     * @minLength 8
+     * @maxLength 120
+     * @pattern ^[A-Za-z0-9_-]+$
+     */
+  requestId: string;
+  /**
+     * @minLength 3
+     * @maxLength 200
+     * @pattern ^(?!drafts\.)[A-Za-z0-9._-]+$
+     */
+  subjectId: string;
+  /**
+     * @minLength 8
+     * @maxLength 120
+     * @pattern ^[A-Za-z0-9_-]+$
+     */
+  revisionId: string;
+}
+
+export type CmsWorkflowDuplicateReceiptStatus = typeof CmsWorkflowDuplicateReceiptStatus[keyof typeof CmsWorkflowDuplicateReceiptStatus];
+
+
+export const CmsWorkflowDuplicateReceiptStatus = {
+  duplicate: 'duplicate',
+} as const;
+
+export interface CmsWorkflowDuplicateReceipt {
+  status: CmsWorkflowDuplicateReceiptStatus;
+  requestId: string;
+}
+
+export type CmsWorkflowAcceptedReceiptStatus = typeof CmsWorkflowAcceptedReceiptStatus[keyof typeof CmsWorkflowAcceptedReceiptStatus];
+
+
+export const CmsWorkflowAcceptedReceiptStatus = {
+  accepted: 'accepted',
+} as const;
+
+export interface CmsWorkflowAcceptedReceipt {
+  status: CmsWorkflowAcceptedReceiptStatus;
+  requestId: string;
+}
+
+export type CmsWorkflowTransitionReceipt = CmsWorkflowAcceptedReceipt & {
+  fromState: CmsWorkflowState;
+  toState: CmsWorkflowState;
+};
+
+export type CmsWorkflowDueReceiptStatus = typeof CmsWorkflowDueReceiptStatus[keyof typeof CmsWorkflowDueReceiptStatus];
+
+
+export const CmsWorkflowDueReceiptStatus = {
+  complete: 'complete',
+  partial: 'partial',
+} as const;
+
+export interface CmsWorkflowDueReceipt {
+  status: CmsWorkflowDueReceiptStatus;
+  /** @minimum 0 */
+  discovered: number;
+  /** @minimum 0 */
+  processed: number;
+}
+
+export type CmsWebhookDuplicateStatus = typeof CmsWebhookDuplicateStatus[keyof typeof CmsWebhookDuplicateStatus];
+
+
+export const CmsWebhookDuplicateStatus = {
+  duplicate: 'duplicate',
+} as const;
+
+export interface CmsWebhookDuplicate {
+  status: CmsWebhookDuplicateStatus;
+}
+
+export type CmsWebhookAcceptedStatus = typeof CmsWebhookAcceptedStatus[keyof typeof CmsWebhookAcceptedStatus];
+
+
+export const CmsWebhookAcceptedStatus = {
+  accepted: 'accepted',
+} as const;
+
+export interface CmsWebhookAccepted {
+  status: CmsWebhookAcceptedStatus;
+  /** @minimum 0 */
+  invalidatedEntries: number;
+}
+
+export type CmsHealthStatus = typeof CmsHealthStatus[keyof typeof CmsHealthStatus];
+
+
+export const CmsHealthStatus = {
+  configured: 'configured',
+  unconfigured: 'unconfigured',
+} as const;
+
+export interface CmsHealth {
+  status: CmsHealthStatus;
+  configured: boolean;
+  previewConfigured: boolean;
+  webhookConfigured: boolean;
+  /** SANITY_API_TOKEN and at least one CMS_WORKFLOW_CREDENTIALS principal are configured. */
+  workflowConfigured: boolean;
+  canonicalMarket: 'uae';
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -69,7 +377,7 @@ export interface EnquiryReceipt {
   /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$ */
   id: string;
   status: EnquiryReceiptStatus;
-  createdAt: string;
+  createdAt: IsoDateTime;
 }
 
 export type NewsletterSubscriptionInputMarket = typeof NewsletterSubscriptionInputMarket[keyof typeof NewsletterSubscriptionInputMarket];
@@ -113,6 +421,16 @@ export interface SubscriptionReceipt {
   /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$ */
   id: string;
   status: SubscriptionReceiptStatus;
-  createdAt: string;
+  createdAt: IsoDateTime;
 }
+
+/**
+ * Market or page slug is invalid
+ */
+export type InvalidCmsPageResponse = ErrorResponse;
+
+/**
+ * Preview token is invalid or expired
+ */
+export type InvalidPreviewTokenResponse = ErrorResponse;
 
