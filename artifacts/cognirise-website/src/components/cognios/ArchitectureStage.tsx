@@ -291,7 +291,7 @@ function CapabilityStudy({
 }) {
   const selectedComponent = layer.components.find((component) => component.id === selected);
   return (
-    <div className={`co-capability-study ${selectedComponent ? "has-detail" : ""}`}>
+    <div className={`co-capability-study ${selectedComponent ? "has-detail is-l3" : "is-l2"}`}>
        <div className="co-component-rail" aria-label={`${layer.name} components`}>
         {layer.components.map((component, index) => {
           const active = component.id === selected;
@@ -318,7 +318,7 @@ function CapabilityStudy({
           );
         })}
       </div>
-      <AnimatePresence mode="wait">
+      <AnimatePresence initial={false} mode="popLayout">
         {selectedComponent && (
           <ComponentDetail
             key={selectedComponent.id}
@@ -331,10 +331,14 @@ function CapabilityStudy({
   );
 }
 
-function ComponentDetail({ layer, component }: { layer: ArchitectureLayer; component: ArchitectureComponent }) {
+const ComponentDetail = React.forwardRef<HTMLElement, {
+  layer: ArchitectureLayer;
+  component: ArchitectureComponent;
+}>(function ComponentDetail({ layer, component }, ref) {
   const reducedMotion = useReducedMotion();
   return (
     <motion.aside
+      ref={ref}
       id={`architecture-component-${component.id}`}
       className="co-component-detail"
       initial={{ opacity: 0, x: reducedMotion ? 0 : 20 }}
@@ -359,7 +363,9 @@ function ComponentDetail({ layer, component }: { layer: ArchitectureLayer; compo
       <DetailBlock title="Controls at this layer" items={layer.controls} />
     </motion.aside>
   );
-}
+});
+
+ComponentDetail.displayName = "ComponentDetail";
 
 function SecurityStudy({ layer }: { layer: ArchitectureLayer }) {
   return (
