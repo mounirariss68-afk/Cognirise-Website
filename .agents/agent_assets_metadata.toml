@@ -113,3 +113,17 @@ mtime_ms = 1788639589208
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/de7ea5bb-39a9-4d3f-936a-92a9e9662674/15e4f6f2-5a92-4a67-9b62-d51de63a8739"
 storage_version_token = "1788639599833322"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "_wEIPwES5LrhxUo1tVuC4"
+uri = "file://artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-PURE-IMAGES-NO-LOGO.zip"
+type = "unspecified"
+title = "Cognirise LinkedIn — PURE IMAGES, NO LOGO"
+description = "Dedicated 9.8 MB ZIP containing only nine clean Pulse PNGs: six 1080×1350 posts and three 1584×396 headers. No Cognirise logo, no text, and no overlays."
+logical_id = "c71aabf4-3f99-43fb-91a3-fae0cac09d6c"
+content_hash = "sha256:5dc1030d4e15c003e20b8f56bba5f154f33de384bb9233250564f07cfe1b9021"
+size = 10182447
+mtime_ms = 1788639766643
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/c71aabf4-3f99-43fb-91a3-fae0cac09d6c/8a9d400a-0223-4a37-93b4-28add9c05232"
+storage_version_token = "1788639776443944"
+content_type = "application/octet-stream"
