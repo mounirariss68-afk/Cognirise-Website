@@ -186,6 +186,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const { market, setMarket } = useMarketStore();
   const [scrolled, setScrolled] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previousPathRef = useRef(window.location.pathname);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -198,7 +199,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setIsOpen(false);
     setActiveDropdown(null);
-    window.scrollTo(0, 0);
+    const pathname = window.location.pathname;
+    const hash = window.location.hash;
+    const pathChanged = previousPathRef.current !== pathname;
+    previousPathRef.current = pathname;
+
+    window.requestAnimationFrame(() => {
+      if (hash) {
+        document.getElementById(hash.slice(1))?.scrollIntoView({ block: "start" });
+      } else if (pathChanged) {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      }
+    });
   }, [location]);
 
   useEffect(() => {
@@ -244,9 +256,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, [location]);
 
   useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
 
