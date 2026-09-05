@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
+import { scrollToSection } from "@/lib/motion";
 
 export default function WorkProof() {
   const { market } = useMarketStore();
@@ -12,7 +13,7 @@ export default function WorkProof() {
     market === "turkiye" ? "Istanbul · Türkiye" :
     "London · Europe";
 
-  const goTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const goTo = scrollToSection;
 
   return (
     <main className="wp">

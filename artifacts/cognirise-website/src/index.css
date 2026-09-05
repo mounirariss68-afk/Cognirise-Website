@@ -165,3 +165,88 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Cognirise Pulse motion grammar: arrival → signal → transfer → resolution. */
+.pulse-motion-page {
+  min-width: 0;
+}
+
+.pulse-motion-page [data-pulse-reveal] {
+  --pulse-shift-x: 0px;
+  opacity: 0.001;
+  transform: translate3d(var(--pulse-shift-x), 24px, 0);
+  transition:
+    opacity 620ms cubic-bezier(.16, 1, .3, 1),
+    transform 760ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.pulse-motion-page [data-pulse-reveal="left"] { --pulse-shift-x: -16px; }
+.pulse-motion-page [data-pulse-reveal="right"] { --pulse-shift-x: 16px; }
+.pulse-motion-page [data-pulse-reveal][data-pulse-visible="true"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.pulse-motion-page img[data-pulse-image] {
+  opacity: 0.001;
+  animation: none !important;
+  transform: scale(1.025);
+  clip-path: inset(0 0 0 100%);
+  transition:
+    opacity 420ms ease-out,
+    transform 900ms cubic-bezier(.16, 1, .3, 1),
+    clip-path 900ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.pulse-motion-page img[data-pulse-image="return"] {
+  clip-path: inset(0 100% 0 0);
+}
+
+.pulse-motion-page img[data-pulse-image][data-pulse-loaded="true"] {
+  opacity: 1;
+  transform: scale(1);
+  clip-path: inset(0);
+}
+
+.pulse-motion-page [data-pulse-reveal]:not([data-pulse-visible="true"]) img[data-pulse-image][data-pulse-loaded="true"] {
+  opacity: 0.001;
+  transform: scale(1.025);
+}
+
+.pulse-motion-page [data-pulse-image-error="true"] {
+  background:
+    linear-gradient(135deg, rgba(16, 41, 87, .96), rgba(118, 89, 223, .72) 52%, rgba(255, 119, 93, .8));
+}
+
+.pulse-motion-page img[data-pulse-loaded="error"] {
+  visibility: hidden;
+}
+
+.pulse-action .pulse-signal-rail {
+  transform-origin: bottom;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .pulse-action:hover .pulse-signal-rail {
+    transform: scaleY(.72);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within { scroll-behavior: auto; }
+  .pulse-motion-page *,
+  .pulse-motion-page *::before,
+  .pulse-motion-page *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    transition-delay: 0ms !important;
+  }
+  .pulse-motion-page [data-pulse-reveal],
+  .pulse-motion-page img[data-pulse-image] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+}

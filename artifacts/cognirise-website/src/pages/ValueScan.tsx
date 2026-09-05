@@ -5,6 +5,7 @@ import { useSubmitEnquiry } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
+import { scrollToSection } from "@/lib/motion";
 
 export default function ValueScan() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -88,7 +89,7 @@ export default function ValueScan() {
     });
   };
 
-  const goTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const goTo = scrollToSection;
 
   return (
     <main className="vs">

@@ -3,6 +3,7 @@ import { ArrowDown, ArrowRight, Plus } from "lucide-react";
 import { useState } from "react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
+import { scrollToSection } from "@/lib/motion";
 
 export default function PublicSector() {
   const [open, setOpen] = useState<number>(0);
@@ -21,7 +22,7 @@ export default function PublicSector() {
     ["04", "Sovereign foundations", "Set deployment, data and governance boundaries before intelligence enters consequential work."]
   ];
 
-  const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const go = scrollToSection;
 
   return (
     <main className="ps">
@@ -72,7 +73,7 @@ export default function PublicSector() {
         .ps-statement-copy small{font-size:12px;display:block;line-height:1.55;margin-top:22px;color:#647491}
         
         .ps-cinematic{margin:0 4.8vw;height:min(650px,50vw);min-height:480px;position:relative;overflow:hidden;background:var(--deep)}
-        .ps-cinematic img{width:100%;height:100%;object-fit:cover;animation:breath 8s ease-in-out infinite alternate}
+        .ps-cinematic img{width:100%;height:100%;object-fit:cover}
         .ps-cinematic:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.9),rgba(7,25,54,.1) 72%)}
         .ps-cinematic-copy{position:absolute;z-index:2;left:6%;bottom:11%;max-width:615px;color:white}
         .ps-cinematic h2{font-weight:600;font-size:clamp(43px,5.3vw,80px);letter-spacing:-.075em;line-height:.96;margin:16px 0}

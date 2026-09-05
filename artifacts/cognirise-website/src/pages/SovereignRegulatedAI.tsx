@@ -2,6 +2,7 @@ import { ArrowDown } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
+import { scrollToSection } from "@/lib/motion";
 
 export default function SovereignRegulatedAI() {
   const { market } = useMarketStore();
@@ -31,7 +32,7 @@ export default function SovereignRegulatedAI() {
             <div className="flex flex-wrap items-center gap-6">
               <BrandButton href="/value-scan">Bring us one process</BrandButton>
               <button 
-                onClick={() => document.getElementById("swimlane")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() => scrollToSection("swimlane")}
                 className="group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]"
               >
                 Explore delivery lifecycle <ArrowDown className="h-4 w-4" />

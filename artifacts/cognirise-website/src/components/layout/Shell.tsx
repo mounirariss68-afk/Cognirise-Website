@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
+import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/": {
@@ -449,7 +450,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        <PulseMotionPage pathname={location.split("?")[0]}>{children}</PulseMotionPage>
+      </main>
 
       <footer className="mt-auto border-t border-border bg-[hsl(var(--brand-deep))] text-white pt-16 pb-12 overflow-hidden relative">
         {/* Decorative background element */}

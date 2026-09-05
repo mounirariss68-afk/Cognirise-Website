@@ -38,7 +38,7 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
         <>
           {/* Signal Rail edge */}
           <div className={cn(
-            "absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] z-0 transition-all duration-300",
+            "pulse-signal-rail absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] z-0 transition-all duration-300",
             variant === "submit" ? "w-full opacity-0 group-hover:opacity-100" : ""
           )} />
 
@@ -63,7 +63,7 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
         );
       }
 
-      const baseClass = "group relative inline-flex min-h-[46px] items-center overflow-hidden pl-6 pr-5 text-sm font-bold transition-all duration-300";
+      const baseClass = "pulse-action group relative inline-flex min-h-[46px] items-center overflow-hidden pl-6 pr-5 text-sm font-bold transition-all duration-300";
       
       const variantClasses = {
         primary: "bg-[hsl(var(--brand-deep))] text-white",

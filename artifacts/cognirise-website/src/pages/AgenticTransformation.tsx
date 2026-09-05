@@ -3,6 +3,7 @@ import { ArrowDown, ArrowRight, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
+import { scrollToSection } from "@/lib/motion";
 
 export default function AgenticTransformation() {
   const [openStep, setOpenStep] = useState<number>(0);
@@ -21,7 +22,7 @@ export default function AgenticTransformation() {
     ["04", "Run, learn, extend", "Governed agents and people work as one system, creating the capacity to take the next priority process on."],
   ];
 
-  const goTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const goTo = scrollToSection;
 
   return (
     <main className="at">
@@ -71,7 +72,7 @@ export default function AgenticTransformation() {
         .at-tension-copy small{display:block;font-size:12px;line-height:1.55;margin-top:23px;color:#647491}
         
         .at-break{height:min(640px,51vw);min-height:470px;margin:0 4.8vw;position:relative;overflow:hidden;background:var(--deep)}
-        .at-break img{width:100%;height:100%;object-fit:cover;animation:at-breathe 8s ease-in-out infinite alternate}
+        .at-break img{width:100%;height:100%;object-fit:cover}
         .at-break:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.84),rgba(7,25,54,.03) 72%)}
         .at-break-copy{position:absolute;z-index:1;left:6%;bottom:11%;color:#fff;max-width:620px}
         .at-break h2{font-size:clamp(42px,5.3vw,79px);line-height:.96;letter-spacing:-.08em;font-weight:600;margin:16px 0}
