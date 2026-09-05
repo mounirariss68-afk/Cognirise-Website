@@ -43,3 +43,17 @@ mtime_ms = 1788546256784
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/18118b26-f368-411a-8ae3-54a076db96d1/41a6eaf7-d3a9-43dc-a340-fb740793f9cc"
 storage_version_token = "1788546370750864"
 content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+
+[[outputs]]
+id = "q-F5ViFHSMcRwYHhCDT0b"
+uri = "file://artifacts/mockup-sandbox/public/images/cognirise/pulse-library/cognirise-pulse-image-library.zip"
+type = "unspecified"
+title = "Cognirise Pulse Image Library"
+description = "Downloadable ZIP containing all 12 high-resolution Cognirise Pulse images."
+logical_id = "84d9f9f1-1559-4ac8-bf38-1bd037e53e17"
+content_hash = "sha256:de626c8841a6702af2a8c4fd6ab3529b5518c198923f006cfc1474b74695e3d1"
+size = 13743980
+mtime_ms = 1788631372664
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/84d9f9f1-1559-4ac8-bf38-1bd037e53e17/046615fa-bad4-4dcc-ab02-6dcbbb70b010"
+storage_version_token = "1788631881001436"
+content_type = "application/octet-stream"
