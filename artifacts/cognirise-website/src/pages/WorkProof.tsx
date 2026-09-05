@@ -148,7 +148,7 @@ export default function WorkProof() {
         <div className="wp-hero-grid">
           <div className="wp-hero-copy">
             <h1>Proof lives in the <em>work.</em></h1>
-            <p>From a priority mandate through the constraints, the build and governed production—we document what changes when intelligence moves real work.</p>
+            <p>Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production—and documents the decisions, controls and outcomes along the way.</p>
             <button className="wp-primary" onClick={() => goTo("proof")}>See the proof model <ArrowDown size={15} /></button>
             <Link href="/value-scan" className="wp-under">Bring one process <ArrowRight size={15} /></Link>
           </div>

@@ -46,7 +46,7 @@ export default function IndustriesOverview() {
         <div className="io-hero-grid">
           <div className="io-hero-copy">
             <h1>Pressure reveals where intelligence <em>belongs.</em></h1>
-            <p>For organisations carrying consequential work: the places where speed matters, and control cannot be an afterthought.</p>
+            <p>Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production—where speed matters and control cannot be an afterthought.</p>
           </div>
           <div className="io-hero-image">
             <img src={assetUrl("/images/cognirise/site-government.jpg")} alt="A monumental civic district connected by a luminous flow of intelligence." />

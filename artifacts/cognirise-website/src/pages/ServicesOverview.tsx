@@ -47,7 +47,7 @@ export default function ServicesOverview() {
         <div className="cps-hero-grid">
           <div className="cps-hero-copy">
             <h1>Stay with the work.<br />From decision to <em>production.</em></h1>
-            <p>Cognirise brings senior operators, engineers and governed agents to the work that needs to change—then remains accountable for making it real.</p>
+             <p>Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production.</p>
             <div className="cps-hero-actions">
               <BrandButton href="#services" variant="submit" onClick={(e) => { e.preventDefault(); document.getElementById("services")?.scrollIntoView({ behavior: "smooth" }); }}>
                 Explore services

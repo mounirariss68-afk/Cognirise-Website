@@ -65,7 +65,7 @@ export default function PlatformsOverview() {
               Ecosystem for <em className="not-italic text-[hsl(var(--brand-pink))]">execution.</em>
             </h1>
             <p className="text-base md:text-lg text-muted-foreground max-w-[460px] mb-10 leading-relaxed">
-              An integrated capability matrix that connects enterprise knowledge, specialist agents, and human accountability under one governed operating system.
+              Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production. CogniOS connects enterprise knowledge, specialist agents and human accountability under one governed operating system.
             </p>
             <div className="flex flex-wrap items-center gap-6">
               <BrandButton href="/value-scan">Bring us one process</BrandButton>
