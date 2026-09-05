@@ -1,215 +1,45 @@
-import { Link } from "wouter";
-import { ArrowRight, Activity, Database, Key, CheckCircle, Search, Terminal } from "lucide-react";
-import { BrandButton } from "@/components/ui/brand-button";
-import { useState } from "react";
+import { Link, useLocation, useSearch } from "wouter";
+import { ArrowLeft, ArrowRight, ChevronRight, Layers, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { architectureLayers, architectureSpines, findLayer, type ArchitectureComponent } from "@/data/cognios-architecture";
 import { useMarketStore } from "@/store/market";
-import { assetUrl } from "@/lib/assets";
 
 export default function CogniOSArchitecture() {
+  const [, setLocation] = useLocation();
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const selectedLayer = findLayer(params.get("layer"));
+  const detail = selectedLayer.components.find((item) => item.id === params.get("component")) ?? null;
+  const closeRef = useRef<HTMLButtonElement>(null);
   const { market } = useMarketStore();
-  const [activeLayer, setActiveLayer] = useState<number | null>(null);
-  const [tracing, setTracing] = useState(false);
-  const [traceStep, setTraceStep] = useState(0);
+  const locationName = market === "uae" ? "Dubai · United Arab Emirates" : market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" : market === "turkiye" ? "Istanbul · Türkiye" : "London · Europe";
+  const selectLayer = (id: string) => setLocation(`/platforms/cognios/architecture?layer=${id}`);
+  const openDetail = (component: ArchitectureComponent) =>
+    setLocation(`/platforms/cognios/architecture?layer=${selectedLayer.id}&component=${component.id}`);
+  const closeDetail = () => setLocation(`/platforms/cognios/architecture?layer=${selectedLayer.id}`);
 
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
+  useEffect(() => {
+    if (!detail) return;
+    closeRef.current?.focus();
+    const key = (event: KeyboardEvent) => event.key === "Escape" && closeDetail();
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [detail]);
 
-  const architectureLayers = [
-    { id: 6, title: "Experience Layer", desc: "Human and agent interactions designed for real operational context.", icon: <Search className="w-5 h-5" /> },
-    { id: 5, title: "Agent Layer", desc: "CogniAgents coordinate governed tasks, decisions and specialist actions.", icon: <Activity className="w-5 h-5" /> },
-    { id: 4, title: "Knowledge Layer", desc: "CogniDocs turns enterprise knowledge into controlled, retrievable context.", icon: <Database className="w-5 h-5" /> },
-    { id: 3, title: "Intelligence Layer", desc: "Models, prompts and orchestration selected for the work at hand.", icon: <Terminal className="w-5 h-5" /> },
-    { id: 2, title: "Integration Layer", desc: "Connects the systems where work, data and decisions already live.", icon: <Key className="w-5 h-5" /> },
-    { id: 1, title: "Foundation Layer", desc: "Infrastructure, data and identity controls shaped around the deployment context.", icon: <CheckCircle className="w-5 h-5" /> },
-  ];
+  return <main className="ca">
+    <style>{`
+      .ca{--navy:#071936;--ink:#102957;--paper:#fdfcfb;--mist:#eef1f6;--violet:#7659df;--pink:#db509e;--coral:#ff775d;background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;min-height:100dvh}.ca *{box-sizing:border-box}.ca h1,.ca h2,.ca h3{font-family:Comfortaa,sans-serif}.ca :focus-visible{outline:3px solid var(--coral);outline-offset:4px}.ca-hero{padding:42px 5vw 67px;max-width:1440px;margin:auto}.ca-kicker{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;display:flex;gap:10px;align-items:center}.ca-kicker:before{content:"";width:25px;height:1px;background:linear-gradient(90deg,var(--violet),var(--coral))}.ca h1{font-size:clamp(51px,7vw,101px);line-height:.91;letter-spacing:-.09em;max-width:740px;margin:36px 0 24px}.ca h1 em{font-style:normal;color:var(--pink)}.ca-hero p{max-width:540px;color:#4d6385;font-size:17px;line-height:1.6}.ca-workspace{background:var(--navy);padding:40px 5vw 85px;color:#fff;position:relative;overflow:hidden}.ca-workspace:before{content:"";position:absolute;width:70vw;height:70vw;left:17%;top:-45%;background:radial-gradient(circle,rgba(118,89,223,.42),transparent 63%)}.ca-topline,.ca-field{max-width:1320px;margin:auto;position:relative;z-index:1}.ca-topline{display:flex;justify-content:space-between;gap:30px;align-items:end;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:24px}.ca-topline h2{font-size:clamp(28px,3vw,45px);letter-spacing:-.07em;margin:7px 0 0}.ca-back{color:#fff;background:none;border:0;cursor:pointer;font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;display:flex;gap:9px;align-items:center}.ca-field{display:grid;grid-template-columns:190px minmax(0,1fr) 190px;gap:25px;margin-top:35px}.ca-spine{border-left:1px solid rgba(255,255,255,.32);border-right:1px solid rgba(255,255,255,.12);padding:15px 9px;min-height:550px;display:flex;flex-direction:column;justify-content:space-between}.ca-spine button{border:0;background:transparent;color:#fff;padding:0;text-align:left;cursor:pointer;font:700 10px Inter;text-transform:uppercase;letter-spacing:.11em;writing-mode:vertical-rl;display:flex;gap:12px}.ca-spine button:after{content:"+";font-size:19px;color:var(--coral)}.ca-spine.expanded button:after{content:"−"}.ca-spine small{font-size:10px;color:#bfcce1;line-height:1.5}.ca-core{min-width:0}.ca-layer-nav{display:flex;gap:4px;overflow:auto;padding-bottom:16px}.ca-layer-nav button{background:rgba(255,255,255,.07);border:1px solid transparent;color:#d8e0ed;cursor:pointer;padding:9px 11px;font:700 10px Inter;letter-spacing:.07em;white-space:nowrap}.ca-layer-nav button[aria-current="true"]{border-color:var(--coral);background:rgba(255,119,93,.15);color:#fff}.ca-layer-card{padding:28px 30px 33px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.27);clip-path:polygon(0 0,100% 0,97% 100%,0 100%)}.ca-layer-meta{color:#ff9b8a;font-size:10px;font-weight:700;letter-spacing:.13em}.ca-layer-card h3{font-size:clamp(30px,4vw,53px);letter-spacing:-.08em;margin:12px 0}.ca-layer-card>p{margin:0;max-width:630px;color:#d9e3f2;line-height:1.55}.ca-principle{border-left:2px solid var(--pink);padding:11px 15px;margin:24px 0 25px;color:#fff;font-size:13px;line-height:1.45}.ca-components{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ca-component{min-height:103px;text-align:left;color:#fff;border:1px solid rgba(255,255,255,.24);background:rgba(7,25,54,.28);padding:16px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;transition:transform .2s,background .2s}.ca-component:hover{transform:translate(-3px,-3px);background:rgba(118,89,223,.43)}.ca-component b{font:600 16px Comfortaa;letter-spacing:-.05em;display:block}.ca-component span{color:#cbd7eb;font-size:11px;line-height:1.45;display:block;margin-top:8px}.ca-component svg{color:var(--coral);flex:none}.ca-captions{margin-top:18px;display:flex;justify-content:space-between;color:#b8c7e1;font-size:10px;text-transform:uppercase;letter-spacing:.1em}.ca-dialog{position:fixed;inset:0;z-index:50;background:rgba(7,25,54,.47);display:flex;justify-content:flex-end}.ca-sheet{width:min(560px,100%);height:100%;background:var(--paper);box-shadow:-12px 0 40px rgba(7,25,54,.25);padding:30px clamp(24px,4vw,55px);overflow:auto;position:relative}.ca-sheet:before{content:"";height:7px;position:absolute;top:0;left:0;right:0;background:linear-gradient(90deg,var(--violet),var(--pink),var(--coral))}.ca-sheet-top{display:flex;justify-content:space-between;align-items:center;margin-top:10px}.ca-close{border:1px solid var(--ink);background:transparent;color:var(--ink);width:39px;height:39px;display:grid;place-items:center;cursor:pointer}.ca-sheet h2{font-size:clamp(32px,5vw,53px);line-height:.98;letter-spacing:-.08em;margin:48px 0 19px}.ca-sheet p{font-size:17px;line-height:1.55;color:#435a7c}.ca-sheet h3{font-size:15px;letter-spacing:-.04em;margin:38px 0 13px}.ca-detail-list{list-style:none;margin:0;padding:0;border-top:1px solid #cbd3e1}.ca-detail-list li{padding:14px 0;border-bottom:1px solid #cbd3e1;font-size:14px;line-height:1.4}.ca-engine{margin-top:29px;padding:15px;border-left:3px solid var(--coral);background:#f0effa;font-size:13px}.ca-foot{padding:90px 5vw;background:var(--mist)}.ca-foot-inner{max-width:1320px;margin:auto}.ca-foot h2{font-size:clamp(43px,6vw,78px);line-height:.95;letter-spacing:-.09em;max-width:760px;margin:18px 0}.ca-foot a{display:inline-flex;align-items:center;gap:14px;background:var(--ink);color:#fff;padding:16px 18px;text-decoration:none;font-size:12px;font-weight:700}@media(max-width:760px){.ca-hero{padding:30px 21px 52px}.ca-workspace{padding:30px 21px 65px}.ca-topline{display:block}.ca-back{margin-top:24px}.ca-field{grid-template-columns:1fr;gap:12px}.ca-spine{min-height:auto;height:50px;display:block;padding:8px}.ca-spine button{writing-mode:horizontal-tb;display:inline-flex}.ca-spine small{display:none}.ca-spine.expanded{height:auto}.ca-spine.expanded small{display:block;margin-top:10px}.ca-field .ca-spine:first-child{order:2}.ca-field .ca-spine:last-child{order:3}.ca-layer-card{padding:22px 17px 26px}.ca-components{grid-template-columns:1fr}.ca-captions{font-size:8px}.ca-foot{padding:65px 21px}.ca-sheet{padding:27px 25px}@media(prefers-reduced-motion:reduce){.ca *{transition:none!important}}}
+    `}</style>
+    <section className="ca-hero"><div className="ca-kicker">CogniOS / architecture explorer / {locationName}</div><h1>Inspect the route. <em>Keep the context.</em></h1><p>A reference workspace for examining how six distinct responsibilities meet two continuous operating spines. Select a plane, then open a component to inspect its role.</p></section>
+    <section className="ca-workspace" aria-label="CogniOS reference architecture explorer"><div className="ca-topline"><div><div className="ca-kicker">Component field</div><h2>{selectedLayer.number} / {selectedLayer.name}</h2></div><button className="ca-back" onClick={() => setLocation("/platforms/cognios")} data-testid="button-back-platform"><ArrowLeft size={16}/> Platform overview</button></div>
+      <div className="ca-field"><Spine spine={architectureSpines[1]} /><div className="ca-core"><nav className="ca-layer-nav" aria-label="Architecture layers">{architectureLayers.map((layer) => <button key={layer.id} onClick={() => selectLayer(layer.id)} aria-current={layer.id === selectedLayer.id ? "true" : undefined} data-testid={`button-layer-${layer.id}`}>{layer.number} {layer.name.replace(" layer", "")}</button>)}</nav><div className="ca-layer-card"><div className="ca-layer-meta">Layer {selectedLayer.number} / reference responsibility</div><h3>{selectedLayer.name}</h3><p>{selectedLayer.responsibility}</p><div className="ca-principle">{selectedLayer.principle}</div><div className="ca-components">{selectedLayer.components.map((item) => <button className="ca-component" key={item.id} onClick={() => openDetail(item)} data-testid={`button-component-${item.id}`} aria-haspopup="dialog"><span><b>{item.name}</b><span>{item.responsibility}</span></span><ChevronRight size={17}/></button>)}</div></div><div className="ca-captions"><span>Selected plane / {selectedLayer.components.length} component families</span><span>Controls: {selectedLayer.controls.join(" · ")}</span></div></div><Spine spine={architectureSpines[0]} /></div></section>
+    <section className="ca-foot"><div className="ca-foot-inner"><div className="ca-kicker">Executive workshop</div><h2>Bring one consequential process. Leave with a route worth testing.</h2><Link href="/value-scan" data-testid="link-value-scan">Start a value scan <ArrowRight size={18}/></Link></div></section>
+    {detail && <div className="ca-dialog" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && closeDetail()}><aside className="ca-sheet" role="dialog" aria-modal="true" aria-label={`${detail.name} architecture detail`}><div className="ca-sheet-top"><div className="ca-kicker">Component / {selectedLayer.name}</div><button ref={closeRef} className="ca-close" onClick={closeDetail} aria-label="Close component detail" data-testid="button-close-component"><X size={20}/></button></div><h2>{detail.name}</h2><p>{detail.responsibility}</p><h3>Reference architectural details</h3><ul className="ca-detail-list">{detail.details.map((item) => <li key={item}>{item}</li>)}</ul>{detail.engine && <div className="ca-engine"><b>Engine relationship</b><br/>{detail.engine} is a related capability within this reference architecture.</div>}<div className="ca-engine"><b>Layer principle</b><br/>{selectedLayer.principle}</div><h3>Controls carried here</h3><ul className="ca-detail-list">{selectedLayer.controls.map((control) => <li key={control}>{control}</li>)}</ul></aside></div>}
+  </main>;
+}
 
-  const handleTrace = () => {
-    if (tracing) return;
-    setTracing(true);
-    setTraceStep(0);
-    
-    let step = 0;
-    const interval = setInterval(() => {
-      step++;
-      setTraceStep(step);
-      if (step > architectureLayers.length) {
-        clearInterval(interval);
-        setTimeout(() => setTracing(false), 2000);
-      }
-    }, 800);
-  };
-
-  return (
-    <div className="flex flex-col">
-      <section className="px-6 md:px-12 pt-8 md:pt-12 max-w-[1440px] mx-auto w-full">
-        <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
-          <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-          Platforms / {marketLocation}
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 lg:gap-16 items-end pb-12 min-h-[50vh]">
-          <div className="pb-4 relative z-10">
-            <h1 className="text-5xl md:text-6xl lg:text-[85px] leading-[0.94] font-semibold mb-8 max-w-[660px]">
-              How intelligence <em className="not-italic text-[hsl(var(--brand-pink))]">moves.</em>
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-[460px] mb-10 leading-relaxed">
-              Explore the six layers of the CogniOS architecture. See how requests are processed, governed, and fulfilled safely.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Architecture Section */}
-      <section className="bg-[hsl(var(--brand-deep))] py-24 text-white relative overflow-hidden">
-        <div className="max-w-[1440px] mx-auto px-6 md:px-12">
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            
-            {/* Left: Diagram */}
-            <div className="relative">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xl font-bold uppercase tracking-widest text-white/50 text-[11px]">System Architecture</h3>
-                <button 
-                  onClick={handleTrace}
-                  disabled={tracing}
-                  className="text-[11px] font-bold uppercase tracking-widest bg-[hsl(var(--brand-coral))] hover:bg-white hover:text-[hsl(var(--brand-deep))] text-white px-4 py-2 transition-colors disabled:opacity-50"
-                >
-                  {tracing ? "Tracing Request..." : "Trace a Request"}
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-2 relative">
-                {/* Trace Line */}
-                <div className="absolute left-6 top-6 bottom-6 w-[2px] bg-white/10 z-0" />
-                {tracing && traceStep > 0 && (
-                  <div 
-                    className="absolute left-6 top-6 w-[2px] bg-gradient-to-b from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))] z-10 transition-all duration-300"
-                    style={{ height: `${(traceStep / architectureLayers.length) * 100}%` }}
-                  />
-                )}
-
-                {architectureLayers.map((layer, index) => {
-                  const isTraced = tracing && traceStep > index;
-                  const isActive = activeLayer === layer.id || isTraced;
-
-                  return (
-                    <button
-                      key={layer.id}
-                      onMouseEnter={() => !tracing && setActiveLayer(layer.id)}
-                      onMouseLeave={() => !tracing && setActiveLayer(null)}
-                      onClick={() => !tracing && setActiveLayer(layer.id)}
-                      className={`relative z-20 flex items-center gap-6 p-4 rounded-sm border text-left transition-all duration-300 ${
-                        isActive 
-                          ? "bg-white/10 border-[hsl(var(--brand-pink))]/50 translate-x-2 shadow-[0_0_20px_rgba(219,80,158,0.1)]" 
-                          : "bg-white/5 border-transparent hover:bg-white/10"
-                      }`}
-                    >
-                      <div className={`w-3 h-3 rounded-full flex-shrink-0 transition-colors ${
-                        isActive ? "bg-[hsl(var(--brand-coral))]" : "bg-white/20"
-                      }`} />
-                      <div className="flex-1">
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-1">
-                          Layer 0{layer.id}
-                        </div>
-                        <div className="text-lg font-semibold">{layer.title}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Right: Info Panel / Accessible Fallback */}
-            <div className="lg:py-16">
-              <div className="sticky top-32">
-                {activeLayer || (tracing && traceStep > 0 && traceStep <= architectureLayers.length) ? (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    {(() => {
-                      const id = tracing && traceStep > 0 && traceStep <= architectureLayers.length ? architectureLayers[traceStep - 1].id : activeLayer;
-                      const layer = architectureLayers.find(l => l.id === id);
-                      if (!layer) return null;
-                      return (
-                        <div className="bg-white/5 border border-white/10 p-8 relative overflow-hidden">
-                          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-                          <div className="text-[hsl(var(--brand-coral))] mb-6">{layer.icon}</div>
-                          <h4 className="text-3xl font-display font-semibold mb-4 text-white">Layer 0{layer.id}: {layer.title}</h4>
-                          <p className="text-white/70 text-lg leading-relaxed">{layer.desc}</p>
-                          <div className="mt-8 pt-6 border-t border-white/10 text-sm text-white/50">
-                            {tracing ? "Tracing in progress..." : "Hover over a layer to inspect its role in the architecture."}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                ) : (
-                  <div className="text-white/50 text-lg leading-relaxed">
-                    Select a layer to inspect its architectural responsibility, or run a trace to see how a request moves from user interaction through the infrastructure and back.
-                  </div>
-                )}
-                
-                {/* Screen reader accessible list */}
-                <div className="sr-only">
-                  <h2>CogniOS Architecture Layers</h2>
-                  <ul>
-                    {architectureLayers.map(l => (
-                      <li key={l.id}>Layer {l.id}: {l.title} - {l.desc}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-[hsl(var(--secondary))] px-6 md:px-12 py-24 w-full">
-        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-12 lg:gap-[7vw] items-center">
-          <div className="lg:py-16">
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">
-              <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-              Accountability
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-[76px] leading-[0.97] font-semibold mb-8">
-              Audit in the <em className="not-italic text-[hsl(var(--brand-coral))]">flow.</em>
-            </h2>
-            <p className="text-lg text-foreground/70 max-w-[415px] mb-10">
-              The architecture is designed so that governance is not an external process. Controls, identity, and logging are enforced natively at the Foundation and Integration layers.
-            </p>
-          </div>
-          
-          <div className="relative h-[400px] lg:h-[570px] lg:-mt-10 clip-diagonal-bottom">
-            <img 
-              src={assetUrl("/images/cognirise/cognirise-pulse-outcomes.jpg")}
-              alt="Data pathways moving through an architectural framework." 
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute right-6 bottom-6 text-[10px] font-semibold uppercase tracking-widest text-white">
-              built-in governance
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-foreground text-white px-6 md:px-12 py-24 relative overflow-hidden">
-        <div className="absolute right-0 bottom-[-5%] text-[20vw] leading-[0.7] font-display font-semibold tracking-tighter text-white/5 pointer-events-none">
-          MOVE
-        </div>
-        <div className="max-w-[1440px] mx-auto relative z-10">
-          <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/60 mb-6">
-            <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-            The first move
-          </div>
-          <h2 className="text-5xl md:text-7xl lg:text-[110px] leading-[0.88] font-semibold tracking-tight mb-8">
-            Bring one process.<br />
-            <em className="not-italic text-[#ff8470]">Leave with a route.</em>
-          </h2>
-          <BrandButton href="/value-scan" variant="submit">Book a value scan</BrandButton>
-        </div>
-      </section>
-    </div>
-  );
+function Spine({ spine }: { spine: typeof architectureSpines[number] }) {
+  const [expanded, setExpanded] = useState(false);
+  const panelId = `spine-${spine.id}-detail`;
+  return <aside className={`ca-spine ${expanded ? "expanded" : ""}`}><button onClick={() => setExpanded(!expanded)} aria-expanded={expanded} aria-controls={panelId} data-testid={`button-spine-${spine.id}`}>{spine.number} / {spine.name}</button><small id={panelId}>{expanded ? <>{spine.description}<br/><br/>{spine.components.join(" · ")}</> : spine.description}</small></aside>;
 }
