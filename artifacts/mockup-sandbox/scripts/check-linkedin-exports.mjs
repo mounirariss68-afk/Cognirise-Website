@@ -6,32 +6,21 @@ import {
   readPngDimensions,
   validateSvgImages,
 } from "./linkedin-export-integrity.mjs";
+import {
+  archiveName,
+  expectedArchiveFiles,
+  expectedPngFiles,
+  imageLedSvgFiles,
+} from "./linkedin-bundle-manifest.mjs";
 
 const assetDirectory = fileURLToPath(
   new URL("../public/images/cognirise/linkedin/", import.meta.url),
 );
-const archiveName = "cognirise-linkedin-pulse-image-led-edition.zip";
-const readmeName = "readme.md";
-const imageLedSvgFiles = [
-  "cognirise-linkedin-action.svg",
-  "cognirise-linkedin-governance.svg",
-  "cognirise-linkedin-header-governance.svg",
-  "cognirise-linkedin-header-judgment.svg",
-  "cognirise-linkedin-header-rhythm.svg",
-  "cognirise-linkedin-judgment.svg",
-  "cognirise-linkedin-knowledge.svg",
-  "cognirise-linkedin-orchestration.svg",
-  "cognirise-linkedin-transformation.svg",
-].sort();
-
 const fail = (message) => {
   throw new Error(`LinkedIn export integrity check failed: ${message}`);
 };
 
 const files = readdirSync(assetDirectory).sort();
-const expectedPngFiles = imageLedSvgFiles.map((file) => file.replace(/\.svg$/, ".png"));
-const expectedArchiveFiles = [...imageLedSvgFiles, ...expectedPngFiles, readmeName].sort();
-
 for (const svgFile of imageLedSvgFiles) {
   if (!files.includes(svgFile)) fail(`${svgFile} is missing`);
   const svg = readFileSync(join(assetDirectory, svgFile), "utf8");
@@ -62,10 +51,13 @@ try {
   archiveFiles = execFileSync("unzip", ["-Z1", archivePath], { encoding: "utf8" })
     .split(/\r?\n/)
     .filter(Boolean)
-    .map((file) => file.replace(/^\.\//, ""))
-    .sort();
+    .map((file) => file.replace(/^\.\//, ""));
 } catch {
   fail(`${archiveName} is missing or unreadable`);
+}
+
+if (!archiveFiles.every((file, index) => file === expectedArchiveFiles[index])) {
+  fail(`ZIP entries are not in deterministic order: ${expectedArchiveFiles.join(", ")}`);
 }
 
 const missingArchiveFiles = expectedArchiveFiles.filter((file) => !archiveFiles.includes(file));
@@ -83,6 +75,16 @@ if (missingArchiveFiles.length > 0 || unexpectedArchiveFiles.length > 0) {
       .filter(Boolean)
       .join("; "),
   );
+}
+
+for (const file of expectedArchiveFiles) {
+  const archivedContents = execFileSync("unzip", ["-p", archivePath, file], {
+    maxBuffer: 50 * 1024 * 1024,
+  });
+  const sourceContents = readFileSync(join(assetDirectory, file));
+  if (!archivedContents.equals(sourceContents)) {
+    fail(`${file} in the ZIP does not match the current source file`);
+  }
 }
 
 console.log(
