@@ -90,9 +90,9 @@ export default function CogniOSPlatform() {
         <div className="co-arch-head">
           <div>
             <div className="co-kicker">Reference architecture</div>
-            <h2>Six layers.<br/>One controlled flow.</h2>
+            <h2>Six layers.<br/>One operating system.</h2>
           </div>
-          <p>Each layer has a distinct responsibility. Together they give teams a practical way to deploy intelligence into the work, not beside it.</p>
+          <p>Each layer has a distinct responsibility. Explore the complete system, then move from a layer to its components and documented controls without losing the whole.</p>
         </div>
         <ArchitectureStage />
       </section>

@@ -1,11 +1,13 @@
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowDown, ArrowRight } from "lucide-react";
-import { BrandButton } from "@/components/ui/brand-button";
+import { ArrowRight, ChevronRight, ArrowDown } from "lucide-react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
+import { useRef } from "react";
 
 export default function Home() {
   const { market } = useMarketStore();
+  const prefersReducedMotion = useReducedMotion();
   
   const marketLocation = 
     market === "uae" ? "Dubai · United Arab Emirates" :
@@ -13,12 +15,30 @@ export default function Home() {
     market === "turkiye" ? "Istanbul · Türkiye" :
     "London · Europe";
 
+  const { scrollYProgress } = useScroll();
+  
+  // Create parallax values only if motion is enabled
+  const yHeroText = useTransform(scrollYProgress, [0, 1], [0, prefersReducedMotion ? 0 : 200]);
+  const yHeroImage = useTransform(scrollYProgress, [0, 1], [0, prefersReducedMotion ? 0 : 100]);
+  const scaleHeroImage = useTransform(scrollYProgress, [0, 0.5], [1, prefersReducedMotion ? 1 : 1.05]);
+
+  const outcomes = [
+    ["01", "Architecture"],
+    ["02", "Engineering"],
+    ["03", "Assurance"],
+    ["04", "Risk"]
+  ];
+
   return (
-    <main className="cp">
+    <div className="cp">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
-        .cp{--ink:#102957;--ink2:#071936;--paper:#fdfcfb;--soft:#f2f4f8;--line:#cbd3e1;--violet:#7659df;--pink:#db509e;--coral:#ff775d;background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;overflow:hidden}.cp *{box-sizing:border-box}.cp button{font:inherit}.cp a{color:inherit;text-decoration:none}.cp :focus-visible{outline:3px solid var(--coral);outline-offset:4px}
-        .cp-hero{padding:22px 4.8vw 0;position:relative}.cp-kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;display:flex;align-items:center;gap:10px}.cp-kicker:before{content:"";width:23px;height:1px;background:linear-gradient(90deg,var(--violet),var(--coral))}.cp-hero-grid{min-height:690px;display:grid;grid-template-columns:.83fr 1.17fr;gap:36px;align-items:end;padding-bottom:34px}.cp-hero-copy{position:relative;z-index:2;padding:0 0 16px}.cp-hero h1,.cp h2,.cp h3{font-family:Comfortaa,sans-serif}.cp-hero h1{font-weight:600;font-size:clamp(48px,6.4vw,100px);line-height:.94;letter-spacing:-.075em;margin:30px 0 28px;max-width:690px}.cp-hero h1 em{font-style:normal;color:var(--pink)}.cp-hero p{font-size:16px;line-height:1.6;color:#415779;max-width:450px;margin:0 0 30px}.cp-hero-actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+        .cp{--ink:#102957;--ink2:#071936;--paper:#fdfcfb;--mist:#eef0f5;--line:#cbd3e1;--violet:#7659df;--pink:#db509e;--coral:#ff775d;background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;overflow-x:hidden}
+        .cp *{box-sizing:border-box}.cp a,.cp button{text-decoration:none;font:inherit}.cp :focus-visible{outline:3px solid var(--coral);outline-offset:4px}
+        .cp-primary{border:1px solid var(--ink);cursor:pointer;color:#fff;background:var(--ink);font-weight:700;font-size:12px;padding:4px 4px 4px 17px;min-height:46px;display:inline-flex;align-items:center;gap:15px;position:relative;isolation:isolate;overflow:hidden;transition:transform .24s,box-shadow .24s}.cp-primary:before{content:"";position:absolute;z-index:-2;inset:-1px;background:linear-gradient(105deg,var(--violet),var(--pink),var(--coral));opacity:0;transition:opacity .24s}.cp-primary:after{content:"";position:absolute;z-index:-1;inset:1px;background:var(--ink);transition:background .24s}.cp-primary svg{width:36px;height:36px;padding:10px;background:#fff;color:var(--ink);transition:transform .24s,background .24s,color .24s}.cp-primary:hover{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--coral)}.cp-primary:hover:before{opacity:1}.cp-primary:hover:after{background:rgba(7,25,54,.94)}.cp-primary:hover svg{transform:translate(3px,-3px);background:var(--coral);color:#fff}
+        .cp-kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;display:flex;align-items:center;gap:10px}.cp-kicker:before{content:"";width:23px;height:1px;background:linear-gradient(90deg,var(--violet),var(--coral))}
+        .cp-hero{padding:22px 4.8vw 0}.cp-hero-grid{display:grid;grid-template-columns:.94fr 1.06fr;gap:4vw;align-items:end;min-height:680px;padding-bottom:34px}
+        .cp h1,.cp h2,.cp h3{font-family:Comfortaa,sans-serif}.cp-hero h1{font-weight:600;font-size:clamp(50px,6.3vw,100px);line-height:.94;letter-spacing:-.08em;margin:30px 0 28px}.cp-hero h1 em{font-style:normal;color:var(--pink)}.cp-hero p{font-size:16.5px;line-height:1.6;color:#405777;max-width:440px;margin-bottom:32px}.cp-hero p strong{color:var(--ink)}
         .cp-hero-image{height:640px;position:relative;overflow:hidden;background:#101d3b;clip-path:polygon(10% 0,100% 0,100% 91%,0 100%,0 12%)}.cp-hero-image img{width:100%;height:100%;object-fit:cover;animation:cpImage 1.4s cubic-bezier(.2,.7,.2,1) both}.cp-hero-image:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.42),transparent 35%),linear-gradient(0deg,rgba(7,25,54,.48),transparent 30%)}.cp-hero-caption{position:absolute;z-index:2;left:34px;bottom:29px;color:#fff;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.cp-hero-caption span{display:block;opacity:.75;margin-bottom:7px}.cp-hero-word{font:600 clamp(58px,9.2vw,150px)/.8 Comfortaa,sans-serif;color:#fff;position:absolute;z-index:2;right:-10px;top:50px;letter-spacing:-.1em;mix-blend-mode:overlay;opacity:.87}
         .cp-proof{margin:0 4.8vw;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr}.cp-proof div{padding:18px 20px;border-right:1px solid var(--line);font-size:12px;line-height:1.4}.cp-proof div:last-child{border:0}.cp-proof b{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;margin-bottom:8px;color:#6a7891}.cp-proof strong{font-weight:600}
         .cp-statement{padding:150px 4.8vw 110px;display:grid;grid-template-columns:1fr 1.15fr;gap:7vw}.cp-statement h2{font-weight:600;font-size:clamp(42px,5vw,78px);letter-spacing:-.075em;line-height:.98;margin:25px 0 0}.cp-statement h2 em{font-style:normal;color:var(--coral)}.cp-statement-copy{align-self:end;border-top:1px solid var(--line);padding-top:22px;font-size:21px;line-height:1.44;color:#30486d;max-width:520px}.cp-statement-copy p{margin:0}.cp-statement-copy small{font-size:12px;display:block;line-height:1.55;margin-top:22px;color:#647491}
@@ -44,188 +64,429 @@ export default function Home() {
         }
       `}</style>
 
-      <section className="cp-hero">
-        <div className="cp-kicker">{marketLocation} / AI-native advisory & engineering</div>
+      <section className="cp-hero overflow-hidden">
+        <motion.div 
+          className="cp-kicker"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {marketLocation} / AI-native advisory & engineering
+        </motion.div>
+        
         <div className="cp-hero-grid">
-          <div className="cp-hero-copy">
-            <h1>Intelligence becomes <em>momentum.</em></h1>
-            <p><strong>Cognirise is the AI-native advisory and engineering firm.</strong> Senior operators, forward-deployed engineers and governed agents move priority work from strategy into production.</p>
-            <div className="cp-hero-actions">
-              <BrandButton href="/value-scan" variant="submit">
-                Bring us one process
-              </BrandButton>
-              <BrandButton href="/what-we-do" variant="editorial" icon={<ArrowDown className="h-4 w-4" />}>
-                See how we work
-              </BrandButton>
+          <motion.div 
+            className="cp-hero-copy"
+            style={{ y: yHeroText }}
+          >
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              Intelligence becomes <em>momentum.</em>
+            </motion.h1>
+            
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+            >
+              <strong>Cognirise is the AI-native advisory and engineering firm.</strong> Senior operators, forward-deployed engineers and governed agents move priority work from strategy into production.
+            </motion.p>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Link href="/what-we-do" className="cp-primary">Explore our practice <ArrowRight /></Link>
+            </motion.div>
+          </motion.div>
+          
+          <motion.div 
+            className="cp-hero-image"
+            style={{ y: yHeroImage }}
+            initial={{ opacity: 0, clipPath: "polygon(10% 0, 100% 0, 100% 0, 0 0, 0 12%)" }}
+            animate={{ opacity: 1, clipPath: "polygon(10% 0, 100% 0, 100% 91%, 0 100%, 0 12%)" }}
+            transition={{ duration: 1.2, ease: [0.2, 0.7, 0.2, 1] }}
+          >
+            <motion.img 
+              src={assetUrl("/images/cognirise/hero-cognirise-pulse.jpg")} 
+              alt="A luminous directional vector cutting through deep navy operational space." 
+              style={{ scale: scaleHeroImage }}
+            />
+            <div className="cp-hero-word">pulse</div>
+            <div className="cp-hero-caption">
+              <span>Operating context</span>Direction and speed
             </div>
-          </div>
-          <div className="cp-hero-image">
-            <img src={assetUrl("/images/cognirise/pulse-hero.jpg")} alt="An abstract field of living intelligence flowing through a white and navy architectural space." />
-            <div className="cp-hero-word">move</div>
-            <div className="cp-hero-caption"><span>01 / living intelligence</span>Not another AI pilot</div>
-          </div>
+          </motion.div>
         </div>
       </section>
-      
-      <section className="cp-proof" aria-label="Cognirise qualities">
-        <div><b>Built for</b><strong>Enterprise and government</strong></div>
-        <div><b>Model</b><strong>Forward-deployed people + agents</strong></div>
-        <div><b>Focus</b><strong>Priority work, not presentationware</strong></div>
-        <div><b>Starting point</b><strong>One process under pressure</strong></div>
+
+      <section className="cp-proof" aria-label="Cognirise company qualities">
+        <div><b>Model</b><strong>Advisory + Engineering</strong></div>
+        <div><b>Focus</b><strong>Complex enterprise & government</strong></div>
+        <div><b>Platform</b><strong>CogniOS (Four native engines)</strong></div>
+        <div><b>Presence</b><strong>Middle East & Europe</strong></div>
       </section>
 
       <section className="cp-statement">
-        <div>
-          <div className="cp-kicker">The pressure is real</div>
-          <h2>AI spend is rising.<br />Too little <em>work</em> is changing.</h2>
-        </div>
-        <div className="cp-statement-copy">
-          <p>Copilots can demonstrate possibility. Transformation begins when the process, people, data and controls move as one operating system.</p>
-          <small>Consulting firms leave slides. Cognirise stays with the work—through the decisions, build and governed deployment.</small>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="cp-kicker">The firm</div>
+          <h2>We don't sell experimentation. <em>We sell operational reality.</em></h2>
+        </motion.div>
+        
+        <motion.div 
+          className="cp-statement-copy"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <p>Most AI programmes fail because they treat intelligence as software to be deployed rather than a capability to be governed. We bridge the gap between algorithmic potential and enterprise authority.</p>
+          <small>We work with leaders who hold accountability for results, providing the advisory clarity to move and the engineering certainty to hold ground.</small>
+        </motion.div>
       </section>
 
       <section className="cp-break">
-        <img src={assetUrl("/images/cognirise/pulse-breakthrough.jpg")} alt="A bright gradient force breaking directly through a rigid architectural maze." />
-        <div className="cp-break-copy">
-          <div className="cp-kicker">A different operating model</div>
-          <h2>Make the route, then move through it.</h2>
-          <p>We bring strategy, engineering and agentic delivery into the same room—so the hardest constraints are addressed before they become the reason nothing ships.</p>
-        </div>
-        <div className="cp-break-mark">02 / breakthrough</div>
+        <motion.img 
+          src={assetUrl("/images/cognirise/pulse-convergence.jpg")} 
+          alt="A cinematic depiction of operational space." 
+          initial={{ scale: 1.1 }}
+          whileInView={{ scale: 1.04 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+        />
+        <motion.div 
+          className="cp-break-copy"
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="cp-kicker">Operating reality</div>
+          <h2>Intelligence without authority is just an experiment.</h2>
+          <p>Our engagements are structured around the moments where automated intent meets human accountability.</p>
+        </motion.div>
+        <div className="cp-break-mark">PULSE // COGNIRISE</div>
       </section>
 
-      <section className="cp-model" id="services">
+      <section className="cp-model">
         <div className="cp-model-head">
-          <div>
-            <div className="cp-kicker">What we bring to the work</div>
-            <h2>Exact where generic AI is vague.</h2>
-          </div>
-          <p className="cp-model-lead">A complete route from a consequential business problem to a working, governed system.</p>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="cp-kicker">How we work</div>
+            <h2>We combine strategy, engineering and platform.</h2>
+          </motion.div>
+          <motion.p 
+            className="cp-model-lead"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            We don't hand over a presentation and wish you luck. We deploy senior teams who take accountability for the architecture, the code and the outcome.
+          </motion.p>
         </div>
+        
         <div className="cp-services">
-          {[
-            ["01","Agentic enterprise transformation","Find the work worth changing. Rebuild it around intelligence."],
-            ["02","Data & AI foundations","Make data, controls and architecture ready for what comes next."],
-            ["03","Engineering with AI","Ship production systems with forward-deployed engineering teams."],
-            ["04","Sovereign & regulated AI","Build local control, security and explainability into the work."],
-            ["05","Digital AI workforce","Deploy governed agents into real operating environments."]
-          ].map(([number,title,copy], index) => {
-            const urls = [
-              "/what-we-do/agentic-enterprise-transformation",
-              "/what-we-do/data-ai-foundations",
-              "/what-we-do/engineering-with-ai",
-              "/what-we-do/sovereign-regulated-ai",
-              "/what-we-do/digital-ai-workforce"
-            ];
-            return (
-              <Link className="cp-service" href={urls[index]} key={title}>
-                <span>{number}</span>
-                <h3>{title}</h3>
-                <p>{copy}</p>
-                <ArrowRight size={18} />
-              </Link>
-            );
-          })}
+          <Link href="/what-we-do/agentic-enterprise-transformation" className="cp-service block group relative overflow-hidden">
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-r from-[rgba(118,89,223,0.05)] to-transparent" 
+              initial={{ x: "-100%" }}
+              whileHover={{ x: 0 }}
+              transition={{ duration: 0.4 }}
+            />
+            <span className="relative z-10">01</span>
+            <h3 className="relative z-10 group-hover:text-[hsl(var(--brand-pink))] transition-colors">Agentic Enterprise Transformation</h3>
+            <p className="relative z-10 group-hover:text-[#102957] transition-colors">Designing the operating model, governance and transition path for an AI-augmented enterprise.</p>
+            <ArrowRight className="relative z-10 group-hover:translate-x-2 transition-transform" />
+          </Link>
+          
+          <Link href="/what-we-do/engineering-with-ai" className="cp-service block group relative overflow-hidden">
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-r from-[rgba(118,89,223,0.05)] to-transparent" 
+              initial={{ x: "-100%" }}
+              whileHover={{ x: 0 }}
+              transition={{ duration: 0.4 }}
+            />
+            <span className="relative z-10">02</span>
+            <h3 className="relative z-10 group-hover:text-[hsl(var(--brand-pink))] transition-colors">Engineering & Modernisation</h3>
+            <p className="relative z-10 group-hover:text-[#102957] transition-colors">Forward-deployed engineering to build new capabilities and safely retire legacy technical debt.</p>
+            <ArrowRight className="relative z-10 group-hover:translate-x-2 transition-transform" />
+          </Link>
+          
+          <Link href="/what-we-do/data-ai-foundations" className="cp-service block group relative overflow-hidden">
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-r from-[rgba(118,89,223,0.05)] to-transparent" 
+              initial={{ x: "-100%" }}
+              whileHover={{ x: 0 }}
+              transition={{ duration: 0.4 }}
+            />
+            <span className="relative z-10">03</span>
+            <h3 className="relative z-10 group-hover:text-[hsl(var(--brand-pink))] transition-colors">Data & AI Foundations</h3>
+            <p className="relative z-10 group-hover:text-[#102957] transition-colors">Structuring enterprise knowledge and systems so they are ready to participate in intelligent work.</p>
+            <ArrowRight className="relative z-10 group-hover:translate-x-2 transition-transform" />
+          </Link>
+          
+          <Link href="/platforms" className="cp-service block group relative overflow-hidden">
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-r from-[rgba(118,89,223,0.05)] to-transparent" 
+              initial={{ x: "-100%" }}
+              whileHover={{ x: 0 }}
+              transition={{ duration: 0.4 }}
+            />
+            <span className="relative z-10 text-[hsl(var(--brand-pink))] font-bold">04</span>
+            <h3 className="relative z-10 group-hover:text-[hsl(var(--brand-pink))] transition-colors">CogniOS Platform</h3>
+            <p className="relative z-10 group-hover:text-[#102957] transition-colors">Our proprietary architecture. A complete operating system for governed enterprise intelligence.</p>
+            <ArrowRight className="relative z-10 text-[hsl(var(--brand-pink))] group-hover:translate-x-2 transition-transform" />
+          </Link>
         </div>
       </section>
 
-      <section className="cp-clarity" aria-labelledby="connected-system-title">
-        <div>
-          <div className="cp-kicker">One system, shaped to the mandate</div>
-          <h2 id="connected-system-title">Advisory defines the route. Engineering makes it real.</h2>
-          <p className="cp-clarity-copy"><strong>CogniOS capabilities help governed intelligence operate in the work.</strong> We use the combination the mandate requires—not a platform looking for a problem.</p>
-        </div>
-        <div className="cp-outcomes">
-          <p className="cp-outcomes-intro">Every mandate defines its own evidence. Cognirise looks for defensible movement in cost, capacity, speed and risk—without forcing every engagement into the same dashboard.</p>
-          <div className="cp-outcome-row" aria-label="Outcome lenses">
-            <div><span>01</span>Cost</div>
-            <div><span>02</span>Capacity</div>
-            <div><span>03</span>Speed</div>
-            <div><span>04</span>Risk</div>
+      <section className="cp-clarity">
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="cp-kicker">Operating conviction</div>
+          <h2>We leave organisations <em>more capable</em> than we found them.</h2>
+          <div className="cp-clarity-copy">
+            We don't create dependencies. <strong>Every engagement is designed to transfer capability to your team.</strong> Whether we're advising the board or committing code alongside your engineers, our goal is to build an environment you can operate and scale yourselves.
           </div>
-        </div>
+        </motion.div>
+        
+        <motion.div 
+          className="cp-outcomes"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <div className="cp-outcomes-intro">We embed our practices into your firm:</div>
+          <div className="cp-outcome-row">
+            {outcomes.map(([num, text], i) => (
+              <motion.div 
+                key={text}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.4 + (i * 0.1) }}
+              >
+                <span>{num}</span>{text}
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </section>
 
       <section className="cp-image-ledger" aria-label="Cognirise outcomes in motion">
         <div className="cp-image-ledger-head">
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
             <div className="cp-kicker">The system in motion</div>
             <h2>Three conditions for change that holds.</h2>
-          </div>
-          <p>We build the path, the controls and the capacity to keep the work moving after the first release.</p>
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            We build the path, the controls and the capacity to keep the work moving after the first release.
+          </motion.p>
         </div>
         <div className="cp-image-ledger-grid">
-          <figure className="cp-ledger-image">
-            <img src={assetUrl("/images/cognirise/cognirise-pulse-outcomes.jpg")} alt="Violet, coral and navy sculptural forms moving precisely through a white architectural space." />
-            <figcaption><span>01 / outcomes</span><strong>Capacity that compounds.</strong></figcaption>
-          </figure>
-          <figure className="cp-ledger-image">
-            <img src={assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")} alt="A luminous thread moving through precise navy gateways in a white architectural chamber." />
-            <figcaption><span>02 / control</span><strong>Governance in the flow.</strong></figcaption>
-          </figure>
-          <figure className="cp-ledger-image">
-            <img src={assetUrl("/images/cognirise/cognirise-pulse-people.jpg")} alt="Senior professionals collaborating around a vibrant translucent structure." />
-            <figcaption><span>03 / people</span><strong>Expertise deployed.</strong></figcaption>
-          </figure>
+          <motion.figure 
+            className="cp-ledger-image group"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <img src={assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")} alt="Visual representation of operational boundaries." />
+            <motion.figcaption
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <span>First condition</span>
+              <strong className="group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">Boundaries you can see.</strong>
+            </motion.figcaption>
+          </motion.figure>
+          
+          <motion.figure 
+            className="cp-ledger-image group"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <img src={assetUrl("/images/cognirise/pulse-convergence.jpg")} alt="Visual representation of people and agents in a shared architecture." />
+            <motion.figcaption
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <span>Second condition</span>
+              <strong className="group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">Work that flows.</strong>
+            </motion.figcaption>
+          </motion.figure>
+          
+          <motion.figure 
+            className="cp-ledger-image group"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <img src={assetUrl("/images/cognirise/site-cognios.jpg")} alt="Visual representation of a durable system." />
+            <motion.figcaption
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <span>Third condition</span>
+              <strong className="group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">A platform that remembers.</strong>
+            </motion.figcaption>
+          </motion.figure>
         </div>
       </section>
 
       <section className="cp-converge">
         <div className="cp-converge-wrap">
-          <div className="cp-converge-copy">
-            <div className="cp-kicker">One accountable team</div>
-            <h2>Human-led. Agent-accelerated.</h2>
-            <p>Human judgment sets the direction. Engineers make the system real. Agents take on governed work. Each force makes the other more useful.</p>
+          <motion.div 
+            className="cp-converge-copy"
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="cp-kicker">Our capability</div>
+            <h2>We deploy teams who bridge the entire operating gap.</h2>
+            <p>You don't need a strategy firm that can't code, or an engineering shop that doesn't understand governance. You need a team that takes the work all the way through.</p>
             <div className="cp-converge-points">
-              <div><span>01</span>Senior operators make the call</div>
-              <div><span>02</span>Forward-deployed engineers build it</div>
-              <div><span>03</span>Governed agents move the work</div>
+              <div><span>01</span>Strategy & operating model advisory</div>
+              <div><span>02</span>Forward-deployed enterprise engineering</div>
+              <div><span>03</span>CogniOS architecture & capability components</div>
             </div>
-          </div>
-          <div className="cp-converge-image">
-            <img src={assetUrl("/images/cognirise/pulse-convergence.jpg")} alt="People standing within an abstract luminous architectural space where human and agent forces converge." />
-          </div>
+            <div className="mt-8">
+              <Link href="/about" className="cp-primary">Meet the team <ArrowRight /></Link>
+            </div>
+          </motion.div>
+          <motion.div 
+            className="cp-converge-image"
+            initial={{ opacity: 0, clipPath: "polygon(100% 0, 100% 0, 100% 100%, 100% 100%)" }}
+            whileInView={{ opacity: 1, clipPath: "polygon(0 8%, 100% 0, 100% 100%, 9% 92%)" }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1, ease: [0.2, 0.7, 0.2, 1] }}
+          >
+            <img src={assetUrl("/images/cognirise/pulse-convergence.jpg")} alt="An abstract convergence of operational signals." />
+          </motion.div>
         </div>
       </section>
 
-      <section className="cp-industries" id="industries">
+      <section className="cp-industries">
         <div className="cp-industry-top">
-          <div>
-            <div className="cp-kicker">Built for consequential work</div>
-            <h2>Where operating pressure is real.</h2>
-          </div>
-          <p>For organisations where speed matters, but control is non-negotiable.</p>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="cp-kicker">Industry context</div>
+            <h2>We work where the rules matter.</h2>
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Our architecture is built for highly regulated, high-stakes environments where "move fast and break things" is not a viable strategy.
+          </motion.p>
         </div>
+        
         <div className="cp-industry-list">
-          {["Banking & financial services","Government & public sector","Telecoms","Travel & hospitality","Energy & resources","Manufacturing & conglomerates"].map((industry,index) => {
-            const urls = [
-              "/industries/banking",
-              "/industries/public-sector",
-              "/industries/telecoms",
-              "/industries/travel",
-              "/industries/energy",
-              "/industries/manufacturing"
-            ];
-            return (
-              <Link className="cp-industry" href={urls[index]} key={industry}>
-                <span>0{index + 1}</span>{industry}<ArrowRight size={16} />
-              </Link>
-            );
-          })}
+          <Link href="/industries/banking" className="cp-industry group">
+            <span>01</span> Banking & Financial Services <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link href="/industries/public-sector" className="cp-industry group">
+            <span>02</span> Government & Public Sector <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link href="/industries/telecoms" className="cp-industry group">
+            <span>03</span> Telecommunications <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link href="/industries/energy" className="cp-industry group">
+            <span>04</span> Energy & Resources <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link href="/industries/travel" className="cp-industry group">
+            <span>05</span> Travel & Logistics <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link href="/industries/manufacturing" className="cp-industry group">
+            <span>06</span> Industrial & Manufacturing <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </section>
 
-      <section className="cp-start" id="start">
+      <section className="cp-start">
         <div className="cp-start-inner">
-          <div className="cp-kicker">The first move</div>
-          <h2>Bring one process.<br /><em>Leave with a route.</em></h2>
-          <p>Start with a process where urgency, complexity and value have already collided. In one focused working session, we will surface the opportunity, constraints and practical route to production.</p>
-          <BrandButton href="/value-scan" variant="submit">
-            Book a value scan
-          </BrandButton>
+          <motion.div 
+            className="cp-kicker"
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+          >
+            Start the work
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Ready to bring <em>intelligence</em> into the enterprise?
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            We don't need a year to prove value. Bring us a complex operational problem, and we'll architect a solution that respects your boundaries and accelerates your outcomes.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <Link href="/contact" className="cp-primary bg-white text-[hsl(var(--brand-deep))] border-transparent">
+              Contact our advisory practice <ArrowRight />
+            </Link>
+          </motion.div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

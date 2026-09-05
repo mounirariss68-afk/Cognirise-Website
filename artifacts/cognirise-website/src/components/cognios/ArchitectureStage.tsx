@@ -1,322 +1,417 @@
-import React, { useEffect, useRef } from "react";
-import { useSearch, useLocation } from "wouter";
-import { ArrowRight, X } from "lucide-react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { architectureLayers, architectureSpines } from "@/data/cognios-architecture";
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, ChevronDown, X } from "lucide-react";
+import { useLocation, useSearch } from "wouter";
+import {
+  architectureEngines,
+  architectureLayers,
+  architectureRequirements,
+  architectureSpines,
+  type ArchitectureComponent,
+  type ArchitectureLayer,
+} from "@/data/cognios-architecture";
 import "./ArchitectureStage.css";
 
-function getLayout(index: number, total: number) {
-  if (total === 6) {
-    const pos = ["top-left", "top-center", "top-right", "bottom-right", "bottom-center", "bottom-left"][index];
-    const coords = [
-      { cx: 20, cy: 25, dx: -1, dy: -1 },
-      { cx: 50, cy: 12, dx: 0, dy: -1 },
-      { cx: 80, cy: 25, dx: 1, dy: -1 },
-      { cx: 80, cy: 75, dx: 1, dy: 1 },
-      { cx: 50, cy: 88, dx: 0, dy: 1 },
-      { cx: 20, cy: 75, dx: -1, dy: 1 },
-    ][index];
-    return { ...coords, pos };
-  }
-  const pos = ["top-left", "top-center", "top-right", "bottom-right", "bottom-left"][index];
-  const coords = [
-    { cx: 20, cy: 30, dx: -1, dy: -1 },
-    { cx: 50, cy: 12, dx: 0, dy: -1 },
-    { cx: 80, cy: 30, dx: 1, dy: -1 },
-    { cx: 75, cy: 82, dx: 1, dy: 1 },
-    { cx: 25, cy: 82, dx: -1, dy: 1 },
-  ][index];
-  return { ...coords, pos };
-}
+type Lens = "capability" | "security";
+type ContextSelection = { type: "spine" | "requirement"; id: string } | null;
+
+const engineFor = (name?: string) =>
+  name ? architectureEngines.find((engine) => engine.name === name) : undefined;
 
 export function ArchitectureStage() {
   const search = useSearch();
   const [location, setLocation] = useLocation();
   const params = new URLSearchParams(search);
-
-  const rawLayerId = params.get("layer");
-  const rawCompId = params.get("component");
-
-  // Validate URL state against active architecture rules
-  const validLayer = architectureLayers.find(l => l.id === rawLayerId);
-  const validatedLayerId = validLayer ? rawLayerId : null;
-
-  const validComp = validLayer?.components.find(c => c.id === rawCompId);
-  const validatedComponentId = validComp ? rawCompId : null;
-
-  const prefersReducedMotion = useReducedMotion();
-  
+  const viewParam = params.get("view");
+  const validLayer = architectureLayers.find((layer) => layer.id === params.get("layer"));
+  const validComponent = validLayer?.components.find((component) => component.id === params.get("component"));
+  const layerId = validLayer?.id ?? null;
+  const componentId = validComponent?.id ?? null;
+  const [lens, setLens] = useState<Lens>(viewParam === "security" ? "security" : "capability");
+  const [contextSelection, setContextSelection] = useState<ContextSelection>(null);
+  const reducedMotion = useReducedMotion();
   const stageRef = useRef<HTMLDivElement>(null);
   const layerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const compRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  
-  const prevLayerId = useRef(validatedLayerId);
-  const prevCompId = useRef(validatedComponentId);
+  const componentRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const previousLayer = useRef(layerId);
+  const previousComponent = useRef(componentId);
 
-  const setParams = (layer: string | null, component: string | null) => {
-    const newParams = new URLSearchParams(search);
-    if (layer) newParams.set("layer", layer);
-    else newParams.delete("layer");
-
-    if (component) newParams.set("component", component);
-    else newParams.delete("component");
-
-    const qs = newParams.toString();
-    const hash = window.location.hash || "#architecture";
-    setLocation(location.split("?")[0] + (qs ? "?" + qs : "") + hash);
+  const setArchitectureState = (nextLayer: string | null, nextComponent: string | null) => {
+    const next = new URLSearchParams(search);
+    if (nextLayer) next.set("layer", nextLayer);
+    else next.delete("layer");
+    if (nextComponent) next.set("component", nextComponent);
+    else next.delete("component");
+    const query = next.toString();
+    setLocation(`${location.split("?")[0]}${query ? `?${query}` : ""}#architecture`);
   };
 
-  const closeLayer = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    setParams(null, null);
-  };
-  
-  const openLayer = (id: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    setParams(id, null);
-  };
-  
-  const toggleComponent = (id: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    setParams(validatedLayerId, validatedComponentId === id ? null : id);
+  const selectLens = (nextLens: Lens) => {
+    setLens(nextLens);
+    setContextSelection(null);
+    const next = new URLSearchParams(search);
+    if (nextLens === "security") {
+      next.set("view", "security");
+      next.delete("component");
+    } else {
+      next.delete("view");
+    }
+    const query = next.toString();
+    setLocation(`${location.split("?")[0]}${query ? `?${query}` : ""}#architecture`);
   };
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        if (validatedComponentId) {
-          setParams(validatedLayerId, null);
-        } else if (validatedLayerId) {
-          closeLayer();
-        }
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [validatedLayerId, validatedComponentId, search, location]);
+    setLens(viewParam === "security" ? "security" : "capability");
+  }, [viewParam]);
 
   useEffect(() => {
-    if (window.location.hash === "#architecture" || validatedLayerId) {
-      setTimeout(() => {
-        stageRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
-      }, 100);
-    }
-  }, []);
+    if (window.location.hash !== "#architecture" && !layerId) return;
+    const scrollToStage = () => stageRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
+    scrollToStage();
+    const settleTimer = window.setTimeout(scrollToStage, 500);
+    return () => window.clearTimeout(settleTimer);
+  }, [layerId]);
 
   useEffect(() => {
-    if (prevCompId.current && !validatedComponentId) {
-      const el = compRefs.current[prevCompId.current];
-      if (el) el.focus();
-    }
-    if (prevLayerId.current && !validatedLayerId && !validatedComponentId) {
-      const el = layerRefs.current[prevLayerId.current];
-      if (el) el.focus();
-    }
-    if (prevLayerId.current !== validatedLayerId && validatedLayerId) {
-      const el = layerRefs.current[validatedLayerId];
-      if (el) el.focus();
-    }
-    prevCompId.current = validatedComponentId;
-    prevLayerId.current = validatedLayerId;
-  }, [validatedLayerId, validatedComponentId]);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (contextSelection) setContextSelection(null);
+      else if (componentId) setArchitectureState(layerId, null);
+      else if (layerId) setArchitectureState(null, null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [componentId, contextSelection, layerId, location, search]);
+
+  useEffect(() => {
+    if (previousComponent.current && !componentId) componentRefs.current[previousComponent.current]?.focus();
+    if (previousLayer.current && !layerId) layerRefs.current[previousLayer.current]?.focus();
+    previousComponent.current = componentId;
+    previousLayer.current = layerId;
+  }, [componentId, layerId]);
 
   return (
-    <div className="co-stage" ref={stageRef} aria-label="CogniOS Architecture Stage">
-      <div className="co-stage-spines">
-        <div className={`co-stage-spine ops ${validatedLayerId ? "is-active" : ""}`}>{architectureSpines[1].name}</div>
-        <div className={`co-stage-spine assurance ${validatedLayerId ? "is-active" : ""}`}>{architectureSpines[0].name}</div>
-      </div>
-      
-      <div className="co-stage-planes">
-        {architectureLayers.map((layer) => {
-          const isActive = validatedLayerId === layer.id;
-          const isOtherActive = validatedLayerId && !isActive;
-
-          return (
-            <div
-              key={layer.id}
-              className={`co-plane ${isActive ? "is-active" : ""} ${isOtherActive ? "is-collapsed" : ""}`}
-              data-testid={`stage-layer-${layer.id}`}
+    <section className="co-architecture-stage" ref={stageRef} aria-label="Interactive CogniOS reference architecture">
+      <header className="co-architecture-head">
+        <div>
+          <span className="co-architecture-kicker">CogniOS / reference architecture</span>
+          <p>One operating system. Six responsibility layers. Two continuous control spines.</p>
+        </div>
+        <div className="co-lens-switch" aria-label="Architecture view">
+          {(["capability", "security"] as Lens[]).map((item) => (
+            <button
+              key={item}
+              type="button"
+              className={lens === item ? "is-active" : ""}
+              aria-pressed={lens === item}
+              onClick={() => selectLens(item)}
             >
-              <button
-                className="co-plane-head"
-                onClick={(e) => isActive ? closeLayer(e) : openLayer(layer.id, e)}
-                aria-expanded={isActive}
-                aria-controls={isActive ? `layer-body-${layer.id}` : undefined}
-                data-testid={isActive ? "button-close-layer" : undefined}
-                ref={(el) => { layerRefs.current[layer.id] = el; }}
+              {item} view
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <div className="co-engine-legend" aria-label="Engine relationship legend">
+        <span className="co-legend-label">Engine association</span>
+        {architectureEngines.map((engine) => (
+          <span key={engine.id}>
+            <i style={{ "--engine": engine.color } as React.CSSProperties} />
+            {engine.name}
+          </span>
+        ))}
+      </div>
+
+      <div className="co-system-boundary">
+        <div className="co-boundary-label">
+          <span>CogniOS / operating-system boundary</span>
+          <span>{lens === "capability" ? "Layer → component → detail" : "Layer → principle → controls"}</span>
+        </div>
+
+        <Spine
+          side="left"
+          spine={architectureSpines[1]}
+          active={contextSelection?.type === "spine" && contextSelection.id === architectureSpines[1].id}
+          onSelect={() => setContextSelection({ type: "spine", id: architectureSpines[1].id })}
+        />
+
+        <div className={`co-system-layers ${layerId ? "has-focus" : ""}`}>
+          {architectureLayers.map((layer) => {
+            const active = layer.id === layerId;
+            const quiet = Boolean(layerId && !active);
+            return (
+              <article
+                key={layer.id}
+                className={`coa-layer ${active ? "is-active" : ""} ${quiet ? "is-quiet" : ""}`}
+                data-testid={`stage-layer-${layer.id}`}
               >
-                <span className="co-plane-num">{layer.number}</span>
-                <div>
-                  <h3 className="co-plane-title">{layer.name}</h3>
-                  <p className="co-plane-desc">{layer.responsibility}</p>
-                </div>
-                <div className="co-plane-action" aria-hidden="true">
-                  {isActive ? <X size={20} /> : <ArrowRight size={18} />}
-                </div>
-              </button>
+                <button
+                  ref={(element) => {
+                    layerRefs.current[layer.id] = element;
+                  }}
+                  type="button"
+                  className="coa-layer-plane"
+                  aria-expanded={active}
+                  aria-controls={active ? `architecture-layer-${layer.id}` : undefined}
+                  onClick={() => {
+                    setContextSelection(null);
+                    setArchitectureState(active ? null : layer.id, null);
+                  }}
+                >
+                  <span className="coa-layer-number">{layer.number}</span>
+                  <span className="coa-layer-heading">
+                    <strong>{layer.name}</strong>
+                    <small>{lens === "capability" ? layer.responsibility : layer.principle}</small>
+                  </span>
+                  <EngineMark engine={layer.engine} />
+                  <span className="coa-layer-count">
+                    {lens === "capability" ? `${layer.components.length} components` : `${layer.controls.length} controls`}
+                  </span>
+                  <span className="coa-layer-action" aria-hidden="true">
+                    {active ? <X size={16} /> : <ArrowRight size={16} />}
+                  </span>
+                </button>
 
-              <AnimatePresence>
-                {isActive && (
-                  <motion.div
-                    id={`layer-body-${layer.id}`}
-                    className={`co-constellation ${validatedComponentId ? "has-active" : ""}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
-                  >
-                    <svg className="co-constellation-lines hidden md:block absolute inset-0 w-full h-full pointer-events-none z-0">
-                      {layer.components.map((c, i) => {
-                        const layout = getLayout(i, layer.components.length);
-                        const isCompActive = validatedComponentId === c.id;
+                <AnimatePresence initial={false}>
+                  {active && (
+                    <motion.div
+                      id={`architecture-layer-${layer.id}`}
+                      className="coa-layer-reconfiguration"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: reducedMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {lens === "capability" ? (
+                        <CapabilityStudy
+                          layer={layer}
+                          selected={componentId}
+                          componentRefs={componentRefs}
+                          onSelect={(id) => setArchitectureState(layer.id, componentId === id ? null : id)}
+                        />
+                      ) : (
+                        <SecurityStudy layer={layer} />
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </article>
+            );
+          })}
+        </div>
 
-                        return (
-                          <g key={`line-${c.id}`} className={isCompActive ? "is-active" : ""} style={{ transition: 'opacity 0.3s' }}>
-                            <line
-                              x1="50%" y1="50%"
-                              x2={`${layout.cx}%`} y2={`${layout.cy}%`}
-                              stroke={isCompActive ? "hsl(var(--brand-coral))" : "rgba(255,255,255,0.3)"}
-                              strokeWidth="1"
-                            />
-                            {c.engine && (
-                              <line
-                                x1={`${layout.cx}%`} y1={`${layout.cy}%`}
-                                x2={`${layout.cx < 50 ? 8 : 92}%`} y2={`${layout.cy}%`}
-                                stroke="hsl(var(--brand-pink))"
-                                strokeOpacity="0.4"
-                                strokeDasharray="2 4"
-                              />
-                            )}
-                          </g>
-                        );
-                      })}
-                    </svg>
+        <Spine
+          side="right"
+          spine={architectureSpines[0]}
+          active={contextSelection?.type === "spine" && contextSelection.id === architectureSpines[0].id}
+          onSelect={() => setContextSelection({ type: "spine", id: architectureSpines[0].id })}
+        />
+      </div>
 
-                    <div className="co-engine-markers hidden md:block absolute inset-0 pointer-events-none z-10">
-                      {layer.components.filter(c => c.engine).map((c) => {
-                        const idx = layer.components.findIndex(x => x.id === c.id);
-                        const layout = getLayout(idx, layer.components.length);
-                        const isRight = layout.cx >= 50;
-                        const ex = isRight ? 92 : 8;
-                        const isOtherActive = validatedComponentId && validatedComponentId !== c.id;
+      <div className="co-requirements" aria-label="Cross-cutting architecture requirements">
+        {architectureRequirements.map((requirement, index) => (
+          <button
+            type="button"
+            key={requirement.id}
+            className={contextSelection?.type === "requirement" && contextSelection.id === requirement.id ? "is-active" : ""}
+            onClick={() => setContextSelection({ type: "requirement", id: requirement.id })}
+          >
+            <span>0{index + 1}</span>
+            <strong>{requirement.name}</strong>
+            <ArrowRight size={14} />
+          </button>
+        ))}
+      </div>
 
-                        return (
-                          <div
-                            key={`engine-${c.id}`}
-                            className="absolute flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-[hsl(var(--brand-pink))] transition-opacity duration-300"
-                            style={{
-                              top: `${layout.cy}%`,
-                              left: isRight ? 'auto' : `${ex}%`,
-                              right: isRight ? `${100 - ex}%` : 'auto',
-                              transform: 'translateY(-50%)',
-                              opacity: isOtherActive ? 0.15 : 1
-                            }}
-                          >
-                            {!isRight && <div className="w-1.5 h-1.5 border border-[hsl(var(--brand-pink))] rotate-45" />}
-                            <span className="whitespace-nowrap">Engine: {c.engine}</span>
-                            {isRight && <div className="w-1.5 h-1.5 border border-[hsl(var(--brand-pink))] rotate-45" />}
-                          </div>
-                        );
-                      })}
-                    </div>
+      <AnimatePresence mode="wait">
+        {contextSelection && (
+          <ContextStudy
+            key={`${contextSelection.type}-${contextSelection.id}`}
+            selection={contextSelection}
+            onClose={() => setContextSelection(null)}
+          />
+        )}
+      </AnimatePresence>
 
-                    <div className={`co-core ${validatedComponentId ? "is-faded" : ""}`}>
-                      <h4>{layer.name}</h4>
-                      <p>{layer.principle}</p>
-                      <div className="co-core-controls">
-                        Controls: {layer.controls.join(" · ")}
-                      </div>
-                    </div>
+      <footer className="co-notation">
+        <span><i className="co-notation-spine" /> Continuous band = cross-cutting spine</span>
+        <span><i className="co-notation-layer" /> Enclosure = component membership</span>
+        <span><i className="co-notation-engine" /> Signal square = documented engine association</span>
+      </footer>
+    </section>
+  );
+}
 
-                    {layer.components.map((comp, i) => {
-                      const layout = getLayout(i, layer.components.length);
-                      const isCompActive = validatedComponentId === comp.id;
-                      
-                      return (
-                        <div
-                          key={comp.id}
-                          className={`co-node-wrap ${isCompActive ? "is-active" : ""}`}
-                          style={{
-                            '--cx': `${layout.cx}%`,
-                            '--cy': `${layout.cy}%`,
-                            '--dx': layout.dx,
-                            '--dy': layout.dy
-                          } as React.CSSProperties}
-                          data-pos={layout.pos}
-                          data-mobile-side={i % 2 === 0 ? "left" : "right"}
-                        >
-                          <button
-                            className="co-node-trigger"
-                            onClick={(e) => toggleComponent(comp.id, e)}
-                            aria-expanded={isCompActive}
-                            aria-controls={isCompActive ? `comp-detail-${comp.id}` : undefined}
-                            data-testid={`stage-component-${comp.id}`}
-                            ref={(el) => { compRefs.current[comp.id] = el; }}
-                          >
-                            <div className="co-node-dot" />
-                            <span className="co-node-title">
-                              {comp.name}
-                              {comp.engine && <span className="md:hidden block text-[9px] font-bold text-[hsl(var(--brand-pink))] tracking-widest uppercase mt-1">Engine: {comp.engine}</span>}
-                            </span>
-                          </button>
+function Spine({
+  spine,
+  side,
+  active,
+  onSelect,
+}: {
+  spine: (typeof architectureSpines)[number];
+  side: "left" | "right";
+  active: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`coa-spine coa-spine-${side} ${active ? "is-active" : ""}`}
+      aria-pressed={active}
+      onClick={onSelect}
+    >
+      <span>{spine.number}</span>
+      <strong>{spine.name}</strong>
+      <ArrowRight size={14} />
+    </button>
+  );
+}
 
-                          <AnimatePresence>
-                            {isCompActive && (
-                              <motion.div
-                                id={`comp-detail-${comp.id}`}
-                                className="co-node-details"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 10 }}
-                                transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
-                              >
-                                <h4 className="font-display text-xl text-white font-semibold mb-2">{comp.name}</h4>
-                                <p className="text-[14px] text-[#aab8ce] mb-5 leading-relaxed">{comp.responsibility}</p>
+function EngineMark({ engine }: { engine?: string }) {
+  const related = engineFor(engine);
+  if (!related) return null;
+  return (
+    <span className="co-engine-mark" style={{ "--engine": related.color } as React.CSSProperties}>
+      <i />
+      {related.name}
+    </span>
+  );
+}
 
-                                {comp.engine && (
-                                  <div className="mb-5 co-engine-detail">
-                                    <span className="block text-[10px] uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-1">Engine Relationship</span>
-                                    <p className="text-[13px] text-[#e2e8f0]"><strong className="text-white">{comp.engine}</strong> is a related capability.</p>
-                                  </div>
-                                )}
-
-                                <div>
-                                  <span className="block text-[10px] uppercase tracking-widest text-[hsl(var(--brand-coral))] mb-3">Reference Details</span>
-                                  <ul className="co-detail-list">
-                                    {comp.details.map((d, idx) => (
-                                      <li key={idx}>{d}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      );
-                    })}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+function CapabilityStudy({
+  layer,
+  selected,
+  onSelect,
+  componentRefs,
+}: {
+  layer: ArchitectureLayer;
+  selected: string | null;
+  onSelect: (id: string) => void;
+  componentRefs: React.MutableRefObject<Record<string, HTMLButtonElement | null>>;
+}) {
+  const selectedComponent = layer.components.find((component) => component.id === selected);
+  return (
+    <div className={`co-capability-study ${selectedComponent ? "has-detail" : ""}`}>
+       <div className="co-component-rail" aria-label={`${layer.name} components`}>
+        {layer.components.map((component, index) => {
+          const active = component.id === selected;
+          return (
+            <button
+              key={component.id}
+              type="button"
+              ref={(element) => {
+                componentRefs.current[component.id] = element;
+              }}
+              className={active ? "is-active" : ""}
+              aria-expanded={active}
+              aria-controls={active ? `architecture-component-${component.id}` : undefined}
+              onClick={() => onSelect(component.id)}
+            >
+              <span className="co-component-index">{String(index + 1).padStart(2, "0")}</span>
+              <span>
+                <strong>{component.name}</strong>
+                <small>{component.responsibility}</small>
+              </span>
+              <EngineMark engine={component.engine} />
+              <ChevronDown size={15} className="co-component-chevron" />
+            </button>
           );
         })}
       </div>
-      
-      <div className="co-stage-legend">
-        <span className="flex items-center gap-2 text-white/70">
-          <div className="w-[1px] h-3 bg-white/40" />
-          Vertical rails = Continuous cross-cutting spines
-        </span>
-        <span className="flex items-center gap-2 text-white/70">
-          <div className="w-4 h-[1px] bg-[hsl(var(--brand-coral))] opacity-80" />
-          Solid spoke = Layer membership
-        </span>
-        <span className="hidden md:flex items-center gap-2 text-white/70">
-          <div className="w-4 h-[1px] border-b border-dashed border-[hsl(var(--brand-pink))] opacity-80" />
-          Dashed tether = Documented engine relationship
-        </span>
-      </div>
+      <AnimatePresence mode="wait">
+        {selectedComponent && (
+          <ComponentDetail
+            key={selectedComponent.id}
+            layer={layer}
+            component={selectedComponent}
+          />
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+function ComponentDetail({ layer, component }: { layer: ArchitectureLayer; component: ArchitectureComponent }) {
+  const reducedMotion = useReducedMotion();
+  return (
+    <motion.aside
+      id={`architecture-component-${component.id}`}
+      className="co-component-detail"
+      initial={{ opacity: 0, x: reducedMotion ? 0 : 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: reducedMotion ? 0 : 12 }}
+      transition={{ duration: reducedMotion ? 0 : 0.25 }}
+    >
+      <span className="co-detail-crumb">Architecture / {layer.name} / component</span>
+      <h3>{component.name}</h3>
+      <p className="co-detail-responsibility">{component.responsibility}</p>
+      {component.engine && (
+        <div className="co-detail-engine">
+          <span>Documented engine association</span>
+          <EngineMark engine={component.engine} />
+        </div>
+      )}
+      <DetailBlock title="Reference details" items={component.details} />
+      <div className="co-detail-principle">
+        <span>Layer principle</span>
+        <p>{layer.principle}</p>
+      </div>
+      <DetailBlock title="Controls at this layer" items={layer.controls} />
+    </motion.aside>
+  );
+}
+
+function SecurityStudy({ layer }: { layer: ArchitectureLayer }) {
+  return (
+    <div className="co-security-study">
+      <div>
+        <span className="co-study-label">Layer principle</span>
+        <h3>{layer.principle}</h3>
+        <p>These controls apply to the complete {layer.name.toLowerCase()}, including every component shown in the capability view.</p>
+      </div>
+      <DetailBlock title="Architecture controls" items={layer.controls} />
+    </div>
+  );
+}
+
+function DetailBlock({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="co-detail-block">
+      <span>{title}</span>
+      <ul>
+        {items.map((item) => <li key={item}>{item}</li>)}
+      </ul>
+    </div>
+  );
+}
+
+function ContextStudy({
+  selection,
+  onClose,
+}: {
+  selection: NonNullable<ContextSelection>;
+  onClose: () => void;
+}) {
+  const reducedMotion = useReducedMotion();
+  const spine = selection.type === "spine" ? architectureSpines.find((item) => item.id === selection.id) : undefined;
+  const requirement = selection.type === "requirement" ? architectureRequirements.find((item) => item.id === selection.id) : undefined;
+  return (
+    <motion.aside
+      className="co-context-study"
+      initial={{ opacity: 0, y: reducedMotion ? 0 : 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: reducedMotion ? 0 : 8 }}
+      transition={{ duration: reducedMotion ? 0 : 0.24 }}
+    >
+      <button type="button" onClick={onClose} aria-label="Close architecture note"><X size={16} /></button>
+      <span>{spine ? "Cross-cutting spine" : "Cross-cutting requirement"}</span>
+      <h3>{spine?.name ?? requirement?.name}</h3>
+      <p>{spine?.description ?? requirement?.description}</p>
+      {spine && (
+        <div className="co-context-components">
+          {spine.components.map((component) => <span key={component}>{component}</span>)}
+        </div>
+      )}
+    </motion.aside>
   );
 }
