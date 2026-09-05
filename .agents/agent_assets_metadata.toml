@@ -99,3 +99,17 @@ mtime_ms = 1788639466064
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/c7fd6e3e-7695-479f-bb32-18786e6c7efa/aa097716-9297-4f48-be75-5c949b8d52e8"
 storage_version_token = "1788639477389101"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "AgWjvYcw6f__UEEpqfBfi"
+uri = "file://artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-IMAGE-ONLY-9-PNGS.zip"
+type = "unspecified"
+title = "Cognirise LinkedIn — IMAGE ONLY (9 PNGs)"
+description = "Dedicated 9.5 MB archive containing only the nine image-only LinkedIn PNGs in an IMAGE-ONLY folder. No text-version assets are included; the approved Cognirise logo remains."
+logical_id = "de7ea5bb-39a9-4d3f-936a-92a9e9662674"
+content_hash = "sha256:dda75371e63a87efa4f6bca439dfa6d122641bcbfe129e558fdd2aba5d1dc868"
+size = 9950559
+mtime_ms = 1788639589208
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/de7ea5bb-39a9-4d3f-936a-92a9e9662674/15e4f6f2-5a92-4a67-9b62-d51de63a8739"
+storage_version_token = "1788639599833322"
+content_type = "application/octet-stream"
