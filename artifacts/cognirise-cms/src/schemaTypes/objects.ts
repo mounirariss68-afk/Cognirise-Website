@@ -38,6 +38,7 @@ export const marketEdition = defineType({
       initialValue: 'draft',
       validation: (Rule) => Rule.required(),
     }),
+    defineField({name: 'parityComplete', type: 'boolean', initialValue: false, description: 'Required before CMS content may replace the reviewed code fallback.'}),
     defineField({name: 'title', type: 'string'}),
     defineField({name: 'summary', type: 'text', rows: 3}),
     defineField({
@@ -50,7 +51,7 @@ export const marketEdition = defineType({
       name: 'sections',
       type: 'array',
       description: 'Optional approved local page composition. Empty means the explicit fallback policy applies.',
-      of: ['heroSection', 'richTextSection', 'claimSection', 'metricSection', 'quoteSection', 'referenceGridSection', 'mediaSection', 'timelineSection', 'comparisonSection', 'ctaSection', 'faqSection', 'downloadGateSection'].map((type) => defineArrayMember({type})),
+      of: ['heroSection', 'richTextSection', 'claimSection', 'metricSection', 'quoteSection', 'referenceGridSection', 'mediaSection', 'timelineSection', 'comparisonSection', 'ctaSection', 'faqSection', 'downloadGateSection', 'formSlotSection'].map((type) => defineArrayMember({type})),
     }),
     defineField({name: 'seo', type: 'seo'}),
     defineField({name: 'approvedBy', type: 'reference', to: [{type: 'person'}]}),
@@ -80,6 +81,14 @@ export const marketEdition = defineType({
         (!value?.approvedBy || !value?.approvedAt)
       ) {
         return 'Approved, scheduled, and published editions require an approver and approval time.'
+      }
+      if (
+        isString(value?.publicationState) &&
+        ['approved', 'scheduled', 'published'].includes(value.publicationState) &&
+        ['canonical', 'override'].includes(String(value?.fallbackMode)) &&
+        (!value?.parityComplete || !Array.isArray(value?.sections) || value.sections.length === 0)
+      ) {
+        return 'Canonical and override pages require parity and at least one approved section before release.'
       }
       if (
         isString(value?.publishAt) &&
@@ -290,6 +299,7 @@ const link = defineType({
     defineField({name: 'label', type: 'string', validation: (Rule) => Rule.required()}),
     defineField({name: 'internal', type: 'reference', to: [{type: 'page'}, {type: 'publication'}]}),
     defineField({name: 'externalUrl', type: 'url'}),
+    defineField({name: 'children', title: 'Submenu items', type: 'array', of: [{type: 'link'}]}),
   ],
   validation: (Rule) => Rule.custom((value) => Boolean(value?.internal) !== Boolean(value?.externalUrl) || 'Choose exactly one destination.'),
 })
@@ -325,6 +335,7 @@ export const sectionTypes = [
   section('ctaSection', 'Call to action', [defineField({name: 'action', type: 'link', validation: (Rule) => Rule.required()})]),
   section('faqSection', 'FAQ', [defineField({name: 'items', type: 'array', of: [{type: 'object', fields: [defineField({name: 'question', type: 'string'}), defineField({name: 'answer', type: 'portableText'})]}]})]),
   section('downloadGateSection', 'Download gate', [defineField({name: 'asset', type: 'reference', to: [{type: 'mediaAsset'}]}), defineField({name: 'consentCopy', type: 'text'})]),
+  section('formSlotSection', 'Code-owned form slot', [defineField({name: 'form', type: 'string', options: {list: ['contact', 'valueScan']}, validation: (Rule) => Rule.required()})]),
 ]
 
 export const objectTypes = [

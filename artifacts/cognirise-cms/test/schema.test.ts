@@ -88,3 +88,11 @@ test('all purpose-built localized edition objects are registered', () => {
     assert.equal(names.has(name), true)
   }
 })
+
+test('governed links support one explicit submenu level', () => {
+  const link = objectTypes.find((type) => type.name === 'link')
+  assert.ok(link && 'fields' in link && Array.isArray(link.fields))
+  const children = link.fields.find((field) => field.name === 'children')
+  assert.ok(children && 'of' in children && Array.isArray(children.of))
+  assert.equal(children.of[0]?.type, 'link')
+})

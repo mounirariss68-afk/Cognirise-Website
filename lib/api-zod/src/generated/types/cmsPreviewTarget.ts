@@ -6,9 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CmsMarket } from "./cmsMarket";
+import type { CmsPageRouteKind } from "./cmsPageRouteKind";
 
 export interface CmsPreviewTarget {
   market: CmsMarket;
+  routeKind: CmsPageRouteKind;
   /**
    * @minLength 1
    * @maxLength 120

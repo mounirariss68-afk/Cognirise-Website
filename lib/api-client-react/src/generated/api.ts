@@ -28,7 +28,10 @@ import type {
   CmsPreviewExchangeInput,
   CmsPreviewTarget,
   CmsPreviewToken,
+  CmsPublicationEnvelope,
+  CmsPublicationListEnvelope,
   CmsPublishWebhookPayload,
+  CmsRuntimeEnvelope,
   CmsWebhookAccepted,
   CmsWebhookDuplicate,
   CmsWorkflowAcceptedReceipt,
@@ -40,6 +43,8 @@ import type {
   EnquiryInput,
   EnquiryReceipt,
   ErrorResponse,
+  GetCmsPreviewPageParams,
+  GetCmsPublishedPageParams,
   HealthStatus,
   InvalidCmsPageResponse,
   InvalidPreviewTokenResponse,
@@ -326,8 +331,21 @@ export const useSubscribeNewsletter = <
 export const getGetCmsPublishedPageUrl = (
   market: "uae" | "ksa" | "turkiye" | "europe",
   slug: string,
+  params: GetCmsPublishedPageParams,
 ) => {
-  return `/api/cms/pages/${market}/${slug}`;
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/cms/pages/${market}/${slug}?${stringifiedParams}`
+    : `/api/cms/pages/${market}/${slug}`;
 };
 
 /**
@@ -336,19 +354,27 @@ export const getGetCmsPublishedPageUrl = (
 export const getCmsPublishedPage = async (
   market: "uae" | "ksa" | "turkiye" | "europe",
   slug: string,
+  params: GetCmsPublishedPageParams,
   options?: Parameters<typeof customFetch>[1],
 ): Promise<CmsPageEnvelope> => {
-  return customFetch<CmsPageEnvelope>(getGetCmsPublishedPageUrl(market, slug), {
-    ...options,
-    method: "GET",
-  });
+  return customFetch<CmsPageEnvelope>(
+    getGetCmsPublishedPageUrl(market, slug, params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
 export const getGetCmsPublishedPageQueryKey = (
   market: "uae" | "ksa" | "turkiye" | "europe",
   slug: string,
+  params?: GetCmsPublishedPageParams,
 ) => {
-  return [`/api/cms/pages/${market}/${slug}`] as const;
+  return [
+    `/api/cms/pages/${market}/${slug}`,
+    ...(params ? [params] : []),
+  ] as const;
 };
 
 export const getGetCmsPublishedPageQueryOptions = <
@@ -357,6 +383,7 @@ export const getGetCmsPublishedPageQueryOptions = <
 >(
   market: "uae" | "ksa" | "turkiye" | "europe",
   slug: string,
+  params: GetCmsPublishedPageParams,
   options?: {
     query?: UseQueryOptions<
       Awaited<ReturnType<typeof getCmsPublishedPage>>,
@@ -369,12 +396,13 @@ export const getGetCmsPublishedPageQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetCmsPublishedPageQueryKey(market, slug);
+    queryOptions?.queryKey ??
+    getGetCmsPublishedPageQueryKey(market, slug, params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getCmsPublishedPage>>
   > = ({ signal }) =>
-    getCmsPublishedPage(market, slug, { signal, ...requestOptions });
+    getCmsPublishedPage(market, slug, params, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -409,6 +437,7 @@ export function useGetCmsPublishedPage<
 >(
   market: "uae" | "ksa" | "turkiye" | "europe",
   slug: string,
+  params: GetCmsPublishedPageParams,
   options?: {
     query?: UseQueryOptions<
       Awaited<ReturnType<typeof getCmsPublishedPage>>,
@@ -421,8 +450,370 @@ export function useGetCmsPublishedPage<
   const queryOptions = getGetCmsPublishedPageQueryOptions(
     market,
     slug,
+    params,
     options,
   );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getGetCmsRuntimeUrl = (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+) => {
+  return `/api/cms/runtime/${market}`;
+};
+
+/**
+ * @summary Read governed markets, navigation, and redirects
+ */
+export const getCmsRuntime = async (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsRuntimeEnvelope> => {
+  return customFetch<CmsRuntimeEnvelope>(getGetCmsRuntimeUrl(market), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetCmsRuntimeQueryKey = (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+) => {
+  return [`/api/cms/runtime/${market}`] as const;
+};
+
+export const getGetCmsRuntimeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCmsRuntime>>,
+  TError = ErrorType<InvalidCmsPageResponse>,
+>(
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsRuntime>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCmsRuntimeQueryKey(market);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCmsRuntime>>> = ({
+    signal,
+  }) => getCmsRuntime(market, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: market !== null && market !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsRuntime>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCmsRuntimeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCmsRuntime>>
+>;
+export type GetCmsRuntimeQueryError = ErrorType<InvalidCmsPageResponse>;
+
+/**
+ * @summary Read governed markets, navigation, and redirects
+ */
+
+export function useGetCmsRuntime<
+  TData = Awaited<ReturnType<typeof getCmsRuntime>>,
+  TError = ErrorType<InvalidCmsPageResponse>,
+>(
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsRuntime>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCmsRuntimeQueryOptions(market, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getGetCmsPublishedPublicationsUrl = (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+) => {
+  return `/api/cms/publications/${market}`;
+};
+
+export const getCmsPublishedPublications = async (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsPublicationListEnvelope> => {
+  return customFetch<CmsPublicationListEnvelope>(
+    getGetCmsPublishedPublicationsUrl(market),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetCmsPublishedPublicationsQueryKey = (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+) => {
+  return [`/api/cms/publications/${market}`] as const;
+};
+
+export const getGetCmsPublishedPublicationsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCmsPublishedPublications>>,
+  TError = ErrorType<unknown>,
+>(
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsPublishedPublications>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetCmsPublishedPublicationsQueryKey(market);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCmsPublishedPublications>>
+  > = ({ signal }) =>
+    getCmsPublishedPublications(market, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: market !== null && market !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsPublishedPublications>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCmsPublishedPublicationsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCmsPublishedPublications>>
+>;
+export type GetCmsPublishedPublicationsQueryError = ErrorType<unknown>;
+
+export function useGetCmsPublishedPublications<
+  TData = Awaited<ReturnType<typeof getCmsPublishedPublications>>,
+  TError = ErrorType<unknown>,
+>(
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsPublishedPublications>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCmsPublishedPublicationsQueryOptions(
+    market,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getGetCmsPublishedPublicationUrl = (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+) => {
+  return `/api/cms/publications/${market}/${slug}`;
+};
+
+export const getCmsPublishedPublication = async (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsPublicationEnvelope> => {
+  return customFetch<CmsPublicationEnvelope>(
+    getGetCmsPublishedPublicationUrl(market, slug),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetCmsPublishedPublicationQueryKey = (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+) => {
+  return [`/api/cms/publications/${market}/${slug}`] as const;
+};
+
+export const getGetCmsPublishedPublicationQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCmsPublishedPublication>>,
+  TError = ErrorType<unknown>,
+>(
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsPublishedPublication>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetCmsPublishedPublicationQueryKey(market, slug);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCmsPublishedPublication>>
+  > = ({ signal }) =>
+    getCmsPublishedPublication(market, slug, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      market !== null &&
+      market !== undefined &&
+      slug !== null &&
+      slug !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsPublishedPublication>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCmsPublishedPublicationQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCmsPublishedPublication>>
+>;
+export type GetCmsPublishedPublicationQueryError = ErrorType<unknown>;
+
+export function useGetCmsPublishedPublication<
+  TData = Awaited<ReturnType<typeof getCmsPublishedPublication>>,
+  TError = ErrorType<unknown>,
+>(
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsPublishedPublication>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCmsPublishedPublicationQueryOptions(
+    market,
+    slug,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getGetCmsSitemapUrl = () => {
+  return `/api/cms/sitemap.xml`;
+};
+
+/**
+ * @summary Generate the localized published-content sitemap
+ */
+export const getCmsSitemap = async (
+  options?: Parameters<typeof customFetch>[1],
+): Promise<string> => {
+  return customFetch<string>(getGetCmsSitemapUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetCmsSitemapQueryKey = () => {
+  return [`/api/cms/sitemap.xml`] as const;
+};
+
+export const getGetCmsSitemapQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCmsSitemap>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsSitemap>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCmsSitemapQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCmsSitemap>>> = ({
+    signal,
+  }) => getCmsSitemap({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsSitemap>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCmsSitemapQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCmsSitemap>>
+>;
+export type GetCmsSitemapQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Generate the localized published-content sitemap
+ */
+
+export function useGetCmsSitemap<
+  TData = Awaited<ReturnType<typeof getCmsSitemap>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsSitemap>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCmsSitemapQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -522,8 +913,21 @@ export const useExchangeCmsPreviewToken = <
 export const getGetCmsPreviewPageUrl = (
   market: "uae" | "ksa" | "turkiye" | "europe",
   slug: string,
+  params: GetCmsPreviewPageParams,
 ) => {
-  return `/api/cms/preview/pages/${market}/${slug}`;
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/cms/preview/pages/${market}/${slug}?${stringifiedParams}`
+    : `/api/cms/preview/pages/${market}/${slug}`;
 };
 
 /**
@@ -532,19 +936,27 @@ export const getGetCmsPreviewPageUrl = (
 export const getCmsPreviewPage = async (
   market: "uae" | "ksa" | "turkiye" | "europe",
   slug: string,
+  params: GetCmsPreviewPageParams,
   options?: Parameters<typeof customFetch>[1],
 ): Promise<CmsPageEnvelope> => {
-  return customFetch<CmsPageEnvelope>(getGetCmsPreviewPageUrl(market, slug), {
-    ...options,
-    method: "GET",
-  });
+  return customFetch<CmsPageEnvelope>(
+    getGetCmsPreviewPageUrl(market, slug, params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
 export const getGetCmsPreviewPageQueryKey = (
   market: "uae" | "ksa" | "turkiye" | "europe",
   slug: string,
+  params?: GetCmsPreviewPageParams,
 ) => {
-  return [`/api/cms/preview/pages/${market}/${slug}`] as const;
+  return [
+    `/api/cms/preview/pages/${market}/${slug}`,
+    ...(params ? [params] : []),
+  ] as const;
 };
 
 export const getGetCmsPreviewPageQueryOptions = <
@@ -553,6 +965,7 @@ export const getGetCmsPreviewPageQueryOptions = <
 >(
   market: "uae" | "ksa" | "turkiye" | "europe",
   slug: string,
+  params: GetCmsPreviewPageParams,
   options?: {
     query?: UseQueryOptions<
       Awaited<ReturnType<typeof getCmsPreviewPage>>,
@@ -565,12 +978,13 @@ export const getGetCmsPreviewPageQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetCmsPreviewPageQueryKey(market, slug);
+    queryOptions?.queryKey ??
+    getGetCmsPreviewPageQueryKey(market, slug, params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getCmsPreviewPage>>
   > = ({ signal }) =>
-    getCmsPreviewPage(market, slug, { signal, ...requestOptions });
+    getCmsPreviewPage(market, slug, params, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -603,6 +1017,7 @@ export function useGetCmsPreviewPage<
 >(
   market: "uae" | "ksa" | "turkiye" | "europe",
   slug: string,
+  params: GetCmsPreviewPageParams,
   options?: {
     query?: UseQueryOptions<
       Awaited<ReturnType<typeof getCmsPreviewPage>>,
@@ -612,7 +1027,12 @@ export function useGetCmsPreviewPage<
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetCmsPreviewPageQueryOptions(market, slug, options);
+  const queryOptions = getGetCmsPreviewPageQueryOptions(
+    market,
+    slug,
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

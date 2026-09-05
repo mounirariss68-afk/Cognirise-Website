@@ -146,6 +146,20 @@ export const GetCmsPublishedPageParams = zod.object({
     .regex(getCmsPublishedPagePathSlugRegExp),
 });
 
+export const GetCmsPublishedPageQueryParams = zod.object({
+  routeKind: zod.enum([
+    "home",
+    "service",
+    "platform",
+    "industry",
+    "caseStudy",
+    "about",
+    "contact",
+    "landing",
+    "legal",
+  ]),
+});
+
 export const getCmsPublishedPageResponsePageOneSlugMax = 120;
 
 export const getCmsPublishedPageResponsePageOneSlugRegExp = new RegExp(
@@ -186,6 +200,17 @@ export const GetCmsPublishedPageResponse = zod.object({
         .min(1)
         .max(getCmsPublishedPageResponsePageOneSlugMax)
         .regex(getCmsPublishedPageResponsePageOneSlugRegExp),
+      routeKind: zod.enum([
+        "home",
+        "service",
+        "platform",
+        "industry",
+        "caseStudy",
+        "about",
+        "contact",
+        "landing",
+        "legal",
+      ]),
       market: zod.enum(["uae", "ksa", "turkiye", "europe"]),
       title: zod.string().optional(),
       summary: zod.string().optional(),
@@ -280,6 +305,346 @@ export const GetCmsPublishedPageResponse = zod.object({
 });
 
 /**
+ * @summary Read governed markets, navigation, and redirects
+ */
+export const GetCmsRuntimeParams = zod.object({
+  market: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+});
+
+export const GetCmsRuntimeResponse = zod.object({
+  schemaVersion: zod.literal(1),
+  market: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+  source: zod.enum(["sanity", "migration-fallback"]),
+  markets: zod.array(
+    zod.object({
+      code: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+      name: zod.string(),
+    }),
+  ),
+  navigation: zod.array(
+    zod.object({
+      placement: zod.enum(["primary", "utility", "footer"]),
+      items: zod.array(zod.record(zod.string(), zod.unknown())),
+    }),
+  ),
+  redirects: zod.array(
+    zod.object({
+      sourcePath: zod.string(),
+      destinationPath: zod.string(),
+      statusCode: zod.union([
+        zod.literal(301),
+        zod.literal(302),
+        zod.literal(307),
+        zod.literal(308),
+      ]),
+    }),
+  ),
+});
+
+export const GetCmsPublishedPublicationsParams = zod.object({
+  market: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+});
+
+export const getCmsPublishedPublicationsResponsePublicationsItemEventStartsAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+export const getCmsPublishedPublicationsResponsePublicationsItemPublishedAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+
+export const getCmsPublishedPublicationsResponsePublicationsItemUpdatedAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+export const getCmsPublishedPublicationsResponseMetaRequestedPublishAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+export const getCmsPublishedPublicationsResponseMetaRequestedExpiresAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+export const getCmsPublishedPublicationsResponseMetaPublishAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+export const getCmsPublishedPublicationsResponseMetaExpiresAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+
+export const GetCmsPublishedPublicationsResponse = zod.object({
+  publications: zod.array(
+    zod.object({
+      id: zod.string(),
+      revision: zod.string(),
+      slug: zod.string(),
+      market: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+      title: zod.string(),
+      format: zod.enum([
+        "article",
+        "report",
+        "video",
+        "webinar",
+        "news",
+        "newsletter",
+        "podcast",
+        "download",
+      ]),
+      dek: zod.string().optional(),
+      body: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
+      authors: zod.array(zod.record(zod.string(), zod.unknown())),
+      topics: zod.array(zod.string()).optional(),
+      media: zod.record(zod.string(), zod.unknown()).optional(),
+      download: zod.record(zod.string(), zod.unknown()).optional(),
+      gated: zod.boolean().optional(),
+      eventStartsAt: zod
+        .string()
+        .regex(
+          getCmsPublishedPublicationsResponsePublicationsItemEventStartsAtRegExp,
+        )
+        .optional()
+        .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+      publishedAt: zod
+        .string()
+        .regex(
+          getCmsPublishedPublicationsResponsePublicationsItemPublishedAtRegExp,
+        )
+        .optional()
+        .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+      readingMinutes: zod.number().int().min(1).optional(),
+      seo: zod.record(zod.string(), zod.unknown()).optional(),
+      publicationState: zod.string(),
+      updatedAt: zod
+        .string()
+        .regex(
+          getCmsPublishedPublicationsResponsePublicationsItemUpdatedAtRegExp,
+        )
+        .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+    }),
+  ),
+  meta: zod.object({
+    requestedMarket: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+    resolvedMarket: zod.union([
+      zod.enum(["uae", "ksa", "turkiye", "europe"]),
+      zod.null(),
+    ]),
+    marketFallback: zod.boolean(),
+    deliveryMode: zod.enum([
+      "canonical",
+      "override",
+      "uaeFallback",
+      "unavailable",
+    ]),
+    requestedPublicationState: zod
+      .enum([
+        "draft",
+        "review",
+        "approved",
+        "scheduled",
+        "published",
+        "expired",
+        "archived",
+      ])
+      .optional(),
+    resolvedPublicationState: zod
+      .enum([
+        "draft",
+        "review",
+        "approved",
+        "scheduled",
+        "published",
+        "expired",
+        "archived",
+      ])
+      .optional(),
+    requestedPublishAt: zod
+      .string()
+      .regex(getCmsPublishedPublicationsResponseMetaRequestedPublishAtRegExp)
+      .optional()
+      .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+    requestedExpiresAt: zod
+      .string()
+      .regex(getCmsPublishedPublicationsResponseMetaRequestedExpiresAtRegExp)
+      .optional()
+      .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+    publishAt: zod
+      .string()
+      .regex(getCmsPublishedPublicationsResponseMetaPublishAtRegExp)
+      .optional()
+      .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+    expiresAt: zod
+      .string()
+      .regex(getCmsPublishedPublicationsResponseMetaExpiresAtRegExp)
+      .optional()
+      .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+    source: zod.enum(["sanity", "cache", "migration-fallback"]),
+    preview: zod.boolean(),
+    fallbackVersion: zod.string().optional(),
+  }),
+});
+
+export const getCmsPublishedPublicationPathSlugMax = 120;
+
+export const getCmsPublishedPublicationPathSlugRegExp = new RegExp(
+  "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+);
+
+export const GetCmsPublishedPublicationParams = zod.object({
+  market: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+  slug: zod.coerce
+    .string()
+    .min(1)
+    .max(getCmsPublishedPublicationPathSlugMax)
+    .regex(getCmsPublishedPublicationPathSlugRegExp),
+});
+
+export const getCmsPublishedPublicationResponsePublicationOneEventStartsAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+export const getCmsPublishedPublicationResponsePublicationOnePublishedAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+
+export const getCmsPublishedPublicationResponsePublicationOneUpdatedAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+export const getCmsPublishedPublicationResponseMetaRequestedPublishAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+export const getCmsPublishedPublicationResponseMetaRequestedExpiresAtRegExp =
+  new RegExp(
+    "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+  );
+export const getCmsPublishedPublicationResponseMetaPublishAtRegExp = new RegExp(
+  "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+);
+export const getCmsPublishedPublicationResponseMetaExpiresAtRegExp = new RegExp(
+  "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+);
+
+export const GetCmsPublishedPublicationResponse = zod.object({
+  publication: zod.union([
+    zod.object({
+      id: zod.string(),
+      revision: zod.string(),
+      slug: zod.string(),
+      market: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+      title: zod.string(),
+      format: zod.enum([
+        "article",
+        "report",
+        "video",
+        "webinar",
+        "news",
+        "newsletter",
+        "podcast",
+        "download",
+      ]),
+      dek: zod.string().optional(),
+      body: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
+      authors: zod.array(zod.record(zod.string(), zod.unknown())),
+      topics: zod.array(zod.string()).optional(),
+      media: zod.record(zod.string(), zod.unknown()).optional(),
+      download: zod.record(zod.string(), zod.unknown()).optional(),
+      gated: zod.boolean().optional(),
+      eventStartsAt: zod
+        .string()
+        .regex(
+          getCmsPublishedPublicationResponsePublicationOneEventStartsAtRegExp,
+        )
+        .optional()
+        .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+      publishedAt: zod
+        .string()
+        .regex(
+          getCmsPublishedPublicationResponsePublicationOnePublishedAtRegExp,
+        )
+        .optional()
+        .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+      readingMinutes: zod.number().int().min(1).optional(),
+      seo: zod.record(zod.string(), zod.unknown()).optional(),
+      publicationState: zod.string(),
+      updatedAt: zod
+        .string()
+        .regex(getCmsPublishedPublicationResponsePublicationOneUpdatedAtRegExp)
+        .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+    }),
+    zod.null(),
+  ]),
+  meta: zod.object({
+    requestedMarket: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+    resolvedMarket: zod.union([
+      zod.enum(["uae", "ksa", "turkiye", "europe"]),
+      zod.null(),
+    ]),
+    marketFallback: zod.boolean(),
+    deliveryMode: zod.enum([
+      "canonical",
+      "override",
+      "uaeFallback",
+      "unavailable",
+    ]),
+    requestedPublicationState: zod
+      .enum([
+        "draft",
+        "review",
+        "approved",
+        "scheduled",
+        "published",
+        "expired",
+        "archived",
+      ])
+      .optional(),
+    resolvedPublicationState: zod
+      .enum([
+        "draft",
+        "review",
+        "approved",
+        "scheduled",
+        "published",
+        "expired",
+        "archived",
+      ])
+      .optional(),
+    requestedPublishAt: zod
+      .string()
+      .regex(getCmsPublishedPublicationResponseMetaRequestedPublishAtRegExp)
+      .optional()
+      .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+    requestedExpiresAt: zod
+      .string()
+      .regex(getCmsPublishedPublicationResponseMetaRequestedExpiresAtRegExp)
+      .optional()
+      .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+    publishAt: zod
+      .string()
+      .regex(getCmsPublishedPublicationResponseMetaPublishAtRegExp)
+      .optional()
+      .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+    expiresAt: zod
+      .string()
+      .regex(getCmsPublishedPublicationResponseMetaExpiresAtRegExp)
+      .optional()
+      .describe("RFC 3339 date-time serialized as an ISO JSON string."),
+    source: zod.enum(["sanity", "cache", "migration-fallback"]),
+    preview: zod.boolean(),
+    fallbackVersion: zod.string().optional(),
+  }),
+});
+
+/**
+ * @summary Generate the localized published-content sitemap
+ */
+export const GetCmsSitemapResponse = zod.unknown();
+
+/**
  * @summary Exchange a signed one-time preview entry token for a private preview cookie
  */
 
@@ -296,6 +661,17 @@ export const exchangeCmsPreviewTokenResponseSlugRegExp = new RegExp(
 export const ExchangeCmsPreviewTokenResponse = zod.object({
   status: zod.enum(["ready"]),
   market: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+  routeKind: zod.enum([
+    "home",
+    "service",
+    "platform",
+    "industry",
+    "caseStudy",
+    "about",
+    "contact",
+    "landing",
+    "legal",
+  ]),
   slug: zod
     .string()
     .min(1)
@@ -320,6 +696,20 @@ export const GetCmsPreviewPageParams = zod.object({
     .min(1)
     .max(getCmsPreviewPagePathSlugMax)
     .regex(getCmsPreviewPagePathSlugRegExp),
+});
+
+export const GetCmsPreviewPageQueryParams = zod.object({
+  routeKind: zod.enum([
+    "home",
+    "service",
+    "platform",
+    "industry",
+    "caseStudy",
+    "about",
+    "contact",
+    "landing",
+    "legal",
+  ]),
 });
 
 export const getCmsPreviewPageResponsePageOneSlugMax = 120;
@@ -360,6 +750,17 @@ export const GetCmsPreviewPageResponse = zod.object({
         .min(1)
         .max(getCmsPreviewPageResponsePageOneSlugMax)
         .regex(getCmsPreviewPageResponsePageOneSlugRegExp),
+      routeKind: zod.enum([
+        "home",
+        "service",
+        "platform",
+        "industry",
+        "caseStudy",
+        "about",
+        "contact",
+        "landing",
+        "legal",
+      ]),
       market: zod.enum(["uae", "ksa", "turkiye", "europe"]),
       title: zod.string().optional(),
       summary: zod.string().optional(),
@@ -465,6 +866,17 @@ export const issueCmsPreviewTokenBodySlugRegExp = new RegExp(
 
 export const IssueCmsPreviewTokenBody = zod.object({
   market: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+  routeKind: zod.enum([
+    "home",
+    "service",
+    "platform",
+    "industry",
+    "caseStudy",
+    "about",
+    "contact",
+    "landing",
+    "legal",
+  ]),
   slug: zod
     .string()
     .min(1)
@@ -481,6 +893,17 @@ export const issueCmsPreviewTokenResponseOneSlugRegExp = new RegExp(
 export const IssueCmsPreviewTokenResponse = zod
   .object({
     market: zod.enum(["uae", "ksa", "turkiye", "europe"]),
+    routeKind: zod.enum([
+      "home",
+      "service",
+      "platform",
+      "industry",
+      "caseStudy",
+      "about",
+      "contact",
+      "landing",
+      "legal",
+    ]),
     slug: zod
       .string()
       .min(1)

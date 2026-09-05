@@ -8,6 +8,7 @@
 import type { CmsMarket } from "./cmsMarket";
 import type { CmsPageBodyItem } from "./cmsPageBodyItem";
 import type { CmsPagePublicationState } from "./cmsPagePublicationState";
+import type { CmsPageRouteKindProperty } from "./cmsPageRouteKindProperty";
 import type { CmsPageSectionsItem } from "./cmsPageSectionsItem";
 import type { CmsPageSeo } from "./cmsPageSeo";
 import type { IsoDateTime } from "./isoDateTime";
@@ -21,6 +22,7 @@ export interface CmsPage {
    * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
    */
   slug: string;
+  routeKind: CmsPageRouteKindProperty;
   market: CmsMarket;
   title?: string;
   summary?: string;

@@ -28,6 +28,21 @@ export function cmsSlugForPath(pathname: string): string {
   const candidate = path.replace(/^\/+|\/+$/g, "").split("/").at(-1) ?? "";
   return slugPattern.test(candidate) ? candidate : "home";
 }
+export type CmsRouteKind = "home" | "service" | "platform" | "industry" | "caseStudy" | "about" | "contact" | "landing" | "legal";
+export function isCmsRouteKind(value: unknown): value is CmsRouteKind {
+  return typeof value === "string" && ["home", "service", "platform", "industry", "caseStudy", "about", "contact", "landing", "legal"].includes(value);
+}
+export function cmsRouteKindForPath(pathname: string): CmsRouteKind {
+  const path = pathname.split("?")[0].replace(/\/+$/, "") || "/";
+  if (path === "/") return "home";
+  if (path === "/what-we-do" || path.startsWith("/what-we-do/")) return "service";
+  if (path === "/platforms" || path.startsWith("/platforms/")) return "platform";
+  if (path === "/industries" || path.startsWith("/industries/")) return "industry";
+  if (path === "/work") return "caseStudy";
+  if (path === "/contact") return "contact";
+  if (["/about", "/partners", "/advisors", "/faq"].includes(path)) return "about";
+  return "landing";
+}
 
 function isCmsPageState(value: unknown): value is CmsPageState {
   if (!value || typeof value !== "object") return false;
@@ -104,10 +119,11 @@ export function hardCodedPageFallback(market: Market): CmsPageState {
  */
 export function useCmsPublishedPage(market: Market, pathname: string, enabled = true) {
   const slug = cmsSlugForPath(pathname);
-  const query = useGetCmsPublishedPage(market, slug, {
+  const routeKind = cmsRouteKindForPath(pathname);
+  const query = useGetCmsPublishedPage(market, slug, { routeKind }, {
     query: {
       enabled,
-      queryKey: getGetCmsPublishedPageQueryKey(market, slug),
+      queryKey: getGetCmsPublishedPageQueryKey(market, slug, { routeKind }),
       select: (envelope) => toState(envelope, market, false),
     },
   });
@@ -115,11 +131,11 @@ export function useCmsPublishedPage(market: Market, pathname: string, enabled = 
   return { ...query, slug, state: query.data ?? hardCodedPageFallback(market) };
 }
 
-export function useCmsPreviewPage(market: Market, slug: string, enabled: boolean) {
-  const query = useGetCmsPreviewPage(market, slug, {
+export function useCmsPreviewPage(market: Market, slug: string, enabled: boolean, routeKind: CmsRouteKind = "landing") {
+  const query = useGetCmsPreviewPage(market, slug, { routeKind }, {
     query: {
       enabled: enabled && slugPattern.test(slug),
-      queryKey: getGetCmsPreviewPageQueryKey(market, slug),
+      queryKey: getGetCmsPreviewPageQueryKey(market, slug, { routeKind }),
       select: (envelope) => toState(envelope, market, true),
     },
   });

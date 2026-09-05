@@ -13,7 +13,7 @@ import { createHmac } from "node:crypto";
 const secret = "a-secure-test-key-that-is-at-least-32-characters";
 
 test("preview tokens preserve market and slug and expire", () => {
-  const token = signPreviewToken({ market: "ksa", slug: "about-us" }, secret, 100, 60);
+  const token = signPreviewToken({ market: "ksa", slug: "about-us", routeKind: "about" }, secret, 100, 60);
   assert.deepEqual(
     (({ market, slug }) => ({ market, slug }))(
       verifyPreviewToken(token, [secret], 120)!,
@@ -25,8 +25,8 @@ test("preview tokens preserve market and slug and expire", () => {
 });
 
 test("preview issue capabilities carry unique nonces for durable one-time consumption", () => {
-  const first = signPreviewToken({ market: "uae", slug: "services" }, secret, 100, 60);
-  const second = signPreviewToken({ market: "uae", slug: "services" }, secret, 100, 60);
+  const first = signPreviewToken({ market: "uae", slug: "services", routeKind: "service" }, secret, 100, 60);
+  const second = signPreviewToken({ market: "uae", slug: "services", routeKind: "service" }, secret, 100, 60);
   assert.notEqual(first, second);
   assert.notEqual(
     verifyPreviewToken(first, [secret], 120)?.nonce,
@@ -52,10 +52,20 @@ test("expired webhook timestamps reject replay attempts", () => {
 });
 
 test("preview claims cannot authorize a different market or page", () => {
-  const claims = verifyPreviewToken(signPreviewToken({ market: "ksa", slug: "services" }, secret, 100, 60), [secret], 120);
-  assert.equal(previewClaimsMatch(claims, "ksa", "services"), true);
-  assert.equal(previewClaimsMatch(claims, "uae", "services"), false);
-  assert.equal(previewClaimsMatch(claims, "ksa", "about"), false);
+  const claims = verifyPreviewToken(signPreviewToken({ market: "ksa", slug: "services", routeKind: "service" }, secret, 100, 60), [secret], 120);
+  assert.equal(previewClaimsMatch(claims, "ksa", "services", "service"), true);
+  assert.equal(previewClaimsMatch(claims, "uae", "services", "service"), false);
+  assert.equal(previewClaimsMatch(claims, "ksa", "about", "service"), false);
+  assert.equal(previewClaimsMatch(claims, "ksa", "services", "platform"), false);
+});
+
+test("preview capabilities bind every approved route family", () => {
+  for (const routeKind of ["home", "service", "platform", "industry", "caseStudy", "about", "contact", "landing", "legal"] as const) {
+    const slug = routeKind === "home" ? "home" : `${routeKind.toLowerCase()}-preview`;
+    const claims = verifyPreviewToken(signPreviewToken({ market: "uae", slug, routeKind }, secret, 100, 60), [secret], 120);
+    assert.equal(previewClaimsMatch(claims, "uae", slug, routeKind), true);
+    assert.equal(previewClaimsMatch(claims, "uae", slug, routeKind === "home" ? "service" : "home"), false);
+  }
 });
 
 test("workflow authorization requires an exact bearer key", () => {

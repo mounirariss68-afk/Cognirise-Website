@@ -76,6 +76,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/CmsMarket"
         - $ref: "#/components/parameters/CmsSlug"
+        - $ref: "#/components/parameters/CmsRouteKind"
       responses:
         "200":
           description: Published page or deterministic migration fallback envelope
@@ -87,6 +88,60 @@ paths:
           $ref: "#/components/responses/InvalidCmsPage"
         "503":
           description: CMS published delivery is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /cms/runtime/{market}:
+    get:
+      operationId: getCmsRuntime
+      tags: [cms]
+      summary: Read governed markets, navigation, and redirects
+      parameters:
+        - $ref: "#/components/parameters/CmsMarket"
+      responses:
+        "200":
+          description: Published runtime configuration or stable empty fallback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmsRuntimeEnvelope"
+        "400":
+          $ref: "#/components/responses/InvalidCmsPage"
+  /cms/publications/{market}:
+    get:
+      operationId: getCmsPublishedPublications
+      tags: [cms]
+      parameters:
+        - $ref: "#/components/parameters/CmsMarket"
+      responses:
+        "200":
+          description: Published publications
+          content: { application/json: { schema: { $ref: "#/components/schemas/CmsPublicationListEnvelope" } } }
+  /cms/publications/{market}/{slug}:
+    get:
+      operationId: getCmsPublishedPublication
+      tags: [cms]
+      parameters:
+        - $ref: "#/components/parameters/CmsMarket"
+        - $ref: "#/components/parameters/CmsSlug"
+      responses:
+        "200":
+          description: Published publication or unavailable envelope
+          content: { application/json: { schema: { $ref: "#/components/schemas/CmsPublicationEnvelope" } } }
+  /cms/sitemap.xml:
+    get:
+      operationId: getCmsSitemap
+      tags: [cms]
+      summary: Generate the localized published-content sitemap
+      responses:
+        "200":
+          description: Sitemap XML
+          content:
+            application/xml:
+              schema: { type: string }
+        "503":
+          description: CMS sitemap generation is unavailable
           content:
             application/json:
               schema:
@@ -121,6 +176,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/CmsMarket"
         - $ref: "#/components/parameters/CmsSlug"
+        - $ref: "#/components/parameters/CmsRouteKind"
       responses:
         "200":
           description: Draft page envelope
@@ -467,6 +523,13 @@ components:
       name: cognirise_cms_preview
       description: HttpOnly cookie issued only by preview token exchange.
   parameters:
+    CmsRouteKind:
+      name: routeKind
+      in: query
+      required: true
+      schema:
+        type: string
+        enum: [home, service, platform, industry, caseStudy, about, contact, landing, legal]
     CmsMarket:
       name: market
       in: path
@@ -508,9 +571,12 @@ components:
     CmsMarket:
       type: string
       enum: [uae, ksa, turkiye, europe]
+    CmsPageRouteKind:
+      type: string
+      enum: [home, service, platform, industry, caseStudy, about, contact, landing, legal]
     CmsPage:
       type: object
-      required: [id, revision, slug, market, sections, updatedAt, publicationState]
+      required: [id, revision, slug, routeKind, market, sections, updatedAt, publicationState]
       properties:
         id: { type: string }
         revision: { type: string }
@@ -519,6 +585,9 @@ components:
           minLength: 1
           maxLength: 120
           pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        routeKind:
+          type: string
+          enum: [home, service, platform, industry, caseStudy, about, contact, landing, legal]
         market: { $ref: "#/components/schemas/CmsMarket" }
         title: { type: string }
         summary: { type: string }
@@ -579,6 +648,81 @@ components:
             - $ref: "#/components/schemas/CmsPage"
             - type: "null"
         meta: { $ref: "#/components/schemas/CmsPageMeta" }
+    CmsRuntimeLink:
+      type: object
+      additionalProperties: true
+    CmsRuntimeNavigation:
+      type: object
+      required: [placement, items]
+      properties:
+        placement: { type: string, enum: [primary, utility, footer] }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/CmsRuntimeLink" }
+    CmsRuntimeMarket:
+      type: object
+      required: [code, name]
+      properties:
+        code: { $ref: "#/components/schemas/CmsMarket" }
+        name: { type: string }
+    CmsRuntimeRedirect:
+      type: object
+      required: [sourcePath, destinationPath, statusCode]
+      properties:
+        sourcePath: { type: string }
+        destinationPath: { type: string }
+        statusCode: { type: integer, enum: [301, 302, 307, 308] }
+    CmsRuntimeEnvelope:
+      type: object
+      required: [schemaVersion, market, source, markets, navigation, redirects]
+      properties:
+        schemaVersion: { type: number, const: 1 }
+        market: { $ref: "#/components/schemas/CmsMarket" }
+        source: { type: string, enum: [sanity, migration-fallback] }
+        markets:
+          type: array
+          items: { $ref: "#/components/schemas/CmsRuntimeMarket" }
+        navigation:
+          type: array
+          items: { $ref: "#/components/schemas/CmsRuntimeNavigation" }
+        redirects:
+          type: array
+          items: { $ref: "#/components/schemas/CmsRuntimeRedirect" }
+    CmsPublication:
+      type: object
+      required: [id, revision, slug, market, title, format, authors, publicationState, updatedAt]
+      properties:
+        id: { type: string }
+        revision: { type: string }
+        slug: { type: string }
+        market: { $ref: "#/components/schemas/CmsMarket" }
+        title: { type: string }
+        format: { type: string, enum: [article, report, video, webinar, news, newsletter, podcast, download] }
+        dek: { type: string }
+        body: { type: array, items: { type: object, additionalProperties: true } }
+        authors: { type: array, items: { type: object, additionalProperties: true } }
+        topics: { type: array, items: { type: string } }
+        media: { type: object, additionalProperties: true }
+        download: { type: object, additionalProperties: true }
+        gated: { type: boolean }
+        eventStartsAt: { $ref: "#/components/schemas/IsoDateTime" }
+        publishedAt: { $ref: "#/components/schemas/IsoDateTime" }
+        readingMinutes: { type: integer, minimum: 1 }
+        seo: { type: object, additionalProperties: true }
+        publicationState: { type: string }
+        updatedAt: { $ref: "#/components/schemas/IsoDateTime" }
+    CmsPublicationEnvelope:
+      type: object
+      required: [publication, meta]
+      properties:
+        publication: { anyOf: [{ $ref: "#/components/schemas/CmsPublication" }, { type: "null" }] }
+        meta: { $ref: "#/components/schemas/CmsPageMeta" }
+    CmsPublicationListEnvelope:
+      type: object
+      required: [publications, meta]
+      properties:
+        publications: { type: array, items: { $ref: "#/components/schemas/CmsPublication" } }
+        meta: { $ref: "#/components/schemas/CmsPageMeta" }
     CmsPreviewExchangeInput:
       type: object
       required: [token]
@@ -589,10 +733,11 @@ components:
       additionalProperties: true
     CmsPreviewExchange:
       type: object
-      required: [status, market, slug, expiresAt]
+      required: [status, market, slug, routeKind, expiresAt]
       properties:
         status: { type: string, enum: [ready] }
         market: { $ref: "#/components/schemas/CmsMarket" }
+        routeKind: { $ref: "#/components/schemas/CmsPageRouteKind" }
         slug:
           type: string
           minLength: 1
@@ -601,9 +746,10 @@ components:
         expiresAt: { type: number, description: Unix epoch seconds }
     CmsPreviewTarget:
       type: object
-      required: [market, slug]
+      required: [market, slug, routeKind]
       properties:
         market: { $ref: "#/components/schemas/CmsMarket" }
+        routeKind: { $ref: "#/components/schemas/CmsPageRouteKind" }
         slug:
           type: string
           minLength: 1
@@ -883,4 +1029,3 @@ components:
           enum: [subscribed]
         createdAt:
           $ref: "#/components/schemas/IsoDateTime"
-

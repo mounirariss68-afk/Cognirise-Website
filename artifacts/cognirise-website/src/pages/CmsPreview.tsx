@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useRoute, useSearch } from "wouter";
 import { useExchangeCmsPreviewToken } from "@workspace/api-client-react";
-import { isCmsMarket, isCmsSlug, useCmsPreviewPage } from "@/lib/cms";
+import { isCmsMarket, isCmsRouteKind, isCmsSlug, useCmsPreviewPage } from "@/lib/cms";
 import { useMarketStore, type Market } from "@/store/market";
+import { CmsPageRenderer } from "@/components/cms/CmsPageRenderer";
 
 function tokenFromSearch(search: string): string | undefined {
   const token = new URLSearchParams(search).get("token");
@@ -17,28 +18,30 @@ export default function CmsPreview() {
   const token = useMemo(() => tokenFromSearch(search), [search]);
   const market = isCmsMarket(params?.market) ? params.market : undefined;
   const slug = isCmsSlug(params?.slug) ? params.slug : undefined;
+  const routeKindValue = new URLSearchParams(search).get("routeKind");
+  const routeKind = isCmsRouteKind(routeKindValue) ? routeKindValue : undefined;
   const exchange = useExchangeCmsPreviewToken();
   const [exchangeComplete, setExchangeComplete] = useState(!token);
   const [exchangeStarted, setExchangeStarted] = useState(false);
-  const preview = useCmsPreviewPage((market ?? "uae") as Market, slug ?? "home", Boolean(market && slug && exchangeComplete));
+  const preview = useCmsPreviewPage((market ?? "uae") as Market, slug ?? "home", Boolean(market && slug && routeKind && exchangeComplete), routeKind);
 
   useEffect(() => {
-    if (!token || !market || !slug || exchangeComplete || exchangeStarted) return;
+    if (!token || !market || !slug || !routeKind || exchangeComplete || exchangeStarted) return;
     setExchangeStarted(true);
     exchange.mutate(
       { data: { token } },
       {
         onSuccess: (result) => {
-          if (result.market !== market || result.slug !== slug) return;
+          if (result.market !== market || result.slug !== slug || result.routeKind !== routeKind) return;
           setMarket(market);
           setExchangeComplete(true);
-          setLocation(`/preview/${market}/${slug}`, { replace: true });
+          setLocation(`/preview/${market}/${slug}?routeKind=${routeKind}`, { replace: true });
         },
       },
     );
-  }, [exchange, exchangeComplete, exchangeStarted, market, setLocation, setMarket, slug, token]);
+  }, [exchange, exchangeComplete, exchangeStarted, market, routeKind, setLocation, setMarket, slug, token]);
 
-  if (!market || !slug) {
+  if (!market || !slug || !routeKind) {
     return <section className="px-6 py-16" data-testid="status-cms-preview-invalid">Invalid preview address.</section>;
   }
 
@@ -60,16 +63,12 @@ export default function CmsPreview() {
   }
 
   return (
-    <article className="mx-auto w-full max-w-[960px] px-6 py-16" data-testid="cms-draft-preview">
-      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[hsl(var(--brand-pink))]">CMS draft preview · {market.toUpperCase()}</p>
-      <h1 className="font-display text-4xl font-semibold text-[hsl(var(--brand-deep))]">{page.title ?? "Untitled draft"}</h1>
-      <div className="mt-8 space-y-4">
-        {page.sections.map((section, index) => (
-          <pre key={index} className="overflow-x-auto border border-border bg-muted/30 p-4 text-xs text-foreground" data-testid={`cms-preview-section-${index}`}>
-            {JSON.stringify(section, null, 2)}
-          </pre>
-        ))}
-      </div>
-    </article>
+    <div data-testid="cms-draft-preview">
+      <aside className="border-b border-border bg-muted/40 px-6 py-3 text-center text-xs font-bold uppercase tracking-widest text-[hsl(var(--brand-pink))]" role="status">
+        Draft preview · requested {market.toUpperCase()} · resolved {preview.state.resolvedMarket?.toUpperCase() ?? "unavailable"}
+        {preview.state.marketFallback ? " · inherited UAE canonical content" : " · market-owned content"}
+      </aside>
+      <CmsPageRenderer page={page} preview />
+    </div>
   );
 }

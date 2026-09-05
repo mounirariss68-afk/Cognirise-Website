@@ -6,6 +6,7 @@ import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
 import { CmsContentStatus } from "@/components/cms/CmsContentStatus";
+import { runtimeNavigation, useCmsRuntime } from "@/lib/cms-runtime";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/": {
@@ -126,7 +127,7 @@ const pageMeta: Record<string, { title: string; description: string }> = {
   },
 };
 
-const navigation = [
+const fallbackNavigation = [
   {
     label: "What we do",
     href: "/what-we-do",
@@ -186,6 +187,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [location, setLocation] = useLocation();
   const { market, setMarket } = useMarketStore();
+  const cmsRuntime = useCmsRuntime(market);
+  const navigation = runtimeNavigation(cmsRuntime.data) ?? fallbackNavigation;
+  const marketOptions = cmsRuntime.data?.markets.length ? cmsRuntime.data.markets : [
+    { code: "uae" as const, name: "United Arab Emirates" },
+    { code: "ksa" as const, name: "Kingdom of Saudi Arabia" },
+    { code: "turkiye" as const, name: "Türkiye" },
+    { code: "europe" as const, name: "Europe" },
+  ];
   const [scrolled, setScrolled] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousPathRef = useRef(window.location.pathname);
@@ -364,7 +373,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
           <div className="hidden items-center gap-6 xl:flex relative z-50">
             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              {['uae', 'ksa', 'turkiye', 'europe'].map((m) => (
+              {marketOptions.map(({ code: m }, marketIndex) => (
                 <div key={m} className="flex items-center gap-2">
                   <button 
                     onClick={() => setMarket(m as any)} 
@@ -372,7 +381,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   >
                     {m === 'turkiye' ? 'TR' : m === 'europe' ? 'EU' : m.toUpperCase()}
                   </button>
-                  {m !== 'europe' && <span className="opacity-30">/</span>}
+                   {marketIndex < marketOptions.length - 1 && <span className="opacity-30">/</span>}
                 </div>
               ))}
             </div>
@@ -445,13 +454,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div className="pb-12 border-t border-border pt-8">
             <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-4">Select Region</span>
             <div className="flex flex-wrap gap-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              {['uae', 'ksa', 'turkiye', 'europe'].map((m) => (
+               {marketOptions.map(({ code: m, name }) => (
                 <button 
                   key={m}
                   onClick={() => { setMarket(m as any); setIsOpen(false); }}
                   className={`transition-colors focus-visible:outline-none ${market === m ? "text-[hsl(var(--brand-pink))]" : "hover:text-[hsl(var(--brand-deep))]"}`}
                 >
-                  {m === 'turkiye' ? 'Türkiye' : m}
+                   {name}
                 </button>
               ))}
             </div>

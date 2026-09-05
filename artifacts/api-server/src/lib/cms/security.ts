@@ -6,6 +6,11 @@ import {
 } from "node:crypto";
 
 export type CmsMarket = "uae" | "ksa" | "turkiye" | "europe";
+export type CmsRouteKind = "home" | "service" | "platform" | "industry" | "caseStudy" | "about" | "contact" | "landing" | "legal";
+export const CMS_ROUTE_KINDS: readonly CmsRouteKind[] = ["home", "service", "platform", "industry", "caseStudy", "about", "contact", "landing", "legal"];
+export function parseRouteKind(value: unknown): CmsRouteKind | undefined {
+  return typeof value === "string" && (CMS_ROUTE_KINDS as readonly string[]).includes(value) ? value as CmsRouteKind : undefined;
+}
 export const CMS_MARKETS: readonly CmsMarket[] = [
   "uae",
   "ksa",
@@ -48,6 +53,7 @@ export interface PreviewClaims {
   v: 1;
   market: CmsMarket;
   slug: string;
+  routeKind: CmsRouteKind;
   iat: number;
   exp: number;
   nonce: string;
@@ -55,7 +61,7 @@ export interface PreviewClaims {
 }
 
 function signPreviewCapability(
-  input: { market: CmsMarket; slug: string },
+  input: { market: CmsMarket; slug: string; routeKind: CmsRouteKind },
   purpose: PreviewClaims["purpose"],
   secret: string,
   nowSeconds = Math.floor(Date.now() / 1000),
@@ -69,6 +75,7 @@ function signPreviewCapability(
     v: 1,
     market: input.market,
     slug: input.slug,
+    routeKind: input.routeKind,
     iat: nowSeconds,
     exp: nowSeconds + lifetimeSeconds,
     nonce: randomBytes(16).toString("hex"),
@@ -80,7 +87,7 @@ function signPreviewCapability(
 }
 
 export function signPreviewToken(
-  input: { market: CmsMarket; slug: string },
+  input: { market: CmsMarket; slug: string; routeKind: CmsRouteKind },
   secret: string,
   nowSeconds = Math.floor(Date.now() / 1000),
   lifetimeSeconds = 15 * 60,
@@ -89,7 +96,7 @@ export function signPreviewToken(
 }
 
 export function signPreviewSession(
-  input: { market: CmsMarket; slug: string },
+  input: { market: CmsMarket; slug: string; routeKind: CmsRouteKind },
   secret: string,
   nowSeconds = Math.floor(Date.now() / 1000),
   lifetimeSeconds = 15 * 60,
@@ -113,10 +120,12 @@ export function verifyPreviewToken(
     const value = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as Partial<PreviewClaims>;
     const market = parseMarket(value.market);
     const slug = safeSlug(value.slug);
+    const routeKind = parseRouteKind(value.routeKind);
     if (
       value.v !== 1 ||
       !market ||
       !slug ||
+      !routeKind ||
       typeof value.iat !== "number" ||
       typeof value.exp !== "number" ||
       typeof value.nonce !== "string" ||
@@ -160,8 +169,9 @@ export function previewClaimsMatch(
   claims: PreviewClaims | undefined,
   market: CmsMarket | undefined,
   slug: string | undefined,
+  routeKind: CmsRouteKind | undefined,
 ): boolean {
-  return Boolean(claims && market && slug && claims.market === market && claims.slug === slug);
+  return Boolean(claims && market && slug && routeKind && claims.market === market && claims.slug === slug && claims.routeKind === routeKind);
 }
 
 export function sha256(value: Buffer | string): string {

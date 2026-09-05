@@ -103,7 +103,7 @@ export const page = defineType({
     defineField({name: 'summary', type: 'text', rows: 3, group: 'content'}),
     defineField({name: 'topics', type: 'array', of: [{type: 'string'}], group: 'content'}),
     defineField({name: 'internalLinkSuggestions', title: 'Internal link suggestions', type: 'text', rows: 4, group: 'content', readOnly: true}),
-    defineField({name: 'sections', type: 'array', group: 'content', description: 'Use only these design-system-approved modules.', of: ['heroSection', 'richTextSection', 'claimSection', 'metricSection', 'quoteSection', 'referenceGridSection', 'mediaSection', 'timelineSection', 'comparisonSection', 'ctaSection', 'faqSection', 'downloadGateSection'].map((type) => defineArrayMember({type}))}),
+    defineField({name: 'sections', type: 'array', group: 'content', description: 'Use only these design-system-approved modules.', of: ['heroSection', 'richTextSection', 'claimSection', 'metricSection', 'quoteSection', 'referenceGridSection', 'mediaSection', 'timelineSection', 'comparisonSection', 'ctaSection', 'faqSection', 'downloadGateSection', 'formSlotSection'].map((type) => defineArrayMember({type}))}),
     defineField({name: 'seo', type: 'seo', group: 'content'}),
     marketEditions,
     ...governanceFields,
@@ -123,13 +123,14 @@ export const navigation = defineType({
 })
 
 export const redirect = defineType({
-  name: 'redirect', title: 'Redirect', type: 'document',
+  name: 'redirect', title: 'Redirect', type: 'document', groups,
   fields: [
-    defineField({name: 'sourcePath', type: 'string', description: 'Path only, beginning with /. No query string.', validation: (Rule) => Rule.required().regex(/^\/(?!\/)/)}),
-    defineField({name: 'destinationPath', type: 'string', validation: (Rule) => Rule.required().regex(/^\/(?!\/)/)}),
-    defineField({name: 'statusCode', type: 'number', options: {list: [301, 302, 307, 308]}, initialValue: 308, validation: (Rule) => Rule.required()}),
-    defineField({name: 'market', type: 'reference', to: [{type: 'market'}], description: 'Leave empty for all markets.'}),
-    defineField({name: 'active', type: 'boolean', initialValue: true}),
+    defineField({name: 'sourcePath', type: 'string', group: 'content', description: 'Path only, beginning with /. No query string.', validation: (Rule) => Rule.required().regex(/^\/(?!\/)/)}),
+    defineField({name: 'destinationPath', type: 'string', group: 'content', validation: (Rule) => Rule.required().regex(/^\/(?!\/)/)}),
+    defineField({name: 'statusCode', type: 'number', group: 'content', options: {list: [301, 302, 307, 308]}, initialValue: 308, validation: (Rule) => Rule.required()}),
+    defineField({name: 'market', type: 'reference', group: 'markets', to: [{type: 'market'}], description: 'Leave empty for all markets.'}),
+    defineField({name: 'active', type: 'boolean', group: 'content', initialValue: false, readOnly: ({document}) => (document?.lifecycle as {state?: string} | undefined)?.state !== 'published', description: 'The trusted release workflow activates published redirects; direct toggles cannot activate drafts.'}),
+    ...governanceFields,
   ],
   validation: (Rule) => Rule.custom((value) => value?.sourcePath === value?.destinationPath ? 'Source and destination must differ.' : true),
   preview: {select: {title: 'sourcePath', destination: 'destinationPath', status: 'statusCode'}, prepare: ({title, destination, status}) => ({title, subtitle: `${status} → ${destination}`})},

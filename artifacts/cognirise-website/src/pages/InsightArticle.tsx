@@ -1,9 +1,36 @@
+import { useEffect, useRef } from "react";
 import { useRoute } from "wouter";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import { useMarketStore } from "@/store/market";
 import { BrandButton } from "@/components/ui/brand-button";
+import { getGetCmsPublishedPublicationQueryKey, useGetCmsPublishedPublication } from "@workspace/api-client-react";
+import { trackEvent } from "@/lib/analytics";
+
+function PortableBody({ value }: { value: unknown }) {
+  if (!Array.isArray(value)) return null;
+  return <>{value.map((block, index) => {
+    if (!block || typeof block !== "object" || !("children" in block) || !Array.isArray(block.children)) return null;
+    const content = block.children.map((child: unknown) => child && typeof child === "object" && "text" in child && typeof child.text === "string" ? child.text : "").join("");
+    if (!content) return null;
+    return block.style === "h2" || block.style === "h3" ? <h3 key={index}>{content}</h3> : <p key={index}>{content}</p>;
+  })}</>;
+}
+function useArticleSeo(publication: { title: string; dek?: string; seo?: Record<string, unknown> } | null | undefined) {
+  useEffect(() => {
+    if (!publication) return;
+    const seo = publication.seo;
+    const title = typeof seo?.metaTitle === "string" ? seo.metaTitle : publication.title;
+    const description = typeof seo?.metaDescription === "string" ? seo.metaDescription : publication.dek;
+    document.title = title;
+    if (description) document.head.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", description);
+  }, [publication]);
+}
+function httpsUrl(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  try { const url = new URL(value); return url.protocol === "https:" ? url.href : undefined; } catch { return undefined; }
+}
 
 const articles = {
   "ai-should-move-the-business": {
@@ -109,12 +136,46 @@ const articles = {
 export default function InsightArticle() {
   const [match, params] = useRoute("/insights/:slug");
   const { market } = useMarketStore();
-  
-  if (!match || !params.slug || !(params.slug in articles)) {
+  const requestedSlug = params?.slug ?? "";
+  const cms = useGetCmsPublishedPublication(market, requestedSlug, { query: { enabled: Boolean(match && requestedSlug), queryKey: getGetCmsPublishedPublicationQueryKey(market, requestedSlug) } });
+  useArticleSeo(cms.data?.publication);
+  const viewedPublication = useRef<string | undefined>(undefined);
+  const known = requestedSlug in articles ? articles[requestedSlug as keyof typeof articles] : undefined;
+  const publication = cms.data?.publication;
+  const fallbackAllowed = cms.isError || cms.data?.meta.source === "migration-fallback";
+  const format = publication?.format ?? "article";
+  const publicationId = publication?.id;
+
+  useEffect(() => {
+    if (!match || !requestedSlug || cms.isLoading) return;
+    if (!publication && !(fallbackAllowed && known)) return;
+
+    const viewKey = `${market}:${requestedSlug}:${publicationId ?? "hardcoded"}`;
+    if (viewedPublication.current === viewKey) return;
+    viewedPublication.current = viewKey;
+    trackEvent("publication_viewed", {
+      market,
+      pathname: window.location.pathname,
+      content_slug: requestedSlug,
+      ...(publicationId ? { content_id: publicationId } : {}),
+      format,
+      delivery_source: publication ? "cms_publication" : "hardcoded_publication",
+    });
+  }, [cms.isLoading, fallbackAllowed, format, known, market, match, publication, publicationId, requestedSlug]);
+
+  if (!match || !params.slug) {
     return <NotFound />;
   }
-
-  const article = articles[params.slug as keyof typeof articles];
+  if (cms.isLoading) return <section className="px-6 py-16" role="status">Loading perspective…</section>;
+  if (!publication && !(fallbackAllowed && known)) return <NotFound />;
+  const article = publication ? {
+    topic: publication.topics?.[0] ?? "Perspective",
+    title: publication.title,
+    date: (publication.publishedAt ?? publication.updatedAt) ? new Date(publication.publishedAt ?? publication.updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "",
+    author: publication.authors?.[0] && typeof publication.authors[0].name === "string" ? publication.authors[0].name : "Cognirise",
+    readingTime: publication.readingMinutes ? `${publication.readingMinutes} min read` : "",
+    content: <PortableBody value={publication.body} />,
+  } : known!;
 
   return (
     <div className="flex flex-col">
@@ -143,6 +204,19 @@ export default function InsightArticle() {
           `}</style>
           
           {article.content}
+          {publication?.media && httpsUrl(publication.media.url) && (
+            <img src={httpsUrl(publication.media.url)} alt={typeof publication.media.altText === "string" ? publication.media.altText : ""} className="mt-10 w-full" loading="lazy" />
+          )}
+          {publication?.download && httpsUrl(publication.download.url) && (
+            <p><a href={httpsUrl(publication.download.url)} download onClick={() => trackEvent("governed_download_clicked", {
+              market,
+              source_page: window.location.pathname,
+              content_slug: requestedSlug,
+              ...(publication.id ? { content_id: publication.id } : {}),
+              format: publication.format ?? "article",
+              delivery_source: "publication_detail",
+            })}>{publication.gated ? "Request access to download" : "Download publication"}</a></p>
+          )}
         </div>
         
         <div className="mt-20 pt-10 border-t border-foreground">

@@ -11,11 +11,16 @@ import {
   cmsConfigurationStatus,
   getPreviewPage,
   getPublishedPage,
+  getPublishedRuntime,
+  getPublishedPublication,
+  getPublishedPublications,
+  getSitemap,
   invalidatePublishedCache,
 } from "../lib/cms/adapter";
 import {
   parseCookie,
   parseMarket,
+  parseRouteKind,
   isWebhookTimestampFresh,
   previewClaimsMatch,
   safeSlug,
@@ -51,15 +56,44 @@ function previewSecrets(): string[] {
 router.get("/cms/pages/:market/:slug", async (req, res): Promise<void> => {
   const market = parseMarket(first(req.params.market));
   const slug = safeSlug(first(req.params.slug));
-  if (!market || !slug) {
+  const kind = parseRouteKind(req.query.routeKind);
+  if (!market || !slug || !kind) {
     res.status(400).json({ error: "Invalid market or page slug" });
     return;
   }
   try {
-    res.json(await getPublishedPage(market, slug));
+    res.json(await getPublishedPage(market, slug, kind));
   } catch (error) {
     req.log.error({ error: error instanceof Error ? error.message : "unknown" }, "CMS published delivery failed");
     res.status(503).json({ error: "CMS published delivery is unavailable" });
+  }
+});
+
+router.get("/cms/runtime/:market", async (req, res): Promise<void> => {
+  const market = parseMarket(first(req.params.market));
+  if (!market) {
+    res.status(400).json({ error: "Invalid market" });
+    return;
+  }
+  res.json(await getPublishedRuntime(market));
+});
+router.get("/cms/publications/:market", async (req, res): Promise<void> => {
+  const market = parseMarket(first(req.params.market)); if (!market) { res.status(400).json({ error: "Invalid market" }); return; }
+  res.json(await getPublishedPublications(market));
+});
+router.get("/cms/publications/:market/:slug", async (req, res): Promise<void> => {
+  const market = parseMarket(first(req.params.market)), slug = safeSlug(first(req.params.slug));
+  if (!market || !slug) { res.status(400).json({ error: "Invalid market or publication slug" }); return; }
+  res.json(await getPublishedPublication(market, slug));
+});
+
+router.get("/cms/sitemap.xml", async (req, res): Promise<void> => {
+  try {
+    const xml = await getSitemap("https://cognirise.ai");
+    res.type("application/xml").set("Cache-Control", "public, max-age=300").send(xml);
+  } catch (error) {
+    req.log.error({ error: error instanceof Error ? error.message : "unknown" }, "CMS sitemap generation failed");
+    res.status(503).json({ error: "CMS sitemap is unavailable" });
   }
 });
 
@@ -97,7 +131,7 @@ router.post("/cms/preview/exchange", async (req, res): Promise<void> => {
     return;
   }
   const sessionToken = signPreviewSession(
-    { market: claims.market, slug: claims.slug },
+    { market: claims.market, slug: claims.slug, routeKind: claims.routeKind },
     previewSecrets()[0]!,
     Math.floor(Date.now() / 1000),
     maxAge,
@@ -109,21 +143,22 @@ router.post("/cms/preview/exchange", async (req, res): Promise<void> => {
     path: "/api/cms/preview",
     maxAge: maxAge * 1000,
   });
-  res.json({ status: "ready", market: claims.market, slug: claims.slug, expiresAt: claims.exp });
+  res.json({ status: "ready", market: claims.market, slug: claims.slug, routeKind: claims.routeKind, expiresAt: claims.exp });
 });
 
 router.get("/cms/preview/pages/:market/:slug", async (req, res): Promise<void> => {
   res.setHeader("Cache-Control", "private, no-store");
   const market = parseMarket(first(req.params.market));
   const slug = safeSlug(first(req.params.slug));
+  const kind = parseRouteKind(req.query.routeKind);
   const cookie = parseCookie(req.headers.cookie, PREVIEW_COOKIE);
   const claims = cookie ? verifyPreviewToken(cookie, previewSecrets()) : undefined;
-  if (!market || !slug || claims?.purpose !== "session" || !previewClaimsMatch(claims, market, slug)) {
+  if (!market || !slug || !kind || claims?.purpose !== "session" || !previewClaimsMatch(claims, market, slug, kind)) {
     res.status(401).json({ error: "Preview authorization does not match this page" });
     return;
   }
   try {
-    res.json(await getPreviewPage(market, slug));
+    res.json(await getPreviewPage(market, slug, kind));
   } catch (error) {
     req.log.error({ error: error instanceof Error ? error.message : "unknown" }, "CMS preview failed");
     res.status(503).json({ error: "CMS preview is unavailable" });
@@ -138,8 +173,9 @@ router.post("/cms/workflow/preview-tokens", async (req, res): Promise<void> => {
   }
   const market = parseMarket(req.body?.market);
   const slug = safeSlug(req.body?.slug);
+  const kind = parseRouteKind(req.body?.routeKind);
   const secret = previewSecrets()[0];
-  if (!market || !slug) {
+  if (!market || !slug || !kind) {
     res.status(400).json({ error: "Invalid market or page slug" });
     return;
   }
@@ -151,7 +187,7 @@ router.post("/cms/workflow/preview-tokens", async (req, res): Promise<void> => {
     res.status(503).json({ error: "CMS preview is not configured" });
     return;
   }
-  const token = signPreviewToken({ market, slug }, secret);
+  const token = signPreviewToken({ market, slug, routeKind: kind }, secret);
   const claims = verifyPreviewToken(token, [secret]);
   if (!claims) throw new Error("Generated preview token failed verification");
   const digest = sha256(token);
@@ -166,7 +202,7 @@ router.post("/cms/workflow/preview-tokens", async (req, res): Promise<void> => {
       metadata: { tokenDigest: digest.slice(0, 16) },
     });
   });
-  res.status(201).json({ token, market, slug });
+  res.status(201).json({ token, market, slug, routeKind: kind });
 });
 
 router.post("/cms/workflow/transitions", async (req, res): Promise<void> => {

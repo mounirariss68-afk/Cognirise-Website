@@ -83,13 +83,13 @@ test("the approved schema flow has applied every CMS governance table", async ()
 
 test("editorial assistance verifies targets, scopes replay, and recovers its decision audit", async () => {
   const suffix = Date.now().toString();
-  const requestId = `assistant_run_${suffix}`;
+  const requestId = `rollback_${Date.now()}`;
   const staleRequestId = `assistant_stale_${suffix}`;
   const redactedRequestId = `assistant_redacted_${suffix}`;
   const restrictedSourceRequestId = `assistant_restricted_${suffix}`;
   const sensitiveOutputRequestId = `assistant_output_${suffix}`;
   const transitionRequestId = `assistant_transition_${suffix}`;
-  const subjectId = `page.assistant.${suffix}`;
+  const subjectId = `integration-rollback-${Date.now()}`;
   const sourceId = `approved.source.${suffix}`;
   const targetRevision = `target-revision-${suffix}`;
   const appliedRevision = `applied-revision-${suffix}`;
@@ -373,7 +373,7 @@ test("editorial assistance verifies targets, scopes replay, and recovers its dec
 
 test("preview exchange consumes its PostgreSQL nonce and rejects replay", async () => {
   const slug = `integration-preview-${Date.now()}`;
-  const token = signPreviewToken({ market: "uae", slug }, previewSecret);
+  const token = signPreviewToken({ market: "uae", slug, routeKind: "landing" }, previewSecret);
   const claims = verifyPreviewToken(token, [previewSecret]);
   assert.ok(claims);
   const digest = sha256(token);
@@ -470,8 +470,8 @@ test("webhook idempotency uses event ID while identical payloads remain valid", 
 });
 
 test("publishing one market preserves another market's live content and pending draft", async () => {
-  const requestId = `integration_${Date.now()}`;
-  const subjectId = `integration-page-${Date.now()}`;
+  const requestId = `rollback_${Date.now()}`;
+  const subjectId = `integration-rollback-${Date.now()}`;
   let mutationBody: {
     mutations?: Array<Record<string, unknown>>;
   } | undefined;
@@ -621,8 +621,8 @@ test("publishing one market preserves another market's live content and pending 
 });
 
 test("the same market completes two releases through author, reviewer, and publisher roles", async () => {
-  const subjectId = `integration-repeat-${Date.now()}`;
-  const requestIds = [1, 2, 3, 4].map((step) => `repeat_${step}_${Date.now()}`);
+  const subjectId = `integration-rollback-${Date.now()}`;
+  const requestIds = [`schedule_a_${Date.now()}`, `schedule_b_${Date.now()}`];
   let draftRevision = 1;
   let draft = {
     _id: `drafts.${subjectId}`,
@@ -738,7 +738,7 @@ test("the same market completes two releases through author, reviewer, and publi
 });
 
 test("scheduling rejects supplied and pre-existing expiry before publication", async () => {
-  const subjectId = `integration-schedule-${Date.now()}`;
+  const subjectId = `integration-rollback-${Date.now()}`;
   const requestIds = [`schedule_a_${Date.now()}`, `schedule_b_${Date.now()}`];
   const publishAt = new Date(Date.now() + 48 * 60 * 60_000).toISOString();
   const expiresAt = new Date(Date.now() + 24 * 60 * 60_000).toISOString();

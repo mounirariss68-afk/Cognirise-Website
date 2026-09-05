@@ -1,16 +1,18 @@
 import { Link, useSearch, useLocation } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { useSubscribeNewsletter } from "@workspace/api-client-react";
+import { useGetCmsPublishedPublications, useSubscribeNewsletter } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
+import { trackEvent } from "@/lib/analytics";
 
 export default function InsightsEditorial() {
   const [email, setEmail] = useState("");
   const subscribeNewsletter = useSubscribeNewsletter();
   const { toast } = useToast();
   const { market } = useMarketStore();
+  const cmsPublications = useGetCmsPublishedPublications(market);
   const searchString = useSearch();
   const [location, setLocation] = useLocation();
   
@@ -36,6 +38,12 @@ export default function InsightsEditorial() {
       }
     }, {
       onSuccess: () => {
+        trackEvent("newsletter_subscribed", {
+          market,
+          source_page: window.location.pathname,
+          form_type: "newsletter",
+          delivery_source: "insights_editorial",
+        });
         toast({
           title: "Subscribed successfully",
           description: "You are on the list. Watch this space.",
@@ -62,7 +70,7 @@ export default function InsightsEditorial() {
     { id: "strategy", label: "Strategy" }
   ];
 
-  const articles = [
+  const fallbackArticles = [
     {
       number: "01",
       title: "AI should move the business—not just assist it.",
@@ -85,6 +93,15 @@ export default function InsightsEditorial() {
       url: "/insights/governed-digital-workforce"
     }
   ];
+  const articles = cmsPublications.data?.meta.source !== "migration-fallback"
+    ? (cmsPublications.data?.publications ?? []).filter((item) => item.format === "article").map((item, index) => ({
+        number: String(index + 1).padStart(2, "0"),
+        title: item.title,
+        copy: item.dek ?? "",
+        topics: item.topics ?? [],
+        url: `/insights/${item.slug}`,
+      }))
+    : fallbackArticles;
 
   const filteredArticles = activeTopic === "all" ? articles : articles.filter(a => a.topics.includes(activeTopic));
 

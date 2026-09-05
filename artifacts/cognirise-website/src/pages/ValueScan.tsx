@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { ArrowDown, ArrowRight, Check } from "lucide-react";
-import { Link } from "wouter";
 import { useSubmitEnquiry } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
+import { trackEvent } from "@/lib/analytics";
 
-export default function ValueScan() {
+export function ValueScanForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -26,12 +26,6 @@ export default function ValueScan() {
   const submitEnquiry = useSubmitEnquiry();
   const { toast } = useToast();
   const { market } = useMarketStore();
-  
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData(prev => ({
@@ -77,6 +71,12 @@ export default function ValueScan() {
       }
     }, {
       onSuccess: () => {
+        trackEvent("value_scan_submitted", {
+          market,
+          source_page: window.location.pathname,
+          form_type: "value_scan",
+          delivery_source: "value_scan_form",
+        });
         setIsSubmitted(true);
       },
       onError: () => {
@@ -89,6 +89,102 @@ export default function ValueScan() {
     });
   };
 
+  return (
+    <div className="vs vs-lab-form">
+      <style>{`
+        .vs-lab-form{--ink:#102957;--paper:#fdfcfb;--line:#cbd3e1;--muted:#526786;--pink:#db509e;color:var(--ink);font-family:Inter,sans-serif;padding:32px 36px}
+        .vs-lab-form *{box-sizing:border-box}.vs-lab-form button{font:inherit}.vs-lab-form :focus-visible{outline:3px solid #ff775d;outline-offset:4px}
+        .vs-lab-form .vs-input{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:0 0 10px;outline:none;font-size:13px;color:var(--ink);font-family:inherit}
+        .vs-lab-form .vs-input:focus,.vs-lab-form .vs-select:focus{border-bottom-color:var(--ink)}
+        .vs-lab-form .vs-select{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:0 0 10px;outline:none;font-size:13px;color:var(--ink);font-family:inherit;appearance:none;border-radius:0}
+        .vs-lab-form .vs-label{display:flex;justify-content:space-between;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+        .vs-lab-form .vs-form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}.vs-lab-form .vs-form-group{margin-bottom:24px}
+        .vs-lab-form .vs-textarea{width:100%;background:#f1f3f7;border:1px solid var(--line);padding:14px;outline:none;font-size:13px;color:var(--ink);resize:vertical;min-height:70px;font-family:inherit}
+        .vs-lab-form .vs-checkbox-label{display:flex;gap:12px;align-items:flex-start;font-size:12px;color:var(--muted);line-height:1.45;cursor:pointer;margin-bottom:24px}.vs-lab-form .vs-checkbox-label input{margin-top:2px;accent-color:var(--pink)}
+        .vs-lab-form .vs-primary{border:1px solid var(--ink);cursor:pointer;color:#fff;background:var(--ink);font-weight:700;font-size:12px;padding:13px 17px;min-height:46px;display:inline-flex;align-items:center;gap:15px}.vs-lab-form .vs-primary:disabled{cursor:wait;opacity:.65}
+        .vs-lab-form .vs-under{border:0;background:none;color:var(--ink);font-size:12px;font-weight:600;cursor:pointer;padding:10px 0}
+        @media(max-width:760px){.vs-lab-form{padding:27px 22px}.vs-lab-form .vs-form-row{grid-template-columns:1fr;gap:18px;margin-bottom:18px}}
+      `}</style>
+      {!isSubmitted ? (
+        <form onSubmit={handleSubmit}>
+          <div className="vs-form-row">
+            <div>
+              <label className="vs-label" htmlFor="firstName">First Name <span style={{color: "var(--pink)"}}>*</span></label>
+              <input className="vs-input" type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} required placeholder="Given name" />
+            </div>
+            <div>
+              <label className="vs-label" htmlFor="lastName">Last Name <span style={{color: "var(--pink)"}}>*</span></label>
+              <input className="vs-input" type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} required placeholder="Family name" />
+            </div>
+          </div>
+          <div className="vs-form-row">
+            <div>
+              <label className="vs-label" htmlFor="email">Work Email <span style={{color: "var(--pink)"}}>*</span></label>
+              <input className="vs-input" type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="name@company.com" />
+            </div>
+            <div>
+              <label className="vs-label" htmlFor="company">Company / Organisation <span style={{color: "var(--pink)"}}>*</span></label>
+              <input className="vs-input" type="text" id="company" name="company" value={formData.company} onChange={handleChange} required placeholder="Your organisation name" />
+            </div>
+          </div>
+          <div className="vs-form-group">
+            <label className="vs-label" htmlFor="role">Role / Title</label>
+            <input className="vs-input" type="text" id="role" name="role" value={formData.role} onChange={handleChange} placeholder="e.g. Head of Operations" />
+          </div>
+          <div className="vs-form-group">
+            <label className="vs-label" htmlFor="processArea">Process Area <span style={{color: "var(--pink)"}}>*</span></label>
+            <select className="vs-select" id="processArea" name="processArea" value={formData.processArea} onChange={handleChange} required>
+              <option value="">Select the closest fit</option>
+              <option value="Agentic enterprise transformation">Agentic enterprise transformation</option>
+              <option value="Data and AI foundations">Data and AI foundations</option>
+              <option value="Engineering with AI">Engineering with AI</option>
+              <option value="Sovereign and regulated AI">Sovereign and regulated AI</option>
+              <option value="Digital AI workforce">Digital AI workforce</option>
+              <option value="Not sure yet">Not sure yet</option>
+            </select>
+          </div>
+          <div className="vs-form-group">
+            <label className="vs-label" htmlFor="operatingContext">Operating Context <span style={{color: "var(--pink)"}}>*</span></label>
+            <textarea className="vs-textarea" id="operatingContext" name="operatingContext" value={formData.operatingContext} onChange={handleChange} required placeholder="Where does the work get stuck? What decisions, data or hand-offs are constraining the outcome?" />
+          </div>
+          <div className="vs-form-group">
+            <label className="vs-label" htmlFor="stakeholders">Stakeholders (Optional)</label>
+            <input className="vs-input" type="text" id="stakeholders" name="stakeholders" value={formData.stakeholders} onChange={handleChange} placeholder="Who holds accountability for this process today?" />
+          </div>
+          <div className="vs-form-group">
+            <label className="vs-label" htmlFor="intendedDecision">Intended Decision (Optional)</label>
+            <input className="vs-input" type="text" id="intendedDecision" name="intendedDecision" value={formData.intendedDecision} onChange={handleChange} placeholder="What specific outcome or decision are you trying to accelerate?" />
+          </div>
+          <label className="vs-checkbox-label">
+            <input type="checkbox" checked={formData.consent} onChange={(event) => setFormData((previous) => ({ ...previous, consent: event.target.checked }))} required />
+            <span>I agree that Cognirise may contact me about this request.</span>
+          </label>
+          <input type="text" name="website" value={formData.website} onChange={handleChange} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{position: "absolute", left: "-9999px"}} />
+          <button type="submit" className="vs-primary" disabled={submitEnquiry.isPending} style={{ marginTop: 8 }}>
+            {submitEnquiry.isPending ? "Submitting..." : "Submit request"} <ArrowRight size={15} />
+          </button>
+        </form>
+      ) : (
+        <div style={{ padding: "40px 0" }} role="status">
+          <Check size={48} color="var(--pink)" style={{ marginBottom: 24 }} />
+          <h3 style={{ fontSize: 32, marginBottom: 16, fontWeight: 600, fontFamily: "Comfortaa, sans-serif" }}>Request received.</h3>
+          <p style={{ color: "var(--muted)", fontSize: 16, marginBottom: 32, lineHeight: 1.5 }}>
+            Thank you. Our team will review the details and contact you shortly to arrange the working session.
+          </p>
+          <button onClick={() => setIsSubmitted(false)} className="vs-under">Submit another request</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function ValueScan() {
+  const { market } = useMarketStore();
+  const marketLocation =
+    market === "uae" ? "Dubai · United Arab Emirates" :
+    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
+    market === "turkiye" ? "Istanbul · Türkiye" :
+    "London · Europe";
   const goTo = scrollToSection;
 
   return (
@@ -136,80 +232,7 @@ export default function ValueScan() {
           <h3>One priority. One room. One useful next move.</h3>
           <p>There is no need to prepare a polished brief. A plain description of where the work is under pressure is enough to start.</p>
         </aside>
-        <div className="vs-lab-form">
-          {!isSubmitted ? (
-            <form onSubmit={handleSubmit}>
-              <div className="vs-form-row">
-                <div>
-                  <label className="vs-label" htmlFor="firstName">First Name <span style={{color: 'var(--pink)'}}>*</span></label>
-                  <input className="vs-input" type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} required placeholder="Given name" />
-                </div>
-                <div>
-                  <label className="vs-label" htmlFor="lastName">Last Name <span style={{color: 'var(--pink)'}}>*</span></label>
-                  <input className="vs-input" type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} required placeholder="Family name" />
-                </div>
-              </div>
-              <div className="vs-form-row">
-                <div>
-                  <label className="vs-label" htmlFor="email">Work Email <span style={{color: 'var(--pink)'}}>*</span></label>
-                  <input className="vs-input" type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="name@company.com" />
-                </div>
-                <div>
-                  <label className="vs-label" htmlFor="company">Company / Organisation <span style={{color: 'var(--pink)'}}>*</span></label>
-                  <input className="vs-input" type="text" id="company" name="company" value={formData.company} onChange={handleChange} required placeholder="Your organisation name" />
-                </div>
-              </div>
-              <div className="vs-form-group">
-                <label className="vs-label" htmlFor="role">Role / Title</label>
-                <input className="vs-input" type="text" id="role" name="role" value={formData.role} onChange={handleChange} placeholder="e.g. Head of Operations" />
-              </div>
-              <div className="vs-form-group">
-                <label className="vs-label" htmlFor="processArea">Process Area <span style={{color: 'var(--pink)'}}>*</span></label>
-                <select className="vs-select" id="processArea" name="processArea" value={formData.processArea} onChange={handleChange} required>
-                  <option value="">Select the closest fit</option>
-                  <option value="Agentic enterprise transformation">Agentic enterprise transformation</option>
-                  <option value="Data and AI foundations">Data and AI foundations</option>
-                  <option value="Engineering with AI">Engineering with AI</option>
-                  <option value="Sovereign and regulated AI">Sovereign and regulated AI</option>
-                  <option value="Digital AI workforce">Digital AI workforce</option>
-                  <option value="Not sure yet">Not sure yet</option>
-                </select>
-              </div>
-              <div className="vs-form-group">
-                <label className="vs-label" htmlFor="operatingContext">Operating Context <span style={{color: 'var(--pink)'}}>*</span></label>
-                <textarea className="vs-textarea" id="operatingContext" name="operatingContext" value={formData.operatingContext} onChange={handleChange} required placeholder="Where does the work get stuck? What decisions, data or hand-offs are constraining the outcome?" />
-              </div>
-              <div className="vs-form-group">
-                <label className="vs-label" htmlFor="stakeholders">Stakeholders (Optional)</label>
-                <input className="vs-input" type="text" id="stakeholders" name="stakeholders" value={formData.stakeholders} onChange={handleChange} placeholder="Who holds accountability for this process today?" />
-              </div>
-              <div className="vs-form-group">
-                <label className="vs-label" htmlFor="intendedDecision">Intended Decision (Optional)</label>
-                <input className="vs-input" type="text" id="intendedDecision" name="intendedDecision" value={formData.intendedDecision} onChange={handleChange} placeholder="What specific outcome or decision are you trying to accelerate?" />
-              </div>
-
-              <label className="vs-checkbox-label">
-                <input type="checkbox" checked={formData.consent} onChange={(e) => setFormData(prev => ({...prev, consent: e.target.checked}))} required />
-                <span>I agree that Cognirise may contact me about this request.</span>
-              </label>
-
-              <input type="text" name="website" value={formData.website} onChange={handleChange} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{position: 'absolute', left: '-9999px'}} />
-
-              <button type="submit" className="vs-primary" disabled={submitEnquiry.isPending} style={{ marginTop: 8 }}>
-                {submitEnquiry.isPending ? "Submitting..." : "Submit request"} <ArrowRight size={15} />
-              </button>
-            </form>
-          ) : (
-            <div style={{ padding: "40px 0" }}>
-              <Check size={48} color="var(--pink)" style={{ marginBottom: 24 }} />
-              <h3 style={{ fontSize: 32, marginBottom: 16, fontWeight: 600, fontFamily: 'Comfortaa, sans-serif' }}>Request received.</h3>
-              <p style={{ color: 'var(--muted)', fontSize: 16, marginBottom: 32, lineHeight: 1.5 }}>
-                Thank you. Our team will review the details and contact you shortly to arrange the working session.
-              </p>
-              <button onClick={() => setIsSubmitted(false)} className="vs-under">Submit another request</button>
-            </div>
-          )}
-        </div>
+        <ValueScanForm />
       </div></section>
       
       <section className="vs-outcome" id="outcomes"><div className="vs-outcome-top"><div><div className="vs-kicker">What you leave with</div><h2>A case that can move inside the business.</h2></div><p>Enough precision to align the next decision—and enough substance to avoid restarting the conversation from zero.</p></div><div className="vs-outcome-grid"><figure><img src={assetUrl("/images/cognirise/site-work-proof.jpg")} alt="A gradient route moving through a complex architectural model." /><figcaption><span>01 / opportunity</span><strong>A focused value hypothesis.</strong></figcaption></figure><figure><img src={assetUrl("/images/cognirise/site-services.jpg")} alt="Violet and coral strands moving decisively through a built structure." /><figcaption><span>02 / route</span><strong>A practical path to production.</strong></figcaption></figure><figure><img src={assetUrl("/images/cognirise/site-work-proof.jpg")} alt="A luminous corridor bridging two sides of an architectural model." /><figcaption><span>03 / decision</span><strong>The next questions, clearly owned.</strong></figcaption></figure></div></section>

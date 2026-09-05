@@ -24,6 +24,36 @@ export const CmsMarket = {
   europe: "europe",
 } as const;
 
+export type CmsPageRouteKind =
+  (typeof CmsPageRouteKind)[keyof typeof CmsPageRouteKind];
+
+export const CmsPageRouteKind = {
+  home: "home",
+  service: "service",
+  platform: "platform",
+  industry: "industry",
+  caseStudy: "caseStudy",
+  about: "about",
+  contact: "contact",
+  landing: "landing",
+  legal: "legal",
+} as const;
+
+export type CmsPageRouteKindProperty =
+  (typeof CmsPageRouteKindProperty)[keyof typeof CmsPageRouteKindProperty];
+
+export const CmsPageRouteKindProperty = {
+  home: "home",
+  service: "service",
+  platform: "platform",
+  industry: "industry",
+  caseStudy: "caseStudy",
+  about: "about",
+  contact: "contact",
+  landing: "landing",
+  legal: "legal",
+} as const;
+
 export type CmsPageBodyItem = { [key: string]: unknown };
 
 export type CmsPageSeo = { [key: string]: unknown };
@@ -52,6 +82,7 @@ export interface CmsPage {
    * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
    */
   slug: string;
+  routeKind: CmsPageRouteKindProperty;
   market: CmsMarket;
   title?: string;
   summary?: string;
@@ -131,6 +162,119 @@ export interface CmsPageEnvelope {
   meta: CmsPageMeta;
 }
 
+export interface CmsRuntimeLink {
+  [key: string]: unknown;
+}
+
+export type CmsRuntimeNavigationPlacement =
+  (typeof CmsRuntimeNavigationPlacement)[keyof typeof CmsRuntimeNavigationPlacement];
+
+export const CmsRuntimeNavigationPlacement = {
+  primary: "primary",
+  utility: "utility",
+  footer: "footer",
+} as const;
+
+export interface CmsRuntimeNavigation {
+  placement: CmsRuntimeNavigationPlacement;
+  items: CmsRuntimeLink[];
+}
+
+export interface CmsRuntimeMarket {
+  code: CmsMarket;
+  name: string;
+}
+
+export type CmsRuntimeRedirectStatusCode =
+  (typeof CmsRuntimeRedirectStatusCode)[keyof typeof CmsRuntimeRedirectStatusCode];
+
+export const CmsRuntimeRedirectStatusCode = {
+  NUMBER_301: 301,
+  NUMBER_302: 302,
+  NUMBER_307: 307,
+  NUMBER_308: 308,
+} as const;
+
+export interface CmsRuntimeRedirect {
+  sourcePath: string;
+  destinationPath: string;
+  statusCode: CmsRuntimeRedirectStatusCode;
+}
+
+export type CmsRuntimeEnvelopeSource =
+  (typeof CmsRuntimeEnvelopeSource)[keyof typeof CmsRuntimeEnvelopeSource];
+
+export const CmsRuntimeEnvelopeSource = {
+  sanity: "sanity",
+  "migration-fallback": "migration-fallback",
+} as const;
+
+export interface CmsRuntimeEnvelope {
+  schemaVersion: 1;
+  market: CmsMarket;
+  source: CmsRuntimeEnvelopeSource;
+  markets: CmsRuntimeMarket[];
+  navigation: CmsRuntimeNavigation[];
+  redirects: CmsRuntimeRedirect[];
+}
+
+export type CmsPublicationFormat =
+  (typeof CmsPublicationFormat)[keyof typeof CmsPublicationFormat];
+
+export const CmsPublicationFormat = {
+  article: "article",
+  report: "report",
+  video: "video",
+  webinar: "webinar",
+  news: "news",
+  newsletter: "newsletter",
+  podcast: "podcast",
+  download: "download",
+} as const;
+
+export type CmsPublicationBodyItem = { [key: string]: unknown };
+
+export type CmsPublicationAuthorsItem = { [key: string]: unknown };
+
+export type CmsPublicationMedia = { [key: string]: unknown };
+
+export type CmsPublicationDownload = { [key: string]: unknown };
+
+export type CmsPublicationSeo = { [key: string]: unknown };
+
+export interface CmsPublication {
+  id: string;
+  revision: string;
+  slug: string;
+  market: CmsMarket;
+  title: string;
+  format: CmsPublicationFormat;
+  dek?: string;
+  body?: CmsPublicationBodyItem[];
+  authors: CmsPublicationAuthorsItem[];
+  topics?: string[];
+  media?: CmsPublicationMedia;
+  download?: CmsPublicationDownload;
+  gated?: boolean;
+  eventStartsAt?: IsoDateTime;
+  publishedAt?: IsoDateTime;
+  /** @minimum 1 */
+  readingMinutes?: number;
+  seo?: CmsPublicationSeo;
+  publicationState: string;
+  updatedAt: IsoDateTime;
+}
+
+export interface CmsPublicationEnvelope {
+  publication: CmsPublication | null;
+  meta: CmsPageMeta;
+}
+
+export interface CmsPublicationListEnvelope {
+  publications: CmsPublication[];
+  meta: CmsPageMeta;
+}
+
 export interface CmsPreviewExchangeInput {
   /** @minLength 1 */
   token: string;
@@ -150,6 +294,7 @@ export const CmsPreviewExchangeStatus = {
 export interface CmsPreviewExchange {
   status: CmsPreviewExchangeStatus;
   market: CmsMarket;
+  routeKind: CmsPageRouteKind;
   /**
    * @minLength 1
    * @maxLength 120
@@ -162,6 +307,7 @@ export interface CmsPreviewExchange {
 
 export interface CmsPreviewTarget {
   market: CmsMarket;
+  routeKind: CmsPageRouteKind;
   /**
    * @minLength 1
    * @maxLength 120
@@ -627,3 +773,26 @@ export type InvalidCmsPageResponse = ErrorResponse;
  * Preview token is invalid or expired
  */
 export type InvalidPreviewTokenResponse = ErrorResponse;
+
+export type CmsRouteKindParameter =
+  (typeof CmsRouteKindParameter)[keyof typeof CmsRouteKindParameter];
+
+export const CmsRouteKindParameter = {
+  home: "home",
+  service: "service",
+  platform: "platform",
+  industry: "industry",
+  caseStudy: "caseStudy",
+  about: "about",
+  contact: "contact",
+  landing: "landing",
+  legal: "legal",
+} as const;
+
+export type GetCmsPublishedPageParams = {
+  routeKind: CmsRouteKindParameter;
+};
+
+export type GetCmsPreviewPageParams = {
+  routeKind: CmsRouteKindParameter;
+};

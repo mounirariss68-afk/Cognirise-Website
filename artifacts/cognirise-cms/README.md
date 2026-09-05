@@ -79,9 +79,9 @@ issue a request.
 
 - Page layouts are constrained to approved section objects. Pages store route kind and stable slug.
 - Every market edition declares `canonical`, `uaeFallback`, `override`, or `unavailable` and has an independent publication state. UAE uses `canonical`; every served market must have an edition record. Pages, navigation, profiles, organizations, and publications each use a purpose-built localized edition object rather than sharing page composition fields.
-- Studio validations and publish-action guards provide editor feedback only. The trusted API must authenticate the operator, authorize the role and market, validate transitions and approvals, transact the release, and append revision/audit records. It is the enforcement boundary.
+- Studio validations and publish-action guards provide editor feedback only. The trusted API authenticates the operator, authorizes the role and market, validates transitions and approvals, transacts releases, and appends revision/audit records for pages, navigation editions, and redirects. It is the enforcement boundary.
 - `revisionRecord` and `auditEvent` are read-only in Studio, and existing records expose no actions. True immutability and append-only enforcement require server-side credentials with create-only access, dataset ACLs, and a webhook or trusted release service. Do not issue these writes from the browser.
-- Future publication dates are deliberately blocked from manual publish. Configure Sanity Scheduled Publishing or a trusted server scheduler. The delivery query must enforce edition state, `publishAt`, and `expiresAt`.
+- Future publication dates are deliberately blocked from manual publish. The trusted API due processor handles scheduled publication and expiry for pages, navigation editions, and redirects; configure an external scheduler to call it. Delivery enforces state, `publishAt`, and `expiresAt`.
 - Schema validation is editorial assistance, not authorization. A server-side release endpoint should call the same policy rules, write a revision snapshot and audit event, and use transactions.
 - Provision the release service as a separate Sanity machine identity. Its token may read/write governed content and create `revisionRecord`/`auditEvent` documents, but project/dataset ACLs must deny update and delete on those immutable record types and deny project administration. Studio `readOnly` fields do not enforce this machine-token boundary.
 - Market uniqueness (one edition per market), one canonical UAE market, redirect collisions, and cross-document expiry checks should also be enforced in CI or a trusted publish service because schema validation cannot guarantee global uniqueness under concurrent edits.
@@ -110,6 +110,15 @@ Recommended provisioning sequence:
 
 Run policy tests with `pnpm --filter @workspace/cognirise-cms test` and type-check with `pnpm --filter @workspace/cognirise-cms typecheck`.
 
+
+## Repeatable migration
+
+The workspace migration command builds deterministic, fixed-ID fixtures for all
+four markets and the governed page, section, navigation, person/advisor,
+organization/partner, publication-format, media, evidence, redirect, and global
+settings shapes:
+
+```sh
 ## Generated client types
 
 With the two public Sanity environment variables set and the Sanity CLI authenticated for that project, run:
@@ -119,3 +128,41 @@ pnpm --filter @workspace/cognirise-cms typegen
 ```
 
 This runs `sanity schema extract --enforce-required-fields` and then Sanity TypeGen using `sanity-typegen.json`. It writes `src/sanity.types.ts` from `schema.json` and also generates result types for GROQ queries tagged with Sanity's `defineQuery` under `src`. Both generated files are ignored so CI or each consuming client can regenerate them against the checked-out schema; do not hand-edit generated types.
+
+# Create only missing documents after editorial approval (never overwrites)
+SANITY_PROJECT_ID=... SANITY_DATASET=... SANITY_API_TOKEN=... \
+  pnpm --filter @workspace/scripts cms:migrate -- --apply
+
+
+# Optionally retain newline-delimited JSON for review/import
+pnpm --filter @workspace/scripts cms:migrate -- --output=/approved/path/cognirise.ndjson
+
+
+# Validate locally without network writes
+pnpm --filter @workspace/scripts cms:migrate
+
+
+# Revision-checked update of reviewed records; requires every current revision
+SANITY_PROJECT_ID=... SANITY_DATASET=... SANITY_API_TOKEN=... \
+  pnpm --filter @workspace/scripts cms:migrate -- --apply --force \
+  --revision-map=/approved/path/revisions.json
+```
+
+The default command uses `createIfNotExists` with stable IDs, so reruns never
+overwrite editorial changes or duplicate records. A deliberate `--force`
+requires a complete revision map and uses Sanity's `ifRevisionID` optimistic
+locking; stale reviews fail atomically rather than overwriting newer edits.
+Migrated lifecycle and market editions
+are deliberately **draft**, and the migrated redirect is inactive. Operators
+must review and release one market/route through the trusted workflow; merely
+running the migration cannot cut public pages, navigation, or redirects over.
+The consuming site retains its reviewed code-owned routes, menus, markets,
+forms, redirects, and sitemap whenever a governed record is absent, non-live,
+invalid, or unavailable.
+
+The browser application can only perform a client-side redirect; it cannot
+emit an HTTP 301/302/307/308 after the document has loaded. `statusCode` is
+therefore retained as governed deployment-edge metadata. Configure the hosting
+edge to consume that metadata for status-bearing redirects; until then the
+website safely navigates in-browser and makes no claim that it preserved an
+HTTP redirect status.
