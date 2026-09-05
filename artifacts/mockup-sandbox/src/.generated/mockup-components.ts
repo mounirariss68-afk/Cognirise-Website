@@ -4,6 +4,7 @@ export const modules: ModuleMap = {
   "./components/mockups/cognios-authority-atlas/AuthorityAtlas.tsx": () => import("../components/mockups/cognios-authority-atlas/AuthorityAtlas.tsx"),
   "./components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx": () => import("../components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx"),
   "./components/mockups/cognirise-directions/AgenticSurge.tsx": () => import("../components/mockups/cognirise-directions/AgenticSurge.tsx"),
+  "./components/mockups/cognirise-directions/CogniriseLinkedInPulse.tsx": () => import("../components/mockups/cognirise-directions/CogniriseLinkedInPulse.tsx"),
   "./components/mockups/cognirise-directions/CognirisePulse.tsx": () => import("../components/mockups/cognirise-directions/CognirisePulse.tsx"),
   "./components/mockups/cognirise-directions/CognirisePulseLibrary.tsx": () => import("../components/mockups/cognirise-directions/CognirisePulseLibrary.tsx"),
   "./components/mockups/cognirise-directions/ExecutiveFieldManual.tsx": () => import("../components/mockups/cognirise-directions/ExecutiveFieldManual.tsx"),

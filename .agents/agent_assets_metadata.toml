@@ -57,3 +57,17 @@ mtime_ms = 1788631372664
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/84d9f9f1-1559-4ac8-bf38-1bd037e53e17/046615fa-bad4-4dcc-ab02-6dcbbb70b010"
 storage_version_token = "1788631881001436"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "n-jDgR7AryEMYEPYUvReg"
+uri = "file://artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-pulse-edition-01.zip"
+type = "unspecified"
+title = "Cognirise LinkedIn Pulse Campaign System"
+description = "Portable campaign package with six publish-ready LinkedIn post PNGs, three guide-free employee header PNGs, self-contained editable SVG sources, and the typology guide."
+logical_id = "0c372386-d8b0-431f-a861-f84da680e8cf"
+content_hash = "sha256:44eee783472dd818eb71260eac968b89b13bf02301c099163388c6ca1b63d95d"
+size = 17010724
+mtime_ms = 1788632287285
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/0c372386-d8b0-431f-a861-f84da680e8cf/f84161df-0bb9-4b5b-8a75-57825a3ca0a5"
+storage_version_token = "1788632298700167"
+content_type = "application/octet-stream"
