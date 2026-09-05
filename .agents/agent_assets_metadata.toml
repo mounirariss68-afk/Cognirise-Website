@@ -85,3 +85,17 @@ mtime_ms = 1788639291658
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/d4c98226-2108-4728-b54b-384654d6fc43/f65b2834-e235-45b0-a1c7-01e513e2fc10"
 storage_version_token = "1788639316693922"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "8AZKjg2ydVdyLqSenEHb1"
+uri = "file://artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-complete-with-image-only.zip"
+type = "unspecified"
+title = "Cognirise LinkedIn — Corrected Complete ZIP"
+description = "Fresh 31 MB archive under a new filename. Verified to contain all nine image-only PNGs, nine text-version PNGs, twelve SVG masters, and the readme."
+logical_id = "c7fd6e3e-7695-479f-bb32-18786e6c7efa"
+content_hash = "sha256:2dd598968d398d96092f81aa5551d7fcd6962346d626fee0ba66f205f49a6aa5"
+size = 31958821
+mtime_ms = 1788639466064
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/c7fd6e3e-7695-479f-bb32-18786e6c7efa/aa097716-9297-4f48-be75-5c949b8d52e8"
+storage_version_token = "1788639477389101"
+content_type = "application/octet-stream"
