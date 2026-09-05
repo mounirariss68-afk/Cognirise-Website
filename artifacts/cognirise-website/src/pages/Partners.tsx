@@ -1,47 +1,133 @@
 import { BrandButton } from "@/components/ui/brand-button";
 
+const partners = [
+  {
+    category: "engineering",
+    name: "BGTS", positioning: "Software engineering & technology services · 30 years of engineering · London, Sheffield, Düsseldorf, Amsterdam, Istanbul, Ankara — Dubai opening",
+    facts: [["2,000+", "full-time professionals"], ["8", "offices across the UK, Europe & Türkiye"], ["ISO/IEC 42001", "certified AI management (plus ISO 27001, 20000-1, 9001)"]],
+    coverage: ["Banking & finance", "Manufacturing", "Automotive", "Telecoms", "Retail & e-commerce", "Media & entertainment", "Technology"],
+    evidence: "HSBC, Vodafone, Mercedes-Benz, Coca-Cola, Booking.com, DHL, Samsung, Intel, IBM, BASF, Honda and Warner Bros. feature among the clients listed on BGTS's site. Case studies include AI-driven data management for retail; machine-learning vehicle pricing for automotive; promotion & loyalty management platforms; PIM modernization and legacy decommissioning.",
+    contribution: "The delivery backbone: two thousand certified engineers with deep financial-services specialization and nearshore scale across Europe and Türkiye — soon on the ground in Dubai. It's how a senior-led firm ships enterprise-scale builds without diluting seniority.",
+    source: "Facts per bgts.com (About Us, industries and case-study pages), accessed August 2026.",
+  },
+  {
+    category: "engineering",
+    name: "Argano", positioning: "Digital transformation consultancy for high-performance operations · Americas-anchored with global delivery",
+    facts: [["Top 1%", "Microsoft Inner Circle — 7 consecutive years"], ["5", "strategic platform alliances: Microsoft, Oracle, SAP, Salesforce, Infor"], ["Partner of the Year", "Oracle (regional) & Infor (healthcare) awards"]],
+    coverage: ["Asset-intensive industries", "Healthcare", "Manufacturing", "Services", "Enterprise ERP · HCM · CX across sectors"],
+    evidence: "Argano designs, implements and runs the enterprise platforms operations depend on — Oracle, SAP, Microsoft Dynamics, Salesforce and Infor — with recent expansion including a SAP delivery center in Mexico and acquisitions in capital-program governance and Oracle ERP services. Public highlights include Infor CloudSuite modernization in healthcare and capital-program governance for asset-intensive industries.",
+    contribution: "Mastery of the systems of record. When CogniOS interfaces with your ERP, CRM or HCM rather than replacing it, Argano's top-1% platform expertise makes those integrations enterprise-grade — and extends Cognirise's reach into the Americas.",
+    source: "Facts per argano.com (homepage, partner and technology pages), accessed August 2026.",
+  },
+  {
+    category: "platform",
+    name: "Lupitor", positioning: "Conversational-AI platform — AI agents for customer experience · Pittsburgh · San Francisco · Istanbul",
+    facts: [["40+", "clients on the platform"], ["0.05%", "reported hallucination rate on its custom-trained LLM"], ["48 hrs", "to a custom demo on your data"]],
+    coverage: ["Voice AI", "Chat & email", "Contact centers", "Any language", "On-premise or cloud"],
+    evidence: "Omnichannel AI agents that hold natural, human-like conversations grounded in your own data — with orchestration guardrails, self-improvement from live interactions, and integrations into CRM, documents and business apps. Deployable inside your infrastructure. Multilingual voice AI that can run on-premise is precisely what sovereign and regulated MENAT clients require — and what most global platforms can't offer.",
+    contribution: "The voice of the digital workforce. Lupitor powers the conversational front door — call centers, citizen hotlines, guest concierges — in any language, on your infrastructure, feeding governed CogniOS workflows behind it.",
+    source: "Facts per lupitor.com, accessed August 2026.",
+  },
+  {
+    category: "platform",
+    name: "Datatoolpack", positioning: "Automated data-preparation platform · Turning raw datasets into structured, AI-ready data",
+    facts: [["10+", "data-cleaning fixations for consistent formats"], ["1,000 → 20,000", "records in a published synthetic-data case example"], ["3 runs", "available in the free starting tier"]],
+    coverage: ["Data completion & verification", "Data cleaning", "Numericalization", "Missing-data handling", "Feature engineering", "Noise reduction", "Synthetic data"],
+    evidence: "AutoData brings common data-preparation steps into preset machine-learning pipelines. The platform can fill and verify values using web searches, API requests and LLM queries; standardize formats; numericalize and scale data; reduce noise; engineer features; and generate synthetic records. Its published HR example transformed inconsistent source data into a structured machine-learning dataset and expanded 1,000 records to 20,000 without manual preprocessing.",
+    contribution: "The preparation layer for AI-ready data. Datatoolpack helps Cognirise clients move from fragmented, inconsistent source data toward governed datasets that can support analytics, model training and CogniOS workflows with less manual pipeline work.",
+    source: "Alliance status confirmed by Cognirise, September 2026. Product facts per datatoolpack.com and AutoData product pages, accessed September 2026.",
+  },
+  {
+    category: "platform",
+    name: "bunjee.ai", positioning: "AI-native organizational intelligence · Capturing how experts and leaders think, then deploying that knowledge across the enterprise",
+    facts: [["30+", "languages supported for AI-led interviews"], ["2,184", "candidates screened in a published use case"], ["6 days", "to complete a process described as normally taking 6–8 weeks"]],
+    coverage: ["Recruitment", "Onboarding", "Training", "Assessment", "Internal communication", "Corporate memory", "Expert knowledge"],
+    evidence: "Bunjee captures conversations, videos, documents and processes from an organization's experts, structures them into a living intelligence layer, and deploys that expertise where teams need it. The same layer supports recruitment, onboarding, communication, assessment and training. Its recruitment workflow combines job posting, CV scoring and AI-led interviews with consistent rubrics, transcripts, rationale and ranked shortlists.",
+    contribution: "The organizational-memory layer. bunjee.ai helps Cognirise clients capture scarce expert judgment once and make it available across hiring, onboarding, learning, assessment and communication — extending governed intelligence from enterprise systems into the way people think and decide.",
+    source: "Alliance status confirmed by Cognirise, September 2026. Product facts and published use-case figures per bunjee.ai, accessed September 2026.",
+  },
+];
+
+const allianceGroups = [
+  {
+    id: "engineering",
+    number: "01",
+    label: "Engineering partners",
+    title: "The capacity to build at enterprise scale.",
+    description: "Engineering partners extend the senior Cognirise field team with platform implementation depth, certified delivery capacity and the specialist muscle to move complex systems into production.",
+  },
+  {
+    id: "platform",
+    number: "02",
+    label: "Platform partners",
+    title: "Specialist products, connected around the work.",
+    description: "Platform partners bring focused capabilities that complement CogniOS — from conversational AI and data readiness to organizational intelligence — selected where they strengthen the client outcome.",
+  },
+];
+
 export default function Partners() {
   return (
-    <div className="flex flex-col">
-      <section className="px-6 md:px-12 py-24 max-w-[1440px] mx-auto w-full">
-        <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
-          <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-          Partners
+    <main className="overflow-hidden">
+      <section className="relative bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12 md:py-32">
+        <div className="absolute -left-28 bottom-0 h-96 w-96 rounded-full bg-[hsl(var(--brand-violet))]/25 blur-3xl" />
+        <div className="relative mx-auto max-w-[1440px]">
+          <p className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/55">Our partners / one accountable ecosystem</p>
+          <h1 className="max-w-[1050px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[100px]">Senior-led. <span className="brand-gradient-text">Partner-amplified.</span></h1>
+          <div className="mt-10 grid gap-8 border-t border-white/20 pt-8 md:grid-cols-[1fr_.6fr]">
+            <p className="max-w-[730px] text-lg leading-8 text-white/70">Cognirise stays deliberately senior and small — and delivers at enterprise scale through two complementary alliance types: engineering partners who extend delivery capacity, and platform partners who bring specialist products into the solution.</p>
+            <p className="text-2xl font-semibold">Five confirmed partners.<br /><span className="text-[hsl(var(--brand-coral))]">One accountable team.</span></p>
+          </div>
         </div>
-        
-        <h1 className="text-5xl md:text-7xl lg:text-[100px] leading-[0.94] font-semibold mb-8 max-w-[800px]">
-          The right ecosystem for <em className="not-italic text-[hsl(var(--brand-pink))]">the work.</em>
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-[500px] mb-16 leading-relaxed">
-          When an engagement needs complementary technology or specialist capability, the ecosystem is selected around the mandate—not presented as a pre-agreed logo wall.
-        </p>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-px border border-border bg-border">
-          {[
-            ["01", "Client-selected technology", "Start with the platforms and providers already relevant to the operating environment."],
-            ["02", "Specialist capability", "Add domain or technical depth only where the work requires it."],
-            ["03", "Clear accountability", "Confirm roles, boundaries and relationships for each engagement before delivery begins."]
-          ].map(([number, title, copy]) => (
-            <div key={number} className="min-h-[280px] bg-white p-8 md:p-10 flex flex-col justify-between">
-              <span className="text-[10px] font-bold tracking-widest text-[hsl(var(--brand-pink))]">{number}</span>
+      <section className="mx-auto max-w-[1440px] px-6 py-20 md:px-12 md:py-32" aria-label="Alliance partner profiles">
+        {allianceGroups.map((group) => {
+          const groupPartners = partners.filter((partner) => partner.category === group.id);
+          return (
+          <section key={group.id} className="mb-32 last:mb-0" aria-labelledby={`${group.id}-partners-heading`}>
+            <header className="mb-16 grid gap-8 border-t border-foreground pt-7 md:grid-cols-[.35fr_1fr]">
+              <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">{group.number} / {group.label}</p>
               <div>
-                <h2 className="text-2xl font-semibold mb-4">{title}</h2>
-                <p className="text-sm leading-relaxed text-muted-foreground">{copy}</p>
+                <h2 id={`${group.id}-partners-heading`} className="max-w-[850px] text-4xl font-semibold leading-none md:text-6xl">{group.title}</h2>
+                <p className="mt-6 max-w-[720px] text-base leading-7 text-muted-foreground">{group.description}</p>
+              </div>
+            </header>
+            {groupPartners.map((partner, index) => (
+          <article key={partner.name} className="mb-24 border-t border-border pt-7 last:mb-0" data-testid={`profile-partner-${partner.name.toLowerCase().replaceAll(".", "-")}`}>
+            <div className="grid gap-10 lg:grid-cols-[.42fr_1fr]">
+              <header>
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-coral))]">0{index + 1} / {group.label}</p>
+                <h3 className="mt-6 text-5xl font-semibold md:text-7xl" data-testid={`text-partner-name-${partner.name.toLowerCase().replaceAll(".", "-")}`}>{partner.name}</h3>
+                <p className="mt-5 max-w-[430px] text-sm font-semibold leading-6 text-muted-foreground">{partner.positioning}</p>
+              </header>
+              <div>
+                <div className="grid bg-[hsl(var(--brand-deep))] text-white sm:grid-cols-3">
+                  {partner.facts.map(([value, label]) => <div key={value} className="border-b border-white/15 p-6 last:border-0 sm:border-b-0 sm:border-r sm:last:border-0"><strong className="block text-2xl text-[hsl(var(--brand-coral))]">{value}</strong><span className="mt-2 block text-xs leading-5 text-white/65">{label}</span></div>)}
+                </div>
+                <div className="mt-9 grid gap-9 md:grid-cols-[.7fr_1.3fr]">
+                  <div><h4 className="mb-4 text-[10px] font-bold uppercase tracking-[.2em]">Coverage</h4><div className="flex flex-wrap gap-2">{partner.coverage.map((item) => <span key={item} className="border border-border bg-secondary px-3 py-2 text-xs font-semibold">{item}</span>)}</div></div>
+                  <div><h4 className="mb-4 text-[10px] font-bold uppercase tracking-[.2em]">Platform, footprint & representative work</h4><p className="text-sm leading-7 text-muted-foreground">{partner.evidence}</p></div>
+                </div>
+                <aside className="mt-9 grid gap-5 bg-secondary p-7 md:grid-cols-[.42fr_1fr]">
+                  <h4 className="text-sm font-bold">What {partner.name} brings to Cognirise clients</h4>
+                  <div><p className="text-sm leading-7 text-muted-foreground">{partner.contribution}</p><p className="mt-6 border-t border-border pt-4 text-[10px] leading-5 text-muted-foreground">{partner.source}</p></div>
+                </aside>
               </div>
             </div>
-          ))}
-        </div>
+          </article>
+            ))}
+          </section>
+          );
+        })}
+        <p className="mt-24 max-w-[900px] border-l-4 border-[hsl(var(--brand-pink))] pl-7 text-xl leading-9">Beyond the confirmed alliance network, Cognirise assembles additional specialist capability per engagement — so every mission gets exactly the engineering depth and platform support it needs.</p>
       </section>
 
-      <section className="bg-foreground text-white px-6 md:px-12 py-24 relative overflow-hidden">
-        <div className="max-w-[1440px] mx-auto relative z-10 text-center">
-          <h2 className="text-4xl md:text-5xl font-semibold tracking-tight mb-8">Bring a relevant capability</h2>
-          <p className="text-lg text-white/80 max-w-[500px] mx-auto mb-12">
-            If your technology or specialist expertise is relevant to a real operating challenge, we can start with the work and test the fit.
-          </p>
-          <BrandButton href="/contact" variant="submit">Start a conversation</BrandButton>
+      <section className="bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12">
+        <div className="mx-auto flex max-w-[1440px] flex-col justify-between gap-10 md:flex-row md:items-end">
+          <div><h2 className="max-w-[800px] text-4xl font-semibold md:text-6xl">One senior team.<br /><span className="text-[hsl(var(--brand-coral))]">The whole network behind it.</span></h2><p className="mt-5 text-white/65">Tell us the outcome. We’ll bring the right partners to the table — under one accountable lead.</p></div>
+          <BrandButton href="/contact" variant="inverse" data-testid="link-partners-contact">Talk to a partner</BrandButton>
         </div>
       </section>
-    </div>
+    </main>
   );
 }

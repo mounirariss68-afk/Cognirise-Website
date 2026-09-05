@@ -1,52 +1,104 @@
 import { Link } from "wouter";
-import { ArrowDown, ArrowRight } from "lucide-react";
-import { useMarketStore } from "@/store/market";
+import { ArrowRight } from "lucide-react";
 import { assetUrl } from "@/lib/assets";
 
+const founders = [
+  {
+    initials: "MA",
+    name: "Mounir Ariss",
+    bio: "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage — now focused on one conviction: the next frontier isn't AI adoption, it's becoming an agentic enterprise.",
+    focus: [
+      ["Agentic Enterprise Transformation", "AI-native workflows and decision layers"],
+      ["Data & AI Foundations", "Architecture, governance, durable capability"],
+      ["SDLC & Legacy Modernization", "AI-augmented delivery, retiring technical debt"],
+    ],
+  },
+  {
+    initials: "GG",
+    name: "Gökhan Güney",
+    bio: "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf — building the engineering muscle that turns strategy decks into systems that run.",
+    focus: [
+      ["Agentic Enterprise Transformation", "Humans + agents in production"],
+      ["Data & AI Foundations", "Platforms and operating models that scale"],
+      ["SDLC & Legacy Modernization", "Engineering acceleration with AI"],
+    ],
+  },
+];
+
 export default function AboutPeople() {
-  const { market } = useMarketStore();
-  
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
-
-  const goTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-
   return (
-    <main className="ap">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
-        .ap{--ink:#102957;--ink2:#071936;--paper:#fdfcfb;--soft:#f1f3f7;--line:#cbd3e1;--muted:#536887;--violet:#7659df;--pink:#db509e;--coral:#ff775d;background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;overflow:hidden}.ap *{box-sizing:border-box}.ap button{font:inherit}.ap a{color:inherit;text-decoration:none}.ap :focus-visible{outline:3px solid var(--coral);outline-offset:4px}.ap h1,.ap h2,.ap h3{font-family:Comfortaa,sans-serif}
-        .ap-kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;display:flex;align-items:center;gap:10px}.ap-kicker:before{content:"";width:23px;height:1px;background:linear-gradient(90deg,var(--violet),var(--coral))}
-        .ap-hero{padding:22px 4.8vw 0}.ap-hero-grid{min-height:680px;display:grid;grid-template-columns:.87fr 1.13fr;gap:42px;align-items:end;padding-bottom:35px}.ap-hero-copy{padding-bottom:17px;position:relative;z-index:1}.ap-hero h1{font-size:clamp(48px,6.35vw,100px);line-height:.94;letter-spacing:-.08em;font-weight:600;margin:30px 0 28px;max-width:650px}.ap-hero h1 em,.ap-statement h2 em{font-style:normal;color:var(--pink)}.ap-hero p{font-size:16px;line-height:1.6;color:#415779;max-width:450px;margin:0 0 30px}.ap-actions{display:flex;gap:18px;align-items:center}.ap-primary{border:1px solid var(--ink);cursor:pointer;color:#fff;background:var(--ink);font-weight:700;font-size:12px;padding:4px 4px 4px 17px;min-height:46px;display:inline-flex;align-items:center;gap:15px;position:relative;isolation:isolate;overflow:hidden;transition:transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s;text-decoration:none}.ap-primary:before{content:"";position:absolute;z-index:-2;inset:-1px;background:linear-gradient(105deg,var(--violet),var(--pink),var(--coral));opacity:0;transition:opacity .24s}.ap-primary:after{content:"";position:absolute;z-index:-1;inset:1px;background:var(--ink);transition:background .24s}.ap-primary svg{width:36px;height:36px;padding:10px;background:#fff;color:var(--ink);transition:transform .24s,background .24s,color .24s}.ap-primary:hover{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--coral)}.ap-primary:hover:before{opacity:1}.ap-primary:hover:after{background:rgba(7,25,54,.94)}.ap-primary:hover svg{transform:translate(3px,-3px);background:var(--coral);color:#fff}.ap-under{background:none;border:0;border-bottom:1px solid var(--ink);padding:8px 0;font-size:12px;font-weight:700;color:var(--ink);display:inline-flex;gap:8px;align-items:center;cursor:pointer}.ap-under:hover{color:var(--pink);border-color:var(--pink)}.ap-hero-image{height:630px;overflow:hidden;position:relative;background:var(--ink2);clip-path:polygon(10% 0,100% 0,100% 91%,0 100%,0 12%)}.ap-hero-image img{width:100%;height:100%;object-fit:cover}.ap-hero-image:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.32),transparent 42%),linear-gradient(0deg,rgba(7,25,54,.65),transparent 42%)}.ap-hero-word{font:600 clamp(60px,9.3vw,150px)/.8 Comfortaa,sans-serif;letter-spacing:-.1em;color:#fff;position:absolute;top:53px;right:-5px;z-index:1;mix-blend-mode:overlay}.ap-caption{position:absolute;left:34px;bottom:28px;z-index:2;color:#fff;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.ap-caption span{display:block;opacity:.7;margin-bottom:7px}
-        .ap-proof{margin:0 4.8vw;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);display:grid;grid-template-columns:repeat(4,1fr)}.ap-proof div{padding:18px 20px;border-right:1px solid var(--line);font-size:12px;line-height:1.45}.ap-proof div:last-child{border:0}.ap-proof b{font-size:10px;letter-spacing:.11em;text-transform:uppercase;display:block;color:#6a7891;margin-bottom:8px}
-        .ap-statement{padding:150px 4.8vw 110px;display:grid;grid-template-columns:1fr 1.12fr;gap:7vw}.ap-statement h2{font-size:clamp(42px,5vw,78px);line-height:.98;letter-spacing:-.075em;font-weight:600;margin:24px 0 0}.ap-statement-copy{align-self:end;border-top:1px solid var(--line);padding-top:22px;color:#30486d;font-size:21px;line-height:1.44;max-width:540px}.ap-statement-copy p{margin:0}.ap-statement-copy small{display:block;margin-top:22px;color:#647491;font-size:12px;line-height:1.55}
-        .ap-leadership{margin:0 4.8vw;height:min(670px,51vw);min-height:500px;background:var(--ink2);position:relative;overflow:hidden}.ap-leadership img{height:100%;width:100%;object-fit:cover}.ap-leadership:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.86),rgba(7,25,54,.06) 70%)}.ap-leadership-copy{position:absolute;z-index:1;left:6%;bottom:11%;color:white;max-width:610px}.ap-leadership h2{font-size:clamp(43px,5.3vw,80px);line-height:.96;letter-spacing:-.08em;font-weight:600;margin:16px 0}.ap-leadership p{font-size:15px;line-height:1.6;color:#dce4f0;max-width:430px}.ap-vertical{position:absolute;z-index:1;right:4%;top:35px;color:#fff;font-size:10px;letter-spacing:.12em;writing-mode:vertical-rl}
-        .ap-model{padding:125px 4.8vw}.ap-model-head{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end}.ap-model h2{font-size:clamp(42px,5vw,72px);line-height:.97;letter-spacing:-.08em;font-weight:600;margin:20px 0 0;max-width:690px}.ap-model-lead{font-size:16px;line-height:1.55;color:#42587b;max-width:410px;margin:0}.ap-roles{margin-top:65px;border-top:1px solid var(--ink)}.ap-role{display:grid;grid-template-columns:72px 1fr 1fr 40px;gap:20px;align-items:center;padding:24px 8px;border-bottom:1px solid var(--line);transition:padding .24s,background .24s}.ap-role:hover{padding-left:21px;background:#f1effb}.ap-role>span{font-size:10px;color:#697a96;letter-spacing:.1em}.ap-role h3{font-size:clamp(20px,2.3vw,32px);letter-spacing:-.06em;line-height:1.05;margin:0;font-weight:600}.ap-role p{font-size:13px;line-height:1.45;margin:0;color:var(--muted);max-width:305px}.ap-role svg{justify-self:end;color:var(--pink)}
-        .ap-field{background:#eef0f5;padding:0 4.8vw 126px}.ap-field-wrap{display:grid;grid-template-columns:1.1fr .9fr;min-height:610px}.ap-field-copy{padding:91px 9% 60px 0}.ap-field h2{font-size:clamp(43px,5vw,76px);line-height:.97;letter-spacing:-.08em;font-weight:600;margin:20px 0 28px}.ap-field p{font-size:16px;line-height:1.6;color:#3e567b;max-width:430px}.ap-principles{margin-top:40px;border-top:1px solid var(--ink)}.ap-principles div{padding:13px 0;border-bottom:1px solid var(--line);font-size:13px;font-weight:600}.ap-principles span{display:inline-block;width:54px;font-size:10px;letter-spacing:.1em;color:var(--pink)}.ap-field-image{margin-top:-46px;overflow:hidden;position:relative;clip-path:polygon(0 8%,100% 0,100% 100%,9% 92%)}.ap-field-image img{width:100%;height:100%;object-fit:cover;transition:transform .7s}.ap-field-image:hover img{transform:scale(1.04)}.ap-field-image:after{content:"shared accountability";position:absolute;right:24px;bottom:23px;color:#fff;font-size:10px;letter-spacing:.11em;text-transform:uppercase}
-        .ap-partners{padding:0 4.8vw 128px}.ap-partner-head{border-top:1px solid var(--ink);padding-top:25px;display:flex;justify-content:space-between;align-items:end;gap:30px}.ap-partners h2{font-size:clamp(40px,4.8vw,70px);line-height:.98;letter-spacing:-.08em;font-weight:600;margin:13px 0 0}.ap-partner-head p{font-size:14px;line-height:1.5;color:var(--muted);max-width:310px}.ap-partner-image{height:400px;position:relative;overflow:hidden;margin-top:44px;clip-path:polygon(0 0,100% 8%,100% 100%,4% 91%)}.ap-partner-image img{height:100%;width:100%;object-fit:cover;object-position:center 65%;transition:transform .7s}.ap-partner-image:hover img{transform:scale(1.04)}.ap-partner-image:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.68),rgba(7,25,54,.05))}.ap-partner-caption{position:absolute;z-index:1;left:32px;bottom:28px;color:#fff;max-width:450px}.ap-partner-caption span{font-size:10px;text-transform:uppercase;letter-spacing:.12em;opacity:.75}.ap-partner-caption strong{display:block;font:600 clamp(24px,3vw,42px)/1 Comfortaa,sans-serif;letter-spacing:-.06em;margin-top:10px}.ap-partner-list{border-top:1px solid var(--line);margin-top:38px}.ap-partner-list div{display:grid;grid-template-columns:90px 1fr 1fr;gap:25px;padding:18px 8px;border-bottom:1px solid var(--line);font-size:13px}.ap-partner-list span{font-size:10px;color:#77859c;letter-spacing:.1em}.ap-partner-list b{font-weight:600}
-        .ap-start{background:var(--ink);color:#fff;padding:104px 4.8vw 104px;position:relative}.ap-start:before{content:"PEOPLE";position:absolute;right:-10px;bottom:-18px;font:600 18vw/.7 Comfortaa,sans-serif;letter-spacing:-.11em;color:rgba(255,255,255,.06)}.ap-start-inner{position:relative;z-index:1;max-width:970px}.ap-start h2{font-size:clamp(52px,7.5vw,113px);line-height:.88;letter-spacing:-.095em;font-weight:600;margin:26px 0}.ap-start h2 em{font-style:normal;color:#ff8470}.ap-start p{font-size:17px;line-height:1.55;color:#d6deed;max-width:500px}.ap-start .ap-primary{margin-top:21px;border-color:transparent;background:linear-gradient(100deg,var(--violet),var(--pink),var(--coral));font-size:13px;padding-left:19px}.ap-start .ap-primary:before{background:#fff}.ap-start .ap-primary:after{background:transparent}.ap-start .ap-primary:hover{box-shadow:6px 6px 0 #fff}
-        @media(max-width:760px){.ap-hero{padding:33px 21px 0}.ap-hero-grid{display:flex;flex-direction:column;min-height:0;gap:32px;align-items:stretch;padding-bottom:25px}.ap-hero h1{font-size:53px;margin:25px 0 22px}.ap-hero-image{height:440px}.ap-hero-word{font-size:70px}.ap-proof{margin:0 21px;grid-template-columns:1fr 1fr}.ap-proof div{padding:16px 12px}.ap-proof div:nth-child(2){border-right:0}.ap-proof div:nth-child(-n+2){border-bottom:1px solid var(--line)}.ap-statement{padding:86px 21px 73px;display:block}.ap-statement h2{font-size:42px}.ap-statement-copy{font-size:18px;margin-top:43px}.ap-leadership{margin:0;height:525px;min-height:0}.ap-leadership-copy{left:23px;right:23px;bottom:28px}.ap-leadership h2{font-size:42px}.ap-model{padding:82px 21px}.ap-model-head{display:block}.ap-model h2{font-size:43px}.ap-model-lead{margin-top:29px}.ap-roles{margin-top:42px}.ap-role{grid-template-columns:35px 1fr 25px;gap:12px;padding:20px 0}.ap-role p{display:none}.ap-role h3{font-size:21px}.ap-field{padding:0 21px 80px}.ap-field-wrap{display:block;min-height:0}.ap-field-copy{padding:76px 0 42px}.ap-field h2{font-size:43px}.ap-field-image{height:390px;margin:0}.ap-partners{padding:0 21px 82px}.ap-partner-head{display:block}.ap-partners h2{font-size:42px}.ap-partner-head p{margin-top:25px}.ap-partner-image{height:345px;margin-top:34px}.ap-partner-caption{left:22px;bottom:22px}.ap-partner-list{margin-top:26px}.ap-partner-list div{grid-template-columns:45px 1fr;padding:17px 0}.ap-partner-list div p{grid-column:2;margin:0;color:var(--muted);line-height:1.45}.ap-start{padding:77px 21px 60px}.ap-start h2{font-size:58px}}
-      `}</style>
-
-      <section className="ap-hero">
-        <div className="ap-kicker">About Cognirise / {marketLocation}</div>
-        <div className="ap-hero-grid"><div className="ap-hero-copy"><h1>Senior-led is not a <em>slogan.</em></h1><p>Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production. Senior advisors, operators and engineers stay with it from the first decision.</p><div className="ap-actions"><button className="ap-primary" onClick={() => goTo("model")}>See the operating model <ArrowRight /></button><button className="ap-under" onClick={() => goTo("field")}>Meet the model <ArrowDown size={15} /></button></div></div><div className="ap-hero-image"><img src={assetUrl("/images/cognirise/site-leadership.jpg")} alt="A diverse senior team working together around a detailed physical model." /><div className="ap-hero-word">present</div><div className="ap-caption"><span>01 / the room where work changes</span>Judgment, close to the work</div></div></div>
+    <main className="overflow-hidden bg-background">
+      <section className="relative min-h-[690px] bg-[hsl(var(--brand-deep))] px-6 py-20 text-white md:px-12 md:py-28">
+        <div className="absolute -right-32 top-0 h-[520px] w-[520px] rounded-full bg-[hsl(var(--brand-pink))]/25 blur-3xl" />
+        <div className="absolute -bottom-48 left-[30%] h-[420px] w-[420px] rounded-full bg-[hsl(var(--brand-violet))]/25 blur-3xl" />
+        <div className="relative mx-auto grid max-w-[1440px] gap-14 lg:grid-cols-[.92fr_1.08fr] lg:items-end">
+          <div>
+            <p className="mb-8 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[.2em] text-white/60">
+              <span className="h-px w-8 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
+              Founding partners
+            </p>
+            <h1 className="max-w-[760px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[104px]">
+              Senior-led is not a slogan. <em className="not-italic text-[hsl(var(--brand-coral))]">It’s the staffing model.</em>
+            </h1>
+            <p className="mt-8 max-w-[570px] text-base leading-7 text-white/70 md:text-lg">
+              The people who frame the decision stay close enough to make it real. Cognirise was founded to keep judgment, engineering and accountability in the same room.
+            </p>
+          </div>
+          <figure className="clip-diagonal relative h-[390px] overflow-hidden lg:h-[520px]">
+            <img className="h-full w-full object-cover" src={assetUrl("/images/cognirise/site-leadership.jpg")} alt="Senior colleagues working together around a detailed physical model." />
+            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))]/80 via-transparent to-transparent" />
+            <figcaption className="absolute bottom-8 left-8 text-xs font-bold uppercase tracking-[.18em]">Judgment stays close to the work</figcaption>
+          </figure>
+        </div>
       </section>
-      <section className="ap-proof" aria-label="Our approach"><div><b>Based in</b><strong>{marketLocation}</strong></div><div><b>Led by</b><strong>Senior advisors and operators</strong></div><div><b>Built with</b><strong>Forward-deployed engineers</strong></div><div><b>Extended by</b><strong>Partner scale, when needed</strong></div></section>
-      <section className="ap-statement"><div><div className="ap-kicker">The people model</div><h2>The work deserves more than a <em>handover.</em></h2></div><div className="ap-statement-copy"><p>We do not separate the people who frame a decision from the people who make it real. The advisory conversation and the delivery conversation happen in the same room.</p><small>That means fewer translations, clearer ownership and a route from an important question to a working system.</small></div></section>
-      <section className="ap-leadership"><img src={assetUrl("/images/cognirise/site-leadership.jpg")} alt="Senior colleagues studying a physical model in a bright UAE workspace." /><div className="ap-leadership-copy"><div className="ap-kicker">Close to the decision</div><h2>Senior attention, where it changes the route.</h2><p>The hard calls arrive early: what matters, what is feasible, what must be governed, and what it will take to move. Our senior people stay close to those calls.</p></div><div className="ap-vertical">02 / senior-led</div></section>
-      <section className="ap-model" id="model"><div className="ap-model-head"><div><div className="ap-kicker">One accountable field team</div><h2>Different disciplines. Shared responsibility.</h2></div><p className="ap-model-lead">The work moves best when each role brings its full perspective, without passing the problem down a chain.</p></div><div className="ap-roles">{[["01","Advisors","Set the direction around the business outcome, constraints and decisions that matter."],["02","Operators","Bring practical context to the process, people and operating environment."],["03","Engineers","Turn the route into a production-ready system, not a demonstration."],["04","Partners","Extend specialist capacity where the work calls for it, without diluting accountability."]].map(([n,t,c]) => <div className="ap-role" key={t}><span>{n}</span><h3>{t}</h3><p>{c}</p><ArrowRight size={17}/></div>)}</div></section>
-      <section className="ap-field" id="field"><div className="ap-field-wrap"><div className="ap-field-copy"><div className="ap-kicker">How the forces connect</div><h2>One team around the work—not around a slide deck.</h2><p>Advisors create clarity. Operators keep it grounded in the reality of the organisation. Engineers make the change durable. The team is designed to hold the route together.</p><div className="ap-principles"><div><span>01</span>Direction stays connected to delivery</div><div><span>02</span>Operational reality shapes the build</div><div><span>03</span>Partner scale serves the work</div></div></div><div className="ap-field-image"><img src={assetUrl("/images/cognirise/pulse-convergence.jpg")} alt="People moving through a vivid architectural space of reflective violet and coral forms." /></div></div></section>
-      <section className="ap-partners" id="partners"><div className="ap-partner-head"><div><div className="ap-kicker">Scale without distance</div><h2>A core team, strengthened by the right relationships.</h2></div><p>Partner capability can add reach and specialist knowledge. It does not replace the people accountable for the work in front of you.</p></div><div className="ap-partner-image"><img src={assetUrl("/images/cognirise/cognirise-pulse-people.jpg")} alt="A group of people gathered beneath an expansive flowing field of violet and coral light." /><div className="ap-partner-caption"><span>03 / collective capability</span><strong>The relationship is the delivery model.</strong></div></div><div className="ap-partner-list"><div><span>Core</span><b>Cognirise field team</b><p>Senior advisors, operators and engineers accountable for the route.</p></div><div><span>Extended</span><b>Specialist partners</b><p>Capability brought in for the needs of the work, under one shared direction.</p></div><div><span>Client</span><b>Your teams</b><p>The people who own the process, the decisions and the change after release.</p></div></div></section>
-      <section className="ap-start" id="start">
-        <div className="ap-start-inner">
-          <div className="ap-kicker">Start in the room</div>
-          <h2>Bring one process.<br /><em>Meet the people.</em></h2>
-          <p>Start with a process where urgency, complexity and value have already collided. We will bring the right people to help surface the opportunity, constraints and practical route forward.</p>
-          <Link href="/value-scan" className="ap-primary">Book a value scan <ArrowRight /></Link>
+
+      <section className="mx-auto max-w-[1440px] px-6 py-24 md:px-12 md:py-36" aria-labelledby="founders-heading">
+        <div className="grid gap-10 border-b border-foreground pb-14 md:grid-cols-2">
+          <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">01 / The founder story</p>
+          <h2 id="founders-heading" className="text-4xl font-semibold leading-none md:text-6xl">Two disciplines.<br />One accountable route.</h2>
+        </div>
+        <div className="divide-y divide-border">
+          {founders.map((founder, index) => (
+            <article key={founder.name} className="grid gap-10 py-16 md:py-24 lg:grid-cols-[.45fr_1fr_1.2fr]" data-testid={`profile-founder-${founder.initials.toLowerCase()}`}>
+              <div className="flex items-start gap-5">
+                <span className="grid h-20 w-20 shrink-0 place-items-center bg-gradient-to-br from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] font-display text-2xl font-bold text-white [clip-path:polygon(0_0,100%_10%,88%_100%,10%_88%)]">{founder.initials}</span>
+                <span className="pt-2 text-[10px] font-bold tracking-[.2em] text-muted-foreground">0{index + 1}</span>
+              </div>
+              <div>
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-[.18em] text-[hsl(var(--brand-pink))]">Founding Partner</p>
+                <h3 className="text-4xl font-semibold md:text-5xl" data-testid={`text-founder-name-${founder.initials.toLowerCase()}`}>{founder.name}</h3>
+                <p className="mt-7 max-w-[520px] text-base leading-7 text-muted-foreground">{founder.bio}</p>
+              </div>
+              <div className="border-t border-foreground pt-1">
+                {founder.focus.map(([title, detail], focusIndex) => (
+                  <div key={title} className="grid grid-cols-[32px_1fr] gap-4 border-b border-border py-5">
+                    <span className="text-[10px] font-bold text-[hsl(var(--brand-coral))]">0{focusIndex + 1}</span>
+                    <div><h4 className="text-sm font-bold">{title}</h4><p className="mt-1 text-sm leading-6 text-muted-foreground">{detail}</p></div>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="relative bg-secondary px-6 py-24 md:px-12">
+        <div className="mx-auto grid max-w-[1440px] gap-12 lg:grid-cols-[1fr_.8fr] lg:items-center">
+          <div>
+            <p className="mb-6 text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">The proof is operational</p>
+            <h2 className="max-w-[850px] text-4xl font-semibold leading-[1.02] md:text-7xl">We run our own firm on our own platform.</h2>
+            <p className="mt-7 max-w-[650px] text-lg leading-8 text-muted-foreground"><strong className="text-foreground">Atelier, powered by CogniOS.</strong> We don’t sell what we don’t live on.</p>
+          </div>
+          <div className="clip-diagonal-bottom h-[310px] overflow-hidden">
+            <img className="h-full w-full object-cover" src={assetUrl("/images/cognirise/pulse-convergence.jpg")} alt="Violet and coral architectural forms converging in a bright space." />
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12">
+        <div className="mx-auto flex max-w-[1440px] flex-col items-start justify-between gap-8 md:flex-row md:items-end">
+          <h2 className="max-w-[800px] text-5xl font-semibold leading-[.95] md:text-7xl">Bring one process.<br /><span className="text-[hsl(var(--brand-coral))]">Meet the people.</span></h2>
+          <Link href="/value-scan" className="inline-flex items-center gap-4 border border-white px-6 py-4 text-sm font-bold transition hover:bg-white hover:text-[hsl(var(--brand-deep))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-coral))]" data-testid="link-about-value-scan">Book a value scan <ArrowRight size={18} /></Link>
         </div>
       </section>
     </main>
