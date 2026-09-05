@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
-import { architectureLayers, architectureSpines } from "@/data/cognios-architecture";
+import { ArchitectureStage } from "@/components/cognios/ArchitectureStage";
 
 export default function CogniOSPlatform() {
   const { market } = useMarketStore();
@@ -86,7 +86,6 @@ export default function CogniOSPlatform() {
         </div>
       </section>
 
-      <style>{`.co-cutaway{margin-top:56px;background:var(--deep);padding:27px 12%;position:relative;min-height:590px;overflow:hidden;clip-path:polygon(0 0,100% 0,100% 95%,96% 100%,0 100%)}.co-cutaway:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 52% 42%,rgba(118,89,223,.38),transparent 42%)}.co-cutaway-planes{position:relative;z-index:2;display:flex;flex-direction:column;gap:9px}.co-cutaway-plane{min-height:78px;color:#fff;display:grid;grid-template-columns:50px 1fr 25px;align-items:center;gap:13px;padding:15px 20px;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.28);clip-path:polygon(0 0,100% 0,97% 100%,0 100%);transition:transform .24s,background .24s}.co-cutaway-plane:nth-child(odd){transform:translateX(4%)}.co-cutaway-plane:nth-child(even){transform:translateX(-3%)}.co-cutaway-plane:hover{transform:translateX(0);background:linear-gradient(90deg,rgba(118,89,223,.65),rgba(219,80,158,.28))}.co-cutaway-plane span{font-size:10px;color:#ffad9c;letter-spacing:.1em}.co-cutaway-plane h3{margin:0;font-size:clamp(17px,2vw,27px);letter-spacing:-.06em}.co-cutaway-plane p{margin:4px 0 0;font-size:11px;line-height:1.4;color:#dbe4f0}.co-cutaway-spine{position:absolute;z-index:3;top:22px;bottom:22px;border-left:1px solid rgba(255,255,255,.5);padding:10px 5px;color:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.1em;writing-mode:vertical-rl}.co-cutaway-spine:after{content:"";display:block;width:6px;height:6px;background:var(--coral);margin:10px auto;box-shadow:0 155px 0 var(--pink),0 310px 0 var(--violet)}.co-cutaway-ops{left:22px}.co-cutaway-assurance{right:22px}.co-cutaway small{position:absolute;z-index:2;bottom:17px;left:12%;color:#cdd9ed;font-size:9px;letter-spacing:.12em;text-transform:uppercase}@media(max-width:760px){.co-cutaway{margin-top:40px;padding:22px 48px;min-height:610px}.co-cutaway-plane:nth-child(n){transform:none}.co-cutaway-plane{grid-template-columns:30px 1fr 18px;padding:13px 12px;gap:7px}.co-cutaway-plane p{font-size:10px}.co-cutaway-plane h3{font-size:16px}.co-cutaway-spine{font-size:0;width:18px;padding:4px}.co-cutaway-ops{left:11px}.co-cutaway-assurance{right:11px}.co-cutaway small{left:48px}}`}</style>
       <section className="co-architecture" id="architecture">
         <div className="co-arch-head">
           <div>
@@ -95,14 +94,7 @@ export default function CogniOSPlatform() {
           </div>
           <p>Each layer has a distinct responsibility. Together they give teams a practical way to deploy intelligence into the work, not beside it.</p>
         </div>
-        <div className="co-cutaway" aria-label="CogniOS six layer cutaway">
-          <div className="co-cutaway-spine co-cutaway-ops">{architectureSpines[1].name}</div>
-          <div className="co-cutaway-spine co-cutaway-assurance">{architectureSpines[0].name}</div>
-          <div className="co-cutaway-planes">
-            {architectureLayers.map((layer) => <Link key={layer.id} href={`/platforms/cognios/architecture?layer=${layer.id}`} className="co-cutaway-plane" data-testid={`link-layer-${layer.id}`} aria-label={`Explore ${layer.name}`}><span>{layer.number}</span><div><h3>{layer.name}</h3><p>{layer.responsibility}</p></div><ArrowRight size={17}/></Link>)}
-          </div>
-          <small>Two continuous spines cross every plane.</small>
-        </div>
+        <ArchitectureStage />
       </section>
 
       <section className="co-spines">

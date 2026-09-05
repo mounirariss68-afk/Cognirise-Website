@@ -143,7 +143,7 @@ const navigation = [
     items: [
       { label: "Platform Overview", href: "/platforms" },
       { label: "CogniOS", href: "/platforms/cognios" },
-      { label: "Architecture", href: "/platforms/cognios/architecture" },
+      { label: "Architecture", href: "/platforms/cognios#architecture" },
       { label: "CogniDocs", href: "/platforms/cognidocs" },
       { label: "CogniAgents", href: "/platforms/cogniagents" },
       { label: "CogniTalk", href: "/platforms/cognitalk" },

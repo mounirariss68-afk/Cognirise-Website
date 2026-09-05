@@ -1,9 +1,14 @@
-import { Switch, Route, Redirect } from "wouter";
+import { Switch, Route, Redirect, useSearch } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import { Shell } from "@/components/layout/Shell";
+
+function RedirectWithSearch({ to }: { to: string }) {
+  const search = useSearch();
+  return <Redirect to={search ? `${to}?${search}#architecture` : `${to}#architecture`} />;
+}
 
 // Pages
 import Home from "@/pages/Home";
@@ -16,7 +21,6 @@ import DigitalAIWorkforce from "@/pages/DigitalAIWorkforce";
 
 import PlatformsOverview from "@/pages/PlatformsOverview";
 import CogniOSPlatform from "@/pages/CogniOSPlatform";
-import CogniOSArchitecture from "@/pages/CogniOSArchitecture";
 import CogniDocs from "@/pages/CogniDocs";
 import CogniAgents from "@/pages/CogniAgents";
 import CogniTalk from "@/pages/CogniTalk";
@@ -60,7 +64,6 @@ function Router() {
         {/* Platforms */}
         <Route path="/platforms" component={PlatformsOverview} />
         <Route path="/platforms/cognios" component={CogniOSPlatform} />
-        <Route path="/platforms/cognios/architecture" component={CogniOSArchitecture} />
         <Route path="/platforms/cognidocs" component={CogniDocs} />
         <Route path="/platforms/cogniagents" component={CogniAgents} />
         <Route path="/platforms/cognitalk" component={CogniTalk} />
@@ -80,7 +83,8 @@ function Router() {
 
         {/* Legacy aliases */}
         <Route path="/who"><Redirect to="/about" /></Route>
-        <Route path="/architecture"><Redirect to="/platforms/cognios/architecture" /></Route>
+        <Route path="/platforms/cognios/architecture"><RedirectWithSearch to="/platforms/cognios" /></Route>
+        <Route path="/architecture"><RedirectWithSearch to="/platforms/cognios" /></Route>
         <Route path="/cognidocs"><Redirect to="/platforms/cognidocs" /></Route>
         <Route path="/cogniagents"><Redirect to="/platforms/cogniagents" /></Route>
         <Route path="/cognitalk"><Redirect to="/platforms/cognitalk" /></Route>
