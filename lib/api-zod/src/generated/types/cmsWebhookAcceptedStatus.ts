@@ -6,9 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsWebhookAcceptedStatus = typeof CmsWebhookAcceptedStatus[keyof typeof CmsWebhookAcceptedStatus];
-
+export type CmsWebhookAcceptedStatus =
+  (typeof CmsWebhookAcceptedStatus)[keyof typeof CmsWebhookAcceptedStatus];
 
 export const CmsWebhookAcceptedStatus = {
-  accepted: 'accepted',
+  accepted: "accepted",
 } as const;

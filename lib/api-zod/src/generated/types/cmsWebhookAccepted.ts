@@ -5,7 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsWebhookAcceptedStatus } from './cmsWebhookAcceptedStatus';
+import type { CmsWebhookAcceptedStatus } from "./cmsWebhookAcceptedStatus";
 
 export interface CmsWebhookAccepted {
   status: CmsWebhookAcceptedStatus;

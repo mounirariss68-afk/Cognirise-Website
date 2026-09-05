@@ -6,15 +6,15 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsWorkflowState = typeof CmsWorkflowState[keyof typeof CmsWorkflowState];
-
+export type CmsWorkflowState =
+  (typeof CmsWorkflowState)[keyof typeof CmsWorkflowState];
 
 export const CmsWorkflowState = {
-  draft: 'draft',
-  review: 'review',
-  approved: 'approved',
-  scheduled: 'scheduled',
-  published: 'published',
-  expired: 'expired',
-  archived: 'archived',
+  draft: "draft",
+  review: "review",
+  approved: "approved",
+  scheduled: "scheduled",
+  published: "published",
+  expired: "expired",
+  archived: "archived",
 } as const;

@@ -6,9 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type SubscriptionReceiptStatus = typeof SubscriptionReceiptStatus[keyof typeof SubscriptionReceiptStatus];
-
+export type SubscriptionReceiptStatus =
+  (typeof SubscriptionReceiptStatus)[keyof typeof SubscriptionReceiptStatus];
 
 export const SubscriptionReceiptStatus = {
-  subscribed: 'subscribed',
+  subscribed: "subscribed",
 } as const;

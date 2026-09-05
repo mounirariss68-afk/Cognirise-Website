@@ -6,15 +6,15 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsPagePublicationState = typeof CmsPagePublicationState[keyof typeof CmsPagePublicationState];
-
+export type CmsPagePublicationState =
+  (typeof CmsPagePublicationState)[keyof typeof CmsPagePublicationState];
 
 export const CmsPagePublicationState = {
-  draft: 'draft',
-  review: 'review',
-  approved: 'approved',
-  scheduled: 'scheduled',
-  published: 'published',
-  expired: 'expired',
-  archived: 'archived',
+  draft: "draft",
+  review: "review",
+  approved: "approved",
+  scheduled: "scheduled",
+  published: "published",
+  expired: "expired",
+  archived: "archived",
 } as const;

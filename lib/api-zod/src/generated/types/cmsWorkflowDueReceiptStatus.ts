@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsWorkflowDueReceiptStatus = typeof CmsWorkflowDueReceiptStatus[keyof typeof CmsWorkflowDueReceiptStatus];
-
+export type CmsWorkflowDueReceiptStatus =
+  (typeof CmsWorkflowDueReceiptStatus)[keyof typeof CmsWorkflowDueReceiptStatus];
 
 export const CmsWorkflowDueReceiptStatus = {
-  complete: 'complete',
-  partial: 'partial',
+  complete: "complete",
+  partial: "partial",
 } as const;

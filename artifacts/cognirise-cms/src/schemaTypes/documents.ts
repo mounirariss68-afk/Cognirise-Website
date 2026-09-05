@@ -2,10 +2,32 @@ import {defineArrayMember, defineField, defineType} from 'sanity'
 
 const isString = (value: unknown): value is string => typeof value === 'string'
 
-const governanceFields = [
+const baseGovernanceFields = [
   defineField({name: 'ownership', type: 'ownership', group: 'governance', validation: (Rule) => Rule.required()}),
   defineField({name: 'lifecycle', type: 'lifecycle', group: 'governance', validation: (Rule) => Rule.required()}),
 ]
+const assistantContentClassField = defineField({
+  name: 'assistantContentClass',
+  title: 'AI processing classification',
+  type: 'string',
+  group: 'governance',
+  options: {list: ['public', 'internal', 'restricted', 'personal', 'clientConfidential']},
+  initialValue: 'public',
+  validation: (Rule) => Rule.required(),
+})
+const assistantReviewField = defineField({
+  name: 'assistantReview',
+  type: 'object',
+  group: 'governance',
+  hidden: true,
+  readOnly: true,
+  fields: [
+    defineField({name: 'requestId', type: 'string'}),
+    defineField({name: 'fieldPath', type: 'string'}),
+    defineField({name: 'appliedAt', type: 'datetime'}),
+  ],
+})
+const governanceFields = [...baseGovernanceFields, assistantContentClassField, assistantReviewField]
 const groups = [{name: 'content', title: 'Content', default: true}, {name: 'markets', title: 'Markets'}, {name: 'governance', title: 'Governance'}]
 const marketEditions = defineField({
   name: 'marketEditions',
@@ -79,6 +101,8 @@ export const page = defineType({
     defineField({name: 'routeKind', type: 'string', group: 'content', options: {list: routeKinds}, validation: (Rule) => Rule.required()}),
     defineField({name: 'slug', type: 'slug', group: 'content', options: {source: 'title'}, description: 'Stable route segment; routeKind determines its route family.', validation: (Rule) => Rule.required()}),
     defineField({name: 'summary', type: 'text', rows: 3, group: 'content'}),
+    defineField({name: 'topics', type: 'array', of: [{type: 'string'}], group: 'content'}),
+    defineField({name: 'internalLinkSuggestions', title: 'Internal link suggestions', type: 'text', rows: 4, group: 'content', readOnly: true}),
     defineField({name: 'sections', type: 'array', group: 'content', description: 'Use only these design-system-approved modules.', of: ['heroSection', 'richTextSection', 'claimSection', 'metricSection', 'quoteSection', 'referenceGridSection', 'mediaSection', 'timelineSection', 'comparisonSection', 'ctaSection', 'faqSection', 'downloadGateSection'].map((type) => defineArrayMember({type}))}),
     defineField({name: 'seo', type: 'seo', group: 'content'}),
     marketEditions,
@@ -112,7 +136,7 @@ export const redirect = defineType({
 })
 
 export const mediaAsset = defineType({
-  name: 'mediaAsset', title: 'Governed media', type: 'document',
+  name: 'mediaAsset', title: 'Governed media', type: 'document', groups,
   fields: [
     defineField({name: 'title', type: 'string', validation: (Rule) => Rule.required()}),
     defineField({name: 'kind', type: 'string', options: {list: ['image', 'video', 'audio', 'document', 'diagram']}, validation: (Rule) => Rule.required()}),
@@ -123,9 +147,11 @@ export const mediaAsset = defineType({
     defineField({name: 'decorative', type: 'boolean', initialValue: false}),
     defineField({name: 'caption', type: 'text'}),
     defineField({name: 'transcript', type: 'portableText', description: 'Required for substantive audio/video.'}),
+    defineField({name: 'chapterNotes', type: 'text', rows: 8, description: 'Reviewer-approved timestamped chapter suggestions.'}),
     defineField({name: 'rightsOwner', type: 'string'}),
     defineField({name: 'rightsExpiresAt', type: 'date'}),
     defineField({name: 'marketsApproved', type: 'array', of: [{type: 'reference', to: [{type: 'market'}]}]}),
+    ...governanceFields,
   ],
   validation: (Rule) => Rule.custom((value) => {
     if (!value?.decorative && !value?.altText && value?.kind === 'image') return 'Non-decorative images require alt text.'
@@ -177,6 +203,8 @@ export const publication = defineType({
     defineField({name: 'updatedAt', type: 'datetime', group: 'content'}),
     defineField({name: 'readingMinutes', type: 'number', group: 'content', validation: (Rule) => Rule.integer().positive()}),
     defineField({name: 'topics', type: 'array', of: [{type: 'string'}], group: 'content'}),
+    defineField({name: 'newsletterVariants', title: 'Newsletter subject and preheader variants', type: 'text', rows: 6, group: 'content', readOnly: true}),
+    defineField({name: 'internalLinkSuggestions', title: 'Internal link suggestions', type: 'text', rows: 4, group: 'content', readOnly: true}),
     defineField({name: 'media', type: 'reference', to: [{type: 'mediaAsset'}], group: 'content'}),
     defineField({name: 'eventStartsAt', type: 'datetime', group: 'content', description: 'Use for webinars or live recordings.'}),
     defineField({name: 'download', type: 'reference', to: [{type: 'mediaAsset'}], group: 'content'}),
@@ -204,6 +232,39 @@ export const referenceSource = defineType({
     defineField({name: 'accessedAt', type: 'date', validation: (Rule) => Rule.required()}),
     defineField({name: 'notes', type: 'text'}),
   ],
+})
+
+export const approvedSource = defineType({
+  name: 'approvedSource',
+  title: 'AI-approved editorial source',
+  type: 'document',
+  groups,
+  description: 'The editorial assistant can ground suggestions only in published documents whose status is approved and whose expiry is still current.',
+  fields: [
+    defineField({name: 'title', type: 'string', group: 'content', validation: (Rule) => Rule.required()}),
+    defineField({name: 'content', type: 'text', rows: 12, group: 'content', description: 'Plain-text, citation-ready source excerpt. Do not include personal data, credentials, or restricted material.', validation: (Rule) => Rule.required().max(30000)}),
+    defineField({name: 'approvalStatus', type: 'string', group: 'governance', options: {list: ['draft', 'approved', 'withdrawn']}, initialValue: 'draft', validation: (Rule) => Rule.required()}),
+    defineField({name: 'contentClass', type: 'string', group: 'governance', options: {list: ['public', 'internal', 'restricted', 'personal', 'clientConfidential']}, initialValue: 'public', validation: (Rule) => Rule.required()}),
+    defineField({name: 'approvedAt', type: 'datetime', group: 'governance'}),
+    defineField({name: 'verifiedAt', type: 'date', group: 'governance'}),
+    defineField({name: 'expiresAt', type: 'datetime', group: 'governance'}),
+    defineField({name: 'marketsApproved', type: 'array', of: [{type: 'reference', to: [{type: 'market'}]}], group: 'markets'}),
+    defineField({name: 'source', type: 'reference', group: 'content', to: [{type: 'referenceSource'}]}),
+    ...baseGovernanceFields,
+  ],
+  validation: (Rule) => Rule.custom((value) => {
+    if (value?.approvalStatus === 'approved' && !value?.approvedAt) return 'Approved sources require an approval timestamp.'
+    if (value?.approvalStatus === 'approved' && !value?.verifiedAt) return 'Approved sources require a verification date.'
+    const ownership = typeof value?.ownership === 'object' && value.ownership !== null
+      ? value.ownership as Record<string, unknown>
+      : undefined
+    if (value?.approvalStatus === 'approved' && typeof ownership?.reviewDueAt !== 'string') return 'Approved sources require a future review date.'
+    if (value?.approvalStatus === 'approved' && (!Array.isArray(value?.marketsApproved) || value.marketsApproved.length === 0)) return 'Approved sources require at least one approved market.'
+    if (value?.approvalStatus === 'approved' && (typeof value?.contentClass !== 'string' || !['public', 'internal'].includes(value.contentClass))) return 'Restricted, personal, and client-confidential sources cannot be approved for the editorial assistant.'
+    if (value?.expiresAt && value?.approvedAt && value.expiresAt <= value.approvedAt) return 'Expiry must be later than approval.'
+    return true
+  }),
+  preview: {select: {title: 'title', status: 'approvalStatus', expires: 'expiresAt'}, prepare: ({title, status, expires}) => ({title, subtitle: `${status || 'draft'} · expires ${expires || 'never'}`})},
 })
 
 export const proof = defineType({
@@ -359,4 +420,4 @@ export const globalSettings = defineType({
   },
 })
 
-export const documentTypes = [market, page, navigation, redirect, mediaAsset, person, organization, publication, referenceSource, proof, claim, revisionRecord, auditEvent, globalSettings]
+export const documentTypes = [market, page, navigation, redirect, mediaAsset, person, organization, publication, referenceSource, approvedSource, proof, claim, revisionRecord, auditEvent, globalSettings]

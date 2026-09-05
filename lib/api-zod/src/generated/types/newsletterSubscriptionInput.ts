@@ -5,24 +5,24 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { NewsletterSubscriptionInputMarket } from './newsletterSubscriptionInputMarket';
+import type { NewsletterSubscriptionInputMarket } from "./newsletterSubscriptionInputMarket";
 
 export interface NewsletterSubscriptionInput {
   /**
-     * @maxLength 254
-     * @pattern ^[^@\s]+@[^@\s]+\.[^@\s]+$
-     */
+   * @maxLength 254
+   * @pattern ^[^@\s]+@[^@\s]+\.[^@\s]+$
+   */
   email: string;
   market: NewsletterSubscriptionInputMarket;
   consent: true;
   /**
-     * @minLength 1
-     * @maxLength 200
-     */
+   * @minLength 1
+   * @maxLength 200
+   */
   sourcePage: string;
   /**
-     * Honeypot field that must remain empty.
-     * @maxLength 0
-     */
+   * Honeypot field that must remain empty.
+   * @maxLength 0
+   */
   website?: string;
 }

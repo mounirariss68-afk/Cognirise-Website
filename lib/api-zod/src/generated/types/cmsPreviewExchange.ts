@@ -5,17 +5,17 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsMarket } from './cmsMarket';
-import type { CmsPreviewExchangeStatus } from './cmsPreviewExchangeStatus';
+import type { CmsMarket } from "./cmsMarket";
+import type { CmsPreviewExchangeStatus } from "./cmsPreviewExchangeStatus";
 
 export interface CmsPreviewExchange {
   status: CmsPreviewExchangeStatus;
   market: CmsMarket;
   /**
-     * @minLength 1
-     * @maxLength 120
-     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-     */
+   * @minLength 1
+   * @maxLength 120
+   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+   */
   slug: string;
   /** Unix epoch seconds */
   expiresAt: number;

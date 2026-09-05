@@ -5,12 +5,12 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsMarket } from './cmsMarket';
-import type { CmsPageMetaDeliveryMode } from './cmsPageMetaDeliveryMode';
-import type { CmsPageMetaRequestedPublicationState } from './cmsPageMetaRequestedPublicationState';
-import type { CmsPageMetaResolvedPublicationState } from './cmsPageMetaResolvedPublicationState';
-import type { CmsPageMetaSource } from './cmsPageMetaSource';
-import type { IsoDateTime } from './isoDateTime';
+import type { CmsMarket } from "./cmsMarket";
+import type { CmsPageMetaDeliveryMode } from "./cmsPageMetaDeliveryMode";
+import type { CmsPageMetaRequestedPublicationState } from "./cmsPageMetaRequestedPublicationState";
+import type { CmsPageMetaResolvedPublicationState } from "./cmsPageMetaResolvedPublicationState";
+import type { CmsPageMetaSource } from "./cmsPageMetaSource";
+import type { IsoDateTime } from "./isoDateTime";
 
 export interface CmsPageMeta {
   requestedMarket: CmsMarket;

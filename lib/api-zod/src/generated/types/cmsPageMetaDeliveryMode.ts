@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsPageMetaDeliveryMode = typeof CmsPageMetaDeliveryMode[keyof typeof CmsPageMetaDeliveryMode];
-
+export type CmsPageMetaDeliveryMode =
+  (typeof CmsPageMetaDeliveryMode)[keyof typeof CmsPageMetaDeliveryMode];
 
 export const CmsPageMetaDeliveryMode = {
-  canonical: 'canonical',
-  override: 'override',
-  uaeFallback: 'uaeFallback',
-  unavailable: 'unavailable',
+  canonical: "canonical",
+  override: "override",
+  uaeFallback: "uaeFallback",
+  unavailable: "unavailable",
 } as const;

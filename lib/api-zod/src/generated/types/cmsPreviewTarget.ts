@@ -5,14 +5,14 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsMarket } from './cmsMarket';
+import type { CmsMarket } from "./cmsMarket";
 
 export interface CmsPreviewTarget {
   market: CmsMarket;
   /**
-     * @minLength 1
-     * @maxLength 120
-     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-     */
+   * @minLength 1
+   * @maxLength 120
+   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+   */
   slug: string;
 }

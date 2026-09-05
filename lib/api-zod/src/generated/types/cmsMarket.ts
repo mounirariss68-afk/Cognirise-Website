@@ -6,12 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsMarket = typeof CmsMarket[keyof typeof CmsMarket];
-
+export type CmsMarket = (typeof CmsMarket)[keyof typeof CmsMarket];
 
 export const CmsMarket = {
-  uae: 'uae',
-  ksa: 'ksa',
-  turkiye: 'turkiye',
-  europe: 'europe',
+  uae: "uae",
+  ksa: "ksa",
+  turkiye: "turkiye",
+  europe: "europe",
 } as const;

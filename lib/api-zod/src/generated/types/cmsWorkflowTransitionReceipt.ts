@@ -5,8 +5,8 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsWorkflowAcceptedReceipt } from './cmsWorkflowAcceptedReceipt';
-import type { CmsWorkflowState } from './cmsWorkflowState';
+import type { CmsWorkflowAcceptedReceipt } from "./cmsWorkflowAcceptedReceipt";
+import type { CmsWorkflowState } from "./cmsWorkflowState";
 
 export type CmsWorkflowTransitionReceipt = CmsWorkflowAcceptedReceipt & {
   fromState: CmsWorkflowState;

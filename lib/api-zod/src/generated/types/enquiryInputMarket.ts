@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type EnquiryInputMarket = typeof EnquiryInputMarket[keyof typeof EnquiryInputMarket];
-
+export type EnquiryInputMarket =
+  (typeof EnquiryInputMarket)[keyof typeof EnquiryInputMarket];
 
 export const EnquiryInputMarket = {
-  uae: 'uae',
-  ksa: 'ksa',
-  turkiye: 'turkiye',
-  europe: 'europe',
+  uae: "uae",
+  ksa: "ksa",
+  turkiye: "turkiye",
+  europe: "europe",
 } as const;

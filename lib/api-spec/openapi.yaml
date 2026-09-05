@@ -297,6 +297,79 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /cms/editorial-assistant/runs:
+    post:
+      operationId: runCmsEditorialAssistant
+      tags: [cms]
+      summary: Produce a grounded editorial suggestion without changing CMS content
+      description: Uses only current published approvedSource documents selected by ID. Targets and sources are classified, screened, redacted, and revision-bound; citation claims must cover the suggestion and bind to exact source quotes. Every failure is closed. Requires CMS workflow bearer authorization and market assignment.
+      security:
+        - CmsWorkflowBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CmsEditorialAssistantInput"
+      responses:
+        "200":
+          description: Idempotent replay of a completed request
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CmsEditorialAssistantResult" }
+        "201":
+          description: Suggestion completed; human review remains mandatory
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CmsEditorialAssistantResult" }
+        "400": { description: Invalid closed-schema input }
+        "401": { description: Workflow authorization required }
+        "403": { description: Principal is not assigned to the market }
+        "409": { description: Request id was previously used by an incomplete or failed run }
+        "422": { description: "Restricted input, unapproved source, or deterministic quality gate rejection" }
+        "429": { description: Per-actor rate or deployment cost limit reached }
+        "503": { description: "Disabled, killed, timed out, unconfigured, or upstream failure; no CMS content changed" }
+  /cms/editorial-assistant/decisions:
+    post:
+      operationId: decideCmsEditorialAssistantRun
+      tags: [cms]
+      summary: Record an independent human acceptance or rejection
+      description: Reviewer, publisher, or administrator only. The run author cannot decide their own run. Acceptance requires a current Sanity resulting revision and does not itself apply generated content.
+      security:
+        - CmsWorkflowBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CmsEditorialAssistantDecisionInput"
+      responses:
+        "201":
+          description: Decision recorded in PostgreSQL and Sanity audit provenance
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CmsEditorialAssistantDecision" }
+        "400": { description: Invalid decision }
+        "401": { description: Reviewer authorization required }
+        "403": { description: Principal is not assigned to the market }
+        "409": { description: "Separation-of-duties, run state, revision, or duplicate-decision conflict" }
+        "503": { description: Sanity verification or audit recording unavailable; decision not recorded }
+  /cms/editorial-assistant/monitoring:
+    get:
+      operationId: getCmsEditorialAssistantMonitoring
+      tags: [cms, health]
+      summary: Read redacted editorial assistant operations metrics
+      description: All-market administrator only. Returns a rolling 24-hour aggregate and never returns prompts, drafts, source text, suggestions, or credentials.
+      security:
+        - CmsWorkflowBearer: []
+      responses:
+        "200":
+          description: Aggregate usage, failure, latency, spend, and independent-decision metrics
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CmsEditorialAssistantMonitoring" }
+        "401": { description: All-market administrator authorization required }
+        "503": { description: Monitoring ledger unavailable }
   /cms/webhooks/publish:
     post:
       operationId: receiveCmsPublishWebhook
@@ -592,6 +665,100 @@ components:
         status: { type: string, enum: [complete, partial] }
         discovered: { type: number, minimum: 0 }
         processed: { type: number, minimum: 0 }
+    CmsEditorialAssistantInput:
+      type: object
+      additionalProperties: false
+      required: [requestId, subjectId, market, operation, draft, sourceIds, contentClass, target]
+      properties:
+        requestId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }
+        subjectId: { type: string, minLength: 3, maxLength: 200, pattern: '^(?!drafts\.)[A-Za-z0-9._-]+$' }
+        market: { $ref: "#/components/schemas/CmsMarket" }
+        operation: { type: string, enum: [draft-generation, summary, report-abstract, transcript-cleanup, chapters, newsletter-variants, market-adaptation, translation, seo-metadata, tags, alt-text, internal-links, quality-review, rewrite] }
+        draft: { type: string, maxLength: 12000 }
+        contentClass: { type: string, enum: [public, internal] }
+        target:
+          type: object
+          additionalProperties: false
+          required: [fieldPath, contentType, language, maxLength, revisionId]
+          properties:
+            fieldPath: { type: string, pattern: '^(organization\.(name|description)|defaultSeo\.(metaTitle|metaDescription)|title|summary|dek|name|role|website|value|context|statement|altText|caption|transcript|chapterNotes|newsletterVariants|internalLinkSuggestions|topics|seo\.(metaTitle|metaDescription)|marketEditions\[_key=="[A-Za-z0-9_-]{1,128}"\]\.(title|summary|dek|name|role|website))$' }
+            contentType: { type: string, enum: [globalSettings, page, navigation, publication, person, organization, proof, claim, mediaAsset] }
+            language: { type: string, pattern: '^[a-z]{2,3}(-[A-Z]{2})?$' }
+            maxLength: { type: number, minimum: 1, maximum: 20000 }
+            revisionId: { type: string, minLength: 3, maxLength: 200, pattern: '^[A-Za-z0-9._-]+$' }
+        sourceIds:
+          type: array
+          minItems: 1
+          maxItems: 12
+          uniqueItems: true
+          items: { type: string, minLength: 3, maxLength: 200, pattern: '^[A-Za-z0-9._-]+$' }
+        instructions: { type: string, maxLength: 2000 }
+    CmsEditorialCitation:
+      type: object
+      required: [claim, sourceId, quote]
+      properties:
+        claim: { type: string }
+        sourceId: { type: string }
+        quote: { type: string }
+    CmsEditorialDiff:
+      type: object
+      required: [op, before, after]
+      properties:
+        op: { type: string, const: replace }
+        before: { type: string }
+        after: { type: string }
+    CmsEditorialQualityGate:
+      type: object
+      required: [gate, passed, detail]
+      properties:
+        gate: { type: string }
+        passed: { type: boolean }
+        detail: { type: string }
+    CmsEditorialAssistantResult:
+      type: object
+      required: [status, suggestion, citations, uncertainties, diff, qualityGates, policyVersion]
+      properties:
+        status: { type: string, const: completed }
+        suggestion: { type: string }
+        citations: { type: array, items: { $ref: "#/components/schemas/CmsEditorialCitation" } }
+        uncertainties: { type: array, items: { type: string } }
+        diff: { type: array, items: { $ref: "#/components/schemas/CmsEditorialDiff" } }
+        qualityGates: { type: array, items: { $ref: "#/components/schemas/CmsEditorialQualityGate" } }
+        policyVersion: { type: string }
+    CmsEditorialAssistantDecisionInput:
+      type: object
+      additionalProperties: false
+      required: [requestId, decision, reason]
+      properties:
+        requestId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }
+        decision: { type: string, enum: [accepted, rejected] }
+        reason: { type: string, minLength: 3, maxLength: 1000 }
+        resultingRevisionId: { type: string, minLength: 3, maxLength: 200, pattern: '^[A-Za-z0-9._-]+$' }
+    CmsEditorialAssistantDecision:
+      type: object
+      required: [requestId, decision, resultingRevisionId, wasEdited]
+      properties:
+        requestId: { type: string }
+        decision: { type: string, enum: [accepted, rejected] }
+        resultingRevisionId: { type: ["string", "null"] }
+        wasEdited: { type: boolean }
+    CmsEditorialAssistantMonitoring:
+      type: object
+      required: [windowHours, runs, failures, spendMicros, averageLatencyMs, decisions]
+      properties:
+        windowHours: { type: number, const: 24 }
+        runs: { type: number, minimum: 0 }
+        failures: { type: number, minimum: 0 }
+        spendMicros: { type: number, minimum: 0 }
+        averageLatencyMs: { type: ["number", "null"], minimum: 0 }
+        decisions:
+          type: object
+          required: [accepted, rejected, editedAccepted, pendingAudit]
+          properties:
+            accepted: { type: number, minimum: 0 }
+            rejected: { type: number, minimum: 0 }
+            editedAccepted: { type: number, minimum: 0 }
+            pendingAudit: { type: number, minimum: 0 }
     CmsWebhookDuplicate:
       type: object
       required: [status]

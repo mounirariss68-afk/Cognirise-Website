@@ -11,6 +11,70 @@ Sanity Studio foundation for governed, multi-market Cognirise content. UAE is ca
 5. Create the UAE market first with code `uae` and `isCanonical` enabled; create KSA (`ksa`), Türkiye (`turkiye`) and Europe (`europe`) next. These are the same codes used by the delivery API.
 6. Open **Global settings** in the desk and populate organization defaults, default SEO, public social/contact/legal/accessibility configuration, and the ordered market switcher. This singleton stores configuration only; subscriber, form submission, and enquiry data belongs in approved server-side systems, never Sanity.
 
+## Governed AI assistant
+
+The document action is available on governed document types and defaults to a
+clearly marked pilot. Configure `SANITY_STUDIO_API_BASE_URL` with the trusted API
+origin and, only if the deployed route differs, set
+`SANITY_STUDIO_GOVERNED_AI_RUNS_PATH` (default
+`/api/cms/editorial-assistant/runs`). Set
+`SANITY_STUDIO_GOVERNED_AI_ROLLOUT=off` to leave the action visible but disabled
+during a staged rollout.
+
+The assistant uses the existing CMS workflow principal convention:
+`Authorization: Bearer <credential>`. An editor enters that credential when
+opening the action; Studio keeps it only in component memory, does not persist
+it, and never puts it in a request body. Do not place workflow credentials,
+Sanity API tokens, or other secrets in `SANITY_STUDIO_*` variables because those
+values are compiled into browser code.
+
+Editors choose the market, operation, supported field, constraints, and one or
+more approved Sanity source document IDs. The document's AI processing
+classification is stored in Sanity and verified by the trusted API rather than
+being asserted by the editor request. The service also verifies the document's
+exact revision, current field value, content type, and target market. It returns
+proposed text, verified citations, explicit uncertainties, quality gates, and a
+diff. Studio validates that response, presents
+current and proposed text side-by-side, and requires an explicit accept,
+accept-without-edits, accept-with-edits, or reject decision. A different
+reviewer/publisher/admin principal must record the decision, preserving
+separation of duties. Acceptance patches a draft field only;
+the assistant has no lifecycle, approval, scheduling, or publication action.
+The action requires a saved Sanity draft and uses a revision-preconditioned
+`drafts.*` mutation; it never patches the published document.
+The patch adds an `assistantReview` quarantine marker. Manual publish and
+trusted workflow transitions remain blocked until the API has verified the
+accepted revision, recorded the independent human decision in PostgreSQL and
+Sanity, and atomically cleared that marker. Interrupted audit writes are
+idempotently recoverable by submitting the same decision again.
+Create grounding records as **AI approved source** documents. The API reads only
+published records whose `approvalStatus` is `approved`, whose classification is
+`public` or `internal`, whose approved markets include the target market, and
+whose approval, verification, review-due, and optional expiry dates are current.
+The API redacts high-confidence personal identifiers and rejects common secret,
+credential, session, signed-URL, and connection-string patterns before any
+provider call. The same policy fail-closes generated suggestions, citations, and
+uncertainties before they can be stored or shown; generated text is never
+silently redacted. Citation claim spans must cover the proposed text, with exact
+quotes from the approved source revision; translation uses complete
+sentence/line alignment with distinct, in-order source units and remains outside
+the default low-risk rollout.
+
+The Studio action exposes draft improvement, summary, report abstract,
+transcript cleanup, chapters, newsletter subject/preheader variants, market
+adaptation, translation, SEO metadata, tags, alt text, internal-link
+suggestions, and quality review. It passes the selected feature, document
+content classification, content type, target field, BCP 47 language, and maximum
+length as dedicated fields in the closed API contract. Configure
+`SANITY_STUDIO_GOVERNED_AI_FEATURES` as `all` or a comma-separated allow-list of
+feature IDs to stage a feature. Transcript cleanup writes `transcript`, chapters
+write `chapterNotes`, newsletter suggestions write `newsletterVariants`, tags
+write `topics`, links write `internalLinkSuggestions`, and translations or
+adaptations write only an explicitly selected market-edition field. The default pilot enables summary, report
+abstract, transcript cleanup, newsletter variants, SEO metadata, tags, alt
+text, and quality review; disabled options are shown as unavailable and cannot
+issue a request.
+
 ## Governance and delivery
 
 - Page layouts are constrained to approved section objects. Pages store route kind and stable slug.

@@ -6,9 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsWebhookDuplicateStatus = typeof CmsWebhookDuplicateStatus[keyof typeof CmsWebhookDuplicateStatus];
-
+export type CmsWebhookDuplicateStatus =
+  (typeof CmsWebhookDuplicateStatus)[keyof typeof CmsWebhookDuplicateStatus];
 
 export const CmsWebhookDuplicateStatus = {
-  duplicate: 'duplicate',
+  duplicate: "duplicate",
 } as const;

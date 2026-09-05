@@ -5,21 +5,21 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsMarket } from './cmsMarket';
-import type { CmsPageBodyItem } from './cmsPageBodyItem';
-import type { CmsPagePublicationState } from './cmsPagePublicationState';
-import type { CmsPageSectionsItem } from './cmsPageSectionsItem';
-import type { CmsPageSeo } from './cmsPageSeo';
-import type { IsoDateTime } from './isoDateTime';
+import type { CmsMarket } from "./cmsMarket";
+import type { CmsPageBodyItem } from "./cmsPageBodyItem";
+import type { CmsPagePublicationState } from "./cmsPagePublicationState";
+import type { CmsPageSectionsItem } from "./cmsPageSectionsItem";
+import type { CmsPageSeo } from "./cmsPageSeo";
+import type { IsoDateTime } from "./isoDateTime";
 
 export interface CmsPage {
   id: string;
   revision: string;
   /**
-     * @minLength 1
-     * @maxLength 120
-     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-     */
+   * @minLength 1
+   * @maxLength 120
+   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+   */
   slug: string;
   market: CmsMarket;
   title?: string;

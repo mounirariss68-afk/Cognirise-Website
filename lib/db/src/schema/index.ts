@@ -19,3 +19,4 @@
 
 export * from "./website-submissions";
 export * from "./cms-governance";
+export * from "./cms-editorial-assistant";

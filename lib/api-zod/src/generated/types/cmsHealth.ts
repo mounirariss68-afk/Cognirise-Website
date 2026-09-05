@@ -5,7 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsHealthStatus } from './cmsHealthStatus';
+import type { CmsHealthStatus } from "./cmsHealthStatus";
 
 export interface CmsHealth {
   status: CmsHealthStatus;
@@ -14,5 +14,5 @@ export interface CmsHealth {
   webhookConfigured: boolean;
   /** SANITY_API_TOKEN and at least one CMS_WORKFLOW_CREDENTIALS principal are configured. */
   workflowConfigured: boolean;
-  canonicalMarket: 'uae';
+  canonicalMarket: "uae";
 }

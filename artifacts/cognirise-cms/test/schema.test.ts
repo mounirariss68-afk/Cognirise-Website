@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import {globalSettings, navigation, organization, person, publication} from '../src/schemaTypes/documents'
+import {approvedSource, globalSettings, mediaAsset, navigation, organization, page, person, publication} from '../src/schemaTypes/documents'
 import {objectTypes} from '../src/schemaTypes/objects'
 
 test('global settings singleton schema contains public configuration only', () => {
@@ -16,9 +16,40 @@ test('global settings singleton schema contains public configuration only', () =
     'defaultMarket',
     'ownership',
     'lifecycle',
+    'assistantContentClass',
+    'assistantReview',
   ])
   assert.equal(fieldNames.includes('subscribers'), false)
   assert.equal(fieldNames.includes('enquiries'), false)
+})
+
+test('assistant grounding source exposes the server-required governance fields', () => {
+  assert.deepEqual(
+    approvedSource.fields.map((field) => field.name),
+    [
+      'title',
+      'content',
+      'approvalStatus',
+      'contentClass',
+      'approvedAt',
+      'verifiedAt',
+      'expiresAt',
+      'marketsApproved',
+      'source',
+      'ownership',
+      'lifecycle',
+    ],
+  )
+})
+
+test('assistant target documents expose classification and review quarantine fields', () => {
+  for (const schema of [page, mediaAsset, publication, person, organization]) {
+    const fields = new Set(schema.fields.map((field) => field.name))
+    assert.equal(fields.has('assistantContentClass'), true, schema.name)
+    assert.equal(fields.has('assistantReview'), true, schema.name)
+    assert.equal(fields.has('ownership'), true, schema.name)
+    assert.equal(fields.has('lifecycle'), true, schema.name)
+  }
 })
 
 test('each non-page document references its purpose-built localized edition', () => {

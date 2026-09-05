@@ -5,23 +5,23 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { EnquiryInputMarket } from './enquiryInputMarket';
+import type { EnquiryInputMarket } from "./enquiryInputMarket";
 
 export interface EnquiryInput {
   /**
-     * @minLength 2
-     * @maxLength 120
-     */
+   * @minLength 2
+   * @maxLength 120
+   */
   name: string;
   /**
-     * @maxLength 254
-     * @pattern ^[^@\s]+@[^@\s]+\.[^@\s]+$
-     */
+   * @maxLength 254
+   * @pattern ^[^@\s]+@[^@\s]+\.[^@\s]+$
+   */
   email: string;
   /**
-     * @minLength 2
-     * @maxLength 160
-     */
+   * @minLength 2
+   * @maxLength 160
+   */
   organization: string;
   /** @maxLength 120 */
   role?: string;
@@ -29,19 +29,19 @@ export interface EnquiryInput {
   /** @maxLength 120 */
   processArea: string;
   /**
-     * @minLength 20
-     * @maxLength 2000
-     */
+   * @minLength 20
+   * @maxLength 2000
+   */
   challenge: string;
   consent: true;
   /**
-     * @minLength 1
-     * @maxLength 200
-     */
+   * @minLength 1
+   * @maxLength 200
+   */
   sourcePage: string;
   /**
-     * Honeypot field that must remain empty.
-     * @maxLength 0
-     */
+   * Honeypot field that must remain empty.
+   * @maxLength 0
+   */
   website?: string;
 }

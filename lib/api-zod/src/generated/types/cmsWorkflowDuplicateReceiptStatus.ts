@@ -6,9 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsWorkflowDuplicateReceiptStatus = typeof CmsWorkflowDuplicateReceiptStatus[keyof typeof CmsWorkflowDuplicateReceiptStatus];
-
+export type CmsWorkflowDuplicateReceiptStatus =
+  (typeof CmsWorkflowDuplicateReceiptStatus)[keyof typeof CmsWorkflowDuplicateReceiptStatus];
 
 export const CmsWorkflowDuplicateReceiptStatus = {
-  duplicate: 'duplicate',
+  duplicate: "duplicate",
 } as const;

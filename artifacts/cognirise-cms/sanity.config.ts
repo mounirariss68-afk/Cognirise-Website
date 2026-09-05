@@ -6,6 +6,11 @@ import {schemaTypes} from './src/schemaTypes'
 import {deskStructure} from './src/deskStructure'
 import {governedDocumentTypes, immutableDocumentTypes} from './src/governance/policy'
 import {guardPublishAction} from './src/governance/publishAction'
+import {governedAiAction} from './src/ai/action'
+
+const aiDocumentTypes = new Set(
+  [...governedDocumentTypes].filter((type) => type !== 'approvedSource').concat('mediaAsset'),
+)
 
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID
 const dataset = process.env.SANITY_STUDIO_DATASET
@@ -45,10 +50,13 @@ export default defineConfig({
       if (immutableDocumentTypes.has(context.schemaType)) {
         return context.documentId?.startsWith('drafts.') ? previous : []
       }
-      if (!governedDocumentTypes.has(context.schemaType)) return previous
-      return previous.map((action) =>
-        action.action === 'publish' ? guardPublishAction(action) : action,
+      if (!aiDocumentTypes.has(context.schemaType)) return previous
+      const governedActions = previous.map((action) =>
+        governedDocumentTypes.has(context.schemaType) && action.action === 'publish'
+          ? guardPublishAction(action)
+          : action,
       )
+      return [...governedActions, governedAiAction]
     },
   },
 })

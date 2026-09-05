@@ -4,6 +4,8 @@ import { after, before, test } from "node:test";
 import type { AddressInfo } from "node:net";
 import { and, eq, inArray } from "drizzle-orm";
 import {
+  cmsAssistantDecisionsTable,
+  cmsAssistantRunsTable,
   cmsPreviewTokenNoncesTable,
   cmsWebhookReceiptsTable,
   cmsWorkflowEventsTable,
@@ -62,17 +64,311 @@ test("the approved schema flow has applied every CMS governance table", async ()
       "cms_workflow_receipts",
       "cms_preview_token_nonces",
       "cms_webhook_receipts",
+      "cms_assistant_runs",
+      "cms_assistant_decisions",
     ]],
   );
   assert.deepEqual(
     result.rows.map((row) => row.table_name).sort(),
     [
+      "cms_assistant_decisions",
+      "cms_assistant_runs",
       "cms_preview_token_nonces",
       "cms_webhook_receipts",
       "cms_workflow_events",
       "cms_workflow_receipts",
     ],
   );
+});
+
+test("editorial assistance verifies targets, scopes replay, and recovers its decision audit", async () => {
+  const suffix = Date.now().toString();
+  const requestId = `assistant_run_${suffix}`;
+  const staleRequestId = `assistant_stale_${suffix}`;
+  const redactedRequestId = `assistant_redacted_${suffix}`;
+  const restrictedSourceRequestId = `assistant_restricted_${suffix}`;
+  const sensitiveOutputRequestId = `assistant_output_${suffix}`;
+  const transitionRequestId = `assistant_transition_${suffix}`;
+  const subjectId = `page.assistant.${suffix}`;
+  const sourceId = `approved.source.${suffix}`;
+  const targetRevision = `target-revision-${suffix}`;
+  const appliedRevision = `applied-revision-${suffix}`;
+  const suggestion = "Cognirise operates in the UAE.";
+  const runInput = {
+    requestId,
+    subjectId,
+    market: "uae",
+    operation: "summary",
+    draft: "Old copy",
+    sourceIds: [sourceId],
+    contentClass: "public",
+    target: {
+      fieldPath: "summary",
+      contentType: "page",
+      language: "en",
+      maxLength: 120,
+      revisionId: targetRevision,
+    },
+  };
+  const environment = [
+    "CMS_ASSISTANT_ENABLED",
+    "CMS_ASSISTANT_KILL_SWITCH",
+    "CMS_ASSISTANT_OPERATIONS",
+    "CMS_ASSISTANT_HOURLY_REQUEST_LIMIT",
+    "CMS_ASSISTANT_DAILY_COST_MICROS",
+    "AI_INTEGRATIONS_OPENAI_BASE_URL",
+    "AI_INTEGRATIONS_OPENAI_API_KEY",
+  ] as const;
+  const previous = new Map(environment.map((name) => [name, process.env[name]]));
+  let stage: "run" | "redacted" | "restrictedSource" | "sensitiveOutput" |
+    "decision" | "transition" = "run";
+  let providerCalls = 0;
+  const providerBodies: string[] = [];
+  let auditMutationAttempts = 0;
+  let auditExists = false;
+  let successfulAuditBody: Record<string, unknown> | undefined;
+  process.env.CMS_ASSISTANT_ENABLED = "true";
+  delete process.env.CMS_ASSISTANT_KILL_SWITCH;
+  process.env.CMS_ASSISTANT_OPERATIONS = "summary";
+  process.env.CMS_ASSISTANT_HOURLY_REQUEST_LIMIT = "500";
+  process.env.CMS_ASSISTANT_DAILY_COST_MICROS = "100000000";
+  process.env.AI_INTEGRATIONS_OPENAI_BASE_URL = "https://ai.example/v1";
+  process.env.AI_INTEGRATIONS_OPENAI_API_KEY = "integration-provider-key";
+
+  globalThis.fetch = async (input, init) => {
+    const url = new URL(String(input));
+    if (url.hostname === "ai.example") {
+      providerCalls += 1;
+      providerBodies.push(String(init?.body));
+      const providerSuggestion = stage === "sensitiveOutput"
+        ? "Email jane@example.com, phone +971 50 123 4567, address 12 Main Street, IP 10.20.30.40, passport A12345678."
+        : suggestion;
+      return new Response(JSON.stringify({
+        id: "assistant-test",
+        object: "chat.completion",
+        created: 1,
+        model: "integration-model",
+        choices: [{
+          index: 0,
+          message: {
+            role: "assistant",
+            content: JSON.stringify({
+              suggestion: providerSuggestion,
+              citations: [{
+                claim: providerSuggestion,
+                sourceId,
+                quote: "Cognirise operates in the UAE.",
+              }],
+              uncertainties: [],
+            }),
+          },
+          finish_reason: "stop",
+        }],
+        usage: { prompt_tokens: 100, completion_tokens: 20, total_tokens: 120 },
+      }), { status: 200, headers: { "content-type": "application/json" } });
+    }
+    if (url.hostname === "integration-test.api.sanity.io") {
+      if (url.pathname.includes("/data/mutate/")) {
+        auditMutationAttempts += 1;
+        if (auditMutationAttempts === 1) return new Response("unavailable", { status: 503 });
+        successfulAuditBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+        auditExists = true;
+        return new Response(JSON.stringify({ results: [] }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      const query = url.searchParams.get("query") ?? "";
+      if (query.includes('_type == "approvedSource"')) {
+        return Response.json({ result: [{
+          _id: sourceId,
+          _rev: `source-revision-${suffix}`,
+          title: "Approved operating fact",
+          content: stage === "restrictedSource"
+            ? "Authorization: Bearer abcdefghijklmnopqrstuvwxyz"
+            : suggestion,
+          approvalStatus: "approved",
+          approvedAt: "2026-01-01T00:00:00.000Z",
+          verifiedAt: "2026-01-01",
+          reviewDueAt: "2035-01-01",
+          expiresAt: "2035-01-01T00:00:00.000Z",
+          markets: ["uae"],
+          contentClass: "public",
+        }] });
+      }
+      if (query.includes("defined(*")) return Response.json({ result: auditExists });
+      if (query.includes("resolvedMarkets")) {
+        return Response.json({ result: {
+          _id: `drafts.${subjectId}`,
+          _type: "page",
+          _rev: appliedRevision,
+          assistantReview: { requestId, fieldPath: "summary" },
+          marketEditions: [],
+          resolvedMarkets: [],
+        } });
+      }
+      return Response.json({ result: stage === "decision" ? {
+        _id: `drafts.${subjectId}`,
+        _type: "page",
+        _rev: appliedRevision,
+        summary: suggestion,
+        assistantReview: { requestId, fieldPath: "summary" },
+      } : stage === "redacted" ? {
+        _id: `drafts.${subjectId}`,
+        _type: "page",
+        _rev: `redacted-revision-${suffix}`,
+        summary: "Contact jane@example.com for details.",
+        assistantContentClass: "public",
+        assistantMarkets: ["uae"],
+        assistantEditions: [],
+      } : {
+        _id: `drafts.${subjectId}`,
+        _type: "page",
+        _rev: targetRevision,
+        summary: "Old copy",
+        assistantContentClass: "public",
+        assistantMarkets: ["uae"],
+        assistantEditions: [],
+      } });
+    }
+    throw new Error(`Unexpected integration fetch: ${url.toString()}`);
+  };
+
+  const post = (path: string, credential: string, body: unknown) =>
+    originalFetch(`${baseUrl}${path}`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${credential}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+  try {
+    const first = await post("/api/cms/editorial-assistant/runs", authorKey, runInput);
+    assert.equal(first.status, 201);
+    assert.equal((await first.json() as { suggestion?: string }).suggestion, suggestion);
+    assert.equal(providerCalls, 1);
+
+    const replay = await post("/api/cms/editorial-assistant/runs", authorKey, runInput);
+    assert.equal(replay.status, 200);
+    const changedReplay = await post(
+      "/api/cms/editorial-assistant/runs",
+      authorKey,
+      { ...runInput, instructions: "Use a different payload" },
+    );
+    assert.equal(changedReplay.status, 409);
+    const actorReplay = await post("/api/cms/editorial-assistant/runs", reviewerKey, runInput);
+    assert.equal(actorReplay.status, 409);
+    assert.equal(providerCalls, 1);
+
+    const stale = await post("/api/cms/editorial-assistant/runs", authorKey, {
+      ...runInput,
+      requestId: staleRequestId,
+      target: { ...runInput.target, revisionId: `stale-${suffix}` },
+    });
+    assert.equal(stale.status, 409);
+    assert.equal((await stale.json() as { code?: string }).code, "target_revision_mismatch");
+    assert.equal(providerCalls, 1);
+
+    stage = "redacted";
+    const redacted = await post("/api/cms/editorial-assistant/runs", authorKey, {
+      ...runInput,
+      requestId: redactedRequestId,
+      draft: "Contact jane@example.com for details.",
+      target: { ...runInput.target, revisionId: `redacted-revision-${suffix}` },
+    });
+    assert.equal(redacted.status, 201);
+    assert.equal(providerCalls, 2);
+    assert.doesNotMatch(providerBodies.at(-1) ?? "", /jane@example\.com/);
+    assert.match(providerBodies.at(-1) ?? "", /REDACTED_EMAIL/);
+
+    stage = "restrictedSource";
+    const restrictedSource = await post("/api/cms/editorial-assistant/runs", authorKey, {
+      ...runInput,
+      requestId: restrictedSourceRequestId,
+    });
+    assert.equal(restrictedSource.status, 422);
+    assert.equal(
+      (await restrictedSource.json() as { code?: string }).code,
+      "restricted_content",
+    );
+    assert.equal(providerCalls, 2);
+
+    stage = "sensitiveOutput";
+    const sensitiveOutput = await post("/api/cms/editorial-assistant/runs", authorKey, {
+      ...runInput,
+      requestId: sensitiveOutputRequestId,
+    });
+    assert.equal(sensitiveOutput.status, 422);
+    assert.equal(
+      (await sensitiveOutput.json() as { code?: string }).code,
+      "sensitive_output",
+    );
+    assert.equal(providerCalls, 3);
+    const [sensitiveOutputRow] = await db.select().from(cmsAssistantRunsTable)
+      .where(eq(cmsAssistantRunsTable.requestId, sensitiveOutputRequestId));
+    assert.equal(sensitiveOutputRow?.result, null);
+    assert.equal(sensitiveOutputRow?.failureCode, "sensitive_output");
+    assert.doesNotMatch(JSON.stringify(sensitiveOutputRow), /jane@example\.com|A12345678/);
+
+    stage = "decision";
+    const decision = {
+      requestId,
+      decision: "accepted",
+      reason: "Evidence and tone reviewed",
+      resultingRevisionId: appliedRevision,
+    };
+    const interrupted = await post("/api/cms/editorial-assistant/decisions", reviewerKey, decision);
+    assert.equal(interrupted.status, 503);
+    let [decisionRow] = await db.select().from(cmsAssistantDecisionsTable)
+      .where(eq(cmsAssistantDecisionsTable.requestId, requestId));
+    assert.equal(decisionRow?.auditStatus, "audit_failed");
+
+    const recovered = await post("/api/cms/editorial-assistant/decisions", reviewerKey, decision);
+    assert.equal(recovered.status, 200);
+    [decisionRow] = await db.select().from(cmsAssistantDecisionsTable)
+      .where(eq(cmsAssistantDecisionsTable.requestId, requestId));
+    assert.equal(decisionRow?.auditStatus, "confirmed");
+    assert.equal(decisionRow?.wasEdited, false);
+    assert.equal(auditMutationAttempts, 2);
+    const mutations = successfulAuditBody?.mutations as Array<Record<string, unknown>> | undefined;
+    assert.ok(Array.isArray(mutations));
+    const quarantinePatch = mutations[1]?.patch as Record<string, unknown> | undefined;
+    assert.equal(quarantinePatch?.id, `drafts.${subjectId}`);
+    assert.equal(quarantinePatch?.ifRevisionID, appliedRevision);
+    assert.deepEqual(quarantinePatch?.unset, ["assistantReview"]);
+
+    stage = "transition";
+    const blockedTransition = await post("/api/cms/workflow/transitions", authorKey, {
+      requestId: transitionRequestId,
+      subjectId,
+      market: "uae",
+      toState: "review",
+    });
+    assert.equal(blockedTransition.status, 409);
+    assert.equal(auditMutationAttempts, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+    for (const [name, value] of previous) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+    await db.delete(cmsAssistantDecisionsTable)
+      .where(eq(cmsAssistantDecisionsTable.requestId, requestId));
+    await db.delete(cmsAssistantRunsTable)
+      .where(inArray(cmsAssistantRunsTable.requestId, [
+        requestId,
+        staleRequestId,
+        redactedRequestId,
+        restrictedSourceRequestId,
+        sensitiveOutputRequestId,
+      ]));
+    await db.delete(cmsWorkflowReceiptsTable)
+      .where(eq(cmsWorkflowReceiptsTable.requestId, transitionRequestId));
+    await db.delete(cmsWorkflowEventsTable)
+      .where(eq(cmsWorkflowEventsTable.target, `page:${subjectId}`));
+  }
 });
 
 test("preview exchange consumes its PostgreSQL nonce and rejects replay", async () => {

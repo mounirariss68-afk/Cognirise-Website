@@ -6,15 +6,15 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsPageMetaRequestedPublicationState = typeof CmsPageMetaRequestedPublicationState[keyof typeof CmsPageMetaRequestedPublicationState];
-
+export type CmsPageMetaRequestedPublicationState =
+  (typeof CmsPageMetaRequestedPublicationState)[keyof typeof CmsPageMetaRequestedPublicationState];
 
 export const CmsPageMetaRequestedPublicationState = {
-  draft: 'draft',
-  review: 'review',
-  approved: 'approved',
-  scheduled: 'scheduled',
-  published: 'published',
-  expired: 'expired',
-  archived: 'archived',
+  draft: "draft",
+  review: "review",
+  approved: "approved",
+  scheduled: "scheduled",
+  published: "published",
+  expired: "expired",
+  archived: "archived",
 } as const;

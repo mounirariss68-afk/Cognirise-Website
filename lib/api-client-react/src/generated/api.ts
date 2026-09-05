@@ -5,10 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   MutationFunction,
   QueryFunction,
@@ -16,10 +13,15 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
 import type {
+  CmsEditorialAssistantDecision,
+  CmsEditorialAssistantDecisionInput,
+  CmsEditorialAssistantInput,
+  CmsEditorialAssistantMonitoring,
+  CmsEditorialAssistantResult,
   CmsHealth,
   CmsPageEnvelope,
   CmsPreviewExchange,
@@ -42,27 +44,27 @@ import type {
   InvalidCmsPageResponse,
   InvalidPreviewTokenResponse,
   NewsletterSubscriptionInput,
-  SubscriptionReceipt
-} from './api.schemas';
+  SubscriptionReceipt,
+} from "./api.schemas";
 
-import { customFetch } from '../custom-fetch';
-import type { ErrorType , BodyType } from '../custom-fetch';
+import { customFetch } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-
-
-const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+const withQueryKey = <T extends object, K>(
+  query: T,
+  queryKey: K,
+): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === 'queryKey') continue;
+    if (key === "queryKey") continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
@@ -73,885 +75,1328 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 export const getHealthCheckUrl = () => {
-
-
-
-
-  return `/api/healthz`
-}
+  return `/api/healthz`;
+};
 
 /**
  * Returns server health status
  * @summary Health check
  */
-export const healthCheck = async ( options?: Parameters<typeof customFetch>[1]): Promise<HealthStatus> => {
-
-  return customFetch<HealthStatus>(getHealthCheckUrl(),
-  {
+export const healthCheck = async (
+  options?: Parameters<typeof customFetch>[1],
+): Promise<HealthStatus> => {
+  return customFetch<HealthStatus>(getHealthCheckUrl(), {
     ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
+    method: "GET",
+  });
+};
 
 export const getHealthCheckQueryKey = () => {
-    return [
-    `/api/healthz`
-    ] as const;
-    }
+  return [`/api/healthz`] as const;
+};
 
+export const getHealthCheckQueryOptions = <
+  TData = Awaited<ReturnType<typeof healthCheck>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof healthCheck>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-export const getHealthCheckQueryOptions = <TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
+  const queryKey = queryOptions?.queryKey ?? getHealthCheckQueryKey();
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof healthCheck>>> = ({
+    signal,
+  }) => healthCheck({ signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getHealthCheckQueryKey();
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof healthCheck>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
 
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof healthCheck>>> = ({ signal }) => healthCheck({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type HealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof healthCheck>>>
-export type HealthCheckQueryError = ErrorType<unknown>
-
+export type HealthCheckQueryResult = NonNullable<
+  Awaited<ReturnType<typeof healthCheck>>
+>;
+export type HealthCheckQueryError = ErrorType<unknown>;
 
 /**
  * @summary Health check
  */
 
-export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useHealthCheck<
+  TData = Awaited<ReturnType<typeof healthCheck>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof healthCheck>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getHealthCheckQueryOptions(options);
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getHealthCheckQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
 
 export const getSubmitEnquiryUrl = () => {
-
-
-
-
-  return `/api/enquiries`
-}
+  return `/api/enquiries`;
+};
 
 /**
  * @summary Submit a Cognirise website enquiry
  */
-export const submitEnquiry = async (enquiryInput: EnquiryInput, options?: Parameters<typeof customFetch>[1]): Promise<EnquiryReceipt> => {
-
-  return customFetch<EnquiryReceipt>(getSubmitEnquiryUrl(),
-  {
+export const submitEnquiry = async (
+  enquiryInput: EnquiryInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<EnquiryReceipt> => {
+  return customFetch<EnquiryReceipt>(getSubmitEnquiryUrl(), {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(enquiryInput)
-  }
-);}
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(enquiryInput),
+  });
+};
 
+export const getSubmitEnquiryMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitEnquiry>>,
+    TError,
+    { data: BodyType<EnquiryInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof submitEnquiry>>,
+  TError,
+  { data: BodyType<EnquiryInput> },
+  TContext
+> => {
+  const mutationKey = ["submitEnquiry"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof submitEnquiry>>,
+    { data: BodyType<EnquiryInput> }
+  > = (props) => {
+    const { data } = props ?? {};
 
+    return submitEnquiry(data, requestOptions);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
-export const getSubmitEnquiryMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitEnquiry>>, TError,{data: BodyType<EnquiryInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof submitEnquiry>>, TError,{data: BodyType<EnquiryInput>}, TContext> => {
+export type SubmitEnquiryMutationResult = NonNullable<
+  Awaited<ReturnType<typeof submitEnquiry>>
+>;
+export type SubmitEnquiryMutationBody = BodyType<EnquiryInput>;
+export type SubmitEnquiryMutationError = ErrorType<void>;
 
-const mutationKey = ['submitEnquiry'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitEnquiry>>, {data: BodyType<EnquiryInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  submitEnquiry(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SubmitEnquiryMutationResult = NonNullable<Awaited<ReturnType<typeof submitEnquiry>>>
-    export type SubmitEnquiryMutationBody = BodyType<EnquiryInput>
-    export type SubmitEnquiryMutationError = ErrorType<void>
-
-    /**
+/**
  * @summary Submit a Cognirise website enquiry
  */
-export const useSubmitEnquiry = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitEnquiry>>, TError,{data: BodyType<EnquiryInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof submitEnquiry>>,
-        TError,
-        {data: BodyType<EnquiryInput>},
-        TContext
-      > => {
-      return useMutation(getSubmitEnquiryMutationOptions(options));
-    }
+export const useSubmitEnquiry = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitEnquiry>>,
+    TError,
+    { data: BodyType<EnquiryInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof submitEnquiry>>,
+  TError,
+  { data: BodyType<EnquiryInput> },
+  TContext
+> => {
+  return useMutation(getSubmitEnquiryMutationOptions(options));
+};
 
 export const getSubscribeNewsletterUrl = () => {
-
-
-
-
-  return `/api/newsletter-subscriptions`
-}
+  return `/api/newsletter-subscriptions`;
+};
 
 /**
  * @summary Subscribe to Cognirise field notes
  */
-export const subscribeNewsletter = async (newsletterSubscriptionInput: NewsletterSubscriptionInput, options?: Parameters<typeof customFetch>[1]): Promise<SubscriptionReceipt> => {
-
-  return customFetch<SubscriptionReceipt>(getSubscribeNewsletterUrl(),
-  {
+export const subscribeNewsletter = async (
+  newsletterSubscriptionInput: NewsletterSubscriptionInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<SubscriptionReceipt> => {
+  return customFetch<SubscriptionReceipt>(getSubscribeNewsletterUrl(), {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(newsletterSubscriptionInput)
-  }
-);}
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(newsletterSubscriptionInput),
+  });
+};
 
+export const getSubscribeNewsletterMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof subscribeNewsletter>>,
+    TError,
+    { data: BodyType<NewsletterSubscriptionInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof subscribeNewsletter>>,
+  TError,
+  { data: BodyType<NewsletterSubscriptionInput> },
+  TContext
+> => {
+  const mutationKey = ["subscribeNewsletter"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof subscribeNewsletter>>,
+    { data: BodyType<NewsletterSubscriptionInput> }
+  > = (props) => {
+    const { data } = props ?? {};
 
+    return subscribeNewsletter(data, requestOptions);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
-export const getSubscribeNewsletterMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subscribeNewsletter>>, TError,{data: BodyType<NewsletterSubscriptionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof subscribeNewsletter>>, TError,{data: BodyType<NewsletterSubscriptionInput>}, TContext> => {
-
-const mutationKey = ['subscribeNewsletter'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof subscribeNewsletter>>, {data: BodyType<NewsletterSubscriptionInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  subscribeNewsletter(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SubscribeNewsletterMutationResult = NonNullable<Awaited<ReturnType<typeof subscribeNewsletter>>>
-    export type SubscribeNewsletterMutationBody = BodyType<NewsletterSubscriptionInput>
-    export type SubscribeNewsletterMutationError = ErrorType<void>
-
-    /**
- * @summary Subscribe to Cognirise field notes
- */
-export const useSubscribeNewsletter = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subscribeNewsletter>>, TError,{data: BodyType<NewsletterSubscriptionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof subscribeNewsletter>>,
-        TError,
-        {data: BodyType<NewsletterSubscriptionInput>},
-        TContext
-      > => {
-      return useMutation(getSubscribeNewsletterMutationOptions(options));
-    }
-
-export const getGetCmsPublishedPageUrl = (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
-    slug: string,) => {
-
-
-
-
-  return `/api/cms/pages/${market}/${slug}`
-}
+export type SubscribeNewsletterMutationResult = NonNullable<
+  Awaited<ReturnType<typeof subscribeNewsletter>>
+>;
+export type SubscribeNewsletterMutationBody =
+  BodyType<NewsletterSubscriptionInput>;
+export type SubscribeNewsletterMutationError = ErrorType<void>;
 
 /**
- * @summary Read a published CMS page
+ * @summary Subscribe to Cognirise field notes
  */
-export const getCmsPublishedPage = async (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
-    slug: string, options?: Parameters<typeof customFetch>[1]): Promise<CmsPageEnvelope> => {
+export const useSubscribeNewsletter = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof subscribeNewsletter>>,
+    TError,
+    { data: BodyType<NewsletterSubscriptionInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof subscribeNewsletter>>,
+  TError,
+  { data: BodyType<NewsletterSubscriptionInput> },
+  TContext
+> => {
+  return useMutation(getSubscribeNewsletterMutationOptions(options));
+};
 
-  return customFetch<CmsPageEnvelope>(getGetCmsPublishedPageUrl(market,slug),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetCmsPublishedPageQueryKey = (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
-    slug: string,) => {
-    return [
-    `/api/cms/pages/${market}/${slug}`
-    ] as const;
-    }
-
-
-export const getGetCmsPublishedPageQueryOptions = <TData = Awaited<ReturnType<typeof getCmsPublishedPage>>, TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>>(market: 'uae' | 'ksa' | 'turkiye' | 'europe',
-    slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsPublishedPage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetCmsPublishedPageUrl = (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
 ) => {
+  return `/api/cms/pages/${market}/${slug}`;
+};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+/**
+ * @summary Read a published CMS page
+ */
+export const getCmsPublishedPage = async (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsPageEnvelope> => {
+  return customFetch<CmsPageEnvelope>(getGetCmsPublishedPageUrl(market, slug), {
+    ...options,
+    method: "GET",
+  });
+};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetCmsPublishedPageQueryKey(market,slug);
+export const getGetCmsPublishedPageQueryKey = (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+) => {
+  return [`/api/cms/pages/${market}/${slug}`] as const;
+};
 
+export const getGetCmsPublishedPageQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCmsPublishedPage>>,
+  TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>,
+>(
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsPublishedPage>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
+  const queryKey =
+    queryOptions?.queryKey ?? getGetCmsPublishedPageQueryKey(market, slug);
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCmsPublishedPage>>> = ({ signal }) => getCmsPublishedPage(market,slug, { signal, ...requestOptions });
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCmsPublishedPage>>
+  > = ({ signal }) =>
+    getCmsPublishedPage(market, slug, { signal, ...requestOptions });
 
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      market !== null &&
+      market !== undefined &&
+      slug !== null &&
+      slug !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsPublishedPage>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
 
-
-
-
-   return  { queryKey, queryFn, enabled: market !== null && market !== undefined && slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCmsPublishedPage>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetCmsPublishedPageQueryResult = NonNullable<Awaited<ReturnType<typeof getCmsPublishedPage>>>
-export type GetCmsPublishedPageQueryError = ErrorType<InvalidCmsPageResponse | ErrorResponse>
-
+export type GetCmsPublishedPageQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCmsPublishedPage>>
+>;
+export type GetCmsPublishedPageQueryError = ErrorType<
+  InvalidCmsPageResponse | ErrorResponse
+>;
 
 /**
  * @summary Read a published CMS page
  */
 
-export function useGetCmsPublishedPage<TData = Awaited<ReturnType<typeof getCmsPublishedPage>>, TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>>(
- market: 'uae' | 'ksa' | 'turkiye' | 'europe',
-    slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsPublishedPage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useGetCmsPublishedPage<
+  TData = Awaited<ReturnType<typeof getCmsPublishedPage>>,
+  TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>,
+>(
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsPublishedPage>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCmsPublishedPageQueryOptions(
+    market,
+    slug,
+    options,
+  );
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetCmsPublishedPageQueryOptions(market,slug,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
 
 export const getExchangeCmsPreviewTokenUrl = () => {
-
-
-
-
-  return `/api/cms/preview/exchange`
-}
+  return `/api/cms/preview/exchange`;
+};
 
 /**
  * @summary Exchange a signed one-time preview entry token for a private preview cookie
  */
-export const exchangeCmsPreviewToken = async (cmsPreviewExchangeInput: CmsPreviewExchangeInput, options?: Parameters<typeof customFetch>[1]): Promise<CmsPreviewExchange> => {
-
-  return customFetch<CmsPreviewExchange>(getExchangeCmsPreviewTokenUrl(),
-  {
+export const exchangeCmsPreviewToken = async (
+  cmsPreviewExchangeInput: CmsPreviewExchangeInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsPreviewExchange> => {
+  return customFetch<CmsPreviewExchange>(getExchangeCmsPreviewTokenUrl(), {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(cmsPreviewExchangeInput)
-  }
-);}
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(cmsPreviewExchangeInput),
+  });
+};
 
+export const getExchangeCmsPreviewTokenMutationOptions = <
+  TError = ErrorType<InvalidPreviewTokenResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof exchangeCmsPreviewToken>>,
+    TError,
+    { data: BodyType<CmsPreviewExchangeInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof exchangeCmsPreviewToken>>,
+  TError,
+  { data: BodyType<CmsPreviewExchangeInput> },
+  TContext
+> => {
+  const mutationKey = ["exchangeCmsPreviewToken"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof exchangeCmsPreviewToken>>,
+    { data: BodyType<CmsPreviewExchangeInput> }
+  > = (props) => {
+    const { data } = props ?? {};
 
+    return exchangeCmsPreviewToken(data, requestOptions);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
-export const getExchangeCmsPreviewTokenMutationOptions = <TError = ErrorType<InvalidPreviewTokenResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof exchangeCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewExchangeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof exchangeCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewExchangeInput>}, TContext> => {
-
-const mutationKey = ['exchangeCmsPreviewToken'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof exchangeCmsPreviewToken>>, {data: BodyType<CmsPreviewExchangeInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  exchangeCmsPreviewToken(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ExchangeCmsPreviewTokenMutationResult = NonNullable<Awaited<ReturnType<typeof exchangeCmsPreviewToken>>>
-    export type ExchangeCmsPreviewTokenMutationBody = BodyType<CmsPreviewExchangeInput>
-    export type ExchangeCmsPreviewTokenMutationError = ErrorType<InvalidPreviewTokenResponse>
-
-    /**
- * @summary Exchange a signed one-time preview entry token for a private preview cookie
- */
-export const useExchangeCmsPreviewToken = <TError = ErrorType<InvalidPreviewTokenResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof exchangeCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewExchangeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof exchangeCmsPreviewToken>>,
-        TError,
-        {data: BodyType<CmsPreviewExchangeInput>},
-        TContext
-      > => {
-      return useMutation(getExchangeCmsPreviewTokenMutationOptions(options));
-    }
-
-export const getGetCmsPreviewPageUrl = (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
-    slug: string,) => {
-
-
-
-
-  return `/api/cms/preview/pages/${market}/${slug}`
-}
+export type ExchangeCmsPreviewTokenMutationResult = NonNullable<
+  Awaited<ReturnType<typeof exchangeCmsPreviewToken>>
+>;
+export type ExchangeCmsPreviewTokenMutationBody =
+  BodyType<CmsPreviewExchangeInput>;
+export type ExchangeCmsPreviewTokenMutationError =
+  ErrorType<InvalidPreviewTokenResponse>;
 
 /**
- * @summary Read a CMS draft page authorized by the private preview cookie
+ * @summary Exchange a signed one-time preview entry token for a private preview cookie
  */
-export const getCmsPreviewPage = async (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
-    slug: string, options?: Parameters<typeof customFetch>[1]): Promise<CmsPageEnvelope> => {
+export const useExchangeCmsPreviewToken = <
+  TError = ErrorType<InvalidPreviewTokenResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof exchangeCmsPreviewToken>>,
+    TError,
+    { data: BodyType<CmsPreviewExchangeInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof exchangeCmsPreviewToken>>,
+  TError,
+  { data: BodyType<CmsPreviewExchangeInput> },
+  TContext
+> => {
+  return useMutation(getExchangeCmsPreviewTokenMutationOptions(options));
+};
 
-  return customFetch<CmsPageEnvelope>(getGetCmsPreviewPageUrl(market,slug),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetCmsPreviewPageQueryKey = (market: 'uae' | 'ksa' | 'turkiye' | 'europe',
-    slug: string,) => {
-    return [
-    `/api/cms/preview/pages/${market}/${slug}`
-    ] as const;
-    }
-
-
-export const getGetCmsPreviewPageQueryOptions = <TData = Awaited<ReturnType<typeof getCmsPreviewPage>>, TError = ErrorType<ErrorResponse>>(market: 'uae' | 'ksa' | 'turkiye' | 'europe',
-    slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsPreviewPage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetCmsPreviewPageUrl = (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
 ) => {
+  return `/api/cms/preview/pages/${market}/${slug}`;
+};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+/**
+ * @summary Read a CMS draft page authorized by the private preview cookie
+ */
+export const getCmsPreviewPage = async (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsPageEnvelope> => {
+  return customFetch<CmsPageEnvelope>(getGetCmsPreviewPageUrl(market, slug), {
+    ...options,
+    method: "GET",
+  });
+};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetCmsPreviewPageQueryKey(market,slug);
+export const getGetCmsPreviewPageQueryKey = (
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+) => {
+  return [`/api/cms/preview/pages/${market}/${slug}`] as const;
+};
 
+export const getGetCmsPreviewPageQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCmsPreviewPage>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsPreviewPage>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
+  const queryKey =
+    queryOptions?.queryKey ?? getGetCmsPreviewPageQueryKey(market, slug);
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCmsPreviewPage>>> = ({ signal }) => getCmsPreviewPage(market,slug, { signal, ...requestOptions });
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCmsPreviewPage>>
+  > = ({ signal }) =>
+    getCmsPreviewPage(market, slug, { signal, ...requestOptions });
 
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      market !== null &&
+      market !== undefined &&
+      slug !== null &&
+      slug !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsPreviewPage>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
 
-
-
-
-   return  { queryKey, queryFn, enabled: market !== null && market !== undefined && slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCmsPreviewPage>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetCmsPreviewPageQueryResult = NonNullable<Awaited<ReturnType<typeof getCmsPreviewPage>>>
-export type GetCmsPreviewPageQueryError = ErrorType<ErrorResponse>
-
+export type GetCmsPreviewPageQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCmsPreviewPage>>
+>;
+export type GetCmsPreviewPageQueryError = ErrorType<ErrorResponse>;
 
 /**
  * @summary Read a CMS draft page authorized by the private preview cookie
  */
 
-export function useGetCmsPreviewPage<TData = Awaited<ReturnType<typeof getCmsPreviewPage>>, TError = ErrorType<ErrorResponse>>(
- market: 'uae' | 'ksa' | 'turkiye' | 'europe',
-    slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsPreviewPage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useGetCmsPreviewPage<
+  TData = Awaited<ReturnType<typeof getCmsPreviewPage>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  market: "uae" | "ksa" | "turkiye" | "europe",
+  slug: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsPreviewPage>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCmsPreviewPageQueryOptions(market, slug, options);
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetCmsPreviewPageQueryOptions(market,slug,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
-
-
-
-
-
-
 export const getIssueCmsPreviewTokenUrl = () => {
-
-
-
-
-  return `/api/cms/workflow/preview-tokens`
-}
+  return `/api/cms/workflow/preview-tokens`;
+};
 
 /**
  * Requires an exact bearer service key for a principal declared in CMS_WORKFLOW_CREDENTIALS.
  * @summary Issue a signed CMS preview entry token
  */
-export const issueCmsPreviewToken = async (cmsPreviewTarget: CmsPreviewTarget, options?: Parameters<typeof customFetch>[1]): Promise<CmsPreviewToken> => {
-
-  return customFetch<CmsPreviewToken>(getIssueCmsPreviewTokenUrl(),
-  {
+export const issueCmsPreviewToken = async (
+  cmsPreviewTarget: CmsPreviewTarget,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsPreviewToken> => {
+  return customFetch<CmsPreviewToken>(getIssueCmsPreviewTokenUrl(), {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(cmsPreviewTarget)
-  }
-);}
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(cmsPreviewTarget),
+  });
+};
 
+export const getIssueCmsPreviewTokenMutationOptions = <
+  TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof issueCmsPreviewToken>>,
+    TError,
+    { data: BodyType<CmsPreviewTarget> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof issueCmsPreviewToken>>,
+  TError,
+  { data: BodyType<CmsPreviewTarget> },
+  TContext
+> => {
+  const mutationKey = ["issueCmsPreviewToken"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof issueCmsPreviewToken>>,
+    { data: BodyType<CmsPreviewTarget> }
+  > = (props) => {
+    const { data } = props ?? {};
 
+    return issueCmsPreviewToken(data, requestOptions);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
-export const getIssueCmsPreviewTokenMutationOptions = <TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof issueCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewTarget>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof issueCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewTarget>}, TContext> => {
+export type IssueCmsPreviewTokenMutationResult = NonNullable<
+  Awaited<ReturnType<typeof issueCmsPreviewToken>>
+>;
+export type IssueCmsPreviewTokenMutationBody = BodyType<CmsPreviewTarget>;
+export type IssueCmsPreviewTokenMutationError = ErrorType<
+  InvalidCmsPageResponse | ErrorResponse
+>;
 
-const mutationKey = ['issueCmsPreviewToken'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof issueCmsPreviewToken>>, {data: BodyType<CmsPreviewTarget>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  issueCmsPreviewToken(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type IssueCmsPreviewTokenMutationResult = NonNullable<Awaited<ReturnType<typeof issueCmsPreviewToken>>>
-    export type IssueCmsPreviewTokenMutationBody = BodyType<CmsPreviewTarget>
-    export type IssueCmsPreviewTokenMutationError = ErrorType<InvalidCmsPageResponse | ErrorResponse>
-
-    /**
+/**
  * @summary Issue a signed CMS preview entry token
  */
-export const useIssueCmsPreviewToken = <TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof issueCmsPreviewToken>>, TError,{data: BodyType<CmsPreviewTarget>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof issueCmsPreviewToken>>,
-        TError,
-        {data: BodyType<CmsPreviewTarget>},
-        TContext
-      > => {
-      return useMutation(getIssueCmsPreviewTokenMutationOptions(options));
-    }
+export const useIssueCmsPreviewToken = <
+  TError = ErrorType<InvalidCmsPageResponse | ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof issueCmsPreviewToken>>,
+    TError,
+    { data: BodyType<CmsPreviewTarget> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof issueCmsPreviewToken>>,
+  TError,
+  { data: BodyType<CmsPreviewTarget> },
+  TContext
+> => {
+  return useMutation(getIssueCmsPreviewTokenMutationOptions(options));
+};
 
 export const getTransitionCmsWorkflowUrl = () => {
-
-
-
-
-  return `/api/cms/workflow/transitions`
-}
+  return `/api/cms/workflow/transitions`;
+};
 
 /**
  * The authenticated CMS_WORKFLOW_CREDENTIALS principal must be assigned to the request market. A reviewer, publisher, or administrator cannot approve or publish an edition they last requested or edited.
  * @summary Apply an authorized market-edition workflow transition
  */
-export const transitionCmsWorkflow = async (cmsWorkflowTransitionInput: CmsWorkflowTransitionInput, options?: Parameters<typeof customFetch>[1]): Promise<CmsWorkflowDuplicateReceipt | CmsWorkflowTransitionReceipt> => {
-
-  return customFetch<CmsWorkflowDuplicateReceipt | CmsWorkflowTransitionReceipt>(getTransitionCmsWorkflowUrl(),
-  {
+export const transitionCmsWorkflow = async (
+  cmsWorkflowTransitionInput: CmsWorkflowTransitionInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsWorkflowDuplicateReceipt | CmsWorkflowTransitionReceipt> => {
+  return customFetch<
+    CmsWorkflowDuplicateReceipt | CmsWorkflowTransitionReceipt
+  >(getTransitionCmsWorkflowUrl(), {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(cmsWorkflowTransitionInput)
-  }
-);}
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(cmsWorkflowTransitionInput),
+  });
+};
 
+export const getTransitionCmsWorkflowMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof transitionCmsWorkflow>>,
+    TError,
+    { data: BodyType<CmsWorkflowTransitionInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof transitionCmsWorkflow>>,
+  TError,
+  { data: BodyType<CmsWorkflowTransitionInput> },
+  TContext
+> => {
+  const mutationKey = ["transitionCmsWorkflow"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof transitionCmsWorkflow>>,
+    { data: BodyType<CmsWorkflowTransitionInput> }
+  > = (props) => {
+    const { data } = props ?? {};
 
+    return transitionCmsWorkflow(data, requestOptions);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
-export const getTransitionCmsWorkflowMutationOptions = <TError = ErrorType<ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof transitionCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowTransitionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof transitionCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowTransitionInput>}, TContext> => {
+export type TransitionCmsWorkflowMutationResult = NonNullable<
+  Awaited<ReturnType<typeof transitionCmsWorkflow>>
+>;
+export type TransitionCmsWorkflowMutationBody =
+  BodyType<CmsWorkflowTransitionInput>;
+export type TransitionCmsWorkflowMutationError = ErrorType<ErrorResponse>;
 
-const mutationKey = ['transitionCmsWorkflow'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof transitionCmsWorkflow>>, {data: BodyType<CmsWorkflowTransitionInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  transitionCmsWorkflow(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type TransitionCmsWorkflowMutationResult = NonNullable<Awaited<ReturnType<typeof transitionCmsWorkflow>>>
-    export type TransitionCmsWorkflowMutationBody = BodyType<CmsWorkflowTransitionInput>
-    export type TransitionCmsWorkflowMutationError = ErrorType<ErrorResponse>
-
-    /**
+/**
  * @summary Apply an authorized market-edition workflow transition
  */
-export const useTransitionCmsWorkflow = <TError = ErrorType<ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof transitionCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowTransitionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof transitionCmsWorkflow>>,
-        TError,
-        {data: BodyType<CmsWorkflowTransitionInput>},
-        TContext
-      > => {
-      return useMutation(getTransitionCmsWorkflowMutationOptions(options));
-    }
+export const useTransitionCmsWorkflow = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof transitionCmsWorkflow>>,
+    TError,
+    { data: BodyType<CmsWorkflowTransitionInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof transitionCmsWorkflow>>,
+  TError,
+  { data: BodyType<CmsWorkflowTransitionInput> },
+  TContext
+> => {
+  return useMutation(getTransitionCmsWorkflowMutationOptions(options));
+};
 
 export const getRollbackCmsWorkflowUrl = () => {
-
-
-
-
-  return `/api/cms/workflow/rollbacks`
-}
+  return `/api/cms/workflow/rollbacks`;
+};
 
 /**
  * Rollback is permitted only for a CMS_WORKFLOW_CREDENTIALS administrator whose assigned markets value is `all`.
  * @summary Restore an immutable page revision
  */
-export const rollbackCmsWorkflow = async (cmsWorkflowRollbackInput: CmsWorkflowRollbackInput, options?: Parameters<typeof customFetch>[1]): Promise<CmsWorkflowDuplicateReceipt | CmsWorkflowAcceptedReceipt> => {
+export const rollbackCmsWorkflow = async (
+  cmsWorkflowRollbackInput: CmsWorkflowRollbackInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsWorkflowDuplicateReceipt | CmsWorkflowAcceptedReceipt> => {
+  return customFetch<CmsWorkflowDuplicateReceipt | CmsWorkflowAcceptedReceipt>(
+    getRollbackCmsWorkflowUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(cmsWorkflowRollbackInput),
+    },
+  );
+};
 
-  return customFetch<CmsWorkflowDuplicateReceipt | CmsWorkflowAcceptedReceipt>(getRollbackCmsWorkflowUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(cmsWorkflowRollbackInput)
-  }
-);}
+export const getRollbackCmsWorkflowMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof rollbackCmsWorkflow>>,
+    TError,
+    { data: BodyType<CmsWorkflowRollbackInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof rollbackCmsWorkflow>>,
+  TError,
+  { data: BodyType<CmsWorkflowRollbackInput> },
+  TContext
+> => {
+  const mutationKey = ["rollbackCmsWorkflow"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof rollbackCmsWorkflow>>,
+    { data: BodyType<CmsWorkflowRollbackInput> }
+  > = (props) => {
+    const { data } = props ?? {};
 
+    return rollbackCmsWorkflow(data, requestOptions);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
+export type RollbackCmsWorkflowMutationResult = NonNullable<
+  Awaited<ReturnType<typeof rollbackCmsWorkflow>>
+>;
+export type RollbackCmsWorkflowMutationBody =
+  BodyType<CmsWorkflowRollbackInput>;
+export type RollbackCmsWorkflowMutationError = ErrorType<ErrorResponse>;
 
-export const getRollbackCmsWorkflowMutationOptions = <TError = ErrorType<ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rollbackCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowRollbackInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof rollbackCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowRollbackInput>}, TContext> => {
-
-const mutationKey = ['rollbackCmsWorkflow'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rollbackCmsWorkflow>>, {data: BodyType<CmsWorkflowRollbackInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  rollbackCmsWorkflow(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type RollbackCmsWorkflowMutationResult = NonNullable<Awaited<ReturnType<typeof rollbackCmsWorkflow>>>
-    export type RollbackCmsWorkflowMutationBody = BodyType<CmsWorkflowRollbackInput>
-    export type RollbackCmsWorkflowMutationError = ErrorType<ErrorResponse>
-
-    /**
+/**
  * @summary Restore an immutable page revision
  */
-export const useRollbackCmsWorkflow = <TError = ErrorType<ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rollbackCmsWorkflow>>, TError,{data: BodyType<CmsWorkflowRollbackInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof rollbackCmsWorkflow>>,
-        TError,
-        {data: BodyType<CmsWorkflowRollbackInput>},
-        TContext
-      > => {
-      return useMutation(getRollbackCmsWorkflowMutationOptions(options));
-    }
+export const useRollbackCmsWorkflow = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof rollbackCmsWorkflow>>,
+    TError,
+    { data: BodyType<CmsWorkflowRollbackInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof rollbackCmsWorkflow>>,
+  TError,
+  { data: BodyType<CmsWorkflowRollbackInput> },
+  TContext
+> => {
+  return useMutation(getRollbackCmsWorkflowMutationOptions(options));
+};
 
 export const getProcessDueCmsWorkflowUrl = () => {
-
-
-
-
-  return `/api/cms/workflow/process-due`
-}
+  return `/api/cms/workflow/process-due`;
+};
 
 /**
  * @summary Publish scheduled editions and expire due published editions
  */
-export const processDueCmsWorkflow = async ( options?: Parameters<typeof customFetch>[1]): Promise<CmsWorkflowDueReceipt> => {
-
-  return customFetch<CmsWorkflowDueReceipt>(getProcessDueCmsWorkflowUrl(),
-  {
+export const processDueCmsWorkflow = async (
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsWorkflowDueReceipt> => {
+  return customFetch<CmsWorkflowDueReceipt>(getProcessDueCmsWorkflowUrl(), {
     ...options,
-    method: 'POST'
+    method: "POST",
+  });
+};
 
+export const getProcessDueCmsWorkflowMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof processDueCmsWorkflow>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof processDueCmsWorkflow>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["processDueCmsWorkflow"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
-  }
-);}
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof processDueCmsWorkflow>>,
+    void
+  > = () => {
+    return processDueCmsWorkflow(requestOptions);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
+export type ProcessDueCmsWorkflowMutationResult = NonNullable<
+  Awaited<ReturnType<typeof processDueCmsWorkflow>>
+>;
 
+export type ProcessDueCmsWorkflowMutationError = ErrorType<ErrorResponse>;
 
-
-export const getProcessDueCmsWorkflowMutationOptions = <TError = ErrorType<ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof processDueCmsWorkflow>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof processDueCmsWorkflow>>, TError,void, TContext> => {
-
-const mutationKey = ['processDueCmsWorkflow'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof processDueCmsWorkflow>>, void> = () => {
-
-
-          return  processDueCmsWorkflow(requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ProcessDueCmsWorkflowMutationResult = NonNullable<Awaited<ReturnType<typeof processDueCmsWorkflow>>>
-
-    export type ProcessDueCmsWorkflowMutationError = ErrorType<ErrorResponse>
-
-    /**
+/**
  * @summary Publish scheduled editions and expire due published editions
  */
-export const useProcessDueCmsWorkflow = <TError = ErrorType<ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof processDueCmsWorkflow>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof processDueCmsWorkflow>>,
-        TError,
-        void,
-        TContext
-      > => {
-      return useMutation(getProcessDueCmsWorkflowMutationOptions(options));
-    }
+export const useProcessDueCmsWorkflow = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof processDueCmsWorkflow>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof processDueCmsWorkflow>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getProcessDueCmsWorkflowMutationOptions(options));
+};
+
+export const getRunCmsEditorialAssistantUrl = () => {
+  return `/api/cms/editorial-assistant/runs`;
+};
+
+/**
+ * Uses only current published approvedSource documents selected by ID. Targets and sources are classified, screened, redacted, and revision-bound; citation claims must cover the suggestion and bind to exact source quotes. Every failure is closed. Requires CMS workflow bearer authorization and market assignment.
+ * @summary Produce a grounded editorial suggestion without changing CMS content
+ */
+export const runCmsEditorialAssistant = async (
+  cmsEditorialAssistantInput: CmsEditorialAssistantInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsEditorialAssistantResult> => {
+  return customFetch<CmsEditorialAssistantResult>(
+    getRunCmsEditorialAssistantUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(cmsEditorialAssistantInput),
+    },
+  );
+};
+
+export const getRunCmsEditorialAssistantMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof runCmsEditorialAssistant>>,
+    TError,
+    { data: BodyType<CmsEditorialAssistantInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof runCmsEditorialAssistant>>,
+  TError,
+  { data: BodyType<CmsEditorialAssistantInput> },
+  TContext
+> => {
+  const mutationKey = ["runCmsEditorialAssistant"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof runCmsEditorialAssistant>>,
+    { data: BodyType<CmsEditorialAssistantInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return runCmsEditorialAssistant(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RunCmsEditorialAssistantMutationResult = NonNullable<
+  Awaited<ReturnType<typeof runCmsEditorialAssistant>>
+>;
+export type RunCmsEditorialAssistantMutationBody =
+  BodyType<CmsEditorialAssistantInput>;
+export type RunCmsEditorialAssistantMutationError = ErrorType<void>;
+
+/**
+ * @summary Produce a grounded editorial suggestion without changing CMS content
+ */
+export const useRunCmsEditorialAssistant = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof runCmsEditorialAssistant>>,
+    TError,
+    { data: BodyType<CmsEditorialAssistantInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof runCmsEditorialAssistant>>,
+  TError,
+  { data: BodyType<CmsEditorialAssistantInput> },
+  TContext
+> => {
+  return useMutation(getRunCmsEditorialAssistantMutationOptions(options));
+};
+
+export const getDecideCmsEditorialAssistantRunUrl = () => {
+  return `/api/cms/editorial-assistant/decisions`;
+};
+
+/**
+ * Reviewer, publisher, or administrator only. The run author cannot decide their own run. Acceptance requires a current Sanity resulting revision and does not itself apply generated content.
+ * @summary Record an independent human acceptance or rejection
+ */
+export const decideCmsEditorialAssistantRun = async (
+  cmsEditorialAssistantDecisionInput: CmsEditorialAssistantDecisionInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsEditorialAssistantDecision> => {
+  return customFetch<CmsEditorialAssistantDecision>(
+    getDecideCmsEditorialAssistantRunUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(cmsEditorialAssistantDecisionInput),
+    },
+  );
+};
+
+export const getDecideCmsEditorialAssistantRunMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof decideCmsEditorialAssistantRun>>,
+    TError,
+    { data: BodyType<CmsEditorialAssistantDecisionInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof decideCmsEditorialAssistantRun>>,
+  TError,
+  { data: BodyType<CmsEditorialAssistantDecisionInput> },
+  TContext
+> => {
+  const mutationKey = ["decideCmsEditorialAssistantRun"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof decideCmsEditorialAssistantRun>>,
+    { data: BodyType<CmsEditorialAssistantDecisionInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return decideCmsEditorialAssistantRun(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DecideCmsEditorialAssistantRunMutationResult = NonNullable<
+  Awaited<ReturnType<typeof decideCmsEditorialAssistantRun>>
+>;
+export type DecideCmsEditorialAssistantRunMutationBody =
+  BodyType<CmsEditorialAssistantDecisionInput>;
+export type DecideCmsEditorialAssistantRunMutationError = ErrorType<void>;
+
+/**
+ * @summary Record an independent human acceptance or rejection
+ */
+export const useDecideCmsEditorialAssistantRun = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof decideCmsEditorialAssistantRun>>,
+    TError,
+    { data: BodyType<CmsEditorialAssistantDecisionInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof decideCmsEditorialAssistantRun>>,
+  TError,
+  { data: BodyType<CmsEditorialAssistantDecisionInput> },
+  TContext
+> => {
+  return useMutation(getDecideCmsEditorialAssistantRunMutationOptions(options));
+};
+
+export const getGetCmsEditorialAssistantMonitoringUrl = () => {
+  return `/api/cms/editorial-assistant/monitoring`;
+};
+
+/**
+ * All-market administrator only. Returns a rolling 24-hour aggregate and never returns prompts, drafts, source text, suggestions, or credentials.
+ * @summary Read redacted editorial assistant operations metrics
+ */
+export const getCmsEditorialAssistantMonitoring = async (
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsEditorialAssistantMonitoring> => {
+  return customFetch<CmsEditorialAssistantMonitoring>(
+    getGetCmsEditorialAssistantMonitoringUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetCmsEditorialAssistantMonitoringQueryKey = () => {
+  return [`/api/cms/editorial-assistant/monitoring`] as const;
+};
+
+export const getGetCmsEditorialAssistantMonitoringQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCmsEditorialAssistantMonitoring>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsEditorialAssistantMonitoring>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetCmsEditorialAssistantMonitoringQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCmsEditorialAssistantMonitoring>>
+  > = ({ signal }) =>
+    getCmsEditorialAssistantMonitoring({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsEditorialAssistantMonitoring>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCmsEditorialAssistantMonitoringQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCmsEditorialAssistantMonitoring>>
+>;
+export type GetCmsEditorialAssistantMonitoringQueryError = ErrorType<void>;
+
+/**
+ * @summary Read redacted editorial assistant operations metrics
+ */
+
+export function useGetCmsEditorialAssistantMonitoring<
+  TData = Awaited<ReturnType<typeof getCmsEditorialAssistantMonitoring>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsEditorialAssistantMonitoring>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions =
+    getGetCmsEditorialAssistantMonitoringQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 export const getReceiveCmsPublishWebhookUrl = () => {
-
-
-
-
-  return `/api/cms/webhooks/publish`
-}
+  return `/api/cms/webhooks/publish`;
+};
 
 /**
  * @summary Receive a signed Sanity publish webhook and invalidate published content
  */
-export const receiveCmsPublishWebhook = async (cmsPublishWebhookPayload: CmsPublishWebhookPayload, options?: Parameters<typeof customFetch>[1]): Promise<CmsWebhookDuplicate | CmsWebhookAccepted> => {
+export const receiveCmsPublishWebhook = async (
+  cmsPublishWebhookPayload: CmsPublishWebhookPayload,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsWebhookDuplicate | CmsWebhookAccepted> => {
+  return customFetch<CmsWebhookDuplicate | CmsWebhookAccepted>(
+    getReceiveCmsPublishWebhookUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(cmsPublishWebhookPayload),
+    },
+  );
+};
 
-  return customFetch<CmsWebhookDuplicate | CmsWebhookAccepted>(getReceiveCmsPublishWebhookUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(cmsPublishWebhookPayload)
-  }
-);}
+export const getReceiveCmsPublishWebhookMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof receiveCmsPublishWebhook>>,
+    TError,
+    { data: BodyType<CmsPublishWebhookPayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof receiveCmsPublishWebhook>>,
+  TError,
+  { data: BodyType<CmsPublishWebhookPayload> },
+  TContext
+> => {
+  const mutationKey = ["receiveCmsPublishWebhook"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
 
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof receiveCmsPublishWebhook>>,
+    { data: BodyType<CmsPublishWebhookPayload> }
+  > = (props) => {
+    const { data } = props ?? {};
 
+    return receiveCmsPublishWebhook(data, requestOptions);
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
+export type ReceiveCmsPublishWebhookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof receiveCmsPublishWebhook>>
+>;
+export type ReceiveCmsPublishWebhookMutationBody =
+  BodyType<CmsPublishWebhookPayload>;
+export type ReceiveCmsPublishWebhookMutationError = ErrorType<ErrorResponse>;
 
-export const getReceiveCmsPublishWebhookMutationOptions = <TError = ErrorType<ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveCmsPublishWebhook>>, TError,{data: BodyType<CmsPublishWebhookPayload>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof receiveCmsPublishWebhook>>, TError,{data: BodyType<CmsPublishWebhookPayload>}, TContext> => {
-
-const mutationKey = ['receiveCmsPublishWebhook'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveCmsPublishWebhook>>, {data: BodyType<CmsPublishWebhookPayload>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  receiveCmsPublishWebhook(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ReceiveCmsPublishWebhookMutationResult = NonNullable<Awaited<ReturnType<typeof receiveCmsPublishWebhook>>>
-    export type ReceiveCmsPublishWebhookMutationBody = BodyType<CmsPublishWebhookPayload>
-    export type ReceiveCmsPublishWebhookMutationError = ErrorType<ErrorResponse>
-
-    /**
+/**
  * @summary Receive a signed Sanity publish webhook and invalidate published content
  */
-export const useReceiveCmsPublishWebhook = <TError = ErrorType<ErrorResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveCmsPublishWebhook>>, TError,{data: BodyType<CmsPublishWebhookPayload>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof receiveCmsPublishWebhook>>,
-        TError,
-        {data: BodyType<CmsPublishWebhookPayload>},
-        TContext
-      > => {
-      return useMutation(getReceiveCmsPublishWebhookMutationOptions(options));
-    }
+export const useReceiveCmsPublishWebhook = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof receiveCmsPublishWebhook>>,
+    TError,
+    { data: BodyType<CmsPublishWebhookPayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof receiveCmsPublishWebhook>>,
+  TError,
+  { data: BodyType<CmsPublishWebhookPayload> },
+  TContext
+> => {
+  return useMutation(getReceiveCmsPublishWebhookMutationOptions(options));
+};
 
 export const getGetCmsHealthUrl = () => {
-
-
-
-
-  return `/api/cms/health`
-}
+  return `/api/cms/health`;
+};
 
 /**
  * @summary Read CMS integration configuration status
  */
-export const getCmsHealth = async ( options?: Parameters<typeof customFetch>[1]): Promise<CmsHealth> => {
-
-  return customFetch<CmsHealth>(getGetCmsHealthUrl(),
-  {
+export const getCmsHealth = async (
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsHealth> => {
+  return customFetch<CmsHealth>(getGetCmsHealthUrl(), {
     ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
+    method: "GET",
+  });
+};
 
 export const getGetCmsHealthQueryKey = () => {
-    return [
-    `/api/cms/health`
-    ] as const;
-    }
+  return [`/api/cms/health`] as const;
+};
 
+export const getGetCmsHealthQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCmsHealth>>,
+  TError = ErrorType<CmsHealth>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsHealth>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-export const getGetCmsHealthQueryOptions = <TData = Awaited<ReturnType<typeof getCmsHealth>>, TError = ErrorType<CmsHealth>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsHealth>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
+  const queryKey = queryOptions?.queryKey ?? getGetCmsHealthQueryKey();
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCmsHealth>>> = ({
+    signal,
+  }) => getCmsHealth({ signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getGetCmsHealthQueryKey();
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsHealth>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
 
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCmsHealth>>> = ({ signal }) => getCmsHealth({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCmsHealth>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetCmsHealthQueryResult = NonNullable<Awaited<ReturnType<typeof getCmsHealth>>>
-export type GetCmsHealthQueryError = ErrorType<CmsHealth>
-
+export type GetCmsHealthQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCmsHealth>>
+>;
+export type GetCmsHealthQueryError = ErrorType<CmsHealth>;
 
 /**
  * @summary Read CMS integration configuration status
  */
 
-export function useGetCmsHealth<TData = Awaited<ReturnType<typeof getCmsHealth>>, TError = ErrorType<CmsHealth>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCmsHealth>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useGetCmsHealth<
+  TData = Awaited<ReturnType<typeof getCmsHealth>>,
+  TError = ErrorType<CmsHealth>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsHealth>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCmsHealthQueryOptions(options);
 
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetCmsHealthQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
 
   return withQueryKey(query, queryOptions.queryKey);
 }

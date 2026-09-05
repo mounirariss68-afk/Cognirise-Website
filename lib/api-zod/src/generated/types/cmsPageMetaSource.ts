@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsPageMetaSource = typeof CmsPageMetaSource[keyof typeof CmsPageMetaSource];
-
+export type CmsPageMetaSource =
+  (typeof CmsPageMetaSource)[keyof typeof CmsPageMetaSource];
 
 export const CmsPageMetaSource = {
-  sanity: 'sanity',
-  cache: 'cache',
-  'migration-fallback': 'migration-fallback',
+  sanity: "sanity",
+  cache: "cache",
+  "migration-fallback": "migration-fallback",
 } as const;

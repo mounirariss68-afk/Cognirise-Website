@@ -5,22 +5,22 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsMarket } from './cmsMarket';
-import type { CmsWorkflowState } from './cmsWorkflowState';
-import type { IsoDateTime } from './isoDateTime';
+import type { CmsMarket } from "./cmsMarket";
+import type { CmsWorkflowState } from "./cmsWorkflowState";
+import type { IsoDateTime } from "./isoDateTime";
 
 export interface CmsWorkflowTransitionInput {
   /**
-     * @minLength 8
-     * @maxLength 120
-     * @pattern ^[A-Za-z0-9_-]+$
-     */
+   * @minLength 8
+   * @maxLength 120
+   * @pattern ^[A-Za-z0-9_-]+$
+   */
   requestId: string;
   /**
-     * @minLength 3
-     * @maxLength 200
-     * @pattern ^(?!drafts\.)[A-Za-z0-9._-]+$
-     */
+   * @minLength 3
+   * @maxLength 200
+   * @pattern ^(?!drafts\.)[A-Za-z0-9._-]+$
+   */
   subjectId: string;
   market: CmsMarket;
   toState: CmsWorkflowState;

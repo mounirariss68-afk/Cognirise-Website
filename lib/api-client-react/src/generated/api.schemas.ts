@@ -15,14 +15,13 @@ export interface ErrorResponse {
  */
 export type IsoDateTime = string;
 
-export type CmsMarket = typeof CmsMarket[keyof typeof CmsMarket];
-
+export type CmsMarket = (typeof CmsMarket)[keyof typeof CmsMarket];
 
 export const CmsMarket = {
-  uae: 'uae',
-  ksa: 'ksa',
-  turkiye: 'turkiye',
-  europe: 'europe',
+  uae: "uae",
+  ksa: "ksa",
+  turkiye: "turkiye",
+  europe: "europe",
 } as const;
 
 export type CmsPageBodyItem = { [key: string]: unknown };
@@ -31,27 +30,27 @@ export type CmsPageSeo = { [key: string]: unknown };
 
 export type CmsPageSectionsItem = { [key: string]: unknown };
 
-export type CmsPagePublicationState = typeof CmsPagePublicationState[keyof typeof CmsPagePublicationState];
-
+export type CmsPagePublicationState =
+  (typeof CmsPagePublicationState)[keyof typeof CmsPagePublicationState];
 
 export const CmsPagePublicationState = {
-  draft: 'draft',
-  review: 'review',
-  approved: 'approved',
-  scheduled: 'scheduled',
-  published: 'published',
-  expired: 'expired',
-  archived: 'archived',
+  draft: "draft",
+  review: "review",
+  approved: "approved",
+  scheduled: "scheduled",
+  published: "published",
+  expired: "expired",
+  archived: "archived",
 } as const;
 
 export interface CmsPage {
   id: string;
   revision: string;
   /**
-     * @minLength 1
-     * @maxLength 120
-     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-     */
+   * @minLength 1
+   * @maxLength 120
+   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+   */
   slug: string;
   market: CmsMarket;
   title?: string;
@@ -65,49 +64,49 @@ export interface CmsPage {
   expiresAt?: IsoDateTime;
 }
 
-export type CmsPageMetaDeliveryMode = typeof CmsPageMetaDeliveryMode[keyof typeof CmsPageMetaDeliveryMode];
-
+export type CmsPageMetaDeliveryMode =
+  (typeof CmsPageMetaDeliveryMode)[keyof typeof CmsPageMetaDeliveryMode];
 
 export const CmsPageMetaDeliveryMode = {
-  canonical: 'canonical',
-  override: 'override',
-  uaeFallback: 'uaeFallback',
-  unavailable: 'unavailable',
+  canonical: "canonical",
+  override: "override",
+  uaeFallback: "uaeFallback",
+  unavailable: "unavailable",
 } as const;
 
-export type CmsPageMetaRequestedPublicationState = typeof CmsPageMetaRequestedPublicationState[keyof typeof CmsPageMetaRequestedPublicationState];
-
+export type CmsPageMetaRequestedPublicationState =
+  (typeof CmsPageMetaRequestedPublicationState)[keyof typeof CmsPageMetaRequestedPublicationState];
 
 export const CmsPageMetaRequestedPublicationState = {
-  draft: 'draft',
-  review: 'review',
-  approved: 'approved',
-  scheduled: 'scheduled',
-  published: 'published',
-  expired: 'expired',
-  archived: 'archived',
+  draft: "draft",
+  review: "review",
+  approved: "approved",
+  scheduled: "scheduled",
+  published: "published",
+  expired: "expired",
+  archived: "archived",
 } as const;
 
-export type CmsPageMetaResolvedPublicationState = typeof CmsPageMetaResolvedPublicationState[keyof typeof CmsPageMetaResolvedPublicationState];
-
+export type CmsPageMetaResolvedPublicationState =
+  (typeof CmsPageMetaResolvedPublicationState)[keyof typeof CmsPageMetaResolvedPublicationState];
 
 export const CmsPageMetaResolvedPublicationState = {
-  draft: 'draft',
-  review: 'review',
-  approved: 'approved',
-  scheduled: 'scheduled',
-  published: 'published',
-  expired: 'expired',
-  archived: 'archived',
+  draft: "draft",
+  review: "review",
+  approved: "approved",
+  scheduled: "scheduled",
+  published: "published",
+  expired: "expired",
+  archived: "archived",
 } as const;
 
-export type CmsPageMetaSource = typeof CmsPageMetaSource[keyof typeof CmsPageMetaSource];
-
+export type CmsPageMetaSource =
+  (typeof CmsPageMetaSource)[keyof typeof CmsPageMetaSource];
 
 export const CmsPageMetaSource = {
-  sanity: 'sanity',
-  cache: 'cache',
-  'migration-fallback': 'migration-fallback',
+  sanity: "sanity",
+  cache: "cache",
+  "migration-fallback": "migration-fallback",
 } as const;
 
 export interface CmsPageMeta {
@@ -137,23 +136,25 @@ export interface CmsPreviewExchangeInput {
   token: string;
 }
 
-export interface CmsPublishWebhookPayload { [key: string]: unknown }
+export interface CmsPublishWebhookPayload {
+  [key: string]: unknown;
+}
 
-export type CmsPreviewExchangeStatus = typeof CmsPreviewExchangeStatus[keyof typeof CmsPreviewExchangeStatus];
-
+export type CmsPreviewExchangeStatus =
+  (typeof CmsPreviewExchangeStatus)[keyof typeof CmsPreviewExchangeStatus];
 
 export const CmsPreviewExchangeStatus = {
-  ready: 'ready',
+  ready: "ready",
 } as const;
 
 export interface CmsPreviewExchange {
   status: CmsPreviewExchangeStatus;
   market: CmsMarket;
   /**
-     * @minLength 1
-     * @maxLength 120
-     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-     */
+   * @minLength 1
+   * @maxLength 120
+   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+   */
   slug: string;
   /** Unix epoch seconds */
   expiresAt: number;
@@ -162,10 +163,10 @@ export interface CmsPreviewExchange {
 export interface CmsPreviewTarget {
   market: CmsMarket;
   /**
-     * @minLength 1
-     * @maxLength 120
-     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-     */
+   * @minLength 1
+   * @maxLength 120
+   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+   */
   slug: string;
 }
 
@@ -173,31 +174,31 @@ export type CmsPreviewToken = CmsPreviewTarget & {
   token: string;
 };
 
-export type CmsWorkflowState = typeof CmsWorkflowState[keyof typeof CmsWorkflowState];
-
+export type CmsWorkflowState =
+  (typeof CmsWorkflowState)[keyof typeof CmsWorkflowState];
 
 export const CmsWorkflowState = {
-  draft: 'draft',
-  review: 'review',
-  approved: 'approved',
-  scheduled: 'scheduled',
-  published: 'published',
-  expired: 'expired',
-  archived: 'archived',
+  draft: "draft",
+  review: "review",
+  approved: "approved",
+  scheduled: "scheduled",
+  published: "published",
+  expired: "expired",
+  archived: "archived",
 } as const;
 
 export interface CmsWorkflowTransitionInput {
   /**
-     * @minLength 8
-     * @maxLength 120
-     * @pattern ^[A-Za-z0-9_-]+$
-     */
+   * @minLength 8
+   * @maxLength 120
+   * @pattern ^[A-Za-z0-9_-]+$
+   */
   requestId: string;
   /**
-     * @minLength 3
-     * @maxLength 200
-     * @pattern ^(?!drafts\.)[A-Za-z0-9._-]+$
-     */
+   * @minLength 3
+   * @maxLength 200
+   * @pattern ^(?!drafts\.)[A-Za-z0-9._-]+$
+   */
   subjectId: string;
   market: CmsMarket;
   toState: CmsWorkflowState;
@@ -207,30 +208,30 @@ export interface CmsWorkflowTransitionInput {
 
 export interface CmsWorkflowRollbackInput {
   /**
-     * @minLength 8
-     * @maxLength 120
-     * @pattern ^[A-Za-z0-9_-]+$
-     */
+   * @minLength 8
+   * @maxLength 120
+   * @pattern ^[A-Za-z0-9_-]+$
+   */
   requestId: string;
   /**
-     * @minLength 3
-     * @maxLength 200
-     * @pattern ^(?!drafts\.)[A-Za-z0-9._-]+$
-     */
+   * @minLength 3
+   * @maxLength 200
+   * @pattern ^(?!drafts\.)[A-Za-z0-9._-]+$
+   */
   subjectId: string;
   /**
-     * @minLength 8
-     * @maxLength 120
-     * @pattern ^[A-Za-z0-9_-]+$
-     */
+   * @minLength 8
+   * @maxLength 120
+   * @pattern ^[A-Za-z0-9_-]+$
+   */
   revisionId: string;
 }
 
-export type CmsWorkflowDuplicateReceiptStatus = typeof CmsWorkflowDuplicateReceiptStatus[keyof typeof CmsWorkflowDuplicateReceiptStatus];
-
+export type CmsWorkflowDuplicateReceiptStatus =
+  (typeof CmsWorkflowDuplicateReceiptStatus)[keyof typeof CmsWorkflowDuplicateReceiptStatus];
 
 export const CmsWorkflowDuplicateReceiptStatus = {
-  duplicate: 'duplicate',
+  duplicate: "duplicate",
 } as const;
 
 export interface CmsWorkflowDuplicateReceipt {
@@ -238,11 +239,11 @@ export interface CmsWorkflowDuplicateReceipt {
   requestId: string;
 }
 
-export type CmsWorkflowAcceptedReceiptStatus = typeof CmsWorkflowAcceptedReceiptStatus[keyof typeof CmsWorkflowAcceptedReceiptStatus];
-
+export type CmsWorkflowAcceptedReceiptStatus =
+  (typeof CmsWorkflowAcceptedReceiptStatus)[keyof typeof CmsWorkflowAcceptedReceiptStatus];
 
 export const CmsWorkflowAcceptedReceiptStatus = {
-  accepted: 'accepted',
+  accepted: "accepted",
 } as const;
 
 export interface CmsWorkflowAcceptedReceipt {
@@ -255,12 +256,12 @@ export type CmsWorkflowTransitionReceipt = CmsWorkflowAcceptedReceipt & {
   toState: CmsWorkflowState;
 };
 
-export type CmsWorkflowDueReceiptStatus = typeof CmsWorkflowDueReceiptStatus[keyof typeof CmsWorkflowDueReceiptStatus];
-
+export type CmsWorkflowDueReceiptStatus =
+  (typeof CmsWorkflowDueReceiptStatus)[keyof typeof CmsWorkflowDueReceiptStatus];
 
 export const CmsWorkflowDueReceiptStatus = {
-  complete: 'complete',
-  partial: 'partial',
+  complete: "complete",
+  partial: "partial",
 } as const;
 
 export interface CmsWorkflowDueReceipt {
@@ -271,22 +272,215 @@ export interface CmsWorkflowDueReceipt {
   processed: number;
 }
 
-export type CmsWebhookDuplicateStatus = typeof CmsWebhookDuplicateStatus[keyof typeof CmsWebhookDuplicateStatus];
+export type CmsEditorialAssistantInputOperation =
+  (typeof CmsEditorialAssistantInputOperation)[keyof typeof CmsEditorialAssistantInputOperation];
 
+export const CmsEditorialAssistantInputOperation = {
+  "draft-generation": "draft-generation",
+  summary: "summary",
+  "report-abstract": "report-abstract",
+  "transcript-cleanup": "transcript-cleanup",
+  chapters: "chapters",
+  "newsletter-variants": "newsletter-variants",
+  "market-adaptation": "market-adaptation",
+  translation: "translation",
+  "seo-metadata": "seo-metadata",
+  tags: "tags",
+  "alt-text": "alt-text",
+  "internal-links": "internal-links",
+  "quality-review": "quality-review",
+  rewrite: "rewrite",
+} as const;
+
+export type CmsEditorialAssistantInputContentClass =
+  (typeof CmsEditorialAssistantInputContentClass)[keyof typeof CmsEditorialAssistantInputContentClass];
+
+export const CmsEditorialAssistantInputContentClass = {
+  public: "public",
+  internal: "internal",
+} as const;
+
+export type CmsEditorialAssistantInputTargetContentType =
+  (typeof CmsEditorialAssistantInputTargetContentType)[keyof typeof CmsEditorialAssistantInputTargetContentType];
+
+export const CmsEditorialAssistantInputTargetContentType = {
+  globalSettings: "globalSettings",
+  page: "page",
+  navigation: "navigation",
+  publication: "publication",
+  person: "person",
+  organization: "organization",
+  proof: "proof",
+  claim: "claim",
+  mediaAsset: "mediaAsset",
+} as const;
+
+export type CmsEditorialAssistantInputTarget = {
+  /** @pattern ^(organization\.(name|description)|defaultSeo\.(metaTitle|metaDescription)|title|summary|dek|name|role|website|value|context|statement|altText|caption|transcript|chapterNotes|newsletterVariants|internalLinkSuggestions|topics|seo\.(metaTitle|metaDescription)|marketEditions\[_key=="[A-Za-z0-9_-]{1,128}"\]\.(title|summary|dek|name|role|website))$ */
+  fieldPath: string;
+  contentType: CmsEditorialAssistantInputTargetContentType;
+  /** @pattern ^[a-z]{2,3}(-[A-Z]{2})?$ */
+  language: string;
+  /**
+   * @minimum 1
+   * @maximum 20000
+   */
+  maxLength: number;
+  /**
+   * @minLength 3
+   * @maxLength 200
+   * @pattern ^[A-Za-z0-9._-]+$
+   */
+  revisionId: string;
+};
+
+export interface CmsEditorialAssistantInput {
+  /**
+   * @minLength 8
+   * @maxLength 120
+   * @pattern ^[A-Za-z0-9_-]+$
+   */
+  requestId: string;
+  /**
+   * @minLength 3
+   * @maxLength 200
+   * @pattern ^(?!drafts\.)[A-Za-z0-9._-]+$
+   */
+  subjectId: string;
+  market: CmsMarket;
+  operation: CmsEditorialAssistantInputOperation;
+  /** @maxLength 12000 */
+  draft: string;
+  contentClass: CmsEditorialAssistantInputContentClass;
+  target: CmsEditorialAssistantInputTarget;
+  /**
+   * @minItems 1
+   * @maxItems 12
+   * @items.minLength 3
+   * @items.maxLength 200
+   * @items.pattern ^[A-Za-z0-9._-]+$
+   */
+  sourceIds: string[];
+  /** @maxLength 2000 */
+  instructions?: string;
+}
+
+export interface CmsEditorialCitation {
+  claim: string;
+  sourceId: string;
+  quote: string;
+}
+
+export interface CmsEditorialDiff {
+  op: "replace";
+  before: string;
+  after: string;
+}
+
+export interface CmsEditorialQualityGate {
+  gate: string;
+  passed: boolean;
+  detail: string;
+}
+
+export interface CmsEditorialAssistantResult {
+  status: "completed";
+  suggestion: string;
+  citations: CmsEditorialCitation[];
+  uncertainties: string[];
+  diff: CmsEditorialDiff[];
+  qualityGates: CmsEditorialQualityGate[];
+  policyVersion: string;
+}
+
+export type CmsEditorialAssistantDecisionInputDecision =
+  (typeof CmsEditorialAssistantDecisionInputDecision)[keyof typeof CmsEditorialAssistantDecisionInputDecision];
+
+export const CmsEditorialAssistantDecisionInputDecision = {
+  accepted: "accepted",
+  rejected: "rejected",
+} as const;
+
+export interface CmsEditorialAssistantDecisionInput {
+  /**
+   * @minLength 8
+   * @maxLength 120
+   * @pattern ^[A-Za-z0-9_-]+$
+   */
+  requestId: string;
+  decision: CmsEditorialAssistantDecisionInputDecision;
+  /**
+   * @minLength 3
+   * @maxLength 1000
+   */
+  reason: string;
+  /**
+   * @minLength 3
+   * @maxLength 200
+   * @pattern ^[A-Za-z0-9._-]+$
+   */
+  resultingRevisionId?: string;
+}
+
+export type CmsEditorialAssistantDecisionDecision =
+  (typeof CmsEditorialAssistantDecisionDecision)[keyof typeof CmsEditorialAssistantDecisionDecision];
+
+export const CmsEditorialAssistantDecisionDecision = {
+  accepted: "accepted",
+  rejected: "rejected",
+} as const;
+
+export interface CmsEditorialAssistantDecision {
+  requestId: string;
+  decision: CmsEditorialAssistantDecisionDecision;
+  /** @nullable */
+  resultingRevisionId: string | null;
+  wasEdited: boolean;
+}
+
+export type CmsEditorialAssistantMonitoringDecisions = {
+  /** @minimum 0 */
+  accepted: number;
+  /** @minimum 0 */
+  rejected: number;
+  /** @minimum 0 */
+  editedAccepted: number;
+  /** @minimum 0 */
+  pendingAudit: number;
+};
+
+export interface CmsEditorialAssistantMonitoring {
+  windowHours: 24;
+  /** @minimum 0 */
+  runs: number;
+  /** @minimum 0 */
+  failures: number;
+  /** @minimum 0 */
+  spendMicros: number;
+  /**
+   * @minimum 0
+   * @nullable
+   */
+  averageLatencyMs: number | null;
+  decisions: CmsEditorialAssistantMonitoringDecisions;
+}
+
+export type CmsWebhookDuplicateStatus =
+  (typeof CmsWebhookDuplicateStatus)[keyof typeof CmsWebhookDuplicateStatus];
 
 export const CmsWebhookDuplicateStatus = {
-  duplicate: 'duplicate',
+  duplicate: "duplicate",
 } as const;
 
 export interface CmsWebhookDuplicate {
   status: CmsWebhookDuplicateStatus;
 }
 
-export type CmsWebhookAcceptedStatus = typeof CmsWebhookAcceptedStatus[keyof typeof CmsWebhookAcceptedStatus];
-
+export type CmsWebhookAcceptedStatus =
+  (typeof CmsWebhookAcceptedStatus)[keyof typeof CmsWebhookAcceptedStatus];
 
 export const CmsWebhookAcceptedStatus = {
-  accepted: 'accepted',
+  accepted: "accepted",
 } as const;
 
 export interface CmsWebhookAccepted {
@@ -295,12 +489,12 @@ export interface CmsWebhookAccepted {
   invalidatedEntries: number;
 }
 
-export type CmsHealthStatus = typeof CmsHealthStatus[keyof typeof CmsHealthStatus];
-
+export type CmsHealthStatus =
+  (typeof CmsHealthStatus)[keyof typeof CmsHealthStatus];
 
 export const CmsHealthStatus = {
-  configured: 'configured',
-  unconfigured: 'unconfigured',
+  configured: "configured",
+  unconfigured: "unconfigured",
 } as const;
 
 export interface CmsHealth {
@@ -310,38 +504,38 @@ export interface CmsHealth {
   webhookConfigured: boolean;
   /** SANITY_API_TOKEN and at least one CMS_WORKFLOW_CREDENTIALS principal are configured. */
   workflowConfigured: boolean;
-  canonicalMarket: 'uae';
+  canonicalMarket: "uae";
 }
 
 export interface HealthStatus {
   status: string;
 }
 
-export type EnquiryInputMarket = typeof EnquiryInputMarket[keyof typeof EnquiryInputMarket];
-
+export type EnquiryInputMarket =
+  (typeof EnquiryInputMarket)[keyof typeof EnquiryInputMarket];
 
 export const EnquiryInputMarket = {
-  uae: 'uae',
-  ksa: 'ksa',
-  turkiye: 'turkiye',
-  europe: 'europe',
+  uae: "uae",
+  ksa: "ksa",
+  turkiye: "turkiye",
+  europe: "europe",
 } as const;
 
 export interface EnquiryInput {
   /**
-     * @minLength 2
-     * @maxLength 120
-     */
+   * @minLength 2
+   * @maxLength 120
+   */
   name: string;
   /**
-     * @maxLength 254
-     * @pattern ^[^@\s]+@[^@\s]+\.[^@\s]+$
-     */
+   * @maxLength 254
+   * @pattern ^[^@\s]+@[^@\s]+\.[^@\s]+$
+   */
   email: string;
   /**
-     * @minLength 2
-     * @maxLength 160
-     */
+   * @minLength 2
+   * @maxLength 160
+   */
   organization: string;
   /** @maxLength 120 */
   role?: string;
@@ -349,28 +543,28 @@ export interface EnquiryInput {
   /** @maxLength 120 */
   processArea: string;
   /**
-     * @minLength 20
-     * @maxLength 2000
-     */
+   * @minLength 20
+   * @maxLength 2000
+   */
   challenge: string;
   consent: true;
   /**
-     * @minLength 1
-     * @maxLength 200
-     */
+   * @minLength 1
+   * @maxLength 200
+   */
   sourcePage: string;
   /**
-     * Honeypot field that must remain empty.
-     * @maxLength 0
-     */
+   * Honeypot field that must remain empty.
+   * @maxLength 0
+   */
   website?: string;
 }
 
-export type EnquiryReceiptStatus = typeof EnquiryReceiptStatus[keyof typeof EnquiryReceiptStatus];
-
+export type EnquiryReceiptStatus =
+  (typeof EnquiryReceiptStatus)[keyof typeof EnquiryReceiptStatus];
 
 export const EnquiryReceiptStatus = {
-  received: 'received',
+  received: "received",
 } as const;
 
 export interface EnquiryReceipt {
@@ -380,41 +574,41 @@ export interface EnquiryReceipt {
   createdAt: IsoDateTime;
 }
 
-export type NewsletterSubscriptionInputMarket = typeof NewsletterSubscriptionInputMarket[keyof typeof NewsletterSubscriptionInputMarket];
-
+export type NewsletterSubscriptionInputMarket =
+  (typeof NewsletterSubscriptionInputMarket)[keyof typeof NewsletterSubscriptionInputMarket];
 
 export const NewsletterSubscriptionInputMarket = {
-  uae: 'uae',
-  ksa: 'ksa',
-  turkiye: 'turkiye',
-  europe: 'europe',
+  uae: "uae",
+  ksa: "ksa",
+  turkiye: "turkiye",
+  europe: "europe",
 } as const;
 
 export interface NewsletterSubscriptionInput {
   /**
-     * @maxLength 254
-     * @pattern ^[^@\s]+@[^@\s]+\.[^@\s]+$
-     */
+   * @maxLength 254
+   * @pattern ^[^@\s]+@[^@\s]+\.[^@\s]+$
+   */
   email: string;
   market: NewsletterSubscriptionInputMarket;
   consent: true;
   /**
-     * @minLength 1
-     * @maxLength 200
-     */
+   * @minLength 1
+   * @maxLength 200
+   */
   sourcePage: string;
   /**
-     * Honeypot field that must remain empty.
-     * @maxLength 0
-     */
+   * Honeypot field that must remain empty.
+   * @maxLength 0
+   */
   website?: string;
 }
 
-export type SubscriptionReceiptStatus = typeof SubscriptionReceiptStatus[keyof typeof SubscriptionReceiptStatus];
-
+export type SubscriptionReceiptStatus =
+  (typeof SubscriptionReceiptStatus)[keyof typeof SubscriptionReceiptStatus];
 
 export const SubscriptionReceiptStatus = {
-  subscribed: 'subscribed',
+  subscribed: "subscribed",
 } as const;
 
 export interface SubscriptionReceipt {
@@ -433,4 +627,3 @@ export type InvalidCmsPageResponse = ErrorResponse;
  * Preview token is invalid or expired
  */
 export type InvalidPreviewTokenResponse = ErrorResponse;
-

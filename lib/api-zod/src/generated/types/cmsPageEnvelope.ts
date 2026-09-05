@@ -5,8 +5,8 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsPage } from './cmsPage';
-import type { CmsPageMeta } from './cmsPageMeta';
+import type { CmsPage } from "./cmsPage";
+import type { CmsPageMeta } from "./cmsPageMeta";
 
 export interface CmsPageEnvelope {
   schemaVersion: 1;

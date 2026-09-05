@@ -25,7 +25,7 @@ function governanceProjection(value: unknown): Publishable {
       }
     : undefined
 
-  return {ownership, lifecycle}
+  return {ownership, lifecycle, assistantReview: value.assistantReview}
 }
 
 export function guardPublishAction(

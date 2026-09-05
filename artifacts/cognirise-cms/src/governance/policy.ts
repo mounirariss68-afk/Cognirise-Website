@@ -39,6 +39,7 @@ export function canTransition(role: EditorialRole, from: LifecycleState, to: Lif
 
 export interface Publishable {
   ownership?: {owner?: unknown; reviewDueAt?: string}
+  assistantReview?: unknown
   lifecycle?: {
     state?: string
     approvedBy?: unknown
@@ -51,6 +52,7 @@ export interface Publishable {
 export function publishBlockers(document: Publishable, now = new Date()): string[] {
   const blockers: string[] = []
   const {ownership, lifecycle} = document
+  if (document.assistantReview) blockers.push('Complete the independent AI decision audit before publishing.')
   if (!ownership?.owner) blockers.push('Assign a content owner.')
   if (!lifecycle || !['approved', 'scheduled', 'published'].includes(lifecycle.state ?? '')) {
     blockers.push('Lifecycle must be approved before publishing.')
@@ -74,5 +76,7 @@ export const governedDocumentTypes = new Set([
   'organization',
   'proof',
   'claim',
+  'approvedSource',
+  'mediaAsset',
 ])
 export const immutableDocumentTypes = new Set(['revisionRecord', 'auditEvent'])

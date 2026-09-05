@@ -5,7 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsWebhookDuplicateStatus } from './cmsWebhookDuplicateStatus';
+import type { CmsWebhookDuplicateStatus } from "./cmsWebhookDuplicateStatus";
 
 export interface CmsWebhookDuplicate {
   status: CmsWebhookDuplicateStatus;

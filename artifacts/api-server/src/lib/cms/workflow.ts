@@ -200,6 +200,9 @@ export async function transitionPage(input: TransitionInput, principal: Workflow
     preferPublished: input.toState === "expired" || input.toState === "archived",
   });
   if (!record(raw) || raw._type !== "page" || !Array.isArray(raw.marketEditions) || !Array.isArray(raw.resolvedMarkets)) throw new Error("Page is invalid or missing");
+  if (record(raw.assistantReview)) {
+    throw new Error("Independent AI decision audit must complete before workflow review");
+  }
   const resolved = raw.resolvedMarkets.find((item) => record(item) && item.code === input.market);
   if (!record(resolved) || typeof resolved._key !== "string" || !/^[A-Za-z0-9_-]+$/.test(resolved._key)) throw new Error("Requested market edition is missing");
   const edition = raw.marketEditions.find((item) => record(item) && item._key === resolved._key);

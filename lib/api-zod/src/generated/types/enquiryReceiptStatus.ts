@@ -6,9 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type EnquiryReceiptStatus = typeof EnquiryReceiptStatus[keyof typeof EnquiryReceiptStatus];
-
+export type EnquiryReceiptStatus =
+  (typeof EnquiryReceiptStatus)[keyof typeof EnquiryReceiptStatus];
 
 export const EnquiryReceiptStatus = {
-  received: 'received',
+  received: "received",
 } as const;

@@ -5,7 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsPreviewTarget } from './cmsPreviewTarget';
+import type { CmsPreviewTarget } from "./cmsPreviewTarget";
 
 export type CmsPreviewToken = CmsPreviewTarget & {
   token: string;

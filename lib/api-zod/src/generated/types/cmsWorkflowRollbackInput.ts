@@ -8,21 +8,21 @@
 
 export interface CmsWorkflowRollbackInput {
   /**
-     * @minLength 8
-     * @maxLength 120
-     * @pattern ^[A-Za-z0-9_-]+$
-     */
+   * @minLength 8
+   * @maxLength 120
+   * @pattern ^[A-Za-z0-9_-]+$
+   */
   requestId: string;
   /**
-     * @minLength 3
-     * @maxLength 200
-     * @pattern ^(?!drafts\.)[A-Za-z0-9._-]+$
-     */
+   * @minLength 3
+   * @maxLength 200
+   * @pattern ^(?!drafts\.)[A-Za-z0-9._-]+$
+   */
   subjectId: string;
   /**
-     * @minLength 8
-     * @maxLength 120
-     * @pattern ^[A-Za-z0-9_-]+$
-     */
+   * @minLength 8
+   * @maxLength 120
+   * @pattern ^[A-Za-z0-9_-]+$
+   */
   revisionId: string;
 }

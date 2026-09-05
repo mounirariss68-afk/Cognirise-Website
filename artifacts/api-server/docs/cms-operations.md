@@ -125,3 +125,146 @@ governance tables with the PostgreSQL backup process. Restore receipts
 before re-enabling webhooks to avoid replaying previously accepted events.
 Audit exports should contain workflow metadata only: this implementation stores
 no enquiry or personal data.
+
+## Governed editorial assistant
+
+`POST /api/cms/editorial-assistant/runs` is a suggestion-only, server-side
+orchestrator. It accepts a closed structured request containing a workflow
+request ID, page ID, assigned market, operation, draft text, and one to twelve
+Sanity source IDs. It never accepts caller-supplied roles, arbitrary prompts,
+GROQ, source text, provider settings, or mutations. Only published
+`approvedSource` records with `approvalStatus=approved`, a `public` or `internal`
+classification, explicit market approval, current verification/review dates,
+and no elapsed expiry are
+sent to the provider. Before provider invocation, the API also retrieves the
+target draft itself and verifies its type, exact revision, exact field value,
+stored processing classification, and market-edition ownership. A caller cannot
+relabel or substitute target content. Source and target content are checked for
+restricted patterns, redacted, bounded by `CMS_ASSISTANT_MAX_SOURCE_CHARS`, and
+explicitly delimited as untrusted data.
+
+The response is structured as a suggestion, verified claim-to-source citations,
+uncertainties, a replacement diff, deterministic gate outcomes, and a policy
+version. Each citation claim must be an exact suggestion span, each quote must
+be verbatim in the cited source revision, and the citation claims must
+collectively cover every letter and number in the suggestion (internal-link
+destinations are verified separately). Non-translation claims must have a
+strong deterministic lexical binding to their quote. Translation requires each
+complete target sentence or line to map one-to-one to a distinct complete
+source sentence or line within a bounded token-length ratio while preserving
+source order. Missing/mismatched citations,
+restricted output, malformed JSON, an upstream error, or timeout fails closed
+and never changes CMS content. Email,
+phone, network address, postal address, labelled name/identity number, and long
+identifier values are redacted before provider submission and persistence.
+JWT, Basic/Bearer authorization, cloud/service tokens, cookies/sessions, signed
+URLs, credential-bearing connection strings, generic secret assignments,
+private keys, and malicious-instruction patterns are blocked before provider
+invocation. The same personal and restricted patterns are checked across the
+entire provider suggestion, every citation claim and quote, and every
+uncertainty before persistence or response. Any match—including a redacted
+placeholder—fails closed; generated output is never silently rewritten.
+
+Enable with `CMS_ASSISTANT_ENABLED=true`. `CMS_ASSISTANT_KILL_SWITCH=true`
+overrides it immediately. Optional bounded controls are
+`CMS_ASSISTANT_TIMEOUT_MS` (1–30 seconds),
+`CMS_ASSISTANT_HOURLY_REQUEST_LIMIT` (per authenticated actor), and
+`CMS_ASSISTANT_DAILY_COST_MICROS` (deployment-wide rolling 24 hours).
+`CMS_ASSISTANT_INPUT_MICROS_PER_MILLION_TOKENS` and
+`CMS_ASSISTANT_OUTPUT_MICROS_PER_MILLION_TOKENS` configure conservative
+reservation and actual-usage reconciliation against the selected model's
+rates. The
+provider defaults to `gpt-5.6-luna` and may be selected with
+`CMS_ASSISTANT_MODEL`. Replit AI Integrations supplies the server-only
+`AI_INTEGRATIONS_OPENAI_BASE_URL` and compatibility key; neither is returned,
+logged, or persisted. The provider is behind an internal interface so a future
+provider can preserve the same policy and validation boundary.
+
+Runs and usage are recorded in `cms_assistant_runs`; only redacted input
+digests, source IDs/revisions, policy/provider/model, structured result, usage,
+and failure code are retained. Request replay is allowed only when the
+authenticated actor and canonical redacted payload digest both match the
+completed run. Human decisions have one immutable decision per run in
+`cms_assistant_decisions`, with a recoverable `pending`/`audit_failed`/`confirmed`
+audit state, and are mirrored to Sanity `auditEvent`. A reviewer,
+publisher, or administrator assigned to the run market must independently call
+`POST /api/cms/editorial-assistant/decisions`. The requesting actor cannot
+decide their own run. Acceptance requires the current Sanity revision and its
+matching `assistantReview` quarantine marker. The API first records a pending
+decision, then atomically creates the Sanity audit event and removes the marker
+with a revision precondition, and finally confirms the database audit state.
+The same decision payload safely reconciles an interrupted attempt. While the
+marker remains, manual publishing and trusted workflow transitions are blocked.
+The decision endpoint never applies generated text.
+
+### Evaluation cases
+
+Before enablement and after policy/provider changes, verify: a normal rewrite
+with an exact approved citation; expired, withdrawn, draft, missing, and
+cross-ID sources; a citation quote absent from its source; prompt injection in a
+source and draft; unrelated quote-to-claim binding; source and target
+classification mismatch; target field, type, revision, and market substitution;
+aggregate source-budget exhaustion; a valid first citation followed by an
+uncited factual sentence; translation with a partial or reused source unit;
+email/phone/address/identifier redaction; JWT, authorization header,
+cloud-token, signed-URL, connection-string, cookie/session, and private-key
+blocking; malformed/empty/oversized provider JSON; restricted provider output;
+provider 429/500 and timeout; kill switch during an incident; repeated request
+IDs with the same actor/payload and with changed actor/payload; hourly and daily
+limits; self-acceptance; acceptance with a stale revision or missing quarantine;
+audit-store interruption and idempotent reconciliation; and rejection without a revision. Acceptance criteria are no CMS mutation from
+a run, no unapproved grounding, all citations verbatim, explicit uncertainty,
+closed failures, and complete run/decision provenance.
+
+### Incident runbook
+
+1. Set `CMS_ASSISTANT_KILL_SWITCH=true`; do not disable normal CMS delivery.
+2. Preserve `cms_assistant_runs`, `cms_assistant_decisions`, and correlated
+   `cms_workflow_events`. Record policy/model/request IDs, never provider keys or
+   raw sensitive input.
+3. Reject pending suggestions and use normal CMS revision/rollback governance
+   for any human-applied revision. The assistant has no direct rollback path.
+4. For suspected source contamination, withdraw affected `approvedSource`
+   documents, identify runs by source provenance, and review resulting
+   revisions and decisions.
+5. For cost/rate anomalies, keep the switch engaged, inspect token/cost totals
+   and actor/request patterns, then lower limits or rotate the compromised CMS
+   workflow credential through the established credential process.
+6. Restore only after evaluation cases pass with a reviewed policy/provider
+   change. Re-enable by clearing the kill switch; never bypass gates or source
+   approval to recover availability.
+
+### Operation scope and progressive rollout
+
+Supported operations are `draft-generation`, `summary`, `report-abstract`,
+`transcript-cleanup`, `chapters`, `newsletter-variants`, `market-adaptation`,
+`translation`, `seo-metadata`, `tags`, `alt-text`, `internal-links`,
+`quality-review`, and legacy `rewrite`. Every request includes a strictly
+validated target field path, content type, language code, and maximum length;
+these are not inferred from free-form instructions. Transcript cleanup targets
+`transcript`; chapter suggestions target `chapterNotes`; newsletter variants
+target `newsletterVariants`; tags target `topics`; alt text targets `altText`;
+internal links target `internalLinkSuggestions`; and translation/market
+adaptation target an explicitly keyed `marketEditions` field.
+Chapter output must provide timestamp-prefixed lines, and newsletter output must
+provide exactly three subject/preheader pairs; malformed provider output fails
+closed rather than being normalized in Studio.
+
+`CMS_ASSISTANT_OPERATIONS` is a server-only comma-separated allowlist. The
+low-risk default enables summaries, abstracts, transcript cleanup, newsletter
+variants, SEO/tags/alt text, and quality review. Drafting, chapters, rewrite,
+market adaptation, translation, and internal links require explicit enablement.
+Progress from disabled evaluation, to one low-risk operation for a small cohort,
+to one additional operation at a time with daily monitoring. Enable
+market/language and link operations only after regional editorial sign-off.
+
+The server rejects unsupported numeric claims, source-market mismatch,
+expired/review-due proof, prohibited wording, field-length breaches, missing
+alt text, empty SEO values, and citation mismatches. The source ledger retains
+policy and prompt-template versions, latency, provider/model, token/cost data,
+source-revision provenance, output or failure code. Blocked/failed actions are
+auditable. `GET /api/cms/editorial-assistant/monitoring` is all-market-admin
+only and returns only rolling 24-hour aggregate usage, failures, latency,
+spend, acceptance/rejection, and accepted-with-edits metrics—never raw content
+or credentials. It also reports decisions whose cross-store audit has not yet
+reached `confirmed`.

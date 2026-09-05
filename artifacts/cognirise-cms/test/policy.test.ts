@@ -42,4 +42,13 @@ test('publish guard reports governance, schedule, and expiry blockers', () => {
     'Publish time is in the future; use Sanity scheduling.',
     'Content is expired.',
   ])
+  assert.deepEqual(publishBlockers({
+    assistantReview: {requestId: 'assistant-request'},
+    ownership: {owner: {_ref: 'person-1'}},
+    lifecycle: {
+      state: 'approved',
+      approvedBy: {_ref: 'person-2'},
+      approvedAt: '2026-09-01T00:00:00Z',
+    },
+  }, now), ['Complete the independent AI decision audit before publishing.'])
 })

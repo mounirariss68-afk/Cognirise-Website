@@ -5,7 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsWorkflowDueReceiptStatus } from './cmsWorkflowDueReceiptStatus';
+import type { CmsWorkflowDueReceiptStatus } from "./cmsWorkflowDueReceiptStatus";
 
 export interface CmsWorkflowDueReceipt {
   status: CmsWorkflowDueReceiptStatus;

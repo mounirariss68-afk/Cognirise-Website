@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type NewsletterSubscriptionInputMarket = typeof NewsletterSubscriptionInputMarket[keyof typeof NewsletterSubscriptionInputMarket];
-
+export type NewsletterSubscriptionInputMarket =
+  (typeof NewsletterSubscriptionInputMarket)[keyof typeof NewsletterSubscriptionInputMarket];
 
 export const NewsletterSubscriptionInputMarket = {
-  uae: 'uae',
-  ksa: 'ksa',
-  turkiye: 'turkiye',
-  europe: 'europe',
+  uae: "uae",
+  ksa: "ksa",
+  turkiye: "turkiye",
+  europe: "europe",
 } as const;

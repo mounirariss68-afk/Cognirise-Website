@@ -6,9 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsPreviewExchangeStatus = typeof CmsPreviewExchangeStatus[keyof typeof CmsPreviewExchangeStatus];
-
+export type CmsPreviewExchangeStatus =
+  (typeof CmsPreviewExchangeStatus)[keyof typeof CmsPreviewExchangeStatus];
 
 export const CmsPreviewExchangeStatus = {
-  ready: 'ready',
+  ready: "ready",
 } as const;

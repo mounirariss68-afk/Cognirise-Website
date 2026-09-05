@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsHealthStatus = typeof CmsHealthStatus[keyof typeof CmsHealthStatus];
-
+export type CmsHealthStatus =
+  (typeof CmsHealthStatus)[keyof typeof CmsHealthStatus];
 
 export const CmsHealthStatus = {
-  configured: 'configured',
-  unconfigured: 'unconfigured',
+  configured: "configured",
+  unconfigured: "unconfigured",
 } as const;

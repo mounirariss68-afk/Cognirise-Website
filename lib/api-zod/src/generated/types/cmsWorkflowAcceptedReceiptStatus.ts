@@ -6,9 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CmsWorkflowAcceptedReceiptStatus = typeof CmsWorkflowAcceptedReceiptStatus[keyof typeof CmsWorkflowAcceptedReceiptStatus];
-
+export type CmsWorkflowAcceptedReceiptStatus =
+  (typeof CmsWorkflowAcceptedReceiptStatus)[keyof typeof CmsWorkflowAcceptedReceiptStatus];
 
 export const CmsWorkflowAcceptedReceiptStatus = {
-  accepted: 'accepted',
+  accepted: "accepted",
 } as const;
