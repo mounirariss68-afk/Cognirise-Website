@@ -521,7 +521,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
             <div>
               <h4 className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-6">Action</h4>
-              <BrandButton href="/value-scan" variant="inverse" className="w-full justify-center text-[hsl(var(--brand-deep))] hover:text-white">Bring us one process</BrandButton>
+              <BrandButton href="/value-scan" variant="inverse" className="w-full justify-center text-[hsl(var(--brand-deep))]">Bring us one process</BrandButton>
             </div>
           </div>
           

@@ -1,9 +1,10 @@
 import { Link } from "wouter";
-import { ArrowDown, ArrowRight, Plus } from "lucide-react";
+import { ArrowDown, Plus } from "lucide-react";
 import { useState } from "react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
+import { BrandButton } from "@/components/ui/brand-button";
 
 export default function PublicSector() {
   const [open, setOpen] = useState<number>(0);
@@ -34,14 +35,6 @@ export default function PublicSector() {
         .ps :focus-visible{outline:3px solid var(--coral);outline-offset:4px}
         .ps h1,.ps h2,.ps h3{font-family:Comfortaa,sans-serif}
         
-        .ps-primary{border:1px solid var(--ink);cursor:pointer;color:#fff;background:var(--ink);font-weight:700;font-size:12px;padding:4px 4px 4px 17px;min-height:46px;display:inline-flex;align-items:center;gap:15px;position:relative;isolation:isolate;overflow:hidden;transition:transform .24s,box-shadow .24s;text-decoration:none}
-        .ps-primary:before{content:"";position:absolute;z-index:-2;inset:-1px;background:linear-gradient(105deg,var(--violet),var(--pink),var(--coral));opacity:0;transition:opacity .24s}
-        .ps-primary:after{content:"";position:absolute;z-index:-1;inset:1px;background:var(--ink);transition:background .24s}
-        .ps-primary svg{width:36px;height:36px;padding:10px;background:#fff;color:var(--ink);transition:transform .24s,background .24s}
-        .ps-primary:hover{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--coral)}
-        .ps-primary:hover:before{opacity:1}
-        .ps-primary:hover:after{background:rgba(7,25,54,.94)}
-        .ps-primary:hover svg{transform:translate(3px,-3px);background:var(--coral);color:#fff}
         
         .ps-hero{padding:22px 4.8vw 0}
         .ps-kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;display:flex;align-items:center;gap:10px}
@@ -122,8 +115,6 @@ export default function PublicSector() {
         .ps-start h2{font-size:clamp(52px,7.5vw,113px);font-weight:600;letter-spacing:-.095em;line-height:.88;margin:26px 0}
         .ps-start h2 em{font-style:normal;color:#ff8470}
         .ps-start p{font-size:17px;line-height:1.55;max-width:510px;color:#d6deed}
-        .ps-start .ps-primary{border-color:transparent;background:linear-gradient(100deg,var(--violet),var(--pink),var(--coral));margin-top:21px;font-size:13px}
-        .ps-start .ps-primary:after{background:transparent}
         
         @keyframes breath{to{transform:scale(1.08) translateX(-1%)}}
         @media(prefers-reduced-motion:reduce){.ps *,.ps *:before,.ps *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
@@ -174,9 +165,7 @@ export default function PublicSector() {
             <h1>Public value needs <em>accountable</em> intelligence.</h1>
             <p>For public-sector work where every decision carries weight: intelligence that is governed, grounded in context and built to serve the people behind the process.</p>
             <div className="ps-actions">
-              <Link href="/value-scan" className="ps-primary">
-                Bring us one process <ArrowRight />
-              </Link>
+              <BrandButton href="/value-scan">Bring us one process</BrandButton>
               <button className="ps-under" onClick={() => go("plays")}>
                 Explore public-sector plays <ArrowDown size={15} />
               </button>
@@ -297,9 +286,7 @@ export default function PublicSector() {
           <div className="ps-kicker">The first move</div>
           <h2>Bring one process.<br /><em>Keep the mandate.</em></h2>
           <p>Start with a process where public value, complexity and urgency have already converged. In a focused working session, we will surface the operating constraints and a practical route to a governed build.</p>
-          <Link href="/value-scan" className="ps-primary">
-            Start a working session <ArrowRight />
-          </Link>
+          <BrandButton href="/value-scan" variant="inverse" className="mt-[21px]">Start a working session</BrandButton>
         </div>
       </section>
     </main>
