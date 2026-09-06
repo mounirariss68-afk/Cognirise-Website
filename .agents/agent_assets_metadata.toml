@@ -21,13 +21,13 @@ id = "wSBKnawYcHLeW2DCeJGmZ"
 uri = "file://.local/outputs/Cognirise-Pulse-PowerPoint-Template.pptx"
 type = "slides"
 title = "Cognirise Pulse PowerPoint Template (PPTX)"
-description = "PowerPoint export including the centered human-and-agent project-team illustration slide."
+description = "Updated PowerPoint with the editable five-flow slide and high-resolution human–AI split portrait layouts."
 logical_id = "b1dfe669-6da3-490a-b000-7e75d6de8b8b"
-content_hash = "sha256:8298ffc3037f6f49809016230b6ce43f88e639df522434928ba606e169e06aca"
-size = 32535812
-mtime_ms = 1788672514789
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b1dfe669-6da3-490a-b000-7e75d6de8b8b/f48e2907-91a5-492f-bfdc-a2b90df7e140"
-storage_version_token = "1788672516274883"
+content_hash = "sha256:070c6cbe14319246cb686c65c3a86d963f6c57f1048ab3c40a74909eee49584a"
+size = 37622083
+mtime_ms = 1788673225529
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b1dfe669-6da3-490a-b000-7e75d6de8b8b/0dd624a6-e708-4a46-a324-8ce550a8fe8e"
+storage_version_token = "1788673227107408"
 content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 
 [[outputs]]
@@ -127,3 +127,17 @@ mtime_ms = 1788639766643
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/c71aabf4-3f99-43fb-91a3-fae0cac09d6c/8a9d400a-0223-4a37-93b4-28add9c05232"
 storage_version_token = "1788639776443944"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "iOU5b90FKpsfbNNthJZkZ"
+uri = "file://.local/outputs/Cognirise-Pulse-PowerPoint-Template---Final.pptx"
+type = "slides"
+title = "Cognirise Pulse PowerPoint Template — Final (PPTX)"
+description = "Final export with the editable five-flow slide and high-resolution human–AI split portrait layouts."
+logical_id = "1565e6ee-740f-4731-a4d2-f071a4aae8f3"
+content_hash = "sha256:7112b6a210d8fdb840d39549695b52e88fe1bea05b0f49bad656ea4e063ae26c"
+size = 37622084
+mtime_ms = 1788673351884
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/1565e6ee-740f-4731-a4d2-f071a4aae8f3/56294d22-f33a-44a3-861b-085b1461cc5b"
+storage_version_token = "1788673352993463"
+content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"

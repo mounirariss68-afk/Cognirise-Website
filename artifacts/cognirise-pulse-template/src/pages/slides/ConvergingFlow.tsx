@@ -25,80 +25,100 @@ export default function ConvergingFlow() {
         </p>
       </div>
 
-      <svg
-        viewBox="0 0 1728 650"
-        className="relative mt-[2.5vh] h-[60vh] w-full"
+      <div
+        className="relative mt-[2.2vh] h-[47vh] w-full"
         role="img"
-        aria-label="Five labeled inputs converge into a central orchestration core and emerge as five labeled outputs"
+        aria-label="Five editable input flows pass through one orchestration core and emerge as five editable outputs"
       >
-        <defs>
-          <linearGradient id="cfEnergy" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#7b5cd6" />
-            <stop offset="0.52" stopColor="#db509e" />
-            <stop offset="1" stopColor="#ef765f" />
-          </linearGradient>
-          <linearGradient id="cfCore" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#18366d" />
-            <stop offset="1" stopColor="#102957" />
-          </linearGradient>
-          <marker id="cfArrowViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-            <path d="M0 1L9 5L0 9Z" fill="#7b5cd6" />
-          </marker>
-          <marker id="cfArrowMagenta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-            <path d="M0 1L9 5L0 9Z" fill="#db509e" />
-          </marker>
-          <marker id="cfArrowCoral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-            <path d="M0 1L9 5L0 9Z" fill="#ef765f" />
-          </marker>
-          <filter id="cfShadow" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="0" dy="10" stdDeviation="12" floodColor="#102957" floodOpacity=".18" />
-          </filter>
-        </defs>
+        <p className="absolute left-0 top-0 text-[calc(1.5*var(--slide-vw))] font-bold tracking-[.13em] text-muted">
+          INPUTS
+        </p>
+        <p className="absolute right-0 top-0 text-[calc(1.5*var(--slide-vw))] font-bold tracking-[.13em] text-muted">
+          OUTPUTS
+        </p>
 
-        <text x="18" y="25" fontSize="25" fontWeight="700" letterSpacing="3" fill="#60708d">INPUTS</text>
-        <text x="1710" y="25" textAnchor="end" fontSize="25" fontWeight="700" letterSpacing="3" fill="#60708d">OUTPUTS</text>
+        <div className="absolute left-0 top-[4.5vh] flex h-[5.7vh] w-[13.5vw] items-center rounded-[.7vw] border-[.12vw] border-[#d9deea] bg-white px-[1.2vw] text-[calc(1.55*var(--slide-vw))] font-semibold text-primary shadow-[0_.7vh_1.5vh_rgba(16,41,87,.08)]">
+          Input one
+        </div>
+        <div className="absolute left-0 top-[12.9vh] flex h-[5.7vh] w-[13.5vw] items-center rounded-[.7vw] border-[.12vw] border-[#d9deea] bg-white px-[1.2vw] text-[calc(1.55*var(--slide-vw))] font-semibold text-primary shadow-[0_.7vh_1.5vh_rgba(16,41,87,.08)]">
+          Input two
+        </div>
+        <div className="absolute left-0 top-[21.3vh] flex h-[5.7vh] w-[13.5vw] items-center rounded-[.7vw] border-[.12vw] border-[#d9deea] bg-white px-[1.2vw] text-[calc(1.55*var(--slide-vw))] font-semibold text-primary shadow-[0_.7vh_1.5vh_rgba(16,41,87,.08)]">
+          Input three
+        </div>
+        <div className="absolute left-0 top-[29.7vh] flex h-[5.7vh] w-[13.5vw] items-center rounded-[.7vw] border-[.12vw] border-[#d9deea] bg-white px-[1.2vw] text-[calc(1.55*var(--slide-vw))] font-semibold text-primary shadow-[0_.7vh_1.5vh_rgba(16,41,87,.08)]">
+          Input four
+        </div>
+        <div className="absolute left-0 top-[38.1vh] flex h-[5.7vh] w-[13.5vw] items-center rounded-[.7vw] border-[.12vw] border-[#d9deea] bg-white px-[1.2vw] text-[calc(1.55*var(--slide-vw))] font-semibold text-primary shadow-[0_.7vh_1.5vh_rgba(16,41,87,.08)]">
+          Input five
+        </div>
 
-        <rect x="0" y="59" width="250" height="68" rx="12" fill="#ffffff" stroke="#d9deea" strokeWidth="2" />
-        <text x="24" y="102" fontSize="27" fontWeight="600" fill="#102957">Input one</text>
-        <rect x="0" y="170" width="250" height="68" rx="12" fill="#ffffff" stroke="#d9deea" strokeWidth="2" />
-        <text x="24" y="213" fontSize="27" fontWeight="600" fill="#102957">Input two</text>
-        <rect x="0" y="281" width="250" height="68" rx="12" fill="#ffffff" stroke="#d9deea" strokeWidth="2" />
-        <text x="24" y="324" fontSize="27" fontWeight="600" fill="#102957">Input three</text>
-        <rect x="0" y="392" width="250" height="68" rx="12" fill="#ffffff" stroke="#d9deea" strokeWidth="2" />
-        <text x="24" y="435" fontSize="27" fontWeight="600" fill="#102957">Input four</text>
-        <rect x="0" y="503" width="250" height="68" rx="12" fill="#ffffff" stroke="#d9deea" strokeWidth="2" />
-        <text x="24" y="546" fontSize="27" fontWeight="600" fill="#102957">Input five</text>
+        <div className="absolute left-[13.5vw] top-[7.1vh] h-[.62vh] w-[23.5vw] rounded-full bg-[#7659df]" />
+        <div className="absolute left-[13.5vw] top-[15.5vh] h-[.62vh] w-[23.5vw] rounded-full bg-[#a758bc]" />
+        <div className="absolute left-[13.5vw] top-[23.9vh] h-[.62vh] w-[23.5vw] rounded-full bg-[#db509e]" />
+        <div className="absolute left-[13.5vw] top-[32.3vh] h-[.62vh] w-[23.5vw] rounded-full bg-[#e26081]" />
+        <div className="absolute left-[13.5vw] top-[40.7vh] h-[.62vh] w-[23.5vw] rounded-full bg-[#ff775d]" />
 
-        <path d="M250 93H420C535 93 585 205 704 265" fill="none" stroke="#7b5cd6" strokeWidth="8" markerEnd="url(#cfArrowViolet)" />
-        <path d="M250 204H455C555 204 600 260 704 292" fill="none" stroke="#a758bc" strokeWidth="8" markerEnd="url(#cfArrowViolet)" />
-        <path d="M250 315H704" fill="none" stroke="#db509e" strokeWidth="8" markerEnd="url(#cfArrowMagenta)" />
-        <path d="M250 426H455C555 426 600 370 704 338" fill="none" stroke="#e26081" strokeWidth="8" markerEnd="url(#cfArrowCoral)" />
-        <path d="M250 537H420C535 537 585 425 704 365" fill="none" stroke="#ef765f" strokeWidth="8" markerEnd="url(#cfArrowCoral)" />
+        <div className="absolute left-[35.95vw] top-[6.7vh] h-[.55vh] w-[1.1vw] origin-right rotate-45 rounded-full bg-[#7659df]" />
+        <div className="absolute left-[35.95vw] top-[7.55vh] h-[.55vh] w-[1.1vw] origin-right -rotate-45 rounded-full bg-[#7659df]" />
+        <div className="absolute left-[35.95vw] top-[15.1vh] h-[.55vh] w-[1.1vw] origin-right rotate-45 rounded-full bg-[#a758bc]" />
+        <div className="absolute left-[35.95vw] top-[15.95vh] h-[.55vh] w-[1.1vw] origin-right -rotate-45 rounded-full bg-[#a758bc]" />
+        <div className="absolute left-[35.95vw] top-[23.5vh] h-[.55vh] w-[1.1vw] origin-right rotate-45 rounded-full bg-[#db509e]" />
+        <div className="absolute left-[35.95vw] top-[24.35vh] h-[.55vh] w-[1.1vw] origin-right -rotate-45 rounded-full bg-[#db509e]" />
+        <div className="absolute left-[35.95vw] top-[31.9vh] h-[.55vh] w-[1.1vw] origin-right rotate-45 rounded-full bg-[#e26081]" />
+        <div className="absolute left-[35.95vw] top-[32.75vh] h-[.55vh] w-[1.1vw] origin-right -rotate-45 rounded-full bg-[#e26081]" />
+        <div className="absolute left-[35.95vw] top-[40.3vh] h-[.55vh] w-[1.1vw] origin-right rotate-45 rounded-full bg-[#ff775d]" />
+        <div className="absolute left-[35.95vw] top-[41.15vh] h-[.55vh] w-[1.1vw] origin-right -rotate-45 rounded-full bg-[#ff775d]" />
 
-        <rect x="718" y="193" width="292" height="244" rx="34" fill="url(#cfCore)" filter="url(#cfShadow)" />
-        <rect x="742" y="217" width="244" height="196" rx="24" fill="none" stroke="url(#cfEnergy)" strokeWidth="4" />
-        <circle cx="864" cy="274" r="23" fill="#db509e" />
-        <path d="M850 274H878M864 260V288" stroke="#ffffff" strokeWidth="5" strokeLinecap="round" />
-        <text x="864" y="338" textAnchor="middle" fontSize="29" fontWeight="700" letterSpacing="1.5" fill="#ffffff">ORCHESTRATION</text>
-        <text x="864" y="376" textAnchor="middle" fontSize="25" fill="#dce4f0">Central element</text>
+        <div className="absolute left-[37vw] top-[3.5vh] h-[40.8vh] w-[16vw] rounded-[1.8vw] bg-primary shadow-[0_1.2vh_2.4vh_rgba(16,41,87,.2)]">
+          <div className="absolute inset-[1.1vw] rounded-[1.2vw] border-[.22vw] border-[#db509e]" />
+          <div className="absolute left-1/2 top-[7.2vh] h-[4.2vh] w-[2.4vw] -translate-x-1/2 rounded-full bg-accent" />
+          <div className="absolute left-1/2 top-[8.8vh] h-[.5vh] w-[1.35vw] -translate-x-1/2 rounded-full bg-white" />
+          <div className="absolute left-1/2 top-[7.85vh] h-[2.4vh] w-[.28vw] -translate-x-1/2 rounded-full bg-white" />
+          <p className="absolute left-1/2 top-[18vh] w-[14vw] -translate-x-1/2 text-center text-[calc(1.5*var(--slide-vw))] font-bold tracking-[.03em] text-white">
+            ORCHESTRATION
+          </p>
+          <p className="absolute left-1/2 top-[23.2vh] w-[10vw] -translate-x-1/2 text-center text-[calc(1.5*var(--slide-vw))] text-[#dce4f0]">
+            Central element
+          </p>
+          <div className="absolute bottom-[5.2vh] left-1/2 h-[.45vh] w-[6.8vw] -translate-x-1/2 rounded-full bg-[#7659df]" />
+          <div className="absolute bottom-[3.9vh] left-1/2 h-[.45vh] w-[6.8vw] -translate-x-1/2 rounded-full bg-[#db509e]" />
+          <div className="absolute bottom-[2.6vh] left-1/2 h-[.45vh] w-[6.8vw] -translate-x-1/2 rounded-full bg-[#ff775d]" />
+        </div>
 
-        <path d="M1024 265C1143 205 1193 93 1308 93H1478" fill="none" stroke="#7b5cd6" strokeWidth="8" markerEnd="url(#cfArrowViolet)" />
-        <path d="M1024 292C1128 260 1173 204 1273 204H1478" fill="none" stroke="#a758bc" strokeWidth="8" markerEnd="url(#cfArrowViolet)" />
-        <path d="M1024 315H1478" fill="none" stroke="#db509e" strokeWidth="8" markerEnd="url(#cfArrowMagenta)" />
-        <path d="M1024 338C1128 370 1173 426 1273 426H1478" fill="none" stroke="#e26081" strokeWidth="8" markerEnd="url(#cfArrowCoral)" />
-        <path d="M1024 365C1143 425 1193 537 1308 537H1478" fill="none" stroke="#ef765f" strokeWidth="8" markerEnd="url(#cfArrowCoral)" />
+        <div className="absolute left-[53vw] top-[7.1vh] h-[.62vh] w-[23.5vw] rounded-full bg-[#7659df]" />
+        <div className="absolute left-[53vw] top-[15.5vh] h-[.62vh] w-[23.5vw] rounded-full bg-[#a758bc]" />
+        <div className="absolute left-[53vw] top-[23.9vh] h-[.62vh] w-[23.5vw] rounded-full bg-[#db509e]" />
+        <div className="absolute left-[53vw] top-[32.3vh] h-[.62vh] w-[23.5vw] rounded-full bg-[#e26081]" />
+        <div className="absolute left-[53vw] top-[40.7vh] h-[.62vh] w-[23.5vw] rounded-full bg-[#ff775d]" />
 
-        <rect x="1478" y="59" width="250" height="68" rx="12" fill="#ffffff" stroke="#d9deea" strokeWidth="2" />
-        <text x="1502" y="102" fontSize="27" fontWeight="600" fill="#102957">Output one</text>
-        <rect x="1478" y="170" width="250" height="68" rx="12" fill="#ffffff" stroke="#d9deea" strokeWidth="2" />
-        <text x="1502" y="213" fontSize="27" fontWeight="600" fill="#102957">Output two</text>
-        <rect x="1478" y="281" width="250" height="68" rx="12" fill="#ffffff" stroke="#d9deea" strokeWidth="2" />
-        <text x="1502" y="324" fontSize="27" fontWeight="600" fill="#102957">Output three</text>
-        <rect x="1478" y="392" width="250" height="68" rx="12" fill="#ffffff" stroke="#d9deea" strokeWidth="2" />
-        <text x="1502" y="435" fontSize="27" fontWeight="600" fill="#102957">Output four</text>
-        <rect x="1478" y="503" width="250" height="68" rx="12" fill="#ffffff" stroke="#d9deea" strokeWidth="2" />
-        <text x="1502" y="546" fontSize="27" fontWeight="600" fill="#102957">Output five</text>
-      </svg>
+        <div className="absolute left-[75.45vw] top-[6.7vh] h-[.55vh] w-[1.1vw] origin-right rotate-45 rounded-full bg-[#7659df]" />
+        <div className="absolute left-[75.45vw] top-[7.55vh] h-[.55vh] w-[1.1vw] origin-right -rotate-45 rounded-full bg-[#7659df]" />
+        <div className="absolute left-[75.45vw] top-[15.1vh] h-[.55vh] w-[1.1vw] origin-right rotate-45 rounded-full bg-[#a758bc]" />
+        <div className="absolute left-[75.45vw] top-[15.95vh] h-[.55vh] w-[1.1vw] origin-right -rotate-45 rounded-full bg-[#a758bc]" />
+        <div className="absolute left-[75.45vw] top-[23.5vh] h-[.55vh] w-[1.1vw] origin-right rotate-45 rounded-full bg-[#db509e]" />
+        <div className="absolute left-[75.45vw] top-[24.35vh] h-[.55vh] w-[1.1vw] origin-right -rotate-45 rounded-full bg-[#db509e]" />
+        <div className="absolute left-[75.45vw] top-[31.9vh] h-[.55vh] w-[1.1vw] origin-right rotate-45 rounded-full bg-[#e26081]" />
+        <div className="absolute left-[75.45vw] top-[32.75vh] h-[.55vh] w-[1.1vw] origin-right -rotate-45 rounded-full bg-[#e26081]" />
+        <div className="absolute left-[75.45vw] top-[40.3vh] h-[.55vh] w-[1.1vw] origin-right rotate-45 rounded-full bg-[#ff775d]" />
+        <div className="absolute left-[75.45vw] top-[41.15vh] h-[.55vh] w-[1.1vw] origin-right -rotate-45 rounded-full bg-[#ff775d]" />
+
+        <div className="absolute right-0 top-[4.5vh] flex h-[5.7vh] w-[13.5vw] items-center rounded-[.7vw] border-[.12vw] border-[#d9deea] bg-white px-[1.2vw] text-[calc(1.55*var(--slide-vw))] font-semibold text-primary shadow-[0_.7vh_1.5vh_rgba(16,41,87,.08)]">
+          Output one
+        </div>
+        <div className="absolute right-0 top-[12.9vh] flex h-[5.7vh] w-[13.5vw] items-center rounded-[.7vw] border-[.12vw] border-[#d9deea] bg-white px-[1.2vw] text-[calc(1.55*var(--slide-vw))] font-semibold text-primary shadow-[0_.7vh_1.5vh_rgba(16,41,87,.08)]">
+          Output two
+        </div>
+        <div className="absolute right-0 top-[21.3vh] flex h-[5.7vh] w-[13.5vw] items-center rounded-[.7vw] border-[.12vw] border-[#d9deea] bg-white px-[1.2vw] text-[calc(1.55*var(--slide-vw))] font-semibold text-primary shadow-[0_.7vh_1.5vh_rgba(16,41,87,.08)]">
+          Output three
+        </div>
+        <div className="absolute right-0 top-[29.7vh] flex h-[5.7vh] w-[13.5vw] items-center rounded-[.7vw] border-[.12vw] border-[#d9deea] bg-white px-[1.2vw] text-[calc(1.55*var(--slide-vw))] font-semibold text-primary shadow-[0_.7vh_1.5vh_rgba(16,41,87,.08)]">
+          Output four
+        </div>
+        <div className="absolute right-0 top-[38.1vh] flex h-[5.7vh] w-[13.5vw] items-center rounded-[.7vw] border-[.12vw] border-[#d9deea] bg-white px-[1.2vw] text-[calc(1.55*var(--slide-vw))] font-semibold text-primary shadow-[0_.7vh_1.5vh_rgba(16,41,87,.08)]">
+          Output five
+        </div>
+      </div>
     </div>
   );
 }
