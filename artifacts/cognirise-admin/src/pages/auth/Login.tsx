@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Loader2, ArrowRight, KeyRound } from "lucide-react";
+import { CogniriseBrand } from "@/components/brand/CogniriseBrand";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -116,16 +117,15 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-background">
-      <div className="flex flex-col justify-center p-8 sm:p-16 lg:p-24 max-w-[600px] w-full mx-auto">
+    <div className="auth-surface min-h-screen grid grid-cols-1 lg:grid-cols-[minmax(0,1.3fr)_minmax(400px,0.7fr)]">
+      <div className="flex flex-col justify-center p-8 sm:p-16 lg:p-24 max-w-[600px] w-full mx-auto relative z-10">
         <div className="mb-12">
-          <div className="w-10 h-10 bg-accent rounded flex items-center justify-center text-sm font-bold text-accent-foreground uppercase tracking-widest leading-none mb-6">
-            CG
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">
+          <CogniriseBrand className="mb-10" />
+          <div className="pulse-rule mb-6 h-1 w-14 rounded-full" />
+          <h1 className="text-3xl font-bold tracking-tight mb-2 text-foreground">
             {mode === "login" ? "Sign in to Cognirise" : "Account Recovery"}
           </h1>
-          <p className="text-muted-foreground text-sm font-mono">
+          <p className="text-muted-foreground text-sm font-mono tracking-tight">
             {mode === "login" ? "First-party editorial cockpit" : "Use a one-time recovery code"}
           </p>
         </div>
@@ -230,22 +230,26 @@ export default function Login() {
           </Form>
         )}
       </div>
-      
-      <div className="hidden lg:block bg-sidebar border-l border-border p-12 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay" 
+
+      <div className="hidden lg:block bg-gradient-to-br from-sidebar via-sidebar to-[#16285a] border-l border-border/50 p-12 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay"
              style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}>
         </div>
-        
-        <div className="h-full flex flex-col justify-between relative z-10 text-sidebar-foreground/80">
+
+        {/* Abstract brand graphics */}
+        <div className="absolute -top-64 -right-64 w-[800px] h-[800px] bg-gradient-to-bl from-accent/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-64 -left-64 w-[600px] h-[600px] bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+        <div className="h-full flex flex-col justify-between relative z-10 text-sidebar-foreground/90">
           <div>
-            <h2 className="font-mono text-sm uppercase tracking-widest text-sidebar-primary mb-4">CogniOS Architecture</h2>
-            <p className="text-lg max-w-md leading-relaxed">
+            <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-brand-coral mb-4">CogniOS Architecture</h2>
+            <p className="font-display text-2xl max-w-md leading-relaxed tracking-tight text-white">
               Precision delivery system for advisory profiles, platforms, and intelligence.
             </p>
           </div>
           
-          <div className="font-mono text-[10px] uppercase tracking-widest flex justify-between opacity-50">
-            <span>Systems Online</span>
+          <div className="font-mono text-[10px] uppercase tracking-widest flex justify-between opacity-60">
+            <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Systems Online</span>
             <span>v0.2.0-core</span>
           </div>
         </div>

@@ -5,23 +5,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, TrendingUp, Users, FileText, Inbox, Activity, Clock, MousePointerClick, Zap, AlertTriangle, Monitor, Share2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 
-function KpiCard({ title, value, label, icon: Icon, description }: { title: string, value: string | number, label?: string, icon: any, description?: string }) {
+function KpiCard({ title, value, label, icon: Icon, description, trend, trendValue }: { title: string, value: string | number, label?: string, icon: any, description?: string, trend?: 'up' | 'down' | 'neutral', trendValue?: string }) {
   return (
-    <Card className="overflow-hidden border-border/60 bg-card/50 backdrop-blur-sm">
-      <CardContent className="p-6">
+    <Card className="overflow-hidden bg-card border-border shadow-sm hover:shadow-md transition-shadow duration-200 group">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      <CardContent className="p-5 relative z-10">
         <div className="flex items-start justify-between space-y-0 pb-2">
           <div className="flex flex-col">
-            <p className="text-[10px] uppercase font-mono tracking-wider text-muted-foreground mb-1">{title}</p>
+            <p className="text-[10px] uppercase font-mono tracking-wider text-muted-foreground mb-1.5">{title}</p>
             <div className="text-3xl font-bold tracking-tight text-foreground">{value}</div>
             {label && <p className="text-xs text-muted-foreground mt-1">{label}</p>}
           </div>
-          <div className="w-8 h-8 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+          <div className="w-8 h-8 rounded-md bg-secondary text-primary flex items-center justify-center border border-border/50 shadow-2xs">
             <Icon className="w-4 h-4" />
           </div>
         </div>
-        {description && (
-          <div className="mt-4 pt-4 border-t border-border/50">
-            <p className="text-[10px] text-muted-foreground font-mono truncate">{description}</p>
+        {(description || trend) && (
+          <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between">
+            {description && <p className="text-[10px] text-muted-foreground font-mono truncate max-w-[80%]">{description}</p>}
+            {trend && trendValue && (
+              <div className={`text-[10px] font-mono flex items-center gap-1 ${
+                trend === 'up' ? 'text-emerald-600' : trend === 'down' ? 'text-destructive' : 'text-muted-foreground'
+              }`}>
+                {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'} {trendValue}
+              </div>
+            )}
           </div>
         )}
       </CardContent>

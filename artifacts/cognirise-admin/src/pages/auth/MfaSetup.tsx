@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Loader2, ShieldCheck, Download, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { CogniriseBrand } from "@/components/brand/CogniriseBrand";
 
 const confirmSchema = z.object({
   code: z.string().length(6, "Code must be exactly 6 digits"),
@@ -72,17 +73,21 @@ export default function MfaSetup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="max-w-md w-full border border-border bg-card rounded-xl p-8 shadow-sm">
+    <div className="auth-surface min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none"
+           style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}>
+      </div>
+      <div className="max-w-md w-full bg-card rounded-2xl p-8 shadow-xl border border-border relative z-10">
+        <CogniriseBrand compact className="mb-8 justify-center" />
         
         {step === "setup" && (
           <>
             <div className="mb-6 text-center">
-              <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent text-primary-foreground rounded-xl flex items-center justify-center mx-auto mb-5 shadow-sm border border-primary/10">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h1 className="text-2xl font-bold tracking-tight mb-2">Secure Your Account</h1>
-              <p className="text-muted-foreground text-sm font-mono leading-relaxed">
+              <h1 className="text-2xl font-bold tracking-tight mb-2 text-foreground">Secure Your Account</h1>
+              <p className="text-muted-foreground text-sm font-mono leading-relaxed tracking-tight">
                 Scan this QR code with an authenticator app (like Google Authenticator or Authy) to set up two-factor authentication.
               </p>
             </div>

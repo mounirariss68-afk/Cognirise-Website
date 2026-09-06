@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Loader2, ArrowRight } from "lucide-react";
+import { CogniriseBrand } from "@/components/brand/CogniriseBrand";
 
 const mfaSchema = z.object({
   code: z.string().length(6, "Code must be exactly 6 digits"),
@@ -51,14 +52,18 @@ export default function MFA() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="max-w-md w-full border border-border bg-card rounded-xl p-8 shadow-sm">
+    <div className="auth-surface min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none"
+           style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}>
+      </div>
+      <div className="max-w-md w-full bg-card rounded-2xl p-8 shadow-xl border border-border relative z-10">
+        <CogniriseBrand compact className="mb-8 justify-center" />
         <div className="mb-8 text-center">
-          <div className="w-12 h-12 bg-accent/10 text-accent rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent text-primary-foreground rounded-xl flex items-center justify-center mx-auto mb-5 shadow-sm border border-primary/10">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight mb-2">Two-Factor Authentication</h1>
-          <p className="text-muted-foreground text-sm font-mono">Enter the 6-digit code from your authenticator app</p>
+          <h1 className="text-2xl font-bold tracking-tight mb-2 text-foreground">Two-Factor Authentication</h1>
+          <p className="text-muted-foreground text-sm font-mono tracking-tight">Enter the 6-digit code from your authenticator app</p>
         </div>
 
         <Form {...form}>

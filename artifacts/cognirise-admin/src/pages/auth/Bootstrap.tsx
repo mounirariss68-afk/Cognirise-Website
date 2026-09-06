@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Loader2, ArrowRight } from "lucide-react";
+import { CogniriseBrand } from "@/components/brand/CogniriseBrand";
 
 const bootstrapSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -73,14 +74,13 @@ export default function Bootstrap() {
   }
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-background">
-      <div className="flex flex-col justify-center p-8 sm:p-16 lg:p-24 max-w-[600px] w-full mx-auto">
+    <div className="auth-surface min-h-screen grid grid-cols-1 lg:grid-cols-[minmax(0,1.3fr)_minmax(400px,0.7fr)]">
+      <div className="flex flex-col justify-center p-8 sm:p-16 lg:p-24 max-w-[600px] w-full mx-auto relative z-10">
         <div className="mb-12">
-          <div className="w-10 h-10 bg-primary text-primary-foreground rounded flex items-center justify-center text-sm font-bold uppercase tracking-widest leading-none mb-6">
-            !
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">System Initialization</h1>
-          <p className="text-muted-foreground text-sm font-mono">Create the primary administrator account</p>
+          <CogniriseBrand className="mb-10" />
+          <div className="pulse-rule mb-6 h-1 w-14 rounded-full" />
+          <h1 className="text-3xl font-bold tracking-tight mb-2 text-foreground">System Initialization</h1>
+          <p className="text-muted-foreground text-sm font-mono tracking-tight">Create the primary administrator account</p>
         </div>
 
         <Form {...form}>
@@ -159,11 +159,15 @@ export default function Bootstrap() {
           </form>
         </Form>
       </div>
-      
-      <div className="hidden lg:flex bg-sidebar border-l border-border p-12 items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay" 
+
+      <div className="hidden lg:flex bg-gradient-to-br from-sidebar to-[#0a1224] border-l border-border/50 p-12 items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay"
              style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}>
         </div>
+
+        {/* Abstract brand graphics */}
+        <div className="absolute -top-64 -left-64 w-[800px] h-[800px] bg-gradient-to-br from-accent/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-64 -right-64 w-[600px] h-[600px] bg-gradient-to-tl from-primary/20 to-transparent rounded-full blur-3xl pointer-events-none" />
       </div>
     </div>
   );
