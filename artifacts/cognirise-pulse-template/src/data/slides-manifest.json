@@ -518,5 +518,13 @@
     "title": "Human and AI portrait — right copy",
     "description": "High-resolution split human-and-robot portrait on the left with a generous right copy zone",
     "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000066",
+    "position": 66,
+    "filepath": "src/pages/slides/PulseJourneyVisual.tsx",
+    "title": "Text-free Pulse journey",
+    "description": "Four-stage transformation journey connected by one continuous Pulse energy ribbon",
+    "speakerNotes": ""
   }
 ]

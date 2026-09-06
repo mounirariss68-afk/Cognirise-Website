@@ -141,3 +141,31 @@ mtime_ms = 1788673351884
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/1565e6ee-740f-4731-a4d2-f071a4aae8f3/56294d22-f33a-44a3-861b-085b1461cc5b"
 storage_version_token = "1788673352993463"
 content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+
+[[outputs]]
+id = "jZojbua-S9GT_V5Yglfl4"
+uri = "file://attached_assets/generated_images/cognirise-pulse-journey-4k.png"
+type = "image"
+title = "Cognirise Pulse Text-Free Journey (4K PNG)"
+description = "3840×2160 standalone illustration with four connected transformation stages and no text."
+logical_id = "cdd27622-3be7-4653-ae43-40928b1e01ff"
+content_hash = "sha256:5c44a1ab091d186d9663e02eba6d20bb76eb20544de0de04ae6d24cff38d838a"
+size = 7822198
+mtime_ms = 1788674215992
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/cdd27622-3be7-4653-ae43-40928b1e01ff/c3125061-e8af-4b71-9296-ca5bb5b49a51"
+storage_version_token = "1788674297033881"
+content_type = "image/png"
+
+[[outputs]]
+id = "dU7Xb0i_7qdBGKyVY8xss"
+uri = "file://.local/outputs/Cognirise-Pulse-Template---Text-Free-Journey.pptx"
+type = "slides"
+title = "Cognirise Pulse Template — Text-Free Journey (PPTX)"
+description = "Updated 66-slide PowerPoint template containing the new full-bleed Pulse journey artwork."
+logical_id = "ed23ea1a-c483-4335-a834-561a1dd6c3a9"
+content_hash = "sha256:36443e34fbd2b5f7a4b0b3422ff9440a5b82c758995fb55b18c9313d84be61c7"
+size = 38398788
+mtime_ms = 1788674316484
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/ed23ea1a-c483-4335-a834-561a1dd6c3a9/1ecb369c-a048-4008-bbff-0664198afd7f"
+storage_version_token = "1788674317493636"
+content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
