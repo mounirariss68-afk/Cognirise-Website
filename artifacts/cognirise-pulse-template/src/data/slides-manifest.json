@@ -526,5 +526,21 @@
     "title": "Text-free Pulse journey",
     "description": "Exact 16:7 four-stage Pulse journey with expanded spacing after stages two and three",
     "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000067",
+    "position": 67,
+    "filepath": "src/pages/slides/DisruptiveConsulting.tsx",
+    "title": "Disruptive consulting transformation",
+    "description": "Text-free raster comparison of a rigid consulting machine transformed by Pulse into an adaptive outcome system",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000068",
+    "position": 68,
+    "filepath": "src/pages/slides/DisruptiveConsultingSubtle.tsx",
+    "title": "Disruptive consulting transformation — subtle",
+    "description": "Restrained text-free raster comparison with lighter structure, a controlled Pulse ribbon, and natural copy space",
+    "speakerNotes": ""
   }
 ]
