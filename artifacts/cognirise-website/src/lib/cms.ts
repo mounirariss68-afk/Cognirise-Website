@@ -7,7 +7,7 @@ import {
 } from "@workspace/api-client-react";
 import type { Market } from "@/store/market";
 
-export type CmsSource = "sanity" | "cache" | "migration-fallback";
+export type CmsSource = "postgres";
 
 export interface CmsPageState {
   readonly page: CmsPageEnvelope["page"];
@@ -16,7 +16,6 @@ export interface CmsPageState {
   readonly marketFallback: boolean;
   readonly source: CmsSource;
   readonly preview: boolean;
-  readonly fallbackVersion?: string;
 }
 
 const validMarkets: readonly Market[] = ["uae", "ksa", "turkiye", "europe"];
@@ -79,9 +78,8 @@ function isCmsPageState(value: unknown): value is CmsPageState {
     (fields.resolvedMarket === null || validMarkets.includes(fields.resolvedMarket as Market)) &&
     typeof fields.marketFallback === "boolean" &&
     ["canonical", "override", "uaeFallback", "unavailable"].includes(fields.deliveryMode as string) &&
-    ["sanity", "cache", "migration-fallback"].includes(fields.source as string) &&
-    typeof fields.preview === "boolean" &&
-    (fields.fallbackVersion === undefined || typeof fields.fallbackVersion === "string")
+    fields.source === "postgres" &&
+    typeof fields.preview === "boolean"
   );
 }
 
@@ -97,26 +95,9 @@ function toState(envelope: CmsPageEnvelope, market: Market, preview: boolean): C
     marketFallback: envelope.meta.marketFallback,
     source: envelope.meta.source,
     preview,
-    ...(envelope.meta.fallbackVersion ? { fallbackVersion: envelope.meta.fallbackVersion } : {}),
   };
 }
 
-export function hardCodedPageFallback(market: Market): CmsPageState {
-  return {
-    page: null,
-    requestedMarket: market,
-    resolvedMarket: "uae",
-    marketFallback: market !== "uae",
-    source: "migration-fallback",
-    preview: false,
-    fallbackVersion: "website-hard-coded-v1",
-  };
-}
-
-/**
- * Published CMS data is intentionally advisory until content migration. Existing
- * page components remain the deterministic rendering and outage fallback.
- */
 export function useCmsPublishedPage(market: Market, pathname: string, enabled = true) {
   const slug = cmsSlugForPath(pathname);
   const routeKind = cmsRouteKindForPath(pathname);
@@ -128,7 +109,7 @@ export function useCmsPublishedPage(market: Market, pathname: string, enabled = 
     },
   });
 
-  return { ...query, slug, state: query.data ?? hardCodedPageFallback(market) };
+  return { ...query, slug, state: query.data };
 }
 
 export function useCmsPreviewPage(market: Market, slug: string, enabled: boolean, routeKind: CmsRouteKind = "landing") {

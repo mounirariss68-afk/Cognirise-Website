@@ -41,10 +41,6 @@ export function constantTimeEqual(left: string, right: string): boolean {
   return timingSafeEqual(a, comparable) && a.length === b.length;
 }
 
-export function isWorkflowAuthorized(header: string | undefined, workflowKey: string | undefined): boolean {
-  return Boolean(workflowKey && header?.startsWith("Bearer ") && constantTimeEqual(header.slice(7), workflowKey));
-}
-
 function b64url(value: string | Buffer): string {
   return Buffer.from(value).toString("base64url");
 }
@@ -141,30 +137,6 @@ export function verifyPreviewToken(
   }
 }
 
-export function verifyWebhookSignature(
-  rawBody: Buffer,
-  timestamp: string,
-  suppliedSignature: string,
-  secret: string,
-): boolean {
-  const expected = createHmac("sha256", secret)
-    .update(timestamp)
-    .update(".")
-    .update(rawBody)
-    .digest("hex");
-  const supplied = suppliedSignature.startsWith("sha256=")
-    ? suppliedSignature.slice(7)
-    : suppliedSignature;
-  return /^[a-f0-9]{64}$/i.test(supplied) &&
-    constantTimeEqual(supplied.toLowerCase(), expected);
-}
-
-export function isWebhookTimestampFresh(timestamp: string | undefined, now = Date.now()): boolean {
-  const timestampNumber = timestamp ? Number(timestamp) : Number.NaN;
-  const timestampMs = timestampNumber < 10_000_000_000 ? timestampNumber * 1000 : timestampNumber;
-  return Number.isFinite(timestampMs) && Math.abs(now - timestampMs) <= 5 * 60_000;
-}
-
 export function previewClaimsMatch(
   claims: PreviewClaims | undefined,
   market: CmsMarket | undefined,
@@ -193,3 +165,14 @@ export function parseCookie(header: string | undefined, name: string): string | 
   }
   return undefined;
 }
+
+export interface PreviewSessionLifecycle {
+  exchangedAt: Date | null;
+  revokedAt: Date | null;
+  expiresAt: Date;
+}
+/** Exchange is one-time; a successful exchange deliberately does not revoke its session. */
+export const canExchangePreviewSession = (session: PreviewSessionLifecycle | undefined, now = new Date()) =>
+  Boolean(session && !session.exchangedAt && !session.revokedAt && session.expiresAt > now);
+export const canReadPreviewSession = (session: PreviewSessionLifecycle | undefined, now = new Date()) =>
+  Boolean(session && session.exchangedAt && !session.revokedAt && session.expiresAt > now);

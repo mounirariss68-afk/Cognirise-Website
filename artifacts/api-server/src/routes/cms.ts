@@ -1,441 +1,248 @@
-import { Router, type IRouter } from "express";
-import {
-  cmsWebhookReceiptsTable,
-  cmsPreviewTokenNoncesTable,
-  cmsWorkflowReceiptsTable,
-  cmsWorkflowEventsTable,
-  db,
-} from "@workspace/db";
-import { and, gt, isNull, eq, sql } from "drizzle-orm";
-import {
-  cmsConfigurationStatus,
-  getPreviewPage,
-  getPublishedPage,
-  getPublishedRuntime,
-  getPublishedPublication,
-  getPublishedPublications,
-  getSitemap,
-  invalidatePublishedCache,
-} from "../lib/cms/adapter";
-import {
-  parseCookie,
-  parseMarket,
-  parseRouteKind,
-  isWebhookTimestampFresh,
-  previewClaimsMatch,
-  safeSlug,
-  sha256,
-  signPreviewToken,
-  signPreviewSession,
-  verifyPreviewToken,
-  verifyWebhookSignature,
-} from "../lib/cms/security";
-import {
-  authenticateWorkflow,
-  dueActions,
-  isMarketAssigned,
-  parseTransitionInput,
-  rollbackPage,
-  transitionPage,
-} from "../lib/cms/workflow";
+import { Router, type IRouter, type Response } from "express";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { cmsDocumentsTable, cmsMarketEditionsTable, cmsPreviewSessionsTable, cmsRevisionsTable, cmsWorkflowEventsTable, db } from "@workspace/db";
+import { getPreviewRevision, getPublishedPage, getPublishedPublications, getRuntime, getSitemap, cmsConfigurationStatus } from "../lib/cms/adapter";
+import { principalForRequest, requireSameOrigin } from "../lib/cms/auth";
+import { dueActions, isMarketAssigned, parseTransitionInput, transitionPage, withDueProcessingLease } from "../lib/cms/workflow";
+import { canExchangePreviewSession, canReadPreviewSession, parseMarket, parseRouteKind, safeSlug, sha256, signPreviewToken, verifyPreviewToken, parseCookie, type CmsMarket } from "../lib/cms/security";
+import { CmsConflictError, CmsForbiddenError, CmsValidationError, createDocument, rollbackEdition, updateEditionDraft } from "../lib/cms/editorial";
 
 const router: IRouter = Router();
-const PREVIEW_COOKIE = "cognirise_cms_preview";
-
-function first(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
+const previewCookie = "cognirise_cms_preview";
+const first = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] : value;
+const secrets = () => (process.env.CMS_PREVIEW_SECRETS ?? process.env.SESSION_SECRET ?? "").split(",").map((v) => v.trim()).filter((v) => v.length >= 32);
+const authorized = (principal: NonNullable<Awaited<ReturnType<typeof principalForRequest>>>, market: string) => principal.markets === "all" || principal.markets.includes(market as "uae" | "ksa" | "turkiye" | "europe");
+function adminError(res: Response, error: unknown): void {
+  if (error instanceof CmsForbiddenError) { res.status(403).json({ error: error.message }); return; }
+  if (error instanceof CmsConflictError) { res.status(409).json({ error: error.message }); return; }
+  if (error instanceof CmsValidationError) { res.status(400).json({ error: error.message }); return; }
+  res.status(500).json({ error: "CMS operation failed" });
 }
-
-function previewSecrets(): string[] {
-  return (process.env.CMS_PREVIEW_SECRETS ?? "")
-    .split(",")
-    .map((secret) => secret.trim())
-    .filter((secret) => secret.length >= 32);
+function diffPayload(before: unknown, after: unknown, path = ""): Array<{ path: string; before: unknown; after: unknown }> {
+  if (JSON.stringify(before) === JSON.stringify(after)) return [];
+  if (!before || !after || typeof before !== "object" || typeof after !== "object" || Array.isArray(before) || Array.isArray(after)) return [{ path: path || "/", before, after }];
+  const left = before as Record<string, unknown>; const right = after as Record<string, unknown>;
+  return [...new Set([...Object.keys(left), ...Object.keys(right)])].flatMap((key) => diffPayload(left[key], right[key], `${path}/${key}`));
+}
+export function previewTokenIdentity(
+  market: CmsMarket,
+  edition: { localizedSlug: string | null },
+  page: { canonicalSlug?: string; routeKind?: string },
+) {
+  const slug = safeSlug(edition.localizedSlug ?? page.canonicalSlug);
+  const routeKind = parseRouteKind(page.routeKind);
+  return slug && routeKind ? { market, slug, routeKind } : undefined;
 }
 
 router.get("/cms/pages/:market/:slug", async (req, res): Promise<void> => {
-  const market = parseMarket(first(req.params.market));
-  const slug = safeSlug(first(req.params.slug));
-  const kind = parseRouteKind(req.query.routeKind);
-  if (!market || !slug || !kind) {
-    res.status(400).json({ error: "Invalid market or page slug" });
-    return;
-  }
-  try {
-    res.json(await getPublishedPage(market, slug, kind));
-  } catch (error) {
-    req.log.error({ error: error instanceof Error ? error.message : "unknown" }, "CMS published delivery failed");
-    res.status(503).json({ error: "CMS published delivery is unavailable" });
-  }
+  const market = parseMarket(first(req.params.market)); const slug = safeSlug(first(req.params.slug)); const kind = parseRouteKind(req.query.routeKind);
+  if (!market || !slug || !kind) { res.status(400).json({ error: "Invalid market, slug, or route kind" }); return; }
+  res.json(await getPublishedPage(market, slug, kind));
 });
-
 router.get("/cms/runtime/:market", async (req, res): Promise<void> => {
   const market = parseMarket(first(req.params.market));
-  if (!market) {
-    res.status(400).json({ error: "Invalid market" });
-    return;
-  }
-  res.json(await getPublishedRuntime(market));
+  if (!market) { res.status(400).json({ error: "Invalid market" }); return; }
+  res.json(await getRuntime(market));
 });
 router.get("/cms/publications/:market", async (req, res): Promise<void> => {
-  const market = parseMarket(first(req.params.market)); if (!market) { res.status(400).json({ error: "Invalid market" }); return; }
-  res.json(await getPublishedPublications(market));
+  const market = parseMarket(first(req.params.market));
+  if (!market) { res.status(400).json({ error: "Invalid market" }); return; }
+  res.json({ publications: await getPublishedPublications(market), meta: { market, source: "postgres" } });
 });
 router.get("/cms/publications/:market/:slug", async (req, res): Promise<void> => {
-  const market = parseMarket(first(req.params.market)), slug = safeSlug(first(req.params.slug));
-  if (!market || !slug) { res.status(400).json({ error: "Invalid market or publication slug" }); return; }
-  res.json(await getPublishedPublication(market, slug));
+  const market = parseMarket(first(req.params.market)); const slug = safeSlug(first(req.params.slug));
+  if (!market || !slug) { res.status(400).json({ error: "Invalid market or slug" }); return; }
+  res.json({ publication: await getPublishedPublications(market, slug), meta: { market, source: "postgres" } });
 });
-
-router.get("/cms/sitemap.xml", async (req, res): Promise<void> => {
+router.get("/cms/sitemap.xml", async (_req, res): Promise<void> => {
   try {
-    const xml = await getSitemap("https://cognirise.ai");
-    res.type("application/xml").set("Cache-Control", "public, max-age=300").send(xml);
+    const urls = await getSitemap();
+    const escapeXml = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+    res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((url) => `<url><loc>${escapeXml(url)}</loc></url>`).join("")}</urlset>`);
   } catch (error) {
-    req.log.error({ error: error instanceof Error ? error.message : "unknown" }, "CMS sitemap generation failed");
-    res.status(503).json({ error: "CMS sitemap is unavailable" });
+    res.status(503).json({ error: error instanceof Error ? error.message : "Sitemap configuration failed" });
   }
 });
 
 router.post("/cms/preview/exchange", async (req, res): Promise<void> => {
-  const token =
-    typeof req.body === "object" && req.body !== null && typeof req.body.token === "string"
-      ? req.body.token
-      : undefined;
-  const claims = token ? verifyPreviewToken(token, previewSecrets()) : undefined;
-  if (!claims || claims.purpose !== "exchange") {
-    res.status(401).json({ error: "Preview token is invalid or expired" });
-    return;
-  }
-  const maxAge = Math.max(0, claims.exp - Math.floor(Date.now() / 1000));
-  const digest = sha256(token);
-  const consumed = await db.transaction(async (tx) => {
-    const rows = await tx.update(cmsPreviewTokenNoncesTable)
-      .set({ consumedAt: new Date() })
-      .where(and(
-        eq(cmsPreviewTokenNoncesTable.digest, digest),
-        isNull(cmsPreviewTokenNoncesTable.consumedAt),
-        gt(cmsPreviewTokenNoncesTable.expiresAt, new Date()),
-      ))
-      .returning({ digest: cmsPreviewTokenNoncesTable.digest });
-    await tx.insert(cmsWorkflowEventsTable).values({
-      action: "preview_token_exchanged", actor: "preview-token",
-      target: `page:${claims.slug}`, market: claims.market,
-      outcome: rows.length === 1 ? "success" : "replay_rejected",
-      metadata: { tokenDigest: digest.slice(0, 16) },
-    });
-    return rows.length === 1;
-  });
-  if (!consumed) {
-    res.status(401).json({ error: "Preview token was already used or revoked" });
-    return;
-  }
-  const sessionToken = signPreviewSession(
-    { market: claims.market, slug: claims.slug, routeKind: claims.routeKind },
-    previewSecrets()[0]!,
-    Math.floor(Date.now() / 1000),
-    maxAge,
-  );
-  res.cookie(PREVIEW_COOKIE, sessionToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/api/cms/preview",
-    maxAge: maxAge * 1000,
-  });
-  res.json({ status: "ready", market: claims.market, slug: claims.slug, routeKind: claims.routeKind, expiresAt: claims.exp });
+  if (!requireSameOrigin(req, res)) return;
+  const token = typeof req.body?.token === "string" ? req.body.token : "";
+  const claims = verifyPreviewToken(token, secrets());
+  if (!claims || claims.purpose !== "exchange") { res.status(401).json({ error: "Preview token is invalid or expired" }); return; }
+  // The issuing API records an exact revision in the server session. Tokens contain
+  // only an opaque nonce and cannot be widened by changing a requested slug.
+  const [session] = await db.select().from(cmsPreviewSessionsTable).where(eq(cmsPreviewSessionsTable.nonceDigest, sha256(token))).limit(1);
+  if (!canExchangePreviewSession(session)) { res.status(401).json({ error: "Preview token was used, revoked, or expired" }); return; }
+  const consumed = await db.update(cmsPreviewSessionsTable).set({ exchangedAt: new Date() }).where(and(eq(cmsPreviewSessionsTable.id, session.id), isNull(cmsPreviewSessionsTable.exchangedAt), isNull(cmsPreviewSessionsTable.revokedAt))).returning({ id: cmsPreviewSessionsTable.id });
+  if (!consumed.length) { res.status(401).json({ error: "Preview token was already used or revoked" }); return; }
+  res.cookie(previewCookie, session.id, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict", path: "/api/cms/preview", maxAge: Math.max(0, session.expiresAt.getTime() - Date.now()) });
+  res.json({ status: "ready", market: claims.market, slug: claims.slug, routeKind: claims.routeKind, expiresAt: Math.floor(session.expiresAt.getTime() / 1000) });
 });
 
 router.get("/cms/preview/pages/:market/:slug", async (req, res): Promise<void> => {
-  res.setHeader("Cache-Control", "private, no-store");
-  const market = parseMarket(first(req.params.market));
-  const slug = safeSlug(first(req.params.slug));
-  const kind = parseRouteKind(req.query.routeKind);
-  const cookie = parseCookie(req.headers.cookie, PREVIEW_COOKIE);
-  const claims = cookie ? verifyPreviewToken(cookie, previewSecrets()) : undefined;
-  if (!market || !slug || !kind || claims?.purpose !== "session" || !previewClaimsMatch(claims, market, slug, kind)) {
-    res.status(401).json({ error: "Preview authorization does not match this page" });
-    return;
-  }
-  try {
-    res.json(await getPreviewPage(market, slug, kind));
-  } catch (error) {
-    req.log.error({ error: error instanceof Error ? error.message : "unknown" }, "CMS preview failed");
-    res.status(503).json({ error: "CMS preview is unavailable" });
-  }
+  res.set("Cache-Control", "private, no-store");
+  const market = parseMarket(first(req.params.market)); const slug = safeSlug(first(req.params.slug)); const kind = parseRouteKind(req.query.routeKind);
+  const sessionId = parseCookie(req.headers.cookie, previewCookie);
+  if (!market || !slug || !kind || !sessionId) { res.status(401).json({ error: "Preview authorization does not match this page" }); return; }
+  const [session] = await db.select().from(cmsPreviewSessionsTable).where(eq(cmsPreviewSessionsTable.id, sessionId)).limit(1);
+  if (!canReadPreviewSession(session)) { res.status(401).json({ error: "Preview authorization is invalid or expired" }); return; }
+  const page = await getPreviewRevision((await db.select({ documentId: cmsMarketEditionsTable.documentId }).from(cmsMarketEditionsTable).where(eq(cmsMarketEditionsTable.id, session.editionId)).limit(1))[0]?.documentId ?? "", session.editionId, session.revisionId);
+  if (!page || page.page?.market !== market || page.page.slug !== slug || page.page.routeKind !== kind) { res.status(401).json({ error: "Preview authorization does not match this page" }); return; }
+  res.json(page);
 });
 
-router.post("/cms/workflow/preview-tokens", async (req, res): Promise<void> => {
-  const principal = authenticateWorkflow(req.headers.authorization);
-  if (!principal) {
-    res.status(401).json({ error: "Workflow authorization required" });
-    return;
-  }
-  const market = parseMarket(req.body?.market);
-  const slug = safeSlug(req.body?.slug);
-  const kind = parseRouteKind(req.body?.routeKind);
-  const secret = previewSecrets()[0];
-  if (!market || !slug || !kind) {
-    res.status(400).json({ error: "Invalid market or page slug" });
-    return;
-  }
-  if (!isMarketAssigned(principal, market)) {
-    res.status(403).json({ error: "Workflow principal is not assigned to this market" });
-    return;
-  }
-  if (!secret || !process.env.SANITY_API_TOKEN) {
-    res.status(503).json({ error: "CMS preview is not configured" });
-    return;
-  }
-  const token = signPreviewToken({ market, slug, routeKind: kind }, secret);
-  const claims = verifyPreviewToken(token, [secret]);
-  if (!claims) throw new Error("Generated preview token failed verification");
-  const digest = sha256(token);
-  await db.transaction(async (tx) => {
-    await tx.insert(cmsPreviewTokenNoncesTable).values({
-      digest, expiresAt: new Date(claims.exp * 1000),
-    });
-    await tx.insert(cmsWorkflowEventsTable).values({
-      action: "preview_token_issued",
-      actor: principal.id,
-      target: `page:${slug}`, market, outcome: "success",
-      metadata: { tokenDigest: digest.slice(0, 16) },
-    });
-  });
-  res.status(201).json({ token, market, slug, routeKind: kind });
-});
-
-router.post("/cms/workflow/transitions", async (req, res): Promise<void> => {
-  const principal = authenticateWorkflow(req.headers.authorization);
-  if (!principal) {
-    res.status(401).json({ error: "Workflow authorization required" });
-    return;
-  }
+router.post("/cms/admin/workflow/transitions", async (req, res): Promise<void> => {
+  if (!requireSameOrigin(req, res)) return;
+  const principal = await principalForRequest(req);
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
   const input = parseTransitionInput(req.body);
-  if (!input) {
-    res.status(400).json({ error: "Workflow transition input is invalid" });
-    return;
-  }
-  const existing = await db.select({ requestId: cmsWorkflowReceiptsTable.requestId })
-    .from(cmsWorkflowReceiptsTable).where(eq(cmsWorkflowReceiptsTable.requestId, input.requestId)).limit(1);
-  if (existing.length) {
-    res.status(200).json({ status: "duplicate", requestId: input.requestId });
-    return;
-  }
+  if (!input) { res.status(400).json({ error: "Workflow transition input is invalid" }); return; }
   try {
-    const result = await transitionPage(input, principal);
-    await db.transaction(async (tx) => {
-      await tx.insert(cmsWorkflowReceiptsTable).values({
-        requestId: input.requestId, action: `transition:${input.toState}`, subjectId: input.subjectId,
-      });
-      await tx.insert(cmsWorkflowEventsTable).values({
-        action: "workflow_transition", actor: principal.id, target: `page:${input.subjectId}`,
-        market: input.market, outcome: "success",
-        metadata: { requestId: input.requestId, role: principal.role, fromState: result.fromState, toState: result.toState },
-      });
-    });
-    invalidatePublishedCache();
-    res.status(202).json({ status: "accepted", requestId: input.requestId, ...result });
+    const outcome = await transitionPage(input, principal);
+    res.status(outcome.duplicate ? 200 : 202).json({ status: outcome.duplicate ? "duplicate" : "accepted", requestId: input.requestId, ...outcome });
   } catch (error) {
-    req.log.warn({ error: error instanceof Error ? error.message : "unknown" }, "CMS transition rejected");
-    await db.insert(cmsWorkflowEventsTable).values({
-      action: "workflow_transition", actor: principal.id, target: `page:${input.subjectId}`,
-      market: input.market, outcome: "rejected",
-      metadata: { requestId: input.requestId, role: principal.role, toState: input.toState },
-    });
-    res.status(409).json({ error: error instanceof Error ? error.message : "Workflow transition failed" });
+    const message = error instanceof Error ? error.message : "Workflow transition failed";
+    res.status(/not assigned|not permitted|Separation of duties/.test(message) ? 403 : 409).json({ error: message });
   }
 });
 
-router.post("/cms/workflow/rollbacks", async (req, res): Promise<void> => {
-  const principal = authenticateWorkflow(req.headers.authorization);
-  const { subjectId, revisionId, requestId } =
-    typeof req.body === "object" && req.body !== null ? req.body : {};
-  if (!principal) {
-    res.status(401).json({ error: "Workflow authorization required" });
-    return;
-  }
-  if (principal.role !== "admin" || principal.markets !== "all") {
-    res.status(409).json({ error: "Rollback requires an all-market admin" });
-    return;
-  }
-  if (typeof requestId !== "string") {
-    res.status(400).json({ error: "Rollback input is invalid" });
-    return;
-  }
-  try {
-    const outcome = await db.transaction(async (tx) => {
-      await tx.execute(
-        sql`select pg_advisory_xact_lock(hashtext(${"cms-rollback:" + requestId}))`,
-      );
-      const existing = await tx
-        .select({
-          requestId: cmsWorkflowReceiptsTable.requestId,
-          action: cmsWorkflowReceiptsTable.action,
-          subjectId: cmsWorkflowReceiptsTable.subjectId,
-        })
-        .from(cmsWorkflowReceiptsTable)
-        .where(eq(cmsWorkflowReceiptsTable.requestId, requestId))
-        .limit(1);
-      if (existing.length > 0) {
-        if (
-          existing[0]?.action === `rollback:${revisionId}` &&
-          existing[0]?.subjectId === subjectId
-        ) return "duplicate" as const;
-        throw new Error("Rollback request ID conflicts with another operation");
-      }
-      await rollbackPage(subjectId, revisionId, requestId, principal);
-      await tx.insert(cmsWorkflowReceiptsTable).values({
-        requestId,
-        action: `rollback:${revisionId}`,
-        subjectId,
-      });
-      await tx.insert(cmsWorkflowEventsTable).values({
-        action: "workflow_rollback", actor: principal.id, target: `page:${subjectId}`,
-        outcome: "success", metadata: { requestId, revisionId, role: principal.role },
-      });
-      return "accepted" as const;
-    });
-    if (outcome === "duplicate") {
-      res.status(200).json({ status: "duplicate", requestId });
-      return;
+router.post("/cms/admin/workflow/process-due", async (req, res): Promise<void> => {
+  if (!requireSameOrigin(req, res)) return;
+  const principal = await principalForRequest(req);
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  if (!["publisher", "admin"].includes(principal.role)) { res.status(403).json({ error: "Publisher role required" }); return; }
+  const lease = await withDueProcessingLease(async () => {
+    const actions = await dueActions(); let processed = 0;
+    for (const action of actions) {
+      if (!isMarketAssigned(principal, action.market)) continue;
+      try { if (!(await transitionPage(action, principal)).duplicate) processed++; } catch { /* stale/due races are safely idempotent */ }
     }
-    invalidatePublishedCache();
-    res.status(202).json({ status: "accepted", requestId });
-  } catch (error) {
-    req.log.warn({ error: error instanceof Error ? error.message : "unknown" }, "CMS rollback rejected");
-    await db.insert(cmsWorkflowEventsTable).values({
-      action: "workflow_rollback", actor: principal.id,
-      target: `page:${typeof subjectId === "string" ? subjectId : "invalid"}`,
-      outcome: "rejected", metadata: { role: principal.role },
-    });
-    res.status(409).json({ error: error instanceof Error ? error.message : "Rollback failed" });
-  }
-});
-
-router.post("/cms/workflow/process-due", async (req, res): Promise<void> => {
-  const principal = authenticateWorkflow(req.headers.authorization);
-  if (!principal || !["publisher", "admin"].includes(principal.role)) {
-    res.status(401).json({ error: "Publisher workflow authorization required" });
-    return;
-  }
-  let actions;
-  try {
-    actions = await dueActions();
-  } catch (error) {
-    req.log.error({ error: error instanceof Error ? error.message : "unknown" }, "CMS due processing unavailable");
-    res.status(503).json({ error: "CMS due processing is unavailable" });
-    return;
-  }
-  let processed = 0;
-  for (const action of actions) {
-    try {
-      const result = await transitionPage(action, principal);
-      await db.transaction(async (tx) => {
-        await tx.insert(cmsWorkflowReceiptsTable).values({
-          requestId: action.requestId, action: `due:${action.toState}`, subjectId: action.subjectId,
-        }).onConflictDoNothing();
-        await tx.insert(cmsWorkflowEventsTable).values({
-          action: "workflow_due_processed", actor: principal.id, target: `page:${action.subjectId}`,
-          market: action.market, outcome: "success",
-          metadata: { requestId: action.requestId, fromState: result.fromState, toState: result.toState },
-        });
-      });
-      processed++;
-    } catch (error) {
-      req.log.warn({ subjectId: action.subjectId, error: error instanceof Error ? error.message : "unknown" }, "Due CMS action failed");
-      await db.insert(cmsWorkflowEventsTable).values({
-        action: "workflow_due_processed", actor: principal.id, target: `page:${action.subjectId}`,
-        market: action.market, outcome: "failed",
-        metadata: { requestId: action.requestId, toState: action.toState },
-      });
-    }
-  }
-  if (processed) invalidatePublishedCache();
-  res.status(200).json({
-    status: processed === actions.length ? "complete" : "partial",
-    discovered: actions.length, processed,
+    return { discovered: actions.length, processed };
   });
+  if (!lease.acquired) { res.status(202).json({ status: "leased", discovered: 0, processed: 0 }); return; }
+  const result = lease.result!;
+  res.json({ status: result.processed === result.discovered ? "complete" : "partial", ...result });
 });
 
-router.post("/cms/webhooks/publish", async (req, res): Promise<void> => {
-  const secret = process.env.SANITY_WEBHOOK_SECRET;
-  if (!secret) {
-    res.status(503).json({ error: "CMS webhook is not configured" });
-    return;
-  }
-  if (!Buffer.isBuffer(req.body)) {
-    res.status(415).json({ error: "Webhook requires an application/json body" });
-    return;
-  }
-  const timestamp = first(req.headers["sanity-webhook-timestamp"]);
-  const signature = first(req.headers["sanity-webhook-signature"]);
-  const eventId = first(req.headers["sanity-webhook-id"]);
-  if (
-    !timestamp ||
-    !signature ||
-    !eventId ||
-    !/^[A-Za-z0-9._:-]{8,200}$/.test(eventId) ||
-    !isWebhookTimestampFresh(timestamp) ||
-    !verifyWebhookSignature(req.body, timestamp, signature, secret)
-  ) {
-    res.status(401).json({ error: "Webhook signature, timestamp, or id is invalid" });
-    return;
-  }
+router.get("/cms/admin/documents", async (req, res): Promise<void> => {
+  const principal = await principalForRequest(req);
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  const editions = await db.select().from(cmsMarketEditionsTable);
+  const permitted = editions.filter((edition) => authorized(principal, edition.market));
+  const ids = [...new Set(permitted.map((edition) => edition.documentId))];
+  const documents = ids.length ? await db.select().from(cmsDocumentsTable).where(inArray(cmsDocumentsTable.id, ids)).orderBy(desc(cmsDocumentsTable.updatedAt)) : [];
+  res.json({ documents, editions: permitted });
+});
+router.get("/cms/admin/access", async (req, res): Promise<void> => {
+  const principal = await principalForRequest(req);
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  res.json({ principal: { id: principal.id, role: principal.role, markets: principal.markets } });
+});
+router.get("/cms/admin/dashboard", async (req, res): Promise<void> => {
+  const principal = await principalForRequest(req);
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  const editions = (await db.select().from(cmsMarketEditionsTable)).filter((edition) => authorized(principal, edition.market));
+  const counts = Object.fromEntries(["draft", "review", "approved", "scheduled", "published", "expired", "archived"].map((state) => [state, editions.filter((edition) => edition.publicationState === state).length]));
+  res.json({ documents: new Set(editions.map((edition) => edition.documentId)).size, editions: editions.length, states: counts });
+});
+router.post("/cms/admin/documents", async (req, res): Promise<void> => {
+  if (!requireSameOrigin(req, res)) return;
+  const principal = await principalForRequest(req);
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  const body = req.body as Record<string, unknown>;
   try {
-    const payload = JSON.parse(req.body.toString("utf8")) as unknown;
-    if (typeof payload !== "object" || payload === null || Array.isArray(payload)) {
-      res.status(400).json({ error: "Webhook payload is invalid" });
-      return;
-    }
-  } catch {
-    res.status(400).json({ error: "Webhook payload is invalid JSON" });
-    return;
-  }
-
-  const digest = sha256(req.body);
-  const result = await db.transaction(async (tx) => {
-    const inserted = await tx
-      .insert(cmsWebhookReceiptsTable)
-      .values({ eventId, payloadDigest: digest })
-      .onConflictDoNothing()
-      .returning({ eventId: cmsWebhookReceiptsTable.eventId });
-    if (inserted.length === 0) {
-      const existing = await tx
-        .select({ payloadDigest: cmsWebhookReceiptsTable.payloadDigest })
-        .from(cmsWebhookReceiptsTable)
-        .where(eq(cmsWebhookReceiptsTable.eventId, eventId))
-        .limit(1);
-      return existing[0]?.payloadDigest === digest ? "duplicate" as const : "conflict" as const;
-    }
-    await tx.insert(cmsWorkflowEventsTable).values({
-      action: "published_content_changed",
-      actor: "sanity-webhook",
-      target: `event:${eventId}`,
-      outcome: "accepted",
-      metadata: { payloadDigest: digest },
-    });
-    return "accepted" as const;
-  });
-  if (result === "duplicate") {
-    res.status(200).json({ status: "duplicate" });
-    return;
-  }
-  if (result === "conflict") {
-    res.status(409).json({ error: "Webhook event ID conflicts with an earlier payload" });
-    return;
-  }
-  const invalidatedEntries = invalidatePublishedCache();
-  res.status(202).json({ status: "accepted", invalidatedEntries });
+    if (!body || typeof body.documentId !== "string") throw new CmsValidationError("documentId is required");
+    res.status(201).json(await createDocument(principal, body.documentId, body.payload));
+  } catch (error) { adminError(res, error); }
 });
-
-router.get("/cms/health", (_req, res): void => {
-  const status = cmsConfigurationStatus();
-  res.status(status.configured ? 200 : 503).json({
-    status: status.configured ? "configured" : "unconfigured",
-    ...status,
-    canonicalMarket: "uae",
-  });
+router.get("/cms/admin/documents/:documentId", async (req, res): Promise<void> => {
+  const principal = await principalForRequest(req);
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  const id = first(req.params.documentId); const [document] = await db.select().from(cmsDocumentsTable).where(eq(cmsDocumentsTable.id, id ?? "")).limit(1);
+  if (!document) { res.status(404).json({ error: "Document not found" }); return; }
+  const editions = (await db.select().from(cmsMarketEditionsTable).where(eq(cmsMarketEditionsTable.documentId, document.id))).filter((edition) => authorized(principal, edition.market));
+  if (!editions.length) { res.status(403).json({ error: "Document is outside assigned markets" }); return; }
+  res.json({ document, editions });
 });
-
+router.get("/cms/admin/documents/:documentId/editions/:market", async (req, res): Promise<void> => {
+  const principal = await principalForRequest(req); const market = parseMarket(first(req.params.market));
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  if (!market || !authorized(principal, market)) { res.status(403).json({ error: "Market access denied" }); return; }
+  const [edition] = await db.select().from(cmsMarketEditionsTable).where(and(eq(cmsMarketEditionsTable.documentId, first(req.params.documentId) ?? ""), eq(cmsMarketEditionsTable.market, market))).limit(1);
+  if (!edition) { res.status(404).json({ error: "Edition not found" }); return; }
+  const [draft] = await db.select().from(cmsRevisionsTable).where(eq(cmsRevisionsTable.id, edition.draftRevisionId!)).limit(1);
+  res.json({ edition, draft });
+});
+router.patch("/cms/admin/documents/:documentId/editions/:market", async (req, res): Promise<void> => {
+  if (!requireSameOrigin(req, res)) return;
+  const principal = await principalForRequest(req); const market = parseMarket(first(req.params.market)); const body = req.body as Record<string, unknown>;
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  try {
+    if (!market || !Number.isInteger(body?.expectedVersion)) throw new CmsValidationError("market and expectedVersion are required");
+    res.json(await updateEditionDraft(principal, first(req.params.documentId) ?? "", market, body.expectedVersion as number, body.payload));
+  } catch (error) { adminError(res, error); }
+});
+router.get("/cms/admin/documents/:documentId/editions/:market/revisions", async (req, res): Promise<void> => {
+  const principal = await principalForRequest(req); const market = parseMarket(first(req.params.market));
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  if (!market || !authorized(principal, market)) { res.status(403).json({ error: "Market access denied" }); return; }
+  const [edition] = await db.select().from(cmsMarketEditionsTable).where(and(eq(cmsMarketEditionsTable.documentId, first(req.params.documentId) ?? ""), eq(cmsMarketEditionsTable.market, market))).limit(1);
+  if (!edition) { res.status(404).json({ error: "Edition not found" }); return; }
+  res.json({ revisions: await db.select().from(cmsRevisionsTable).where(eq(cmsRevisionsTable.editionId, edition.id)).orderBy(desc(cmsRevisionsTable.revisionNumber)) });
+});
+router.post("/cms/admin/documents/:documentId/editions/:market/rollback", async (req, res): Promise<void> => {
+  if (!requireSameOrigin(req, res)) return;
+  const principal = await principalForRequest(req); const market = parseMarket(first(req.params.market)); const body = req.body as Record<string, unknown>;
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  try {
+    if (!market || typeof body?.revisionId !== "string" || !Number.isInteger(body.expectedVersion)) throw new CmsValidationError("revisionId and expectedVersion are required");
+    res.json(await rollbackEdition(principal, first(req.params.documentId) ?? "", market, body.revisionId, body.expectedVersion as number));
+  } catch (error) { adminError(res, error); }
+});
+router.get("/cms/admin/revisions/:revisionId", async (req, res): Promise<void> => {
+  const principal = await principalForRequest(req);
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  const [revision] = await db.select().from(cmsRevisionsTable).where(eq(cmsRevisionsTable.id, first(req.params.revisionId) ?? "")).limit(1);
+  if (!revision) { res.status(404).json({ error: "Revision not found" }); return; }
+  const [edition] = await db.select().from(cmsMarketEditionsTable).where(eq(cmsMarketEditionsTable.id, revision.editionId)).limit(1);
+  if (!edition || !authorized(principal, edition.market)) { res.status(403).json({ error: "Market access denied" }); return; }
+  res.json({ revision, edition });
+});
+router.get("/cms/admin/revisions/:revisionId/diff/:againstRevisionId", async (req, res): Promise<void> => {
+  const principal = await principalForRequest(req);
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  const ids = [first(req.params.revisionId) ?? "", first(req.params.againstRevisionId) ?? ""];
+  const revisions = await db.select().from(cmsRevisionsTable).where(inArray(cmsRevisionsTable.id, ids));
+  const current = revisions.find((item) => item.id === ids[0]); const against = revisions.find((item) => item.id === ids[1]);
+  if (!current || !against || current.editionId !== against.editionId) { res.status(404).json({ error: "Comparable revisions not found" }); return; }
+  const [edition] = await db.select().from(cmsMarketEditionsTable).where(eq(cmsMarketEditionsTable.id, current.editionId)).limit(1);
+  if (!edition || !authorized(principal, edition.market)) { res.status(403).json({ error: "Market access denied" }); return; }
+  res.json({ revisionId: current.id, againstRevisionId: against.id, changes: diffPayload(against.payload, current.payload) });
+});
+router.get("/cms/admin/audit-events", async (req, res): Promise<void> => {
+  const principal = await principalForRequest(req);
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  const events = await db.select().from(cmsWorkflowEventsTable).orderBy(desc(cmsWorkflowEventsTable.createdAt));
+  res.json({ events: events.filter((event) => !event.market || authorized(principal, event.market)) });
+});
+router.post("/cms/admin/documents/:documentId/editions/:market/preview", async (req, res): Promise<void> => {
+  if (!requireSameOrigin(req, res)) return;
+  const principal = await principalForRequest(req); const market = parseMarket(first(req.params.market)); const body = req.body as Record<string, unknown>;
+  if (!principal) { res.status(401).json({ error: "CMS authentication required" }); return; }
+  if (!market || !authorized(principal, market)) { res.status(403).json({ error: "Market access denied" }); return; }
+  if (typeof body?.revisionId !== "string") { res.status(400).json({ error: "revisionId is required" }); return; }
+  const secret = secrets()[0];
+  if (!secret) { res.status(503).json({ error: "Preview signing is not configured" }); return; }
+  const [edition] = await db.select().from(cmsMarketEditionsTable).where(and(eq(cmsMarketEditionsTable.documentId, first(req.params.documentId) ?? ""), eq(cmsMarketEditionsTable.market, market))).limit(1);
+  const [revision] = edition ? await db.select().from(cmsRevisionsTable).where(and(eq(cmsRevisionsTable.id, body.revisionId), eq(cmsRevisionsTable.editionId, edition.id))).limit(1) : [];
+  const page = (revision?.payload as unknown as { content?: { kind?: string; canonicalSlug?: string; routeKind?: string } } | undefined)?.content;
+  if (!edition || !revision || page?.kind !== "page" || !page.canonicalSlug || !parseRouteKind(page.routeKind)) { res.status(400).json({ error: "Preview requires an exact page revision" }); return; }
+  const identity = previewTokenIdentity(market, edition, page);
+  if (!identity) { res.status(400).json({ error: "Preview requires a valid localized or canonical slug" }); return; }
+  const token = signPreviewToken(identity, secret, undefined, 10 * 60);
+  const expiresAt = new Date(Date.now() + 10 * 60_000);
+  await db.insert(cmsPreviewSessionsTable).values({ nonceDigest: sha256(token), editionId: edition.id, revisionId: revision.id, expiresAt, createdByPrincipalId: principal.id });
+  res.status(201).json({ token, expiresAt });
+});
+router.get("/cms/health", (_req, res): void => { const status = cmsConfigurationStatus(); res.status(status.configured ? 200 : 503).json({ status: status.configured ? "configured" : "unconfigured", ...status, canonicalMarket: "uae" }); });
 export default router;

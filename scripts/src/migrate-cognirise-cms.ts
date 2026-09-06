@@ -1,4 +1,22 @@
-import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import {
+  cmsDocumentsTable,
+  cmsMarketEditionsTable,
+  cmsMediaAssetsTable,
+  cmsMediaReferencesTable,
+  cmsMediaVersionsTable,
+  cmsRedirectsTable,
+  cmsRevisionsTable,
+  db,
+} from "@workspace/db";
+import { and, desc, eq, inArray } from "drizzle-orm";
+// Keep the script package independent of the API artifact's TypeScript project while
+// validating with the exact runtime contract used by API writes and reads.
+const cmsEditionPayloadSchema: {
+  safeParse(value: unknown): { success: true; data: Record<string, unknown> } | { success: false; error: { issues: Array<{ path: PropertyKey[]; message: string }> } };
+} = (await import(new URL("../../artifacts/api-server/src/lib/cms/contracts.ts", import.meta.url).href)).cmsEditionPayloadSchema;
+const mediaReferences: (value: unknown) => Array<{ mediaId: string; fieldPath: string }> =
+  (await import(new URL("../../artifacts/api-server/src/lib/cms/media-references.ts", import.meta.url).href)).mediaReferences;
 
 type Document = Record<string, unknown> & { _id: string; _type: string };
 
@@ -830,11 +848,92 @@ const documents: Document[] = [
   },
 ];
 
+const plain = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
+const stableRef = (value: unknown, fixtureId: string, path: string) => {
+  const id = plain(value)._ref;
+  if (typeof id !== "string") throw new Error(`Fixture ${fixtureId} has invalid reference at ${path}`);
+  return { id };
+};
+const boundedParts = (value: unknown, max: number) => {
+  const text = String(value);
+  if (text.length <= max) return [text];
+  const words = text.split(/\s+/); const parts: string[] = []; let current = "";
+  for (const word of words) {
+    if (current && current.length + word.length + 1 > max) { parts.push(current); current = word; }
+    else current += `${current ? " " : ""}${word}`;
+  }
+  if (current) parts.push(current);
+  return parts;
+};
+const textBlocks = (value: unknown, fixtureId: string, path: string) => {
+  if (!Array.isArray(value)) throw new Error(`Fixture ${fixtureId} has invalid Portable Text at ${path}`);
+  return value.map((block, index) => {
+    const source = plain(block);
+    if (source._type !== "block" || !Array.isArray(source.children)) throw new Error(`Fixture ${fixtureId} has invalid Portable Text block at ${path}[${index}]`);
+    return {
+      type: "block" as const,
+      style: ["normal", "h2", "h3", "blockquote"].includes(String(source.style)) ? source.style as "normal" | "h2" | "h3" | "blockquote" : "normal" as const,
+      children: source.children.map((child, childIndex) => {
+        const span = plain(child);
+        if (span._type !== "span" || typeof span.text !== "string") throw new Error(`Fixture ${fixtureId} has invalid Portable Text span at ${path}[${index}].children[${childIndex}]`);
+        return { type: "span" as const, text: span.text, marks: Array.isArray(span.marks) ? span.marks.filter((mark): mark is "strong" | "em" | "code" => mark === "strong" || mark === "em" || mark === "code") : [] };
+      }),
+    };
+  });
+};
+const ownership = (fixture: Document) => ({
+  owner: fixture.ownership ? stableRef(plain(fixture.ownership).owner, fixture._id, "ownership.owner") : { id: "person-editorial-owner" },
+  sensitivity: "public" as const,
+});
+function normalizedContent(fixture: Document, market: string): Record<string, unknown> {
+  const source = fixture as Record<string, unknown>;
+  const edition = (Array.isArray(source.marketEditions) ? source.marketEditions : []).find((entry) => plain(entry)._key === market);
+  const localized = plain(edition);
+  if (fixture._type === "page") {
+    const rawSections = (market === "uae" ? localized.sections : undefined) ?? source.sections ?? [];
+    if (!Array.isArray(rawSections)) throw new Error(`Fixture ${fixture._id} has invalid sections`);
+    const sections = rawSections.map((entry, index) => {
+      const section = plain(entry); const id = typeof section._key === "string" ? section._key : `${fixture._id}-section-${index + 1}`;
+      const base = { id, heading: typeof section.heading === "string" ? section.heading : typeof source.title === "string" ? source.title : fixture._id, ...(typeof section.eyebrow === "string" ? { eyebrow: section.eyebrow } : {}), ...(section.body ? { body: textBlocks(section.body, fixture._id, `sections[${index}].body`) } : {}) };
+      if (section._type === "heroSection") return { ...base, type: "hero" as const, ...(section.primaryAction ? { primaryAction: { label: plain(section.primaryAction).label, internal: stableRef(plain(section.primaryAction).internal, fixture._id, `sections[${index}].primaryAction.internal`) } } : {}), ...(section.media ? { media: stableRef(section.media, fixture._id, `sections[${index}].media`) } : {}) };
+      if (section._type === "referenceGridSection") return { ...base, type: "referenceGrid" as const, items: Array.isArray(section.items) ? section.items.map((ref, refIndex) => stableRef(ref, fixture._id, `sections[${index}].items[${refIndex}]`)) : [] };
+      if (section._type === "mediaSection") return { ...base, type: "media" as const, media: stableRef(section.media, fixture._id, `sections[${index}].media`) };
+      if (section._type === "formSlotSection") return { ...base, type: "formSlot" as const, form: section.form === "contact" ? "contact" as const : "valueScan" as const };
+      if (section._type === "ctaSection") return { ...base, type: "cta" as const, action: { label: plain(section.action).label, internal: stableRef(plain(section.action).internal, fixture._id, `sections[${index}].action.internal`) } };
+      if (section._type === "timelineSection") return { ...base, type: "timeline" as const, steps: Array.isArray(section.steps) ? section.steps.map((step) => ({ label: String(plain(step).label ?? ""), detail: String(plain(step).detail ?? "") })) : [] };
+      if (section._type === "faqSection") return { ...base, type: "faq" as const, items: Array.isArray(section.items) ? section.items.map((item, itemIndex) => ({ question: String(plain(item).question ?? ""), answer: textBlocks(plain(item).answer, fixture._id, `sections[${index}].items[${itemIndex}].answer`) })) : [] };
+      return { ...base, type: "richText" as const };
+    });
+    return { kind: "page", title: String(localized.title ?? source.title), routeKind: source.routeKind, canonicalSlug: plain(source.slug).current, ...(typeof localized.summary === "string" || typeof source.summary === "string" ? { summary: String(localized.summary ?? source.summary) } : {}), topics: [], sections, ...(source.seo ? { seo: normalizeSeo(source.seo, fixture) } : {}), ownership: ownership(fixture) };
+  }
+  if (fixture._type === "publication") return { kind: "publication", title: String(localized.title ?? source.title), canonicalSlug: plain(source.slug).current, format: source.format, ...(source.dek ? { dek: String(localized.dek ?? source.dek) } : {}), body: textBlocks(localized.body ?? source.body, fixture._id, "body"), authors: (Array.isArray(source.authors) ? source.authors : []).map((ref, i) => stableRef(ref, fixture._id, `authors[${i}]`)), topics: Array.isArray(source.topics) ? source.topics : [], ...(source.media ? { media: stableRef(source.media, fixture._id, "media") } : {}), ...(source.publishedAt ? { publishedAt: source.publishedAt } : {}), ...(source.readingMinutes ? { readingMinutes: source.readingMinutes } : {}), ...(source.seo ? { seo: normalizeSeo(source.seo, fixture) } : {}), ownership: ownership(fixture) };
+  if (fixture._type === "person") return { kind: "person", name: source.name, ...(source.role ? { role: source.role } : {}), profileType: source.profileType, ...(source.bio ? { bio: textBlocks(source.bio, fixture._id, "bio") } : {}), expertise: (Array.isArray(source.expertise) ? source.expertise : []).flatMap((item) => boundedParts(item, 100)), ownership: ownership(fixture) };
+  if (fixture._type === "organization") return { kind: "organization", name: source.name, ...(source.organizationType ? { organizationType: source.organizationType } : {}), ...(source.description ? { description: textBlocks(source.description, fixture._id, "description") } : {}), ...(source.website ? { website: source.website } : {}), capabilities: (Array.isArray(source.capabilities) ? source.capabilities : []).flatMap((item) => boundedParts(item, 160)), ownership: ownership(fixture) };
+  if (fixture._type === "navigation") return {
+    kind: "navigation",
+    content: {
+      placement: source.placement,
+      items: normalizeValue(source.items),
+    },
+    ownership: ownership(fixture),
+  };
+  return { kind: fixture._type, content: normalizeValue(source), ownership: ownership(fixture) };
+}
+function normalizeSeo(value: unknown, fixture: Document) {
+  const source = plain(value); const result: Record<string, unknown> = { noIndex: false };
+  for (const key of ["metaTitle", "metaDescription", "canonicalUrl", "structuredDataType"]) if (typeof source[key] === "string") result[key] = source[key];
+  if (source.openGraphImage) result.openGraphImage = stableRef(source.openGraphImage, fixture._id, "seo.openGraphImage");
+  return result;
+}
+function normalizeValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(normalizeValue);
+  if (!value || typeof value !== "object") return value;
+  const object = plain(value);
+  if (typeof object._ref === "string") return { id: object._ref };
+  return Object.fromEntries(Object.entries(object).filter(([key]) => !key.startsWith("_")).map(([key, child]) => [key, normalizeValue(child)]));
+}
+
 async function main() {
-  const apply = process.argv.includes("--apply");
-  const force = process.argv.includes("--force");
-  const revisionsArg = process.argv.find((arg) => arg.startsWith("--revision-map="));
-  const outputArg = process.argv.find((arg) => arg.startsWith("--output="));
   const pageDocuments = documents.filter((document) => document._type === "page");
   for (const page of pageDocuments) {
     const slug = (page.slug as { current?: unknown } | undefined)?.current;
@@ -885,48 +984,120 @@ async function main() {
       throw new Error(`Page ${slug} contains a missing structured collection reference`);
     }
   }
-  if (outputArg) {
-    const { writeFile } = await import("node:fs/promises");
-    await writeFile(outputArg.slice("--output=".length), `${documents.map((doc) => JSON.stringify(doc)).join("\n")}\n`);
-  }
-  if (!apply) {
-    process.stdout.write(`Validated ${documents.length} deterministic CMS fixtures. Re-run with --apply to upsert them.\n`);
-    return;
-  }
-  const projectId = process.env.SANITY_PROJECT_ID;
-  const dataset = process.env.SANITY_DATASET;
-  const token = process.env.SANITY_API_TOKEN;
-  if (!projectId || !dataset || !token) throw new Error("SANITY_PROJECT_ID, SANITY_DATASET, and SANITY_API_TOKEN are required");
-  if (force && !revisionsArg) throw new Error("--force requires --revision-map=/approved/path/revisions.json");
-  let revisions: Record<string, string> = {};
-  if (revisionsArg) {
-    const raw = await readFile(revisionsArg.slice("--revision-map=".length), "utf8");
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || Object.values(parsed).some((value) => typeof value !== "string")) {
-      throw new Error("Revision map must be a JSON object of document IDs to Sanity revision IDs");
+  const counts = { documentsCreated: 0, documentsUpdated: 0, editionsCreated: 0, editionsUpdated: 0, revisionsCreated: 0, revisionsUnchanged: 0, mediaCreated: 0, mediaUpdated: 0, redirectsCreated: 0, redirectsUpdated: 0 };
+  const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+  const slugOf = (document: Document) => {
+    const slug = document.slug;
+    return typeof slug === "object" && slug && !Array.isArray(slug) && typeof (slug as { current?: unknown }).current === "string"
+      ? (slug as { current: string }).current : null;
+  };
+  const ownerOf = (document: Document) => {
+    const ownership = document.ownership;
+    return typeof ownership === "object" && ownership && !Array.isArray(ownership) &&
+      typeof (ownership as { owner?: { _ref?: unknown } }).owner?._ref === "string"
+      ? (ownership as { owner: { _ref: string } }).owner._ref : "person-editorial-owner";
+  };
+  await db.transaction(async (tx) => {
+    const seededRevisionReferences: Array<{ revisionId: string; content: unknown }> = [];
+    for (const fixture of documents) {
+      if (fixture._type === "market") continue;
+      if (fixture._type === "redirect") {
+        const marketRef = fixture.market as { _ref?: unknown } | undefined;
+        const market = typeof marketRef?._ref === "string" ? marketRef._ref.replace(/^market-/, "") : null;
+        const existing = await tx.select({ id: cmsRedirectsTable.id }).from(cmsRedirectsTable).where(eq(cmsRedirectsTable.id, fixture._id)).limit(1);
+        await tx.insert(cmsRedirectsTable).values({ id: fixture._id, market, sourcePath: fixture.sourcePath as string, destinationPath: fixture.destinationPath as string, statusCode: fixture.statusCode as number, active: false, state: "draft" }).onConflictDoUpdate({
+          target: cmsRedirectsTable.id,
+          set: { market, sourcePath: fixture.sourcePath as string, destinationPath: fixture.destinationPath as string, statusCode: fixture.statusCode as number, active: false, state: "draft" },
+        });
+        existing.length ? counts.redirectsUpdated++ : counts.redirectsCreated++;
+        continue;
+      }
+      if (fixture._type === "mediaAsset") {
+        const existing = await tx.select({ id: cmsMediaAssetsTable.id }).from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.id, fixture._id)).limit(1);
+        await tx.insert(cmsMediaAssetsTable).values({ id: fixture._id, kind: fixture.kind as string, title: fixture.title as string, altText: fixture.altText as string | undefined, decorative: fixture.decorative as boolean | undefined, rightsOwner: fixture.rightsOwner as string | undefined, lifecycleState: "draft", createdByPrincipalId: "person-editorial-owner" }).onConflictDoUpdate({
+          target: cmsMediaAssetsTable.id, set: { kind: fixture.kind as string, title: fixture.title as string, altText: fixture.altText as string | undefined, decorative: fixture.decorative as boolean | undefined, rightsOwner: fixture.rightsOwner as string | undefined, lifecycleState: "draft" },
+        });
+        const externalUrl = fixture.externalUrl as string | undefined;
+        if (externalUrl) await tx.insert(cmsMediaVersionsTable).values({ mediaId: fixture._id, version: 1, externalUrl, createdByPrincipalId: "person-editorial-owner" }).onConflictDoNothing();
+        existing.length ? counts.mediaUpdated++ : counts.mediaCreated++;
+        continue;
+      }
+      const canonicalSlug = slugOf(fixture);
+      const existingDocument = await tx.select({ id: cmsDocumentsTable.id }).from(cmsDocumentsTable).where(eq(cmsDocumentsTable.id, fixture._id)).limit(1);
+      await tx.insert(cmsDocumentsTable).values({ id: fixture._id, kind: fixture._type, canonicalSlug, routeKind: typeof fixture.routeKind === "string" ? fixture.routeKind : null, ownerId: ownerOf(fixture), contentClass: "public" }).onConflictDoUpdate({
+        target: cmsDocumentsTable.id, set: { kind: fixture._type, canonicalSlug, routeKind: typeof fixture.routeKind === "string" ? fixture.routeKind : null, ownerId: ownerOf(fixture), contentClass: "public" },
+      });
+      existingDocument.length ? counts.documentsUpdated++ : counts.documentsCreated++;
+      for (const market of markets) {
+        const fallbackMode = market.code === "uae" ? "canonical" : "uaeFallback";
+        const candidate = { schemaVersion: 1 as const, documentId: fixture._id, market: market.code, fallbackMode, content: normalizedContent(fixture, market.code) };
+        const checked = cmsEditionPayloadSchema.safeParse(candidate);
+        if (!checked.success) {
+          const issue = checked.error.issues[0];
+          throw new Error(`Fixture ${fixture._id} normalization failed at ${issue?.path.join(".") ?? "payload"}: ${issue?.message ?? "invalid payload"}`);
+        }
+        const payload = checked.data;
+        const contentDigest = digest(payload);
+        let [edition] = await tx.select().from(cmsMarketEditionsTable).where(and(eq(cmsMarketEditionsTable.documentId, fixture._id), eq(cmsMarketEditionsTable.market, market.code))).limit(1);
+        if (!edition) {
+          [edition] = await tx.insert(cmsMarketEditionsTable).values({ documentId: fixture._id, market: market.code, fallbackMode, publicationState: "draft", localizedSlug: canonicalSlug, parityComplete: false }).returning();
+          counts.editionsCreated++;
+        } else {
+          await tx.update(cmsMarketEditionsTable).set({ fallbackMode, publicationState: "draft", localizedSlug: canonicalSlug, parityComplete: false, liveRevisionId: null }).where(eq(cmsMarketEditionsTable.id, edition.id));
+          counts.editionsUpdated++;
+        }
+        const [draft] = edition!.draftRevisionId ? await tx.select().from(cmsRevisionsTable).where(eq(cmsRevisionsTable.id, edition!.draftRevisionId)).limit(1) : [];
+        if (draft?.contentDigest === contentDigest) {
+          counts.revisionsUnchanged++;
+          seededRevisionReferences.push({ revisionId: draft.id, content: payload.content });
+          continue;
+        }
+        const number = draft ? draft.revisionNumber + 1 : 1;
+        const [revision] = await tx.insert(cmsRevisionsTable).values({ editionId: edition!.id, revisionNumber: number, payloadVersion: 1, payload, contentDigest, createdByPrincipalId: "person-editorial-owner", reason: "cognirise-cms-seed" }).returning();
+        await tx.update(cmsMarketEditionsTable).set({ draftRevisionId: revision!.id, version: edition!.version + (draft ? 1 : 0), publicationState: "draft", liveRevisionId: null }).where(eq(cmsMarketEditionsTable.id, edition!.id));
+        seededRevisionReferences.push({ revisionId: revision!.id, content: payload.content });
+        counts.revisionsCreated++;
+      }
     }
-    revisions = parsed as Record<string, string>;
-  }
-  if (force && documents.some((document) => !revisions[document._id])) {
-    throw new Error("Revision map must include every fixture ID when --force is used");
-  }
-  const mutations = documents.map((document) => {
-    if (!force) return { createIfNotExists: document };
-    const { _id, _type, ...set } = document;
-    return { patch: { id: _id, ifRevisionID: revisions[_id], set } };
+    const referencesByRevision = seededRevisionReferences.map((revision) => ({
+      ...revision,
+      references: mediaReferences(revision.content),
+    }));
+    const referencedMediaIds = [...new Set(referencesByRevision.flatMap((revision) =>
+      revision.references.map((reference) => reference.mediaId)))];
+    const mediaVersions = referencedMediaIds.length
+      ? await tx.select({
+        mediaId: cmsMediaVersionsTable.mediaId,
+        version: cmsMediaVersionsTable.version,
+      }).from(cmsMediaVersionsTable)
+        .where(inArray(cmsMediaVersionsTable.mediaId, referencedMediaIds))
+        .orderBy(desc(cmsMediaVersionsTable.version))
+      : [];
+    const selectedVersions = new Map<string, number>();
+    for (const version of mediaVersions) {
+      if (!selectedVersions.has(version.mediaId)) selectedVersions.set(version.mediaId, version.version);
+    }
+    for (const revision of referencesByRevision) {
+      const references = revision.references;
+      await tx.delete(cmsMediaReferencesTable).where(eq(cmsMediaReferencesTable.revisionId, revision.revisionId));
+      if (references.length) {
+        if (references.some((reference) => !selectedVersions.has(reference.mediaId))) {
+          throw new Error(`Seed revision ${revision.revisionId} references media without a concrete version`);
+        }
+        await tx.insert(cmsMediaReferencesTable).values(
+          references.map((reference) => ({
+            ...reference,
+            mediaVersion: selectedVersions.get(reference.mediaId)!,
+            revisionId: revision.revisionId,
+          })),
+        );
+      }
+    }
   });
-  const response = await fetch(`https://${projectId}.api.sanity.io/v2025-02-19/data/mutate/${encodeURIComponent(dataset)}?returnIds=true`, {
-    method: "POST",
-    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
-    body: JSON.stringify({ mutations }),
-  });
-  if (!response.ok) throw new Error(`Sanity migration failed with status ${response.status}: ${await response.text()}`);
-  const result = await response.json() as { transactionId?: string };
-  process.stdout.write(`${force ? "Revision-checked updated" : "Created missing"} ${documents.length} CMS fixtures in transaction ${result.transactionId ?? "unknown"}.\n`);
+  process.stdout.write(`${JSON.stringify({ seed: "cognirise-cms-postgres", ...counts })}\n`);
 }
 
-void readFile(new URL("../../artifacts/cognirise-cms/src/schemaTypes/documents.ts", import.meta.url), "utf8")
-  .then(() => main())
+void main()
   .catch((error: unknown) => {
     process.stderr.write(`${error instanceof Error ? error.message : "CMS migration failed"}\n`);
     process.exitCode = 1;

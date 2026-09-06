@@ -123,60 +123,6 @@ const pageMeta: Record<string, { title: string; description: string }> = {
   },
 };
 
-const fallbackNavigation = [
-  {
-    label: "What we do",
-    href: "/what-we-do",
-    items: [
-      { label: "Overview", href: "/what-we-do" },
-      { label: "Agentic Enterprise Transformation", href: "/what-we-do/agentic-enterprise-transformation" },
-      { label: "Data & AI Foundations", href: "/what-we-do/data-ai-foundations" },
-      { label: "Engineering with AI", href: "/what-we-do/engineering-with-ai" },
-      { label: "Sovereign & Regulated AI", href: "/what-we-do/sovereign-regulated-ai" },
-      { label: "Digital AI Workforce", href: "/what-we-do/digital-ai-workforce" },
-    ]
-  },
-  {
-    label: "Platforms",
-    href: "/platforms",
-    items: [
-      { label: "Platform Overview", href: "/platforms" },
-      { label: "CogniOS", href: "/platforms/cognios" },
-      { label: "Architecture", href: "/platforms/cognios#architecture" },
-      { label: "CogniDocs", href: "/platforms/cognidocs" },
-      { label: "CogniAgents", href: "/platforms/cogniagents" },
-      { label: "CogniTalk", href: "/platforms/cognitalk" },
-      { label: "CogniWare", href: "/platforms/cogniware" },
-    ]
-  },
-  {
-    label: "Industries",
-    href: "/industries",
-    items: [
-      { label: "Industries Overview", href: "/industries" },
-      { label: "Banking & Financial Services", href: "/industries/banking" },
-      { label: "Public Sector", href: "/industries/public-sector" },
-      { label: "Telecoms", href: "/industries/telecoms" },
-      { label: "Travel & Hospitality", href: "/industries/travel" },
-      { label: "Energy & Resources", href: "/industries/energy" },
-      { label: "Manufacturing & Conglomerates", href: "/industries/manufacturing" },
-    ]
-  },
-  { label: "Work", href: "/work" },
-  { label: "Insights", href: "/insights" },
-  {
-    label: "About",
-    href: "/about",
-    items: [
-      { label: "Our Team", href: "/about" },
-      { label: "Board of Advisors", href: "/about#board-of-advisors" },
-      { label: "Partners", href: "/partners" },
-      { label: "FAQ", href: "/faq" },
-      { label: "Contact", href: "/contact" },
-    ]
-  },
-];
-
 export function Shell({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -184,8 +130,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
   const { market, setMarket } = useMarketStore();
   const cmsRuntime = useCmsRuntime(market);
-  const navigation = runtimeNavigation(cmsRuntime.data) ?? fallbackNavigation;
-  const marketOptions = cmsRuntime.data?.markets.length ? cmsRuntime.data.markets : [
+  const navigation = runtimeNavigation(cmsRuntime.data) ?? [];
+  const marketOptions = [
     { code: "uae" as const, name: "United Arab Emirates" },
     { code: "ksa" as const, name: "Kingdom of Saudi Arabia" },
     { code: "turkiye" as const, name: "Türkiye" },

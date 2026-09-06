@@ -20,3 +20,15 @@ Treat provider event IDs as idempotency identities; payload digests are audit ev
 **Why:** Different legitimate events can carry identical payloads, and checking a receipt only after an external mutation allows concurrent retries to execute twice.
 
 **How to apply:** A repeated ID with the same payload is a duplicate, the same ID with a different payload is a conflict, and different IDs with identical payloads are independently accepted.
+
+Keep pre-launch fixture imports draft-only even when that makes public routes explicitly unavailable; never restore a code-owned content fallback to make the site appear populated.
+
+**Why:** A visible unavailable state preserves the single publishing authority and approval trail, while a convenient fallback silently creates a second source of truth.
+
+**How to apply:** Seed deterministically into drafts, publish through the governed workflow, and treat an empty public route as a release-readiness signal rather than a reason to bypass PostgreSQL.
+
+Bind every revision-level media reference to its concrete immutable media version and preserve the full reference index across every snapshot-producing path.
+
+**Why:** Re-indexing against the newest asset version changes old revisions, while omitting the index during workflow or assistant snapshots strips media from hydration and public binary authorization.
+
+**How to apply:** Store media ID, media version, and canonical field path together; copy them unchanged for text-only snapshots; reject snapshots whose media-reference identity set changes unexpectedly.

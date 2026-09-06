@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { runtimeNavigation } from "../src/lib/cms-runtime.ts";
 
 const app = await readFile(new URL("../src/App.tsx", import.meta.url), "utf8");
 const renderer = await readFile(new URL("../src/components/cms/CmsPageRenderer.tsx", import.meta.url), "utf8");
@@ -13,11 +14,10 @@ const contact = await readFile(new URL("../src/pages/Contact.tsx", import.meta.u
 const valueScan = await readFile(new URL("../src/pages/ValueScan.tsx", import.meta.url), "utf8");
 const analytics = await readFile(new URL("../src/lib/analytics.ts", import.meta.url), "utf8");
 
-test("public rendering retains explicit hard-coded routes and code-owned forms", () => {
-  assert.match(app, /const hardCodedRoutes/);
-  assert.match(renderer, /formSlotSection/);
-  assert.match(renderer, /section\.form === "contact"/);
-  assert.match(app, /cms\.data\?\.page/);
+test("public rendering uses PostgreSQL authority and explicit unavailable/not-found states", () => {
+  assert.doesNotMatch(app, /hardCodedRoutes/);
+  assert.match(renderer, /formSlot/);
+  assert.match(app, /status-cms-page-unavailable/);
   assert.match(app, /return <NotFound \/>/);
 });
 
@@ -34,7 +34,7 @@ test("CMS form slots compose code-owned submission forms, not full pages", () =>
   assert.doesNotMatch(renderer, /import ValueScan from/);
 
   const formSlotBranch = renderer.slice(
-    renderer.indexOf('if (type === "formSlotSection")'),
+    renderer.indexOf('if (type === "formSlot")'),
     renderer.indexOf('if (type === "referenceGridSection")'),
   );
   assert.doesNotMatch(formSlotBranch, /section\.(fields|action|endpoint|consent)/);
@@ -52,20 +52,41 @@ test("preview visibly distinguishes inherited canonical content", () => {
   assert.match(preview, /resolved \{preview\.state\.resolvedMarket/);
 });
 
-test("governed shell data and redirects retain stable fallbacks", () => {
+test("governed shell data has no code-owned navigation fallback", () => {
   assert.match(app, /function GovernedRedirects/);
   assert.match(app, /runtime\.data\?\.redirects/);
-  assert.match(shell, /runtimeNavigation\(cmsRuntime\.data\) \?\? fallbackNavigation/);
-  assert.match(shell, /cmsRuntime\.data\?\.markets\.length/);
+  assert.doesNotMatch(shell, /fallbackNavigation/);
   assert.match(runtime, /\["https:", "mailto:", "tel:"\]/);
 });
 
-test("publication delivery only falls back on outage and preserves deterministic not found", () => {
+test("governed navigation fails closed on malformed runtime items", () => {
+  const envelope = {
+    schemaVersion: 1,
+    market: "uae",
+    source: "postgres",
+    redirects: [],
+    navigation: [{
+      id: "navigation-primary",
+      revision: "revision-1",
+      kind: "navigation",
+      placement: "primary",
+      items: "not-an-array",
+    }],
+  };
+  assert.equal(runtimeNavigation(envelope), undefined);
+  envelope.navigation[0].items = [{
+    label: "Services",
+    internal: { id: "page-services", _type: "page", slug: "what-we-do", routeKind: "service" },
+  }];
+  assert.deepEqual(runtimeNavigation(envelope), [{ label: "Services", href: "/what-we-do" }]);
+});
+
+test("publication delivery is PostgreSQL-only and preserves unavailable/not-found", () => {
   assert.match(insights, /useGetCmsPublishedPublications/);
-  assert.match(insights, /meta\.source !== "migration-fallback"/);
+  assert.doesNotMatch(insights, /migration-fallback/);
   assert.match(article, /useGetCmsPublishedPublication/);
-  assert.match(article, /fallbackAllowed = cms\.isError \|\| cms\.data\?\.meta\.source === "migration-fallback"/);
-  assert.match(article, /if \(!publication && !\(fallbackAllowed && known\)\) return <NotFound \/>/);
+  assert.match(article, /status-publication-unavailable/);
+  assert.match(article, /if \(!publication\) return <NotFound \/>/);
   assert.doesNotMatch(article, /dangerouslySetInnerHTML/);
 });
 

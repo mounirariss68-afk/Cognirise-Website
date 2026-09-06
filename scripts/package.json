@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
-    "cms:migrate": "tsx ./src/migrate-cognirise-cms.ts",
+    "cms:seed": "tsx ./src/migrate-cognirise-cms.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
+    "@workspace/db": "workspace:*",
     "@types/node": "catalog:",
+    "drizzle-orm": "catalog:",
     "tsx": "catalog:"
   }
 }

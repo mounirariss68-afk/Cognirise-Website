@@ -1,417 +1,124 @@
-import { constantTimeEqual, parseMarket, type CmsMarket } from "./security";
+import { and, eq, lte, or, sql } from "drizzle-orm";
+import { createHash } from "node:crypto";
+import { cmsMarketEditionsTable, cmsMediaReferencesTable, cmsOutboxTable, cmsRevisionsTable, cmsWorkflowEventsTable, cmsWorkflowReceiptsTable, db } from "@workspace/db";
+import type { CmsMarket } from "./security";
 
 export const editorialRoles = ["author", "regionalEditor", "reviewer", "publisher", "admin"] as const;
 export type EditorialRole = typeof editorialRoles[number];
 export const editionStates = ["draft", "review", "approved", "scheduled", "published", "expired", "archived"] as const;
 export type EditionState = typeof editionStates[number];
-const transitions: Record<EditorialRole, ReadonlySet<string>> = {
-  author: new Set(["draft:review"]),
-  regionalEditor: new Set(["draft:review"]),
-  reviewer: new Set(["review:approved"]),
-  publisher: new Set(["approved:scheduled", "approved:published", "scheduled:published", "published:expired", "expired:archived"]),
-  admin: new Set(["*"]),
-};
-export function canTransition(role: EditorialRole, from: EditionState, to: EditionState): boolean {
-  return transitions[role].has("*") || transitions[role].has(`${from}:${to}`);
-}
-
-export function pageReleaseReadinessError(
-  edition: Record<string, unknown>,
-  toState: EditionState,
-): string | undefined {
-  if (
-    ["approved", "scheduled", "published"].includes(toState) &&
-    ["canonical", "override"].includes(String(edition.fallbackMode)) &&
-    (edition.parityComplete !== true || !Array.isArray(edition.sections) || edition.sections.length === 0)
-  ) {
-    return "Canonical and override page parity must be complete with approved sections before release";
-  }
-  return undefined;
-}
 export interface WorkflowPrincipal { id: string; role: EditorialRole; markets: readonly CmsMarket[] | "all"; }
-export function authenticateWorkflow(header: string | undefined): WorkflowPrincipal | undefined {
-  if (!header?.startsWith("Bearer ")) return undefined;
-  let values: unknown;
-  try { values = JSON.parse(process.env.CMS_WORKFLOW_CREDENTIALS ?? "[]"); } catch { return undefined; }
-  if (!Array.isArray(values)) return undefined;
-  const supplied = header.slice(7);
-  for (const item of values) {
-    if (!record(item)) continue;
-    const role = item.role as EditorialRole;
-    const markets = Array.isArray(item.markets)
-      ? item.markets.map(parseMarket).filter((market): market is CmsMarket => Boolean(market))
-      : role === "admin" && item.markets === "all" ? "all" : undefined;
-    if (typeof item.id === "string" && typeof item.key === "string" && item.key.length >= 32 &&
-      editorialRoles.includes(role) && markets && (markets === "all" || markets.length > 0) &&
-      constantTimeEqual(supplied, item.key)) {
-      return { id: item.id, role, markets };
-    }
-  }
-  return undefined;
-}
-export function isMarketAssigned(principal: WorkflowPrincipal, market: CmsMarket): boolean {
-  return principal.markets === "all" || principal.markets.includes(market);
-}
-export function violatesSeparationOfDuties(
+export interface TransitionInput { requestId: string; subjectId: string; market: CmsMarket; toState: EditionState; expectedVersion: number; publishAt?: string; expiresAt?: string; }
+const permissions: Record<EditorialRole, ReadonlySet<string>> = {
+  author: new Set(["draft:review"]), regionalEditor: new Set(["draft:review"]), reviewer: new Set(["review:approved"]),
+  publisher: new Set(["approved:scheduled", "approved:published", "scheduled:published", "published:expired", "expired:archived"]), admin: new Set(["*"]),
+};
+export const isMarketAssigned = (principal: WorkflowPrincipal, market: CmsMarket) => principal.markets === "all" || principal.markets.includes(market);
+export const canTransition = (role: EditorialRole, from: EditionState, to: EditionState) => permissions[role].has("*") || permissions[role].has(`${from}:${to}`);
+export const hasEditionConflict = (actualVersion: number, expectedVersion: number) => actualVersion !== expectedVersion;
+export const violatesSeparationOfDuties = (
   principal: WorkflowPrincipal,
-  edition: Record<string, unknown>,
+  edition: Pick<typeof cmsMarketEditionsTable.$inferSelect, "lastEditorPrincipalId" | "lastRequesterPrincipalId">,
   toState: EditionState,
-): boolean {
-  if (!["approved", "published"].includes(toState) || !["reviewer", "publisher", "admin"].includes(principal.role)) return false;
-  return edition.lastEditorActor === principal.id || edition.lastRequesterActor === principal.id;
+) => ["approved", "published"].includes(toState) &&
+  (edition.lastEditorPrincipalId === principal.id || edition.lastRequesterPrincipalId === principal.id);
+const canonicalDate = (value: string | undefined) => value ? new Date(value).toISOString() : null;
+/** Stable request identity retained with every workflow receipt. */
+export function workflowRequestDigest(input: TransitionInput, principal: WorkflowPrincipal): string {
+  return createHash("sha256").update(JSON.stringify({
+    actor: principal.id,
+    expectedVersion: input.expectedVersion,
+    expiresAt: canonicalDate(input.expiresAt),
+    market: input.market,
+    publishAt: canonicalDate(input.publishAt),
+    subjectId: input.subjectId,
+    toState: input.toState,
+  })).digest("hex");
 }
-
-const CURRENT_QUERY = `(select(
-  $preferPublished => *[_type in ["page","navigation","publication","redirect"] && _id == $id][0],
-  coalesce(*[_type in ["page","navigation","publication","redirect"] && _id == "drafts." + $id][0], *[_type in ["page","navigation","publication","redirect"] && _id == $id][0])
-)){
-  ..., "resolvedMarkets": marketEditions[]{
-    _key, "code": market->code, publicationState, fallbackMode, title,
-    parityComplete, sections,
-    approvedBy, approvedAt, publishAt, expiresAt,
-    lastEditorActor, lastRequesterActor, lastApprovalActor
-  }, "redirectMarket": market->code
-}`;
-const REVISION_QUERY = `*[_type == "revisionRecord" && subjectId == $id && revisionId == $revisionId][0]{snapshot, reason}`;
-const DUE_QUERY = `*[_type in ["page","navigation","publication"] && count(marketEditions[
-  (publicationState == "scheduled" && defined(publishAt) && publishAt <= $now) ||
-  (publicationState == "published" && defined(expiresAt) && expiresAt <= $now)
-]) > 0]{
-  _id, marketEditions[]{_key, "market": market->code, publicationState, publishAt, expiresAt}
-}`;
-const REDIRECT_DUE_QUERY = `*[_type == "redirect" && (
-  (lifecycle.state == "scheduled" && defined(lifecycle.publishAt) && lifecycle.publishAt <= $now) ||
-  (lifecycle.state == "published" && defined(lifecycle.expiresAt) && lifecycle.expiresAt <= $now)
-)]{_id, "market": market->code, lifecycle}`;
-function record(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-function config() {
-  const projectId = process.env.SANITY_PROJECT_ID, dataset = process.env.SANITY_DATASET, token = process.env.SANITY_API_TOKEN;
-  if (!projectId || !dataset || !token) throw new Error("Trusted CMS workflow is not configured");
-  if (!/^[a-z0-9-]+$/.test(projectId) || !/^[a-zA-Z0-9_-]+$/.test(dataset)) throw new Error("Invalid CMS configuration");
-  return { projectId, dataset, token };
-}
-async function query(queryText: string, params: Record<string, unknown>): Promise<unknown> {
-  const cms = config();
-  const search = new URLSearchParams({ query: queryText, perspective: "drafts" });
-  for (const [key, value] of Object.entries(params)) search.set(`$${key}`, JSON.stringify(value));
-  const response = await fetch(`https://${cms.projectId}.api.sanity.io/v2025-02-19/data/query/${encodeURIComponent(cms.dataset)}?${search}`, {
-    headers: { Authorization: `Bearer ${cms.token}` }, signal: AbortSignal.timeout(8_000),
-  });
-  if (!response.ok) throw new Error(`CMS workflow query failed with status ${response.status}`);
-  const body = await response.json() as unknown;
-  if (!record(body) || !("result" in body)) throw new Error("CMS workflow query response is invalid");
-  return body.result;
-}
-async function mutate(mutations: readonly Record<string, unknown>[], transactionId: string) {
-  const cms = config();
-  const response = await fetch(`https://${cms.projectId}.api.sanity.io/v2025-02-19/data/mutate/${encodeURIComponent(cms.dataset)}`, {
-    method: "POST", headers: { Authorization: `Bearer ${cms.token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ mutations, transactionId }), signal: AbortSignal.timeout(10_000),
-  });
-  if (!response.ok) throw new Error(`CMS workflow mutation failed with status ${response.status}`);
-}
-function validId(value: unknown, subject = false): string | undefined {
-  const pattern = subject ? /^[A-Za-z0-9._-]{3,200}$/ : /^[A-Za-z0-9_-]{8,120}$/;
-  return typeof value === "string" && pattern.test(value) && !value.startsWith("drafts.") ? value : undefined;
-}
-function state(value: unknown): EditionState | undefined {
-  return typeof value === "string" && editionStates.includes(value as EditionState) ? value as EditionState : undefined;
-}
-export interface TransitionInput {
-  requestId: string; subjectId: string; market: CmsMarket; toState: EditionState;
-  publishAt?: string; expiresAt?: string;
+export function lifecycleDateError(
+  existing: { publishAt: Date | null; expiresAt: Date | null },
+  input: TransitionInput,
+  now = new Date(),
+): string | undefined {
+  if (!["scheduled", "published"].includes(input.toState)) return;
+  const publishAt = input.publishAt ? new Date(input.publishAt) : existing.publishAt;
+  const expiresAt = input.expiresAt ? new Date(input.expiresAt) : existing.expiresAt;
+  if (input.toState === "scheduled" && (!publishAt || publishAt <= now)) return "Scheduling requires a future publishAt";
+  if (input.toState === "published" && publishAt && publishAt > now) return "Publication is not due";
+  const effectivePublishAt = publishAt ?? now;
+  if (input.toState === "published" && expiresAt && expiresAt <= now) return "Publication expiry must be in the future";
+  if (expiresAt && expiresAt <= effectivePublishAt) return "Expiry must be strictly later than publication";
+  return undefined;
 }
 export function parseTransitionInput(value: unknown): TransitionInput | undefined {
-  if (!record(value)) return undefined;
-  const allowed = new Set(["requestId", "subjectId", "market", "toState", "publishAt", "expiresAt"]);
-  if (Object.keys(value).some((key) => !allowed.has(key))) return undefined;
-  const requestId = validId(value.requestId), subjectId = validId(value.subjectId, true);
-  const market = parseMarket(value.market), toState = state(value.toState);
-  const publishAt = typeof value.publishAt === "string" && Number.isFinite(Date.parse(value.publishAt)) ? value.publishAt : undefined;
-  const expiresAt = typeof value.expiresAt === "string" && Number.isFinite(Date.parse(value.expiresAt)) ? value.expiresAt : undefined;
-  if (!requestId || !subjectId || !market || !toState) return undefined;
-  return { requestId, subjectId, market, toState, ...(publishAt ? { publishAt } : {}), ...(expiresAt ? { expiresAt } : {}) };
-}
-function publishableSnapshot(raw: Record<string, unknown>, id: string) {
-  const copy = structuredClone(raw);
-  delete copy._rev; delete copy._createdAt; delete copy._updatedAt; delete copy.resolvedMarkets;
-  copy._id = id;
-  return copy;
-}
-function governanceRecords(input: TransitionInput, principal: WorkflowPrincipal, from: EditionState, raw: Record<string, unknown>, now: string) {
-  const lifecycle = record(raw.lifecycle) ? raw.lifecycle : undefined;
-  return [
-    { createIfNotExists: { _id: `revisionRecord.${input.requestId}`, _type: "revisionRecord", subjectId: input.subjectId, revisionId: input.requestId, snapshot: JSON.stringify(raw), createdAt: now, createdBy: principal.id, reason: `${from}:${input.toState}`, actors: lifecycle ? { requester: lifecycle.lastRequesterActor, editor: lifecycle.lastEditorActor, approver: lifecycle.lastApprovalActor, transition: principal.id } : undefined } },
-    { createIfNotExists: { _id: `auditEvent.${input.requestId}`, _type: "auditEvent", eventId: input.requestId, occurredAt: now, actorId: principal.id, action: "workflow_transition", subjectId: input.subjectId, marketCode: input.market, fromState: from, toState: input.toState, metadata: JSON.stringify({ requester: lifecycle?.lastRequesterActor, editor: lifecycle?.lastEditorActor, approver: lifecycle?.lastApprovalActor, transitionActor: principal.id }) } },
-  ];
-}
-
-export function redirectGovernanceError(lifecycle: Record<string, unknown>, toState: EditionState, principal: WorkflowPrincipal): string | undefined {
-  if (violatesSeparationOfDuties(principal, lifecycle, toState)) return "Separation of duties prevents self-approval or self-publication";
-  if (toState === "published" && lifecycle.lastApprovalActor === principal.id) return "Separation of duties prevents an approver from publishing their own approval";
-  if (["scheduled", "published"].includes(toState) && (!lifecycle.approvedBy || typeof lifecycle.approvedAt !== "string" || typeof lifecycle.lastApprovalActor !== "string")) return "Recorded independent redirect approval is required";
-  return undefined;
-}
-export function publishWithDraftSynchronization(
-  records: readonly Record<string, unknown>[],
-  published: Record<string, unknown>,
-  draft: Record<string, unknown>,
-  targetKey: string,
-): readonly Record<string, unknown>[] {
-  const mutations: Record<string, unknown>[] = [...records, { createOrReplace: published }];
+  if (!value || typeof value !== "object" || Array.isArray(value)) return;
+  const v = value as Record<string, unknown>;
+  if (Object.keys(v).some((key) => !["requestId", "subjectId", "market", "toState", "expectedVersion", "publishAt", "expiresAt"].includes(key))) return;
+  if (typeof v.requestId !== "string" || !/^[A-Za-z0-9_-]{8,120}$/.test(v.requestId) || typeof v.subjectId !== "string" || typeof v.expectedVersion !== "number" || !Number.isInteger(v.expectedVersion) || !editionStates.includes(v.toState as EditionState) || !["uae", "ksa", "turkiye", "europe"].includes(v.market as string)) return;
   if (
-    typeof draft._id === "string" &&
-    draft._id.startsWith("drafts.") &&
-    typeof draft._rev === "string"
-  ) {
-    const targetPath = `marketEditions[_key=="${targetKey}"]`;
-    mutations.push({
-      patch: {
-        id: draft._id,
-        ifRevisionID: draft._rev,
-        set: { [`${targetPath}.publicationState`]: "draft" },
-        unset: [
-          `${targetPath}.approvedBy`,
-          `${targetPath}.approvedAt`,
-          `${targetPath}.lastApprovalActor`,
-          `${targetPath}.publishAt`,
-          `${targetPath}.expiresAt`,
-        ],
-      },
-    });
-  }
-  return mutations;
-}
-
-export function composeMarketRelease(
-  draft: Record<string, unknown>,
-  currentPublished: unknown,
-  subjectId: string,
-  targetKey: string,
-  toState: EditionState,
-  publishAt?: string,
-  expiresAt?: string,
-): Record<string, unknown> {
-  const draftEditions = Array.isArray(draft.marketEditions)
-    ? draft.marketEditions.filter(record)
-    : [];
-  const sourceTarget = draftEditions.find((item) => item._key === targetKey);
-  if (!sourceTarget) throw new Error("Requested market edition disappeared");
-  const hasPublishedBase =
-    record(currentPublished) &&
-    ["page", "navigation", "publication"].includes(String(currentPublished._type)) &&
-    Array.isArray(currentPublished.marketEditions);
-  const published = publishableSnapshot(
-    hasPublishedBase ? currentPublished : draft,
-    subjectId,
-  );
-  const editions = hasPublishedBase
-    ? (published.marketEditions as unknown[]).filter(record)
-    : [];
-  const releasedTarget = structuredClone(sourceTarget);
-  releasedTarget.publicationState = toState;
-  if (publishAt) releasedTarget.publishAt = publishAt;
-  if (expiresAt) releasedTarget.expiresAt = expiresAt;
-  const targetIndex = editions.findIndex((item) => item._key === targetKey);
-  if (targetIndex >= 0) editions[targetIndex] = releasedTarget;
-  else editions.push(releasedTarget);
-  published.marketEditions = editions;
-  return published;
-}
-async function transitionRedirect(raw: Record<string, unknown>, input: TransitionInput, principal: WorkflowPrincipal, now: Date) {
-  const lifecycle = record(raw.lifecycle) ? raw.lifecycle : undefined;
-  const from = lifecycle ? state(lifecycle.state) : undefined;
-  const assignedMarket = parseMarket(raw.redirectMarket);
-  if (!from || !canTransition(principal.role, from, input.toState)) throw new Error("Workflow transition is not permitted");
-  if (!lifecycle) throw new Error("Redirect lifecycle is missing");
-  if (assignedMarket && assignedMarket !== input.market) throw new Error("Redirect market does not match requested market");
-  if (!isMarketAssigned(principal, input.market)) throw new Error("Principal is not assigned to this market");
-  if (!record(raw.ownership) || !raw.ownership.owner) throw new Error("A content owner is required");
-  const governanceError = redirectGovernanceError(lifecycle, input.toState, principal);
-  if (governanceError) throw new Error(governanceError);
-  if (input.toState === "scheduled" && (!input.publishAt || Date.parse(input.publishAt) <= now.getTime())) throw new Error("Scheduling requires a future publishAt");
-  const publishAt = input.publishAt ?? (typeof lifecycle.publishAt === "string" ? lifecycle.publishAt : undefined);
-  const expiresAt = input.expiresAt ?? (typeof lifecycle.expiresAt === "string" ? lifecycle.expiresAt : undefined);
-  if (expiresAt && publishAt && Date.parse(expiresAt) <= Date.parse(publishAt)) throw new Error("expiresAt must be later than publishAt");
-  if (input.toState === "published" && publishAt && Date.parse(publishAt) > now.getTime()) throw new Error("Publication is not due");
-  const path = "lifecycle";
-  const set: Record<string, unknown> = { [`${path}.state`]: input.toState };
-  if (input.publishAt) set[`${path}.publishAt`] = input.publishAt;
-  if (input.expiresAt) set[`${path}.expiresAt`] = input.expiresAt;
-  if (input.toState === "approved") {
-    set[`${path}.approvedAt`] = now.toISOString();
-    set[`${path}.approvedBy`] = { _type: "reference", _ref: principal.id };
-    set[`${path}.lastApprovalActor`] = principal.id;
-  }
-  if (input.toState === "review") {
-    set[`${path}.lastEditorActor`] = principal.id;
-    set[`${path}.lastRequesterActor`] = principal.id;
-  }
-  if (input.toState === "published") set[`${path}.lastPublisherActor`] = principal.id;
-  if (input.toState === "published") set.active = true;
-  if (["expired", "archived"].includes(input.toState)) set.active = false;
-  const nowIso = now.toISOString();
-  const snapshot = publishableSnapshot(raw, input.subjectId);
-  Object.assign(snapshot, Object.fromEntries(Object.entries(set).filter(([key]) => !key.includes("."))));
-  if (["published", "expired", "archived"].includes(input.toState)) {
-    const published = publishableSnapshot(raw, input.subjectId);
-    const nextLifecycle = {
-      ...lifecycle, state: input.toState,
-      ...(input.publishAt ? { publishAt: input.publishAt } : {}),
-      ...(input.expiresAt ? { expiresAt: input.expiresAt } : {}),
-      ...(input.toState === "published" ? { lastPublisherActor: principal.id } : {}),
-    };
-    published.lifecycle = nextLifecycle;
-    if (input.toState === "published") published.active = true;
-    if (["expired", "archived"].includes(input.toState)) published.active = false;
-    await mutate([...governanceRecords(input, principal, from, published, nowIso), { createOrReplace: published }], input.requestId);
-  } else {
-    await mutate([...governanceRecords(input, principal, from, raw, nowIso), { patch: { id: String(raw._id), ifRevisionID: raw._rev, set } }], input.requestId);
-  }
-  return { fromState: from, toState: input.toState };
+    (v.publishAt !== undefined && (typeof v.publishAt !== "string" || !Number.isFinite(Date.parse(v.publishAt)))) ||
+    (v.expiresAt !== undefined && (typeof v.expiresAt !== "string" || !Number.isFinite(Date.parse(v.expiresAt))))
+  ) return;
+  return { requestId: v.requestId, subjectId: v.subjectId, market: v.market as CmsMarket, toState: v.toState as EditionState, expectedVersion: v.expectedVersion, ...(typeof v.publishAt === "string" ? { publishAt: v.publishAt } : {}), ...(typeof v.expiresAt === "string" ? { expiresAt: v.expiresAt } : {}) };
 }
 export async function transitionPage(input: TransitionInput, principal: WorkflowPrincipal, now = new Date()) {
-  const raw = await query(CURRENT_QUERY, {
-    id: input.subjectId,
-    preferPublished: input.toState === "expired" || input.toState === "archived",
-  });
-  if (record(raw) && raw._type === "redirect") return transitionRedirect(raw, input, principal, now);
-  if (!record(raw) || !["page", "navigation", "publication"].includes(String(raw._type)) || !Array.isArray(raw.marketEditions) || !Array.isArray(raw.resolvedMarkets)) throw new Error("Governed runtime document is invalid or missing");
-  if (raw._type === "page" && record(raw.assistantReview)) {
-    throw new Error("Independent AI decision audit must complete before workflow review");
-  }
-  const resolved = raw.resolvedMarkets.find((item) => record(item) && item.code === input.market);
-  if (!record(resolved) || typeof resolved._key !== "string" || !/^[A-Za-z0-9_-]+$/.test(resolved._key)) throw new Error("Requested market edition is missing");
-  const edition = raw.marketEditions.find((item) => record(item) && item._key === resolved._key);
-  if (!record(edition)) throw new Error("Requested market edition is invalid");
-  const from = state(edition.publicationState);
   if (!isMarketAssigned(principal, input.market)) throw new Error("Principal is not assigned to this market");
-  if (!from || !canTransition(principal.role, from, input.toState)) throw new Error("Workflow transition is not permitted");
-  if (violatesSeparationOfDuties(principal, edition, input.toState)) throw new Error("Separation of duties prevents self-approval or self-publication");
-  if (input.toState === "approved" && edition.fallbackMode === "override" && typeof edition.title !== "string") {
-    throw new Error("A market override requires local content before approval");
-  }
-  if (input.toState === "scheduled" && (!input.publishAt || Date.parse(input.publishAt) <= now.getTime())) throw new Error("Scheduling requires a future publishAt");
-  const effectivePublishAt = input.publishAt ??
-    (typeof edition.publishAt === "string" ? edition.publishAt : undefined);
-  const effectiveExpiresAt = input.expiresAt ??
-    (typeof edition.expiresAt === "string" ? edition.expiresAt : undefined);
-  if (input.expiresAt && Date.parse(input.expiresAt) <= now.getTime()) throw new Error("expiresAt must be in the future");
-  if (
-    effectivePublishAt &&
-    effectiveExpiresAt &&
-    Date.parse(effectiveExpiresAt) <= Date.parse(effectivePublishAt)
-  ) throw new Error("expiresAt must be later than publishAt");
-  if (["scheduled", "published"].includes(input.toState)) {
-    if (!record(raw.ownership) || !raw.ownership.owner) throw new Error("A content owner is required");
-    if (!edition.approvedBy || typeof edition.approvedAt !== "string") throw new Error("Recorded market approval is required");
-  }
-  const pageReadinessError = raw._type === "page"
-    ? pageReleaseReadinessError(edition, input.toState)
-    : undefined;
-  if (pageReadinessError) throw new Error(pageReadinessError);
-  if (input.toState === "published") {
-    if (effectivePublishAt && Date.parse(effectivePublishAt) > now.getTime()) throw new Error("Publication is not due");
-    if (effectiveExpiresAt && Date.parse(effectiveExpiresAt) <= now.getTime()) throw new Error("Expired content cannot be published");
-  }
-  const path = `marketEditions[_key=="${resolved._key}"]`;
-  const set: Record<string, unknown> = { [`${path}.publicationState`]: input.toState };
-  if (input.publishAt) set[`${path}.publishAt`] = input.publishAt;
-  if (input.expiresAt) set[`${path}.expiresAt`] = input.expiresAt;
-  if (input.toState === "approved") {
-    set[`${path}.approvedAt`] = now.toISOString();
-    set[`${path}.approvedBy`] = { _type: "reference", _ref: principal.id };
-    set[`${path}.lastApprovalActor`] = principal.id;
-  }
-  if (input.toState === "review") {
-    set[`${path}.lastEditorActor`] = principal.id;
-    set[`${path}.lastRequesterActor`] = principal.id;
-  }
-  const nowIso = now.toISOString();
-  if (input.toState === "published" || input.toState === "expired" || input.toState === "archived") {
-    const currentPublished = input.toState === "published"
-      ? await query(CURRENT_QUERY, { id: input.subjectId, preferPublished: true })
-      : raw;
-    const published = composeMarketRelease(
-      raw,
-      currentPublished,
-      input.subjectId,
-      resolved._key,
-      input.toState,
-      input.publishAt,
-      input.expiresAt,
-    );
-    const records = governanceRecords(input, principal, from, published, nowIso);
-    await mutate(
-      input.toState === "published"
-        ? publishWithDraftSynchronization(records, published, raw, resolved._key)
-        : [...records, { createOrReplace: published }],
-      input.requestId,
-    );
-  } else {
-    const records = governanceRecords(input, principal, from, raw, nowIso);
-    await mutate([...records, { patch: { id: String(raw._id), ifRevisionID: raw._rev, set } }], input.requestId);
-  }
-  return { fromState: from, toState: input.toState };
-}
-export async function rollbackPage(subjectId: string, revisionId: string, requestId: string, principal: WorkflowPrincipal) {
-  if (!validId(subjectId, true) || !validId(revisionId) || !validId(requestId) ||
-    principal.role !== "admin" || principal.markets !== "all") throw new Error("Rollback requires an all-market admin");
-  const [revision, current] = await Promise.all([
-    query(REVISION_QUERY, { id: subjectId, revisionId }),
-    query(CURRENT_QUERY, { id: subjectId, preferPublished: true }),
-  ]);
-  if (
-    !record(revision) ||
-    typeof revision.snapshot !== "string" ||
-    typeof revision.reason !== "string" ||
-    (!revision.reason.endsWith(":published") && !revision.reason.startsWith("rollback:")) ||
-    !record(current)
-  ) throw new Error("Immutable published revision is missing");
-  const historical = JSON.parse(revision.snapshot) as unknown;
-  if (!record(historical) || !["page", "navigation", "publication", "redirect"].includes(String(historical._type))) throw new Error("Immutable revision is invalid");
-  const now = new Date().toISOString();
-  await mutate([
-    { createIfNotExists: { _id: `revisionRecord.${requestId}`, _type: "revisionRecord", subjectId, revisionId: requestId, snapshot: JSON.stringify(current), createdAt: now, createdBy: principal.id, reason: `rollback:${revisionId}` } },
-    { createIfNotExists: { _id: `auditEvent.${requestId}`, _type: "auditEvent", eventId: requestId, occurredAt: now, actorId: principal.id, action: "rollback", subjectId, metadata: JSON.stringify({ revisionId }) } },
-    { createOrReplace: publishableSnapshot(historical, subjectId) },
-  ], requestId);
+  const requestDigest = workflowRequestDigest(input, principal);
+  return db.transaction(async (tx) => {
+    const [duplicate] = await tx.select().from(cmsWorkflowReceiptsTable).where(eq(cmsWorkflowReceiptsTable.requestId, input.requestId)).limit(1);
+    if (duplicate) {
+      if (!duplicate.requestDigest || duplicate.requestDigest !== requestDigest) throw new Error("Workflow request ID was already used with a different identity");
+      return { duplicate: true as const, fromState: undefined, toState: input.toState };
+    }
+    const [edition] = await tx.select().from(cmsMarketEditionsTable).where(and(eq(cmsMarketEditionsTable.documentId, input.subjectId), eq(cmsMarketEditionsTable.market, input.market))).limit(1);
+    if (!edition || hasEditionConflict(edition.version, input.expectedVersion)) throw new Error("Edition has changed; reload before transitioning");
+    const from = edition.publicationState as EditionState;
+    if (!canTransition(principal.role, from, input.toState)) throw new Error("Workflow transition is not permitted");
+    if (violatesSeparationOfDuties(principal, edition, input.toState)) throw new Error("Separation of duties prevents self-approval or self-publication");
+    if (["scheduled", "published"].includes(input.toState) && !edition.approvedAt) throw new Error("Recorded independent approval is required");
+    const datesError = lifecycleDateError(edition, input, now);
+    if (datesError) throw new Error(datesError);
+    const [snapshot] = await tx.select().from(cmsRevisionsTable).where(eq(cmsRevisionsTable.id, edition.draftRevisionId!)).limit(1);
+    if (!snapshot) throw new Error("Draft revision is missing");
+    const [immutable] = await tx.insert(cmsRevisionsTable).values({ editionId: edition.id, revisionNumber: snapshot.revisionNumber + 1, payloadVersion: snapshot.payloadVersion, payload: snapshot.payload, contentDigest: snapshot.contentDigest, createdByPrincipalId: principal.id, reason: `${from}:${input.toState}` }).returning();
+    const mediaReferences = await tx.select().from(cmsMediaReferencesTable)
+      .where(eq(cmsMediaReferencesTable.revisionId, snapshot.id));
+    if (mediaReferences.length) {
+      await tx.insert(cmsMediaReferencesTable).values(mediaReferences.map((reference) => ({
+        mediaId: reference.mediaId,
+        mediaVersion: reference.mediaVersion,
+        revisionId: immutable!.id,
+        fieldPath: reference.fieldPath,
+      })));
+    }
+    const update = await tx.update(cmsMarketEditionsTable).set({
+      publicationState: input.toState, version: edition.version + 1, draftRevisionId: immutable!.id,
+      ...(input.toState === "published" ? { liveRevisionId: immutable!.id, lastPublisherPrincipalId: principal.id } : {}),
+      ...(input.toState === "approved" ? { approvedAt: now, approvedByPrincipalId: principal.id, lastApprovalPrincipalId: principal.id } : {}),
+      ...(input.toState === "review" ? { lastEditorPrincipalId: principal.id, lastRequesterPrincipalId: principal.id } : {}),
+      ...(input.publishAt ? { publishAt: new Date(input.publishAt) } : {}), ...(input.expiresAt ? { expiresAt: new Date(input.expiresAt) } : {}),
+    }).where(and(eq(cmsMarketEditionsTable.id, edition.id), eq(cmsMarketEditionsTable.version, input.expectedVersion))).returning();
+    if (!update.length) throw new Error("Edition has changed; reload before transitioning");
+    await tx.insert(cmsWorkflowReceiptsTable).values({ requestId: input.requestId, requestDigest, action: `transition:${input.toState}`, subjectId: input.subjectId });
+    await tx.insert(cmsWorkflowEventsTable).values({ action: "workflow_transition", actor: principal.id, target: `document:${input.subjectId}`, market: input.market, outcome: "success", metadata: { fromState: from, toState: input.toState, revisionId: immutable!.id } });
+    await tx.insert(cmsOutboxTable).values({ topic: "cms.invalidation", aggregateId: input.subjectId, dedupeKey: `transition:${input.requestId}`, payload: { market: input.market, state: input.toState, revisionId: immutable!.id } });
+    return { duplicate: false as const, fromState: from, toState: input.toState };
+  });
 }
 export async function dueActions(now = new Date()): Promise<TransitionInput[]> {
-  const [editionDocuments, redirects] = await Promise.all([
-    query(DUE_QUERY, { now: now.toISOString() }),
-    query(REDIRECT_DUE_QUERY, { now: now.toISOString() }),
-  ]);
-  if (!Array.isArray(editionDocuments) || !Array.isArray(redirects)) throw new Error("Due workflow response is invalid");
-  return dueActionsFromDocuments([...editionDocuments, ...redirects], now);
+  // Keep the advisory-locked scheduler pass deliberately short; the next pass
+  // picks up any remaining due editions and receipts make retries idempotent.
+  const editions = await db.select().from(cmsMarketEditionsTable).where(or(
+    and(eq(cmsMarketEditionsTable.publicationState, "scheduled"), lte(cmsMarketEditionsTable.publishAt, now)),
+    and(eq(cmsMarketEditionsTable.publicationState, "published"), lte(cmsMarketEditionsTable.expiresAt, now)),
+  )).limit(100);
+  return editions.map((edition) => ({ requestId: `due_${edition.id}_${edition.version}`, subjectId: edition.documentId, market: edition.market as CmsMarket, expectedVersion: edition.version, toState: edition.publicationState === "scheduled" ? "published" : "expired" }));
 }
-export function dueActionsFromDocuments(raw: readonly unknown[], now = new Date()): TransitionInput[] {
-  const actions: TransitionInput[] = [];
-  for (const doc of raw) {
-    if (!record(doc) || typeof doc._id !== "string") continue;
-    if (doc._type === "redirect" && record(doc.lifecycle)) {
-      const market = parseMarket(doc.market) ?? "uae";
-      const scheduled = doc.lifecycle.state === "scheduled" && typeof doc.lifecycle.publishAt === "string" && Date.parse(doc.lifecycle.publishAt) <= now.getTime();
-      const expired = doc.lifecycle.state === "published" && typeof doc.lifecycle.expiresAt === "string" && Date.parse(doc.lifecycle.expiresAt) <= now.getTime();
-      if (scheduled || expired) actions.push({ requestId: `due_redirect_${doc._id.replace(/^drafts\./, "")}_${now.getTime()}`, subjectId: doc._id.replace(/^drafts\./, ""), market, toState: scheduled ? "published" : "expired" });
-      continue;
-    }
-    if (!Array.isArray(doc.marketEditions)) continue;
-    for (const edition of doc.marketEditions) {
-      if (!record(edition) || typeof edition._key !== "string" || !/^[A-Za-z0-9_-]+$/.test(edition._key)) continue;
-      const market = parseMarket(edition.market);
-      if (!market) continue;
-      const scheduled = edition.publicationState === "scheduled" && typeof edition.publishAt === "string" && Date.parse(edition.publishAt) <= now.getTime();
-      const expired = edition.publicationState === "published" && typeof edition.expiresAt === "string" && Date.parse(edition.expiresAt) <= now.getTime();
-      if (scheduled || expired) actions.push({
-        requestId: `due_${edition._key}_${now.getTime()}`,
-        subjectId: doc._id.replace(/^drafts\./, ""),
-        market,
-        toState: scheduled ? "published" : "expired",
-      });
-    }
-  }
-  return actions;
+/** Holds a transaction-scoped PostgreSQL advisory lease while a scheduler pass runs. */
+export async function withDueProcessingLease<T>(work: () => Promise<T>): Promise<{ acquired: boolean; result?: T }> {
+  return db.transaction(async (tx) => {
+    const lease = (await tx.execute(sql<{ acquired: boolean }>`select pg_try_advisory_xact_lock(8675310) as acquired`)).rows[0];
+    if (!lease?.acquired) return { acquired: false };
+    return { acquired: true, result: await work() };
+  });
 }

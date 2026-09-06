@@ -1,1031 +1,492 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
+  # Do not change the title: generated import paths depend on it.
   title: Api
   version: 0.1.0
-  description: API specification
+  description: PostgreSQL-backed Cognirise API. Public CMS reads never silently fall back; an explicit UAE edition fallback is represented in delivery metadata.
 servers:
   - url: /api
-    description: Base API path
 tags:
   - name: health
-    description: Health operations
   - name: enquiries
-    description: Website enquiry and subscription operations
   - name: cms
-    description: Published content, preview, and CMS workflow operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
-      summary: Health check
-      description: Returns server health status
-      responses:
-        "200":
-          description: Healthy
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HealthStatus"
+      responses: { "200": { description: Healthy, content: { application/json: { schema: { $ref: "#/components/schemas/HealthStatus" } } } } }
   /enquiries:
     post:
       operationId: submitEnquiry
       tags: [enquiries]
-      summary: Submit a Cognirise website enquiry
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/EnquiryInput"
-      responses:
-        "201":
-          description: Enquiry accepted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EnquiryReceipt"
-        "400":
-          description: Invalid enquiry
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/EnquiryInput" } } } }
+      responses: { "201": { description: Accepted, content: { application/json: { schema: { $ref: "#/components/schemas/EnquiryReceipt" } } } }, "400": { $ref: "#/components/responses/Error" } }
   /newsletter-subscriptions:
     post:
       operationId: subscribeNewsletter
       tags: [enquiries]
-      summary: Subscribe to Cognirise field notes
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/NewsletterSubscriptionInput"
-      responses:
-        "201":
-          description: Subscription accepted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SubscriptionReceipt"
-        "400":
-          description: Invalid subscription
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/NewsletterSubscriptionInput" } } } }
+      responses: { "201": { description: Accepted, content: { application/json: { schema: { $ref: "#/components/schemas/SubscriptionReceipt" } } } }, "400": { $ref: "#/components/responses/Error" } }
   /cms/pages/{market}/{slug}:
     get:
       operationId: getCmsPublishedPage
       tags: [cms]
-      summary: Read a published CMS page
-      parameters:
-        - $ref: "#/components/parameters/CmsMarket"
-        - $ref: "#/components/parameters/CmsSlug"
-        - $ref: "#/components/parameters/CmsRouteKind"
-      responses:
-        "200":
-          description: Published page or deterministic migration fallback envelope
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsPageEnvelope"
-        "400":
-          $ref: "#/components/responses/InvalidCmsPage"
-        "503":
-          description: CMS published delivery is unavailable
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+      parameters: [{ $ref: "#/components/parameters/CmsMarket" }, { $ref: "#/components/parameters/CmsSlug" }, { $ref: "#/components/parameters/CmsRouteKind" }]
+      responses: { "200": { description: Published page or unavailable envelope, content: { application/json: { schema: { $ref: "#/components/schemas/CmsPageEnvelope" } } } }, "400": { $ref: "#/components/responses/Error" } }
   /cms/runtime/{market}:
     get:
       operationId: getCmsRuntime
       tags: [cms]
-      summary: Read governed markets, navigation, and redirects
-      parameters:
-        - $ref: "#/components/parameters/CmsMarket"
-      responses:
-        "200":
-          description: Published runtime configuration or stable empty fallback
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsRuntimeEnvelope"
-        "400":
-          $ref: "#/components/responses/InvalidCmsPage"
+      parameters: [{ $ref: "#/components/parameters/CmsMarket" }]
+      responses: { "200": { description: Published runtime, content: { application/json: { schema: { $ref: "#/components/schemas/CmsRuntimeEnvelope" } } } }, "400": { $ref: "#/components/responses/Error" } }
   /cms/publications/{market}:
     get:
       operationId: getCmsPublishedPublications
       tags: [cms]
-      parameters:
-        - $ref: "#/components/parameters/CmsMarket"
-      responses:
-        "200":
-          description: Published publications
-          content: { application/json: { schema: { $ref: "#/components/schemas/CmsPublicationListEnvelope" } } }
+      parameters: [{ $ref: "#/components/parameters/CmsMarket" }]
+      responses: { "200": { description: Published publications, content: { application/json: { schema: { $ref: "#/components/schemas/CmsPublicationListEnvelope" } } } }, "400": { $ref: "#/components/responses/Error" } }
   /cms/publications/{market}/{slug}:
     get:
       operationId: getCmsPublishedPublication
       tags: [cms]
-      parameters:
-        - $ref: "#/components/parameters/CmsMarket"
-        - $ref: "#/components/parameters/CmsSlug"
-      responses:
-        "200":
-          description: Published publication or unavailable envelope
-          content: { application/json: { schema: { $ref: "#/components/schemas/CmsPublicationEnvelope" } } }
+      parameters: [{ $ref: "#/components/parameters/CmsMarket" }, { $ref: "#/components/parameters/CmsSlug" }]
+      responses: { "200": { description: Publication or null, content: { application/json: { schema: { $ref: "#/components/schemas/CmsPublicationEnvelope" } } } }, "400": { $ref: "#/components/responses/Error" } }
   /cms/sitemap.xml:
     get:
       operationId: getCmsSitemap
       tags: [cms]
-      summary: Generate the localized published-content sitemap
-      responses:
-        "200":
-          description: Sitemap XML
-          content:
-            application/xml:
-              schema: { type: string }
-        "503":
-          description: CMS sitemap generation is unavailable
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+      responses: { "200": { description: "Absolute HTTPS sitemap XML for live, governed public routes", content: { application/xml: { schema: { type: string } } } }, "503": { $ref: "#/components/responses/Error" } }
   /cms/preview/exchange:
     post:
       operationId: exchangeCmsPreviewToken
       tags: [cms]
-      summary: Exchange a signed one-time preview entry token for a private preview cookie
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CmsPreviewExchangeInput"
-      responses:
-        "200":
-          description: Preview cookie issued
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsPreviewExchange"
-        "401":
-          $ref: "#/components/responses/InvalidPreviewToken"
+      description: "Same-origin enforced: exchanges a one-time token for a private preview cookie."
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CmsPreviewExchangeInput" } } } }
+      responses: { "200": { description: Cookie issued, content: { application/json: { schema: { $ref: "#/components/schemas/CmsPreviewExchange" } } } }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" } }
   /cms/preview/pages/{market}/{slug}:
     get:
       operationId: getCmsPreviewPage
       tags: [cms]
-      summary: Read a CMS draft page authorized by the private preview cookie
-      security:
-        - CmsPreviewCookie: []
-      parameters:
-        - $ref: "#/components/parameters/CmsMarket"
-        - $ref: "#/components/parameters/CmsSlug"
-        - $ref: "#/components/parameters/CmsRouteKind"
-      responses:
-        "200":
-          description: Draft page envelope
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsPageEnvelope"
-        "401":
-          description: Preview cookie is missing, invalid, expired, or does not match the requested page
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "503":
-          description: CMS preview is unavailable
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /cms/workflow/preview-tokens:
-    post:
-      operationId: issueCmsPreviewToken
-      tags: [cms]
-      summary: Issue a signed CMS preview entry token
-      description: Requires an exact bearer service key for a principal declared in CMS_WORKFLOW_CREDENTIALS.
-      security:
-        - CmsWorkflowBearer: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CmsPreviewTarget"
-      responses:
-        "201":
-          description: Signed preview token issued
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsPreviewToken"
-        "400":
-          $ref: "#/components/responses/InvalidCmsPage"
-        "401":
-          description: Workflow authorization is required
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "403":
-          description: Authenticated workflow principal is not assigned to the requested market
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "503":
-          description: CMS preview secrets or the trusted Sanity API token are not configured
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /cms/workflow/transitions:
-    post:
-      operationId: transitionCmsWorkflow
-      tags: [cms]
-      summary: Apply an authorized market-edition workflow transition
-      description: The authenticated CMS_WORKFLOW_CREDENTIALS principal must be assigned to the request market. A reviewer, publisher, or administrator cannot approve or publish an edition they last requested or edited.
-      security:
-        - CmsWorkflowBearer: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CmsWorkflowTransitionInput"
-      responses:
-        "200":
-          description: Request id was already processed
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsWorkflowDuplicateReceipt"
-        "202":
-          description: Workflow transition accepted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsWorkflowTransitionReceipt"
-        "400":
-          description: Workflow transition input is invalid
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "401":
-          description: Workflow authorization is required
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: Workflow state or governance conflict rejected the transition, including an unassigned market principal or separation-of-duties self-approval/self-publication denial
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /cms/workflow/rollbacks:
-    post:
-      operationId: rollbackCmsWorkflow
-      tags: [cms]
-      summary: Restore an immutable page revision
-      description: Rollback is permitted only for a CMS_WORKFLOW_CREDENTIALS administrator whose assigned markets value is `all`.
-      security:
-        - CmsWorkflowBearer: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CmsWorkflowRollbackInput"
-      responses:
-        "200":
-          description: Duplicate rollback request acknowledged without repeating the Sanity mutation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsWorkflowDuplicateReceipt"
-        "202":
-          description: Rollback accepted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsWorkflowAcceptedReceipt"
-        "400":
-          description: Rollback request body is invalid
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "401":
-          description: Workflow authorization is required
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: Rollback input, all-market administrator authorization, revision, or idempotency requirement was rejected
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /cms/workflow/process-due:
-    post:
-      operationId: processDueCmsWorkflow
-      tags: [cms]
-      summary: Publish scheduled editions and expire due published editions
-      security:
-        - CmsWorkflowBearer: []
-      responses:
-        "200":
-          description: Due workflow processing completed
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsWorkflowDueReceipt"
-        "401":
-          description: Publisher or administrator workflow authorization is required
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "503":
-          description: Due workflow discovery is unavailable
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /cms/editorial-assistant/runs:
-    post:
-      operationId: runCmsEditorialAssistant
-      tags: [cms]
-      summary: Produce a grounded editorial suggestion without changing CMS content
-      description: Uses only current published approvedSource documents selected by ID. Targets and sources are classified, screened, redacted, and revision-bound; citation claims must cover the suggestion and bind to exact source quotes. Every failure is closed. Requires CMS workflow bearer authorization and market assignment.
-      security:
-        - CmsWorkflowBearer: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CmsEditorialAssistantInput"
-      responses:
-        "200":
-          description: Idempotent replay of a completed request
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/CmsEditorialAssistantResult" }
-        "201":
-          description: Suggestion completed; human review remains mandatory
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/CmsEditorialAssistantResult" }
-        "400": { description: Invalid closed-schema input }
-        "401": { description: Workflow authorization required }
-        "403": { description: Principal is not assigned to the market }
-        "409": { description: Request id was previously used by an incomplete or failed run }
-        "422": { description: "Restricted input, unapproved source, or deterministic quality gate rejection" }
-        "429": { description: Per-actor rate or deployment cost limit reached }
-        "503": { description: "Disabled, killed, timed out, unconfigured, or upstream failure; no CMS content changed" }
-  /cms/editorial-assistant/decisions:
-    post:
-      operationId: decideCmsEditorialAssistantRun
-      tags: [cms]
-      summary: Record an independent human acceptance or rejection
-      description: Reviewer, publisher, or administrator only. The run author cannot decide their own run. Acceptance requires a current Sanity resulting revision and does not itself apply generated content.
-      security:
-        - CmsWorkflowBearer: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CmsEditorialAssistantDecisionInput"
-      responses:
-        "201":
-          description: Decision recorded in PostgreSQL and Sanity audit provenance
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/CmsEditorialAssistantDecision" }
-        "400": { description: Invalid decision }
-        "401": { description: Reviewer authorization required }
-        "403": { description: Principal is not assigned to the market }
-        "409": { description: "Separation-of-duties, run state, revision, or duplicate-decision conflict" }
-        "503": { description: Sanity verification or audit recording unavailable; decision not recorded }
-  /cms/editorial-assistant/monitoring:
-    get:
-      operationId: getCmsEditorialAssistantMonitoring
-      tags: [cms, health]
-      summary: Read redacted editorial assistant operations metrics
-      description: All-market administrator only. Returns a rolling 24-hour aggregate and never returns prompts, drafts, source text, suggestions, or credentials.
-      security:
-        - CmsWorkflowBearer: []
-      responses:
-        "200":
-          description: Aggregate usage, failure, latency, spend, and independent-decision metrics
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/CmsEditorialAssistantMonitoring" }
-        "401": { description: All-market administrator authorization required }
-        "503": { description: Monitoring ledger unavailable }
-  /cms/webhooks/publish:
-    post:
-      operationId: receiveCmsPublishWebhook
-      tags: [cms]
-      summary: Receive a signed Sanity publish webhook and invalidate published content
-      parameters:
-        - name: sanity-webhook-timestamp
-          in: header
-          required: true
-          schema: { type: string }
-        - name: sanity-webhook-signature
-          in: header
-          required: true
-          schema: { type: string }
-        - name: sanity-webhook-id
-          in: header
-          required: true
-          schema: { type: string, pattern: '^[A-Za-z0-9._:-]{8,200}$' }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CmsPublishWebhookPayload"
-      responses:
-        "200":
-          description: Duplicate webhook acknowledged
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsWebhookDuplicate"
-        "202":
-          description: Webhook accepted and cache invalidated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsWebhookAccepted"
-        "400":
-          description: Webhook JSON payload is invalid
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "401":
-          description: Webhook signature, timestamp, or event id is invalid
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: Webhook event ID was previously accepted with a different payload
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "415":
-          description: Webhook must have an application/json body
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "503":
-          description: CMS webhook is not configured
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+      security: [{ CmsPreviewCookie: [] }]
+      parameters: [{ $ref: "#/components/parameters/CmsMarket" }, { $ref: "#/components/parameters/CmsSlug" }, { $ref: "#/components/parameters/CmsRouteKind" }]
+      responses: { "200": { description: Revision-bound preview, content: { application/json: { schema: { $ref: "#/components/schemas/CmsPageEnvelope" } } } }, "401": { $ref: "#/components/responses/Error" } }
   /cms/health:
     get:
       operationId: getCmsHealth
       tags: [cms, health]
-      summary: Read CMS integration configuration status
-      responses:
-        "200":
-          description: CMS integration is configured
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsHealth"
-        "503":
-          description: CMS integration is unconfigured
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CmsHealth"
+      responses: { "200": { description: Configured, content: { application/json: { schema: { $ref: "#/components/schemas/CmsHealth" } } } }, "503": { description: Unconfigured, content: { application/json: { schema: { $ref: "#/components/schemas/CmsHealth" } } } } }
+  /cms/admin/access:
+    get:
+      operationId: getCmsAdminAccess
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      responses: { "200": { description: Derived PostgreSQL principal, content: { application/json: { schema: { $ref: "#/components/schemas/CmsAccessEnvelope" } } } }, "401": { $ref: "#/components/responses/Error" } }
+  /cms/admin/dashboard:
+    get:
+      operationId: getCmsAdminDashboard
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      responses: { "200": { description: Assigned market counts, content: { application/json: { schema: { $ref: "#/components/schemas/CmsDashboard" } } } }, "401": { $ref: "#/components/responses/Error" } }
+  /cms/admin/documents:
+    get:
+      operationId: listCmsAdminDocuments
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      responses: { "200": { description: Documents and permitted editions, content: { application/json: { schema: { $ref: "#/components/schemas/CmsDocumentListEnvelope" } } } }, "401": { $ref: "#/components/responses/Error" } }
+    post:
+      operationId: createCmsAdminDocument
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced. Creates a governed document and its editions from the supplied validated payload.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CmsDocumentCreateInput" } } } }
+      responses: { "201": { description: Created document result, content: { application/json: { schema: { $ref: "#/components/schemas/CmsDocumentCreateResult" } } } }, "400": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "409": { $ref: "#/components/responses/Error" } }
+  /cms/admin/documents/{documentId}:
+    get:
+      operationId: getCmsAdminDocument
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/DocumentId" }]
+      responses: { "200": { description: Document and permitted editions, content: { application/json: { schema: { $ref: "#/components/schemas/CmsDocumentDetailEnvelope" } } } }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "404": { $ref: "#/components/responses/Error" } }
+  /cms/admin/documents/{documentId}/editions/{market}:
+    get:
+      operationId: getCmsAdminEdition
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/DocumentId" }, { $ref: "#/components/parameters/CmsMarket" }]
+      responses: { "200": { description: Edition and current draft revision, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditionDetailEnvelope" } } } }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "404": { $ref: "#/components/responses/Error" } }
+    patch:
+      operationId: updateCmsAdminEdition
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced. expectedVersion is required for optimistic concurrency.
+      parameters: [{ $ref: "#/components/parameters/DocumentId" }, { $ref: "#/components/parameters/CmsMarket" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditionUpdateInput" } } } }
+      responses: { "200": { description: Updated edition result, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditionMutationResult" } } } }, "400": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "409": { $ref: "#/components/responses/Error" } }
+  /cms/admin/documents/{documentId}/editions/{market}/revisions:
+    get:
+      operationId: listCmsAdminEditionRevisions
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/DocumentId" }, { $ref: "#/components/parameters/CmsMarket" }]
+      responses: { "200": { description: Immutable revision history, content: { application/json: { schema: { $ref: "#/components/schemas/CmsRevisionListEnvelope" } } } }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "404": { $ref: "#/components/responses/Error" } }
+  /cms/admin/documents/{documentId}/editions/{market}/rollback:
+    post:
+      operationId: rollbackCmsAdminEdition
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced. expectedVersion is required for optimistic concurrency.
+      parameters: [{ $ref: "#/components/parameters/DocumentId" }, { $ref: "#/components/parameters/CmsMarket" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditionRollbackInput" } } } }
+      responses: { "200": { description: New draft restored from revision, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditionMutationResult" } } } }, "400": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "409": { $ref: "#/components/responses/Error" } }
+  /cms/admin/documents/{documentId}/editions/{market}/preview:
+    post:
+      operationId: issueCmsAdminPreview
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced. Issues a ten-minute, one-time preview capability for an exact page revision.
+      parameters: [{ $ref: "#/components/parameters/DocumentId" }, { $ref: "#/components/parameters/CmsMarket" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CmsPreviewIssueInput" } } } }
+      responses: { "201": { description: Preview capability, content: { application/json: { schema: { $ref: "#/components/schemas/CmsPreviewIssuance" } } } }, "400": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "503": { $ref: "#/components/responses/Error" } }
+  /cms/admin/revisions/{revisionId}:
+    get:
+      operationId: getCmsAdminRevision
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/RevisionId" }]
+      responses: { "200": { description: Revision and edition, content: { application/json: { schema: { $ref: "#/components/schemas/CmsRevisionDetailEnvelope" } } } }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "404": { $ref: "#/components/responses/Error" } }
+  /cms/admin/revisions/{revisionId}/diff/{againstRevisionId}:
+    get:
+      operationId: getCmsAdminRevisionDiff
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/RevisionId" }, { $ref: "#/components/parameters/AgainstRevisionId" }]
+      responses: { "200": { description: Structural payload diff, content: { application/json: { schema: { $ref: "#/components/schemas/CmsRevisionDiff" } } } }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "404": { $ref: "#/components/responses/Error" } }
+  /cms/admin/audit-events:
+    get:
+      operationId: listCmsAdminAuditEvents
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      responses: { "200": { description: Visible append-only audit events, content: { application/json: { schema: { $ref: "#/components/schemas/CmsAuditEventListEnvelope" } } } }, "401": { $ref: "#/components/responses/Error" } }
+  /cms/admin/workflow/transitions:
+    post:
+      operationId: transitionCmsAdminWorkflow
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced. Atomically applies an authorized edition transition; expectedVersion provides optimistic concurrency.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditionTransition" } } } }
+      responses: { "200": { description: Idempotent duplicate, content: { application/json: { schema: { $ref: "#/components/schemas/CmsTransitionReceipt" } } } }, "202": { description: Accepted, content: { application/json: { schema: { $ref: "#/components/schemas/CmsTransitionReceipt" } } } }, "400": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "409": { $ref: "#/components/responses/Error" } }
+  /cms/admin/workflow/process-due:
+    post:
+      operationId: processDueCmsAdminWorkflow
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced. Processes due scheduled publication and expiry transitions.
+      responses: { "200": { description: Processed, content: { application/json: { schema: { $ref: "#/components/schemas/CmsDueProcessingReceipt" } } } }, "202": { description: Another worker owns the lease, content: { application/json: { schema: { $ref: "#/components/schemas/CmsDueProcessingReceipt" } } } }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" } }
+  /cms/admin/media:
+    get:
+      operationId: listCmsAdminMedia
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      responses: { "200": { description: Assets visible to principal, content: { application/json: { schema: { $ref: "#/components/schemas/CmsMediaListEnvelope" } } } }, "401": { $ref: "#/components/responses/Error" } }
+  /cms/admin/media/upload-intent:
+    post:
+      operationId: createCmsMediaUploadIntent
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced. Creates a private, short-lived object-storage upload intent.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CmsMediaUploadIntentInput" } } } }
+      responses: { "201": { description: Upload intent, content: { application/json: { schema: { $ref: "#/components/schemas/CmsMediaUploadIntent" } } } }, "400": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "503": { $ref: "#/components/responses/Error" } }
+  /cms/admin/media/finalize:
+    post:
+      operationId: finalizeCmsMediaUpload
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced. Verifies the exact uploaded object against its intent.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CmsMediaFinalizeInput" } } } }
+      responses: { "200": { description: Draft asset and its first version, content: { application/json: { schema: { $ref: "#/components/schemas/CmsMediaFinalizeResult" } } } }, "400": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "404": { $ref: "#/components/responses/Error" }, "409": { $ref: "#/components/responses/Error" }, "503": { $ref: "#/components/responses/Error" } }
+  /cms/admin/media/{mediaId}:
+    patch:
+      operationId: updateCmsAdminMedia
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced.
+      parameters: [{ $ref: "#/components/parameters/MediaId" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CmsMediaUpdateInput" } } } }
+      responses: { "200": { description: Updated asset, content: { application/json: { schema: { $ref: "#/components/schemas/CmsMediaEnvelope" } } } }, "400": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "404": { $ref: "#/components/responses/Error" } }
+    delete:
+      operationId: archiveCmsAdminMedia
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced. Archives rather than removes the media record.
+      parameters: [{ $ref: "#/components/parameters/MediaId" }]
+      responses: { "204": { description: Archived }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "404": { $ref: "#/components/responses/Error" } }
+  /cms/media/{mediaId}/versions/{version}:
+    get:
+      operationId: getCmsPublicMediaVersion
+      tags: [cms]
+      parameters: [{ $ref: "#/components/parameters/MediaId" }, { $ref: "#/components/parameters/MediaVersion" }]
+      responses: { "200": { description: "Published, live-referenced binary asset", content: { image/jpeg: { schema: { type: string, format: binary } }, image/png: { schema: { type: string, format: binary } }, image/webp: { schema: { type: string, format: binary } }, image/gif: { schema: { type: string, format: binary } }, image/avif: { schema: { type: string, format: binary } }, application/pdf: { schema: { type: string, format: binary } } } }, "400": { $ref: "#/components/responses/Error" }, "404": { $ref: "#/components/responses/Error" } }
+  /cms/editorial-assistant/runs:
+    post:
+      operationId: runCmsEditorialAssistant
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced. Produces a grounded suggestion only; it does not change CMS content.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditorialAssistantInput" } } } }
+      responses: { "200": { description: Completed idempotent replay, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditorialAssistantResult" } } } }, "201": { description: Completed, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditorialAssistantResult" } } } }, "400": { $ref: "#/components/responses/Error" }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "409": { $ref: "#/components/responses/Error" }, "422": { $ref: "#/components/responses/Error" }, "429": { $ref: "#/components/responses/Error" }, "503": { $ref: "#/components/responses/Error" } }
+  /cms/editorial-assistant/decisions:
+    post:
+      operationId: decideCmsEditorialAssistantRun
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Same-origin enforced. Records an independent human decision and only accepted runs may edit the current draft revision.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditorialAssistantDecisionInput" } } } }
+      responses: { "201": { description: Decision recorded, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditorialAssistantDecision" } } } }, "400": { $ref: "#/components/responses/Error" }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "409": { $ref: "#/components/responses/Error" }, "503": { $ref: "#/components/responses/Error" } }
+  /cms/editorial-assistant/runs/pending:
+    get:
+      operationId: listCmsEditorialAssistantPendingRuns
+      tags: [cms]
+      security: [{ ClerkSession: [] }]
+      description: Reviewer-visible, market-scoped completed assistant runs without prompt or source material.
+      responses: { "200": { description: Review queue, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditorialAssistantPendingRunList" } } } }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" } }
+  /cms/editorial-assistant/monitoring:
+    get:
+      operationId: getCmsEditorialAssistantMonitoring
+      tags: [cms, health]
+      security: [{ ClerkSession: [] }]
+      responses: { "200": { description: Redacted rolling 24-hour aggregates, content: { application/json: { schema: { $ref: "#/components/schemas/CmsEditorialAssistantMonitoring" } } } }, "401": { $ref: "#/components/responses/Error" }, "403": { $ref: "#/components/responses/Error" }, "503": { $ref: "#/components/responses/Error" } }
 components:
   securitySchemes:
-    CmsWorkflowBearer:
-      type: http
-      scheme: bearer
-      description: 'Exact service key from a CMS_WORKFLOW_CREDENTIALS principal. Non-admin principals are restricted to their assigned markets; only an admin assigned markets "all" may roll back content.'
-    CmsPreviewCookie:
-      type: apiKey
-      in: cookie
-      name: cognirise_cms_preview
-      description: HttpOnly cookie issued only by preview token exchange.
+    ClerkSession: { type: apiKey, in: cookie, name: __session, description: Clerk session; roles and market assignments are derived server-side from PostgreSQL. }
+    CmsPreviewCookie: { type: apiKey, in: cookie, name: cognirise_cms_preview, description: HttpOnly revision-bound preview session. }
   parameters:
-    CmsRouteKind:
-      name: routeKind
-      in: query
-      required: true
-      schema:
-        type: string
-        enum: [home, service, platform, industry, caseStudy, about, contact, landing, legal]
-    CmsMarket:
-      name: market
-      in: path
-      required: true
-      schema:
-        $ref: "#/components/schemas/CmsMarket"
-    CmsSlug:
-      name: slug
-      in: path
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 120
-        pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+    CmsMarket: { name: market, in: path, required: true, schema: { $ref: "#/components/schemas/CmsMarket" } }
+    CmsSlug: { name: slug, in: path, required: true, schema: { type: string, minLength: 1, maxLength: 120, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$' } }
+    CmsRouteKind: { name: routeKind, in: query, required: true, schema: { $ref: "#/components/schemas/CmsPageRouteKind" } }
+    DocumentId: { name: documentId, in: path, required: true, schema: { $ref: "#/components/schemas/CmsId" } }
+    RevisionId: { name: revisionId, in: path, required: true, schema: { type: string, format: uuid } }
+    AgainstRevisionId: { name: againstRevisionId, in: path, required: true, schema: { type: string, format: uuid } }
+    MediaId: { name: mediaId, in: path, required: true, schema: { type: string, minLength: 1 } }
+    MediaVersion: { name: version, in: path, required: true, schema: { type: integer, minimum: 1 } }
   responses:
-    InvalidCmsPage:
-      description: Market or page slug is invalid
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ErrorResponse"
-    InvalidPreviewToken:
-      description: Preview token is invalid or expired
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ErrorResponse"
+    Error: { description: Request failed, content: { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } } }
   schemas:
-    ErrorResponse:
-      type: object
-      required: [error]
-      properties:
-        error: { type: string }
-    IsoDateTime:
-      type: string
-      description: RFC 3339 date-time serialized as an ISO JSON string.
-      pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$'
-    CmsMarket:
-      type: string
-      enum: [uae, ksa, turkiye, europe]
-    CmsPageRouteKind:
-      type: string
-      enum: [home, service, platform, industry, caseStudy, about, contact, landing, legal]
+    ErrorResponse: { type: object, additionalProperties: false, required: [error], properties: { error: { type: string }, code: { type: string } } }
+    IsoDateTime: { type: string, format: date-time }
+    CmsId: { type: string, minLength: 3, maxLength: 200, pattern: '^[A-Za-z0-9._-]+$' }
+    CmsMarket: { type: string, enum: [uae, ksa, turkiye, europe] }
+    CmsPageRouteKind: { type: string, enum: [home, service, platform, industry, caseStudy, about, contact, landing, legal] }
+    CmsPublicationState: { type: string, enum: [draft, review, approved, scheduled, published, expired, archived] }
+    CmsFallbackMode: { type: string, enum: [canonical, uaeFallback, override, unavailable] }
+    CmsPayload: { type: object, additionalProperties: true, description: Bounded generic JSON representation of the server's strict, versioned Zod CMS payload union. }
     CmsPage:
       type: object
+      additionalProperties: false
       required: [id, revision, slug, routeKind, market, sections, updatedAt, publicationState]
       properties:
-        id: { type: string }
-        revision: { type: string }
-        slug:
-          type: string
-          minLength: 1
-          maxLength: 120
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
-        routeKind:
-          type: string
-          enum: [home, service, platform, industry, caseStudy, about, contact, landing, legal]
+        id: { type: string, }
+        revision: { type: string, }
+        slug: { type: string, }
+        routeKind: { $ref: "#/components/schemas/CmsPageRouteKind" }
         market: { $ref: "#/components/schemas/CmsMarket" }
-        title: { type: string }
-        summary: { type: string }
-        body:
-          type: array
-          items:
-            type: object
-            additionalProperties: true
-        seo:
-          type: object
-          additionalProperties: true
-        sections:
-          type: array
-          items:
-            type: object
-            additionalProperties: true
+        title: { type: string, }
+        summary: { type: string, }
+        sections: { type: array, items: { type: object, additionalProperties: true } }
+        seo: { type: object, additionalProperties: true }
         updatedAt: { $ref: "#/components/schemas/IsoDateTime" }
-        publicationState:
-          type: string
-          enum: [draft, review, approved, scheduled, published, expired, archived]
+        publicationState: { $ref: "#/components/schemas/CmsPublicationState" }
         publishAt: { $ref: "#/components/schemas/IsoDateTime" }
         expiresAt: { $ref: "#/components/schemas/IsoDateTime" }
     CmsPageMeta:
       type: object
+      additionalProperties: false
       required: [requestedMarket, resolvedMarket, marketFallback, deliveryMode, source, preview]
       properties:
         requestedMarket: { $ref: "#/components/schemas/CmsMarket" }
-        resolvedMarket:
-          anyOf:
-            - $ref: "#/components/schemas/CmsMarket"
-            - type: "null"
+        resolvedMarket: { type: [string, "null"], enum: [uae, ksa, turkiye, europe, null] }
         marketFallback: { type: boolean }
-        deliveryMode:
-          type: string
-          enum: [canonical, override, uaeFallback, unavailable]
-        requestedPublicationState:
-          type: string
-          enum: [draft, review, approved, scheduled, published, expired, archived]
-        resolvedPublicationState:
-          type: string
-          enum: [draft, review, approved, scheduled, published, expired, archived]
+        deliveryMode: { $ref: "#/components/schemas/CmsFallbackMode" }
+        requestedPublicationState: { $ref: "#/components/schemas/CmsPublicationState" }
+        resolvedPublicationState: { $ref: "#/components/schemas/CmsPublicationState" }
         requestedPublishAt: { $ref: "#/components/schemas/IsoDateTime" }
         requestedExpiresAt: { $ref: "#/components/schemas/IsoDateTime" }
         publishAt: { $ref: "#/components/schemas/IsoDateTime" }
         expiresAt: { $ref: "#/components/schemas/IsoDateTime" }
-        source:
-          type: string
-          enum: [sanity, cache, migration-fallback]
+        source: { type: string, const: postgres }
         preview: { type: boolean }
-        fallbackVersion: { type: string }
-    CmsPageEnvelope:
-      type: object
-      required: [schemaVersion, page, meta]
-      properties:
-        schemaVersion: { type: number, const: 1 }
-        page:
-          anyOf:
-            - $ref: "#/components/schemas/CmsPage"
-            - type: "null"
-        meta: { $ref: "#/components/schemas/CmsPageMeta" }
-    CmsRuntimeLink:
-      type: object
-      additionalProperties: true
-    CmsRuntimeNavigation:
-      type: object
-      required: [placement, items]
-      properties:
-        placement: { type: string, enum: [primary, utility, footer] }
-        items:
-          type: array
-          items: { $ref: "#/components/schemas/CmsRuntimeLink" }
-    CmsRuntimeMarket:
-      type: object
-      required: [code, name]
-      properties:
-        code: { $ref: "#/components/schemas/CmsMarket" }
-        name: { type: string }
-    CmsRuntimeRedirect:
-      type: object
-      required: [sourcePath, destinationPath, statusCode]
-      properties:
-        sourcePath: { type: string }
-        destinationPath: { type: string }
-        statusCode: { type: integer, enum: [301, 302, 307, 308] }
-    CmsRuntimeEnvelope:
-      type: object
-      required: [schemaVersion, market, source, markets, navigation, redirects]
-      properties:
-        schemaVersion: { type: number, const: 1 }
-        market: { $ref: "#/components/schemas/CmsMarket" }
-        source: { type: string, enum: [sanity, migration-fallback] }
-        markets:
-          type: array
-          items: { $ref: "#/components/schemas/CmsRuntimeMarket" }
-        navigation:
-          type: array
-          items: { $ref: "#/components/schemas/CmsRuntimeNavigation" }
-        redirects:
-          type: array
-          items: { $ref: "#/components/schemas/CmsRuntimeRedirect" }
+    CmsPageEnvelope: { type: object, additionalProperties: false, required: [schemaVersion, page, meta], properties: { schemaVersion: { type: integer, const: 1 }, page: { anyOf: [{ $ref: "#/components/schemas/CmsPage" }, { type: "null" }] }, meta: { $ref: "#/components/schemas/CmsPageMeta" } } }
     CmsPublication:
       type: object
-      required: [id, revision, slug, market, title, format, authors, publicationState, updatedAt]
+      additionalProperties: true
+      required: [id, revision, slug, market, kind, title, format, body, authors, topics, gated]
       properties:
         id: { type: string }
         revision: { type: string }
-        slug: { type: string }
+        slug: { type: [string, "null"] }
         market: { $ref: "#/components/schemas/CmsMarket" }
+        kind: { type: string, const: publication }
         title: { type: string }
         format: { type: string, enum: [article, report, video, webinar, news, newsletter, podcast, download] }
         dek: { type: string }
         body: { type: array, items: { type: object, additionalProperties: true } }
-        authors: { type: array, items: { type: object, additionalProperties: true } }
+        authors: { type: array, items: { $ref: "#/components/schemas/CmsPublicPerson" } }
         topics: { type: array, items: { type: string } }
-        media: { type: object, additionalProperties: true }
-        download: { type: object, additionalProperties: true }
+        media: { $ref: "#/components/schemas/CmsPublicMedia" }
+        download: { $ref: "#/components/schemas/CmsPublicMedia" }
         gated: { type: boolean }
         eventStartsAt: { $ref: "#/components/schemas/IsoDateTime" }
         publishedAt: { $ref: "#/components/schemas/IsoDateTime" }
-        readingMinutes: { type: integer, minimum: 1 }
+        readingMinutes: { type: integer }
         seo: { type: object, additionalProperties: true }
-        publicationState: { type: string }
+    CmsPublicPerson:
+      type: object
+      additionalProperties: false
+      required: [id, _type, name, expertise]
+      properties:
+        id: { type: string }
+        _type: { type: string, const: person }
+        name: { type: string }
+        role: { type: string }
+        bio: { type: array, items: { type: object, additionalProperties: true } }
+        expertise: { type: array, items: { type: string } }
+    CmsPublicMedia:
+      type: object
+      additionalProperties: false
+      required: [id, kind, url, title, decorative]
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [image, document] }
+        url: { type: string, description: Versioned same-origin CMS route or direct HTTPS asset URL. }
+        title: { type: string }
+        altText: { type: string }
+        decorative: { type: boolean }
+        caption: { type: string }
+    CmsPublicationMeta: { type: object, additionalProperties: false, required: [market, source], properties: { market: { $ref: "#/components/schemas/CmsMarket" }, source: { type: string, const: postgres } } }
+    CmsPublicationEnvelope: { type: object, additionalProperties: false, required: [publication, meta], properties: { publication: { anyOf: [{ $ref: "#/components/schemas/CmsPublication" }, { type: "null" }] }, meta: { $ref: "#/components/schemas/CmsPublicationMeta" } } }
+    CmsPublicationListEnvelope: { type: object, additionalProperties: false, required: [publications, meta], properties: { publications: { type: array, items: { $ref: "#/components/schemas/CmsPublication" } }, meta: { $ref: "#/components/schemas/CmsPublicationMeta" } } }
+    CmsRuntimeNavigationTarget:
+      type: object
+      additionalProperties: false
+      required: [id, _type, slug]
+      properties:
+        id: { type: string }
+        _type: { type: string, enum: [page, publication] }
+        slug: { type: string }
+        routeKind: { $ref: "#/components/schemas/CmsPageRouteKind" }
+    CmsRuntimeNavigationLink:
+      type: object
+      additionalProperties: false
+      required: [label]
+      properties:
+        label: { type: string }
+        internal: { $ref: "#/components/schemas/CmsRuntimeNavigationTarget" }
+        externalUrl: { type: string }
+        children: { type: array, items: { $ref: "#/components/schemas/CmsRuntimeNavigationLink" } }
+    CmsRuntimeNavigation:
+      type: object
+      additionalProperties: false
+      required: [id, revision, kind, placement, items]
+      properties:
+        id: { type: string }
+        revision: { type: string }
+        kind: { type: string, const: navigation }
+        placement: { type: string, enum: [primary, utility, footer] }
+        items: { type: array, items: { $ref: "#/components/schemas/CmsRuntimeNavigationLink" } }
+    CmsRuntimeEnvelope:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, market, navigation, redirects, source]
+      properties:
+        schemaVersion: { type: integer, const: 1 }
+        market: { $ref: "#/components/schemas/CmsMarket" }
+        source: { type: string, const: postgres }
+        navigation: { type: array, description: "Validated navigation content with top-level placement/items and market-resolved internal route targets.", items: { $ref: "#/components/schemas/CmsRuntimeNavigation" } }
+        redirects: { type: array, items: { type: object, additionalProperties: false, required: [sourcePath, destinationPath, statusCode], properties: { sourcePath: { type: string }, destinationPath: { type: string }, statusCode: { type: integer } } } }
+    CmsPreviewExchangeInput: { type: object, additionalProperties: false, required: [token], properties: { token: { type: string, minLength: 1 } } }
+    CmsPreviewExchange: { type: object, additionalProperties: false, required: [status, market, slug, routeKind, expiresAt], properties: { status: { type: string, const: ready }, market: { $ref: "#/components/schemas/CmsMarket" }, slug: { type: string }, routeKind: { $ref: "#/components/schemas/CmsPageRouteKind" }, expiresAt: { type: integer } } }
+    CmsHealth: { type: object, additionalProperties: false, required: [status, configured, previewConfigured, workflowConfigured, canonicalMarket], properties: { status: { type: string, enum: [configured, unconfigured] }, configured: { type: boolean }, previewConfigured: { type: boolean }, workflowConfigured: { type: boolean }, canonicalMarket: { type: string, const: uae } } }
+    CmsPrincipal: { type: object, additionalProperties: false, required: [id, role, markets], properties: { id: { type: string }, role: { type: string, enum: [author, regionalEditor, reviewer, publisher, admin] }, markets: { anyOf: [{ type: string, const: all }, { type: array, items: { $ref: "#/components/schemas/CmsMarket" } }] } } }
+    CmsAccessEnvelope: { type: object, additionalProperties: false, required: [principal], properties: { principal: { $ref: "#/components/schemas/CmsPrincipal" } } }
+    CmsDocument:
+      type: object
+      additionalProperties: false
+      required: [id, kind, canonicalSlug, routeKind, ownerId, contentClass, currentVersion, archivedAt, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [page, navigation, publication, person, organization, referenceSource, approvedSource, proof, claim, globalSettings] }
+        canonicalSlug: { type: [string, "null"] }
+        routeKind: { type: [string, "null"] }
+        ownerId: { type: [string, "null"] }
+        contentClass: { type: string }
+        currentVersion: { type: integer }
+        archivedAt: { type: [string, "null"], format: date-time }
+        createdAt: { $ref: "#/components/schemas/IsoDateTime" }
         updatedAt: { $ref: "#/components/schemas/IsoDateTime" }
-    CmsPublicationEnvelope:
-      type: object
-      required: [publication, meta]
-      properties:
-        publication: { anyOf: [{ $ref: "#/components/schemas/CmsPublication" }, { type: "null" }] }
-        meta: { $ref: "#/components/schemas/CmsPageMeta" }
-    CmsPublicationListEnvelope:
-      type: object
-      required: [publications, meta]
-      properties:
-        publications: { type: array, items: { $ref: "#/components/schemas/CmsPublication" } }
-        meta: { $ref: "#/components/schemas/CmsPageMeta" }
-    CmsPreviewExchangeInput:
-      type: object
-      required: [token]
-      properties:
-        token: { type: string, minLength: 1 }
-    CmsPublishWebhookPayload:
-      type: object
-      additionalProperties: true
-    CmsPreviewExchange:
-      type: object
-      required: [status, market, slug, routeKind, expiresAt]
-      properties:
-        status: { type: string, enum: [ready] }
-        market: { $ref: "#/components/schemas/CmsMarket" }
-        routeKind: { $ref: "#/components/schemas/CmsPageRouteKind" }
-        slug:
-          type: string
-          minLength: 1
-          maxLength: 120
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
-        expiresAt: { type: number, description: Unix epoch seconds }
-    CmsPreviewTarget:
-      type: object
-      required: [market, slug, routeKind]
-      properties:
-        market: { $ref: "#/components/schemas/CmsMarket" }
-        routeKind: { $ref: "#/components/schemas/CmsPageRouteKind" }
-        slug:
-          type: string
-          minLength: 1
-          maxLength: 120
-          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
-    CmsPreviewToken:
-      allOf:
-        - $ref: "#/components/schemas/CmsPreviewTarget"
-        - type: object
-          required: [token]
-          properties:
-            token: { type: string }
-    CmsWorkflowState:
-      type: string
-      enum: [draft, review, approved, scheduled, published, expired, archived]
-    CmsWorkflowTransitionInput:
+    CmsEdition:
       type: object
       additionalProperties: false
-      required: [requestId, subjectId, market, toState]
+      required: [id, documentId, market, fallbackMode, publicationState, localizedSlug, parityComplete, version, draftRevisionId, liveRevisionId, approvedByPrincipalId, approvedAt, lastEditorPrincipalId, lastRequesterPrincipalId, lastApprovalPrincipalId, lastPublisherPrincipalId, publishAt, expiresAt, createdAt, updatedAt]
       properties:
-        requestId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }
-        subjectId: { type: string, minLength: 3, maxLength: 200, pattern: '^(?!drafts\.)[A-Za-z0-9._-]+$' }
+        id: { type: string, format: uuid }
+        documentId: { type: string }
         market: { $ref: "#/components/schemas/CmsMarket" }
-        toState: { $ref: "#/components/schemas/CmsWorkflowState" }
-        publishAt: { $ref: "#/components/schemas/IsoDateTime" }
-        expiresAt: { $ref: "#/components/schemas/IsoDateTime" }
-    CmsWorkflowRollbackInput:
-      type: object
-      additionalProperties: false
-      required: [requestId, subjectId, revisionId]
-      properties:
-        requestId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }
-        subjectId: { type: string, minLength: 3, maxLength: 200, pattern: '^(?!drafts\.)[A-Za-z0-9._-]+$' }
-        revisionId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }
-    CmsWorkflowDuplicateReceipt:
-      type: object
-      required: [status, requestId]
-      properties:
-        status: { type: string, enum: [duplicate] }
-        requestId: { type: string }
-    CmsWorkflowAcceptedReceipt:
-      type: object
-      required: [status, requestId]
-      properties:
-        status: { type: string, enum: [accepted] }
-        requestId: { type: string }
-    CmsWorkflowTransitionReceipt:
-      allOf:
-        - $ref: "#/components/schemas/CmsWorkflowAcceptedReceipt"
-        - type: object
-          required: [fromState, toState]
-          properties:
-            fromState: { $ref: "#/components/schemas/CmsWorkflowState" }
-            toState: { $ref: "#/components/schemas/CmsWorkflowState" }
-    CmsWorkflowDueReceipt:
-      type: object
-      required: [status, discovered, processed]
-      properties:
-        status: { type: string, enum: [complete, partial] }
-        discovered: { type: number, minimum: 0 }
-        processed: { type: number, minimum: 0 }
-    CmsEditorialAssistantInput:
-      type: object
-      additionalProperties: false
-      required: [requestId, subjectId, market, operation, draft, sourceIds, contentClass, target]
-      properties:
-        requestId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }
-        subjectId: { type: string, minLength: 3, maxLength: 200, pattern: '^(?!drafts\.)[A-Za-z0-9._-]+$' }
-        market: { $ref: "#/components/schemas/CmsMarket" }
-        operation: { type: string, enum: [draft-generation, summary, report-abstract, transcript-cleanup, chapters, newsletter-variants, market-adaptation, translation, seo-metadata, tags, alt-text, internal-links, quality-review, rewrite] }
-        draft: { type: string, maxLength: 12000 }
-        contentClass: { type: string, enum: [public, internal] }
-        target:
-          type: object
-          additionalProperties: false
-          required: [fieldPath, contentType, language, maxLength, revisionId]
-          properties:
-            fieldPath: { type: string, pattern: '^(organization\.(name|description)|defaultSeo\.(metaTitle|metaDescription)|title|summary|dek|name|role|website|value|context|statement|altText|caption|transcript|chapterNotes|newsletterVariants|internalLinkSuggestions|topics|seo\.(metaTitle|metaDescription)|marketEditions\[_key=="[A-Za-z0-9_-]{1,128}"\]\.(title|summary|dek|name|role|website))$' }
-            contentType: { type: string, enum: [globalSettings, page, navigation, publication, person, organization, proof, claim, mediaAsset] }
-            language: { type: string, pattern: '^[a-z]{2,3}(-[A-Z]{2})?$' }
-            maxLength: { type: number, minimum: 1, maximum: 20000 }
-            revisionId: { type: string, minLength: 3, maxLength: 200, pattern: '^[A-Za-z0-9._-]+$' }
-        sourceIds:
-          type: array
-          minItems: 1
-          maxItems: 12
-          uniqueItems: true
-          items: { type: string, minLength: 3, maxLength: 200, pattern: '^[A-Za-z0-9._-]+$' }
-        instructions: { type: string, maxLength: 2000 }
-    CmsEditorialCitation:
-      type: object
-      required: [claim, sourceId, quote]
-      properties:
-        claim: { type: string }
-        sourceId: { type: string }
-        quote: { type: string }
-    CmsEditorialDiff:
-      type: object
-      required: [op, before, after]
-      properties:
-        op: { type: string, const: replace }
-        before: { type: string }
-        after: { type: string }
-    CmsEditorialQualityGate:
-      type: object
-      required: [gate, passed, detail]
-      properties:
-        gate: { type: string }
-        passed: { type: boolean }
-        detail: { type: string }
-    CmsEditorialAssistantResult:
-      type: object
-      required: [status, suggestion, citations, uncertainties, diff, qualityGates, policyVersion]
-      properties:
-        status: { type: string, const: completed }
-        suggestion: { type: string }
-        citations: { type: array, items: { $ref: "#/components/schemas/CmsEditorialCitation" } }
-        uncertainties: { type: array, items: { type: string } }
-        diff: { type: array, items: { $ref: "#/components/schemas/CmsEditorialDiff" } }
-        qualityGates: { type: array, items: { $ref: "#/components/schemas/CmsEditorialQualityGate" } }
-        policyVersion: { type: string }
-    CmsEditorialAssistantDecisionInput:
-      type: object
-      additionalProperties: false
-      required: [requestId, decision, reason]
-      properties:
-        requestId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }
-        decision: { type: string, enum: [accepted, rejected] }
-        reason: { type: string, minLength: 3, maxLength: 1000 }
-        resultingRevisionId: { type: string, minLength: 3, maxLength: 200, pattern: '^[A-Za-z0-9._-]+$' }
-    CmsEditorialAssistantDecision:
-      type: object
-      required: [requestId, decision, resultingRevisionId, wasEdited]
-      properties:
-        requestId: { type: string }
-        decision: { type: string, enum: [accepted, rejected] }
-        resultingRevisionId: { type: ["string", "null"] }
-        wasEdited: { type: boolean }
-    CmsEditorialAssistantMonitoring:
-      type: object
-      required: [windowHours, runs, failures, spendMicros, averageLatencyMs, decisions]
-      properties:
-        windowHours: { type: number, const: 24 }
-        runs: { type: number, minimum: 0 }
-        failures: { type: number, minimum: 0 }
-        spendMicros: { type: number, minimum: 0 }
-        averageLatencyMs: { type: ["number", "null"], minimum: 0 }
-        decisions:
-          type: object
-          required: [accepted, rejected, editedAccepted, pendingAudit]
-          properties:
-            accepted: { type: number, minimum: 0 }
-            rejected: { type: number, minimum: 0 }
-            editedAccepted: { type: number, minimum: 0 }
-            pendingAudit: { type: number, minimum: 0 }
-    CmsWebhookDuplicate:
-      type: object
-      required: [status]
-      properties:
-        status: { type: string, enum: [duplicate] }
-    CmsWebhookAccepted:
-      type: object
-      required: [status, invalidatedEntries]
-      properties:
-        status: { type: string, enum: [accepted] }
-        invalidatedEntries: { type: number, minimum: 0 }
-    CmsHealth:
-      type: object
-      required: [status, configured, previewConfigured, webhookConfigured, workflowConfigured, canonicalMarket]
-      properties:
-        status: { type: string, enum: [configured, unconfigured] }
-        configured: { type: boolean }
-        previewConfigured: { type: boolean }
-        webhookConfigured: { type: boolean }
-        workflowConfigured:
-          type: boolean
-          description: SANITY_API_TOKEN and at least one CMS_WORKFLOW_CREDENTIALS principal are configured.
-        canonicalMarket: { type: string, const: uae }
-    HealthStatus:
-      type: object
-      properties:
-        status:
-          type: string
-      required:
-        - status
-    EnquiryInput:
-      type: object
-      required:
-        - name
-        - email
-        - organization
-        - market
-        - processArea
-        - challenge
-        - consent
-        - sourcePage
-      properties:
-        name:
-          type: string
-          minLength: 2
-          maxLength: 120
-        email:
-          type: string
-          pattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
-          maxLength: 254
-        organization:
-          type: string
-          minLength: 2
-          maxLength: 160
-        role:
-          type: string
-          maxLength: 120
-        market:
-          type: string
-          enum: [uae, ksa, turkiye, europe]
-        processArea:
-          type: string
-          maxLength: 120
-        challenge:
-          type: string
-          minLength: 20
-          maxLength: 2000
-        consent:
-          type: boolean
-          const: true
-        sourcePage:
-          type: string
-          minLength: 1
-          maxLength: 200
-        website:
-          type: string
-          maxLength: 0
-          description: Honeypot field that must remain empty.
-    EnquiryReceipt:
-      type: object
-      required: [id, status, createdAt]
-      properties:
-        id:
-          type: string
-          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
-        status:
-          type: string
-          enum: [received]
-        createdAt:
-          $ref: "#/components/schemas/IsoDateTime"
-    NewsletterSubscriptionInput:
-      type: object
-      required: [email, market, consent, sourcePage]
-      properties:
-        email:
-          type: string
-          pattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
-          maxLength: 254
-        market:
-          type: string
-          enum: [uae, ksa, turkiye, europe]
-        consent:
-          type: boolean
-          const: true
-        sourcePage:
-          type: string
-          minLength: 1
-          maxLength: 200
-        website:
-          type: string
-          maxLength: 0
-          description: Honeypot field that must remain empty.
-    SubscriptionReceipt:
-      type: object
-      required: [id, status, createdAt]
-      properties:
-        id:
-          type: string
-          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
-        status:
-          type: string
-          enum: [subscribed]
-        createdAt:
-          $ref: "#/components/schemas/IsoDateTime"
+        fallbackMode: { $ref: "#/components/schemas/CmsFallbackMode" }
+        publicationState: { $ref: "#/components/schemas/CmsPublicationState" }
+        localizedSlug: { type: [string, "null"] }
+        parityComplete: { type: boolean }
+        version: { type: integer }
+        draftRevisionId: { type: [string, "null"], format: uuid }
+        liveRevisionId: { type: [string, "null"], format: uuid }
+        approvedByPrincipalId: { type: [string, "null"] }
+        approvedAt: { type: [string, "null"], format: date-time }
+        lastEditorPrincipalId: { type: [string, "null"] }
+        lastRequesterPrincipalId: { type: [string, "null"] }
+        lastApprovalPrincipalId: { type: [string, "null"] }
+        lastPublisherPrincipalId: { type: [string, "null"] }
+        publishAt: { type: [string, "null"], format: date-time }
+        expiresAt: { type: [string, "null"], format: date-time }
+        createdAt: { $ref: "#/components/schemas/IsoDateTime" }
+        updatedAt: { $ref: "#/components/schemas/IsoDateTime" }
+    CmsRevision: { type: object, additionalProperties: false, required: [id, editionId, revisionNumber, payloadVersion, payload, contentDigest, createdByPrincipalId, reason, createdAt], properties: { id: { type: string, format: uuid }, editionId: { type: string, format: uuid }, revisionNumber: { type: integer }, payloadVersion: { type: integer }, payload: { $ref: "#/components/schemas/CmsPayload" }, contentDigest: { type: string }, createdByPrincipalId: { type: string }, reason: { type: string }, createdAt: { $ref: "#/components/schemas/IsoDateTime" } } }
+    CmsDocumentListEnvelope: { type: object, additionalProperties: false, required: [documents, editions], properties: { documents: { type: array, items: { $ref: "#/components/schemas/CmsDocument" } }, editions: { type: array, items: { $ref: "#/components/schemas/CmsEdition" } } } }
+    CmsDocumentDetailEnvelope: { type: object, additionalProperties: false, required: [document, editions], properties: { document: { $ref: "#/components/schemas/CmsDocument" }, editions: { type: array, items: { $ref: "#/components/schemas/CmsEdition" } } } }
+    CmsEditionDetailEnvelope: { type: object, additionalProperties: false, required: [edition, draft], properties: { edition: { $ref: "#/components/schemas/CmsEdition" }, draft: { $ref: "#/components/schemas/CmsRevision" } } }
+    CmsRevisionListEnvelope: { type: object, additionalProperties: false, required: [revisions], properties: { revisions: { type: array, items: { $ref: "#/components/schemas/CmsRevision" } } } }
+    CmsRevisionDetailEnvelope: { type: object, additionalProperties: false, required: [revision, edition], properties: { revision: { $ref: "#/components/schemas/CmsRevision" }, edition: { $ref: "#/components/schemas/CmsEdition" } } }
+    CmsDocumentCreateInput: { type: object, additionalProperties: false, required: [documentId, payload], properties: { documentId: { $ref: "#/components/schemas/CmsId" }, payload: { $ref: "#/components/schemas/CmsPayload" } } }
+    CmsDocumentCreateResult: { type: object, additionalProperties: false, required: [document, editions], properties: { document: { $ref: "#/components/schemas/CmsDocument" }, editions: { type: array, items: { $ref: "#/components/schemas/CmsEdition" } } } }
+    CmsEditionUpdateInput: { type: object, additionalProperties: false, required: [expectedVersion], properties: { expectedVersion: { type: integer, minimum: 1 }, payload: { $ref: "#/components/schemas/CmsPayload" } } }
+    CmsEditionRollbackInput: { type: object, additionalProperties: false, required: [revisionId, expectedVersion], properties: { revisionId: { type: string, format: uuid }, expectedVersion: { type: integer, minimum: 1 } } }
+    CmsEditionMutationResult: { type: object, additionalProperties: false, required: [edition, revision], properties: { edition: { $ref: "#/components/schemas/CmsEdition" }, revision: { $ref: "#/components/schemas/CmsRevision" } } }
+    CmsEditionTransition: { type: object, additionalProperties: false, required: [requestId, subjectId, market, toState, expectedVersion], properties: { requestId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }, subjectId: { $ref: "#/components/schemas/CmsId" }, market: { $ref: "#/components/schemas/CmsMarket" }, toState: { $ref: "#/components/schemas/CmsPublicationState" }, expectedVersion: { type: integer, minimum: 1 }, publishAt: { $ref: "#/components/schemas/IsoDateTime" }, expiresAt: { $ref: "#/components/schemas/IsoDateTime" } } }
+    CmsTransitionReceipt: { type: object, additionalProperties: true, required: [status, requestId], properties: { status: { type: string, enum: [accepted, duplicate] }, requestId: { type: string }, fromState: { $ref: "#/components/schemas/CmsPublicationState" }, toState: { $ref: "#/components/schemas/CmsPublicationState" } } }
+    CmsDueProcessingReceipt: { type: object, additionalProperties: false, required: [status, discovered, processed], properties: { status: { type: string, enum: [complete, partial, leased] }, discovered: { type: integer, minimum: 0 }, processed: { type: integer, minimum: 0 } } }
+    CmsPreviewIssueInput: { type: object, additionalProperties: false, required: [revisionId], properties: { revisionId: { type: string, format: uuid } } }
+    CmsPreviewIssuance: { type: object, additionalProperties: false, required: [token, expiresAt], properties: { token: { type: string }, expiresAt: { $ref: "#/components/schemas/IsoDateTime" } } }
+    CmsDiffChange: { type: object, additionalProperties: false, required: [path, before, after], properties: { path: { type: string }, before: {}, after: {} } }
+    CmsRevisionDiff: { type: object, additionalProperties: false, required: [revisionId, againstRevisionId, changes], properties: { revisionId: { type: string, format: uuid }, againstRevisionId: { type: string, format: uuid }, changes: { type: array, items: { $ref: "#/components/schemas/CmsDiffChange" } } } }
+    CmsAuditEvent: { type: object, additionalProperties: false, required: [id, action, actor, target, market, outcome, metadata, createdAt], properties: { id: { type: string, format: uuid }, action: { type: string }, actor: { type: string }, target: { type: string }, market: { type: [string, "null"] }, outcome: { type: string }, metadata: { type: [object, "null"], additionalProperties: { type: [string, number, boolean, "null"] } }, createdAt: { $ref: "#/components/schemas/IsoDateTime" } } }
+    CmsAuditEventListEnvelope: { type: object, additionalProperties: false, required: [events], properties: { events: { type: array, items: { $ref: "#/components/schemas/CmsAuditEvent" } } } }
+    CmsDashboard: { type: object, additionalProperties: false, required: [documents, editions, states], properties: { documents: { type: integer, minimum: 0 }, editions: { type: integer, minimum: 0 }, states: { type: object, additionalProperties: false, required: [draft, review, approved, scheduled, published, expired, archived], properties: { draft: { type: integer }, review: { type: integer }, approved: { type: integer }, scheduled: { type: integer }, published: { type: integer }, expired: { type: integer }, archived: { type: integer } } } } }
+    CmsMediaAsset: { type: object, additionalProperties: false, required: [id, kind, title, altText, decorative, caption, rightsOwner, rightsExpiresAt, lifecycleState, pendingObjectPath, pendingContentType, pendingByteSize, pendingExpiresAt, createdByPrincipalId, createdAt, updatedAt], properties: { id: { type: string }, kind: { type: string, enum: [image, document] }, title: { type: string }, altText: { type: [string, "null"] }, decorative: { type: boolean }, caption: { type: [string, "null"] }, rightsOwner: { type: [string, "null"] }, rightsExpiresAt: { type: [string, "null"], format: date-time }, lifecycleState: { type: string, enum: [pending, draft, published, archived] }, pendingObjectPath: { type: [string, "null"] }, pendingContentType: { type: [string, "null"] }, pendingByteSize: { type: [integer, "null"] }, pendingExpiresAt: { type: [string, "null"], format: date-time }, createdByPrincipalId: { type: string }, createdAt: { $ref: "#/components/schemas/IsoDateTime" }, updatedAt: { $ref: "#/components/schemas/IsoDateTime" } } }
+    CmsMediaVersion: { type: object, additionalProperties: false, required: [id, mediaId, version, objectPath, externalUrl, contentType, byteSize, checksum, metadata, createdByPrincipalId, createdAt], properties: { id: { type: string, format: uuid }, mediaId: { type: string }, version: { type: integer }, objectPath: { type: [string, "null"] }, externalUrl: { type: [string, "null"] }, contentType: { type: [string, "null"] }, byteSize: { type: [integer, "null"] }, checksum: { type: [string, "null"] }, metadata: { type: object, additionalProperties: { type: [string, number, boolean, "null"] } }, createdByPrincipalId: { type: string }, createdAt: { $ref: "#/components/schemas/IsoDateTime" } } }
+    CmsMediaListEnvelope: { type: object, additionalProperties: false, required: [media], properties: { media: { type: array, items: { $ref: "#/components/schemas/CmsMediaAsset" } } } }
+    CmsMediaEnvelope: { type: object, additionalProperties: false, required: [media], properties: { media: { $ref: "#/components/schemas/CmsMediaAsset" } } }
+    CmsMediaUploadIntentInput: { type: object, additionalProperties: false, required: [title, decorative, contentType, size], properties: { title: { type: string, maxLength: 240 }, altText: { type: string, maxLength: 1000 }, decorative: { type: boolean }, contentType: { type: string, enum: [image/jpeg, image/png, image/webp, image/gif, image/avif, application/pdf] }, size: { type: integer, minimum: 1, maximum: 26214400 } } }
+    CmsMediaUploadIntent: { type: object, additionalProperties: false, required: [mediaId, objectPath, uploadUrl, expiresAt], properties: { mediaId: { type: string }, objectPath: { type: string }, uploadUrl: { type: string }, expiresAt: { $ref: "#/components/schemas/IsoDateTime" } } }
+    CmsMediaFinalizeInput: { type: object, additionalProperties: false, required: [mediaId, objectPath], properties: { mediaId: { type: string }, objectPath: { type: string } } }
+    CmsMediaFinalizeResult: { type: object, additionalProperties: false, required: [media, version], properties: { media: { $ref: "#/components/schemas/CmsMediaAsset" }, version: { $ref: "#/components/schemas/CmsMediaVersion" } } }
+    CmsMediaUpdateInput: { type: object, additionalProperties: false, properties: { title: { type: string, maxLength: 240 }, altText: { type: [string, "null"], maxLength: 1000 }, decorative: { type: boolean }, caption: { type: string }, rightsOwner: { type: string }, lifecycleState: { type: string, enum: [draft, published, archived] } } }
+    CmsEditorialAssistantInput: { type: object, additionalProperties: false, required: [requestId, subjectId, market, operation, draft, sourceIds, contentClass, target], properties: { requestId: { type: string, minLength: 8, maxLength: 120, pattern: '^[A-Za-z0-9_-]+$' }, subjectId: { $ref: "#/components/schemas/CmsId" }, market: { $ref: "#/components/schemas/CmsMarket" }, operation: { type: string, enum: [summary, report-abstract, seo-metadata, quality-review, rewrite] }, draft: { type: string, maxLength: 12000 }, sourceIds: { type: array, minItems: 1, maxItems: 12, uniqueItems: true, items: { $ref: "#/components/schemas/CmsId" } }, contentClass: { type: string, enum: [public, internal] }, instructions: { type: string, maxLength: 2000 }, target: { type: object, additionalProperties: false, required: [fieldPath, contentType, language, maxLength, revisionId], properties: { fieldPath: { type: string, enum: [title, summary, dek, name, role, website, seo.metaTitle, seo.metaDescription] }, contentType: { type: string, enum: [page, publication, person, organization] }, language: { type: string }, maxLength: { type: integer, minimum: 1, maximum: 20000 }, revisionId: { type: string, format: uuid } } } } }
+    CmsEditorialAssistantResult: { type: object, additionalProperties: false, required: [status, suggestion, citations, uncertainties, diff, qualityGates, policyVersion], properties: { status: { type: string, const: completed }, suggestion: { type: string }, citations: { type: array, items: { type: object, additionalProperties: false, required: [claim, sourceId, quote], properties: { claim: { type: string }, sourceId: { type: string }, quote: { type: string } } } }, uncertainties: { type: array, items: { type: string } }, diff: { type: array, items: { type: object, additionalProperties: false, required: [op, before, after], properties: { op: { type: string, const: replace }, before: { type: string }, after: { type: string } } } }, qualityGates: { type: array, items: { type: object, additionalProperties: false, required: [gate, passed, detail], properties: { gate: { type: string }, passed: { type: boolean }, detail: { type: string } } } }, policyVersion: { type: string } } }
+    CmsEditorialAssistantDecisionInput: { type: object, additionalProperties: false, required: [requestId, decision, reason], properties: { requestId: { type: string }, decision: { type: string, enum: [accepted, rejected] }, reason: { type: string, minLength: 3, maxLength: 1000 }, expectedRevisionId: { type: string, format: uuid, description: Current draft revision expected by an accepted decision; must equal the run target. } } }
+    CmsEditorialAssistantDecision: { type: object, additionalProperties: false, required: [requestId, decision, resultingRevisionId, wasEdited], properties: { requestId: { type: string }, decision: { type: string, enum: [accepted, rejected] }, resultingRevisionId: { type: [string, "null"], format: uuid }, wasEdited: { type: boolean } } }
+    CmsEditorialAssistantPendingRun: { type: object, additionalProperties: false, required: [requestId, actor, market, subjectId, operation, targetContext, result, createdAt, completedAt, decided], properties: { requestId: { type: string }, actor: { type: string }, market: { $ref: "#/components/schemas/CmsMarket" }, subjectId: { type: string }, operation: { type: string }, targetContext: { type: object, additionalProperties: false, required: [revisionId, fieldPath, contentType], properties: { revisionId: { type: string }, fieldPath: { type: string }, contentType: { type: string } } }, result: { $ref: "#/components/schemas/CmsEditorialAssistantResult" }, createdAt: { $ref: "#/components/schemas/IsoDateTime" }, completedAt: { type: [string, "null"], format: date-time }, decided: { type: boolean } } }
+    CmsEditorialAssistantPendingRunList: { type: object, additionalProperties: false, required: [runs], properties: { runs: { type: array, items: { $ref: "#/components/schemas/CmsEditorialAssistantPendingRun" } } } }
+    CmsEditorialAssistantMonitoring: { type: object, additionalProperties: false, required: [windowHours, runs, failures, spendMicros, decisions], properties: { windowHours: { type: integer, const: 24 }, runs: { type: integer, minimum: 0 }, failures: { type: integer, minimum: 0 }, spendMicros: { type: integer, minimum: 0 }, decisions: { type: object, additionalProperties: false, required: [accepted, rejected], properties: { accepted: { type: integer, minimum: 0 }, rejected: { type: integer, minimum: 0 } } } } }
+    HealthStatus: { type: object, required: [status], properties: { status: { type: string } } }
+    EnquiryInput: { type: object, required: [name, email, organization, market, processArea, challenge, consent, sourcePage], properties: { name: { type: string, minLength: 2, maxLength: 120 }, email: { type: string, maxLength: 254 }, organization: { type: string, minLength: 2, maxLength: 160 }, role: { type: string, maxLength: 120 }, market: { $ref: "#/components/schemas/CmsMarket" }, processArea: { type: string, maxLength: 120 }, challenge: { type: string, minLength: 20, maxLength: 2000 }, consent: { type: boolean, const: true }, sourcePage: { type: string, minLength: 1, maxLength: 200 }, website: { type: string, maxLength: 0 } } }
+    EnquiryReceipt: { type: object, required: [id, status, createdAt], properties: { id: { type: string, format: uuid }, status: { type: string, const: received }, createdAt: { $ref: "#/components/schemas/IsoDateTime" } } }
+    NewsletterSubscriptionInput: { type: object, required: [email, market, consent, sourcePage], properties: { email: { type: string, maxLength: 254 }, market: { $ref: "#/components/schemas/CmsMarket" }, consent: { type: boolean, const: true }, sourcePage: { type: string, minLength: 1, maxLength: 200 }, website: { type: string, maxLength: 0 } } }
+    SubscriptionReceipt: { type: object, required: [id, status, createdAt], properties: { id: { type: string, format: uuid }, status: { type: string, const: subscribed }, createdAt: { $ref: "#/components/schemas/IsoDateTime" } } }

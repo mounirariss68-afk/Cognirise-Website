@@ -13,11 +13,8 @@ export type AssistantOperation = typeof assistantOperations[number];
 export const assistantContentClasses = ["public", "internal"] as const;
 export type AssistantContentClass = typeof assistantContentClasses[number];
 
-const assistantContentTypes = [
-  "globalSettings", "page", "navigation", "publication", "person",
-  "organization", "proof", "claim", "mediaAsset",
-] as const;
-const targetFieldPath = /^(?:organization\.(?:name|description)|defaultSeo\.(?:metaTitle|metaDescription)|title|summary|dek|name|role|website|value|context|statement|altText|caption|transcript|chapterNotes|newsletterVariants|internalLinkSuggestions|topics|seo\.(?:metaTitle|metaDescription)|marketEditions\[_key=="[A-Za-z0-9_-]{1,128}"\]\.(?:title|summary|dek|name|role|website))$/;
+const assistantContentTypes = ["page", "publication", "person", "organization"] as const;
+const targetFieldPath = /^(?:title|summary|dek|name|role|website|seo\.(?:metaTitle|metaDescription))$/;
 
 export interface AssistantInput {
   requestId: string;
@@ -56,6 +53,19 @@ export interface AssistantOutput {
   diff: Array<{ op: "replace"; before: string; after: string }>;
   qualityGates: Array<{ gate: string; passed: boolean; detail: string }>;
   policyVersion: string;
+}
+
+/** Decision guards are pure so route policy remains testable without mutations. */
+export function assistantDecisionGuard(
+  runActor: string,
+  decider: string,
+  currentRevisionId: string | null,
+  targetRevisionId: string,
+  expectedRevisionId: string,
+): "self_decision" | "stale_target" | undefined {
+  if (runActor === decider) return "self_decision";
+  if (currentRevisionId !== targetRevisionId || expectedRevisionId !== targetRevisionId) return "stale_target";
+  return undefined;
 }
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -99,6 +109,14 @@ export function parseAssistantInput(value: unknown): AssistantInput | undefined 
     (value.instructions !== undefined && (typeof value.instructions !== "string" || value.instructions.length > 2_000))
   ) return;
   const fieldPath = value.target.fieldPath as string;
+  const contentType = value.target.contentType as typeof assistantContentTypes[number];
+  const validFieldForType: Record<typeof assistantContentTypes[number], readonly string[]> = {
+    page: ["title", "summary", "seo.metaTitle", "seo.metaDescription"],
+    publication: ["title", "dek", "seo.metaTitle", "seo.metaDescription"],
+    person: ["name", "role"],
+    organization: ["name", "website"],
+  };
+  if (!validFieldForType[contentType].includes(fieldPath)) return;
   if (operation === "alt-text" && fieldPath !== "altText") return;
   if (operation === "summary" &&
     !["summary", "dek"].some((field) =>

@@ -5,16 +5,17 @@ import { BrandButton } from "@/components/ui/brand-button";
 import { ContactForm } from "@/pages/Contact";
 import { ValueScanForm } from "@/pages/ValueScan";
 import { trackEvent } from "@/lib/analytics";
+import { cmsMediaHref } from "@/lib/cms-media";
 import { useMarketStore } from "@/store/market";
 
 type CmsPage = NonNullable<CmsPageEnvelope["page"]>;
 type UnknownRecord = Record<string, unknown>;
 
 const approvedSections = new Set([
-  "heroSection", "richTextSection", "claimSection", "metricSection", "quoteSection",
-  "referenceGridSection", "mediaSection", "timelineSection", "comparisonSection",
-  "ctaSection", "faqSection", "downloadGateSection",
-  "formSlotSection",
+  "hero", "richText", "claims", "metrics", "quote",
+  "referenceGrid", "media", "timeline", "comparison",
+  "cta", "faq", "downloadGate",
+  "formSlot",
 ]);
 
 function record(value: unknown): value is UnknownRecord {
@@ -58,8 +59,8 @@ function PortableText({ value }: { value: unknown }) {
   return (
     <div className="space-y-4 text-base leading-relaxed text-foreground/80">
       {value.map((block, index) => {
-        if (!record(block) || block._type !== "block" || !Array.isArray(block.children)) return null;
-        const content = block.children.map((child) => record(child) ? text(child.text) ?? "" : "").join("");
+        if (!record(block) || block.type !== "block" || !Array.isArray(block.children)) return null;
+        const content = block.children.map((child) => record(child) && child.type === "span" ? text(child.text) ?? "" : "").join("");
         if (!content) return null;
         if (block.style === "h2") return <h2 key={index} className="font-display text-3xl font-semibold text-[hsl(var(--brand-deep))]">{content}</h2>;
         if (block.style === "h3") return <h3 key={index} className="font-display text-xl font-semibold text-[hsl(var(--brand-deep))]">{content}</h3>;
@@ -81,8 +82,8 @@ function Action({ value }: { value: unknown }) {
 function Media({ value, market, contentSlug }: { value: unknown; market: string; contentSlug: string }) {
   const hasPlayed = useRef(false);
   if (!record(value)) return null;
-  const url = safeHref(value.url ?? value.externalUrl);
-  if (!url || !url.startsWith("https:")) return null;
+  const url = cmsMediaHref(value.url);
+  if (!url) return null;
   const kind = text(value.kind);
   const decorative = value.decorative === true;
   const alt = decorative ? "" : text(value.altText);
@@ -106,15 +107,21 @@ function Media({ value, market, contentSlug }: { value: unknown; market: string;
 }
 
 function Section({ section, index, market, contentSlug }: { section: UnknownRecord; index: number; market: string; contentSlug: string }) {
-  const type = text(section._type);
-  if (!type || !approvedSections.has(type) || section.enabled === false) return null;
+  const type = text(section.type);
+  if (section.enabled === false) return null;
+  if (!type || !approvedSections.has(type)) {
+    if (import.meta.env.DEV) {
+      throw new Error(`Unsupported CMS section type: ${type ?? "missing"}`);
+    }
+    return <section className="sr-only" role="status" aria-label="A page section is unavailable" data-cms-section="unavailable">A page section is unavailable.</section>;
+  }
   const heading = text(section.heading);
   const eyebrow = text(section.eyebrow);
   const shell = (content: React.ReactNode) => (
-    <section className={type === "heroSection" ? "bg-muted/30 py-20 md:py-28" : "py-14 md:py-20"} data-cms-section={type}>
+    <section className={type === "hero" ? "bg-muted/30 py-20 md:py-28" : "py-14 md:py-20"} data-cms-section={type}>
       <div className="mx-auto w-full max-w-[1200px] px-6 md:px-12">
         {eyebrow && <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[hsl(var(--brand-pink))]">{eyebrow}</p>}
-        {heading && (type === "heroSection"
+        {heading && (type === "hero"
           ? <h1 className="max-w-4xl font-display text-4xl font-semibold leading-tight text-[hsl(var(--brand-deep))] md:text-6xl">{heading}</h1>
           : <h2 className="mb-6 max-w-3xl font-display text-3xl font-semibold text-[hsl(var(--brand-deep))] md:text-4xl">{heading}</h2>)}
         {content}
@@ -122,21 +129,21 @@ function Section({ section, index, market, contentSlug }: { section: UnknownReco
     </section>
   );
 
-  if (type === "heroSection") return shell(<><div className="mt-6 max-w-3xl"><PortableText value={section.body} /></div><div className="mt-8"><Action value={section.primaryAction} /></div><div className="mt-10"><Media value={section.media} market={market} contentSlug={contentSlug} /></div></>);
-  if (type === "richTextSection" || type === "claimSection" || type === "metricSection") {
-    const items = Array.isArray(section.claims) ? section.claims : Array.isArray(section.proof) ? section.proof : [];
+  if (type === "hero") return shell(<><div className="mt-6 max-w-3xl"><PortableText value={section.body} /></div><div className="mt-8"><Action value={section.primaryAction} /></div><div className="mt-10"><Media value={section.media} market={market} contentSlug={contentSlug} /></div></>);
+  if (type === "richText" || type === "claims" || type === "metrics") {
+    const items = Array.isArray(section.claims) ? section.claims : Array.isArray(section.proof) ? section.proof : Array.isArray(section.items) ? section.items : [];
     return shell(<><PortableText value={section.body} />{items.length > 0 && <div className="mt-8 grid gap-4 md:grid-cols-3">{items.filter(record).map((item, itemIndex) => <article key={itemIndex} className="border border-border p-6"><strong className="font-display text-2xl text-[hsl(var(--brand-deep))]">{text(item.value) ?? text(item.statement) ?? text(item.title)}</strong>{text(item.context) && <p className="mt-2 text-sm text-muted-foreground">{text(item.context)}</p>}</article>)}</div>}</>);
   }
-  if (type === "quoteSection") return shell(<blockquote className="max-w-4xl font-display text-2xl leading-relaxed text-[hsl(var(--brand-deep))]">“{text(section.quote)}”</blockquote>);
-  if (type === "mediaSection") return shell(<><Media value={section.media} market={market} contentSlug={contentSlug} />{record(section.media) && text(section.media.caption) && <p className="mt-3 text-sm text-muted-foreground">{text(section.media.caption)}</p>}<PortableText value={record(section.media) ? section.media.transcript : undefined} /></>);
-  if (type === "timelineSection") return shell(<ol className="grid gap-5 md:grid-cols-3">{(Array.isArray(section.steps) ? section.steps : []).filter(record).map((step, stepIndex) => <li key={stepIndex} className="border-t-2 border-[hsl(var(--brand-coral))] pt-4"><strong>{text(step.label)}</strong><p className="mt-2 text-sm text-muted-foreground">{text(step.detail)}</p></li>)}</ol>);
-  if (type === "comparisonSection") return shell(<div className="grid gap-6 md:grid-cols-2"><div className="bg-muted/40 p-6"><h3 className="font-semibold">Before</h3><p className="mt-3">{text(section.before)}</p></div><div className="bg-[hsl(var(--brand-deep))] p-6 text-white"><h3 className="font-semibold">After</h3><p className="mt-3 text-white/80">{text(section.after)}</p></div></div>);
-  if (type === "ctaSection") return shell(<><PortableText value={section.body} /><div className="mt-8"><Action value={section.action} /></div></>);
-  if (type === "faqSection") return shell(<div className="divide-y divide-border">{(Array.isArray(section.items) ? section.items : []).filter(record).map((item, itemIndex) => <details key={itemIndex} className="py-5"><summary className="cursor-pointer font-semibold">{text(item.question)}</summary><div className="mt-3"><PortableText value={item.answer} /></div></details>)}</div>);
-  if (type === "downloadGateSection") {
+  if (type === "quote") return shell(<blockquote className="max-w-4xl font-display text-2xl leading-relaxed text-[hsl(var(--brand-deep))]">“{text(section.quote)}”</blockquote>);
+  if (type === "media") return shell(<><Media value={section.media} market={market} contentSlug={contentSlug} />{record(section.media) && text(section.media.caption) && <p className="mt-3 text-sm text-muted-foreground">{text(section.media.caption)}</p>}<PortableText value={record(section.media) ? section.media.transcript : undefined} /></>);
+  if (type === "timeline") return shell(<ol className="grid gap-5 md:grid-cols-3">{(Array.isArray(section.steps) ? section.steps : []).filter(record).map((step, stepIndex) => <li key={stepIndex} className="border-t-2 border-[hsl(var(--brand-coral))] pt-4"><strong>{text(step.label)}</strong><p className="mt-2 text-sm text-muted-foreground">{text(step.detail)}</p></li>)}</ol>);
+  if (type === "comparison") return shell(<div className="grid gap-6 md:grid-cols-2"><div className="bg-muted/40 p-6"><h3 className="font-semibold">Before</h3><p className="mt-3">{text(section.before)}</p></div><div className="bg-[hsl(var(--brand-deep))] p-6 text-white"><h3 className="font-semibold">After</h3><p className="mt-3 text-white/80">{text(section.after)}</p></div></div>);
+  if (type === "cta") return shell(<><PortableText value={section.body} /><div className="mt-8"><Action value={section.action} /></div></>);
+  if (type === "faq") return shell(<div className="divide-y divide-border">{(Array.isArray(section.items) ? section.items : []).filter(record).map((item, itemIndex) => <details key={itemIndex} className="py-5"><summary className="cursor-pointer font-semibold">{text(item.question)}</summary><div className="mt-3"><PortableText value={item.answer} /></div></details>)}</div>);
+  if (type === "downloadGate") {
     const asset = record(section.asset) ? section.asset : undefined;
-    const href = safeHref(asset?.url);
-    return shell(<><p className="mb-5 text-muted-foreground">{text(section.consentCopy)}</p>{href?.startsWith("https:") && <a className="font-bold text-[hsl(var(--brand-pink))] underline" href={href} download onClick={() => trackEvent("governed_download_clicked", {
+    const href = cmsMediaHref(asset?.url);
+    return shell(<><p className="mb-5 text-muted-foreground">{text(section.consentCopy)}</p>{href && <a className="font-bold text-[hsl(var(--brand-pink))] underline" href={href} download onClick={() => trackEvent("governed_download_clicked", {
       market,
       source_page: window.location.pathname,
       content_slug: contentSlug,
@@ -144,12 +151,12 @@ function Section({ section, index, market, contentSlug }: { section: UnknownReco
       delivery_source: "cms_download_gate",
     })}>Download {text(asset?.title) ?? "asset"}</a>}</>);
   }
-  if (type === "formSlotSection") {
+  if (type === "formSlot") {
     if (section.form === "contact") return shell(<ContactForm />);
     if (section.form === "valueScan") return shell(<ValueScanForm />);
     return null;
   }
-  if (type === "referenceGridSection") return shell(
+  if (type === "referenceGrid") return shell(
     <div className="grid gap-5 md:grid-cols-3">
       {(Array.isArray(section.items) ? section.items : []).filter(record).map((item, itemIndex) => {
         const href = linkHref({ internal: item });
@@ -172,7 +179,7 @@ function Section({ section, index, market, contentSlug }: { section: UnknownReco
       })}
     </div>,
   );
-  return <div key={index} />;
+  return null;
 }
 
 function seoText(seo: UnknownRecord | undefined, key: string): string | undefined {
@@ -241,7 +248,7 @@ export function CmsPageRenderer({ page, preview = false }: { page: CmsPage; prev
     });
   }, [market, page.revision, page.slug, preview]);
 
-  return <div data-testid="cms-page" data-cms-revision={page.revision}>{page.sections.filter(record).map((section, index) => <Section key={text(section._key) ?? `${text(section._type)}-${index}`} section={section} index={index} market={market} contentSlug={page.slug} />)}</div>;
+  return <div data-testid="cms-page" data-cms-revision={page.revision}>{page.sections.filter(record).map((section, index) => <Section key={text(section.id) ?? `${text(section.type)}-${index}`} section={section} index={index} market={market} contentSlug={page.slug} />)}</div>;
 }
 
 export const approvedCmsSectionTypes = approvedSections;

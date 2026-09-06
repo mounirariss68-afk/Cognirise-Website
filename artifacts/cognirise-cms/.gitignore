@@ -1,4 +1,0 @@
-.sanity/
-dist/
-schema.json
-src/sanity.types.ts

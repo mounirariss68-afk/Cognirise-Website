@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   AssistantFailure,
   ASSISTANT_POLICY_VERSION,
-  assistantOperations,
+  assistantDecisionGuard,
   buildGroundedPrompt,
   estimatedProviderCostMicros,
   parseAssistantInput,
@@ -45,6 +45,12 @@ test("assistant input is closed, bounded, and market-scoped", () => {
   assert.equal(parseAssistantInput({ ...input, market: "global" }), undefined);
 });
 
+test("assistant decisions reject the requesting actor and stale revision targets", () => {
+  assert.equal(assistantDecisionGuard("author", "author", "revision-1", "revision-1", "revision-1"), "self_decision");
+  assert.equal(assistantDecisionGuard("author", "reviewer", "revision-2", "revision-1", "revision-1"), "stale_target");
+  assert.equal(assistantDecisionGuard("author", "reviewer", "revision-1", "revision-1", "revision-1"), undefined);
+});
+
 test("assistant operations use dedicated target fields", () => {
   assert.equal(parseAssistantInput({
     ...input,
@@ -58,58 +64,30 @@ test("assistant operations use dedicated target fields", () => {
   }), undefined);
 });
 
-test("representative evaluations cover every operation, market, and content type", () => {
+test("editorial console operations accept supported target kinds and fields", () => {
   const evaluations = [
-    ["draft-generation", "uae", "globalSettings", "organization.name", "Approved organization name"],
     ["summary", "ksa", "page", "summary", "Approved page summary"],
     ["report-abstract", "turkiye", "publication", "dek", "Approved report abstract"],
-    ["transcript-cleanup", "europe", "mediaAsset", "transcript", "Approved transcript wording"],
-    ["chapters", "uae", "mediaAsset", "chapterNotes", "00:00 Opening chapter"],
-    ["newsletter-variants", "ksa", "publication", "newsletterVariants", "Approved subject one — Approved preheader one\nApproved subject two — Approved preheader two\nApproved subject three — Approved preheader three"],
-    ["market-adaptation", "turkiye", "page", 'marketEditions[_key=="turkiye"].summary', "Approved Türkiye summary"],
-    ["translation", "europe", "person", 'marketEditions[_key=="europe"].role', "الدور المعتمد"],
-    ["seo-metadata", "uae", "globalSettings", "defaultSeo.metaDescription", "Approved SEO description"],
-    ["tags", "ksa", "page", "topics", "Capability, learning"],
-    ["alt-text", "turkiye", "mediaAsset", "altText", "Facilitator beside a workshop board"],
-    ["internal-links", "europe", "publication", "internalLinkSuggestions", "[Approved insight](/insights)"],
-    ["quality-review", "uae", "proof", "context", "Approved proof context"],
-    ["rewrite", "ksa", "claim", "statement", "Approved claim statement"],
-    ["rewrite", "turkiye", "navigation", "title", "Approved navigation title"],
-    ["rewrite", "europe", "organization", "name", "Approved organization name"],
+    ["seo-metadata", "uae", "page", "seo.metaDescription", "Approved SEO description"],
+    ["quality-review", "europe", "person", "role", "Approved role"],
+    ["rewrite", "ksa", "organization", "website", "Approved website"],
   ] as const;
   assert.deepEqual(
     new Set(evaluations.map(([operation]) => operation)),
-    new Set(assistantOperations),
-  );
-  assert.deepEqual(
-    new Set(evaluations.map(([, market]) => market)),
-    new Set(["uae", "ksa", "turkiye", "europe"]),
-  );
-  assert.deepEqual(
-    new Set(evaluations.map(([, , contentType]) => contentType)),
-    new Set([
-      "globalSettings", "page", "navigation", "publication", "person",
-      "organization", "proof", "claim", "mediaAsset",
-    ]),
+    new Set(["summary", "report-abstract", "seo-metadata", "quality-review", "rewrite"]),
   );
   for (const [operation, market, contentType, fieldPath, suggestion] of evaluations) {
-    const approvedQuote = operation === "translation"
-      ? "Approved role description"
-      : operation === "internal-links"
-        ? "[Approved insight]"
-        : suggestion;
+    const approvedQuote = suggestion;
     const candidate = parseAssistantInput({
       ...input,
       requestId: `evaluation_${operation.replaceAll("-", "_")}`,
       market,
       operation,
-      draft: ["draft-generation", "summary", "report-abstract", "chapters",
-        "newsletter-variants", "market-adaptation", "translation", "seo-metadata",
-        "tags", "alt-text", "internal-links"].includes(operation) ? "" : suggestion,
+      draft: suggestion,
       target: {
         fieldPath,
         contentType,
-        language: operation === "translation" ? "ar" : "en",
+        language: "en",
         maxLength: 500,
         revisionId: "evaluation-revision",
       },
@@ -119,7 +97,7 @@ test("representative evaluations cover every operation, market, and content type
     const output = validateOutput({
       suggestion,
       citations: [{
-        claim: operation === "internal-links" ? "[Approved insight]" : suggestion,
+        claim: suggestion,
         sourceId: source.id,
         quote: approvedQuote,
       }],

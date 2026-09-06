@@ -49,6 +49,8 @@ export const cmsPreviewTokenNoncesTable = pgTable("cms_preview_token_nonces", {
 /** Idempotency key ledger for trusted workflow mutations. */
 export const cmsWorkflowReceiptsTable = pgTable("cms_workflow_receipts", {
   requestId: text("request_id").primaryKey(),
+  /** SHA-256 of the complete canonical transition identity. Legacy nulls conflict. */
+  requestDigest: text("request_digest"),
   action: text("action").notNull(),
   subjectId: text("subject_id").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

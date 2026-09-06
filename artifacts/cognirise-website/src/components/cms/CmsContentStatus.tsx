@@ -6,11 +6,10 @@ export function CmsContentStatus({ pathname }: { pathname: string }) {
   const isPreviewRoute = pathname.startsWith("/preview/");
   const { state } = useCmsPublishedPage(market, pathname, !isPreviewRoute);
 
-  if (isPreviewRoute || (!state.marketFallback && state.source !== "migration-fallback")) return null;
+  if (isPreviewRoute || !state?.marketFallback) return null;
 
-  const message = state.marketFallback
-    ? `Regional content is using the ${state.resolvedMarket?.toUpperCase() ?? "default"} market fallback.`
-    : "Showing the verified website content fallback.";
+  const message =
+    `Regional content is using the ${state.resolvedMarket?.toUpperCase() ?? "UAE"} market fallback.`;
 
   return (
     <p
