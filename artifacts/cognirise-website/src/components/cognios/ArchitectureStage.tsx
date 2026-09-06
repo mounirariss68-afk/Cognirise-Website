@@ -27,6 +27,7 @@ export function ArchitectureStage() {
   const validComponent = validLayer?.components.find((component) => component.id === params.get("component"));
   const layerId = validLayer?.id ?? null;
   const componentId = validComponent?.id ?? null;
+  const activeLevel = componentId ? 2 : layerId ? 1 : 0;
   const [lens, setLens] = useState<Lens>(viewParam === "security" ? "security" : "capability");
   const [contextSelection, setContextSelection] = useState<ContextSelection>(null);
   const reducedMotion = useReducedMotion();
@@ -91,7 +92,7 @@ export function ArchitectureStage() {
   }, [componentId, layerId]);
 
   return (
-    <section className="co-architecture-stage" ref={stageRef} aria-label="Interactive CogniOS reference architecture">
+    <section className="co-architecture-stage" ref={stageRef} aria-label="Interactive CogniOS reference architecture" data-testid="architecture-stage">
       <header className="co-architecture-head">
         <div>
           <span className="co-architecture-kicker">CogniOS / reference architecture</span>
@@ -105,6 +106,7 @@ export function ArchitectureStage() {
               className={lens === item ? "is-active" : ""}
               aria-pressed={lens === item}
               onClick={() => selectLens(item)}
+              data-testid={`lens-${item}`}
             >
               {item} view
             </button>
@@ -122,90 +124,106 @@ export function ArchitectureStage() {
         ))}
       </div>
 
-      <div className="co-system-boundary">
+      <div className="co-system-boundary" data-testid="system-boundary">
         <div className="co-boundary-label">
           <span>CogniOS / operating-system boundary</span>
-          <span>{lens === "capability" ? "Layer → component → detail" : "Layer → principle → controls"}</span>
+          <div className="co-level-track" aria-label={`Architecture level L${activeLevel}`} data-testid="architecture-level">
+            <span className={activeLevel === 0 ? "is-active" : ""}>L0 System</span>
+            <i aria-hidden="true">→</i>
+            <span className={activeLevel === 1 ? "is-active" : ""}>L1 Layer</span>
+            <i aria-hidden="true">→</i>
+            <span className={activeLevel === 2 ? "is-active" : ""}>L2 Component</span>
+          </div>
         </div>
 
-        <Spine
-          side="left"
-          spine={architectureSpines[1]}
-          active={contextSelection?.type === "spine" && contextSelection.id === architectureSpines[1].id}
-          onSelect={() => setContextSelection({ type: "spine", id: architectureSpines[1].id })}
-        />
+        <div className="co-system-grid">
+          <Spine
+            side="left"
+            spine={architectureSpines[1]}
+            active={contextSelection?.type === "spine" && contextSelection.id === architectureSpines[1].id}
+            onSelect={() => setContextSelection({ type: "spine", id: architectureSpines[1].id })}
+          />
 
-        <div className={`co-system-layers ${layerId ? "has-focus" : ""}`}>
-          {architectureLayers.map((layer) => {
-            const active = layer.id === layerId;
-            const quiet = Boolean(layerId && !active);
-            return (
-              <article
-                key={layer.id}
-                className={`coa-layer ${active ? "is-active" : ""} ${quiet ? "is-quiet" : ""}`}
-                data-testid={`stage-layer-${layer.id}`}
-              >
-                <button
-                  ref={(element) => {
-                    layerRefs.current[layer.id] = element;
-                  }}
-                  type="button"
-                  className="coa-layer-plane"
-                  aria-expanded={active}
-                  aria-controls={active ? `architecture-layer-${layer.id}` : undefined}
-                  onClick={() => {
-                    setContextSelection(null);
-                    setArchitectureState(active ? null : layer.id, null);
-                  }}
+          <div className={`co-system-layers ${layerId ? "has-focus" : ""}`}>
+            {architectureLayers.map((layer) => {
+              const active = layer.id === layerId;
+              const quiet = Boolean(layerId && !active);
+              return (
+                <article
+                  key={layer.id}
+                  className={`coa-layer ${active ? "is-active" : ""} ${quiet ? "is-quiet" : ""}`}
+                  data-testid={`stage-layer-${layer.id}`}
                 >
-                  <span className="coa-layer-number">{layer.number}</span>
-                  <span className="coa-layer-heading">
-                    <strong>{layer.name}</strong>
-                    <small>{lens === "capability" ? layer.responsibility : layer.principle}</small>
-                  </span>
-                  <EngineMark engine={layer.engine} />
-                  <span className="coa-layer-count">
-                    {lens === "capability" ? `${layer.components.length} components` : `${layer.controls.length} controls`}
-                  </span>
-                  <span className="coa-layer-action" aria-hidden="true">
-                    {active ? <X size={16} /> : <ArrowRight size={16} />}
-                  </span>
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {active && (
-                    <motion.div
-                      id={`architecture-layer-${layer.id}`}
-                      className="coa-layer-reconfiguration"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: reducedMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      {lens === "capability" ? (
-                        <CapabilityStudy
-                          layer={layer}
-                          selected={componentId}
-                          componentRefs={componentRefs}
-                          onSelect={(id) => setArchitectureState(layer.id, componentId === id ? null : id)}
-                        />
+                  <button
+                    ref={(element) => {
+                      layerRefs.current[layer.id] = element;
+                    }}
+                    type="button"
+                    className="coa-layer-plane"
+                    aria-expanded={active}
+                    aria-controls={active ? `architecture-layer-${layer.id}` : undefined}
+                    onClick={() => {
+                      setContextSelection(null);
+                      setArchitectureState(active ? null : layer.id, null);
+                    }}
+                    data-testid={`layer-btn-${layer.id}`}
+                  >
+                    <span className="coa-layer-number">{layer.number}</span>
+                    <div className="coa-layer-heading">
+                      <strong>{layer.name}</strong>
+                      <small>{lens === "capability" ? layer.responsibility : layer.principle}</small>
+                    </div>
+                    <div className="coa-layer-meta">
+                      <EngineMark engine={layer.engine} />
+                      <span className="coa-layer-count">
+                        {lens === "capability" ? `${layer.components.length} components` : `${layer.controls.length} controls`}
+                      </span>
+                    </div>
+                    <span className="coa-layer-action" aria-hidden="true">
+                      {active ? (
+                        <span className="coa-close-badge" data-testid={`close-layer-${layer.id}`}><X size={12} /> CLOSE</span>
                       ) : (
-                        <SecurityStudy layer={layer} />
+                        <ArrowRight size={16} />
                       )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </article>
-            );
-          })}
-        </div>
+                    </span>
+                  </button>
 
-        <Spine
-          side="right"
-          spine={architectureSpines[0]}
-          active={contextSelection?.type === "spine" && contextSelection.id === architectureSpines[0].id}
-          onSelect={() => setContextSelection({ type: "spine", id: architectureSpines[0].id })}
-        />
+                  <AnimatePresence initial={false}>
+                    {active && (
+                      <motion.div
+                        id={`architecture-layer-${layer.id}`}
+                        className="coa-layer-reconfiguration"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: reducedMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] }}
+                        data-testid={`layer-content-${layer.id}`}
+                      >
+                        {lens === "capability" ? (
+                          <CapabilityStudy
+                            layer={layer}
+                            selected={componentId}
+                            componentRefs={componentRefs}
+                            onSelect={(id) => setArchitectureState(layer.id, componentId === id ? null : id)}
+                          />
+                        ) : (
+                          <SecurityStudy layer={layer} />
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </article>
+              );
+            })}
+          </div>
+
+          <Spine
+            side="right"
+            spine={architectureSpines[0]}
+            active={contextSelection?.type === "spine" && contextSelection.id === architectureSpines[0].id}
+            onSelect={() => setContextSelection({ type: "spine", id: architectureSpines[0].id })}
+          />
+        </div>
       </div>
 
       <div className="co-requirements" aria-label="Cross-cutting architecture requirements">
@@ -215,6 +233,7 @@ export function ArchitectureStage() {
             key={requirement.id}
             className={contextSelection?.type === "requirement" && contextSelection.id === requirement.id ? "is-active" : ""}
             onClick={() => setContextSelection({ type: "requirement", id: requirement.id })}
+            data-testid={`req-btn-${requirement.id}`}
           >
             <span>0{index + 1}</span>
             <strong>{requirement.name}</strong>
@@ -259,10 +278,11 @@ function Spine({
       className={`coa-spine coa-spine-${side} ${active ? "is-active" : ""}`}
       aria-pressed={active}
       onClick={onSelect}
+      data-testid={`spine-btn-${spine.id}`}
     >
-      <span>{spine.number}</span>
+      <span className="coa-spine-letter">{spine.number}</span>
       <strong>{spine.name}</strong>
-      <ArrowRight size={14} />
+      <ArrowRight size={14} className="coa-spine-arrow" />
     </button>
   );
 }
@@ -291,7 +311,7 @@ function CapabilityStudy({
 }) {
   const selectedComponent = layer.components.find((component) => component.id === selected);
   return (
-    <div className={`co-capability-study ${selectedComponent ? "has-detail is-l3" : "is-l2"}`}>
+    <div className={`co-capability-study ${selectedComponent ? "has-detail is-l3" : "is-l2"}`} data-testid="capability-study">
        <div className="co-component-rail" aria-label={`${layer.name} components`}>
         {layer.components.map((component, index) => {
           const active = component.id === selected;
@@ -306,13 +326,16 @@ function CapabilityStudy({
               aria-expanded={active}
               aria-controls={active ? `architecture-component-${component.id}` : undefined}
               onClick={() => onSelect(component.id)}
+              data-testid={`component-btn-${component.id}`}
             >
               <span className="co-component-index">{String(index + 1).padStart(2, "0")}</span>
-              <span>
+              <div className="co-component-heading">
                 <strong>{component.name}</strong>
                 <small>{component.responsibility}</small>
-              </span>
-              <EngineMark engine={component.engine} />
+              </div>
+              <div className="co-component-meta">
+                <EngineMark engine={component.engine} />
+              </div>
               <ChevronDown size={15} className="co-component-chevron" />
             </button>
           );
@@ -324,6 +347,7 @@ function CapabilityStudy({
             key={selectedComponent.id}
             layer={layer}
             component={selectedComponent}
+            onClose={() => onSelect(selectedComponent.id)}
           />
         )}
       </AnimatePresence>
@@ -334,7 +358,8 @@ function CapabilityStudy({
 const ComponentDetail = React.forwardRef<HTMLElement, {
   layer: ArchitectureLayer;
   component: ArchitectureComponent;
-}>(function ComponentDetail({ layer, component }, ref) {
+  onClose: () => void;
+}>(function ComponentDetail({ layer, component, onClose }, ref) {
   const reducedMotion = useReducedMotion();
   return (
     <motion.aside
@@ -345,8 +370,14 @@ const ComponentDetail = React.forwardRef<HTMLElement, {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: reducedMotion ? 0 : 12 }}
       transition={{ duration: reducedMotion ? 0 : 0.25 }}
+      data-testid={`component-detail-${component.id}`}
     >
-      <span className="co-detail-crumb">Architecture / {layer.name} / component</span>
+      <header className="co-detail-header">
+        <span className="co-detail-crumb">Architecture / {layer.name} / component</span>
+        <button className="co-detail-close" onClick={onClose} aria-label="Close component detail" data-testid="close-detail-btn">
+          <X size={16} />
+        </button>
+      </header>
       <h3>{component.name}</h3>
       <p className="co-detail-responsibility">{component.responsibility}</p>
       {component.engine && (
@@ -408,8 +439,9 @@ function ContextStudy({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: reducedMotion ? 0 : 8 }}
       transition={{ duration: reducedMotion ? 0 : 0.24 }}
+      data-testid={`context-study-${selection.id}`}
     >
-      <button type="button" onClick={onClose} aria-label="Close architecture note"><X size={16} /></button>
+      <button type="button" onClick={onClose} aria-label="Close architecture note" data-testid="close-context-btn"><X size={16} /></button>
       <span>{spine ? "Cross-cutting spine" : "Cross-cutting requirement"}</span>
       <h3>{spine?.name ?? requirement?.name}</h3>
       <p>{spine?.description ?? requirement?.description}</p>
