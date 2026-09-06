@@ -20,15 +20,9 @@ source_uri = "file://deliverables/cognirise-website-redesign-plan.md"
 id = "wSBKnawYcHLeW2DCeJGmZ"
 uri = "file://.local/outputs/Cognirise-Pulse-PowerPoint-Template.pptx"
 type = "slides"
-title = "Cognirise Pulse PowerPoint Template (PPTX)"
+title = "Cognirise Pulse PowerPoint Template.pptx"
 description = "Updated PowerPoint with the editable five-flow slide and high-resolution human–AI split portrait layouts."
 logical_id = "b1dfe669-6da3-490a-b000-7e75d6de8b8b"
-content_hash = "sha256:070c6cbe14319246cb686c65c3a86d963f6c57f1048ab3c40a74909eee49584a"
-size = 37622083
-mtime_ms = 1788673225529
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b1dfe669-6da3-490a-b000-7e75d6de8b8b/0dd624a6-e708-4a46-a324-8ce550a8fe8e"
-storage_version_token = "1788673227107408"
-content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 
 [[outputs]]
 id = "vYBd6HWtLZ6NFNMKqudNc"
