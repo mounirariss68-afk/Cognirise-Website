@@ -7,4 +7,4 @@ Database mutations performed while developing a task are not the durable deliver
 
 **Why:** A CMS cutover completed and verified against an isolated task database, but the merged main database remained empty because post-merge setup applied only the schema. The committed report therefore described the task environment rather than the main environment.
 
-**How to apply:** For future governed data migrations, ship a production-blocked reconciliation command alongside the migration. Distinguish absent, complete, and partial states; verify a first application fully; preserve later editorial changes on complete replays; and fail visibly on partial or conflicting state.
+**How to apply:** For future governed data migrations, ship a production-blocked reconciliation command alongside the migration. Verify a first application fully; allow expanded manifests to append operations only when every existing receipt still matches a live subject; preserve later editorial changes; and fail visibly on conflicts, missing subjects, or incomplete application.
