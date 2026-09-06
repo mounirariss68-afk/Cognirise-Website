@@ -164,6 +164,7 @@ export function ArchitectureStage() {
                   }}
                   type="button"
                   className="coa-layer-plane"
+                   aria-label={active ? `Close ${layer.name} and show all architecture layers` : `Open ${layer.name}`}
                   aria-expanded={active}
                   aria-controls={active ? `architecture-layer-${layer.id}` : undefined}
                   onClick={() => {
@@ -184,9 +185,22 @@ export function ArchitectureStage() {
                     {lens === "capability" ? `${layer.components.length} components` : `${layer.controls.length} controls`}
                   </span>
                   <span className="coa-layer-action" aria-hidden="true">
-                    {active ? <X size={16} /> : <ArrowRight size={16} />}
+                     {!active && <ArrowRight size={16} />}
                   </span>
                 </button>
+                 {active && (
+                   <button
+                     type="button"
+                     className="coa-layer-close"
+                     aria-label={`Close ${layer.name} and show all architecture layers`}
+                     onClick={() => {
+                       setContextSelection(null);
+                       setArchitectureState(null, null);
+                     }}
+                   >
+                     <X size={16} />
+                   </button>
+                 )}
 
                 <AnimatePresence initial={false}>
                   {active && (
@@ -204,6 +218,7 @@ export function ArchitectureStage() {
                           selected={componentId}
                           componentRefs={componentRefs}
                           onSelect={(id) => setArchitectureState(layer.id, componentId === id ? null : id)}
+                         onCloseDetail={() => setArchitectureState(layer.id, null)}
                         />
                       ) : (
                         <SecurityStudy layer={layer} />
@@ -300,11 +315,13 @@ function CapabilityStudy({
   selected,
   onSelect,
   componentRefs,
+  onCloseDetail,
 }: {
   layer: ArchitectureLayer;
   selected: string | null;
   onSelect: (id: string) => void;
   componentRefs: React.MutableRefObject<Record<string, HTMLButtonElement | null>>;
+  onCloseDetail: () => void;
 }) {
   const selectedComponent = layer.components.find((component) => component.id === selected);
   return (
@@ -341,6 +358,7 @@ function CapabilityStudy({
             key={selectedComponent.id}
             layer={layer}
             component={selectedComponent}
+             onClose={onCloseDetail}
           />
         )}
       </AnimatePresence>
@@ -351,7 +369,8 @@ function CapabilityStudy({
 const ComponentDetail = React.forwardRef<HTMLElement, {
   layer: ArchitectureLayer;
   component: ArchitectureComponent;
-}>(function ComponentDetail({ layer, component }, ref) {
+  onClose: () => void;
+}>(function ComponentDetail({ layer, component, onClose }, ref) {
   const reducedMotion = useReducedMotion();
   return (
     <motion.aside
@@ -363,6 +382,14 @@ const ComponentDetail = React.forwardRef<HTMLElement, {
       exit={{ opacity: 0, x: reducedMotion ? 0 : 12 }}
       transition={{ duration: reducedMotion ? 0 : 0.25 }}
     >
+      <button
+        type="button"
+        className="co-component-detail-close"
+        aria-label={`Close ${component.name} detail and return to ${layer.name} components`}
+        onClick={onClose}
+      >
+        <X size={17} />
+      </button>
       <span className="co-detail-crumb">Architecture / {layer.name} / component</span>
       <h3>{component.name}</h3>
       <p className="co-detail-responsibility">{component.responsibility}</p>
