@@ -8,6 +8,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "cms:inventory": "tsx ./src/cms/inventory.ts",
     "cms:import": "tsx ./src/cms/import.ts",
+    "cms:reconcile": "tsx ./src/cms/reconcile.ts",
     "cms:verify": "tsx ./src/cms/verify.ts",
     "cms:backup": "tsx ./src/cms/backup.ts",
     "cms:verify-backup": "tsx ./src/cms/verify-backup.ts",

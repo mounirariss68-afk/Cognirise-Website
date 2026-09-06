@@ -33,9 +33,13 @@ pnpm --filter @workspace/scripts cms:import -- --apply-db --target=development -
 pnpm --filter @workspace/scripts cms:import -- --apply-db --target=development --defer-media-upload --write
 # Verify document, revision, audit, receipt, and migration-account parity in that database.
 pnpm --filter @workspace/scripts cms:verify -- --db
+# Reconcile an empty development database after a merge; complete imports are left unchanged.
+pnpm --filter @workspace/scripts cms:reconcile
 ```
 
 `cms:inventory` deterministically extracts the complete public fields for five people, five partners, five platforms, and three articles and reconciles 22 governed assets. `cms:import` creates payload-only operations by default. With the development safeguard, it idempotently creates UAE/English draft editions, exact revision media references, immutable media versions, redacted audits, and receipts. The suspended migration identity has no credential or session. Migrated claims and media remain drafts/pending review. `cms:verify -- --db --write` proves row, digest, payload, media-version, reference, receipt, audit, and draft-isolation parity and writes the cutover report.
+
+Post-merge setup runs `cms:reconcile` after applying the schema. On an empty database, reconciliation imports deferred-media drafts and runs full database parity verification. On later merges, it validates the immutable receipt digests and their document/media subjects, then leaves current editorial workflow and publication state untouched. A partial import, digest conflict, or missing receipt subject fails setup for operator review instead of attempting destructive repair.
 
 Generated payload writing is restricted to `scripts/cms/output/`. Database mutation is restricted to the explicit `cms:import -- --apply-db` path and requires `DATABASE_URL`. Review every `needs-review` item before approval or publication. Never treat this inventory as approval for claims, image rights, sources, or market visibility.
 
