@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://cognirise.ai/api/cms/sitemap.xml
+Sitemap: https://cognirise.ai/sitemap.xml

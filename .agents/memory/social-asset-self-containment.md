@@ -7,4 +7,4 @@ Downloadable social SVG masters must embed their raster imagery as data URIs rat
 
 **Why:** An SVG can load correctly as a document while its external images disappear when that SVG is rendered through an image element or opened away from the preview server. The failure leaves typography and overlays on an empty field and can survive source-only checks.
 
-**How to apply:** Validate an explicit delivery manifest rather than every SVG in a shared folder: image-led exports must have decoded, production-scale embedded imagery and matching PNGs, while intentional live-copy SVG-only masters follow their separate handoff contract. Confirm expected PNG dimensions, inspect a contact sheet, and package the exact declared SVG/PNG/readme set.
+**How to apply:** For image-led social exports, verify there are no environment-specific image references, confirm the expected number and dimensions of PNG renders, inspect a contact sheet, and package self-contained SVGs with their matching PNGs.

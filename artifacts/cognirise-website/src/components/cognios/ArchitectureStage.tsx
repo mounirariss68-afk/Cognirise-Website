@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ChevronDown, X } from "lucide-react";
-import { useSearch } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import {
   architectureEngines,
   architectureLayers,
@@ -20,6 +20,7 @@ const engineFor = (name?: string) =>
 
 export function ArchitectureStage() {
   const search = useSearch();
+  const [location, setLocation] = useLocation();
   const params = new URLSearchParams(search);
   const viewParam = params.get("view");
   const validLayer = architectureLayers.find((layer) => layer.id === params.get("layer"));
@@ -32,47 +33,23 @@ export function ArchitectureStage() {
   const stageRef = useRef<HTMLDivElement>(null);
   const layerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const componentRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const requestedFocus = useRef<{ type: "layer" | "component"; id: string } | null>(null);
   const previousLayer = useRef(layerId);
   const previousComponent = useRef(componentId);
-  const initialArchitectureState = useRef({ hasHash: window.location.hash === "#architecture", layerId });
 
-  const setArchitectureState = useCallback((
-    nextLayer: string | null,
-    nextComponent: string | null,
-    options?: { replace?: boolean },
-  ) => {
+  const setArchitectureState = (nextLayer: string | null, nextComponent: string | null) => {
     const next = new URLSearchParams(search);
     if (nextLayer) next.set("layer", nextLayer);
     else next.delete("layer");
     if (nextComponent) next.set("component", nextComponent);
     else next.delete("component");
     const query = next.toString();
-    const href = `${window.location.pathname}${query ? `?${query}` : ""}#architecture`;
-    window.history[options?.replace ? "replaceState" : "pushState"](
-      window.history.state,
-      "",
-      href,
-    );
-    window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
-  }, [search]);
-
-  const closeLayer = useCallback(() => {
-    if (layerId) requestedFocus.current = { type: "layer", id: layerId };
-    setContextSelection(null);
-    setArchitectureState(null, null, { replace: true });
-  }, [layerId, setArchitectureState]);
-
-  const closeComponent = useCallback(() => {
-    if (componentId) requestedFocus.current = { type: "component", id: componentId };
-    setContextSelection(null);
-    setArchitectureState(layerId, null, { replace: true });
-  }, [componentId, layerId, setArchitectureState]);
+    setLocation(`${location.split("?")[0]}${query ? `?${query}` : ""}#architecture`);
+  };
 
   const selectLens = (nextLens: Lens) => {
     setLens(nextLens);
     setContextSelection(null);
-    const next = new URLSearchParams(window.location.search);
+    const next = new URLSearchParams(search);
     if (nextLens === "security") {
       next.set("view", "security");
       next.delete("component");
@@ -80,9 +57,7 @@ export function ArchitectureStage() {
       next.delete("view");
     }
     const query = next.toString();
-    const href = `${window.location.pathname}${query ? `?${query}` : ""}#architecture`;
-    window.history.pushState(window.history.state, "", href);
-    window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
+    setLocation(`${location.split("?")[0]}${query ? `?${query}` : ""}#architecture`);
   };
 
   useEffect(() => {
@@ -90,52 +65,30 @@ export function ArchitectureStage() {
   }, [viewParam]);
 
   useEffect(() => {
-    if (!initialArchitectureState.current.hasHash && !initialArchitectureState.current.layerId) return;
+    if (window.location.hash !== "#architecture" && !layerId) return;
     const scrollToStage = () => stageRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
     scrollToStage();
     const settleTimer = window.setTimeout(scrollToStage, 500);
     return () => window.clearTimeout(settleTimer);
-  }, []);
+  }, [layerId]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       if (contextSelection) setContextSelection(null);
-      else if (componentId) closeComponent();
-      else if (layerId) closeLayer();
+      else if (componentId) setArchitectureState(layerId, null);
+      else if (layerId) setArchitectureState(null, null);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [closeComponent, closeLayer, componentId, contextSelection, layerId]);
+  }, [componentId, contextSelection, layerId, location, search]);
 
   useEffect(() => {
-    const priorComponent = previousComponent.current;
-    const priorLayer = previousLayer.current;
-    const focusRequest = requestedFocus.current;
-    requestedFocus.current = null;
-    const focusDelay = reducedMotion ? 0 : 80;
-    const focusTimer = window.setTimeout(() => {
-      if (focusRequest?.type === "component") {
-        componentRefs.current[focusRequest.id]?.focus();
-        return;
-      }
-      if (focusRequest?.type === "layer") {
-        layerRefs.current[focusRequest.id]?.focus();
-        return;
-      }
-      const currentFocus = document.activeElement;
-      if (
-        currentFocus &&
-        currentFocus !== document.body &&
-        stageRef.current?.contains(currentFocus)
-      ) return;
-      if (priorComponent && !componentId && priorLayer === layerId) componentRefs.current[priorComponent]?.focus();
-      else if (priorLayer && !layerId) layerRefs.current[priorLayer]?.focus();
-    }, focusDelay);
+    if (previousComponent.current && !componentId) componentRefs.current[previousComponent.current]?.focus();
+    if (previousLayer.current && !layerId) layerRefs.current[previousLayer.current]?.focus();
     previousComponent.current = componentId;
     previousLayer.current = layerId;
-    return () => window.clearTimeout(focusTimer);
-  }, [componentId, layerId, reducedMotion]);
+  }, [componentId, layerId]);
 
   return (
     <section className="co-architecture-stage" ref={stageRef} aria-label="Interactive CogniOS reference architecture">
@@ -175,17 +128,12 @@ export function ArchitectureStage() {
           <span>{lens === "capability" ? "Layer → component → detail" : "Layer → principle → controls"}</span>
         </div>
 
-        <div className="coa-spine-field" aria-label="Continuous control spines">
-          {architectureSpines.map((spine, index) => (
-            <Spine
-              key={spine.id}
-              side={index === 0 ? "left" : "right"}
-              spine={spine}
-              active={contextSelection?.type === "spine" && contextSelection.id === spine.id}
-              onSelect={() => setContextSelection({ type: "spine", id: spine.id })}
-            />
-          ))}
-        </div>
+        <Spine
+          side="left"
+          spine={architectureSpines[1]}
+          active={contextSelection?.type === "spine" && contextSelection.id === architectureSpines[1].id}
+          onSelect={() => setContextSelection({ type: "spine", id: architectureSpines[1].id })}
+        />
 
         <div className={`co-system-layers ${layerId ? "has-focus" : ""}`}>
           {architectureLayers.map((layer) => {
@@ -203,13 +151,11 @@ export function ArchitectureStage() {
                   }}
                   type="button"
                   className="coa-layer-plane"
-                   aria-label={active ? `${layer.name} selected` : `Open ${layer.name}`}
                   aria-expanded={active}
                   aria-controls={active ? `architecture-layer-${layer.id}` : undefined}
                   onClick={() => {
-                     if (active) return;
                     setContextSelection(null);
-                     setArchitectureState(layer.id, null);
+                    setArchitectureState(active ? null : layer.id, null);
                   }}
                 >
                   <span className="coa-layer-number">{layer.number}</span>
@@ -217,45 +163,23 @@ export function ArchitectureStage() {
                     <strong>{layer.name}</strong>
                     <small>{lens === "capability" ? layer.responsibility : layer.principle}</small>
                   </span>
-                   <span className="coa-component-presence" aria-hidden="true">
-                     {layer.components.map((component) => <i key={component.id} />)}
-                   </span>
                   <EngineMark engine={layer.engine} />
                   <span className="coa-layer-count">
                     {lens === "capability" ? `${layer.components.length} components` : `${layer.controls.length} controls`}
                   </span>
                   <span className="coa-layer-action" aria-hidden="true">
-                     {!active && <ArrowRight size={16} />}
+                    {active ? <X size={16} /> : <ArrowRight size={16} />}
                   </span>
                 </button>
-                 {active && (
-                   <button
-                     type="button"
-                     className="coa-layer-close"
-                      data-testid="architecture-layer-close"
-                     aria-label={`Close ${layer.name} and show all architecture layers`}
-                      onPointerDown={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        closeLayer();
-                      }}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        if (event.detail === 0) closeLayer();
-                      }}
-                   >
-                     <X size={16} />
-                   </button>
-                 )}
 
                 <AnimatePresence initial={false}>
                   {active && (
                     <motion.div
                       id={`architecture-layer-${layer.id}`}
                       className="coa-layer-reconfiguration"
-                     initial={{ opacity: 0 }}
-                     animate={{ opacity: 1 }}
-                     exit={{ opacity: 0 }}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: reducedMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] }}
                     >
                       {lens === "capability" ? (
@@ -264,7 +188,6 @@ export function ArchitectureStage() {
                           selected={componentId}
                           componentRefs={componentRefs}
                           onSelect={(id) => setArchitectureState(layer.id, componentId === id ? null : id)}
-                          onCloseDetail={closeComponent}
                         />
                       ) : (
                         <SecurityStudy layer={layer} />
@@ -277,6 +200,12 @@ export function ArchitectureStage() {
           })}
         </div>
 
+        <Spine
+          side="right"
+          spine={architectureSpines[0]}
+          active={contextSelection?.type === "spine" && contextSelection.id === architectureSpines[0].id}
+          onSelect={() => setContextSelection({ type: "spine", id: architectureSpines[0].id })}
+        />
       </div>
 
       <div className="co-requirements" aria-label="Cross-cutting architecture requirements">
@@ -309,13 +238,6 @@ export function ArchitectureStage() {
         <span><i className="co-notation-layer" /> Enclosure = component membership</span>
         <span><i className="co-notation-engine" /> Signal square = documented engine association</span>
       </footer>
-      <div className="sr-only" aria-live="polite">
-        {componentId
-          ? `${validComponent?.name} component detail selected within ${validLayer?.name}.`
-          : layerId
-            ? `${validLayer?.name} selected.`
-            : "Complete six-layer architecture shown."}
-      </div>
     </section>
   );
 }
@@ -361,13 +283,11 @@ function CapabilityStudy({
   selected,
   onSelect,
   componentRefs,
-  onCloseDetail,
 }: {
   layer: ArchitectureLayer;
   selected: string | null;
   onSelect: (id: string) => void;
   componentRefs: React.MutableRefObject<Record<string, HTMLButtonElement | null>>;
-  onCloseDetail: () => void;
 }) {
   const selectedComponent = layer.components.find((component) => component.id === selected);
   return (
@@ -404,7 +324,6 @@ function CapabilityStudy({
             key={selectedComponent.id}
             layer={layer}
             component={selectedComponent}
-             onClose={onCloseDetail}
           />
         )}
       </AnimatePresence>
@@ -415,36 +334,18 @@ function CapabilityStudy({
 const ComponentDetail = React.forwardRef<HTMLElement, {
   layer: ArchitectureLayer;
   component: ArchitectureComponent;
-  onClose: () => void;
-}>(function ComponentDetail({ layer, component, onClose }, ref) {
+}>(function ComponentDetail({ layer, component }, ref) {
   const reducedMotion = useReducedMotion();
   return (
     <motion.aside
       ref={ref}
       id={`architecture-component-${component.id}`}
       className="co-component-detail"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0, x: reducedMotion ? 0 : 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: reducedMotion ? 0 : 12 }}
       transition={{ duration: reducedMotion ? 0 : 0.25 }}
     >
-      <button
-        type="button"
-        className="co-component-detail-close"
-         data-testid="architecture-component-close"
-        aria-label={`Close ${component.name} detail and return to ${layer.name} components`}
-         onPointerDown={(event) => {
-           event.preventDefault();
-           event.stopPropagation();
-           onClose();
-         }}
-         onClick={(event) => {
-           event.stopPropagation();
-           if (event.detail === 0) onClose();
-         }}
-      >
-        <X size={17} />
-      </button>
       <span className="co-detail-crumb">Architecture / {layer.name} / component</span>
       <h3>{component.name}</h3>
       <p className="co-detail-responsibility">{component.responsibility}</p>
@@ -472,7 +373,7 @@ function SecurityStudy({ layer }: { layer: ArchitectureLayer }) {
       <div>
         <span className="co-study-label">Layer principle</span>
         <h3>{layer.principle}</h3>
-        <p>These are the approved layer-level reference controls for the {layer.name.toLowerCase()}; component-specific applicability is not implied.</p>
+        <p>These controls apply to the complete {layer.name.toLowerCase()}, including every component shown in the capability view.</p>
       </div>
       <DetailBlock title="Architecture controls" items={layer.controls} />
     </div>

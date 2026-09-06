@@ -1,7 +1,0 @@
-const base = import.meta.env.BASE_URL;
-export default function RegionalClosingVienna(){return <div className="w-screen h-screen overflow-hidden relative bg-[#f8f7f4] text-[#102957] font-body" style={{fontFamily:"Inter, Aptos, Arial, sans-serif"}}>
-<div className="absolute left-[5vw] top-[5vh] w-[11vw] h-[9vh] overflow-hidden"><img src={base+"images/logo-blue.svg"} crossOrigin="anonymous" alt="Cognirise" className="w-full h-full object-contain object-left"/></div>
-<div className="absolute left-[5vw] top-[23vh] w-[38vw]"><p className="text-[calc(1.5*var(--slide-vw))] font-bold tracking-[.18em] uppercase text-[#1760ce]">Regional closing · Austria</p><h1 className="font-display text-[calc(7.1*var(--slide-vw))] leading-[.92] tracking-[-.07em] mt-[2vh]" style={{fontFamily:"Comfortaa, 'Arial Rounded MT Bold', Arial, sans-serif"}}>Vienna</h1><p className="text-[calc(2*var(--slide-vw))] leading-[1.4] mt-[4vh] w-[31vw]">Intelligence, centered on the work.</p></div>
-<div className="absolute left-[5vw] bottom-[7vh] w-[26vw] h-[1.1vh] bg-[linear-gradient(90deg,#815fe8_0%,#db509e_52%,#ff775d_100%)]"/><p className="absolute left-[5vw] bottom-[10vh] text-[calc(1.5*var(--slide-vw))] font-semibold tracking-[.06em]">COGNIRISE PULSE</p>
-<img src={base+"images/regional-closing/vienna-pulse-transparent.png"} crossOrigin="anonymous" alt="Off-white and navy globe oriented on Vienna with a flowing Vienna skyline" className="absolute right-[-2vw] top-[5vh] w-[64vw] h-[90vh] object-contain"/>
-</div>}

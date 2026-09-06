@@ -37,24 +37,18 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
       return (
         <>
           {/* Signal Rail edge */}
-          <span
-            aria-hidden="true"
-            className="pulse-signal-rail absolute inset-y-0 left-0 z-0 w-1 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]"
-          />
+          <div className={cn(
+            "pulse-signal-rail absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] z-0 transition-all duration-300",
+            variant === "submit" ? "w-full opacity-0 group-hover:opacity-100" : ""
+          )} />
 
           {/* Hover surface layer */}
-          <span
-            aria-hidden="true"
-            className={cn(
-              "pulse-action-hover absolute inset-0 z-0 opacity-0 pointer-events-none",
-              variant === "inverse" ? "bg-[hsl(var(--brand-deep))]/6" : "bg-white/7"
-            )}
-          />
+          <div className="absolute inset-0 bg-white/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-0 pointer-events-none" />
 
-          <span className="pulse-action-content relative z-10 flex min-w-0 items-center gap-3.5">
-            <span className="min-w-0 whitespace-normal text-left leading-snug">{children}</span>
-            <span aria-hidden="true" className="pulse-action-icon flex shrink-0 items-center justify-center">
-              {isLoading ? <Loader2 className="h-[17px] w-[17px] animate-spin" /> : (icon || <ArrowRight className="h-[17px] w-[17px]" strokeWidth={2} />)}
+          <span className="relative z-10 flex items-center gap-4 transition-transform duration-300 group-hover:translate-x-1">
+            {children}
+            <span className="flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1">
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (icon || <ArrowRight className="h-4 w-4" />)}
             </span>
           </span>
         </>
@@ -69,13 +63,13 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
         );
       }
 
-      const baseClass = "pulse-action group relative inline-flex min-h-12 max-w-full cursor-pointer items-center overflow-hidden border border-transparent py-3 pl-6 pr-5 text-[13px] font-bold tracking-[-0.01em]";
+      const baseClass = "pulse-action group relative inline-flex min-h-[46px] items-center overflow-hidden pl-6 pr-5 text-sm font-bold transition-all duration-300";
       
       const variantClasses = {
         primary: "bg-[hsl(var(--brand-deep))] text-white",
         inverse: "bg-white text-[hsl(var(--brand-deep))]",
-        secondary: "bg-transparent text-foreground border-foreground/20",
-        submit: "bg-[hsl(var(--brand-deep))] text-white",
+        secondary: "bg-transparent text-foreground border border-foreground/20",
+        submit: "bg-[hsl(var(--brand-deep))] text-white border border-transparent shadow-[4px_4px_0px_hsl(var(--brand-coral))] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[8px_8px_0px_hsl(var(--brand-coral))]",
         editorial: "" // Handled above
       };
 
@@ -84,7 +78,7 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
       return cn(
         baseClass,
         variantClass,
-        "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[hsl(var(--brand-coral))] focus-visible:ring-offset-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-45",
+        "focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none",
         className
       );
     };
@@ -92,20 +86,9 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
     if (href) {
       return (
         <Link
-          {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
-          ref={ref as React.ForwardedRef<HTMLAnchorElement>}
           href={href}
           className={getClasses()}
-          aria-busy={isLoading || undefined}
-          aria-disabled={disabled || isLoading || undefined}
-          tabIndex={disabled || isLoading ? -1 : props.tabIndex}
-          onClick={(event) => {
-            if (disabled || isLoading) {
-              event.preventDefault();
-              return;
-            }
-            props.onClick?.(event as any);
-          }}
+          onClick={props.onClick as any}
           style={{ ...props.style, color: forcedTextColor }}
         >
           {renderContent()}
@@ -118,7 +101,6 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
         ref={ref as React.ForwardedRef<HTMLButtonElement>}
         className={getClasses()}
         disabled={disabled || isLoading}
-        aria-busy={isLoading || undefined}
         {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
         style={{ ...props.style, color: forcedTextColor }}
       >

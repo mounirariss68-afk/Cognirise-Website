@@ -5,8 +5,6 @@ import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
-import { CmsContentStatus } from "@/components/cms/CmsContentStatus";
-import { runtimeNavigation, useCmsRuntime } from "@/lib/cms-runtime";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/": {
@@ -102,12 +100,16 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     description: "Field notes for leaders building AI-native organisations across strategy, architecture, governance and operations.",
   },
   "/about": {
-    title: "Our Team | Cognirise",
-    description: "Meet the operating leaders and Board of Advisors behind Cognirise's senior-led AI transformation model.",
+    title: "About Cognirise | Senior-Led AI Transformation",
+    description: "Meet the principles behind Cognirise: senior accountability, practical delivery and intelligence designed around real work.",
   },
   "/partners": {
     title: "Partners | Cognirise",
     description: "The alliance and technology network that supports our operating model.",
+  },
+  "/advisors": {
+    title: "Advisors | Cognirise",
+    description: "Senior strategic guidance shaping our capability and delivery.",
   },
   "/faq": {
     title: "FAQ | Cognirise",
@@ -123,20 +125,66 @@ const pageMeta: Record<string, { title: string; description: string }> = {
   },
 };
 
+const navigation = [
+  {
+    label: "What we do",
+    href: "/what-we-do",
+    items: [
+      { label: "Overview", href: "/what-we-do" },
+      { label: "Agentic Enterprise Transformation", href: "/what-we-do/agentic-enterprise-transformation" },
+      { label: "Data & AI Foundations", href: "/what-we-do/data-ai-foundations" },
+      { label: "Engineering with AI", href: "/what-we-do/engineering-with-ai" },
+      { label: "Sovereign & Regulated AI", href: "/what-we-do/sovereign-regulated-ai" },
+      { label: "Digital AI Workforce", href: "/what-we-do/digital-ai-workforce" },
+    ]
+  },
+  {
+    label: "Platforms",
+    href: "/platforms",
+    items: [
+      { label: "Platform Overview", href: "/platforms" },
+      { label: "CogniOS", href: "/platforms/cognios" },
+      { label: "Architecture", href: "/platforms/cognios#architecture" },
+      { label: "CogniDocs", href: "/platforms/cognidocs" },
+      { label: "CogniAgents", href: "/platforms/cogniagents" },
+      { label: "CogniTalk", href: "/platforms/cognitalk" },
+      { label: "CogniWare", href: "/platforms/cogniware" },
+    ]
+  },
+  {
+    label: "Industries",
+    href: "/industries",
+    items: [
+      { label: "Industries Overview", href: "/industries" },
+      { label: "Banking & Financial Services", href: "/industries/banking" },
+      { label: "Public Sector", href: "/industries/public-sector" },
+      { label: "Telecoms", href: "/industries/telecoms" },
+      { label: "Travel & Hospitality", href: "/industries/travel" },
+      { label: "Energy & Resources", href: "/industries/energy" },
+      { label: "Manufacturing & Conglomerates", href: "/industries/manufacturing" },
+    ]
+  },
+  { label: "Work", href: "/work" },
+  { label: "Insights", href: "/insights" },
+  {
+    label: "About",
+    href: "/about",
+    items: [
+      { label: "Firm & Leadership", href: "/about" },
+      { label: "Partners", href: "/partners" },
+      { label: "Advisors", href: "/advisors" },
+      { label: "FAQ", href: "/faq" },
+      { label: "Contact", href: "/contact" },
+    ]
+  },
+];
+
 export function Shell({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [location, setLocation] = useLocation();
   const { market, setMarket } = useMarketStore();
-  const cmsRuntime = useCmsRuntime(market);
-  const navigation = runtimeNavigation(cmsRuntime.data) ?? [];
-  const marketOptions = [
-    { code: "uae" as const, name: "United Arab Emirates" },
-    { code: "ksa" as const, name: "Kingdom of Saudi Arabia" },
-    { code: "turkiye" as const, name: "Türkiye" },
-    { code: "europe" as const, name: "Europe" },
-  ];
   const [scrolled, setScrolled] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousPathRef = useRef(window.location.pathname);
@@ -167,7 +215,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, [location]);
 
   useEffect(() => {
-    const isPreviewRoute = location.startsWith("/preview/");
     const articleTitle = location.startsWith("/insights/") && "AI Transformation Perspective | Cognirise";
     const meta = pageMeta[location] ?? {
       title: articleTitle || "Page Not Found | Cognirise",
@@ -206,12 +253,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
     setMeta('meta[property="og:description"]', "content", meta.description, true);
     setMeta('meta[name="twitter:title"]', "content", meta.title, true);
     setMeta('meta[name="twitter:description"]', "content", meta.description, true);
-    if (isPreviewRoute) {
-      setMeta('meta[name="robots"]', "content", "noindex, nofollow", true);
-      document.head.querySelector('link[rel="canonical"]')?.remove();
-      return;
-    }
-    document.head.querySelector('meta[name="robots"]')?.remove();
     setLink("canonical", window.location.origin + location);
   }, [location]);
 
@@ -315,7 +356,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
           <div className="hidden items-center gap-6 xl:flex relative z-50">
             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              {marketOptions.map(({ code: m }, marketIndex) => (
+              {['uae', 'ksa', 'turkiye', 'europe'].map((m) => (
                 <div key={m} className="flex items-center gap-2">
                   <button 
                     onClick={() => setMarket(m as any)} 
@@ -323,7 +364,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   >
                     {m === 'turkiye' ? 'TR' : m === 'europe' ? 'EU' : m.toUpperCase()}
                   </button>
-                   {marketIndex < marketOptions.length - 1 && <span className="opacity-30">/</span>}
+                  {m !== 'europe' && <span className="opacity-30">/</span>}
                 </div>
               ))}
             </div>
@@ -343,7 +384,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
       {/* Main content offset so it doesn't hide behind fixed header */}
       <div className="h-[72px] md:h-[82px] shrink-0" />
-       <CmsContentStatus pathname={location} />
 
       {isOpen && (
         <div className="fixed inset-0 top-[72px] md:top-[82px] z-40 bg-white px-6 py-8 overflow-y-auto xl:hidden animate-in fade-in duration-200">
@@ -396,13 +436,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div className="pb-12 border-t border-border pt-8">
             <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-4">Select Region</span>
             <div className="flex flex-wrap gap-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-               {marketOptions.map(({ code: m, name }) => (
+              {['uae', 'ksa', 'turkiye', 'europe'].map((m) => (
                 <button 
                   key={m}
                   onClick={() => { setMarket(m as any); setIsOpen(false); }}
                   className={`transition-colors focus-visible:outline-none ${market === m ? "text-[hsl(var(--brand-pink))]" : "hover:text-[hsl(var(--brand-deep))]"}`}
                 >
-                   {name}
+                  {m === 'turkiye' ? 'Türkiye' : m}
                 </button>
               ))}
             </div>
@@ -463,7 +503,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
             <div>
               <h4 className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-6">Action</h4>
-              <BrandButton href="/value-scan" variant="inverse" className="w-full justify-center text-[hsl(var(--brand-deep))]">Bring us one process</BrandButton>
+              <BrandButton href="/value-scan" variant="inverse" className="w-full justify-center text-[hsl(var(--brand-deep))] hover:text-white">Bring us one process</BrandButton>
             </div>
           </div>
           

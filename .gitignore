@@ -47,6 +47,3 @@ Thumbs.db
 # Replit
 .cache/
 .local/
-
-# Generated visual-regression diagnostics
-artifacts/mockup-sandbox/public/images/cognirise/linkedin/comparison-output/

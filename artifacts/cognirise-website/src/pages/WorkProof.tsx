@@ -3,7 +3,6 @@ import { ArrowDown, ArrowRight } from "lucide-react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
-import { BrandButton } from "@/components/ui/brand-button";
 
 export default function WorkProof() {
   const { market } = useMarketStore();
@@ -25,6 +24,13 @@ export default function WorkProof() {
         .wp button{font:inherit}
         .wp a{color:inherit;text-decoration:none}
         .wp :focus-visible{outline:3px solid var(--coral);outline-offset:4px}
+        .wp-primary{border:1px solid var(--ink);cursor:pointer;color:#fff;background:var(--ink);font-weight:700;font-size:12px;padding:4px 4px 4px 17px;min-height:46px;display:inline-flex;align-items:center;gap:15px;position:relative;isolation:isolate;overflow:hidden;transition:transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s}
+        .wp-primary:before{content:"";position:absolute;z-index:-2;inset:-1px;background:linear-gradient(105deg,var(--violet),var(--pink),var(--coral));opacity:0;transition:opacity .24s}
+        .wp-primary:after{content:"";position:absolute;z-index:-1;inset:1px;background:var(--ink);transition:background .24s}
+        .wp-primary svg{width:36px;height:36px;padding:10px;background:#fff;color:var(--ink);transition:transform .24s,background .24s,color .24s}
+        .wp-primary:hover{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--coral)}
+        .wp-primary:hover:before{opacity:1}
+        .wp-primary:hover svg{transform:translate(3px,-3px);background:var(--coral);color:#fff}
         .wp-kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;display:flex;gap:10px;align-items:center}
         .wp-kicker:before{content:"";width:23px;height:1px;background:linear-gradient(90deg,var(--violet),var(--coral))}
         .wp-hero{padding:23px 4.8vw 0}
@@ -97,6 +103,8 @@ export default function WorkProof() {
         .wp-start-in{position:relative;z-index:1;max-width:970px}
         .wp-start h2{font-size:clamp(52px,7.5vw,112px);font-weight:600;letter-spacing:-.095em;line-height:.88;margin:26px 0}
         .wp-start p{font-size:17px;line-height:1.55;max-width:500px;color:#d6deed}
+        .wp-start .wp-primary{margin-top:20px;background:linear-gradient(100deg,var(--violet),var(--pink),var(--coral));border:0}
+        .wp-start .wp-primary:after{background:transparent}
         @media(max-width:760px){
           .wp-hero{padding:33px 21px 0}
           .wp-hero-grid{display:flex;flex-direction:column;min-height:0;gap:32px;padding-bottom:25px}
@@ -142,7 +150,7 @@ export default function WorkProof() {
           <div className="wp-hero-copy">
             <h1>Proof lives in the <em>work.</em></h1>
             <p>Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production—and documents the decisions, controls and outcomes along the way.</p>
-            <BrandButton onClick={() => goTo("proof")} icon={<ArrowDown size={17} />}>See the proof model</BrandButton>
+            <button className="wp-primary" onClick={() => goTo("proof")}>See the proof model <ArrowDown size={15} /></button>
             <Link href="/value-scan" className="wp-under">Bring one process <ArrowRight size={15} /></Link>
           </div>
           <div className="wp-hero-art">
@@ -255,7 +263,7 @@ export default function WorkProof() {
           <div className="wp-kicker">The first move</div>
           <h2>Bring one process.<br /><em>Make the proof useful.</em></h2>
           <p>Start with work where urgency, complexity and value have already collided. Together we can surface the mandate, constraints and practical route to production.</p>
-          <BrandButton href="/value-scan" variant="inverse" className="mt-5">Book a value scan</BrandButton>
+          <Link href="/value-scan" className="wp-primary">Book a value scan <ArrowRight size={16} /></Link>
         </div>
       </section>
     </main>

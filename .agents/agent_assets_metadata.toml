@@ -20,9 +20,15 @@ source_uri = "file://deliverables/cognirise-website-redesign-plan.md"
 id = "wSBKnawYcHLeW2DCeJGmZ"
 uri = "file://.local/outputs/Cognirise-Pulse-PowerPoint-Template.pptx"
 type = "slides"
-title = "Cognirise Pulse PowerPoint Template.pptx"
-description = "Updated PowerPoint with the editable five-flow slide and high-resolution human–AI split portrait layouts."
+title = "Cognirise Pulse PowerPoint Template (PPTX)"
+description = "Reusable 18-layout PowerPoint template in the approved Cognirise Pulse design system."
 logical_id = "b1dfe669-6da3-490a-b000-7e75d6de8b8b"
+content_hash = "sha256:33429e5f75bbc70c6c58c511b9610b6ff7385fb9bd4eb572eefd3adf04cc018e"
+size = 20066739
+mtime_ms = 1788536598448
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b1dfe669-6da3-490a-b000-7e75d6de8b8b/fd22791d-6cd8-49f2-9ddd-2c992efe0798"
+storage_version_token = "1788536599371763"
+content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 
 [[outputs]]
 id = "vYBd6HWtLZ6NFNMKqudNc"
@@ -70,152 +76,12 @@ content_type = "application/octet-stream"
 id = "QcD0EdOItrXO9E8mDLR8I"
 uri = "file://artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-pulse-image-led-edition.zip"
 type = "unspecified"
-title = "Cognirise Pulse LinkedIn — Complete Download"
-description = "Updated 31 MB ZIP containing nine LinkedIn designs with text, nine matching image-only PNGs with the Cognirise logo, twelve editable SVG masters, and the readme."
+title = "Cognirise Pulse LinkedIn — Image-led Edition"
+description = "Complete 21 MB bundle with six 1080×1350 post masters, three 1584×396 profile headers, self-contained editable SVGs, matching high-resolution PNGs, and usage guidance."
 logical_id = "d4c98226-2108-4728-b54b-384654d6fc43"
-content_hash = "sha256:7be75a6afeeaa32a78e89fa4140aa6fc79b8ac4120a3767234118653e7ca2ce4"
-size = 31958646
-mtime_ms = 1788639291658
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/d4c98226-2108-4728-b54b-384654d6fc43/f65b2834-e235-45b0-a1c7-01e513e2fc10"
-storage_version_token = "1788639316693922"
+content_hash = "sha256:29b7213201ed119ab26644ec113f73c3ba216c29befa579d81bbd757fdbedd53"
+size = 22007556
+mtime_ms = 1788634645906
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/d4c98226-2108-4728-b54b-384654d6fc43/1fbfe6f6-cbdc-4c7e-8bf1-807852c6c637"
+storage_version_token = "1788634771007098"
 content_type = "application/octet-stream"
-
-[[outputs]]
-id = "8AZKjg2ydVdyLqSenEHb1"
-uri = "file://artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-complete-with-image-only.zip"
-type = "unspecified"
-title = "Cognirise LinkedIn — Corrected Complete ZIP"
-description = "Fresh 31 MB archive under a new filename. Verified to contain all nine image-only PNGs, nine text-version PNGs, twelve SVG masters, and the readme."
-logical_id = "c7fd6e3e-7695-479f-bb32-18786e6c7efa"
-content_hash = "sha256:2dd598968d398d96092f81aa5551d7fcd6962346d626fee0ba66f205f49a6aa5"
-size = 31958821
-mtime_ms = 1788639466064
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/c7fd6e3e-7695-479f-bb32-18786e6c7efa/aa097716-9297-4f48-be75-5c949b8d52e8"
-storage_version_token = "1788639477389101"
-content_type = "application/octet-stream"
-
-[[outputs]]
-id = "AgWjvYcw6f__UEEpqfBfi"
-uri = "file://artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-IMAGE-ONLY-9-PNGS.zip"
-type = "unspecified"
-title = "Cognirise LinkedIn — IMAGE ONLY (9 PNGs)"
-description = "Dedicated 9.5 MB archive containing only the nine image-only LinkedIn PNGs in an IMAGE-ONLY folder. No text-version assets are included; the approved Cognirise logo remains."
-logical_id = "de7ea5bb-39a9-4d3f-936a-92a9e9662674"
-content_hash = "sha256:dda75371e63a87efa4f6bca439dfa6d122641bcbfe129e558fdd2aba5d1dc868"
-size = 9950559
-mtime_ms = 1788639589208
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/de7ea5bb-39a9-4d3f-936a-92a9e9662674/15e4f6f2-5a92-4a67-9b62-d51de63a8739"
-storage_version_token = "1788639599833322"
-content_type = "application/octet-stream"
-
-[[outputs]]
-id = "_wEIPwES5LrhxUo1tVuC4"
-uri = "file://artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-PURE-IMAGES-NO-LOGO.zip"
-type = "unspecified"
-title = "Cognirise LinkedIn — PURE IMAGES, NO LOGO"
-description = "Dedicated 9.8 MB ZIP containing only nine clean Pulse PNGs: six 1080×1350 posts and three 1584×396 headers. No Cognirise logo, no text, and no overlays."
-logical_id = "c71aabf4-3f99-43fb-91a3-fae0cac09d6c"
-content_hash = "sha256:5dc1030d4e15c003e20b8f56bba5f154f33de384bb9233250564f07cfe1b9021"
-size = 10182447
-mtime_ms = 1788639766643
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/c71aabf4-3f99-43fb-91a3-fae0cac09d6c/8a9d400a-0223-4a37-93b4-28add9c05232"
-storage_version_token = "1788639776443944"
-content_type = "application/octet-stream"
-
-[[outputs]]
-id = "iOU5b90FKpsfbNNthJZkZ"
-uri = "file://.local/outputs/Cognirise-Pulse-PowerPoint-Template---Final.pptx"
-type = "slides"
-title = "Cognirise Pulse PowerPoint Template — Final (PPTX)"
-description = "Final export with the editable five-flow slide and high-resolution human–AI split portrait layouts."
-logical_id = "1565e6ee-740f-4731-a4d2-f071a4aae8f3"
-content_hash = "sha256:7112b6a210d8fdb840d39549695b52e88fe1bea05b0f49bad656ea4e063ae26c"
-size = 37622084
-mtime_ms = 1788673351884
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/1565e6ee-740f-4731-a4d2-f071a4aae8f3/56294d22-f33a-44a3-861b-085b1461cc5b"
-storage_version_token = "1788673352993463"
-content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-
-[[outputs]]
-id = "jZojbua-S9GT_V5Yglfl4"
-uri = "file://attached_assets/generated_images/cognirise-pulse-journey-4k.png"
-type = "image"
-title = "Cognirise Pulse Text-Free Journey (4K PNG)"
-description = "3840×2160 standalone illustration with four connected transformation stages and no text."
-logical_id = "cdd27622-3be7-4653-ae43-40928b1e01ff"
-content_hash = "sha256:5c44a1ab091d186d9663e02eba6d20bb76eb20544de0de04ae6d24cff38d838a"
-size = 7822198
-mtime_ms = 1788674215992
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/cdd27622-3be7-4653-ae43-40928b1e01ff/c3125061-e8af-4b71-9296-ca5bb5b49a51"
-storage_version_token = "1788674297033881"
-content_type = "image/png"
-
-[[outputs]]
-id = "dU7Xb0i_7qdBGKyVY8xss"
-uri = "file://.local/outputs/Cognirise-Pulse-Template---Text-Free-Journey.pptx"
-type = "slides"
-title = "Cognirise Pulse Template — Text-Free Journey (PPTX)"
-description = "Updated 66-slide PowerPoint template containing the new full-bleed Pulse journey artwork."
-logical_id = "ed23ea1a-c483-4335-a834-561a1dd6c3a9"
-content_hash = "sha256:36443e34fbd2b5f7a4b0b3422ff9440a5b82c758995fb55b18c9313d84be61c7"
-size = 38398788
-mtime_ms = 1788674316484
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/ed23ea1a-c483-4335-a834-561a1dd6c3a9/1ecb369c-a048-4008-bbff-0664198afd7f"
-storage_version_token = "1788674317493636"
-content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-
-[[outputs]]
-id = "tkYJmvWTRwWUSZa-7nIjE"
-uri = "file://attached_assets/generated_images/cognirise-pulse-journey-off-white-4k.png"
-type = "image"
-title = "Cognirise Pulse Journey — Corrected Off-White (4K PNG)"
-description = "Corrected 3840×2160 Pulse illustration with an off-white architectural canvas, navy structure, and restrained violet–magenta–coral flow."
-logical_id = "3058124c-bee9-42bd-bdc7-2e01d2c3bb1f"
-content_hash = "sha256:3cda5e3e39925df035fad560ba7d98405b5dd4dbd81aa9e86a8c7780c63dc503"
-size = 4922529
-mtime_ms = 1788674772701
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/3058124c-bee9-42bd-bdc7-2e01d2c3bb1f/cd77db53-1320-4c36-b2ac-14e21012e0e5"
-storage_version_token = "1788674873612081"
-content_type = "image/png"
-
-[[outputs]]
-id = "FA47EeTkWLptSoDNI1GjB"
-uri = "file://.local/outputs/Cognirise-Pulse-Template---Corrected-Off-White-Journey.pptx"
-type = "slides"
-title = "Cognirise Pulse Template — Corrected Off-White Journey (PPTX)"
-description = "Updated 66-slide PowerPoint template containing the corrected light-surface Pulse journey artwork."
-logical_id = "65d8128f-8cef-4671-9e48-c30fe6b5e813"
-content_hash = "sha256:fdfc78eaa470dea15857d03d83b705c94317389001117dcc0842c50cb4e45c8f"
-size = 38100509
-mtime_ms = 1788674891965
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/65d8128f-8cef-4671-9e48-c30fe6b5e813/9c4e6767-379f-43bf-a3e3-6625c1ad27e9"
-storage_version_token = "1788674893103729"
-content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-
-[[outputs]]
-id = "fRB_ke2n_rCqnsvrSuoww"
-uri = "file://attached_assets/generated_images/cognirise-pulse-journey-16x7-master.png"
-type = "image"
-title = "Cognirise Pulse Journey — Spaced 16:7 Master (PNG)"
-description = "Exact 3840×1680 text-free master with increased spacing after stages 2 and 3."
-logical_id = "77f926ab-5cc2-4c8a-8a6e-ac25889492ac"
-content_hash = "sha256:b8719b7f9a090cb69b53366290ae45356c0390a3587dd783a813eaa29a6250f5"
-size = 3929104
-mtime_ms = 1788679365955
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/77f926ab-5cc2-4c8a-8a6e-ac25889492ac/45025ec7-6a4b-4f79-8afc-20af07f77175"
-storage_version_token = "1788679459694170"
-content_type = "image/png"
-
-[[outputs]]
-id = "N1dJ7DOosEYJYf5Xi7r4p"
-uri = "file://.local/outputs/Cognirise-Pulse-Template---Spaced-16x7-Journey.pptx"
-type = "slides"
-title = "Cognirise Pulse Template — Spaced 16:7 Journey (PPTX)"
-description = "Updated 66-slide PowerPoint with the complete 16:7 journey master centered on slide 66."
-logical_id = "40f8a34d-c7fd-4d61-8541-6f0d199965de"
-content_hash = "sha256:a0bb8e9ae92c1825ddd84b1fe373a3b42fc171dacb69bcd4512fffef6da8c7e8"
-size = 44472546
-mtime_ms = 1788679475323
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/40f8a34d-c7fd-4d61-8541-6f0d199965de/84ebff32-d3ad-476c-8223-9ed3be5512bc"
-storage_version_token = "1788679476442989"
-content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"

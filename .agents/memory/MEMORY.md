@@ -2,9 +2,4 @@
 - [Cognirise Pulse direction](cognirise-pulse-direction.md) — Approved brand system for future Cognirise website, presentation, and campaign design.
 - [Slide export fidelity](slide-export-fidelity.md) — PowerPoint conversion isolates slide roots; preserve export-safe typography there and verify with a real renderer.
 - [CogniOS reference architecture](cognios-reference-architecture.md) — Preserve the six source layers and two spines; present components as a reference model, not shipped-product claims.
-- [CMS release invariants](cms-release-invariants.md) — Market releases, lifecycle dates, and event retries require explicit isolation and idempotency boundaries.
 - [Social asset self-containment](social-asset-self-containment.md) — Embed imagery in downloadable SVGs and visually verify matching PNG exports before delivery.
-- [API codegen compatibility](api-codegen-compatibility.md) — Orval regeneration needs two Zod 3 compatibility corrections until the generator/toolchain is upgraded.
-- [Governed AI boundaries](governed-ai-boundaries.md) — Screen both sides of model calls; citation presence alone never proves complete grounding.
-- [Pulse raster recomposition](pulse-raster-recomposition.md) — Preserve approved scenes with content-aware expansion; generative edits and sliced light backgrounds can alter or seam.
-- [Architecture drill-down hit geometry](architecture-drilldown-hit-geometry.md) — Keep CogniOS drill-down controls stationary; decorative 3D/positional motion can desync painted and clickable planes.

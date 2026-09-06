@@ -18,6 +18,3 @@
 //   export type Post = typeof postsTable.$inferSelect;
 
 export * from "./website-submissions";
-export * from "./cms-governance";
-export * from "./cms-editorial-assistant";
-export * from "./cms-content";

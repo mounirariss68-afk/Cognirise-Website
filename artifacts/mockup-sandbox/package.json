@@ -5,12 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "vite dev",
-    "build": "pnpm run check:linkedin-exports && vite build",
+    "build": "vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "package:linkedin-exports": "node scripts/package-linkedin-exports.mjs && pnpm run check:linkedin-exports",
-    "check:linkedin-exports": "node scripts/check-linkedin-exports.mjs",
-    "test:linkedin-exports": "node --test scripts/check-linkedin-exports.test.mjs"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",

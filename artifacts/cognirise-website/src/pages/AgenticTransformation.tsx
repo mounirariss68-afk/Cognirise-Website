@@ -1,10 +1,9 @@
 import { Link } from "wouter";
-import { ArrowDown, Minus, Plus } from "lucide-react";
+import { ArrowDown, ArrowRight, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
-import { BrandButton } from "@/components/ui/brand-button";
 
 export default function AgenticTransformation() {
   const [openStep, setOpenStep] = useState<number>(0);
@@ -34,6 +33,14 @@ export default function AgenticTransformation() {
         .at button{font:inherit}
         .at :focus-visible{outline:3px solid var(--coral);outline-offset:4px}
         .at h1,.at h2,.at h3{font-family:Comfortaa,sans-serif}
+        .at-primary{border:1px solid var(--ink);cursor:pointer;color:#fff;background:var(--ink);font-weight:700;font-size:12px;padding:4px 4px 4px 17px;min-height:46px;display:inline-flex;align-items:center;gap:15px;position:relative;isolation:isolate;overflow:hidden;transition:transform .24s,box-shadow .24s;text-decoration:none}
+        .at-primary:before{content:"";position:absolute;z-index:-2;inset:-1px;background:linear-gradient(105deg,var(--violet),var(--pink),var(--coral));opacity:0;transition:.24s}
+        .at-primary:after{content:"";position:absolute;z-index:-1;inset:1px;background:var(--ink);transition:.24s}
+        .at-primary svg{width:36px;height:36px;padding:10px;background:#fff;color:var(--ink);transition:.24s}
+        .at-primary:hover{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--coral)}
+        .at-primary:hover:before{opacity:1}
+        .at-primary:hover:after{background:rgba(7,25,54,.94)}
+        .at-primary:hover svg{transform:translate(3px,-3px);background:var(--coral);color:#fff}
         
         .at-hero{padding:21px 4.8vw 0}
         .at-kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;display:flex;gap:10px;align-items:center}
@@ -119,6 +126,9 @@ export default function AgenticTransformation() {
         .at-start h2{font-size:clamp(51px,7.5vw,111px);font-weight:600;line-height:.88;letter-spacing:-.095em;margin:27px 0}
         .at-start h2 em{font-style:normal;color:#ff8470}
         .at-start p{font-size:17px;line-height:1.55;color:#d6deed;max-width:515px}
+        .at-start .at-primary{border-color:transparent;background:linear-gradient(100deg,var(--violet),var(--pink),var(--coral));margin-top:18px}
+        .at-start .at-primary:after{background:transparent}
+        .at-start .at-primary:hover{box-shadow:6px 6px 0 #fff}
         
         @keyframes at-breathe{to{transform:scale(1.08) translateX(-1%)}}
         @media(prefers-reduced-motion:reduce){.at *,.at *:before,.at *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
@@ -169,7 +179,9 @@ export default function AgenticTransformation() {
             <h1>Make AI change the <em>work.</em></h1>
             <p>Agentic Enterprise Transformation brings senior operators, forward-deployed engineers and governed agents together around the processes that matter most.</p>
             <div className="at-actions">
-              <BrandButton href="/value-scan">Bring us one process</BrandButton>
+              <Link href="/value-scan" className="at-primary">
+                Bring us one process <ArrowRight size={15} />
+              </Link>
               <button className="at-under" onClick={() => goTo("model")}>
                 Explore the operating model <ArrowDown size={15} />
               </button>
@@ -276,7 +288,9 @@ export default function AgenticTransformation() {
           <div className="at-kicker">The first move</div>
           <h2>Bring one process.<br /><em>Leave with a route.</em></h2>
           <p>Start with the work where urgency, complexity and value have already collided. In a focused working session, we surface the opportunity, constraints and a practical route to production.</p>
-          <BrandButton href="/value-scan" variant="inverse" className="mt-[18px]">Book a value scan</BrandButton>
+          <Link href="/value-scan" className="at-primary">
+            Book a value scan <ArrowRight size={16} />
+          </Link>
         </div>
       </section>
     </main>

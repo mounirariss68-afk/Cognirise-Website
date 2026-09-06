@@ -1,18 +1,16 @@
 import { Link, useSearch, useLocation } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { useGetCmsPublishedPublications, useSubscribeNewsletter } from "@workspace/api-client-react";
+import { useSubscribeNewsletter } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
-import { trackEvent } from "@/lib/analytics";
 
 export default function InsightsEditorial() {
   const [email, setEmail] = useState("");
   const subscribeNewsletter = useSubscribeNewsletter();
   const { toast } = useToast();
   const { market } = useMarketStore();
-  const cmsPublications = useGetCmsPublishedPublications(market);
   const searchString = useSearch();
   const [location, setLocation] = useLocation();
   
@@ -38,12 +36,6 @@ export default function InsightsEditorial() {
       }
     }, {
       onSuccess: () => {
-        trackEvent("newsletter_subscribed", {
-          market,
-          source_page: window.location.pathname,
-          form_type: "newsletter",
-          delivery_source: "insights_editorial",
-        });
         toast({
           title: "Subscribed successfully",
           description: "You are on the list. Watch this space.",
@@ -70,13 +62,29 @@ export default function InsightsEditorial() {
     { id: "strategy", label: "Strategy" }
   ];
 
-  const articles = (cmsPublications.data?.publications ?? []).filter((item) => item.format === "article").map((item, index) => ({
-    number: String(index + 1).padStart(2, "0"),
-    title: item.title,
-    copy: item.dek ?? "",
-    topics: item.topics ?? [],
-    url: `/insights/${item.slug}`,
-  }));
+  const articles = [
+    {
+      number: "01",
+      title: "AI should move the business—not just assist it.",
+      copy: "Redesigning priority work around people, data, controls and intelligent execution.",
+      topics: ["strategy"],
+      url: "/insights/ai-should-move-the-business"
+    },
+    {
+      number: "02",
+      title: "The conditions for AI that can hold up in production.",
+      copy: "Why data, security, governance and architecture are part of the work.",
+      topics: ["engineering"],
+      url: "/insights/foundations-for-production"
+    },
+    {
+      number: "03",
+      title: "From agent experiments to a governed digital workforce.",
+      copy: "Deploying agents with people accountable at every decision point.",
+      topics: ["governance", "operations"],
+      url: "/insights/governed-digital-workforce"
+    }
+  ];
 
   const filteredArticles = activeTopic === "all" ? articles : articles.filter(a => a.topics.includes(activeTopic));
 
@@ -230,6 +238,18 @@ export default function InsightsEditorial() {
           <p className="ie-intro">A reading room for leaders building AI-native organisations: the operating questions behind the strategy, architecture and deployment.</p>
         </div>
         <div className="ie-hero-rule" />
+        <article className="ie-feature">
+          <div className="ie-feature-visual">
+            <img src={assetUrl('/images/cognirise/site-insights.jpg')} alt="Violet and coral architectural planes arranged in a bright white space." />
+            <span className="ie-num">01 / featured point of view</span>
+          </div>
+          <div className="ie-feature-copy">
+            <div className="ie-meta">Perspective · Agentic enterprise</div>
+            <h2>AI should move the business—not just assist it.</h2>
+            <p>AI transformation is not a portfolio of pilots. It is a decision to redesign priority work around people, data, controls and intelligent execution.</p>
+            <Link href="/insights/ai-should-move-the-business" className="ie-text-link">Read the point of view <ArrowRight size={15} /></Link>
+          </div>
+        </article>
       </section>
 
       <section className="ie-articles">
@@ -250,11 +270,7 @@ export default function InsightsEditorial() {
           </aside>
           
           <div className="ie-article-list">
-            {cmsPublications.isLoading ? (
-              <p role="status" style={{ color: '#536887', paddingTop: '30px', fontSize: '14px' }}>Loading published perspectives…</p>
-            ) : cmsPublications.isError ? (
-              <p role="alert" style={{ color: '#536887', paddingTop: '30px', fontSize: '14px' }}>Published perspectives are currently unavailable.</p>
-            ) : filteredArticles.length === 0 ? (
+            {filteredArticles.length === 0 ? (
               <p style={{ color: '#536887', paddingTop: '30px', fontSize: '14px' }}>No articles found for this topic.</p>
             ) : (
               filteredArticles.map(({ number, title, copy, url }) => (
@@ -276,6 +292,29 @@ export default function InsightsEditorial() {
         <div><b>In focus</b>Transformation, sovereign AI and a digital workforce.</div>
       </section>
       
+      <section className="ie-collections">
+        <div className="ie-section-head">
+          <div>
+            <div className="ie-kicker">Thematic collections</div>
+            <h2>Read by the question in front of you.</h2>
+          </div>
+          <p>Essays and practical signals for the people accountable for making the work change.</p>
+        </div>
+        <div className="ie-collection-grid">
+          <Link href="/insights/foundations-for-production" className="ie-collection">
+            <img src={assetUrl('/images/cognirise/site-infrastructure.jpg')} alt="An architectural infrastructure landscape carrying violet and coral light routes." />
+            <div className="ie-meta">Collection / foundations</div>
+            <h3>The conditions for AI that can hold up in production.</h3>
+            <p>Data, security, governance and architecture are not the preamble. They are the work.</p>
+          </Link>
+          <Link href="/insights/governed-digital-workforce" className="ie-collection">
+            <img src={assetUrl('/images/cognirise/site-cognios.jpg')} alt="Layered translucent platforms flowing with violet and coral intelligence." />
+            <div className="ie-meta">Collection / platforms</div>
+            <h3>From agent experiments to a governed digital workforce.</h3>
+            <p>What it takes to deploy agents into real operating environments—with people accountable at every decision point.</p>
+          </Link>
+        </div>
+      </section>
       
       <section className="ie-routes" id="routes">
         <div className="ie-routes-head">
