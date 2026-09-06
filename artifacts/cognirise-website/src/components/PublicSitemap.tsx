@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useGetPublicSitemap } from "@workspace/api-client-react";
 import { useMarketStore } from "@/store/market";
+import { ALLIANCE_PLATFORM_LIST } from "@/lib/alliancePlatforms";
 
 export function PublicSitemap() {
   const { market } = useMarketStore();
@@ -10,13 +11,19 @@ export function PublicSitemap() {
     const id = "public-sitemap-jsonld";
     document.getElementById(id)?.remove();
     if (!sitemap.data?.items.length) return;
+    // Inject statically defined alliance platforms into the sitemap
+    const allianceItems = ALLIANCE_PLATFORM_LIST.map(({ slug }) => ({
+      url: `${window.location.origin}/platforms/${slug}`,
+    }));
+    const allItems = [...sitemap.data.items, ...allianceItems];
+
     const script = document.createElement("script");
     script.id = id;
     script.type = "application/ld+json";
     script.text = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "ItemList",
-      itemListElement: sitemap.data.items.map((entry, index) => ({
+      itemListElement: allItems.map((entry, index) => ({
         "@type": "ListItem",
         position: index + 1,
         url: entry.url,

@@ -35,6 +35,9 @@ export const SERVICE_LINES = [
     value: "Create a reusable operating layer that moves work while keeping people accountable.",
     destinations: [
       ["Platform overview", "/platforms"],
+      ["Lupitor", "/platforms/lupitor"],
+      ["Datatoolpack AutoData", "/platforms/datatoolpack"],
+      ["bunjee.ai", "/platforms/bunjee-ai"],
       ["Digital AI workforce", "/what-we-do/digital-ai-workforce"],
     ],
   },

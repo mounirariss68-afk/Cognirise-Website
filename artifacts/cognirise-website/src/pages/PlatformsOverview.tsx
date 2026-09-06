@@ -6,6 +6,7 @@ import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
 import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
+import { ALLIANCE_PLATFORM_LIST } from "@/lib/alliancePlatforms";
 
 const platformFallback = [
   { name: "CogniOS", description: "The core operating system for governed enterprise intelligence.", link: "/platforms/cognios", category: "Foundation & Orchestration" },
@@ -122,6 +123,25 @@ export default function PlatformsOverview() {
               </div>
             </div>
           ))}
+
+          {/* Alliance Platforms Section */}
+          <div className="border-t border-foreground pt-8">
+            <h3 className="text-xl font-bold uppercase tracking-widest text-muted-foreground mb-8 text-[11px]">Platform Alliances</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+              {ALLIANCE_PLATFORM_LIST.map((platform) => (
+                <Link href={`/platforms/${platform.slug}`} key={platform.slug} data-testid={`link-platform-${platform.slug}`}>
+                  <div className="group block bg-[hsl(var(--secondary))] p-8 hover:bg-[hsl(var(--brand-violet))/5] transition-colors border border-transparent hover:border-[hsl(var(--brand-pink))/20] cursor-pointer relative overflow-hidden h-full">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))] transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100" />
+                    <div className="flex justify-between items-start mb-6">
+                      <h4 className="text-3xl font-semibold text-[hsl(var(--brand-deep))] transition-colors group-hover:text-[hsl(var(--brand-pink))]">{platform.name}</h4>
+                      <ArrowRight className="h-6 w-6 text-muted-foreground group-hover:text-[hsl(var(--brand-coral))] transition-transform group-hover:translate-x-1" />
+                    </div>
+                      <p className="text-foreground/70 leading-relaxed text-sm">{platform.summary}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

@@ -66,6 +66,18 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: "CogniWare | Cognirise",
     description: "Composable intelligence capabilities connected to the systems that run the enterprise.",
   },
+  "/platforms/lupitor": {
+    title: "Lupitor Conversational AI Alliance | Cognirise",
+    description: "Explore Lupitor’s verified multilingual, multichannel AI agents and cloud, sovereign cloud and air-gapped deployment with Cognirise integration.",
+  },
+  "/platforms/datatoolpack": {
+    title: "Datatoolpack AutoData Alliance | Cognirise",
+    description: "Explore automated data profiling, cleaning, transformation, anomaly detection, pipeline automation and AI-ready export through AutoData.",
+  },
+  "/platforms/bunjee-ai": {
+    title: "bunjee.ai Organizational Intelligence Alliance | Cognirise",
+    description: "Explore how bunjee.ai captures expert knowledge and deploys organizational intelligence across hiring, onboarding, communication, assessment and training.",
+  },
   "/industries": {
     title: "AI Transformation by Industry | Cognirise",
     description: "Sector-specific routes for organisations where intelligent transformation must be fast, sovereign and defensible.",
@@ -154,6 +166,9 @@ const navigation: NavigationItem[] = [
       { id: "platforms.cogniagents", label: "CogniAgents", href: "/platforms/cogniagents" },
       { id: "platforms.cognitalk", label: "CogniTalk", href: "/platforms/cognitalk" },
       { id: "platforms.cogniware", label: "CogniWare", href: "/platforms/cogniware" },
+      { id: "platforms.lupitor", label: "Lupitor", href: "/platforms/lupitor" },
+      { id: "platforms.datatoolpack", label: "Datatoolpack", href: "/platforms/datatoolpack" },
+      { id: "platforms.bunjee-ai", label: "bunjee.ai", href: "/platforms/bunjee-ai" },
     ]
   },
   {

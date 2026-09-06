@@ -28,6 +28,7 @@ import CogniAgents from "@/pages/CogniAgents";
 import CogniTalk from "@/pages/CogniTalk";
 import CogniWare from "@/pages/CogniWare";
 import PlatformDetail from "@/pages/PlatformDetail";
+import AlliancePlatformDetail from "@/pages/AlliancePlatformDetail";
 
 import IndustriesOverview from "@/pages/IndustriesOverview";
 import IndustryBanking from "@/pages/IndustryBanking";
@@ -73,6 +74,9 @@ function Router() {
         <Route path="/platforms/cogniagents" component={CogniAgents} />
         <Route path="/platforms/cognitalk" component={CogniTalk} />
         <Route path="/platforms/cogniware" component={CogniWare} />
+        <Route path="/platforms/lupitor"><AlliancePlatformDetail slug="lupitor" /></Route>
+        <Route path="/platforms/datatoolpack"><AlliancePlatformDetail slug="datatoolpack" /></Route>
+        <Route path="/platforms/bunjee-ai"><AlliancePlatformDetail slug="bunjee-ai" /></Route>
         <Route path="/platforms/:slug" component={PlatformDetail} />
 
         {/* Industries */}

@@ -123,6 +123,16 @@ export default function Partners() {
                 <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-coral))]">0{index + 1} / {group.label}</p>
                 <h3 className="mt-6 text-5xl font-semibold md:text-7xl" data-testid={`text-partner-name-${partner.name.toLowerCase().replaceAll(".", "-")}`}>{partner.name}</h3>
                 <p className="mt-5 max-w-[430px] text-sm font-semibold leading-6 text-muted-foreground">{partner.positioning}</p>
+                {group.id === "platform" && ["Lupitor", "Datatoolpack", "bunjee.ai"].includes(partner.name) && (
+                  <div className="mt-8">
+                    <BrandButton
+                      href={`/platforms/${partner.name === "Lupitor" ? "lupitor" : partner.name === "Datatoolpack" ? "datatoolpack" : "bunjee-ai"}`}
+                      variant="secondary"
+                    >
+                      View Platform Integration
+                    </BrandButton>
+                  </div>
+                )}
               </header>
               <div>
                 <div className="grid bg-[hsl(var(--brand-deep))] text-white sm:grid-cols-3">
