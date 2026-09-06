@@ -11,7 +11,6 @@ export const modules: ModuleMap = {
   "./components/mockups/cognirise-directions/LivingArchitecture.tsx": () => import("../components/mockups/cognirise-directions/LivingArchitecture.tsx"),
   "./components/mockups/cognirise-directions/PrecisionInMotion.tsx": () => import("../components/mockups/cognirise-directions/PrecisionInMotion.tsx"),
   "./components/mockups/cognirise-directions/VisibleIntelligence.tsx": () => import("../components/mockups/cognirise-directions/VisibleIntelligence.tsx"),
-  "./components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx": () => import("../components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx"),
   "./components/mockups/cognirise-site/AboutPeople.tsx": () => import("../components/mockups/cognirise-site/AboutPeople.tsx"),
   "./components/mockups/cognirise-site/AgenticTransformation.tsx": () => import("../components/mockups/cognirise-site/AgenticTransformation.tsx"),
   "./components/mockups/cognirise-site/CogniOSPlatform.tsx": () => import("../components/mockups/cognirise-site/CogniOSPlatform.tsx"),
@@ -20,5 +19,6 @@ export const modules: ModuleMap = {
   "./components/mockups/cognirise-site/PublicSector.tsx": () => import("../components/mockups/cognirise-site/PublicSector.tsx"),
   "./components/mockups/cognirise-site/ServicesOverview.tsx": () => import("../components/mockups/cognirise-site/ServicesOverview.tsx"),
   "./components/mockups/cognirise-site/ValueScan.tsx": () => import("../components/mockups/cognirise-site/ValueScan.tsx"),
-  "./components/mockups/cognirise-site/WorkProof.tsx": () => import("../components/mockups/cognirise-site/WorkProof.tsx")
+  "./components/mockups/cognirise-site/WorkProof.tsx": () => import("../components/mockups/cognirise-site/WorkProof.tsx"),
+  "./components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx": () => import("../components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx")
 };
