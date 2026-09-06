@@ -85,3 +85,17 @@ mtime_ms = 1788634645906
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/d4c98226-2108-4728-b54b-384654d6fc43/1fbfe6f6-cbdc-4c7e-8bf1-807852c6c637"
 storage_version_token = "1788634771007098"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "crKJWJQm5ubz8cRDwiueP"
+uri = "file://attached_assets/generated_images/cognirise-connected-enterprise-panorama-16x4.png"
+type = "image"
+title = "Cognirise Connected Enterprise Panorama — 16:4"
+description = "Simplified Pulse-aligned isometric system illustration, delivered as a text-free 2400 × 600 PNG for wide presentation layouts."
+logical_id = "9c00327f-93dd-4765-8548-c92cbae16888"
+content_hash = "sha256:d2e25b9b47bfb283be1ddc90088c0dc6911ff9c58b0b2093bd328aaa8f254466"
+size = 961305
+mtime_ms = 1788709389735
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/9c00327f-93dd-4765-8548-c92cbae16888/07c0d9dd-5b64-449c-aebe-c6d8df0c15d5"
+storage_version_token = "1788709409111467"
+content_type = "image/png"
