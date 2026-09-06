@@ -43,7 +43,6 @@ import InsightsEditorial from "@/pages/InsightsEditorial";
 import InsightArticle from "@/pages/InsightArticle";
 import AboutPeople from "@/pages/AboutPeople";
 import Partners from "@/pages/Partners";
-import Advisors from "@/pages/Advisors";
 import FAQ from "@/pages/FAQ";
 import Contact from "@/pages/Contact";
 import ValueScan from "@/pages/ValueScan";
@@ -74,7 +73,6 @@ const hardCodedRoutes: Record<string, React.ComponentType> = {
   "/insights": InsightsEditorial,
   "/about": AboutPeople,
   "/partners": Partners,
-  "/advisors": Advisors,
   "/faq": FAQ,
   "/contact": Contact,
   "/value-scan": ValueScan,
@@ -149,6 +147,7 @@ function Router() {
         <Route path="/pov-travel"><Redirect to="/industries/travel" /></Route>
         <Route path="/pov-energy"><Redirect to="/industries/energy" /></Route>
         <Route path="/pov-manufacturing"><Redirect to="/industries/manufacturing" /></Route>
+        <Route path="/advisors"><Redirect to="/about#board-of-advisors" /></Route>
         <Route component={GovernedRedirects} />
       </Switch>
     </Shell>

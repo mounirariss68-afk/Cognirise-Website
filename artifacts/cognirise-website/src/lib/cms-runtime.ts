@@ -43,12 +43,17 @@ export function runtimeNavigation(envelope: CmsRuntimeEnvelope | undefined): Pub
   const parseItems = (source: Record<string, unknown>[], depth = 0): PublicNavigationItem[] => source.flatMap((item) => {
     const label = typeof item.label === "string" ? item.label.trim() : "";
     const internal = record(item.internal) ? internalHref(item.internal) : undefined;
-    const href = internal ?? safePublicHref(item.externalUrl);
+    const resolvedHref = internal ?? safePublicHref(item.externalUrl);
+    const href = resolvedHref === "/advisors" ? "/about#board-of-advisors" : resolvedHref;
     if (!label || !href) return [];
     const children = depth === 0 && Array.isArray(item.children)
       ? parseItems(item.children.filter(record), depth + 1)
       : undefined;
-    return [{ label, href, ...(children?.length ? { items: children } : {}) }];
+    return [{
+      label: resolvedHref === "/advisors" && label.toLowerCase() === "advisors" ? "Board of Advisors" : label,
+      href,
+      ...(children?.length ? { items: children } : {}),
+    }];
   });
   const items = parseItems(primary.items);
   return items.length ? items : undefined;
