@@ -27,6 +27,7 @@ import CogniDocs from "@/pages/CogniDocs";
 import CogniAgents from "@/pages/CogniAgents";
 import CogniTalk from "@/pages/CogniTalk";
 import CogniWare from "@/pages/CogniWare";
+import PlatformDetail from "@/pages/PlatformDetail";
 
 import IndustriesOverview from "@/pages/IndustriesOverview";
 import IndustryBanking from "@/pages/IndustryBanking";
@@ -37,6 +38,7 @@ import IndustryEnergy from "@/pages/IndustryEnergy";
 import IndustryManufacturing from "@/pages/IndustryManufacturing";
 
 import WorkProof from "@/pages/WorkProof";
+import CaseStudyDetail from "@/pages/CaseStudyDetail";
 import InsightsEditorial from "@/pages/InsightsEditorial";
 import InsightArticle from "@/pages/InsightArticle";
 import AboutPeople from "@/pages/AboutPeople";
@@ -45,6 +47,7 @@ import Advisors from "@/pages/Advisors";
 import FAQ from "@/pages/FAQ";
 import Contact from "@/pages/Contact";
 import ValueScan from "@/pages/ValueScan";
+import CmsPreview from "@/pages/CmsPreview";
 
 function Router() {
   return (
@@ -70,6 +73,7 @@ function Router() {
         <Route path="/platforms/cogniagents" component={CogniAgents} />
         <Route path="/platforms/cognitalk" component={CogniTalk} />
         <Route path="/platforms/cogniware" component={CogniWare} />
+        <Route path="/platforms/:slug" component={PlatformDetail} />
 
         {/* Industries */}
         <Route path="/industries" component={IndustriesOverview} />
@@ -102,6 +106,7 @@ function Router() {
 
         {/* Work & Insights */}
         <Route path="/work" component={WorkProof} />
+        <Route path="/work/:slug" component={CaseStudyDetail} />
         <Route path="/insights" component={InsightsEditorial} />
         <Route path="/insights/:slug" component={InsightArticle} />
         
@@ -112,6 +117,7 @@ function Router() {
         <Route path="/faq" component={FAQ} />
         <Route path="/contact" component={Contact} />
         <Route path="/value-scan" component={ValueScan} />
+        <Route path="/preview/:token" component={CmsPreview} />
         
         <Route component={NotFound} />
       </Switch>

@@ -7,6 +7,7 @@ import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
 import { setAnalyticsConsent, useAnalyticsConsent } from "@/lib/analytics";
 import { SERVICE_LINE_LABELS } from "@/lib/serviceLines";
+import { useGetPublicNavigationSettings } from "@workspace/api-client-react";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/": {
@@ -127,54 +128,60 @@ const pageMeta: Record<string, { title: string; description: string }> = {
   },
 };
 
-const navigation = [
+type NavigationItem = { id: string; label: string; href: string; items?: NavigationItem[] };
+
+const navigation: NavigationItem[] = [
   {
+    id: "what-we-do",
     label: "What we do",
     href: "/what-we-do",
     items: [
-      { label: "Overview", href: "/what-we-do" },
-      { label: SERVICE_LINE_LABELS[0], href: "/what-we-do#consulting-engineering" },
-      { label: SERVICE_LINE_LABELS[1], href: "/what-we-do#sovereign-solutions" },
-      { label: SERVICE_LINE_LABELS[2], href: "/what-we-do#ai-platforms" },
+      { id: "what-we-do.overview", label: "Overview", href: "/what-we-do" },
+      { id: "what-we-do.consulting-engineering", label: SERVICE_LINE_LABELS[0], href: "/what-we-do#consulting-engineering" },
+      { id: "what-we-do.sovereign-solutions", label: SERVICE_LINE_LABELS[1], href: "/what-we-do#sovereign-solutions" },
+      { id: "what-we-do.ai-platforms", label: SERVICE_LINE_LABELS[2], href: "/what-we-do#ai-platforms" },
     ]
   },
   {
+    id: "platforms",
     label: "Platforms",
     href: "/platforms",
     items: [
-      { label: "Platform Overview", href: "/platforms" },
-      { label: "CogniOS", href: "/platforms/cognios" },
-      { label: "Architecture", href: "/platforms/cognios#architecture" },
-      { label: "CogniDocs", href: "/platforms/cognidocs" },
-      { label: "CogniAgents", href: "/platforms/cogniagents" },
-      { label: "CogniTalk", href: "/platforms/cognitalk" },
-      { label: "CogniWare", href: "/platforms/cogniware" },
+      { id: "platforms.overview", label: "Platform Overview", href: "/platforms" },
+      { id: "platforms.cognios", label: "CogniOS", href: "/platforms/cognios" },
+      { id: "platforms.architecture", label: "Architecture", href: "/platforms/cognios#architecture" },
+      { id: "platforms.cognidocs", label: "CogniDocs", href: "/platforms/cognidocs" },
+      { id: "platforms.cogniagents", label: "CogniAgents", href: "/platforms/cogniagents" },
+      { id: "platforms.cognitalk", label: "CogniTalk", href: "/platforms/cognitalk" },
+      { id: "platforms.cogniware", label: "CogniWare", href: "/platforms/cogniware" },
     ]
   },
   {
+    id: "industries",
     label: "Industries",
     href: "/industries",
     items: [
-      { label: "Industries Overview", href: "/industries" },
-      { label: "Banking & Financial Services", href: "/industries/banking" },
-      { label: "Public Sector", href: "/industries/public-sector" },
-      { label: "Telecoms", href: "/industries/telecoms" },
-      { label: "Travel & Hospitality", href: "/industries/travel" },
-      { label: "Energy & Resources", href: "/industries/energy" },
-      { label: "Manufacturing & Conglomerates", href: "/industries/manufacturing" },
+      { id: "industries.overview", label: "Industries Overview", href: "/industries" },
+      { id: "industries.banking", label: "Banking & Financial Services", href: "/industries/banking" },
+      { id: "industries.public-sector", label: "Public Sector", href: "/industries/public-sector" },
+      { id: "industries.telecoms", label: "Telecoms", href: "/industries/telecoms" },
+      { id: "industries.travel", label: "Travel & Hospitality", href: "/industries/travel" },
+      { id: "industries.energy", label: "Energy & Resources", href: "/industries/energy" },
+      { id: "industries.manufacturing", label: "Manufacturing & Conglomerates", href: "/industries/manufacturing" },
     ]
   },
-  { label: "Work", href: "/work" },
-  { label: "Insights", href: "/insights" },
+  { id: "work", label: "Work", href: "/work" },
+  { id: "insights", label: "Insights", href: "/insights" },
   {
+    id: "about",
     label: "About",
     href: "/about",
     items: [
-      { label: "Firm & Leadership", href: "/about" },
-      { label: "Partners", href: "/partners" },
-      { label: "Advisors", href: "/advisors" },
-      { label: "FAQ", href: "/faq" },
-      { label: "Contact", href: "/contact" },
+      { id: "about.leadership", label: "Firm & Leadership", href: "/about" },
+      { id: "about.partners", label: "Partners", href: "/partners" },
+      { id: "about.advisors", label: "Advisors", href: "/advisors" },
+      { id: "about.faq", label: "FAQ", href: "/faq" },
+      { id: "about.contact", label: "Contact", href: "/contact" },
     ]
   },
 ];
@@ -217,6 +224,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [location, setLocation] = useLocation();
+  const navigationSettings = useGetPublicNavigationSettings();
+  const enabledNavigation = new Map(navigationSettings.data?.items.map((item) => [item.id, item.enabled]) ?? []);
+  const visibleNavigation = navigation
+    .filter((item) => enabledNavigation.get(item.id) ?? true)
+    .map((item) => {
+      const visibleChildren = item.items?.filter((child) => enabledNavigation.get(child.id) ?? true);
+      return { ...item, items: visibleChildren?.length ? visibleChildren : undefined };
+    });
   const { market, setMarket } = useMarketStore();
   const [scrolled, setScrolled] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -330,7 +345,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
           <nav className="hidden h-full items-center xl:flex">
             <ul className="flex items-center gap-2">
-              {navigation.map((item) => (
+              {visibleNavigation.map((item) => (
                 <li
                   key={item.href}
                   className="relative h-full flex items-center px-4"
@@ -421,7 +436,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       {isOpen && (
         <div className="fixed inset-0 top-[72px] md:top-[82px] z-40 bg-white px-6 py-8 overflow-y-auto xl:hidden animate-in fade-in duration-200">
           <nav className="flex flex-col gap-2 pb-12">
-            {navigation.map((item) => (
+            {visibleNavigation.map((item) => (
               <div key={item.href} className="flex flex-col border-b border-border last:border-0">
                 <div className="flex items-center justify-between py-4">
                   <Link

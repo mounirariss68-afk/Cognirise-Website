@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { assetUrl } from "@/lib/assets";
-import { contentRecord, text, tupleList, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { SERVICE_LINE_LABELS } from "@/lib/serviceLines";
 
@@ -30,15 +30,14 @@ const foundersFallback = [
 
 export default function AboutPeople() {
   const foundersQuery = useCmsCollection("person", foundersFallback, (item) => {
-    const content = contentRecord(item);
-    const role = text(content.role, "");
-    if (text(content.collection, "") !== "founders" && !role.toLowerCase().includes("found")) return null;
+    const content = contentRecord(item, "person");
+    if (content.role !== "founder") return null;
     const name = item.title;
     return {
-      initials: text(content.initials, name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2)),
+      initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2),
       name,
-      bio: text(content.bio, item.summary || ""),
-      focus: tupleList(content.focus, []),
+      bio: content.biography,
+      focus: content.focusAreas.map((focus) => [focus.title, focus.detail]),
     };
   });
   const page = useCmsEntry("person", "about");

@@ -7,3 +7,4 @@
 - [CMS publication boundaries](cms-publication-boundaries.md) — Public content and media authority comes from the approved published revision, never mutable draft-level references.
 - [Hover transition verification](hover-transition-verification.md) — Automation hover helpers can hide transition timing; verify motion with direct pointer events and frame samples.
 - [API TypeScript route tests](api-typescript-route-tests.md) — Bundle route-level tests with the server build tool; native type stripping cannot resolve this monorepo’s extensionless ESM imports.
+- [CMS media import authority](cms-media-import-authority.md) — Never equate imported media metadata with durable object upload; keep inaccessible or unreviewed assets private and pending.

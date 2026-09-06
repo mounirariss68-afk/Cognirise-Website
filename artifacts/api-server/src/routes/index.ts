@@ -8,6 +8,7 @@ import submissionsRouter from "./submissions";
 import publicRouter from "./public";
 import analyticsRouter from "./analytics";
 import mediaRouter from "./media";
+import navigationRouter from "./navigation";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(submissionsRouter);
 router.use(publicRouter);
 router.use(analyticsRouter);
 router.use(mediaRouter);
+router.use(navigationRouter);
 
 export default router;

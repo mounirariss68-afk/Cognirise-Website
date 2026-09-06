@@ -6,4 +6,7 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type DocumentUpdateContent = { [key: string]: unknown };
+export interface CmsLink {
+  label: string;
+  url: string;
+}

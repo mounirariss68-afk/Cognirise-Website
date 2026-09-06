@@ -8,8 +8,6 @@
 
 export interface PublicationInput {
   revisionId: string;
-  /** @nullable */
-  publishAt?: Date | null;
   /** @maxLength 1000 */
   note?: string;
 }

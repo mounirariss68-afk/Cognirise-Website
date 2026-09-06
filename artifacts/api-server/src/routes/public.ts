@@ -1,8 +1,12 @@
 import { Router, type IRouter } from "express";
 import { pool } from "@workspace/db";
 import {
+  cmsPublicRoute,
+  type CmsContent,
+  type CmsDocumentKind,
   GetPublicSitemapQueryParams,
   ListPublishedContentQueryParams,
+  validateCmsSnapshot,
 } from "@workspace/api-zod";
 import { asyncRoute, throttle } from "../lib/http";
 import { pageOf } from "../lib/cms";
@@ -20,8 +24,40 @@ router.use(
   throttle(publicLimiter, (req) => req.ip ?? "unknown"),
 );
 
-async function published(row: Record<string, any>, locale: string) {
-  const snapshot = row.payload;
+class PublicContractError extends Error {}
+
+async function marketCandidates(requestedMarket: string, requestedLocale: string) {
+  if (requestedLocale !== "en") return null;
+  const result = await pool.query(
+    `SELECT code,default_locale,fallback_market_code,fallback_locale,is_canonical
+     FROM market_editions WHERE enabled=true`,
+  );
+  const markets = new Map(result.rows.map((row) => [String(row.code), row]));
+  const requested = markets.get(requestedMarket);
+  if (!requested) return null;
+  const candidates: string[] = [];
+  const visited = new Set<string>();
+  let current: Record<string, any> | undefined = requested;
+  while (current && !visited.has(String(current.code)) && candidates.length < 8) {
+    const code = String(current.code);
+    visited.add(code);
+    candidates.push(code);
+    current = current.fallback_market_code
+      ? markets.get(String(current.fallback_market_code))
+      : undefined;
+  }
+  const canonical = result.rows.find((row) => row.is_canonical);
+  if (canonical && !candidates.includes(String(canonical.code))) candidates.push(String(canonical.code));
+  if (markets.has("uae") && !candidates.includes("uae")) candidates.push("uae");
+  return candidates;
+}
+
+async function published(row: Record<string, any>) {
+  const validation = validateCmsSnapshot(row.kind as CmsDocumentKind, row.payload, "publish");
+  if (!validation.success) {
+    throw new PublicContractError(`Published revision ${row.revision_number} is invalid: ${validation.errors.join("; ")}`);
+  }
+  const snapshot = validation.data;
   const mediaIds = Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds.map(String) : [];
   const assets = await pool.query(
     `SELECT a.*,v.width,v.height,v.metadata FROM cms_media_assets a
@@ -44,7 +80,9 @@ async function published(row: Record<string, any>, locale: string) {
       caption: asset.metadata?.caption ?? null, credit: asset.credit ?? null,
     })),
     market: row.market,
-    locale,
+    locale: row.locale,
+    requestedMarket: row.requested_market,
+    usedFallback: row.market !== row.requested_market,
     revision: row.revision_number,
     publishedAt: row.published_at,
     updatedAt: row.updated_at,
@@ -61,34 +99,54 @@ router.get(
     }
     const { page, pageSize, market, locale = "en" } = parsed.data;
     const kind = parsed.data.kind ?? null;
+    const candidates = await marketCandidates(market, locale);
+    if (!candidates) {
+      res.status(404).json({ error: "Market or locale is unavailable." });
+      return;
+    }
     const result = await pool.query(
       `WITH selected AS (
-         SELECT d.id,d.kind,e.market,e.published_at,e.updated_at,e.localized_slug,
+         SELECT d.id,d.kind,e.market,e.locale,e.published_at,e.updated_at,e.localized_slug,
                 r.revision_number,r.payload,
                 row_number() OVER (PARTITION BY d.id
-                  ORDER BY CASE WHEN e.market=$2 THEN 0 ELSE 1 END) AS market_rank
+                   ORDER BY array_position($2::text[],e.market),e.updated_at DESC,e.id) AS market_rank
            FROM cms_documents d
            JOIN cms_market_editions e ON e.document_id=d.id
            JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
              AND r.workflow_state='approved'
           WHERE d.status<>'archived' AND e.publication_state='published'
             AND e.published_at<=now() AND ($1::text IS NULL OR d.kind=$1)
-            AND e.market IN ($2,'uae')
+             AND e.market=ANY($2::text[])
             AND ${PUBLIC_PAYLOAD_SQL}
        )
-       SELECT *,count(*) OVER() total_count FROM selected WHERE market_rank=1
-        ORDER BY published_at DESC
-        LIMIT $3 OFFSET $4`,
-      [kind, market, pageSize, (page - 1) * pageSize],
+       SELECT *,count(*) OVER() total_count,$3::text requested_market
+         FROM selected WHERE market_rank=1
+         ORDER BY COALESCE((payload->'content'->>'order')::int,0),payload->>'title',published_at DESC
+         LIMIT $4 OFFSET $5`,
+      [kind, candidates, market, pageSize, (page - 1) * pageSize],
     );
-    res.json(
-      pageOf(
-        await Promise.all(result.rows.map((row) => published(row, locale))),
+    try {
+      const items = await Promise.all(result.rows.map((row) => published(row)));
+      res.json({
+        ...pageOf(
+        items,
         Number(result.rows[0]?.total_count ?? 0),
         page,
         pageSize,
-      ),
-    );
+        ),
+        market: items[0]?.market ?? market,
+        locale,
+        requestedMarket: market,
+        usedFallback: items.some((item) => item.usedFallback),
+      });
+    } catch (error) {
+      if (error instanceof PublicContractError) {
+        req.log.error({ err: error, kind, market }, "Invalid published CMS content");
+        res.status(502).json({ error: "Published content failed contract validation." });
+        return;
+      }
+      throw error;
+    }
   }),
 );
 
@@ -96,9 +154,14 @@ router.get(
   "/public/content/:market/:locale/:kind/:slug",
   asyncRoute(async (req, res) => {
     const { market, locale, kind, slug } = req.params;
+    const candidates = await marketCandidates(String(market), String(locale));
+    if (!candidates) {
+      res.status(404).json({ error: "Market or locale is unavailable." });
+      return;
+    }
     const result = await pool.query(
-      `SELECT d.id,d.kind,e.market,e.published_at,e.updated_at,e.localized_slug,
-              r.revision_number,r.payload
+      `SELECT d.id,d.kind,e.market,e.locale,e.published_at,e.updated_at,e.localized_slug,
+              r.revision_number,r.payload,$3::text requested_market
          FROM cms_documents d
          JOIN cms_market_editions e ON e.document_id=d.id
           JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
@@ -106,16 +169,25 @@ router.get(
         WHERE d.status<>'archived' AND e.publication_state='published'
           AND e.published_at<=now() AND d.kind=$1
           AND COALESCE(r.payload->>'slug',e.localized_slug)=$2
-           AND e.market IN ($3,'uae')
+           AND e.market=ANY($4::text[])
             AND ${PUBLIC_PAYLOAD_SQL}
-        ORDER BY CASE WHEN e.market=$3 THEN 0 ELSE 1 END LIMIT 1`,
-      [kind, slug, market],
+         ORDER BY array_position($4::text[],e.market),e.updated_at DESC,e.id LIMIT 1`,
+      [kind, slug, market, candidates],
     );
     if (!result.rowCount) {
       res.status(404).json({ error: "Published content not found." });
       return;
     }
-    res.json(await published(result.rows[0], String(locale)));
+    try {
+      res.json(await published(result.rows[0]));
+    } catch (error) {
+      if (error instanceof PublicContractError) {
+        req.log.error({ err: error, kind, slug, market }, "Invalid published CMS content");
+        res.status(502).json({ error: "Published content failed contract validation." });
+        return;
+      }
+      throw error;
+    }
   }),
 );
 
@@ -148,23 +220,32 @@ router.get(
       return;
     }
     const result = await pool.query(
-      `SELECT d.kind,e.updated_at,r.payload,ARRAY[e.market] markets
+      `SELECT d.kind,e.market,e.locale,e.updated_at,r.payload
          FROM cms_documents d JOIN cms_market_editions e ON e.document_id=d.id
          JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
            AND r.workflow_state='approved'
         WHERE d.status<>'archived' AND e.publication_state='published'
-           AND e.published_at<=now() AND ($1::text IS NULL OR e.market=$1)
+            AND e.published_at<=now() AND ($1::text IS NULL OR e.market=$1)
+            AND COALESCE((r.payload->'seo'->>'noIndex')::boolean,false)=false
             AND ${PUBLIC_PAYLOAD_SQL}`,
       [parsed.data.market ?? null],
     );
     const items = result.rows.flatMap((row) => {
-      const markets: string[] = parsed.data.market ? [parsed.data.market] : row.markets;
-      return markets.map((market) => ({
-        url: `/${market}/${parsed.data.locale ?? "en"}/${row.kind}/${row.payload.slug}`,
+      const validation = validateCmsSnapshot(row.kind as CmsDocumentKind, row.payload, "publish");
+      if (!validation.success) return [];
+      const route = cmsPublicRoute(
+        row.kind as CmsDocumentKind,
+        validation.data.slug,
+        validation.data.content as CmsContent,
+      );
+      if (!route) return [];
+      const suffix = row.market === "uae" ? "" : `?market=${encodeURIComponent(row.market)}`;
+      return [{
+        url: `${route}${suffix}`,
         updatedAt: row.updated_at,
         changeFrequency: "weekly",
         priority: 0.7,
-      }));
+      }];
     });
     res.json({ items, generatedAt: new Date() });
   }),

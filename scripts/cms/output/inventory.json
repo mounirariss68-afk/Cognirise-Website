@@ -1,15 +1,21 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-09-06T17:30:33.127Z",
-  "dryRun": false,
+  "schemaVersion": 2,
   "source": "artifacts/cognirise-website",
   "expectedCounts": {
     "people": 5,
+    "founders": 2,
     "advisors": 3,
     "partners": 5,
     "platforms": 5,
     "articles": 3,
     "assets": 22
+  },
+  "explicitOmissions": {
+    "caseStudies": "No genuine public case-study records are present in the current website.",
+    "povDocuments": "No genuine public POV documents are present in the current website.",
+    "employees": "No additional public employee profiles are present in the current website.",
+    "nonUaeEditions": "No approved non-UAE editions or translations are present.",
+    "codeOwnedAsset": "blueprint-annotated.png remains code-owned with the specialist CogniOS experience."
   },
   "records": [
     {
@@ -17,18 +23,46 @@
       "type": "person",
       "name": "Mounir Ariss",
       "sourceFile": "src/pages/AboutPeople.tsx",
+      "route": "/about",
       "fields": {
-        "role": "Founder",
-        "bio": "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage — now focused on one conviction: the next frontier isn't AI adoption, it's becoming an agentic enterprise.",
-        "marketVisibility": [
-          "uae"
-        ]
+        "slug": "mounir-ariss",
+        "summary": "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage — now focused on one conviction: the next frontier isn't AI adoption, it's becoming an agentic enterprise.",
+        "content": {
+          "schemaVersion": 1,
+          "role": "founder",
+          "title": "Founding Partner",
+          "biography": "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage — now focused on one conviction: the next frontier isn't AI adoption, it's becoming an agentic enterprise.",
+          "focusAreas": [
+            {
+              "title": "Agentic Enterprise Transformation",
+              "detail": "Advisory judgment, AI-native workflows and production engineering"
+            },
+            {
+              "title": "Sovereign AI & Data Foundations",
+              "detail": "Architecture, governance and local control"
+            },
+            {
+              "title": "Digital Workforce & Platforms",
+              "detail": "Connected knowledge, agents and integrations"
+            }
+          ],
+          "profileLinks": [],
+          "visibility": "public",
+          "order": 0,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Add role/title and confirm public market visibility.",
-          "Confirm source, verification date, review date, approved headshot or approved fallback."
+          "Confirm title, profile source, verification date, review date, market visibility, and approved identity media or fallback."
         ]
       }
     },
@@ -37,18 +71,46 @@
       "type": "person",
       "name": "Gökhan Güney",
       "sourceFile": "src/pages/AboutPeople.tsx",
+      "route": "/about",
       "fields": {
-        "role": "Founder",
-        "bio": "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf — building the engineering muscle that turns strategy decks into systems that run.",
-        "marketVisibility": [
-          "uae"
-        ]
+        "slug": "gokhan-guney",
+        "summary": "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf — building the engineering muscle that turns strategy decks into systems that run.",
+        "content": {
+          "schemaVersion": 1,
+          "role": "founder",
+          "title": "Founding Partner",
+          "biography": "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf — building the engineering muscle that turns strategy decks into systems that run.",
+          "focusAreas": [
+            {
+              "title": "Agentic Enterprise Transformation",
+              "detail": "Humans and engineers carrying change into production"
+            },
+            {
+              "title": "Sovereign AI & Data Foundations",
+              "detail": "Governed solutions designed for local operating realities"
+            },
+            {
+              "title": "Digital Workforce & Platforms",
+              "detail": "Platforms and operating models that scale"
+            }
+          ],
+          "profileLinks": [],
+          "visibility": "public",
+          "order": 1,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Add role/title and confirm public market visibility.",
-          "Confirm source, verification date, review date, approved headshot or approved fallback."
+          "Confirm title, profile source, verification date, review date, market visibility, and approved identity media or fallback."
         ]
       }
     },
@@ -57,21 +119,34 @@
       "type": "person",
       "name": "Alexis Lecanuet",
       "sourceFile": "src/pages/Advisors.tsx",
+      "route": "/advisors",
       "fields": {
-        "role": "Advisory Board Member",
-        "title": "Regional Senior Managing Director, Accenture Middle East",
-        "bio": "A 24-year Accenture career culminating in leadership of the firm's Middle East business — strategy execution, client portfolio leadership and regional operations. Previously built and expanded Accenture's products portfolio across the Middle East and Türkiye, with deep roots in consumer, retail and large-scale digital transformation across Europe and MENA. Ranked among Forbes Middle East's “Global Meets Local” top 50 executives; board member of INJAZ ME; educated at ESCP Europe and SKEMA.",
-        "contribution": "The incumbent's playbook, from the inside: how global consultancies win, price and scale in this region — so our senior-led, platform-powered model is sharpened precisely where the traditional model is weakest.",
-        "source": "Profile per AmCham Abu Dhabi bio, Forbes Middle East and Consultancy-me.com, accessed August 2026.",
-        "marketVisibility": [
-          "uae"
-        ]
+        "slug": "alexis-lecanuet",
+        "summary": "A 24-year Accenture career culminating in leadership of the firm's Middle East business — strategy execution, client portfolio leadership and regional operations. Previously built and expanded Accenture's products portfolio across the Middle East and Türkiye, with deep roots in consumer, retail and large-scale digital transformation across Europe and MENA. Ranked among Forbes Middle East's “Global Meets Local” top 50 executives; board member of INJAZ ME; educated at ESCP Europe and SKEMA.",
+        "content": {
+          "schemaVersion": 1,
+          "role": "advisor",
+          "title": "Regional Senior Managing Director, Accenture Middle East",
+          "biography": "A 24-year Accenture career culminating in leadership of the firm's Middle East business — strategy execution, client portfolio leadership and regional operations. Previously built and expanded Accenture's products portfolio across the Middle East and Türkiye, with deep roots in consumer, retail and large-scale digital transformation across Europe and MENA. Ranked among Forbes Middle East's “Global Meets Local” top 50 executives; board member of INJAZ ME; educated at ESCP Europe and SKEMA.",
+          "contribution": "The incumbent's playbook, from the inside: how global consultancies win, price and scale in this region — so our senior-led, platform-powered model is sharpened precisely where the traditional model is weakest.",
+          "focusAreas": [],
+          "profileLinks": [],
+          "visibility": "public",
+          "order": 0,
+          "sources": [
+            {
+              "label": "Profile per AmCham Abu Dhabi bio, Forbes Middle East and Consultancy-me.com, accessed August 2026.",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm role/title and public market visibility.",
-          "Confirm source, verification date, review date, approved headshot or approved fallback."
+          "Confirm title, profile source, verification date, review date, market visibility, and approved identity media or fallback."
         ]
       }
     },
@@ -80,21 +155,34 @@
       "type": "person",
       "name": "Rami Aslan",
       "sourceFile": "src/pages/Advisors.tsx",
+      "route": "/advisors",
       "fields": {
-        "role": "Advisory Board Member",
-        "title": "Former CEO, Türk Telekom · Investor & Board Member",
-        "bio": "More than 25 years across North America, Europe, the Middle East and Africa. CEO of Türk Telekom (2013–2017) — Türkiye's largest telecom operator, with some 35,000 employees serving 40+ million customers — after leading Oger Telecom as CEO and executive board member. Earlier, head of M&A and corporate finance at the Oger Group, concluding transactions exceeding US$25 billion, following banking roles at Citigroup and TD covering telecom and technology. Board roles have spanned Avea, TTNET, Cell-C and operators across four more countries. Since 2018, a co-founder of venture and private-equity initiatives. McGill BCom and MBA.",
-        "contribution": "The operator's seat: what transformation looks like when you're accountable for 35,000 people and a nation's network — plus an investor's discipline on our economics and a telecom depth that anchors one of our core industries.",
-        "source": "Profile per McGill Desautels advisory board bio and public announcements, accessed August 2026.",
-        "marketVisibility": [
-          "uae"
-        ]
+        "slug": "rami-aslan",
+        "summary": "More than 25 years across North America, Europe, the Middle East and Africa. CEO of Türk Telekom (2013–2017) — Türkiye's largest telecom operator, with some 35,000 employees serving 40+ million customers — after leading Oger Telecom as CEO and executive board member. Earlier, head of M&A and corporate finance at the Oger Group, concluding transactions exceeding US$25 billion, following banking roles at Citigroup and TD covering telecom and technology. Board roles have spanned Avea, TTNET, Cell-C and operators across four more countries. Since 2018, a co-founder of venture and private-equity initiatives. McGill BCom and MBA.",
+        "content": {
+          "schemaVersion": 1,
+          "role": "advisor",
+          "title": "Former CEO, Türk Telekom · Investor & Board Member",
+          "biography": "More than 25 years across North America, Europe, the Middle East and Africa. CEO of Türk Telekom (2013–2017) — Türkiye's largest telecom operator, with some 35,000 employees serving 40+ million customers — after leading Oger Telecom as CEO and executive board member. Earlier, head of M&A and corporate finance at the Oger Group, concluding transactions exceeding US$25 billion, following banking roles at Citigroup and TD covering telecom and technology. Board roles have spanned Avea, TTNET, Cell-C and operators across four more countries. Since 2018, a co-founder of venture and private-equity initiatives. McGill BCom and MBA.",
+          "contribution": "The operator's seat: what transformation looks like when you're accountable for 35,000 people and a nation's network — plus an investor's discipline on our economics and a telecom depth that anchors one of our core industries.",
+          "focusAreas": [],
+          "profileLinks": [],
+          "visibility": "public",
+          "order": 1,
+          "sources": [
+            {
+              "label": "Profile per McGill Desautels advisory board bio and public announcements, accessed August 2026.",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm role/title and public market visibility.",
-          "Confirm source, verification date, review date, approved headshot or approved fallback."
+          "Confirm title, profile source, verification date, review date, market visibility, and approved identity media or fallback."
         ]
       }
     },
@@ -103,21 +191,34 @@
       "type": "person",
       "name": "Fadi Mattar",
       "sourceFile": "src/pages/Advisors.tsx",
+      "route": "/advisors",
       "fields": {
-        "role": "Advisory Board Member",
-        "title": "Public & Government Affairs Director — IMEA & Türkiye, and Country Director Kuwait & Levant, Dow",
-        "bio": "A senior corporate-affairs and country leader at Dow, responsible for public and government affairs across India, the Middle East, Africa and Türkiye, and for Dow's business in Kuwait and the Levant. His Dow decade spans public affairs, government relations and country leadership; before Dow he headed corporate communications at EQUATE Petrochemical, served as Marketing Director for MENA at American Express, and held corporate communications and marketing roles at Citibank across the UAE, Bahrain and Oman — a career bridging energy & petrochemicals, financial services, and the corridors where business meets government in the Gulf.",
-        "contribution": "The stakeholder map: how large industrials and governments in the Gulf actually make decisions — sharpening our energy & resources proposition, our public-sector posture, and how the Cognirise story lands with boards, ministries and media.",
-        "source": "Profile per Dow announcements and public executive profiles (publicly spelled “Fadi Matar”), accessed August 2026.",
-        "marketVisibility": [
-          "uae"
-        ]
+        "slug": "fadi-mattar",
+        "summary": "A senior corporate-affairs and country leader at Dow, responsible for public and government affairs across India, the Middle East, Africa and Türkiye, and for Dow's business in Kuwait and the Levant. His Dow decade spans public affairs, government relations and country leadership; before Dow he headed corporate communications at EQUATE Petrochemical, served as Marketing Director for MENA at American Express, and held corporate communications and marketing roles at Citibank across the UAE, Bahrain and Oman — a career bridging energy & petrochemicals, financial services, and the corridors where business meets government in the Gulf.",
+        "content": {
+          "schemaVersion": 1,
+          "role": "advisor",
+          "title": "Public & Government Affairs Director — IMEA & Türkiye, and Country Director Kuwait & Levant, Dow",
+          "biography": "A senior corporate-affairs and country leader at Dow, responsible for public and government affairs across India, the Middle East, Africa and Türkiye, and for Dow's business in Kuwait and the Levant. His Dow decade spans public affairs, government relations and country leadership; before Dow he headed corporate communications at EQUATE Petrochemical, served as Marketing Director for MENA at American Express, and held corporate communications and marketing roles at Citibank across the UAE, Bahrain and Oman — a career bridging energy & petrochemicals, financial services, and the corridors where business meets government in the Gulf.",
+          "contribution": "The stakeholder map: how large industrials and governments in the Gulf actually make decisions — sharpening our energy & resources proposition, our public-sector posture, and how the Cognirise story lands with boards, ministries and media.",
+          "focusAreas": [],
+          "profileLinks": [],
+          "visibility": "public",
+          "order": 2,
+          "sources": [
+            {
+              "label": "Profile per Dow announcements and public executive profiles (publicly spelled “Fadi Matar”), accessed August 2026.",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm role/title and public market visibility.",
-          "Confirm source, verification date, review date, approved headshot or approved fallback."
+          "Confirm title, profile source, verification date, review date, market visibility, and approved identity media or fallback."
         ]
       }
     },
@@ -126,17 +227,65 @@
       "type": "partner",
       "name": "BGTS",
       "sourceFile": "src/pages/Partners.tsx",
+      "route": "/partners",
       "fields": {
-        "category": "engineering",
-        "positioning": "Software engineering & technology services · 30 years of engineering · London, Sheffield, Düsseldorf, Amsterdam, Istanbul, Ankara — Dubai opening",
-        "marketVisibility": [
-          "uae"
-        ]
+        "slug": "bgts",
+        "summary": "Software engineering & technology services · 30 years of engineering · London, Sheffield, Düsseldorf, Amsterdam, Istanbul, Ankara — Dubai opening",
+        "content": {
+          "schemaVersion": 1,
+          "allianceCategory": "engineering",
+          "positioning": "Software engineering & technology services · 30 years of engineering · London, Sheffield, Düsseldorf, Amsterdam, Istanbul, Ankara — Dubai opening",
+          "facts": [
+            {
+              "value": "2,000+",
+              "label": "full-time professionals"
+            },
+            {
+              "value": "8",
+              "label": "offices across the UK, Europe & Türkiye"
+            },
+            {
+              "value": "ISO/IEC 42001",
+              "label": "certified AI management (plus ISO 27001, 20000-1, 9001)"
+            }
+          ],
+          "evidence": [
+            {
+              "statement": "HSBC, Vodafone, Mercedes-Benz, Coca-Cola, Booking.com, DHL, Samsung, Intel, IBM, BASF, Honda and Warner Bros. feature among the clients listed on BGTS's site. Case studies include AI-driven data management for retail; machine-learning vehicle pricing for automotive; promotion & loyalty management platforms; PIM modernization and legacy decommissioning.",
+              "source": {
+                "label": "Facts per bgts.com (About Us, industries and case-study pages), accessed August 2026.",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": false
+            }
+          ],
+          "coverage": [
+            "Banking & finance",
+            "Manufacturing",
+            "Automotive",
+            "Telecoms",
+            "Retail & e-commerce",
+            "Media & entertainment",
+            "Technology"
+          ],
+          "contribution": "The delivery backbone: two thousand certified engineers with deep financial-services specialization and nearshore scale across Europe and Türkiye — soon on the ground in Dubai. It's how a senior-led firm ships enterprise-scale builds without diluting seniority.",
+          "relationshipStatus": "active",
+          "visibility": "public",
+          "order": 0,
+          "sources": [
+            {
+              "label": "Facts per bgts.com (About Us, industries and case-study pages), accessed August 2026.",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm alliance status, logo rights, source/verification and review dates, claims, website, and market visibility."
+          "Confirm alliance status, website, logo rights, claim approval, verification date, and review date before publication."
         ]
       }
     },
@@ -145,17 +294,63 @@
       "type": "partner",
       "name": "Argano",
       "sourceFile": "src/pages/Partners.tsx",
+      "route": "/partners",
       "fields": {
-        "category": "engineering",
-        "positioning": "Digital transformation consultancy for high-performance operations · Americas-anchored with global delivery",
-        "marketVisibility": [
-          "uae"
-        ]
+        "slug": "argano",
+        "summary": "Digital transformation consultancy for high-performance operations · Americas-anchored with global delivery",
+        "content": {
+          "schemaVersion": 1,
+          "allianceCategory": "engineering",
+          "positioning": "Digital transformation consultancy for high-performance operations · Americas-anchored with global delivery",
+          "facts": [
+            {
+              "value": "Top 1%",
+              "label": "Microsoft Inner Circle — 7 consecutive years"
+            },
+            {
+              "value": "5",
+              "label": "strategic platform alliances: Microsoft, Oracle, SAP, Salesforce, Infor"
+            },
+            {
+              "value": "Partner of the Year",
+              "label": "Oracle (regional) & Infor (healthcare) awards"
+            }
+          ],
+          "evidence": [
+            {
+              "statement": "Argano designs, implements and runs the enterprise platforms operations depend on — Oracle, SAP, Microsoft Dynamics, Salesforce and Infor — with recent expansion including a SAP delivery center in Mexico and acquisitions in capital-program governance and Oracle ERP services. Public highlights include Infor CloudSuite modernization in healthcare and capital-program governance for asset-intensive industries.",
+              "source": {
+                "label": "Facts per argano.com (homepage, partner and technology pages), accessed August 2026.",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": false
+            }
+          ],
+          "coverage": [
+            "Asset-intensive industries",
+            "Healthcare",
+            "Manufacturing",
+            "Services",
+            "Enterprise ERP · HCM · CX across sectors"
+          ],
+          "contribution": "Mastery of the systems of record. When CogniOS interfaces with your ERP, CRM or HCM rather than replacing it, Argano's top-1% platform expertise makes those integrations enterprise-grade — and extends Cognirise's reach into the Americas.",
+          "relationshipStatus": "active",
+          "visibility": "public",
+          "order": 1,
+          "sources": [
+            {
+              "label": "Facts per argano.com (homepage, partner and technology pages), accessed August 2026.",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm alliance status, logo rights, source/verification and review dates, claims, website, and market visibility."
+          "Confirm alliance status, website, logo rights, claim approval, verification date, and review date before publication."
         ]
       }
     },
@@ -164,17 +359,63 @@
       "type": "partner",
       "name": "Lupitor",
       "sourceFile": "src/pages/Partners.tsx",
+      "route": "/partners",
       "fields": {
-        "category": "platform",
-        "positioning": "Conversational-AI platform — AI agents for customer experience · Pittsburgh · San Francisco · Istanbul",
-        "marketVisibility": [
-          "uae"
-        ]
+        "slug": "lupitor",
+        "summary": "Conversational-AI platform — AI agents for customer experience · Pittsburgh · San Francisco · Istanbul",
+        "content": {
+          "schemaVersion": 1,
+          "allianceCategory": "platform",
+          "positioning": "Conversational-AI platform — AI agents for customer experience · Pittsburgh · San Francisco · Istanbul",
+          "facts": [
+            {
+              "value": "40+",
+              "label": "clients on the platform"
+            },
+            {
+              "value": "0.05%",
+              "label": "reported hallucination rate on its custom-trained LLM"
+            },
+            {
+              "value": "48 hrs",
+              "label": "to a custom demo on your data"
+            }
+          ],
+          "evidence": [
+            {
+              "statement": "Omnichannel AI agents that hold natural, human-like conversations grounded in your own data — with orchestration guardrails, self-improvement from live interactions, and integrations into CRM, documents and business apps. Deployable inside your infrastructure. Multilingual voice AI that can run on-premise is precisely what sovereign and regulated MENAT clients require — and what most global platforms can't offer.",
+              "source": {
+                "label": "Facts per lupitor.com, accessed August 2026.",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": false
+            }
+          ],
+          "coverage": [
+            "Voice AI",
+            "Chat & email",
+            "Contact centers",
+            "Any language",
+            "On-premise or cloud"
+          ],
+          "contribution": "The voice of the digital workforce. Lupitor powers the conversational front door — call centers, citizen hotlines, guest concierges — in any language, on your infrastructure, feeding governed CogniOS workflows behind it.",
+          "relationshipStatus": "active",
+          "visibility": "public",
+          "order": 2,
+          "sources": [
+            {
+              "label": "Facts per lupitor.com, accessed August 2026.",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm alliance status, logo rights, source/verification and review dates, claims, website, and market visibility."
+          "Confirm alliance status, website, logo rights, claim approval, verification date, and review date before publication."
         ]
       }
     },
@@ -183,17 +424,65 @@
       "type": "partner",
       "name": "Datatoolpack",
       "sourceFile": "src/pages/Partners.tsx",
+      "route": "/partners",
       "fields": {
-        "category": "platform",
-        "positioning": "Automated data-preparation platform · Turning raw datasets into structured, AI-ready data",
-        "marketVisibility": [
-          "uae"
-        ]
+        "slug": "datatoolpack",
+        "summary": "Automated data-preparation platform · Turning raw datasets into structured, AI-ready data",
+        "content": {
+          "schemaVersion": 1,
+          "allianceCategory": "platform",
+          "positioning": "Automated data-preparation platform · Turning raw datasets into structured, AI-ready data",
+          "facts": [
+            {
+              "value": "10+",
+              "label": "data-cleaning fixations for consistent formats"
+            },
+            {
+              "value": "1,000 → 20,000",
+              "label": "records in a published synthetic-data case example"
+            },
+            {
+              "value": "3 runs",
+              "label": "available in the free starting tier"
+            }
+          ],
+          "evidence": [
+            {
+              "statement": "AutoData brings common data-preparation steps into preset machine-learning pipelines. The platform can fill and verify values using web searches, API requests and LLM queries; standardize formats; numericalize and scale data; reduce noise; engineer features; and generate synthetic records. Its published HR example transformed inconsistent source data into a structured machine-learning dataset and expanded 1,000 records to 20,000 without manual preprocessing.",
+              "source": {
+                "label": "Alliance status confirmed by Cognirise, September 2026. Product facts per datatoolpack.com and AutoData product pages, accessed September 2026.",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": false
+            }
+          ],
+          "coverage": [
+            "Data completion & verification",
+            "Data cleaning",
+            "Numericalization",
+            "Missing-data handling",
+            "Feature engineering",
+            "Noise reduction",
+            "Synthetic data"
+          ],
+          "contribution": "The preparation layer for AI-ready data. Datatoolpack helps Cognirise clients move from fragmented, inconsistent source data toward governed datasets that can support analytics, model training and CogniOS workflows with less manual pipeline work.",
+          "relationshipStatus": "active",
+          "visibility": "public",
+          "order": 3,
+          "sources": [
+            {
+              "label": "Alliance status confirmed by Cognirise, September 2026. Product facts per datatoolpack.com and AutoData product pages, accessed September 2026.",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm alliance status, logo rights, source/verification and review dates, claims, website, and market visibility."
+          "Confirm alliance status, website, logo rights, claim approval, verification date, and review date before publication."
         ]
       }
     },
@@ -202,17 +491,65 @@
       "type": "partner",
       "name": "bunjee.ai",
       "sourceFile": "src/pages/Partners.tsx",
+      "route": "/partners",
       "fields": {
-        "category": "platform",
-        "positioning": "AI-native organizational intelligence · Capturing how experts and leaders think, then deploying that knowledge across the enterprise",
-        "marketVisibility": [
-          "uae"
-        ]
+        "slug": "bunjee-ai",
+        "summary": "AI-native organizational intelligence · Capturing how experts and leaders think, then deploying that knowledge across the enterprise",
+        "content": {
+          "schemaVersion": 1,
+          "allianceCategory": "platform",
+          "positioning": "AI-native organizational intelligence · Capturing how experts and leaders think, then deploying that knowledge across the enterprise",
+          "facts": [
+            {
+              "value": "30+",
+              "label": "languages supported for AI-led interviews"
+            },
+            {
+              "value": "2,184",
+              "label": "candidates screened in a published use case"
+            },
+            {
+              "value": "6 days",
+              "label": "to complete a process described as normally taking 6–8 weeks"
+            }
+          ],
+          "evidence": [
+            {
+              "statement": "Bunjee captures conversations, videos, documents and processes from an organization's experts, structures them into a living intelligence layer, and deploys that expertise where teams need it. The same layer supports recruitment, onboarding, communication, assessment and training. Its recruitment workflow combines job posting, CV scoring and AI-led interviews with consistent rubrics, transcripts, rationale and ranked shortlists.",
+              "source": {
+                "label": "Alliance status confirmed by Cognirise, September 2026. Product facts and published use-case figures per bunjee.ai, accessed September 2026.",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": false
+            }
+          ],
+          "coverage": [
+            "Recruitment",
+            "Onboarding",
+            "Training",
+            "Assessment",
+            "Internal communication",
+            "Corporate memory",
+            "Expert knowledge"
+          ],
+          "contribution": "The organizational-memory layer. bunjee.ai helps Cognirise clients capture scarce expert judgment once and make it available across hiring, onboarding, learning, assessment and communication — extending governed intelligence from enterprise systems into the way people think and decide.",
+          "relationshipStatus": "active",
+          "visibility": "public",
+          "order": 4,
+          "sources": [
+            {
+              "label": "Alliance status confirmed by Cognirise, September 2026. Product facts and published use-case figures per bunjee.ai, accessed September 2026.",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm alliance status, logo rights, source/verification and review dates, claims, website, and market visibility."
+          "Confirm alliance status, website, logo rights, claim approval, verification date, and review date before publication."
         ]
       }
     },
@@ -223,16 +560,34 @@
       "sourceFile": "src/pages/PlatformsOverview.tsx",
       "route": "/platforms/cognios",
       "fields": {
+        "slug": "cognios",
         "summary": "The core operating system for governed enterprise intelligence.",
-        "routeSlug": "cognios",
-        "marketVisibility": [
-          "uae"
+        "content": {
+          "schemaVersion": 1,
+          "category": "Foundation & Orchestration",
+          "summary": "The core operating system for governed enterprise intelligence.",
+          "template": "cognios-specialist",
+          "sections": [],
+          "capabilities": [],
+          "differentiators": [],
+          "visibility": "public",
+          "order": 0,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/PlatformsOverview.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/site-cognios.jpg"
         ]
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm template ownership (CogniOS remains code-owned), CTA, SEO, hero media, capabilities, market visibility, and display order."
+          "Confirm CTA, SEO, media rights, verification date, review date, and whether a standard detail is editorially ready."
         ]
       }
     },
@@ -243,16 +598,32 @@
       "sourceFile": "src/pages/PlatformsOverview.tsx",
       "route": "/platforms/cognidocs",
       "fields": {
+        "slug": "cognidocs",
         "summary": "Knowledge made available with context and control.",
-        "routeSlug": "cognidocs",
-        "marketVisibility": [
-          "uae"
-        ]
+        "content": {
+          "schemaVersion": 1,
+          "category": "Specialist Engines",
+          "summary": "Knowledge made available with context and control.",
+          "template": "standard",
+          "sections": [],
+          "capabilities": [],
+          "differentiators": [],
+          "visibility": "public",
+          "order": 1,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/PlatformsOverview.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm template ownership (CogniOS remains code-owned), CTA, SEO, hero media, capabilities, market visibility, and display order."
+          "Confirm CTA, SEO, media rights, verification date, review date, and whether a standard detail is editorially ready."
         ]
       }
     },
@@ -263,16 +634,32 @@
       "sourceFile": "src/pages/PlatformsOverview.tsx",
       "route": "/platforms/cogniagents",
       "fields": {
+        "slug": "cogniagents",
         "summary": "Governed agents coordinating operational tasks.",
-        "routeSlug": "cogniagents",
-        "marketVisibility": [
-          "uae"
-        ]
+        "content": {
+          "schemaVersion": 1,
+          "category": "Specialist Engines",
+          "summary": "Governed agents coordinating operational tasks.",
+          "template": "standard",
+          "sections": [],
+          "capabilities": [],
+          "differentiators": [],
+          "visibility": "public",
+          "order": 2,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/PlatformsOverview.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm template ownership (CogniOS remains code-owned), CTA, SEO, hero media, capabilities, market visibility, and display order."
+          "Confirm CTA, SEO, media rights, verification date, review date, and whether a standard detail is editorially ready."
         ]
       }
     },
@@ -283,16 +670,32 @@
       "sourceFile": "src/pages/PlatformsOverview.tsx",
       "route": "/platforms/cognitalk",
       "fields": {
+        "slug": "cognitalk",
         "summary": "Conversational layer for human-AI interaction in the flow of work.",
-        "routeSlug": "cognitalk",
-        "marketVisibility": [
-          "uae"
-        ]
+        "content": {
+          "schemaVersion": 1,
+          "category": "Specialist Engines",
+          "summary": "Conversational layer for human-AI interaction in the flow of work.",
+          "template": "standard",
+          "sections": [],
+          "capabilities": [],
+          "differentiators": [],
+          "visibility": "public",
+          "order": 3,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/PlatformsOverview.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm template ownership (CogniOS remains code-owned), CTA, SEO, hero media, capabilities, market visibility, and display order."
+          "Confirm CTA, SEO, media rights, verification date, review date, and whether a standard detail is editorially ready."
         ]
       }
     },
@@ -303,16 +706,32 @@
       "sourceFile": "src/pages/PlatformsOverview.tsx",
       "route": "/platforms/cogniware",
       "fields": {
+        "slug": "cogniware",
         "summary": "Composable intelligence integrations for enterprise systems.",
-        "routeSlug": "cogniware",
-        "marketVisibility": [
-          "uae"
-        ]
+        "content": {
+          "schemaVersion": 1,
+          "category": "Specialist Engines",
+          "summary": "Composable intelligence integrations for enterprise systems.",
+          "template": "standard",
+          "sections": [],
+          "capabilities": [],
+          "differentiators": [],
+          "visibility": "public",
+          "order": 4,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/PlatformsOverview.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": []
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm template ownership (CogniOS remains code-owned), CTA, SEO, hero media, capabilities, market visibility, and display order."
+          "Confirm CTA, SEO, media rights, verification date, review date, and whether a standard detail is editorially ready."
         ]
       }
     },
@@ -324,19 +743,78 @@
       "route": "/insights/ai-should-move-the-business",
       "fields": {
         "slug": "ai-should-move-the-business",
-        "topic": "Agentic enterprise",
-        "publishedDate": "3 September 2026",
-        "author": "Strategy Practice",
-        "readingTime": "5 min read",
-        "heroImage": "/images/cognirise/site-insights.jpg",
-        "marketVisibility": [
-          "uae"
+        "summary": "AI transformation is not a portfolio of pilots. It is a decision to redesign priority work around people, data, controls and intelligent execution.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "article",
+          "teaser": "AI transformation is not a portfolio of pilots. It is a decision to redesign priority work around people, data, controls and intelligent execution.",
+          "body": [
+            {
+              "type": "paragraph",
+              "text": "AI transformation is not a portfolio of pilots. It is a decision to redesign priority work around people, data, controls and intelligent execution."
+            },
+            {
+              "type": "paragraph",
+              "text": "Many enterprises are stuck in a holding pattern. They have copilots assisting individuals, but the core operating model remains unchanged. The friction points—hand-offs, data silos, slow decisions—are still there, just slightly masked by faster email drafting."
+            },
+            {
+              "type": "paragraph",
+              "text": "Transformation begins when leaders stop asking \"how can AI help our people?\" and start asking \"how should this work move?\" When you design the process for intelligence, you don't just add a conversational interface. You build governed agents that execute tasks, connected to the knowledge they need, escalating to human authority only when judgment is required."
+            },
+            {
+              "type": "heading",
+              "level": 3,
+              "text": "The limits of assistance"
+            },
+            {
+              "type": "paragraph",
+              "text": "A copilot makes a single task faster. Agentic transformation makes a sequence of tasks automatic. If a loan origination process requires six hand-offs across three departments, giving each person an AI assistant doesn't fix the process—it just makes the hand-offs happen marginally faster."
+            },
+            {
+              "type": "paragraph",
+              "text": "The alternative is to look at the process end-to-end. Where is the data? What are the regulatory boundaries? What are the decision criteria? Once those are mapped, a governed digital workforce can handle the routine validation and assembly, bringing a synthesized decision to the human operator. The work moves."
+            },
+            {
+              "type": "heading",
+              "level": 3,
+              "text": "Designing for control"
+            },
+            {
+              "type": "paragraph",
+              "text": "Moving work automatically requires trust, which means governance cannot be an afterthought. An agentic enterprise builds control into the flow: audit trails, clear authority boundaries, and deterministic fallbacks. The system is designed to stop and ask for direction when uncertainty arises."
+            },
+            {
+              "type": "paragraph",
+              "text": "Stop running isolated pilots. Bring one consequential process under pressure, and redesign it for intelligence."
+            }
+          ],
+          "author": "Strategy Practice",
+          "publicationDate": "2026-09-03",
+          "readingTimeMinutes": 5,
+          "topics": [
+            "Agentic enterprise"
+          ],
+          "sectors": [],
+          "platformIds": [],
+          "social": {},
+          "visibility": "public",
+          "order": 0,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/InsightArticle.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/site-insights.jpg"
         ]
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm author, publication/updated dates, topic taxonomy, source/review date, hero media rights and SEO metadata."
+          "Confirm author, publication date, source, verification date, review date, hero rights, SEO, and social metadata."
         ]
       }
     },
@@ -348,19 +826,74 @@
       "route": "/insights/foundations-for-production",
       "fields": {
         "slug": "foundations-for-production",
-        "topic": "Foundations",
-        "publishedDate": "28 August 2026",
-        "author": "Engineering Practice",
-        "readingTime": "4 min read",
-        "heroImage": "/images/cognirise/site-infrastructure.jpg",
-        "marketVisibility": [
-          "uae"
+        "summary": "Data, security, governance and architecture are not the preamble. They are the work.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "article",
+          "teaser": "Data, security, governance and architecture are not the preamble. They are the work.",
+          "body": [
+            {
+              "type": "paragraph",
+              "text": "Data, security, governance and architecture are not the preamble. They are the work."
+            },
+            {
+              "type": "paragraph",
+              "text": "The hardest part of AI isn't the model. It's the environment around the model. When a promising prototype fails to reach production, it is rarely because the intelligence wasn't good enough. It fails because the enterprise wasn't ready to support it."
+            },
+            {
+              "type": "paragraph",
+              "text": "Production demands a different set of questions: who may access what, where data may move, what the operating team can observe, and how the system connects to the wider estate. A conversational interface alone does not answer them."
+            },
+            {
+              "type": "heading",
+              "level": 3,
+              "text": "The integration reality"
+            },
+            {
+              "type": "paragraph",
+              "text": "AI needs a place to operate. It needs a structured route to enterprise knowledge. If your documentation is a mess of conflicting versions, an LLM will simply hallucinate at scale. The foundation of any AI transformation is data hygiene and semantic architecture."
+            },
+            {
+              "type": "paragraph",
+              "text": "The CogniOS architecture approaches this systematically. Before agents are orchestrated, the knowledge layer and integration route need to be designed around controlled context and the systems of record."
+            },
+            {
+              "type": "heading",
+              "level": 3,
+              "text": "Boundaries by design"
+            },
+            {
+              "type": "paragraph",
+              "text": "For public-sector and regulated work, the relevant boundaries must be made explicit before architecture choices are made. Data location, access, authority and evidence requirements should shape the foundation rather than appear as a policy note at the end."
+            }
+          ],
+          "author": "Engineering Practice",
+          "publicationDate": "2026-08-28",
+          "readingTimeMinutes": 4,
+          "topics": [
+            "Foundations"
+          ],
+          "sectors": [],
+          "platformIds": [],
+          "social": {},
+          "visibility": "public",
+          "order": 1,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/InsightArticle.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/site-infrastructure.jpg"
         ]
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm author, publication/updated dates, topic taxonomy, source/review date, hero media rights and SEO metadata."
+          "Confirm author, publication date, source, verification date, review date, hero rights, SEO, and social metadata."
         ]
       }
     },
@@ -372,19 +905,69 @@
       "route": "/insights/governed-digital-workforce",
       "fields": {
         "slug": "governed-digital-workforce",
-        "topic": "Platforms",
-        "publishedDate": "15 August 2026",
-        "author": "Platforms Team",
-        "readingTime": "6 min read",
-        "heroImage": "/images/cognirise/site-cognios.jpg",
-        "marketVisibility": [
-          "uae"
+        "summary": "What it takes to deploy agents into real operating environments—with people accountable at every decision point.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "article",
+          "teaser": "What it takes to deploy agents into real operating environments—with people accountable at every decision point.",
+          "body": [
+            {
+              "type": "paragraph",
+              "text": "What it takes to deploy agents into real operating environments—with people accountable at every decision point."
+            },
+            {
+              "type": "paragraph",
+              "text": "We are moving from an era where AI generates text to an era where AI takes action. Agents are systems that can perceive an environment, make decisions based on a goal, and use tools to execute tasks. But deploying an agent in a consequential enterprise environment is fundamentally different from a sandbox experiment."
+            },
+            {
+              "type": "paragraph",
+              "text": "A digital workforce requires an operating model. Who manages the agents? How do they escalate exceptions? How do you audit a decision made at machine speed?"
+            },
+            {
+              "type": "heading",
+              "level": 3,
+              "text": "The accountability model"
+            },
+            {
+              "type": "paragraph",
+              "text": "Agents do not replace human authority; they require it to be more precise. A governed digital workforce operates within strict, declarative boundaries. An agent might have the authority to process an invoice up to $10,000 if it matches a purchase order, but it must flag anything anomalous to a human operator."
+            },
+            {
+              "type": "paragraph",
+              "text": "This is where the Experience Layer of CogniOS becomes critical. The interface between human and agent must fit the operating context and present the information necessary for a person to make an informed judgment."
+            },
+            {
+              "type": "paragraph",
+              "text": "The digital workforce is not an IT project. It is a new way of organizing the enterprise. Start with one process, define the boundaries, and build the controls before you scale."
+            }
+          ],
+          "author": "Platforms Team",
+          "publicationDate": "2026-08-15",
+          "readingTimeMinutes": 6,
+          "topics": [
+            "Platforms"
+          ],
+          "sectors": [],
+          "platformIds": [],
+          "social": {},
+          "visibility": "public",
+          "order": 2,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/InsightArticle.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/site-cognios.jpg"
         ]
       },
       "review": {
         "status": "needs-review",
         "reasons": [
-          "Confirm author, publication/updated dates, topic taxonomy, source/review date, hero media rights and SEO metadata."
+          "Confirm author, publication date, source, verification date, review date, hero rights, SEO, and social metadata."
         ]
       }
     },
@@ -396,14 +979,36 @@
       "fields": {
         "publicPath": "/images/cognirise/cognirise-pulse-governance.jpg",
         "bytes": 144921,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "7f462ae555d626662aa17f0654b0308cf1d869d704bb3032351ccf2ac03d35b7",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/components/ServiceLineTiles.tsx",
+          "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
+          "artifacts/cognirise-website/src/pages/EngineeringWithAI.tsx",
+          "artifacts/cognirise-website/src/pages/Home.tsx",
+          "artifacts/cognirise-website/src/pages/PublicSector.tsx"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "7f462ae555d626662aa17f0654b0308cf1d869d704bb3032351ccf2ac03d35b7"
     },
     {
       "externalId": "asset:756471849fafbe93e1b9",
@@ -413,14 +1018,34 @@
       "fields": {
         "publicPath": "/images/cognirise/cognirise-pulse-outcomes.jpg",
         "bytes": 81880,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "883ed6bb9c1e30549f290b696ed59fc4a74888d1ed5a544f567d6c850fb7fc50",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
+          "artifacts/cognirise-website/src/pages/DataAIFoundations.tsx",
+          "artifacts/cognirise-website/src/pages/WorkProof.tsx"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "883ed6bb9c1e30549f290b696ed59fc4a74888d1ed5a544f567d6c850fb7fc50"
     },
     {
       "externalId": "asset:cb22af24054d18218ace",
@@ -430,14 +1055,35 @@
       "fields": {
         "publicPath": "/images/cognirise/cognirise-pulse-people.jpg",
         "bytes": 142212,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/components/ServiceLineTiles.tsx",
+          "artifacts/cognirise-website/src/pages/DigitalAIWorkforce.tsx",
+          "artifacts/cognirise-website/src/pages/Home.tsx",
+          "artifacts/cognirise-website/src/pages/ServicesOverview.tsx"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034"
     },
     {
       "externalId": "asset:cb984945a1a83771804c",
@@ -447,14 +1093,30 @@
       "fields": {
         "publicPath": "/images/cognirise/image_1788532369588.png",
         "bytes": 556911,
-        "extension": ".png"
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "4e10ff0d5534704f48eaa834c4861d9b9aa9666c027773f52c9736de37046841",
+        "width": 970,
+        "height": 1318,
+        "usages": [],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "4e10ff0d5534704f48eaa834c4861d9b9aa9666c027773f52c9736de37046841"
     },
     {
       "externalId": "asset:03186baa2b347275061a",
@@ -464,14 +1126,30 @@
       "fields": {
         "publicPath": "/images/cognirise/image_1788532453951.png",
         "bytes": 465005,
-        "extension": ".png"
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "d39d7ffb61c9b640d55a0f6249b4f613d1816a1cba5e3134263d816468ee9fef",
+        "width": 1110,
+        "height": 694,
+        "usages": [],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "d39d7ffb61c9b640d55a0f6249b4f613d1816a1cba5e3134263d816468ee9fef"
     },
     {
       "externalId": "asset:b985e15c10096f5ccc2a",
@@ -481,14 +1159,30 @@
       "fields": {
         "publicPath": "/images/cognirise/image_1788532520646.png",
         "bytes": 1988083,
-        "extension": ".png"
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "6ba124dcd8c6800e7d42b5622d3d142ac9933a5980bf58fd7b208b64441d5eaa",
+        "width": 1612,
+        "height": 1203,
+        "usages": [],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "6ba124dcd8c6800e7d42b5622d3d142ac9933a5980bf58fd7b208b64441d5eaa"
     },
     {
       "externalId": "asset:81e9604dee13233586a4",
@@ -498,14 +1192,30 @@
       "fields": {
         "publicPath": "/images/cognirise/image_1788532533170.png",
         "bytes": 370759,
-        "extension": ".png"
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "f8f5dcd0abd1810578019b3013dd0a570ebb4e66113591953f873f9a94f2bab1",
+        "width": 1614,
+        "height": 898,
+        "usages": [],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "f8f5dcd0abd1810578019b3013dd0a570ebb4e66113591953f873f9a94f2bab1"
     },
     {
       "externalId": "asset:ac4382080a9dfc27f347",
@@ -515,14 +1225,30 @@
       "fields": {
         "publicPath": "/images/cognirise/image_1788532545919.png",
         "bytes": 1609152,
-        "extension": ".png"
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "af1ac1121e74cb0b1c196b50006a5acd0a7442b0b56891f647854bc0b854494b",
+        "width": 1619,
+        "height": 1325,
+        "usages": [],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "af1ac1121e74cb0b1c196b50006a5acd0a7442b0b56891f647854bc0b854494b"
     },
     {
       "externalId": "asset:cec6e3eeef341dca4ef6",
@@ -532,14 +1258,30 @@
       "fields": {
         "publicPath": "/images/cognirise/image_1788532565489.png",
         "bytes": 209361,
-        "extension": ".png"
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "d7ccf255681903f515405738914c8ccda40349e1ec36422567d2ca6a3dd1e545",
+        "width": 1621,
+        "height": 1313,
+        "usages": [],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "d7ccf255681903f515405738914c8ccda40349e1ec36422567d2ca6a3dd1e545"
     },
     {
       "externalId": "asset:3cca1551f0dec19ae890",
@@ -549,14 +1291,30 @@
       "fields": {
         "publicPath": "/images/cognirise/logo-blue.svg",
         "bytes": 92990,
-        "extension": ".svg"
+        "extension": ".svg",
+        "mimeType": "image/svg+xml",
+        "checksum": "c2cba1a5a6e4f4eefe2f711dae492f3160d277cb46ab43e2f616c68a92ed97ec",
+        "width": 1320,
+        "height": 388,
+        "usages": [],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "c2cba1a5a6e4f4eefe2f711dae492f3160d277cb46ab43e2f616c68a92ed97ec"
     },
     {
       "externalId": "asset:207b88a034dc17247e9c",
@@ -566,14 +1324,30 @@
       "fields": {
         "publicPath": "/images/cognirise/logo-white.svg",
         "bytes": 93008,
-        "extension": ".svg"
+        "extension": ".svg",
+        "mimeType": "image/svg+xml",
+        "checksum": "52863a39ed2631ee05ad321b2cebbef1d158d88c262d2f3a72338267fc389887",
+        "width": 1320,
+        "height": 388,
+        "usages": [],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "52863a39ed2631ee05ad321b2cebbef1d158d88c262d2f3a72338267fc389887"
     },
     {
       "externalId": "asset:5d8da6b74c77327bf3a1",
@@ -583,14 +1357,35 @@
       "fields": {
         "publicPath": "/images/cognirise/pulse-breakthrough.jpg",
         "bytes": 185294,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "a798b751527e5ffe41958651d0c0c5e55a04a920b12a56f1e4de019c73dfc35e",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
+          "artifacts/cognirise-website/src/pages/Home.tsx",
+          "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
+          "artifacts/cognirise-website/src/pages/WorkProof.tsx"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "a798b751527e5ffe41958651d0c0c5e55a04a920b12a56f1e4de019c73dfc35e"
     },
     {
       "externalId": "asset:1aa85e3f80b4199ec833",
@@ -600,14 +1395,34 @@
       "fields": {
         "publicPath": "/images/cognirise/pulse-convergence.jpg",
         "bytes": 138711,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "6ee4af35cc0bc38f7cb278ce2fbfe3304463bf7f9886605ad6c315348919f050",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/AboutPeople.tsx",
+          "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
+          "artifacts/cognirise-website/src/pages/Home.tsx"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "6ee4af35cc0bc38f7cb278ce2fbfe3304463bf7f9886605ad6c315348919f050"
     },
     {
       "externalId": "asset:302ea3c4bf1fbfb78fed",
@@ -617,14 +1432,32 @@
       "fields": {
         "publicPath": "/images/cognirise/pulse-hero.jpg",
         "bytes": 189454,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "0c0053392fe1823f2aafe053711bd07114cb4153dd8552a362a5ac2b2c8653b4",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/Home.tsx"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "0c0053392fe1823f2aafe053711bd07114cb4153dd8552a362a5ac2b2c8653b4"
     },
     {
       "externalId": "asset:963a3139d76ebb1cbd21",
@@ -634,14 +1467,37 @@
       "fields": {
         "publicPath": "/images/cognirise/site-cognios.jpg",
         "bytes": 160562,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "fc856d336a4780e5c7568f0cb1b9e96dda8ee7d4fd1f7967df9ce37c0be3a781",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
+          "artifacts/cognirise-website/src/pages/Home.tsx",
+          "artifacts/cognirise-website/src/pages/InsightArticle.tsx",
+          "artifacts/cognirise-website/src/pages/InsightsEditorial.tsx",
+          "artifacts/cognirise-website/src/pages/PlatformsOverview.tsx",
+          "artifacts/cognirise-website/src/pages/PublicSector.tsx"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "fc856d336a4780e5c7568f0cb1b9e96dda8ee7d4fd1f7967df9ce37c0be3a781"
     },
     {
       "externalId": "asset:8e7e9479de6f42bcf2bc",
@@ -651,14 +1507,32 @@
       "fields": {
         "publicPath": "/images/cognirise/site-financial.jpg",
         "bytes": 178138,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "6df89ba5ba9d3fc17254be728e5f658d626284dd08a1f69aec9cf47e7b9a504f",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "6df89ba5ba9d3fc17254be728e5f658d626284dd08a1f69aec9cf47e7b9a504f"
     },
     {
       "externalId": "asset:24cc90e2f42d888d21c8",
@@ -668,14 +1542,34 @@
       "fields": {
         "publicPath": "/images/cognirise/site-government.jpg",
         "bytes": 164010,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "c89a938dee3d4daa6dd11ed0dc158a6c7a48812199a167acfc065ab263dd6f4b",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx",
+          "artifacts/cognirise-website/src/pages/PublicSector.tsx",
+          "artifacts/cognirise-website/src/pages/SovereignRegulatedAI.tsx"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "c89a938dee3d4daa6dd11ed0dc158a6c7a48812199a167acfc065ab263dd6f4b"
     },
     {
       "externalId": "asset:5510debf4e4390420a56",
@@ -685,14 +1579,35 @@
       "fields": {
         "publicPath": "/images/cognirise/site-infrastructure.jpg",
         "bytes": 187940,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "75c105711b2c2d910aa0c19502947137c73624f6fbe6e78ac73f744ff591777d",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/components/ServiceLineTiles.tsx",
+          "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx",
+          "artifacts/cognirise-website/src/pages/InsightArticle.tsx",
+          "artifacts/cognirise-website/src/pages/InsightsEditorial.tsx"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "75c105711b2c2d910aa0c19502947137c73624f6fbe6e78ac73f744ff591777d"
     },
     {
       "externalId": "asset:166331f8bc21e20ab360",
@@ -702,14 +1617,33 @@
       "fields": {
         "publicPath": "/images/cognirise/site-insights.jpg",
         "bytes": 80613,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "a89ccd0247db245d7ed66ca1ee7d5ad99325d36bcc5e9b5084523081836c2d25",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/InsightArticle.tsx",
+          "artifacts/cognirise-website/src/pages/InsightsEditorial.tsx"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "a89ccd0247db245d7ed66ca1ee7d5ad99325d36bcc5e9b5084523081836c2d25"
     },
     {
       "externalId": "asset:ca77430e1566676f9498",
@@ -719,14 +1653,32 @@
       "fields": {
         "publicPath": "/images/cognirise/site-leadership.jpg",
         "bytes": 130920,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "7a76c4658558b38c0b4cb2f7e075deb3f9128b2e6951a12a36c771d36a836ba4",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/AboutPeople.tsx"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "7a76c4658558b38c0b4cb2f7e075deb3f9128b2e6951a12a36c771d36a836ba4"
     },
     {
       "externalId": "asset:ac50e1fb2480a2f9caf5",
@@ -736,14 +1688,34 @@
       "fields": {
         "publicPath": "/images/cognirise/site-services.jpg",
         "bytes": 154801,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "1d1e44ef9c90cc89d22f5676cb6bbdb86cb5b02972e5d5ffcc05dca88b53be99",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
+          "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
+          "artifacts/cognirise-website/src/pages/ValueScan.tsx"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "1d1e44ef9c90cc89d22f5676cb6bbdb86cb5b02972e5d5ffcc05dca88b53be99"
     },
     {
       "externalId": "asset:e9746bc3d249a652deb4",
@@ -753,14 +1725,36 @@
       "fields": {
         "publicPath": "/images/cognirise/site-work-proof.jpg",
         "bytes": 115728,
-        "extension": ".jpg"
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "61c0e28ea60a07c3eed1aecf06446f9c1cb83c607e565ecae076cfd7625c5a71",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/ValueScan.tsx",
+          "artifacts/cognirise-website/src/pages/WorkProof.tsx"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
       },
       "review": {
         "status": "needs-review",
         "reasons": [
           "Confirm rights holder, source, license, and descriptive alt text before media import."
         ]
-      }
+      },
+      "digest": "61c0e28ea60a07c3eed1aecf06446f9c1cb83c607e565ecae076cfd7625c5a71"
     }
-  ]
+  ],
+  "manifestDigest": "0b92d8aa7f4b21ce5d4b9bd61f5006e6de3798a8cd88d216be341ef7c1047fd7",
+  "generatedAt": "2026-09-06T19:48:41.729Z",
+  "dryRun": false
 }

@@ -20,6 +20,7 @@ tags:
   - { name: audit, description: Audit trail }
   - { name: public, description: Published public content }
   - { name: analytics, description: First-party analytics and consent }
+  - { name: navigation, description: Governed public navigation visibility }
 paths:
   /healthz:
     get:
@@ -33,6 +34,52 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /public/navigation:
+    get:
+      operationId: getPublicNavigationSettings
+      tags: [public, navigation]
+      summary: Get published header navigation visibility
+      responses:
+        "200":
+          description: Navigation visibility
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NavigationSettings"
+  /navigation:
+    get:
+      operationId: getNavigationSettings
+      tags: [navigation]
+      summary: Get editable header navigation visibility
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Navigation visibility
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NavigationSettings"
+    put:
+      operationId: updateNavigationSettings
+      tags: [navigation]
+      summary: Enable or disable header menu and submenu items
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNavigationSettings"
+      responses:
+        "200":
+          description: Updated navigation visibility
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NavigationSettings"
   /enquiries:
     post:
       operationId: submitEnquiry
@@ -579,6 +626,29 @@ paths:
       responses:
         "200":
           description: Archived document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+  /documents/{documentId}/restore:
+    post:
+      operationId: restoreDocument
+      tags: [documents]
+      summary: Restore an archived document as a draft
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArchiveInput"
+      responses:
+        "200":
+          description: Restored draft document
           content:
             application/json:
               schema:
@@ -1243,6 +1313,35 @@ components:
         details:
           type: object
           additionalProperties: true
+    NavigationSetting:
+      type: object
+      additionalProperties: false
+      required: [id, enabled]
+      properties:
+        id: { type: string }
+        enabled: { type: boolean }
+    NavigationSettings:
+      type: object
+      additionalProperties: false
+      required: [items, updatedAt]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/NavigationSetting"
+        updatedAt:
+          type: ["string", "null"]
+          format: date-time
+    UpdateNavigationSettings:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/NavigationSetting"
     HealthStatus:
       type: object
       required: [status]
@@ -1548,6 +1647,151 @@ components:
     DocumentStatus:
       type: string
       enum: [draft, in-review, approved, scheduled, published, archived]
+    CmsStructuredContent:
+      description: Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
+      oneOf:
+        - $ref: "#/components/schemas/CmsPersonContent"
+        - $ref: "#/components/schemas/CmsPartnerContent"
+        - $ref: "#/components/schemas/CmsPlatformContent"
+        - $ref: "#/components/schemas/CmsPublicationContent"
+        - $ref: "#/components/schemas/CmsCaseStudyContent"
+    CmsPersonContent:
+      type: object
+      required: [schemaVersion]
+      properties:
+        schemaVersion: { type: number, enum: [1] }
+        role: { type: string, enum: [founder, leader, employee, advisor] }
+        title: { type: string }
+        biography: { type: string }
+        contribution: { type: string }
+        focusAreas: { type: array, items: { type: object, additionalProperties: false, required: [title, detail], properties: { title: { type: string }, detail: { type: string } } } }
+        profileLinks: { type: array, items: { $ref: "#/components/schemas/CmsLink" } }
+        identityMediaId: { type: string }
+        approvedFallback: { type: string, enum: [initials, brand-mark] }
+        visibility: { $ref: "#/components/schemas/CmsVisibility" }
+        order: { type: number, multipleOf: 1 }
+        sources: { type: array, items: { $ref: "#/components/schemas/CmsSource" } }
+        verificationDate: { type: string, format: date }
+        reviewDate: { type: string, format: date }
+        relatedIds: { type: array, items: { type: string } }
+    CmsPartnerContent:
+      type: object
+      required: [schemaVersion]
+      properties:
+        schemaVersion: { type: number, enum: [1] }
+        allianceCategory: { type: string }
+        positioning: { type: string }
+        facts: { type: array, items: { type: object, additionalProperties: false, required: [value, label], properties: { value: { type: string }, label: { type: string } } } }
+        evidence: { type: array, items: { $ref: "#/components/schemas/CmsEvidence" } }
+        coverage: { type: array, items: { type: string } }
+        contribution: { type: string }
+        website: { type: string, pattern: '^https?://.+' }
+        logoMediaId: { type: string }
+        relationshipStatus: { type: string, enum: [active, prospective, paused, ended] }
+        visibility: { $ref: "#/components/schemas/CmsVisibility" }
+        order: { type: number, multipleOf: 1 }
+        sources: { type: array, items: { $ref: "#/components/schemas/CmsSource" } }
+        verificationDate: { type: string, format: date }
+        reviewDate: { type: string, format: date }
+        relatedIds: { type: array, items: { type: string } }
+    CmsPlatformContent:
+      type: object
+      required: [schemaVersion]
+      properties:
+        schemaVersion: { type: number, enum: [1] }
+        category: { type: string }
+        summary: { type: string }
+        template: { type: string, enum: [standard, cognios-specialist] }
+        heroMediaId: { type: string }
+        sections: { type: array, items: { type: object, required: [heading, body], properties: { heading: { type: string }, body: { type: array, items: { $ref: "#/components/schemas/CmsRichBlock" } } } } }
+        capabilities: { type: array, items: { type: string } }
+        differentiators: { type: array, items: { type: string } }
+        cta: { $ref: "#/components/schemas/CmsLink" }
+        visibility: { $ref: "#/components/schemas/CmsVisibility" }
+        order: { type: number, multipleOf: 1 }
+        sources: { type: array, items: { $ref: "#/components/schemas/CmsSource" } }
+        verificationDate: { type: string, format: date }
+        reviewDate: { type: string, format: date }
+        relatedIds: { type: array, items: { type: string } }
+    CmsPublicationContent:
+      type: object
+      required: [schemaVersion]
+      properties:
+        schemaVersion: { type: number, enum: [1] }
+        variant: { type: string, enum: [article, pov] }
+        teaser: { type: string }
+        body: { type: array, items: { $ref: "#/components/schemas/CmsRichBlock" } }
+        author: { type: string }
+        publicationDate: { type: string, format: date }
+        updatedDate: { type: string, format: date }
+        readingTimeMinutes: { type: number, multipleOf: 1, minimum: 1 }
+        topics: { type: array, items: { type: string } }
+        sectors: { type: array, items: { type: string } }
+        platformIds: { type: array, items: { type: string } }
+        heroMediaId: { type: string }
+        pdfMediaId: { type: string }
+        visibility: { $ref: "#/components/schemas/CmsVisibility" }
+        order: { type: number, multipleOf: 1 }
+        sources: { type: array, items: { $ref: "#/components/schemas/CmsSource" } }
+        verificationDate: { type: string, format: date }
+        reviewDate: { type: string, format: date }
+        relatedIds: { type: array, items: { type: string } }
+    CmsCaseStudyContent:
+      type: object
+      required: [schemaVersion]
+      properties:
+        schemaVersion: { type: number, enum: [1] }
+        variant: { type: string, enum: [summary, full] }
+        disclosure: { type: string, enum: [named, anonymized, restricted] }
+        mandate: { type: string }
+        context: { type: string }
+        constraints: { type: array, items: { type: string } }
+        work: { type: array, items: { $ref: "#/components/schemas/CmsRichBlock" } }
+        controls: { type: array, items: { type: string } }
+        outcomes: { type: array, items: { type: string } }
+        evidence: { type: array, items: { $ref: "#/components/schemas/CmsEvidence" } }
+        heroMediaId: { type: string }
+        visibility: { $ref: "#/components/schemas/CmsVisibility" }
+        order: { type: number, multipleOf: 1 }
+        sources: { type: array, items: { $ref: "#/components/schemas/CmsSource" } }
+        verificationDate: { type: string, format: date }
+        reviewDate: { type: string, format: date }
+        relatedIds: { type: array, items: { type: string } }
+    CmsVisibility:
+      type: string
+      enum: [public, hidden, restricted]
+    CmsLink:
+      type: object
+      additionalProperties: false
+      required: [label, url]
+      properties:
+        label: { type: string }
+        url: { type: string }
+    CmsSource:
+      type: object
+      additionalProperties: false
+      required: [label]
+      properties:
+        label: { type: string }
+        url: { type: string, pattern: '^https?://.+' }
+        accessedAt: { type: string, format: date }
+    CmsEvidence:
+      type: object
+      additionalProperties: false
+      required: [statement, source, approved]
+      properties:
+        statement: { type: string }
+        source: { $ref: "#/components/schemas/CmsSource" }
+        approved: { type: boolean }
+    CmsRichBlock:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, enum: [heading, paragraph, list, quote] }
+        level: { type: number, enum: [2, 3] }
+        text: { type: string }
+        style: { type: string, enum: [bullet, numbered] }
+        items: { type: array, items: { type: string } }
     Document:
       type: object
       required: [id, kind, slug, title, status, content, markets, revisionNumber, createdAt, updatedAt]
@@ -1561,8 +1805,7 @@ components:
         status:
           $ref: "#/components/schemas/DocumentStatus"
         content:
-          type: object
-          additionalProperties: true
+          $ref: "#/components/schemas/CmsStructuredContent"
         seo:
           $ref: "#/components/schemas/SeoMetadata"
         mediaIds:
@@ -1591,8 +1834,7 @@ components:
         title: { type: string, minLength: 1, maxLength: 200 }
         summary: { type: string, maxLength: 500 }
         content:
-          type: object
-          additionalProperties: true
+          $ref: "#/components/schemas/CmsStructuredContent"
         seo:
           $ref: "#/components/schemas/SeoMetadataInput"
         mediaIds:
@@ -1612,8 +1854,7 @@ components:
         title: { type: string, minLength: 1, maxLength: 200 }
         summary: { type: ["string", "null"], maxLength: 500 }
         content:
-          type: object
-          additionalProperties: true
+          $ref: "#/components/schemas/CmsStructuredContent"
         seo:
           $ref: "#/components/schemas/SeoMetadataInput"
         mediaIds:
@@ -1650,11 +1891,15 @@ components:
         imageId: { type: string }
     DocumentRevision:
       type: object
-      required: [id, documentId, number, snapshot, createdBy, createdAt]
+      required: [id, documentId, number, market, locale, snapshot, createdBy, createdAt]
       properties:
         id: { type: string }
         documentId: { type: string }
         number: { type: number, multipleOf: 1, minimum: 1 }
+        market: { type: string }
+        locale: { type: string }
+        requestedMarket: { type: string }
+        usedFallback: { type: boolean }
         snapshot:
           $ref: "#/components/schemas/DocumentSnapshot"
         note: { type: ["string", "null"] }
@@ -1668,8 +1913,7 @@ components:
         title: { type: string }
         summary: { type: ["string", "null"] }
         content:
-          type: object
-          additionalProperties: true
+          $ref: "#/components/schemas/CmsStructuredContent"
         seo:
           $ref: "#/components/schemas/SeoMetadata"
         mediaIds:
@@ -1693,7 +1937,6 @@ components:
       required: [revisionId]
       properties:
         revisionId: { type: string }
-        publishAt: { type: ["string", "null"], format: date-time }
         note: { type: string, maxLength: 1000 }
     RollbackInput:
       type: object
@@ -1709,12 +1952,19 @@ components:
         reason: { type: string, maxLength: 1000 }
     DocumentPreview:
       type: object
-      required: [document, previewUrl, expiresAt]
+      required: [document, previewUrl, expiresAt, market, locale, revisionNumber, usedFallback, warnings]
       properties:
         document:
           $ref: "#/components/schemas/DocumentSnapshot"
         previewUrl: { type: string }
         expiresAt: { type: string, format: date-time }
+        market: { type: string }
+        locale: { type: string }
+        revisionNumber: { type: number, multipleOf: 1, minimum: 1 }
+        usedFallback: { type: boolean }
+        warnings:
+          type: array
+          items: { type: string }
     DocumentPage:
       allOf:
         - $ref: "#/components/schemas/PageMetadata"
@@ -2137,12 +2387,16 @@ components:
       allOf:
         - $ref: "#/components/schemas/PageMetadata"
         - type: object
-          required: [items]
+          required: [items, market, locale, requestedMarket, usedFallback]
           properties:
             items:
               type: array
               items:
                 $ref: "#/components/schemas/PublishedContent"
+            market: { type: string }
+            locale: { type: string }
+            requestedMarket: { type: string }
+            usedFallback: { type: boolean }
     Sitemap:
       type: object
       required: [items, generatedAt]

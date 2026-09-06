@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import { useMarketStore } from "@/store/market";
 import { BrandButton } from "@/components/ui/brand-button";
-import { contentRecord, stringList, text, useCmsEntry } from "@/lib/cms";
+import { contentRecord, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 
 const articles = {
@@ -114,18 +114,24 @@ export default function InsightArticle() {
   const slug = params?.slug || "";
   const cms = useCmsEntry("publication", slug);
   const fallbackArticle = slug in articles ? articles[slug as keyof typeof articles] : undefined;
-  const record = cms.data ? contentRecord(cms.data) : undefined;
-  const cmsBody = record ? stringList(record.body ?? record.paragraphs, []) : [];
+  const record = cms.data ? contentRecord(cms.data, "publication") : undefined;
   const article = cms.data ? {
-    topic: text(record?.topic, "Perspective"),
+    topic: record?.topics[0] || "Perspective",
     title: cms.data.title,
-    date: text(record?.date, new Date(cms.data.publishedAt).toLocaleDateString("en-GB", { dateStyle: "long" })),
-    author: text(record?.author, "Cognirise"),
-    readingTime: text(record?.readingTime, "5 min read"),
+    date: new Date(`${record?.publicationDate}T00:00:00Z`).toLocaleDateString("en-GB", { dateStyle: "long", timeZone: "UTC" }),
+    author: record?.author || "Cognirise",
+    readingTime: `${record?.readingTimeMinutes ?? 1} min read`,
     heroImage: cms.data.media?.[0]?.url || "",
-    content: cmsBody.length ? (
-      <>{cmsBody.map((paragraph, index) => <p className={index === 0 ? "lead" : undefined} key={index}>{paragraph}</p>)}</>
-    ) : <p className="lead">{cms.data.summary}</p>,
+    content: record?.variant === "pov" ? (
+      <><p className="lead">{record.teaser}</p>{record.pdfMediaId && <p><a href={cms.data.media?.find((media) => media.id === record.pdfMediaId)?.url}>Download the approved POV document</a></p>}</>
+    ) : (
+      <>{record?.body.map((block, index) => {
+        if (block.type === "heading") return <h3 key={index}>{block.text}</h3>;
+        if (block.type === "list") return <ul key={index}>{block.items.map((item) => <li key={item}>{item}</li>)}</ul>;
+        if (block.type === "quote") return <blockquote key={index}>{block.text}</blockquote>;
+        return <p className={index === 0 ? "lead" : undefined} key={index}>{block.text}</p>;
+      })}</>
+    ),
   } : fallbackArticle;
   useDynamicMetadata(cms.data?.seo && metadataFromSeo(cms.data.seo, {
     title: `${cms.data.title} | Cognirise`,
@@ -133,7 +139,7 @@ export default function InsightArticle() {
     imageUrl: cms.data.media?.[0]?.url,
   }));
 
-  if (!match || !slug || (!article && !cms.isPending)) {
+  if (!match || !slug || (!article && !cms.isPending) || (cms.isAuthoritative && cms.issue)) {
     return <NotFound />;
   }
 

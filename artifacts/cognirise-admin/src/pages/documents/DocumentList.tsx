@@ -27,7 +27,8 @@ import { useGetSession } from "@workspace/api-client-react";
 const createDocSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required").regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid slug format (e.g. my-post-name)"),
-  market: z.string().min(1, "Market is required")
+  market: z.string().min(1, "Market is required"),
+  locale: z.literal("en"),
 });
 
 export default function DocumentList({ kind }: { kind: DocumentKind }) {
@@ -58,7 +59,8 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     defaultValues: {
       title: "",
       slug: "",
-      market: "uae"
+      market: "uae",
+      locale: "en",
     }
   });
 
@@ -83,16 +85,17 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
         title: values.title,
         slug: values.slug,
         markets: [values.market],
-        content: {}
+        content: { schemaVersion: 1 }
       }
     }, {
       onSuccess: (newDoc) => {
+        queryClient.invalidateQueries({ queryKey: getListDocumentsQueryKey({ kind, page, pageSize: 20, search: search || undefined, status }) });
         toast({ title: "Created successfully" });
         setIsCreateOpen(false);
         setLocation(`/content/${newDoc.id}`);
       },
       onError: (error) => {
-        toast({ title: "Creation failed", variant: "destructive", description: (error as any).error || "A conflict occurred" });
+        toast({ title: "Creation failed", variant: "destructive", description: (error as any).error || (error as any).message || "A conflict occurred" });
       }
     });
   };
@@ -132,7 +135,6 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="draft">Draft</SelectItem>
               <SelectItem value="in-review">In Review</SelectItem>
-              <SelectItem value="scheduled">Scheduled</SelectItem>
               <SelectItem value="published">Published</SelectItem>
               <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
@@ -229,7 +231,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
           <DialogHeader>
             <DialogTitle>Create {getKindLabel(kind)}</DialogTitle>
             <DialogDescription className="font-mono text-xs">
-              Initialize a new document. The slug forms the URL path.
+              Initialize an incomplete governed draft. Fill the type-specific fields on the next screen before review.
             </DialogDescription>
           </DialogHeader>
           
@@ -276,12 +278,23 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="uae">UAE (Global Base)</SelectItem>
-                        <SelectItem value="ksa">Saudi Arabia</SelectItem>
-                        <SelectItem value="turkiye">Türkiye</SelectItem>
-                        <SelectItem value="europe">Europe</SelectItem>
+                        <SelectItem value="uae">UAE (canonical)</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="locale"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-mono text-xs uppercase tracking-wider">Locale</FormLabel>
+                    <FormControl>
+                      <Input {...field} disabled value="English (en)" />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">English-only until approved localized content exists.</p>
                     <FormMessage />
                   </FormItem>
                 )}

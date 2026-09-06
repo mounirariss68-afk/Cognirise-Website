@@ -4,7 +4,7 @@ import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
-import { contentRecord, text, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 
 const platformFallback = [
@@ -18,13 +18,12 @@ const platformFallback = [
 export default function PlatformsOverview() {
   const { market } = useMarketStore();
   const platformsQuery = useCmsCollection("platform", platformFallback, (item) => {
-    if (item.slug === "platforms") return null;
-    const content = contentRecord(item);
+    const content = contentRecord(item, "platform");
     return {
       name: item.title,
-      description: text(content.description, item.summary || ""),
-      link: text(content.url, `/platforms/${item.slug}`),
-      category: text(content.category, "Specialist Engines"),
+      description: content.summary,
+      link: `/platforms/${item.slug}`,
+      category: content.category,
     };
   });
   const page = useCmsEntry("platform", "platforms");

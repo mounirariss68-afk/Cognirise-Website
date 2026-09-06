@@ -5,7 +5,7 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
-import type { DocumentContent } from './documentContent';
+import type { CmsStructuredContent } from './cmsStructuredContent';
 import type { DocumentKind } from './documentKind';
 import type { DocumentStatus } from './documentStatus';
 import type { SeoMetadata } from './seoMetadata';
@@ -19,7 +19,7 @@ export interface Document {
   /** @nullable */
   summary?: string | null;
   status: DocumentStatus;
-  content: DocumentContent;
+  content: CmsStructuredContent;
   seo?: SeoMetadata;
   mediaIds?: string[];
   markets: string[];

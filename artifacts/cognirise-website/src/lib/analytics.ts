@@ -70,6 +70,7 @@ export function AnalyticsBridge() {
   const previousMarket = useRef(market);
 
   useEffect(() => {
+    if (location.startsWith("/preview/")) return;
     const url = new URL(window.location.href);
     if (url.searchParams.get("market") !== market) {
       url.searchParams.set("market", market);
@@ -85,6 +86,7 @@ export function AnalyticsBridge() {
   }, [consent, location, market]);
 
   useEffect(() => {
+    if (location.startsWith("/preview/")) return;
     const handleClick = (event: MouseEvent) => {
       const anchor = (event.target as Element | null)?.closest<HTMLAnchorElement>("a[href]");
       if (!anchor || anchor.classList.contains("pulse-action")) return;
@@ -98,7 +100,7 @@ export function AnalyticsBridge() {
     };
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
-  }, [market]);
+  }, [location, market]);
 
   return null;
 }

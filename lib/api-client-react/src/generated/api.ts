@@ -68,6 +68,7 @@ import type {
   MfaConfirmationInput,
   MfaSetup,
   MfaVerificationInput,
+  NavigationSettings,
   NewsletterSubscriptionInput,
   NotFoundResponse,
   PasswordChangeInput,
@@ -90,6 +91,7 @@ import type {
   SubmissionUpdate,
   SubscriptionReceipt,
   UnauthorizedResponse,
+  UpdateNavigationSettings,
   User,
   UserCredentialUpdate,
   UserInvitation,
@@ -201,6 +203,231 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
+
+export const getGetPublicNavigationSettingsUrl = () => {
+
+
+
+
+  return `/api/public/navigation`
+}
+
+/**
+ * @summary Get published header navigation visibility
+ */
+export const getPublicNavigationSettings = async ( options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
+
+  return customFetch<NavigationSettings>(getGetPublicNavigationSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicNavigationSettingsQueryKey = () => {
+    return [
+    `/api/public/navigation`
+    ] as const;
+    }
+
+
+export const getGetPublicNavigationSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicNavigationSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicNavigationSettings>>> = ({ signal }) => getPublicNavigationSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicNavigationSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicNavigationSettings>>>
+export type GetPublicNavigationSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get published header navigation visibility
+ */
+
+export function useGetPublicNavigationSettings<TData = Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicNavigationSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetNavigationSettingsUrl = () => {
+
+
+
+
+  return `/api/navigation`
+}
+
+/**
+ * @summary Get editable header navigation visibility
+ */
+export const getNavigationSettings = async ( options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
+
+  return customFetch<NavigationSettings>(getGetNavigationSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetNavigationSettingsQueryKey = () => {
+    return [
+    `/api/navigation`
+    ] as const;
+    }
+
+
+export const getGetNavigationSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getNavigationSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetNavigationSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNavigationSettings>>> = ({ signal }) => getNavigationSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNavigationSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetNavigationSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getNavigationSettings>>>
+export type GetNavigationSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get editable header navigation visibility
+ */
+
+export function useGetNavigationSettings<TData = Awaited<ReturnType<typeof getNavigationSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetNavigationSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateNavigationSettingsUrl = () => {
+
+
+
+
+  return `/api/navigation`
+}
+
+/**
+ * @summary Enable or disable header menu and submenu items
+ */
+export const updateNavigationSettings = async (updateNavigationSettings: UpdateNavigationSettings, options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
+
+  return customFetch<NavigationSettings>(getUpdateNavigationSettingsUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateNavigationSettings)
+  }
+);}
+
+
+
+
+
+export const getUpdateNavigationSettingsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateNavigationSettings>>, TError,{data: BodyType<UpdateNavigationSettings>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateNavigationSettings>>, TError,{data: BodyType<UpdateNavigationSettings>}, TContext> => {
+
+const mutationKey = ['updateNavigationSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateNavigationSettings>>, {data: BodyType<UpdateNavigationSettings>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateNavigationSettings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateNavigationSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof updateNavigationSettings>>>
+    export type UpdateNavigationSettingsMutationBody = BodyType<UpdateNavigationSettings>
+    export type UpdateNavigationSettingsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Enable or disable header menu and submenu items
+ */
+export const useUpdateNavigationSettings = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateNavigationSettings>>, TError,{data: BodyType<UpdateNavigationSettings>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateNavigationSettings>>,
+        TError,
+        {data: BodyType<UpdateNavigationSettings>},
+        TContext
+      > => {
+      return useMutation(getUpdateNavigationSettingsMutationOptions(options));
+    }
 
 export const getSubmitEnquiryUrl = () => {
 
@@ -2118,6 +2345,78 @@ export const useArchiveDocument = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getArchiveDocumentMutationOptions(options));
+    }
+
+export const getRestoreDocumentUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/restore`
+}
+
+/**
+ * @summary Restore an archived document as a draft
+ */
+export const restoreDocument = async (documentId: string,
+    archiveInput: ArchiveInput, options?: Parameters<typeof customFetch>[1]): Promise<Document> => {
+
+  return customFetch<Document>(getRestoreDocumentUrl(documentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(archiveInput)
+  }
+);}
+
+
+
+
+
+export const getRestoreDocumentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof restoreDocument>>, TError,{documentId: string;data: BodyType<ArchiveInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof restoreDocument>>, TError,{documentId: string;data: BodyType<ArchiveInput>}, TContext> => {
+
+const mutationKey = ['restoreDocument'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof restoreDocument>>, {documentId: string;data: BodyType<ArchiveInput>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  restoreDocument(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RestoreDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof restoreDocument>>>
+    export type RestoreDocumentMutationBody = BodyType<ArchiveInput>
+    export type RestoreDocumentMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Restore an archived document as a draft
+ */
+export const useRestoreDocument = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof restoreDocument>>, TError,{documentId: string;data: BodyType<ArchiveInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof restoreDocument>>,
+        TError,
+        {documentId: string;data: BodyType<ArchiveInput>},
+        TContext
+      > => {
+      return useMutation(getRestoreDocumentMutationOptions(options));
     }
 
 export const getPreviewDocumentUrl = (documentId: string,) => {

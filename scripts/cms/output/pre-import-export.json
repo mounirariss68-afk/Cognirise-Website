@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "target": "development",
+  "capturedAt": "2026-09-06T19:53:41.183Z",
+  "manifestDigest": "0b92d8aa7f4b21ce5d4b9bd61f5006e6de3798a8cd88d216be341ef7c1047fd7",
+  "before": {
+    "documents": 18,
+    "editions": 18,
+    "revisions": 18,
+    "media": 5,
+    "receipts": 23,
+    "audits": 47
+  },
+  "localAssets": [
+    {
+      "publicPath": "/images/cognirise/cognirise-pulse-governance.jpg",
+      "checksum": "7f462ae555d626662aa17f0654b0308cf1d869d704bb3032351ccf2ac03d35b7",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/cognirise-pulse-outcomes.jpg",
+      "checksum": "883ed6bb9c1e30549f290b696ed59fc4a74888d1ed5a544f567d6c850fb7fc50",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/cognirise-pulse-people.jpg",
+      "checksum": "3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/image_1788532369588.png",
+      "checksum": "4e10ff0d5534704f48eaa834c4861d9b9aa9666c027773f52c9736de37046841",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/image_1788532453951.png",
+      "checksum": "d39d7ffb61c9b640d55a0f6249b4f613d1816a1cba5e3134263d816468ee9fef",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/image_1788532520646.png",
+      "checksum": "6ba124dcd8c6800e7d42b5622d3d142ac9933a5980bf58fd7b208b64441d5eaa",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/image_1788532533170.png",
+      "checksum": "f8f5dcd0abd1810578019b3013dd0a570ebb4e66113591953f873f9a94f2bab1",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/image_1788532545919.png",
+      "checksum": "af1ac1121e74cb0b1c196b50006a5acd0a7442b0b56891f647854bc0b854494b",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/image_1788532565489.png",
+      "checksum": "d7ccf255681903f515405738914c8ccda40349e1ec36422567d2ca6a3dd1e545",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/logo-blue.svg",
+      "checksum": "c2cba1a5a6e4f4eefe2f711dae492f3160d277cb46ab43e2f616c68a92ed97ec",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/logo-white.svg",
+      "checksum": "52863a39ed2631ee05ad321b2cebbef1d158d88c262d2f3a72338267fc389887",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/pulse-breakthrough.jpg",
+      "checksum": "a798b751527e5ffe41958651d0c0c5e55a04a920b12a56f1e4de019c73dfc35e",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/pulse-convergence.jpg",
+      "checksum": "6ee4af35cc0bc38f7cb278ce2fbfe3304463bf7f9886605ad6c315348919f050",
+      "ownership": "cms-candidate"
+    },
+    {
+      "publicPath": "/images/cognirise/pulse-hero.jpg",
+      "checksum": "0c0053392fe1823f2aafe053711bd07114cb4153dd8552a362a5ac2b2c8653b4",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/site-cognios.jpg",
+      "checksum": "fc856d336a4780e5c7568f0cb1b9e96dda8ee7d4fd1f7967df9ce37c0be3a781",
+      "ownership": "cms-candidate"
+    },
+    {
+      "publicPath": "/images/cognirise/site-financial.jpg",
+      "checksum": "6df89ba5ba9d3fc17254be728e5f658d626284dd08a1f69aec9cf47e7b9a504f",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/site-government.jpg",
+      "checksum": "c89a938dee3d4daa6dd11ed0dc158a6c7a48812199a167acfc065ab263dd6f4b",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/site-infrastructure.jpg",
+      "checksum": "75c105711b2c2d910aa0c19502947137c73624f6fbe6e78ac73f744ff591777d",
+      "ownership": "cms-candidate"
+    },
+    {
+      "publicPath": "/images/cognirise/site-insights.jpg",
+      "checksum": "a89ccd0247db245d7ed66ca1ee7d5ad99325d36bcc5e9b5084523081836c2d25",
+      "ownership": "cms-candidate"
+    },
+    {
+      "publicPath": "/images/cognirise/site-leadership.jpg",
+      "checksum": "7a76c4658558b38c0b4cb2f7e075deb3f9128b2e6951a12a36c771d36a836ba4",
+      "ownership": "cms-candidate"
+    },
+    {
+      "publicPath": "/images/cognirise/site-services.jpg",
+      "checksum": "1d1e44ef9c90cc89d22f5676cb6bbdb86cb5b02972e5d5ffcc05dca88b53be99",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/site-work-proof.jpg",
+      "checksum": "61c0e28ea60a07c3eed1aecf06446f9c1cb83c607e565ecae076cfd7625c5a71",
+      "ownership": "code-owned"
+    }
+  ]
+}

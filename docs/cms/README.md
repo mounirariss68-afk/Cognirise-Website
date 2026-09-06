@@ -26,14 +26,17 @@ pnpm --filter @workspace/scripts cms:inventory
 pnpm --filter @workspace/scripts cms:inventory -- --write
 pnpm --filter @workspace/scripts cms:import -- --write
 pnpm --filter @workspace/scripts cms:verify
-# Transactionally create UAE draft documents/revisions in the configured database.
-pnpm --filter @workspace/scripts cms:import -- --apply-db --write
+# Transactionally create UAE/English drafts in development only.
+pnpm --filter @workspace/scripts cms:import -- --apply-db --target=development --write
+# If App Storage sidecar credentials are unavailable, preserve private pending
+# media metadata without claiming durable upload or approval:
+pnpm --filter @workspace/scripts cms:import -- --apply-db --target=development --defer-media-upload --write
 # Verify document, revision, audit, receipt, and migration-account parity in that database.
 pnpm --filter @workspace/scripts cms:verify -- --db
 ```
 
-`cms:inventory` reads the existing website TSX and `public/images`, inventories founders, advisors, five partners, five platforms, three articles, and static assets, and emits a review register. `cms:import` creates payload-only operations for all non-asset records by default. With `--apply-db`, it transactionally and idempotently creates UAE draft documents and revisions: articles map to `publication`; founders/advisors map to `person`. Stable slugs and structured source/review metadata are preserved in the revision payload. It attributes revisions to a suspended viewer-only migration account, without a password or session, and records redacted audit events and idempotency receipts. Migrated claims remain drafts pending approval. `cms:verify` checks inventory/payload coverage; `--db` additionally checks database parity without changing it.
+`cms:inventory` deterministically extracts the complete public fields for five people, five partners, five platforms, and three articles and reconciles 22 governed assets. `cms:import` creates payload-only operations by default. With the development safeguard, it idempotently creates UAE/English draft editions, exact revision media references, immutable media versions, redacted audits, and receipts. The suspended migration identity has no credential or session. Migrated claims and media remain drafts/pending review. `cms:verify -- --db --write` proves row, digest, payload, media-version, reference, receipt, audit, and draft-isolation parity and writes the cutover report.
 
 Generated payload writing is restricted to `scripts/cms/output/`. Database mutation is restricted to the explicit `cms:import -- --apply-db` path and requires `DATABASE_URL`. Review every `needs-review` item before approval or publication. Never treat this inventory as approval for claims, image rights, sources, or market visibility.
 
-See [governance](governance.md), [operations](operations.md), [security](security.md), [backup and restore](backup-restore.md), and [retention and privacy](retention-privacy.md).
+See [governance](governance.md), [content cutover](content-cutover.md), [operations](operations.md), [security](security.md), [backup and restore](backup-restore.md), and [retention and privacy](retention-privacy.md).

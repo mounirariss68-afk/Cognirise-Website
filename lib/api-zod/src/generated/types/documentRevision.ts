@@ -12,6 +12,10 @@ export interface DocumentRevision {
   documentId: string;
   /** @minimum 1 */
   number: number;
+  market: string;
+  locale: string;
+  requestedMarket?: string;
+  usedFallback?: boolean;
   snapshot: DocumentSnapshot;
   /** @nullable */
   note?: string | null;

@@ -6,4 +6,7 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type DocumentInputContent = { [key: string]: unknown };
+export type CmsPersonContentFocusAreasItem = {
+  title: string;
+  detail: string;
+};

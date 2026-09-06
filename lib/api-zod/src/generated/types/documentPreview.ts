@@ -11,4 +11,10 @@ export interface DocumentPreview {
   document: DocumentSnapshot;
   previewUrl: string;
   expiresAt: Date;
+  market: string;
+  locale: string;
+  /** @minimum 1 */
+  revisionNumber: number;
+  usedFallback: boolean;
+  warnings: string[];
 }

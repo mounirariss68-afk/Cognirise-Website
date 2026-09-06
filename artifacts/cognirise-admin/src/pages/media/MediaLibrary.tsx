@@ -106,7 +106,7 @@ export default function MediaLibrary() {
 
       toast({ title: "Asset finalized successfully" });
       setFinalizeAsset(null);
-      queryClient.invalidateQueries({ queryKey: getListMediaQueryKey({ page: 1, pageSize: 40 }) });
+      await queryClient.invalidateQueries({ queryKey: getListMediaQueryKey({ page, pageSize: 40, search: search || undefined }) });
     } catch (err: any) {
       toast({ title: "Finalization failed", description: err.error || "An error occurred", variant: "destructive" });
     }

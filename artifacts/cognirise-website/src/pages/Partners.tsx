@@ -1,5 +1,5 @@
 import { BrandButton } from "@/components/ui/brand-button";
-import { contentRecord, stringList, text, tupleList, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 
 const partnersFallback = [
@@ -69,18 +69,18 @@ const allianceGroups = [
 
 export default function Partners() {
   const partnersQuery = useCmsCollection("partner", partnersFallback, (item) => {
-    const content = contentRecord(item);
-    const category = text(content.category, "");
+    const content = contentRecord(item, "partner");
+    const category = content.allianceCategory;
     if (category !== "engineering" && category !== "platform") return null;
     return {
       category,
       name: item.title,
-      positioning: text(content.positioning, item.summary || ""),
-      facts: tupleList(content.facts, []),
-      coverage: stringList(content.coverage, []),
-      evidence: text(content.evidence, ""),
-      contribution: text(content.contribution, ""),
-      source: text(content.source, ""),
+      positioning: content.positioning,
+      facts: content.facts.map((fact) => [fact.value, fact.label]),
+      coverage: content.coverage,
+      evidence: content.evidence.map((evidence) => evidence.statement).join(" "),
+      contribution: content.contribution,
+      source: content.sources.map((source) => source.label).join("; "),
     };
   });
   const page = useCmsEntry("partner", "partners");

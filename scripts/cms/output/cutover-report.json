@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "target": "configured development database",
+  "manifestDigest": "0b92d8aa7f4b21ce5d4b9bd61f5006e6de3798a8cd88d216be341ef7c1047fd7",
+  "generatedAt": "2026-09-06T19:57:39.794Z",
+  "parity": {
+    "inventoryRecords": 40,
+    "contentOperations": 18,
+    "mediaOperations": 22,
+    "cmsCandidateMedia": 5,
+    "database": {
+      "documents": 18,
+      "editions": 18,
+      "revisions": 18,
+      "media": 5,
+      "durableMediaObjects": 0,
+      "references": 4,
+      "receipts": 23,
+      "audits": 23,
+      "approvedRevisionIds": [],
+      "draftRevisionIds": [
+        "ae77e949-a0ac-4168-90de-1e894b319e3d",
+        "9c8c7b5e-5645-4bda-ae8b-49e4b989f2a0",
+        "adc9db7c-1c2d-4b9a-b418-c130b2ac618d",
+        "064e4ee4-1919-4925-8745-a19878a5e779",
+        "451fd7d0-abbc-4756-8584-9dce7ebb58f6",
+        "ec270c46-c3e2-4d23-ab05-39fc7c00ca2c",
+        "8adc2032-d132-49f1-a152-c8ab20efd01c",
+        "23be98c9-83e9-4212-8ec6-aae09b15d187",
+        "692aeb7e-42d6-4784-bcd2-c99231c873ce",
+        "8d44601d-2065-497a-acef-a5b87e1291ea",
+        "e202f422-bd7a-4b09-be1c-abd86d23b364",
+        "1e06207c-6ffa-4558-bcd6-5ec043d140ca",
+        "6c08a4fd-53bc-496c-ba3f-bafd037ed95b",
+        "08ae846e-e4c8-494a-ba92-142a8bd7c7fc",
+        "4dae83ac-68b9-462e-baca-e6dd3a9236aa",
+        "8b7bcb9b-a912-4d99-820a-6d22c96a8f2b",
+        "ab00917b-5893-4e91-981e-f3eea4bddf7a",
+        "7f842df5-e45a-4d9e-8954-5f8794fc2db2"
+      ]
+    }
+  },
+  "release": {
+    "approvedRevisionIds": [],
+    "cmsAuthoritativeCollections": [],
+    "compiledFallbackCollections": [
+      "people",
+      "partners",
+      "platforms",
+      "publications",
+      "case-studies"
+    ],
+    "fallbackRemovalDecisions": "No fallback was removed; all migrated content remains an unapproved draft.",
+    "mediaReadiness": "Candidate metadata is present; durable object upload, rights, and accessibility remain unresolved.",
+    "unresolvedDrafts": [
+      "person:8a0e78e95b87db8e0acd",
+      "person:8a26fa2024db762f831e",
+      "person:f62fafba1d69ec9281e2",
+      "person:66893d0003c5bb956534",
+      "person:869b2b63e38d11b890d4",
+      "partner:1979d23ae4b0180a8730",
+      "partner:e0a95dba0b210710bf80",
+      "partner:67f4c24af1afcd13994c",
+      "partner:2df78dce9f0295109a9c",
+      "partner:22ed98800fd1bc4f2ea2",
+      "platform:9e140b9f1826f113724d",
+      "platform:ad6443586a3a8ab1ef1e",
+      "platform:feee10ede22540e7ee76",
+      "platform:b02a12c93017b942417e",
+      "platform:43b775c6dff3c7b27b3a",
+      "article:61a4464d1a1eda48677c",
+      "article:9474572cb302401fa421",
+      "article:b6772e67157735b8912d"
+    ],
+    "candidatePublicUrls": [
+      "/platforms/cognios",
+      "/platforms/cognidocs",
+      "/platforms/cogniagents",
+      "/platforms/cognitalk",
+      "/platforms/cogniware",
+      "/insights/ai-should-move-the-business",
+      "/insights/foundations-for-production",
+      "/insights/governed-digital-workforce"
+    ]
+  },
+  "rollback": {
+    "content": "Keep compiled fallbacks enabled. If a later publication must be reverted, select its prior approved revision in the admin rollback flow.",
+    "data": "Use scripts/cms/output/pre-import-export.json and idempotency receipts to identify imported rows; never delete published editions during rollback.",
+    "media": "Static website files remain in place. Candidate CMS media remains private and pending durable-upload, rights, and accessibility checks."
+  }
+}

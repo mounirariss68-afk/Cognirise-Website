@@ -13,6 +13,22 @@ export interface ApiError {
   details?: ApiErrorDetails;
 }
 
+export interface NavigationSetting {
+  id: string;
+  enabled: boolean;
+}
+
+export interface NavigationSettings {
+  items: NavigationSetting[];
+  /** @nullable */
+  updatedAt: string | null;
+}
+
+export interface UpdateNavigationSettings {
+  /** @minItems 1 */
+  items: NavigationSetting[];
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -424,7 +440,281 @@ export const DocumentStatus = {
   archived: 'archived',
 } as const;
 
-export type DocumentContent = { [key: string]: unknown };
+export type CmsPersonContentSchemaVersion = typeof CmsPersonContentSchemaVersion[keyof typeof CmsPersonContentSchemaVersion];
+
+
+export const CmsPersonContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export type CmsPersonContentRole = typeof CmsPersonContentRole[keyof typeof CmsPersonContentRole];
+
+
+export const CmsPersonContentRole = {
+  founder: 'founder',
+  leader: 'leader',
+  employee: 'employee',
+  advisor: 'advisor',
+} as const;
+
+export interface CmsLink {
+  label: string;
+  url: string;
+}
+
+export type CmsPersonContentApprovedFallback = typeof CmsPersonContentApprovedFallback[keyof typeof CmsPersonContentApprovedFallback];
+
+
+export const CmsPersonContentApprovedFallback = {
+  initials: 'initials',
+  'brand-mark': 'brand-mark',
+} as const;
+
+export type CmsVisibility = typeof CmsVisibility[keyof typeof CmsVisibility];
+
+
+export const CmsVisibility = {
+  public: 'public',
+  hidden: 'hidden',
+  restricted: 'restricted',
+} as const;
+
+export interface CmsSource {
+  label: string;
+  /** @pattern ^https?://.+ */
+  url?: string;
+  accessedAt?: string;
+}
+
+export type CmsPersonContentFocusAreasItem = {
+  title: string;
+  detail: string;
+};
+
+export interface CmsPersonContent {
+  schemaVersion: CmsPersonContentSchemaVersion;
+  role?: CmsPersonContentRole;
+  title?: string;
+  biography?: string;
+  contribution?: string;
+  focusAreas?: CmsPersonContentFocusAreasItem[];
+  profileLinks?: CmsLink[];
+  identityMediaId?: string;
+  approvedFallback?: CmsPersonContentApprovedFallback;
+  visibility?: CmsVisibility;
+  order?: number;
+  sources?: CmsSource[];
+  verificationDate?: string;
+  reviewDate?: string;
+  relatedIds?: string[];
+}
+
+export type CmsPartnerContentSchemaVersion = typeof CmsPartnerContentSchemaVersion[keyof typeof CmsPartnerContentSchemaVersion];
+
+
+export const CmsPartnerContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export interface CmsEvidence {
+  statement: string;
+  source: CmsSource;
+  approved: boolean;
+}
+
+export type CmsPartnerContentRelationshipStatus = typeof CmsPartnerContentRelationshipStatus[keyof typeof CmsPartnerContentRelationshipStatus];
+
+
+export const CmsPartnerContentRelationshipStatus = {
+  active: 'active',
+  prospective: 'prospective',
+  paused: 'paused',
+  ended: 'ended',
+} as const;
+
+export type CmsPartnerContentFactsItem = {
+  value: string;
+  label: string;
+};
+
+export interface CmsPartnerContent {
+  schemaVersion: CmsPartnerContentSchemaVersion;
+  allianceCategory?: string;
+  positioning?: string;
+  facts?: CmsPartnerContentFactsItem[];
+  evidence?: CmsEvidence[];
+  coverage?: string[];
+  contribution?: string;
+  /** @pattern ^https?://.+ */
+  website?: string;
+  logoMediaId?: string;
+  relationshipStatus?: CmsPartnerContentRelationshipStatus;
+  visibility?: CmsVisibility;
+  order?: number;
+  sources?: CmsSource[];
+  verificationDate?: string;
+  reviewDate?: string;
+  relatedIds?: string[];
+}
+
+export type CmsPlatformContentSchemaVersion = typeof CmsPlatformContentSchemaVersion[keyof typeof CmsPlatformContentSchemaVersion];
+
+
+export const CmsPlatformContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export type CmsPlatformContentTemplate = typeof CmsPlatformContentTemplate[keyof typeof CmsPlatformContentTemplate];
+
+
+export const CmsPlatformContentTemplate = {
+  standard: 'standard',
+  'cognios-specialist': 'cognios-specialist',
+} as const;
+
+export type CmsRichBlockType = typeof CmsRichBlockType[keyof typeof CmsRichBlockType];
+
+
+export const CmsRichBlockType = {
+  heading: 'heading',
+  paragraph: 'paragraph',
+  list: 'list',
+  quote: 'quote',
+} as const;
+
+export type CmsRichBlockLevel = typeof CmsRichBlockLevel[keyof typeof CmsRichBlockLevel];
+
+
+export const CmsRichBlockLevel = {
+  NUMBER_2: 2,
+  NUMBER_3: 3,
+} as const;
+
+export type CmsRichBlockStyle = typeof CmsRichBlockStyle[keyof typeof CmsRichBlockStyle];
+
+
+export const CmsRichBlockStyle = {
+  bullet: 'bullet',
+  numbered: 'numbered',
+} as const;
+
+export interface CmsRichBlock {
+  type: CmsRichBlockType;
+  level?: CmsRichBlockLevel;
+  text?: string;
+  style?: CmsRichBlockStyle;
+  items?: string[];
+}
+
+export type CmsPlatformContentSectionsItem = {
+  heading: string;
+  body: CmsRichBlock[];
+};
+
+export interface CmsPlatformContent {
+  schemaVersion: CmsPlatformContentSchemaVersion;
+  category?: string;
+  summary?: string;
+  template?: CmsPlatformContentTemplate;
+  heroMediaId?: string;
+  sections?: CmsPlatformContentSectionsItem[];
+  capabilities?: string[];
+  differentiators?: string[];
+  cta?: CmsLink;
+  visibility?: CmsVisibility;
+  order?: number;
+  sources?: CmsSource[];
+  verificationDate?: string;
+  reviewDate?: string;
+  relatedIds?: string[];
+}
+
+export type CmsPublicationContentSchemaVersion = typeof CmsPublicationContentSchemaVersion[keyof typeof CmsPublicationContentSchemaVersion];
+
+
+export const CmsPublicationContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export type CmsPublicationContentVariant = typeof CmsPublicationContentVariant[keyof typeof CmsPublicationContentVariant];
+
+
+export const CmsPublicationContentVariant = {
+  article: 'article',
+  pov: 'pov',
+} as const;
+
+export interface CmsPublicationContent {
+  schemaVersion: CmsPublicationContentSchemaVersion;
+  variant?: CmsPublicationContentVariant;
+  teaser?: string;
+  body?: CmsRichBlock[];
+  author?: string;
+  publicationDate?: string;
+  updatedDate?: string;
+  /** @minimum 1 */
+  readingTimeMinutes?: number;
+  topics?: string[];
+  sectors?: string[];
+  platformIds?: string[];
+  heroMediaId?: string;
+  pdfMediaId?: string;
+  visibility?: CmsVisibility;
+  order?: number;
+  sources?: CmsSource[];
+  verificationDate?: string;
+  reviewDate?: string;
+  relatedIds?: string[];
+}
+
+export type CmsCaseStudyContentSchemaVersion = typeof CmsCaseStudyContentSchemaVersion[keyof typeof CmsCaseStudyContentSchemaVersion];
+
+
+export const CmsCaseStudyContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export type CmsCaseStudyContentVariant = typeof CmsCaseStudyContentVariant[keyof typeof CmsCaseStudyContentVariant];
+
+
+export const CmsCaseStudyContentVariant = {
+  summary: 'summary',
+  full: 'full',
+} as const;
+
+export type CmsCaseStudyContentDisclosure = typeof CmsCaseStudyContentDisclosure[keyof typeof CmsCaseStudyContentDisclosure];
+
+
+export const CmsCaseStudyContentDisclosure = {
+  named: 'named',
+  anonymized: 'anonymized',
+  restricted: 'restricted',
+} as const;
+
+export interface CmsCaseStudyContent {
+  schemaVersion: CmsCaseStudyContentSchemaVersion;
+  variant?: CmsCaseStudyContentVariant;
+  disclosure?: CmsCaseStudyContentDisclosure;
+  mandate?: string;
+  context?: string;
+  constraints?: string[];
+  work?: CmsRichBlock[];
+  controls?: string[];
+  outcomes?: string[];
+  evidence?: CmsEvidence[];
+  heroMediaId?: string;
+  visibility?: CmsVisibility;
+  order?: number;
+  sources?: CmsSource[];
+  verificationDate?: string;
+  reviewDate?: string;
+  relatedIds?: string[];
+}
+
+/**
+ * Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
+ */
+export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent;
 
 export interface SeoMetadata {
   title: string;
@@ -445,7 +735,7 @@ export interface Document {
   /** @nullable */
   summary?: string | null;
   status: DocumentStatus;
-  content: DocumentContent;
+  content: CmsStructuredContent;
   seo?: SeoMetadata;
   mediaIds?: string[];
   markets: string[];
@@ -464,8 +754,6 @@ export interface Document {
   createdAt: string;
   updatedAt: string;
 }
-
-export type DocumentInputContent = { [key: string]: unknown };
 
 export interface SeoMetadataInput {
   /**
@@ -497,14 +785,12 @@ export interface DocumentInput {
   title: string;
   /** @maxLength 500 */
   summary?: string;
-  content: DocumentInputContent;
+  content: CmsStructuredContent;
   seo?: SeoMetadataInput;
   mediaIds?: string[];
   /** @minItems 1 */
   markets: string[];
 }
-
-export type DocumentUpdateContent = { [key: string]: unknown };
 
 export interface DocumentUpdate {
   /**
@@ -522,7 +808,7 @@ export interface DocumentUpdate {
      * @nullable
      */
   summary?: string | null;
-  content?: DocumentUpdateContent;
+  content?: CmsStructuredContent;
   seo?: SeoMetadataInput;
   mediaIds?: string[];
   /** @minItems 1 */
@@ -534,14 +820,12 @@ export interface DocumentUpdate {
   revisionNumber: number;
 }
 
-export type DocumentSnapshotContent = { [key: string]: unknown };
-
 export interface DocumentSnapshot {
   slug: string;
   title: string;
   /** @nullable */
   summary?: string | null;
-  content: DocumentSnapshotContent;
+  content: CmsStructuredContent;
   seo?: SeoMetadata;
   mediaIds?: string[];
   markets: string[];
@@ -552,6 +836,10 @@ export interface DocumentRevision {
   documentId: string;
   /** @minimum 1 */
   number: number;
+  market: string;
+  locale: string;
+  requestedMarket?: string;
+  usedFallback?: boolean;
   snapshot: DocumentSnapshot;
   /** @nullable */
   note?: string | null;
@@ -567,8 +855,6 @@ export interface ReviewSubmissionInput {
 
 export interface PublicationInput {
   revisionId: string;
-  /** @nullable */
-  publishAt?: string | null;
   /** @maxLength 1000 */
   note?: string;
 }
@@ -588,6 +874,12 @@ export interface DocumentPreview {
   document: DocumentSnapshot;
   previewUrl: string;
   expiresAt: string;
+  market: string;
+  locale: string;
+  /** @minimum 1 */
+  revisionNumber: number;
+  usedFallback: boolean;
+  warnings: string[];
 }
 
 export interface PageMetadata {
@@ -1050,6 +1342,10 @@ export interface PublishedContent {
 
 export type PublishedContentPage = PageMetadata & {
   items: PublishedContent[];
+  market: string;
+  locale: string;
+  requestedMarket: string;
+  usedFallback: boolean;
 };
 
 export type SitemapEntryChangeFrequency = typeof SitemapEntryChangeFrequency[keyof typeof SitemapEntryChangeFrequency];

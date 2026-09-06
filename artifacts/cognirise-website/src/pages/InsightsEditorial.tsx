@@ -5,7 +5,7 @@ import { useSubscribeNewsletter } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
-import { contentRecord, stringList, text, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 
 const articlesFallback = [
@@ -22,13 +22,12 @@ export default function InsightsEditorial() {
   const searchString = useSearch();
   const [location, setLocation] = useLocation();
   const articlesQuery = useCmsCollection("publication", articlesFallback, (item, index) => {
-    if (item.slug === "insights") return null;
-    const content = contentRecord(item);
+    const content = contentRecord(item, "publication");
     return {
       number: String(index + 1).padStart(2, "0"),
       title: item.title,
-      copy: text(content.excerpt, item.summary || ""),
-      topics: stringList(content.topics, [text(content.topic, "strategy")]),
+      copy: content.teaser,
+      topics: content.topics,
       url: `/insights/${item.slug}`,
     };
   });

@@ -6,4 +6,7 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type DocumentSnapshotContent = { [key: string]: unknown };
+export interface NavigationSetting {
+  id: string;
+  enabled: boolean;
+}

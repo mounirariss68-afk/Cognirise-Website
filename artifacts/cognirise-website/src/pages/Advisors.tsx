@@ -1,5 +1,5 @@
 import { BrandButton } from "@/components/ui/brand-button";
-import { contentRecord, text, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 
 const advisorsFallback = [
@@ -25,18 +25,17 @@ const advisorsFallback = [
 
 export default function Advisors() {
   const advisorsQuery = useCmsCollection("person", advisorsFallback, (item) => {
-    const content = contentRecord(item);
-    const role = text(content.role, "");
-    if (text(content.collection, "") !== "advisors" && !role.toLowerCase().includes("advisor")) return null;
+    const content = contentRecord(item, "person");
+    if (content.role !== "advisor") return null;
     const name = item.title;
     return {
-      initials: text(content.initials, name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2)),
+      initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2),
       name,
-      role: role || "Advisory Board Member",
-      title: text(content.position, text(content.jobTitle, "")),
-      background: text(content.background, item.summary || ""),
-      contribution: text(content.contribution, ""),
-      source: text(content.source, ""),
+      role: "Advisory Board Member",
+      title: content.title,
+      background: content.biography,
+      contribution: content.contribution || "",
+      source: content.sources.map((source) => source.label).join("; "),
     };
   });
   const page = useCmsEntry("person", "advisors");

@@ -20,6 +20,7 @@ import MarketEditions from '@/pages/markets/MarketEditions';
 import Inbox from '@/pages/submissions/Inbox';
 import UserAdmin from '@/pages/users/UserAdmin';
 import AuditLog from '@/pages/audit/AuditLog';
+import NavigationSettings from '@/pages/NavigationSettings';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/submissions" component={() => <AppLayout administratorOnly><Inbox /></AppLayout>} />
       <Route path="/users" component={() => <AppLayout administratorOnly><UserAdmin /></AppLayout>} />
       <Route path="/audit-log" component={() => <AppLayout administratorOnly><AuditLog /></AppLayout>} />
+      <Route path="/navigation" component={() => <AppLayout administratorOnly><NavigationSettings /></AppLayout>} />
       
       <Route component={() => <AppLayout><NotFound /></AppLayout>} />
     </Switch>

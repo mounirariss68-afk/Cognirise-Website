@@ -6,6 +6,7 @@ import {
   useSubmitDocument,
   usePublishDocument,
   useArchiveDocument,
+  useRestoreDocument,
   useListDocumentRevisions,
   useRollbackDocument,
   usePreviewDocument,
@@ -16,6 +17,7 @@ import {
   DocumentStatus,
   SeoMetadataInput
 } from "@workspace/api-client-react";
+import { type CmsDocumentKind, validateCmsContent } from "@workspace/api-zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +31,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ContentEditor } from "./ContentEditor";
 
 export default function DocumentDetail() {
   const [, params] = useRoute("/content/:id");
@@ -38,7 +41,7 @@ export default function DocumentDetail() {
   const queryClient = useQueryClient();
 
   const { data: session } = useGetSession();
-  const isPublisherOrAdmin = session?.user?.role === "publisher" || session?.user?.role === "administrator";
+  const isAdministrator = session?.user?.role === "administrator";
 
   const { data: doc, isLoading } = useGetDocument(id!, { query: { enabled: !!id, queryKey: getGetDocumentQueryKey(id!) } });
   
@@ -46,10 +49,11 @@ export default function DocumentDetail() {
   const submitDoc = useSubmitDocument();
   const publishDoc = usePublishDocument();
   const archiveDoc = useArchiveDocument();
+  const restoreDoc = useRestoreDocument();
   const rollbackDoc = useRollbackDocument();
 
   // Load preview info explicitly if authenticated & needed
-  const { data: previewData } = usePreviewDocument(id!, { query: { enabled: !!id, queryKey: getPreviewDocumentQueryKey(id!) } });
+  const { refetch: createPreview } = usePreviewDocument(id!, { query: { enabled: false, queryKey: getPreviewDocumentQueryKey(id!) } });
 
   // Revisions data
   const { data: revisionsData } = useListDocumentRevisions(id!, { query: { enabled: !!id, queryKey: getListDocumentRevisionsQueryKey(id!) } });
@@ -57,11 +61,11 @@ export default function DocumentDetail() {
   // Local state for editor fields
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
-  const [contentJson, setContentJson] = useState("");
+  const [content, setContent] = useState<Record<string, any>>({});
   const [seo, setSeo] = useState<SeoMetadataInput>({ title: "", description: "", canonicalUrl: "", noIndex: false });
   
   const initialized = useRef(false);
-  const lastSaved = useRef({ title: "", summary: "", contentJson: "", seo: {} as any });
+  const lastSaved = useRef({ title: "", summary: "", content: {} as Record<string, any>, seo: {} as any });
 
   const [hasUnsaved, setHasUnsaved] = useState(false);
   
@@ -77,8 +81,8 @@ export default function DocumentDetail() {
     if (doc && !initialized.current) {
       setTitle(doc.title);
       setSummary(doc.summary || "");
-      const formattedContent = JSON.stringify(doc.content || {}, null, 2);
-      setContentJson(formattedContent);
+      const nextContent = (doc.content || {}) as Record<string, any>;
+      setContent(nextContent);
       const formattedSeo = doc.seo ? {
         title: doc.seo.title || "",
         description: doc.seo.description || "",
@@ -88,7 +92,7 @@ export default function DocumentDetail() {
       
       setSeo(formattedSeo);
       
-      lastSaved.current = { title: doc.title, summary: doc.summary || "", contentJson: formattedContent, seo: formattedSeo };
+      lastSaved.current = { title: doc.title, summary: doc.summary || "", content: nextContent, seo: formattedSeo };
       initialized.current = true;
     }
   }, [doc]);
@@ -98,10 +102,10 @@ export default function DocumentDetail() {
     if (!initialized.current) return;
     const isDirty = title !== lastSaved.current.title || 
                     summary !== lastSaved.current.summary || 
-                    contentJson !== lastSaved.current.contentJson ||
+                    JSON.stringify(content) !== JSON.stringify(lastSaved.current.content) ||
                     JSON.stringify(seo) !== JSON.stringify(lastSaved.current.seo);
     setHasUnsaved(isDirty);
-  }, [title, summary, contentJson, seo]);
+  }, [title, summary, content, seo]);
 
   // Before unload protection
   useEffect(() => {
@@ -115,23 +119,16 @@ export default function DocumentDetail() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsaved]);
 
-  const isJsonValid = useMemo(() => {
-    try {
-      JSON.parse(contentJson);
-      return true;
-    } catch(e) {
-      return false;
-    }
-  }, [contentJson]);
+  const contentValidation = useMemo(
+    () => doc ? validateCmsContent(doc.kind as CmsDocumentKind, content, "draft") : { success: false as const, errors: [] },
+    [content, doc],
+  );
 
   const handleSave = () => {
     if (!doc) return;
     
-    let parsedContent = {};
-    try {
-      parsedContent = JSON.parse(contentJson);
-    } catch (e) {
-      toast({ title: "Invalid JSON", description: "Please fix JSON errors before saving", variant: "destructive" });
+    if (!contentValidation.success) {
+      toast({ title: "Structured content is incomplete", description: contentValidation.errors[0], variant: "destructive" });
       return;
     }
 
@@ -140,16 +137,17 @@ export default function DocumentDetail() {
       data: {
         title,
         summary: summary || null,
-        content: parsedContent,
+        content: contentValidation.data,
         seo,
         revisionNumber: doc.revisionNumber
       }
     }, {
       onSuccess: (updated) => {
-        lastSaved.current = { title, summary, contentJson, seo };
+        lastSaved.current = { title, summary, content: contentValidation.data as Record<string, any>, seo };
         setHasUnsaved(false);
-        // Patch cache locally to avoid full refetch triggering save loops
         queryClient.setQueryData(getGetDocumentQueryKey(id!), (old: any) => old ? { ...old, ...updated } : old);
+        queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
+        queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("documents") || String(query.queryKey[0]).includes("published") });
         toast({ title: "Saved successfully" });
       },
       onError: (err) => {
@@ -182,11 +180,13 @@ export default function DocumentDetail() {
     }
   };
 
-  const handleAction = (action: "submit" | "publish" | "archive") => {
+  const handleAction = (action: "submit" | "publish" | "archive" | "restore") => {
     const opts = {
       onSuccess: (updated: any) => {
         queryClient.setQueryData(getGetDocumentQueryKey(id!), updated);
-        toast({ title: `Document ${action}ed successfully` });
+        queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
+        queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("documents") || String(query.queryKey[0]).includes("published") || String(query.queryKey[0]).includes("preview") });
+        toast({ title: action === "publish" ? "Selected UAE edition revision published" : action === "submit" ? "UAE edition submitted for review" : action === "restore" ? "Document restored as a draft" : "Document archived" });
         if (action === "publish") setPublishOpen(false);
       },
       onError: (err: any) => toast({ title: "Action failed", description: err.error, variant: "destructive" })
@@ -194,6 +194,7 @@ export default function DocumentDetail() {
 
     if (action === "submit") submitDoc.mutate({ documentId: id!, data: {} }, opts);
     if (action === "archive") archiveDoc.mutate({ documentId: id!, data: {} }, opts);
+    if (action === "restore") restoreDoc.mutate({ documentId: id!, data: {} }, opts);
     if (action === "publish" && publishRevisionId) {
       publishDoc.mutate({ documentId: id!, data: { revisionId: publishRevisionId } }, opts);
     }
@@ -223,7 +224,17 @@ export default function DocumentDetail() {
   };
 
   // Find the latest revision ID for the publish dialog default
-  const latestRevId = revisionsData?.items[0]?.id;
+  const sortedRevisions = [...(revisionsData?.items ?? [])].sort((a, b) => b.number - a.number || String(b.createdAt).localeCompare(String(a.createdAt)));
+  const latestRevId = sortedRevisions[0]?.id;
+  const openPreview = async () => {
+    const result = await createPreview();
+    if (!result.data?.previewUrl) {
+      toast({ title: "Preview unavailable", description: "Save a valid edition revision first.", variant: "destructive" });
+      return;
+    }
+    const prefix = import.meta.env.DEV ? "/cognirise-website" : "";
+    window.open(`${prefix}${result.data.previewUrl}`, "_blank", "noopener,noreferrer");
+  };
   
   // Data for comparison
   const compareRev1 = revisionsData?.items.find(r => r.id === selectedRevs[0]);
@@ -235,7 +246,7 @@ export default function DocumentDetail() {
       {/* Top Bar */}
       <header className="flex-none h-16 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => setLocation(`/${doc.kind}s`)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+           <Button variant="ghost" size="icon" onClick={() => setLocation(doc.kind === "case-study" ? "/case-studies" : `/${doc.kind}s`)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <div className="h-4 w-px bg-border"></div>
@@ -253,15 +264,13 @@ export default function DocumentDetail() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {previewData?.previewUrl && (
-            <Button variant="outline" size="sm" onClick={() => window.open(previewData.previewUrl, "_blank")} className="font-mono uppercase tracking-wider text-xs mr-2">
-              <Eye className="w-3.5 h-3.5 mr-2" /> Live Preview
-            </Button>
-          )}
+          <Button variant="outline" size="sm" onClick={openPreview} className="font-mono uppercase tracking-wider text-xs mr-2">
+            <Eye className="w-3.5 h-3.5 mr-2" /> Preview
+          </Button>
 
           <Button 
             onClick={handleSave} 
-            disabled={updateDoc.isPending || !hasUnsaved || !isJsonValid} 
+            disabled={updateDoc.isPending || !hasUnsaved || !contentValidation.success}
             size="sm" 
             variant="default" 
             className="font-mono uppercase tracking-wider text-xs"
@@ -271,22 +280,24 @@ export default function DocumentDetail() {
           </Button>
 
           {doc.status === "draft" && (
-            <Button variant="outline" size="sm" onClick={() => handleAction("submit")} disabled={submitDoc.isPending || hasUnsaved || !isJsonValid} className="font-mono uppercase tracking-wider text-xs">
+            <Button variant="outline" size="sm" onClick={() => handleAction("submit")} disabled={submitDoc.isPending || hasUnsaved || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs">
               <Send className="w-3.5 h-3.5 mr-2" /> Submit Review
             </Button>
           )}
-          {isPublisherOrAdmin && ["approved", "in-review", "draft"].includes(doc.status) && (
-            <Button size="sm" onClick={() => { setPublishRevisionId(latestRevId || null); setPublishOpen(true); }} disabled={hasUnsaved || !isJsonValid} className="font-mono uppercase tracking-wider text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+          {isAdministrator && ["approved", "in-review", "draft"].includes(doc.status) && (
+            <Button size="sm" onClick={() => { setPublishRevisionId(latestRevId || null); setPublishOpen(true); }} disabled={hasUnsaved || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
               <Globe className="w-3.5 h-3.5 mr-2" /> Publish...
             </Button>
           )}
-          {isPublisherOrAdmin && (
+          {isAdministrator && (
             doc.status !== "archived" ? (
                <Button variant="ghost" size="sm" onClick={() => handleAction("archive")} className="text-muted-foreground hover:text-destructive" title="Archive Document">
                  <Archive className="w-4 h-4" />
                </Button>
             ) : (
-               <span className="font-mono text-xs text-muted-foreground ml-2">Archived Document</span>
+               <Button variant="outline" size="sm" onClick={() => handleAction("restore")} disabled={restoreDoc.isPending} className="font-mono uppercase tracking-wider text-xs">
+                 <RotateCcw className="mr-2 h-4 w-4" /> Restore as draft
+               </Button>
             )
           )}
         </div>
@@ -316,21 +327,16 @@ export default function DocumentDetail() {
               />
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Structured JSON Content</label>
-                {!isJsonValid && <span className="font-mono text-[10px] text-destructive flex items-center"><AlertTriangle className="w-3 h-3 mr-1"/> Invalid JSON</span>}
-              </div>
-              <Textarea 
-                value={contentJson}
-                onChange={(e) => setContentJson(e.target.value)}
-                className={`font-mono text-sm leading-relaxed min-h-[400px] resize-y bg-background focus-visible:ring-1 shadow-sm ${!isJsonValid ? 'border-destructive focus-visible:ring-destructive' : 'border-border/50 focus-visible:ring-primary'}`}
-                placeholder="{}"
-              />
-              <p className="font-mono text-[10px] text-muted-foreground mt-2">
-                Directly edit the document payload. Structure must adhere to the {doc.kind} schema constraints.
-              </p>
-            </div>
+            <ContentEditor
+              kind={doc.kind as CmsDocumentKind}
+              value={content}
+              onChange={setContent}
+              errors={contentValidation.success ? [] : contentValidation.errors}
+            />
+            <details className="rounded-md border bg-muted/20 p-4">
+              <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider">Advanced structured view (read only)</summary>
+              <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap text-xs">{JSON.stringify(content, null, 2)}</pre>
+            </details>
           </div>
         </div>
 
@@ -438,7 +444,7 @@ export default function DocumentDetail() {
                    <GitCompare className="w-3 h-3 mr-1" /> Compare
                  </Button>
                </div>
-               {revisionsData?.items.map(rev => (
+                {sortedRevisions.map(rev => (
                  <div key={rev.id} className="p-4 border-b border-border/50 hover:bg-muted/30 transition-colors group flex gap-3">
                     <Checkbox 
                       checked={selectedRevs.includes(rev.id)}
@@ -453,7 +459,7 @@ export default function DocumentDetail() {
                       {rev.note && <p className="text-[10px] text-muted-foreground font-mono mb-2">{rev.note}</p>}
                       
                       <div className="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {isPublisherOrAdmin && doc.revisionNumber !== rev.number && (
+                         {isAdministrator && doc.revisionNumber !== rev.number && (
                           <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 font-mono uppercase tracking-wider" onClick={() => handleRollback(rev.id)}>
                              <RotateCcw className="w-3 h-3 mr-1" /> Rollback
                           </Button>
@@ -475,7 +481,7 @@ export default function DocumentDetail() {
           <DialogHeader>
             <DialogTitle>Publish Content</DialogTitle>
             <DialogDescription className="font-mono text-xs mt-2">
-              Select the exact revision you want to make live across {doc.markets.join(", ")}.
+               Select the exact revision to publish for its UAE/English edition. Other market editions are unchanged.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
@@ -487,7 +493,7 @@ export default function DocumentDetail() {
                   onChange={(e) => setPublishRevisionId(e.target.value)}
                >
                  <option value="" disabled>Select a revision...</option>
-                 {revisionsData?.items.map(rev => (
+                  {sortedRevisions.map(rev => (
                    <option key={rev.id} value={rev.id}>
                      Revision {rev.number} ({format(new Date(rev.createdAt), "MMM d, HH:mm")})
                    </option>

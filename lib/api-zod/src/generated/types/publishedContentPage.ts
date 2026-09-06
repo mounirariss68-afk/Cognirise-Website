@@ -10,4 +10,8 @@ import type { PublishedContent } from './publishedContent';
 
 export type PublishedContentPage = PageMetadata & {
   items: PublishedContent[];
+  market: string;
+  locale: string;
+  requestedMarket: string;
+  usedFallback: boolean;
 };

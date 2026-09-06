@@ -3,17 +3,20 @@ import { Router, type IRouter } from "express";
 import { pool } from "@workspace/db";
 import {
   ArchiveDocumentBody,
+  type CmsDocumentKind,
   CreateDocumentBody,
   ListDocumentsQueryParams,
   PublishDocumentBody,
   RollbackDocumentBody,
   SubmitDocumentBody,
   UpdateDocumentBody,
+  validateCmsSnapshot,
 } from "@workspace/api-zod";
 import {
   authenticate,
   requireCsrf,
   requireEditor,
+  requireAdministrator,
   requireMfa,
   requirePublisher,
   type AuthContext,
@@ -40,7 +43,8 @@ const documentSelect = `
     FROM cms_market_editions e
     LEFT JOIN cms_revisions r ON r.edition_id=e.id
     WHERE e.document_id=d.id
-    ORDER BY r.revision_number DESC NULLS LAST,e.created_at LIMIT 1
+     ORDER BY CASE WHEN e.market='uae' THEN 0 ELSE 1 END,
+       r.revision_number DESC NULLS LAST,e.created_at,e.id LIMIT 1
   ) x ON true`;
 
 function mapDocument(row: Record<string, any>) {
@@ -97,24 +101,21 @@ function payload(input: Record<string, any>) {
 async function syncMediaReferences(
   client: { query: (sql: string, values?: unknown[]) => Promise<any> },
   documentId: string,
+  revisionId: string,
   mediaIds: unknown,
 ) {
-  await client.query("DELETE FROM cms_media_references WHERE document_id=$1", [documentId]);
   for (const assetId of Array.isArray(mediaIds) ? mediaIds : []) {
     await client.query(
       `INSERT INTO cms_media_references(asset_id,document_id,field_path)
-       SELECT id,$2,'mediaIds' FROM cms_media_assets WHERE id=$1 AND status IN ('active','ready')`,
-      [assetId, documentId],
+       SELECT id,$2,$3 FROM cms_media_assets WHERE id=$1 AND status IN ('active','ready')
+       ON CONFLICT DO NOTHING`,
+      [assetId, documentId, `revision:${revisionId}`],
     );
   }
 }
 
-function publishGovernanceErrors(kind: string, snapshot: Record<string, any>): string[] {
-  const errors: string[] = [];
-  if (["publication", "case-study"].includes(kind) && !snapshot.source) errors.push("A source is required.");
-  if (kind === "case-study" && !snapshot.reviewedBy) errors.push("A reviewer is required for case studies.");
-  if (kind === "case-study" && snapshot.claims && !snapshot.claimsApproved) errors.push("Case-study claims must be approved.");
-  return errors;
+function validateSnapshot(kind: string, snapshot: unknown, mode: "draft" | "publish") {
+  return validateCmsSnapshot(kind as CmsDocumentKind, snapshot, mode);
 }
 
 const digest = (value: unknown) =>
@@ -158,7 +159,12 @@ router.post(
   asyncRoute(async (req, res) => {
     const parsed = CreateDocumentBody.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: "Invalid document." });
+      res.status(400).json({ error: "Invalid document.", details: parsed.error.issues });
+      return;
+    }
+    const validated = validateSnapshot(parsed.data.kind, payload(parsed.data), "draft");
+    if (!validated.success) {
+      res.status(422).json({ error: "Content contract validation failed.", details: validated.errors });
       return;
     }
     const auth = res.locals.auth as AuthContext;
@@ -170,7 +176,7 @@ router.post(
          VALUES ($1,$2,$3,$4,'active') RETURNING id`,
         [parsed.data.kind, parsed.data.slug, parsed.data.title, auth.user.id],
       );
-      const snapshot = payload(parsed.data);
+       const snapshot = validated.data;
       for (const market of parsed.data.markets) {
         const edition = await client.query(
           `INSERT INTO cms_market_editions
@@ -178,15 +184,20 @@ router.post(
            VALUES ($1,$2,'en',$3,'draft') RETURNING id`,
           [root.rows[0].id, market, parsed.data.slug],
         );
-        await client.query(
+        const revision = await client.query(
           `INSERT INTO cms_revisions
            (edition_id,revision_number,payload,content_digest,workflow_state,
             created_by_user_id,reason)
-           VALUES ($1,1,$2,$3,'draft',$4,'Initial draft')`,
+            VALUES ($1,1,$2,$3,'draft',$4,'Initial draft') RETURNING id`,
           [edition.rows[0].id, snapshot, digest(snapshot), auth.user.id],
         );
+        await syncMediaReferences(
+          client,
+          String(root.rows[0].id),
+          String(revision.rows[0].id),
+          snapshot.mediaIds,
+        );
       }
-      await syncMediaReferences(client, String(root.rows[0].id), snapshot.mediaIds);
       await client.query("COMMIT");
       const document = await getDocument(String(root.rows[0].id));
       await audit(auth, "document.created", "document", String(root.rows[0].id));
@@ -219,7 +230,7 @@ router.patch(
   asyncRoute(async (req, res) => {
     const parsed = UpdateDocumentBody.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: "Invalid document update." });
+      res.status(400).json({ error: "Invalid document update.", details: parsed.error.issues });
       return;
     }
     const id = String(req.params.documentId);
@@ -240,26 +251,46 @@ router.patch(
     }
     const auth = res.locals.auth as AuthContext;
     const next = { ...current, ...parsed.data };
-    const snapshot = payload(next);
-    const editions = await pool.query(
-      "SELECT id FROM cms_market_editions WHERE document_id=$1",
-      [id],
-    );
-    for (const edition of editions.rows) {
-      await pool.query(
+    const validated = validateSnapshot(current.kind, payload(next), "draft");
+    if (!validated.success) {
+      res.status(422).json({ error: "Content contract validation failed.", details: validated.errors });
+      return;
+    }
+    const snapshot = validated.data;
+    const requestedMarket = parsed.data.markets?.[0] ?? "uae";
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const edition = await client.query(
+        `SELECT id FROM cms_market_editions WHERE document_id=$1 AND market=$2
+         ORDER BY created_at,id LIMIT 1`,
+        [id, requestedMarket],
+      );
+      if (!edition.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: `The ${requestedMarket} edition does not exist.` });
+        return;
+      }
+      const revision = await client.query(
         `INSERT INTO cms_revisions
          (edition_id,revision_number,payload,content_digest,workflow_state,
           created_by_user_id,reason)
-         SELECT $1,COALESCE(max(revision_number),0)+1,$2,$3,'draft',$4,'Edited'
-         FROM cms_revisions WHERE edition_id=$1`,
-        [edition.id, snapshot, digest(snapshot), auth.user.id],
+          SELECT $1,COALESCE(max(revision_number),0)+1,$2,$3,'draft',$4,'Edited'
+          FROM cms_revisions WHERE edition_id=$1 RETURNING id`,
+        [edition.rows[0].id, snapshot, digest(snapshot), auth.user.id],
       );
+      await syncMediaReferences(client, id, String(revision.rows[0].id), snapshot.mediaIds);
+      await client.query(
+        `UPDATE cms_documents SET canonical_slug=$2,title=$3,updated_at=now() WHERE id=$1`,
+        [id, next.slug, next.title],
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
     }
-    await syncMediaReferences(pool, id, snapshot.mediaIds);
-    await pool.query(
-      `UPDATE cms_documents SET canonical_slug=$2,title=$3,updated_at=now() WHERE id=$1`,
-      [id, next.slug, next.title],
-    );
     await audit(auth, "document.updated", "document", id);
     res.json(await getDocument(id));
   }),
@@ -290,14 +321,18 @@ router.get(
   "/documents/:documentId/revisions",
   asyncRoute(async (req, res) => {
     const result = await pool.query(
-      `SELECT r.*,e.document_id FROM cms_revisions r JOIN cms_market_editions e
-       ON e.id=r.edition_id WHERE e.document_id=$1 ORDER BY r.created_at DESC`,
+      `SELECT r.*,e.document_id,e.market,e.locale FROM cms_revisions r JOIN cms_market_editions e
+       ON e.id=r.edition_id WHERE e.document_id=$1
+       ORDER BY CASE WHEN e.market='uae' THEN 0 ELSE 1 END,
+         r.revision_number DESC,r.created_at DESC,r.id DESC`,
       [req.params.documentId],
     );
     const items = result.rows.map((row) => ({
       id: String(row.id),
       documentId: String(row.document_id),
       number: row.revision_number,
+      market: row.market,
+      locale: row.locale,
       snapshot: row.payload,
       note: row.reason,
       createdBy: String(row.created_by_user_id),
@@ -311,7 +346,7 @@ router.get(
   "/documents/:documentId/revisions/:revisionId",
   asyncRoute(async (req, res) => {
     const result = await pool.query(
-      `SELECT r.*,e.document_id FROM cms_revisions r JOIN cms_market_editions e
+      `SELECT r.*,e.document_id,e.market,e.locale FROM cms_revisions r JOIN cms_market_editions e
        ON e.id=r.edition_id WHERE r.id=$1 AND e.document_id=$2`,
       [req.params.revisionId, req.params.documentId],
     );
@@ -324,6 +359,8 @@ router.get(
       id: String(row.id),
       documentId: String(row.document_id),
       number: row.revision_number,
+      market: row.market,
+      locale: row.locale,
       snapshot: row.payload,
       note: row.reason,
       createdBy: String(row.created_by_user_id),
@@ -362,11 +399,11 @@ router.post(
 router.post(
   "/documents/:documentId/publish",
   requireCsrf,
-  requirePublisher,
+  requireAdministrator,
   asyncRoute(async (req, res) => {
     const parsed = PublishDocumentBody.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: "Invalid publication request." });
+      res.status(400).json({ error: "Invalid publication request.", details: parsed.error.issues });
       return;
     }
     const id = String(req.params.documentId);
@@ -384,13 +421,26 @@ router.post(
       res.status(409).json({ error: "The selected revision does not exist." });
       return;
     }
-    const governanceErrors = publishGovernanceErrors(revision.rows[0].kind, revision.rows[0].payload);
-    if (governanceErrors.length) {
+    const validation = validateSnapshot(revision.rows[0].kind, revision.rows[0].payload, "publish");
+    if (!validation.success) {
       await client.query("ROLLBACK");
-      res.status(422).json({ error: "Publication governance validation failed.", details: governanceErrors });
+      res.status(422).json({ error: "Publication governance validation failed.", details: validation.errors });
       return;
     }
-    const scheduled = Boolean(parsed.data.publishAt && parsed.data.publishAt > new Date());
+    const mediaIds = validation.data.mediaIds;
+    const readyMedia = mediaIds.length
+      ? await client.query(
+          "SELECT id::text id FROM cms_media_assets WHERE id::text=ANY($1::text[]) AND status IN ('active','ready')",
+          [mediaIds],
+        )
+      : { rows: [] };
+    const readyIds = new Set(readyMedia.rows.map((row: { id: string }) => row.id));
+    const unavailable = mediaIds.filter((mediaId) => !readyIds.has(mediaId));
+    if (unavailable.length) {
+      await client.query("ROLLBACK");
+      res.status(422).json({ error: "Publication references unavailable media.", details: unavailable });
+      return;
+    }
     await client.query(
       `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,
        approved_at=now() WHERE id=$1`,
@@ -400,12 +450,16 @@ router.post(
       `UPDATE cms_market_editions SET publication_state=$2,publish_at=$3,
         published_revision_id=$4,published_at=CASE WHEN $2='published' THEN now() ELSE published_at END,
        updated_at=now() WHERE id=$1`,
-      [revision.rows[0].edition_id, scheduled ? "scheduled" : "published", scheduled ? parsed.data.publishAt : null, parsed.data.revisionId],
+       [revision.rows[0].edition_id, "published", null, parsed.data.revisionId],
     );
     await client.query(
       `INSERT INTO cms_audit_events(actor_user_id,actor_label,action,target_type,target_id,metadata)
        VALUES ($1,$2,'document.published','document',$3,$4)`,
-      [auth.user.id, auth.user.email, id, { scheduled }],
+       [auth.user.id, auth.user.email, id, {
+         scheduled: false,
+         editionId: String(revision.rows[0].edition_id),
+         revisionId: parsed.data.revisionId,
+       }],
     );
     await client.query("COMMIT");
     res.json(await getDocument(id));
@@ -421,7 +475,7 @@ router.post(
 router.post(
   "/documents/:documentId/rollback",
   requireCsrf,
-  requirePublisher,
+  requireAdministrator,
   asyncRoute(async (req, res) => {
     const parsed = RollbackDocumentBody.safeParse(req.body);
     if (!parsed.success) {
@@ -480,6 +534,37 @@ router.post(
   }),
 );
 
+router.post(
+  "/documents/:documentId/restore",
+  requireCsrf,
+  requirePublisher,
+  asyncRoute(async (req, res) => {
+    const parsed = ArchiveDocumentBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Invalid restore request." });
+      return;
+    }
+    const id = String(req.params.documentId);
+    const restored = await pool.query(
+      `UPDATE cms_documents SET status='active',archived_at=NULL,updated_at=now()
+       WHERE id=$1 AND status='archived' RETURNING id`,
+      [id],
+    );
+    if (!restored.rowCount) {
+      res.status(409).json({ error: "Only archived documents can be restored." });
+      return;
+    }
+    await pool.query(
+      `UPDATE cms_market_editions
+       SET publication_state='draft',publish_at=NULL,published_at=NULL,published_revision_id=NULL,updated_at=now()
+       WHERE document_id=$1 AND publication_state='archived'`,
+      [id],
+    );
+    await audit(res.locals.auth as AuthContext, "document.restored", "document", id, parsed.data);
+    res.json(await getDocument(id));
+  }),
+);
+
 router.get(
   "/documents/:documentId/preview",
   requireEditor,
@@ -492,8 +577,12 @@ router.get(
     }
     const market = typeof req.query.market === "string" ? req.query.market : "uae";
     const edition = await pool.query(
-      `SELECT id,market FROM cms_market_editions WHERE document_id=$1
-       ORDER BY CASE WHEN market=$2 THEN 0 WHEN market='uae' THEN 1 ELSE 2 END LIMIT 1`,
+      `SELECT e.id,e.market,e.locale,
+         CASE WHEN e.market=$2 THEN false ELSE true END used_fallback
+       FROM cms_market_editions e
+       WHERE e.document_id=$1 AND e.market IN ($2,'uae')
+       ORDER BY CASE WHEN e.market=$2 THEN 0 WHEN e.market='uae' THEN 1 ELSE 2 END,
+         e.created_at,e.id LIMIT 1`,
       [id, market],
     );
     if (!edition.rowCount) {
@@ -507,10 +596,25 @@ router.get(
        VALUES ($1,$2,$3,$4)`,
       [hashToken(token), edition.rows[0].id, (res.locals.auth as AuthContext).user.id, expiresAt],
     );
+    const revision = await pool.query(
+      `SELECT id,payload,revision_number FROM cms_revisions
+       WHERE edition_id=$1 ORDER BY revision_number DESC,created_at DESC,id DESC LIMIT 1`,
+      [edition.rows[0].id],
+    );
+    if (!revision.rowCount) {
+      res.status(404).json({ error: "Document has no revision." });
+      return;
+    }
+    const validation = validateSnapshot(document.kind, revision.rows[0].payload, "draft");
     res.json({
-      document: payload(document),
+      document: revision.rows[0].payload,
       previewUrl: `/preview/${token}`,
       expiresAt,
+      market: edition.rows[0].market,
+      locale: edition.rows[0].locale,
+      revisionNumber: revision.rows[0].revision_number,
+      usedFallback: edition.rows[0].used_fallback,
+      warnings: validation.success ? [] : validation.errors,
     });
   }),
 );
@@ -521,9 +625,10 @@ router.get(
   requireMfa,
   asyncRoute(async (req, res) => {
     const preview = await pool.query(
-      `SELECT e.market,r.payload,r.revision_number
+      `SELECT d.kind,e.market,e.locale,r.id revision_id,r.payload,r.revision_number
          FROM cms_preview_sessions p
          JOIN cms_market_editions e ON e.id=p.edition_id
+         JOIN cms_documents d ON d.id=e.document_id
          JOIN LATERAL (
            SELECT * FROM cms_revisions WHERE edition_id=e.id
            ORDER BY revision_number DESC LIMIT 1
@@ -540,10 +645,23 @@ router.get(
       "X-Robots-Tag": "noindex, nofollow, noarchive",
     });
     const row = preview.rows[0];
+    const validation = validateSnapshot(row.kind, row.payload, "draft");
+    const mediaIds = validation.success ? validation.data.mediaIds : [];
+    const availableMedia = mediaIds.length ? await pool.query(
+      `SELECT id FROM cms_media_assets WHERE id::text=ANY($1::text[]) AND status IN ('active','ready')`,
+      [mediaIds],
+    ) : { rows: [] };
+    const availableIds = new Set(availableMedia.rows.map((asset) => String(asset.id)));
     res.json({
+      kind: row.kind,
       document: row.payload,
       market: row.market,
+      locale: row.locale,
+      revisionId: String(row.revision_id),
       revisionNumber: row.revision_number,
+      usedFallback: false,
+      missingMediaIds: mediaIds.filter((id) => !availableIds.has(id)),
+      validationWarnings: validation.success ? [] : validation.errors,
     });
   }),
 );

@@ -5,5 +5,9 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { CmsRichBlock } from './cmsRichBlock';
 
-export type DocumentContent = { [key: string]: unknown };
+export type CmsPlatformContentSectionsItem = {
+  heading: string;
+  body: CmsRichBlock[];
+};

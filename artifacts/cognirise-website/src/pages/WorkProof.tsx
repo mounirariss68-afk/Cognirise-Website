@@ -14,8 +14,8 @@ const patternFallback = [{
 export default function WorkProof() {
   const { market } = useMarketStore();
   const patterns = useCmsCollection("case-study", patternFallback, (item) => {
-    const content = contentRecord(item);
-    return { title: item.title, copy: text(content.outcome, item.summary || "") };
+    const content = contentRecord(item, "case-study");
+    return { title: item.title, copy: content.outcomes[0] || item.summary || "" };
   });
   const page = useCmsEntry("case-study", "work");
   useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
