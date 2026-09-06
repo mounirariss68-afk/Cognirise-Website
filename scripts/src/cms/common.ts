@@ -10,7 +10,7 @@ export const defaultOutputDirectory = path.join(repositoryRoot, "scripts/cms/out
 export type ReviewStatus = "needs-review";
 export interface InventoryRecord {
   externalId: string;
-  type: "person" | "partner" | "platform" | "article" | "asset";
+  type: "person" | "partner" | "platform" | "article" | "industry" | "asset";
   name: string;
   sourceFile: string;
   route?: string;
@@ -91,7 +91,7 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
         height: dimensions.height,
         usages: usages.get(publicPath) ?? [],
         cmsOwnership: (usages.get(publicPath) ?? []).some((usage) =>
-          /AboutPeople|Advisors|Partners|PlatformsOverview|InsightsEditorial|InsightArticle/.test(usage),
+          /AboutPeople|Advisors|Partners|PlatformsOverview|InsightsEditorial|InsightArticle|industries\.ts/.test(usage),
         ) ? "cms-candidate" : "code-owned",
         accessibility: { altText: null, decorative: null },
         rights: { status: "needs-review", owner: null, source: null },

@@ -8,7 +8,8 @@
     "partners": 5,
     "platforms": 5,
     "articles": 3,
-    "assets": 22
+    "industries": 5,
+    "assets": 25
   },
   "explicitOmissions": {
     "caseStudies": "No genuine public case-study records are present in the current website.",
@@ -972,6 +973,621 @@
       }
     },
     {
+      "externalId": "industry:b60f973e571d3059824d",
+      "type": "industry",
+      "name": "Financial Services",
+      "sourceFile": "src/content/industries.ts",
+      "route": "/industries/financial-services",
+      "fields": {
+        "slug": "financial-services",
+        "summary": "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
+        "content": {
+          "schemaVersion": 1,
+          "legacyPath": "/industries/banking",
+          "name": "Financial Services",
+          "shortName": "Finance",
+          "thesis": "The model estate—not the chatbot—is where trust is won.",
+          "accent": "trust is won.",
+          "dek": "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
+          "image": "/images/cognirise/site-financial.jpg",
+          "imageAlt": "A precise financial mechanism crossed by a controlled luminous route.",
+          "variant": "ledger",
+          "pressures": [
+            {
+              "title": "Validation before velocity",
+              "body": "Non-deterministic systems still have to meet established model-risk expectations: clear purpose, testing, monitoring and accountable challenge."
+            },
+            {
+              "title": "Concentration is an operating risk",
+              "body": "Dependence on a small set of cloud, data and model providers can amplify third-party and systemic exposure."
+            },
+            {
+              "title": "Sovereignty shapes the architecture",
+              "body": "In the Gulf, residency, explainability and bilingual customer disclosure belong in the design brief, not the launch checklist."
+            }
+          ],
+          "reversal": {
+            "title": "Automation can move work in the wrong direction.",
+            "body": "Publicly reported customer-service reversals at Klarna and Commonwealth Bank show why containment or headcount claims are not the same as sustained service quality."
+          },
+          "myth": {
+            "claim": "“A chatbot proves the bank is AI-native.”",
+            "verdict": "No. The harder evidence sits in governed fraud, credit, onboarding, collections and operations—where decisions can be tested and traced."
+          },
+          "gcc": "Regional ambition is high, but public, comparable evidence of realised AI value remains limited. The credible route is to publish controls and measured outcomes together.",
+          "service": {
+            "label": "Sovereign AI Solutions",
+            "href": "/what-we-do#sovereign-solutions",
+            "firstMove": "Map one exception-heavy, evidence-heavy decision."
+          },
+          "uses": [
+            {
+              "use": "Onboarding and KYC",
+              "evidence": "Measured process outcomes",
+              "boundary": "Human approval and complete evidence trail"
+            },
+            {
+              "use": "Fraud and credit models",
+              "evidence": "Established analytical practice",
+              "boundary": "Independent validation and drift monitoring"
+            },
+            {
+              "use": "Service assistance",
+              "evidence": "Mixed company reports",
+              "boundary": "Escalation quality, not deflection alone"
+            }
+          ],
+          "sources": [
+            {
+              "label": "Model risk management guidance",
+              "publisher": "US Federal Reserve",
+              "kind": "Official source",
+              "url": "https://www.federalreserve.gov/frrs/guidance/supervisory-guidance-on-model-risk-management.htm"
+            },
+            {
+              "label": "AI adoption and financial stability",
+              "publisher": "Financial Stability Board",
+              "kind": "Official source",
+              "url": "https://www.fsb.org/uploads/P14112024.pdf"
+            },
+            {
+              "label": "Customer-service reversal",
+              "publisher": "ABC News",
+              "kind": "Independent study",
+              "url": "https://www.abc.net.au/news/2025-08-21/cba-backtracks-on-ai-job-cuts-as-chatbot-lifts-call-volumes/105679492/"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "order": 1,
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/site-financial.jpg"
+        ]
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm hero-media rights, alt text, verification date, review date, source classifications, and source URLs before publication."
+        ]
+      }
+    },
+    {
+      "externalId": "industry:37a17e1c80062ece7c5c",
+      "type": "industry",
+      "name": "Telecoms",
+      "sourceFile": "src/content/industries.ts",
+      "route": "/industries/telecoms",
+      "fields": {
+        "slug": "telecoms",
+        "summary": "Network intelligence matters when it can observe, decide and act inside a bounded domain—with service impact, energy use and human override visible.",
+        "content": {
+          "schemaVersion": 1,
+          "legacyPath": "/industries/telecoms",
+          "name": "Telecoms",
+          "shortName": "Telecoms",
+          "thesis": "Autonomy is earned one closed loop at a time.",
+          "accent": "closed loop",
+          "dek": "Network intelligence matters when it can observe, decide and act inside a bounded domain—with service impact, energy use and human override visible.",
+          "image": "/images/cognirise/site-infrastructure.jpg",
+          "imageAlt": "Connected infrastructure carrying a luminous signal across an operating landscape.",
+          "variant": "network",
+          "pressures": [
+            {
+              "title": "Fragmented operating context",
+              "body": "Alarms, customer state and commercial systems rarely present one reliable version of an incident."
+            },
+            {
+              "title": "Autonomy has levels",
+              "body": "A certified domain or use case is not an autonomous network. Scope and intervention boundaries must remain explicit."
+            },
+            {
+              "title": "AI infrastructure has economics",
+              "body": "GPU capacity, orchestration and energy demand need a business case beyond the promise of a new service category."
+            }
+          ],
+          "reversal": {
+            "title": "Containment is not customer resolution.",
+            "body": "Public frustration with automated support shows why call avoidance cannot be reported as value without resolution quality and repeat-contact measures."
+          },
+          "myth": {
+            "claim": "“Level 4 means the whole network runs itself.”",
+            "verdict": "No. Industry certifications apply to defined scenarios and domains; broad autonomy remains an operating programme, not a switch."
+          },
+          "gcc": "Gulf operators combine sovereign-cloud investment, national AI programmes and advanced mobile infrastructure. Data residency and operating ownership remain the binding constraints.",
+          "service": {
+            "label": "AI Platforms",
+            "href": "/what-we-do#ai-platforms",
+            "firstMove": "Close one high-volume incident or service loop."
+          },
+          "uses": [
+            {
+              "use": "Incident triage",
+              "evidence": "Company-reported operational results",
+              "boundary": "Named domain and human override"
+            },
+            {
+              "use": "Agent assistance",
+              "evidence": "Company and vendor metrics",
+              "boundary": "Resolution and repeat-contact measures"
+            },
+            {
+              "use": "Energy optimisation",
+              "evidence": "Controlled trials",
+              "boundary": "Network quality guardrails"
+            }
+          ],
+          "sources": [
+            {
+              "label": "Autonomous-network certification",
+              "publisher": "Ericsson / TM Forum",
+              "kind": "Company-reported",
+              "url": "https://www.ericsson.com/en/news/2025/6/tdc-net-and-ericsson-achieves-industry-first-certification-from-tm-forum-of-level-4-autonomy"
+            },
+            {
+              "label": "5G energy-efficiency trial",
+              "publisher": "Ericsson and Vodafone UK",
+              "kind": "Vendor claim",
+              "url": "https://www.ericsson.com/en/press-releases/3/2025/vodafone-uk-and-ericsson-trial-ai-solutions-for-improved-5g-energy-efficiency"
+            },
+            {
+              "label": "Customer-service operating result",
+              "publisher": "Virgin Media O2",
+              "kind": "Company-reported",
+              "url": "https://news.virginmediao2.co.uk/ai-helps-virgin-media-o2-avoid-over-one-million-call-transfers-as-it-saves-customers-more-than-400000-hours-of-time-on-the-phone/"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "order": 2,
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/site-infrastructure.jpg"
+        ]
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm hero-media rights, alt text, verification date, review date, source classifications, and source URLs before publication."
+        ]
+      }
+    },
+    {
+      "externalId": "industry:eb42d39013fdf2f822eb",
+      "type": "industry",
+      "name": "Travel & Hospitality",
+      "sourceFile": "src/content/industries.ts",
+      "route": "/industries/travel-hospitality",
+      "fields": {
+        "slug": "travel-hospitality",
+        "summary": "Personalisation is visible. Recovery is valuable. The decisive capability is coordinated action across inventory, policy, customer context and frontline judgment when plans change.",
+        "content": {
+          "schemaVersion": 1,
+          "legacyPath": "/industries/travel",
+          "name": "Travel & Hospitality",
+          "shortName": "Travel",
+          "thesis": "The real test arrives when the journey breaks.",
+          "accent": "journey breaks.",
+          "dek": "Personalisation is visible. Recovery is valuable. The decisive capability is coordinated action across inventory, policy, customer context and frontline judgment when plans change.",
+          "image": "/images/cognirise/pulse-convergence.jpg",
+          "imageAlt": "Multiple illuminated routes converging through a cinematic transport environment.",
+          "variant": "journey",
+          "pressures": [
+            {
+              "title": "Disruption compresses time",
+              "body": "A useful system must assemble options and constraints while a traveller is still waiting—not in a report after the event."
+            },
+            {
+              "title": "Inventory remains fragmented",
+              "body": "Air, hotel, loyalty and partner systems limit what can be promised and fulfilled in one interaction."
+            },
+            {
+              "title": "Hospitality depends on judgment",
+              "body": "Automation should increase the frontline team’s room to act, not remove the human recovery moment."
+            }
+          ],
+          "reversal": {
+            "title": "A seamless demo can conceal a broken hand-off.",
+            "body": "When automated advice cannot change a booking, honour policy or transfer context, it adds another queue rather than removing one."
+          },
+          "myth": {
+            "claim": "“Hyper-personalisation is the main prize.”",
+            "verdict": "Not during disruption. Reliable recovery, operational coordination and a clear human hand-off protect more trust."
+          },
+          "gcc": "Rapid aviation and tourism growth raises the value of multilingual service and integrated operations—but targets should not be presented as realised outcomes.",
+          "service": {
+            "label": "Consulting & Engineering with AI",
+            "href": "/what-we-do#consulting-engineering",
+            "firstMove": "Trace one disruption from signal to resolved journey."
+          },
+          "uses": [
+            {
+              "use": "Disruption recovery",
+              "evidence": "Operational use cases",
+              "boundary": "Policy-aware options and accountable approval"
+            },
+            {
+              "use": "Frontline assistance",
+              "evidence": "Company-reported pilots",
+              "boundary": "Context transfer and staff discretion"
+            },
+            {
+              "use": "Demand and operations",
+              "evidence": "Established forecasting practice",
+              "boundary": "Volatility and override monitoring"
+            }
+          ],
+          "sources": [
+            {
+              "label": "Aviation passenger-rights framework",
+              "publisher": "US Department of Transportation",
+              "kind": "Official source",
+              "url": "https://www.transportation.gov/airconsumer"
+            },
+            {
+              "label": "Airline digital operations research",
+              "publisher": "IATA",
+              "kind": "Official source",
+              "url": "https://www.iata.org/en/programs/airline-distribution/retailing/"
+            },
+            {
+              "label": "Tourism measurement and outlook",
+              "publisher": "UN Tourism",
+              "kind": "Official source",
+              "url": "https://www.unwto.org/tourism-data/global-and-regional-tourism-performance"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "order": 3,
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/pulse-convergence.jpg"
+        ]
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm hero-media rights, alt text, verification date, review date, source classifications, and source URLs before publication."
+        ]
+      }
+    },
+    {
+      "externalId": "industry:4382ac13aa186ee8959b",
+      "type": "industry",
+      "name": "Energy & Resources",
+      "sourceFile": "src/content/industries.ts",
+      "route": "/industries/energy-resources",
+      "fields": {
+        "slug": "energy-resources",
+        "summary": "A prediction has no operating value until the right team can connect it to asset history, safety boundaries, work orders and available parts.",
+        "content": {
+          "schemaVersion": 1,
+          "legacyPath": "/industries/energy",
+          "name": "Energy & Resources",
+          "shortName": "Energy",
+          "thesis": "In physical operations, confidence needs a field address.",
+          "accent": "field address.",
+          "dek": "A prediction has no operating value until the right team can connect it to asset history, safety boundaries, work orders and available parts.",
+          "image": "/images/cognirise/pulse-breakthrough.jpg",
+          "imageAlt": "A luminous route moving through a vast industrial landscape at dusk.",
+          "variant": "field",
+          "pressures": [
+            {
+              "title": "Context is physically distributed",
+              "body": "Engineering records, telemetry, inspection evidence and field knowledge live at different speeds and in different systems."
+            },
+            {
+              "title": "Safety limits the action space",
+              "body": "Recommendations must respect permits, operating envelopes and accountable human authority."
+            },
+            {
+              "title": "Prediction is not execution",
+              "body": "A failure signal creates value only when maintenance capacity, parts and production plans can respond."
+            }
+          ],
+          "reversal": {
+            "title": "Predictive maintenance can generate a new backlog.",
+            "body": "More alerts without precision, workflow integration and parts readiness can increase inspection work while leaving downtime unchanged."
+          },
+          "myth": {
+            "claim": "“A digital twin is a finished product.”",
+            "verdict": "No. Its value depends on scope, fidelity, update discipline and the decisions it is authorised to support."
+          },
+          "gcc": "The region contains world-scale assets and recognised digital operations. External awards and operator claims are useful signals, not substitutes for site-level outcome evidence.",
+          "service": {
+            "label": "Data & AI Foundations",
+            "href": "/what-we-do/data-ai-foundations",
+            "firstMove": "Connect one critical asset signal to a safe work decision."
+          },
+          "uses": [
+            {
+              "use": "Asset knowledge",
+              "evidence": "Operational deployments",
+              "boundary": "Versioned engineering authority"
+            },
+            {
+              "use": "Maintenance prediction",
+              "evidence": "Measured site-level outcomes",
+              "boundary": "False-positive cost and work-order capacity"
+            },
+            {
+              "use": "Safety assistance",
+              "evidence": "Early deployments",
+              "boundary": "No autonomous safety-critical approval"
+            }
+          ],
+          "sources": [
+            {
+              "label": "Global Lighthouse recognition",
+              "publisher": "World Economic Forum / Aramco",
+              "kind": "Company-reported",
+              "url": "https://www.aramco.com/en/news-media/news/2025/fifth-aramco-facility-receives-world-economic-forum-global-lighthouse-network-status"
+            },
+            {
+              "label": "AI and energy outlook",
+              "publisher": "International Energy Agency",
+              "kind": "Official source",
+              "url": "https://www.iea.org/reports/energy-and-ai"
+            },
+            {
+              "label": "Predictive maintenance at scale",
+              "publisher": "McKinsey",
+              "kind": "Independent study",
+              "url": "https://www.mckinsey.com/capabilities/operations/our-insights/prediction-at-scale-how-industry-can-get-more-value-out-of-maintenance"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "order": 4,
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/pulse-breakthrough.jpg"
+        ]
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm hero-media rights, alt text, verification date, review date, source classifications, and source URLs before publication."
+        ]
+      }
+    },
+    {
+      "externalId": "industry:300df81759c6db6cbf86",
+      "type": "industry",
+      "name": "Manufacturing",
+      "sourceFile": "src/content/industries.ts",
+      "route": "/industries/manufacturing",
+      "fields": {
+        "slug": "manufacturing",
+        "summary": "Industrial intelligence earns its place by improving a bounded production decision across quality, maintenance, planning and workforce safety—without pretending the dark factory has arrived.",
+        "content": {
+          "schemaVersion": 1,
+          "legacyPath": "/industries/manufacturing",
+          "name": "Manufacturing",
+          "shortName": "Manufacturing",
+          "thesis": "The factory is a system of constraints, not a collection of demos.",
+          "accent": "system of constraints",
+          "dek": "Industrial intelligence earns its place by improving a bounded production decision across quality, maintenance, planning and workforce safety—without pretending the dark factory has arrived.",
+          "image": "/images/cognirise/cognirise-pulse-outcomes.jpg",
+          "imageAlt": "A cinematic advanced manufacturing environment with people and luminous production signals.",
+          "variant": "factory",
+          "pressures": [
+            {
+              "title": "Brownfield reality",
+              "body": "Plants combine equipment generations, control systems and data quality that cannot be normalised by presentation layer alone."
+            },
+            {
+              "title": "False positives carry cost",
+              "body": "Vision and predictive systems must be assessed against rework, inspection load and line interruption—not model accuracy alone."
+            },
+            {
+              "title": "Adoption happens on the floor",
+              "body": "Operators and engineers need traceable assistance inside established work, with safe fallback when the system is uncertain."
+            }
+          ],
+          "reversal": {
+            "title": "Automation plans meet labour and reliability limits.",
+            "body": "High-profile humanoid and lights-out ambitions remain bounded by deployment readiness, worker agreements and the economics of variable production."
+          },
+          "myth": {
+            "claim": "“The dark factory is the destination.”",
+            "verdict": "Not for most operations. The stronger near-term case is a more capable workforce operating better-instrumented, safer and more adaptive lines."
+          },
+          "gcc": "Lighthouse sites and Industry 4.0 programmes show regional momentum. Their recognition is evidence of capability at named facilities—not proof that every plant shares the same maturity.",
+          "service": {
+            "label": "Engineering with AI",
+            "href": "/what-we-do/engineering-with-ai",
+            "firstMove": "Instrument one quality or flow constraint end to end."
+          },
+          "uses": [
+            {
+              "use": "Quality inspection",
+              "evidence": "Company-reported deployments",
+              "boundary": "False-positive and escape-rate monitoring"
+            },
+            {
+              "use": "Maintenance planning",
+              "evidence": "Measured industrial practice",
+              "boundary": "Integrated parts and work-order response"
+            },
+            {
+              "use": "Industrial copilots",
+              "evidence": "Vendor and customer reports",
+              "boundary": "Approved instructions and operator authority"
+            }
+          ],
+          "sources": [
+            {
+              "label": "UAE Industry 4.0 programme",
+              "publisher": "UAE Ministry of Industry and Advanced Technology",
+              "kind": "Official source",
+              "url": "https://moiat.gov.ae/en/programs/uae-industry-4-backup"
+            },
+            {
+              "label": "Industrial copilot adoption",
+              "publisher": "Siemens / thyssenkrupp",
+              "kind": "Vendor claim",
+              "url": "https://press.siemens.com/global/en/pressrelease/siemens-industrial-copilot-expanded-adopted-thyssenkrupp"
+            },
+            {
+              "label": "AI quality inspection expansion",
+              "publisher": "GE Aerospace",
+              "kind": "Company-reported",
+              "url": "https://www.geaerospace.com/news/press-releases/ge-aerospace-expanding-application-ai-blade-inspections-cfm-leap-and-ge9x-engines"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "order": 5,
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cognirise-pulse-outcomes.jpg"
+        ]
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm hero-media rights, alt text, verification date, review date, source classifications, and source URLs before publication."
+        ]
+      }
+    },
+    {
+      "externalId": "asset:eaa35ae39186f9be0518",
+      "type": "asset",
+      "name": "alliance-bunjee.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/alliance-bunjee.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/alliance-bunjee.jpg",
+        "bytes": 149988,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "dc596527cd69e4c429bb4d9a74fa1ce4217d33fb756a941a55a465c999610546",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/lib/alliancePlatforms.ts"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "dc596527cd69e4c429bb4d9a74fa1ce4217d33fb756a941a55a465c999610546"
+    },
+    {
+      "externalId": "asset:1702a55d5a824fce8b1f",
+      "type": "asset",
+      "name": "alliance-datatoolpack.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/alliance-datatoolpack.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/alliance-datatoolpack.jpg",
+        "bytes": 142168,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "b6b763fec567e5117f55a47364797fe9b5c4ea4d6806e1f87c0a58cf1fac7efc",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/lib/alliancePlatforms.ts"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "b6b763fec567e5117f55a47364797fe9b5c4ea4d6806e1f87c0a58cf1fac7efc"
+    },
+    {
+      "externalId": "asset:4c4436fd877268245369",
+      "type": "asset",
+      "name": "alliance-lupitor.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/alliance-lupitor.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/alliance-lupitor.jpg",
+        "bytes": 132485,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "a301bd790154bf25492e6216d41205a8bb914c9d7a926f6b9dce49b5f01ebecf",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/lib/alliancePlatforms.ts"
+        ],
+        "cmsOwnership": "code-owned",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "a301bd790154bf25492e6216d41205a8bb914c9d7a926f6b9dce49b5f01ebecf"
+    },
+    {
       "externalId": "asset:f6a19919d1de6e4dd655",
       "type": "asset",
       "name": "cognirise-pulse-governance.jpg",
@@ -988,8 +1604,7 @@
           "artifacts/cognirise-website/src/components/ServiceLineTiles.tsx",
           "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
           "artifacts/cognirise-website/src/pages/EngineeringWithAI.tsx",
-          "artifacts/cognirise-website/src/pages/Home.tsx",
-          "artifacts/cognirise-website/src/pages/PublicSector.tsx"
+          "artifacts/cognirise-website/src/pages/Home.tsx"
         ],
         "cmsOwnership": "code-owned",
         "accessibility": {
@@ -1024,11 +1639,12 @@
         "width": 1024,
         "height": 1024,
         "usages": [
+          "artifacts/cognirise-website/src/content/industries.ts",
           "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
           "artifacts/cognirise-website/src/pages/DataAIFoundations.tsx",
           "artifacts/cognirise-website/src/pages/WorkProof.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
         "accessibility": {
           "altText": null,
           "decorative": null
@@ -1363,12 +1979,13 @@
         "width": 1024,
         "height": 1024,
         "usages": [
+          "artifacts/cognirise-website/src/content/industries.ts",
           "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
           "artifacts/cognirise-website/src/pages/Home.tsx",
           "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
           "artifacts/cognirise-website/src/pages/WorkProof.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
         "accessibility": {
           "altText": null,
           "decorative": null
@@ -1401,6 +2018,7 @@
         "width": 1024,
         "height": 1024,
         "usages": [
+          "artifacts/cognirise-website/src/content/industries.ts",
           "artifacts/cognirise-website/src/pages/AboutPeople.tsx",
           "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
           "artifacts/cognirise-website/src/pages/Home.tsx"
@@ -1477,8 +2095,7 @@
           "artifacts/cognirise-website/src/pages/Home.tsx",
           "artifacts/cognirise-website/src/pages/InsightArticle.tsx",
           "artifacts/cognirise-website/src/pages/InsightsEditorial.tsx",
-          "artifacts/cognirise-website/src/pages/PlatformsOverview.tsx",
-          "artifacts/cognirise-website/src/pages/PublicSector.tsx"
+          "artifacts/cognirise-website/src/pages/PlatformsOverview.tsx"
         ],
         "cmsOwnership": "cms-candidate",
         "accessibility": {
@@ -1513,9 +2130,10 @@
         "width": 1024,
         "height": 1024,
         "usages": [
+          "artifacts/cognirise-website/src/content/industries.ts",
           "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
         "accessibility": {
           "altText": null,
           "decorative": null
@@ -1548,8 +2166,6 @@
         "width": 1024,
         "height": 1024,
         "usages": [
-          "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx",
-          "artifacts/cognirise-website/src/pages/PublicSector.tsx",
           "artifacts/cognirise-website/src/pages/SovereignRegulatedAI.tsx"
         ],
         "cmsOwnership": "code-owned",
@@ -1586,6 +2202,7 @@
         "height": 1024,
         "usages": [
           "artifacts/cognirise-website/src/components/ServiceLineTiles.tsx",
+          "artifacts/cognirise-website/src/content/industries.ts",
           "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx",
           "artifacts/cognirise-website/src/pages/InsightArticle.tsx",
           "artifacts/cognirise-website/src/pages/InsightsEditorial.tsx"
@@ -1754,7 +2371,7 @@
       "digest": "61c0e28ea60a07c3eed1aecf06446f9c1cb83c607e565ecae076cfd7625c5a71"
     }
   ],
-  "manifestDigest": "0b92d8aa7f4b21ce5d4b9bd61f5006e6de3798a8cd88d216be341ef7c1047fd7",
-  "generatedAt": "2026-09-06T19:48:41.729Z",
+  "manifestDigest": "a2490dfce10bee01ae910ddf0b8f9e9a331bf0e0d3aa2529b17f448f885d329c",
+  "generatedAt": "2026-09-06T20:35:20.843Z",
   "dryRun": false
 }

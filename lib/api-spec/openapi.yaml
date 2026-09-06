@@ -1643,7 +1643,7 @@ components:
 
     DocumentKind:
       type: string
-      enum: [person, partner, platform, publication, case-study]
+      enum: [person, partner, platform, publication, case-study, industry]
     DocumentStatus:
       type: string
       enum: [draft, in-review, approved, scheduled, published, archived]

@@ -678,7 +678,7 @@ export const ListDocumentsQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listDocumentsQueryPageMultipleOf).default(listDocumentsQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listDocumentsQueryPageSizeMax).multipleOf(listDocumentsQueryPageSizeMultipleOf).default(listDocumentsQueryPageSizeDefault),
   "search": zod.coerce.string().max(listDocumentsQuerySearchMax).optional(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']).optional(),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']).optional(),
   "status": zod.enum(['draft', 'in-review', 'approved', 'scheduled', 'published', 'archived']).optional(),
   "market": zod.coerce.string().optional()
 })
@@ -726,7 +726,7 @@ export const ListDocumentsResponse = zod.object({
 }).and(zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string().regex(listDocumentsResponseTwoItemsItemSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -949,7 +949,7 @@ export const createDocumentBodySeoNoIndexDefault = false;
 
 
 export const CreateDocumentBody = zod.object({
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string().max(createDocumentBodySlugMax).regex(createDocumentBodySlugRegExp),
   "title": zod.string().min(1).max(createDocumentBodyTitleMax),
   "summary": zod.string().max(createDocumentBodySummaryMax).optional(),
@@ -1148,7 +1148,7 @@ export const createDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const CreateDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string().regex(createDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1365,7 +1365,7 @@ export const getDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const GetDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string().regex(getDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1792,7 +1792,7 @@ export const updateDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const UpdateDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string().regex(updateDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -2478,7 +2478,7 @@ export const submitDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const SubmitDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string().regex(submitDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -2704,7 +2704,7 @@ export const publishDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const PublishDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string().regex(publishDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -2930,7 +2930,7 @@ export const rollbackDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const RollbackDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string().regex(rollbackDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3155,7 +3155,7 @@ export const archiveDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const ArchiveDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string().regex(archiveDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3380,7 +3380,7 @@ export const restoreDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const RestoreDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string().regex(restoreDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -4646,7 +4646,7 @@ export const listPublishedContentQueryPageSizeMultipleOf = 1;
 export const ListPublishedContentQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listPublishedContentQueryPageMultipleOf).default(listPublishedContentQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listPublishedContentQueryPageSizeMax).multipleOf(listPublishedContentQueryPageSizeMultipleOf).default(listPublishedContentQueryPageSizeDefault),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']).optional(),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']).optional(),
   "market": zod.coerce.string(),
   "locale": zod.coerce.string().optional()
 })
@@ -4677,7 +4677,7 @@ export const ListPublishedContentResponse = zod.object({
 }).and(zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string(),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -4718,7 +4718,7 @@ export const ListPublishedContentResponse = zod.object({
 export const GetPublishedContentParams = zod.object({
   "market": zod.coerce.string(),
   "locale": zod.coerce.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.coerce.string()
 })
 
@@ -4732,7 +4732,7 @@ export const getPublishedContentResponseRevisionMultipleOf = 1;
 
 export const GetPublishedContentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
   "slug": zod.string(),
   "title": zod.string(),
   "summary": zod.string().nullish(),

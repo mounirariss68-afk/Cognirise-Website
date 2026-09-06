@@ -463,12 +463,11 @@ export default function Home() {
         
         <div className="mt-9 lg:mt-[54px] grid grid-cols-1 lg:grid-cols-2 border-t border-[#cbd3e1]">
           {[
-            { num: "01", name: "Banking & Financial Services", href: "/industries/banking" },
-            { num: "02", name: "Government & Public Sector", href: "/industries/public-sector" },
-            { num: "03", name: "Telecommunications", href: "/industries/telecoms" },
-            { num: "04", name: "Energy & Resources", href: "/industries/energy" },
-            { num: "05", name: "Travel & Logistics", href: "/industries/travel" },
-            { num: "06", name: "Industrial & Manufacturing", href: "/industries/manufacturing" }
+            { num: "01", name: "Financial Services", href: "/industries/financial-services" },
+            { num: "02", name: "Telecoms", href: "/industries/telecoms" },
+            { num: "03", name: "Travel & Hospitality", href: "/industries/travel-hospitality" },
+            { num: "04", name: "Energy & Resources", href: "/industries/energy-resources" },
+            { num: "05", name: "Manufacturing", href: "/industries/manufacturing" }
           ].map((ind, i) => (
             <Link key={ind.num} href={ind.href} className={`group p-[21px_10px] flex items-center gap-4 font-display font-semibold text-[17px] lg:text-[18px] tracking-[-0.04em] border-b border-[#cbd3e1] transition-colors duration-200 hover:bg-[#f2f4f8] hover:text-[hsl(var(--brand-pink))] ${i % 2 === 0 ? 'lg:border-r lg:border-[#cbd3e1]' : ''}`}>
               <span className="font-sans text-[10px] tracking-[0.1em] text-[#77859c]">{ind.num}</span>

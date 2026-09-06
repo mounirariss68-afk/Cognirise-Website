@@ -12,6 +12,10 @@ function RedirectWithSearch({ to }: { to: string }) {
   return <Redirect to={search ? `${to}?${search}#architecture` : `${to}#architecture`} />;
 }
 
+function CanonicalRedirect({ to }: { to: string }) {
+  const search = useSearch();
+  return <Redirect to={search ? `${to}?${search}` : to} />;
+}
 // Pages
 import Home from "@/pages/Home";
 import ServicesOverview from "@/pages/ServicesOverview";
@@ -28,11 +32,11 @@ import CogniAgents from "@/pages/CogniAgents";
 import CogniTalk from "@/pages/CogniTalk";
 import CogniWare from "@/pages/CogniWare";
 import PlatformDetail from "@/pages/PlatformDetail";
+
 import AlliancePlatformDetail from "@/pages/AlliancePlatformDetail";
 
 import IndustriesOverview from "@/pages/IndustriesOverview";
 import IndustryBanking from "@/pages/IndustryBanking";
-import PublicSector from "@/pages/PublicSector";
 import IndustryTelecoms from "@/pages/IndustryTelecoms";
 import IndustryTravel from "@/pages/IndustryTravel";
 import IndustryEnergy from "@/pages/IndustryEnergy";
@@ -50,7 +54,7 @@ import Contact from "@/pages/Contact";
 import ValueScan from "@/pages/ValueScan";
 import CmsPreview from "@/pages/CmsPreview";
 
-function Router() {
+export function Router() {
   return (
     <Shell>
       <Switch>
@@ -81,11 +85,15 @@ function Router() {
 
         {/* Industries */}
         <Route path="/industries" component={IndustriesOverview} />
-        <Route path="/industries/banking" component={IndustryBanking} />
-        <Route path="/industries/public-sector" component={PublicSector} />
+        <Route path="/industries/financial-services" component={IndustryBanking} />
+        <Route path="/industries/travel-hospitality" component={IndustryTravel} />
+        <Route path="/industries/energy-resources" component={IndustryEnergy} />
+        <Route path="/industries/banking"><CanonicalRedirect to="/industries/financial-services" /></Route>
+        <Route path="/industries/public-sector"><CanonicalRedirect to="/industries" /></Route>
+        <Route path="/industries/government"><CanonicalRedirect to="/industries" /></Route>
         <Route path="/industries/telecoms" component={IndustryTelecoms} />
-        <Route path="/industries/travel" component={IndustryTravel} />
-        <Route path="/industries/energy" component={IndustryEnergy} />
+        <Route path="/industries/travel"><CanonicalRedirect to="/industries/travel-hospitality" /></Route>
+        <Route path="/industries/energy"><CanonicalRedirect to="/industries/energy-resources" /></Route>
         <Route path="/industries/manufacturing" component={IndustryManufacturing} />
         
         {/* Legacy aliases */}
@@ -100,11 +108,11 @@ function Router() {
         <Route path="/cognitalk"><Redirect to="/platforms/cognitalk" /></Route>
         <Route path="/cogniware"><Redirect to="/platforms/cogniware" /></Route>
         
-        <Route path="/pov-banking"><Redirect to="/industries/banking" /></Route>
-        <Route path="/pov-government"><Redirect to="/industries/public-sector" /></Route>
+        <Route path="/pov-banking"><CanonicalRedirect to="/industries/financial-services" /></Route>
+        <Route path="/pov-government"><CanonicalRedirect to="/industries" /></Route>
         <Route path="/pov-telecoms"><Redirect to="/industries/telecoms" /></Route>
-        <Route path="/pov-travel"><Redirect to="/industries/travel" /></Route>
-        <Route path="/pov-energy"><Redirect to="/industries/energy" /></Route>
+        <Route path="/pov-travel"><CanonicalRedirect to="/industries/travel-hospitality" /></Route>
+        <Route path="/pov-energy"><CanonicalRedirect to="/industries/energy-resources" /></Route>
         <Route path="/pov-manufacturing"><Redirect to="/industries/manufacturing" /></Route>
 
 

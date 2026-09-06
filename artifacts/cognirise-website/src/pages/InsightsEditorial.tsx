@@ -328,7 +328,7 @@ export default function InsightsEditorial() {
         <div className="ie-route-list">
           {[
             ["01","Banking & financial services","Build intelligence into the work without compromising control.","governance"],
-            ["02","Government & public sector","Sovereign capability for services with public consequence.","governance"],
+            ["02","Financial services","Governed decisions where trust, evidence and control move together.","governance"],
             ["03","Telecoms","Turn complex operations into a stronger service engine.","operations"],
             ["04","Travel & hospitality","Make service moments more responsive, not more remote.","operations"],
             ["05","Energy & resources","Apply intelligence where safety, scale and continuity meet.","operations"],

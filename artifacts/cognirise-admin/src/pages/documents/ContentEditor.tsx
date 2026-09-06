@@ -23,6 +23,17 @@ function parsePairs(value: string, left: string, right: string) {
     return { [left]: a.trim(), [right]: rest.join("|").trim() };
   }).filter((item) => item[left] && item[right]);
 }
+function tripleLines(value: unknown, first: string, second: string, third: string) {
+  return Array.isArray(value)
+    ? value.map((item) => `${item?.[first] ?? ""} | ${item?.[second] ?? ""} | ${item?.[third] ?? ""}`).join("\n")
+    : "";
+}
+function parseTriples(value: string, first: string, second: string, third: string) {
+  return stringLines(value).map((line) => {
+    const [a, b, ...rest] = line.split("|");
+    return { [first]: a?.trim(), [second]: b?.trim(), [third]: rest.join("|").trim() };
+  }).filter((item) => item[first] && item[second] && item[third]);
+}
 function sourceLines(value: unknown) {
   return Array.isArray(value)
     ? value.map((item) => `${item.label ?? ""} | ${item.url ?? ""} | ${item.accessedAt ?? ""}`).join("\n")
@@ -33,6 +44,17 @@ function parseSources(value: string) {
     const [label, url, accessedAt] = line.split("|").map((part) => part.trim());
     return { label, ...(url ? { url } : {}), ...(accessedAt ? { accessedAt } : {}) };
   }).filter((item) => item.label);
+}
+function industrySourceLines(value: unknown) {
+  return Array.isArray(value)
+    ? value.map((item) => `${item.label ?? ""} | ${item.publisher ?? ""} | ${item.kind ?? ""} | ${item.url ?? ""} | ${item.accessedAt ?? ""}`).join("\n")
+    : "";
+}
+function parseIndustrySources(value: string) {
+  return stringLines(value).map((line) => {
+    const [label, publisher, kind, url, accessedAt] = line.split("|").map((part) => part.trim());
+    return { label, publisher, kind, url, ...(accessedAt ? { accessedAt } : {}) };
+  }).filter((item) => item.label && item.publisher && item.kind && item.url);
 }
 function richLines(value: unknown) {
   return Array.isArray(value)
@@ -97,7 +119,7 @@ export function ContentEditor({ kind, value, onChange, errors }: {
         <Field label="Verification date" type="date" value={value.verificationDate} onChange={(next) => set("verificationDate", next || undefined)} />
         <Field label="Next review date" type="date" value={value.reviewDate} onChange={(next) => set("reviewDate", next || undefined)} />
       </div>
-      <Area label="Sources" value={sourceLines(value.sources)} onChange={(next) => set("sources", parseSources(next))} placeholder="Source label | https://source.example | YYYY-MM-DD" />
+      {kind !== "industry" && <Area label="Sources" value={sourceLines(value.sources)} onChange={(next) => set("sources", parseSources(next))} placeholder="Source label | https://source.example | YYYY-MM-DD" />}
       <Area label="Related record IDs" value={lines(value.relatedIds)} onChange={(next) => set("relatedIds", stringLines(next))} placeholder="One CMS record UUID per line" rows={3} />
     </section>
   );
@@ -179,6 +201,28 @@ export function ContentEditor({ kind, value, onChange, errors }: {
         <Area label="Outcomes" value={lines(value.outcomes)} onChange={(next) => set("outcomes", stringLines(next))} />
         <Area label="Approved evidence and claims" value={evidenceLines(value.evidence)} onChange={(next) => set("evidence", parseEvidence(next))} placeholder="Claim | Source label | https://... | approved or needs-review" />
         <Area label="Quote" value={value.quote ? `${value.quote.text} | ${value.quote.attribution ?? ""}` : ""} onChange={(next) => { const [text, attribution] = next.split("|").map((part) => part.trim()); set("quote", text ? { text, ...(attribution ? { attribution } : {}) } : undefined); }} placeholder="Quote | Attribution" />
+      </>}
+
+      {kind === "industry" && <>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Legacy path" value={value.legacyPath} onChange={(next) => set("legacyPath", next)} placeholder="/industries/legacy-slug" />
+          <Field label="Public name" value={value.name} onChange={(next) => set("name", next)} />
+          <Field label="Short name" value={value.shortName} onChange={(next) => set("shortName", next)} />
+          <Field label="Thesis accent" value={value.accent} onChange={(next) => set("accent", next)} />
+          <Field label="Fallback image path" value={value.image} onChange={(next) => set("image", next)} placeholder="/images/industry.jpg" />
+          <Field label="Image alternative text" value={value.imageAlt} onChange={(next) => set("imageAlt", next)} />
+          <Field label="Hero media ID" value={value.heroMediaId} onChange={(next) => set("heroMediaId", next || undefined)} />
+          <Choice label="Editorial variant" value={value.variant ?? ""} options={["ledger", "network", "journey", "field", "factory"]} onChange={(next) => set("variant", next)} />
+        </div>
+        <Area label="Opening thesis" value={value.thesis ?? ""} onChange={(next) => set("thesis", next)} />
+        <Area label="Editorial summary" value={value.dek ?? ""} onChange={(next) => set("dek", next)} />
+        <Area label="Operating pressures" value={pairLines(value.pressures, "title", "body")} onChange={(next) => set("pressures", parsePairs(next, "title", "body"))} placeholder="Pressure title | Explanation (3–5 required)" rows={6} />
+        <Area label="Documented reversal" value={value.reversal ? `${value.reversal.title} | ${value.reversal.body}` : ""} onChange={(next) => { const [title, ...body] = next.split("|"); set("reversal", { title: title.trim(), body: body.join("|").trim() }); }} placeholder="Title | Explanation" />
+        <Area label="Myth and verdict" value={value.myth ? `${value.myth.claim} | ${value.myth.verdict}` : ""} onChange={(next) => { const [claim, ...verdict] = next.split("|"); set("myth", { claim: claim.trim(), verdict: verdict.join("|").trim() }); }} placeholder="Myth | Verdict" />
+        <Area label="GCC context" value={value.gcc ?? ""} onChange={(next) => set("gcc", next)} />
+        <Area label="Relevant service and first move" value={value.service ? `${value.service.label} | ${value.service.href} | ${value.service.firstMove}` : ""} onChange={(next) => set("service", parseTriples(next, "label", "href", "firstMove")[0] ?? {})} placeholder="Service label | /internal-path | First move" />
+        <Area label="Use-case evidence" value={tripleLines(value.uses, "use", "evidence", "boundary")} onChange={(next) => set("uses", parseTriples(next, "use", "evidence", "boundary"))} placeholder="Use case | Evidence class | Required boundary" rows={6} />
+        <Area label="Industry source trail" value={industrySourceLines(value.sources)} onChange={(next) => set("sources", parseIndustrySources(next))} placeholder="Label | Publisher | Official source / Independent study / Company-reported / Vendor claim | https://... | YYYY-MM-DD" rows={7} />
       </>}
 
       {common}

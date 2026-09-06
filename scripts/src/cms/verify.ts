@@ -166,7 +166,7 @@ async function verifyDatabase(records: InventoryRecord[]) {
         }
         if (JSON.stringify(canonical(validation.data.content)) !== JSON.stringify(canonical({
           ...(operation.payload.content as Record<string, unknown>),
-          ...(operation.mediaPaths[0] && (operation.kind === "platform" || operation.kind === "publication")
+          ...(operation.mediaPaths[0] && (operation.kind === "platform" || operation.kind === "publication" || operation.kind === "industry")
             ? { heroMediaId: mediaByPath.get(operation.mediaPaths[0]) }
             : {}),
         }))) throw new Error(`Content payload parity mismatch for ${operation.externalId}.`);
@@ -231,12 +231,12 @@ async function main() {
   const calculatedManifestDigest = createHash("sha256").update(JSON.stringify(stable)).digest("hex");
   if (manifestDigest !== calculatedManifestDigest || payload.manifestDigest !== manifestDigest) errors.push("Manifest digest mismatch.");
   const count = (type: string) => inventory.records.filter((record) => record.type === type).length;
-  for (const [type, expected] of Object.entries({ person: 5, partner: 5, platform: 5, article: 3, asset: 22 })) {
+  for (const [type, expected] of Object.entries({ person: 5, partner: 5, platform: 5, article: 3, industry: 5, asset: 25 })) {
     if (count(type) !== expected) errors.push(`Expected ${expected} ${type} records, found ${count(type)}.`);
   }
   const operations = migrationOperations(inventory.records);
   const mediaOperations = mediaMigrationOperations(inventory.records);
-  if (payload.operations.length !== 18 || payload.mediaOperations.length !== 22) errors.push("Import payload must contain 18 content and 22 media operations.");
+  if (payload.operations.length !== 23 || payload.mediaOperations.length !== 25) errors.push("Import payload must contain 23 content and 25 media operations.");
   const payloadContent = new Map(payload.operations.map((operation) => [operation.externalId, operation.requestDigest]));
   const payloadMedia = new Map(payload.mediaOperations.map((operation) => [operation.externalId, operation.requestDigest]));
   if (operations.some((operation) => payloadContent.get(operation.externalId) !== operation.requestDigest)) errors.push("Content operation digest mismatch.");
@@ -269,7 +269,7 @@ async function main() {
     release: {
       approvedRevisionIds: database?.approvedRevisionIds ?? [],
       cmsAuthoritativeCollections: [],
-      compiledFallbackCollections: ["people", "partners", "platforms", "publications", "case-studies"],
+      compiledFallbackCollections: ["people", "partners", "platforms", "publications", "case-studies", "industries"],
       fallbackRemovalDecisions: "No fallback was removed; all migrated content remains an unapproved draft.",
       mediaReadiness: database && database.durableMediaObjects === database.media
         ? "Candidate objects are present but remain pending rights and accessibility review."

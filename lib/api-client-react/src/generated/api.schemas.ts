@@ -426,6 +426,7 @@ export const DocumentKind = {
   platform: 'platform',
   publication: 'publication',
   'case-study': 'case-study',
+  industry: 'industry',
 } as const;
 
 export type DocumentStatus = typeof DocumentStatus[keyof typeof DocumentStatus];

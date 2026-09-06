@@ -1,17 +1,32 @@
 {
   "schemaVersion": 1,
   "target": "development",
-  "capturedAt": "2026-09-06T19:53:41.183Z",
-  "manifestDigest": "0b92d8aa7f4b21ce5d4b9bd61f5006e6de3798a8cd88d216be341ef7c1047fd7",
+  "capturedAt": "2026-09-06T20:37:19.069Z",
+  "manifestDigest": "a2490dfce10bee01ae910ddf0b8f9e9a331bf0e0d3aa2529b17f448f885d329c",
   "before": {
-    "documents": 18,
-    "editions": 18,
-    "revisions": 18,
-    "media": 5,
-    "receipts": 23,
-    "audits": 47
+    "documents": 0,
+    "editions": 0,
+    "revisions": 0,
+    "media": 0,
+    "receipts": 0,
+    "audits": 33
   },
   "localAssets": [
+    {
+      "publicPath": "/images/cognirise/alliance-bunjee.jpg",
+      "checksum": "dc596527cd69e4c429bb4d9a74fa1ce4217d33fb756a941a55a465c999610546",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/alliance-datatoolpack.jpg",
+      "checksum": "b6b763fec567e5117f55a47364797fe9b5c4ea4d6806e1f87c0a58cf1fac7efc",
+      "ownership": "code-owned"
+    },
+    {
+      "publicPath": "/images/cognirise/alliance-lupitor.jpg",
+      "checksum": "a301bd790154bf25492e6216d41205a8bb914c9d7a926f6b9dce49b5f01ebecf",
+      "ownership": "code-owned"
+    },
     {
       "publicPath": "/images/cognirise/cognirise-pulse-governance.jpg",
       "checksum": "7f462ae555d626662aa17f0654b0308cf1d869d704bb3032351ccf2ac03d35b7",
@@ -20,7 +35,7 @@
     {
       "publicPath": "/images/cognirise/cognirise-pulse-outcomes.jpg",
       "checksum": "883ed6bb9c1e30549f290b696ed59fc4a74888d1ed5a544f567d6c850fb7fc50",
-      "ownership": "code-owned"
+      "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cognirise-pulse-people.jpg",
@@ -70,7 +85,7 @@
     {
       "publicPath": "/images/cognirise/pulse-breakthrough.jpg",
       "checksum": "a798b751527e5ffe41958651d0c0c5e55a04a920b12a56f1e4de019c73dfc35e",
-      "ownership": "code-owned"
+      "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/pulse-convergence.jpg",
@@ -90,7 +105,7 @@
     {
       "publicPath": "/images/cognirise/site-financial.jpg",
       "checksum": "6df89ba5ba9d3fc17254be728e5f658d626284dd08a1f69aec9cf47e7b9a504f",
-      "ownership": "code-owned"
+      "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/site-government.jpg",

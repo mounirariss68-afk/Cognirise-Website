@@ -185,29 +185,55 @@ function articleRecords(items: Record<string, SourceObject>, file: string) {
   });
 }
 
+function industryRecords(items: SourceObject[], file: string) {
+  return items.map((item): InventoryRecord => {
+    const { slug, ...content } = item;
+    const validation = validateCmsContent("industry", content, "draft");
+    if (!validation.success) throw new Error(`${item.name}: ${validation.errors.join("; ")}`);
+    return {
+      externalId: stableId("industry", path.join(websiteRoot, file), String(slug)),
+      type: "industry",
+      name: String(item.name),
+      sourceFile: file,
+      route: `/industries/${slug}`,
+      fields: {
+        slug: String(slug),
+        summary: String(item.dek),
+        content,
+        mediaPaths: [String(item.image)],
+      },
+      review: review([
+        "Confirm hero-media rights, alt text, verification date, review date, source classifications, and source URLs before publication.",
+      ]),
+    };
+  });
+}
+
 async function main() {
   const peopleFile = "src/pages/AboutPeople.tsx";
   const advisorsFile = "src/pages/Advisors.tsx";
   const partnerFile = "src/pages/Partners.tsx";
   const platformFile = "src/pages/PlatformsOverview.tsx";
   const articleFile = "src/pages/InsightArticle.tsx";
+  const industryFile = "src/content/industries.ts";
   const people = personRecords(await extractVariable(peopleFile, "foundersFallback") as SourceObject[], peopleFile, "founder");
   const advisors = personRecords(await extractVariable(advisorsFile, "advisorsFallback") as SourceObject[], advisorsFile, "advisor");
   const partners = partnerRecords(await extractVariable(partnerFile, "partnersFallback") as SourceObject[], partnerFile);
   const platforms = platformRecords(await extractVariable(platformFile, "platformFallback") as SourceObject[], platformFile);
   const articles = articleRecords(await extractArticles(articleFile, "articles"), articleFile);
+  const industries = industryRecords(await extractVariable(industryFile, "INDUSTRIES") as SourceObject[], industryFile);
   const assets = await assetRecords();
-  const records = [...people, ...advisors, ...partners, ...platforms, ...articles, ...assets];
+  const records = [...people, ...advisors, ...partners, ...platforms, ...articles, ...industries, ...assets];
 
-  if (people.length !== 2 || advisors.length !== 3 || partners.length !== 5 || platforms.length !== 5 || articles.length !== 3) {
-    throw new Error("The public website no longer matches the governed 2 founder / 3 advisor / 5 partner / 5 platform / 3 article manifest.");
+  if (people.length !== 2 || advisors.length !== 3 || partners.length !== 5 || platforms.length !== 5 || articles.length !== 3 || industries.length !== 5) {
+    throw new Error("The public website no longer matches the governed 2 founder / 3 advisor / 5 partner / 5 platform / 3 article / 5 industry manifest.");
   }
-  if (assets.length !== 22) throw new Error(`Expected 22 governed website assets, found ${assets.length}.`);
+  if (assets.length !== 25) throw new Error(`Expected 25 governed website assets, found ${assets.length}.`);
 
   const stable = {
     schemaVersion: 2,
     source: relative(websiteRoot),
-    expectedCounts: { people: 5, founders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, assets: 22 },
+    expectedCounts: { people: 5, founders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, industries: 5, assets: 25 },
     explicitOmissions: {
       caseStudies: "No genuine public case-study records are present in the current website.",
       povDocuments: "No genuine public POV documents are present in the current website.",

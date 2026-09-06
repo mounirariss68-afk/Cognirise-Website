@@ -12,6 +12,7 @@ import {
 import {
   mediaMigrationOperations,
   migrationOperations,
+  resolveMigrationMedia,
   resultDigest,
   type MediaMigrationOperation,
   type MigrationOperation,
@@ -72,7 +73,7 @@ async function uploadMedia(operations: MediaMigrationOperation[]) {
         contentType: operation.mimeType,
         metadata: {
           cacheControl: "private, max-age=31536000, immutable",
-          metadata: { checksum: operation.checksum, source: "cms-inventory-v2" },
+          metadata: { checksum: operation.checksum, source: "cms-inventory-v3" },
         },
       });
     } else {
@@ -84,22 +85,6 @@ async function uploadMedia(operations: MediaMigrationOperation[]) {
     storageKeys.set(operation.publicPath, storageKey);
   }
   return storageKeys;
-}
-
-function withMedia(operation: MigrationOperation, mediaByPath: Map<string, string>) {
-  const mediaIds = operation.mediaPaths.map((path) => {
-    const id = mediaByPath.get(path);
-    if (!id) throw new Error(`No imported CMS media record for ${path}.`);
-    return id;
-  });
-  const content = structuredClone(operation.payload.content) as Record<string, unknown>;
-  if (mediaIds[0] && (operation.kind === "platform" || operation.kind === "publication")) {
-    content.heroMediaId = mediaIds[0];
-  }
-  const payload = { ...operation.payload, content, mediaIds };
-  const validation = validateCmsSnapshot(operation.kind as CmsDocumentKind, payload, "draft");
-  if (!validation.success) throw new Error(`${operation.externalId}: ${validation.errors.join("; ")}`);
-  return validation.data;
 }
 
 async function applyDatabase(
@@ -234,7 +219,7 @@ async function applyDatabase(
           .where(eq(cmsDocumentsTable.canonicalSlug, operation.slug));
         if (conflict) throw new Error(`Slug ${operation.slug} is already owned by a non-migration document.`);
 
-        const resolvedPayload = withMedia(operation, mediaByPath);
+        const resolvedPayload = resolveMigrationMedia(operation, mediaByPath);
         const [document] = await tx.insert(cmsDocumentsTable).values({
           kind: operation.kind,
           canonicalSlug: operation.slug,

@@ -15,4 +15,5 @@ export const DocumentKind = {
   platform: 'platform',
   publication: 'publication',
   'case-study': 'case-study',
+  industry: 'industry',
 } as const;

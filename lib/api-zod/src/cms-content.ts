@@ -1,12 +1,13 @@
 import { z } from "zod";
 
 export const CMS_CONTRACT_VERSION = 1 as const;
-export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study"] as const;
+export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study", "industry"] as const;
 export type CmsDocumentKind = (typeof cmsDocumentKinds)[number];
 export type CmsValidationMode = "draft" | "publish";
 
 const safeExternalUrl = z.string().url().regex(/^https?:\/\//i, "Only HTTP(S) links are allowed.");
-const safeInternalPath = z.string().regex(/^\/(?!\/)[a-z0-9/_-]*(?:\?[a-z0-9&=_-]+)?$/i);
+const safeInternalPath = z.string().regex(/^\/(?!\/)[a-z0-9/_-]*(?:\?[a-z0-9&=_-]+)?(?:#[a-z0-9_-]+)?$/i);
+const safeAssetPath = z.string().regex(/^\/(?!\/)[a-z0-9/_.-]+$/i);
 const safeLink = z.union([safeExternalUrl, safeInternalPath]);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD.");
 const optionalDate = date.optional();
@@ -129,12 +130,64 @@ export const caseStudyContentSchema = z.object({
   ...governance,
 }).strict();
 
+const industrySourceSchema = z.object({
+  label: z.string().trim().min(1).max(240),
+  publisher: z.string().trim().min(1).max(240),
+  kind: z.enum(["Official source", "Independent study", "Company-reported", "Vendor claim"]),
+  url: safeExternalUrl,
+  accessedAt: optionalDate,
+}).strict();
+
+export const industryContentSchema = z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
+  legacyPath: safeInternalPath,
+  name: z.string().trim().min(1).max(160),
+  shortName: z.string().trim().min(1).max(80),
+  thesis: z.string().trim().min(1).max(240),
+  accent: z.string().trim().min(1).max(120),
+  dek: z.string().trim().min(1).max(2_000),
+  image: safeAssetPath,
+  imageAlt: z.string().trim().min(1).max(300),
+  variant: z.enum(["ledger", "network", "journey", "field", "factory"]),
+  pressures: z.array(z.object({
+    title: z.string().trim().min(1).max(160),
+    body: z.string().trim().min(1).max(1_000),
+  }).strict()).min(3).max(5),
+  reversal: z.object({
+    title: z.string().trim().min(1).max(240),
+    body: z.string().trim().min(1).max(2_000),
+  }).strict(),
+  myth: z.object({
+    claim: z.string().trim().min(1).max(240),
+    verdict: z.string().trim().min(1).max(2_000),
+  }).strict(),
+  gcc: z.string().trim().min(1).max(2_000),
+  service: z.object({
+    label: z.string().trim().min(1).max(160),
+    href: safeInternalPath,
+    firstMove: z.string().trim().min(1).max(240),
+  }).strict(),
+  uses: z.array(z.object({
+    use: z.string().trim().min(1).max(160),
+    evidence: z.string().trim().min(1).max(240),
+    boundary: z.string().trim().min(1).max(500),
+  }).strict()).min(1).max(12),
+  sources: z.array(industrySourceSchema).min(1).max(30),
+  heroMediaId: z.string().uuid().optional(),
+  verificationDate: date,
+  reviewDate: date,
+  visibility: z.enum(["public", "hidden", "restricted"]).default("public"),
+  order: z.number().int().min(0).max(10_000).default(0),
+  relatedIds: idList,
+}).strict();
+
 export const cmsContentSchemas = {
   person: personContentSchema,
   partner: partnerContentSchema,
   platform: platformContentSchema,
   publication: publicationContentSchema,
   "case-study": caseStudyContentSchema,
+  industry: industryContentSchema,
 } as const;
 
 export type PersonContent = z.infer<typeof personContentSchema>;
@@ -142,7 +195,8 @@ export type PartnerContent = z.infer<typeof partnerContentSchema>;
 export type PlatformContent = z.infer<typeof platformContentSchema>;
 export type PublicationContent = z.infer<typeof publicationContentSchema>;
 export type CaseStudyContent = z.infer<typeof caseStudyContentSchema>;
-export type CmsContent = PersonContent | PartnerContent | PlatformContent | PublicationContent | CaseStudyContent;
+export type IndustryContent = z.infer<typeof industryContentSchema>;
+export type CmsContent = PersonContent | PartnerContent | PlatformContent | PublicationContent | CaseStudyContent | IndustryContent;
 
 function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   const errors: string[] = [];
@@ -171,6 +225,11 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
     if (caseStudy.disclosure === "restricted") errors.push("Restricted case studies cannot be published publicly.");
     if (caseStudy.variant === "full" && !caseStudy.work.length) errors.push("A full case study requires a work narrative.");
     if (caseStudy.evidence.some((claim) => !claim.approved)) errors.push("Every case-study evidence statement must be approved.");
+  }
+  if (kind === "industry") {
+    const industry = value as IndustryContent;
+    if (industry.pressures.length < 3) errors.push("At least three operating pressures are required.");
+    if (!industry.imageAlt) errors.push("Industry hero imagery requires alternative text.");
   }
   return errors;
 }
@@ -249,6 +308,7 @@ export function cmsPublicRoute(kind: CmsDocumentKind, slug: string, content: Cms
   if (kind === "person" || kind === "partner") return null;
   if (kind === "platform") return `/platforms/${slug}`;
   if (kind === "publication") return `/insights/${slug}`;
+  if (kind === "industry") return `/industries/${slug}`;
   const caseStudy = content as CaseStudyContent;
   return caseStudy.variant === "full" && caseStudy.disclosure !== "restricted"
     ? `/work/${slug}`

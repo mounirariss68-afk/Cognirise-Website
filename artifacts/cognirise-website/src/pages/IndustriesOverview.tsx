@@ -3,6 +3,8 @@ import { ArrowRight, Plus } from "lucide-react";
 import { useState } from "react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
+import { INDUSTRIES } from "@/content/industries";
+import { contentRecord, useCmsCollection } from "@/lib/cms";
 
 export default function IndustriesOverview() {
   const [active, setActive] = useState<number>(0);
@@ -14,14 +16,20 @@ export default function IndustriesOverview() {
     market === "turkiye" ? "Istanbul · Türkiye" :
     "London · Europe";
 
-  const sectors = [
-    { num: "01", title: "Banking & financial services", url: "/industries/banking", view: "Trust is the operating system.", copy: "Build intelligence into customer journeys, risk and operations without giving up the controls that make trust possible." },
-    { num: "02", title: "Government & public sector", url: "/industries/public-sector", view: "Public value needs a route to delivery.", copy: "Move complex public services from policy to practical, governed execution—designed around citizens, teams and sovereign control." },
-    { num: "03", title: "Telecoms", url: "/industries/telecoms", view: "The network is only the beginning.", copy: "Turn service, operations and enterprise data into a more responsive operating model for customers and the people who serve them." },
-    { num: "04", title: "Energy & resources", url: "/industries/energy", view: "Physical operations leave no room for theatre.", copy: "Connect field reality, planning and assurance so critical work is safer, faster and visible at the point decisions are made." },
-    { num: "05", title: "Travel & hospitality", url: "/industries/travel", view: "Every moment of service is a decision.", copy: "Design more useful experiences across the journey while giving frontline teams the intelligence to resolve what matters." },
-    { num: "06", title: "Manufacturing", url: "/industries/manufacturing", view: "Complexity should not become inertia.", copy: "Create a shared route through portfolios, plants and supply chains—where insight can become action across the enterprise." },
-  ];
+  const industryQuery = useCmsCollection("industry", INDUSTRIES, (item) => ({
+    ...contentRecord(item, "industry"),
+    slug: item.slug,
+  }));
+  const industryRecords = industryQuery.data.length === 5
+    ? industryQuery.data
+    : industryQuery.isAuthoritative ? industryQuery.data : INDUSTRIES;
+  const sectors = industryRecords.map((industry, index) => ({
+    num: String(index + 1).padStart(2, "0"),
+    title: industry.name,
+    url: `/industries/${industry.slug}`,
+    view: industry.thesis,
+    copy: industry.dek,
+  }));
 
   return (
     <div className="io">
@@ -49,7 +57,7 @@ export default function IndustriesOverview() {
             <p>Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production—where speed matters and control cannot be an afterthought.</p>
           </div>
           <div className="io-hero-image">
-            <img src={assetUrl("/images/cognirise/site-government.jpg")} alt="A monumental civic district connected by a luminous flow of intelligence." />
+            <img src={assetUrl("/images/cognirise/site-infrastructure.jpg")} alt="Connected operating environments crossed by a luminous flow of intelligence." />
             <div className="io-hero-word">pressure</div>
             <div className="io-cap">
               <span>01 / operating environments</span>
@@ -60,7 +68,7 @@ export default function IndustriesOverview() {
       </section>
 
       <section className="io-rail" aria-label="Industry focus">
-        <div><b>Built for</b><strong>UAE enterprise and government</strong></div>
+        <div><b>Built for</b><strong>Consequential enterprise work</strong></div>
         <div><b>Working where</b><strong>Urgency meets scrutiny</strong></div>
         <div><b>Starting point</b><strong>One process under pressure</strong></div>
       </section>
@@ -81,7 +89,7 @@ export default function IndustriesOverview() {
         <div className="io-chapter-copy">
           <div className="io-kicker">Trust at speed</div>
           <h2>Make controls part of the flow.</h2>
-          <p>In financial services and public institutions, intelligence only earns its place when it can work with the standards, data and accountability already in motion.</p>
+          <p>In financial services and critical industries, intelligence only earns its place when it can work with the standards, data and accountability already in motion.</p>
         </div>
         <div className="io-chapter-index">02 / governed movement</div>
       </section>

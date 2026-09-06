@@ -3,13 +3,13 @@ import { type CmsDocumentKind, validateCmsSnapshot } from "@workspace/api-zod";
 import { InventoryRecord } from "./common.js";
 
 export type MigratableRecord = InventoryRecord & {
-  type: "person" | "partner" | "platform" | "article";
+  type: "person" | "partner" | "platform" | "article" | "industry";
 };
 
 export interface MigrationOperation {
   externalId: string;
   idempotencyKey: string;
-  kind: "person" | "partner" | "platform" | "publication";
+  kind: "person" | "partner" | "platform" | "publication" | "industry";
   slug: string;
   title: string;
   payload: Record<string, unknown>;
@@ -80,6 +80,22 @@ export function migrationOperations(records: InventoryRecord[]) {
     .map(migrationOperation);
 }
 
+export function resolveMigrationMedia(operation: MigrationOperation, mediaByPath: Map<string, string>) {
+  const mediaIds = operation.mediaPaths.map((mediaPath) => {
+    const id = mediaByPath.get(mediaPath);
+    if (!id) throw new Error(`No imported CMS media record for ${mediaPath}.`);
+    return id;
+  });
+  const content = structuredClone(operation.payload.content) as Record<string, unknown>;
+  if (mediaIds[0] && (operation.kind === "platform" || operation.kind === "publication" || operation.kind === "industry")) {
+    content.heroMediaId = mediaIds[0];
+  }
+  const payload = { ...operation.payload, content, mediaIds };
+  const validation = validateCmsSnapshot(operation.kind as CmsDocumentKind, payload, "draft");
+  if (!validation.success) throw new Error(`${operation.externalId}: ${validation.errors.join("; ")}`);
+  return validation.data;
+}
+
 export function mediaMigrationOperations(records: InventoryRecord[]): MediaMigrationOperation[] {
   return records.filter((record) => record.type === "asset").map((record) => {
     const fields = record.fields;
@@ -94,7 +110,7 @@ export function mediaMigrationOperations(records: InventoryRecord[]): MediaMigra
     }
     const operation = {
       externalId: record.externalId,
-      idempotencyKey: `cms-media-inventory-v2:${record.externalId}`,
+      idempotencyKey: `cms-media-inventory-v3:${record.externalId}`,
       filename: record.name,
       sourceFile: record.sourceFile,
       publicPath: fields.publicPath,

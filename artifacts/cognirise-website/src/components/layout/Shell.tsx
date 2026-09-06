@@ -71,29 +71,25 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: "AI Transformation by Industry | Cognirise",
     description: "Sector-specific routes for organisations where intelligent transformation must be fast, sovereign and defensible.",
   },
-  "/industries/banking": {
-    title: "Banking & Financial Services | Cognirise",
-    description: "Build intelligence into customer journeys, risk and operations without giving up the controls that make trust possible.",
-  },
-  "/industries/public-sector": {
-    title: "Public Sector AI Transformation | Cognirise",
-    description: "Build sovereign, governed AI capability for public services where trust, continuity and human authority matter.",
+  "/industries/financial-services": {
+    title: "Financial Services AI | Evidence-Led Industry View | Cognirise",
+    description: "A governed view of AI in financial services: model risk, operating reversals, evidenced use cases and GCC context.",
   },
   "/industries/telecoms": {
-    title: "Telecoms | Cognirise",
-    description: "Turn service, operations and enterprise data into a more responsive operating model for customers and the people who serve them.",
+    title: "Telecoms AI | Evidence-Led Industry View | Cognirise",
+    description: "An evidence-led view of telecoms AI across bounded network autonomy, service resolution and infrastructure economics.",
   },
-  "/industries/travel": {
-    title: "Travel & Hospitality | Cognirise",
-    description: "Design more useful experiences across the journey while giving frontline teams the intelligence to resolve what matters.",
+  "/industries/travel-hospitality": {
+    title: "Travel & Hospitality AI | Evidence-Led Industry View | Cognirise",
+    description: "A practical view of AI in travel and hospitality, centred on disruption recovery, frontline judgment and evidence.",
   },
-  "/industries/energy": {
-    title: "Energy & Resources | Cognirise",
-    description: "Connect field reality, planning and assurance so critical work is safer, faster and visible at the point decisions are made.",
+  "/industries/energy-resources": {
+    title: "Energy & Resources AI | Evidence-Led Industry View | Cognirise",
+    description: "A field-grounded view of AI in energy and resources, from asset context and maintenance to safe operating boundaries.",
   },
   "/industries/manufacturing": {
-    title: "Manufacturing & Conglomerates | Cognirise",
-    description: "Create a shared route through portfolios, plants and supply chains.",
+    title: "Manufacturing AI | Evidence-Led Industry View | Cognirise",
+    description: "An evidence-led view of industrial AI across quality, maintenance, planning and the connected workforce.",
   },
   "/work": {
     title: "How Cognirise Delivers AI Transformation",
@@ -166,12 +162,11 @@ const navigation: NavigationItem[] = [
     href: "/industries",
     items: [
       { id: "industries.overview", label: "Industries Overview", href: "/industries" },
-      { id: "industries.banking", label: "Banking & Financial Services", href: "/industries/banking" },
-      { id: "industries.public-sector", label: "Public Sector", href: "/industries/public-sector" },
+      { id: "industries.banking", label: "Financial Services", href: "/industries/financial-services" },
       { id: "industries.telecoms", label: "Telecoms", href: "/industries/telecoms" },
-      { id: "industries.travel", label: "Travel & Hospitality", href: "/industries/travel" },
-      { id: "industries.energy", label: "Energy & Resources", href: "/industries/energy" },
-      { id: "industries.manufacturing", label: "Manufacturing & Conglomerates", href: "/industries/manufacturing" },
+      { id: "industries.travel", label: "Travel & Hospitality", href: "/industries/travel-hospitality" },
+      { id: "industries.energy", label: "Energy & Resources", href: "/industries/energy-resources" },
+      { id: "industries.manufacturing", label: "Manufacturing", href: "/industries/manufacturing" },
     ]
   },
   { id: "work", label: "Work", href: "/work" },

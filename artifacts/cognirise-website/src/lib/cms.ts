@@ -8,6 +8,7 @@ import {
   type PlatformContent,
   type PublicationContent,
   type CaseStudyContent,
+  type IndustryContent,
   validateCmsContent,
 } from "@workspace/api-zod";
 import { useMarketStore } from "@/store/market";
@@ -18,6 +19,7 @@ export type CmsContentByKind = {
   platform: PlatformContent;
   publication: PublicationContent;
   "case-study": CaseStudyContent;
+  industry: IndustryContent;
 };
 export type CmsRecord<T extends CmsContent = CmsContent> = T & {
   id: string;
@@ -31,12 +33,14 @@ export type CmsRecord<T extends CmsContent = CmsContent> = T & {
 };
 export type CmsDeliveryState = "cms" | "compiled-fallback" | "intentional-empty" | "loading" | "api-error" | "contract-error";
 
+const env = import.meta.env ?? {};
 const CUTOVER: Record<CmsDocumentKind, boolean> = {
-  person: import.meta.env.VITE_CMS_CUTOVER_PEOPLE === "true",
-  partner: import.meta.env.VITE_CMS_CUTOVER_PARTNERS === "true",
-  platform: import.meta.env.VITE_CMS_CUTOVER_PLATFORMS === "true",
-  publication: import.meta.env.VITE_CMS_CUTOVER_PUBLICATIONS === "true",
-  "case-study": import.meta.env.VITE_CMS_CUTOVER_CASE_STUDIES === "true",
+  person: env.VITE_CMS_CUTOVER_PEOPLE === "true",
+  partner: env.VITE_CMS_CUTOVER_PARTNERS === "true",
+  platform: env.VITE_CMS_CUTOVER_PLATFORMS === "true",
+  publication: env.VITE_CMS_CUTOVER_PUBLICATIONS === "true",
+  "case-study": env.VITE_CMS_CUTOVER_CASE_STUDIES === "true",
+  industry: env.VITE_CMS_CUTOVER_INDUSTRIES === "true",
 };
 
 export function contentRecord<K extends CmsDocumentKind>(item: PublishedContent, _kind: K): CmsRecord<CmsContentByKind[K]> {
