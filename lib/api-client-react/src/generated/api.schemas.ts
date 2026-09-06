@@ -606,6 +606,29 @@ export interface CmsMediaAsset {
   updatedAt: IsoDateTime;
 }
 
+export type CmsAdminMediaVersionMetadata = {
+  [key: string]: string | number | boolean | null;
+};
+
+export interface CmsAdminMediaVersion {
+  mediaId: string;
+  /** @minimum 1 */
+  version: number;
+  /** @nullable */
+  contentType: string | null;
+  /** @nullable */
+  byteSize: number | null;
+  /** @nullable */
+  checksum: string | null;
+  metadata: CmsAdminMediaVersionMetadata;
+  createdAt: IsoDateTime;
+  previewUrl: string;
+}
+
+export type CmsAdminMediaListItem = CmsMediaAsset & {
+  latestVersion: CmsAdminMediaVersion | null;
+};
+
 export type CmsMediaVersionMetadata = {
   [key: string]: string | number | boolean | null;
 };
@@ -630,7 +653,7 @@ export interface CmsMediaVersion {
 }
 
 export interface CmsMediaListEnvelope {
-  media: CmsMediaAsset[];
+  media: CmsAdminMediaListItem[];
 }
 
 export interface CmsMediaEnvelope {

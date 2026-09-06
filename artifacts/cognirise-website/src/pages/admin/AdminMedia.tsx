@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { getListCmsAdminMediaQueryKey, useListCmsAdminMedia, useCreateCmsMediaUploadIntent, useFinalizeCmsMediaUpload, useUpdateCmsAdminMedia, useArchiveCmsAdminMedia } from "@workspace/api-client-react";
+import React, { useState, useEffect } from "react";
+import { getListCmsAdminMediaQueryKey, previewCmsAdminMediaVersion, useListCmsAdminMedia, useCreateCmsMediaUploadIntent, useFinalizeCmsMediaUpload, useUpdateCmsAdminMedia, useArchiveCmsAdminMedia } from "@workspace/api-client-react";
 import { format } from "date-fns";
 import { Loader2, Search, Upload, Image as ImageIcon, FileText, CheckCircle2, ShieldAlert, X, Edit2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -248,6 +248,51 @@ function EditModal({ asset, open, onOpenChange }: { asset: any, open: boolean, o
   );
 }
 
+function AuthenticatedMediaPreview({ asset }: { asset: any }) {
+  const [src, setSrc] = useState<string>();
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (!asset.latestVersion?.previewUrl) return;
+    const controller = new AbortController();
+    let objectUrl: string | undefined;
+    setFailed(false);
+    setSrc(undefined);
+    previewCmsAdminMediaVersion(asset.id, asset.latestVersion.version, {
+      credentials: "same-origin",
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((blob) => {
+        if (controller.signal.aborted) return;
+        objectUrl = URL.createObjectURL(blob);
+        setSrc(objectUrl);
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") setFailed(true);
+      });
+    return () => {
+      controller.abort();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [asset.latestVersion?.previewUrl]);
+
+  if (asset.kind === "image" && src) {
+    return <img src={src} alt={asset.decorative ? "" : asset.altText || asset.title} className="h-full w-full object-contain" />;
+  }
+  if (asset.kind === "document" && src) {
+    return (
+      <a href={src} target="_blank" rel="noreferrer" className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/60 hover:text-white">
+        <FileText className="h-8 w-8" />
+        <span className="text-xs">Open PDF preview</span>
+      </a>
+    );
+  }
+  return asset.kind === "image"
+    ? <ImageIcon className={`h-8 w-8 ${failed ? "text-red-400/60" : "text-white/20"}`} />
+    : <FileText className={`h-8 w-8 ${failed ? "text-red-400/60" : "text-white/20"}`} />;
+}
+
 export default function AdminMedia() {
   const { data, isLoading, error } = useListCmsAdminMedia();
   const archiveMutation = useArchiveCmsAdminMedia();
@@ -343,11 +388,7 @@ export default function AdminMedia() {
                 </div>
                 
                 <div className="aspect-square bg-white/5 flex items-center justify-center relative overflow-hidden">
-                  {asset.kind === "image" ? (
-                    <ImageIcon className="h-8 w-8 text-white/20" />
-                  ) : (
-                    <FileText className="h-8 w-8 text-white/20" />
-                  )}
+                  <AuthenticatedMediaPreview asset={asset} />
                   {asset.lifecycleState === "published" && (
                     <div className="absolute bottom-2 right-2 bg-black/50 rounded-full p-0.5">
                       <CheckCircle2 className="h-4 w-4 text-emerald-400" />
@@ -361,9 +402,7 @@ export default function AdminMedia() {
                 </div>
                 <div className="p-3 flex-1 flex flex-col">
                   <div className="text-sm font-medium text-white truncate" title={asset.title}>{asset.title}</div>
-                  {asset.lifecycleState === "published" && (
-                    <p className="mt-1 text-xs text-white/40">Published. Public preview requires a media version.</p>
-                  )}
+                  {asset.latestVersion && <p className="mt-1 text-xs text-white/40">Version {asset.latestVersion.version}</p>}
                   <div className="text-xs text-white/40 mt-1 flex justify-between items-center">
                     <span className="capitalize">{asset.kind}</span>
                     <span>{format(new Date(asset.updatedAt), "MMM d")}</span>

@@ -5,8 +5,9 @@
  * PostgreSQL-backed Cognirise API. Public CMS reads never silently fall back; an explicit UAE edition fallback is represented in delivery metadata.
  * OpenAPI spec version: 0.1.0
  */
-import type { CmsAdminMediaListItem } from "./cmsAdminMediaListItem";
+import type { CmsAdminMediaVersion } from "./cmsAdminMediaVersion";
+import type { CmsMediaAsset } from "./cmsMediaAsset";
 
-export interface CmsMediaListEnvelope {
-  media: CmsAdminMediaListItem[];
-}
+export type CmsAdminMediaListItem = CmsMediaAsset & {
+  latestVersion: CmsAdminMediaVersion | null;
+};

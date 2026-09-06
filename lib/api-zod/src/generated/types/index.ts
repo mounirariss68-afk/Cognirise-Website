@@ -8,6 +8,9 @@
 
 export * from "./_cmsRuntimeNavigationTargetType";
 export * from "./cmsAccessEnvelope";
+export * from "./cmsAdminMediaListItem";
+export * from "./cmsAdminMediaVersion";
+export * from "./cmsAdminMediaVersionMetadata";
 export * from "./cmsAuditEvent";
 export * from "./cmsAuditEventListEnvelope";
 export * from "./cmsAuditEventMetadata";

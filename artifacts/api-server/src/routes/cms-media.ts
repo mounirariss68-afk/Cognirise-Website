@@ -8,12 +8,15 @@ import { cmsEditionPayloadSchema } from "../lib/cms/contracts";
 import { mediaReferences } from "../lib/cms/media-references";
 import { CmsObjectStorage } from "../lib/cms/object-storage";
 
+type CmsPrincipal = NonNullable<Awaited<ReturnType<typeof principalForRequest>>>;
+export type CmsPrincipalResolver = (req: Request) => Promise<CmsPrincipal | undefined>;
+
 export interface CmsMediaStorage {
   createPendingPath(mediaId: string): string;
   signPut(objectPath: string): Promise<string>;
-  fileMetadata(objectPath: string): Promise<{ contentType?: string; size?: string; md5Hash?: string; metadata?: Record<string, string> } | undefined>;
-  file(objectPath: string): {
-    getMetadata(): PromiseLike<readonly [{ contentType?: string; size?: string | number }, ...unknown[]]>;
+  fileMetadata(objectPath: string): Promise<{ contentType?: string; size?: string; md5Hash?: string; generation?: string; metadata?: Record<string, string> } | undefined>;
+  file(objectPath: string, generation?: string): {
+    getMetadata(): PromiseLike<readonly [{ contentType?: string; size?: string | number; md5Hash?: string; generation?: string | number }, ...unknown[]]>;
     createReadStream(): Readable;
   };
 }
@@ -23,26 +26,113 @@ const maxBytes = 25 * 1024 * 1024;
 const first = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] : value;
 const isString = (value: unknown, max: number) => typeof value === "string" && value.length <= max;
 
-async function principal(req: Request, res: Response): Promise<Awaited<ReturnType<typeof principalForRequest>> | undefined> {
-  const user = await principalForRequest(req);
+async function principal(req: Request, res: Response, resolvePrincipal: CmsPrincipalResolver): Promise<CmsPrincipal | undefined> {
+  const user = await resolvePrincipal(req);
   if (!user) res.status(401).json({ error: "CMS authentication required" });
   return user;
 }
-function canManage(user: NonNullable<Awaited<ReturnType<typeof principalForRequest>>>) {
+function canManage(user: CmsPrincipal) {
   return ["author", "regionalEditor", "publisher", "admin"].includes(user.role);
 }
 
-export function createCmsMediaRouter(storage: CmsMediaStorage = new CmsObjectStorage()): IRouter {
+export function createCmsMediaRouter(
+  storage: CmsMediaStorage = new CmsObjectStorage(),
+  resolvePrincipal: CmsPrincipalResolver = principalForRequest,
+): IRouter {
 const router: IRouter = Router();
 
 router.get("/cms/admin/media", async (req, res): Promise<void> => {
-  const user = await principal(req, res); if (!user) return;
+  res.set("Cache-Control", "no-store");
+  const user = await principal(req, res, resolvePrincipal); if (!user) return;
+  if (!canManage(user)) { res.status(403).json({ error: "Media access denied" }); return; }
   const assets = await db.select().from(cmsMediaAssetsTable).orderBy(desc(cmsMediaAssetsTable.updatedAt));
-  res.json({ media: user.role === "admin" ? assets : assets.filter((asset) => asset.createdByPrincipalId === user.id) });
+  const visibleAssets = user.role === "admin" ? assets : assets.filter((asset) => asset.createdByPrincipalId === user.id);
+  const versions = await db.select().from(cmsMediaVersionsTable).orderBy(desc(cmsMediaVersionsTable.version));
+  const latestVersionByMediaId = new Map<string, typeof versions[number]>();
+  for (const version of versions) {
+    if (!latestVersionByMediaId.has(version.mediaId)) latestVersionByMediaId.set(version.mediaId, version);
+  }
+  res.json({
+    media: visibleAssets.map((asset) => {
+      const version = latestVersionByMediaId.get(asset.id);
+      return {
+        ...asset,
+        latestVersion: version ? {
+          mediaId: version.mediaId,
+          version: version.version,
+          contentType: version.contentType,
+          byteSize: version.byteSize,
+          checksum: version.checksum,
+          metadata: version.metadata,
+          createdAt: version.createdAt,
+          previewUrl: `/api/cms/admin/media/${encodeURIComponent(asset.id)}/versions/${version.version}/preview`,
+        } : null,
+      };
+    }),
+  });
+});
+router.get("/cms/admin/media/:mediaId/versions/:version", async (req, res): Promise<void> => {
+  res.set("Cache-Control", "no-store");
+  const user = await principal(req, res, resolvePrincipal); if (!user) return;
+  if (!canManage(user)) { res.status(403).json({ error: "Media access denied" }); return; }
+  const mediaId = first(req.params.mediaId) ?? "";
+  const versionNumber = Number(first(req.params.version));
+  if (!Number.isInteger(versionNumber) || versionNumber < 1) { res.status(400).json({ error: "Invalid media version" }); return; }
+  const [asset] = await db.select().from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.id, mediaId)).limit(1);
+  if (!asset) { res.status(404).json({ error: "Media asset not found" }); return; }
+  if (asset.createdByPrincipalId !== user.id && user.role !== "admin") { res.status(403).json({ error: "Media access denied" }); return; }
+  if (asset.rightsExpiresAt && asset.rightsExpiresAt <= new Date()) { res.status(403).json({ error: "Media rights have expired" }); return; }
+  const [version] = await db.select().from(cmsMediaVersionsTable).where(and(eq(cmsMediaVersionsTable.mediaId, mediaId), eq(cmsMediaVersionsTable.version, versionNumber))).limit(1);
+  if (!version?.objectPath) { res.status(404).json({ error: "Media version not found" }); return; }
+  res.json({
+    mediaId,
+    version: version.version,
+    contentType: version.contentType,
+    byteSize: version.byteSize,
+    checksum: version.checksum,
+    metadata: version.metadata,
+    createdAt: version.createdAt,
+    previewUrl: `/api/cms/admin/media/${encodeURIComponent(mediaId)}/versions/${version.version}/preview`,
+  });
+});
+router.get("/cms/admin/media/:mediaId/versions/:version/preview", async (req, res): Promise<void> => {
+  res.set("Cache-Control", "no-store");
+  const user = await principal(req, res, resolvePrincipal); if (!user) return;
+  if (!canManage(user)) { res.status(403).json({ error: "Media access denied" }); return; }
+  const mediaId = first(req.params.mediaId) ?? "";
+  const versionNumber = Number(first(req.params.version));
+  if (!Number.isInteger(versionNumber) || versionNumber < 1) { res.status(400).json({ error: "Invalid media version" }); return; }
+  const [asset] = await db.select().from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.id, mediaId)).limit(1);
+  if (!asset) { res.status(404).json({ error: "Media asset not found" }); return; }
+  if (asset.createdByPrincipalId !== user.id && user.role !== "admin") { res.status(403).json({ error: "Media access denied" }); return; }
+  if (asset.rightsExpiresAt && asset.rightsExpiresAt <= new Date()) { res.status(403).json({ error: "Media rights have expired" }); return; }
+  const [version] = await db.select().from(cmsMediaVersionsTable).where(and(eq(cmsMediaVersionsTable.mediaId, mediaId), eq(cmsMediaVersionsTable.version, versionNumber))).limit(1);
+  if (!version?.objectPath) { res.status(404).json({ error: "Media version not found" }); return; }
+  try {
+    const storageGeneration = typeof version.metadata.storageGeneration === "string"
+      ? version.metadata.storageGeneration
+      : undefined;
+    const file = storage.file(version.objectPath, storageGeneration); const [metadata] = await file.getMetadata();
+    if ((storageGeneration && String(metadata.generation) !== storageGeneration) ||
+      (version.contentType && metadata.contentType !== version.contentType) ||
+      (version.byteSize !== null && Number(metadata.size) !== version.byteSize) ||
+      (version.checksum && metadata.md5Hash !== version.checksum)) {
+      res.status(404).json({ error: "Media object no longer matches its immutable version" }); return;
+    }
+    res.set("Content-Type", String(metadata.contentType ?? version.contentType ?? "application/octet-stream"));
+    res.set("Content-Disposition", "inline");
+    if (metadata.size) res.set("Content-Length", String(metadata.size));
+    const stream = file.createReadStream();
+    stream.once("error", (error) => {
+      if (!res.headersSent) res.status(404).json({ error: "Media object not found" });
+      else res.destroy(error);
+    });
+    stream.pipe(res);
+  } catch { res.status(404).json({ error: "Media object not found" }); }
 });
 router.post("/cms/admin/media/upload-intent", async (req, res): Promise<void> => {
   if (!requireSameOrigin(req, res)) return;
-  const user = await principal(req, res); if (!user) return;
+  const user = await principal(req, res, resolvePrincipal); if (!user) return;
   if (!canManage(user)) { res.status(403).json({ error: "Media upload is not permitted" }); return; }
   const body = req.body as Record<string, unknown>;
   if (!body || !isString(body.title, 240) || (body.altText !== undefined && !isString(body.altText, 1000)) ||
@@ -64,7 +154,7 @@ router.post("/cms/admin/media/upload-intent", async (req, res): Promise<void> =>
 });
 router.post("/cms/admin/media/finalize", async (req, res): Promise<void> => {
   if (!requireSameOrigin(req, res)) return;
-  const user = await principal(req, res); if (!user) return;
+  const user = await principal(req, res, resolvePrincipal); if (!user) return;
   const body = req.body as Record<string, unknown>;
   if (!body || typeof body.mediaId !== "string" || typeof body.objectPath !== "string") { res.status(400).json({ error: "mediaId and objectPath are required" }); return; }
   const [asset] = await db.select().from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.id, body.mediaId)).limit(1);
@@ -74,12 +164,12 @@ router.post("/cms/admin/media/finalize", async (req, res): Promise<void> => {
   try {
     const metadata = await storage.fileMetadata(body.objectPath);
     const size = Number(metadata?.size);
-    if (!metadata || !metadata.contentType || metadata.contentType !== asset.pendingContentType || size !== asset.pendingByteSize || !allowedTypes.has(metadata.contentType) || !Number.isSafeInteger(size)) {
+    if (!metadata || !metadata.contentType || metadata.contentType !== asset.pendingContentType || size !== asset.pendingByteSize || !allowedTypes.has(metadata.contentType) || !Number.isSafeInteger(size) || typeof metadata.generation !== "string") {
       res.status(400).json({ error: "Uploaded object does not match its upload intent" }); return;
     }
     const [version] = await db.insert(cmsMediaVersionsTable).values({
       mediaId: asset.id, version: 1, objectPath: body.objectPath, contentType: metadata.contentType, byteSize: size,
-      checksum: metadata.md5Hash ?? null, metadata: metadata.metadata ?? {}, createdByPrincipalId: user.id,
+      checksum: metadata.md5Hash ?? null, metadata: { ...(metadata.metadata ?? {}), storageGeneration: metadata.generation }, createdByPrincipalId: user.id,
     }).returning();
     const [updated] = await db.update(cmsMediaAssetsTable).set({ lifecycleState: "draft", pendingObjectPath: null, pendingContentType: null, pendingByteSize: null, pendingExpiresAt: null }).where(eq(cmsMediaAssetsTable.id, asset.id)).returning();
     res.json({ media: updated, version });
@@ -87,7 +177,7 @@ router.post("/cms/admin/media/finalize", async (req, res): Promise<void> => {
 });
 router.patch("/cms/admin/media/:mediaId", async (req, res): Promise<void> => {
   if (!requireSameOrigin(req, res)) return;
-  const user = await principal(req, res); if (!user) return;
+  const user = await principal(req, res, resolvePrincipal); if (!user) return;
   const body = req.body as Record<string, unknown>;
   if (!body || Object.keys(body).some((key) => !["title", "altText", "decorative", "caption", "rightsOwner", "lifecycleState"].includes(key)) ||
     (body.title !== undefined && !isString(body.title, 240)) || (body.altText !== undefined && body.altText !== null && !isString(body.altText, 1000)) ||
@@ -108,7 +198,7 @@ router.patch("/cms/admin/media/:mediaId", async (req, res): Promise<void> => {
 });
 router.delete("/cms/admin/media/:mediaId", async (req, res): Promise<void> => {
   if (!requireSameOrigin(req, res)) return;
-  const user = await principal(req, res); if (!user) return;
+  const user = await principal(req, res, resolvePrincipal); if (!user) return;
   const [asset] = await db.select().from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.id, first(req.params.mediaId) ?? "")).limit(1);
   if (!asset) { res.status(404).json({ error: "Media asset not found" }); return; }
   if (asset.createdByPrincipalId !== user.id && user.role !== "admin") { res.status(403).json({ error: "Media access denied" }); return; }
@@ -154,7 +244,16 @@ router.get("/cms/media/:mediaId/versions/:version", async (req, res): Promise<vo
         reference.mediaId === asset.id && reference.fieldPath === fieldPath);
   })) { res.status(404).json({ error: "Media is not publicly referenced" }); return; }
   try {
-    const file = storage.file(version.objectPath); const [metadata] = await file.getMetadata();
+    const storageGeneration = typeof version.metadata.storageGeneration === "string"
+      ? version.metadata.storageGeneration
+      : undefined;
+    const file = storage.file(version.objectPath, storageGeneration); const [metadata] = await file.getMetadata();
+    if ((storageGeneration && String(metadata.generation) !== storageGeneration) ||
+      (version.contentType && metadata.contentType !== version.contentType) ||
+      (version.byteSize !== null && Number(metadata.size) !== version.byteSize) ||
+      (version.checksum && metadata.md5Hash !== version.checksum)) {
+      res.status(404).json({ error: "Media object no longer matches its immutable version" }); return;
+    }
     res.set("Content-Type", String(metadata.contentType ?? version.contentType ?? "application/octet-stream"));
     res.set("Cache-Control", "public, max-age=31536000, immutable"); if (metadata.size) res.set("Content-Length", String(metadata.size));
     const stream = file.createReadStream();

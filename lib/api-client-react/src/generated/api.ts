@@ -18,6 +18,7 @@ import type {
 
 import type {
   CmsAccessEnvelope,
+  CmsAdminMediaVersion,
   CmsAuditEventListEnvelope,
   CmsDashboard,
   CmsDocumentCreateInput,
@@ -2816,6 +2817,223 @@ export const useArchiveCmsAdminMedia = <
 > => {
   return useMutation(getArchiveCmsAdminMediaMutationOptions(options));
 };
+
+export const getGetCmsAdminMediaVersionUrl = (
+  mediaId: string,
+  version: number,
+) => {
+  return `/api/cms/admin/media/${mediaId}/versions/${version}`;
+};
+
+/**
+ * Returns immutable metadata and an authenticated preview route for one exact version. Responses are no-store and rights-aware.
+ */
+export const getCmsAdminMediaVersion = async (
+  mediaId: string,
+  version: number,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<CmsAdminMediaVersion> => {
+  return customFetch<CmsAdminMediaVersion>(
+    getGetCmsAdminMediaVersionUrl(mediaId, version),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetCmsAdminMediaVersionQueryKey = (
+  mediaId: string,
+  version: number,
+) => {
+  return [`/api/cms/admin/media/${mediaId}/versions/${version}`] as const;
+};
+
+export const getGetCmsAdminMediaVersionQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCmsAdminMediaVersion>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  mediaId: string,
+  version: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsAdminMediaVersion>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetCmsAdminMediaVersionQueryKey(mediaId, version);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCmsAdminMediaVersion>>
+  > = ({ signal }) =>
+    getCmsAdminMediaVersion(mediaId, version, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      mediaId !== null &&
+      mediaId !== undefined &&
+      version !== null &&
+      version !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCmsAdminMediaVersion>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCmsAdminMediaVersionQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCmsAdminMediaVersion>>
+>;
+export type GetCmsAdminMediaVersionQueryError = ErrorType<ErrorResponse>;
+
+export function useGetCmsAdminMediaVersion<
+  TData = Awaited<ReturnType<typeof getCmsAdminMediaVersion>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  mediaId: string,
+  version: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCmsAdminMediaVersion>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCmsAdminMediaVersionQueryOptions(
+    mediaId,
+    version,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getPreviewCmsAdminMediaVersionUrl = (
+  mediaId: string,
+  version: number,
+) => {
+  return `/api/cms/admin/media/${mediaId}/versions/${version}/preview`;
+};
+
+/**
+ * Streams one exact editor-visible version after authentication and rights checks. The response is never cached.
+ */
+export const previewCmsAdminMediaVersion = async (
+  mediaId: string,
+  version: number,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<Blob> => {
+  return customFetch<Blob>(
+    getPreviewCmsAdminMediaVersionUrl(mediaId, version),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getPreviewCmsAdminMediaVersionQueryKey = (
+  mediaId: string,
+  version: number,
+) => {
+  return [
+    `/api/cms/admin/media/${mediaId}/versions/${version}/preview`,
+  ] as const;
+};
+
+export const getPreviewCmsAdminMediaVersionQueryOptions = <
+  TData = Awaited<ReturnType<typeof previewCmsAdminMediaVersion>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  mediaId: string,
+  version: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof previewCmsAdminMediaVersion>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getPreviewCmsAdminMediaVersionQueryKey(mediaId, version);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof previewCmsAdminMediaVersion>>
+  > = ({ signal }) =>
+    previewCmsAdminMediaVersion(mediaId, version, {
+      signal,
+      ...requestOptions,
+    });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      mediaId !== null &&
+      mediaId !== undefined &&
+      version !== null &&
+      version !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof previewCmsAdminMediaVersion>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type PreviewCmsAdminMediaVersionQueryResult = NonNullable<
+  Awaited<ReturnType<typeof previewCmsAdminMediaVersion>>
+>;
+export type PreviewCmsAdminMediaVersionQueryError = ErrorType<ErrorResponse>;
+
+export function usePreviewCmsAdminMediaVersion<
+  TData = Awaited<ReturnType<typeof previewCmsAdminMediaVersion>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  mediaId: string,
+  version: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof previewCmsAdminMediaVersion>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getPreviewCmsAdminMediaVersionQueryOptions(
+    mediaId,
+    version,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 export const getGetCmsPublicMediaVersionUrl = (
   mediaId: string,

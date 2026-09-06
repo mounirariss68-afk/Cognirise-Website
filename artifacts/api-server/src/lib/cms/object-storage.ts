@@ -40,19 +40,19 @@ export class CmsObjectStorage {
     return data.signed_url;
   }
 
-  async fileMetadata(objectPath: string): Promise<{ contentType?: string; size?: string; md5Hash?: string; metadata?: Record<string, string> } | undefined> {
+  async fileMetadata(objectPath: string): Promise<{ contentType?: string; size?: string; md5Hash?: string; generation?: string; metadata?: Record<string, string> } | undefined> {
     if (!objectPath.startsWith(`${privateDirectory()}/cms-media/`)) return undefined;
     const { bucketName, objectName } = splitPath(objectPath);
     const file = objectStorageClient.bucket(bucketName).file(objectName);
     const [exists] = await file.exists();
     if (!exists) return undefined;
     const [metadata] = await file.getMetadata();
-    return metadata as { contentType?: string; size?: string; md5Hash?: string; metadata?: Record<string, string> };
+    return metadata as { contentType?: string; size?: string; md5Hash?: string; generation?: string; metadata?: Record<string, string> };
   }
 
-  file(objectPath: string) {
+  file(objectPath: string, generation?: string) {
     if (!objectPath.startsWith(`${privateDirectory()}/cms-media/`)) throw new Error("Invalid CMS media path");
     const { bucketName, objectName } = splitPath(objectPath);
-    return objectStorageClient.bucket(bucketName).file(objectName);
+    return objectStorageClient.bucket(bucketName).file(objectName, generation ? { generation } : undefined);
   }
 }

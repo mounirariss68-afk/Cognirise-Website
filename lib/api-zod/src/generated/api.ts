@@ -1292,24 +1292,47 @@ export const ProcessDueCmsAdminWorkflowResponse = zod.object({
 
 export const ListCmsAdminMediaResponse = zod.object({
   media: zod.array(
-    zod.object({
-      id: zod.string(),
-      kind: zod.enum(["image", "document"]),
-      title: zod.string(),
-      altText: zod.string().nullable(),
-      decorative: zod.boolean(),
-      caption: zod.string().nullable(),
-      rightsOwner: zod.string().nullable(),
-      rightsExpiresAt: zod.string().datetime({ offset: true }).nullable(),
-      lifecycleState: zod.enum(["pending", "draft", "published", "archived"]),
-      pendingObjectPath: zod.string().nullable(),
-      pendingContentType: zod.string().nullable(),
-      pendingByteSize: zod.number().int().nullable(),
-      pendingExpiresAt: zod.string().datetime({ offset: true }).nullable(),
-      createdByPrincipalId: zod.string(),
-      createdAt: zod.string().datetime({ offset: true }),
-      updatedAt: zod.string().datetime({ offset: true }),
-    }),
+    zod
+      .object({
+        id: zod.string(),
+        kind: zod.enum(["image", "document"]),
+        title: zod.string(),
+        altText: zod.string().nullable(),
+        decorative: zod.boolean(),
+        caption: zod.string().nullable(),
+        rightsOwner: zod.string().nullable(),
+        rightsExpiresAt: zod.string().datetime({ offset: true }).nullable(),
+        lifecycleState: zod.enum(["pending", "draft", "published", "archived"]),
+        pendingObjectPath: zod.string().nullable(),
+        pendingContentType: zod.string().nullable(),
+        pendingByteSize: zod.number().int().nullable(),
+        pendingExpiresAt: zod.string().datetime({ offset: true }).nullable(),
+        createdByPrincipalId: zod.string(),
+        createdAt: zod.string().datetime({ offset: true }),
+        updatedAt: zod.string().datetime({ offset: true }),
+      })
+      .and(
+        zod.object({
+          latestVersion: zod.union([
+            zod.object({
+              mediaId: zod.string(),
+              version: zod.number().int().min(1),
+              contentType: zod.string().nullable(),
+              byteSize: zod.number().int().nullable(),
+              checksum: zod.string().nullable(),
+              metadata: zod.record(
+                zod.string(),
+                zod
+                  .union([zod.string(), zod.number(), zod.boolean()])
+                  .nullable(),
+              ),
+              createdAt: zod.string().datetime({ offset: true }),
+              previewUrl: zod.string(),
+            }),
+            zod.null(),
+          ]),
+        }),
+      ),
   ),
 });
 
@@ -1443,6 +1466,40 @@ export const ArchiveCmsAdminMediaParams = zod.object({
 });
 
 export const ArchiveCmsAdminMediaResponse = zod.void();
+
+/**
+ * Returns immutable metadata and an authenticated preview route for one exact version. Responses are no-store and rights-aware.
+ */
+
+export const GetCmsAdminMediaVersionParams = zod.object({
+  mediaId: zod.coerce.string().min(1),
+  version: zod.coerce.number().int().min(1),
+});
+
+export const GetCmsAdminMediaVersionResponse = zod.object({
+  mediaId: zod.string(),
+  version: zod.number().int().min(1),
+  contentType: zod.string().nullable(),
+  byteSize: zod.number().int().nullable(),
+  checksum: zod.string().nullable(),
+  metadata: zod.record(
+    zod.string(),
+    zod.union([zod.string(), zod.number(), zod.boolean()]).nullable(),
+  ),
+  createdAt: zod.string().datetime({ offset: true }),
+  previewUrl: zod.string(),
+});
+
+/**
+ * Streams one exact editor-visible version after authentication and rights checks. The response is never cached.
+ */
+
+export const PreviewCmsAdminMediaVersionParams = zod.object({
+  mediaId: zod.coerce.string().min(1),
+  version: zod.coerce.number().int().min(1),
+});
+
+export const PreviewCmsAdminMediaVersionResponse = zod.unknown();
 
 export const GetCmsPublicMediaVersionParams = zod.object({
   mediaId: zod.coerce.string().min(1),
