@@ -14,43 +14,36 @@ interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 
 export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, BrandButtonProps & React.AnchorHTMLAttributes<HTMLAnchorElement>>(
   ({ children, variant = "primary", className, icon, href, isLoading, disabled, ...props }, ref) => {
+    const isUnavailable = disabled || isLoading;
     const forcedTextColor =
       variant === "primary" || variant === "submit"
         ? "#ffffff"
         : variant === "inverse"
           ? "hsl(var(--brand-deep))"
           : undefined;
-    
-    // Core styling logic
+
     const renderContent = () => {
       if (variant === "editorial") {
         return (
           <>
-            {children}
-            <div className="text-[hsl(var(--brand-coral))] transition-transform group-hover:translate-x-1">
+            <span>{children}</span>
+            <span className="pulse-editorial-icon" aria-hidden="true">
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (icon || <ArrowRight className="h-4 w-4" />)}
-            </div>
+            </span>
           </>
         );
       }
 
       return (
         <>
-          {/* Signal Rail edge */}
-          <div className={cn(
-            "pulse-signal-rail absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] z-0 transition-all duration-300",
-            variant === "submit" ? "w-full opacity-0 group-hover:opacity-100" : ""
-          )} />
-
-          {/* Hover surface layer */}
-          <div className="absolute inset-0 bg-white/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-0 pointer-events-none" />
-
-          <span className="relative z-10 flex items-center gap-4 transition-transform duration-300 group-hover:translate-x-1">
-            {children}
-            <span className="flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1">
+          <span className="pulse-action-sheen" aria-hidden="true" />
+          <span className="pulse-action-layout">
+            <span className="pulse-action-label">{children}</span>
+            <span className="pulse-action-icon" aria-hidden="true">
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (icon || <ArrowRight className="h-4 w-4" />)}
             </span>
           </span>
+          <span className="pulse-signal-rail" aria-hidden="true" />
         </>
       );
     };
@@ -58,18 +51,18 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
     const getClasses = () => {
       if (variant === "editorial") {
         return cn(
-          "group relative inline-flex items-center gap-3 border-b-2 border-foreground/20 pb-2 text-sm font-bold text-foreground transition-all hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:border-[hsl(var(--brand-pink))] disabled:opacity-50 disabled:pointer-events-none",
+          "group relative inline-flex items-center gap-3 border-b-2 border-foreground/20 pb-2 text-sm font-bold text-foreground transition-all hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))] focus-visible:rounded-sm focus-visible:border-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-coral))] focus-visible:ring-offset-4 disabled:pointer-events-none disabled:opacity-50",
           className
         );
       }
 
-      const baseClass = "pulse-action group relative inline-flex min-h-[46px] items-center overflow-hidden pl-6 pr-5 text-sm font-bold transition-all duration-300";
+      const baseClass = "pulse-action relative inline-flex min-h-[52px] min-w-[11rem] items-center overflow-hidden rounded-full text-sm font-bold";
       
       const variantClasses = {
-        primary: "bg-[hsl(var(--brand-deep))] text-white",
-        inverse: "bg-white text-[hsl(var(--brand-deep))]",
-        secondary: "bg-transparent text-foreground border border-foreground/20",
-        submit: "bg-[hsl(var(--brand-deep))] text-white border border-transparent shadow-[4px_4px_0px_hsl(var(--brand-coral))] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[8px_8px_0px_hsl(var(--brand-coral))]",
+        primary: "pulse-action-primary",
+        inverse: "pulse-action-inverse",
+        secondary: "pulse-action-secondary",
+        submit: "pulse-action-submit",
         editorial: "" // Handled above
       };
 
@@ -78,18 +71,31 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
       return cn(
         baseClass,
         variantClass,
-        "focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none",
+        "focus-visible:outline-none disabled:pointer-events-none",
         className
       );
     };
 
     if (href) {
+      const anchorProps = props as React.AnchorHTMLAttributes<HTMLAnchorElement>;
+
       return (
         <Link
+          {...anchorProps}
+          ref={ref as React.ForwardedRef<HTMLAnchorElement>}
           href={href}
           className={getClasses()}
-          onClick={props.onClick as any}
-          style={{ ...props.style, color: forcedTextColor }}
+          aria-busy={isLoading || undefined}
+          aria-disabled={isUnavailable || undefined}
+          tabIndex={isUnavailable ? -1 : anchorProps.tabIndex}
+          onClick={(event) => {
+            if (isUnavailable) {
+              event.preventDefault();
+              return;
+            }
+            anchorProps.onClick?.(event);
+          }}
+          style={{ ...anchorProps.style, color: forcedTextColor }}
         >
           {renderContent()}
         </Link>
@@ -100,7 +106,8 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
       <button
         ref={ref as React.ForwardedRef<HTMLButtonElement>}
         className={getClasses()}
-        disabled={disabled || isLoading}
+        disabled={isUnavailable}
+        aria-busy={isLoading || undefined}
         {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
         style={{ ...props.style, color: forcedTextColor }}
       >

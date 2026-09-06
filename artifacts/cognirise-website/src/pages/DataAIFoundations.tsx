@@ -32,12 +32,13 @@ export default function DataAIFoundations() {
             </p>
             <div className="flex flex-wrap items-center gap-6">
               <BrandButton href="/value-scan">Bring us one process</BrandButton>
-              <button 
+              <BrandButton
+                variant="editorial"
+                icon={<ArrowDown className="h-4 w-4" />}
                 onClick={() => scrollToSection("swimlane")}
-                className="group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]"
               >
-                Explore delivery lifecycle <ArrowDown className="h-4 w-4" />
-              </button>
+                Explore delivery lifecycle
+              </BrandButton>
             </div>
           </div>
           
