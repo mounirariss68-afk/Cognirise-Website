@@ -1,5 +1,5 @@
 import { Switch, Route, Redirect, useLocation, useSearch, Router as WouterRouter } from "wouter";
-import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
@@ -8,63 +8,11 @@ import { CmsPageRenderer } from "@/components/cms/CmsPageRenderer";
 import { useCmsPublishedPage } from "@/lib/cms";
 import { useMarketStore } from "@/store/market";
 import { safePublicHref, useCmsRuntime } from "@/lib/cms-runtime";
-import { useEffect, useRef } from "react";
+import { lazy, Suspense } from "react";
 
-// Clerk
-import { ClerkProvider, ClerkLoaded, useClerk } from "@clerk/react";
-import { publishableKeyFromHost } from '@clerk/react/internal';
-import { dark } from "@clerk/themes";
-
-const clerkPubKey = publishableKeyFromHost(
-  window.location.hostname,
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
-);
-const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
 const basePath = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
 
-function stripBase(path: string): string {
-  return basePath && path.startsWith(basePath)
-    ? path.slice(basePath.length) || "/"
-    : path;
-}
-
-const clerkAppearance = {
-  theme: dark,
-  cssLayerName: "clerk",
-  variables: {
-    colorPrimary: "hsl(253 66% 61%)", // brand-violet
-    colorBackground: "hsl(217 76% 12%)", // brand-deep
-    colorInput: "hsl(219 69% 20%)", // card-border equivalent
-    colorInputText: "#ffffff",
-    colorText: "#ffffff",
-    colorTextSecondary: "rgba(255,255,255,0.6)",
-  },
-  elements: {
-    cardBox: "bg-[hsl(217,76%,12%)] border border-white/10 shadow-xl",
-  }
-};
-
-function ClerkQueryClientCacheInvalidator() {
-  const { addListener } = useClerk();
-  const queryClient = useQueryClient();
-  const prevUserIdRef = useRef<string | null | undefined>(undefined);
-
-  useEffect(() => {
-    const unsubscribe = addListener(({ user }) => {
-      const userId = user?.id ?? null;
-      if (
-        prevUserIdRef.current !== undefined &&
-        prevUserIdRef.current !== userId
-      ) {
-        queryClient.clear();
-      }
-      prevUserIdRef.current = userId;
-    });
-    return unsubscribe;
-  }, [addListener, queryClient]);
-
-  return null;
-}
+const AdminApp = lazy(() => import("@/pages/admin/AdminApp"));
 
 function RedirectWithSearch({ to }: { to: string }) {
   const search = useSearch();
@@ -74,16 +22,6 @@ function RedirectWithSearch({ to }: { to: string }) {
 import InsightArticle from "@/pages/InsightArticle";
 import InsightsEditorial from "@/pages/InsightsEditorial";
 import CmsPreview from "@/pages/CmsPreview";
-
-// Admin Pages
-import { AdminLayout } from "@/pages/admin/AdminLayout";
-import AdminSignIn from "@/pages/admin/AdminSignIn";
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import AdminContentList from "@/pages/admin/AdminContentList";
-import AdminContentEditor from "@/pages/admin/AdminContentEditor";
-import AdminMedia from "@/pages/admin/AdminMedia";
-import AdminAudit from "@/pages/admin/AdminAudit";
-import AdminAssistant from "@/pages/admin/AdminAssistant";
 
 const approvedRoutes = new Set([
   "/", "/what-we-do", "/what-we-do/agentic-enterprise-transformation",
@@ -172,46 +110,23 @@ function PublicRouter() {
 }
 
 function RootRouter() {
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
   const isAdmin = location.startsWith("/admin");
 
-  if (!clerkPubKey && isAdmin) {
-    return <div className="p-8 text-red-500">Missing VITE_CLERK_PUBLISHABLE_KEY</div>;
-  }
-
-  // If it's an admin route, we mount the ClerkProvider
   if (isAdmin) {
     return (
-      <ClerkProvider
-        publishableKey={clerkPubKey || ""}
-        proxyUrl={clerkProxyUrl}
-        appearance={clerkAppearance}
-        signInUrl={`${basePath}/admin/sign-in`}
-        routerPush={(to) => setLocation(stripBase(to))}
-        routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
+      <Suspense
+        fallback={
+          <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--brand-deep))] text-white">
+            Loading management console…
+          </div>
+        }
       >
-        <ClerkQueryClientCacheInvalidator />
-        <Switch>
-          <Route path="/admin/sign-in/*?" component={AdminSignIn} />
-          <Route>
-            <AdminLayout>
-              <Switch>
-                <Route path="/admin" component={AdminDashboard} />
-                <Route path="/admin/content" component={AdminContentList} />
-                <Route path="/admin/content/:documentId/:market" component={AdminContentEditor} />
-                <Route path="/admin/media" component={AdminMedia} />
-                <Route path="/admin/audit" component={AdminAudit} />
-                <Route path="/admin/assistant" component={AdminAssistant} />
-                <Route component={NotFound} />
-              </Switch>
-            </AdminLayout>
-          </Route>
-        </Switch>
-      </ClerkProvider>
+        <AdminApp />
+      </Suspense>
     );
   }
 
-  // Otherwise return the public router without Clerk loaded to save bundle size/overhead for public visitors
   return <PublicRouter />;
 }
 
