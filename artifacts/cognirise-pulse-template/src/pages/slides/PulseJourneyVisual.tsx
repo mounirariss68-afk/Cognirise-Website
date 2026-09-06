@@ -2,7 +2,7 @@ const base = import.meta.env.BASE_URL;
 
 export default function PulseJourneyVisual() {
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-[#071126]">
+    <div className="relative h-screen w-screen overflow-hidden bg-[#f8f7f4]">
       <img
         src={`${base}images/pulse-journey-text-free-4k.png`}
         crossOrigin="anonymous"

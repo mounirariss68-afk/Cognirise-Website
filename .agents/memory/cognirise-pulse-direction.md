@@ -9,4 +9,4 @@ For Arabic and bilingual campaign work, Alexandria is the approved Arabic family
 
 **Why:** The user approved Cognirise Pulse as the creative standard, then explicitly rejected the inset-arrow CTA and later card-grid, thin-stepper and grey-box regressions as materially below that standard. A page-wide parallax and repeated reveal implementation also made the homepage feel stuck, unreliable and less intentional.
 
-**How to apply:** Use this direction across Cognirise website pages, presentations, campaign assets and related brand materials unless the user explicitly asks for a new visual direction. Translate each content model into its own clear spatial composition.
+**How to apply:** Use this direction across Cognirise website pages, presentations, campaign assets and related brand materials unless the user explicitly asks for a new visual direction. Translate each content model into its own clear spatial composition. When a supplied reference uses a dark or neon treatment, preserve only its useful structure and storytelling; do not inherit that palette by default. Pulse imagery remains off-white-dominant unless the user explicitly requests a dark surface.

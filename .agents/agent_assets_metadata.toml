@@ -169,3 +169,31 @@ mtime_ms = 1788674316484
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/ed23ea1a-c483-4335-a834-561a1dd6c3a9/1ecb369c-a048-4008-bbff-0664198afd7f"
 storage_version_token = "1788674317493636"
 content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+
+[[outputs]]
+id = "tkYJmvWTRwWUSZa-7nIjE"
+uri = "file://attached_assets/generated_images/cognirise-pulse-journey-off-white-4k.png"
+type = "image"
+title = "Cognirise Pulse Journey — Corrected Off-White (4K PNG)"
+description = "Corrected 3840×2160 Pulse illustration with an off-white architectural canvas, navy structure, and restrained violet–magenta–coral flow."
+logical_id = "3058124c-bee9-42bd-bdc7-2e01d2c3bb1f"
+content_hash = "sha256:3cda5e3e39925df035fad560ba7d98405b5dd4dbd81aa9e86a8c7780c63dc503"
+size = 4922529
+mtime_ms = 1788674772701
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/3058124c-bee9-42bd-bdc7-2e01d2c3bb1f/cd77db53-1320-4c36-b2ac-14e21012e0e5"
+storage_version_token = "1788674873612081"
+content_type = "image/png"
+
+[[outputs]]
+id = "FA47EeTkWLptSoDNI1GjB"
+uri = "file://.local/outputs/Cognirise-Pulse-Template---Corrected-Off-White-Journey.pptx"
+type = "slides"
+title = "Cognirise Pulse Template — Corrected Off-White Journey (PPTX)"
+description = "Updated 66-slide PowerPoint template containing the corrected light-surface Pulse journey artwork."
+logical_id = "65d8128f-8cef-4671-9e48-c30fe6b5e813"
+content_hash = "sha256:fdfc78eaa470dea15857d03d83b705c94317389001117dcc0842c50cb4e45c8f"
+size = 38100509
+mtime_ms = 1788674891965
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/65d8128f-8cef-4671-9e48-c30fe6b5e813/9c4e6767-379f-43bf-a3e3-6625c1ad27e9"
+storage_version_token = "1788674893103729"
+content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
