@@ -10,6 +10,8 @@ export type AuthTokenGetter = () => Promise<string | null> | string | null;
 
 const NO_BODY_STATUS = new Set([204, 205, 304]);
 const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS", "TRACE"]);
+const CSRF_COOKIE_NAME = "__Host-cognirise_csrf";
 
 // ---------------------------------------------------------------------------
 // Module-level configuration
@@ -76,6 +78,32 @@ function resolveUrl(input: RequestInfo | URL): string {
   if (typeof input === "string") return input;
   if (isUrl(input)) return input.toString();
   return input.url;
+}
+
+function isSameOriginBrowserRequest(input: RequestInfo | URL): boolean {
+  // Do not rely on browser globals in SSR or native runtimes.
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    return false;
+  }
+
+  try {
+    return new URL(resolveUrl(input), window.location.href).origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+function getBrowserCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+
+  const prefix = `${name}=`;
+  for (const cookie of document.cookie.split(/;\s*/)) {
+    if (cookie.startsWith(prefix)) {
+      return cookie.slice(prefix.length);
+    }
+  }
+
+  return null;
 }
 
 function mergeHeaders(...sources: Array<HeadersInit | undefined>): Headers {
@@ -349,6 +377,17 @@ export async function customFetch<T = unknown>(
     headers.set("accept", DEFAULT_JSON_ACCEPT);
   }
 
+  const sameOriginBrowserRequest = isSameOriginBrowserRequest(input);
+
+  // Browser session cookies must accompany first-party API calls. A CSRF token
+  // is only meaningful alongside those cookies, so never add it cross-origin.
+  if (sameOriginBrowserRequest && !SAFE_METHODS.has(method) && !headers.has("x-csrf-token")) {
+    const csrfToken = getBrowserCookie(CSRF_COOKIE_NAME);
+    if (csrfToken !== null) {
+      headers.set("x-csrf-token", csrfToken);
+    }
+  }
+
   // Attach bearer token when an auth getter is configured and no
   // Authorization header has been explicitly provided.
   if (_authTokenGetter && !headers.has("authorization")) {
@@ -360,7 +399,12 @@ export async function customFetch<T = unknown>(
 
   const requestInfo = { method, url: resolveUrl(input) };
 
-  const response = await fetch(input, { ...init, method, headers });
+  const response = await fetch(input, {
+    ...init,
+    method,
+    headers,
+    ...(sameOriginBrowserRequest ? { credentials: "include" } : {}),
+  });
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);

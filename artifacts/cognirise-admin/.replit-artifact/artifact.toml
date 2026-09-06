@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/admin/"
+title = "Cognirise Admin"
+description = "A secure first-party editorial console for managing Cognirise content, market editions, media, submissions, users, audit history, and privacy-aware performance reporting."
+version = "1.0.0"
+id = "artifacts/cognirise-admin"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/admin/" ]
+localPort = 22090
+
+[services.development]
+run = "pnpm --filter @workspace/cognirise-admin run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cognirise-admin", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/cognirise-admin/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22090"
+BASE_PATH = "/admin/"

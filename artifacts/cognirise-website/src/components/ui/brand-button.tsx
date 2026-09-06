@@ -2,6 +2,8 @@ import * as React from "react";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
+import { trackEvent } from "@/lib/analytics";
+import { useMarketStore } from "@/store/market";
 
 interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -14,6 +16,7 @@ interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 
 export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, BrandButtonProps & React.AnchorHTMLAttributes<HTMLAnchorElement>>(
   ({ children, variant = "primary", className, icon, href, isLoading, disabled, ...props }, ref) => {
+    const { market } = useMarketStore();
     const isUnavailable = disabled || isLoading;
     const forcedTextColor =
       variant === "primary" || variant === "submit"
@@ -93,6 +96,10 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
               event.preventDefault();
               return;
             }
+            trackEvent("cta_click", market, {
+              label: typeof children === "string" ? children : undefined,
+              destination: href,
+            });
             anchorProps.onClick?.(event);
           }}
           style={{ ...anchorProps.style, color: forcedTextColor }}

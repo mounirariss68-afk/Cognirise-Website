@@ -5,6 +5,7 @@ import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
+import { setAnalyticsConsent, useAnalyticsConsent } from "@/lib/analytics";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/": {
@@ -178,6 +179,39 @@ const navigation = [
     ]
   },
 ];
+
+function AnalyticsPreference() {
+  const enabled = useAnalyticsConsent();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const update = async () => {
+    setSaving(true);
+    setError("");
+    try {
+      await setAnalyticsConsent(!enabled);
+    } catch {
+      setError("Could not record analytics preference.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-3">
+      <span>Analytics: {enabled ? "on" : "off"}</span>
+      <button
+        type="button"
+        className="underline underline-offset-4 hover:text-white disabled:opacity-50"
+        onClick={update}
+        disabled={saving}
+      >
+        {saving ? "Saving…" : enabled ? "Disable" : "Allow"}
+      </button>
+      {error && <span role="alert" className="text-[hsl(var(--brand-coral))]">{error}</span>}
+    </div>
+  );
+}
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -509,6 +543,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-semibold text-white/50">
             <p>© {new Date().getFullYear()} Cognirise. All rights reserved.</p>
+            <AnalyticsPreference />
           </div>
         </div>
       </footer>

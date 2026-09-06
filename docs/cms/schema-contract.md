@@ -1,0 +1,12 @@
+# CMS schema and governance contract
+
+- UUIDs are the stable identity for users, content, editions, revisions, media, submissions, consent, and events. Slugs, paths, emails, storage keys, and third-party identifiers are lookup keys, never relationship identities. Normalize emails, markets, locales, slugs, and paths before writing.
+- Credentials are separated from users. Store only password hashes, recovery-code digests, session/preview token digests, and encrypted TOTP secrets with a key version. Secrets and tokens must never enter audit metadata. Expiry, revocation, lockout, and one-time consumption are enforced transactionally.
+- Revisions are immutable snapshots. Editing creates the next edition-scoped revision number; publication changes edition state only after approval. A market edition is the release boundary. Scheduled publish/expiry workers must use row locking and idempotency receipts.
+- Taxonomy and document/media references use stable foreign keys. A referenced media object or document is restricted from deletion; archive it or replace references first. Media versions are immutable and checksummed.
+- Submission source rows remain immutable evidence. Workflow state and its append-only events live in the workflow sidecar. Consent policy/version/time and deletion deadline are mandatory; access is least-privilege and retention jobs record an audit event.
+- Analytics requires a current consent decision. Raw events use pseudonymous digests, reject direct identifiers and free-form sensitive data, and are retained only long enough to build daily aggregates. Withdrawal stops future collection; retention policy governs deletion rather than silent fallback.
+- Audit events are append-only, redacted, and request-correlated. Every authentication, permission, preview, content mutation, approval, publish, rollback, export, and deletion outcome is recorded. Application roles may insert and read permitted rows but may not update or delete audit events or immutable revisions.
+- Database uniqueness is the final concurrency guard. Services must still validate allowed workflow values, positive sizes/version numbers, time ordering, redirect destinations, content payload versions, and authorization in the same transaction. `updated_at` is explicitly advanced by the writer.
+
+Migrations are forward-only and reviewed with schema changes. Backups must include database and versioned media; restoration and revision rollback are separate procedures and must be rehearsed.

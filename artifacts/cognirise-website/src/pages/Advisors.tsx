@@ -1,6 +1,8 @@
 import { BrandButton } from "@/components/ui/brand-button";
+import { contentRecord, text, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 
-const advisors = [
+const advisorsFallback = [
   {
     initials: "AL", name: "Alexis Lecanuet", role: "Advisory Board Member", title: "Regional Senior Managing Director, Accenture Middle East",
     background: "A 24-year Accenture career culminating in leadership of the firm's Middle East business — strategy execution, client portfolio leadership and regional operations. Previously built and expanded Accenture's products portfolio across the Middle East and Türkiye, with deep roots in consumer, retail and large-scale digital transformation across Europe and MENA. Ranked among Forbes Middle East's “Global Meets Local” top 50 executives; board member of INJAZ ME; educated at ESCP Europe and SKEMA.",
@@ -22,6 +24,28 @@ const advisors = [
 ];
 
 export default function Advisors() {
+  const advisorsQuery = useCmsCollection("person", advisorsFallback, (item) => {
+    const content = contentRecord(item);
+    const role = text(content.role, "");
+    if (text(content.collection, "") !== "advisors" && !role.toLowerCase().includes("advisor")) return null;
+    const name = item.title;
+    return {
+      initials: text(content.initials, name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2)),
+      name,
+      role: role || "Advisory Board Member",
+      title: text(content.position, text(content.jobTitle, "")),
+      background: text(content.background, item.summary || ""),
+      contribution: text(content.contribution, ""),
+      source: text(content.source, ""),
+    };
+  });
+  const page = useCmsEntry("person", "advisors");
+  useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
+    title: "Advisors | Cognirise",
+    description: "Senior strategic guidance shaping Cognirise capability and delivery.",
+  }));
+  const advisors = advisorsQuery.data;
+
   return (
     <main className="overflow-hidden">
       <section className="relative bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12 md:py-32">
@@ -40,7 +64,7 @@ export default function Advisors() {
               <header className="lg:sticky lg:top-28 lg:self-start">
                 <div className="mb-8 flex items-start justify-between">
                   <span className="grid h-24 w-24 place-items-center bg-[hsl(var(--brand-deep))] font-display text-3xl font-bold text-white [clip-path:polygon(0_0,100%_12%,86%_100%,8%_88%)]">{advisor.initials}</span>
-                  <span className="text-xs font-bold text-[hsl(var(--brand-coral))]">0{index + 1} / 03</span>
+                  <span className="text-xs font-bold text-[hsl(var(--brand-coral))]">0{index + 1} / {String(advisors.length).padStart(2, "0")}</span>
                 </div>
                 <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[hsl(var(--brand-pink))]">{advisor.role}</p>
                 <h2 className="mt-3 text-4xl font-semibold md:text-5xl" data-testid={`text-advisor-name-${advisor.initials.toLowerCase()}`}>{advisor.name}</h2>

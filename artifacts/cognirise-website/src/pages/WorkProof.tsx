@@ -3,9 +3,26 @@ import { ArrowDown, ArrowRight } from "lucide-react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
+import { contentRecord, text, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
+
+const patternFallback = [{
+  title: "One process under pressure.",
+  copy: "The record follows the mandate through constraints, build decisions, governed release and the outcome measures that the sponsor can stand behind.",
+}];
 
 export default function WorkProof() {
   const { market } = useMarketStore();
+  const patterns = useCmsCollection("case-study", patternFallback, (item) => {
+    const content = contentRecord(item);
+    return { title: item.title, copy: text(content.outcome, item.summary || "") };
+  });
+  const page = useCmsEntry("case-study", "work");
+  useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
+    title: "How Cognirise Delivers AI Transformation",
+    description: "See how Cognirise frames, builds and governs consequential AI transformation work.",
+  }));
+  const featuredPattern = patterns.data[0];
   
   const marketLocation = 
     market === "uae" ? "Dubai · United Arab Emirates" :
@@ -245,7 +262,7 @@ export default function WorkProof() {
             <img src={assetUrl('/images/cognirise/site-work-proof.jpg')} alt="An architectural route joining different operating environments." />
             <figcaption>
               <span>Anonymized engagement pattern</span>
-              <strong>One process under pressure.</strong>
+               <strong>{featuredPattern.title}</strong>
             </figcaption>
           </figure>
           <aside className="wp-pattern">
@@ -253,7 +270,7 @@ export default function WorkProof() {
               <div className="wp-kicker">What is documented</div>
               <p>Where work gets stuck. What can change. What must stay controlled.</p>
             </div>
-            <small>The record follows the mandate through constraints, build decisions, governed release and the outcome measures that the sponsor can stand behind.</small>
+             <small>{featuredPattern.copy}</small>
           </aside>
         </div>
       </section>

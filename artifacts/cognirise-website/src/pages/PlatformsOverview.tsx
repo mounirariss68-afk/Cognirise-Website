@@ -4,9 +4,34 @@ import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
+import { contentRecord, text, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
+
+const platformFallback = [
+  { name: "CogniOS", description: "The core operating system for governed enterprise intelligence.", link: "/platforms/cognios", category: "Foundation & Orchestration" },
+  { name: "CogniDocs", description: "Knowledge made available with context and control.", link: "/platforms/cognidocs", category: "Specialist Engines" },
+  { name: "CogniAgents", description: "Governed agents coordinating operational tasks.", link: "/platforms/cogniagents", category: "Specialist Engines" },
+  { name: "CogniTalk", description: "Conversational layer for human-AI interaction in the flow of work.", link: "/platforms/cognitalk", category: "Specialist Engines" },
+  { name: "CogniWare", description: "Composable intelligence integrations for enterprise systems.", link: "/platforms/cogniware", category: "Specialist Engines" },
+];
 
 export default function PlatformsOverview() {
   const { market } = useMarketStore();
+  const platformsQuery = useCmsCollection("platform", platformFallback, (item) => {
+    if (item.slug === "platforms") return null;
+    const content = contentRecord(item);
+    return {
+      name: item.title,
+      description: text(content.description, item.summary || ""),
+      link: text(content.url, `/platforms/${item.slug}`),
+      category: text(content.category, "Specialist Engines"),
+    };
+  });
+  const page = useCmsEntry("platform", "platforms");
+  useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
+    title: "CogniOS Platform Ecosystem | Cognirise",
+    description: "Discover the platform architecture connecting enterprise knowledge, agents and accountability.",
+  }));
   
   const marketLocation = 
     market === "uae" ? "Dubai · United Arab Emirates" :
@@ -14,43 +39,11 @@ export default function PlatformsOverview() {
     market === "turkiye" ? "Istanbul · Türkiye" :
     "London · Europe";
 
-  const matrix = [
-    {
-      category: "Foundation & Orchestration",
-      products: [
-        {
-          name: "CogniOS",
-          description: "The core operating system for governed enterprise intelligence.",
-          link: "/platforms/cognios"
-        }
-      ]
-    },
-    {
-      category: "Specialist Engines",
-      products: [
-        {
-          name: "CogniDocs",
-          description: "Knowledge made available with context and control.",
-          link: "/platforms/cognidocs"
-        },
-        {
-          name: "CogniAgents",
-          description: "Governed agents coordinating operational tasks.",
-          link: "/platforms/cogniagents"
-        },
-        {
-          name: "CogniTalk",
-          description: "Conversational layer for human-AI interaction in the flow of work.",
-          link: "/platforms/cognitalk"
-        },
-        {
-          name: "CogniWare",
-          description: "Composable intelligence integrations for enterprise systems.",
-          link: "/platforms/cogniware"
-        }
-      ]
-    }
-  ];
+  const categories = ["Foundation & Orchestration", "Specialist Engines"];
+  const matrix = categories.map((category) => ({
+    category,
+    products: platformsQuery.data.filter((product) => product.category === category),
+  })).filter((section) => section.products.length);
 
   return (
     <div className="flex flex-col">

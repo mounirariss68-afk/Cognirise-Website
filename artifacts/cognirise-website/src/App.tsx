@@ -4,6 +4,8 @@ import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import { Shell } from "@/components/layout/Shell";
+import { AnalyticsBridge } from "@/lib/analytics";
+import { PublicSitemap } from "@/components/PublicSitemap";
 
 function RedirectWithSearch({ to }: { to: string }) {
   const search = useSearch();
@@ -120,6 +122,8 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <AnalyticsBridge />
+      <PublicSitemap />
       <Router />
       <Toaster />
     </QueryClientProvider>

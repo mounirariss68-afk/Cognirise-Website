@@ -1,0 +1,1 @@
+ALTER TABLE "cms_taxonomy_terms" ADD CONSTRAINT "cms_taxonomy_terms_parent_id_cms_taxonomy_terms_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."cms_taxonomy_terms"("id") ON DELETE set null ON UPDATE no action;

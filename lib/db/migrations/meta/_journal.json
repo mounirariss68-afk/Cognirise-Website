@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788714823284,
+      "tag": "0000_cms_first_party",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788714882178,
+      "tag": "0001_cms_media_versions",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788714911886,
+      "tag": "0002_cms_taxonomy_parent",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788715298480,
+      "tag": "0003_market_editions_configuration",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788715337424,
+      "tag": "0004_market_editions_canonical_constraint",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788715400000,
+      "tag": "0005_cms_temporary_credentials",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788715500000,
+      "tag": "0006_cms_published_revision",
+      "breakpoints": true
+    }
+  ]
+}

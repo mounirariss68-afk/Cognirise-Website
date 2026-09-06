@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "market_editions_one_canonical_uidx" ON "market_editions" USING btree ("is_canonical") WHERE "market_editions"."is_canonical";

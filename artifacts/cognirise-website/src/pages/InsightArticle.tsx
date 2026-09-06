@@ -4,6 +4,8 @@ import { ArrowRight } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import { useMarketStore } from "@/store/market";
 import { BrandButton } from "@/components/ui/brand-button";
+import { contentRecord, stringList, text, useCmsEntry } from "@/lib/cms";
+import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 
 const articles = {
   "ai-should-move-the-business": {
@@ -109,12 +111,33 @@ const articles = {
 export default function InsightArticle() {
   const [match, params] = useRoute("/insights/:slug");
   const { market } = useMarketStore();
-  
-  if (!match || !params.slug || !(params.slug in articles)) {
+  const slug = params?.slug || "";
+  const cms = useCmsEntry("publication", slug);
+  const fallbackArticle = slug in articles ? articles[slug as keyof typeof articles] : undefined;
+  const record = cms.data ? contentRecord(cms.data) : undefined;
+  const cmsBody = record ? stringList(record.body ?? record.paragraphs, []) : [];
+  const article = cms.data ? {
+    topic: text(record?.topic, "Perspective"),
+    title: cms.data.title,
+    date: text(record?.date, new Date(cms.data.publishedAt).toLocaleDateString("en-GB", { dateStyle: "long" })),
+    author: text(record?.author, "Cognirise"),
+    readingTime: text(record?.readingTime, "5 min read"),
+    heroImage: cms.data.media?.[0]?.url || "",
+    content: cmsBody.length ? (
+      <>{cmsBody.map((paragraph, index) => <p className={index === 0 ? "lead" : undefined} key={index}>{paragraph}</p>)}</>
+    ) : <p className="lead">{cms.data.summary}</p>,
+  } : fallbackArticle;
+  useDynamicMetadata(cms.data?.seo && metadataFromSeo(cms.data.seo, {
+    title: `${cms.data.title} | Cognirise`,
+    description: cms.data.summary || "A Cognirise perspective on governed AI-native organisations.",
+    imageUrl: cms.data.media?.[0]?.url,
+  }));
+
+  if (!match || !slug || (!article && !cms.isPending)) {
     return <NotFound />;
   }
 
-  const article = articles[params.slug as keyof typeof articles];
+  if (!article) return null;
 
   return (
     <div className="flex flex-col">

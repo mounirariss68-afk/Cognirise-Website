@@ -5,6 +5,14 @@ import { useSubscribeNewsletter } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
+import { contentRecord, stringList, text, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
+
+const articlesFallback = [
+  { number: "01", title: "AI should move the business—not just assist it.", copy: "Redesigning priority work around people, data, controls and intelligent execution.", topics: ["strategy"], url: "/insights/ai-should-move-the-business" },
+  { number: "02", title: "The conditions for AI that can hold up in production.", copy: "Why data, security, governance and architecture are part of the work.", topics: ["engineering"], url: "/insights/foundations-for-production" },
+  { number: "03", title: "From agent experiments to a governed digital workforce.", copy: "Deploying agents with people accountable at every decision point.", topics: ["governance", "operations"], url: "/insights/governed-digital-workforce" },
+];
 
 export default function InsightsEditorial() {
   const [email, setEmail] = useState("");
@@ -13,6 +21,22 @@ export default function InsightsEditorial() {
   const { market } = useMarketStore();
   const searchString = useSearch();
   const [location, setLocation] = useLocation();
+  const articlesQuery = useCmsCollection("publication", articlesFallback, (item, index) => {
+    if (item.slug === "insights") return null;
+    const content = contentRecord(item);
+    return {
+      number: String(index + 1).padStart(2, "0"),
+      title: item.title,
+      copy: text(content.excerpt, item.summary || ""),
+      topics: stringList(content.topics, [text(content.topic, "strategy")]),
+      url: `/insights/${item.slug}`,
+    };
+  });
+  const page = useCmsEntry("publication", "insights");
+  useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
+    title: "AI Transformation Insights | Cognirise",
+    description: "Field notes for leaders building AI-native organisations.",
+  }));
   
   const searchParams = new URLSearchParams(searchString);
   const activeTopic = searchParams.get("topic") || "all";
@@ -62,29 +86,7 @@ export default function InsightsEditorial() {
     { id: "strategy", label: "Strategy" }
   ];
 
-  const articles = [
-    {
-      number: "01",
-      title: "AI should move the business—not just assist it.",
-      copy: "Redesigning priority work around people, data, controls and intelligent execution.",
-      topics: ["strategy"],
-      url: "/insights/ai-should-move-the-business"
-    },
-    {
-      number: "02",
-      title: "The conditions for AI that can hold up in production.",
-      copy: "Why data, security, governance and architecture are part of the work.",
-      topics: ["engineering"],
-      url: "/insights/foundations-for-production"
-    },
-    {
-      number: "03",
-      title: "From agent experiments to a governed digital workforce.",
-      copy: "Deploying agents with people accountable at every decision point.",
-      topics: ["governance", "operations"],
-      url: "/insights/governed-digital-workforce"
-    }
-  ];
+  const articles = articlesQuery.data;
 
   const filteredArticles = activeTopic === "all" ? articles : articles.filter(a => a.topics.includes(activeTopic));
 

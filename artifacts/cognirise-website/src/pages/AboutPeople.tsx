@@ -1,8 +1,10 @@
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { assetUrl } from "@/lib/assets";
+import { contentRecord, text, tupleList, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 
-const founders = [
+const foundersFallback = [
   {
     initials: "MA",
     name: "Mounir Ariss",
@@ -26,6 +28,25 @@ const founders = [
 ];
 
 export default function AboutPeople() {
+  const foundersQuery = useCmsCollection("person", foundersFallback, (item) => {
+    const content = contentRecord(item);
+    const role = text(content.role, "");
+    if (text(content.collection, "") !== "founders" && !role.toLowerCase().includes("found")) return null;
+    const name = item.title;
+    return {
+      initials: text(content.initials, name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2)),
+      name,
+      bio: text(content.bio, item.summary || ""),
+      focus: tupleList(content.focus, []),
+    };
+  });
+  const page = useCmsEntry("person", "about");
+  useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
+    title: "About Cognirise | Senior-Led AI Transformation",
+    description: "Meet the principles behind Cognirise and its senior-led team.",
+  }));
+  const founders = foundersQuery.data;
+
   return (
     <main className="overflow-hidden bg-background">
       <section className="relative min-h-[690px] bg-[hsl(var(--brand-deep))] px-6 py-20 text-white md:px-12 md:py-28">

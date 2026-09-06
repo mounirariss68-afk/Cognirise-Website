@@ -1,6 +1,8 @@
 import { BrandButton } from "@/components/ui/brand-button";
+import { contentRecord, stringList, text, tupleList, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 
-const partners = [
+const partnersFallback = [
   {
     category: "engineering",
     name: "BGTS", positioning: "Software engineering & technology services · 30 years of engineering · London, Sheffield, Düsseldorf, Amsterdam, Istanbul, Ankara — Dubai opening",
@@ -66,6 +68,28 @@ const allianceGroups = [
 ];
 
 export default function Partners() {
+  const partnersQuery = useCmsCollection("partner", partnersFallback, (item) => {
+    const content = contentRecord(item);
+    const category = text(content.category, "");
+    if (category !== "engineering" && category !== "platform") return null;
+    return {
+      category,
+      name: item.title,
+      positioning: text(content.positioning, item.summary || ""),
+      facts: tupleList(content.facts, []),
+      coverage: stringList(content.coverage, []),
+      evidence: text(content.evidence, ""),
+      contribution: text(content.contribution, ""),
+      source: text(content.source, ""),
+    };
+  });
+  const page = useCmsEntry("partner", "partners");
+  useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
+    title: "Partners | Cognirise",
+    description: "The alliance and technology network supporting the Cognirise operating model.",
+  }));
+  const partners = partnersQuery.data;
+
   return (
     <main className="overflow-hidden">
       <section className="relative bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12 md:py-32">
@@ -75,7 +99,7 @@ export default function Partners() {
           <h1 className="max-w-[1050px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[100px]">Senior-led. <span className="brand-gradient-text">Partner-amplified.</span></h1>
           <div className="mt-10 grid gap-8 border-t border-white/20 pt-8 md:grid-cols-[1fr_.6fr]">
             <p className="max-w-[730px] text-lg leading-8 text-white/70">Cognirise stays deliberately senior and small — and delivers at enterprise scale through two complementary alliance types: engineering partners who extend delivery capacity, and platform partners who bring specialist products into the solution.</p>
-            <p className="text-2xl font-semibold">Five confirmed partners.<br /><span className="text-[hsl(var(--brand-coral))]">One accountable team.</span></p>
+            <p className="text-2xl font-semibold">{partners.length} confirmed partners.<br /><span className="text-[hsl(var(--brand-coral))]">One accountable team.</span></p>
           </div>
         </div>
       </section>
