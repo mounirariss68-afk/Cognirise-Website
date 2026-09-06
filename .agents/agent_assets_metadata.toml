@@ -21,13 +21,13 @@ id = "wSBKnawYcHLeW2DCeJGmZ"
 uri = "file://.local/outputs/Cognirise-Pulse-PowerPoint-Template.pptx"
 type = "slides"
 title = "Cognirise Pulse PowerPoint Template (PPTX)"
-description = "Reusable 18-layout PowerPoint template in the approved Cognirise Pulse design system."
+description = "Updated 63-slide template including the editable one-to-five split-flow diagram."
 logical_id = "b1dfe669-6da3-490a-b000-7e75d6de8b8b"
-content_hash = "sha256:33429e5f75bbc70c6c58c511b9610b6ff7385fb9bd4eb572eefd3adf04cc018e"
-size = 20066739
-mtime_ms = 1788536598448
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b1dfe669-6da3-490a-b000-7e75d6de8b8b/fd22791d-6cd8-49f2-9ddd-2c992efe0798"
-storage_version_token = "1788536599371763"
+content_hash = "sha256:2c26d50ba00cdd7689a4044db951cd24b1446601e77e34d176add580073b50a5"
+size = 32950384
+mtime_ms = 1788671455982
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b1dfe669-6da3-490a-b000-7e75d6de8b8b/691c410c-f8f1-4e0f-a4df-fdce7f48f1c6"
+storage_version_token = "1788671467197353"
 content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 
 [[outputs]]

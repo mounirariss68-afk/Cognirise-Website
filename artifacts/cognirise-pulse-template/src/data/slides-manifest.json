@@ -494,5 +494,13 @@
     "title": "Many flows. One orchestrated core.",
     "description": "Five inbound and five outbound flows converging through a central element",
     "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000063",
+    "position": 63,
+    "filepath": "src/pages/slides/SplitFlow.tsx",
+    "title": "One source. Five clear destinations.",
+    "description": "One source splitting into five separated destination flows",
+    "speakerNotes": ""
   }
 ]
