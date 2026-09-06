@@ -20,7 +20,7 @@ const SERVICE_VISUALS: Record<string, { img: string; pos: string }> = {
 };
 
 export function ServiceLineTiles({ className = "" }: { className?: string }) {
-  const [openService, setOpenService] = useState<number | null>(0);
+  const [openService, setOpenService] = useState<number | null>(null);
 
   return (
     <div className={`cps-line-component ${className}`}>
@@ -125,7 +125,7 @@ export function ServiceLineTiles({ className = "" }: { className?: string }) {
                   aria-selected={isActive}
                   aria-controls={`service-panel-${index}`}
                   id={`service-tab-${index}`}
-                  tabIndex={isActive ? 0 : -1}
+                  tabIndex={openService === null ? (index === 0 ? 0 : -1) : (isActive ? 0 : -1)}
                   role="tab"
                 >
                   <div className="cps-tile-header">

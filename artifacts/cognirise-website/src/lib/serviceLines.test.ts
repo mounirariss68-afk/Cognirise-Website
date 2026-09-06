@@ -24,7 +24,9 @@ test("service touchpoints use the canonical model instead of four or five-item p
 
 test("service tiles expose selection, panels, keyboard navigation and reduced motion", async () => {
   const source = await readFile(new URL("../components/ServiceLineTiles.tsx", import.meta.url), "utf8");
+  assert.match(source, /useState<number \| null>\(null\)/);
   assert.match(source, /aria-selected=\{isActive\}/);
+  assert.match(source, /tabIndex=\{openService === null \? \(index === 0 \? 0 : -1\)/);
   assert.match(source, /role="tabpanel"/);
   assert.match(source, /ArrowLeft/);
   assert.match(source, /onFocus=\{\(\) => setOpenService\(index\)\}/);
