@@ -191,3 +191,31 @@ mtime_ms = 1788674891965
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/65d8128f-8cef-4671-9e48-c30fe6b5e813/9c4e6767-379f-43bf-a3e3-6625c1ad27e9"
 storage_version_token = "1788674893103729"
 content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+
+[[outputs]]
+id = "fRB_ke2n_rCqnsvrSuoww"
+uri = "file://attached_assets/generated_images/cognirise-pulse-journey-16x7-master.png"
+type = "image"
+title = "Cognirise Pulse Journey — Spaced 16:7 Master (PNG)"
+description = "Exact 3840×1680 text-free master with increased spacing after stages 2 and 3."
+logical_id = "77f926ab-5cc2-4c8a-8a6e-ac25889492ac"
+content_hash = "sha256:b8719b7f9a090cb69b53366290ae45356c0390a3587dd783a813eaa29a6250f5"
+size = 3929104
+mtime_ms = 1788679365955
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/77f926ab-5cc2-4c8a-8a6e-ac25889492ac/45025ec7-6a4b-4f79-8afc-20af07f77175"
+storage_version_token = "1788679459694170"
+content_type = "image/png"
+
+[[outputs]]
+id = "N1dJ7DOosEYJYf5Xi7r4p"
+uri = "file://.local/outputs/Cognirise-Pulse-Template---Spaced-16x7-Journey.pptx"
+type = "slides"
+title = "Cognirise Pulse Template — Spaced 16:7 Journey (PPTX)"
+description = "Updated 66-slide PowerPoint with the complete 16:7 journey master centered on slide 66."
+logical_id = "40f8a34d-c7fd-4d61-8541-6f0d199965de"
+content_hash = "sha256:a0bb8e9ae92c1825ddd84b1fe373a3b42fc171dacb69bcd4512fffef6da8c7e8"
+size = 44472546
+mtime_ms = 1788679475323
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/40f8a34d-c7fd-4d61-8541-6f0d199965de/84ebff32-d3ad-476c-8223-9ed3be5512bc"
+storage_version_token = "1788679476442989"
+content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"

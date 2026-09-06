@@ -7,7 +7,7 @@ export default function PulseJourneyVisual() {
         src={`${base}images/pulse-journey-text-free-4k.png`}
         crossOrigin="anonymous"
         alt="Four-stage enterprise transformation journey connected by a continuous Pulse energy ribbon"
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-contain"
       />
     </div>
   );
