@@ -7,8 +7,6 @@
  */
 
 export interface MfaConfirmationInput {
-  /** @pattern ^[A-Z2-7]+$ */
-  secret: string;
   /** @pattern ^[0-9]{6}$ */
   code: string;
 }

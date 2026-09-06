@@ -44,7 +44,7 @@ export default function MfaSetup() {
     if (!setupMfa.data) return;
     
     confirmMfa.mutate(
-      { data: { secret: setupMfa.data.secret, code: values.code } },
+      { data: { code: values.code } },
       {
         onSuccess: (data) => {
           setRecoveryCodes(data.recoveryCodes);
@@ -52,7 +52,12 @@ export default function MfaSetup() {
           queryClient.invalidateQueries({ queryKey: getGetSessionQueryKey() });
         },
         onError: (err) => {
-          toast({ title: "Verification failed", description: (err as any).error, variant: "destructive" });
+          const error = err as { data?: { error?: string } };
+          toast({
+            title: "Verification failed",
+            description: error.data?.error ?? "The authenticator code is invalid or the setup has expired.",
+            variant: "destructive",
+          });
         },
       }
     );

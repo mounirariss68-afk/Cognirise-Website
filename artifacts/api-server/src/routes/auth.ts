@@ -37,12 +37,17 @@ import {
   randomBase32,
 } from "../lib/security";
 import { isInitialSetupRequired } from "../lib/policy";
+import {
+  classifyMfaFailure,
+  EnrollmentStore,
+  LoginChallengeStore,
+} from "../lib/mfa-lifecycle";
 
 const router: IRouter = Router();
 const loginLimiter = new SlidingWindowThrottle(8, 15 * 60_000);
 const mfaLimiter = new SlidingWindowThrottle(8, 10 * 60_000);
-const challenges = new Map<string, { userId: string; secret: string; expiresAt: Date }>();
-const enrollments = new Map<string, { secret: string; expiresAt: Date }>();
+const challenges = new LoginChallengeStore();
+const enrollments = new EnrollmentStore();
 const loginThrottle = throttle(
   loginLimiter,
   (req) => `${req.ip}:${String(req.body?.email ?? "").toLowerCase()}`,
@@ -185,17 +190,27 @@ router.post(
     }
     const challengeKey = hashToken(parsed.data.challengeId);
     const challenge = challenges.get(challengeKey);
-    if (!challenge || challenge.expiresAt <= new Date() || !verifyTotp(challenge.secret, parsed.data.code)) {
+    const failureReason = classifyMfaFailure(
+      challenge,
+      Boolean(challenge && verifyTotp(challenge.secret, parsed.data.code)),
+    );
+    if (failureReason) {
+      req.log.warn({ stage: "login", reason: failureReason }, "MFA verification rejected");
       await auditLogin("", challenge?.userId ?? null, "failure", "invalid_mfa");
       res.status(401).json(AUTH_ERROR);
       return;
     }
-    challenges.delete(challengeKey);
-    await auditLogin("", challenge.userId, "success", "mfa");
+    const consumed = challenges.consume(challengeKey);
+    if (!consumed) {
+      req.log.warn({ stage: "login", reason: "consumed" }, "MFA verification rejected");
+      res.status(401).json(AUTH_ERROR);
+      return;
+    }
+    await auditLogin("", consumed.userId, "success", "mfa");
     await pool.query("UPDATE cms_users SET last_login_at=now() WHERE id=$1", [
-      challenge.userId,
+      consumed.userId,
     ]);
-    const created = await createSession(challenge.userId, true, req, res);
+    const created = await createSession(consumed.userId, true, req, res);
     res.json({
       authenticated: true,
       session: publicSession(created.session),
@@ -219,16 +234,17 @@ router.post(
       res.status(409).json({ error: "MFA is already enrolled." });
       return;
     }
-    const secret = randomBase32();
-    const expiresAt = new Date(Date.now() + 10 * 60_000);
-    enrollments.set(auth.tokenHash, { secret, expiresAt });
+    const enrollment = enrollments.getOrCreate(auth.tokenHash, () => ({
+      secret: randomBase32(),
+      expiresAt: new Date(Date.now() + 10 * 60_000),
+    }));
     await auditAuth(auth.user.id, "auth.mfa_enrollment_started");
     const issuer = encodeURIComponent("Cognirise CMS");
     const account = encodeURIComponent(auth.user.email);
     res.json({
-      secret,
-      provisioningUri: `otpauth://totp/${issuer}:${account}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`,
-      expiresAt,
+      secret: enrollment.secret,
+      provisioningUri: `otpauth://totp/${issuer}:${account}?secret=${enrollment.secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`,
+      expiresAt: enrollment.expiresAt,
     });
   }),
 );
@@ -240,21 +256,23 @@ router.post(
   asyncRoute(async (req, res) => {
     const parsed = ConfirmMfaBody.safeParse(req.body);
     if (!parsed.success) {
-      await auditLogin("", null, "failure", "invalid_recovery_request");
+      req.log.warn({ stage: "enrollment", reason: "invalid_request" }, "MFA verification rejected");
+      await auditLogin("", null, "failure", "invalid_mfa_enrollment_request");
       res.status(400).json({ error: "Invalid MFA confirmation." });
       return;
     }
     const auth = res.locals.auth as AuthContext;
     const enrollment = enrollments.get(auth.tokenHash);
-    if (
-      !enrollment ||
-      enrollment.expiresAt <= new Date() ||
-      enrollment.secret !== parsed.data.secret ||
-      !verifyTotp(enrollment.secret, parsed.data.code)
-    ) {
-      res.status(401).json(AUTH_ERROR);
+    const failureReason = classifyMfaFailure(
+      enrollment,
+      Boolean(enrollment && verifyTotp(enrollment.secret, parsed.data.code)),
+    );
+    if (failureReason) {
+      req.log.warn({ stage: "enrollment", reason: failureReason }, "MFA verification rejected");
+      res.status(401).json({ error: "The authenticator code is invalid or the setup has expired." });
       return;
     }
+    if (!enrollment) throw new Error("MFA enrollment invariant failed");
     const recoveryCodes = Array.from({ length: 10 }, () => {
       const raw = randomBase32(8);
       return `${raw.slice(0, 4)}-${raw.slice(4)}`;

@@ -6,3 +6,4 @@
 - [Wide artwork composition](wide-artwork-composition.md) — Extend the illustrated field to reach wide ratios; never substitute blank padding or low-detail enlargement.
 - [CMS publication boundaries](cms-publication-boundaries.md) — Public content and media authority comes from the approved published revision, never mutable draft-level references.
 - [Hover transition verification](hover-transition-verification.md) — Automation hover helpers can hide transition timing; verify motion with direct pointer events and frame samples.
+- [API TypeScript route tests](api-typescript-route-tests.md) — Bundle route-level tests with the server build tool; native type stripping cannot resolve this monorepo’s extensionless ESM imports.

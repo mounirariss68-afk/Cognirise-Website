@@ -282,12 +282,10 @@ export const SetupMfaResponse = zod.object({
 /**
  * @summary Confirm TOTP MFA enrollment
  */
-export const confirmMfaBodySecretRegExp = new RegExp('^[A-Z2-7]+$');
 export const confirmMfaBodyCodeRegExp = new RegExp('^[0-9]{6}$');
 
 
 export const ConfirmMfaBody = zod.object({
-  "secret": zod.string().regex(confirmMfaBodySecretRegExp),
   "code": zod.string().regex(confirmMfaBodyCodeRegExp)
 })
 

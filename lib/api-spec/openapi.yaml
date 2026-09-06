@@ -1353,11 +1353,8 @@ components:
     MfaConfirmationInput:
       type: object
       additionalProperties: false
-      required: [secret, code]
+      required: [code]
       properties:
-        secret:
-          type: string
-          pattern: '^[A-Z2-7]+$'
         code: { type: string, pattern: '^[0-9]{6}$' }
     MfaConfirmation:
       allOf:
