@@ -542,5 +542,85 @@
     "title": "Disruptive consulting transformation — subtle",
     "description": "Restrained text-free raster comparison with lighter structure, a controlled Pulse ribbon, and natural copy space",
     "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000069",
+    "position": 69,
+    "filepath": "src/pages/slides/RegionalClosingDubai.tsx",
+    "title": "Regional closing — Dubai",
+    "description": "City-centered blue globe and Dubai skyline on the Pulse light canvas",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000070",
+    "position": 70,
+    "filepath": "src/pages/slides/RegionalClosingAbuDhabi.tsx",
+    "title": "Regional closing — Abu Dhabi",
+    "description": "City-centered blue globe and Abu Dhabi skyline on the Pulse light canvas",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000071",
+    "position": 71,
+    "filepath": "src/pages/slides/RegionalClosingDoha.tsx",
+    "title": "Regional closing — Doha",
+    "description": "City-centered blue globe and Doha skyline on the Pulse light canvas",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000072",
+    "position": 72,
+    "filepath": "src/pages/slides/RegionalClosingRiyadh.tsx",
+    "title": "Regional closing — Riyadh",
+    "description": "City-centered blue globe and Riyadh skyline on the Pulse light canvas",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000073",
+    "position": 73,
+    "filepath": "src/pages/slides/RegionalClosingJeddah.tsx",
+    "title": "Regional closing — Jeddah",
+    "description": "City-centered blue globe and Jeddah skyline on the Pulse light canvas",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000074",
+    "position": 74,
+    "filepath": "src/pages/slides/RegionalClosingVienna.tsx",
+    "title": "Regional closing — Vienna",
+    "description": "City-centered blue globe and Vienna skyline on the Pulse light canvas",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000075",
+    "position": 75,
+    "filepath": "src/pages/slides/RegionalClosingIstanbul.tsx",
+    "title": "Regional closing — Istanbul",
+    "description": "City-centered blue globe and Istanbul skyline on the Pulse light canvas",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000076",
+    "position": 76,
+    "filepath": "src/pages/slides/RegionalClosingAnkara.tsx",
+    "title": "Regional closing — Ankara",
+    "description": "City-centered blue globe and Ankara skyline on the Pulse light canvas",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000077",
+    "position": 77,
+    "filepath": "src/pages/slides/RegionalClosingAmsterdam.tsx",
+    "title": "Regional closing — Amsterdam",
+    "description": "City-centered blue globe and Amsterdam skyline on the Pulse light canvas",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000078",
+    "position": 78,
+    "filepath": "src/pages/slides/RegionalClosingLondon.tsx",
+    "title": "Regional closing — London",
+    "description": "City-centered blue globe and London skyline on the Pulse light canvas",
+    "speakerNotes": ""
   }
 ]

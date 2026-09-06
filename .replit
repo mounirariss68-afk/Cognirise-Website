@@ -22,3 +22,7 @@ timeoutMs = 120000
 [nix]
 channel = "stable-25_05"
 packages = ["libreoffice"]
+
+[[ports]]
+localPort = 26081
+externalPort = 3000
