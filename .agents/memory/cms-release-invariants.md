@@ -21,11 +21,11 @@ Treat provider event IDs as idempotency identities; payload digests are audit ev
 
 **How to apply:** A repeated ID with the same payload is a duplicate, the same ID with a different payload is a conflict, and different IDs with identical payloads are independently accepted.
 
-Keep pre-launch fixture imports draft-only even when that makes public routes explicitly unavailable; never restore a code-owned content fallback to make the site appear populated.
+Keep fixture imports draft-only until an explicit market launch, but make every later seed non-destructive: it must never demote a governed edition, clear a live revision, or reset published media.
 
-**Why:** A visible unavailable state preserves the single publishing authority and approval trail, while a convenient fallback silently creates a second source of truth.
+**Why:** Draft-only imports preserve the approval trail, but a repeatable seed that resets launched content can take the whole public site offline. The initial UAE baseline outage exposed this boundary.
 
-**How to apply:** Seed deterministically into drafts, publish through the governed workflow, and treat an empty public route as a release-readiness signal rather than a reason to bypass PostgreSQL.
+**How to apply:** Seed new content into drafts, publish an initial baseline through independent workflow actors, mark parity complete only after validation, and leave every non-draft edition and published media lifecycle untouched on reruns.
 
 Bind every revision-level media reference to its concrete immutable media version and preserve the full reference index across every snapshot-producing path.
 

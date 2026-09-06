@@ -1015,7 +1015,7 @@ async function main() {
       if (fixture._type === "mediaAsset") {
         const existing = await tx.select({ id: cmsMediaAssetsTable.id }).from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.id, fixture._id)).limit(1);
         await tx.insert(cmsMediaAssetsTable).values({ id: fixture._id, kind: fixture.kind as string, title: fixture.title as string, altText: fixture.altText as string | undefined, decorative: fixture.decorative as boolean | undefined, rightsOwner: fixture.rightsOwner as string | undefined, lifecycleState: "draft", createdByPrincipalId: "person-editorial-owner" }).onConflictDoUpdate({
-          target: cmsMediaAssetsTable.id, set: { kind: fixture.kind as string, title: fixture.title as string, altText: fixture.altText as string | undefined, decorative: fixture.decorative as boolean | undefined, rightsOwner: fixture.rightsOwner as string | undefined, lifecycleState: "draft" },
+          target: cmsMediaAssetsTable.id, set: { kind: fixture.kind as string, title: fixture.title as string, altText: fixture.altText as string | undefined, decorative: fixture.decorative as boolean | undefined, rightsOwner: fixture.rightsOwner as string | undefined },
         });
         const externalUrl = fixture.externalUrl as string | undefined;
         if (externalUrl) await tx.insert(cmsMediaVersionsTable).values({ mediaId: fixture._id, version: 1, externalUrl, createdByPrincipalId: "person-editorial-owner" }).onConflictDoNothing();
@@ -1043,8 +1043,9 @@ async function main() {
           [edition] = await tx.insert(cmsMarketEditionsTable).values({ documentId: fixture._id, market: market.code, fallbackMode, publicationState: "draft", localizedSlug: canonicalSlug, parityComplete: false }).returning();
           counts.editionsCreated++;
         } else {
-          await tx.update(cmsMarketEditionsTable).set({ fallbackMode, publicationState: "draft", localizedSlug: canonicalSlug, parityComplete: false, liveRevisionId: null }).where(eq(cmsMarketEditionsTable.id, edition.id));
           counts.editionsUpdated++;
+          if (edition.publicationState !== "draft") continue;
+          await tx.update(cmsMarketEditionsTable).set({ fallbackMode, localizedSlug: canonicalSlug, parityComplete: false }).where(eq(cmsMarketEditionsTable.id, edition.id));
         }
         const [draft] = edition!.draftRevisionId ? await tx.select().from(cmsRevisionsTable).where(eq(cmsRevisionsTable.id, edition!.draftRevisionId)).limit(1) : [];
         if (draft?.contentDigest === contentDigest) {
@@ -1054,7 +1055,7 @@ async function main() {
         }
         const number = draft ? draft.revisionNumber + 1 : 1;
         const [revision] = await tx.insert(cmsRevisionsTable).values({ editionId: edition!.id, revisionNumber: number, payloadVersion: 1, payload, contentDigest, createdByPrincipalId: "person-editorial-owner", reason: "cognirise-cms-seed" }).returning();
-        await tx.update(cmsMarketEditionsTable).set({ draftRevisionId: revision!.id, version: edition!.version + (draft ? 1 : 0), publicationState: "draft", liveRevisionId: null }).where(eq(cmsMarketEditionsTable.id, edition!.id));
+        await tx.update(cmsMarketEditionsTable).set({ draftRevisionId: revision!.id, version: edition!.version + (draft ? 1 : 0) }).where(eq(cmsMarketEditionsTable.id, edition!.id));
         seededRevisionReferences.push({ revisionId: revision!.id, content: payload.content });
         counts.revisionsCreated++;
       }
