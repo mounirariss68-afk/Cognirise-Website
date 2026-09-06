@@ -507,8 +507,16 @@
     "id": "f0000000-0000-4000-8000-000000000064",
     "position": 64,
     "filepath": "src/pages/slides/HumanAgentTeam.tsx",
-    "title": "Human and agent project team illustration",
-    "description": "Text-free centered illustration with open space for presenter copy",
+    "title": "Human and agent team — left copy",
+    "description": "Text-free editable team illustration on the right with a generous left copy zone",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000065",
+    "position": 65,
+    "filepath": "src/pages/slides/HumanAgentTeamLeft.tsx",
+    "title": "Human and agent team — right copy",
+    "description": "Text-free editable team illustration on the left with a generous right copy zone",
     "speakerNotes": ""
   }
 ]

@@ -1,11 +1,27 @@
-export default function HumanAgentTeam() {
+type HumanAgentTeamProps = {
+  illustrationSide?: "left" | "right";
+};
+
+export function HumanAgentTeamLayout({ illustrationSide = "right" }: HumanAgentTeamProps) {
+  const isRight = illustrationSide === "right";
+
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-bg">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(219,80,158,0.07),transparent_25%)]" />
+      <div
+        className={
+          isRight
+            ? "absolute inset-0 bg-[radial-gradient(circle_at_74%_50%,rgba(219,80,158,0.07),transparent_25%)]"
+            : "absolute inset-0 bg-[radial-gradient(circle_at_26%_50%,rgba(219,80,158,0.07),transparent_25%)]"
+        }
+      />
 
       <svg
         viewBox="0 0 840 560"
-        className="absolute left-1/2 top-1/2 h-[48vh] w-[43vw] -translate-x-1/2 -translate-y-1/2"
+        className={
+          isRight
+            ? "absolute left-[73%] top-1/2 h-[56vh] w-[48vw] -translate-x-1/2 -translate-y-1/2"
+            : "absolute left-[27%] top-1/2 h-[56vh] w-[48vw] -translate-x-1/2 -translate-y-1/2"
+        }
         role="img"
         aria-label="Three people and three digital agents collaborating around a shared project workspace"
       >
@@ -90,4 +106,8 @@ export default function HumanAgentTeam() {
       </svg>
     </div>
   );
+}
+
+export default function HumanAgentTeam() {
+  return <HumanAgentTeamLayout illustrationSide="right" />;
 }
