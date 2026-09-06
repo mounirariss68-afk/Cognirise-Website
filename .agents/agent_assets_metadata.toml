@@ -99,3 +99,17 @@ mtime_ms = 1788709389735
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/9c00327f-93dd-4765-8548-c92cbae16888/07c0d9dd-5b64-449c-aebe-c6d8df0c15d5"
 storage_version_token = "1788709409111467"
 content_type = "image/png"
+
+[[outputs]]
+id = "6EXHeKoFuDRU3pwLAipk7"
+uri = "file://attached_assets/generated_images/cognirise-original-outpainted-16x4-3200x800.png"
+type = "image"
+title = "Cognirise Original Illustration — Extended 16:4"
+description = "Outpainted 3200 × 800 PNG preserving the original scene while continuing the left network and completing the right arm, platform, databases, and stacked structures."
+logical_id = "6b427c24-78c2-4664-9c6b-2cdd0e0b2d35"
+content_hash = "sha256:6227d21b60720e9f9506b11602cafb120fb97872645e8c4028f60fef0ad5488b"
+size = 2459826
+mtime_ms = 1788709954819
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/6b427c24-78c2-4664-9c6b-2cdd0e0b2d35/3a29f872-0620-49b6-9ce8-adc65feea116"
+storage_version_token = "1788709994428195"
+content_type = "image/png"
