@@ -7,3 +7,4 @@
 - [API codegen compatibility](api-codegen-compatibility.md) — Orval regeneration needs two Zod 3 compatibility corrections until the generator/toolchain is upgraded.
 - [Governed AI boundaries](governed-ai-boundaries.md) — Screen both sides of model calls; citation presence alone never proves complete grounding.
 - [Pulse raster recomposition](pulse-raster-recomposition.md) — Preserve approved scenes with content-aware expansion; generative edits and sliced light backgrounds can alter or seam.
+- [Architecture drill-down hit geometry](architecture-drilldown-hit-geometry.md) — Keep CogniOS drill-down controls stationary; decorative 3D/positional motion can desync painted and clickable planes.

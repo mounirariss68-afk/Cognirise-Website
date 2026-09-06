@@ -8,7 +8,8 @@
     "build": "vite build --config vite.config.ts",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "test:cognios-browser": "node test/browser/cognios-drilldown.browser.mjs"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",
