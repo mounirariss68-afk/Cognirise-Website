@@ -5,6 +5,7 @@ import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { useRef, useState } from "react";
 import { BlueprintJourney } from "@/components/BlueprintJourney";
+import { ServiceLineTiles } from "@/components/ServiceLineTiles";
 
 const Kicker = ({ children, className = "text-[#102957]" }: { children: React.ReactNode, className?: string }) => (
   <div className={`flex items-center gap-3 text-[10px] tracking-[0.12em] uppercase font-semibold ${className}`}>
@@ -249,7 +250,7 @@ export default function Home() {
       </section>
 
       {/* MODEL */}
-      <section className="px-6 md:px-[4.8vw] py-[82px] lg:py-[125px]">
+      <section id="service-lines" className="px-6 md:px-[4.8vw] py-[82px] lg:py-[125px]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-end">
           <motion.div {...mConfig}>
             <Kicker>How we work</Kicker>
@@ -268,54 +269,7 @@ export default function Home() {
           </motion.p>
         </div>
         
-        <div className="mt-10 lg:mt-[65px] border-t border-[#102957]">
-          {[
-            { 
-              num: "01", 
-              title: "Agentic Enterprise Transformation", 
-              desc: "Designing the operating model, governance and transition path for an AI-augmented enterprise.",
-              href: "/what-we-do/agentic-enterprise-transformation"
-            },
-            { 
-              num: "02", 
-              title: "Engineering & Modernisation", 
-              desc: "Forward-deployed engineering to build new capabilities and safely retire legacy technical debt.",
-              href: "/what-we-do/engineering-with-ai"
-            },
-            { 
-              num: "03", 
-              title: "Data & AI Foundations", 
-              desc: "Structuring enterprise knowledge and systems so they are ready to participate in intelligent work.",
-              href: "/what-we-do/data-ai-foundations"
-            },
-            { 
-              num: "04", 
-              title: "CogniOS Platform", 
-              desc: "Our proprietary architecture. A complete operating system for governed enterprise intelligence.",
-              href: "/platforms",
-              highlight: true
-            }
-          ].map((svc) => (
-            <Link key={svc.num} href={svc.href} className="group relative w-full text-left grid grid-cols-[35px_1fr_25px] lg:grid-cols-[72px_1fr_1fr_40px] items-center gap-3 lg:gap-5 p-[20px_0] lg:p-[23px_8px] border-b border-[#cbd3e1] text-[#102957] cursor-pointer transition-all duration-300 hover:pl-[12px] lg:hover:pl-[21px] hover:bg-[#f1effb] overflow-hidden">
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-r from-[rgba(118,89,223,0.05)] to-transparent" 
-                initial={{ x: "-100%" }}
-                whileHover={prefersReducedMotion ? {} : { x: 0 }}
-                transition={{ duration: 0.4 }}
-              />
-              <span className={`relative z-10 text-[10px] tracking-[0.1em] ${svc.highlight ? 'text-[hsl(var(--brand-pink))] font-bold' : 'text-[#697a96]'}`}>
-                {svc.num}
-              </span>
-              <h3 className={`relative z-10 font-display font-semibold text-[21px] lg:text-[clamp(20px,2.3vw,32px)] leading-[1.05] tracking-[-0.06em] m-0 transition-colors ${svc.highlight ? 'group-hover:text-[hsl(var(--brand-pink))]' : 'group-hover:text-[hsl(var(--brand-pink))]'}`}>
-                {svc.title}
-              </h3>
-              <p className="relative z-10 hidden lg:block text-[13px] leading-[1.45] text-[#536887] m-0 max-w-[300px] group-hover:text-[#102957] transition-colors">
-                {svc.desc}
-              </p>
-              <ArrowRight className={`relative z-10 justify-self-end transition-transform group-hover:translate-x-2 ${svc.highlight ? 'text-[hsl(var(--brand-pink))]' : ''}`} />
-            </Link>
-          ))}
-        </div>
+        <ServiceLineTiles className="mt-10 lg:mt-[65px]" />
       </section>
 
       {/* BLUEPRINT */}

@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
+import { SERVICE_LINE_LABELS } from "@/lib/serviceLines";
 
 export default function ValueScan() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -167,11 +168,7 @@ export default function ValueScan() {
                 <label className="vs-label" htmlFor="processArea">Process Area <span style={{color: 'var(--pink)'}}>*</span></label>
                 <select className="vs-select" id="processArea" name="processArea" value={formData.processArea} onChange={handleChange} required>
                   <option value="">Select the closest fit</option>
-                  <option value="Agentic enterprise transformation">Agentic enterprise transformation</option>
-                  <option value="Data and AI foundations">Data and AI foundations</option>
-                  <option value="Engineering with AI">Engineering with AI</option>
-                  <option value="Sovereign and regulated AI">Sovereign and regulated AI</option>
-                  <option value="Digital AI workforce">Digital AI workforce</option>
+                  {SERVICE_LINE_LABELS.map((label) => <option value={label} key={label}>{label}</option>)}
                   <option value="Not sure yet">Not sure yet</option>
                 </select>
               </div>

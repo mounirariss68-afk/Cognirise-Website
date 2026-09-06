@@ -177,7 +177,7 @@ export default function AgenticTransformation() {
         <div className="at-hero-grid">
           <div className="at-hero-copy">
             <h1>Make AI change the <em>work.</em></h1>
-            <p>Agentic Enterprise Transformation brings senior operators, forward-deployed engineers and governed agents together around the processes that matter most.</p>
+            <p>As a capability within Consulting & Engineering with AI, agentic enterprise transformation brings senior operators, forward-deployed engineers and governed agents together around the processes that matter most.</p>
             <div className="at-actions">
               <Link href="/value-scan" className="at-primary">
                 Bring us one process <ArrowRight size={15} />
@@ -268,17 +268,17 @@ export default function AgenticTransformation() {
       <section className="at-related">
         <div className="at-related-head">
           <div>
-            <div className="at-kicker">Adjacent services</div>
+            <div className="at-kicker">Connected service lines</div>
             <h2>The transformation needs its ground.</h2>
           </div>
-          <p>Go deeper where the work demands it: foundations, engineering, sovereign control and the digital workforce.</p>
+          <p>Go deeper through the three service lines, with specialist capabilities supporting each route.</p>
         </div>
         <Link href="/what-we-do" className="at-service-photo">
           <img src={assetUrl("/images/cognirise/site-services.jpg")} alt="A colourful current travelling through a layered architectural environment." />
           <div className="at-service-caption">
             <div className="at-kicker">Connected capability</div>
             <h3>Data, architecture and delivery—aligned to the same move.</h3>
-            <p>Explore Data & AI Foundations, Engineering with AI, Sovereign & Regulated AI and the Digital AI Workforce.</p>
+            <p>Explore Consulting & Engineering with AI, Sovereign AI Solutions and AI Platforms.</p>
           </div>
         </Link>
       </section>

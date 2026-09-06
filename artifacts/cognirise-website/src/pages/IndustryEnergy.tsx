@@ -102,7 +102,7 @@ export default function IndustryEnergy() {
           <div className="flex flex-col gap-6 border-l border-white/20 pl-8">
              <div className="flex items-center gap-4">
                 <span className="text-[hsl(var(--brand-pink))] text-[10px] uppercase tracking-widest font-bold">Services</span>
-                <span className="text-white/80">Data & AI Foundations</span>
+                 <span className="text-white/80">AI Platforms</span>
              </div>
              <div className="flex items-center gap-4">
                 <span className="text-[hsl(var(--brand-pink))] text-[10px] uppercase tracking-widest font-bold">Platforms</span>

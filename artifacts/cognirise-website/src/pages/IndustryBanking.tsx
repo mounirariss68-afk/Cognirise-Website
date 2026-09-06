@@ -102,7 +102,7 @@ export default function IndustryBanking() {
           <div className="flex flex-col gap-6 border-l border-white/20 pl-8">
              <div className="flex items-center gap-4">
                 <span className="text-[hsl(var(--brand-pink))] text-[10px] uppercase tracking-widest font-bold">Services</span>
-                <span className="text-white/80">Sovereign & Regulated AI</span>
+                 <span className="text-white/80">Sovereign AI Solutions</span>
              </div>
              <div className="flex items-center gap-4">
                 <span className="text-[hsl(var(--brand-pink))] text-[10px] uppercase tracking-widest font-bold">Platforms</span>

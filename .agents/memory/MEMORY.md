@@ -5,3 +5,4 @@
 - [Social asset self-containment](social-asset-self-containment.md) — Embed imagery in downloadable SVGs and visually verify matching PNG exports before delivery.
 - [Wide artwork composition](wide-artwork-composition.md) — Extend the illustrated field to reach wide ratios; never substitute blank padding or low-detail enlargement.
 - [CMS publication boundaries](cms-publication-boundaries.md) — Public content and media authority comes from the approved published revision, never mutable draft-level references.
+- [Hover transition verification](hover-transition-verification.md) — Automation hover helpers can hide transition timing; verify motion with direct pointer events and frame samples.

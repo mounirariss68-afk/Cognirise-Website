@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { assetUrl } from "@/lib/assets";
 import { contentRecord, text, tupleList, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
+import { SERVICE_LINE_LABELS } from "@/lib/serviceLines";
 
 const foundersFallback = [
   {
@@ -10,9 +11,9 @@ const foundersFallback = [
     name: "Mounir Ariss",
     bio: "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage — now focused on one conviction: the next frontier isn't AI adoption, it's becoming an agentic enterprise.",
     focus: [
-      ["Agentic Enterprise Transformation", "AI-native workflows and decision layers"],
-      ["Data & AI Foundations", "Architecture, governance, durable capability"],
-      ["SDLC & Legacy Modernization", "AI-augmented delivery, retiring technical debt"],
+      [SERVICE_LINE_LABELS[0], "Advisory judgment, AI-native workflows and production engineering"],
+      [SERVICE_LINE_LABELS[1], "Architecture, governance and local control"],
+      [SERVICE_LINE_LABELS[2], "Connected knowledge, agents and integrations"],
     ],
   },
   {
@@ -20,9 +21,9 @@ const foundersFallback = [
     name: "Gökhan Güney",
     bio: "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf — building the engineering muscle that turns strategy decks into systems that run.",
     focus: [
-      ["Agentic Enterprise Transformation", "Humans + agents in production"],
-      ["Data & AI Foundations", "Platforms and operating models that scale"],
-      ["SDLC & Legacy Modernization", "Engineering acceleration with AI"],
+      [SERVICE_LINE_LABELS[0], "Humans and engineers carrying change into production"],
+      [SERVICE_LINE_LABELS[1], "Governed solutions designed for local operating realities"],
+      [SERVICE_LINE_LABELS[2], "Platforms and operating models that scale"],
     ],
   },
 ];

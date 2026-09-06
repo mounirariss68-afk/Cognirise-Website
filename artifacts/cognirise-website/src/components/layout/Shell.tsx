@@ -6,6 +6,7 @@ import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
 import { setAnalyticsConsent, useAnalyticsConsent } from "@/lib/analytics";
+import { SERVICE_LINE_LABELS } from "@/lib/serviceLines";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/": {
@@ -13,28 +14,28 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     description: "Cognirise redesigns consequential enterprise work around people, data, controls and intelligent execution.",
   },
   "/what-we-do": {
-    title: "AI Transformation Services | Cognirise",
-    description: "Explore Cognirise services for agentic transformation, AI foundations, modern engineering and sovereign enterprise delivery.",
+    title: "Consulting, Sovereign AI & AI Platforms | Cognirise",
+    description: `Explore ${SERVICE_LINE_LABELS.join(", ")}.`,
   },
   "/what-we-do/agentic-enterprise-transformation": {
-    title: "Agentic Enterprise Transformation | Cognirise",
-    description: "Redesign priority work for governed intelligent execution with a practical route from one process to production.",
+    title: "Agentic Transformation Capability | Consulting & Engineering with AI",
+    description: "A supporting capability within Consulting & Engineering with AI for redesigning priority work around governed intelligent execution.",
   },
   "/what-we-do/data-ai-foundations": {
-    title: "Data & AI Foundations | Cognirise",
-    description: "Make data, controls and architecture ready for what comes next.",
+    title: "Data & AI Foundations Capability | Consulting & Engineering with AI",
+    description: "A supporting capability within Consulting & Engineering with AI for making data, controls and architecture production-ready.",
   },
   "/what-we-do/engineering-with-ai": {
-    title: "Engineering with AI | Cognirise",
-    description: "Ship production systems with forward-deployed engineering teams.",
+    title: "Engineering Capability | Consulting & Engineering with AI",
+    description: "A supporting capability within Consulting & Engineering with AI for shipping production systems with forward-deployed teams.",
   },
   "/what-we-do/sovereign-regulated-ai": {
-    title: "Sovereign & Regulated AI | Cognirise",
-    description: "Build local control, security and explainability into the work.",
+    title: "Sovereign & Regulated Capability | Sovereign AI Solutions",
+    description: "A supporting capability within Sovereign AI Solutions for building local control, security and explainability into the work.",
   },
   "/what-we-do/digital-ai-workforce": {
-    title: "Digital AI Workforce | Cognirise",
-    description: "Deploy governed agents into real operating environments.",
+    title: "Digital Workforce Capability | AI Platforms",
+    description: "A supporting capability within AI Platforms for deploying governed agents into real operating environments.",
   },
   "/platforms": {
     title: "CogniOS Platform Ecosystem | Cognirise",
@@ -132,11 +133,9 @@ const navigation = [
     href: "/what-we-do",
     items: [
       { label: "Overview", href: "/what-we-do" },
-      { label: "Agentic Enterprise Transformation", href: "/what-we-do/agentic-enterprise-transformation" },
-      { label: "Data & AI Foundations", href: "/what-we-do/data-ai-foundations" },
-      { label: "Engineering with AI", href: "/what-we-do/engineering-with-ai" },
-      { label: "Sovereign & Regulated AI", href: "/what-we-do/sovereign-regulated-ai" },
-      { label: "Digital AI Workforce", href: "/what-we-do/digital-ai-workforce" },
+      { label: SERVICE_LINE_LABELS[0], href: "/what-we-do#consulting-engineering" },
+      { label: SERVICE_LINE_LABELS[1], href: "/what-we-do#sovereign-solutions" },
+      { label: SERVICE_LINE_LABELS[2], href: "/what-we-do#ai-platforms" },
     ]
   },
   {
