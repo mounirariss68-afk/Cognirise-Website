@@ -502,5 +502,13 @@
     "title": "One source. Five clear destinations.",
     "description": "One source splitting into five separated destination flows",
     "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000064",
+    "position": 64,
+    "filepath": "src/pages/slides/HumanAgentTeam.tsx",
+    "title": "Human and agent project team illustration",
+    "description": "Text-free centered illustration with open space for presenter copy",
+    "speakerNotes": ""
   }
 ]

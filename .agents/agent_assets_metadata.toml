@@ -21,13 +21,13 @@ id = "wSBKnawYcHLeW2DCeJGmZ"
 uri = "file://.local/outputs/Cognirise-Pulse-PowerPoint-Template.pptx"
 type = "slides"
 title = "Cognirise Pulse PowerPoint Template (PPTX)"
-description = "Updated 63-slide template including the editable one-to-five split-flow diagram."
+description = "PowerPoint export including the centered human-and-agent project-team illustration slide."
 logical_id = "b1dfe669-6da3-490a-b000-7e75d6de8b8b"
-content_hash = "sha256:2c26d50ba00cdd7689a4044db951cd24b1446601e77e34d176add580073b50a5"
-size = 32950384
-mtime_ms = 1788671455982
-storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b1dfe669-6da3-490a-b000-7e75d6de8b8b/691c410c-f8f1-4e0f-a4df-fdce7f48f1c6"
-storage_version_token = "1788671467197353"
+content_hash = "sha256:8298ffc3037f6f49809016230b6ce43f88e639df522434928ba606e169e06aca"
+size = 32535812
+mtime_ms = 1788672514789
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b1dfe669-6da3-490a-b000-7e75d6de8b8b/f48e2907-91a5-492f-bfdc-a2b90df7e140"
+storage_version_token = "1788672516274883"
 content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 
 [[outputs]]
