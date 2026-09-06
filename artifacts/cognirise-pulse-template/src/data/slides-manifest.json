@@ -486,5 +486,13 @@
     "title": "Force-field analysis",
     "description": "Force-field analysis",
     "speakerNotes": ""
+  },
+  {
+    "id": "f0000000-0000-4000-8000-000000000062",
+    "position": 62,
+    "filepath": "src/pages/slides/ConvergingFlow.tsx",
+    "title": "Many flows. One orchestrated core.",
+    "description": "Five inbound and five outbound flows converging through a central element",
+    "speakerNotes": ""
   }
 ]
