@@ -20,6 +20,5 @@ export const modules: ModuleMap = {
   "./components/mockups/cognirise-site/PublicSector.tsx": () => import("../components/mockups/cognirise-site/PublicSector.tsx"),
   "./components/mockups/cognirise-site/ServicesOverview.tsx": () => import("../components/mockups/cognirise-site/ServicesOverview.tsx"),
   "./components/mockups/cognirise-site/ValueScan.tsx": () => import("../components/mockups/cognirise-site/ValueScan.tsx"),
-  "./components/mockups/cognirise-site/WorkProof.tsx": () => import("../components/mockups/cognirise-site/WorkProof.tsx"),
-  "./components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx": () => import("../components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx")
+  "./components/mockups/cognirise-site/WorkProof.tsx": () => import("../components/mockups/cognirise-site/WorkProof.tsx")
 };
