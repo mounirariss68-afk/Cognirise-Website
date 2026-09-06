@@ -14,7 +14,7 @@ export type AlliancePlatform = {
   contribution: string;
   sources: Array<{ label: string; url: string; supports: string }>;
   verifiedOn: string;
-  meta: { title: string; description: string };
+  meta: { title: string; description: string; socialImage: string };
 };
 
 export const ALLIANCE_PLATFORMS: Record<AlliancePlatform["slug"], AlliancePlatform> = {
@@ -53,6 +53,7 @@ export const ALLIANCE_PLATFORMS: Record<AlliancePlatform["slug"], AlliancePlatfo
     meta: {
       title: "Lupitor Conversational AI Alliance | Cognirise",
       description: "Explore Lupitor’s verified multilingual, multichannel AI agents and cloud, sovereign cloud and air-gapped deployment with Cognirise integration.",
+      socialImage: "/images/cognirise/alliance-lupitor.jpg",
     },
   },
   datatoolpack: {
@@ -90,6 +91,7 @@ export const ALLIANCE_PLATFORMS: Record<AlliancePlatform["slug"], AlliancePlatfo
     meta: {
       title: "Datatoolpack AutoData Alliance | Cognirise",
       description: "Explore automated data profiling, cleaning, transformation, anomaly detection, pipeline automation and AI-ready export through AutoData.",
+      socialImage: "/images/cognirise/alliance-datatoolpack.jpg",
     },
   },
   "bunjee-ai": {
@@ -125,6 +127,7 @@ export const ALLIANCE_PLATFORMS: Record<AlliancePlatform["slug"], AlliancePlatfo
     meta: {
       title: "bunjee.ai Organizational Intelligence Alliance | Cognirise",
       description: "Explore how bunjee.ai captures expert knowledge and deploys organizational intelligence across hiring, onboarding, communication, assessment and training.",
+      socialImage: "/images/cognirise/alliance-bunjee.jpg",
     },
   },
 };

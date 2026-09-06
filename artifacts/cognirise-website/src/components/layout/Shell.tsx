@@ -7,6 +7,7 @@ import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
 import { setAnalyticsConsent, useAnalyticsConsent } from "@/lib/analytics";
 import { SERVICE_LINE_LABELS } from "@/lib/serviceLines";
+import { ALLIANCE_PLATFORMS } from "@/lib/alliancePlatforms";
 import { useGetPublicNavigationSettings } from "@workspace/api-client-react";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
@@ -65,18 +66,6 @@ const pageMeta: Record<string, { title: string; description: string }> = {
   "/platforms/cogniware": {
     title: "CogniWare | Cognirise",
     description: "Composable intelligence capabilities connected to the systems that run the enterprise.",
-  },
-  "/platforms/lupitor": {
-    title: "Lupitor Conversational AI Alliance | Cognirise",
-    description: "Explore Lupitor’s verified multilingual, multichannel AI agents and cloud, sovereign cloud and air-gapped deployment with Cognirise integration.",
-  },
-  "/platforms/datatoolpack": {
-    title: "Datatoolpack AutoData Alliance | Cognirise",
-    description: "Explore automated data profiling, cleaning, transformation, anomaly detection, pipeline automation and AI-ready export through AutoData.",
-  },
-  "/platforms/bunjee-ai": {
-    title: "bunjee.ai Organizational Intelligence Alliance | Cognirise",
-    description: "Explore how bunjee.ai captures expert knowledge and deploys organizational intelligence across hiring, onboarding, communication, assessment and training.",
   },
   "/industries": {
     title: "AI Transformation by Industry | Cognirise",
@@ -279,7 +268,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const articleTitle = location.startsWith("/insights/") && "AI Transformation Perspective | Cognirise";
-    const meta = pageMeta[location] ?? {
+    const allianceSlug = location.match(/^\/platforms\/(lupitor|datatoolpack|bunjee-ai)$/)?.[1] as keyof typeof ALLIANCE_PLATFORMS | undefined;
+    const alliance = allianceSlug ? ALLIANCE_PLATFORMS[allianceSlug] : undefined;
+    const meta = alliance?.meta ?? pageMeta[location] ?? {
       title: articleTitle || "Page Not Found | Cognirise",
       description: location.startsWith("/insights/")
         ? "A Cognirise perspective on building governed AI-native organisations and production-ready intelligent work."
@@ -316,7 +307,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
     setMeta('meta[property="og:description"]', "content", meta.description, true);
     setMeta('meta[name="twitter:title"]', "content", meta.title, true);
     setMeta('meta[name="twitter:description"]', "content", meta.description, true);
-    setLink("canonical", window.location.origin + location);
+    const canonical = window.location.origin + location;
+    const socialImage = alliance ? window.location.origin + alliance.meta.socialImage : window.location.origin + "/images/cognirise/pulse-hero.jpg";
+    setMeta('meta[property="og:url"]', "content", canonical, true);
+    setMeta('meta[property="og:image"]', "content", socialImage, true);
+    setMeta('meta[name="twitter:image"]', "content", socialImage, true);
+    setLink("canonical", canonical);
   }, [location]);
 
   useEffect(() => {
