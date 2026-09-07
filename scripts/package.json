@@ -6,6 +6,7 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "pnpm run typecheck && tsx --test src/**/*.test.ts",
     "cms:inventory": "tsx ./src/cms/inventory.ts",
     "cms:import": "tsx ./src/cms/import.ts",
     "cms:reconcile": "tsx ./src/cms/reconcile.ts",

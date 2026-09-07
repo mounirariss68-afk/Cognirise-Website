@@ -100,16 +100,12 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     description: "Field notes for leaders building AI-native organisations across strategy, architecture, governance and operations.",
   },
   "/about": {
-    title: "About Cognirise | Senior-Led AI Transformation",
-    description: "Meet the principles behind Cognirise: senior accountability, practical delivery and intelligence designed around real work.",
+    title: "Our Team | Cognirise",
+    description: "Meet the Cognirise leadership team and Board of Advisors behind our senior-led AI transformation work.",
   },
   "/partners": {
     title: "Partners | Cognirise",
     description: "The alliance and technology network that supports our operating model.",
-  },
-  "/advisors": {
-    title: "Advisors | Cognirise",
-    description: "Senior strategic guidance shaping our capability and delivery.",
   },
   "/faq": {
     title: "FAQ | Cognirise",
@@ -176,9 +172,9 @@ const navigation: NavigationItem[] = [
     label: "About",
     href: "/about",
     items: [
-      { id: "about.leadership", label: "Firm & Leadership", href: "/about" },
+      { id: "about.leadership", label: "Our Team", href: "/about" },
       { id: "about.partners", label: "Partners", href: "/partners" },
-      { id: "about.advisors", label: "Advisors", href: "/advisors" },
+      { id: "about.advisors", label: "Board of Advisors", href: "/about#board-of-advisors" },
       { id: "about.faq", label: "FAQ", href: "/faq" },
       { id: "about.contact", label: "Contact", href: "/contact" },
     ]

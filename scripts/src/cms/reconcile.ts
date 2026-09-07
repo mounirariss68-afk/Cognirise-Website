@@ -8,6 +8,8 @@ import {
 import {
   mediaMigrationOperations,
   migrationOperations,
+  personAvailabilityOperations,
+  personGovernanceOperations,
 } from "./migration.js";
 
 interface Inventory {
@@ -19,6 +21,7 @@ interface Inventory {
 interface ExpectedReceipt {
   requestDigest: string;
   subjectType: "document" | "media";
+  tolerateDigestDrift?: boolean;
 }
 
 async function loadDatabase() {
@@ -65,33 +68,40 @@ async function inspectReconciliationState(
     subjectId: cmsOperationReceiptsTable.subjectId,
   }).from(cmsOperationReceiptsTable);
   const relevantReceipts = receipts.filter((receipt) => expected.has(receipt.idempotencyKey));
+  const conflicts: Array<{ idempotencyKey: string; expectedDigest: string; actualDigest: string }> = [];
 
   const documentIds: string[] = [];
   const mediaIds: string[] = [];
   for (const receipt of relevantReceipts) {
     const operation = expected.get(receipt.idempotencyKey)!;
-    if (receipt.requestDigest !== operation.requestDigest) {
-      throw new Error(`CMS cutover receipt digest mismatch for ${receipt.idempotencyKey}.`);
+    if (receipt.requestDigest !== operation.requestDigest && !operation.tolerateDigestDrift) {
+      conflicts.push({
+        idempotencyKey: receipt.idempotencyKey,
+        expectedDigest: operation.requestDigest,
+        actualDigest: receipt.requestDigest,
+      });
     }
     if (operation.subjectType === "document") documentIds.push(receipt.subjectId);
     else mediaIds.push(receipt.subjectId);
   }
 
+  const uniqueDocumentIds = [...new Set(documentIds)];
+  const uniqueMediaIds = [...new Set(mediaIds)];
   const [documents, media] = await Promise.all([
-    documentIds.length
+    uniqueDocumentIds.length
       ? db.select({ id: cmsDocumentsTable.id })
         .from(cmsDocumentsTable)
-        .where(inArray(cmsDocumentsTable.id, documentIds))
+        .where(inArray(cmsDocumentsTable.id, uniqueDocumentIds))
       : [],
-    mediaIds.length
+    uniqueMediaIds.length
       ? db.select({ id: cmsMediaAssetsTable.id })
         .from(cmsMediaAssetsTable)
-        .where(inArray(cmsMediaAssetsTable.id, mediaIds))
+        .where(inArray(cmsMediaAssetsTable.id, uniqueMediaIds))
       : [],
   ]);
-  if (documents.length !== documentIds.length || media.length !== mediaIds.length) {
+  if (documents.length !== uniqueDocumentIds.length || media.length !== uniqueMediaIds.length) {
     throw new Error(
-      `CMS cutover receipts reference missing records: found ${documents.length}/${documentIds.length} documents and ${media.length}/${mediaIds.length} media assets.`,
+      `CMS cutover receipts reference missing records: found ${documents.length}/${uniqueDocumentIds.length} documents and ${media.length}/${uniqueMediaIds.length} media assets.`,
     );
   }
 
@@ -101,6 +111,7 @@ async function inspectReconciliationState(
     state: missingCount === 0 ? "complete" as const : "pending" as const,
     existingCount,
     missingCount,
+    conflicts,
   };
 }
 
@@ -118,10 +129,14 @@ async function main() {
   }
 
   const expected = new Map<string, ExpectedReceipt>();
+  const governedLegacyExternalIds = new Set(
+    personGovernanceOperations(inventory.records).map((operation) => operation.externalId),
+  );
   for (const operation of migrationOperations(inventory.records)) {
     expected.set(operation.idempotencyKey, {
       requestDigest: operation.requestDigest,
       subjectType: "document",
+      tolerateDigestDrift: governedLegacyExternalIds.has(operation.externalId),
     });
   }
   for (const operation of mediaMigrationOperations(inventory.records)
@@ -131,13 +146,30 @@ async function main() {
       subjectType: "media",
     });
   }
+  for (const operation of personAvailabilityOperations(inventory.records)) {
+    expected.set(operation.idempotencyKey, {
+      requestDigest: operation.requestDigest,
+      subjectType: "document",
+    });
+  }
+  for (const operation of personGovernanceOperations(inventory.records)) {
+    expected.set(operation.idempotencyKey, {
+      requestDigest: operation.requestDigest,
+      subjectType: "document",
+    });
+  }
 
   const database = await loadDatabase();
   try {
     const before = await inspectReconciliationState(expected, database);
     if (before.state === "complete") {
+      if (before.conflicts.length) {
+        console.warn(
+          `CMS cutover is complete with ${before.conflicts.length} preserved inventory drift conflict(s). Existing records were not overwritten; use an explicitly versioned operation for each intentional replacement.`,
+        );
+      }
       console.log(
-        `CMS cutover already reconciled: ${expected.size} receipts have matching digests and live records. Existing editorial state was left unchanged.`,
+        `CMS cutover already reconciled: ${expected.size} expected receipts reference live records. Existing editorial state was left unchanged.`,
       );
       return;
     }
@@ -159,6 +191,14 @@ async function main() {
     ]);
 
     const after = await inspectReconciliationState(expected, database);
+    if (after.conflicts.length) {
+      const details = after.conflicts
+        .map((conflict) => `${conflict.idempotencyKey} (stored ${conflict.actualDigest}, inventory ${conflict.expectedDigest})`)
+        .join("; ");
+      console.warn(
+        `CMS reconciliation preserved ${after.conflicts.length} previously imported operation(s) whose inventory changed. Resolve each intentional replacement with an explicitly versioned operation: ${details}`,
+      );
+    }
     if (after.state !== "complete") {
       throw new Error(
         `CMS cutover reconciliation remained incomplete after import: ${after.missingCount} operations are still missing.`,
@@ -174,7 +214,7 @@ async function main() {
       ]);
     }
     console.log(
-      `CMS cutover reconciliation completed: ${expected.size} receipts have matching digests and live records. Existing editorial state was left unchanged.`,
+      `CMS cutover reconciliation completed: ${expected.size} expected receipts reference live records. Existing editorial state was left unchanged.`,
     );
   } finally {
     await database.pool.end();

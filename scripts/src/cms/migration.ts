@@ -33,6 +33,25 @@ export interface MediaMigrationOperation {
   requestDigest: string;
 }
 
+export interface PersonAvailabilityOperation {
+  externalId: string;
+  documentIdempotencyKey: string;
+  idempotencyKey: string;
+  market: string;
+  decision: "show" | "off";
+  requestDigest: string;
+}
+
+export interface PersonGovernanceOperation {
+  externalId: string;
+  documentIdempotencyKey: string;
+  idempotencyKey: string;
+  market: string;
+  controlled: { role: "founder" | "leader" | "advisor"; title: string; order: number };
+  legacyControlled: Array<{ role: "founder" | "advisor"; title: string; order: number }>;
+  requestDigest: string;
+}
+
 const digest = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
 
@@ -78,6 +97,55 @@ export function migrationOperations(records: InventoryRecord[]) {
   return records
     .filter((record): record is MigratableRecord => record.type !== "asset")
     .map(migrationOperation);
+}
+
+export function personAvailabilityOperations(records: InventoryRecord[]): PersonAvailabilityOperation[] {
+  return records
+    .filter((record) => record.type === "person")
+    .map((record) => {
+      const decision = record.fields.initialMarketAvailability;
+      if (decision !== "show" && decision !== "off") {
+        throw new Error(`${record.externalId}: missing initial person market availability.`);
+      }
+      const operation: Omit<PersonAvailabilityOperation, "requestDigest"> = {
+        externalId: record.externalId,
+        documentIdempotencyKey: `cms-inventory-v2:${record.externalId}`,
+        idempotencyKey: `cms-person-availability-v1:${record.externalId}:uae`,
+        market: "uae",
+        decision,
+      };
+      return { ...operation, requestDigest: digest(operation) };
+    });
+}
+
+const legacyPersonControls: Record<string, PersonGovernanceOperation["legacyControlled"]> = {
+  "person:8a0e78e95b87db8e0acd": [{ role: "founder", title: "Founding Partner", order: 0 }],
+  "person:8a26fa2024db762f831e": [{ role: "founder", title: "Founding Partner", order: 1 }],
+  "person:f62fafba1d69ec9281e2": [{ role: "advisor", title: "Regional Senior Managing Director, Accenture Middle East", order: 0 }],
+  "person:66893d0003c5bb956534": [{ role: "advisor", title: "Former CEO, Türk Telekom · Investor & Board Member", order: 1 }],
+  "person:869b2b63e38d11b890d4": [{ role: "advisor", title: "Public & Government Affairs Director — IMEA & Türkiye, and Country Director Kuwait & Levant, Dow", order: 2 }],
+};
+
+export function personGovernanceOperations(records: InventoryRecord[]): PersonGovernanceOperation[] {
+  return records.filter((record) => record.type === "person" && legacyPersonControls[record.externalId])
+    .map((record) => {
+      const content = record.fields.content as Record<string, unknown>;
+      const role = content.role;
+      const title = content.title;
+      const order = content.order;
+      if ((role !== "founder" && role !== "leader" && role !== "advisor") || typeof title !== "string" || typeof order !== "number") {
+        throw new Error(`${record.externalId}: invalid controlled person governance fields.`);
+      }
+      const operation: Omit<PersonGovernanceOperation, "requestDigest"> = {
+        externalId: record.externalId,
+        documentIdempotencyKey: `cms-inventory-v2:${record.externalId}`,
+        idempotencyKey: `cms-person-governance-v1:${record.externalId}`,
+        market: "uae",
+        controlled: { role: role as "founder" | "leader" | "advisor", title, order },
+        legacyControlled: legacyPersonControls[record.externalId],
+      };
+      return { ...operation, requestDigest: digest(operation) };
+    });
 }
 
 export function resolveMigrationMedia(operation: MigrationOperation, mediaByPath: Map<string, string>) {

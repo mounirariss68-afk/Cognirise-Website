@@ -1,6 +1,7 @@
 import {
   AnyPgColumn,
   boolean,
+  check,
   index,
   integer,
   jsonb,
@@ -11,9 +12,11 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { cmsUsersTable } from "./cms-auth";
+import { marketEditionsTable } from "./market-editions";
 
 export const cmsDocumentsTable = pgTable(
   "cms_documents",
@@ -74,6 +77,52 @@ export const cmsMarketEditionsTable = pgTable(
       table.publishAt,
     ),
     index("cms_market_editions_published_revision_idx").on(table.publishedRevisionId),
+  ],
+);
+
+/**
+ * An explicit delivery decision for a person in a configured market.
+ * Absence of a row and `inherit` have the same delivery semantics, while
+ * retaining `inherit` allows an editor's deliberate reset to be audited.
+ */
+export const cmsPersonMarketAvailabilityTable = pgTable(
+  "cms_person_market_availability",
+  {
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => cmsDocumentsTable.id, { onDelete: "cascade" }),
+    marketEditionId: uuid("market_edition_id")
+      .notNull()
+      .references(() => marketEditionsTable.id, { onDelete: "cascade" }),
+    /** Legacy pre-staging decision retained for an append-safe migration. */
+    decision: text("decision").notNull().default("inherit"),
+    publishedDecision: text("published_decision").notNull().default("inherit"),
+    draftDecision: text("draft_decision"),
+    updatedByUserId: uuid("updated_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    publishedByUserId: uuid("published_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.documentId, table.marketEditionId] }),
+    check(
+      "cms_person_market_availability_decision_check",
+      sql`${table.decision} IN ('inherit', 'show', 'off')`,
+    ),
+    check(
+      "cms_person_market_availability_published_decision_check",
+      sql`${table.publishedDecision} IN ('inherit', 'show', 'off')`,
+    ),
+    check(
+      "cms_person_market_availability_draft_decision_check",
+      sql`${table.draftDecision} IS NULL OR ${table.draftDecision} IN ('inherit', 'show', 'off')`,
+    ),
+    index("cms_person_market_availability_market_idx").on(table.marketEditionId),
   ],
 );
 
@@ -291,6 +340,8 @@ export const insertCmsMediaAssetSchema = createInsertSchema(
 export type InsertCmsDocument = z.infer<typeof insertCmsDocumentSchema>;
 export type CmsDocument = typeof cmsDocumentsTable.$inferSelect;
 export type CmsMarketEdition = typeof cmsMarketEditionsTable.$inferSelect;
+export type CmsPersonMarketAvailability =
+  typeof cmsPersonMarketAvailabilityTable.$inferSelect;
 export type CmsRevision = typeof cmsRevisionsTable.$inferSelect;
 export type CmsTaxonomy = typeof cmsTaxonomiesTable.$inferSelect;
 export type CmsTaxonomyTerm = typeof cmsTaxonomyTermsTable.$inferSelect;

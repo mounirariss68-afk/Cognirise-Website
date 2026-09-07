@@ -22,6 +22,8 @@ export interface PublishedContent {
   media?: PublicMedia[];
   market: string;
   locale: string;
+  requestedMarket: string;
+  usedFallback: boolean;
   /** @minimum 1 */
   revision: number;
   publishedAt: Date;

@@ -15,7 +15,10 @@ export function PublicSitemap() {
     const allianceItems = ALLIANCE_PLATFORM_LIST.map(({ slug }) => ({
       url: `${window.location.origin}/platforms/${slug}`,
     }));
-    const allItems = [...sitemap.data.items, ...allianceItems];
+    const allItems = [
+      ...sitemap.data.items.filter((entry) => new URL(entry.url, window.location.origin).pathname !== "/advisors"),
+      ...allianceItems,
+    ];
 
     const script = document.createElement("script");
     script.id = id;

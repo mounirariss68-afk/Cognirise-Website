@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { cmsPublicRoute, UpdateNavigationSettingsSchema, validateCmsContent, validateCmsSnapshot } from "@workspace/api-zod";
+import {
+  cmsPublicRoute,
+  UpdateDocumentMarketAvailabilityBody,
+  UpdateNavigationSettingsSchema,
+  validateCmsContent,
+  validateCmsSnapshot,
+} from "@workspace/api-zod";
 
 const governance = {
   schemaVersion: 1,
@@ -107,4 +113,14 @@ test("navigation settings accept only known unique menu item IDs", () => {
   assert.equal(UpdateNavigationSettingsSchema.safeParse({
     items: [{ id: "external.unsafe", enabled: false }],
   }).success, false);
+});
+
+test("market availability accepts only the governed three-state decision", () => {
+  for (const decision of ["inherit", "show", "off"]) {
+    assert.equal(UpdateDocumentMarketAvailabilityBody.safeParse({ decision }).success, true);
+  }
+  assert.equal(
+    UpdateDocumentMarketAvailabilityBody.safeParse({ decision: "hidden" }).success,
+    false,
+  );
 });

@@ -117,6 +117,11 @@ router.get(
           WHERE d.status<>'archived' AND e.publication_state='published'
             AND e.published_at<=now() AND ($1::text IS NULL OR d.kind=$1)
              AND e.market=ANY($2::text[])
+             AND (d.kind<>'person' OR NOT EXISTS (
+               SELECT 1 FROM cms_person_market_availability a
+               JOIN market_editions requested ON requested.id=a.market_edition_id
+               WHERE a.document_id=d.id AND requested.code=$3 AND a.published_decision='off'
+             ))
             AND ${PUBLIC_PAYLOAD_SQL}
        )
        SELECT *,count(*) OVER() total_count,$3::text requested_market
@@ -170,6 +175,11 @@ router.get(
           AND e.published_at<=now() AND d.kind=$1
           AND COALESCE(r.payload->>'slug',e.localized_slug)=$2
            AND e.market=ANY($4::text[])
+            AND (d.kind<>'person' OR NOT EXISTS (
+              SELECT 1 FROM cms_person_market_availability a
+              JOIN market_editions requested ON requested.id=a.market_edition_id
+              WHERE a.document_id=d.id AND requested.code=$3 AND a.published_decision='off'
+            ))
             AND ${PUBLIC_PAYLOAD_SQL}
          ORDER BY array_position($4::text[],e.market),e.updated_at DESC,e.id LIMIT 1`,
       [kind, slug, market, candidates],

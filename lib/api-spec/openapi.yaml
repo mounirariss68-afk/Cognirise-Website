@@ -513,6 +513,72 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DocumentRevisionPage"
+  /documents/{documentId}/market-availability:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    get:
+      operationId: getDocumentMarketAvailability
+      tags: [documents]
+      summary: Get a person's decisions for every configured market edition
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Person market availability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentMarketAvailability"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/market-availability/{marketEditionId}:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+      - $ref: "#/components/parameters/MarketEditionId"
+    put:
+      operationId: updateDocumentMarketAvailability
+      tags: [documents]
+      summary: Set a person's governed availability for a market edition
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarketAvailabilityUpdate"
+      responses:
+        "200":
+          description: Updated market availability decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketAvailability"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/market-availability/{marketEditionId}/publish:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+      - $ref: "#/components/parameters/MarketEditionId"
+    post:
+      operationId: publishDocumentMarketAvailability
+      tags: [documents]
+      summary: Publish a staged person market availability decision
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      responses:
+        "204":
+          description: Staged decision published
+        "409":
+          $ref: "#/components/responses/Conflict"
   /documents/{documentId}/revisions/{revisionId}:
     parameters:
       - $ref: "#/components/parameters/DocumentId"
@@ -1870,6 +1936,54 @@ components:
           multipleOf: 1
           minimum: 1
           description: Optimistic concurrency version.
+    MarketAvailabilityDecision:
+      type: string
+      enum: [inherit, show, off]
+    MarketAvailability:
+      type: object
+      additionalProperties: false
+      required:
+        [marketEditionId, market, displayName, enabled, publishedDecision, publishedEffectiveAvailable, pendingDecision, previewEffectiveAvailable, hasEdition, updatedAt, publishedAt]
+      properties:
+        marketEditionId: { type: string }
+        market: { type: string }
+        displayName: { type: string }
+        enabled: { type: boolean }
+        publishedDecision:
+          $ref: "#/components/schemas/MarketAvailabilityDecision"
+        publishedEffectiveAvailable:
+          type: boolean
+          description: Whether the currently published decision permits public resolution.
+        pendingDecision:
+          anyOf:
+            - $ref: "#/components/schemas/MarketAvailabilityDecision"
+            - type: "null"
+          description: An editor-staged decision that is not public until published.
+        previewEffectiveAvailable:
+          type: boolean
+          description: Whether a preview resolves after applying the pending decision.
+        hasEdition:
+          type: boolean
+          description: Whether the document has its own content edition for this market.
+        updatedAt: { type: ["string", "null"], format: date-time }
+        publishedAt: { type: ["string", "null"], format: date-time }
+    DocumentMarketAvailability:
+      type: object
+      additionalProperties: false
+      required: [documentId, items]
+      properties:
+        documentId: { type: string }
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketAvailability"
+    MarketAvailabilityUpdate:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision:
+          $ref: "#/components/schemas/MarketAvailabilityDecision"
     SeoMetadata:
       type: object
       required: [title, description]
@@ -2349,7 +2463,7 @@ components:
 
     PublishedContent:
       type: object
-      required: [id, kind, slug, title, content, market, locale, revision, publishedAt, updatedAt]
+      required: [id, kind, slug, title, content, market, locale, requestedMarket, usedFallback, revision, publishedAt, updatedAt]
       properties:
         id: { type: string }
         kind:
@@ -2368,6 +2482,8 @@ components:
             $ref: "#/components/schemas/PublicMedia"
         market: { type: string }
         locale: { type: string }
+        requestedMarket: { type: string }
+        usedFallback: { type: boolean }
         revision: { type: number, multipleOf: 1, minimum: 1 }
         publishedAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }

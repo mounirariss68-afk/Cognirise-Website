@@ -36,6 +36,7 @@ import type {
   Document,
   DocumentInput,
   DocumentKind,
+  DocumentMarketAvailability,
   DocumentPage,
   DocumentPreview,
   DocumentRevision,
@@ -54,6 +55,8 @@ import type {
   ListSubmissionsParams,
   ListUsersParams,
   LoginInput,
+  MarketAvailability,
+  MarketAvailabilityUpdate,
   MarketEdition,
   MarketEditionInput,
   MarketEditionPage,
@@ -1976,6 +1979,230 @@ export function useListDocumentRevisions<TData = Awaited<ReturnType<typeof listD
 
 
 
+
+export const getGetDocumentMarketAvailabilityUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/market-availability`
+}
+
+/**
+ * @summary Get a person's decisions for every configured market edition
+ */
+export const getDocumentMarketAvailability = async (documentId: string, options?: Parameters<typeof customFetch>[1]): Promise<DocumentMarketAvailability> => {
+
+  return customFetch<DocumentMarketAvailability>(getGetDocumentMarketAvailabilityUrl(documentId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDocumentMarketAvailabilityQueryKey = (documentId: string,) => {
+    return [
+    `/api/documents/${documentId}/market-availability`
+    ] as const;
+    }
+
+
+export const getGetDocumentMarketAvailabilityQueryOptions = <TData = Awaited<ReturnType<typeof getDocumentMarketAvailability>>, TError = ErrorType<NotFoundResponse | ConflictResponse>>(documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDocumentMarketAvailability>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDocumentMarketAvailabilityQueryKey(documentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDocumentMarketAvailability>>> = ({ signal }) => getDocumentMarketAvailability(documentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: documentId !== null && documentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDocumentMarketAvailability>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetDocumentMarketAvailabilityQueryResult = NonNullable<Awaited<ReturnType<typeof getDocumentMarketAvailability>>>
+export type GetDocumentMarketAvailabilityQueryError = ErrorType<NotFoundResponse | ConflictResponse>
+
+
+/**
+ * @summary Get a person's decisions for every configured market edition
+ */
+
+export function useGetDocumentMarketAvailability<TData = Awaited<ReturnType<typeof getDocumentMarketAvailability>>, TError = ErrorType<NotFoundResponse | ConflictResponse>>(
+ documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDocumentMarketAvailability>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetDocumentMarketAvailabilityQueryOptions(documentId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateDocumentMarketAvailabilityUrl = (documentId: string,
+    marketEditionId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/market-availability/${marketEditionId}`
+}
+
+/**
+ * @summary Set a person's governed availability for a market edition
+ */
+export const updateDocumentMarketAvailability = async (documentId: string,
+    marketEditionId: string,
+    marketAvailabilityUpdate: MarketAvailabilityUpdate, options?: Parameters<typeof customFetch>[1]): Promise<MarketAvailability> => {
+
+  return customFetch<MarketAvailability>(getUpdateDocumentMarketAvailabilityUrl(documentId,marketEditionId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(marketAvailabilityUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateDocumentMarketAvailabilityMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string;data: BodyType<MarketAvailabilityUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string;data: BodyType<MarketAvailabilityUpdate>}, TContext> => {
+
+const mutationKey = ['updateDocumentMarketAvailability'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateDocumentMarketAvailability>>, {documentId: string;marketEditionId: string;data: BodyType<MarketAvailabilityUpdate>}> = (props) => {
+          const {documentId,marketEditionId,data} = props ?? {};
+
+          return  updateDocumentMarketAvailability(documentId,marketEditionId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateDocumentMarketAvailabilityMutationResult = NonNullable<Awaited<ReturnType<typeof updateDocumentMarketAvailability>>>
+    export type UpdateDocumentMarketAvailabilityMutationBody = BodyType<MarketAvailabilityUpdate>
+    export type UpdateDocumentMarketAvailabilityMutationError = ErrorType<BadRequestResponse | NotFoundResponse | ConflictResponse>
+
+    /**
+ * @summary Set a person's governed availability for a market edition
+ */
+export const useUpdateDocumentMarketAvailability = <TError = ErrorType<BadRequestResponse | NotFoundResponse | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string;data: BodyType<MarketAvailabilityUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateDocumentMarketAvailability>>,
+        TError,
+        {documentId: string;marketEditionId: string;data: BodyType<MarketAvailabilityUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateDocumentMarketAvailabilityMutationOptions(options));
+    }
+
+export const getPublishDocumentMarketAvailabilityUrl = (documentId: string,
+    marketEditionId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/market-availability/${marketEditionId}/publish`
+}
+
+/**
+ * @summary Publish a staged person market availability decision
+ */
+export const publishDocumentMarketAvailability = async (documentId: string,
+    marketEditionId: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getPublishDocumentMarketAvailabilityUrl(documentId,marketEditionId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPublishDocumentMarketAvailabilityMutationOptions = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string}, TContext> => {
+
+const mutationKey = ['publishDocumentMarketAvailability'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, {documentId: string;marketEditionId: string}> = (props) => {
+          const {documentId,marketEditionId} = props ?? {};
+
+          return  publishDocumentMarketAvailability(documentId,marketEditionId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublishDocumentMarketAvailabilityMutationResult = NonNullable<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>>
+
+    export type PublishDocumentMarketAvailabilityMutationError = ErrorType<ConflictResponse>
+
+    /**
+ * @summary Publish a staged person market availability decision
+ */
+export const usePublishDocumentMarketAvailability = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publishDocumentMarketAvailability>>,
+        TError,
+        {documentId: string;marketEditionId: string},
+        TContext
+      > => {
+      return useMutation(getPublishDocumentMarketAvailabilityMutationOptions(options));
+    }
 
 export const getGetDocumentRevisionUrl = (documentId: string,
     revisionId: string,) => {

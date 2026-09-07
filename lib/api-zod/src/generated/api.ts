@@ -2219,6 +2219,69 @@ export const ListDocumentRevisionsResponse = zod.object({
 
 
 /**
+ * @summary Get a person's decisions for every configured market edition
+ */
+export const GetDocumentMarketAvailabilityParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const GetDocumentMarketAvailabilityResponse = zod.object({
+  "documentId": zod.string(),
+  "items": zod.array(zod.object({
+  "marketEditionId": zod.string(),
+  "market": zod.string(),
+  "displayName": zod.string(),
+  "enabled": zod.boolean(),
+  "publishedDecision": zod.enum(['inherit', 'show', 'off']),
+  "publishedEffectiveAvailable": zod.boolean().describe('Whether the currently published decision permits public resolution.'),
+  "pendingDecision": zod.union([zod.enum(['inherit', 'show', 'off']),zod.null()]).describe('An editor-staged decision that is not public until published.'),
+  "previewEffectiveAvailable": zod.boolean().describe('Whether a preview resolves after applying the pending decision.'),
+  "hasEdition": zod.boolean().describe('Whether the document has its own content edition for this market.'),
+  "updatedAt": zod.coerce.date().nullable(),
+  "publishedAt": zod.coerce.date().nullable()
+}))
+})
+
+
+/**
+ * @summary Set a person's governed availability for a market edition
+ */
+export const UpdateDocumentMarketAvailabilityParams = zod.object({
+  "documentId": zod.coerce.string(),
+  "marketEditionId": zod.coerce.string()
+})
+
+export const UpdateDocumentMarketAvailabilityBody = zod.object({
+  "decision": zod.enum(['inherit', 'show', 'off'])
+})
+
+export const UpdateDocumentMarketAvailabilityResponse = zod.object({
+  "marketEditionId": zod.string(),
+  "market": zod.string(),
+  "displayName": zod.string(),
+  "enabled": zod.boolean(),
+  "publishedDecision": zod.enum(['inherit', 'show', 'off']),
+  "publishedEffectiveAvailable": zod.boolean().describe('Whether the currently published decision permits public resolution.'),
+  "pendingDecision": zod.union([zod.enum(['inherit', 'show', 'off']),zod.null()]).describe('An editor-staged decision that is not public until published.'),
+  "previewEffectiveAvailable": zod.boolean().describe('Whether a preview resolves after applying the pending decision.'),
+  "hasEdition": zod.boolean().describe('Whether the document has its own content edition for this market.'),
+  "updatedAt": zod.coerce.date().nullable(),
+  "publishedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Publish a staged person market availability decision
+ */
+export const PublishDocumentMarketAvailabilityParams = zod.object({
+  "documentId": zod.coerce.string(),
+  "marketEditionId": zod.coerce.string()
+})
+
+export const PublishDocumentMarketAvailabilityResponse = zod.void()
+
+
+/**
  * @summary Get a document revision
  */
 export const GetDocumentRevisionParams = zod.object({
@@ -4701,6 +4764,8 @@ export const ListPublishedContentResponse = zod.object({
 })).optional(),
   "market": zod.string(),
   "locale": zod.string(),
+  "requestedMarket": zod.string(),
+  "usedFallback": zod.boolean(),
   "revision": zod.number().min(1).multipleOf(listPublishedContentResponseTwoItemsItemRevisionMultipleOf),
   "publishedAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -4756,6 +4821,8 @@ export const GetPublishedContentResponse = zod.object({
 })).optional(),
   "market": zod.string(),
   "locale": zod.string(),
+  "requestedMarket": zod.string(),
+  "usedFallback": zod.boolean(),
   "revision": zod.number().min(1).multipleOf(getPublishedContentResponseRevisionMultipleOf),
   "publishedAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()

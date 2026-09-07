@@ -821,6 +821,44 @@ export interface DocumentUpdate {
   revisionNumber: number;
 }
 
+export type MarketAvailabilityDecision = typeof MarketAvailabilityDecision[keyof typeof MarketAvailabilityDecision];
+
+
+export const MarketAvailabilityDecision = {
+  inherit: 'inherit',
+  show: 'show',
+  off: 'off',
+} as const;
+
+export interface MarketAvailability {
+  marketEditionId: string;
+  market: string;
+  displayName: string;
+  enabled: boolean;
+  publishedDecision: MarketAvailabilityDecision;
+  /** Whether the currently published decision permits public resolution. */
+  publishedEffectiveAvailable: boolean;
+  /** An editor-staged decision that is not public until published. */
+  pendingDecision: MarketAvailabilityDecision | null;
+  /** Whether a preview resolves after applying the pending decision. */
+  previewEffectiveAvailable: boolean;
+  /** Whether the document has its own content edition for this market. */
+  hasEdition: boolean;
+  /** @nullable */
+  updatedAt: string | null;
+  /** @nullable */
+  publishedAt: string | null;
+}
+
+export interface DocumentMarketAvailability {
+  documentId: string;
+  items: MarketAvailability[];
+}
+
+export interface MarketAvailabilityUpdate {
+  decision: MarketAvailabilityDecision;
+}
+
 export interface DocumentSnapshot {
   slug: string;
   title: string;
@@ -1335,6 +1373,8 @@ export interface PublishedContent {
   media?: PublicMedia[];
   market: string;
   locale: string;
+  requestedMarket: string;
+  usedFallback: boolean;
   /** @minimum 1 */
   revision: number;
   publishedAt: string;

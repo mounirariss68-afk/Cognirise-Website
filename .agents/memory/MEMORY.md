@@ -9,3 +9,4 @@
 - [API TypeScript route tests](api-typescript-route-tests.md) — Bundle route-level tests with the server build tool; native type stripping cannot resolve this monorepo’s extensionless ESM imports.
 - [CMS media import authority](cms-media-import-authority.md) — Never equate imported media metadata with durable object upload; keep inaccessible or unreviewed assets private and pending.
 - [CMS merge reconciliation](cms-merge-reconciliation.md) — Development data created by isolated task work must cross the merge boundary through safe, idempotent reconciliation.
+- [Person market availability](person-market-availability.md) — Stage and publish availability separately; requested-market suppression must run before content fallback.

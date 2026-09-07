@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { Storage } from "@google-cloud/storage";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { type CmsDocumentKind, validateCmsSnapshot } from "@workspace/api-zod";
 import {
   emitJson,
@@ -12,10 +12,14 @@ import {
 import {
   mediaMigrationOperations,
   migrationOperations,
+  personAvailabilityOperations,
+  personGovernanceOperations,
   resolveMigrationMedia,
   resultDigest,
   type MediaMigrationOperation,
   type MigrationOperation,
+  type PersonAvailabilityOperation,
+  type PersonGovernanceOperation,
 } from "./migration.js";
 
 const args = process.argv.slice(2);
@@ -90,6 +94,8 @@ async function uploadMedia(operations: MediaMigrationOperation[]) {
 async function applyDatabase(
   operations: MigrationOperation[],
   mediaOperations: MediaMigrationOperation[],
+  availabilityOperations: PersonAvailabilityOperation[],
+  governanceOperations: PersonGovernanceOperation[],
   storageKeys: Map<string, string>,
 ) {
   const {
@@ -100,6 +106,7 @@ async function applyDatabase(
     cmsMediaReferencesTable,
     cmsMediaVersionsTable,
     cmsOperationReceiptsTable,
+    cmsPersonMarketAvailabilityTable,
     cmsRevisionsTable,
     cmsUsersTable,
     marketEditionsTable,
@@ -147,7 +154,10 @@ async function applyDatabase(
         const [receipt] = await tx.select().from(cmsOperationReceiptsTable)
           .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.idempotencyKey));
         if (receipt && receipt.requestDigest !== operation.requestDigest) {
-          throw new Error(`Media idempotency conflict for ${operation.externalId}.`);
+          console.error(`Preserving previously imported media for ${operation.externalId}; the inventory digest changed.`);
+          mediaByPath.set(operation.publicPath, receipt.subjectId);
+          mediaReplayed++;
+          continue;
         }
         let [asset] = await tx.select({ id: cmsMediaAssetsTable.id })
           .from(cmsMediaAssetsTable)
@@ -210,7 +220,9 @@ async function applyDatabase(
           .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.idempotencyKey));
         if (receipt) {
           if (receipt.requestDigest !== operation.requestDigest) {
-            throw new Error(`Idempotency key conflict for ${operation.externalId}; inventory content changed.`);
+            console.error(`Preserving previously imported document for ${operation.externalId}; the inventory digest changed.`);
+            replayed++;
+            continue;
           }
           replayed++;
           continue;
@@ -280,7 +292,237 @@ async function applyDatabase(
         });
         created++;
       }
-      return { created, replayed, mediaCreated, mediaReplayed };
+      let availabilityCreated = 0;
+      let availabilityReplayed = 0;
+      const availabilityConflicts: string[] = [];
+      for (const operation of availabilityOperations) {
+        const [receipt] = await tx.select().from(cmsOperationReceiptsTable)
+          .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.idempotencyKey));
+        if (receipt) {
+          if (receipt.requestDigest !== operation.requestDigest) {
+            console.error(`Preserving previously initialized availability for ${operation.externalId}; the inventory digest changed.`);
+            availabilityReplayed++;
+            continue;
+          }
+          availabilityReplayed++;
+          continue;
+        }
+        const [documentReceipt] = await tx.select().from(cmsOperationReceiptsTable)
+          .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.documentIdempotencyKey));
+        if (!documentReceipt) {
+          throw new Error(`Cannot initialize availability before importing ${operation.externalId}.`);
+        }
+        const [market] = await tx.select({ id: marketEditionsTable.id }).from(marketEditionsTable)
+          .where(eq(marketEditionsTable.code, operation.market));
+        if (!market) throw new Error(`Configured market ${operation.market} was not found.`);
+        const [existingAvailability] = await tx.select({
+          publishedDecision: cmsPersonMarketAvailabilityTable.publishedDecision,
+        }).from(cmsPersonMarketAvailabilityTable).where(and(
+          eq(cmsPersonMarketAvailabilityTable.documentId, documentReceipt.subjectId),
+          eq(cmsPersonMarketAvailabilityTable.marketEditionId, market.id),
+        ));
+        if (existingAvailability && existingAvailability.publishedDecision !== operation.decision) {
+          availabilityConflicts.push(
+            `${operation.externalId}: existing ${existingAvailability.publishedDecision}, inventory ${operation.decision}`,
+          );
+          console.error(`Preserving editorial availability for ${operation.externalId}; it conflicts with the inventory default.`);
+          await tx.insert(cmsOperationReceiptsTable).values({
+            idempotencyKey: operation.idempotencyKey,
+            operation: "cms.inventory.person-market-availability-conflict-preserved",
+            subjectId: documentReceipt.subjectId,
+            requestDigest: operation.requestDigest,
+            resultDigest: resultDigest({
+              documentId: documentReceipt.subjectId,
+              market: operation.market,
+              preservedDecision: existingAvailability.publishedDecision,
+              inventoryDecision: operation.decision,
+            }),
+          });
+          await tx.insert(cmsAuditEventsTable).values({
+            actorUserId: serviceAccount.id,
+            actorLabel: "cms-inventory-migration",
+            action: "cms.inventory.person-market-availability-conflict-preserved",
+            targetType: "person",
+            targetId: documentReceipt.subjectId,
+            requestId: operation.idempotencyKey,
+            metadata: {
+              market: operation.market,
+              preservedDecision: existingAvailability.publishedDecision,
+              inventoryDecision: operation.decision,
+            },
+          });
+          availabilityCreated++;
+          continue;
+        }
+        if (!existingAvailability) {
+          await tx.insert(cmsPersonMarketAvailabilityTable).values({
+            documentId: documentReceipt.subjectId,
+            marketEditionId: market.id,
+            decision: operation.decision,
+            publishedDecision: operation.decision,
+            updatedByUserId: serviceAccount.id,
+            publishedByUserId: serviceAccount.id,
+            publishedAt: new Date(),
+          });
+        }
+        await tx.insert(cmsOperationReceiptsTable).values({
+          idempotencyKey: operation.idempotencyKey,
+          operation: "cms.inventory.person-market-availability",
+          subjectId: documentReceipt.subjectId,
+          requestDigest: operation.requestDigest,
+          resultDigest: resultDigest({
+            documentId: documentReceipt.subjectId,
+            marketEditionId: market.id,
+            decision: operation.decision,
+          }),
+        });
+        await tx.insert(cmsAuditEventsTable).values({
+          actorUserId: serviceAccount.id,
+          actorLabel: "cms-inventory-migration",
+          action: "cms.inventory.person-market-availability-initialized",
+          targetType: "person",
+          targetId: documentReceipt.subjectId,
+          requestId: operation.idempotencyKey,
+          metadata: { market: operation.market, decision: operation.decision },
+        });
+        availabilityCreated++;
+      }
+      let governanceCreated = 0;
+      let governanceReplayed = 0;
+      const governanceConflicts: string[] = [];
+      for (const operation of governanceOperations) {
+        const [receipt] = await tx.select().from(cmsOperationReceiptsTable)
+          .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.idempotencyKey));
+        if (receipt) {
+          if (receipt.requestDigest !== operation.requestDigest) {
+            governanceConflicts.push(`${operation.externalId}: governance receipt digest changed`);
+          } else {
+            governanceReplayed++;
+          }
+          continue;
+        }
+        const [documentReceipt] = await tx.select().from(cmsOperationReceiptsTable)
+          .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.documentIdempotencyKey));
+        if (!documentReceipt) {
+          governanceConflicts.push(`${operation.externalId}: legacy import receipt not found`);
+          continue;
+        }
+        const preserveGovernanceConflict = async (reason: string, preserved: unknown) => {
+          governanceConflicts.push(`${operation.externalId}: ${reason}`);
+          console.error(`Preserving editorial person fields for ${operation.externalId}: ${reason}.`);
+          await tx.insert(cmsOperationReceiptsTable).values({
+            idempotencyKey: operation.idempotencyKey,
+            operation: "cms.inventory.person-governance-conflict-preserved",
+            subjectId: documentReceipt.subjectId,
+            requestDigest: operation.requestDigest,
+            resultDigest: resultDigest({
+              documentId: documentReceipt.subjectId,
+              preserved,
+              inventoryControlled: operation.controlled,
+            }),
+          });
+          await tx.insert(cmsAuditEventsTable).values({
+            actorUserId: serviceAccount.id,
+            actorLabel: "cms-inventory-migration",
+            action: "cms.inventory.person-governance-conflict-preserved",
+            targetType: "person",
+            targetId: documentReceipt.subjectId,
+            requestId: operation.idempotencyKey,
+            metadata: {
+              market: operation.market,
+              reason,
+              preserved,
+              inventoryControlled: operation.controlled,
+            },
+          });
+          governanceCreated++;
+        };
+        const [edition] = await tx.select().from(cmsMarketEditionsTable).where(and(
+          eq(cmsMarketEditionsTable.documentId, documentReceipt.subjectId),
+          eq(cmsMarketEditionsTable.market, operation.market),
+        ));
+        if (!edition) {
+          await preserveGovernanceConflict("canonical market edition not found", null);
+          continue;
+        }
+        const [current] = await tx.select().from(cmsRevisionsTable)
+          .where(eq(cmsRevisionsTable.editionId, edition.id))
+          .orderBy(desc(cmsRevisionsTable.revisionNumber))
+          .limit(1);
+        const payload = current?.payload as Record<string, unknown> | undefined;
+        const content = payload?.content as Record<string, unknown> | undefined;
+        const actual = content && typeof content.role === "string" && typeof content.title === "string"
+          && typeof content.order === "number"
+          ? { role: content.role, title: content.title, order: content.order }
+          : undefined;
+        const matches = (candidate: typeof actual) => candidate
+          && candidate.role === operation.controlled.role
+          && candidate.title === operation.controlled.title
+          && candidate.order === operation.controlled.order;
+        const isLegacy = actual && operation.legacyControlled.some((candidate) =>
+          candidate.role === actual.role && candidate.title === actual.title && candidate.order === actual.order,
+        );
+        if (!current || !payload || !content || (!matches(actual) && !isLegacy)) {
+          await preserveGovernanceConflict(
+            "controlled fields differ from known legacy or desired values",
+            actual ?? null,
+          );
+          continue;
+        }
+        let revisionId = current.id;
+        if (!matches(actual)) {
+          const nextPayload = {
+            ...payload,
+            content: { ...content, ...operation.controlled },
+          };
+          const validation = validateCmsSnapshot("person", nextPayload, "draft");
+          if (!validation.success) {
+            governanceConflicts.push(`${operation.externalId}: ${validation.errors.join("; ")}`);
+            continue;
+          }
+          const [revision] = await tx.insert(cmsRevisionsTable).values({
+            editionId: edition.id,
+            revisionNumber: current.revisionNumber + 1,
+            payloadVersion: current.payloadVersion,
+            payload: validation.data,
+            contentDigest: resultDigest(validation.data),
+            workflowState: "draft",
+            createdByUserId: serviceAccount.id,
+            reason: "Versioned person governance reconciliation; pending editorial review.",
+          }).returning({ id: cmsRevisionsTable.id });
+          if (!revision) throw new Error(`Could not create governance revision for ${operation.externalId}.`);
+          revisionId = revision.id;
+        }
+        await tx.insert(cmsOperationReceiptsTable).values({
+          idempotencyKey: operation.idempotencyKey,
+          operation: "cms.inventory.person-governance",
+          subjectId: documentReceipt.subjectId,
+          requestDigest: operation.requestDigest,
+          resultDigest: resultDigest({ documentId: documentReceipt.subjectId, revisionId, controlled: operation.controlled }),
+        });
+        await tx.insert(cmsAuditEventsTable).values({
+          actorUserId: serviceAccount.id,
+          actorLabel: "cms-inventory-migration",
+          action: "cms.inventory.person-governance-reconciled",
+          targetType: "person",
+          targetId: documentReceipt.subjectId,
+          requestId: operation.idempotencyKey,
+          metadata: { market: operation.market, revisionId, controlled: operation.controlled },
+        });
+        governanceCreated++;
+      }
+      return {
+        created,
+        replayed,
+        mediaCreated,
+        mediaReplayed,
+        availabilityCreated,
+        availabilityReplayed,
+        availabilityConflicts,
+        governanceCreated,
+        governanceReplayed,
+        governanceConflicts,
+      };
     });
     return { before, ...imported };
   } finally {
@@ -295,11 +537,13 @@ async function main() {
   }
   const operations = migrationOperations(inventory.records);
   const mediaOperations = mediaMigrationOperations(inventory.records);
+  const availabilityOperations = personAvailabilityOperations(inventory.records);
+  const governanceOperations = personGovernanceOperations(inventory.records);
   let database;
   if (shouldApplyDatabase) {
     assertDevelopmentTarget();
     const storageKeys = await uploadMedia(mediaOperations);
-    database = await applyDatabase(operations, mediaOperations, storageKeys);
+    database = await applyDatabase(operations, mediaOperations, availabilityOperations, governanceOperations, storageKeys);
     if (shouldWrite) {
       await emitJson({
         schemaVersion: 1,
@@ -325,6 +569,8 @@ async function main() {
       ? `Imported governed UAE/English drafts and candidate media metadata. No content was approved or published; media remains pending rights/accessibility${deferMediaUpload ? " and durable-object upload" : ""} review.`
       : "No storage or database call was made. Use --apply-db --target=development to import governed drafts.",
     operations,
+    availabilityOperations,
+    governanceOperations,
     mediaOperations,
     database,
   }, outputPath(destination, "import-payload.json"), shouldWrite);

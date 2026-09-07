@@ -2,8 +2,9 @@
   "schemaVersion": 2,
   "source": "artifacts/cognirise-website",
   "expectedCounts": {
-    "people": 5,
-    "founders": 2,
+    "people": 8,
+    "founders": 3,
+    "leaders": 2,
     "advisors": 3,
     "partners": 5,
     "platforms": 5,
@@ -27,26 +28,14 @@
       "route": "/about",
       "fields": {
         "slug": "mounir-ariss",
-        "summary": "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage — now focused on one conviction: the next frontier isn't AI adoption, it's becoming an agentic enterprise.",
+        "summary": "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage, with senior accountability kept close to delivery.",
         "content": {
           "schemaVersion": 1,
           "role": "founder",
-          "title": "Founding Partner",
-          "biography": "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage — now focused on one conviction: the next frontier isn't AI adoption, it's becoming an agentic enterprise.",
-          "focusAreas": [
-            {
-              "title": "Agentic Enterprise Transformation",
-              "detail": "Advisory judgment, AI-native workflows and production engineering"
-            },
-            {
-              "title": "Sovereign AI & Data Foundations",
-              "detail": "Architecture, governance and local control"
-            },
-            {
-              "title": "Digital Workforce & Platforms",
-              "detail": "Connected knowledge, agents and integrations"
-            }
-          ],
+          "title": "CEO & Co-founder",
+          "biography": "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage, with senior accountability kept close to delivery.",
+          "contribution": "Strategic judgment, practical transformation leadership and a focus on turning consequential AI decisions into operating results.",
+          "focusAreas": [],
           "profileLinks": [],
           "visibility": "public",
           "order": 0,
@@ -58,7 +47,119 @@
           ],
           "relatedIds": []
         },
-        "mediaPaths": []
+        "mediaPaths": [],
+        "initialMarketAvailability": "show"
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm title, profile source, verification date, review date, market visibility, and approved identity media or fallback."
+        ]
+      }
+    },
+    {
+      "externalId": "person:0af0924910a556b5f374",
+      "type": "person",
+      "name": "Bulent Egrilmez",
+      "sourceFile": "src/pages/AboutPeople.tsx",
+      "route": "/about",
+      "fields": {
+        "slug": "bulent-egrilmez",
+        "summary": "A technology leader focused on production-grade AI, LLM and RAG systems, multi-agent architecture, product delivery and enterprise transformation.",
+        "content": {
+          "schemaVersion": 1,
+          "role": "founder",
+          "title": "CTO & Co-founder",
+          "biography": "A technology leader focused on production-grade AI, LLM and RAG systems, multi-agent architecture, product delivery and enterprise transformation.",
+          "contribution": "The engineering discipline to move AI from a promising prototype into secure, scalable systems that perform in production.",
+          "focusAreas": [],
+          "profileLinks": [],
+          "visibility": "public",
+          "order": 1,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": [],
+        "initialMarketAvailability": "show"
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm title, profile source, verification date, review date, market visibility, and approved identity media or fallback."
+        ]
+      }
+    },
+    {
+      "externalId": "person:4b66d17219fef61bc32d",
+      "type": "person",
+      "name": "Omer Barbaros Yis",
+      "sourceFile": "src/pages/AboutPeople.tsx",
+      "route": "/about",
+      "fields": {
+        "slug": "omer-barbaros-yis",
+        "summary": "An experienced business and technology leader helping organisations connect strategic ambition, operating priorities and executable transformation.",
+        "content": {
+          "schemaVersion": 1,
+          "role": "founder",
+          "title": "Co-founder",
+          "biography": "An experienced business and technology leader helping organisations connect strategic ambition, operating priorities and executable transformation.",
+          "contribution": "An operator’s perspective on shaping partnerships and practical routes from enterprise priorities to sustained value.",
+          "focusAreas": [],
+          "profileLinks": [],
+          "visibility": "public",
+          "order": 2,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": [],
+        "initialMarketAvailability": "show"
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm title, profile source, verification date, review date, market visibility, and approved identity media or fallback."
+        ]
+      }
+    },
+    {
+      "externalId": "person:5a04a9ee3d62e4e602d8",
+      "type": "person",
+      "name": "Hisham Nofal, PhD.",
+      "sourceFile": "src/pages/AboutPeople.tsx",
+      "route": "/about",
+      "fields": {
+        "slug": "hisham-nofal-phd",
+        "summary": "More than two decades across education consulting, sector leadership and academia, with deep experience of GCC and MENA education systems and former leadership of KPMG Saudi Arabia’s education sector.",
+        "content": {
+          "schemaVersion": 1,
+          "role": "leader",
+          "title": "Education Sector lead",
+          "biography": "More than two decades across education consulting, sector leadership and academia, with deep experience of GCC and MENA education systems and former leadership of KPMG Saudi Arabia’s education sector.",
+          "contribution": "Sector depth that connects education policy and institutional ambition with workable, responsible transformation.",
+          "focusAreas": [],
+          "profileLinks": [],
+          "visibility": "public",
+          "order": 3,
+          "sources": [
+            {
+              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "relatedIds": []
+        },
+        "mediaPaths": [],
+        "initialMarketAvailability": "show"
       },
       "review": {
         "status": "needs-review",
@@ -75,29 +176,17 @@
       "route": "/about",
       "fields": {
         "slug": "gokhan-guney",
-        "summary": "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf — building the engineering muscle that turns strategy decks into systems that run.",
+        "summary": "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf, building the engineering muscle that turns strategy into systems that run.",
         "content": {
           "schemaVersion": 1,
-          "role": "founder",
-          "title": "Founding Partner",
-          "biography": "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf — building the engineering muscle that turns strategy decks into systems that run.",
-          "focusAreas": [
-            {
-              "title": "Agentic Enterprise Transformation",
-              "detail": "Humans and engineers carrying change into production"
-            },
-            {
-              "title": "Sovereign AI & Data Foundations",
-              "detail": "Governed solutions designed for local operating realities"
-            },
-            {
-              "title": "Digital Workforce & Platforms",
-              "detail": "Platforms and operating models that scale"
-            }
-          ],
+          "role": "leader",
+          "title": "Co-founder",
+          "biography": "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf, building the engineering muscle that turns strategy into systems that run.",
+          "contribution": "Delivery leadership, local operating knowledge and the discipline required to carry complex change into production.",
+          "focusAreas": [],
           "profileLinks": [],
           "visibility": "public",
-          "order": 1,
+          "order": 4,
           "sources": [
             {
               "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
@@ -106,7 +195,8 @@
           ],
           "relatedIds": []
         },
-        "mediaPaths": []
+        "mediaPaths": [],
+        "initialMarketAvailability": "off"
       },
       "review": {
         "status": "needs-review",
@@ -119,30 +209,31 @@
       "externalId": "person:f62fafba1d69ec9281e2",
       "type": "person",
       "name": "Alexis Lecanuet",
-      "sourceFile": "src/pages/Advisors.tsx",
-      "route": "/advisors",
+      "sourceFile": "src/pages/AboutPeople.tsx",
+      "route": "/about",
       "fields": {
         "slug": "alexis-lecanuet",
-        "summary": "A 24-year Accenture career culminating in leadership of the firm's Middle East business — strategy execution, client portfolio leadership and regional operations. Previously built and expanded Accenture's products portfolio across the Middle East and Türkiye, with deep roots in consumer, retail and large-scale digital transformation across Europe and MENA. Ranked among Forbes Middle East's “Global Meets Local” top 50 executives; board member of INJAZ ME; educated at ESCP Europe and SKEMA.",
+        "summary": "A senior regional leader with extensive experience in strategy execution, client portfolio leadership and large-scale digital transformation across Europe and MENA.",
         "content": {
           "schemaVersion": 1,
           "role": "advisor",
-          "title": "Regional Senior Managing Director, Accenture Middle East",
-          "biography": "A 24-year Accenture career culminating in leadership of the firm's Middle East business — strategy execution, client portfolio leadership and regional operations. Previously built and expanded Accenture's products portfolio across the Middle East and Türkiye, with deep roots in consumer, retail and large-scale digital transformation across Europe and MENA. Ranked among Forbes Middle East's “Global Meets Local” top 50 executives; board member of INJAZ ME; educated at ESCP Europe and SKEMA.",
-          "contribution": "The incumbent's playbook, from the inside: how global consultancies win, price and scale in this region — so our senior-led, platform-powered model is sharpened precisely where the traditional model is weakest.",
+          "title": "Former Regional CEO, Accenture Middle East",
+          "biography": "A senior regional leader with extensive experience in strategy execution, client portfolio leadership and large-scale digital transformation across Europe and MENA.",
+          "contribution": "An inside view of how transformation firms win and scale in the region, sharpening Cognirise’s senior-led, platform-powered model.",
           "focusAreas": [],
           "profileLinks": [],
           "visibility": "public",
-          "order": 0,
+          "order": 5,
           "sources": [
             {
-              "label": "Profile per AmCham Abu Dhabi bio, Forbes Middle East and Consultancy-me.com, accessed August 2026.",
+              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
               "accessedAt": "2026-09-06"
             }
           ],
           "relatedIds": []
         },
-        "mediaPaths": []
+        "mediaPaths": [],
+        "initialMarketAvailability": "show"
       },
       "review": {
         "status": "needs-review",
@@ -155,30 +246,31 @@
       "externalId": "person:66893d0003c5bb956534",
       "type": "person",
       "name": "Rami Aslan",
-      "sourceFile": "src/pages/Advisors.tsx",
-      "route": "/advisors",
+      "sourceFile": "src/pages/AboutPeople.tsx",
+      "route": "/about",
       "fields": {
         "slug": "rami-aslan",
-        "summary": "More than 25 years across North America, Europe, the Middle East and Africa. CEO of Türk Telekom (2013–2017) — Türkiye's largest telecom operator, with some 35,000 employees serving 40+ million customers — after leading Oger Telecom as CEO and executive board member. Earlier, head of M&A and corporate finance at the Oger Group, concluding transactions exceeding US$25 billion, following banking roles at Citigroup and TD covering telecom and technology. Board roles have spanned Avea, TTNET, Cell-C and operators across four more countries. Since 2018, a co-founder of venture and private-equity initiatives. McGill BCom and MBA.",
+        "summary": "More than 25 years across North America, Europe, the Middle East and Africa, spanning telecom operations, corporate finance, investment and board leadership.",
         "content": {
           "schemaVersion": 1,
           "role": "advisor",
           "title": "Former CEO, Türk Telekom · Investor & Board Member",
-          "biography": "More than 25 years across North America, Europe, the Middle East and Africa. CEO of Türk Telekom (2013–2017) — Türkiye's largest telecom operator, with some 35,000 employees serving 40+ million customers — after leading Oger Telecom as CEO and executive board member. Earlier, head of M&A and corporate finance at the Oger Group, concluding transactions exceeding US$25 billion, following banking roles at Citigroup and TD covering telecom and technology. Board roles have spanned Avea, TTNET, Cell-C and operators across four more countries. Since 2018, a co-founder of venture and private-equity initiatives. McGill BCom and MBA.",
-          "contribution": "The operator's seat: what transformation looks like when you're accountable for 35,000 people and a nation's network — plus an investor's discipline on our economics and a telecom depth that anchors one of our core industries.",
+          "biography": "More than 25 years across North America, Europe, the Middle East and Africa, spanning telecom operations, corporate finance, investment and board leadership.",
+          "contribution": "The operator’s seat on transformation at national scale, alongside investor discipline and deep telecom expertise.",
           "focusAreas": [],
           "profileLinks": [],
           "visibility": "public",
-          "order": 1,
+          "order": 6,
           "sources": [
             {
-              "label": "Profile per McGill Desautels advisory board bio and public announcements, accessed August 2026.",
+              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
               "accessedAt": "2026-09-06"
             }
           ],
           "relatedIds": []
         },
-        "mediaPaths": []
+        "mediaPaths": [],
+        "initialMarketAvailability": "show"
       },
       "review": {
         "status": "needs-review",
@@ -191,30 +283,31 @@
       "externalId": "person:869b2b63e38d11b890d4",
       "type": "person",
       "name": "Fadi Mattar",
-      "sourceFile": "src/pages/Advisors.tsx",
-      "route": "/advisors",
+      "sourceFile": "src/pages/AboutPeople.tsx",
+      "route": "/about",
       "fields": {
         "slug": "fadi-mattar",
-        "summary": "A senior corporate-affairs and country leader at Dow, responsible for public and government affairs across India, the Middle East, Africa and Türkiye, and for Dow's business in Kuwait and the Levant. His Dow decade spans public affairs, government relations and country leadership; before Dow he headed corporate communications at EQUATE Petrochemical, served as Marketing Director for MENA at American Express, and held corporate communications and marketing roles at Citibank across the UAE, Bahrain and Oman — a career bridging energy & petrochemicals, financial services, and the corridors where business meets government in the Gulf.",
+        "summary": "A senior corporate-affairs and country leader whose career bridges energy and petrochemicals, financial services, government relations and business leadership in the Gulf.",
         "content": {
           "schemaVersion": 1,
           "role": "advisor",
           "title": "Public & Government Affairs Director — IMEA & Türkiye, and Country Director Kuwait & Levant, Dow",
-          "biography": "A senior corporate-affairs and country leader at Dow, responsible for public and government affairs across India, the Middle East, Africa and Türkiye, and for Dow's business in Kuwait and the Levant. His Dow decade spans public affairs, government relations and country leadership; before Dow he headed corporate communications at EQUATE Petrochemical, served as Marketing Director for MENA at American Express, and held corporate communications and marketing roles at Citibank across the UAE, Bahrain and Oman — a career bridging energy & petrochemicals, financial services, and the corridors where business meets government in the Gulf.",
-          "contribution": "The stakeholder map: how large industrials and governments in the Gulf actually make decisions — sharpening our energy & resources proposition, our public-sector posture, and how the Cognirise story lands with boards, ministries and media.",
+          "biography": "A senior corporate-affairs and country leader whose career bridges energy and petrochemicals, financial services, government relations and business leadership in the Gulf.",
+          "contribution": "A grounded understanding of how large industrial organisations and governments make decisions, strengthening our market and stakeholder perspective.",
           "focusAreas": [],
           "profileLinks": [],
           "visibility": "public",
-          "order": 2,
+          "order": 7,
           "sources": [
             {
-              "label": "Profile per Dow announcements and public executive profiles (publicly spelled “Fadi Matar”), accessed August 2026.",
+              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
               "accessedAt": "2026-09-06"
             }
           ],
           "relatedIds": []
         },
-        "mediaPaths": []
+        "mediaPaths": [],
+        "initialMarketAvailability": "show"
       },
       "review": {
         "status": "needs-review",
@@ -2019,7 +2112,6 @@
         "height": 1024,
         "usages": [
           "artifacts/cognirise-website/src/content/industries.ts",
-          "artifacts/cognirise-website/src/pages/AboutPeople.tsx",
           "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
           "artifacts/cognirise-website/src/pages/Home.tsx"
         ],
@@ -2056,6 +2148,7 @@
         "width": 1024,
         "height": 1024,
         "usages": [
+          "artifacts/cognirise-website/src/components/layout/Shell.tsx",
           "artifacts/cognirise-website/src/pages/Home.tsx"
         ],
         "cmsOwnership": "code-owned",
@@ -2371,7 +2464,7 @@
       "digest": "61c0e28ea60a07c3eed1aecf06446f9c1cb83c607e565ecae076cfd7625c5a71"
     }
   ],
-  "manifestDigest": "a2490dfce10bee01ae910ddf0b8f9e9a331bf0e0d3aa2529b17f448f885d329c",
-  "generatedAt": "2026-09-06T20:35:20.843Z",
+  "manifestDigest": "d0936e30be5e3db7f13e2dd577e0775aab4dcbac97400a12a508c01cf0836d02",
+  "generatedAt": "2026-09-07T01:50:54.592Z",
   "dryRun": false
 }

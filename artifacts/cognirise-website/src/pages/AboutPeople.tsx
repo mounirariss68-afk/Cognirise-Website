@@ -1,118 +1,188 @@
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { assetUrl } from "@/lib/assets";
-import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
-import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
-import { SERVICE_LINE_LABELS } from "@/lib/serviceLines";
+import { contentRecord, useCmsCollection } from "@/lib/cms";
 
-const foundersFallback = [
+type TeamProfile = {
+  initials: string;
+  name: string;
+  group: "leadership" | "advisor";
+  title: string;
+  background: string;
+  contribution: string;
+  enabled: boolean;
+};
+
+export const peopleFallback: TeamProfile[] = [
   {
     initials: "MA",
     name: "Mounir Ariss",
-    bio: "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage — now focused on one conviction: the next frontier isn't AI adoption, it's becoming an agentic enterprise.",
-    focus: [
-      [SERVICE_LINE_LABELS[0], "Advisory judgment, AI-native workflows and production engineering"],
-      [SERVICE_LINE_LABELS[1], "Architecture, governance and local control"],
-      [SERVICE_LINE_LABELS[2], "Connected knowledge, agents and integrations"],
-    ],
+    group: "leadership",
+    title: "CEO & Co-founder",
+    background: "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage, with senior accountability kept close to delivery.",
+    contribution: "Strategic judgment, practical transformation leadership and a focus on turning consequential AI decisions into operating results.",
+    enabled: true,
+  },
+  {
+    initials: "BE",
+    name: "Bulent Egrilmez",
+    group: "leadership",
+    title: "CTO & Co-founder",
+    background: "A technology leader focused on production-grade AI, LLM and RAG systems, multi-agent architecture, product delivery and enterprise transformation.",
+    contribution: "The engineering discipline to move AI from a promising prototype into secure, scalable systems that perform in production.",
+    enabled: true,
+  },
+  {
+    initials: "OBY",
+    name: "Omer Barbaros Yis",
+    group: "leadership",
+    title: "Co-founder",
+    background: "An experienced business and technology leader helping organisations connect strategic ambition, operating priorities and executable transformation.",
+    contribution: "An operator’s perspective on shaping partnerships and practical routes from enterprise priorities to sustained value.",
+    enabled: true,
+  },
+  {
+    initials: "HN",
+    name: "Hisham Nofal, PhD.",
+    group: "leadership",
+    title: "Education Sector lead",
+    background: "More than two decades across education consulting, sector leadership and academia, with deep experience of GCC and MENA education systems and former leadership of KPMG Saudi Arabia’s education sector.",
+    contribution: "Sector depth that connects education policy and institutional ambition with workable, responsible transformation.",
+    enabled: true,
   },
   {
     initials: "GG",
     name: "Gökhan Güney",
-    bio: "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf — building the engineering muscle that turns strategy decks into systems that run.",
-    focus: [
-      [SERVICE_LINE_LABELS[0], "Humans and engineers carrying change into production"],
-      [SERVICE_LINE_LABELS[1], "Governed solutions designed for local operating realities"],
-      [SERVICE_LINE_LABELS[2], "Platforms and operating models that scale"],
-    ],
+    group: "leadership",
+    title: "Co-founder",
+    background: "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf, building the engineering muscle that turns strategy into systems that run.",
+    contribution: "Delivery leadership, local operating knowledge and the discipline required to carry complex change into production.",
+    enabled: false,
+  },
+  {
+    initials: "AL",
+    name: "Alexis Lecanuet",
+    group: "advisor",
+    title: "Former Regional CEO, Accenture Middle East",
+    background: "A senior regional leader with extensive experience in strategy execution, client portfolio leadership and large-scale digital transformation across Europe and MENA.",
+    contribution: "An inside view of how transformation firms win and scale in the region, sharpening Cognirise’s senior-led, platform-powered model.",
+    enabled: true,
+  },
+  {
+    initials: "RA",
+    name: "Rami Aslan",
+    group: "advisor",
+    title: "Former CEO, Türk Telekom · Investor & Board Member",
+    background: "More than 25 years across North America, Europe, the Middle East and Africa, spanning telecom operations, corporate finance, investment and board leadership.",
+    contribution: "The operator’s seat on transformation at national scale, alongside investor discipline and deep telecom expertise.",
+    enabled: true,
+  },
+  {
+    initials: "FM",
+    name: "Fadi Mattar",
+    group: "advisor",
+    title: "Public & Government Affairs Director — IMEA & Türkiye, and Country Director Kuwait & Levant, Dow",
+    background: "A senior corporate-affairs and country leader whose career bridges energy and petrochemicals, financial services, government relations and business leadership in the Gulf.",
+    contribution: "A grounded understanding of how large industrial organisations and governments make decisions, strengthening our market and stakeholder perspective.",
+    enabled: true,
   },
 ];
 
+const profileOrder = peopleFallback.map(({ name }) => name);
+
+function ProfileList({ profiles, label }: { profiles: TeamProfile[]; label: string }) {
+  if (!profiles.length) {
+    return <p className="border-y border-border py-12 text-muted-foreground">No {label.toLowerCase()} profiles are currently published.</p>;
+  }
+
+  return (
+    <div className="divide-y divide-border border-y border-foreground">
+      {profiles.map((profile, index) => (
+        <article key={profile.name} className="grid gap-10 py-16 lg:grid-cols-[.55fr_1.25fr]" data-testid={`profile-${profile.group}-${profile.initials.toLowerCase()}`}>
+          <header className="lg:sticky lg:top-28 lg:self-start">
+            <div className="mb-8 flex items-start justify-between">
+              <span className="grid h-24 w-24 place-items-center bg-gradient-to-br from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] font-display text-2xl font-bold text-white [clip-path:polygon(0_0,100%_10%,88%_100%,10%_88%)]">{profile.initials}</span>
+              <span className="text-xs font-bold text-[hsl(var(--brand-coral))]">{String(index + 1).padStart(2, "0")} / {String(profiles.length).padStart(2, "0")}</span>
+            </div>
+            <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[hsl(var(--brand-pink))]">{profile.title}</p>
+            <h3 className="mt-3 text-4xl font-semibold md:text-5xl" data-testid={`text-profile-name-${profile.initials.toLowerCase()}`}>{profile.name}</h3>
+          </header>
+          <div className="grid gap-8 md:grid-cols-[1.15fr_.85fr]">
+            <div>
+              <h4 className="mb-5 text-[10px] font-bold uppercase tracking-[.2em] text-muted-foreground">Background</h4>
+              <p className="text-base leading-8 text-muted-foreground">{profile.background}</p>
+            </div>
+            <aside className="relative bg-secondary p-8 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-[hsl(var(--brand-violet))] before:via-[hsl(var(--brand-pink))] before:to-[hsl(var(--brand-coral))]">
+              <h4 className="text-sm font-bold">What {profile.name.split(" ")[0]} brings to Cognirise</h4>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">{profile.contribution}</p>
+            </aside>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 export default function AboutPeople() {
-  const foundersQuery = useCmsCollection("person", foundersFallback, (item) => {
+  const peopleQuery = useCmsCollection("person", peopleFallback, (item) => {
     const content = contentRecord(item, "person");
-    if (content.role !== "founder") return null;
+    if (content.role !== "founder" && content.role !== "leader" && content.role !== "advisor") return null;
     const name = item.title;
     return {
-      initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2),
+      initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 3),
       name,
-      bio: content.biography,
-      focus: content.focusAreas.map((focus) => [focus.title, focus.detail]),
+      group: content.role === "advisor" ? "advisor" as const : "leadership" as const,
+      title: content.title,
+      background: content.biography || "",
+      contribution: content.contribution || content.focusAreas.map((focus) => focus.detail).join(" "),
+      enabled: true,
     };
   });
-  const page = useCmsEntry("person", "about");
-  useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
-    title: "About Cognirise | Senior-Led AI Transformation",
-    description: "Meet the principles behind Cognirise and its senior-led team.",
-  }));
-  const founders = foundersQuery.data;
+  const visiblePeople = peopleQuery.data
+    .filter((profile) => profile.enabled)
+    .sort((a, b) => {
+      const aIndex = profileOrder.indexOf(a.name);
+      const bIndex = profileOrder.indexOf(b.name);
+      return (aIndex < 0 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex < 0 ? Number.MAX_SAFE_INTEGER : bIndex);
+    });
+  const leadership = visiblePeople.filter((profile) => profile.group === "leadership");
+  const advisors = visiblePeople.filter((profile) => profile.group === "advisor");
 
   return (
     <main className="overflow-hidden bg-background">
-      <section className="relative min-h-[690px] bg-[hsl(var(--brand-deep))] px-6 py-20 text-white md:px-12 md:py-28">
+      <section className="relative min-h-[650px] bg-[hsl(var(--brand-deep))] px-6 py-20 text-white md:px-12 md:py-28">
         <div className="absolute -right-32 top-0 h-[520px] w-[520px] rounded-full bg-[hsl(var(--brand-pink))]/25 blur-3xl" />
-        <div className="absolute -bottom-48 left-[30%] h-[420px] w-[420px] rounded-full bg-[hsl(var(--brand-violet))]/25 blur-3xl" />
         <div className="relative mx-auto grid max-w-[1440px] gap-14 lg:grid-cols-[.92fr_1.08fr] lg:items-end">
           <div>
-            <p className="mb-8 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[.2em] text-white/60">
-              <span className="h-px w-8 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-              Founding partners
-            </p>
-            <h1 className="max-w-[760px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[104px]">
-              Senior-led is not a slogan. <em className="not-italic text-[hsl(var(--brand-coral))]">It’s the staffing model.</em>
-            </h1>
-            <p className="mt-8 max-w-[570px] text-base leading-7 text-white/70 md:text-lg">
-              The people who frame the decision stay close enough to make it real. Cognirise was founded to keep judgment, engineering and accountability in the same room.
-            </p>
+            <p className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/60">Our Team</p>
+            <h1 className="max-w-[760px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[104px]">Judgment stays <em className="not-italic text-[hsl(var(--brand-coral))]">close to the work.</em></h1>
+            <p className="mt-8 max-w-[590px] text-lg leading-8 text-white/70">The people who frame the decision stay close enough to make it real. Leadership, engineering and accountability belong in the same room.</p>
           </div>
           <figure className="clip-diagonal relative h-[390px] overflow-hidden lg:h-[520px]">
             <img className="h-full w-full object-cover" src={assetUrl("/images/cognirise/site-leadership.jpg")} alt="Senior colleagues working together around a detailed physical model." />
             <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))]/80 via-transparent to-transparent" />
-            <figcaption className="absolute bottom-8 left-8 text-xs font-bold uppercase tracking-[.18em]">Judgment stays close to the work</figcaption>
           </figure>
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1440px] px-6 py-24 md:px-12 md:py-36" aria-labelledby="founders-heading">
-        <div className="grid gap-10 border-b border-foreground pb-14 md:grid-cols-2">
-          <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">01 / The founder story</p>
-          <h2 id="founders-heading" className="text-4xl font-semibold leading-none md:text-6xl">Two disciplines.<br />One accountable route.</h2>
+      <section className="mx-auto max-w-[1440px] px-6 py-24 md:px-12 md:py-32" aria-labelledby="leadership-team">
+        <div className="mb-14 grid gap-6 md:grid-cols-2">
+          <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">01 / Our Team</p>
+          <h2 id="leadership-team" className="text-4xl font-semibold md:text-6xl">Leadership Team</h2>
         </div>
-        <div className="divide-y divide-border">
-          {founders.map((founder, index) => (
-            <article key={founder.name} className="grid gap-10 py-16 md:py-24 lg:grid-cols-[.45fr_1fr_1.2fr]" data-testid={`profile-founder-${founder.initials.toLowerCase()}`}>
-              <div className="flex items-start gap-5">
-                <span className="grid h-20 w-20 shrink-0 place-items-center bg-gradient-to-br from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] font-display text-2xl font-bold text-white [clip-path:polygon(0_0,100%_10%,88%_100%,10%_88%)]">{founder.initials}</span>
-                <span className="pt-2 text-[10px] font-bold tracking-[.2em] text-muted-foreground">0{index + 1}</span>
-              </div>
-              <div>
-                <p className="mb-3 text-[10px] font-bold uppercase tracking-[.18em] text-[hsl(var(--brand-pink))]">Founding Partner</p>
-                <h3 className="text-4xl font-semibold md:text-5xl" data-testid={`text-founder-name-${founder.initials.toLowerCase()}`}>{founder.name}</h3>
-                <p className="mt-7 max-w-[520px] text-base leading-7 text-muted-foreground">{founder.bio}</p>
-              </div>
-              <div className="border-t border-foreground pt-1">
-                {founder.focus.map(([title, detail], focusIndex) => (
-                  <div key={title} className="grid grid-cols-[32px_1fr] gap-4 border-b border-border py-5">
-                    <span className="text-[10px] font-bold text-[hsl(var(--brand-coral))]">0{focusIndex + 1}</span>
-                    <div><h4 className="text-sm font-bold">{title}</h4><p className="mt-1 text-sm leading-6 text-muted-foreground">{detail}</p></div>
-                  </div>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
+        <ProfileList profiles={leadership} label="Leadership Team" />
       </section>
 
-      <section className="relative bg-secondary px-6 py-24 md:px-12">
-        <div className="mx-auto grid max-w-[1440px] gap-12 lg:grid-cols-[1fr_.8fr] lg:items-center">
-          <div>
-            <p className="mb-6 text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">The proof is operational</p>
-            <h2 className="max-w-[850px] text-4xl font-semibold leading-[1.02] md:text-7xl">We run our own firm on our own platform.</h2>
-            <p className="mt-7 max-w-[650px] text-lg leading-8 text-muted-foreground"><strong className="text-foreground">Atelier, powered by CogniOS.</strong> We don’t sell what we don’t live on.</p>
+      <section id="board-of-advisors" className="scroll-mt-24 bg-secondary px-6 py-24 md:px-12 md:py-32" aria-labelledby="board-of-advisors-heading">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="mb-14 grid gap-6 md:grid-cols-2">
+            <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">02 / Counsel at scale</p>
+            <div>
+              <h2 id="board-of-advisors-heading" className="text-4xl font-semibold md:text-6xl">Board of Advisors</h2>
+              <p className="mt-5 max-w-[650px] leading-7 text-muted-foreground">Senior leaders who pressure-test our model and keep it grounded in what enterprises actually need.</p>
+            </div>
           </div>
-          <div className="clip-diagonal-bottom h-[310px] overflow-hidden">
-            <img className="h-full w-full object-cover" src={assetUrl("/images/cognirise/pulse-convergence.jpg")} alt="Violet and coral architectural forms converging in a bright space." />
-          </div>
+          <ProfileList profiles={advisors} label="Board of Advisors" />
         </div>
       </section>
 

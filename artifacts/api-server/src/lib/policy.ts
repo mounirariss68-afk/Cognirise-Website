@@ -20,6 +20,18 @@ export function selectMarketWithUaeFallback(
   return null;
 }
 
+export type MarketAvailabilityDecision = "inherit" | "show" | "off";
+
+/** An explicit decision for the originally requested market is authoritative. */
+export function selectMarketWithAvailability(
+  requestedMarket: string,
+  availableMarkets: readonly string[],
+  requestedDecision: MarketAvailabilityDecision = "inherit",
+): string | null {
+  if (requestedDecision === "off") return null;
+  return selectMarketWithUaeFallback(requestedMarket, availableMarkets);
+}
+
 export function canChangeCanonicalSlug(
   currentSlug: string,
   nextSlug: string | undefined,

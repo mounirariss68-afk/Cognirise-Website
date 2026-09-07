@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
 import { 
@@ -7,6 +7,10 @@ import {
   DocumentKind, 
   DocumentStatus,
   getListDocumentsQueryKey
+} from "@workspace/api-client-react";
+import {
+  getListMarketEditionsQueryKey,
+  useListMarketEditions,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -23,12 +27,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { useGetSession } from "@workspace/api-client-react";
+import { PeopleMarketMatrix } from "./PeopleMarketMatrix";
 
 const createDocSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required").regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid slug format (e.g. my-post-name)"),
   market: z.string().min(1, "Market is required"),
-  locale: z.literal("en"),
 });
 
 export default function DocumentList({ kind }: { kind: DocumentKind }) {
@@ -43,6 +47,9 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const canCreate = session?.user?.role !== "viewer";
+  const canManageAvailability = session?.user?.role === "editor"
+    || session?.user?.role === "publisher"
+    || session?.user?.role === "administrator";
 
   const { data: pageData, isLoading } = useListDocuments({
     kind,
@@ -51,6 +58,26 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     search: search || undefined,
     status
   }, { query: { queryKey: getListDocumentsQueryKey({ kind, page, pageSize: 20, search: search || undefined, status }) } });
+  const peopleMatrixParams = { kind: "person" as const, page: 1, pageSize: 100 };
+  const { data: peopleMatrixData } = useListDocuments(
+    peopleMatrixParams,
+    {
+      query: {
+        queryKey: getListDocumentsQueryKey(peopleMatrixParams),
+        enabled: kind === "person",
+      },
+    },
+  );
+  const marketParams = { page: 1, pageSize: 100 };
+  const { data: marketData, isLoading: areMarketsLoading, isError: marketsFailed } = useListMarketEditions(
+    marketParams,
+    { query: { queryKey: getListMarketEditionsQueryKey(marketParams) } },
+  );
+  const enabledMarkets = useMemo(
+    () => (marketData?.items ?? []).filter((market) => market.enabled),
+    [marketData?.items],
+  );
+  const primaryMarket = enabledMarkets.find((market) => market.isCanonical) ?? enabledMarkets[0];
 
   const createDocument = useCreateDocument();
 
@@ -59,10 +86,15 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     defaultValues: {
       title: "",
       slug: "",
-      market: "uae",
-      locale: "en",
+      market: "",
     }
   });
+
+  useEffect(() => {
+    if (!form.getValues("market") && primaryMarket) {
+      form.setValue("market", primaryMarket.code, { shouldValidate: true });
+    }
+  }, [form, primaryMarket]);
 
   const getKindLabel = (k: string) => {
     return k.charAt(0).toUpperCase() + k.slice(1).replace('-', ' ');
@@ -114,6 +146,15 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
           </Button>
         )}
       </div>
+
+      {kind === "person" && peopleMatrixData && enabledMarkets.length > 0 && (
+        <PeopleMarketMatrix
+          people={peopleMatrixData.items}
+          markets={enabledMarkets}
+          canManage={canManageAvailability}
+          isAdministrator={session?.user?.role === "administrator"}
+        />
+      )}
 
       <div className="bg-card border border-border rounded-xl shadow-sm flex flex-col flex-1 overflow-hidden">
         <div className="p-4 border-b border-border flex items-center gap-4 bg-muted/20">
@@ -271,30 +312,29 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-mono text-xs uppercase tracking-wider">Primary Market</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={areMarketsLoading || enabledMarkets.length === 0}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select market" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="uae">UAE (canonical)</SelectItem>
+                        {enabledMarkets.map((market) => (
+                          <SelectItem key={market.id} value={market.code}>
+                            {market.displayName}{market.isCanonical ? " (canonical)" : ""}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="locale"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-mono text-xs uppercase tracking-wider">Locale</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled value="English (en)" />
-                    </FormControl>
-                    <p className="text-xs text-muted-foreground">English-only until approved localized content exists.</p>
+                    {marketsFailed ? (
+                      <p className="text-xs text-destructive">Markets could not be loaded. Try again before creating this document.</p>
+                    ) : !areMarketsLoading && enabledMarkets.length === 0 ? (
+                      <p className="text-xs text-destructive">No enabled market is available. Ask an administrator to enable one.</p>
+                    ) : primaryMarket ? (
+                      <p className="text-xs text-muted-foreground">
+                        The primary edition starts in {primaryMarket.defaultLocale}; other editions can inherit through configured fallbacks.
+                      </p>
+                    ) : null}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -302,7 +342,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
               
               <DialogFooter className="pt-4">
                 <Button type="button" variant="ghost" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={createDocument.isPending}>
+                <Button type="submit" disabled={createDocument.isPending || areMarketsLoading || enabledMarkets.length === 0}>
                   {createDocument.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                   Create & Edit
                 </Button>

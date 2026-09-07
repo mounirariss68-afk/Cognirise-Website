@@ -223,6 +223,160 @@ router.get(
   }),
 );
 
+router.get(
+  "/documents/:documentId/market-availability",
+  asyncRoute(async (req, res) => {
+    const id = String(req.params.documentId);
+    const document = await pool.query(
+      "SELECT kind FROM cms_documents WHERE id=$1",
+      [id],
+    );
+    if (!document.rowCount) {
+      res.status(404).json({ error: "Document not found." });
+      return;
+    }
+    if (document.rows[0].kind !== "person") {
+      res.status(409).json({ error: "Market availability is only supported for people." });
+      return;
+    }
+    const result = await pool.query(
+      `SELECT m.id market_edition_id,m.code market,m.display_name,m.enabled,
+              COALESCE(a.published_decision,'inherit') published_decision,
+              a.draft_decision,
+              EXISTS(SELECT 1 FROM cms_market_editions e
+                WHERE e.document_id=$1 AND e.market=m.code) has_edition,
+              COALESCE(a.published_decision,'inherit')<>'off' published_effective_available,
+              COALESCE(a.draft_decision,a.published_decision,'inherit')<>'off' preview_effective_available,
+              a.updated_at,a.published_at
+         FROM market_editions m
+         LEFT JOIN cms_person_market_availability a
+           ON a.document_id=$1 AND a.market_edition_id=m.id
+        ORDER BY m.is_canonical DESC,m.display_name,m.code`,
+      [id],
+    );
+    res.json({
+      documentId: id,
+      items: result.rows.map((row) => ({
+        marketEditionId: String(row.market_edition_id),
+        market: row.market,
+        displayName: row.display_name,
+        enabled: row.enabled,
+        publishedDecision: row.published_decision,
+        publishedEffectiveAvailable: row.published_effective_available,
+        pendingDecision: row.draft_decision ?? null,
+        previewEffectiveAvailable: row.preview_effective_available,
+        hasEdition: row.has_edition,
+        updatedAt: row.updated_at ?? null,
+        publishedAt: row.published_at ?? null,
+      })),
+    });
+  }),
+);
+
+router.put(
+  "/documents/:documentId/market-availability/:marketEditionId",
+  requireCsrf,
+  requireEditor,
+  asyncRoute(async (req, res) => {
+    const decision = req.body?.decision;
+    if (!["inherit", "show", "off"].includes(decision)) {
+      res.status(400).json({ error: "Invalid market availability decision." });
+      return;
+    }
+    const documentId = String(req.params.documentId);
+    const marketEditionId = String(req.params.marketEditionId);
+    const auth = res.locals.auth as AuthContext;
+    const target = await pool.query(
+      `SELECT d.kind,m.code market
+         FROM cms_documents d CROSS JOIN market_editions m
+        WHERE d.id=$1 AND m.id=$2`,
+      [documentId, marketEditionId],
+    );
+    if (!target.rowCount) {
+      res.status(404).json({ error: "Person or market edition not found." });
+      return;
+    }
+    if (target.rows[0].kind !== "person") {
+      res.status(409).json({ error: "Market availability is only supported for people." });
+      return;
+    }
+    await pool.query(
+      `INSERT INTO cms_person_market_availability
+         (document_id,market_edition_id,draft_decision,updated_by_user_id)
+       VALUES ($1,$2,$3,$4)
+       ON CONFLICT (document_id,market_edition_id) DO UPDATE
+         SET draft_decision=EXCLUDED.draft_decision,updated_by_user_id=EXCLUDED.updated_by_user_id,
+             updated_at=now()`,
+      [documentId, marketEditionId, decision, auth.user.id],
+    );
+    await audit(auth, "person.market_availability.staged", "document", documentId, {
+      marketEditionId,
+      market: target.rows[0].market,
+      decision,
+    });
+    const updated = await pool.query(
+      `SELECT m.id market_edition_id,m.code market,m.display_name,m.enabled,
+              a.published_decision,a.draft_decision,
+              a.published_decision<>'off' published_effective_available,
+              COALESCE(a.draft_decision,a.published_decision)<>'off' preview_effective_available,
+              EXISTS(SELECT 1 FROM cms_market_editions e
+                WHERE e.document_id=$1 AND e.market=m.code) has_edition,
+              a.updated_at,a.published_at
+         FROM market_editions m JOIN cms_person_market_availability a
+           ON a.market_edition_id=m.id AND a.document_id=$1
+        WHERE m.id=$2`,
+      [documentId, marketEditionId],
+    );
+    const row = updated.rows[0];
+    res.json({
+      marketEditionId: String(row.market_edition_id),
+      market: row.market,
+      displayName: row.display_name,
+      enabled: row.enabled,
+      publishedDecision: row.published_decision,
+      publishedEffectiveAvailable: row.published_effective_available,
+      pendingDecision: row.draft_decision ?? null,
+      previewEffectiveAvailable: row.preview_effective_available,
+      hasEdition: row.has_edition,
+      updatedAt: row.updated_at,
+      publishedAt: row.published_at ?? null,
+    });
+  }),
+);
+
+router.post(
+  "/documents/:documentId/market-availability/:marketEditionId/publish",
+  requireCsrf,
+  requireAdministrator,
+  asyncRoute(async (req, res) => {
+    const documentId = String(req.params.documentId);
+    const marketEditionId = String(req.params.marketEditionId);
+    const auth = res.locals.auth as AuthContext;
+    const published = await pool.query(
+      `UPDATE cms_person_market_availability a
+          SET published_decision=a.draft_decision,draft_decision=NULL,
+              published_by_user_id=$3,published_at=now(),updated_at=now()
+         FROM cms_documents d,market_editions m
+        WHERE a.document_id=$1 AND a.market_edition_id=$2
+          AND d.id=a.document_id AND d.kind='person' AND m.id=a.market_edition_id
+          AND a.draft_decision IS NOT NULL
+      RETURNING m.code market,a.published_decision,a.published_at`,
+      [documentId, marketEditionId, auth.user.id],
+    );
+    if (!published.rowCount) {
+      res.status(409).json({ error: "No pending person market availability decision exists." });
+      return;
+    }
+    const row = published.rows[0];
+    await audit(auth, "person.market_availability.published", "document", documentId, {
+      marketEditionId,
+      market: row.market,
+      decision: row.published_decision,
+    });
+    res.status(204).end();
+  }),
+);
+
 router.patch(
   "/documents/:documentId",
   requireCsrf,

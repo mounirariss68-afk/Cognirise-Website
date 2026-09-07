@@ -19,6 +19,7 @@ import {
   canChangeCanonicalSlug,
   isPublicContentVisible,
   isInitialSetupRequired,
+  selectMarketWithAvailability,
 } from "../src/lib/policy.ts";
 import { detectMediaSignature } from "../src/lib/object-storage.ts";
 import {
@@ -279,6 +280,12 @@ test("market selection prefers exact edition then UAE and never draft-like absen
   assert.equal(selectMarketWithUaeFallback("ksa", ["ksa", "uae"]), "ksa");
   assert.equal(selectMarketWithUaeFallback("ksa", ["uae"]), "uae");
   assert.equal(selectMarketWithUaeFallback("ksa", ["europe"]), null);
+});
+
+test("an explicit off decision for the requested market prevents fallback", () => {
+  assert.equal(selectMarketWithAvailability("ksa", ["uae"], "off"), null);
+  assert.equal(selectMarketWithAvailability("ksa", ["uae"], "inherit"), "uae");
+  assert.equal(selectMarketWithAvailability("ksa", ["uae"], "show"), "uae");
 });
 
 test("drafts and restricted case studies are isolated from public selection", () => {

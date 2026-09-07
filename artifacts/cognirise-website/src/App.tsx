@@ -16,6 +16,11 @@ function CanonicalRedirect({ to }: { to: string }) {
   const search = useSearch();
   return <Redirect to={search ? `${to}?${search}` : to} />;
 }
+
+function AnchoredRedirect({ to, anchor }: { to: string; anchor: string }) {
+  const search = useSearch();
+  return <Redirect to={`${to}${search ? `?${search}` : ""}#${anchor}`} />;
+}
 // Pages
 import Home from "@/pages/Home";
 import ServicesOverview from "@/pages/ServicesOverview";
@@ -48,7 +53,6 @@ import InsightsEditorial from "@/pages/InsightsEditorial";
 import InsightArticle from "@/pages/InsightArticle";
 import AboutPeople from "@/pages/AboutPeople";
 import Partners from "@/pages/Partners";
-import Advisors from "@/pages/Advisors";
 import FAQ from "@/pages/FAQ";
 import Contact from "@/pages/Contact";
 import ValueScan from "@/pages/ValueScan";
@@ -125,7 +129,7 @@ export function Router() {
         {/* Company */}
         <Route path="/about" component={AboutPeople} />
         <Route path="/partners" component={Partners} />
-        <Route path="/advisors" component={Advisors} />
+        <Route path="/advisors"><AnchoredRedirect to="/about" anchor="board-of-advisors" /></Route>
         <Route path="/faq" component={FAQ} />
         <Route path="/contact" component={Contact} />
         <Route path="/value-scan" component={ValueScan} />
