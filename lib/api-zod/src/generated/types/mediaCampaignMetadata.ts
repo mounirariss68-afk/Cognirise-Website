@@ -7,10 +7,40 @@
  */
 
 export interface MediaCampaignMetadata {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     * @pattern \S
+     */
   campaign?: string;
+  /**
+     * @minLength 1
+     * @maxLength 80
+     * @pattern \S
+     */
   edition?: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     * @pattern \S
+     */
   title?: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     * @pattern \S
+     */
   purpose?: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     * @pattern \S
+     */
   pulseSource?: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     * @pattern \S
+     */
   approvedUse?: string;
 }

@@ -2204,12 +2204,12 @@ components:
       type: object
       additionalProperties: false
       properties:
-        campaign: { type: string }
-        edition: { type: string }
-        title: { type: string }
-        purpose: { type: string }
-        pulseSource: { type: string }
-        approvedUse: { type: string }
+        campaign: { type: string, minLength: 1, maxLength: 120, pattern: '\S' }
+        edition: { type: string, minLength: 1, maxLength: 80, pattern: '\S' }
+        title: { type: string, minLength: 1, maxLength: 160, pattern: '\S' }
+        purpose: { type: string, minLength: 1, maxLength: 300, pattern: '\S' }
+        pulseSource: { type: string, minLength: 1, maxLength: 160, pattern: '\S' }
+        approvedUse: { type: string, minLength: 1, maxLength: 300, pattern: '\S' }
     MediaAsset:
       type: object
       required: [id, filename, objectPath, mimeType, size, collection, status, createdAt, updatedAt]

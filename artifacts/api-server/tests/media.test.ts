@@ -57,6 +57,29 @@ test("media classification requires a kind only for LinkedIn", () => {
   assert.equal(isValidMediaClassification({ collection: "linkedin", linkedinAssetKind: "header" }), true);
 });
 
+test("campaign metadata rejects blank and excessively long values", () => {
+  const baseUpload = {
+    filename: "campaign.png",
+    mimeType: "image/png",
+    size: 1024,
+    collection: "linkedin",
+    linkedinAssetKind: "post",
+  } as const;
+
+  assert.equal(RequestMediaUploadBody.safeParse({
+    ...baseUpload,
+    campaignMetadata: { campaign: "   " },
+  }).success, false);
+  assert.equal(RequestMediaUploadBody.safeParse({
+    ...baseUpload,
+    campaignMetadata: { title: "x".repeat(161) },
+  }).success, false);
+  assert.equal(RequestMediaUploadBody.safeParse({
+    ...baseUpload,
+    campaignMetadata: { approvedUse: "x".repeat(301) },
+  }).success, false);
+});
+
 test("active and ready media are usable while pending and failed stay explicit", () => {
   assert.equal(isUsableMediaStatus("active"), true);
   assert.equal(isUsableMediaStatus("ready"), true);

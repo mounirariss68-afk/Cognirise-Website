@@ -4,6 +4,7 @@ import {
   useFinalizeMediaUpload,
   useListMedia,
   useRequestMediaUpload,
+  useUpdateMedia,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -14,6 +15,7 @@ import {
   Linkedin,
   List,
   Loader2,
+  Pencil,
   Search,
   UploadCloud,
 } from "lucide-react";
@@ -30,11 +32,14 @@ import { useToast } from "@/hooks/use-toast";
 type MediaCollection = "website" | "linkedin";
 type LinkedInAssetKind = "post" | "header";
 type CampaignMetadata = {
-  title?: string | null;
-  theme?: string | null;
-  campaignTitle?: string | null;
-  campaignTheme?: string | null;
+  campaign?: string;
+  edition?: string;
+  title?: string;
+  purpose?: string;
+  pulseSource?: string;
+  approvedUse?: string;
 };
+type CampaignField = keyof CampaignMetadata;
 type ExtendedMediaAsset = {
   id: string;
   filename: string;
@@ -50,18 +55,36 @@ type ExtendedMediaAsset = {
   createdAt: string;
   collection?: MediaCollection | null;
   linkedinAssetKind?: LinkedInAssetKind | null;
-  campaignTitle?: string | null;
-  campaignTheme?: string | null;
   campaignMetadata?: CampaignMetadata | null;
 };
 
 const PAGE_SIZE = 40;
+const EMPTY_CAMPAIGN: Record<CampaignField, string> = {
+  campaign: "",
+  edition: "",
+  title: "",
+  purpose: "",
+  pulseSource: "",
+  approvedUse: "",
+};
+const CAMPAIGN_FIELDS: Array<{ key: CampaignField; label: string; maxLength: number; placeholder: string; multiline?: boolean }> = [
+  { key: "campaign", label: "Campaign", maxLength: 120, placeholder: "e.g. Human + Agent Advantage" },
+  { key: "edition", label: "Edition", maxLength: 80, placeholder: "e.g. UAE launch" },
+  { key: "title", label: "Title", maxLength: 160, placeholder: "Public-facing asset title" },
+  { key: "purpose", label: "Purpose", maxLength: 300, placeholder: "What this asset is designed to achieve", multiline: true },
+  { key: "pulseSource", label: "Pulse source", maxLength: 160, placeholder: "Source issue, article, or research" },
+  { key: "approvedUse", label: "Approved use", maxLength: 300, placeholder: "Where and how this asset may be used", multiline: true },
+];
 
 function assetCampaign(asset: ExtendedMediaAsset) {
-  return {
-    title: asset.campaignTitle ?? asset.campaignMetadata?.campaignTitle ?? asset.campaignMetadata?.title,
-    theme: asset.campaignTheme ?? asset.campaignMetadata?.campaignTheme ?? asset.campaignMetadata?.theme,
-  };
+  return asset.campaignMetadata ?? {};
+}
+
+function cleanCampaignMetadata(values: Record<CampaignField, string>): CampaignMetadata | undefined {
+  const entries = CAMPAIGN_FIELDS
+    .map(({ key }) => [key, values[key].trim()] as const)
+    .filter(([, value]) => value.length > 0);
+  return entries.length ? Object.fromEntries(entries) : undefined;
 }
 
 function statusPresentation(status: string) {
@@ -154,11 +177,14 @@ export default function MediaLibrary() {
   const [finalizeAsset, setFinalizeAsset] = useState<ExtendedMediaAsset | null>(null);
   const [altText, setAltText] = useState("");
   const [credit, setCredit] = useState("");
+  const [campaignFields, setCampaignFields] = useState<Record<CampaignField, string>>(EMPTY_CAMPAIGN);
+  const [editingAsset, setEditingAsset] = useState<ExtendedMediaAsset | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const requestUpload = useRequestMediaUpload();
   const finalizeUpload = useFinalizeMediaUpload();
+  const updateMedia = useUpdateMedia();
 
   // These contract fields are intentionally supplied ahead of generated client regeneration.
   const listParams = {
@@ -212,6 +238,7 @@ export default function MediaLibrary() {
       setFinalizeAsset(response.media as ExtendedMediaAsset);
       setAltText("");
       setCredit("");
+      setCampaignFields(EMPTY_CAMPAIGN);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "An error occurred during upload";
       toast({ title: "Upload failed", description: message, variant: "destructive" });
@@ -231,6 +258,7 @@ export default function MediaLibrary() {
           objectPath: finalizeAsset.objectPath,
           altText: altText || undefined,
           credit: credit || undefined,
+          campaignMetadata: finalizeAsset.collection === "linkedin" ? cleanCampaignMetadata(campaignFields) : undefined,
         },
       });
       toast({ title: "Asset finalized successfully" });
@@ -241,6 +269,70 @@ export default function MediaLibrary() {
       toast({ title: "Finalization failed", description: detail, variant: "destructive" });
     }
   };
+
+  const openEditor = (asset: ExtendedMediaAsset) => {
+    setEditingAsset(asset);
+    setCampaignFields({
+      ...EMPTY_CAMPAIGN,
+      ...Object.fromEntries(
+        Object.entries(asset.campaignMetadata ?? {}).map(([key, value]) => [key, value ?? ""]),
+      ),
+    });
+  };
+
+  const saveCampaignMetadata = async () => {
+    if (!editingAsset) return;
+    try {
+      const updated = await updateMedia.mutateAsync({
+        mediaId: editingAsset.id,
+        data: { campaignMetadata: cleanCampaignMetadata(campaignFields) ?? null },
+      });
+      queryClient.setQueriesData(
+        { queryKey: getListMediaQueryKey() },
+        (current: typeof data) => current
+          ? { ...current, items: current.items.map((item) => item.id === updated.id ? updated : item) }
+          : current,
+      );
+      setEditingAsset(null);
+      toast({ title: "Campaign metadata saved" });
+    } catch (error: unknown) {
+      const detail = typeof error === "object" && error && "error" in error ? String(error.error) : "An error occurred";
+      toast({ title: "Metadata update failed", description: detail, variant: "destructive" });
+    }
+  };
+
+  const campaignForm = (
+    <div className="grid gap-4 sm:grid-cols-2">
+      {CAMPAIGN_FIELDS.map((field) => (
+        <div key={field.key} className={`space-y-2 ${field.multiline ? "sm:col-span-2" : ""}`}>
+          <Label htmlFor={`campaign-${field.key}`} className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+            {field.label}
+          </Label>
+          {field.multiline ? (
+            <Textarea
+              id={`campaign-${field.key}`}
+              value={campaignFields[field.key]}
+              onChange={(event) => setCampaignFields((current) => ({ ...current, [field.key]: event.target.value }))}
+              placeholder={field.placeholder}
+              maxLength={field.maxLength}
+              className="resize-none"
+            />
+          ) : (
+            <Input
+              id={`campaign-${field.key}`}
+              value={campaignFields[field.key]}
+              onChange={(event) => setCampaignFields((current) => ({ ...current, [field.key]: event.target.value }))}
+              placeholder={field.placeholder}
+              maxLength={field.maxLength}
+            />
+          )}
+          <p className="text-right text-[10px] font-mono text-muted-foreground">
+            {campaignFields[field.key].length}/{field.maxLength}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="mx-auto flex h-full max-w-7xl flex-col p-8">
@@ -385,8 +477,19 @@ export default function MediaLibrary() {
                       {collection === "linkedin" && (
                         <div className="space-y-1 border-t border-border/60 pt-2 text-[11px]">
                           <p className="font-mono uppercase tracking-wide text-primary">{asset.linkedinAssetKind === "header" ? "Profile header" : "Post image"}</p>
-                          {campaign.title && <p className="font-medium">{campaign.title}</p>}
-                          {campaign.theme && <p className="text-muted-foreground">Theme: {campaign.theme}</p>}
+                           <div className="flex items-start justify-between gap-2">
+                             <div>
+                               {campaign.title && <p className="font-medium">{campaign.title}</p>}
+                               {campaign.campaign && <p className="text-muted-foreground">Campaign: {campaign.campaign}</p>}
+                               {campaign.edition && <p className="text-muted-foreground">Edition: {campaign.edition}</p>}
+                               {campaign.purpose && <p className="line-clamp-2 text-muted-foreground">Purpose: {campaign.purpose}</p>}
+                               {campaign.pulseSource && <p className="truncate text-muted-foreground">Pulse: {campaign.pulseSource}</p>}
+                               {campaign.approvedUse && <p className="line-clamp-2 text-muted-foreground">Approved: {campaign.approvedUse}</p>}
+                             </div>
+                             <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => openEditor(asset)} aria-label={`Edit campaign metadata for ${asset.filename}`}>
+                               <Pencil className="h-3.5 w-3.5" />
+                             </Button>
+                           </div>
                         </div>
                       )}
                       <p className="line-clamp-2 text-[11px] text-muted-foreground">{asset.altText || "No alt text provided"}</p>
@@ -432,7 +535,12 @@ export default function MediaLibrary() {
                           <td className="px-4 py-3">
                             <p className="text-[10px] font-mono uppercase tracking-wide text-primary">{asset.linkedinAssetKind === "header" ? "Profile header" : "Post image"}</p>
                             <p className="mt-1 font-medium">{campaign.title || "Campaign title not recorded"}</p>
-                            <p className="text-xs text-muted-foreground">{campaign.theme ? `Theme: ${campaign.theme}` : "Theme not recorded"}</p>
+                             <p className="text-xs text-muted-foreground">{campaign.campaign ? `Campaign: ${campaign.campaign}` : "Campaign not recorded"}</p>
+                             <p className="text-xs text-muted-foreground">{campaign.edition ? `Edition: ${campaign.edition}` : "Edition not recorded"}</p>
+                             {campaign.purpose && <p className="mt-1 max-w-72 text-xs text-muted-foreground">Purpose: {campaign.purpose}</p>}
+                             {campaign.pulseSource && <p className="max-w-72 text-xs text-muted-foreground">Pulse: {campaign.pulseSource}</p>}
+                             {campaign.approvedUse && <p className="max-w-72 text-xs text-muted-foreground">Approved: {campaign.approvedUse}</p>}
+                             <Button variant="link" size="sm" className="mt-1 h-auto p-0 text-xs" onClick={() => openEditor(asset)}>Edit metadata</Button>
                           </td>
                         )}
                         <td className="max-w-64 px-4 py-3">
@@ -464,11 +572,11 @@ export default function MediaLibrary() {
       </div>
 
       <Dialog open={Boolean(finalizeAsset)} onOpenChange={(open) => !open && setFinalizeAsset(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Asset metadata</DialogTitle>
             <DialogDescription className="mt-1 text-xs font-mono">
-              Add alt text for accessibility and any required usage credits.
+               Add accessibility, rights, and campaign context before publishing the asset.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -483,11 +591,34 @@ export default function MediaLibrary() {
               <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Credit / rights</Label>
               <Input value={credit} onChange={(event) => setCredit(event.target.value)} placeholder="e.g. Internal, Getty Images" />
             </div>
+            {finalizeAsset?.collection === "linkedin" && (
+              <div className="border-t border-border pt-4">
+                <p className="mb-4 text-xs font-mono uppercase tracking-wider text-primary">LinkedIn campaign details</p>
+                {campaignForm}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setFinalizeAsset(null)}>Skip for now</Button>
             <Button onClick={handleFinalize} disabled={finalizeUpload.isPending}>
               {finalizeUpload.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save metadata
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(editingAsset)} onOpenChange={(open) => !open && setEditingAsset(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit LinkedIn campaign metadata</DialogTitle>
+            <DialogDescription>Keep the governed campaign context for {editingAsset?.filename} current.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">{campaignForm}</div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditingAsset(null)}>Cancel</Button>
+            <Button onClick={saveCampaignMetadata} disabled={updateMedia.isPending}>
+              {updateMedia.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save metadata
             </Button>
           </DialogFooter>

@@ -4041,6 +4041,30 @@ export const listMediaResponseTwoItemsItemWidthMultipleOf = 1;
 
 export const listMediaResponseTwoItemsItemHeightMultipleOf = 1;
 
+export const listMediaResponseTwoItemsItemCampaignMetadataOneCampaignMax = 120;
+
+
+export const listMediaResponseTwoItemsItemCampaignMetadataOneCampaignRegExp = new RegExp('\\S');
+export const listMediaResponseTwoItemsItemCampaignMetadataOneEditionMax = 80;
+
+
+export const listMediaResponseTwoItemsItemCampaignMetadataOneEditionRegExp = new RegExp('\\S');
+export const listMediaResponseTwoItemsItemCampaignMetadataOneTitleMax = 160;
+
+
+export const listMediaResponseTwoItemsItemCampaignMetadataOneTitleRegExp = new RegExp('\\S');
+export const listMediaResponseTwoItemsItemCampaignMetadataOnePurposeMax = 300;
+
+
+export const listMediaResponseTwoItemsItemCampaignMetadataOnePurposeRegExp = new RegExp('\\S');
+export const listMediaResponseTwoItemsItemCampaignMetadataOnePulseSourceMax = 160;
+
+
+export const listMediaResponseTwoItemsItemCampaignMetadataOnePulseSourceRegExp = new RegExp('\\S');
+export const listMediaResponseTwoItemsItemCampaignMetadataOneApprovedUseMax = 300;
+
+
+export const listMediaResponseTwoItemsItemCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
 export const listMediaResponseTwoItemsItemFocalPointOneXMin = 0;
 export const listMediaResponseTwoItemsItemFocalPointOneXMax = 1;
 
@@ -4071,12 +4095,12 @@ export const ListMediaResponse = zod.object({
   "collection": zod.enum(['website', 'linkedin']),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
-  "campaign": zod.string().optional(),
-  "edition": zod.string().optional(),
-  "title": zod.string().optional(),
-  "purpose": zod.string().optional(),
-  "pulseSource": zod.string().optional(),
-  "approvedUse": zod.string().optional()
+  "campaign": zod.string().min(1).max(listMediaResponseTwoItemsItemCampaignMetadataOneCampaignMax).regex(listMediaResponseTwoItemsItemCampaignMetadataOneCampaignRegExp).optional(),
+  "edition": zod.string().min(1).max(listMediaResponseTwoItemsItemCampaignMetadataOneEditionMax).regex(listMediaResponseTwoItemsItemCampaignMetadataOneEditionRegExp).optional(),
+  "title": zod.string().min(1).max(listMediaResponseTwoItemsItemCampaignMetadataOneTitleMax).regex(listMediaResponseTwoItemsItemCampaignMetadataOneTitleRegExp).optional(),
+  "purpose": zod.string().min(1).max(listMediaResponseTwoItemsItemCampaignMetadataOnePurposeMax).regex(listMediaResponseTwoItemsItemCampaignMetadataOnePurposeRegExp).optional(),
+  "pulseSource": zod.string().min(1).max(listMediaResponseTwoItemsItemCampaignMetadataOnePulseSourceMax).regex(listMediaResponseTwoItemsItemCampaignMetadataOnePulseSourceRegExp).optional(),
+  "approvedUse": zod.string().min(1).max(listMediaResponseTwoItemsItemCampaignMetadataOneApprovedUseMax).regex(listMediaResponseTwoItemsItemCampaignMetadataOneApprovedUseRegExp).optional()
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(listMediaResponseTwoItemsItemFocalPointOneXMin).max(listMediaResponseTwoItemsItemFocalPointOneXMax),
@@ -4100,6 +4124,30 @@ export const requestMediaUploadBodyMimeTypeMax = 120;
 export const requestMediaUploadBodySizeMax = 52428800;
 export const requestMediaUploadBodySizeMultipleOf = 1;
 
+export const requestMediaUploadBodyCampaignMetadataCampaignMax = 120;
+
+
+export const requestMediaUploadBodyCampaignMetadataCampaignRegExp = new RegExp('\\S');
+export const requestMediaUploadBodyCampaignMetadataEditionMax = 80;
+
+
+export const requestMediaUploadBodyCampaignMetadataEditionRegExp = new RegExp('\\S');
+export const requestMediaUploadBodyCampaignMetadataTitleMax = 160;
+
+
+export const requestMediaUploadBodyCampaignMetadataTitleRegExp = new RegExp('\\S');
+export const requestMediaUploadBodyCampaignMetadataPurposeMax = 300;
+
+
+export const requestMediaUploadBodyCampaignMetadataPurposeRegExp = new RegExp('\\S');
+export const requestMediaUploadBodyCampaignMetadataPulseSourceMax = 160;
+
+
+export const requestMediaUploadBodyCampaignMetadataPulseSourceRegExp = new RegExp('\\S');
+export const requestMediaUploadBodyCampaignMetadataApprovedUseMax = 300;
+
+
+export const requestMediaUploadBodyCampaignMetadataApprovedUseRegExp = new RegExp('\\S');
 
 
 export const RequestMediaUploadBody = zod.object({
@@ -4110,12 +4158,12 @@ export const RequestMediaUploadBody = zod.object({
   "collection": zod.enum(['website', 'linkedin']).optional(),
   "linkedinAssetKind": zod.enum(['post', 'header']).optional(),
   "campaignMetadata": zod.object({
-  "campaign": zod.string().optional(),
-  "edition": zod.string().optional(),
-  "title": zod.string().optional(),
-  "purpose": zod.string().optional(),
-  "pulseSource": zod.string().optional(),
-  "approvedUse": zod.string().optional()
+  "campaign": zod.string().min(1).max(requestMediaUploadBodyCampaignMetadataCampaignMax).regex(requestMediaUploadBodyCampaignMetadataCampaignRegExp).optional(),
+  "edition": zod.string().min(1).max(requestMediaUploadBodyCampaignMetadataEditionMax).regex(requestMediaUploadBodyCampaignMetadataEditionRegExp).optional(),
+  "title": zod.string().min(1).max(requestMediaUploadBodyCampaignMetadataTitleMax).regex(requestMediaUploadBodyCampaignMetadataTitleRegExp).optional(),
+  "purpose": zod.string().min(1).max(requestMediaUploadBodyCampaignMetadataPurposeMax).regex(requestMediaUploadBodyCampaignMetadataPurposeRegExp).optional(),
+  "pulseSource": zod.string().min(1).max(requestMediaUploadBodyCampaignMetadataPulseSourceMax).regex(requestMediaUploadBodyCampaignMetadataPulseSourceRegExp).optional(),
+  "approvedUse": zod.string().min(1).max(requestMediaUploadBodyCampaignMetadataApprovedUseMax).regex(requestMediaUploadBodyCampaignMetadataApprovedUseRegExp).optional()
 }).optional()
 })
 
@@ -4126,6 +4174,30 @@ export const requestMediaUploadResponseMediaWidthMultipleOf = 1;
 
 export const requestMediaUploadResponseMediaHeightMultipleOf = 1;
 
+export const requestMediaUploadResponseMediaCampaignMetadataOneCampaignMax = 120;
+
+
+export const requestMediaUploadResponseMediaCampaignMetadataOneCampaignRegExp = new RegExp('\\S');
+export const requestMediaUploadResponseMediaCampaignMetadataOneEditionMax = 80;
+
+
+export const requestMediaUploadResponseMediaCampaignMetadataOneEditionRegExp = new RegExp('\\S');
+export const requestMediaUploadResponseMediaCampaignMetadataOneTitleMax = 160;
+
+
+export const requestMediaUploadResponseMediaCampaignMetadataOneTitleRegExp = new RegExp('\\S');
+export const requestMediaUploadResponseMediaCampaignMetadataOnePurposeMax = 300;
+
+
+export const requestMediaUploadResponseMediaCampaignMetadataOnePurposeRegExp = new RegExp('\\S');
+export const requestMediaUploadResponseMediaCampaignMetadataOnePulseSourceMax = 160;
+
+
+export const requestMediaUploadResponseMediaCampaignMetadataOnePulseSourceRegExp = new RegExp('\\S');
+export const requestMediaUploadResponseMediaCampaignMetadataOneApprovedUseMax = 300;
+
+
+export const requestMediaUploadResponseMediaCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
 export const requestMediaUploadResponseMediaFocalPointOneXMin = 0;
 export const requestMediaUploadResponseMediaFocalPointOneXMax = 1;
 
@@ -4151,12 +4223,12 @@ export const RequestMediaUploadResponse = zod.object({
   "collection": zod.enum(['website', 'linkedin']),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
-  "campaign": zod.string().optional(),
-  "edition": zod.string().optional(),
-  "title": zod.string().optional(),
-  "purpose": zod.string().optional(),
-  "pulseSource": zod.string().optional(),
-  "approvedUse": zod.string().optional()
+  "campaign": zod.string().min(1).max(requestMediaUploadResponseMediaCampaignMetadataOneCampaignMax).regex(requestMediaUploadResponseMediaCampaignMetadataOneCampaignRegExp).optional(),
+  "edition": zod.string().min(1).max(requestMediaUploadResponseMediaCampaignMetadataOneEditionMax).regex(requestMediaUploadResponseMediaCampaignMetadataOneEditionRegExp).optional(),
+  "title": zod.string().min(1).max(requestMediaUploadResponseMediaCampaignMetadataOneTitleMax).regex(requestMediaUploadResponseMediaCampaignMetadataOneTitleRegExp).optional(),
+  "purpose": zod.string().min(1).max(requestMediaUploadResponseMediaCampaignMetadataOnePurposeMax).regex(requestMediaUploadResponseMediaCampaignMetadataOnePurposeRegExp).optional(),
+  "pulseSource": zod.string().min(1).max(requestMediaUploadResponseMediaCampaignMetadataOnePulseSourceMax).regex(requestMediaUploadResponseMediaCampaignMetadataOnePulseSourceRegExp).optional(),
+  "approvedUse": zod.string().min(1).max(requestMediaUploadResponseMediaCampaignMetadataOneApprovedUseMax).regex(requestMediaUploadResponseMediaCampaignMetadataOneApprovedUseRegExp).optional()
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(requestMediaUploadResponseMediaFocalPointOneXMin).max(requestMediaUploadResponseMediaFocalPointOneXMax),
@@ -4188,6 +4260,30 @@ export const getMediaResponseWidthMultipleOf = 1;
 
 export const getMediaResponseHeightMultipleOf = 1;
 
+export const getMediaResponseCampaignMetadataOneCampaignMax = 120;
+
+
+export const getMediaResponseCampaignMetadataOneCampaignRegExp = new RegExp('\\S');
+export const getMediaResponseCampaignMetadataOneEditionMax = 80;
+
+
+export const getMediaResponseCampaignMetadataOneEditionRegExp = new RegExp('\\S');
+export const getMediaResponseCampaignMetadataOneTitleMax = 160;
+
+
+export const getMediaResponseCampaignMetadataOneTitleRegExp = new RegExp('\\S');
+export const getMediaResponseCampaignMetadataOnePurposeMax = 300;
+
+
+export const getMediaResponseCampaignMetadataOnePurposeRegExp = new RegExp('\\S');
+export const getMediaResponseCampaignMetadataOnePulseSourceMax = 160;
+
+
+export const getMediaResponseCampaignMetadataOnePulseSourceRegExp = new RegExp('\\S');
+export const getMediaResponseCampaignMetadataOneApprovedUseMax = 300;
+
+
+export const getMediaResponseCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
 export const getMediaResponseFocalPointOneXMin = 0;
 export const getMediaResponseFocalPointOneXMax = 1;
 
@@ -4212,12 +4308,12 @@ export const GetMediaResponse = zod.object({
   "collection": zod.enum(['website', 'linkedin']),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
-  "campaign": zod.string().optional(),
-  "edition": zod.string().optional(),
-  "title": zod.string().optional(),
-  "purpose": zod.string().optional(),
-  "pulseSource": zod.string().optional(),
-  "approvedUse": zod.string().optional()
+  "campaign": zod.string().min(1).max(getMediaResponseCampaignMetadataOneCampaignMax).regex(getMediaResponseCampaignMetadataOneCampaignRegExp).optional(),
+  "edition": zod.string().min(1).max(getMediaResponseCampaignMetadataOneEditionMax).regex(getMediaResponseCampaignMetadataOneEditionRegExp).optional(),
+  "title": zod.string().min(1).max(getMediaResponseCampaignMetadataOneTitleMax).regex(getMediaResponseCampaignMetadataOneTitleRegExp).optional(),
+  "purpose": zod.string().min(1).max(getMediaResponseCampaignMetadataOnePurposeMax).regex(getMediaResponseCampaignMetadataOnePurposeRegExp).optional(),
+  "pulseSource": zod.string().min(1).max(getMediaResponseCampaignMetadataOnePulseSourceMax).regex(getMediaResponseCampaignMetadataOnePulseSourceRegExp).optional(),
+  "approvedUse": zod.string().min(1).max(getMediaResponseCampaignMetadataOneApprovedUseMax).regex(getMediaResponseCampaignMetadataOneApprovedUseRegExp).optional()
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(getMediaResponseFocalPointOneXMin).max(getMediaResponseFocalPointOneXMax),
@@ -4245,6 +4341,30 @@ export const updateMediaBodyCaptionMax = 500;
 
 export const updateMediaBodyCreditMax = 200;
 
+export const updateMediaBodyCampaignMetadataOneCampaignMax = 120;
+
+
+export const updateMediaBodyCampaignMetadataOneCampaignRegExp = new RegExp('\\S');
+export const updateMediaBodyCampaignMetadataOneEditionMax = 80;
+
+
+export const updateMediaBodyCampaignMetadataOneEditionRegExp = new RegExp('\\S');
+export const updateMediaBodyCampaignMetadataOneTitleMax = 160;
+
+
+export const updateMediaBodyCampaignMetadataOneTitleRegExp = new RegExp('\\S');
+export const updateMediaBodyCampaignMetadataOnePurposeMax = 300;
+
+
+export const updateMediaBodyCampaignMetadataOnePurposeRegExp = new RegExp('\\S');
+export const updateMediaBodyCampaignMetadataOnePulseSourceMax = 160;
+
+
+export const updateMediaBodyCampaignMetadataOnePulseSourceRegExp = new RegExp('\\S');
+export const updateMediaBodyCampaignMetadataOneApprovedUseMax = 300;
+
+
+export const updateMediaBodyCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
 export const updateMediaBodyFocalPointOneXMin = 0;
 export const updateMediaBodyFocalPointOneXMax = 1;
 
@@ -4261,12 +4381,12 @@ export const UpdateMediaBody = zod.object({
   "collection": zod.enum(['website', 'linkedin']).optional(),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
-  "campaign": zod.string().optional(),
-  "edition": zod.string().optional(),
-  "title": zod.string().optional(),
-  "purpose": zod.string().optional(),
-  "pulseSource": zod.string().optional(),
-  "approvedUse": zod.string().optional()
+  "campaign": zod.string().min(1).max(updateMediaBodyCampaignMetadataOneCampaignMax).regex(updateMediaBodyCampaignMetadataOneCampaignRegExp).optional(),
+  "edition": zod.string().min(1).max(updateMediaBodyCampaignMetadataOneEditionMax).regex(updateMediaBodyCampaignMetadataOneEditionRegExp).optional(),
+  "title": zod.string().min(1).max(updateMediaBodyCampaignMetadataOneTitleMax).regex(updateMediaBodyCampaignMetadataOneTitleRegExp).optional(),
+  "purpose": zod.string().min(1).max(updateMediaBodyCampaignMetadataOnePurposeMax).regex(updateMediaBodyCampaignMetadataOnePurposeRegExp).optional(),
+  "pulseSource": zod.string().min(1).max(updateMediaBodyCampaignMetadataOnePulseSourceMax).regex(updateMediaBodyCampaignMetadataOnePulseSourceRegExp).optional(),
+  "approvedUse": zod.string().min(1).max(updateMediaBodyCampaignMetadataOneApprovedUseMax).regex(updateMediaBodyCampaignMetadataOneApprovedUseRegExp).optional()
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(updateMediaBodyFocalPointOneXMin).max(updateMediaBodyFocalPointOneXMax),
@@ -4281,6 +4401,30 @@ export const updateMediaResponseWidthMultipleOf = 1;
 
 export const updateMediaResponseHeightMultipleOf = 1;
 
+export const updateMediaResponseCampaignMetadataOneCampaignMax = 120;
+
+
+export const updateMediaResponseCampaignMetadataOneCampaignRegExp = new RegExp('\\S');
+export const updateMediaResponseCampaignMetadataOneEditionMax = 80;
+
+
+export const updateMediaResponseCampaignMetadataOneEditionRegExp = new RegExp('\\S');
+export const updateMediaResponseCampaignMetadataOneTitleMax = 160;
+
+
+export const updateMediaResponseCampaignMetadataOneTitleRegExp = new RegExp('\\S');
+export const updateMediaResponseCampaignMetadataOnePurposeMax = 300;
+
+
+export const updateMediaResponseCampaignMetadataOnePurposeRegExp = new RegExp('\\S');
+export const updateMediaResponseCampaignMetadataOnePulseSourceMax = 160;
+
+
+export const updateMediaResponseCampaignMetadataOnePulseSourceRegExp = new RegExp('\\S');
+export const updateMediaResponseCampaignMetadataOneApprovedUseMax = 300;
+
+
+export const updateMediaResponseCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
 export const updateMediaResponseFocalPointOneXMin = 0;
 export const updateMediaResponseFocalPointOneXMax = 1;
 
@@ -4305,12 +4449,12 @@ export const UpdateMediaResponse = zod.object({
   "collection": zod.enum(['website', 'linkedin']),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
-  "campaign": zod.string().optional(),
-  "edition": zod.string().optional(),
-  "title": zod.string().optional(),
-  "purpose": zod.string().optional(),
-  "pulseSource": zod.string().optional(),
-  "approvedUse": zod.string().optional()
+  "campaign": zod.string().min(1).max(updateMediaResponseCampaignMetadataOneCampaignMax).regex(updateMediaResponseCampaignMetadataOneCampaignRegExp).optional(),
+  "edition": zod.string().min(1).max(updateMediaResponseCampaignMetadataOneEditionMax).regex(updateMediaResponseCampaignMetadataOneEditionRegExp).optional(),
+  "title": zod.string().min(1).max(updateMediaResponseCampaignMetadataOneTitleMax).regex(updateMediaResponseCampaignMetadataOneTitleRegExp).optional(),
+  "purpose": zod.string().min(1).max(updateMediaResponseCampaignMetadataOnePurposeMax).regex(updateMediaResponseCampaignMetadataOnePurposeRegExp).optional(),
+  "pulseSource": zod.string().min(1).max(updateMediaResponseCampaignMetadataOnePulseSourceMax).regex(updateMediaResponseCampaignMetadataOnePulseSourceRegExp).optional(),
+  "approvedUse": zod.string().min(1).max(updateMediaResponseCampaignMetadataOneApprovedUseMax).regex(updateMediaResponseCampaignMetadataOneApprovedUseRegExp).optional()
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(updateMediaResponseFocalPointOneXMin).max(updateMediaResponseFocalPointOneXMax),
@@ -4347,6 +4491,30 @@ export const finalizeMediaUploadBodyCaptionMax = 500;
 
 export const finalizeMediaUploadBodyCreditMax = 200;
 
+export const finalizeMediaUploadBodyCampaignMetadataCampaignMax = 120;
+
+
+export const finalizeMediaUploadBodyCampaignMetadataCampaignRegExp = new RegExp('\\S');
+export const finalizeMediaUploadBodyCampaignMetadataEditionMax = 80;
+
+
+export const finalizeMediaUploadBodyCampaignMetadataEditionRegExp = new RegExp('\\S');
+export const finalizeMediaUploadBodyCampaignMetadataTitleMax = 160;
+
+
+export const finalizeMediaUploadBodyCampaignMetadataTitleRegExp = new RegExp('\\S');
+export const finalizeMediaUploadBodyCampaignMetadataPurposeMax = 300;
+
+
+export const finalizeMediaUploadBodyCampaignMetadataPurposeRegExp = new RegExp('\\S');
+export const finalizeMediaUploadBodyCampaignMetadataPulseSourceMax = 160;
+
+
+export const finalizeMediaUploadBodyCampaignMetadataPulseSourceRegExp = new RegExp('\\S');
+export const finalizeMediaUploadBodyCampaignMetadataApprovedUseMax = 300;
+
+
+export const finalizeMediaUploadBodyCampaignMetadataApprovedUseRegExp = new RegExp('\\S');
 
 
 export const FinalizeMediaUploadBody = zod.object({
@@ -4358,12 +4526,12 @@ export const FinalizeMediaUploadBody = zod.object({
   "collection": zod.enum(['website', 'linkedin']).optional(),
   "linkedinAssetKind": zod.enum(['post', 'header']).optional(),
   "campaignMetadata": zod.object({
-  "campaign": zod.string().optional(),
-  "edition": zod.string().optional(),
-  "title": zod.string().optional(),
-  "purpose": zod.string().optional(),
-  "pulseSource": zod.string().optional(),
-  "approvedUse": zod.string().optional()
+  "campaign": zod.string().min(1).max(finalizeMediaUploadBodyCampaignMetadataCampaignMax).regex(finalizeMediaUploadBodyCampaignMetadataCampaignRegExp).optional(),
+  "edition": zod.string().min(1).max(finalizeMediaUploadBodyCampaignMetadataEditionMax).regex(finalizeMediaUploadBodyCampaignMetadataEditionRegExp).optional(),
+  "title": zod.string().min(1).max(finalizeMediaUploadBodyCampaignMetadataTitleMax).regex(finalizeMediaUploadBodyCampaignMetadataTitleRegExp).optional(),
+  "purpose": zod.string().min(1).max(finalizeMediaUploadBodyCampaignMetadataPurposeMax).regex(finalizeMediaUploadBodyCampaignMetadataPurposeRegExp).optional(),
+  "pulseSource": zod.string().min(1).max(finalizeMediaUploadBodyCampaignMetadataPulseSourceMax).regex(finalizeMediaUploadBodyCampaignMetadataPulseSourceRegExp).optional(),
+  "approvedUse": zod.string().min(1).max(finalizeMediaUploadBodyCampaignMetadataApprovedUseMax).regex(finalizeMediaUploadBodyCampaignMetadataApprovedUseRegExp).optional()
 }).optional()
 })
 
@@ -4374,6 +4542,30 @@ export const finalizeMediaUploadResponseWidthMultipleOf = 1;
 
 export const finalizeMediaUploadResponseHeightMultipleOf = 1;
 
+export const finalizeMediaUploadResponseCampaignMetadataOneCampaignMax = 120;
+
+
+export const finalizeMediaUploadResponseCampaignMetadataOneCampaignRegExp = new RegExp('\\S');
+export const finalizeMediaUploadResponseCampaignMetadataOneEditionMax = 80;
+
+
+export const finalizeMediaUploadResponseCampaignMetadataOneEditionRegExp = new RegExp('\\S');
+export const finalizeMediaUploadResponseCampaignMetadataOneTitleMax = 160;
+
+
+export const finalizeMediaUploadResponseCampaignMetadataOneTitleRegExp = new RegExp('\\S');
+export const finalizeMediaUploadResponseCampaignMetadataOnePurposeMax = 300;
+
+
+export const finalizeMediaUploadResponseCampaignMetadataOnePurposeRegExp = new RegExp('\\S');
+export const finalizeMediaUploadResponseCampaignMetadataOnePulseSourceMax = 160;
+
+
+export const finalizeMediaUploadResponseCampaignMetadataOnePulseSourceRegExp = new RegExp('\\S');
+export const finalizeMediaUploadResponseCampaignMetadataOneApprovedUseMax = 300;
+
+
+export const finalizeMediaUploadResponseCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
 export const finalizeMediaUploadResponseFocalPointOneXMin = 0;
 export const finalizeMediaUploadResponseFocalPointOneXMax = 1;
 
@@ -4398,12 +4590,12 @@ export const FinalizeMediaUploadResponse = zod.object({
   "collection": zod.enum(['website', 'linkedin']),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
-  "campaign": zod.string().optional(),
-  "edition": zod.string().optional(),
-  "title": zod.string().optional(),
-  "purpose": zod.string().optional(),
-  "pulseSource": zod.string().optional(),
-  "approvedUse": zod.string().optional()
+  "campaign": zod.string().min(1).max(finalizeMediaUploadResponseCampaignMetadataOneCampaignMax).regex(finalizeMediaUploadResponseCampaignMetadataOneCampaignRegExp).optional(),
+  "edition": zod.string().min(1).max(finalizeMediaUploadResponseCampaignMetadataOneEditionMax).regex(finalizeMediaUploadResponseCampaignMetadataOneEditionRegExp).optional(),
+  "title": zod.string().min(1).max(finalizeMediaUploadResponseCampaignMetadataOneTitleMax).regex(finalizeMediaUploadResponseCampaignMetadataOneTitleRegExp).optional(),
+  "purpose": zod.string().min(1).max(finalizeMediaUploadResponseCampaignMetadataOnePurposeMax).regex(finalizeMediaUploadResponseCampaignMetadataOnePurposeRegExp).optional(),
+  "pulseSource": zod.string().min(1).max(finalizeMediaUploadResponseCampaignMetadataOnePulseSourceMax).regex(finalizeMediaUploadResponseCampaignMetadataOnePulseSourceRegExp).optional(),
+  "approvedUse": zod.string().min(1).max(finalizeMediaUploadResponseCampaignMetadataOneApprovedUseMax).regex(finalizeMediaUploadResponseCampaignMetadataOneApprovedUseRegExp).optional()
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(finalizeMediaUploadResponseFocalPointOneXMin).max(finalizeMediaUploadResponseFocalPointOneXMax),
