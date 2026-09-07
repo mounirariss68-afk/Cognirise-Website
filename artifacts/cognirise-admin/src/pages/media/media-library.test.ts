@@ -40,10 +40,12 @@ test("LinkedIn-only campaign metadata is captured during finalization and remain
   assert.match(source, /setQueriesData/);
 });
 
-test("grid and list previews replace pending, failed, missing and broken images with explicit states", async () => {
+test("grid and list previews render review assets while replacing pending, failed, missing and broken images with explicit states", async () => {
   const source = await readFile(new URL("src/pages/media/MediaLibrary.tsx", adminRoot), "utf8");
 
   assert.match(source, /asset\.status === "pending"/);
+  assert.match(source, /asset\.status === "review"/);
+  assert.match(source, /label: "Awaiting review"/);
   assert.match(source, /asset\.status === "failed"/);
   assert.match(source, /"Preview unavailable"/);
   assert.match(source, /"File unavailable"/);

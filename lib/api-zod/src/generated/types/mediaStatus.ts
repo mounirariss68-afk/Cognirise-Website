@@ -11,6 +11,7 @@ export type MediaStatus = typeof MediaStatus[keyof typeof MediaStatus];
 
 export const MediaStatus = {
   pending: 'pending',
+  review: 'review',
   ready: 'ready',
   failed: 'failed',
 } as const;

@@ -4106,7 +4106,7 @@ export const ListMediaResponse = zod.object({
   "x": zod.number().min(listMediaResponseTwoItemsItemFocalPointOneXMin).max(listMediaResponseTwoItemsItemFocalPointOneXMax),
   "y": zod.number().min(listMediaResponseTwoItemsItemFocalPointOneYMin).max(listMediaResponseTwoItemsItemFocalPointOneYMax)
 }),zod.null()]).optional(),
-  "status": zod.enum(['pending', 'ready', 'failed']),
+  "status": zod.enum(['pending', 'review', 'ready', 'failed']),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -4234,7 +4234,7 @@ export const RequestMediaUploadResponse = zod.object({
   "x": zod.number().min(requestMediaUploadResponseMediaFocalPointOneXMin).max(requestMediaUploadResponseMediaFocalPointOneXMax),
   "y": zod.number().min(requestMediaUploadResponseMediaFocalPointOneYMin).max(requestMediaUploadResponseMediaFocalPointOneYMax)
 }),zod.null()]).optional(),
-  "status": zod.enum(['pending', 'ready', 'failed']),
+  "status": zod.enum(['pending', 'review', 'ready', 'failed']),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -4319,7 +4319,7 @@ export const GetMediaResponse = zod.object({
   "x": zod.number().min(getMediaResponseFocalPointOneXMin).max(getMediaResponseFocalPointOneXMax),
   "y": zod.number().min(getMediaResponseFocalPointOneYMin).max(getMediaResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
-  "status": zod.enum(['pending', 'ready', 'failed']),
+  "status": zod.enum(['pending', 'review', 'ready', 'failed']),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -4460,7 +4460,7 @@ export const UpdateMediaResponse = zod.object({
   "x": zod.number().min(updateMediaResponseFocalPointOneXMin).max(updateMediaResponseFocalPointOneXMax),
   "y": zod.number().min(updateMediaResponseFocalPointOneYMin).max(updateMediaResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
-  "status": zod.enum(['pending', 'ready', 'failed']),
+  "status": zod.enum(['pending', 'review', 'ready', 'failed']),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -4601,7 +4601,7 @@ export const FinalizeMediaUploadResponse = zod.object({
   "x": zod.number().min(finalizeMediaUploadResponseFocalPointOneXMin).max(finalizeMediaUploadResponseFocalPointOneXMax),
   "y": zod.number().min(finalizeMediaUploadResponseFocalPointOneYMin).max(finalizeMediaUploadResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
-  "status": zod.enum(['pending', 'ready', 'failed']),
+  "status": zod.enum(['pending', 'review', 'ready', 'failed']),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()

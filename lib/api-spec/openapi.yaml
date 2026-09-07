@@ -2193,7 +2193,7 @@ components:
 
     MediaStatus:
       type: string
-      enum: [pending, ready, failed]
+      enum: [pending, review, ready, failed]
     MediaCollection:
       type: string
       enum: [website, linkedin]

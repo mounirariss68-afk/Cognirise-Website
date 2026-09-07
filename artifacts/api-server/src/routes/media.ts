@@ -38,8 +38,13 @@ export function isUsableMediaStatus(status: unknown): boolean {
   return status === "active" || status === "ready";
 }
 
-export function apiMediaStatus(status: unknown): "pending" | "ready" | "failed" {
+export function isPreviewableMediaStatus(status: unknown): boolean {
+  return isUsableMediaStatus(status) || status === "pending-review";
+}
+
+export function apiMediaStatus(status: unknown): "pending" | "review" | "ready" | "failed" {
   if (isUsableMediaStatus(status)) return "ready";
+  if (status === "pending-review") return "review";
   if (status === "failed") return "failed";
   return "pending";
 }
@@ -49,10 +54,9 @@ export function media(row: Record<string, any>) {
     id: String(row.id),
     filename: row.filename,
     objectPath: row.storage_key,
-    publicUrl:
-      row.status === "active" || row.status === "ready"
-        ? `/api/media/${String(row.id)}/file`
-        : null,
+    publicUrl: isPreviewableMediaStatus(row.status)
+      ? `/api/media/${String(row.id)}/file`
+      : null,
     mimeType: row.media_type,
     size: row.byte_size,
     width: row.width,
@@ -157,7 +161,7 @@ router.get("/media/:mediaId/file", asyncRoute(async (req, res) => {
        SELECT storage_key,metadata FROM cms_media_versions
        WHERE asset_id=a.id ORDER BY version_number DESC LIMIT 1
      ) v ON true
-     WHERE a.id=$1 AND a.status IN ('active','ready')`,
+      WHERE a.id=$1 AND a.status IN ('active','ready','pending-review')`,
     [req.params.mediaId],
   );
   if (!result.rowCount) {

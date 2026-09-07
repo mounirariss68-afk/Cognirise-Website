@@ -91,6 +91,9 @@ function statusPresentation(status: string) {
   if (status === "ready" || status === "active") {
     return { label: "Available", className: "bg-emerald-500/10 text-emerald-700" };
   }
+  if (status === "review") {
+    return { label: "Awaiting review", className: "bg-amber-500/10 text-amber-700" };
+  }
   if (status === "failed") {
     return { label: "Failed", className: "bg-red-500/10 text-red-700" };
   }
@@ -122,8 +125,8 @@ function AssetPreview({
 }) {
   const isPending = asset.status === "pending";
   const isFailed = asset.status === "failed";
-  const isUsable = asset.status === "ready" || asset.status === "active";
-  const canRender = isUsable && Boolean(asset.publicUrl) && !broken;
+  const isPreviewable = asset.status === "ready" || asset.status === "active" || asset.status === "review";
+  const canRender = isPreviewable && Boolean(asset.publicUrl) && !broken;
 
   return (
     <div className={`relative flex items-center justify-center overflow-hidden bg-muted ${className}`}>

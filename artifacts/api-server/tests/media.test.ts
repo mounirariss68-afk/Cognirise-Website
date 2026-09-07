@@ -7,6 +7,7 @@ import {
 } from "@workspace/api-zod";
 import {
   apiMediaStatus,
+  isPreviewableMediaStatus,
   isUsableMediaStatus,
   isValidMediaClassification,
   media,
@@ -83,9 +84,12 @@ test("campaign metadata rejects blank and excessively long values", () => {
 test("active and ready media are usable while pending and failed stay explicit", () => {
   assert.equal(isUsableMediaStatus("active"), true);
   assert.equal(isUsableMediaStatus("ready"), true);
+  assert.equal(isUsableMediaStatus("pending-review"), false);
   assert.equal(isUsableMediaStatus("pending"), false);
   assert.equal(isUsableMediaStatus("failed"), false);
-  assert.equal(apiMediaStatus("pending-review"), "pending");
+  assert.equal(isPreviewableMediaStatus("pending-review"), true);
+  assert.equal(isPreviewableMediaStatus("pending"), false);
+  assert.equal(apiMediaStatus("pending-review"), "review");
 
   const base = {
     id: "asset-id",
@@ -116,6 +120,9 @@ test("active and ready media are usable while pending and failed stay explicit",
   const pending = media({ ...base, status: "pending" });
   assert.equal(pending.status, "pending");
   assert.equal(pending.publicUrl, null);
+  const pendingReview = media({ ...base, status: "pending-review" });
+  assert.equal(pendingReview.status, "review");
+  assert.equal(pendingReview.publicUrl, "/api/media/asset-id/file");
   const failed = media({ ...base, status: "failed" });
   assert.equal(failed.status, "failed");
   assert.equal(failed.publicUrl, null);
