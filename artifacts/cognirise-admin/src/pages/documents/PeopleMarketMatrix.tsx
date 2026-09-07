@@ -3,14 +3,13 @@ import {
   getGetDocumentMarketAvailabilityQueryKey,
   type Document,
   type MarketEdition,
-  type MarketAvailabilityDecision,
   useGetDocumentMarketAvailability,
   usePublishDocumentMarketAvailability,
   useUpdateDocumentMarketAvailability,
 } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Lock, Send } from "lucide-react";
@@ -43,7 +42,8 @@ function PersonAvailabilityRow({ person, markets, canManage, isAdministrator }: 
   const publish = usePublishDocumentMarketAvailability();
   const byMarket = new Map(availability.data?.items.map((item) => [item.marketEditionId, item]));
 
-  const setDecision = (market: MarketEdition, decision: MarketAvailabilityDecision) => {
+  const setAvailability = (market: MarketEdition, available: boolean) => {
+    const decision = available ? "show" : "off";
     update.mutate({
       documentId: person.id,
       marketEditionId: market.id,
@@ -51,7 +51,10 @@ function PersonAvailabilityRow({ person, markets, canManage, isAdministrator }: 
     }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetDocumentMarketAvailabilityQueryKey(person.id) });
-        toast({ title: "Availability staged", description: `${person.title} · ${market.displayName}: ${decision}. Public availability is unchanged until an administrator publishes it.` });
+        toast({
+          title: "Change staged",
+          description: `${person.title} is ${available ? "available" : "hidden"} in ${market.displayName} after publication.`,
+        });
       },
       onError: (error) => toast({
         title: "Availability was not changed",
@@ -82,45 +85,44 @@ function PersonAvailabilityRow({ person, markets, canManage, isAdministrator }: 
       </TableCell>
       {markets.map((market) => {
         const item = byMarket.get(market.id);
+        const hasPendingChange = Boolean(item?.pendingDecision);
+        const checked = hasPendingChange
+          ? item?.previewEffectiveAvailable
+          : item?.publishedEffectiveAvailable;
         return (
-          <TableCell key={market.id} className="min-w-48 align-top">
+          <TableCell key={market.id} className="min-w-36 align-top">
             {availability.isLoading ? (
-              <Loader2 className="mt-2 h-4 w-4 animate-spin text-muted-foreground" />
+              <div className="flex items-center justify-center py-2" aria-label={`Loading ${person.title} availability in ${market.displayName}`}>
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
             ) : availability.isError || !item ? (
               <p className="text-xs text-destructive" role="alert">
                 {errorMessage(availability.error) ?? "Availability unavailable"}
               </p>
             ) : (
-              <div className="space-y-2">
-                <Select
-                  value={item.pendingDecision ?? item.publishedDecision}
-                  onValueChange={(value) => setDecision(market, value as MarketAvailabilityDecision)}
+              <div className="flex flex-col items-center gap-2">
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={(nextChecked) => setAvailability(market, nextChecked === true)}
                   disabled={!canManage || update.isPending || publish.isPending}
-                >
-                  <SelectTrigger className="h-8" aria-label={`${person.title} explicit availability in ${market.displayName}`}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="inherit">Inherit</SelectItem>
-                    <SelectItem value="show">Explicit on</SelectItem>
-                    <SelectItem value="off">Explicit off</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="flex flex-wrap items-center gap-1">
-                  <Badge variant={item.publishedEffectiveAvailable ? "default" : "secondary"} className="text-[10px]">
-                    Public {item.publishedEffectiveAvailable ? "on" : "off"}
-                  </Badge>
-                  <Badge variant={item.previewEffectiveAvailable ? "default" : "secondary"} className="text-[10px]">
-                    Preview {item.previewEffectiveAvailable ? "on" : "off"}
-                  </Badge>
-                  <Badge variant="outline" className="text-[10px]">
-                    {item.hasEdition ? "Edition present" : "Fallback"}
-                  </Badge>
-                </div>
-                {item.pendingDecision && (
-                  <p className="text-[10px] text-amber-700">Staged: {item.pendingDecision}</p>
+                  aria-label={`${person.title} available in ${market.displayName}`}
+                  className="mt-1 h-5 w-5"
+                />
+                {hasPendingChange ? (
+                  <div className="flex flex-col items-center gap-1">
+                    <Badge variant="outline" className="border-amber-300 bg-amber-50 text-[10px] text-amber-800">
+                      Pending: {item.previewEffectiveAvailable ? "Available" : "Hidden"}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground">
+                      Live: {item.publishedEffectiveAvailable ? "Available" : "Hidden"}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">
+                    Live: {item.publishedEffectiveAvailable ? "Available" : "Hidden"}
+                  </span>
                 )}
-                {isAdministrator && item.pendingDecision && (
+                {isAdministrator && hasPendingChange && (
                   <Button
                     type="button"
                     variant="outline"
@@ -149,7 +151,7 @@ export function PeopleMarketMatrix({ people, markets, canManage, isAdministrator
         <div>
           <h2 id="people-market-heading" className="font-semibold">People market availability</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Changes stage a pre-publication result. Public and preview results are shown separately; only enabled configured markets are shown.
+            Checked means available; unchecked means hidden. Changes remain pending until an administrator publishes them.
           </p>
           {!canManage && (
             <p className="mt-2 flex items-center gap-1 text-xs text-amber-700">
@@ -164,9 +166,8 @@ export function PeopleMarketMatrix({ people, markets, canManage, isAdministrator
             <TableRow>
               <TableHead>Person</TableHead>
               {markets.map((market) => (
-                <TableHead key={market.id}>
+                <TableHead key={market.id} className="min-w-36 text-center">
                   <span>{market.displayName}</span>
-                  <span className="ml-1 font-mono text-[10px] text-muted-foreground">({market.code})</span>
                 </TableHead>
               ))}
             </TableRow>
