@@ -65,14 +65,7 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
   );
   const sourceFiles = (await walk(path.join(websiteRoot, "src"))).filter((file) => /\.(ts|tsx)$/.test(file));
   const usages = new Map<string, string[]>();
-  const legacyAltText: Record<string, string> = {
-    "image_1788532369588.png": "Design agency website reference with a portfolio grid and orange accent typography.",
-    "image_1788532453951.png": "Minimal-motion website reference with three monochrome image panels.",
-    "image_1788532520646.png": "Black-and-white studio website reference with bold typography over a portrait.",
-    "image_1788532533170.png": "Orange strategy website reference with a monochrome fashion portrait.",
-    "image_1788532545919.png": "Monochrome website reference showing a portrait and packaging design work.",
-    "image_1788532565489.png": "Black-and-white agency website reference presenting reputation metrics and services.",
-  };
+  const legacyAltText: Record<string, string> = {};
   for (const sourceFile of sourceFiles) {
     const contents = await readFile(sourceFile, "utf8");
     for (const match of contents.matchAll(/\/images\/[A-Za-z0-9_./-]+/g)) {

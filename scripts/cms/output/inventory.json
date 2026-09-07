@@ -10,9 +10,9 @@
     "platforms": 5,
     "articles": 3,
     "industries": 6,
-    "websiteAssets": 29,
+    "websiteAssets": 23,
     "linkedinAssets": 9,
-    "assets": 38
+    "assets": 32
   },
   "explicitOmissions": {
     "caseStudies": "No genuine public case-study records are present in the current website.",
@@ -1916,222 +1916,6 @@
       "digest": "3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034"
     },
     {
-      "externalId": "asset:cb984945a1a83771804c",
-      "type": "asset",
-      "name": "image_1788532369588.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/image_1788532369588.png",
-      "fields": {
-        "publicPath": "/images/cognirise/image_1788532369588.png",
-        "bytes": 556911,
-        "extension": ".png",
-        "mimeType": "image/png",
-        "checksum": "4e10ff0d5534704f48eaa834c4861d9b9aa9666c027773f52c9736de37046841",
-        "width": 970,
-        "height": 1318,
-        "usages": [],
-        "cmsOwnership": "cms-candidate",
-        "collection": "website",
-        "linkedinAssetKind": null,
-        "campaignMetadata": null,
-        "accessibility": {
-          "altText": "Design agency website reference with a portfolio grid and orange accent typography.",
-          "decorative": false
-        },
-        "rights": {
-          "status": "needs-review",
-          "owner": "Rights holder pending editorial review",
-          "source": "/images/cognirise/image_1788532369588.png"
-        }
-      },
-      "review": {
-        "status": "needs-review",
-        "reasons": [
-          "Confirm rights holder, source, license, and descriptive alt text before media import."
-        ]
-      },
-      "digest": "4e10ff0d5534704f48eaa834c4861d9b9aa9666c027773f52c9736de37046841"
-    },
-    {
-      "externalId": "asset:03186baa2b347275061a",
-      "type": "asset",
-      "name": "image_1788532453951.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/image_1788532453951.png",
-      "fields": {
-        "publicPath": "/images/cognirise/image_1788532453951.png",
-        "bytes": 465005,
-        "extension": ".png",
-        "mimeType": "image/png",
-        "checksum": "d39d7ffb61c9b640d55a0f6249b4f613d1816a1cba5e3134263d816468ee9fef",
-        "width": 1110,
-        "height": 694,
-        "usages": [],
-        "cmsOwnership": "cms-candidate",
-        "collection": "website",
-        "linkedinAssetKind": null,
-        "campaignMetadata": null,
-        "accessibility": {
-          "altText": "Minimal-motion website reference with three monochrome image panels.",
-          "decorative": false
-        },
-        "rights": {
-          "status": "needs-review",
-          "owner": "Rights holder pending editorial review",
-          "source": "/images/cognirise/image_1788532453951.png"
-        }
-      },
-      "review": {
-        "status": "needs-review",
-        "reasons": [
-          "Confirm rights holder, source, license, and descriptive alt text before media import."
-        ]
-      },
-      "digest": "d39d7ffb61c9b640d55a0f6249b4f613d1816a1cba5e3134263d816468ee9fef"
-    },
-    {
-      "externalId": "asset:b985e15c10096f5ccc2a",
-      "type": "asset",
-      "name": "image_1788532520646.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/image_1788532520646.png",
-      "fields": {
-        "publicPath": "/images/cognirise/image_1788532520646.png",
-        "bytes": 1988083,
-        "extension": ".png",
-        "mimeType": "image/png",
-        "checksum": "6ba124dcd8c6800e7d42b5622d3d142ac9933a5980bf58fd7b208b64441d5eaa",
-        "width": 1612,
-        "height": 1203,
-        "usages": [],
-        "cmsOwnership": "cms-candidate",
-        "collection": "website",
-        "linkedinAssetKind": null,
-        "campaignMetadata": null,
-        "accessibility": {
-          "altText": "Black-and-white studio website reference with bold typography over a portrait.",
-          "decorative": false
-        },
-        "rights": {
-          "status": "needs-review",
-          "owner": "Rights holder pending editorial review",
-          "source": "/images/cognirise/image_1788532520646.png"
-        }
-      },
-      "review": {
-        "status": "needs-review",
-        "reasons": [
-          "Confirm rights holder, source, license, and descriptive alt text before media import."
-        ]
-      },
-      "digest": "6ba124dcd8c6800e7d42b5622d3d142ac9933a5980bf58fd7b208b64441d5eaa"
-    },
-    {
-      "externalId": "asset:81e9604dee13233586a4",
-      "type": "asset",
-      "name": "image_1788532533170.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/image_1788532533170.png",
-      "fields": {
-        "publicPath": "/images/cognirise/image_1788532533170.png",
-        "bytes": 370759,
-        "extension": ".png",
-        "mimeType": "image/png",
-        "checksum": "f8f5dcd0abd1810578019b3013dd0a570ebb4e66113591953f873f9a94f2bab1",
-        "width": 1614,
-        "height": 898,
-        "usages": [],
-        "cmsOwnership": "cms-candidate",
-        "collection": "website",
-        "linkedinAssetKind": null,
-        "campaignMetadata": null,
-        "accessibility": {
-          "altText": "Orange strategy website reference with a monochrome fashion portrait.",
-          "decorative": false
-        },
-        "rights": {
-          "status": "needs-review",
-          "owner": "Rights holder pending editorial review",
-          "source": "/images/cognirise/image_1788532533170.png"
-        }
-      },
-      "review": {
-        "status": "needs-review",
-        "reasons": [
-          "Confirm rights holder, source, license, and descriptive alt text before media import."
-        ]
-      },
-      "digest": "f8f5dcd0abd1810578019b3013dd0a570ebb4e66113591953f873f9a94f2bab1"
-    },
-    {
-      "externalId": "asset:ac4382080a9dfc27f347",
-      "type": "asset",
-      "name": "image_1788532545919.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/image_1788532545919.png",
-      "fields": {
-        "publicPath": "/images/cognirise/image_1788532545919.png",
-        "bytes": 1609152,
-        "extension": ".png",
-        "mimeType": "image/png",
-        "checksum": "af1ac1121e74cb0b1c196b50006a5acd0a7442b0b56891f647854bc0b854494b",
-        "width": 1619,
-        "height": 1325,
-        "usages": [],
-        "cmsOwnership": "cms-candidate",
-        "collection": "website",
-        "linkedinAssetKind": null,
-        "campaignMetadata": null,
-        "accessibility": {
-          "altText": "Monochrome website reference showing a portrait and packaging design work.",
-          "decorative": false
-        },
-        "rights": {
-          "status": "needs-review",
-          "owner": "Rights holder pending editorial review",
-          "source": "/images/cognirise/image_1788532545919.png"
-        }
-      },
-      "review": {
-        "status": "needs-review",
-        "reasons": [
-          "Confirm rights holder, source, license, and descriptive alt text before media import."
-        ]
-      },
-      "digest": "af1ac1121e74cb0b1c196b50006a5acd0a7442b0b56891f647854bc0b854494b"
-    },
-    {
-      "externalId": "asset:cec6e3eeef341dca4ef6",
-      "type": "asset",
-      "name": "image_1788532565489.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/image_1788532565489.png",
-      "fields": {
-        "publicPath": "/images/cognirise/image_1788532565489.png",
-        "bytes": 209361,
-        "extension": ".png",
-        "mimeType": "image/png",
-        "checksum": "d7ccf255681903f515405738914c8ccda40349e1ec36422567d2ca6a3dd1e545",
-        "width": 1621,
-        "height": 1313,
-        "usages": [],
-        "cmsOwnership": "cms-candidate",
-        "collection": "website",
-        "linkedinAssetKind": null,
-        "campaignMetadata": null,
-        "accessibility": {
-          "altText": "Black-and-white agency website reference presenting reputation metrics and services.",
-          "decorative": false
-        },
-        "rights": {
-          "status": "needs-review",
-          "owner": "Rights holder pending editorial review",
-          "source": "/images/cognirise/image_1788532565489.png"
-        }
-      },
-      "review": {
-        "status": "needs-review",
-        "reasons": [
-          "Confirm rights holder, source, license, and descriptive alt text before media import."
-        ]
-      },
-      "digest": "d7ccf255681903f515405738914c8ccda40349e1ec36422567d2ca6a3dd1e545"
-    },
-    {
       "externalId": "asset:142ae134e579aa22b3fa",
       "type": "asset",
       "name": "pulse-industry-education.jpg",
@@ -3199,7 +2983,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "6d57524e13839df92ea3ca8b13ab7ac7628794531bcdd10b6b1f6dfc8b628c39",
-  "generatedAt": "2026-09-07T06:48:33.202Z",
+  "manifestDigest": "43a65b736114e479a4d5603065090a044fbae38bfa71105c18211c2bb027652c",
+  "generatedAt": "2026-09-07T07:46:43.987Z",
   "dryRun": false
 }
