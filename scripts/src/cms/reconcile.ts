@@ -12,6 +12,7 @@ import {
   personAvailabilityOperations,
   personGovernanceOperations,
 } from "./migration.js";
+import { mapWithConcurrency } from "./media-reconciliation.js";
 import { objectStorageClient } from "./object-storage.js";
 
 interface Inventory {
@@ -122,26 +123,24 @@ async function inspectReconciliationState(
   }
   if (!process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID) throw new Error("DEFAULT_OBJECT_STORAGE_BUCKET_ID is required.");
   const bucket = objectStorageClient.bucket(process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID);
-  for (const receipt of relevantReceipts) {
+  const mediaReceipts = relevantReceipts.filter((receipt) => expected.get(receipt.idempotencyKey)?.media);
+  const mediaInvalid = await mapWithConcurrency(mediaReceipts, 6, async (receipt) => {
     const operation = expected.get(receipt.idempotencyKey);
-    if (!operation?.media) continue;
+    if (!operation?.media) return undefined;
     const asset = mediaById.get(receipt.subjectId);
     const version = latestVersionByAsset.get(receipt.subjectId);
     if (!asset || !version) {
-      invalid.push(`${operation.media.publicPath}: missing asset or immutable version`);
-      continue;
+      return `${operation.media.publicPath}: missing asset or immutable version`;
     }
     if (asset.checksum !== operation.media.checksum || asset.byteSize !== operation.media.byteSize
       || version.checksum !== operation.media.checksum || version.byteSize !== operation.media.byteSize
       || version.storageKey.startsWith("deferred/")) {
-      invalid.push(`${operation.media.publicPath}: database checksum, size, or storage key is incomplete`);
-      continue;
+      return `${operation.media.publicPath}: database checksum, size, or storage key is incomplete`;
     }
     const object = bucket.file(version.storageKey);
     const [exists] = await object.exists();
     if (!exists) {
-      invalid.push(`${operation.media.publicPath}: durable object is missing`);
-      continue;
+      return `${operation.media.publicPath}: durable object is missing`;
     }
     const [metadata] = await object.getMetadata();
     const sourceBytes = await readFile(`${repositoryRoot}/${operation.media.sourceFile}`);
@@ -152,9 +151,11 @@ async function inspectReconciliationState(
         || metadata.md5Hash === sourceMd5
       );
     if (!objectMatches) {
-      invalid.push(`${operation.media.publicPath}: durable object is invalid`);
+      return `${operation.media.publicPath}: durable object is invalid`;
     }
-  }
+    return undefined;
+  });
+  invalid.push(...mediaInvalid.filter((item): item is string => Boolean(item)));
 
   const existingCount = relevantReceipts.length;
   const missingCount = expected.size - existingCount;

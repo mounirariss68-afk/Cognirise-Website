@@ -7,4 +7,4 @@ Shell-run CMS reconciliation jobs cannot rely on Google Application Default Cred
 
 **Why:** A generic Google Storage client failed despite a configured App Storage bucket, and repeated full-object reads inside a database transaction made a repair exceed the shell execution limit.
 
-**How to apply:** For one-off App Storage jobs, use the Replit sidecar authentication path. Verify source identity before opening a write transaction; inside the transaction, rely on the already-verified storage key and immutable metadata rather than performing remote object downloads.
+**How to apply:** For one-off App Storage jobs, use the Replit sidecar authentication path. Verify source identity before opening a write transaction; run independent remote object checks with modest bounded concurrency rather than serially; and inside the transaction, rely on the already-verified storage key and immutable metadata instead of downloading objects.

@@ -21,6 +21,7 @@ import {
   type PersonAvailabilityOperation,
   type PersonGovernanceOperation,
 } from "./migration.js";
+import { mapWithConcurrency } from "./media-reconciliation.js";
 import { objectStorageClient } from "./object-storage.js";
 
 const args = process.argv.slice(2);
@@ -75,8 +76,8 @@ async function verifyStoredMedia(
 async function uploadMedia(operations: MediaMigrationOperation[]) {
   const bucket = objectStorageClient.bucket(process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID!);
   const prefix = process.env.PRIVATE_OBJECT_DIR!.replace(/^\/+|\/+$/g, "");
-  const storageKeys = new Map<string, string>();
-  for (const operation of operations.filter((item) => item.cmsOwnership === "cms-candidate")) {
+  const candidates = operations.filter((item) => item.cmsOwnership === "cms-candidate");
+  const entries = await mapWithConcurrency(candidates, 6, async (operation) => {
     if (!["image/jpeg", "image/png", "image/webp", "image/avif", "application/pdf"].includes(operation.mimeType)) {
       throw new Error(`CMS candidate ${operation.publicPath} has an unsupported media type.`);
     }
@@ -107,9 +108,9 @@ async function uploadMedia(operations: MediaMigrationOperation[]) {
     if (!await verifyStoredMedia(bucket, storageKey, operation, expectedMd5)) {
       throw new Error(`Stored object checksum conflict for ${operation.publicPath}.`);
     }
-    storageKeys.set(operation.publicPath, storageKey);
-  }
-  return storageKeys;
+    return [operation.publicPath, storageKey] as const;
+  });
+  return new Map(entries);
 }
 
 async function applyDatabase(

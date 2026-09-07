@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { mediaDisposition } from "./media-reconciliation.js";
+import { mapWithConcurrency, mediaDisposition } from "./media-reconciliation.js";
 
 const expected = { checksum: "abc", byteSize: 42, storageKey: "private/cms-media/inventory-abc" };
 const complete = {
@@ -26,6 +26,22 @@ test("deferred and missing objects are repairable incomplete states", () => {
 test("an existing object with the wrong bytes is invalid, not successful", () => {
   assert.equal(mediaDisposition(expected, { ...complete, objectChecksum: "wrong" }), "invalid");
   assert.equal(mediaDisposition(expected, { ...complete, objectByteSize: 41 }), "invalid");
+});
+
+test("remote media work is bounded and keeps result order", async () => {
+  let active = 0;
+  let maximumActive = 0;
+  const results = await mapWithConcurrency([1, 2, 3, 4, 5, 6], 2, async (value) => {
+    active++;
+    maximumActive = Math.max(maximumActive, active);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    active--;
+    return value * 2;
+  });
+
+  assert.deepEqual(results, [2, 4, 6, 8, 10, 12]);
+  assert.equal(maximumActive, 2);
+  await assert.rejects(() => mapWithConcurrency([1], 0, async (value) => value));
 });
 
 test("the executable reconciliation uploads and verifies durable objects without deferred mode", async () => {
