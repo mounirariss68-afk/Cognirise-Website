@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { FocalPoint } from './focalPoint';
+import type { LinkedInAssetKind } from './linkedInAssetKind';
+import type { MediaCampaignMetadata } from './mediaCampaignMetadata';
+import type { MediaCollection } from './mediaCollection';
 import type { MediaStatus } from './mediaStatus';
 
 export interface MediaAsset {
@@ -35,9 +38,12 @@ export interface MediaAsset {
   caption?: string | null;
   /** @nullable */
   credit?: string | null;
+  collection: MediaCollection;
+  linkedinAssetKind?: LinkedInAssetKind | null;
+  campaignMetadata?: MediaCampaignMetadata | null;
   focalPoint?: FocalPoint | null;
   status: MediaStatus;
-  createdBy: string;
+  createdBy?: string;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -5,6 +5,9 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { LinkedInAssetKind } from './linkedInAssetKind';
+import type { MediaCampaignMetadata } from './mediaCampaignMetadata';
+import type { MediaCollection } from './mediaCollection';
 
 export interface MediaUploadInput {
   /**
@@ -23,4 +26,7 @@ export interface MediaUploadInput {
      */
   size: number;
   checksum?: string;
+  collection?: MediaCollection;
+  linkedinAssetKind?: LinkedInAssetKind;
+  campaignMetadata?: MediaCampaignMetadata;
 }

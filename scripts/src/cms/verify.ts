@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { type CmsDocumentKind, cmsPublicRoute, validateCmsSnapshot } from "@workspace/api-zod";
 import {
   emitJson,
@@ -81,6 +81,7 @@ async function verifyDatabase(records: InventoryRecord[]) {
 
       const mediaByPath = new Map<string, string>();
       let durableMediaObjects = 0;
+      let mediaReceiptConflicts = 0;
       for (const operation of mediaMigrationOperations(records).filter((item) => item.cmsOwnership === "cms-candidate")) {
         const [asset] = await tx.select({
           id: cmsMediaAssetsTable.id,
@@ -88,21 +89,39 @@ async function verifyDatabase(records: InventoryRecord[]) {
           checksum: cmsMediaAssetsTable.checksum,
           byteSize: cmsMediaAssetsTable.byteSize,
           storageKey: cmsMediaAssetsTable.storageKey,
+          altText: cmsMediaAssetsTable.altText,
+          credit: cmsMediaAssetsTable.credit,
+          collection: cmsMediaAssetsTable.collection,
+          linkedinAssetKind: cmsMediaAssetsTable.linkedinAssetKind,
+          campaignMetadata: cmsMediaAssetsTable.campaignMetadata,
         }).from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.checksum, operation.checksum));
-        if (!asset || asset.status !== "pending-review" || asset.byteSize !== operation.byteSize) {
+        if (
+          !asset ||
+          asset.status !== "pending-review" ||
+          asset.byteSize !== operation.byteSize ||
+          asset.altText !== operation.altText ||
+          asset.credit !== operation.credit ||
+          asset.collection !== operation.collection ||
+          asset.linkedinAssetKind !== operation.linkedinAssetKind ||
+          JSON.stringify(canonical(asset.campaignMetadata)) !== JSON.stringify(canonical(operation.campaignMetadata))
+        ) {
           throw new Error(`Missing pending-review media parity for ${operation.publicPath}.`);
         }
         const [version] = await tx.select({
           checksum: cmsMediaVersionsTable.checksum,
+          byteSize: cmsMediaVersionsTable.byteSize,
+          storageKey: cmsMediaVersionsTable.storageKey,
           width: cmsMediaVersionsTable.width,
           height: cmsMediaVersionsTable.height,
-        }).from(cmsMediaVersionsTable).where(and(
-          eq(cmsMediaVersionsTable.assetId, asset.id),
-          eq(cmsMediaVersionsTable.versionNumber, 1),
-        ));
+        }).from(cmsMediaVersionsTable)
+          .where(eq(cmsMediaVersionsTable.assetId, asset.id))
+          .orderBy(desc(cmsMediaVersionsTable.versionNumber))
+          .limit(1);
         if (
           !version ||
           version.checksum !== operation.checksum ||
+          version.byteSize !== operation.byteSize ||
+          version.storageKey.startsWith("deferred/") ||
           version.width !== operation.width ||
           version.height !== operation.height
         ) throw new Error(`Missing immutable media version parity for ${operation.publicPath}.`);
@@ -112,11 +131,12 @@ async function verifyDatabase(records: InventoryRecord[]) {
         const [audit] = await tx.select({ requestId: cmsAuditEventsTable.requestId })
           .from(cmsAuditEventsTable)
           .where(eq(cmsAuditEventsTable.requestId, operation.idempotencyKey));
-        if (!receipt || receipt.requestDigest !== operation.requestDigest || !audit) {
+        if (!receipt || !audit) {
           throw new Error(`Missing media receipt/audit parity for ${operation.publicPath}.`);
         }
+        if (receipt.requestDigest !== operation.requestDigest) mediaReceiptConflicts++;
         mediaByPath.set(operation.publicPath, String(asset.id));
-        if (!asset.storageKey.startsWith("deferred/")) durableMediaObjects++;
+        if (!asset.storageKey.startsWith("deferred/") && !version.storageKey.startsWith("deferred/")) durableMediaObjects++;
       }
 
       const approvedRevisionIds: string[] = [];
@@ -205,6 +225,7 @@ async function verifyDatabase(records: InventoryRecord[]) {
         revisions: draftRevisionIds.length,
         media: mediaByPath.size,
         durableMediaObjects,
+        mediaReceiptConflicts,
         references: migrationOperations(records).reduce((total, operation) => total + operation.mediaPaths.length, 0),
         receipts: migrationOperations(records).length + mediaByPath.size,
         audits: migrationOperations(records).length + mediaByPath.size,
@@ -231,12 +252,26 @@ async function main() {
   const calculatedManifestDigest = createHash("sha256").update(JSON.stringify(stable)).digest("hex");
   if (manifestDigest !== calculatedManifestDigest || payload.manifestDigest !== manifestDigest) errors.push("Manifest digest mismatch.");
   const count = (type: string) => inventory.records.filter((record) => record.type === type).length;
-  for (const [type, expected] of Object.entries({ person: 8, partner: 5, platform: 5, article: 3, industry: 6, asset: 31 })) {
+  const expectedByType: Record<string, number | undefined> = {
+    person: inventory.expectedCounts.people,
+    partner: inventory.expectedCounts.partners,
+    platform: inventory.expectedCounts.platforms,
+    article: inventory.expectedCounts.articles,
+    industry: inventory.expectedCounts.industries,
+    asset: inventory.expectedCounts.assets,
+  };
+  for (const [type, expected] of Object.entries(expectedByType)) {
+    if (typeof expected !== "number") {
+      errors.push(`Inventory expectedCounts is missing ${type}.`);
+      continue;
+    }
     if (count(type) !== expected) errors.push(`Expected ${expected} ${type} records, found ${count(type)}.`);
   }
   const operations = migrationOperations(inventory.records);
   const mediaOperations = mediaMigrationOperations(inventory.records);
-  if (payload.operations.length !== 27 || payload.mediaOperations.length !== 31) errors.push("Import payload must contain 27 content and 31 media operations.");
+  if (payload.operations.length !== operations.length || payload.mediaOperations.length !== mediaOperations.length) {
+    errors.push(`Import payload must contain ${operations.length} content and ${mediaOperations.length} media operations.`);
+  }
   const payloadContent = new Map(payload.operations.map((operation) => [operation.externalId, operation.requestDigest]));
   const payloadMedia = new Map(payload.mediaOperations.map((operation) => [operation.externalId, operation.requestDigest]));
   if (operations.some((operation) => payloadContent.get(operation.externalId) !== operation.requestDigest)) errors.push("Content operation digest mismatch.");

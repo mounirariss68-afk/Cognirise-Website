@@ -203,7 +203,13 @@ router.get(
 
 router.get("/public/media/:mediaId", asyncRoute(async (req, res) => {
   const asset = await pool.query(
-    `SELECT a.storage_key,a.media_type FROM cms_media_assets a
+    `SELECT COALESCE(v.storage_key,a.storage_key) storage_key,
+       CASE WHEN v.metadata->>'rendition'='webp-1600' THEN 'image/webp' ELSE a.media_type END media_type
+       FROM cms_media_assets a
+      LEFT JOIN LATERAL (
+        SELECT storage_key,metadata FROM cms_media_versions
+        WHERE asset_id=a.id ORDER BY version_number DESC LIMIT 1
+      ) v ON true
       JOIN cms_market_editions e ON e.publication_state='published' AND e.published_at<=now()
       JOIN cms_documents d ON d.id=e.document_id
       JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id

@@ -10,14 +10,16 @@
     "platforms": 5,
     "articles": 3,
     "industries": 6,
-    "assets": 31
+    "websiteAssets": 29,
+    "linkedinAssets": 9,
+    "assets": 38
   },
   "explicitOmissions": {
     "caseStudies": "No genuine public case-study records are present in the current website.",
     "povDocuments": "No genuine public POV documents are present in the current website.",
     "employees": "No additional public employee profiles are present in the current website.",
     "nonUaeEditions": "No approved non-UAE editions or translations are present.",
-    "codeOwnedAsset": "blueprint-annotated.png remains code-owned with the specialist CogniOS experience."
+    "codeOwnedAsset": "blueprint-annotated.png, logo SVGs, LinkedIn SVG masters, and the LinkedIn ZIP remain code/source-owned."
   },
   "records": [
     {
@@ -1693,15 +1695,18 @@
         "usages": [
           "artifacts/cognirise-website/src/lib/alliancePlatforms.ts"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "alliance bunjee",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/alliance-bunjee.jpg"
         }
       },
       "review": {
@@ -1728,15 +1733,18 @@
         "usages": [
           "artifacts/cognirise-website/src/lib/alliancePlatforms.ts"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "alliance datatoolpack",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/alliance-datatoolpack.jpg"
         }
       },
       "review": {
@@ -1763,15 +1771,18 @@
         "usages": [
           "artifacts/cognirise-website/src/lib/alliancePlatforms.ts"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "alliance lupitor",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/alliance-lupitor.jpg"
         }
       },
       "review": {
@@ -1801,15 +1812,18 @@
           "artifacts/cognirise-website/src/pages/EngineeringWithAI.tsx",
           "artifacts/cognirise-website/src/pages/Home.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "cognirise pulse governance",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/cognirise-pulse-governance.jpg"
         }
       },
       "review": {
@@ -1838,15 +1852,18 @@
           "artifacts/cognirise-website/src/pages/DataAIFoundations.tsx",
           "artifacts/cognirise-website/src/pages/WorkProof.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "cognirise pulse outcomes",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/cognirise-pulse-outcomes.jpg"
         }
       },
       "review": {
@@ -1876,15 +1893,18 @@
           "artifacts/cognirise-website/src/pages/Home.tsx",
           "artifacts/cognirise-website/src/pages/ServicesOverview.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "cognirise pulse people",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/cognirise-pulse-people.jpg"
         }
       },
       "review": {
@@ -1909,15 +1929,18 @@
         "width": 970,
         "height": 1318,
         "usages": [],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "Design agency website reference with a portfolio grid and orange accent typography.",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/image_1788532369588.png"
         }
       },
       "review": {
@@ -1942,15 +1965,18 @@
         "width": 1110,
         "height": 694,
         "usages": [],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "Minimal-motion website reference with three monochrome image panels.",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/image_1788532453951.png"
         }
       },
       "review": {
@@ -1975,15 +2001,18 @@
         "width": 1612,
         "height": 1203,
         "usages": [],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "Black-and-white studio website reference with bold typography over a portrait.",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/image_1788532520646.png"
         }
       },
       "review": {
@@ -2008,15 +2037,18 @@
         "width": 1614,
         "height": 898,
         "usages": [],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "Orange strategy website reference with a monochrome fashion portrait.",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/image_1788532533170.png"
         }
       },
       "review": {
@@ -2041,15 +2073,18 @@
         "width": 1619,
         "height": 1325,
         "usages": [],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "Monochrome website reference showing a portrait and packaging design work.",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/image_1788532545919.png"
         }
       },
       "review": {
@@ -2074,15 +2109,18 @@
         "width": 1621,
         "height": 1313,
         "usages": [],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "Black-and-white agency website reference presenting reputation metrics and services.",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/image_1788532565489.png"
         }
       },
       "review": {
@@ -2110,14 +2148,17 @@
           "artifacts/cognirise-website/src/content/industries.ts"
         ],
         "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "pulse industry education",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/industries/pulse-industry-education.jpg"
         }
       },
       "review": {
@@ -2145,14 +2186,17 @@
           "artifacts/cognirise-website/src/content/industries.ts"
         ],
         "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "pulse industry energy",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/industries/pulse-industry-energy.jpg"
         }
       },
       "review": {
@@ -2180,14 +2224,17 @@
           "artifacts/cognirise-website/src/content/industries.ts"
         ],
         "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "pulse industry financial",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/industries/pulse-industry-financial.jpg"
         }
       },
       "review": {
@@ -2215,14 +2262,17 @@
           "artifacts/cognirise-website/src/content/industries.ts"
         ],
         "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "pulse industry public sector",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/industries/pulse-industry-public-sector.jpg"
         }
       },
       "review": {
@@ -2250,14 +2300,17 @@
           "artifacts/cognirise-website/src/content/industries.ts"
         ],
         "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "pulse industry telecoms",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/industries/pulse-industry-telecoms.jpg"
         }
       },
       "review": {
@@ -2285,14 +2338,17 @@
           "artifacts/cognirise-website/src/content/industries.ts"
         ],
         "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "pulse industry travel",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/industries/pulse-industry-travel.jpg"
         }
       },
       "review": {
@@ -2302,72 +2358,6 @@
         ]
       },
       "digest": "c5d787e4b692481e5213aa4f218626e5f776c8eaa5f171548c46594877c10204"
-    },
-    {
-      "externalId": "asset:3cca1551f0dec19ae890",
-      "type": "asset",
-      "name": "logo-blue.svg",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/logo-blue.svg",
-      "fields": {
-        "publicPath": "/images/cognirise/logo-blue.svg",
-        "bytes": 92990,
-        "extension": ".svg",
-        "mimeType": "image/svg+xml",
-        "checksum": "c2cba1a5a6e4f4eefe2f711dae492f3160d277cb46ab43e2f616c68a92ed97ec",
-        "width": 1320,
-        "height": 388,
-        "usages": [],
-        "cmsOwnership": "code-owned",
-        "accessibility": {
-          "altText": null,
-          "decorative": null
-        },
-        "rights": {
-          "status": "needs-review",
-          "owner": null,
-          "source": null
-        }
-      },
-      "review": {
-        "status": "needs-review",
-        "reasons": [
-          "Confirm rights holder, source, license, and descriptive alt text before media import."
-        ]
-      },
-      "digest": "c2cba1a5a6e4f4eefe2f711dae492f3160d277cb46ab43e2f616c68a92ed97ec"
-    },
-    {
-      "externalId": "asset:207b88a034dc17247e9c",
-      "type": "asset",
-      "name": "logo-white.svg",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/logo-white.svg",
-      "fields": {
-        "publicPath": "/images/cognirise/logo-white.svg",
-        "bytes": 93008,
-        "extension": ".svg",
-        "mimeType": "image/svg+xml",
-        "checksum": "52863a39ed2631ee05ad321b2cebbef1d158d88c262d2f3a72338267fc389887",
-        "width": 1320,
-        "height": 388,
-        "usages": [],
-        "cmsOwnership": "code-owned",
-        "accessibility": {
-          "altText": null,
-          "decorative": null
-        },
-        "rights": {
-          "status": "needs-review",
-          "owner": null,
-          "source": null
-        }
-      },
-      "review": {
-        "status": "needs-review",
-        "reasons": [
-          "Confirm rights holder, source, license, and descriptive alt text before media import."
-        ]
-      },
-      "digest": "52863a39ed2631ee05ad321b2cebbef1d158d88c262d2f3a72338267fc389887"
     },
     {
       "externalId": "asset:5d8da6b74c77327bf3a1",
@@ -2388,15 +2378,18 @@
           "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
           "artifacts/cognirise-website/src/pages/WorkProof.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "pulse breakthrough",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/pulse-breakthrough.jpg"
         }
       },
       "review": {
@@ -2424,15 +2417,18 @@
           "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
           "artifacts/cognirise-website/src/pages/Home.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "pulse convergence",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/pulse-convergence.jpg"
         }
       },
       "review": {
@@ -2460,15 +2456,18 @@
           "artifacts/cognirise-website/src/components/layout/Shell.tsx",
           "artifacts/cognirise-website/src/pages/Home.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "pulse hero",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/pulse-hero.jpg"
         }
       },
       "review": {
@@ -2500,14 +2499,17 @@
           "artifacts/cognirise-website/src/pages/PlatformsOverview.tsx"
         ],
         "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "site cognios",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/site-cognios.jpg"
         }
       },
       "review": {
@@ -2534,15 +2536,18 @@
         "usages": [
           "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "site financial",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/site-financial.jpg"
         }
       },
       "review": {
@@ -2569,15 +2574,18 @@
         "usages": [
           "artifacts/cognirise-website/src/pages/SovereignRegulatedAI.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "site government",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/site-government.jpg"
         }
       },
       "review": {
@@ -2608,14 +2616,17 @@
           "artifacts/cognirise-website/src/pages/InsightsEditorial.tsx"
         ],
         "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "site infrastructure",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/site-infrastructure.jpg"
         }
       },
       "review": {
@@ -2644,14 +2655,17 @@
           "artifacts/cognirise-website/src/pages/InsightsEditorial.tsx"
         ],
         "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "site insights",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/site-insights.jpg"
         }
       },
       "review": {
@@ -2679,14 +2693,17 @@
           "artifacts/cognirise-website/src/pages/AboutPeople.tsx"
         ],
         "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "site leadership",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/site-leadership.jpg"
         }
       },
       "review": {
@@ -2715,15 +2732,18 @@
           "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
           "artifacts/cognirise-website/src/pages/ValueScan.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "site services",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/site-services.jpg"
         }
       },
       "review": {
@@ -2751,15 +2771,18 @@
           "artifacts/cognirise-website/src/pages/ValueScan.tsx",
           "artifacts/cognirise-website/src/pages/WorkProof.tsx"
         ],
-        "cmsOwnership": "code-owned",
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
         "accessibility": {
-          "altText": null,
-          "decorative": null
+          "altText": "site work proof",
+          "decorative": false
         },
         "rights": {
           "status": "needs-review",
-          "owner": null,
-          "source": null
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/site-work-proof.jpg"
         }
       },
       "review": {
@@ -2769,9 +2792,414 @@
         ]
       },
       "digest": "61c0e28ea60a07c3eed1aecf06446f9c1cb83c607e565ecae076cfd7625c5a71"
+    },
+    {
+      "externalId": "asset:b2ed1d2b2101c2204709",
+      "type": "asset",
+      "name": "cognirise-linkedin-governance.png",
+      "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-governance.png",
+      "fields": {
+        "publicPath": "/linkedin/cognirise-linkedin-governance.png",
+        "bytes": 1014101,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "93d83eaeee9a6e891ff5d2d0e0e76e26f5a4f6e2ac3baad7fd226e9342e833af",
+        "width": 1080,
+        "height": 1350,
+        "usages": [
+          "Cognirise LinkedIn communications"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "linkedin",
+        "linkedinAssetKind": "post",
+        "campaignMetadata": {
+          "campaign": "Pulse",
+          "edition": "02",
+          "title": "Governance",
+          "purpose": "A point of view on controls as an enabling architecture.",
+          "pulseSource": "Governed AI / Control in motion",
+          "approvedUse": "Cognirise LinkedIn communications only"
+        },
+        "accessibility": {
+          "altText": "Dark architectural gates with a magenta and coral current and Governance is the architecture of motion text.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Pulse image-led edition"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm campaign copy and publishing date before use."
+        ]
+      },
+      "digest": "93d83eaeee9a6e891ff5d2d0e0e76e26f5a4f6e2ac3baad7fd226e9342e833af"
+    },
+    {
+      "externalId": "asset:825c8a93d04790bbd0bd",
+      "type": "asset",
+      "name": "cognirise-linkedin-judgment.png",
+      "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-judgment.png",
+      "fields": {
+        "publicPath": "/linkedin/cognirise-linkedin-judgment.png",
+        "bytes": 1622385,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "34e11266daafe5976140c2f793db243d197cca220dd9d3f0417234e262607f09",
+        "width": 1080,
+        "height": 1350,
+        "usages": [
+          "Cognirise LinkedIn communications"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "linkedin",
+        "linkedinAssetKind": "post",
+        "campaignMetadata": {
+          "campaign": "Pulse",
+          "edition": "02",
+          "title": "Judgment",
+          "purpose": "A human and AI perspective for consequential decisions.",
+          "pulseSource": "Human + AI / Shared judgment",
+          "approvedUse": "Cognirise LinkedIn communications only"
+        },
+        "accessibility": {
+          "altText": "Coral and violet currents meet around an architectural platform with Judgment stays visible text.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Pulse image-led edition"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm campaign copy and publishing date before use."
+        ]
+      },
+      "digest": "34e11266daafe5976140c2f793db243d197cca220dd9d3f0417234e262607f09"
+    },
+    {
+      "externalId": "asset:8d4c4659e4d1e2863730",
+      "type": "asset",
+      "name": "cognirise-linkedin-orchestration.png",
+      "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-orchestration.png",
+      "fields": {
+        "publicPath": "/linkedin/cognirise-linkedin-orchestration.png",
+        "bytes": 1257233,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "0ca7120bafc7976550fffacb2083ec2f16038de5d4df0f0bea106ae8854a0934",
+        "width": 1080,
+        "height": 1350,
+        "usages": [
+          "Cognirise LinkedIn communications"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "linkedin",
+        "linkedinAssetKind": "post",
+        "campaignMetadata": {
+          "campaign": "Pulse",
+          "edition": "02",
+          "title": "Orchestration",
+          "purpose": "A systems view of operating rhythm.",
+          "pulseSource": "Orchestration / Many forces, one rhythm",
+          "approvedUse": "Cognirise LinkedIn communications only"
+        },
+        "accessibility": {
+          "altText": "Violet and coral current flowing across monumental navy frames with operating rhythm text.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Pulse image-led edition"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm campaign copy and publishing date before use."
+        ]
+      },
+      "digest": "0ca7120bafc7976550fffacb2083ec2f16038de5d4df0f0bea106ae8854a0934"
+    },
+    {
+      "externalId": "asset:8b8113e72a4ebd0da335",
+      "type": "asset",
+      "name": "cognirise-linkedin-transformation.png",
+      "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-transformation.png",
+      "fields": {
+        "publicPath": "/linkedin/cognirise-linkedin-transformation.png",
+        "bytes": 1491688,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "126fa90ac1aafc3bfef840c530f06a6a8fbe6fb7226303de717d16dadd5063a0",
+        "width": 1080,
+        "height": 1350,
+        "usages": [
+          "Cognirise LinkedIn communications"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "linkedin",
+        "linkedinAssetKind": "post",
+        "campaignMetadata": {
+          "campaign": "Pulse",
+          "edition": "02",
+          "title": "Transformation",
+          "purpose": "A considered prompt about how change gets structure.",
+          "pulseSource": "Transformation / New operating form",
+          "approvedUse": "Cognirise LinkedIn communications only"
+        },
+        "accessibility": {
+          "altText": "A coral violet force breaks through monumental navy architecture with change needs an operating form text.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Pulse image-led edition"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm campaign copy and publishing date before use."
+        ]
+      },
+      "digest": "126fa90ac1aafc3bfef840c530f06a6a8fbe6fb7226303de717d16dadd5063a0"
+    },
+    {
+      "externalId": "asset:78c77a565b04dfd99fc9",
+      "type": "asset",
+      "name": "cognirise-linkedin-knowledge.png",
+      "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-knowledge.png",
+      "fields": {
+        "publicPath": "/linkedin/cognirise-linkedin-knowledge.png",
+        "bytes": 1176217,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "c492f6c82f90a5c19cab17baaa8a2fe997b4ddb2391c212475adeac21e0c64fe",
+        "width": 1080,
+        "height": 1350,
+        "usages": [
+          "Cognirise LinkedIn communications"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "linkedin",
+        "linkedinAssetKind": "post",
+        "campaignMetadata": {
+          "campaign": "Pulse",
+          "edition": "02",
+          "title": "Knowledge",
+          "purpose": "A knowledge intelligence perspective.",
+          "pulseSource": "Knowledge intelligence / Living index",
+          "approvedUse": "Cognirise LinkedIn communications only"
+        },
+        "accessibility": {
+          "altText": "Layered translucent library architecture with Insight needs a living index text.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Pulse image-led edition"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm campaign copy and publishing date before use."
+        ]
+      },
+      "digest": "c492f6c82f90a5c19cab17baaa8a2fe997b4ddb2391c212475adeac21e0c64fe"
+    },
+    {
+      "externalId": "asset:1466c1c5cc65907d9f3f",
+      "type": "asset",
+      "name": "cognirise-linkedin-action.png",
+      "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-action.png",
+      "fields": {
+        "publicPath": "/linkedin/cognirise-linkedin-action.png",
+        "bytes": 1275394,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "11733af887ceb9df5989b462758def32ce916ab2c28592c67cbdaa84f55263a7",
+        "width": 1080,
+        "height": 1350,
+        "usages": [
+          "Cognirise LinkedIn communications"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "linkedin",
+        "linkedinAssetKind": "post",
+        "campaignMetadata": {
+          "campaign": "Pulse",
+          "edition": "02",
+          "title": "Action",
+          "purpose": "An agentic workflow perspective.",
+          "pulseSource": "Agentic workflows / Directed action",
+          "approvedUse": "Cognirise LinkedIn communications only"
+        },
+        "accessibility": {
+          "altText": "Violet and coral action streams move through a monumental operating environment with Turn intelligence toward action text.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Pulse image-led edition"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm campaign copy and publishing date before use."
+        ]
+      },
+      "digest": "11733af887ceb9df5989b462758def32ce916ab2c28592c67cbdaa84f55263a7"
+    },
+    {
+      "externalId": "asset:c1cc817de69cd0183603",
+      "type": "asset",
+      "name": "cognirise-linkedin-header-governance.png",
+      "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-header-governance.png",
+      "fields": {
+        "publicPath": "/linkedin/cognirise-linkedin-header-governance.png",
+        "bytes": 390774,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "109006e6a03d3c7e98cd2397da4fb761b325882cd5da3b361f6b40a71d47f9e2",
+        "width": 1584,
+        "height": 396,
+        "usages": [
+          "Cognirise LinkedIn communications"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "linkedin",
+        "linkedinAssetKind": "header",
+        "campaignMetadata": {
+          "campaign": "Pulse",
+          "edition": "02",
+          "title": "Governance in motion",
+          "purpose": "A deep architectural profile treatment.",
+          "pulseSource": "Governed AI / Control in motion",
+          "approvedUse": "Cognirise LinkedIn communications only"
+        },
+        "accessibility": {
+          "altText": "Wide architectural header featuring governance in motion.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Pulse image-led edition"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm campaign copy and publishing date before use."
+        ]
+      },
+      "digest": "109006e6a03d3c7e98cd2397da4fb761b325882cd5da3b361f6b40a71d47f9e2"
+    },
+    {
+      "externalId": "asset:bd3dcd93e2f9ee1a407c",
+      "type": "asset",
+      "name": "cognirise-linkedin-header-judgment.png",
+      "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-header-judgment.png",
+      "fields": {
+        "publicPath": "/linkedin/cognirise-linkedin-header-judgment.png",
+        "bytes": 889703,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "67fe71354cefcb675c5ad914711c1e3d102a359f201ebf7d95e87334b4e04146",
+        "width": 1584,
+        "height": 396,
+        "usages": [
+          "Cognirise LinkedIn communications"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "linkedin",
+        "linkedinAssetKind": "header",
+        "campaignMetadata": {
+          "campaign": "Pulse",
+          "edition": "02",
+          "title": "Human judgment",
+          "purpose": "A luminous profile treatment for people-led work.",
+          "pulseSource": "Human + AI / Shared judgment",
+          "approvedUse": "Cognirise LinkedIn communications only"
+        },
+        "accessibility": {
+          "altText": "Wide header where coral and violet currents meet, with Human judgment visible.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Pulse image-led edition"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm campaign copy and publishing date before use."
+        ]
+      },
+      "digest": "67fe71354cefcb675c5ad914711c1e3d102a359f201ebf7d95e87334b4e04146"
+    },
+    {
+      "externalId": "asset:0b7fba49942ca5d66ead",
+      "type": "asset",
+      "name": "cognirise-linkedin-header-rhythm.png",
+      "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-header-rhythm.png",
+      "fields": {
+        "publicPath": "/linkedin/cognirise-linkedin-header-rhythm.png",
+        "bytes": 916575,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3",
+        "width": 1584,
+        "height": 396,
+        "usages": [
+          "Cognirise LinkedIn communications"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "linkedin",
+        "linkedinAssetKind": "header",
+        "campaignMetadata": {
+          "campaign": "Pulse",
+          "edition": "02",
+          "title": "Operating rhythm",
+          "purpose": "A panoramic systems-oriented profile treatment.",
+          "pulseSource": "Orchestration / Many forces, one rhythm",
+          "approvedUse": "Cognirise LinkedIn communications only"
+        },
+        "accessibility": {
+          "altText": "Wide header with flowing current among monumental architectural frames.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Pulse image-led edition"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm campaign copy and publishing date before use."
+        ]
+      },
+      "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "3bfc8cc896cb43c58e23eab1ae2d1f9861b2566352891e89cc3cc71d445afa9e",
-  "generatedAt": "2026-09-07T02:42:45.461Z",
+  "manifestDigest": "6d57524e13839df92ea3ca8b13ab7ac7628794531bcdd10b6b1f6dfc8b628c39",
+  "generatedAt": "2026-09-07T06:48:33.202Z",
   "dryRun": false
 }

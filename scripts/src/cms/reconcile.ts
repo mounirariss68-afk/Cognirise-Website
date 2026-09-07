@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
-import { inArray } from "drizzle-orm";
+import { createHash } from "node:crypto";
+import { desc, inArray } from "drizzle-orm";
 import {
   type InventoryRecord,
   repositoryRoot,
@@ -11,6 +12,7 @@ import {
   personAvailabilityOperations,
   personGovernanceOperations,
 } from "./migration.js";
+import { objectStorageClient } from "./object-storage.js";
 
 interface Inventory {
   schemaVersion: number;
@@ -22,6 +24,7 @@ interface ExpectedReceipt {
   requestDigest: string;
   subjectType: "document" | "media";
   tolerateDigestDrift?: boolean;
+  media?: ReturnType<typeof mediaMigrationOperations>[number];
 }
 
 async function loadDatabase() {
@@ -59,6 +62,7 @@ async function inspectReconciliationState(
   const {
     cmsDocumentsTable,
     cmsMediaAssetsTable,
+    cmsMediaVersionsTable,
     cmsOperationReceiptsTable,
     db,
   } = database;
@@ -87,31 +91,79 @@ async function inspectReconciliationState(
 
   const uniqueDocumentIds = [...new Set(documentIds)];
   const uniqueMediaIds = [...new Set(mediaIds)];
-  const [documents, media] = await Promise.all([
+  const [documents, media, versions] = await Promise.all([
     uniqueDocumentIds.length
       ? db.select({ id: cmsDocumentsTable.id })
         .from(cmsDocumentsTable)
         .where(inArray(cmsDocumentsTable.id, uniqueDocumentIds))
       : [],
     uniqueMediaIds.length
-      ? db.select({ id: cmsMediaAssetsTable.id })
+      ? db.select()
         .from(cmsMediaAssetsTable)
         .where(inArray(cmsMediaAssetsTable.id, uniqueMediaIds))
       : [],
+    uniqueMediaIds.length
+      ? db.select().from(cmsMediaVersionsTable)
+        .where(inArray(cmsMediaVersionsTable.assetId, uniqueMediaIds))
+        .orderBy(desc(cmsMediaVersionsTable.versionNumber))
+      : [],
   ]);
-  if (documents.length !== uniqueDocumentIds.length || media.length !== uniqueMediaIds.length) {
-    throw new Error(
-      `CMS cutover receipts reference missing records: found ${documents.length}/${uniqueDocumentIds.length} documents and ${media.length}/${uniqueMediaIds.length} media assets.`,
-    );
+  const invalid: string[] = [];
+  if (documents.length !== uniqueDocumentIds.length) {
+    invalid.push(`receipt subjects: found ${documents.length}/${uniqueDocumentIds.length} documents`);
+  }
+  if (media.length !== uniqueMediaIds.length) {
+    invalid.push(`receipt subjects: found ${media.length}/${uniqueMediaIds.length} media assets`);
+  }
+  const mediaById = new Map(media.map((asset) => [asset.id, asset]));
+  const latestVersionByAsset = new Map<string, typeof versions[number]>();
+  for (const version of versions) {
+    if (!latestVersionByAsset.has(version.assetId)) latestVersionByAsset.set(version.assetId, version);
+  }
+  if (!process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID) throw new Error("DEFAULT_OBJECT_STORAGE_BUCKET_ID is required.");
+  const bucket = objectStorageClient.bucket(process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID);
+  for (const receipt of relevantReceipts) {
+    const operation = expected.get(receipt.idempotencyKey);
+    if (!operation?.media) continue;
+    const asset = mediaById.get(receipt.subjectId);
+    const version = latestVersionByAsset.get(receipt.subjectId);
+    if (!asset || !version) {
+      invalid.push(`${operation.media.publicPath}: missing asset or immutable version`);
+      continue;
+    }
+    if (asset.checksum !== operation.media.checksum || asset.byteSize !== operation.media.byteSize
+      || version.checksum !== operation.media.checksum || version.byteSize !== operation.media.byteSize
+      || version.storageKey.startsWith("deferred/")) {
+      invalid.push(`${operation.media.publicPath}: database checksum, size, or storage key is incomplete`);
+      continue;
+    }
+    const object = bucket.file(version.storageKey);
+    const [exists] = await object.exists();
+    if (!exists) {
+      invalid.push(`${operation.media.publicPath}: durable object is missing`);
+      continue;
+    }
+    const [metadata] = await object.getMetadata();
+    const sourceBytes = await readFile(`${repositoryRoot}/${operation.media.sourceFile}`);
+    const sourceMd5 = createHash("md5").update(sourceBytes).digest("base64");
+    const objectMatches = Number(metadata.size) === operation.media.byteSize
+      && (
+        metadata.metadata?.checksum === operation.media.checksum
+        || metadata.md5Hash === sourceMd5
+      );
+    if (!objectMatches) {
+      invalid.push(`${operation.media.publicPath}: durable object is invalid`);
+    }
   }
 
   const existingCount = relevantReceipts.length;
   const missingCount = expected.size - existingCount;
   return {
-    state: missingCount === 0 ? "complete" as const : "pending" as const,
+    state: missingCount === 0 && invalid.length === 0 ? "complete" as const : "pending" as const,
     existingCount,
     missingCount,
     conflicts,
+    invalid,
   };
 }
 
@@ -144,6 +196,7 @@ async function main() {
     expected.set(operation.idempotencyKey, {
       requestDigest: operation.requestDigest,
       subjectType: "media",
+      media: operation,
     });
   }
   for (const operation of personAvailabilityOperations(inventory.records)) {
@@ -162,23 +215,17 @@ async function main() {
   const database = await loadDatabase();
   try {
     const before = await inspectReconciliationState(expected, database);
+    const initialImport = before.existingCount === 0;
     if (before.state === "complete") {
-      if (before.conflicts.length) {
-        console.warn(
-          `CMS cutover is complete with ${before.conflicts.length} preserved inventory drift conflict(s). Existing records were not overwritten; use an explicitly versioned operation for each intentional replacement.`,
-        );
-      }
       console.log(
-        `CMS cutover already reconciled: ${expected.size} expected receipts reference live records. Existing editorial state was left unchanged.`,
+        `CMS media reconciliation completed: missing=0 invalid=0 conflicts=${before.conflicts.length} created=0 repaired=0 reused=${before.existingCount}.`,
       );
       return;
     }
-
-    const initialImport = before.existingCount === 0;
     console.log(
       initialImport
-        ? `CMS cutover is absent; importing ${before.missingCount} governed development operations with deferred media.`
-        : `CMS inventory expanded safely: preserving ${before.existingCount} completed operations and applying ${before.missingCount} new operations.`,
+        ? `CMS cutover is absent; uploading and importing ${before.missingCount} governed development operations.`
+        : `CMS reconciliation: missing=${before.missingCount} invalid=${before.invalid.length} conflicts=${before.conflicts.length}; verifying and repairing without replacing valid immutable versions.`,
     );
     await run("pnpm", [
       "--filter",
@@ -187,7 +234,6 @@ async function main() {
       "--",
       "--apply-db",
       "--target=development",
-      "--defer-media-upload",
     ]);
 
     const after = await inspectReconciliationState(expected, database);
@@ -201,7 +247,7 @@ async function main() {
     }
     if (after.state !== "complete") {
       throw new Error(
-        `CMS cutover reconciliation remained incomplete after import: ${after.missingCount} operations are still missing.`,
+        `CMS cutover reconciliation remained incomplete: missing=${after.missingCount} invalid=${after.invalid.length} conflicts=${after.conflicts.length}. ${after.invalid.join("; ")}`,
       );
     }
     if (initialImport) {
@@ -214,7 +260,7 @@ async function main() {
       ]);
     }
     console.log(
-      `CMS cutover reconciliation completed: ${expected.size} expected receipts reference live records. Existing editorial state was left unchanged.`,
+      `CMS media reconciliation completed: missing=0 invalid=0 conflicts=${after.conflicts.length} created=${after.existingCount - before.existingCount} repaired=${before.invalid.length} reused=${before.existingCount - before.invalid.length}.`,
     );
   } finally {
     await database.pool.end();

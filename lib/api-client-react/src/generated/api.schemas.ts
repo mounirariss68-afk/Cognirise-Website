@@ -1020,6 +1020,31 @@ export const MediaStatus = {
   failed: 'failed',
 } as const;
 
+export type MediaCollection = typeof MediaCollection[keyof typeof MediaCollection];
+
+
+export const MediaCollection = {
+  website: 'website',
+  linkedin: 'linkedin',
+} as const;
+
+export type LinkedInAssetKind = typeof LinkedInAssetKind[keyof typeof LinkedInAssetKind];
+
+
+export const LinkedInAssetKind = {
+  post: 'post',
+  header: 'header',
+} as const;
+
+export interface MediaCampaignMetadata {
+  campaign?: string;
+  edition?: string;
+  title?: string;
+  purpose?: string;
+  pulseSource?: string;
+  approvedUse?: string;
+}
+
 export interface FocalPoint {
   /**
      * @minimum 0
@@ -1060,9 +1085,12 @@ export interface MediaAsset {
   caption?: string | null;
   /** @nullable */
   credit?: string | null;
+  collection: MediaCollection;
+  linkedinAssetKind?: LinkedInAssetKind | null;
+  campaignMetadata?: MediaCampaignMetadata | null;
   focalPoint?: FocalPoint | null;
   status: MediaStatus;
-  createdBy: string;
+  createdBy?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -1084,6 +1112,9 @@ export interface MediaUploadInput {
      */
   size: number;
   checksum?: string;
+  collection?: MediaCollection;
+  linkedinAssetKind?: LinkedInAssetKind;
+  campaignMetadata?: MediaCampaignMetadata;
 }
 
 export type MediaUploadMethod = typeof MediaUploadMethod[keyof typeof MediaUploadMethod];
@@ -1113,6 +1144,9 @@ export interface MediaFinalizeInput {
   caption?: string;
   /** @maxLength 200 */
   credit?: string;
+  collection?: MediaCollection;
+  linkedinAssetKind?: LinkedInAssetKind;
+  campaignMetadata?: MediaCampaignMetadata;
 }
 
 export interface MediaUpdate {
@@ -1136,6 +1170,9 @@ export interface MediaUpdate {
      * @nullable
      */
   credit?: string | null;
+  collection?: MediaCollection;
+  linkedinAssetKind?: LinkedInAssetKind | null;
+  campaignMetadata?: MediaCampaignMetadata | null;
   focalPoint?: FocalPoint | null;
 }
 
@@ -1552,6 +1589,8 @@ pageSize?: PageSizeParameter;
  */
 search?: SearchParameter;
 mimeType?: string;
+collection?: MediaCollection;
+linkedinAssetKind?: LinkedInAssetKind;
 };
 
 export type ListSubmissionsParams = {

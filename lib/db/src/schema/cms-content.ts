@@ -250,6 +250,9 @@ export const cmsMediaAssetsTable = pgTable(
     checksum: text("checksum").notNull(),
     altText: text("alt_text"),
     credit: text("credit"),
+    collection: text("collection").notNull().default("website"),
+    linkedinAssetKind: text("linkedin_asset_kind"),
+    campaignMetadata: jsonb("campaign_metadata").$type<Record<string, unknown>>(),
     status: text("status").notNull().default("active"),
     uploadedByUserId: uuid("uploaded_by_user_id").references(
       () => cmsUsersTable.id,
@@ -262,6 +265,19 @@ export const cmsMediaAssetsTable = pgTable(
     uniqueIndex("cms_media_assets_storage_key_uidx").on(table.storageKey),
     index("cms_media_assets_checksum_idx").on(table.checksum),
     index("cms_media_assets_status_idx").on(table.status),
+    index("cms_media_assets_collection_kind_idx").on(
+      table.collection,
+      table.linkedinAssetKind,
+    ),
+    check(
+      "cms_media_assets_collection_check",
+      sql`${table.collection} IN ('website', 'linkedin')`,
+    ),
+    check(
+      "cms_media_assets_collection_kind_check",
+      sql`(${table.collection} = 'website' AND ${table.linkedinAssetKind} IS NULL)
+        OR (${table.collection} = 'linkedin' AND ${table.linkedinAssetKind} IN ('post', 'header'))`,
+    ),
   ],
 );
 

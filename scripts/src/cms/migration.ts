@@ -30,6 +30,11 @@ export interface MediaMigrationOperation {
   height: number | null;
   cmsOwnership: "cms-candidate" | "code-owned";
   usages: string[];
+  collection: "website" | "linkedin";
+  linkedinAssetKind: "post" | "header" | null;
+  campaignMetadata: Record<string, unknown> | null;
+  altText: string;
+  credit: string;
   requestDigest: string;
 }
 
@@ -176,6 +181,16 @@ export function mediaMigrationOperations(records: InventoryRecord[]): MediaMigra
     ) {
       throw new Error(`${record.externalId}: invalid asset manifest.`);
     }
+    const accessibility = fields.accessibility as Record<string, unknown> | undefined;
+    const rights = fields.rights as Record<string, unknown> | undefined;
+    if ((fields.collection !== "website" && fields.collection !== "linkedin")
+      || typeof accessibility?.altText !== "string" || typeof rights?.owner !== "string") {
+      throw new Error(`${record.externalId}: missing governed collection, alt text, or credit.`);
+    }
+    const linkedinAssetKind = fields.linkedinAssetKind;
+    if (fields.collection === "linkedin" && linkedinAssetKind !== "post" && linkedinAssetKind !== "header") {
+      throw new Error(`${record.externalId}: LinkedIn media must be classified as post or header.`);
+    }
     const operation = {
       externalId: record.externalId,
       idempotencyKey: `cms-media-inventory-v3:${record.externalId}`,
@@ -191,8 +206,32 @@ export function mediaMigrationOperations(records: InventoryRecord[]): MediaMigra
       usages: Array.isArray(fields.usages)
         ? fields.usages.filter((value): value is string => typeof value === "string")
         : [],
+      collection: fields.collection as "website" | "linkedin",
+      linkedinAssetKind: fields.collection === "linkedin" ? linkedinAssetKind as "post" | "header" : null,
+      campaignMetadata: fields.campaignMetadata && typeof fields.campaignMetadata === "object"
+        ? fields.campaignMetadata as Record<string, unknown>
+        : null,
+      altText: accessibility.altText,
+      credit: rights.owner,
     };
-    return { ...operation, requestDigest: digest(operation) };
+    // Keep the v3 receipt digest stable for already-imported website binaries.
+    // Classification lives in mutable asset fields/version metadata and does
+    // not manufacture a replacement immutable binary version.
+    const legacyDigestShape = {
+      externalId: operation.externalId,
+      idempotencyKey: operation.idempotencyKey,
+      filename: operation.filename,
+      sourceFile: operation.sourceFile,
+      publicPath: operation.publicPath,
+      checksum: operation.checksum,
+      mimeType: operation.mimeType,
+      byteSize: operation.byteSize,
+      width: operation.width,
+      height: operation.height,
+      cmsOwnership: operation.cmsOwnership,
+      usages: operation.usages,
+    };
+    return { ...operation, requestDigest: digest(legacyDigestShape) };
   });
 }
 

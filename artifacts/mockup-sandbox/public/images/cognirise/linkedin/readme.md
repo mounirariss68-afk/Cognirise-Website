@@ -1,6 +1,6 @@
 # Cognirise Pulse / LinkedIn masters
 
-Nine image-led SVG masters for Cognirise LinkedIn communications. Posts are 1080 × 1350 (4:5); headers are 1584 × 396. Each editable SVG is self-contained with its named Pulse image embedded and is designed to export edge-to-edge. A matching high-resolution PNG is included for direct publishing.
+Nine image-led SVG masters for Cognirise LinkedIn communications. Posts are 1080 × 1350 (4:5); headers are 1584 × 396. Each editable SVG is self-contained with its named Pulse image embedded and is designed to export edge-to-edge. The matching nine PNGs are the approved, publish-ready CMS collection; SVGs and the ZIP remain editable source artifacts and are not imported.
 
 | Master | Pulse source |
 | --- | --- |
@@ -10,6 +10,12 @@ Nine image-led SVG masters for Cognirise LinkedIn communications. Posts are 1080
 | transformation | Transformation / New operating form |
 | knowledge | Knowledge intelligence / Living index |
 | action | Agentic workflows / Directed action |
+
+CMS classification: governance, judgment, orchestration, transformation,
+knowledge, and action are `linkedin/post`; header-governance,
+header-judgment, and header-rhythm are `linkedin/header`. Campaign metadata,
+purpose, Pulse source, descriptive alt text, and Cognirise credit are carried
+from the asset-room manifest into each immutable CMS media version.
 
 Copy is editable SVG text. Keep profile-header copy clear of the lower-left 430 × 146px profile overlay zone. SVGs intentionally do not contain guides, feed chrome, or production notes.
 

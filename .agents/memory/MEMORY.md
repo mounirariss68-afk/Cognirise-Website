@@ -12,3 +12,4 @@
 - [Person market availability](person-market-availability.md) — Stage and publish availability separately; requested-market suppression must run before content fallback.
 - [Modular panorama continuity](modular-panorama-continuity.md) — Derive adjoining Pulse modules from one connected master and never animate them out of alignment.
 - [Website browser validation routing](website-browser-validation-routing.md) — Use the root dev-domain target so SPA assets and API requests reach their separate managed workflows.
+- [App Storage one-off scripts](app-storage-one-off-scripts.md) — Shell-run CMS jobs lack Google ADC; use Replit sidecar auth and keep object reads outside database transactions.

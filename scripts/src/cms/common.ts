@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 export const websiteRoot = path.join(repositoryRoot, "artifacts/cognirise-website");
+export const linkedinRoot = path.join(repositoryRoot, "artifacts/mockup-sandbox/public/images/cognirise/linkedin");
 export const defaultOutputDirectory = path.join(repositoryRoot, "scripts/cms/output");
 
 export type ReviewStatus = "needs-review";
@@ -57,9 +58,21 @@ export async function walk(directory: string): Promise<string[]> {
 
 export async function assetRecords(): Promise<InventoryRecord[]> {
   const directory = path.join(websiteRoot, "public/images");
-  const files = (await walk(directory)).filter((file) => path.basename(file) !== "blueprint-annotated.png");
+  // Editorial raster artwork belongs in the CMS. Editable masters, archives,
+  // brand marks, and the CogniOS UI annotation remain source/code-owned.
+  const files = (await walk(directory)).filter((file) =>
+    /\.(png|jpe?g)$/i.test(file) && path.basename(file) !== "blueprint-annotated.png"
+  );
   const sourceFiles = (await walk(path.join(websiteRoot, "src"))).filter((file) => /\.(ts|tsx)$/.test(file));
   const usages = new Map<string, string[]>();
+  const legacyAltText: Record<string, string> = {
+    "image_1788532369588.png": "Design agency website reference with a portfolio grid and orange accent typography.",
+    "image_1788532453951.png": "Minimal-motion website reference with three monochrome image panels.",
+    "image_1788532520646.png": "Black-and-white studio website reference with bold typography over a portrait.",
+    "image_1788532533170.png": "Orange strategy website reference with a monochrome fashion portrait.",
+    "image_1788532545919.png": "Monochrome website reference showing a portrait and packaging design work.",
+    "image_1788532565489.png": "Black-and-white agency website reference presenting reputation metrics and services.",
+  };
   for (const sourceFile of sourceFiles) {
     const contents = await readFile(sourceFile, "utf8");
     for (const match of contents.matchAll(/\/images\/[A-Za-z0-9_./-]+/g)) {
@@ -90,13 +103,72 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
         width: dimensions.width,
         height: dimensions.height,
         usages: usages.get(publicPath) ?? [],
-        cmsOwnership: (usages.get(publicPath) ?? []).some((usage) =>
-          /AboutPeople|Advisors|Partners|PlatformsOverview|InsightsEditorial|InsightArticle|industries\.ts/.test(usage),
-        ) ? "cms-candidate" : "code-owned",
-        accessibility: { altText: null, decorative: null },
-        rights: { status: "needs-review", owner: null, source: null },
+        cmsOwnership: "cms-candidate",
+        collection: "website",
+        linkedinAssetKind: null,
+        campaignMetadata: null,
+        accessibility: {
+          altText: legacyAltText[path.basename(file)]
+            ?? path.basename(file, extension).replaceAll("-", " "),
+          decorative: false,
+        },
+        rights: { status: "needs-review", owner: "Rights holder pending editorial review", source: publicPath },
       },
       review: review(["Confirm rights holder, source, license, and descriptive alt text before media import."]),
+      digest: checksum,
+    };
+  }));
+}
+
+const linkedinAssets = [
+  ["governance", "post", "Governance", "A point of view on controls as an enabling architecture.", "Governed AI / Control in motion", "Dark architectural gates with a magenta and coral current and Governance is the architecture of motion text."],
+  ["judgment", "post", "Judgment", "A human and AI perspective for consequential decisions.", "Human + AI / Shared judgment", "Coral and violet currents meet around an architectural platform with Judgment stays visible text."],
+  ["orchestration", "post", "Orchestration", "A systems view of operating rhythm.", "Orchestration / Many forces, one rhythm", "Violet and coral current flowing across monumental navy frames with operating rhythm text."],
+  ["transformation", "post", "Transformation", "A considered prompt about how change gets structure.", "Transformation / New operating form", "A coral violet force breaks through monumental navy architecture with change needs an operating form text."],
+  ["knowledge", "post", "Knowledge", "A knowledge intelligence perspective.", "Knowledge intelligence / Living index", "Layered translucent library architecture with Insight needs a living index text."],
+  ["action", "post", "Action", "An agentic workflow perspective.", "Agentic workflows / Directed action", "Violet and coral action streams move through a monumental operating environment with Turn intelligence toward action text."],
+  ["header-governance", "header", "Governance in motion", "A deep architectural profile treatment.", "Governed AI / Control in motion", "Wide architectural header featuring governance in motion."],
+  ["header-judgment", "header", "Human judgment", "A luminous profile treatment for people-led work.", "Human + AI / Shared judgment", "Wide header where coral and violet currents meet, with Human judgment visible."],
+  ["header-rhythm", "header", "Operating rhythm", "A panoramic systems-oriented profile treatment.", "Orchestration / Many forces, one rhythm", "Wide header with flowing current among monumental architectural frames."],
+] as const;
+
+export async function linkedinAssetRecords(): Promise<InventoryRecord[]> {
+  return Promise.all(linkedinAssets.map(async ([slug, kind, title, purpose, pulseSource, altText]) => {
+    const filename = `cognirise-linkedin-${slug}.png`;
+    const file = path.join(linkedinRoot, filename);
+    const bytes = await readFile(file);
+    const info = await stat(file);
+    const checksum = createHash("sha256").update(bytes).digest("hex");
+    const dimensions = imageDimensions(bytes, ".png");
+    return {
+      externalId: stableId("asset", file, filename),
+      type: "asset" as const,
+      name: filename,
+      sourceFile: relative(file),
+      fields: {
+        publicPath: `/linkedin/${filename}`,
+        bytes: info.size,
+        extension: ".png",
+        mimeType: "image/png",
+        checksum,
+        width: dimensions.width,
+        height: dimensions.height,
+        usages: ["Cognirise LinkedIn communications"],
+        cmsOwnership: "cms-candidate",
+        collection: "linkedin",
+        linkedinAssetKind: kind,
+        campaignMetadata: {
+          campaign: "Pulse",
+          edition: "02",
+          title,
+          purpose,
+          pulseSource,
+          approvedUse: "Cognirise LinkedIn communications only",
+        },
+        accessibility: { altText, decorative: false },
+        rights: { status: "approved-use", owner: "Cognirise", source: "Pulse image-led edition" },
+      },
+      review: review(["Confirm campaign copy and publishing date before use."]),
       digest: checksum,
     };
   }));

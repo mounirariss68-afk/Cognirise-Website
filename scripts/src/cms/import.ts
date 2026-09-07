@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { Storage } from "@google-cloud/storage";
+import type { Storage } from "@google-cloud/storage";
 import { and, desc, eq } from "drizzle-orm";
 import { type CmsDocumentKind, validateCmsSnapshot } from "@workspace/api-zod";
 import {
@@ -21,6 +21,7 @@ import {
   type PersonAvailabilityOperation,
   type PersonGovernanceOperation,
 } from "./migration.js";
+import { objectStorageClient } from "./object-storage.js";
 
 const args = process.argv.slice(2);
 const shouldWrite = args.includes("--write");
@@ -44,19 +45,35 @@ function assertDevelopmentTarget() {
   if (target !== "development") {
     throw new Error("Database import requires the explicit --target=development safeguard.");
   }
+  if (deferMediaUpload) {
+    throw new Error("Deferred media database imports are no longer supported; durable upload and verification are required.");
+  }
   if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required.");
-  if (!deferMediaUpload && (!process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID || !process.env.PRIVATE_OBJECT_DIR)) {
+  if (!process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID || !process.env.PRIVATE_OBJECT_DIR) {
     throw new Error("Development Object Storage is not configured.");
   }
 }
 
+async function verifyStoredMedia(
+  bucket: ReturnType<Storage["bucket"]>,
+  storageKey: string,
+  operation: MediaMigrationOperation,
+  expectedMd5?: string,
+) {
+  if (storageKey.startsWith("deferred/")) return false;
+  const object = bucket.file(storageKey);
+  const [exists] = await object.exists();
+  if (!exists) return false;
+  const [metadata] = await object.getMetadata();
+  if (Number(metadata.size) !== operation.byteSize) return false;
+  if (metadata.metadata?.checksum === operation.checksum) return true;
+  if (expectedMd5 && metadata.md5Hash === expectedMd5) return true;
+  const [storedBytes] = await object.download();
+  return createHash("sha256").update(storedBytes).digest("hex") === operation.checksum;
+}
+
 async function uploadMedia(operations: MediaMigrationOperation[]) {
-  if (deferMediaUpload) {
-    return new Map(operations.filter((item) => item.cmsOwnership === "cms-candidate")
-      .map((item) => [item.publicPath, `deferred/cms-media/inventory-${item.checksum}`]));
-  }
-  const storage = new Storage();
-  const bucket = storage.bucket(process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID!);
+  const bucket = objectStorageClient.bucket(process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID!);
   const prefix = process.env.PRIVATE_OBJECT_DIR!.replace(/^\/+|\/+$/g, "");
   const storageKeys = new Map<string, string>();
   for (const operation of operations.filter((item) => item.cmsOwnership === "cms-candidate")) {
@@ -65,6 +82,7 @@ async function uploadMedia(operations: MediaMigrationOperation[]) {
     }
     const bytes = await readFile(`${repositoryRoot}/${operation.sourceFile}`);
     const checksum = createHash("sha256").update(bytes).digest("hex");
+    const expectedMd5 = createHash("md5").update(bytes).digest("base64");
     if (checksum !== operation.checksum || bytes.length !== operation.byteSize) {
       throw new Error(`Asset changed after inventory: ${operation.sourceFile}.`);
     }
@@ -85,6 +103,9 @@ async function uploadMedia(operations: MediaMigrationOperation[]) {
       if (Number(metadata.size) !== operation.byteSize) {
         throw new Error(`Stored object size conflict for ${operation.publicPath}.`);
       }
+    }
+    if (!await verifyStoredMedia(bucket, storageKey, operation, expectedMd5)) {
+      throw new Error(`Stored object checksum conflict for ${operation.publicPath}.`);
     }
     storageKeys.set(operation.publicPath, storageKey);
   }
@@ -113,6 +134,7 @@ async function applyDatabase(
     db,
     pool,
   } = await import("@workspace/db");
+  const storageBucket = objectStorageClient.bucket(process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID!);
   try {
     const before = {
       documents: (await db.select().from(cmsDocumentsTable)).length,
@@ -150,33 +172,50 @@ async function applyDatabase(
       const mediaByPath = new Map<string, string>();
       let mediaCreated = 0;
       let mediaReplayed = 0;
+      let mediaRepaired = 0;
       for (const operation of mediaOperations.filter((item) => item.cmsOwnership === "cms-candidate")) {
         const [receipt] = await tx.select().from(cmsOperationReceiptsTable)
           .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.idempotencyKey));
-        if (receipt && receipt.requestDigest !== operation.requestDigest) {
-          console.error(`Preserving previously imported media for ${operation.externalId}; the inventory digest changed.`);
-          mediaByPath.set(operation.publicPath, receipt.subjectId);
-          mediaReplayed++;
-          continue;
+        const durableStorageKey = storageKeys.get(operation.publicPath);
+        if (!durableStorageKey || durableStorageKey.startsWith("deferred/")) {
+          throw new Error(`No verified durable object is available for ${operation.publicPath}.`);
         }
-        let [asset] = await tx.select({ id: cmsMediaAssetsTable.id })
-          .from(cmsMediaAssetsTable)
-          .where(eq(cmsMediaAssetsTable.checksum, operation.checksum));
+        let [asset] = receipt
+          ? await tx.select().from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.id, receipt.subjectId))
+          : await tx.select().from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.checksum, operation.checksum));
+        if (receipt && receipt.requestDigest !== operation.requestDigest) {
+          const binaryStillMatches = asset
+            && asset.checksum === operation.checksum
+            && asset.byteSize === operation.byteSize
+            && asset.mediaType === operation.mimeType;
+          if (!binaryStillMatches) {
+            console.error(`Preserving previously imported media for ${operation.externalId}; the inventory digest and binary identity changed.`);
+            mediaByPath.set(operation.publicPath, receipt.subjectId);
+            mediaReplayed++;
+            continue;
+          }
+          console.warn(`Repairing matching media binary for ${operation.externalId} while preserving its earlier inventory receipt digest.`);
+        }
         if (!asset) {
           [asset] = await tx.insert(cmsMediaAssetsTable).values({
-            storageKey: storageKeys.get(operation.publicPath)!,
+            storageKey: durableStorageKey,
             filename: operation.filename,
             mediaType: operation.mimeType,
             byteSize: operation.byteSize,
             checksum: operation.checksum,
+            altText: operation.altText,
+            credit: operation.credit,
+            collection: operation.collection,
+            linkedinAssetKind: operation.linkedinAssetKind,
+            campaignMetadata: operation.campaignMetadata,
             status: "pending-review",
             uploadedByUserId: serviceAccount.id,
-          }).returning({ id: cmsMediaAssetsTable.id });
+          }).returning();
           if (!asset) throw new Error(`Could not create media ${operation.externalId}.`);
           await tx.insert(cmsMediaVersionsTable).values({
             assetId: asset.id,
             versionNumber: 1,
-            storageKey: storageKeys.get(operation.publicPath)!,
+            storageKey: durableStorageKey,
             checksum: operation.checksum,
             byteSize: operation.byteSize,
             width: operation.width,
@@ -184,13 +223,69 @@ async function applyDatabase(
             metadata: {
               sourcePath: operation.publicPath,
               usages: operation.usages,
+               collection: operation.collection,
+               linkedinAssetKind: operation.linkedinAssetKind,
+               campaignMetadata: operation.campaignMetadata,
+               altText: operation.altText,
+               credit: operation.credit,
               accessibilityStatus: "needs-review",
               rightsStatus: "needs-review",
             },
           });
           mediaCreated++;
         } else {
-          mediaReplayed++;
+          const [latestVersion] = await tx.select().from(cmsMediaVersionsTable)
+            .where(eq(cmsMediaVersionsTable.assetId, asset.id))
+            .orderBy(desc(cmsMediaVersionsTable.versionNumber))
+            .limit(1);
+          const durableVersionIsCurrent = latestVersion
+            && latestVersion.checksum === operation.checksum
+            && latestVersion.byteSize === operation.byteSize
+            && latestVersion.storageKey === durableStorageKey;
+          if (!durableVersionIsCurrent) {
+            await tx.insert(cmsMediaVersionsTable).values({
+              assetId: asset.id,
+              versionNumber: (latestVersion?.versionNumber ?? 0) + 1,
+              storageKey: durableStorageKey,
+              checksum: operation.checksum,
+              byteSize: operation.byteSize,
+              width: operation.width,
+              height: operation.height,
+              metadata: {
+                sourcePath: operation.publicPath,
+                usages: operation.usages,
+                collection: operation.collection,
+                linkedinAssetKind: operation.linkedinAssetKind,
+                campaignMetadata: operation.campaignMetadata,
+                altText: operation.altText,
+                credit: operation.credit,
+                accessibilityStatus: "needs-review",
+                rightsStatus: "needs-review",
+                repairsIncompleteVersion: latestVersion?.versionNumber ?? null,
+              },
+            });
+            await tx.update(cmsMediaAssetsTable).set({
+              storageKey: durableStorageKey,
+              filename: operation.filename,
+              mediaType: operation.mimeType,
+              byteSize: operation.byteSize,
+              checksum: operation.checksum,
+              altText: operation.altText,
+              credit: operation.credit,
+              updatedAt: new Date(),
+            }).where(eq(cmsMediaAssetsTable.id, asset.id));
+            mediaRepaired++;
+          } else {
+            mediaReplayed++;
+          }
+          await tx.update(cmsMediaAssetsTable).set({
+            altText: operation.altText,
+            credit: operation.credit,
+            collection: operation.collection,
+            linkedinAssetKind: operation.linkedinAssetKind,
+            campaignMetadata: operation.campaignMetadata,
+            updatedAt: new Date(),
+          }).where(eq(cmsMediaAssetsTable.id, asset.id));
         }
         mediaByPath.set(operation.publicPath, String(asset.id));
         if (!receipt) {
@@ -515,6 +610,7 @@ async function applyDatabase(
         created,
         replayed,
         mediaCreated,
+        mediaRepaired,
         mediaReplayed,
         availabilityCreated,
         availabilityReplayed,
@@ -566,7 +662,7 @@ async function main() {
     dryRun: !shouldApplyDatabase,
     mode: shouldApplyDatabase ? "development-db-apply" : "payload-only",
     note: shouldApplyDatabase
-      ? `Imported governed UAE/English drafts and candidate media metadata. No content was approved or published; media remains pending rights/accessibility${deferMediaUpload ? " and durable-object upload" : ""} review.`
+      ? "Imported governed UAE/English drafts and verified durable media. No content was approved or published; website media remains pending rights/accessibility review."
       : "No storage or database call was made. Use --apply-db --target=development to import governed drafts.",
     operations,
     availabilityOperations,

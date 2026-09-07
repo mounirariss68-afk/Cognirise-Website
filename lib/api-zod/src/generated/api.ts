@@ -4019,7 +4019,9 @@ export const ListMediaQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listMediaQueryPageMultipleOf).default(listMediaQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listMediaQueryPageSizeMax).multipleOf(listMediaQueryPageSizeMultipleOf).default(listMediaQueryPageSizeDefault),
   "search": zod.coerce.string().max(listMediaQuerySearchMax).optional(),
-  "mimeType": zod.coerce.string().optional()
+  "mimeType": zod.coerce.string().optional(),
+  "collection": zod.enum(['website', 'linkedin']).optional(),
+  "linkedinAssetKind": zod.enum(['post', 'header']).optional()
 })
 
 export const listMediaResponseOnePageMultipleOf = 1;
@@ -4066,12 +4068,22 @@ export const ListMediaResponse = zod.object({
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
   "credit": zod.string().nullish(),
+  "collection": zod.enum(['website', 'linkedin']),
+  "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
+  "campaignMetadata": zod.union([zod.object({
+  "campaign": zod.string().optional(),
+  "edition": zod.string().optional(),
+  "title": zod.string().optional(),
+  "purpose": zod.string().optional(),
+  "pulseSource": zod.string().optional(),
+  "approvedUse": zod.string().optional()
+}),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(listMediaResponseTwoItemsItemFocalPointOneXMin).max(listMediaResponseTwoItemsItemFocalPointOneXMax),
   "y": zod.number().min(listMediaResponseTwoItemsItemFocalPointOneYMin).max(listMediaResponseTwoItemsItemFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'ready', 'failed']),
-  "createdBy": zod.string(),
+  "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 }))
@@ -4094,7 +4106,17 @@ export const RequestMediaUploadBody = zod.object({
   "filename": zod.string().min(1).max(requestMediaUploadBodyFilenameMax),
   "mimeType": zod.string().min(1).max(requestMediaUploadBodyMimeTypeMax),
   "size": zod.number().min(1).max(requestMediaUploadBodySizeMax).multipleOf(requestMediaUploadBodySizeMultipleOf),
-  "checksum": zod.string().optional()
+  "checksum": zod.string().optional(),
+  "collection": zod.enum(['website', 'linkedin']).optional(),
+  "linkedinAssetKind": zod.enum(['post', 'header']).optional(),
+  "campaignMetadata": zod.object({
+  "campaign": zod.string().optional(),
+  "edition": zod.string().optional(),
+  "title": zod.string().optional(),
+  "purpose": zod.string().optional(),
+  "pulseSource": zod.string().optional(),
+  "approvedUse": zod.string().optional()
+}).optional()
 })
 
 export const requestMediaUploadResponseMediaSizeMin = 0;
@@ -4126,12 +4148,22 @@ export const RequestMediaUploadResponse = zod.object({
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
   "credit": zod.string().nullish(),
+  "collection": zod.enum(['website', 'linkedin']),
+  "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
+  "campaignMetadata": zod.union([zod.object({
+  "campaign": zod.string().optional(),
+  "edition": zod.string().optional(),
+  "title": zod.string().optional(),
+  "purpose": zod.string().optional(),
+  "pulseSource": zod.string().optional(),
+  "approvedUse": zod.string().optional()
+}),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(requestMediaUploadResponseMediaFocalPointOneXMin).max(requestMediaUploadResponseMediaFocalPointOneXMax),
   "y": zod.number().min(requestMediaUploadResponseMediaFocalPointOneYMin).max(requestMediaUploadResponseMediaFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'ready', 'failed']),
-  "createdBy": zod.string(),
+  "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 }),
@@ -4177,12 +4209,22 @@ export const GetMediaResponse = zod.object({
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
   "credit": zod.string().nullish(),
+  "collection": zod.enum(['website', 'linkedin']),
+  "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
+  "campaignMetadata": zod.union([zod.object({
+  "campaign": zod.string().optional(),
+  "edition": zod.string().optional(),
+  "title": zod.string().optional(),
+  "purpose": zod.string().optional(),
+  "pulseSource": zod.string().optional(),
+  "approvedUse": zod.string().optional()
+}),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(getMediaResponseFocalPointOneXMin).max(getMediaResponseFocalPointOneXMax),
   "y": zod.number().min(getMediaResponseFocalPointOneYMin).max(getMediaResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'ready', 'failed']),
-  "createdBy": zod.string(),
+  "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -4216,6 +4258,16 @@ export const UpdateMediaBody = zod.object({
   "altText": zod.string().max(updateMediaBodyAltTextMax).nullish(),
   "caption": zod.string().max(updateMediaBodyCaptionMax).nullish(),
   "credit": zod.string().max(updateMediaBodyCreditMax).nullish(),
+  "collection": zod.enum(['website', 'linkedin']).optional(),
+  "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
+  "campaignMetadata": zod.union([zod.object({
+  "campaign": zod.string().optional(),
+  "edition": zod.string().optional(),
+  "title": zod.string().optional(),
+  "purpose": zod.string().optional(),
+  "pulseSource": zod.string().optional(),
+  "approvedUse": zod.string().optional()
+}),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(updateMediaBodyFocalPointOneXMin).max(updateMediaBodyFocalPointOneXMax),
   "y": zod.number().min(updateMediaBodyFocalPointOneYMin).max(updateMediaBodyFocalPointOneYMax)
@@ -4250,12 +4302,22 @@ export const UpdateMediaResponse = zod.object({
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
   "credit": zod.string().nullish(),
+  "collection": zod.enum(['website', 'linkedin']),
+  "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
+  "campaignMetadata": zod.union([zod.object({
+  "campaign": zod.string().optional(),
+  "edition": zod.string().optional(),
+  "title": zod.string().optional(),
+  "purpose": zod.string().optional(),
+  "pulseSource": zod.string().optional(),
+  "approvedUse": zod.string().optional()
+}),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(updateMediaResponseFocalPointOneXMin).max(updateMediaResponseFocalPointOneXMax),
   "y": zod.number().min(updateMediaResponseFocalPointOneYMin).max(updateMediaResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'ready', 'failed']),
-  "createdBy": zod.string(),
+  "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -4292,7 +4354,17 @@ export const FinalizeMediaUploadBody = zod.object({
   "checksum": zod.string().optional(),
   "altText": zod.string().max(finalizeMediaUploadBodyAltTextMax).optional(),
   "caption": zod.string().max(finalizeMediaUploadBodyCaptionMax).optional(),
-  "credit": zod.string().max(finalizeMediaUploadBodyCreditMax).optional()
+  "credit": zod.string().max(finalizeMediaUploadBodyCreditMax).optional(),
+  "collection": zod.enum(['website', 'linkedin']).optional(),
+  "linkedinAssetKind": zod.enum(['post', 'header']).optional(),
+  "campaignMetadata": zod.object({
+  "campaign": zod.string().optional(),
+  "edition": zod.string().optional(),
+  "title": zod.string().optional(),
+  "purpose": zod.string().optional(),
+  "pulseSource": zod.string().optional(),
+  "approvedUse": zod.string().optional()
+}).optional()
 })
 
 export const finalizeMediaUploadResponseSizeMin = 0;
@@ -4323,12 +4395,22 @@ export const FinalizeMediaUploadResponse = zod.object({
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
   "credit": zod.string().nullish(),
+  "collection": zod.enum(['website', 'linkedin']),
+  "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
+  "campaignMetadata": zod.union([zod.object({
+  "campaign": zod.string().optional(),
+  "edition": zod.string().optional(),
+  "title": zod.string().optional(),
+  "purpose": zod.string().optional(),
+  "pulseSource": zod.string().optional(),
+  "approvedUse": zod.string().optional()
+}),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(finalizeMediaUploadResponseFocalPointOneXMin).max(finalizeMediaUploadResponseFocalPointOneXMax),
   "y": zod.number().min(finalizeMediaUploadResponseFocalPointOneYMin).max(finalizeMediaUploadResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'ready', 'failed']),
-  "createdBy": zod.string(),
+  "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })

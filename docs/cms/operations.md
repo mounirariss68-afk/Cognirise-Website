@@ -4,6 +4,36 @@
 
 Daily: review failed publishes, overdue evidence/review dates, media upload failures, privileged-account changes, export events, and health status. Weekly: review draft backlog, archive candidates, dependency updates, error trends, and backup completion evidence. Monthly: access review, restore-readiness review, retention job results, and a sample audit-log review.
 
+## Media catalog reconciliation
+
+The approved catalog is 29 CMS-managed website raster images plus exactly nine
+LinkedIn PNGs: six `post` images and three `header` images in the `linkedin`
+collection. SVG/ZIP masters, logos, and code-owned UI imagery are intentionally
+excluded. Each operation carries collection, LinkedIn kind where applicable,
+campaign metadata, descriptive alt text, credit, dimensions, source checksum,
+and usage.
+
+Run only in development, with `DATABASE_URL`,
+`DEFAULT_OBJECT_STORAGE_BUCKET_ID`, and `PRIVATE_OBJECT_DIR` configured:
+
+```sh
+pnpm --filter @workspace/scripts cms:inventory -- --write
+pnpm --filter @workspace/scripts cms:reconcile
+```
+
+Reconciliation uploads to a checksum-addressed private object and verifies its
+GCS size plus stored checksum or provider MD5 against the source before database success. It then
+reports `missing`, `invalid`, `conflicts`, `created`, `repaired`, and `reused`.
+On a rerun, valid immutable versions are reused. A deferred key, missing object,
+missing version, wrong size, or wrong checksum is incomplete: when the source
+is available the tool appends a verified version and repairs the mutable asset
+pointer; it does not update or delete the old immutable version. Any remaining
+invalid item or receipt conflict is an operator-visible failure.
+
+Never use `--defer-media-upload` for a database import; it is rejected. Do not
+copy production credentials into development or bypass the explicit
+`--target=development` and production-environment guards.
+
 ## Backup operations
 
 On the approved backup schedule, an operator exports and verifies content metadata with a caller-supplied private directory:

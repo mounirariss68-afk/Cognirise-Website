@@ -834,6 +834,14 @@ paths:
         - name: mimeType
           in: query
           schema: { type: string }
+        - name: collection
+          in: query
+          schema:
+            $ref: "#/components/schemas/MediaCollection"
+        - name: linkedinAssetKind
+          in: query
+          schema:
+            $ref: "#/components/schemas/LinkedInAssetKind"
       responses:
         "200":
           description: Paginated media
@@ -2161,9 +2169,25 @@ components:
     MediaStatus:
       type: string
       enum: [pending, ready, failed]
+    MediaCollection:
+      type: string
+      enum: [website, linkedin]
+    LinkedInAssetKind:
+      type: string
+      enum: [post, header]
+    MediaCampaignMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        campaign: { type: string }
+        edition: { type: string }
+        title: { type: string }
+        purpose: { type: string }
+        pulseSource: { type: string }
+        approvedUse: { type: string }
     MediaAsset:
       type: object
-      required: [id, filename, objectPath, mimeType, size, status, createdBy, createdAt, updatedAt]
+      required: [id, filename, objectPath, mimeType, size, collection, status, createdAt, updatedAt]
       properties:
         id: { type: string }
         filename: { type: string }
@@ -2177,6 +2201,16 @@ components:
         altText: { type: ["string", "null"] }
         caption: { type: ["string", "null"] }
         credit: { type: ["string", "null"] }
+        collection:
+          $ref: "#/components/schemas/MediaCollection"
+        linkedinAssetKind:
+          anyOf:
+            - $ref: "#/components/schemas/LinkedInAssetKind"
+            - type: "null"
+        campaignMetadata:
+          anyOf:
+            - $ref: "#/components/schemas/MediaCampaignMetadata"
+            - type: "null"
         focalPoint:
           anyOf:
             - $ref: "#/components/schemas/FocalPoint"
@@ -2201,6 +2235,12 @@ components:
         mimeType: { type: string, minLength: 1, maxLength: 120 }
         size: { type: number, multipleOf: 1, minimum: 1, maximum: 52428800 }
         checksum: { type: string }
+        collection:
+          $ref: "#/components/schemas/MediaCollection"
+        linkedinAssetKind:
+          $ref: "#/components/schemas/LinkedInAssetKind"
+        campaignMetadata:
+          $ref: "#/components/schemas/MediaCampaignMetadata"
     MediaUpload:
       type: object
       required: [media, uploadUrl, method, headers, expiresAt]
@@ -2223,6 +2263,12 @@ components:
         altText: { type: string, maxLength: 300 }
         caption: { type: string, maxLength: 500 }
         credit: { type: string, maxLength: 200 }
+        collection:
+          $ref: "#/components/schemas/MediaCollection"
+        linkedinAssetKind:
+          $ref: "#/components/schemas/LinkedInAssetKind"
+        campaignMetadata:
+          $ref: "#/components/schemas/MediaCampaignMetadata"
     MediaUpdate:
       type: object
       additionalProperties: false
@@ -2231,6 +2277,16 @@ components:
         altText: { type: ["string", "null"], maxLength: 300 }
         caption: { type: ["string", "null"], maxLength: 500 }
         credit: { type: ["string", "null"], maxLength: 200 }
+        collection:
+          $ref: "#/components/schemas/MediaCollection"
+        linkedinAssetKind:
+          anyOf:
+            - $ref: "#/components/schemas/LinkedInAssetKind"
+            - type: "null"
+        campaignMetadata:
+          anyOf:
+            - $ref: "#/components/schemas/MediaCampaignMetadata"
+            - type: "null"
         focalPoint:
           anyOf:
             - $ref: "#/components/schemas/FocalPoint"

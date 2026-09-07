@@ -10,7 +10,24 @@ const allowedTypes = new Set([
   "application/pdf",
 ]);
 export const MAX_MEDIA_BYTES = 50 * 1024 * 1024;
-const storage = new Storage();
+const REPLIT_SIDECAR_ENDPOINT = "http://127.0.0.1:1106";
+const storage = new Storage({
+  credentials: {
+    audience: "replit",
+    subject_token_type: "access_token",
+    token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`,
+    type: "external_account",
+    credential_source: {
+      url: `${REPLIT_SIDECAR_ENDPOINT}/credential`,
+      format: {
+        type: "json",
+        subject_token_field_name: "access_token",
+      },
+    },
+    universe_domain: "googleapis.com",
+  },
+  projectId: "",
+});
 
 function configuration() {
   const bucketName = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;

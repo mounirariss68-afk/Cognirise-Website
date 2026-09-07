@@ -8,6 +8,7 @@ import {
   relative,
   review,
   stableId,
+  linkedinAssetRecords,
   websiteRoot,
 } from "./common.js";
 import { extractArticles, extractVariable } from "./source-extract.js";
@@ -235,7 +236,7 @@ async function main() {
   const platforms = platformRecords(await extractVariable(platformFile, "platformFallback") as SourceObject[], platformFile);
   const articles = articleRecords(await extractArticles(articleFile, "articles"), articleFile);
   const industries = industryRecords(await extractVariable(industryFile, "INDUSTRIES") as SourceObject[], industryFile);
-  const assets = await assetRecords();
+  const assets = [...await assetRecords(), ...await linkedinAssetRecords()];
   const records = [...people, ...partners, ...platforms, ...articles, ...industries, ...assets];
 
   const expectedPeople = [
@@ -260,18 +261,18 @@ async function main() {
   if (partners.length !== 5 || platforms.length !== 5 || articles.length !== 3 || industries.length !== 6) {
     throw new Error("The public website no longer matches the governed 5 partner / 5 platform / 3 article / 6 industry manifest.");
   }
-  if (assets.length !== 31) throw new Error(`Expected 31 governed website assets, found ${assets.length}.`);
+  if (assets.length !== 38) throw new Error(`Expected 29 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
 
   const stable = {
     schemaVersion: 2,
     source: relative(websiteRoot),
-    expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, industries: 6, assets: 31 },
+    expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, industries: 6, websiteAssets: 29, linkedinAssets: 9, assets: 38 },
     explicitOmissions: {
       caseStudies: "No genuine public case-study records are present in the current website.",
       povDocuments: "No genuine public POV documents are present in the current website.",
       employees: "No additional public employee profiles are present in the current website.",
       nonUaeEditions: "No approved non-UAE editions or translations are present.",
-      codeOwnedAsset: "blueprint-annotated.png remains code-owned with the specialist CogniOS experience.",
+      codeOwnedAsset: "blueprint-annotated.png, logo SVGs, LinkedIn SVG masters, and the LinkedIn ZIP remain code/source-owned.",
     },
     records,
   };
