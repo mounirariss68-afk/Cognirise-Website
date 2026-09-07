@@ -1240,6 +1240,31 @@ paths:
                 $ref: "#/components/schemas/PublishedContent"
         "404":
           $ref: "#/components/responses/NotFound"
+  /public/media/{mediaId}/{versionId}:
+    get:
+      operationId: getPublishedMedia
+      tags: [public]
+      summary: Download the immutable media version approved with published content
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: versionId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Published media bytes
+          content:
+            image/jpeg: {}
+            image/png: {}
+            image/webp: {}
+            image/avif: {}
+            application/pdf: {}
+        "404":
+          $ref: "#/components/responses/NotFound"
   /public/sitemap:
     get:
       operationId: getPublicSitemap
@@ -2545,9 +2570,10 @@ components:
         updatedAt: { type: string, format: date-time }
     PublicMedia:
       type: object
-      required: [id, url, mimeType]
+      required: [id, versionId, url, mimeType]
       properties:
         id: { type: string }
+        versionId: { type: string }
         url: { type: string }
         mimeType: { type: string }
         width: { type: ["number", "null"], multipleOf: 1 }

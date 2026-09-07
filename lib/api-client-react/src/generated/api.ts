@@ -4403,6 +4403,88 @@ export function useGetPublishedContent<TData = Awaited<ReturnType<typeof getPubl
 
 
 
+export const getGetPublishedMediaUrl = (mediaId: string,
+    versionId: string,) => {
+
+
+
+
+  return `/api/public/media/${mediaId}/${versionId}`
+}
+
+/**
+ * @summary Download the immutable media version approved with published content
+ */
+export const getPublishedMedia = async (mediaId: string,
+    versionId: string, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getGetPublishedMediaUrl(mediaId,versionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublishedMediaQueryKey = (mediaId: string,
+    versionId: string,) => {
+    return [
+    `/api/public/media/${mediaId}/${versionId}`
+    ] as const;
+    }
+
+
+export const getGetPublishedMediaQueryOptions = <TData = Awaited<ReturnType<typeof getPublishedMedia>>, TError = ErrorType<NotFoundResponse>>(mediaId: string,
+    versionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublishedMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublishedMediaQueryKey(mediaId,versionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublishedMedia>>> = ({ signal }) => getPublishedMedia(mediaId,versionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: mediaId !== null && mediaId !== undefined && versionId !== null && versionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublishedMedia>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublishedMediaQueryResult = NonNullable<Awaited<ReturnType<typeof getPublishedMedia>>>
+export type GetPublishedMediaQueryError = ErrorType<NotFoundResponse>
+
+
+/**
+ * @summary Download the immutable media version approved with published content
+ */
+
+export function useGetPublishedMedia<TData = Awaited<ReturnType<typeof getPublishedMedia>>, TError = ErrorType<NotFoundResponse>>(
+ mediaId: string,
+    versionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublishedMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublishedMediaQueryOptions(mediaId,versionId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getGetPublicSitemapUrl = (params?: GetPublicSitemapParams,) => {
   const normalizedParams = new URLSearchParams();
 

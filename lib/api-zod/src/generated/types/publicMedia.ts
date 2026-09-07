@@ -8,6 +8,7 @@
 
 export interface PublicMedia {
   id: string;
+  versionId: string;
   url: string;
   mimeType: string;
   /** @nullable */

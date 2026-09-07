@@ -4836,6 +4836,7 @@ export const ListPublishedContentResponse = zod.object({
 }).optional(),
   "media": zod.array(zod.object({
   "id": zod.string(),
+  "versionId": zod.string(),
   "url": zod.string(),
   "mimeType": zod.string(),
   "width": zod.number().multipleOf(listPublishedContentResponseTwoItemsItemMediaItemWidthMultipleOf).nullish(),
@@ -4893,6 +4894,7 @@ export const GetPublishedContentResponse = zod.object({
 }).optional(),
   "media": zod.array(zod.object({
   "id": zod.string(),
+  "versionId": zod.string(),
   "url": zod.string(),
   "mimeType": zod.string(),
   "width": zod.number().multipleOf(getPublishedContentResponseMediaItemWidthMultipleOf).nullish(),
@@ -4909,6 +4911,17 @@ export const GetPublishedContentResponse = zod.object({
   "publishedAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
+
+
+/**
+ * @summary Download the immutable media version approved with published content
+ */
+export const GetPublishedMediaParams = zod.object({
+  "mediaId": zod.coerce.string(),
+  "versionId": zod.coerce.string()
+})
+
+export const GetPublishedMediaResponse = zod.unknown()
 
 
 /**

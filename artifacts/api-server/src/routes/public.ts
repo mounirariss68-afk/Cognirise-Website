@@ -14,6 +14,9 @@ import { SlidingWindowThrottle } from "../lib/security";
 import { downloadMediaObject } from "../lib/object-storage";
 
 const router: IRouter = Router();
+export const publicMediaDelivery = {
+  download: downloadMediaObject,
+};
 const PUBLIC_PAYLOAD_SQL = `(r.payload->>'visibility' IS NULL OR r.payload->>'visibility'='public')
   AND (r.payload->'content'->>'visibility' IS NULL OR r.payload->'content'->>'visibility'='public')
   AND (r.payload->>'confidential' IS NULL OR r.payload->>'confidential' NOT IN ('true','restricted'))
@@ -52,6 +55,10 @@ async function marketCandidates(requestedMarket: string, requestedLocale: string
   return candidates;
 }
 
+export function publicMediaUrl(assetId: string, versionId: string) {
+  return `/api/public/media/${assetId}/${versionId}`;
+}
+
 async function published(row: Record<string, any>) {
   const validation = validateCmsSnapshot(row.kind as CmsDocumentKind, row.payload, "publish");
   if (!validation.success) {
@@ -60,11 +67,13 @@ async function published(row: Record<string, any>) {
   const snapshot = validation.data;
   const mediaIds = Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds.map(String) : [];
   const assets = await pool.query(
-    `SELECT a.*,v.width,v.height,v.metadata FROM cms_media_assets a
-      LEFT JOIN LATERAL (SELECT width,height,metadata FROM cms_media_versions
-        WHERE asset_id=a.id ORDER BY version_number DESC LIMIT 1) v ON true
-      WHERE a.id::text=ANY($1::text[]) AND a.status IN ('active','ready')`,
-    [mediaIds],
+    `SELECT a.*,v.id version_id,v.width,v.height,v.metadata
+       FROM cms_media_references ref
+       JOIN cms_media_assets a ON a.id=ref.asset_id
+       JOIN cms_media_versions v ON v.id=ref.media_version_id AND v.asset_id=a.id
+      WHERE ref.document_id=$1 AND ref.field_path=$2
+        AND a.id::text=ANY($3::text[]) AND a.status IN ('active','ready')`,
+    [String(row.id), `revision:${String(row.revision_id)}`, mediaIds],
   );
   return {
     id: String(row.id),
@@ -75,7 +84,8 @@ async function published(row: Record<string, any>) {
     content: snapshot.content,
     seo: snapshot.seo,
     media: assets.rows.map((asset) => ({
-      id: String(asset.id), url: `/api/public/media/${asset.id}`, mimeType: asset.media_type,
+       id: String(asset.id), versionId: String(asset.version_id),
+       url: publicMediaUrl(String(asset.id), String(asset.version_id)), mimeType: asset.media_type,
       width: asset.width ?? null, height: asset.height ?? null, altText: asset.alt_text ?? null,
       caption: asset.metadata?.caption ?? null, credit: asset.credit ?? null,
     })),
@@ -107,7 +117,7 @@ router.get(
     const result = await pool.query(
       `WITH selected AS (
          SELECT d.id,d.kind,e.market,e.locale,e.published_at,e.updated_at,e.localized_slug,
-                r.revision_number,r.payload,
+                 r.id revision_id,r.revision_number,r.payload,
                 row_number() OVER (PARTITION BY d.id
                    ORDER BY array_position($2::text[],e.market),e.updated_at DESC,e.id) AS market_rank
            FROM cms_documents d
@@ -166,7 +176,7 @@ router.get(
     }
     const result = await pool.query(
       `SELECT d.id,d.kind,e.market,e.locale,e.published_at,e.updated_at,e.localized_slug,
-              r.revision_number,r.payload,$3::text requested_market
+               r.id revision_id,r.revision_number,r.payload,$3::text requested_market
          FROM cms_documents d
          JOIN cms_market_editions e ON e.document_id=d.id
           JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
@@ -201,28 +211,28 @@ router.get(
   }),
 );
 
-router.get("/public/media/:mediaId", asyncRoute(async (req, res) => {
+router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
   const asset = await pool.query(
-    `SELECT COALESCE(v.storage_key,a.storage_key) storage_key,
+    `SELECT v.storage_key,
        CASE WHEN v.metadata->>'rendition'='webp-1600' THEN 'image/webp' ELSE a.media_type END media_type
        FROM cms_media_assets a
-      LEFT JOIN LATERAL (
-        SELECT storage_key,metadata FROM cms_media_versions
-        WHERE asset_id=a.id ORDER BY version_number DESC LIMIT 1
-      ) v ON true
+       JOIN cms_media_versions v ON v.asset_id=a.id AND v.id=$2
       JOIN cms_market_editions e ON e.publication_state='published' AND e.published_at<=now()
       JOIN cms_documents d ON d.id=e.document_id
       JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
         AND r.workflow_state='approved'
-      WHERE a.id=$1 AND a.status IN ('active','ready') AND d.status<>'archived'
-       AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE(r.payload->'mediaIds','[]'::jsonb)) media_id
-         WHERE media_id=a.id::text)
+       JOIN cms_media_references ref ON ref.document_id=d.id
+         AND ref.field_path='revision:'||r.id::text
+         AND ref.asset_id=a.id AND ref.media_version_id=v.id
+       WHERE a.id=$1 AND a.status IN ('active','ready') AND d.status<>'archived'
+        AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE(r.payload->'mediaIds','[]'::jsonb)) media_id
+          WHERE media_id=a.id::text)
        AND ${PUBLIC_PAYLOAD_SQL} LIMIT 1`,
-    [req.params.mediaId],
+    [req.params.mediaId, req.params.versionId],
   );
   if (!asset.rowCount) { res.status(404).json({ error: "Public media not found." }); return; }
   res.type(asset.rows[0].media_type);
-  const stream = await downloadMediaObject(asset.rows[0].storage_key);
+  const stream = await publicMediaDelivery.download(asset.rows[0].storage_key);
   stream.on("error", () => res.destroy());
   stream.pipe(res);
 }));

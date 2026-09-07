@@ -11,6 +11,7 @@ import {
   isValidMediaClassification,
   media,
 } from "../src/routes/media.ts";
+import { publicMediaUrl } from "../src/routes/public.ts";
 
 test("media contract accepts governed collection filters and classification", () => {
   const filters = ListMediaQueryParams.safeParse({
@@ -95,4 +96,11 @@ test("active and ready media are usable while pending and failed stay explicit",
   const failed = media({ ...base, status: "failed" });
   assert.equal(failed.status, "failed");
   assert.equal(failed.publicUrl, null);
+});
+
+test("published media URLs identify the immutable approved version", () => {
+  assert.equal(
+    publicMediaUrl("asset-id", "version-id"),
+    "/api/public/media/asset-id/version-id",
+  );
 });

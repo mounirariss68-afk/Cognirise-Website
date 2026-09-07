@@ -106,8 +106,14 @@ async function syncMediaReferences(
 ) {
   for (const assetId of Array.isArray(mediaIds) ? mediaIds : []) {
     await client.query(
-      `INSERT INTO cms_media_references(asset_id,document_id,field_path)
-       SELECT id,$2,$3 FROM cms_media_assets WHERE id=$1 AND status IN ('active','ready')
+      `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
+       SELECT asset.id,version.id,$2,$3
+         FROM cms_media_assets asset
+         JOIN LATERAL (
+           SELECT id FROM cms_media_versions
+            WHERE asset_id=asset.id ORDER BY version_number DESC LIMIT 1
+         ) version ON true
+        WHERE asset.id=$1 AND asset.status IN ('active','ready')
        ON CONFLICT DO NOTHING`,
       [assetId, documentId, `revision:${revisionId}`],
     );
@@ -582,10 +588,36 @@ router.post(
       return;
     }
     const mediaIds = validation.data.mediaIds;
+    if (mediaIds.length) {
+      await client.query(
+        `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
+         SELECT asset.id,version.id,$2,$3
+           FROM cms_media_assets asset
+           JOIN LATERAL (
+             SELECT id FROM cms_media_versions
+              WHERE asset_id=asset.id ORDER BY version_number DESC LIMIT 1
+           ) version ON true
+          WHERE asset.id::text=ANY($1::text[])
+            AND asset.status IN ('active','ready')
+         ON CONFLICT DO NOTHING`,
+        [mediaIds, id, `revision:${parsed.data.revisionId}`],
+      );
+    }
     const readyMedia = mediaIds.length
       ? await client.query(
-          "SELECT id::text id FROM cms_media_assets WHERE id::text=ANY($1::text[]) AND status IN ('active','ready')",
-          [mediaIds],
+          `SELECT a.id::text id,COALESCE(pinned.id,latest.id)::text version_id
+             FROM cms_media_assets a
+             JOIN cms_media_references ref ON ref.asset_id=a.id
+               AND ref.document_id=$2 AND ref.field_path=$3
+             LEFT JOIN cms_media_versions pinned
+               ON pinned.id=ref.media_version_id AND pinned.asset_id=a.id
+             LEFT JOIN LATERAL (
+               SELECT id FROM cms_media_versions
+                WHERE asset_id=a.id ORDER BY version_number DESC LIMIT 1
+             ) latest ON ref.media_version_id IS NULL
+            WHERE a.id::text=ANY($1::text[]) AND a.status IN ('active','ready')
+              AND COALESCE(pinned.id,latest.id) IS NOT NULL`,
+          [mediaIds, id, `revision:${parsed.data.revisionId}`],
         )
       : { rows: [] };
     const readyIds = new Set(readyMedia.rows.map((row: { id: string }) => row.id));
@@ -594,6 +626,22 @@ router.post(
       await client.query("ROLLBACK");
       res.status(422).json({ error: "Publication references unavailable media.", details: unavailable });
       return;
+    }
+    if (mediaIds.length) {
+      const selectedVersionIds = readyMedia.rows.map(
+        (row: { version_id: string }) => row.version_id,
+      );
+      await client.query(
+        `UPDATE cms_media_references ref
+            SET media_version_id=selected.id
+           FROM cms_media_versions selected
+          WHERE selected.id::text=ANY($1::text[])
+            AND ref.asset_id=selected.asset_id
+            AND ref.document_id=$2
+            AND ref.field_path=$3
+            AND ref.media_version_id IS NULL`,
+        [selectedVersionIds, id, `revision:${parsed.data.revisionId}`],
+      );
     }
     await client.query(
       `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,
@@ -647,13 +695,35 @@ router.post(
       res.status(409).json({ error: "The selected revision does not exist." });
       return;
     }
-    await pool.query(
+    const revision = await pool.query(
       `INSERT INTO cms_revisions
        (edition_id,revision_number,payload,content_digest,workflow_state,
         created_by_user_id,reason)
        SELECT $1,max(revision_number)+1,$2,$3,'draft',$4,$5
-       FROM cms_revisions WHERE edition_id=$1`,
+        FROM cms_revisions WHERE edition_id=$1 RETURNING id`,
       [old.rows[0].edition_id, old.rows[0].payload, digest(old.rows[0].payload), auth.user.id, parsed.data.note],
+    );
+    await pool.query(
+      `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
+       SELECT ref.asset_id,COALESCE(ref.media_version_id,latest.id),ref.document_id,$3
+         FROM cms_media_references ref
+         LEFT JOIN LATERAL (
+           SELECT id FROM cms_media_versions
+            WHERE asset_id=ref.asset_id ORDER BY version_number DESC LIMIT 1
+         ) latest ON ref.media_version_id IS NULL
+        WHERE ref.document_id=$1 AND ref.field_path=$2
+       ON CONFLICT DO NOTHING`,
+      [
+        id,
+        `revision:${parsed.data.revisionId}`,
+        `revision:${String(revision.rows[0].id)}`,
+      ],
+    );
+    await syncMediaReferences(
+      pool,
+      id,
+      String(revision.rows[0].id),
+      old.rows[0].payload?.mediaIds,
     );
     await audit(auth, "document.rolled_back", "document", id);
     res.json(await getDocument(id));

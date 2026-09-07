@@ -2,6 +2,7 @@ import {
   AnyPgColumn,
   boolean,
   check,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -303,6 +304,7 @@ export const cmsMediaVersionsTable = pgTable(
       table.assetId,
       table.versionNumber,
     ),
+    uniqueIndex("cms_media_versions_id_asset_uidx").on(table.id, table.assetId),
     uniqueIndex("cms_media_versions_storage_key_uidx").on(table.storageKey),
   ],
 );
@@ -314,6 +316,7 @@ export const cmsMediaReferencesTable = pgTable(
     assetId: uuid("asset_id")
       .notNull()
       .references(() => cmsMediaAssetsTable.id, { onDelete: "restrict" }),
+    mediaVersionId: uuid("media_version_id"),
     documentId: uuid("document_id")
       .notNull()
       .references(() => cmsDocumentsTable.id, { onDelete: "cascade" }),
@@ -326,7 +329,13 @@ export const cmsMediaReferencesTable = pgTable(
       table.fieldPath,
       table.assetId,
     ),
+    foreignKey({
+      columns: [table.mediaVersionId, table.assetId],
+      foreignColumns: [cmsMediaVersionsTable.id, cmsMediaVersionsTable.assetId],
+      name: "cms_media_references_version_asset_fk",
+    }).onDelete("restrict"),
     index("cms_media_references_asset_idx").on(table.assetId),
+    index("cms_media_references_version_idx").on(table.mediaVersionId),
   ],
 );
 
