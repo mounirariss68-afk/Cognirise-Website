@@ -6,6 +6,7 @@ import { assetUrl } from "@/lib/assets";
 import { useRef, useState } from "react";
 import { BlueprintJourney } from "@/components/BlueprintJourney";
 import { ServiceLineTiles } from "@/components/ServiceLineTiles";
+import { BrandButton } from "@/components/ui/brand-button";
 
 const Kicker = ({ children, className = "text-[#102957]" }: { children: React.ReactNode, className?: string }) => (
   <div className={`flex items-center gap-3 text-[10px] tracking-[0.12em] uppercase font-semibold ${className}`}>
@@ -18,14 +19,6 @@ const SectionHeading = ({ children, className = "" }: { children: React.ReactNod
   <h2 className={`font-display font-semibold text-[clamp(42px,5vw,78px)] tracking-[-0.075em] leading-[0.98] mt-6 ${className}`}>
     {children}
   </h2>
-);
-
-const CtaButton = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <Link href={href} className="group relative inline-flex items-center gap-4 bg-[#102957] text-white px-6 py-4 font-bold text-[13px] tracking-wide overflow-hidden transition-all duration-300 hover:-translate-y-[3px] hover:-translate-x-[3px] hover:shadow-[6px_6px_0px_hsl(var(--brand-coral))] hover:bg-[#071936]">
-    <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-    <span className="relative z-10 pl-2">{children}</span>
-    <ArrowRight className="w-5 h-5 relative z-10 transition-transform group-hover:translate-x-1 group-hover:text-[hsl(var(--brand-coral))]" />
-  </Link>
 );
 
 const PulseImage = ({
@@ -145,7 +138,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
-              <CtaButton href="/what-we-do">Explore our practice</CtaButton>
+              <BrandButton href="/what-we-do">Explore our practice</BrandButton>
             </motion.div>
           </motion.div>
           
@@ -433,7 +426,7 @@ export default function Home() {
               ))}
             </div>
             <div className="mt-8">
-              <CtaButton href="/about">Meet the team</CtaButton>
+              <BrandButton href="/about">Meet the team</BrandButton>
             </div>
           </motion.div>
           
@@ -494,7 +487,7 @@ export default function Home() {
               Speak with a partner about deploying governed intelligence into your core workflows.
             </p>
             
-            <CtaButton href="/contact">Book a consultation</CtaButton>
+            <BrandButton href="/contact" variant="inverse">Book a consultation</BrandButton>
           </motion.div>
         </div>
       </section>

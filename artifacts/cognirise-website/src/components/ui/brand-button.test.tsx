@@ -14,7 +14,8 @@ test("renders every main variant with the shared Pulse action structure", () => 
     assert.match(markup, new RegExp(`pulse-action-${variant}`));
     assert.match(markup, /pulse-action-layout/);
     assert.match(markup, /pulse-action-icon/);
-    assert.match(markup, /pulse-signal-rail/);
+    assert.match(markup, /pulse-action-sheen/);
+    assert.doesNotMatch(markup, /pulse-signal-rail/);
   }
 });
 

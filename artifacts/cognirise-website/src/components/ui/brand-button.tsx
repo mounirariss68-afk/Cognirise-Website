@@ -46,7 +46,6 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (icon || <ArrowRight className="h-4 w-4" />)}
             </span>
           </span>
-          <span className="pulse-signal-rail" aria-hidden="true" />
         </>
       );
     };

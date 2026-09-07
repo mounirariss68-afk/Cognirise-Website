@@ -296,11 +296,29 @@
   transition: left 460ms cubic-bezier(.16, 1, .3, 1);
 }
 
+.pulse-action-icon::after {
+  content: "";
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 7px;
+  height: 7px;
+  border: 2px solid hsl(var(--brand-deep));
+  border-radius: 999px;
+  background: hsl(var(--brand-coral));
+  box-shadow: 0 0 0 1px hsl(var(--brand-coral) / .22);
+}
+
 .pulse-action-inverse .pulse-action-icon,
 .pulse-action-secondary .pulse-action-icon {
   border-color: hsl(var(--brand-deep) / .12);
   background: hsl(var(--brand-deep) / .07);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+
+.pulse-action-inverse .pulse-action-icon::after,
+.pulse-action-secondary .pulse-action-icon::after {
+  border-color: rgba(255, 255, 255, .96);
 }
 
 .pulse-action-sheen {
@@ -311,19 +329,6 @@
   background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, .14), transparent 78%);
   opacity: 0;
   transition: opacity 240ms ease;
-}
-
-.pulse-signal-rail {
-  position: absolute;
-  z-index: 3;
-  left: 21px;
-  bottom: 3px;
-  width: 26px;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, hsl(var(--brand-violet)), hsl(var(--brand-pink)), hsl(var(--brand-coral)));
-  box-shadow: 0 0 8px hsl(var(--brand-pink) / .42);
-  transition: left 460ms cubic-bezier(.16, 1, .3, 1);
 }
 
 .pulse-action:focus-visible {
@@ -339,10 +344,6 @@
 
 .pulse-action:focus-visible .pulse-action-label {
   transform: translateX(-4px);
-}
-
-.pulse-action:focus-visible .pulse-signal-rail {
-  left: calc(100% - 47px);
 }
 
 .pulse-action:focus-visible .pulse-action-sheen {
@@ -374,10 +375,6 @@
 
   .pulse-action:hover .pulse-action-label {
     transform: translateX(-4px);
-  }
-
-  .pulse-action:hover .pulse-signal-rail {
-    left: calc(100% - 47px);
   }
 
   .pulse-action:hover .pulse-action-sheen {
@@ -412,9 +409,6 @@
   }
   .pulse-action .pulse-action-label {
     transform: translateX(-4px);
-  }
-  .pulse-action .pulse-signal-rail {
-    left: calc(100% - 47px);
   }
   .pulse-action,
   .pulse-action *,
