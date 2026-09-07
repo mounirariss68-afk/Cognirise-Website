@@ -9,10 +9,10 @@ import { validateCmsContent } from "@workspace/api-zod";
 import { IndustryEditorialView } from "@/components/industries/IndustryEditorial";
 import { INDUSTRIES } from "./industries";
 
-test("publishes exactly five complete, distinct industry records", () => {
-  assert.equal(INDUSTRIES.length, 5);
-  assert.equal(new Set(INDUSTRIES.map((item) => item.slug)).size, 5);
-  assert.equal(new Set(INDUSTRIES.map((item) => item.thesis)).size, 5);
+test("publishes exactly six complete, distinct industry records", () => {
+  assert.equal(INDUSTRIES.length, 6);
+  assert.equal(new Set(INDUSTRIES.map((item) => item.slug)).size, 6);
+  assert.equal(new Set(INDUSTRIES.map((item) => item.thesis)).size, 6);
   for (const item of INDUSTRIES) {
     assert.equal(item.pressures.length, 3);
     assert.ok(item.reversal.body);
@@ -24,9 +24,9 @@ test("publishes exactly five complete, distinct industry records", () => {
   }
 });
 
-test("does not publish public sector or research-production language", () => {
+test("does not publish internal research-production language", () => {
   const published = JSON.stringify(INDUSTRIES).toLowerCase();
-  assert.doesNotMatch(published, /government & public sector|editor note|placeholder|tbd|claude/);
+  assert.doesNotMatch(published, /editor note|placeholder|tbd|claude/);
 });
 
 test("keeps evidence classifications and source labels visible", () => {
@@ -45,13 +45,13 @@ test("every compiled industry passes the governed publish contract", () => {
   }
 });
 
-test("renders all five migrated CMS industry payloads without compiled fallback", () => {
+test("renders all six migrated CMS industry payloads without compiled fallback", () => {
   const payload = JSON.parse(readFileSync(
     path.resolve(process.cwd(), "../../scripts/cms/output/import-payload.json"),
     "utf8",
   )) as { operations: Array<{ kind: string; slug: string; payload: { content: Omit<(typeof INDUSTRIES)[number], "slug"> } }> };
   const operations = payload.operations.filter((operation) => operation.kind === "industry");
-  assert.equal(operations.length, 5);
+  assert.equal(operations.length, 6);
 
   for (const operation of operations) {
     const validation = validateCmsContent("industry", operation.payload.content, "publish");

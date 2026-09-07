@@ -49,7 +49,9 @@ export function PulseMotionPage({
       cleanups.push(() => revealObserver.disconnect());
     }
 
-    const images = Array.from(root.querySelectorAll<HTMLImageElement>("img"));
+    const images = Array.from(
+      root.querySelectorAll<HTMLImageElement>("img:not([data-pulse-image-resilient])"),
+    );
     images.forEach((image, index) => {
       image.dataset.pulseImage = index % 2 === 0 ? "forward" : "return";
       image.decoding = "async";

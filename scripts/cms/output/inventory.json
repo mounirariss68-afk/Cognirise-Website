@@ -9,8 +9,8 @@
     "partners": 5,
     "platforms": 5,
     "articles": 3,
-    "industries": 5,
-    "assets": 25
+    "industries": 6,
+    "assets": 31
   },
   "explicitOmissions": {
     "caseStudies": "No genuine public case-study records are present in the current website.",
@@ -1082,8 +1082,8 @@
           "thesis": "The model estate—not the chatbot—is where trust is won.",
           "accent": "trust is won.",
           "dek": "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
-          "image": "/images/cognirise/site-financial.jpg",
-          "imageAlt": "A precise financial mechanism crossed by a controlled luminous route.",
+          "image": "/images/cognirise/industries/pulse-industry-financial.jpg",
+          "imageAlt": "A cinematic financial landscape crossed by controlled luminous routes.",
           "variant": "ledger",
           "pressures": [
             {
@@ -1157,7 +1157,7 @@
           "relatedIds": []
         },
         "mediaPaths": [
-          "/images/cognirise/site-financial.jpg"
+          "/images/cognirise/industries/pulse-industry-financial.jpg"
         ]
       },
       "review": {
@@ -1184,8 +1184,8 @@
           "thesis": "Autonomy is earned one closed loop at a time.",
           "accent": "closed loop",
           "dek": "Network intelligence matters when it can observe, decide and act inside a bounded domain—with service impact, energy use and human override visible.",
-          "image": "/images/cognirise/site-infrastructure.jpg",
-          "imageAlt": "Connected infrastructure carrying a luminous signal across an operating landscape.",
+          "image": "/images/cognirise/industries/pulse-industry-telecoms.jpg",
+          "imageAlt": "A cinematic telecommunications network carrying luminous signals across an operating landscape.",
           "variant": "network",
           "pressures": [
             {
@@ -1259,7 +1259,7 @@
           "relatedIds": []
         },
         "mediaPaths": [
-          "/images/cognirise/site-infrastructure.jpg"
+          "/images/cognirise/industries/pulse-industry-telecoms.jpg"
         ]
       },
       "review": {
@@ -1286,8 +1286,8 @@
           "thesis": "The real test arrives when the journey breaks.",
           "accent": "journey breaks.",
           "dek": "Personalisation is visible. Recovery is valuable. The decisive capability is coordinated action across inventory, policy, customer context and frontline judgment when plans change.",
-          "image": "/images/cognirise/pulse-convergence.jpg",
-          "imageAlt": "Multiple illuminated routes converging through a cinematic transport environment.",
+          "image": "/images/cognirise/industries/pulse-industry-travel.jpg",
+          "imageAlt": "Multiple illuminated routes converging through a cinematic travel environment.",
           "variant": "journey",
           "pressures": [
             {
@@ -1361,7 +1361,7 @@
           "relatedIds": []
         },
         "mediaPaths": [
-          "/images/cognirise/pulse-convergence.jpg"
+          "/images/cognirise/industries/pulse-industry-travel.jpg"
         ]
       },
       "review": {
@@ -1388,8 +1388,8 @@
           "thesis": "In physical operations, confidence needs a field address.",
           "accent": "field address.",
           "dek": "A prediction has no operating value until the right team can connect it to asset history, safety boundaries, work orders and available parts.",
-          "image": "/images/cognirise/pulse-breakthrough.jpg",
-          "imageAlt": "A luminous route moving through a vast industrial landscape at dusk.",
+          "image": "/images/cognirise/industries/pulse-industry-energy.jpg",
+          "imageAlt": "A luminous route moving through a cinematic energy landscape at dusk.",
           "variant": "field",
           "pressures": [
             {
@@ -1463,7 +1463,7 @@
           "relatedIds": []
         },
         "mediaPaths": [
-          "/images/cognirise/pulse-breakthrough.jpg"
+          "/images/cognirise/industries/pulse-industry-energy.jpg"
         ]
       },
       "review": {
@@ -1474,98 +1474,200 @@
       }
     },
     {
-      "externalId": "industry:300df81759c6db6cbf86",
+      "externalId": "industry:e201f6f730b8afa45524",
       "type": "industry",
-      "name": "Manufacturing",
+      "name": "Public Sector",
       "sourceFile": "src/content/industries.ts",
-      "route": "/industries/manufacturing",
+      "route": "/industries/public-sector",
       "fields": {
-        "slug": "manufacturing",
-        "summary": "Industrial intelligence earns its place by improving a bounded production decision across quality, maintenance, planning and workforce safety—without pretending the dark factory has arrived.",
+        "slug": "public-sector",
+        "summary": "Public institutions create durable value when intelligence makes services clearer, faster and more accountable—without weakening accessibility, privacy, due process or human authority.",
         "content": {
           "schemaVersion": 1,
           "legacyPath": "/industries/manufacturing",
-          "name": "Manufacturing",
-          "shortName": "Manufacturing",
-          "thesis": "The factory is a system of constraints, not a collection of demos.",
-          "accent": "system of constraints",
-          "dek": "Industrial intelligence earns its place by improving a bounded production decision across quality, maintenance, planning and workforce safety—without pretending the dark factory has arrived.",
-          "image": "/images/cognirise/cognirise-pulse-outcomes.jpg",
-          "imageAlt": "A cinematic advanced manufacturing environment with people and luminous production signals.",
-          "variant": "factory",
+          "name": "Public Sector",
+          "shortName": "Public Sector",
+          "thesis": "Public value is earned at the point of service.",
+          "accent": "point of service.",
+          "dek": "Public institutions create durable value when intelligence makes services clearer, faster and more accountable—without weakening accessibility, privacy, due process or human authority.",
+          "image": "/images/cognirise/industries/pulse-industry-public-sector.jpg",
+          "imageAlt": "Citizens moving through a bright monumental civic space connected by a luminous service route.",
+          "variant": "ledger",
           "pressures": [
             {
-              "title": "Brownfield reality",
-              "body": "Plants combine equipment generations, control systems and data quality that cannot be normalised by presentation layer alone."
+              "title": "Legitimacy before velocity",
+              "body": "Decisions that affect people need named authority, traceable evidence, clear explanations and a practical route to human review."
             },
             {
-              "title": "False positives carry cost",
-              "body": "Vision and predictive systems must be assessed against rework, inspection load and line interruption—not model accuracy alone."
+              "title": "Accessibility is part of the system",
+              "body": "A digital service succeeds only when people across languages, abilities and levels of digital confidence can complete the journey."
             },
             {
-              "title": "Adoption happens on the floor",
-              "body": "Operators and engineers need traceable assistance inside established work, with safe fallback when the system is uncertain."
+              "title": "Data boundaries shape trust",
+              "body": "Identity, eligibility and case information require explicit purpose, controlled access and retention rules before models enter the workflow."
             }
           ],
           "reversal": {
-            "title": "Automation plans meet labour and reliability limits.",
-            "body": "High-profile humanoid and lights-out ambitions remain bounded by deployment readiness, worker agreements and the economics of variable production."
+            "title": "Automating a broken service can harden the friction.",
+            "body": "Faster classification or response generation creates little public value when fragmented policy, unclear ownership and inaccessible hand-offs remain unchanged."
           },
           "myth": {
-            "claim": "“The dark factory is the destination.”",
-            "verdict": "Not for most operations. The stronger near-term case is a more capable workforce operating better-instrumented, safer and more adaptive lines."
+            "claim": "“A public chatbot proves digital government is intelligent.”",
+            "verdict": "No. The stronger evidence is a governed end-to-end service where outcomes, exceptions and human accountability can be measured and challenged."
           },
-          "gcc": "Lighthouse sites and Industry 4.0 programmes show regional momentum. Their recognition is evidence of capability at named facilities—not proof that every plant shares the same maturity.",
+          "gcc": "Gulf governments combine ambitious digital-service programmes with high expectations for sovereign infrastructure and bilingual access. Credible progress connects that ambition to transparent controls and service-level evidence.",
           "service": {
-            "label": "Engineering with AI",
-            "href": "/what-we-do/engineering-with-ai",
-            "firstMove": "Instrument one quality or flow constraint end to end."
+            "label": "Sovereign & Regulated AI",
+            "href": "/what-we-do/sovereign-regulated-ai",
+            "firstMove": "Map one high-friction public journey from policy intent to resolved case."
           },
           "uses": [
             {
-              "use": "Quality inspection",
-              "evidence": "Company-reported deployments",
-              "boundary": "False-positive and escape-rate monitoring"
+              "use": "Case intake and triage",
+              "evidence": "Established digital-service practice",
+              "boundary": "Accessible channels, documented criteria and human escalation"
             },
             {
-              "use": "Maintenance planning",
-              "evidence": "Measured industrial practice",
-              "boundary": "Integrated parts and work-order response"
+              "use": "Decision support",
+              "evidence": "Guidance-led emerging practice",
+              "boundary": "Named authority, explanation and contestability"
             },
             {
-              "use": "Industrial copilots",
-              "evidence": "Vendor and customer reports",
-              "boundary": "Approved instructions and operator authority"
+              "use": "Service operations",
+              "evidence": "Measured operational deployments",
+              "boundary": "Outcome, equity and repeat-contact monitoring"
             }
           ],
           "sources": [
             {
-              "label": "UAE Industry 4.0 programme",
-              "publisher": "UAE Ministry of Industry and Advanced Technology",
+              "label": "UAE Strategy for Artificial Intelligence",
+              "publisher": "UAE Government",
               "kind": "Official source",
-              "url": "https://moiat.gov.ae/en/programs/uae-industry-4-backup"
+              "url": "https://u.ae/en/about-the-uae/strategies-initiatives-and-awards/strategies-plans-and-visions/government-services-and-digital-transformation/uae-strategy-for-artificial-intelligence"
             },
             {
-              "label": "Industrial copilot adoption",
-              "publisher": "Siemens / thyssenkrupp",
-              "kind": "Vendor claim",
-              "url": "https://press.siemens.com/global/en/pressrelease/siemens-industrial-copilot-expanded-adopted-thyssenkrupp"
+              "label": "OECD AI Principles",
+              "publisher": "OECD",
+              "kind": "Official source",
+              "url": "https://oecd.ai/en/ai-principles"
             },
             {
-              "label": "AI quality inspection expansion",
-              "publisher": "GE Aerospace",
-              "kind": "Company-reported",
-              "url": "https://www.geaerospace.com/news/press-releases/ge-aerospace-expanding-application-ai-blade-inspections-cfm-leap-and-ge9x-engines"
+              "label": "AI Risk Management Framework",
+              "publisher": "US National Institute of Standards and Technology",
+              "kind": "Official source",
+              "url": "https://www.nist.gov/itl/ai-risk-management-framework"
             }
           ],
-          "verificationDate": "2026-09-06",
-          "reviewDate": "2027-03-06",
+          "verificationDate": "2026-09-07",
+          "reviewDate": "2027-03-07",
           "visibility": "public",
           "order": 5,
           "relatedIds": []
         },
         "mediaPaths": [
-          "/images/cognirise/cognirise-pulse-outcomes.jpg"
+          "/images/cognirise/industries/pulse-industry-public-sector.jpg"
+        ]
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm hero-media rights, alt text, verification date, review date, source classifications, and source URLs before publication."
+        ]
+      }
+    },
+    {
+      "externalId": "industry:8c90ace640ac504ab64a",
+      "type": "industry",
+      "name": "Education",
+      "sourceFile": "src/content/industries.ts",
+      "route": "/industries/education",
+      "fields": {
+        "slug": "education",
+        "summary": "Education systems create durable value when AI supports defined learning and teaching work with appropriate evidence, privacy safeguards and educator judgment—not when fluent output is treated as proof of learning.",
+        "content": {
+          "schemaVersion": 1,
+          "legacyPath": "/industries/education",
+          "name": "Education",
+          "shortName": "Education",
+          "thesis": "Learning gains need more than a convincing answer.",
+          "accent": "more than a convincing answer.",
+          "dek": "Education systems create durable value when AI supports defined learning and teaching work with appropriate evidence, privacy safeguards and educator judgment—not when fluent output is treated as proof of learning.",
+          "image": "/images/cognirise/industries/pulse-industry-education.jpg",
+          "imageAlt": "A cinematic learning environment connected by luminous knowledge pathways.",
+          "variant": "network",
+          "pressures": [
+            {
+              "title": "Learning evidence remains the test",
+              "body": "Useful tools need evaluation against learning, teaching and equity outcomes in their actual context—not engagement or output quality alone."
+            },
+            {
+              "title": "Learner data requires stewardship",
+              "body": "Student records, age-appropriate access, privacy and security controls shape what can be used and how it can be governed."
+            },
+            {
+              "title": "Educator judgment stays accountable",
+              "body": "AI can support preparation and feedback, but assessment, safeguarding and consequential decisions require clear human responsibility."
+            }
+          ],
+          "reversal": {
+            "title": "A polished response can obscure a learning gap.",
+            "body": "When learners can submit generated work without understanding, output quality may rise while teachers lose the evidence needed to judge progress and provide support."
+          },
+          "myth": {
+            "claim": "“Generative AI personalises learning by default.”",
+            "verdict": "No. Personalisation depends on sound pedagogy, reliable context, evaluation and educator oversight; a tailored-looking response is not evidence of learning."
+          },
+          "gcc": "Regional digital-education ambitions create scope for responsible experimentation. Credible progress still depends on local curriculum alignment, learner protections, teacher capability and evidence that outcomes improve.",
+          "service": {
+            "label": "Data & AI Foundations",
+            "href": "/what-we-do/data-ai-foundations",
+            "firstMove": "Map one learning or teaching workflow where evidence, privacy and educator authority must stay connected."
+          },
+          "uses": [
+            {
+              "use": "Teacher preparation",
+              "evidence": "Guidance-led emerging practice",
+              "boundary": "Educator review, approved materials and learner-data controls"
+            },
+            {
+              "use": "Learner assistance",
+              "evidence": "Early deployment evidence",
+              "boundary": "Age-appropriate access, disclosure and learning evaluation"
+            },
+            {
+              "use": "Assessment support",
+              "evidence": "Established analytical practice",
+              "boundary": "Human judgment, contestability and academic-integrity controls"
+            }
+          ],
+          "sources": [
+            {
+              "label": "Guidance for generative AI in education and research",
+              "publisher": "UNESCO",
+              "kind": "Official source",
+              "url": "https://www.unesco.org/en/articles/guidance-generative-ai-education-and-research"
+            },
+            {
+              "label": "OECD Digital Education Outlook 2026",
+              "publisher": "OECD",
+              "kind": "Official source",
+              "url": "https://www.oecd.org/en/publications/oecd-digital-education-outlook-2026_062a7394-en.html"
+            },
+            {
+              "label": "Artificial Intelligence and the Future of Teaching and Learning",
+              "publisher": "US Department of Education",
+              "kind": "Official source",
+              "url": "https://www.ed.gov/media/document/ai-reportpdf-43861.pdf"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "order": 6,
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/industries/pulse-industry-education.jpg"
         ]
       },
       "review": {
@@ -1732,12 +1834,11 @@
         "width": 1024,
         "height": 1024,
         "usages": [
-          "artifacts/cognirise-website/src/content/industries.ts",
           "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
           "artifacts/cognirise-website/src/pages/DataAIFoundations.tsx",
           "artifacts/cognirise-website/src/pages/WorkProof.tsx"
         ],
-        "cmsOwnership": "cms-candidate",
+        "cmsOwnership": "code-owned",
         "accessibility": {
           "altText": null,
           "decorative": null
@@ -1993,6 +2094,216 @@
       "digest": "d7ccf255681903f515405738914c8ccda40349e1ec36422567d2ca6a3dd1e545"
     },
     {
+      "externalId": "asset:142ae134e579aa22b3fa",
+      "type": "asset",
+      "name": "pulse-industry-education.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-education.jpg",
+        "bytes": 113611,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "c46f7f761b52660fa218a376b0f157d5d4b8f9aca86eb83fb750af7f16d6dc42",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/content/industries.ts"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "c46f7f761b52660fa218a376b0f157d5d4b8f9aca86eb83fb750af7f16d6dc42"
+    },
+    {
+      "externalId": "asset:fcf7c186aab2468bef23",
+      "type": "asset",
+      "name": "pulse-industry-energy.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-energy.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-energy.jpg",
+        "bytes": 105398,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "d0398015c4cc624a5eaf3f850c837a5a9b6bd84766634789a0ce325739e2fabb",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/content/industries.ts"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "d0398015c4cc624a5eaf3f850c837a5a9b6bd84766634789a0ce325739e2fabb"
+    },
+    {
+      "externalId": "asset:5936a9b4c6ac5c729fda",
+      "type": "asset",
+      "name": "pulse-industry-financial.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-financial.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-financial.jpg",
+        "bytes": 117787,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "4be720fc3fa0f9c57d4c2d39237292d0bcb0c0f62407a04368c88d9460c81fe0",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/content/industries.ts"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "4be720fc3fa0f9c57d4c2d39237292d0bcb0c0f62407a04368c88d9460c81fe0"
+    },
+    {
+      "externalId": "asset:ce6e9786500aa02af86d",
+      "type": "asset",
+      "name": "pulse-industry-public-sector.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-public-sector.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-public-sector.jpg",
+        "bytes": 117717,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "63169082b985e74463d34177d228583f07a5f55f15d0fde97328133a9e440f85",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/content/industries.ts"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "63169082b985e74463d34177d228583f07a5f55f15d0fde97328133a9e440f85"
+    },
+    {
+      "externalId": "asset:1f857b96d54e29e56146",
+      "type": "asset",
+      "name": "pulse-industry-telecoms.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-telecoms.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-telecoms.jpg",
+        "bytes": 111568,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "35e13aabf861ec5d2700fea7b81ceb00672a74d367bd030d2d3ca03fd6e2d733",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/content/industries.ts"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "35e13aabf861ec5d2700fea7b81ceb00672a74d367bd030d2d3ca03fd6e2d733"
+    },
+    {
+      "externalId": "asset:970056b64f6910389d7f",
+      "type": "asset",
+      "name": "pulse-industry-travel.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-travel.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-travel.jpg",
+        "bytes": 75644,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "c5d787e4b692481e5213aa4f218626e5f776c8eaa5f171548c46594877c10204",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/content/industries.ts"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "accessibility": {
+          "altText": null,
+          "decorative": null
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": null,
+          "source": null
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "c5d787e4b692481e5213aa4f218626e5f776c8eaa5f171548c46594877c10204"
+    },
+    {
       "externalId": "asset:3cca1551f0dec19ae890",
       "type": "asset",
       "name": "logo-blue.svg",
@@ -2072,13 +2383,12 @@
         "width": 1024,
         "height": 1024,
         "usages": [
-          "artifacts/cognirise-website/src/content/industries.ts",
           "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
           "artifacts/cognirise-website/src/pages/Home.tsx",
           "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
           "artifacts/cognirise-website/src/pages/WorkProof.tsx"
         ],
-        "cmsOwnership": "cms-candidate",
+        "cmsOwnership": "code-owned",
         "accessibility": {
           "altText": null,
           "decorative": null
@@ -2111,11 +2421,10 @@
         "width": 1024,
         "height": 1024,
         "usages": [
-          "artifacts/cognirise-website/src/content/industries.ts",
           "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
           "artifacts/cognirise-website/src/pages/Home.tsx"
         ],
-        "cmsOwnership": "cms-candidate",
+        "cmsOwnership": "code-owned",
         "accessibility": {
           "altText": null,
           "decorative": null
@@ -2223,10 +2532,9 @@
         "width": 1024,
         "height": 1024,
         "usages": [
-          "artifacts/cognirise-website/src/content/industries.ts",
           "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx"
         ],
-        "cmsOwnership": "cms-candidate",
+        "cmsOwnership": "code-owned",
         "accessibility": {
           "altText": null,
           "decorative": null
@@ -2295,7 +2603,6 @@
         "height": 1024,
         "usages": [
           "artifacts/cognirise-website/src/components/ServiceLineTiles.tsx",
-          "artifacts/cognirise-website/src/content/industries.ts",
           "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx",
           "artifacts/cognirise-website/src/pages/InsightArticle.tsx",
           "artifacts/cognirise-website/src/pages/InsightsEditorial.tsx"
@@ -2464,7 +2771,7 @@
       "digest": "61c0e28ea60a07c3eed1aecf06446f9c1cb83c607e565ecae076cfd7625c5a71"
     }
   ],
-  "manifestDigest": "d0936e30be5e3db7f13e2dd577e0775aab4dcbac97400a12a508c01cf0836d02",
-  "generatedAt": "2026-09-07T01:50:54.592Z",
+  "manifestDigest": "3bfc8cc896cb43c58e23eab1ae2d1f9861b2566352891e89cc3cc71d445afa9e",
+  "generatedAt": "2026-09-07T02:42:45.461Z",
   "dryRun": false
 }

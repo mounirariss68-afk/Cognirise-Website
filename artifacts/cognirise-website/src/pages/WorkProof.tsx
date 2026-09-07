@@ -1,10 +1,12 @@
 import { Link } from "wouter";
-import { ArrowDown, ArrowRight } from "lucide-react";
+import { ArrowDown, ArrowRight, Plus } from "lucide-react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
 import { contentRecord, text, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
+import { SpatialDisclosure, SpatialDisclosureItem, SpatialDisclosureTrigger, SpatialDisclosurePanel } from "@/components/ui/spatial-disclosure";
+import { PulseImage } from "@/components/ui/pulse-image";
 
 const patternFallback = [{
   title: "One process under pressure.",
@@ -85,11 +87,6 @@ export default function WorkProof() {
         .wp-ledger h2{font-size:clamp(42px,5vw,73px);line-height:.98;letter-spacing:-.08em;font-weight:600;margin:20px 0 0}
         .wp-ledger-lead{font-size:16px;line-height:1.58;max-width:410px;color:#42587b;margin:0}
         .wp-stages{margin-top:63px;border-top:1px solid var(--ink)}
-        .wp-stage{display:grid;grid-template-columns:70px 1fr 1.1fr;gap:20px;align-items:start;padding:25px 8px;border-bottom:1px solid var(--line)}
-        .wp-stage:hover{background:#f2eff9}
-        .wp-stage span{font-size:10px;letter-spacing:.1em;color:#697a96;padding-top:7px}
-        .wp-stage h3{font-weight:600;font-size:clamp(22px,2.4vw,34px);letter-spacing:-.065em;line-height:1.05;margin:0}
-        .wp-stage p{font-size:14px;line-height:1.52;color:#536887;margin:0;max-width:410px}
         .wp-outcome{background:var(--mist);padding:0 4.8vw 115px}
         .wp-outcome-wrap{display:grid;grid-template-columns:1fr 1fr;gap:5vw;min-height:560px}
         .wp-outcome-copy{padding:88px 0 45px}
@@ -143,9 +140,6 @@ export default function WorkProof() {
           .wp-ledger h2{font-size:43px}
           .wp-ledger-lead{margin-top:29px}
           .wp-stages{margin-top:42px}
-          .wp-stage{grid-template-columns:35px 1fr;padding:20px 0}
-          .wp-stage p{grid-column:2;font-size:13px}
-          .wp-stage h3{font-size:22px}
           .wp-outcome{padding:0 21px 80px}
           .wp-outcome-wrap{display:flex;flex-direction:column;min-height:0}
           .wp-outcome-copy{padding:76px 0 42px}
@@ -171,7 +165,7 @@ export default function WorkProof() {
             <Link href="/value-scan" className="wp-under">Bring one process <ArrowRight size={15} /></Link>
           </div>
           <div className="wp-hero-art">
-            <img src={assetUrl('/images/cognirise/site-work-proof.jpg')} alt="A vivid violet-to-coral route moving through a white architectural model." />
+            <PulseImage src={assetUrl('/images/cognirise/site-work-proof.jpg')} alt="A vivid violet-to-coral route moving through a white architectural model." className="w-full h-full object-cover" />
             <div className="wp-hero-word">proof</div>
             <div className="wp-caption"><span>01 / work in motion</span>From mandate to governed production</div>
           </div>
@@ -197,7 +191,7 @@ export default function WorkProof() {
       </section>
       
       <section className="wp-image-break">
-        <img src={assetUrl('/images/cognirise/pulse-breakthrough.jpg')} alt="A violet and coral current cutting through an architectural maze." />
+        <PulseImage src={assetUrl('/images/cognirise/pulse-breakthrough.jpg')} alt="A violet and coral current cutting through an architectural maze." className="w-full h-full object-cover" />
         <div className="wp-break-copy">
           <div className="wp-kicker">The proof route</div>
           <h2>Constraints are part of the brief.</h2>
@@ -214,20 +208,26 @@ export default function WorkProof() {
           </div>
           <p className="wp-ledger-lead">A useful proof story makes its context, choices and operating controls visible—so leaders can judge what it took to make progress stick.</p>
         </div>
-        <div className="wp-stages">
+
+        <SpatialDisclosure defaultValue="01" allowCollapse={true} preview className="wp-stages">
           {[
             ["01","Mandate","The priority work, the sponsor question and what a useful change needs to achieve."],
             ["02","Constraints","The data, architecture, security, sovereignty and operating realities that define the possible."],
             ["03","Build","Forward-deployed operators and engineers turn the route into a working system with the people who will run it."],
             ["04","Governed production","Controls, ownership and accountability are embedded where the work happens—not added at the end."]
           ].map(([n,title,copy]) => (
-            <article className="wp-stage" key={n}>
-              <span>{n}</span>
-              <h3>{title}</h3>
-              <p>{copy}</p>
-            </article>
+            <SpatialDisclosureItem key={n} id={n} className="group border-b border-[#cbd3e1] transition-colors data-[state=active]:bg-[#f2eff9]">
+              <SpatialDisclosureTrigger id={n} className="w-full text-left grid grid-cols-[70px_1fr_32px] gap-[20px] items-center p-[25px_8px] max-[760px]:grid-cols-[35px_1fr_32px] max-[760px]:p-[20px_0]">
+                <span className="text-[10px] tracking-[0.1em] text-[#697a96] pt-[7px]">{n}</span>
+                <h3 className="font-semibold text-[clamp(22px,2.4vw,34px)] tracking-[-0.065em] leading-[1.05] m-0 group-hover:text-[hsl(var(--brand-pink))] transition-colors">{title}</h3>
+                <Plus className="h-5 w-5 justify-self-end text-muted-foreground group-data-[state=active]:rotate-45 group-data-[state=active]:text-[hsl(var(--brand-pink))] transition-transform" />
+              </SpatialDisclosureTrigger>
+              <SpatialDisclosurePanel id={n} className="data-[state=inactive]:hidden px-[25px] pb-[25px] pl-[98px] max-[760px]:pl-[55px] max-[760px]:px-0">
+                <p className="text-[14px] leading-[1.52] text-[#536887] m-0 max-w-[410px]">{copy}</p>
+              </SpatialDisclosurePanel>
+            </SpatialDisclosureItem>
           ))}
-        </div>
+        </SpatialDisclosure>
       </section>
       
       <section className="wp-outcome">
@@ -244,7 +244,7 @@ export default function WorkProof() {
             </div>
           </div>
           <div className="wp-outcome-image">
-            <img src={assetUrl('/images/cognirise/cognirise-pulse-outcomes.jpg')} alt="A coral route passing through a violet arch and a navy structure." />
+            <PulseImage src={assetUrl('/images/cognirise/cognirise-pulse-outcomes.jpg')} alt="A coral route passing through a violet arch and a navy structure." className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
@@ -259,7 +259,7 @@ export default function WorkProof() {
         </div>
         <div className="wp-note-grid">
           <figure className="wp-note-image">
-            <img src={assetUrl('/images/cognirise/site-work-proof.jpg')} alt="An architectural route joining different operating environments." />
+            <PulseImage src={assetUrl('/images/cognirise/site-work-proof.jpg')} alt="An architectural route joining different operating environments." className="w-full h-full object-cover" />
             <figcaption>
               <span>Anonymized engagement pattern</span>
                <strong>{featuredPattern.title}</strong>

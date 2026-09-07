@@ -6,6 +6,7 @@ import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
 import { SERVICE_LINES } from "@/lib/serviceLines";
 import { ServiceLineTiles } from "@/components/ServiceLineTiles";
+import { PulseImage } from "@/components/ui/pulse-image";
 
 export default function ServicesOverview() {
   const [route, setRoute] = useState<string | null>(null);
@@ -51,7 +52,7 @@ export default function ServicesOverview() {
             </div>
           </div>
           <div className="cps-hero-image">
-            <img src={assetUrl("/images/cognirise/site-services.jpg")} alt="Violet and coral intelligence routes moving through a bright architectural space." />
+            <PulseImage src={assetUrl("/images/cognirise/site-services.jpg")} alt="Violet and coral intelligence routes moving through a bright architectural space." className="w-full h-full object-cover" />
             <div className="cps-hero-word">work</div>
             <div className="cps-caption"><span>01 / services</span>One accountable route</div>
           </div>
@@ -77,7 +78,7 @@ export default function ServicesOverview() {
       </section>
 
       <section className="cps-break">
-        <img src={assetUrl("/images/cognirise/pulse-breakthrough.jpg")} alt="A vivid flow of violet and coral threads breaking through a white architectural maze." />
+        <PulseImage src={assetUrl("/images/cognirise/pulse-breakthrough.jpg")} alt="A vivid flow of violet and coral threads breaking through a white architectural maze." className="w-full h-full object-cover" />
         <div className="cps-break-copy">
           <div className="cps-kicker">From the first hard question</div>
           <h2>Make the route. Then keep moving.</h2>
@@ -94,7 +95,7 @@ export default function ServicesOverview() {
           </div>
           <p className="cps-services-lead">Start where the current pressure is clearest. We will connect it to the wider operating system from there.</p>
         </div>
-        <ServiceLineTiles className="mt-[61px] max-[760px]:mt-[42px]" />
+        <ServiceLineTiles variant="full" className="mt-[61px] max-[760px]:mt-[42px]" />
       </section>
 
       <section className="cps-route" id="route">
@@ -113,7 +114,7 @@ export default function ServicesOverview() {
             {route && <p className="cps-route-response" aria-live="polite">Start there. We will bring the relevant operators, engineers and controls into the first conversation.</p>}
           </div>
           <div className="cps-route-image">
-            <img src={assetUrl("/images/cognirise/cognirise-pulse-people.jpg")} alt="A group of professionals beneath flowing bands of light in a navy architectural space." />
+            <PulseImage src={assetUrl("/images/cognirise/cognirise-pulse-people.jpg")} alt="A group of professionals beneath flowing bands of light in a navy architectural space." className="w-full h-full object-cover" />
           </div>
         </div>
       </section>

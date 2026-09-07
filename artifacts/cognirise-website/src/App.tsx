@@ -45,7 +45,8 @@ import IndustryBanking from "@/pages/IndustryBanking";
 import IndustryTelecoms from "@/pages/IndustryTelecoms";
 import IndustryTravel from "@/pages/IndustryTravel";
 import IndustryEnergy from "@/pages/IndustryEnergy";
-import IndustryManufacturing from "@/pages/IndustryManufacturing";
+import IndustryPublicSector from "@/pages/IndustryPublicSector";
+import IndustryEducation from "@/pages/IndustryEducation";
 
 import WorkProof from "@/pages/WorkProof";
 import CaseStudyDetail from "@/pages/CaseStudyDetail";
@@ -93,12 +94,12 @@ export function Router() {
         <Route path="/industries/travel-hospitality" component={IndustryTravel} />
         <Route path="/industries/energy-resources" component={IndustryEnergy} />
         <Route path="/industries/banking"><CanonicalRedirect to="/industries/financial-services" /></Route>
-        <Route path="/industries/public-sector"><CanonicalRedirect to="/industries" /></Route>
-        <Route path="/industries/government"><CanonicalRedirect to="/industries" /></Route>
+        <Route path="/industries/government"><CanonicalRedirect to="/industries/public-sector" /></Route>
         <Route path="/industries/telecoms" component={IndustryTelecoms} />
         <Route path="/industries/travel"><CanonicalRedirect to="/industries/travel-hospitality" /></Route>
         <Route path="/industries/energy"><CanonicalRedirect to="/industries/energy-resources" /></Route>
-        <Route path="/industries/manufacturing" component={IndustryManufacturing} />
+        <Route path="/industries/public-sector" component={IndustryPublicSector} />
+        <Route path="/industries/education" component={IndustryEducation} />
         
         {/* Legacy aliases */}
         <Route path="/sectors"><Redirect to="/industries" /></Route>
@@ -113,11 +114,13 @@ export function Router() {
         <Route path="/cogniware"><Redirect to="/platforms/cogniware" /></Route>
         
         <Route path="/pov-banking"><CanonicalRedirect to="/industries/financial-services" /></Route>
-        <Route path="/pov-government"><CanonicalRedirect to="/industries" /></Route>
+        <Route path="/pov-government"><CanonicalRedirect to="/industries/public-sector" /></Route>
         <Route path="/pov-telecoms"><Redirect to="/industries/telecoms" /></Route>
         <Route path="/pov-travel"><CanonicalRedirect to="/industries/travel-hospitality" /></Route>
         <Route path="/pov-energy"><CanonicalRedirect to="/industries/energy-resources" /></Route>
-        <Route path="/pov-manufacturing"><Redirect to="/industries/manufacturing" /></Route>
+        <Route path="/industries/manufacturing"><CanonicalRedirect to="/industries/public-sector" /></Route>
+        <Route path="/pov-manufacturing"><CanonicalRedirect to="/industries/public-sector" /></Route>
+        <Route path="/pov-public-sector"><CanonicalRedirect to="/industries/public-sector" /></Route>
 
 
         {/* Work & Insights */}

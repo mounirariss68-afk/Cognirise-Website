@@ -11,3 +11,4 @@
 - [CMS merge reconciliation](cms-merge-reconciliation.md) — Development data created by isolated task work must cross the merge boundary through safe, idempotent reconciliation.
 - [Person market availability](person-market-availability.md) — Stage and publish availability separately; requested-market suppression must run before content fallback.
 - [Modular panorama continuity](modular-panorama-continuity.md) — Derive adjoining Pulse modules from one connected master and never animate them out of alignment.
+- [Website browser validation routing](website-browser-validation-routing.md) — Use the root dev-domain target so SPA assets and API requests reach their separate managed workflows.

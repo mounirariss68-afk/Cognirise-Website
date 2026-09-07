@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowDown, ArrowRight } from "lucide-react";
+import { ArrowDown, ArrowRight, Plus } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
@@ -7,6 +7,8 @@ import { scrollToSection } from "@/lib/motion";
 import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { ALLIANCE_PLATFORM_LIST } from "@/lib/alliancePlatforms";
+import { SpatialDisclosure, SpatialDisclosureItem, SpatialDisclosureTrigger, SpatialDisclosurePanel } from "@/components/ui/spatial-disclosure";
+import { PulseImage } from "@/components/ui/pulse-image";
 
 const platformFallback = [
   { name: "CogniOS", description: "The core operating system for governed enterprise intelligence.", link: "/platforms/cognios", category: "Foundation & Orchestration" },
@@ -73,7 +75,7 @@ export default function PlatformsOverview() {
           </div>
           
           <div className="relative h-[400px] lg:h-[640px] clip-diagonal-bottom bg-[hsl(var(--brand-deep))]">
-            <img 
+            <PulseImage
               src={assetUrl("/images/cognirise/site-cognios.jpg")}
               alt="A network of luminous paths connecting within a larger structure." 
               className="absolute inset-0 h-full w-full object-cover opacity-90 scale-105"
@@ -103,46 +105,56 @@ export default function PlatformsOverview() {
           </h2>
         </div>
 
-        <div className="flex flex-col gap-16">
+        <SpatialDisclosure orientation="vertical" allowCollapse={true} defaultValue={matrix[0]?.category} className="flex flex-col">
           {matrix.map((section, idx) => (
-            <div key={idx} className="border-t border-foreground pt-8">
-              <h3 className="text-xl font-bold uppercase tracking-widest text-muted-foreground mb-8 text-[11px]">{section.category}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                {section.products.map((product) => (
-                  <Link href={product.link} key={product.name}>
+            <SpatialDisclosureItem key={idx} id={section.category} className="border-t border-foreground">
+              <SpatialDisclosureTrigger id={section.category} className="w-full flex items-center justify-between text-left group pt-8 pb-8">
+                <h3 className="text-xl font-bold uppercase tracking-widest text-muted-foreground group-hover:text-[hsl(var(--brand-pink))] transition-colors text-[11px] m-0">{section.category}</h3>
+                <Plus className="h-6 w-6 text-foreground group-hover:text-[hsl(var(--brand-pink))] transition-transform duration-300 group-data-[state=active]:rotate-45 group-data-[state=active]:text-[hsl(var(--brand-pink))]" />
+              </SpatialDisclosureTrigger>
+              <SpatialDisclosurePanel id={section.category} className="data-[state=inactive]:hidden pb-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                  {section.products.map((product) => (
+                    <Link href={product.link} key={product.name}>
+                      <div className="group block bg-[hsl(var(--secondary))] p-8 hover:bg-[hsl(var(--brand-violet))/5] transition-colors border border-transparent hover:border-[hsl(var(--brand-pink))/20] cursor-pointer relative overflow-hidden h-full">
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))] transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100" />
+                        <div className="flex justify-between items-start mb-6">
+                          <h4 className="text-3xl md:text-4xl font-semibold text-[hsl(var(--brand-deep))] transition-colors group-hover:text-[hsl(var(--brand-pink))]">{product.name}</h4>
+                          <ArrowRight className="h-6 w-6 text-muted-foreground group-hover:text-[hsl(var(--brand-coral))] transition-transform group-hover:translate-x-1" />
+                        </div>
+                        <p className="text-foreground/70 leading-relaxed text-base max-w-[300px]">{product.description}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </SpatialDisclosurePanel>
+            </SpatialDisclosureItem>
+          ))}
+
+          {/* Alliance Platforms Section */}
+          <SpatialDisclosureItem id="alliances" className="border-t border-foreground">
+            <SpatialDisclosureTrigger id="alliances" className="w-full flex items-center justify-between text-left group pt-8 pb-8">
+              <h3 className="text-xl font-bold uppercase tracking-widest text-muted-foreground group-hover:text-[hsl(var(--brand-pink))] transition-colors text-[11px] m-0">Platform Alliances</h3>
+              <Plus className="h-6 w-6 text-foreground group-hover:text-[hsl(var(--brand-pink))] transition-transform duration-300 group-data-[state=active]:rotate-45 group-data-[state=active]:text-[hsl(var(--brand-pink))]" />
+            </SpatialDisclosureTrigger>
+            <SpatialDisclosurePanel id="alliances" className="data-[state=inactive]:hidden pb-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+                {ALLIANCE_PLATFORM_LIST.map((platform) => (
+                  <Link href={`/platforms/${platform.slug}`} key={platform.slug} data-testid={`link-platform-${platform.slug}`}>
                     <div className="group block bg-[hsl(var(--secondary))] p-8 hover:bg-[hsl(var(--brand-violet))/5] transition-colors border border-transparent hover:border-[hsl(var(--brand-pink))/20] cursor-pointer relative overflow-hidden h-full">
                       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))] transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100" />
                       <div className="flex justify-between items-start mb-6">
-                        <h4 className="text-3xl md:text-4xl font-semibold text-[hsl(var(--brand-deep))] transition-colors group-hover:text-[hsl(var(--brand-pink))]">{product.name}</h4>
+                        <h4 className="text-3xl font-semibold text-[hsl(var(--brand-deep))] transition-colors group-hover:text-[hsl(var(--brand-pink))]">{platform.name}</h4>
                         <ArrowRight className="h-6 w-6 text-muted-foreground group-hover:text-[hsl(var(--brand-coral))] transition-transform group-hover:translate-x-1" />
                       </div>
-                      <p className="text-foreground/70 leading-relaxed text-base max-w-[300px]">{product.description}</p>
+                        <p className="text-foreground/70 leading-relaxed text-sm">{platform.summary}</p>
                     </div>
                   </Link>
                 ))}
               </div>
-            </div>
-          ))}
-
-          {/* Alliance Platforms Section */}
-          <div className="border-t border-foreground pt-8">
-            <h3 className="text-xl font-bold uppercase tracking-widest text-muted-foreground mb-8 text-[11px]">Platform Alliances</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
-              {ALLIANCE_PLATFORM_LIST.map((platform) => (
-                <Link href={`/platforms/${platform.slug}`} key={platform.slug} data-testid={`link-platform-${platform.slug}`}>
-                  <div className="group block bg-[hsl(var(--secondary))] p-8 hover:bg-[hsl(var(--brand-violet))/5] transition-colors border border-transparent hover:border-[hsl(var(--brand-pink))/20] cursor-pointer relative overflow-hidden h-full">
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))] transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100" />
-                    <div className="flex justify-between items-start mb-6">
-                      <h4 className="text-3xl font-semibold text-[hsl(var(--brand-deep))] transition-colors group-hover:text-[hsl(var(--brand-pink))]">{platform.name}</h4>
-                      <ArrowRight className="h-6 w-6 text-muted-foreground group-hover:text-[hsl(var(--brand-coral))] transition-transform group-hover:translate-x-1" />
-                    </div>
-                      <p className="text-foreground/70 leading-relaxed text-sm">{platform.summary}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
+            </SpatialDisclosurePanel>
+          </SpatialDisclosureItem>
+        </SpatialDisclosure>
       </section>
 
       <section className="bg-foreground text-white px-6 md:px-12 py-24 relative overflow-hidden">

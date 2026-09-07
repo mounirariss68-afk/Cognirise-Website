@@ -87,9 +87,13 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: "Energy & Resources AI | Evidence-Led Industry View | Cognirise",
     description: "A field-grounded view of AI in energy and resources, from asset context and maintenance to safe operating boundaries.",
   },
-  "/industries/manufacturing": {
-    title: "Manufacturing AI | Evidence-Led Industry View | Cognirise",
-    description: "An evidence-led view of industrial AI across quality, maintenance, planning and the connected workforce.",
+  "/industries/public-sector": {
+    title: "Public Sector AI | Evidence-Led Industry View | Cognirise",
+    description: "An evidence-led view of governed public-sector AI, accessible services, accountability and sovereign delivery.",
+  },
+  "/industries/education": {
+    title: "Education AI | Evidence-Led Industry View | Cognirise",
+    description: "An evidence-led view of AI in education, centred on learning evidence, learner protections and educator judgment.",
   },
   "/work": {
     title: "How Cognirise Delivers AI Transformation",
@@ -162,7 +166,8 @@ const navigation: NavigationItem[] = [
       { id: "industries.telecoms", label: "Telecoms", href: "/industries/telecoms" },
       { id: "industries.travel", label: "Travel & Hospitality", href: "/industries/travel-hospitality" },
       { id: "industries.energy", label: "Energy & Resources", href: "/industries/energy-resources" },
-      { id: "industries.manufacturing", label: "Manufacturing", href: "/industries/manufacturing" },
+      { id: "industries.public-sector", label: "Public Sector", href: "/industries/public-sector" },
+      { id: "industries.education", label: "Education", href: "/industries/education" },
     ]
   },
   { id: "work", label: "Work", href: "/work" },

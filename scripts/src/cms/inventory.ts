@@ -257,15 +257,15 @@ async function main() {
   if (JSON.stringify(actualPeople) !== JSON.stringify(expectedPeople)) {
     throw new Error("The public people source no longer matches the governed roster, titles, order, or initial availability.");
   }
-  if (partners.length !== 5 || platforms.length !== 5 || articles.length !== 3 || industries.length !== 5) {
-    throw new Error("The public website no longer matches the governed 5 partner / 5 platform / 3 article / 5 industry manifest.");
+  if (partners.length !== 5 || platforms.length !== 5 || articles.length !== 3 || industries.length !== 6) {
+    throw new Error("The public website no longer matches the governed 5 partner / 5 platform / 3 article / 6 industry manifest.");
   }
-  if (assets.length !== 25) throw new Error(`Expected 25 governed website assets, found ${assets.length}.`);
+  if (assets.length !== 31) throw new Error(`Expected 31 governed website assets, found ${assets.length}.`);
 
   const stable = {
     schemaVersion: 2,
     source: relative(websiteRoot),
-    expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, industries: 5, assets: 25 },
+    expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, industries: 6, assets: 31 },
     explicitOmissions: {
       caseStudies: "No genuine public case-study records are present in the current website.",
       povDocuments: "No genuine public POV documents are present in the current website.",

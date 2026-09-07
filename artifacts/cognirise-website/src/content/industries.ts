@@ -31,7 +31,7 @@ export const INDUSTRIES: IndustryContent[] = [
     schemaVersion: 1, slug: "financial-services", legacyPath: "/industries/banking", name: "Financial Services", shortName: "Finance",
     thesis: "The model estate—not the chatbot—is where trust is won.",
     accent: "trust is won.", dek: "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
-    image: "/images/cognirise/site-financial.jpg", imageAlt: "A precise financial mechanism crossed by a controlled luminous route.", variant: "ledger",
+    image: "/images/cognirise/industries/pulse-industry-financial.jpg", imageAlt: "A cinematic financial landscape crossed by controlled luminous routes.", variant: "ledger",
     pressures: [
       { title: "Validation before velocity", body: "Non-deterministic systems still have to meet established model-risk expectations: clear purpose, testing, monitoring and accountable challenge." },
       { title: "Concentration is an operating risk", body: "Dependence on a small set of cloud, data and model providers can amplify third-party and systemic exposure." },
@@ -56,7 +56,7 @@ export const INDUSTRIES: IndustryContent[] = [
   {
     schemaVersion: 1, slug: "telecoms", legacyPath: "/industries/telecoms", name: "Telecoms", shortName: "Telecoms",
     thesis: "Autonomy is earned one closed loop at a time.", accent: "closed loop", dek: "Network intelligence matters when it can observe, decide and act inside a bounded domain—with service impact, energy use and human override visible.",
-    image: "/images/cognirise/site-infrastructure.jpg", imageAlt: "Connected infrastructure carrying a luminous signal across an operating landscape.", variant: "network",
+    image: "/images/cognirise/industries/pulse-industry-telecoms.jpg", imageAlt: "A cinematic telecommunications network carrying luminous signals across an operating landscape.", variant: "network",
     pressures: [
       { title: "Fragmented operating context", body: "Alarms, customer state and commercial systems rarely present one reliable version of an incident." },
       { title: "Autonomy has levels", body: "A certified domain or use case is not an autonomous network. Scope and intervention boundaries must remain explicit." },
@@ -81,7 +81,7 @@ export const INDUSTRIES: IndustryContent[] = [
   {
     schemaVersion: 1, slug: "travel-hospitality", legacyPath: "/industries/travel", name: "Travel & Hospitality", shortName: "Travel",
     thesis: "The real test arrives when the journey breaks.", accent: "journey breaks.", dek: "Personalisation is visible. Recovery is valuable. The decisive capability is coordinated action across inventory, policy, customer context and frontline judgment when plans change.",
-    image: "/images/cognirise/pulse-convergence.jpg", imageAlt: "Multiple illuminated routes converging through a cinematic transport environment.", variant: "journey",
+    image: "/images/cognirise/industries/pulse-industry-travel.jpg", imageAlt: "Multiple illuminated routes converging through a cinematic travel environment.", variant: "journey",
     pressures: [
       { title: "Disruption compresses time", body: "A useful system must assemble options and constraints while a traveller is still waiting—not in a report after the event." },
       { title: "Inventory remains fragmented", body: "Air, hotel, loyalty and partner systems limit what can be promised and fulfilled in one interaction." },
@@ -106,7 +106,7 @@ export const INDUSTRIES: IndustryContent[] = [
   {
     schemaVersion: 1, slug: "energy-resources", legacyPath: "/industries/energy", name: "Energy & Resources", shortName: "Energy",
     thesis: "In physical operations, confidence needs a field address.", accent: "field address.", dek: "A prediction has no operating value until the right team can connect it to asset history, safety boundaries, work orders and available parts.",
-    image: "/images/cognirise/pulse-breakthrough.jpg", imageAlt: "A luminous route moving through a vast industrial landscape at dusk.", variant: "field",
+    image: "/images/cognirise/industries/pulse-industry-energy.jpg", imageAlt: "A luminous route moving through a cinematic energy landscape at dusk.", variant: "field",
     pressures: [
       { title: "Context is physically distributed", body: "Engineering records, telemetry, inspection evidence and field knowledge live at different speeds and in different systems." },
       { title: "Safety limits the action space", body: "Recommendations must respect permits, operating envelopes and accountable human authority." },
@@ -129,29 +129,54 @@ export const INDUSTRIES: IndustryContent[] = [
     verificationDate: "2026-09-06", reviewDate: "2027-03-06", visibility: "public", order: 4, relatedIds: [],
   },
   {
-    schemaVersion: 1, slug: "manufacturing", legacyPath: "/industries/manufacturing", name: "Manufacturing", shortName: "Manufacturing",
-    thesis: "The factory is a system of constraints, not a collection of demos.", accent: "system of constraints", dek: "Industrial intelligence earns its place by improving a bounded production decision across quality, maintenance, planning and workforce safety—without pretending the dark factory has arrived.",
-    image: "/images/cognirise/cognirise-pulse-outcomes.jpg", imageAlt: "A cinematic advanced manufacturing environment with people and luminous production signals.", variant: "factory",
+    schemaVersion: 1, slug: "public-sector", legacyPath: "/industries/manufacturing", name: "Public Sector", shortName: "Public Sector",
+    thesis: "Public value is earned at the point of service.", accent: "point of service.", dek: "Public institutions create durable value when intelligence makes services clearer, faster and more accountable—without weakening accessibility, privacy, due process or human authority.",
+    image: "/images/cognirise/industries/pulse-industry-public-sector.jpg", imageAlt: "Citizens moving through a bright monumental civic space connected by a luminous service route.", variant: "ledger",
     pressures: [
-      { title: "Brownfield reality", body: "Plants combine equipment generations, control systems and data quality that cannot be normalised by presentation layer alone." },
-      { title: "False positives carry cost", body: "Vision and predictive systems must be assessed against rework, inspection load and line interruption—not model accuracy alone." },
-      { title: "Adoption happens on the floor", body: "Operators and engineers need traceable assistance inside established work, with safe fallback when the system is uncertain." },
+      { title: "Legitimacy before velocity", body: "Decisions that affect people need named authority, traceable evidence, clear explanations and a practical route to human review." },
+      { title: "Accessibility is part of the system", body: "A digital service succeeds only when people across languages, abilities and levels of digital confidence can complete the journey." },
+      { title: "Data boundaries shape trust", body: "Identity, eligibility and case information require explicit purpose, controlled access and retention rules before models enter the workflow." },
     ],
-    reversal: { title: "Automation plans meet labour and reliability limits.", body: "High-profile humanoid and lights-out ambitions remain bounded by deployment readiness, worker agreements and the economics of variable production." },
-    myth: { claim: "“The dark factory is the destination.”", verdict: "Not for most operations. The stronger near-term case is a more capable workforce operating better-instrumented, safer and more adaptive lines." },
-    gcc: "Lighthouse sites and Industry 4.0 programmes show regional momentum. Their recognition is evidence of capability at named facilities—not proof that every plant shares the same maturity.",
-    service: { label: "Engineering with AI", href: "/what-we-do/engineering-with-ai", firstMove: "Instrument one quality or flow constraint end to end." },
+    reversal: { title: "Automating a broken service can harden the friction.", body: "Faster classification or response generation creates little public value when fragmented policy, unclear ownership and inaccessible hand-offs remain unchanged." },
+    myth: { claim: "“A public chatbot proves digital government is intelligent.”", verdict: "No. The stronger evidence is a governed end-to-end service where outcomes, exceptions and human accountability can be measured and challenged." },
+    gcc: "Gulf governments combine ambitious digital-service programmes with high expectations for sovereign infrastructure and bilingual access. Credible progress connects that ambition to transparent controls and service-level evidence.",
+    service: { label: "Sovereign & Regulated AI", href: "/what-we-do/sovereign-regulated-ai", firstMove: "Map one high-friction public journey from policy intent to resolved case." },
     uses: [
-      { use: "Quality inspection", evidence: "Company-reported deployments", boundary: "False-positive and escape-rate monitoring" },
-      { use: "Maintenance planning", evidence: "Measured industrial practice", boundary: "Integrated parts and work-order response" },
-      { use: "Industrial copilots", evidence: "Vendor and customer reports", boundary: "Approved instructions and operator authority" },
+      { use: "Case intake and triage", evidence: "Established digital-service practice", boundary: "Accessible channels, documented criteria and human escalation" },
+      { use: "Decision support", evidence: "Guidance-led emerging practice", boundary: "Named authority, explanation and contestability" },
+      { use: "Service operations", evidence: "Measured operational deployments", boundary: "Outcome, equity and repeat-contact monitoring" },
     ],
     sources: [
-      { label: "UAE Industry 4.0 programme", publisher: "UAE Ministry of Industry and Advanced Technology", kind: "Official source", url: "https://moiat.gov.ae/en/programs/uae-industry-4-backup" },
-      { label: "Industrial copilot adoption", publisher: "Siemens / thyssenkrupp", kind: "Vendor claim", url: "https://press.siemens.com/global/en/pressrelease/siemens-industrial-copilot-expanded-adopted-thyssenkrupp" },
-      { label: "AI quality inspection expansion", publisher: "GE Aerospace", kind: "Company-reported", url: "https://www.geaerospace.com/news/press-releases/ge-aerospace-expanding-application-ai-blade-inspections-cfm-leap-and-ge9x-engines" },
+      { label: "UAE Strategy for Artificial Intelligence", publisher: "UAE Government", kind: "Official source", url: "https://u.ae/en/about-the-uae/strategies-initiatives-and-awards/strategies-plans-and-visions/government-services-and-digital-transformation/uae-strategy-for-artificial-intelligence" },
+      { label: "OECD AI Principles", publisher: "OECD", kind: "Official source", url: "https://oecd.ai/en/ai-principles" },
+      { label: "AI Risk Management Framework", publisher: "US National Institute of Standards and Technology", kind: "Official source", url: "https://www.nist.gov/itl/ai-risk-management-framework" },
     ],
-    verificationDate: "2026-09-06", reviewDate: "2027-03-06", visibility: "public", order: 5, relatedIds: [],
+    verificationDate: "2026-09-07", reviewDate: "2027-03-07", visibility: "public", order: 5, relatedIds: [],
+  },
+  {
+    schemaVersion: 1, slug: "education", legacyPath: "/industries/education", name: "Education", shortName: "Education",
+    thesis: "Learning gains need more than a convincing answer.", accent: "more than a convincing answer.", dek: "Education systems create durable value when AI supports defined learning and teaching work with appropriate evidence, privacy safeguards and educator judgment—not when fluent output is treated as proof of learning.",
+    image: "/images/cognirise/industries/pulse-industry-education.jpg", imageAlt: "A cinematic learning environment connected by luminous knowledge pathways.", variant: "network",
+    pressures: [
+      { title: "Learning evidence remains the test", body: "Useful tools need evaluation against learning, teaching and equity outcomes in their actual context—not engagement or output quality alone." },
+      { title: "Learner data requires stewardship", body: "Student records, age-appropriate access, privacy and security controls shape what can be used and how it can be governed." },
+      { title: "Educator judgment stays accountable", body: "AI can support preparation and feedback, but assessment, safeguarding and consequential decisions require clear human responsibility." },
+    ],
+    reversal: { title: "A polished response can obscure a learning gap.", body: "When learners can submit generated work without understanding, output quality may rise while teachers lose the evidence needed to judge progress and provide support." },
+    myth: { claim: "“Generative AI personalises learning by default.”", verdict: "No. Personalisation depends on sound pedagogy, reliable context, evaluation and educator oversight; a tailored-looking response is not evidence of learning." },
+    gcc: "Regional digital-education ambitions create scope for responsible experimentation. Credible progress still depends on local curriculum alignment, learner protections, teacher capability and evidence that outcomes improve.",
+    service: { label: "Data & AI Foundations", href: "/what-we-do/data-ai-foundations", firstMove: "Map one learning or teaching workflow where evidence, privacy and educator authority must stay connected." },
+    uses: [
+      { use: "Teacher preparation", evidence: "Guidance-led emerging practice", boundary: "Educator review, approved materials and learner-data controls" },
+      { use: "Learner assistance", evidence: "Early deployment evidence", boundary: "Age-appropriate access, disclosure and learning evaluation" },
+      { use: "Assessment support", evidence: "Established analytical practice", boundary: "Human judgment, contestability and academic-integrity controls" },
+    ],
+    sources: [
+      { label: "Guidance for generative AI in education and research", publisher: "UNESCO", kind: "Official source", url: "https://www.unesco.org/en/articles/guidance-generative-ai-education-and-research" },
+      { label: "OECD Digital Education Outlook 2026", publisher: "OECD", kind: "Official source", url: "https://www.oecd.org/en/publications/oecd-digital-education-outlook-2026_062a7394-en.html" },
+      { label: "Artificial Intelligence and the Future of Teaching and Learning", publisher: "US Department of Education", kind: "Official source", url: "https://www.ed.gov/media/document/ai-reportpdf-43861.pdf" },
+    ],
+    verificationDate: "2026-09-06", reviewDate: "2027-03-06", visibility: "public", order: 6, relatedIds: [],
   },
 ];
 

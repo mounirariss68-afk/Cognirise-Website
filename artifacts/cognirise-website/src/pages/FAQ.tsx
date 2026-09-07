@@ -1,10 +1,8 @@
 import { Plus } from "lucide-react";
-import { useState } from "react";
 import { BrandButton } from "@/components/ui/brand-button";
+import { SpatialDisclosure, SpatialDisclosureItem, SpatialDisclosureTrigger, SpatialDisclosurePanel } from "@/components/ui/spatial-disclosure";
 
 export default function FAQ() {
-  const [open, setOpen] = useState<number | null>(null);
-
   const faqs = [
     {
       q: "What is governed intelligence?",
@@ -36,29 +34,33 @@ export default function FAQ() {
           Clarity on <em className="not-italic text-[hsl(var(--brand-pink))]">control.</em>
         </h1>
 
-        <div className="border-t border-foreground max-w-[900px]">
-          {faqs.map((faq, i) => (
-            <div key={i}>
-              <button 
-                className={`w-full group flex items-center justify-between gap-8 px-4 py-8 border-b border-border cursor-pointer transition-all duration-300 hover:bg-[hsl(var(--brand-violet))/5] hover:pl-8 text-left ${open === i ? 'bg-[hsl(var(--brand-violet))/5] pl-8' : ''}`}
-                onClick={() => setOpen(open === i ? null : i)}
-              >
-                <h3 className="text-2xl font-semibold flex-1 group-hover:text-[hsl(var(--brand-pink))] transition-colors">
-                  {faq.q}
-                </h3>
-                <Plus className={`h-6 w-6 transition-transform duration-300 ${open === i ? 'rotate-45 text-[hsl(var(--brand-pink))]' : 'text-foreground group-hover:text-[hsl(var(--brand-pink))]'}`} />
-              </button>
-              
-              <div 
-                className={`overflow-hidden transition-all duration-300 ${open === i ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
-              >
-                <div className="bg-[hsl(var(--brand-violet))/5] border-b border-border px-8 py-8 -mt-[1px]">
-                  <p className="text-lg leading-relaxed text-foreground/80">{faq.a}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <SpatialDisclosure className="border-t border-foreground max-w-[900px]">
+          {faqs.map((faq, i) => {
+            const id = String(i);
+            return (
+              <SpatialDisclosureItem key={i} id={id}>
+                <SpatialDisclosureTrigger
+                  id={id}
+                  className="w-full group flex items-center justify-between gap-8 px-4 py-8 border-b border-border cursor-pointer transition-all duration-300 hover:bg-[hsl(var(--brand-violet))/5] hover:pl-8 text-left data-[state=active]:bg-[hsl(var(--brand-violet))/5] data-[state=active]:pl-8"
+                >
+                  <h3 className="text-2xl font-semibold flex-1 group-hover:text-[hsl(var(--brand-pink))] transition-colors">
+                    {faq.q}
+                  </h3>
+                  <Plus className="h-6 w-6 text-foreground group-hover:text-[hsl(var(--brand-pink))] transition-transform duration-300 group-data-[state=active]:rotate-45 group-data-[state=active]:text-[hsl(var(--brand-pink))]" />
+                </SpatialDisclosureTrigger>
+
+                <SpatialDisclosurePanel
+                  id={id}
+                  className="overflow-hidden transition-all duration-300 data-[state=inactive]:max-h-0 data-[state=inactive]:opacity-0 data-[state=active]:max-h-[500px] data-[state=active]:opacity-100"
+                >
+                  <div className="bg-[hsl(var(--brand-violet))/5] border-b border-border px-8 py-8 -mt-[1px]">
+                    <p className="text-lg leading-relaxed text-foreground/80">{faq.a}</p>
+                  </div>
+                </SpatialDisclosurePanel>
+              </SpatialDisclosureItem>
+            );
+          })}
+        </SpatialDisclosure>
       </section>
       
       <section className="px-6 md:px-12 pb-24 max-w-[1440px] mx-auto w-full">

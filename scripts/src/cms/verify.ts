@@ -231,12 +231,12 @@ async function main() {
   const calculatedManifestDigest = createHash("sha256").update(JSON.stringify(stable)).digest("hex");
   if (manifestDigest !== calculatedManifestDigest || payload.manifestDigest !== manifestDigest) errors.push("Manifest digest mismatch.");
   const count = (type: string) => inventory.records.filter((record) => record.type === type).length;
-  for (const [type, expected] of Object.entries({ person: 5, partner: 5, platform: 5, article: 3, industry: 5, asset: 25 })) {
+  for (const [type, expected] of Object.entries({ person: 8, partner: 5, platform: 5, article: 3, industry: 6, asset: 31 })) {
     if (count(type) !== expected) errors.push(`Expected ${expected} ${type} records, found ${count(type)}.`);
   }
   const operations = migrationOperations(inventory.records);
   const mediaOperations = mediaMigrationOperations(inventory.records);
-  if (payload.operations.length !== 23 || payload.mediaOperations.length !== 25) errors.push("Import payload must contain 23 content and 25 media operations.");
+  if (payload.operations.length !== 27 || payload.mediaOperations.length !== 31) errors.push("Import payload must contain 27 content and 31 media operations.");
   const payloadContent = new Map(payload.operations.map((operation) => [operation.externalId, operation.requestDigest]));
   const payloadMedia = new Map(payload.mediaOperations.map((operation) => [operation.externalId, operation.requestDigest]));
   if (operations.some((operation) => payloadContent.get(operation.externalId) !== operation.requestDigest)) errors.push("Content operation digest mismatch.");

@@ -22,18 +22,18 @@ function loadInventory(): Inventory {
   )) as Inventory;
 }
 
-test("the governed inventory produces five publishable industry cutover records idempotently", () => {
+test("the governed inventory produces six publishable industry cutover records idempotently", () => {
   const inventory = loadInventory();
-  assert.equal(inventory.expectedCounts.industries, 5);
+  assert.equal(inventory.expectedCounts.industries, 6);
 
   const firstPass = migrationOperations(inventory.records);
   const secondPass = migrationOperations(inventory.records);
   assert.deepEqual(secondPass, firstPass, "reconciliation inputs must be stable across replays");
 
   const industries = firstPass.filter((operation) => operation.kind === "industry");
-  assert.equal(industries.length, 5);
-  assert.equal(new Set(industries.map((operation) => operation.slug)).size, 5);
-  assert.equal(new Set(industries.map((operation) => operation.idempotencyKey)).size, 5);
+  assert.equal(industries.length, 6);
+  assert.equal(new Set(industries.map((operation) => operation.slug)).size, 6);
+  assert.equal(new Set(industries.map((operation) => operation.idempotencyKey)).size, 6);
 
   const media = mediaMigrationOperations(inventory.records);
   const candidateByPath = new Map(

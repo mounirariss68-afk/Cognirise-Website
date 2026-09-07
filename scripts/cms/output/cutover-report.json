@@ -1,49 +1,13 @@
 {
   "schemaVersion": 1,
-  "target": "configured development database",
-  "manifestDigest": "a2490dfce10bee01ae910ddf0b8f9e9a331bf0e0d3aa2529b17f448f885d329c",
-  "generatedAt": "2026-09-06T20:38:25.838Z",
+  "target": "manifest dry run",
+  "manifestDigest": "3bfc8cc896cb43c58e23eab1ae2d1f9861b2566352891e89cc3cc71d445afa9e",
+  "generatedAt": "2026-09-07T02:42:48.419Z",
   "parity": {
-    "inventoryRecords": 48,
-    "contentOperations": 23,
-    "mediaOperations": 25,
-    "cmsCandidateMedia": 8,
-    "database": {
-      "documents": 23,
-      "editions": 23,
-      "revisions": 23,
-      "media": 8,
-      "durableMediaObjects": 0,
-      "references": 9,
-      "receipts": 31,
-      "audits": 31,
-      "approvedRevisionIds": [],
-      "draftRevisionIds": [
-        "65d4b882-feea-4c72-9036-31264053ee67",
-        "b26ba5b2-4ac9-49ce-92e6-9ae4e3253a0b",
-        "23d05fe7-ef36-481a-a381-83d9c775ea3a",
-        "e05089a7-328f-44b7-8002-849c77328519",
-        "242e0184-f1c3-478e-a23b-3db6e7d779e4",
-        "49246358-6a77-4a8f-bf73-f68fd7209c64",
-        "f3f0d2e5-2e9d-4c23-9c3c-292ea04216e4",
-        "29294d0c-551a-4849-8bbb-e5cf7e60dde9",
-        "96161d8c-d481-4a58-ad1c-8a339ff3a23a",
-        "a65e993b-1091-4c87-95bc-fecb41598115",
-        "f9e64313-e7ab-4ef8-9fb0-6010080fbd3f",
-        "e2682cc3-35c3-425a-a8ab-6926451aa0c3",
-        "41f95918-d90c-4283-b7d4-11ee013d2eaa",
-        "68ce1400-9df3-489d-a67b-195118984477",
-        "658fde41-e9de-40d4-aae8-f18b9cfe7d5f",
-        "adccbcba-a2c6-4a09-8aef-3b431189d2bc",
-        "7f638c8d-cba8-480e-a645-d4b2930d2220",
-        "09345525-19cf-4c97-aedf-068545c8aab1",
-        "2b1abaca-06a2-4bf0-ba4b-4401b7800bdb",
-        "11b68fec-0710-4567-9261-107e085b4e04",
-        "2f5f9e31-11bb-42ab-8ea7-cd0b622775e3",
-        "3e613072-2092-4a94-a724-f40ab49322de",
-        "4a1b95b6-5ba3-4fc2-8bb6-e9df8de37bc3"
-      ]
-    }
+    "inventoryRecords": 58,
+    "contentOperations": 27,
+    "mediaOperations": 31,
+    "cmsCandidateMedia": 10
   },
   "release": {
     "approvedRevisionIds": [],
@@ -60,6 +24,9 @@
     "mediaReadiness": "Candidate metadata is present; durable object upload, rights, and accessibility remain unresolved.",
     "unresolvedDrafts": [
       "person:8a0e78e95b87db8e0acd",
+      "person:0af0924910a556b5f374",
+      "person:4b66d17219fef61bc32d",
+      "person:5a04a9ee3d62e4e602d8",
       "person:8a26fa2024db762f831e",
       "person:f62fafba1d69ec9281e2",
       "person:66893d0003c5bb956534",
@@ -81,7 +48,8 @@
       "industry:37a17e1c80062ece7c5c",
       "industry:eb42d39013fdf2f822eb",
       "industry:4382ac13aa186ee8959b",
-      "industry:300df81759c6db6cbf86"
+      "industry:e201f6f730b8afa45524",
+      "industry:8c90ace640ac504ab64a"
     ],
     "candidatePublicUrls": [
       "/platforms/cognios",
@@ -96,7 +64,8 @@
       "/industries/telecoms",
       "/industries/travel-hospitality",
       "/industries/energy-resources",
-      "/industries/manufacturing"
+      "/industries/public-sector",
+      "/industries/education"
     ]
   },
   "rollback": {

@@ -12,7 +12,8 @@
   <url><loc>https://cognirise.ai/industries/telecoms</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://cognirise.ai/industries/travel-hospitality</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://cognirise.ai/industries/energy-resources</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://cognirise.ai/industries/manufacturing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://cognirise.ai/industries/public-sector</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://cognirise.ai/industries/education</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://cognirise.ai/work</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://cognirise.ai/insights</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://cognirise.ai/insights/ai-should-move-the-business</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>

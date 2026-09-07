@@ -10,6 +10,7 @@ import {
   type ArchitectureComponent,
   type ArchitectureLayer,
 } from "@/data/cognios-architecture";
+import { SpatialDisclosure, SpatialDisclosureItem, SpatialDisclosureTrigger, SpatialDisclosurePanel, useSpatialDisclosure } from "@/components/ui/spatial-disclosure";
 import "./ArchitectureStage.css";
 
 type Lens = "capability" | "security";
@@ -33,8 +34,6 @@ export function ArchitectureStage() {
   const [contextSelection, setContextSelection] = useState<ContextSelection>(null);
   const reducedMotion = useReducedMotion();
   const stageRef = useRef<HTMLDivElement>(null);
-  const layerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const componentRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const previousLayer = useRef(layerId);
   const previousComponent = useRef(componentId);
 
@@ -95,11 +94,17 @@ export function ArchitectureStage() {
   }, [componentId, contextSelection, layerId, location, search]);
 
   useEffect(() => {
+    const findDisclosureTrigger = (id: string | null) => {
+      if (!id) return null;
+      return Array.from(
+        stageRef.current?.querySelectorAll<HTMLElement>("[data-disclosure-trigger]") ?? [],
+      ).find((element) => element.dataset.disclosureTrigger === id) ?? null;
+    };
     const componentToRestore = previousComponent.current && !componentId
-      ? componentRefs.current[previousComponent.current]
+      ? findDisclosureTrigger(previousComponent.current)
       : null;
-    const layerToRestore = previousLayer.current && !layerId
-      ? layerRefs.current[previousLayer.current]
+    const layerToRestore = previousLayer.current && (!layerId || !componentId)
+      ? findDisclosureTrigger(previousLayer.current)
       : null;
 
     const focusFrame = window.requestAnimationFrame(() => {
@@ -166,74 +171,72 @@ export function ArchitectureStage() {
           />
 
           <div className="coas-layers">
-            {architectureLayers.map((layer) => {
-              const active = layer.id === layerId;
-              const quiet = Boolean(layerId && !active);
-              return (
-                <article
-                  key={layer.id}
-                  className={`coas-layer ${active ? "is-active" : ""} ${quiet ? "is-quiet" : ""}`}
-                  data-layer-id={layer.id}
-                  data-testid={`stage-layer-${layer.id}`}
-                >
-                  <button
-                    ref={(element) => {
-                      layerRefs.current[layer.id] = element;
-                    }}
-                    type="button"
-                    className="coas-layer-btn"
-                    aria-expanded={active}
-                    aria-controls={active ? `architecture-layer-${layer.id}` : undefined}
-                    aria-label={active ? `Close ${layer.name} layer study` : `Open ${layer.name} layer study`}
-                    onClick={() => {
-                      setContextSelection(null);
-                      setArchitectureState(active ? null : layer.id, null);
-                    }}
-                    data-testid={`layer-btn-${layer.id}`}
+            <SpatialDisclosure value={layerId} onChange={(id) => setArchitectureState(id, null)} orientation="vertical" allowCollapse={true}>
+              {architectureLayers.map((layer) => {
+                return (
+                  <SpatialDisclosureItem
+                    key={layer.id}
+                    id={layer.id}
+                    className={({ isActive, isSelected }) => `coas-layer ${isActive ? "is-active" : ""} ${layerId && !isActive ? "is-quiet" : ""}`}
                   >
-                    <span className="coas-layer-num">{layer.number}</span>
-                    <div className="coas-layer-title">
-                      <strong>{layer.name}</strong>
-                      <small>{lens === "capability" ? layer.responsibility : layer.principle}</small>
-                    </div>
-                    <div className="coas-layer-meta">
-                      <EngineMark engine={layer.engine} />
-                      <span className="coas-layer-count">
-                        {lens === "capability" ? `${layer.components.length} components` : `${layer.controls.length} controls`}
-                      </span>
-                    </div>
-                    <span className="coas-layer-action" aria-hidden="true">
-                      {active ? <X size={16} /> : <ArrowRight size={16} />}
-                    </span>
-                  </button>
+                    {({ isActive }) => (
+                      <>
+                        <SpatialDisclosureTrigger
+                          id={layer.id}
+                          className="coas-layer-btn"
+                          aria-label={isActive ? `Close ${layer.name} layer study` : `Open ${layer.name} layer study`}
+                          data-testid={`layer-btn-${layer.id}`}
+                          onClick={() => {
+                            if (!isActive) setContextSelection(null);
+                          }}
+                        >
+                          <span className="coas-layer-num">{layer.number}</span>
+                          <div className="coas-layer-title">
+                            <strong>{layer.name}</strong>
+                            <small>{lens === "capability" ? layer.responsibility : layer.principle}</small>
+                          </div>
+                          <div className="coas-layer-meta">
+                            <EngineMark engine={layer.engine} />
+                            <span className="coas-layer-count">
+                              {lens === "capability" ? `${layer.components.length} components` : `${layer.controls.length} controls`}
+                            </span>
+                          </div>
+                          <span className="coas-layer-action" aria-hidden="true">
+                            {isActive ? <X size={16} /> : <ArrowRight size={16} />}
+                          </span>
+                        </SpatialDisclosureTrigger>
 
-                  <AnimatePresence initial={false}>
-                    {active && (
-                      <motion.div
-                        id={`architecture-layer-${layer.id}`}
-                        className="coas-layer-study"
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: reducedMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] }}
-                        data-testid={`layer-content-${layer.id}`}
-                      >
-                        {lens === "capability" ? (
-                          <CapabilityStudy
-                            layer={layer}
-                            selected={componentId}
-                            componentRefs={componentRefs}
-                            onSelect={(id) => setArchitectureState(layer.id, componentId === id ? null : id)}
-                          />
-                        ) : (
-                          <SecurityStudy layer={layer} />
-                        )}
-                      </motion.div>
+                        <AnimatePresence initial={false}>
+                          {isActive && (
+                            <motion.div
+                              id={`architecture-layer-${layer.id}`}
+                              className="coas-layer-study"
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: reducedMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] }}
+                              data-testid={`layer-content-${layer.id}`}
+                            >
+                              <SpatialDisclosurePanel id={layer.id}>
+                                {lens === "capability" ? (
+                                  <CapabilityStudy
+                                    layer={layer}
+                                    selected={componentId}
+                                    onSelect={(id) => setArchitectureState(layer.id, componentId === id ? null : id)}
+                                  />
+                                ) : (
+                                  <SecurityStudy layer={layer} />
+                                )}
+                              </SpatialDisclosurePanel>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </>
                     )}
-                  </AnimatePresence>
-                </article>
-              );
-            })}
+                  </SpatialDisclosureItem>
+                );
+              })}
+            </SpatialDisclosure>
           </div>
 
           <Spine
@@ -321,66 +324,73 @@ function CapabilityStudy({
   layer,
   selected,
   onSelect,
-  componentRefs,
 }: {
   layer: ArchitectureLayer;
   selected: string | null;
   onSelect: (id: string) => void;
-  componentRefs: React.MutableRefObject<Record<string, HTMLButtonElement | null>>;
 }) {
-  const selectedComponent = layer.components.find(c => c.id === selected);
+  return (
+    <SpatialDisclosure value={selected} onChange={onSelect} orientation="horizontal" allowCollapse={true} className="coas-study-inner">
+      <CapabilityStudyInner layer={layer} />
+    </SpatialDisclosure>
+  );
+}
+
+function CapabilityStudyInner({ layer }: { layer: ArchitectureLayer }) {
+  const { activeIndex, toggle } = useSpatialDisclosure();
+  const selectedComponent = layer.components.find((c) => c.id === activeIndex);
+  const reducedMotion = useReducedMotion();
 
   return (
-    <div className="coas-study-inner" data-testid="capability-study">
-       <div className="coas-component-rail" aria-label={`${layer.name} components`}>
-        {layer.components.map((component, index) => {
-          const active = component.id === selected;
-          return (
-            <button
-              key={component.id}
-              ref={(element) => {
-                componentRefs.current[component.id] = element;
-              }}
-              type="button"
-              className={`coas-comp-btn ${active ? "is-active" : ""}`}
-              aria-expanded={active}
-              aria-controls={active ? `architecture-component-${component.id}` : undefined}
-              aria-label={active ? `Close ${component.name} component detail` : `Open ${component.name} component detail`}
-              onClick={() => onSelect(component.id)}
-              data-testid={`component-btn-${component.id}`}
-            >
-              <div className="coas-comp-head">
-                <span className="coas-comp-idx">{String(index + 1).padStart(2, "0")}</span>
-                <span className="coas-comp-act" aria-hidden="true">{active ? <X size={14} /> : <ChevronDown size={14} />}</span>
-              </div>
-              <div className="coas-comp-title">{component.name}</div>
-              <div className="coas-comp-desc">{component.responsibility}</div>
-              <div className="coas-comp-foot">
-                <EngineMark engine={component.engine} />
-              </div>
-            </button>
-          );
-        })}
+    <>
+      <div className="coas-component-rail" aria-label={`${layer.name} components`}>
+        {layer.components.map((component, index) => (
+          <SpatialDisclosureItem key={component.id} id={component.id}>
+            {({ isActive }) => (
+              <SpatialDisclosureTrigger
+                id={component.id}
+                className={`coas-comp-btn ${isActive ? "is-active" : ""}`}
+                aria-label={isActive ? `Close ${component.name} component detail` : `Open ${component.name} component detail`}
+                data-testid={`component-btn-${component.id}`}
+              >
+                <div className="coas-comp-head">
+                  <span className="coas-comp-idx">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="coas-comp-act" aria-hidden="true">
+                    {isActive ? <X size={14} /> : <ChevronDown size={14} />}
+                  </span>
+                </div>
+                <div className="coas-comp-title">{component.name}</div>
+                <div className="coas-comp-desc">{component.responsibility}</div>
+                <div className="coas-comp-foot">
+                  <EngineMark engine={component.engine} />
+                </div>
+              </SpatialDisclosureTrigger>
+            )}
+          </SpatialDisclosureItem>
+        ))}
       </div>
 
-      <AnimatePresence initial={false}>
+      <AnimatePresence initial={false} mode="wait">
         {selectedComponent && (
           <motion.div
+            key={selectedComponent.id}
             className="coas-comp-detail-wrap"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: reducedMotion ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             <ComponentDetail
               layer={layer}
               component={selectedComponent}
-              onClose={() => onSelect(selectedComponent.id)}
+              onClose={() => {
+                toggle(selectedComponent.id);
+              }}
             />
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }
 
@@ -402,6 +412,7 @@ const ComponentDetail = React.forwardRef<HTMLElement, {
           <X size={16} />
         </button>
       </header>
+
       <div className="coas-detail-summary">
         <div>
           <h3>{component.name}</h3>

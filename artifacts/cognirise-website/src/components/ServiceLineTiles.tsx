@@ -1,8 +1,15 @@
-import { useState } from "react";
 import { Link } from "wouter";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Plus, X } from "lucide-react";
 import { assetUrl } from "@/lib/assets";
 import { SERVICE_LINES } from "@/lib/serviceLines";
+import {
+  SpatialDisclosure,
+  SpatialDisclosureItem,
+  SpatialDisclosureTrigger,
+  SpatialDisclosurePanel,
+  useSpatialDisclosure
+} from "@/components/ui/spatial-disclosure";
+import { PulseImage } from "@/components/ui/pulse-image";
 
 const SERVICE_VISUALS: Record<string, { img: string; pos: string }> = {
   "consulting-engineering": {
@@ -19,11 +26,16 @@ const SERVICE_VISUALS: Record<string, { img: string; pos: string }> = {
   },
 };
 
-export function ServiceLineTiles({ className = "" }: { className?: string }) {
-  const [openService, setOpenService] = useState<number | null>(null);
-
+export function ServiceLineTiles({ className = "", variant = "full" }: { className?: string, variant?: "full" | "summary" }) {
   return (
-    <div className={`cps-line-component ${className}`}>
+    <SpatialDisclosure
+      mode="editorial"
+      orientation="horizontal"
+      allowCollapse={true}
+      previewOverridesSelection
+      previewExpands
+      className={`cps-line-component cps-line-${variant} ${className}`}
+    >
       <style>{`
         .cps-line-component{--ink:#102957;--paper:#fdfcfb;--line:#cad2df;--pink:#dc509f;--coral:#ff775d;color:var(--ink);font-family:Inter,sans-serif}
         .cps-line-component *{box-sizing:border-box}
@@ -32,17 +44,23 @@ export function ServiceLineTiles({ className = "" }: { className?: string }) {
         .cps-line-component h3{font-family:Comfortaa,sans-serif}
         .cps-tiles{display:flex;flex-direction:column;gap:16px}
         .cps-tile{position:relative;min-width:0;background:var(--paper);border:1px solid var(--line);overflow:hidden;display:flex;flex:1 1 0%;flex-direction:column;transition:background .85s cubic-bezier(.19,1,.22,1)}
+        .cps-tile:after{content:"";position:absolute;z-index:4;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg,#7659df,var(--pink),var(--coral));transform:scaleY(0);transform-origin:top;transition:transform .18s ease;pointer-events:none}
+        .cps-tile.active:after{transform:scaleY(1)}
         .cps-tile:hover:not(.active){background:#f8f9fc}
         .cps-tile:hover:not(.active) .cps-tile-visual img{transform:scale(1.03)}
         .cps-tile-left{position:relative;z-index:2;display:flex;flex-direction:column;width:100%}
         .cps-tile-btn{appearance:none;background:transparent;border:none;text-align:left;width:100%;padding:0;cursor:pointer;outline:none;color:inherit;flex-shrink:0;font:inherit}
         .cps-tile-btn:focus-visible{outline:3px solid var(--coral);outline-offset:-3px}
         .cps-tile-header{padding:24px;display:flex;flex-direction:column;gap:12px;position:relative}
+        .cps-tile-meta{display:flex;align-items:center;justify-content:space-between;gap:16px}
         .cps-tile-no{font-size:11px;letter-spacing:.1em;color:var(--pink);font-weight:600}
+        .cps-tile-affordance{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:#526886}
+        .cps-tile-affordance svg{color:var(--coral);transition:transform .18s ease}
         .cps-tile-header h3{font-size:clamp(22px,2.2vw,28px);line-height:1.1;font-weight:600;letter-spacing:-.04em;margin:0;max-width:100%}
+        .cps-tile-orientation{font-size:12px;line-height:1.45;color:#526886;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
         .cps-tile-copy{display:flex;flex-direction:column;flex-grow:1;position:relative}
         .cps-tile-copy-inner{display:none;padding:0 24px 32px}
-        .cps-tile.active .cps-tile-copy-inner{display:flex;flex-direction:column;animation:cpsTileFadeIn .5s ease forwards}
+         .cps-tile.active .cps-tile-copy-inner{display:flex;flex-direction:column;animation:cpsTileFadeIn .5s ease forwards}
         .cps-tile-short{font-size:14px;line-height:1.5;color:#30486d;font-weight:500;margin:0 0 24px;max-width:95%}
         .cps-tile-desc{display:flex;flex-direction:column;gap:16px;margin-bottom:28px}
         .cps-tile-desc strong,.cps-tile-dests-wrap strong{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--pink);display:block;margin-bottom:8px}
@@ -57,16 +75,17 @@ export function ServiceLineTiles({ className = "" }: { className?: string }) {
         .cps-tile-visual:after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(8,26,58,.1),transparent 30%);pointer-events:none}
         @media (min-width:1024px){
           .cps-tiles{flex-direction:row;height:660px}
+          .cps-line-summary .cps-tiles{height:560px}
           .cps-tile{display:block;flex:0 0 auto;width:calc(18.519% - 5.926px);transition:width .85s cubic-bezier(.19,1,.22,1),background .85s cubic-bezier(.19,1,.22,1);will-change:width}
           .cps-tile.active{width:calc(62.963% - 20.148px);background:#fff}
           .cps-tiles.all-collapsed .cps-tile{width:calc(33.333% - 10.667px)}
           .cps-tile-left{position:absolute;inset:0;height:100%;transition:width .85s cubic-bezier(.19,1,.22,1)}
           .cps-tile.active .cps-tile-left{width:50%}
-          .cps-tile-header{padding:32px 32px 24px;gap:14px;height:190px}
-          .cps-tile.active .cps-tile-header{height:140px}
+          .cps-tile-header{padding:32px 32px 24px;gap:14px;height:250px}
+          .cps-tile.active .cps-tile-header{height:190px}
           .cps-tile-copy-inner{display:flex;position:absolute;inset:0;padding:0 32px 32px;opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .5s ease .2s,transform .5s ease .2s,visibility .5s ease .2s;min-width:340px;overflow-y:auto;animation:none!important}
           .cps-tile.active .cps-tile-copy-inner{opacity:1;visibility:visible;transform:translateY(0)}
-          .cps-tile-visual{position:absolute;inset:190px 0 0;height:auto;transition:inset .85s cubic-bezier(.19,1,.22,1)}
+          .cps-tile-visual{position:absolute;inset:250px 0 0;height:auto;transition:inset .85s cubic-bezier(.19,1,.22,1)}
           .cps-tile.active .cps-tile-visual{inset:0 0 0 50%}
           .cps-tile-visual:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.95) 10%,rgba(255,255,255,.4) 25%,transparent 45%);opacity:0;transition:opacity .85s cubic-bezier(.19,1,.22,1);pointer-events:none;z-index:2}
           .cps-tile[data-service="consulting-engineering"] .cps-tile-visual:before{background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.98) 17%,rgba(255,255,255,.76) 34%,rgba(255,255,255,.26) 52%,transparent 68%)}
@@ -75,104 +94,120 @@ export function ServiceLineTiles({ className = "" }: { className?: string }) {
         @keyframes cpsTileFadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
         @media(prefers-reduced-motion:reduce){.cps-line-component *,.cps-line-component *:before,.cps-line-component *:after{animation:none!important;transition:none!important}}
       `}</style>
+      <SpatialDisclosureTiles variant={variant} />
+    </SpatialDisclosure>
+  );
+}
 
-      <div
-        className={`cps-tiles ${openService === null ? "all-collapsed" : ""}`}
-        role="tablist"
-        aria-label="Service lines"
-        aria-orientation="horizontal"
-        onMouseLeave={(event) => {
-          const focusedElement = document.activeElement;
-          const hasKeyboardFocus = focusedElement instanceof HTMLElement
-            && event.currentTarget.contains(focusedElement)
-            && focusedElement.matches(":focus-visible");
-          if (!hasKeyboardFocus) setOpenService(null);
-        }}
-        onBlurCapture={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-            setOpenService(null);
-          }
-        }}
-      >
-        {SERVICE_LINES.map((service, index) => {
-          const isActive = openService === index;
-          const visual = SERVICE_VISUALS[service.id];
+function SpatialDisclosureTiles({ variant }: { variant: "full" | "summary" }) {
+  const { activeIndex } = useSpatialDisclosure();
 
-          return (
-            <div
-              key={service.id}
-              id={service.id}
-              data-service={service.id}
-              className={`cps-tile ${isActive ? "active" : ""}`}
-              onMouseEnter={() => setOpenService(index)}
-            >
-              <div className="cps-tile-left">
-                <button
-                  className="cps-tile-btn"
-                  onClick={() => setOpenService(index)}
-                  onFocus={() => setOpenService(index)}
-                  onKeyDown={(event) => {
-                    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-                    event.preventDefault();
-                    const next = event.key === "Home"
-                      ? 0
-                      : event.key === "End"
-                        ? SERVICE_LINES.length - 1
-                        : (index + (event.key === "ArrowRight" ? 1 : -1) + SERVICE_LINES.length) % SERVICE_LINES.length;
-                    document.getElementById(`service-tab-${next}`)?.focus();
-                  }}
-                  aria-expanded={isActive}
-                  aria-selected={isActive}
-                  aria-controls={`service-panel-${index}`}
-                  id={`service-tab-${index}`}
-                  tabIndex={openService === null ? (index === 0 ? 0 : -1) : (isActive ? 0 : -1)}
-                  role="tab"
-                >
-                  <div className="cps-tile-header">
-                    <span className="cps-tile-no">0{index + 1}</span>
-                    <h3>{service.label}</h3>
-                  </div>
-                </button>
-                <div className="cps-tile-copy">
-                  <div
-                    className="cps-tile-copy-inner"
-                    id={`service-panel-${index}`}
-                    role="tabpanel"
-                    aria-labelledby={`service-tab-${index}`}
-                    aria-hidden={!isActive}
-                  >
-                    <p className="cps-tile-short">{service.short}</p>
-                    <div className="cps-tile-desc">
-                      <div>
-                        <strong>How we help</strong>
-                        <p>{service.description}</p>
-                      </div>
-                      <div>
-                        <strong>The difference</strong>
-                        <p>{service.value}</p>
-                      </div>
+  return (
+    <div
+      className={`cps-tiles ${activeIndex === null ? "all-collapsed" : ""}`}
+      role="group"
+      aria-label="Service lines"
+    >
+      {SERVICE_LINES.map((service, index) => {
+        const visual = SERVICE_VISUALS[service.id];
+        const id = String(index);
+
+        return (
+          <SpatialDisclosureItem
+            key={service.id}
+            id={id}
+            className={({ isActive, isSelected }) => `cps-tile ${isActive ? "active" : ""} ${isSelected ? "selected" : ""}`}
+            data-service={service.id}
+          >
+            {({ isActive }) => (
+              <>
+                <div className="cps-tile-left">
+                   <SpatialDisclosureTrigger
+                     id={id}
+                     className="cps-tile-btn"
+                     tabIndex={index === 0 ? 0 : -1}
+                     data-testid={`service-trigger-${service.id}`}
+                   >
+                    <div className="cps-tile-header">
+                       <div className="cps-tile-meta">
+                         <span className="cps-tile-no">0{index + 1}</span>
+                         <span className="cps-tile-affordance" aria-hidden="true">
+                            {isActive ? "Collapse" : "Expand"}
+                            {isActive ? <X size={15} /> : <Plus size={15} />}
+                         </span>
+                       </div>
+                      <h3 data-testid={`service-title-${service.id}`}>{service.label}</h3>
+                       <p className="cps-tile-orientation">{service.short}</p>
                     </div>
-                    <div className="cps-tile-dests-wrap">
-                      <strong>Supporting destinations</strong>
-                      <div className="cps-tile-dests">
-                        {service.destinations.map(([label, url]) => (
-                          <Link href={url} key={label} className="cps-tile-dest group" tabIndex={isActive ? 0 : -1}>
-                            {label}
-                            <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
+                  </SpatialDisclosureTrigger>
+                  <div className="cps-tile-copy">
+                    <SpatialDisclosurePanel id={id} className="cps-tile-copy-inner" data-testid={`service-panel-${service.id}`}>
+                      <p className="cps-tile-short">{service.short}</p>
+                      {variant === "full" ? (
+                        <>
+                          <div className="cps-tile-desc">
+                            <div>
+                              <strong>How we help</strong>
+                              <p>{service.description}</p>
+                            </div>
+                            <div>
+                              <strong>The difference</strong>
+                              <p>{service.value}</p>
+                            </div>
+                          </div>
+                          <div className="cps-tile-dests-wrap">
+                            <strong>Supporting destinations</strong>
+                            <div className="cps-tile-dests">
+                              {service.destinations.map(([label, url]) => (
+                                <Link href={url} key={label} className="cps-tile-dest group" tabIndex={isActive ? 0 : -1}>
+                                  {label}
+                                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="cps-tile-desc">
+                            <div>
+                              <strong>Outcome</strong>
+                              <p>{service.value}</p>
+                            </div>
+                          </div>
+                          <div className="cps-tile-dests-wrap mt-auto">
+                            <strong>Explore</strong>
+                            <div className="cps-tile-dests">
+                              <Link
+                                href={service.destinations[0][1]}
+                                className="cps-tile-dest group"
+                                tabIndex={isActive ? 0 : -1}
+                                data-testid={`service-link-${service.id}`}
+                              >
+                                {service.destinations[0][0]}
+                                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                              </Link>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </SpatialDisclosurePanel>
                   </div>
                 </div>
-              </div>
-              <div className="cps-tile-visual" aria-hidden="true">
-                <img src={visual.img} style={{ objectPosition: visual.pos }} alt="" />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                <div className="cps-tile-visual" aria-hidden="true">
+                  <PulseImage
+                    src={visual.img}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    style={{ objectPosition: visual.pos }}
+                    eager
+                  />
+                </div>
+              </>
+            )}
+          </SpatialDisclosureItem>
+        );
+      })}
     </div>
   );
 }
