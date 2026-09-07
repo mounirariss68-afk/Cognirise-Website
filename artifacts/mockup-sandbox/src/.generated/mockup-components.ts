@@ -10,6 +10,7 @@ export const modules: ModuleMap = {
   "./components/mockups/cognirise-directions/ExecutiveFieldManual.tsx": () => import("../components/mockups/cognirise-directions/ExecutiveFieldManual.tsx"),
   "./components/mockups/cognirise-directions/GradientEngine.tsx": () => import("../components/mockups/cognirise-directions/GradientEngine.tsx"),
   "./components/mockups/cognirise-directions/LivingArchitecture.tsx": () => import("../components/mockups/cognirise-directions/LivingArchitecture.tsx"),
+  "./components/mockups/cognirise-directions/ModularDrawings.tsx": () => import("../components/mockups/cognirise-directions/ModularDrawings.tsx"),
   "./components/mockups/cognirise-directions/PrecisionInMotion.tsx": () => import("../components/mockups/cognirise-directions/PrecisionInMotion.tsx"),
   "./components/mockups/cognirise-directions/VisibleIntelligence.tsx": () => import("../components/mockups/cognirise-directions/VisibleIntelligence.tsx"),
   "./components/mockups/cognirise-site/AboutPeople.tsx": () => import("../components/mockups/cognirise-site/AboutPeople.tsx"),

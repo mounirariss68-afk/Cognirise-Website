@@ -10,3 +10,4 @@
 - [CMS media import authority](cms-media-import-authority.md) — Never equate imported media metadata with durable object upload; keep inaccessible or unreviewed assets private and pending.
 - [CMS merge reconciliation](cms-merge-reconciliation.md) — Development data created by isolated task work must cross the merge boundary through safe, idempotent reconciliation.
 - [Person market availability](person-market-availability.md) — Stage and publish availability separately; requested-market suppression must run before content fallback.
+- [Modular panorama continuity](modular-panorama-continuity.md) — Derive adjoining Pulse modules from one connected master and never animate them out of alignment.
