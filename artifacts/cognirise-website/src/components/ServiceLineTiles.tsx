@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowRight, Plus, X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { assetUrl } from "@/lib/assets";
 import { SERVICE_LINES } from "@/lib/serviceLines";
 import {
@@ -64,10 +64,8 @@ export function ServiceLineTiles({
         .cps-tile-btn{appearance:none;background:transparent;border:none;text-align:left;width:100%;padding:0;cursor:pointer;outline:none;color:inherit;flex-shrink:0;font:inherit}
         .cps-tile-btn:focus-visible{outline:3px solid var(--coral);outline-offset:-3px}
         .cps-tile-header{padding:24px;display:flex;flex-direction:column;gap:12px;position:relative}
-        .cps-tile-meta{display:flex;align-items:center;justify-content:space-between;gap:16px}
+        .cps-tile-meta{display:flex;align-items:center}
         .cps-tile-no{font-size:11px;letter-spacing:.1em;color:var(--pink);font-weight:600}
-        .cps-tile-affordance{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:#526886}
-        .cps-tile-affordance svg{color:var(--coral);transition:transform .18s ease}
         .cps-tile-header h3{font-size:clamp(22px,2.2vw,28px);line-height:1.1;font-weight:600;letter-spacing:-.04em;margin:0;max-width:100%}
         .cps-tile-orientation{font-size:12px;line-height:1.45;color:#526886;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
         .cps-tile-copy{display:flex;flex-direction:column;flex-grow:1;position:relative}
@@ -78,6 +76,7 @@ export function ServiceLineTiles({
         .cps-tile-desc strong,.cps-tile-dests-wrap strong{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--pink);display:block;margin-bottom:8px}
         .cps-tile-desc p{font-size:13px;line-height:1.55;color:#526886;margin:0}
         .cps-tile-dests{display:flex;flex-wrap:wrap;align-items:center;gap:7px 18px}
+        .cps-tile[data-service="ai-platforms"] .cps-tile-dests{flex-direction:column;flex-wrap:nowrap;align-items:flex-start}
         .cps-tile-dest{display:inline-flex;align-items:center;gap:6px;width:max-content;max-width:100%;padding:2px 0;font-size:12px;line-height:1.35;font-weight:650;color:var(--ink);text-decoration:underline;text-decoration-color:rgba(220,80,159,.35);text-decoration-thickness:1px;text-underline-offset:4px;transition:color .2s ease,text-decoration-color .2s ease}
         .cps-tile-dest svg{flex:0 0 auto}
         .cps-tile-dest:hover{color:var(--pink);text-decoration-color:var(--pink)}
@@ -168,10 +167,6 @@ function SpatialDisclosureTiles({ variant, source }: { variant: "full" | "summar
                     <div className="cps-tile-header">
                        <div className="cps-tile-meta">
                          <span className="cps-tile-no">0{index + 1}</span>
-                         <span className="cps-tile-affordance" aria-hidden="true">
-                            {isActive ? "Collapse" : "Expand"}
-                            {isActive ? <X size={15} /> : <Plus size={15} />}
-                         </span>
                        </div>
                       <h3 data-testid={`service-title-${service.id}`}>{service.label}</h3>
                        <p className="cps-tile-orientation">{service.short}</p>

@@ -31,7 +31,8 @@ test("service tiles expose selection, panels, keyboard navigation and reduced mo
   assert.match(source, /mode="editorial"/);
   assert.match(source, /variant = "full"/);
   assert.match(source, /service\.short/);
-  assert.match(source, /Expand/);
+  assert.doesNotMatch(source, /["'](?:Expand|Collapse)["']|cps-tile-affordance|<Plus|<X/);
+  assert.doesNotMatch(source, /import\s*\{[^}]*\b(?:Plus|X)\b[^}]*\}\s*from\s*["']lucide-react["']/);
   assert.match(source, /activeIndex === null/);
   assert.match(source, /all-collapsed/);
   assert.match(source, /prefers-reduced-motion:reduce/);
@@ -46,6 +47,18 @@ test("both service tile variants render every available destination as compact t
   assert.doesNotMatch(source, /service\.destinations\[0\]/);
   assert.match(source, /text-decoration:underline/);
   assert.doesNotMatch(source, /\.cps-tile-dest\{[^}]*border:/);
+});
+
+test("AI Platforms destinations stay stacked as one link per row at every viewport", async () => {
+  const source = await readFile(new URL("../components/ServiceLineTiles.tsx", import.meta.url), "utf8");
+  assert.match(
+    source,
+    /\.cps-tile\[data-service="ai-platforms"\] \.cps-tile-dests\{flex-direction:column;flex-wrap:nowrap;align-items:flex-start\}/,
+  );
+  assert.doesNotMatch(
+    source,
+    /@media[^{]*\{[^}]*\.cps-tile\[data-service="ai-platforms"\] \.cps-tile-dests/,
+  );
 });
 
 test("service interest analytics distinguish card activation from destination navigation", async () => {
