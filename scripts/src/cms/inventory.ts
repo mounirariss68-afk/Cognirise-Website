@@ -261,12 +261,12 @@ async function main() {
   if (partners.length !== 5 || platforms.length !== 5 || articles.length !== 3 || industries.length !== 6) {
     throw new Error("The public website no longer matches the governed 5 partner / 5 platform / 3 article / 6 industry manifest.");
   }
-  if (assets.length !== 32) throw new Error(`Expected 23 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
+  if (assets.length !== 41) throw new Error(`Expected 32 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
 
   const stable = {
     schemaVersion: 2,
     source: relative(websiteRoot),
-    expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, industries: 6, websiteAssets: 23, linkedinAssets: 9, assets: 32 },
+    expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, industries: 6, websiteAssets: 32, linkedinAssets: 9, assets: 41 },
     explicitOmissions: {
       caseStudies: "No genuine public case-study records are present in the current website.",
       povDocuments: "No genuine public POV documents are present in the current website.",

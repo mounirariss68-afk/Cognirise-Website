@@ -9,6 +9,7 @@ import {
   resolveMigrationMedia,
 } from "../../../scripts/src/cms/migration";
 import type { InventoryRecord } from "../../../scripts/src/cms/common";
+import { pulseIndustryMedia } from "../../../scripts/src/cms/industry-media";
 
 type Inventory = {
   expectedCounts: Record<string, number>;
@@ -48,5 +49,31 @@ test("the governed inventory produces six publishable industry cutover records i
     assert.equal(resolved.mediaIds.length, 1);
     assert.equal((resolved.content as { heroMediaId?: string }).heroMediaId, resolved.mediaIds[0]);
     assert.equal(cmsPublicRoute("industry", operation.slug, resolved.content), `/industries/${operation.slug}`);
+  }
+});
+
+test("the Pulse industry family governs nine native-wide assets but associates only the six existing industries", () => {
+  const inventory = loadInventory();
+  const media = mediaMigrationOperations(inventory.records);
+  const mediaByPath = new Map(media.map((operation) => [operation.publicPath, operation]));
+  const associated = pulseIndustryMedia.filter((item) => item.slug);
+  const unassociated = pulseIndustryMedia.filter((item) => !item.slug);
+
+  assert.equal(pulseIndustryMedia.length, 9);
+  assert.equal(associated.length, 6);
+  assert.deepEqual(
+    unassociated.map((item) => item.sector),
+    ["Manufacturing", "Defense", "Retail & CPG"],
+  );
+
+  for (const item of pulseIndustryMedia) {
+    const operation = mediaByPath.get(item.publicPath);
+    assert.ok(operation, `missing ${item.publicPath}`);
+    assert.equal(operation.cmsOwnership, "cms-candidate");
+    assert.equal(operation.collection, "website");
+    assert.equal(operation.mimeType, "image/png");
+    assert.equal(operation.width, 1536);
+    assert.equal(operation.height, 1024);
+    assert.equal(operation.altText, item.altText);
   }
 });

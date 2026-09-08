@@ -10,9 +10,9 @@
     "platforms": 5,
     "articles": 3,
     "industries": 6,
-    "websiteAssets": 23,
+    "websiteAssets": 32,
     "linkedinAssets": 9,
-    "assets": 32
+    "assets": 41
   },
   "explicitOmissions": {
     "caseStudies": "No genuine public case-study records are present in the current website.",
@@ -1731,7 +1731,8 @@
         "width": 1024,
         "height": 1024,
         "usages": [
-          "artifacts/cognirise-website/src/lib/alliancePlatforms.ts"
+          "artifacts/cognirise-website/src/lib/alliancePlatforms.ts",
+          "artifacts/cognirise-website/src/pages/DatatoolpackAutoData.tsx"
         ],
         "cmsOwnership": "cms-candidate",
         "collection": "website",
@@ -1916,6 +1917,82 @@
       "digest": "3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034"
     },
     {
+      "externalId": "asset:cfa67b78e45f66ac9561",
+      "type": "asset",
+      "name": "pulse-industry-defense-protection.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-defense-protection.png",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-defense-protection.png",
+        "bytes": 3089701,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "ab57adbe16350bd3b16ec1865a3bf7dc410dd55f196fe338da61969c9e56a969",
+        "width": 1536,
+        "height": 1024,
+        "usages": [
+          "Governed industry-family asset; unassociated until a Defense industry record is separately approved"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "Signals filtered through translucent security layers around a hardened communications and radar complex.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Approved Cognirise Pulse industry family"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
+        ]
+      },
+      "digest": "ab57adbe16350bd3b16ec1865a3bf7dc410dd55f196fe338da61969c9e56a969"
+    },
+    {
+      "externalId": "asset:bbbaa7ea7a2547b64df3",
+      "type": "asset",
+      "name": "pulse-industry-education-learning.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-learning.png",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-education-learning.png",
+        "bytes": 2469819,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "5a162d8e0f96b2cf4ff8773033aa9a4fe67988e478070be4b6449c964d00c5b3",
+        "width": 1536,
+        "height": 1024,
+        "usages": [
+          "CMS industry hero: Education"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "Students learning individually and in groups across a stepped campus connected by luminous knowledge paths.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Approved Cognirise Pulse industry family"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
+        ]
+      },
+      "digest": "5a162d8e0f96b2cf4ff8773033aa9a4fe67988e478070be4b6449c964d00c5b3"
+    },
+    {
       "externalId": "asset:142ae134e579aa22b3fa",
       "type": "asset",
       "name": "pulse-industry-education.jpg",
@@ -1952,6 +2029,44 @@
         ]
       },
       "digest": "c46f7f761b52660fa218a376b0f157d5d4b8f9aca86eb83fb750af7f16d6dc42"
+    },
+    {
+      "externalId": "asset:32801370fdaa16c78c12",
+      "type": "asset",
+      "name": "pulse-industry-energy-resources.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-energy-resources.png",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-energy-resources.png",
+        "bytes": 2696268,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "ec728d1f5f3085326b09eb2bb0909c32b9167da0f9659ffcbb0b4595d802aa31",
+        "width": 1536,
+        "height": 1024,
+        "usages": [
+          "CMS industry hero: Energy & Resources"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "Luminous operational signals moving through geological layers and field infrastructure toward a controlled intervention.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Approved Cognirise Pulse industry family"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
+        ]
+      },
+      "digest": "ec728d1f5f3085326b09eb2bb0909c32b9167da0f9659ffcbb0b4595d802aa31"
     },
     {
       "externalId": "asset:fcf7c186aab2468bef23",
@@ -1992,6 +2107,44 @@
       "digest": "d0398015c4cc624a5eaf3f850c837a5a9b6bd84766634789a0ce325739e2fabb"
     },
     {
+      "externalId": "asset:1e6df259a2603a5fb96c",
+      "type": "asset",
+      "name": "pulse-industry-financial-services.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-financial-services.png",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-financial-services.png",
+        "bytes": 2529874,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "c3e273ee9fbade51617899dde33a49f19a2d2e8804486c91226013d0ad4f2b82",
+        "width": 1536,
+        "height": 1024,
+        "usages": [
+          "CMS industry hero: Financial Services"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "Transparent custody chambers and luminous governed transaction paths converging through a financial operations landscape.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Approved Cognirise Pulse industry family"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
+        ]
+      },
+      "digest": "c3e273ee9fbade51617899dde33a49f19a2d2e8804486c91226013d0ad4f2b82"
+    },
+    {
       "externalId": "asset:5936a9b4c6ac5c729fda",
       "type": "asset",
       "name": "pulse-industry-financial.jpg",
@@ -2028,6 +2181,82 @@
         ]
       },
       "digest": "4be720fc3fa0f9c57d4c2d39237292d0bcb0c0f62407a04368c88d9460c81fe0"
+    },
+    {
+      "externalId": "asset:10710c6450dd72bf00ff",
+      "type": "asset",
+      "name": "pulse-industry-manufacturing-production.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-manufacturing-production.png",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-manufacturing-production.png",
+        "bytes": 2489622,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "727af375484e4c4c7c24188c140f68a1a6fd20cfd99c7a5016f96ecb30a2cef4",
+        "width": 1536,
+        "height": 1024,
+        "usages": [
+          "Governed industry-family asset; unassociated until a Manufacturing industry record is separately approved"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "Precision components moving through coordinated production cells toward a transparent inspection chamber.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Approved Cognirise Pulse industry family"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
+        ]
+      },
+      "digest": "727af375484e4c4c7c24188c140f68a1a6fd20cfd99c7a5016f96ecb30a2cef4"
+    },
+    {
+      "externalId": "asset:1f2bc243d3d62cb6da04",
+      "type": "asset",
+      "name": "pulse-industry-public-sector-services.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-public-sector-services.png",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-public-sector-services.png",
+        "bytes": 2446012,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "942dfbcb83fc0264f06f4ba60e7511670973fe75b14ada8d3b144a155918ec4b",
+        "width": 1536,
+        "height": 1024,
+        "usages": [
+          "CMS industry hero: Public Sector"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "Citizens receiving documents and support at an accessible civic service centre linked by luminous service routes.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Approved Cognirise Pulse industry family"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
+        ]
+      },
+      "digest": "942dfbcb83fc0264f06f4ba60e7511670973fe75b14ada8d3b144a155918ec4b"
     },
     {
       "externalId": "asset:ce6e9786500aa02af86d",
@@ -2068,6 +2297,82 @@
       "digest": "63169082b985e74463d34177d228583f07a5f55f15d0fde97328133a9e440f85"
     },
     {
+      "externalId": "asset:8ae105105458a57d3366",
+      "type": "asset",
+      "name": "pulse-industry-retail-cpg-demand.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-retail-cpg-demand.png",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-retail-cpg-demand.png",
+        "bytes": 2443814,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "aa462c52b3c18ead38262e19c5369f106e42e54a0d45f727fa6e78d80f89a355",
+        "width": 1536,
+        "height": 1024,
+        "usages": [
+          "Governed industry-family asset; unassociated until a Retail and CPG industry record is separately approved"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "Luminous demand and replenishment routes connecting consumer products, inventory modules, and fulfilment shelves.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Approved Cognirise Pulse industry family"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
+        ]
+      },
+      "digest": "aa462c52b3c18ead38262e19c5369f106e42e54a0d45f727fa6e78d80f89a355"
+    },
+    {
+      "externalId": "asset:bfe072a6104263c97bd2",
+      "type": "asset",
+      "name": "pulse-industry-telecoms-network.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-telecoms-network.png",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-telecoms-network.png",
+        "bytes": 2916763,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "d96cabad74c82ce7074b24027d02bf0ad9baa46c29db6281a63ddc859cb41602",
+        "width": 1536,
+        "height": 1024,
+        "usages": [
+          "CMS industry hero: Telecoms"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "Distributed communications nodes linked by luminous signals across a wide network landscape.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Approved Cognirise Pulse industry family"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
+        ]
+      },
+      "digest": "d96cabad74c82ce7074b24027d02bf0ad9baa46c29db6281a63ddc859cb41602"
+    },
+    {
       "externalId": "asset:1f857b96d54e29e56146",
       "type": "asset",
       "name": "pulse-industry-telecoms.jpg",
@@ -2104,6 +2409,44 @@
         ]
       },
       "digest": "35e13aabf861ec5d2700fea7b81ceb00672a74d367bd030d2d3ca03fd6e2d733"
+    },
+    {
+      "externalId": "asset:aae9100da7c6f1f8fca7",
+      "type": "asset",
+      "name": "pulse-industry-travel-hospitality.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-travel-hospitality.png",
+      "fields": {
+        "publicPath": "/images/cognirise/industries/pulse-industry-travel-hospitality.png",
+        "bytes": 2541165,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "0b0c4f31e80e84026616024e948c403785150ae4e6cdf9efc6fec2e360bbb7ce",
+        "width": 1536,
+        "height": 1024,
+        "usages": [
+          "CMS industry hero: Travel & Hospitality"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "Luminous passenger routes rerouting through a layered terminal as an aircraft departs in the distance.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Approved Cognirise Pulse industry family"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
+        ]
+      },
+      "digest": "0b0c4f31e80e84026616024e948c403785150ae4e6cdf9efc6fec2e360bbb7ce"
     },
     {
       "externalId": "asset:970056b64f6910389d7f",
@@ -2983,7 +3326,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "43a65b736114e479a4d5603065090a044fbae38bfa71105c18211c2bb027652c",
-  "generatedAt": "2026-09-07T07:46:43.987Z",
+  "manifestDigest": "885f2e737696c5c0f844d80048af960e92788f86e5fb9d3a7046533d7a2ada5c",
+  "generatedAt": "2026-09-08T21:21:27.728Z",
   "dryRun": false
 }

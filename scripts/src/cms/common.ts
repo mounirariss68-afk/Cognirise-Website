@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { pulseIndustryMediaByFilename } from "./industry-media.js";
 
 export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 export const websiteRoot = path.join(repositoryRoot, "artifacts/cognirise-website");
@@ -82,6 +83,7 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
     const publicPath = `/${path.relative(path.join(websiteRoot, "public"), file).replaceAll(path.sep, "/")}`;
     const extension = path.extname(file).toLowerCase();
     const dimensions = imageDimensions(bytes, extension);
+    const approvedIndustryMedia = pulseIndustryMediaByFilename.get(path.basename(file));
     return {
       externalId: stableId("asset", file, name),
       type: "asset" as const,
@@ -95,19 +97,26 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
         checksum,
         width: dimensions.width,
         height: dimensions.height,
-        usages: usages.get(publicPath) ?? [],
+        usages: approvedIndustryMedia
+          ? [approvedIndustryMedia.usage]
+          : usages.get(publicPath) ?? [],
         cmsOwnership: "cms-candidate",
         collection: "website",
         linkedinAssetKind: null,
         campaignMetadata: null,
         accessibility: {
-          altText: legacyAltText[path.basename(file)]
+          altText: approvedIndustryMedia?.altText
+            ?? legacyAltText[path.basename(file)]
             ?? path.basename(file, extension).replaceAll("-", " "),
           decorative: false,
         },
-        rights: { status: "needs-review", owner: "Rights holder pending editorial review", source: publicPath },
+        rights: approvedIndustryMedia
+          ? { status: "approved-use", owner: "Cognirise", source: "Approved Cognirise Pulse industry family" }
+          : { status: "needs-review", owner: "Rights holder pending editorial review", source: publicPath },
       },
-      review: review(["Confirm rights holder, source, license, and descriptive alt text before media import."]),
+      review: review(approvedIndustryMedia
+        ? ["Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."]
+        : ["Confirm rights holder, source, license, and descriptive alt text before media import."]),
       digest: checksum,
     };
   }));

@@ -43,9 +43,21 @@ const CUTOVER: Record<CmsDocumentKind, boolean> = {
   industry: env.VITE_CMS_CUTOVER_INDUSTRIES === "true",
 };
 
-export function contentRecord<K extends CmsDocumentKind>(item: PublishedContent, _kind: K): CmsRecord<CmsContentByKind[K]> {
+export function contentRecord<K extends CmsDocumentKind>(item: PublishedContent, kind: K): CmsRecord<CmsContentByKind[K]> {
+  const content = { ...(item.content as CmsContent) } as CmsContent & {
+    heroMediaId?: string;
+    image?: string;
+    imageAlt?: string;
+  };
+  if (kind === "industry" && content.heroMediaId) {
+    const hero = item.media?.find((media) => media.id === content.heroMediaId);
+    if (hero) {
+      content.image = hero.url;
+      content.imageAlt = hero.altText || content.imageAlt;
+    }
+  }
   return {
-    ...(item.content as CmsContent),
+    ...content,
     id: item.id,
     slug: item.slug,
     title: item.title,

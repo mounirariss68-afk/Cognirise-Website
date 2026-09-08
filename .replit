@@ -22,3 +22,8 @@ timeoutMs = 120000
 [nix]
 channel = "stable-25_05"
 packages = ["libreoffice"]
+
+[userenv]
+
+[userenv.development]
+VITE_CMS_CUTOVER_INDUSTRIES = "true"

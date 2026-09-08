@@ -6,7 +6,7 @@ Daily: review failed publishes, overdue evidence/review dates, media upload fail
 
 ## Media catalog reconciliation
 
-The approved catalog is 29 CMS-managed website raster images plus exactly nine
+The approved catalog is 32 CMS-managed website raster images plus exactly nine
 LinkedIn PNGs: six `post` images and three `header` images in the `linkedin`
 collection. SVG/ZIP masters, logos, and code-owned UI imagery are intentionally
 excluded. Each operation carries collection, LinkedIn kind where applicable,
@@ -33,6 +33,26 @@ invalid item or receipt conflict is an operator-visible failure.
 Never use `--defer-media-upload` for a database import; it is rejected. Do not
 copy production credentials into development or bypass the explicit
 `--target=development` and production-environment guards.
+
+After explicit visual approval of the nine-image Pulse industry family, publish
+the six existing UAE/English industry associations with the dedicated,
+idempotent cutover. Manufacturing, Defense, and Retail & CPG remain approved
+media with no document reference:
+
+```sh
+pnpm --filter @workspace/scripts cms:publish-industry-images -- --apply-db --target=development
+pnpm --filter @workspace/scripts cms:publish-industry-images -- --verify-db --target=development
+```
+
+The cutover creates a new approved revision for each of the six existing
+industries, pins the exact immutable media version, and preserves every previous
+revision, media asset, and media version. Do not run it before the complete
+family receives explicit visual approval.
+
+Once the transaction verifies successfully, enable the existing
+`VITE_CMS_CUTOVER_INDUSTRIES=true` environment gate for the target environment
+and restart the website workflow. This makes the published CMS records
+authoritative while retaining the compiled fallback for rollback.
 
 ## Backup operations
 

@@ -1,0 +1,635 @@
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import {
+  type CmsDocumentKind,
+  validateCmsSnapshot,
+} from "@workspace/api-zod";
+import {
+  type InventoryRecord,
+  repositoryRoot,
+} from "./common.js";
+import { pulseIndustryMedia } from "./industry-media.js";
+import {
+  mediaMigrationOperations,
+  migrationOperations,
+  resultDigest,
+  type MediaMigrationOperation,
+  type MigrationOperation,
+} from "./migration.js";
+import { objectStorageClient } from "./object-storage.js";
+
+const args = process.argv.slice(2);
+const shouldApply = args.includes("--apply-db");
+const shouldVerify = args.includes("--verify-db");
+const target = args.find((argument) => argument.startsWith("--target="))?.slice(9);
+const APPROVED_AT = "2026-09-08";
+const CUTOVER_PREFIX = "cms-industry-pulse-cutover-v2";
+const LEGACY_CUTOVER_PREFIX = "cms-industry-pulse-cutover-v1";
+const MEDIA_APPROVAL_PREFIX = "cms-industry-pulse-media-approval-v2";
+
+interface Inventory {
+  schemaVersion: number;
+  manifestDigest: string;
+  records: InventoryRecord[];
+}
+
+interface ApprovedMedia {
+  definition: (typeof pulseIndustryMedia)[number];
+  operation: MediaMigrationOperation;
+  assetId: string;
+  versionId: string;
+}
+
+interface SqlClient {
+  query: (
+    queryText: string,
+    values?: any[],
+  ) => Promise<{ rowCount: number | null; rows: any[] }>;
+}
+
+function assertDevelopmentTarget() {
+  if (process.env.NODE_ENV === "production" || process.env.REPLIT_DEPLOYMENT === "1") {
+    throw new Error("The Pulse industry cutover is disabled in production.");
+  }
+  if (target !== "development") {
+    throw new Error("Database work requires the explicit --target=development safeguard.");
+  }
+  if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required.");
+  if (!process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID || !process.env.PRIVATE_OBJECT_DIR) {
+    throw new Error("Development Object Storage is not configured.");
+  }
+}
+
+async function loadPlan() {
+  const inventory = JSON.parse(
+    await readFile(`${repositoryRoot}/scripts/cms/output/inventory.json`, "utf8"),
+  ) as Inventory;
+  if (inventory.schemaVersion !== 2 || !inventory.manifestDigest) {
+    throw new Error("Unsupported or invalid CMS inventory.");
+  }
+  const operationsByPath = new Map(
+    mediaMigrationOperations(inventory.records).map((operation) => [operation.publicPath, operation]),
+  );
+  const contentOperationsBySlug = new Map(
+    migrationOperations(inventory.records)
+      .filter((operation) => operation.kind === "industry")
+      .map((operation) => [operation.slug, operation]),
+  );
+  const plan = pulseIndustryMedia.map((definition) => {
+    const operation = operationsByPath.get(definition.publicPath);
+    if (!operation) throw new Error(`The governed inventory is missing ${definition.publicPath}.`);
+    if (
+      operation.collection !== "website"
+      || operation.cmsOwnership !== "cms-candidate"
+      || operation.mimeType !== "image/png"
+      || operation.width !== 1536
+      || operation.height !== 1024
+      || operation.altText !== definition.altText
+    ) {
+      throw new Error(`${definition.publicPath} does not match the approved media contract.`);
+    }
+    const contentOperation = definition.slug
+      ? contentOperationsBySlug.get(definition.slug)
+      : undefined;
+    if (definition.slug && !contentOperation) {
+      throw new Error(`The governed inventory is missing the ${definition.slug} content baseline.`);
+    }
+    return { definition, operation, contentOperation };
+  });
+  const associated = plan.filter((item) => item.definition.slug);
+  if (plan.length !== 9 || associated.length !== 6) {
+    throw new Error("The Pulse industry family must contain exactly nine assets and six website associations.");
+  }
+  return plan;
+}
+
+async function uploadApprovedMedia(
+  plan: Awaited<ReturnType<typeof loadPlan>>,
+) {
+  const bucket = objectStorageClient.bucket(process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID!);
+  const prefix = process.env.PRIVATE_OBJECT_DIR!.replace(/^\/+|\/+$/g, "");
+  const storageKeys = new Map<string, string>();
+  for (const item of plan) {
+    const bytes = await readFile(`${repositoryRoot}/${item.operation.sourceFile}`);
+    const checksum = createHash("sha256").update(bytes).digest("hex");
+    if (checksum !== item.operation.checksum || bytes.length !== item.operation.byteSize) {
+      throw new Error(`Asset changed after approval: ${item.operation.sourceFile}.`);
+    }
+    const storageKey = `${prefix}/cms-media/approved-${item.operation.checksum}`;
+    const object = bucket.file(storageKey);
+    const [exists] = await object.exists();
+    if (!exists) {
+      await object.save(bytes, {
+        resumable: false,
+        contentType: item.operation.mimeType,
+        metadata: {
+          cacheControl: "private, max-age=31536000, immutable",
+          metadata: { checksum: item.operation.checksum, source: "cms-industry-pulse-approval-v2" },
+        },
+      });
+    }
+    const [metadata] = await object.getMetadata();
+    if (
+      Number(metadata.size) !== item.operation.byteSize
+      || metadata.metadata?.checksum !== item.operation.checksum
+    ) {
+      throw new Error(`Approved storage object parity failed for ${item.definition.publicPath}.`);
+    }
+    storageKeys.set(item.definition.publicPath, storageKey);
+  }
+  return storageKeys;
+}
+
+async function approveMedia(
+  client: SqlClient,
+  admin: { id: string; email: string },
+  plan: Awaited<ReturnType<typeof loadPlan>>,
+  approvedStorageKeys: Map<string, string>,
+) {
+  const approved = new Map<string, ApprovedMedia>();
+  for (const item of plan) {
+    const mediaResult = await client.query(
+      `SELECT a.id::text asset_id,a.status,a.checksum,a.byte_size,a.alt_text,a.credit,a.collection
+         FROM cms_media_assets a
+        WHERE a.checksum=$1`,
+      [item.operation.checksum],
+    );
+    if (mediaResult.rowCount !== 1) {
+      throw new Error(`Expected one imported media asset for ${item.definition.publicPath}.`);
+    }
+    const media = mediaResult.rows[0] as Record<string, unknown>;
+    if (
+      media.checksum !== item.operation.checksum
+      || Number(media.byte_size) !== item.operation.byteSize
+      || media.collection !== "website"
+    ) {
+      throw new Error(`Imported media parity failed for ${item.definition.publicPath}.`);
+    }
+    const storageKey = approvedStorageKeys.get(item.definition.publicPath)!;
+    const metadata = {
+      sourcePath: item.definition.publicPath,
+      usages: [item.definition.usage],
+      altText: item.definition.altText,
+      credit: "Cognirise",
+      accessibilityStatus: "approved",
+      rightsStatus: "approved-use",
+      approvedUse: "Cognirise industry imagery",
+      approvedAt: APPROVED_AT,
+    };
+    let version = await client.query(
+      `SELECT id::text,checksum,byte_size,width,height,metadata
+         FROM cms_media_versions
+        WHERE asset_id=$1 AND storage_key=$2`,
+      [media.asset_id, storageKey],
+    );
+    if (!version.rowCount) {
+      const nextVersion = await client.query(
+        "SELECT COALESCE(max(version_number),0)::int + 1 next_version FROM cms_media_versions WHERE asset_id=$1",
+        [media.asset_id],
+      );
+      version = await client.query(
+        `INSERT INTO cms_media_versions
+          (asset_id,version_number,storage_key,checksum,byte_size,width,height,metadata)
+         VALUES ($1,$2,$3,$4,$5,1536,1024,$6)
+         RETURNING id::text,checksum,byte_size,width,height,metadata`,
+        [
+          media.asset_id,
+          Number(nextVersion.rows[0].next_version),
+          storageKey,
+          item.operation.checksum,
+          item.operation.byteSize,
+          metadata,
+        ],
+      );
+    }
+    const approvedVersion = version.rows[0] as Record<string, unknown>;
+    if (
+      approvedVersion.checksum !== item.operation.checksum
+      || Number(approvedVersion.byte_size) !== item.operation.byteSize
+      || Number(approvedVersion.width) !== 1536
+      || Number(approvedVersion.height) !== 1024
+    ) {
+      throw new Error(`Approved immutable version parity failed for ${item.definition.publicPath}.`);
+    }
+    await client.query(
+      `UPDATE cms_media_assets
+          SET status='active',alt_text=$2,credit='Cognirise',updated_at=now()
+        WHERE id=$1`,
+      [media.asset_id, item.definition.altText],
+    );
+    const approvalRequestId = `${MEDIA_APPROVAL_PREFIX}:${item.operation.checksum.slice(0, 24)}`;
+    await client.query(
+      `INSERT INTO cms_audit_events
+        (actor_user_id,actor_label,action,target_type,target_id,request_id,metadata)
+       VALUES ($1,$2,'media.approved','media',$3,$4,$5)
+       ON CONFLICT (request_id) DO NOTHING`,
+      [
+        admin.id,
+        admin.email,
+        media.asset_id,
+        approvalRequestId,
+        {
+          approvedAt: APPROVED_AT,
+          approvedUse: "Cognirise industry imagery",
+          publicPath: item.definition.publicPath,
+          associatedIndustry: item.definition.slug,
+        },
+      ],
+    );
+    approved.set(item.definition.publicPath, {
+      ...item,
+      assetId: String(media.asset_id),
+      versionId: String(approvedVersion.id),
+    });
+  }
+  return approved;
+}
+
+async function applyCutover(
+  plan: Awaited<ReturnType<typeof loadPlan>>,
+) {
+  const approvedStorageKeys = await uploadApprovedMedia(plan);
+  const { pool } = await import("@workspace/db");
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const administrators = await client.query(
+      `SELECT id::text,email FROM cms_users
+        WHERE role='administrator' AND status='active'
+        ORDER BY created_at`,
+    );
+    if (administrators.rowCount !== 1) {
+      throw new Error("The cutover requires exactly one active CMS administrator for attribution.");
+    }
+    const admin = administrators.rows[0] as { id: string; email: string };
+    const approvedMedia = await approveMedia(client, admin, plan, approvedStorageKeys);
+    let published = 0;
+    let replayed = 0;
+
+    for (const item of plan.filter((candidate) => candidate.definition.slug)) {
+      const slug = item.definition.slug!;
+      const media = approvedMedia.get(item.definition.publicPath)!;
+      const idempotencyKey = `${CUTOVER_PREFIX}:${slug}`;
+      const editionResult = await client.query(
+        `SELECT d.id::text document_id,e.id::text edition_id,e.locale,e.publication_state,
+                e.published_revision_id::text
+           FROM cms_documents d
+           JOIN cms_market_editions e ON e.document_id=d.id AND e.market='uae'
+          WHERE d.kind='industry' AND d.canonical_slug=$1`,
+        [slug],
+      );
+      if (editionResult.rowCount !== 1 || editionResult.rows[0].locale !== "en") {
+        throw new Error(`Expected one UAE/English industry edition for ${slug}.`);
+      }
+      const edition = editionResult.rows[0] as {
+        document_id: string;
+        edition_id: string;
+        published_revision_id: string | null;
+      };
+      const legacyReceipt = await client.query(
+        "SELECT subject_id FROM cms_operation_receipts WHERE idempotency_key=$1",
+        [`${LEGACY_CUTOVER_PREFIX}:${slug}`],
+      );
+      const receipt = await client.query(
+        `SELECT r.request_digest,a.metadata
+           FROM cms_operation_receipts r
+           LEFT JOIN cms_audit_events a ON a.request_id=r.idempotency_key
+          WHERE r.idempotency_key=$1`,
+        [idempotencyKey],
+      );
+      if (receipt.rowCount) {
+        const auditMetadata = receipt.rows[0].metadata as Record<string, unknown> | null;
+        const sourceRevisionId = typeof auditMetadata?.sourceRevisionId === "string"
+          ? auditMetadata.sourceRevisionId
+          : legacyReceipt.rowCount
+            ? String(legacyReceipt.rows[0].subject_id)
+            : null;
+        if (!sourceRevisionId) {
+          throw new Error(`Cutover receipt for ${slug} is missing its immutable source revision identity.`);
+        }
+        const replayDigest = resultDigest({
+          slug,
+          checksum: item.operation.checksum,
+          mediaVersionId: media.versionId,
+          publicPath: item.definition.publicPath,
+          sourceRevisionId,
+        });
+        if (receipt.rows[0].request_digest !== replayDigest) {
+          throw new Error(`Cutover receipt conflict for ${slug}.`);
+        }
+        replayed++;
+        continue;
+      }
+      let sourceRevision;
+      if (legacyReceipt.rowCount) {
+        sourceRevision = await client.query(
+          `SELECT id::text,revision_number,payload,workflow_state
+             FROM cms_revisions
+            WHERE id=$1 AND edition_id=$2`,
+          [legacyReceipt.rows[0].subject_id, edition.edition_id],
+        );
+      } else if (edition.published_revision_id) {
+        sourceRevision = await client.query(
+          `SELECT id::text,revision_number,payload,workflow_state
+             FROM cms_revisions
+            WHERE id=$1 AND edition_id=$2 AND workflow_state='approved'`,
+          [edition.published_revision_id, edition.edition_id],
+        );
+      } else {
+        sourceRevision = await client.query(
+          `SELECT id::text,revision_number,payload,workflow_state
+             FROM cms_revisions
+            WHERE edition_id=$1
+            ORDER BY revision_number`,
+          [edition.edition_id],
+        );
+        if (
+          sourceRevision.rowCount !== 1
+          || Number(sourceRevision.rows[0].revision_number) !== 1
+          || resultDigest({
+            ...sourceRevision.rows[0].payload,
+            mediaIds: [],
+            content: {
+              ...sourceRevision.rows[0].payload.content,
+              heroMediaId: undefined,
+            },
+          }) !== resultDigest(item.contentOperation!.payload)
+        ) {
+          throw new Error(`${slug} has unreviewed editorial drift; choose and approve a source revision before the image cutover.`);
+        }
+      }
+      if (sourceRevision.rowCount !== 1) {
+        throw new Error(`No explicitly reviewed source revision exists for ${slug}.`);
+      }
+      const source = sourceRevision.rows[0] as {
+        id: string;
+        revision_number: number;
+        payload: Record<string, unknown>;
+      };
+      const request = {
+        slug,
+        checksum: item.operation.checksum,
+        mediaVersionId: media.versionId,
+        publicPath: item.definition.publicPath,
+        sourceRevisionId: source.id,
+      };
+      const requestDigest = resultDigest(request);
+      const latestRevision = await client.query(
+        "SELECT COALESCE(max(revision_number),0)::int latest FROM cms_revisions WHERE edition_id=$1",
+        [edition.edition_id],
+      );
+      const payload = structuredClone(source.payload);
+      payload.mediaIds = [media.assetId];
+      payload.content = {
+        ...((payload.content && typeof payload.content === "object") ? payload.content : {}),
+        heroMediaId: media.assetId,
+      };
+      const validation = validateCmsSnapshot("industry" as CmsDocumentKind, payload, "publish");
+      if (!validation.success) {
+        throw new Error(`${slug}: ${validation.errors.join("; ")}`);
+      }
+      const revisionResult = await client.query(
+        `INSERT INTO cms_revisions
+          (edition_id,revision_number,payload_version,payload,content_digest,workflow_state,
+           created_by_user_id,approved_by_user_id,approved_at,reason)
+         VALUES ($1,$2,1,$3,$4,'approved',$5,$5,now(),$6)
+         RETURNING id::text`,
+        [
+          edition.edition_id,
+          Number(latestRevision.rows[0].latest) + 1,
+          validation.data,
+          resultDigest(validation.data),
+          admin.id,
+          "Approved Cognirise Pulse industry-image cutover; previous revisions and media preserved.",
+        ],
+      );
+      const revisionId = String(revisionResult.rows[0].id);
+      await client.query(
+        `INSERT INTO cms_media_references
+          (asset_id,media_version_id,document_id,field_path)
+         VALUES ($1,$2,$3,$4)`,
+        [media.assetId, media.versionId, edition.document_id, `revision:${revisionId}`],
+      );
+      await client.query(
+        `UPDATE cms_market_editions
+            SET publication_state='published',parity_complete=true,publish_at=NULL,
+                published_revision_id=$2,published_at=now(),updated_at=now()
+          WHERE id=$1`,
+        [edition.edition_id, revisionId],
+      );
+      await client.query(
+        "UPDATE cms_documents SET updated_at=now() WHERE id=$1",
+        [edition.document_id],
+      );
+      await client.query(
+        `INSERT INTO cms_operation_receipts
+          (idempotency_key,operation,subject_id,request_digest,result_digest)
+         VALUES ($1,'cms.industry.pulse-media-cutover',$2,$3,$4)`,
+        [
+          idempotencyKey,
+          revisionId,
+          requestDigest,
+          resultDigest({
+            documentId: edition.document_id,
+            editionId: edition.edition_id,
+            revisionId,
+            mediaId: media.assetId,
+            mediaVersionId: media.versionId,
+          }),
+        ],
+      );
+      await client.query(
+        `INSERT INTO cms_audit_events
+          (actor_user_id,actor_label,action,target_type,target_id,request_id,metadata)
+         VALUES ($1,$2,'document.published','document',$3,$4,$5)`,
+        [
+          admin.id,
+          admin.email,
+          edition.document_id,
+          idempotencyKey,
+          {
+            market: "uae",
+            locale: "en",
+            revisionId,
+            mediaId: media.assetId,
+            mediaVersionId: media.versionId,
+            sourceRevisionId: source.id,
+            reason: "Approved Cognirise Pulse industry-image cutover",
+          },
+        ],
+      );
+      published++;
+    }
+    await verifyCutover(plan, client);
+    await client.query("COMMIT");
+    console.log(`Pulse industry cutover applied: media=9 published=${published} replayed=${replayed} unassociated=3.`);
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+async function verifyCutover(
+  plan: Awaited<ReturnType<typeof loadPlan>>,
+  providedClient?: SqlClient,
+) {
+  const { pool } = await import("@workspace/db");
+  const ownedClient = providedClient ? null : await pool.connect();
+  const client = providedClient ?? ownedClient!;
+  try {
+    let associated = 0;
+    let unassociated = 0;
+    for (const item of plan) {
+      const media = await client.query(
+        `SELECT a.id::text asset_id,a.status,a.alt_text,a.credit,
+                v.id::text version_id,v.storage_key,v.checksum,v.width,v.height,v.metadata
+           FROM cms_media_assets a
+           JOIN LATERAL (
+             SELECT * FROM cms_media_versions
+              WHERE asset_id=a.id ORDER BY version_number DESC LIMIT 1
+           ) v ON true
+          WHERE a.checksum=$1`,
+        [item.operation.checksum],
+      );
+      if (media.rowCount !== 1) {
+        throw new Error(`Missing approved media for ${item.definition.publicPath}.`);
+      }
+      const row = media.rows[0] as Record<string, unknown>;
+      const metadata = row.metadata as Record<string, unknown> | null;
+      if (
+        row.status !== "active"
+        || row.alt_text !== item.definition.altText
+        || row.credit !== "Cognirise"
+        || row.checksum !== item.operation.checksum
+        || Number(row.width) !== 1536
+        || Number(row.height) !== 1024
+        || String(row.storage_key).startsWith("deferred/")
+        || metadata?.accessibilityStatus !== "approved"
+        || metadata?.rightsStatus !== "approved-use"
+      ) {
+        throw new Error(`Approved media governance parity failed for ${item.definition.publicPath}.`);
+      }
+
+      if (!item.definition.slug) {
+        const references = await client.query(
+          "SELECT count(*)::int count FROM cms_media_references WHERE asset_id=$1",
+          [row.asset_id],
+        );
+        if (Number(references.rows[0].count) !== 0) {
+          throw new Error(`${item.definition.sector} must remain an unassociated governed asset.`);
+        }
+        unassociated++;
+        continue;
+      }
+
+      const publication = await client.query(
+        `SELECT d.id::text document_id,e.publication_state,e.published_revision_id::text,
+                r.workflow_state,r.payload,ref.asset_id::text,ref.media_version_id::text
+           FROM cms_documents d
+           JOIN cms_market_editions e ON e.document_id=d.id AND e.market='uae'
+           JOIN cms_revisions r ON r.id=e.published_revision_id
+           JOIN cms_media_references ref ON ref.document_id=d.id
+             AND ref.field_path='revision:' || r.id::text
+             AND ref.asset_id=$2
+          WHERE d.kind='industry' AND d.canonical_slug=$1`,
+        [item.definition.slug, row.asset_id],
+      );
+      if (publication.rowCount !== 1) {
+        throw new Error(`Missing published pinned revision for ${item.definition.slug}.`);
+      }
+      const published = publication.rows[0] as Record<string, unknown>;
+      const validation = validateCmsSnapshot(
+        "industry",
+        published.payload,
+        "publish",
+      );
+      if (
+        published.publication_state !== "published"
+        || published.workflow_state !== "approved"
+        || published.media_version_id !== row.version_id
+        || !validation.success
+        || validation.data.mediaIds[0] !== row.asset_id
+        || (validation.data.content as Record<string, unknown>).heroMediaId !== row.asset_id
+      ) {
+        throw new Error(`Published industry parity failed for ${item.definition.slug}.`);
+      }
+      const history = await client.query(
+        `SELECT count(DISTINCT r.id)::int revision_count,
+                count(DISTINCT r.id) FILTER (WHERE r.revision_number=1)::int original_revision_count,
+                count(DISTINCT ref.id) FILTER (WHERE ref.asset_id<>$2)::int preserved_reference_count
+           FROM cms_documents d
+           JOIN cms_market_editions e ON e.document_id=d.id AND e.market='uae'
+           JOIN cms_revisions r ON r.edition_id=e.id
+           LEFT JOIN cms_media_references ref ON ref.document_id=d.id
+          WHERE d.kind='industry' AND d.canonical_slug=$1`,
+        [item.definition.slug, row.asset_id],
+      );
+      const preserved = history.rows[0] as Record<string, unknown>;
+      if (
+        Number(preserved.revision_count) < 2
+        || Number(preserved.original_revision_count) !== 1
+        || Number(preserved.preserved_reference_count) < 1
+      ) {
+        throw new Error(`Original revision or media preservation failed for ${item.definition.slug}.`);
+      }
+      associated++;
+    }
+    const publishedIndustries = await client.query(
+      `SELECT count(*)::int count
+         FROM cms_market_editions e
+         JOIN cms_documents d ON d.id=e.document_id
+        WHERE d.kind='industry' AND e.publication_state='published'`,
+    );
+    const additionalPages = await client.query(
+      `SELECT count(*)::int count
+         FROM cms_documents
+        WHERE kind='industry' AND canonical_slug IN ('defense','retail-cpg')`,
+    );
+    const additionalPublications = await client.query(
+      `SELECT count(*)::int count
+         FROM cms_market_editions e
+         JOIN cms_documents d ON d.id=e.document_id
+        WHERE d.kind='industry'
+          AND d.canonical_slug IN ('manufacturing','defense','retail-cpg')
+          AND e.publication_state='published'`,
+    );
+    if (
+      Number(publishedIndustries.rows[0].count) !== 6
+      || Number(additionalPages.rows[0].count) !== 0
+      || Number(additionalPublications.rows[0].count) !== 0
+    ) {
+      throw new Error("Only the six existing public industries may be published by this cutover.");
+    }
+    console.log(`Verified Pulse industry cutover: approvedMedia=9 publishedIndustries=${associated} unassociatedMedia=${unassociated}.`);
+  } finally {
+    ownedClient?.release();
+  }
+}
+
+async function main() {
+  const plan = await loadPlan();
+  if (!shouldApply && !shouldVerify) {
+    console.log(JSON.stringify({
+      approvedMedia: plan.map((item) => item.definition.publicPath),
+      publishedIndustries: plan.flatMap((item) => item.definition.slug ? [item.definition.slug] : []),
+      unassociatedMedia: plan.flatMap((item) => item.definition.slug ? [] : [item.definition.sector]),
+    }, null, 2));
+    console.error("Dry run: pass --apply-db or --verify-db with --target=development.");
+    return;
+  }
+  assertDevelopmentTarget();
+  try {
+    if (shouldApply) await applyCutover(plan);
+    await verifyCutover(plan);
+  } finally {
+    const { pool } = await import("@workspace/db");
+    await pool.end();
+  }
+}
+
+main().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : error);
+  process.exitCode = 1;
+});
