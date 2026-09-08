@@ -78,7 +78,7 @@ export const ALLIANCE_PLATFORMS: Record<AlliancePlatform["slug"], AlliancePlatfo
       { title: "Connector pathways at the intake edge", description: "Integration planning can cover databases, warehouses, storage, streams and file-based intake, subject to partner-supported options." },
       { title: "Outputs retain the preparation story", description: "Stage files and a pipeline report make the path from raw input to prepared output more visible." },
     ],
-    contribution: "Cognirise identifies the data product and quality boundary, connects AutoData to the relevant source and destination systems, and places its outputs inside governed analytics, model and CogniOS delivery workflows. Datatoolpack remains the product owner.",
+    contribution: "Datatoolpack brings the specialist AutoData platform and data-preparation capability. Cognirise shapes the data product and quality approach, connects the relevant source and destination systems, and integrates AutoData outputs into governed analytics, model and CogniOS delivery workflows.",
     sources: [
       { label: "Datatoolpack AutoData overview", url: "https://datatoolpack.com/", supports: "Profiling, cleaning, feature engineering, anomaly detection, pipeline automation and AI-ready export." },
       { label: "AutoData pipeline", url: "https://autodata.datatoolpack.com/", supports: "Pipeline stages, transformations, stage CSV outputs and pipeline report." },

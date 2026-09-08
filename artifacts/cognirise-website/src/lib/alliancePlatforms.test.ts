@@ -16,7 +16,13 @@ test("defines three governed alliance platform narratives with traceable officia
     assert.ok(platform.facts.every((fact) => fact.sourceUrl.startsWith("https://")));
     assert.ok(platform.sources.every((source) => source.url.startsWith("https://") && source.supports));
     assert.equal(platform.verifiedOn, "6 September 2026");
-    assert.match(platform.contribution, /remains the product owner/);
+    if (platform.slug === "datatoolpack") {
+      assert.match(platform.contribution, /Datatoolpack brings the specialist AutoData platform/);
+      assert.match(platform.contribution, /Cognirise shapes the data product and quality approach/);
+      assert.doesNotMatch(platform.contribution, /remains the product owner|not a Cognirise product/i);
+    } else {
+      assert.match(platform.contribution, /remains the product owner/);
+    }
     assert.ok(platform.meta.title.length > 30);
     assert.ok(platform.meta.description.length > 100);
   }

@@ -159,6 +159,34 @@
   clip-path: polygon(0 8%, 100% 0, 100% 100%, 9% 92%);
 }
 
+.autodata-stack-card {
+  min-height: 300px;
+}
+
+.autodata-stack-card-content {
+  padding: 3.75rem 2rem 3.75rem;
+}
+
+@media (min-width: 768px) {
+  .autodata-stack-card {
+    min-height: 340px;
+  }
+
+  .autodata-stack-card-content {
+    padding: 4.5rem 2rem 4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .autodata-stack-card {
+    min-height: 360px;
+  }
+
+  .autodata-stack-card-content {
+    padding: 4.75rem 2.25rem 4.75rem;
+  }
+}
+
 .brand-gradient-text {
   background: linear-gradient(105deg, hsl(var(--brand-violet)), hsl(var(--brand-pink)), hsl(var(--brand-coral)));
   -webkit-background-clip: text;

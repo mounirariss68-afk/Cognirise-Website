@@ -92,14 +92,6 @@ export const AUTO_DATA_PIPELINE: PipelineStage[] = [
   }
 ];
 
-export const FLEET_EXAMPLE = [
-  { source: "Wind OEM A", tag: "WTG_01.ActPwr" },
-  { source: "PV inverter OEM B", tag: "INV_A3.P_AC_kW" },
-  { source: "Storage OEM C", tag: "BESS.RackPower" },
-  { source: "Site SCADA", tag: "PLT_NET_MW" },
-  { source: "Monthly report", tag: "Net output" },
-];
-
 export const AUTODATA_CAPABILITIES = [
   {
     title: "Dataset profiling",
@@ -135,81 +127,17 @@ export const AUTODATA_CAPABILITIES = [
   }
 ];
 
-export type GovernanceRecord = {
-  id: string;
-  classification: "explanatory-copy" | "partner-supplied-claim" | "approved-evidence";
-  publicationStatus: "published" | "published-with-attribution" | "withheld";
-  source: string;
-  sourceLocation: string;
-  verifiedOn: string | null;
-  note: string;
-};
-
-export const AUTODATA_CONTENT_GOVERNANCE: GovernanceRecord[] = [
+export const AUTODATA_DEEP_DIVES = [
   {
-    id: "model-readiness-framing",
-    classification: "explanatory-copy",
-    publicationStatus: "published",
-    source: "Cognirise editorial synthesis",
-    sourceLocation: "AutoData briefing, slides 2–4",
-    verifiedOn: "6 September 2026",
-    note: "Explains stack position and the alliance boundary without making a comparative performance claim.",
+    id: "overview",
+    label: "Datatoolpack AutoData overview",
+    url: "https://datatoolpack.com/",
+    description: "Explore the platform’s data-profiling, preparation, feature-engineering, and export capabilities."
   },
   {
-    id: "fleet-example",
-    classification: "explanatory-copy",
-    publicationStatus: "published",
-    source: "Cognirise editorial synthesis",
-    sourceLocation: "AutoData briefing, slide 2",
-    verifiedOn: "6 September 2026",
-    note: "The five source labels are an explanatory fleet-data example, not a customer case study.",
-  },
-  {
-    id: "pipeline-and-capabilities",
-    classification: "partner-supplied-claim",
-    publicationStatus: "published-with-attribution",
-    source: "Datatoolpack briefing",
-    sourceLocation: "AutoData briefing, slides 3–5",
-    verifiedOn: null,
-    note: "Product mechanism and capability descriptions are partner supplied and are not independent Cognirise validation.",
-  },
-  {
-    id: "official-product-pages",
-    classification: "approved-evidence",
-    publicationStatus: "published",
-    source: "Datatoolpack official product pages",
-    sourceLocation: "Links in the evidence register",
-    verifiedOn: "6 September 2026",
-    note: "Supports the high-level preparation workflow and capability summary.",
-  },
-  {
-    id: "restricted-briefing-claims",
-    classification: "partner-supplied-claim",
-    publicationStatus: "withheld",
-    source: "Datatoolpack briefing",
-    sourceLocation: "AutoData briefing, slides 1, 3, and 6",
-    verifiedOn: null,
-    note: "Quantitative problem statements, deployment promises, named connectors, train–serve-skew wording, named customers, benchmarks, cost claims, and performance comparisons are withheld pending source and publication approval.",
-  },
+    id: "pipeline-architecture",
+    label: "AutoData pipeline architecture",
+    url: "https://autodata.datatoolpack.com/",
+    description: "See the preparation stages, transformations, and inference-replay architecture in more detail."
+  }
 ];
-
-export const EVIDENCE_REGISTER = {
-  verifiedOn: "6 September 2026",
-  briefing: {
-    label: "Supplied AutoData briefing",
-    supports: "Fleet example, stack position, eight-stage pipeline, fitted-transform replay, and capability descriptions.",
-    status: "Partner-supplied material; mechanism descriptions are not independent Cognirise validation.",
-  },
-  sources: [
-    {
-      label: "Datatoolpack AutoData overview",
-      url: "https://datatoolpack.com/",
-      supports: "Profiling, cleaning, feature engineering, anomaly detection, pipeline automation, and model-ready export."
-    },
-    {
-      label: "AutoData pipeline architecture",
-      url: "https://autodata.datatoolpack.com/",
-      supports: "Pipeline stages, transformations, and evidence of separated inference replay."
-    }
-  ]
-};

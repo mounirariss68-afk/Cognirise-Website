@@ -121,6 +121,80 @@ async function navigate() {
   await waitForReady();
 }
 
+async function assertStackCardContainsCopy(width, height, mobile) {
+  await send("Emulation.setDeviceMetricsOverride", {
+    width,
+    height,
+    deviceScaleFactor: 1,
+    mobile,
+  });
+  await navigate();
+  const bounds = await evaluate(`(() => {
+    const card = document.querySelector('[data-testid="card-autodata-stack"]');
+    const content = document.querySelector('[data-testid="content-autodata-stack"]');
+    const cardRect = card.getBoundingClientRect();
+    const contentRect = content.getBoundingClientRect();
+    const copyRects = [...content.children].flatMap((element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return [...range.getClientRects()].map((rect) => ({
+        label: element.textContent.trim(),
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        left: rect.left,
+      }));
+    });
+    const clipPath = getComputedStyle(card).clipPath;
+    const isInsideClip = (point) => {
+      const x = point.x - cardRect.left;
+      const y = point.y - cardRect.top;
+      const topEdge = cardRect.height * 0.08 * (1 - x / cardRect.width);
+      const leftEdge = cardRect.width * 0.09 * (y / cardRect.height - 0.08) / 0.84;
+      const bottomEdge = cardRect.height * (0.92 + 0.08 * (x / cardRect.width - 0.09) / 0.91);
+      return y >= topEdge - 0.5
+        && x >= leftEdge - 0.5
+        && y <= bottomEdge + 0.5
+        && x <= cardRect.width + 0.5;
+    };
+    const unsafeCopyCorners = copyRects.flatMap((rect) => {
+      const inset = 1;
+      const corners = [
+        { x: rect.left + inset, y: rect.top + inset },
+        { x: rect.right - inset, y: rect.top + inset },
+        { x: rect.right - inset, y: rect.bottom - inset },
+        { x: rect.left + inset, y: rect.bottom - inset },
+      ];
+      return corners
+        .filter((point) => !isInsideClip(point))
+        .map(() => rect.label);
+    });
+    return {
+      card: { top: cardRect.top, right: cardRect.right, bottom: cardRect.bottom, left: cardRect.left },
+      content: { top: contentRect.top, right: contentRect.right, bottom: contentRect.bottom, left: contentRect.left },
+      copyRects,
+      clipPath,
+      unsafeCopyCorners,
+      scrollOverflow: content.scrollHeight > content.clientHeight || content.scrollWidth > content.clientWidth,
+    };
+  })()`);
+  assert.equal(bounds.scrollOverflow, false, `stack-card content scrolls at ${width}px`);
+  assert.equal(
+    bounds.clipPath,
+    "polygon(0px 8%, 100% 0px, 100% 100%, 9% 92%)",
+    `stack card clip changed unexpectedly at ${width}px`,
+  );
+  assert.deepEqual(bounds.unsafeCopyCorners, [], `stack-card copy intersects the clipped edge at ${width}px`);
+  assert.ok(bounds.content.left >= bounds.card.left, `stack-card content escapes left at ${width}px`);
+  assert.ok(bounds.content.right <= bounds.card.right, `stack-card content escapes right at ${width}px`);
+  for (const rect of bounds.copyRects) {
+    assert.ok(rect.top >= bounds.card.top, `stack-card copy escapes top at ${width}px`);
+    assert.ok(rect.right <= bounds.card.right, `stack-card copy escapes right at ${width}px`);
+    assert.ok(rect.bottom <= bounds.card.bottom, `stack-card copy escapes bottom at ${width}px`);
+    assert.ok(rect.left >= bounds.card.left, `stack-card copy escapes left at ${width}px`);
+  }
+}
+
 try {
   await send("Page.enable");
   await send("Runtime.enable");
@@ -145,7 +219,7 @@ try {
       linearDisplay: getComputedStyle(linear).display,
       selected: first.getAttribute("aria-selected"),
       tabs: document.querySelectorAll('[data-testid^="tab-stage-"]').length,
-      sources: document.querySelectorAll('[data-testid^="text-source-interactive-"]').length,
+      sourceStatusRows: document.querySelectorAll('[data-testid^="text-source-interactive-"]').length,
       invalidControls: [...document.querySelectorAll('[data-testid^="tab-stage-"]')]
         .filter((tab) => !document.getElementById(tab.getAttribute("aria-controls"))).length,
       title: document.title,
@@ -158,7 +232,7 @@ try {
   assert.equal(desktop.linearDisplay, "none");
   assert.equal(desktop.selected, "true");
   assert.equal(desktop.tabs, 8);
-  assert.equal(desktop.sources, 8);
+  assert.equal(desktop.sourceStatusRows, 0);
   assert.equal(desktop.invalidControls, 0);
   assert.match(desktop.title, /Datatoolpack AutoData Model-Readiness Layer/);
   assert.match(desktop.description, /eight-stage pipeline/);
@@ -200,13 +274,9 @@ try {
     "true",
   );
 
-  await send("Emulation.setDeviceMetricsOverride", {
-    width: 390,
-    height: 844,
-    deviceScaleFactor: 1,
-    mobile: true,
-  });
-  await navigate();
+  await assertStackCardContainsCopy(1440, 1000, false);
+  await assertStackCardContainsCopy(768, 1024, false);
+  await assertStackCardContainsCopy(390, 844, true);
   const mobile = await evaluate(`(() => ({
     interactiveDisplay: getComputedStyle(document.querySelector(".autodata-pipeline-interactive")).display,
     linearDisplay: getComputedStyle(document.querySelector(".autodata-pipeline-linear")).display,
