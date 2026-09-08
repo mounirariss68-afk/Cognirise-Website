@@ -211,3 +211,17 @@ mtime_ms = 1788900634206
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/4393449a-08fe-4f40-b976-f8c20c80c23e/fad44cdf-e60f-497f-baae-87f05b867d6a"
 storage_version_token = "1788900660237416"
 content_type = "image/png"
+
+[[outputs]]
+id = "c9TIEpJYbZh8KwCobZYjU"
+uri = "file://attached_assets/generated_images/pulse-industries-final-candidates/pulse-industry-public-sector-redesigned-refined.png"
+type = "image"
+title = "Public Sector — Inclusive Citizen Service Delivery"
+description = "Native 1536×1024 refinement with one parent and pram, an independent wheelchair user on the accessible route, an older citizen carrying an issued document, staffed service bays, visible case processing, resolution, and appeal paths."
+logical_id = "b99a8857-f631-4b82-9293-97c49e8b36bf"
+content_hash = "sha256:f902f449923814fec5a2bd0c695ce5481044256d87af117aa9a4dd1360267373"
+size = 2514071
+mtime_ms = 1788901483827
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b99a8857-f631-4b82-9293-97c49e8b36bf/741bbffd-c06b-4940-9584-a49e262afe3d"
+storage_version_token = "1788901506210769"
+content_type = "image/png"
