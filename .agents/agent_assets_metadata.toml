@@ -225,3 +225,17 @@ mtime_ms = 1788901483827
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b99a8857-f631-4b82-9293-97c49e8b36bf/741bbffd-c06b-4940-9584-a49e262afe3d"
 storage_version_token = "1788901506210769"
 content_type = "image/png"
+
+[[outputs]]
+id = "RaF3PfKDjzGjKtk1_nQGI"
+uri = "file://attached_assets/generated_images/pulse-industries-final-candidates/pulse-industry-public-sector-final-light.png"
+type = "image"
+title = "Public Sector — Lightened Final Candidate"
+description = "Native 1536×1024 tonal refinement with brighter civic architecture and midtones, while preserving the approved citizen-service composition and Pulse contrast."
+logical_id = "765f9bf6-8dbb-41d0-bc68-18ef1304f6c4"
+content_hash = "sha256:942dfbcb83fc0264f06f4ba60e7511670973fe75b14ada8d3b144a155918ec4b"
+size = 2446012
+mtime_ms = 1788901590599
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/765f9bf6-8dbb-41d0-bc68-18ef1304f6c4/59b6c522-73c2-40cb-983b-5b4e6d6cd979"
+storage_version_token = "1788901613559224"
+content_type = "image/png"
