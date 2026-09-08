@@ -49,7 +49,7 @@ const stages = [
     accent: "#e74f91",
     image: "/images/cognirise/blueprint-activate.jpg",
     imageAlt:
-      "Client operators overseeing governed software running in a live automated production facility.",
+      "A forward-deployed engineer and client product owner reviewing orchestrated agent workflows and human approval gates for a live MVP.",
     imagePosition: "50% 52%",
   },
   {
