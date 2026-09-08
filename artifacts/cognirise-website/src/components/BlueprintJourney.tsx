@@ -14,6 +14,10 @@ const stages = [
       "Frame the highest-value opportunity and the decision it needs to unlock. We keep discovery deliberately narrow so effort moves toward proof, not an expanding scope.",
     outcome: "A prioritised opportunity and a clear decision boundary.",
     accent: "#7659df",
+    image: "/images/cognirise/blueprint-innovate.jpg",
+    imageAlt:
+      "A mixed client and Cognirise team prioritising opportunities together around a workshop table.",
+    imagePosition: "50% 48%",
   },
   {
     id: 2,
@@ -27,6 +31,10 @@ const stages = [
     outcome: "A working proof stakeholders can test, challenge and decide on.",
     accent: "#db509e",
     highlight: true,
+    image: "/images/cognirise/blueprint-demonstrate.jpg",
+    imageAlt:
+      "A client team closely testing a working prototype on a large tablet in a bright studio.",
+    imagePosition: "50% 45%",
   },
   {
     id: 3,
@@ -39,6 +47,10 @@ const stages = [
       "Forward-deployed engineers turn the validated direction into a governed MVP, combining accountable human judgement with the speed and scale of agents.",
     outcome: "A usable MVP with the engineering and controls needed to operate.",
     accent: "#e74f91",
+    image: "/images/cognirise/blueprint-activate.jpg",
+    imageAlt:
+      "Client operators overseeing governed software running in a live automated production facility.",
+    imagePosition: "50% 52%",
   },
   {
     id: 4,
@@ -51,6 +63,10 @@ const stages = [
       "We harden the capability, transfer the operating knowledge and leave it in your environment. Your team owns the system and the path to scale it.",
     outcome: "A client-owned capability, operating model and scale plan.",
     accent: "#ff775d",
+    image: "/images/cognirise/blueprint-operate.jpg",
+    imageAlt:
+      "Client leaders transferring ownership as connected teams work across a multi-level operations hub.",
+    imagePosition: "50% 48%",
   },
 ];
 
@@ -174,37 +190,45 @@ export function BlueprintJourney() {
           })}
         </div>
 
-        <div
-          className="relative mt-7 w-full overflow-hidden bg-[#f8f5f1]"
-          style={{ aspectRatio: "3.4 / 1" }}
-        >
-          <img
-            src={assetUrl("/images/cognirise/blueprint-annotated.png")}
-            alt="A connected four-part illustration moving from opportunity discovery through prototype and human-agent delivery to an owned operational system."
-            width={1326}
-            height={699}
-            loading="lazy"
-            decoding="async"
-            className="absolute left-0 top-[-47%] h-auto w-full max-w-none select-none"
-          />
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-3 bg-[#f8f5f1] lg:h-8" />
-          <div
-            className="absolute inset-0 z-20 grid grid-cols-4"
-            aria-hidden="true"
-          >
-            {stages.map((stage) => (
-              <div
+        <div className="mt-7 grid grid-cols-2 gap-1.5 overflow-hidden bg-[#f8f5f1] sm:gap-2 lg:grid-cols-4 lg:gap-1">
+          {stages.map((stage) => {
+            const selected = stage.id === activeStage;
+            return (
+              <figure
                 key={stage.id}
                 onMouseEnter={() => setActiveStage(stage.id)}
                 onClick={() => setActiveStage(stage.id)}
-                className={`transition-colors ${
-                  activeStage === stage.id
-                    ? "bg-[#102957]/[0.015]"
-                    : "hover:bg-white/10"
+                className={`group relative m-0 min-h-[210px] cursor-pointer overflow-hidden bg-[#102957] sm:min-h-[260px] lg:min-h-[360px] ${
+                  selected ? "z-10" : ""
                 }`}
-              />
-            ))}
-          </div>
+              >
+                <motion.img
+                  src={assetUrl(stage.image)}
+                  alt={stage.imageAlt}
+                  width={1024}
+                  height={1024}
+                  loading="lazy"
+                  decoding="async"
+                  animate={{
+                    scale: selected && !reducedMotion ? 1.025 : 1,
+                    opacity: selected ? 1 : 0.78,
+                  }}
+                  transition={{ duration: reducedMotion ? 0 : 0.45 }}
+                  className="absolute inset-0 h-full w-full select-none object-cover"
+                  style={{ objectPosition: stage.imagePosition }}
+                />
+                <div
+                  className={`pointer-events-none absolute inset-0 transition-opacity ${
+                    selected ? "opacity-100" : "opacity-0"
+                  }`}
+                  style={{
+                    boxShadow: `inset 0 -5px 0 ${stage.accent}, inset 0 0 0 1px rgba(255,255,255,.35)`,
+                  }}
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#071936]/35 via-transparent to-white/5" />
+              </figure>
+            );
+          })}
         </div>
 
         <div className="relative mt-5 grid grid-cols-4 items-start gap-0" aria-label="Delivery timing">
