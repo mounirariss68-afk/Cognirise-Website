@@ -135,12 +135,12 @@ export function BlueprintJourney() {
           .blueprint-visual img {
             width: 100%; height: 100%; object-fit: cover;
             filter: saturate(1.02) contrast(0.99) brightness(1.04);
-            transform: scale(1.08);
-            transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
+            transform: scale(1);
+            transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
           }
           .blueprint-item.active .blueprint-visual img {
             filter: saturate(1.08) contrast(1) brightness(1.02);
-            transform: scale(1);
+            transform: scale(1.04);
           }
           .blueprint-visual:after {
             content: ""; position: absolute; z-index: 2; inset: 0;
