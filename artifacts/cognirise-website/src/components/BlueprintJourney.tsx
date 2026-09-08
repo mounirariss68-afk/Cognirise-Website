@@ -163,7 +163,10 @@ export function BlueprintJourney() {
             appearance: none; border: 0; background: transparent; color: white;
             width: 100%; min-width: 0; padding: 25px 24px 20px;
             display: grid; grid-template-columns: 1fr; grid-template-rows: auto auto auto; gap: 6px;
-            text-align: left; cursor: pointer; align-self: end;
+            text-align: left; cursor: pointer; align-self: end; z-index: 3;
+          }
+          .blueprint-trigger:before {
+            content: ""; position: absolute; inset: 0; cursor: pointer;
           }
           .blueprint-trigger:focus-visible { outline: 3px solid hsl(var(--brand-coral)); outline-offset: -4px; }
 
@@ -177,7 +180,7 @@ export function BlueprintJourney() {
           .blueprint-item.active .blueprint-title { color: white; text-shadow: 0 2px 16px rgba(0,0,0,0.9); }
           .blueprint-item.active .blueprint-subtitle { color: rgba(255,255,255,0.95); }
 
-          .blueprint-panel { display: grid; grid-template-rows: 0fr; min-height: 0; transition: grid-template-rows 0.58s cubic-bezier(0.16, 1, 0.3, 1); }
+          .blueprint-panel { position: relative; z-index: 4; pointer-events: none; display: grid; grid-template-rows: 0fr; min-height: 0; transition: grid-template-rows 0.58s cubic-bezier(0.16, 1, 0.3, 1); }
           .blueprint-item.active .blueprint-panel { grid-template-rows: 1fr; }
           .blueprint-panel-inner { min-height: 0; overflow: hidden; }
           .blueprint-panel-content { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 14px; }

@@ -28,3 +28,8 @@ test("BlueprintJourney uses a controlled gradient for readability without hiding
   assert.match(source, /linear-gradient\(0deg, rgba\(7,25,54,0\.95\) 0%, rgba\(7,25,54,0\.6\) 35%, transparent 70%\)/);
   assert.match(source, /linear-gradient\(0deg, rgba\(7,25,54,0\.98\) 0%, rgba\(7,25,54,0\.85\) 55%, transparent 90%\)/);
 });
+
+test("BlueprintJourney makes the full image card a hover and click target", () => {
+  assert.match(source, /\.blueprint-trigger:before\s*\{[\s\S]*position: absolute; inset: 0;/);
+  assert.match(source, /\.blueprint-panel\s*\{[\s\S]*pointer-events: none;/);
+});
