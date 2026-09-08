@@ -10,6 +10,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -304,7 +305,7 @@ export const cmsMediaVersionsTable = pgTable(
       table.assetId,
       table.versionNumber,
     ),
-    uniqueIndex("cms_media_versions_id_asset_uidx").on(table.id, table.assetId),
+    unique("cms_media_versions_id_asset_uidx").on(table.id, table.assetId),
     uniqueIndex("cms_media_versions_storage_key_uidx").on(table.storageKey),
   ],
 );

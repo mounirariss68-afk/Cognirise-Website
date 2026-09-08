@@ -242,7 +242,7 @@ async function applyDatabase(
           const durableVersionIsCurrent = latestVersion
             && latestVersion.checksum === operation.checksum
             && latestVersion.byteSize === operation.byteSize
-            && latestVersion.storageKey === durableStorageKey;
+            && !latestVersion.storageKey.startsWith("deferred/");
           if (!durableVersionIsCurrent) {
             await tx.insert(cmsMediaVersionsTable).values({
               assetId: asset.id,
