@@ -48,6 +48,21 @@ test("both service tile variants render every available destination as compact t
   assert.doesNotMatch(source, /\.cps-tile-dest\{[^}]*border:/);
 });
 
+test("service interest analytics distinguish card activation from destination navigation", async () => {
+  const [tiles, home, overview] = await Promise.all([
+    readFile(new URL("../components/ServiceLineTiles.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../pages/Home.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../pages/ServicesOverview.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.match(tiles, /trackEvent\("service_card_activated"/);
+  assert.match(tiles, /trackEvent\("service_destination_clicked"/);
+  assert.match(tiles, /service_line: serviceLine/);
+  assert.match(tiles, /destination/);
+  assert.match(tiles, /source/);
+  assert.match(home, /source="homepage"/);
+  assert.match(overview, /source="services_overview"/);
+});
+
 test("service tiles use Pulse raster illustrations instead of generated vector drawings", async () => {
   const source = await readFile(new URL("../components/ServiceLineTiles.tsx", import.meta.url), "utf8");
   assert.match(source, /SERVICE_VISUALS/);

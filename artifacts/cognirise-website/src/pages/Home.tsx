@@ -245,7 +245,7 @@ export default function Home() {
           </motion.p>
         </div>
         
-        <ServiceLineTiles variant="summary" className="mt-10 lg:mt-[65px]" />
+        <ServiceLineTiles variant="summary" source="homepage" className="mt-10 lg:mt-[65px]" />
       </section>
 
       {/* BLUEPRINT */}

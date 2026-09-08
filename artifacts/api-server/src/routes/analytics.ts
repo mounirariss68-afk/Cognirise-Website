@@ -10,8 +10,34 @@ import { hashToken } from "../lib/security";
 
 const router: IRouter = Router();
 const limiter = new SlidingWindowThrottle(120, 60_000);
-const eventNames = new Set(["page_view", "cta_click", "value_scan_submit", "newsletter_subscribe", "publication_view", "web_vital"]);
+const eventNames = new Set([
+  "page_view",
+  "cta_click",
+  "value_scan_submit",
+  "newsletter_subscribe",
+  "publication_view",
+  "web_vital",
+  "service_card_activated",
+  "service_destination_clicked",
+]);
 const propertyKeys = new Set(["cta", "utm_source", "lcp", "inp", "cls"]);
+const serviceLineIds = new Set([
+  "consulting-engineering",
+  "sovereign-solutions",
+  "ai-platforms",
+]);
+const serviceSources = new Set(["homepage", "services_overview"]);
+const serviceDestinations = new Set([
+  "/what-we-do/agentic-enterprise-transformation",
+  "/what-we-do/data-ai-foundations",
+  "/what-we-do/engineering-with-ai",
+  "/what-we-do/sovereign-regulated-ai",
+  "/platforms",
+  "/platforms/lupitor",
+  "/platforms/datatoolpack",
+  "/platforms/bunjee-ai",
+  "/what-we-do/digital-ai-workforce",
+]);
 router.use("/analytics", throttle(limiter, (req) => req.ip ?? "unknown"));
 
 router.post(
@@ -73,14 +99,11 @@ router.post(
       res.status(202).json({ accepted: false, id: null });
       return;
     }
-    const properties = Object.fromEntries(
-      Object.entries(input.properties ?? {}).filter(([key, value]) =>
-        propertyKeys.has(key) &&
-        (["lcp", "inp", "cls"].includes(key)
-          ? typeof value === "number" && Number.isFinite(value)
-          : typeof value === "string"),
-      ),
-    );
+    const properties = sanitizeEventProperties(input.name, input.properties);
+    if (properties === null) {
+      res.status(202).json({ accepted: false, id: null });
+      return;
+    }
     const consent = await pool.query(
       `SELECT id,analytics_allowed FROM cms_analytics_consents
         WHERE subject_digest=$1 AND policy_version=$2
@@ -120,4 +143,46 @@ function safeHost(value: string): string | null {
   } catch {
     return null;
   }
+}
+
+function sanitizeEventProperties(
+  eventName: string,
+  input: Record<string, unknown> | undefined,
+): Record<string, string | number> | null {
+  const properties = input ?? {};
+  if (
+    eventName === "service_card_activated" ||
+    eventName === "service_destination_clicked"
+  ) {
+    const serviceLine = properties.service_line;
+    const source = properties.source;
+    if (
+      typeof serviceLine !== "string" ||
+      !serviceLineIds.has(serviceLine) ||
+      typeof source !== "string" ||
+      !serviceSources.has(source)
+    ) {
+      return null;
+    }
+    if (eventName === "service_card_activated") {
+      return { service_line: serviceLine, source };
+    }
+    const destination = properties.destination;
+    if (
+      typeof destination !== "string" ||
+      !serviceDestinations.has(destination)
+    ) {
+      return null;
+    }
+    return { service_line: serviceLine, destination, source };
+  }
+
+  return Object.fromEntries(
+    Object.entries(properties).filter(([key, value]) =>
+      propertyKeys.has(key) &&
+      (["lcp", "inp", "cls"].includes(key)
+        ? typeof value === "number" && Number.isFinite(value)
+        : typeof value === "string"),
+    ),
+  ) as Record<string, string | number>;
 }

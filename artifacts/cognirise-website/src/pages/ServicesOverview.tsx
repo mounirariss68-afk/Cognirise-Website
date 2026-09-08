@@ -95,7 +95,7 @@ export default function ServicesOverview() {
           </div>
           <p className="cps-services-lead">Start where the current pressure is clearest. We will connect it to the wider operating system from there.</p>
         </div>
-        <ServiceLineTiles variant="full" className="mt-[61px] max-[760px]:mt-[42px]" />
+        <ServiceLineTiles variant="full" source="services_overview" className="mt-[61px] max-[760px]:mt-[42px]" />
       </section>
 
       <section className="cps-route" id="route">

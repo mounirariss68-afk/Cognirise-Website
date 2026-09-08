@@ -10,6 +10,10 @@ import {
   useSpatialDisclosure
 } from "@/components/ui/spatial-disclosure";
 import { PulseImage } from "@/components/ui/pulse-image";
+import { trackEvent } from "@/lib/analytics";
+import { useMarketStore } from "@/store/market";
+
+type ServiceLineTilesSource = "homepage" | "services_overview";
 
 const SERVICE_VISUALS: Record<string, { img: string; pos: string }> = {
   "consulting-engineering": {
@@ -26,7 +30,15 @@ const SERVICE_VISUALS: Record<string, { img: string; pos: string }> = {
   },
 };
 
-export function ServiceLineTiles({ className = "", variant = "full" }: { className?: string, variant?: "full" | "summary" }) {
+export function ServiceLineTiles({
+  className = "",
+  variant = "full",
+  source,
+}: {
+  className?: string;
+  variant?: "full" | "summary";
+  source: ServiceLineTilesSource;
+}) {
   return (
     <SpatialDisclosure
       mode="editorial"
@@ -95,13 +107,30 @@ export function ServiceLineTiles({ className = "", variant = "full" }: { classNa
         @keyframes cpsTileFadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
         @media(prefers-reduced-motion:reduce){.cps-line-component *,.cps-line-component *:before,.cps-line-component *:after{animation:none!important;transition:none!important}}
       `}</style>
-      <SpatialDisclosureTiles variant={variant} />
+      <SpatialDisclosureTiles variant={variant} source={source} />
     </SpatialDisclosure>
   );
 }
 
-function SpatialDisclosureTiles({ variant }: { variant: "full" | "summary" }) {
-  const { activeIndex, preview, toggle } = useSpatialDisclosure();
+function SpatialDisclosureTiles({ variant, source }: { variant: "full" | "summary"; source: ServiceLineTilesSource }) {
+  const { activeIndex, selectedIndex, preview, toggle } = useSpatialDisclosure();
+  const { market } = useMarketStore();
+
+  const trackCardActivation = (selectionId: string, serviceLine: string) => {
+    if (selectedIndex === selectionId) return;
+    trackEvent("service_card_activated", market, {
+      service_line: serviceLine,
+      source,
+    });
+  };
+
+  const trackDestinationClick = (serviceLine: string, destination: string) => {
+    trackEvent("service_destination_clicked", market, {
+      service_line: serviceLine,
+      destination,
+      source,
+    });
+  };
 
   return (
     <div
@@ -122,6 +151,7 @@ function SpatialDisclosureTiles({ variant }: { variant: "full" | "summary" }) {
             onMouseEnter={() => preview(id)}
             onClick={(event) => {
               if ((event.target as HTMLElement).closest("a, button")) return;
+               trackCardActivation(id, service.id);
               toggle(id);
             }}
           >
@@ -133,6 +163,7 @@ function SpatialDisclosureTiles({ variant }: { variant: "full" | "summary" }) {
                      className="cps-tile-btn"
                      tabIndex={index === 0 ? 0 : -1}
                      data-testid={`service-trigger-${service.id}`}
+                      onClick={() => trackCardActivation(id, service.id)}
                    >
                     <div className="cps-tile-header">
                        <div className="cps-tile-meta">
@@ -165,7 +196,13 @@ function SpatialDisclosureTiles({ variant }: { variant: "full" | "summary" }) {
                             <strong>Supporting destinations</strong>
                             <div className="cps-tile-dests">
                               {service.destinations.map(([label, url]) => (
-                                <Link href={url} key={label} className="cps-tile-dest group" tabIndex={isActive ? 0 : -1}>
+                                <Link
+                                  href={url}
+                                  key={label}
+                                  className="cps-tile-dest group"
+                                  tabIndex={isActive ? 0 : -1}
+                                  onClick={() => trackDestinationClick(service.id, url)}
+                                >
                                   {label}
                                   <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                                 </Link>
@@ -191,6 +228,7 @@ function SpatialDisclosureTiles({ variant }: { variant: "full" | "summary" }) {
                                    className="cps-tile-dest group"
                                    tabIndex={isActive ? 0 : -1}
                                    data-testid={`service-link-${service.id}-${destinationIndex}`}
+                                    onClick={() => trackDestinationClick(service.id, url)}
                                  >
                                    {label}
                                    <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
