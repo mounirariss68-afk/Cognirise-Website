@@ -427,6 +427,7 @@ export const DocumentKind = {
   publication: 'publication',
   'case-study': 'case-study',
   industry: 'industry',
+  framework: 'framework',
 } as const;
 
 export type DocumentStatus = typeof DocumentStatus[keyof typeof DocumentStatus];
@@ -712,10 +713,163 @@ export interface CmsCaseStudyContent {
   relatedIds?: string[];
 }
 
+export type CmsFrameworkContentSchemaVersion = typeof CmsFrameworkContentSchemaVersion[keyof typeof CmsFrameworkContentSchemaVersion];
+
+
+export const CmsFrameworkContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export type CmsFrameworkContentTemplate = typeof CmsFrameworkContentTemplate[keyof typeof CmsFrameworkContentTemplate];
+
+
+export const CmsFrameworkContentTemplate = {
+  'agent-authority': 'agent-authority',
+} as const;
+
+export type CmsFrameworkWorkedExampleHandover = typeof CmsFrameworkWorkedExampleHandover[keyof typeof CmsFrameworkWorkedExampleHandover];
+
+
+export const CmsFrameworkWorkedExampleHandover = {
+  knowledge: 'knowledge',
+  decision: 'decision',
+  action: 'action',
+} as const;
+
+export type CmsFrameworkWorkedExampleReversibility = typeof CmsFrameworkWorkedExampleReversibility[keyof typeof CmsFrameworkWorkedExampleReversibility];
+
+
+export const CmsFrameworkWorkedExampleReversibility = {
+  R1: 'R1',
+  R2: 'R2',
+  R3: 'R3',
+  R4: 'R4',
+} as const;
+
+export type CmsFrameworkWorkedExampleReach = typeof CmsFrameworkWorkedExampleReach[keyof typeof CmsFrameworkWorkedExampleReach];
+
+
+export const CmsFrameworkWorkedExampleReach = {
+  H1: 'H1',
+  H2: 'H2',
+  H3: 'H3',
+  H4: 'H4',
+  H5: 'H5',
+} as const;
+
+export type CmsFrameworkWorkedExampleExposureBand = typeof CmsFrameworkWorkedExampleExposureBand[keyof typeof CmsFrameworkWorkedExampleExposureBand];
+
+
+export const CmsFrameworkWorkedExampleExposureBand = {
+  E1: 'E1',
+  E2: 'E2',
+  E3: 'E3',
+  E4: 'E4',
+  E5: 'E5',
+} as const;
+
+export type CmsFrameworkWorkedExampleRequestedAuthority = typeof CmsFrameworkWorkedExampleRequestedAuthority[keyof typeof CmsFrameworkWorkedExampleRequestedAuthority];
+
+
+export const CmsFrameworkWorkedExampleRequestedAuthority = {
+  'out-of-loop': 'out-of-loop',
+  'on-loop': 'on-loop',
+  'in-loop': 'in-loop',
+  'in-loop-second': 'in-loop-second',
+  'in-loop-external': 'in-loop-external',
+} as const;
+
+export interface CmsFrameworkWorkedExample {
+  sector: string;
+  title: string;
+  handover: CmsFrameworkWorkedExampleHandover;
+  reversibility: CmsFrameworkWorkedExampleReversibility;
+  reach: CmsFrameworkWorkedExampleReach;
+  exposureBand: CmsFrameworkWorkedExampleExposureBand;
+  oversight: string;
+  detail: string;
+  requestedAuthority: CmsFrameworkWorkedExampleRequestedAuthority;
+  interventionWindow?: string;
+  accountableRole: string;
+  promotionEvidence: string;
+  automaticDemotion: string;
+  authorityArtefact?: string;
+}
+
+export type CmsFrameworkExampleHandover = typeof CmsFrameworkExampleHandover[keyof typeof CmsFrameworkExampleHandover];
+
+
+export const CmsFrameworkExampleHandover = {
+  knowledge: 'knowledge',
+  decision: 'decision',
+  action: 'action',
+} as const;
+
+export type CmsFrameworkExampleReversibility = typeof CmsFrameworkExampleReversibility[keyof typeof CmsFrameworkExampleReversibility];
+
+
+export const CmsFrameworkExampleReversibility = {
+  R1: 'R1',
+  R2: 'R2',
+  R3: 'R3',
+  R4: 'R4',
+} as const;
+
+export type CmsFrameworkExampleReach = typeof CmsFrameworkExampleReach[keyof typeof CmsFrameworkExampleReach];
+
+
+export const CmsFrameworkExampleReach = {
+  H1: 'H1',
+  H2: 'H2',
+  H3: 'H3',
+  H4: 'H4',
+  H5: 'H5',
+} as const;
+
+export type CmsFrameworkExampleExposureBand = typeof CmsFrameworkExampleExposureBand[keyof typeof CmsFrameworkExampleExposureBand];
+
+
+export const CmsFrameworkExampleExposureBand = {
+  E1: 'E1',
+  E2: 'E2',
+  E3: 'E3',
+  E4: 'E4',
+  E5: 'E5',
+} as const;
+
+export interface CmsFrameworkExample {
+  sector: string;
+  title: string;
+  handover: CmsFrameworkExampleHandover;
+  reversibility: CmsFrameworkExampleReversibility;
+  reach: CmsFrameworkExampleReach;
+  exposureBand: CmsFrameworkExampleExposureBand;
+  oversight: string;
+  detail: string;
+}
+
+export interface CmsFrameworkContent {
+  schemaVersion: CmsFrameworkContentSchemaVersion;
+  template: CmsFrameworkContentTemplate;
+  teaser: string;
+  handoverExplanation: string;
+  methodology: CmsRichBlock[];
+  workedExample: CmsFrameworkWorkedExample;
+  sectorExamples?: CmsFrameworkExample[];
+  heroMediaId?: string;
+  cta?: CmsLink;
+  visibility?: CmsVisibility;
+  order?: number;
+  sources?: CmsSource[];
+  verificationDate?: string;
+  reviewDate?: string;
+  relatedIds?: string[];
+}
+
 /**
  * Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
  */
-export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent;
+export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent;
 
 export interface SeoMetadata {
   title: string;
@@ -756,6 +910,11 @@ export interface Document {
   updatedAt: string;
 }
 
+/**
+ * Raw structured content preserved for document-kind validation by the shared CMS contract.
+ */
+export type DocumentInputContent = { [key: string]: unknown };
+
 export interface SeoMetadataInput {
   /**
      * @minLength 1
@@ -786,12 +945,18 @@ export interface DocumentInput {
   title: string;
   /** @maxLength 500 */
   summary?: string;
-  content: CmsStructuredContent;
+  /** Raw structured content preserved for document-kind validation by the shared CMS contract. */
+  content: DocumentInputContent;
   seo?: SeoMetadataInput;
   mediaIds?: string[];
   /** @minItems 1 */
   markets: string[];
 }
+
+/**
+ * Raw structured content preserved for document-kind validation by the shared CMS contract.
+ */
+export type DocumentUpdateContent = { [key: string]: unknown };
 
 export interface DocumentUpdate {
   /**
@@ -809,7 +974,8 @@ export interface DocumentUpdate {
      * @nullable
      */
   summary?: string | null;
-  content?: CmsStructuredContent;
+  /** Raw structured content preserved for document-kind validation by the shared CMS contract. */
+  content?: DocumentUpdateContent;
   seo?: SeoMetadataInput;
   mediaIds?: string[];
   /** @minItems 1 */

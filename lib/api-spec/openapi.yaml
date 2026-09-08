@@ -1742,7 +1742,7 @@ components:
 
     DocumentKind:
       type: string
-      enum: [person, partner, platform, publication, case-study, industry]
+      enum: [person, partner, platform, publication, case-study, industry, framework]
     DocumentStatus:
       type: string
       enum: [draft, in-review, approved, scheduled, published, archived]
@@ -1754,6 +1754,7 @@ components:
         - $ref: "#/components/schemas/CmsPlatformContent"
         - $ref: "#/components/schemas/CmsPublicationContent"
         - $ref: "#/components/schemas/CmsCaseStudyContent"
+        - $ref: "#/components/schemas/CmsFrameworkContent"
     CmsPersonContent:
       type: object
       required: [schemaVersion]
@@ -1856,6 +1857,60 @@ components:
         verificationDate: { type: string, format: date }
         reviewDate: { type: string, format: date }
         relatedIds: { type: array, items: { type: string } }
+    CmsFrameworkContent:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, template, teaser, handoverExplanation, methodology, workedExample]
+      properties:
+        schemaVersion: { type: number, enum: [1] }
+        template: { type: string, enum: [agent-authority] }
+        teaser: { type: string }
+        handoverExplanation: { type: string }
+        methodology: { type: array, items: { $ref: "#/components/schemas/CmsRichBlock" } }
+        workedExample: { $ref: "#/components/schemas/CmsFrameworkWorkedExample" }
+        sectorExamples: { type: array, items: { $ref: "#/components/schemas/CmsFrameworkExample" } }
+        heroMediaId: { type: string }
+        cta: { $ref: "#/components/schemas/CmsLink" }
+        visibility: { $ref: "#/components/schemas/CmsVisibility" }
+        order: { type: number, multipleOf: 1 }
+        sources: { type: array, items: { $ref: "#/components/schemas/CmsSource" } }
+        verificationDate: { type: string, format: date }
+        reviewDate: { type: string, format: date }
+        relatedIds: { type: array, items: { type: string } }
+    CmsFrameworkExample:
+      type: object
+      additionalProperties: false
+      required: [sector, title, handover, reversibility, reach, exposureBand, oversight, detail]
+      properties:
+        sector: { type: string }
+        title: { type: string }
+        handover: { type: string, enum: [knowledge, decision, action] }
+        reversibility: { type: string, enum: [R1, R2, R3, R4] }
+        reach: { type: string, enum: [H1, H2, H3, H4, H5] }
+        exposureBand: { type: string, enum: [E1, E2, E3, E4, E5] }
+        oversight: { type: string }
+        detail: { type: string }
+    CmsFrameworkWorkedExample:
+      type: object
+      additionalProperties: false
+      required: [sector, title, handover, reversibility, reach, exposureBand, oversight, detail, requestedAuthority, accountableRole, promotionEvidence, automaticDemotion]
+      properties:
+        sector: { type: string }
+        title: { type: string }
+        handover: { type: string, enum: [knowledge, decision, action] }
+        reversibility: { type: string, enum: [R1, R2, R3, R4] }
+        reach: { type: string, enum: [H1, H2, H3, H4, H5] }
+        exposureBand: { type: string, enum: [E1, E2, E3, E4, E5] }
+        oversight: { type: string }
+        detail: { type: string }
+        requestedAuthority:
+          type: string
+          enum: [out-of-loop, on-loop, in-loop, in-loop-second, in-loop-external]
+        interventionWindow: { type: string }
+        accountableRole: { type: string }
+        promotionEvidence: { type: string }
+        automaticDemotion: { type: string }
+        authorityArtefact: { type: string }
     CmsVisibility:
       type: string
       enum: [public, hidden, restricted]
@@ -1933,7 +1988,9 @@ components:
         title: { type: string, minLength: 1, maxLength: 200 }
         summary: { type: string, maxLength: 500 }
         content:
-          $ref: "#/components/schemas/CmsStructuredContent"
+          type: object
+          additionalProperties: true
+          description: Raw structured content preserved for document-kind validation by the shared CMS contract.
         seo:
           $ref: "#/components/schemas/SeoMetadataInput"
         mediaIds:
@@ -1953,7 +2010,9 @@ components:
         title: { type: string, minLength: 1, maxLength: 200 }
         summary: { type: ["string", "null"], maxLength: 500 }
         content:
-          $ref: "#/components/schemas/CmsStructuredContent"
+          type: object
+          additionalProperties: true
+          description: Raw structured content preserved for document-kind validation by the shared CMS contract.
         seo:
           $ref: "#/components/schemas/SeoMetadataInput"
         mediaIds:

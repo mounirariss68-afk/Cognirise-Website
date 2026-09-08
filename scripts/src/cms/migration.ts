@@ -3,13 +3,13 @@ import { type CmsDocumentKind, validateCmsSnapshot } from "@workspace/api-zod";
 import { InventoryRecord } from "./common.js";
 
 export type MigratableRecord = InventoryRecord & {
-  type: "person" | "partner" | "platform" | "article" | "industry";
+  type: "person" | "partner" | "platform" | "article" | "industry" | "framework";
 };
 
 export interface MigrationOperation {
   externalId: string;
   idempotencyKey: string;
-  kind: "person" | "partner" | "platform" | "publication" | "industry";
+  kind: "person" | "partner" | "platform" | "publication" | "industry" | "framework";
   slug: string;
   title: string;
   payload: Record<string, unknown>;
@@ -160,7 +160,7 @@ export function resolveMigrationMedia(operation: MigrationOperation, mediaByPath
     return id;
   });
   const content = structuredClone(operation.payload.content) as Record<string, unknown>;
-  if (mediaIds[0] && (operation.kind === "platform" || operation.kind === "publication" || operation.kind === "industry")) {
+  if (mediaIds[0] && (operation.kind === "platform" || operation.kind === "publication" || operation.kind === "industry" || operation.kind === "framework")) {
     content.heroMediaId = mediaIds[0];
   }
   const payload = { ...operation.payload, content, mediaIds };

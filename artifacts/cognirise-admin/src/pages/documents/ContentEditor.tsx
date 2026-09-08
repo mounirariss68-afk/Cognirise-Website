@@ -225,6 +225,51 @@ export function ContentEditor({ kind, value, onChange, errors }: {
         <Area label="Industry source trail" value={industrySourceLines(value.sources)} onChange={(next) => set("sources", parseIndustrySources(next))} placeholder="Label | Publisher | Official source / Independent study / Company-reported / Vendor claim | https://... | YYYY-MM-DD" rows={7} />
       </>}
 
+      {kind === "framework" && <>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Choice label="Framework template" value={value.template ?? ""} options={["agent-authority"]} onChange={(next) => set("template", next)} />
+          <Field label="Hero media ID" value={value.heroMediaId} onChange={(next) => set("heroMediaId", next || undefined)} />
+          <Field label="CTA label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan" } : undefined)} />
+          <Field label="CTA link" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Start a Value Scan", href: next } : undefined)} />
+        </div>
+        <Area label="Teaser" value={value.teaser ?? ""} onChange={(next) => set("teaser", next)} />
+        <Area label="Handover explanation" value={value.handoverExplanation ?? ""} onChange={(next) => set("handoverExplanation", next)} rows={6} />
+        <Area label="Methodology narrative" value={richLines(value.methodology)} onChange={(next) => set("methodology", parseRich(next))} placeholder={"H2: Heading\nP: Governed explanation\nLIST: First; Second"} rows={12} />
+        <Area
+          label="Worked example"
+          value={value.workedExample ? [value.workedExample.sector, value.workedExample.title, value.workedExample.handover, value.workedExample.reversibility, value.workedExample.reach, value.workedExample.exposureBand, value.workedExample.oversight, value.workedExample.detail].join(" | ") : ""}
+          onChange={(next) => {
+            const [sector, title, handover, reversibility, reach, exposureBand, oversight, ...detail] = next.split("|").map((part) => part.trim());
+            set("workedExample", { ...value.workedExample, sector, title, handover, reversibility, reach, exposureBand, oversight, detail: detail.join(" | ") });
+          }}
+          placeholder="Sector | Title | action | R3 | H2 | E2 | On the loop | Explanation"
+          rows={4}
+        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Choice
+            label="Worked example requested authority"
+            value={value.workedExample?.requestedAuthority ?? "out-of-loop"}
+            options={["out-of-loop", "on-loop", "in-loop", "in-loop-second", "in-loop-external"]}
+            onChange={(next) => set("workedExample", { ...value.workedExample, requestedAuthority: next })}
+          />
+          <Field label="Intervention window" value={value.workedExample?.interventionWindow} onChange={(next) => set("workedExample", { ...value.workedExample, interventionWindow: next || undefined })} />
+          <Field label="Accountable operating role" value={value.workedExample?.accountableRole} onChange={(next) => set("workedExample", { ...value.workedExample, accountableRole: next })} />
+          <Field label="Approved authority artefact (if above ceiling)" value={value.workedExample?.authorityArtefact} onChange={(next) => set("workedExample", { ...value.workedExample, authorityArtefact: next || undefined })} />
+        </div>
+        <Area label="Promotion evidence" value={value.workedExample?.promotionEvidence ?? ""} onChange={(next) => set("workedExample", { ...value.workedExample, promotionEvidence: next })} rows={4} />
+        <Area label="Automatic-demotion condition" value={value.workedExample?.automaticDemotion ?? ""} onChange={(next) => set("workedExample", { ...value.workedExample, automaticDemotion: next })} rows={4} />
+        <Area
+          label="Sector examples"
+          value={Array.isArray(value.sectorExamples) ? value.sectorExamples.map((item: any) => [item.sector, item.title, item.handover, item.reversibility, item.reach, item.exposureBand, item.oversight, item.detail].join(" | ")).join("\n") : ""}
+          onChange={(next) => set("sectorExamples", stringLines(next).map((line) => {
+            const [sector, title, handover, reversibility, reach, exposureBand, oversight, ...detail] = line.split("|").map((part) => part.trim());
+            return { sector, title, handover, reversibility, reach, exposureBand, oversight, detail: detail.join(" | ") };
+          }))}
+          placeholder="One example per line: Sector | Title | knowledge / decision / action | R1–R4 | H1–H5 | E1–E5 | Oversight | Detail"
+          rows={7}
+        />
+      </>}
+
       {common}
     </div>
   );

@@ -6,6 +6,7 @@ export const NAVIGATION_ITEM_REGISTRY = [
   { id: "what-we-do.consulting-engineering", label: "Consulting & Engineering", parentId: "what-we-do" },
   { id: "what-we-do.sovereign-solutions", label: "Sovereign Solutions", parentId: "what-we-do" },
   { id: "what-we-do.ai-platforms", label: "AI Platforms", parentId: "what-we-do" },
+  { id: "what-we-do.agent-authority", label: "Agent Authority Model", parentId: "what-we-do" },
   { id: "platforms", label: "Platforms" },
   { id: "platforms.overview", label: "Platform Overview", parentId: "platforms" },
   { id: "platforms.cognios", label: "CogniOS", parentId: "platforms" },

@@ -246,7 +246,7 @@ export default function DocumentDetail() {
       {/* Top Bar */}
       <header className="flex-none h-16 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-4">
-           <Button variant="ghost" size="icon" onClick={() => setLocation(doc.kind === "case-study" ? "/case-studies" : doc.kind === "industry" ? "/industries" : `/${doc.kind}s`)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+           <Button variant="ghost" size="icon" onClick={() => setLocation(doc.kind === "case-study" ? "/case-studies" : doc.kind === "industry" ? "/industries" : doc.kind === "framework" ? "/frameworks" : `/${doc.kind}s`)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <div className="h-4 w-px bg-border"></div>

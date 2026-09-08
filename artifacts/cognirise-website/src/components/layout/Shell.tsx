@@ -123,6 +123,10 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: "Book an AI Value Scan | Cognirise",
     description: "Bring Cognirise one process under pressure and leave with a clearer route toward governed intelligent execution.",
   },
+  "/methodologies/agent-authority-model": {
+    title: "Agent Authority Model | Cognirise",
+    description: "A deterministic framework to measure, promote, and constrain intelligent agents based on evidence of capability and clear boundaries of operational authority.",
+  },
 };
 
 type NavigationItem = { id: string; label: string; href: string; items?: NavigationItem[] };
@@ -137,6 +141,7 @@ const navigation: NavigationItem[] = [
       { id: "what-we-do.consulting-engineering", label: SERVICE_LINE_LABELS[0], href: "/what-we-do#consulting-engineering" },
       { id: "what-we-do.sovereign-solutions", label: SERVICE_LINE_LABELS[1], href: "/what-we-do#sovereign-solutions" },
       { id: "what-we-do.ai-platforms", label: SERVICE_LINE_LABELS[2], href: "/what-we-do#ai-platforms" },
+      { id: "what-we-do.agent-authority", label: "Agent Authority Model", href: "/methodologies/agent-authority-model" },
     ]
   },
   {
@@ -542,6 +547,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 <li><Link href="/what-we-do" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Services</Link></li>
                 <li><Link href="/platforms" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Platforms</Link></li>
                 <li><Link href="/industries" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Industries</Link></li>
+                 <li><Link href="/methodologies/agent-authority-model" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Agent Authority Model</Link></li>
                 <li><Link href="/work" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Work</Link></li>
               </ul>
             </div>

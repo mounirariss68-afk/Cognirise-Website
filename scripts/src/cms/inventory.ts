@@ -225,6 +225,94 @@ function industryRecords(items: SourceObject[], file: string) {
   });
 }
 
+function frameworkRecords(): InventoryRecord[] {
+  const content = {
+    schemaVersion: 1,
+    template: "agent-authority",
+    teaser: "A deterministic way to set how much authority each agent handover may exercise on its own.",
+    handoverExplanation: "Govern the handover, not the agent. Knowledge, Decision and Action describe individual moments when an agent passes something to a person, another agent or a system. One agent can make several handovers, and each can carry a different exposure and authority ceiling.",
+    methodology: [
+      { type: "heading", level: 2, text: "Exposure sets the ceiling" },
+      { type: "paragraph", text: "Classify what is handed over, then score reversibility from R1 to R4 and reach from H1 to H5. The more severe answer determines E1 to E5 and therefore the permitted oversight." },
+      { type: "list", style: "bullet", items: [
+        "E1: out of the loop for internal, reversible handovers.",
+        "E2: on the loop, with a stated intervention window.",
+        "E3: in the loop before the handover acts.",
+        "E4: in the loop with an independent second control.",
+        "E5: in the loop with external safety sign-off.",
+      ] },
+      { type: "heading", level: 2, text: "Evidence earns the climb" },
+      { type: "paragraph", text: "Name one accountable operating role, the evidence required for promotion and the conditions that automatically demote the handover. Authority requested above the ceiling must sit in an approved artefact such as a template, whitelist, rule set or blocking gate rather than in the model itself." },
+    ],
+    workedExample: {
+      sector: "Travel & hospitality",
+      title: "Airline disruption re-accommodation",
+      handover: "action",
+      reversibility: "R3",
+      reach: "H2",
+      exposureBand: "E2",
+      oversight: "On the loop, with a stated intervention window",
+      detail: "The agent rebooks one passenger and issues a boarding pass. Reversal needs the passenger or receiving carrier, so the intervention window must be shorter than the time the released seat remains available. The accountable role is the Duty Manager, Operations Control Centre.",
+      requestedAuthority: "on-loop",
+      interventionWindow: "Before the released-seat inventory expires.",
+      accountableRole: "Duty Manager, Operations Control Centre",
+      promotionEvidence: "500 consecutive rebookings with zero disputed reversals and no complaint uplift against the manual control.",
+      automaticDemotion: "Any involuntary downgrade or caused missed connection.",
+    },
+    sectorExamples: [
+      {
+        sector: "Telecoms",
+        title: "Telecom tariff answer",
+        handover: "knowledge",
+        reversibility: "R1",
+        reach: "H1",
+        exposureBand: "E1",
+        oversight: "Out of the loop",
+        detail: "A person receives information; no customer record or system state changes.",
+      },
+      {
+        sector: "Financial services",
+        title: "Credit decline and adverse-action reason",
+        handover: "decision",
+        reversibility: "R4",
+        reach: "H3",
+        exposureBand: "E3",
+        oversight: "In the loop",
+        detail: "The decision fixes a consequential outcome and creates a regulator-inspectable record.",
+      },
+    ],
+    cta: { label: "Start a Value Scan", href: "/value-scan" },
+    visibility: "public",
+    order: 0,
+    sources: [
+      { label: "Cognirise Agent Authority Model, approved source presentation", accessedAt: SOURCE_DATE },
+      { label: "EU AI Act, Article 14 — Human oversight", url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj", accessedAt: SOURCE_DATE },
+      { label: "NIST AI Risk Management Framework", url: "https://www.nist.gov/itl/ai-risk-management-framework", accessedAt: SOURCE_DATE },
+    ],
+    verificationDate: SOURCE_DATE,
+    reviewDate: "2027-03-06",
+    relatedIds: [],
+  };
+  const validation = validateCmsContent("framework", content, "draft");
+  if (!validation.success) throw new Error(`Agent Authority Model: ${validation.errors.join("; ")}`);
+  return [{
+    externalId: "framework:agent-authority-model-v1",
+    type: "framework",
+    name: "The Agent Authority Model",
+    sourceFile: "attached_assets/Cognirise_Agent_Authority_Model_1788905486347.pptx",
+    route: "/methodologies/agent-authority-model",
+    fields: {
+      slug: "agent-authority-model",
+      summary: content.teaser,
+      content,
+      mediaPaths: ["/images/cognirise/cognirise-pulse-governance.jpg"],
+    },
+    review: review([
+      "Confirm the framework narrative, standards provenance, review date, and extracted gateway artwork before publication.",
+    ]),
+  }];
+}
+
 async function main() {
   const peopleFile = "src/pages/AboutPeople.tsx";
   const partnerFile = "src/pages/Partners.tsx";
@@ -236,8 +324,9 @@ async function main() {
   const platforms = platformRecords(await extractVariable(platformFile, "platformFallback") as SourceObject[], platformFile);
   const articles = articleRecords(await extractArticles(articleFile, "articles"), articleFile);
   const industries = industryRecords(await extractVariable(industryFile, "INDUSTRIES") as SourceObject[], industryFile);
+  const frameworks = frameworkRecords();
   const assets = [...await assetRecords(), ...await linkedinAssetRecords()];
-  const records = [...people, ...partners, ...platforms, ...articles, ...industries, ...assets];
+  const records = [...people, ...partners, ...platforms, ...articles, ...industries, ...frameworks, ...assets];
 
   const expectedPeople = [
     ["Mounir Ariss", "founder", "CEO & Co-founder", "show"],
@@ -261,12 +350,12 @@ async function main() {
   if (partners.length !== 5 || platforms.length !== 5 || articles.length !== 3 || industries.length !== 6) {
     throw new Error("The public website no longer matches the governed 5 partner / 5 platform / 3 article / 6 industry manifest.");
   }
-  if (assets.length !== 41) throw new Error(`Expected 32 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
+  if (assets.length !== 45) throw new Error(`Expected 36 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
 
   const stable = {
     schemaVersion: 2,
     source: relative(websiteRoot),
-    expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, industries: 6, websiteAssets: 32, linkedinAssets: 9, assets: 41 },
+    expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, industries: 6, frameworks: 1, websiteAssets: 36, linkedinAssets: 9, assets: 45 },
     explicitOmissions: {
       caseStudies: "No genuine public case-study records are present in the current website.",
       povDocuments: "No genuine public POV documents are present in the current website.",

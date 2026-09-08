@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { CmsCaseStudyContent } from './cmsCaseStudyContent';
+import type { CmsFrameworkContent } from './cmsFrameworkContent';
 import type { CmsPartnerContent } from './cmsPartnerContent';
 import type { CmsPersonContent } from './cmsPersonContent';
 import type { CmsPlatformContent } from './cmsPlatformContent';
@@ -14,4 +15,4 @@ import type { CmsPublicationContent } from './cmsPublicationContent';
 /**
  * Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
  */
-export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent;
+export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent;

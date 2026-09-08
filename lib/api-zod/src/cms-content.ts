@@ -1,9 +1,40 @@
 import { z } from "zod";
+import {
+  type HScore,
+  type Oversight,
+  type RScore,
+  OVERSIGHT_LABELS,
+  OVERSIGHT_ORDER,
+  getCeiling,
+  getEBand,
+  isRequestedAboveCeiling,
+} from "./agent-authority";
 
 export const CMS_CONTRACT_VERSION = 1 as const;
-export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study", "industry"] as const;
+export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study", "industry", "framework"] as const;
 export type CmsDocumentKind = (typeof cmsDocumentKinds)[number];
 export type CmsValidationMode = "draft" | "publish";
+
+export function initialCmsContent(kind: CmsDocumentKind): CmsContent {
+  if (kind === "framework") {
+    return {
+      schemaVersion: CMS_CONTRACT_VERSION,
+      template: "agent-authority",
+    } as CmsContent;
+  }
+
+  return { schemaVersion: CMS_CONTRACT_VERSION } as CmsContent;
+}
+
+function isInitialCmsDraft(kind: CmsDocumentKind, input: unknown): boolean {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) return false;
+  const expected = initialCmsContent(kind) as unknown as Record<string, unknown>;
+  const received = input as Record<string, unknown>;
+  const expectedKeys = Object.keys(expected);
+  const receivedKeys = Object.keys(received);
+  return receivedKeys.length === expectedKeys.length
+    && expectedKeys.every((key) => received[key] === expected[key]);
+}
 
 const safeExternalUrl = z.string().url().regex(/^https?:\/\//i, "Only HTTP(S) links are allowed.");
 const safeInternalPath = z.string().regex(/^\/(?!\/)[a-z0-9/_-]*(?:\?[a-z0-9&=_-]+)?(?:#[a-z0-9_-]+)?$/i);
@@ -181,6 +212,39 @@ export const industryContentSchema = z.object({
   relatedIds: idList,
 }).strict();
 
+const frameworkExampleSchema = z.object({
+  sector: z.string().trim().min(1).max(160),
+  title: z.string().trim().min(1).max(240),
+  handover: z.enum(["knowledge", "decision", "action"]),
+  reversibility: z.enum(["R1", "R2", "R3", "R4"]),
+  reach: z.enum(["H1", "H2", "H3", "H4", "H5"]),
+  exposureBand: z.enum(["E1", "E2", "E3", "E4", "E5"]),
+  oversight: z.string().trim().min(1).max(500),
+  detail: z.string().trim().min(1).max(2_000),
+}).strict();
+
+const frameworkWorkedExampleSchema = frameworkExampleSchema.extend({
+  requestedAuthority: z.enum(OVERSIGHT_ORDER),
+  interventionWindow: z.string().trim().min(1).max(1_000).optional(),
+  accountableRole: z.string().trim().min(1).max(240),
+  promotionEvidence: z.string().trim().min(1).max(2_000),
+  automaticDemotion: z.string().trim().min(1).max(2_000),
+  authorityArtefact: z.string().trim().min(1).max(1_000).optional(),
+}).strict();
+
+export const frameworkContentSchema = z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
+  template: z.literal("agent-authority"),
+  teaser: z.string().trim().min(1).max(1_000),
+  handoverExplanation: z.string().trim().min(1).max(4_000),
+  methodology: z.array(cmsRichBlockSchema).min(1).max(100),
+  workedExample: frameworkWorkedExampleSchema,
+  sectorExamples: z.array(frameworkExampleSchema).max(20).default([]),
+  heroMediaId: z.string().uuid().optional(),
+  cta: z.object({ label: z.string().trim().min(1).max(120), href: safeLink }).strict().optional(),
+  ...governance,
+}).strict();
+
 export const cmsContentSchemas = {
   person: personContentSchema,
   partner: partnerContentSchema,
@@ -188,6 +252,7 @@ export const cmsContentSchemas = {
   publication: publicationContentSchema,
   "case-study": caseStudyContentSchema,
   industry: industryContentSchema,
+  framework: frameworkContentSchema,
 } as const;
 
 export type PersonContent = z.infer<typeof personContentSchema>;
@@ -196,7 +261,8 @@ export type PlatformContent = z.infer<typeof platformContentSchema>;
 export type PublicationContent = z.infer<typeof publicationContentSchema>;
 export type CaseStudyContent = z.infer<typeof caseStudyContentSchema>;
 export type IndustryContent = z.infer<typeof industryContentSchema>;
-export type CmsContent = PersonContent | PartnerContent | PlatformContent | PublicationContent | CaseStudyContent | IndustryContent;
+export type FrameworkContent = z.infer<typeof frameworkContentSchema>;
+export type CmsContent = PersonContent | PartnerContent | PlatformContent | PublicationContent | CaseStudyContent | IndustryContent | FrameworkContent;
 
 function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   const errors: string[] = [];
@@ -231,17 +297,45 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
     if (industry.pressures.length < 3) errors.push("At least three operating pressures are required.");
     if (!industry.imageAlt) errors.push("Industry hero imagery requires alternative text.");
   }
+  if (kind === "framework") {
+    const framework = value as FrameworkContent;
+    if (!framework.heroMediaId) errors.push("A framework requires approved hero media.");
+    for (const [index, example] of [framework.workedExample, ...framework.sectorExamples].entries()) {
+      const rScore = Number(example.reversibility.slice(1)) as RScore;
+      const hScore = Number(example.reach.slice(1)) as HScore;
+      const expectedBand = getEBand(rScore, hScore);
+      const expectedCeiling = getCeiling(expectedBand);
+      const location = index === 0 ? "Worked example" : `Sector example ${index}`;
+      if (example.exposureBand !== `E${expectedBand}`) {
+        errors.push(`${location} exposure must be E${expectedBand} for ${example.reversibility}/${example.reach}.`);
+      }
+      if (example.oversight !== OVERSIGHT_LABELS[expectedCeiling]) {
+        errors.push(`${location} oversight must match the calculated ${OVERSIGHT_LABELS[expectedCeiling]} ceiling.`);
+      }
+    }
+    const workedBand = getEBand(
+      Number(framework.workedExample.reversibility.slice(1)) as RScore,
+      Number(framework.workedExample.reach.slice(1)) as HScore,
+    );
+    const workedCeiling = getCeiling(workedBand);
+    if (
+      (workedCeiling === "on-loop" || framework.workedExample.requestedAuthority === "on-loop") &&
+      !framework.workedExample.interventionWindow
+    ) {
+      errors.push("The worked example requires a stated intervention window for on-the-loop operation.");
+    }
+    if (
+      isRequestedAboveCeiling(framework.workedExample.requestedAuthority as Oversight, workedCeiling) &&
+      !framework.workedExample.authorityArtefact
+    ) {
+      errors.push("The worked example must name the approved artefact carrying authority above the ceiling.");
+    }
+  }
   return errors;
 }
 
 export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: CmsValidationMode = "draft") {
-  if (
-    mode === "draft" &&
-    typeof input === "object" &&
-    input !== null &&
-    Object.keys(input).length === 1 &&
-    (input as Record<string, unknown>).schemaVersion === CMS_CONTRACT_VERSION
-  ) {
+  if (mode === "draft" && isInitialCmsDraft(kind, input)) {
     return { success: true as const, data: input as CmsContent };
   }
   const parsed = cmsContentSchemas[kind].safeParse(input);
@@ -309,6 +403,7 @@ export function cmsPublicRoute(kind: CmsDocumentKind, slug: string, content: Cms
   if (kind === "platform") return `/platforms/${slug}`;
   if (kind === "publication") return `/insights/${slug}`;
   if (kind === "industry") return `/industries/${slug}`;
+  if (kind === "framework") return `/methodologies/${slug}`;
   const caseStudy = content as CaseStudyContent;
   return caseStudy.variant === "full" && caseStudy.disclosure !== "restricted"
     ? `/work/${slug}`

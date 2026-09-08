@@ -49,6 +49,7 @@ function Router() {
       <Route path="/publications" component={() => <AppLayout><DocumentList kind="publication" /></AppLayout>} />
       <Route path="/case-studies" component={() => <AppLayout><DocumentList kind="case-study" /></AppLayout>} />
       <Route path="/industries" component={() => <AppLayout><DocumentList kind="industry" /></AppLayout>} />
+      <Route path="/frameworks" component={() => <AppLayout><DocumentList kind="framework" /></AppLayout>} />
       
       {/* Content detail */}
       <Route path="/content/:id" component={() => <AppLayout><DocumentDetail /></AppLayout>} />

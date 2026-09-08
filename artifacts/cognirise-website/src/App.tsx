@@ -60,12 +60,17 @@ import Contact from "@/pages/Contact";
 import ValueScan from "@/pages/ValueScan";
 import CmsPreview from "@/pages/CmsPreview";
 
+import AgentAuthorityModel from "@/pages/AgentAuthorityModel";
+
 export function Router() {
   return (
     <Shell>
       <Switch>
         <Route path="/" component={Home} />
         
+        {/* Methodologies */}
+        <Route path="/methodologies/agent-authority-model" component={AgentAuthorityModel} />
+
         {/* Services */}
         <Route path="/what-we-do" component={ServicesOverview} />
         <Route path="/what-we-do/agentic-enterprise-transformation" component={AgenticTransformation} />

@@ -28,6 +28,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { useGetSession } from "@workspace/api-client-react";
 import { PeopleMarketMatrix } from "./PeopleMarketMatrix";
+import { initialCmsContent } from "@workspace/api-zod";
 
 const createDocSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -117,7 +118,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
         title: values.title,
         slug: values.slug,
         markets: [values.market],
-        content: { schemaVersion: 1 }
+        content: initialCmsContent(kind)
       }
     }, {
       onSuccess: (newDoc) => {

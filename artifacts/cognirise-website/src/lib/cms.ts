@@ -9,6 +9,7 @@ import {
   type PublicationContent,
   type CaseStudyContent,
   type IndustryContent,
+  type FrameworkContent,
   validateCmsContent,
 } from "@workspace/api-zod";
 import { useMarketStore } from "@/store/market";
@@ -20,6 +21,7 @@ export type CmsContentByKind = {
   publication: PublicationContent;
   "case-study": CaseStudyContent;
   industry: IndustryContent;
+  framework: FrameworkContent;
 };
 export type CmsRecord<T extends CmsContent = CmsContent> = T & {
   id: string;
@@ -32,6 +34,17 @@ export type CmsRecord<T extends CmsContent = CmsContent> = T & {
   updatedAt: string;
 };
 export type CmsDeliveryState = "cms" | "compiled-fallback" | "intentional-empty" | "loading" | "api-error" | "contract-error";
+export type CmsEntryRenderPolicy = "cms" | "compiled-fallback" | "loading" | "unavailable";
+
+export function cmsEntryRenderPolicy(
+  isAuthoritative: boolean,
+  delivery: CmsDeliveryState,
+): CmsEntryRenderPolicy {
+  if (delivery === "cms") return "cms";
+  if (!isAuthoritative && delivery === "compiled-fallback") return "compiled-fallback";
+  if (delivery === "loading") return "loading";
+  return "unavailable";
+}
 
 const env = import.meta.env ?? {};
 const CUTOVER: Record<CmsDocumentKind, boolean> = {
@@ -41,6 +54,7 @@ const CUTOVER: Record<CmsDocumentKind, boolean> = {
   publication: env.VITE_CMS_CUTOVER_PUBLICATIONS === "true",
   "case-study": env.VITE_CMS_CUTOVER_CASE_STUDIES === "true",
   industry: env.VITE_CMS_CUTOVER_INDUSTRIES === "true",
+  framework: env.VITE_CMS_CUTOVER_FRAMEWORKS === "true",
 };
 
 export function contentRecord<K extends CmsDocumentKind>(item: PublishedContent, kind: K): CmsRecord<CmsContentByKind[K]> {
@@ -122,9 +136,11 @@ export function useCmsEntry(kind: DocumentKind, slug: string) {
   // Collection landing narratives are intentionally code-owned; only entity
   // details are CMS-owned. Do not model landings as sentinel entity records.
   const codeOwnedLanding = ["about", "advisors", "partners", "platforms", "insights", "work"].includes(slug);
+  const cutover = CUTOVER[kind as CmsDocumentKind];
+  const cutoverGated = kind === "framework" && !cutover;
   const query = useGetPublishedContent(market, "en", kind, slug, {
     query: {
-      enabled: !codeOwnedLanding,
+      enabled: !codeOwnedLanding && !cutoverGated,
       queryKey: getGetPublishedContentQueryKey(market, "en", kind, slug),
     },
   });
@@ -139,13 +155,13 @@ export function useCmsEntry(kind: DocumentKind, slug: string) {
   if (issue) console.error(issue);
   return {
     ...query,
-    data: codeOwnedLanding ? undefined : validation?.success ? query.data : undefined,
-    delivery: codeOwnedLanding ? "intentional-empty" as const
+    data: codeOwnedLanding || cutoverGated ? undefined : validation?.success ? query.data : undefined,
+    delivery: codeOwnedLanding || cutoverGated ? "compiled-fallback" as const
       : query.isPending ? "loading" as const
       : issue ? (validation && !validation.success ? "contract-error" : "api-error") as CmsDeliveryState
       : query.data ? "cms" as const
       : "intentional-empty" as const,
     issue,
-    isAuthoritative: CUTOVER[kind as CmsDocumentKind],
+    isAuthoritative: cutover,
   };
 }

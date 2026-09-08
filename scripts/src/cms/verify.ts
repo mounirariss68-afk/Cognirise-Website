@@ -186,7 +186,7 @@ async function verifyDatabase(records: InventoryRecord[]) {
         }
         if (JSON.stringify(canonical(validation.data.content)) !== JSON.stringify(canonical({
           ...(operation.payload.content as Record<string, unknown>),
-          ...(operation.mediaPaths[0] && (operation.kind === "platform" || operation.kind === "publication" || operation.kind === "industry")
+          ...(operation.mediaPaths[0] && (operation.kind === "platform" || operation.kind === "publication" || operation.kind === "industry" || operation.kind === "framework")
             ? { heroMediaId: mediaByPath.get(operation.mediaPaths[0]) }
             : {}),
         }))) throw new Error(`Content payload parity mismatch for ${operation.externalId}.`);
@@ -258,6 +258,7 @@ async function main() {
     platform: inventory.expectedCounts.platforms,
     article: inventory.expectedCounts.articles,
     industry: inventory.expectedCounts.industries,
+    framework: inventory.expectedCounts.frameworks,
     asset: inventory.expectedCounts.assets,
   };
   for (const [type, expected] of Object.entries(expectedByType)) {
@@ -304,7 +305,7 @@ async function main() {
     release: {
       approvedRevisionIds: database?.approvedRevisionIds ?? [],
       cmsAuthoritativeCollections: [],
-      compiledFallbackCollections: ["people", "partners", "platforms", "publications", "case-studies", "industries"],
+      compiledFallbackCollections: ["people", "partners", "platforms", "publications", "case-studies", "industries", "frameworks"],
       fallbackRemovalDecisions: "No fallback was removed; all migrated content remains an unapproved draft.",
       mediaReadiness: database && database.durableMediaObjects === database.media
         ? "Candidate objects are present but remain pending rights and accessibility review."

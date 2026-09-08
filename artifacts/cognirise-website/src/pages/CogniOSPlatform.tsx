@@ -78,12 +78,15 @@ export default function CogniOSPlatform() {
         </div>
       </section>
 
-      <section className="co-wide">
-        <img src={assetUrl("/images/cognirise/pulse-convergence.jpg")} alt="A luminous architectural environment where human presence and intelligent systems meet." />
+      <section className="co-wide group">
+        <img src={assetUrl("/images/cognirise/pulse-breakthrough.jpg")} className="transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" alt="A cinematic depiction of operational space." />
         <div className="co-wide-copy">
-          <div className="co-kicker">The platform in practice</div>
-          <h2>Build the route.<br/>Keep the authority.</h2>
-          <p>CogniOS brings the structures around intelligence into the same operating environment, rather than asking teams to govern them after the fact.</p>
+          <div className="co-kicker text-white/80">Operating reality</div>
+          <h2 className="tracking-[-0.075em]">Intelligence without authority is just an experiment.</h2>
+          <p>Our engagements are structured around the moments where automated intent meets human accountability. CogniOS brings the structures around intelligence into the same operating environment, rather than asking teams to govern them after the fact.</p>
+        </div>
+        <div className="absolute z-10 right-[4%] top-[34px] text-white/70 text-[10px] tracking-[0.12em] [writing-mode:vertical-rl]">
+          PULSE // COGNIRISE
         </div>
       </section>
 

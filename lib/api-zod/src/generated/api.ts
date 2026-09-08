@@ -678,7 +678,7 @@ export const ListDocumentsQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listDocumentsQueryPageMultipleOf).default(listDocumentsQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listDocumentsQueryPageSizeMax).multipleOf(listDocumentsQueryPageSizeMultipleOf).default(listDocumentsQueryPageSizeDefault),
   "search": zod.coerce.string().max(listDocumentsQuerySearchMax).optional(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']).optional(),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']).optional(),
   "status": zod.enum(['draft', 'in-review', 'approved', 'scheduled', 'published', 'archived']).optional(),
   "market": zod.coerce.string().optional()
 })
@@ -714,6 +714,9 @@ export const listDocumentsResponseTwoItemsItemContentFiveEvidenceItemSourceUrlRe
 export const listDocumentsResponseTwoItemsItemContentFiveOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentSixOrderMultipleOf = 1;
+
+export const listDocumentsResponseTwoItemsItemContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf = 1;
 
 
@@ -726,7 +729,7 @@ export const ListDocumentsResponse = zod.object({
 }).and(zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string().regex(listDocumentsResponseTwoItemsItemSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -887,6 +890,59 @@ export const ListDocumentsResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(listDocumentsResponseTwoItemsItemContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(listDocumentsResponseTwoItemsItemContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -921,26 +977,6 @@ export const createDocumentBodyTitleMax = 200;
 
 export const createDocumentBodySummaryMax = 500;
 
-export const createDocumentBodyContentOneOrderMultipleOf = 1;
-
-export const createDocumentBodyContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const createDocumentBodyContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
-export const createDocumentBodyContentTwoWebsiteRegExp = new RegExp('^https?://.+');
-export const createDocumentBodyContentTwoOrderMultipleOf = 1;
-
-export const createDocumentBodyContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const createDocumentBodyContentThreeOrderMultipleOf = 1;
-
-export const createDocumentBodyContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const createDocumentBodyContentFourReadingTimeMinutesMultipleOf = 1;
-
-export const createDocumentBodyContentFourOrderMultipleOf = 1;
-
-export const createDocumentBodyContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const createDocumentBodyContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
-export const createDocumentBodyContentFiveOrderMultipleOf = 1;
-
-export const createDocumentBodyContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const createDocumentBodySeoTitleMax = 70;
 
 export const createDocumentBodySeoDescriptionMax = 170;
@@ -949,167 +985,11 @@ export const createDocumentBodySeoNoIndexDefault = false;
 
 
 export const CreateDocumentBody = zod.object({
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string().max(createDocumentBodySlugMax).regex(createDocumentBodySlugRegExp),
   "title": zod.string().min(1).max(createDocumentBodyTitleMax),
   "summary": zod.string().max(createDocumentBodySummaryMax).optional(),
-  "content": zod.union([zod.object({
-  "schemaVersion": zod.literal(1),
-  "role": zod.enum(['founder', 'leader', 'employee', 'advisor']).optional(),
-  "title": zod.string().optional(),
-  "biography": zod.string().optional(),
-  "contribution": zod.string().optional(),
-  "focusAreas": zod.array(zod.object({
-  "title": zod.string(),
-  "detail": zod.string()
-})).optional(),
-  "profileLinks": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string()
-})).optional(),
-  "identityMediaId": zod.string().optional(),
-  "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
-  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(createDocumentBodyContentOneOrderMultipleOf).optional(),
-  "sources": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(createDocumentBodyContentOneSourcesItemUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-})).optional(),
-  "verificationDate": zod.coerce.date().optional(),
-  "reviewDate": zod.coerce.date().optional(),
-  "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
-  "schemaVersion": zod.literal(1),
-  "allianceCategory": zod.string().optional(),
-  "positioning": zod.string().optional(),
-  "facts": zod.array(zod.object({
-  "value": zod.string(),
-  "label": zod.string()
-})).optional(),
-  "evidence": zod.array(zod.object({
-  "statement": zod.string(),
-  "source": zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(createDocumentBodyContentTwoEvidenceItemSourceUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-}),
-  "approved": zod.boolean()
-})).optional(),
-  "coverage": zod.array(zod.string()).optional(),
-  "contribution": zod.string().optional(),
-  "website": zod.string().regex(createDocumentBodyContentTwoWebsiteRegExp).optional(),
-  "logoMediaId": zod.string().optional(),
-  "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
-  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(createDocumentBodyContentTwoOrderMultipleOf).optional(),
-  "sources": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(createDocumentBodyContentTwoSourcesItemUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-})).optional(),
-  "verificationDate": zod.coerce.date().optional(),
-  "reviewDate": zod.coerce.date().optional(),
-  "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
-  "schemaVersion": zod.literal(1),
-  "category": zod.string().optional(),
-  "summary": zod.string().optional(),
-  "template": zod.enum(['standard', 'cognios-specialist']).optional(),
-  "heroMediaId": zod.string().optional(),
-  "sections": zod.array(zod.object({
-  "heading": zod.string(),
-  "body": zod.array(zod.object({
-  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
-  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
-  "text": zod.string().optional(),
-  "style": zod.enum(['bullet', 'numbered']).optional(),
-  "items": zod.array(zod.string()).optional()
-}))
-})).optional(),
-  "capabilities": zod.array(zod.string()).optional(),
-  "differentiators": zod.array(zod.string()).optional(),
-  "cta": zod.object({
-  "label": zod.string(),
-  "url": zod.string()
-}).optional(),
-  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(createDocumentBodyContentThreeOrderMultipleOf).optional(),
-  "sources": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(createDocumentBodyContentThreeSourcesItemUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-})).optional(),
-  "verificationDate": zod.coerce.date().optional(),
-  "reviewDate": zod.coerce.date().optional(),
-  "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
-  "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['article', 'pov']).optional(),
-  "teaser": zod.string().optional(),
-  "body": zod.array(zod.object({
-  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
-  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
-  "text": zod.string().optional(),
-  "style": zod.enum(['bullet', 'numbered']).optional(),
-  "items": zod.array(zod.string()).optional()
-})).optional(),
-  "author": zod.string().optional(),
-  "publicationDate": zod.coerce.date().optional(),
-  "updatedDate": zod.coerce.date().optional(),
-  "readingTimeMinutes": zod.number().min(1).multipleOf(createDocumentBodyContentFourReadingTimeMinutesMultipleOf).optional(),
-  "topics": zod.array(zod.string()).optional(),
-  "sectors": zod.array(zod.string()).optional(),
-  "platformIds": zod.array(zod.string()).optional(),
-  "heroMediaId": zod.string().optional(),
-  "pdfMediaId": zod.string().optional(),
-  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(createDocumentBodyContentFourOrderMultipleOf).optional(),
-  "sources": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(createDocumentBodyContentFourSourcesItemUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-})).optional(),
-  "verificationDate": zod.coerce.date().optional(),
-  "reviewDate": zod.coerce.date().optional(),
-  "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
-  "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
-  "context": zod.string().optional(),
-  "constraints": zod.array(zod.string()).optional(),
-  "work": zod.array(zod.object({
-  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
-  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
-  "text": zod.string().optional(),
-  "style": zod.enum(['bullet', 'numbered']).optional(),
-  "items": zod.array(zod.string()).optional()
-})).optional(),
-  "controls": zod.array(zod.string()).optional(),
-  "outcomes": zod.array(zod.string()).optional(),
-  "evidence": zod.array(zod.object({
-  "statement": zod.string(),
-  "source": zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(createDocumentBodyContentFiveEvidenceItemSourceUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-}),
-  "approved": zod.boolean()
-})).optional(),
-  "heroMediaId": zod.string().optional(),
-  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(createDocumentBodyContentFiveOrderMultipleOf).optional(),
-  "sources": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(createDocumentBodyContentFiveSourcesItemUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-})).optional(),
-  "verificationDate": zod.coerce.date().optional(),
-  "reviewDate": zod.coerce.date().optional(),
-  "relatedIds": zod.array(zod.string()).optional()
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+  "content": zod.record(zod.string(), zod.unknown()).describe('Raw structured content preserved for document-kind validation by the shared CMS contract.'),
   "seo": zod.object({
   "title": zod.string().min(1).max(createDocumentBodySeoTitleMax),
   "description": zod.string().min(1).max(createDocumentBodySeoDescriptionMax),
@@ -1142,13 +1022,16 @@ export const createDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new 
 export const createDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const createDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentSixOrderMultipleOf = 1;
+
+export const createDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const createDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const CreateDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string().regex(createDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1309,6 +1192,59 @@ export const CreateDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(createDocumentResponseContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -1359,13 +1295,16 @@ export const getDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new Reg
 export const getDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const getDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentSixOrderMultipleOf = 1;
+
+export const getDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const getDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const GetDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string().regex(getDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1526,6 +1465,59 @@ export const GetDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(getDocumentResponseContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(getDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -1563,26 +1555,6 @@ export const updateDocumentBodyTitleMax = 200;
 
 export const updateDocumentBodySummaryMax = 500;
 
-export const updateDocumentBodyContentOneOrderMultipleOf = 1;
-
-export const updateDocumentBodyContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const updateDocumentBodyContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
-export const updateDocumentBodyContentTwoWebsiteRegExp = new RegExp('^https?://.+');
-export const updateDocumentBodyContentTwoOrderMultipleOf = 1;
-
-export const updateDocumentBodyContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const updateDocumentBodyContentThreeOrderMultipleOf = 1;
-
-export const updateDocumentBodyContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const updateDocumentBodyContentFourReadingTimeMinutesMultipleOf = 1;
-
-export const updateDocumentBodyContentFourOrderMultipleOf = 1;
-
-export const updateDocumentBodyContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const updateDocumentBodyContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
-export const updateDocumentBodyContentFiveOrderMultipleOf = 1;
-
-export const updateDocumentBodyContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const updateDocumentBodySeoTitleMax = 70;
 
 export const updateDocumentBodySeoDescriptionMax = 170;
@@ -1596,163 +1568,7 @@ export const UpdateDocumentBody = zod.object({
   "slug": zod.string().max(updateDocumentBodySlugMax).regex(updateDocumentBodySlugRegExp).optional(),
   "title": zod.string().min(1).max(updateDocumentBodyTitleMax).optional(),
   "summary": zod.string().max(updateDocumentBodySummaryMax).nullish(),
-  "content": zod.union([zod.object({
-  "schemaVersion": zod.literal(1),
-  "role": zod.enum(['founder', 'leader', 'employee', 'advisor']).optional(),
-  "title": zod.string().optional(),
-  "biography": zod.string().optional(),
-  "contribution": zod.string().optional(),
-  "focusAreas": zod.array(zod.object({
-  "title": zod.string(),
-  "detail": zod.string()
-})).optional(),
-  "profileLinks": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string()
-})).optional(),
-  "identityMediaId": zod.string().optional(),
-  "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
-  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(updateDocumentBodyContentOneOrderMultipleOf).optional(),
-  "sources": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(updateDocumentBodyContentOneSourcesItemUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-})).optional(),
-  "verificationDate": zod.coerce.date().optional(),
-  "reviewDate": zod.coerce.date().optional(),
-  "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
-  "schemaVersion": zod.literal(1),
-  "allianceCategory": zod.string().optional(),
-  "positioning": zod.string().optional(),
-  "facts": zod.array(zod.object({
-  "value": zod.string(),
-  "label": zod.string()
-})).optional(),
-  "evidence": zod.array(zod.object({
-  "statement": zod.string(),
-  "source": zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(updateDocumentBodyContentTwoEvidenceItemSourceUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-}),
-  "approved": zod.boolean()
-})).optional(),
-  "coverage": zod.array(zod.string()).optional(),
-  "contribution": zod.string().optional(),
-  "website": zod.string().regex(updateDocumentBodyContentTwoWebsiteRegExp).optional(),
-  "logoMediaId": zod.string().optional(),
-  "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
-  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(updateDocumentBodyContentTwoOrderMultipleOf).optional(),
-  "sources": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(updateDocumentBodyContentTwoSourcesItemUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-})).optional(),
-  "verificationDate": zod.coerce.date().optional(),
-  "reviewDate": zod.coerce.date().optional(),
-  "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
-  "schemaVersion": zod.literal(1),
-  "category": zod.string().optional(),
-  "summary": zod.string().optional(),
-  "template": zod.enum(['standard', 'cognios-specialist']).optional(),
-  "heroMediaId": zod.string().optional(),
-  "sections": zod.array(zod.object({
-  "heading": zod.string(),
-  "body": zod.array(zod.object({
-  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
-  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
-  "text": zod.string().optional(),
-  "style": zod.enum(['bullet', 'numbered']).optional(),
-  "items": zod.array(zod.string()).optional()
-}))
-})).optional(),
-  "capabilities": zod.array(zod.string()).optional(),
-  "differentiators": zod.array(zod.string()).optional(),
-  "cta": zod.object({
-  "label": zod.string(),
-  "url": zod.string()
-}).optional(),
-  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(updateDocumentBodyContentThreeOrderMultipleOf).optional(),
-  "sources": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(updateDocumentBodyContentThreeSourcesItemUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-})).optional(),
-  "verificationDate": zod.coerce.date().optional(),
-  "reviewDate": zod.coerce.date().optional(),
-  "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
-  "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['article', 'pov']).optional(),
-  "teaser": zod.string().optional(),
-  "body": zod.array(zod.object({
-  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
-  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
-  "text": zod.string().optional(),
-  "style": zod.enum(['bullet', 'numbered']).optional(),
-  "items": zod.array(zod.string()).optional()
-})).optional(),
-  "author": zod.string().optional(),
-  "publicationDate": zod.coerce.date().optional(),
-  "updatedDate": zod.coerce.date().optional(),
-  "readingTimeMinutes": zod.number().min(1).multipleOf(updateDocumentBodyContentFourReadingTimeMinutesMultipleOf).optional(),
-  "topics": zod.array(zod.string()).optional(),
-  "sectors": zod.array(zod.string()).optional(),
-  "platformIds": zod.array(zod.string()).optional(),
-  "heroMediaId": zod.string().optional(),
-  "pdfMediaId": zod.string().optional(),
-  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(updateDocumentBodyContentFourOrderMultipleOf).optional(),
-  "sources": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(updateDocumentBodyContentFourSourcesItemUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-})).optional(),
-  "verificationDate": zod.coerce.date().optional(),
-  "reviewDate": zod.coerce.date().optional(),
-  "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
-  "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
-  "context": zod.string().optional(),
-  "constraints": zod.array(zod.string()).optional(),
-  "work": zod.array(zod.object({
-  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
-  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
-  "text": zod.string().optional(),
-  "style": zod.enum(['bullet', 'numbered']).optional(),
-  "items": zod.array(zod.string()).optional()
-})).optional(),
-  "controls": zod.array(zod.string()).optional(),
-  "outcomes": zod.array(zod.string()).optional(),
-  "evidence": zod.array(zod.object({
-  "statement": zod.string(),
-  "source": zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(updateDocumentBodyContentFiveEvidenceItemSourceUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-}),
-  "approved": zod.boolean()
-})).optional(),
-  "heroMediaId": zod.string().optional(),
-  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(updateDocumentBodyContentFiveOrderMultipleOf).optional(),
-  "sources": zod.array(zod.object({
-  "label": zod.string(),
-  "url": zod.string().regex(updateDocumentBodyContentFiveSourcesItemUrlRegExp).optional(),
-  "accessedAt": zod.coerce.date().optional()
-})).optional(),
-  "verificationDate": zod.coerce.date().optional(),
-  "reviewDate": zod.coerce.date().optional(),
-  "relatedIds": zod.array(zod.string()).optional()
-})]).optional().describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+  "content": zod.record(zod.string(), zod.unknown()).optional().describe('Raw structured content preserved for document-kind validation by the shared CMS contract.'),
   "seo": zod.object({
   "title": zod.string().min(1).max(updateDocumentBodySeoTitleMax),
   "description": zod.string().min(1).max(updateDocumentBodySeoDescriptionMax),
@@ -1786,13 +1602,16 @@ export const updateDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new 
 export const updateDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentSixOrderMultipleOf = 1;
+
+export const updateDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const updateDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const UpdateDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string().regex(updateDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1953,6 +1772,59 @@ export const UpdateDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(updateDocumentResponseContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(updateDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -2024,6 +1896,9 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveEvidenc
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOrderMultipleOf = 1;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 
 export const ListDocumentRevisionsResponse = zod.object({
@@ -2200,6 +2075,59 @@ export const ListDocumentRevisionsResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -2311,6 +2239,9 @@ export const getDocumentRevisionResponseSnapshotContentFiveEvidenceItemSourceUrl
 export const getDocumentRevisionResponseSnapshotContentFiveOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentSixOrderMultipleOf = 1;
+
+export const getDocumentRevisionResponseSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 
 export const GetDocumentRevisionResponse = zod.object({
@@ -2481,6 +2412,59 @@ export const GetDocumentRevisionResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(getDocumentRevisionResponseSnapshotContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(getDocumentRevisionResponseSnapshotContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -2535,13 +2519,16 @@ export const submitDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new 
 export const submitDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentSixOrderMultipleOf = 1;
+
+export const submitDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const submitDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const SubmitDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string().regex(submitDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -2702,6 +2689,59 @@ export const SubmitDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(submitDocumentResponseContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(submitDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -2761,13 +2801,16 @@ export const publishDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new
 export const publishDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentSixOrderMultipleOf = 1;
+
+export const publishDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const publishDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const PublishDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string().regex(publishDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -2928,6 +2971,59 @@ export const PublishDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(publishDocumentResponseContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(publishDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -2987,13 +3083,16 @@ export const rollbackDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = ne
 export const rollbackDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentSixOrderMultipleOf = 1;
+
+export const rollbackDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const rollbackDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const RollbackDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string().regex(rollbackDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3154,6 +3253,59 @@ export const RollbackDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(rollbackDocumentResponseContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rollbackDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -3212,13 +3364,16 @@ export const archiveDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new
 export const archiveDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentSixOrderMultipleOf = 1;
+
+export const archiveDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const archiveDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const ArchiveDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string().regex(archiveDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3379,6 +3534,59 @@ export const ArchiveDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(archiveDocumentResponseContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(archiveDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -3437,13 +3645,16 @@ export const restoreDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new
 export const restoreDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentSixOrderMultipleOf = 1;
+
+export const restoreDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const restoreDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const RestoreDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string().regex(restoreDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3604,6 +3815,59 @@ export const RestoreDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(restoreDocumentResponseContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(restoreDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -3653,6 +3917,9 @@ export const previewDocumentResponseDocumentContentFiveEvidenceItemSourceUrlRegE
 export const previewDocumentResponseDocumentContentFiveOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentSixOrderMultipleOf = 1;
+
+export const previewDocumentResponseDocumentContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const previewDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -3813,6 +4080,59 @@ export const PreviewDocumentResponse = zod.object({
   "sources": zod.array(zod.object({
   "label": zod.string(),
   "url": zod.string().regex(previewDocumentResponseDocumentContentFiveSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(previewDocumentResponseDocumentContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(previewDocumentResponseDocumentContentSixSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
@@ -4983,7 +5303,7 @@ export const listPublishedContentQueryPageSizeMultipleOf = 1;
 export const ListPublishedContentQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listPublishedContentQueryPageMultipleOf).default(listPublishedContentQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listPublishedContentQueryPageSizeMax).multipleOf(listPublishedContentQueryPageSizeMultipleOf).default(listPublishedContentQueryPageSizeDefault),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']).optional(),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']).optional(),
   "market": zod.coerce.string(),
   "locale": zod.coerce.string().optional()
 })
@@ -5014,7 +5334,7 @@ export const ListPublishedContentResponse = zod.object({
 }).and(zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string(),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -5058,7 +5378,7 @@ export const ListPublishedContentResponse = zod.object({
 export const GetPublishedContentParams = zod.object({
   "market": zod.coerce.string(),
   "locale": zod.coerce.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.coerce.string()
 })
 
@@ -5072,7 +5392,7 @@ export const getPublishedContentResponseRevisionMultipleOf = 1;
 
 export const GetPublishedContentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
   "slug": zod.string(),
   "title": zod.string(),
   "summary": zod.string().nullish(),

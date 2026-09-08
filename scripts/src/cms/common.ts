@@ -12,7 +12,7 @@ export const defaultOutputDirectory = path.join(repositoryRoot, "scripts/cms/out
 export type ReviewStatus = "needs-review";
 export interface InventoryRecord {
   externalId: string;
-  type: "person" | "partner" | "platform" | "article" | "industry" | "asset";
+  type: "person" | "partner" | "platform" | "article" | "industry" | "framework" | "asset";
   name: string;
   sourceFile: string;
   route?: string;

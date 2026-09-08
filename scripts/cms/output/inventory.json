@@ -10,9 +10,10 @@
     "platforms": 5,
     "articles": 3,
     "industries": 6,
-    "websiteAssets": 32,
+    "frameworks": 1,
+    "websiteAssets": 36,
     "linkedinAssets": 9,
-    "assets": 41
+    "assets": 45
   },
   "explicitOmissions": {
     "caseStudies": "No genuine public case-study records are present in the current website.",
@@ -1680,6 +1681,125 @@
       }
     },
     {
+      "externalId": "framework:agent-authority-model-v1",
+      "type": "framework",
+      "name": "The Agent Authority Model",
+      "sourceFile": "attached_assets/Cognirise_Agent_Authority_Model_1788905486347.pptx",
+      "route": "/methodologies/agent-authority-model",
+      "fields": {
+        "slug": "agent-authority-model",
+        "summary": "A deterministic way to set how much authority each agent handover may exercise on its own.",
+        "content": {
+          "schemaVersion": 1,
+          "template": "agent-authority",
+          "teaser": "A deterministic way to set how much authority each agent handover may exercise on its own.",
+          "handoverExplanation": "Govern the handover, not the agent. Knowledge, Decision and Action describe individual moments when an agent passes something to a person, another agent or a system. One agent can make several handovers, and each can carry a different exposure and authority ceiling.",
+          "methodology": [
+            {
+              "type": "heading",
+              "level": 2,
+              "text": "Exposure sets the ceiling"
+            },
+            {
+              "type": "paragraph",
+              "text": "Classify what is handed over, then score reversibility from R1 to R4 and reach from H1 to H5. The more severe answer determines E1 to E5 and therefore the permitted oversight."
+            },
+            {
+              "type": "list",
+              "style": "bullet",
+              "items": [
+                "E1: out of the loop for internal, reversible handovers.",
+                "E2: on the loop, with a stated intervention window.",
+                "E3: in the loop before the handover acts.",
+                "E4: in the loop with an independent second control.",
+                "E5: in the loop with external safety sign-off."
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "text": "Evidence earns the climb"
+            },
+            {
+              "type": "paragraph",
+              "text": "Name one accountable operating role, the evidence required for promotion and the conditions that automatically demote the handover. Authority requested above the ceiling must sit in an approved artefact such as a template, whitelist, rule set or blocking gate rather than in the model itself."
+            }
+          ],
+          "workedExample": {
+            "sector": "Travel & hospitality",
+            "title": "Airline disruption re-accommodation",
+            "handover": "action",
+            "reversibility": "R3",
+            "reach": "H2",
+            "exposureBand": "E2",
+            "oversight": "On the loop, with a stated intervention window",
+            "detail": "The agent rebooks one passenger and issues a boarding pass. Reversal needs the passenger or receiving carrier, so the intervention window must be shorter than the time the released seat remains available. The accountable role is the Duty Manager, Operations Control Centre.",
+            "requestedAuthority": "on-loop",
+            "interventionWindow": "Before the released-seat inventory expires.",
+            "accountableRole": "Duty Manager, Operations Control Centre",
+            "promotionEvidence": "500 consecutive rebookings with zero disputed reversals and no complaint uplift against the manual control.",
+            "automaticDemotion": "Any involuntary downgrade or caused missed connection."
+          },
+          "sectorExamples": [
+            {
+              "sector": "Telecoms",
+              "title": "Telecom tariff answer",
+              "handover": "knowledge",
+              "reversibility": "R1",
+              "reach": "H1",
+              "exposureBand": "E1",
+              "oversight": "Out of the loop",
+              "detail": "A person receives information; no customer record or system state changes."
+            },
+            {
+              "sector": "Financial services",
+              "title": "Credit decline and adverse-action reason",
+              "handover": "decision",
+              "reversibility": "R4",
+              "reach": "H3",
+              "exposureBand": "E3",
+              "oversight": "In the loop",
+              "detail": "The decision fixes a consequential outcome and creates a regulator-inspectable record."
+            }
+          ],
+          "cta": {
+            "label": "Start a Value Scan",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 0,
+          "sources": [
+            {
+              "label": "Cognirise Agent Authority Model, approved source presentation",
+              "accessedAt": "2026-09-06"
+            },
+            {
+              "label": "EU AI Act, Article 14 — Human oversight",
+              "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+              "accessedAt": "2026-09-06"
+            },
+            {
+              "label": "NIST AI Risk Management Framework",
+              "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cognirise-pulse-governance.jpg"
+        ]
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm the framework narrative, standards provenance, review date, and extracted gateway artwork before publication."
+        ]
+      }
+    },
+    {
       "externalId": "asset:eaa35ae39186f9be0518",
       "type": "asset",
       "name": "alliance-bunjee.jpg",
@@ -1795,6 +1915,158 @@
       "digest": "a301bd790154bf25492e6216d41205a8bb914c9d7a926f6b9dce49b5f01ebecf"
     },
     {
+      "externalId": "asset:e0f679e84ec041a70072",
+      "type": "asset",
+      "name": "blueprint-activate.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-activate.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/blueprint-activate.jpg",
+        "bytes": 238397,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "6aad7d2952da062355fb5cb7985d24d8a03d203e7cb4bff7822680f53620d4fc",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "blueprint activate",
+          "decorative": false
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/blueprint-activate.jpg"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "6aad7d2952da062355fb5cb7985d24d8a03d203e7cb4bff7822680f53620d4fc"
+    },
+    {
+      "externalId": "asset:c326eca100d2e1a40b03",
+      "type": "asset",
+      "name": "blueprint-demonstrate.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-demonstrate.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/blueprint-demonstrate.jpg",
+        "bytes": 116731,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "d3adffb9f47209ad444accc42645636c87e6f02ed33532fe801cd6e64f3d9eaa",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "blueprint demonstrate",
+          "decorative": false
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/blueprint-demonstrate.jpg"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "d3adffb9f47209ad444accc42645636c87e6f02ed33532fe801cd6e64f3d9eaa"
+    },
+    {
+      "externalId": "asset:e4efa6dd910f7f8183a8",
+      "type": "asset",
+      "name": "blueprint-innovate.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-innovate.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/blueprint-innovate.jpg",
+        "bytes": 99878,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "75712a6d757cbd3806a1729bdff4c5a8dfe832afa6675ffb3fd61af0169bf82d",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "blueprint innovate",
+          "decorative": false
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/blueprint-innovate.jpg"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "75712a6d757cbd3806a1729bdff4c5a8dfe832afa6675ffb3fd61af0169bf82d"
+    },
+    {
+      "externalId": "asset:1d309dbdc530df4f40bc",
+      "type": "asset",
+      "name": "blueprint-operate.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-operate.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/blueprint-operate.jpg",
+        "bytes": 130308,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "c1ca56e88503a2891b03a71e75252317b7dc064c2b2ee7f4d113bfa039386706",
+        "width": 1024,
+        "height": 1024,
+        "usages": [
+          "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "blueprint operate",
+          "decorative": false
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/blueprint-operate.jpg"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "c1ca56e88503a2891b03a71e75252317b7dc064c2b2ee7f4d113bfa039386706"
+    },
+    {
       "externalId": "asset:f6a19919d1de6e4dd655",
       "type": "asset",
       "name": "cognirise-pulse-governance.jpg",
@@ -1809,6 +2081,7 @@
         "height": 1024,
         "usages": [
           "artifacts/cognirise-website/src/components/ServiceLineTiles.tsx",
+          "artifacts/cognirise-website/src/pages/AgentAuthorityModel.tsx",
           "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
           "artifacts/cognirise-website/src/pages/EngineeringWithAI.tsx",
           "artifacts/cognirise-website/src/pages/Home.tsx"
@@ -2501,7 +2774,7 @@
         "height": 1024,
         "usages": [
           "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
-          "artifacts/cognirise-website/src/pages/Home.tsx",
+          "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
           "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
           "artifacts/cognirise-website/src/pages/WorkProof.tsx"
         ],
@@ -3326,7 +3599,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "885f2e737696c5c0f844d80048af960e92788f86e5fb9d3a7046533d7a2ada5c",
-  "generatedAt": "2026-09-08T21:21:27.728Z",
+  "manifestDigest": "0dc914cbf521aea81b39cfa71b1468d9d0311d8f76c0d9fedef497be96941105",
+  "generatedAt": "2026-09-08T22:59:29.627Z",
   "dryRun": false
 }

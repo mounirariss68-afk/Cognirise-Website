@@ -9,7 +9,7 @@ import { ServiceLineTiles } from "@/components/ServiceLineTiles";
 import { BrandButton } from "@/components/ui/brand-button";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { INDUSTRIES } from "@/content/industries";
-import { contentRecord, useCmsCollection } from "@/lib/cms";
+import { cmsEntryRenderPolicy, contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import {
   SpatialDisclosure,
   SpatialDisclosureItem,
@@ -40,6 +40,13 @@ export default function Home() {
     slug: item.slug,
   }));
   const industryRecords = industryQuery.isAuthoritative ? industryQuery.data : INDUSTRIES;
+  const frameworkQuery = useCmsEntry("framework", "agent-authority-model");
+  const frameworkRenderPolicy = cmsEntryRenderPolicy(frameworkQuery.isAuthoritative, frameworkQuery.delivery);
+  const frameworkRecord = frameworkQuery.data ? contentRecord(frameworkQuery.data, "framework") : null;
+  const featuredFramework = frameworkRecord?.template === "agent-authority" ? frameworkRecord : null;
+  const frameworkHero = featuredFramework?.heroMediaId
+    ? featuredFramework.media?.find((media) => media.id === featuredFramework.heroMediaId)
+    : undefined;
   const homeIndustries = industryRecords.map((industry, index) => ({
     id: String(index + 1).padStart(2, "0"),
     slug: industry.slug,
@@ -180,35 +187,56 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* BREAK IMAGE */}
-      <section className="mx-0 lg:mx-[4.8vw] bg-[#071936] h-[520px] lg:h-[min(650px,50vw)] lg:min-h-[480px] relative overflow-hidden group">
-        <PulseImage
-          src={assetUrl("/images/cognirise/pulse-breakthrough.jpg")} 
-          alt="A cinematic depiction of operational space." 
-          className="w-full h-full object-cover opacity-90"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#071936]/90 to-[#071936]/10" />
+      {/* METHODOLOGIES */}
+      {frameworkRenderPolicy !== "loading" && frameworkRenderPolicy !== "unavailable" && (
+      <section className="mx-6 md:mx-[4.8vw] mb-6 lg:mb-10 bg-[hsl(var(--brand-deep))] text-white px-6 md:px-12 py-16 lg:py-24 relative overflow-hidden group">
+        <div className="absolute inset-0 pointer-events-none opacity-20 transition-opacity duration-700 group-hover:opacity-40">
+          <PulseImage
+            src={frameworkHero?.url ?? assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")}
+            alt={frameworkHero?.altText || "A luminous gateway marking the boundary of permitted agent authority."}
+            className="w-full h-full object-cover mix-blend-screen"
+          />
+        </div>
         
-        <motion.div 
-          className="absolute z-10 left-6 lg:left-[6%] bottom-8 lg:bottom-[11%] max-w-[610px] text-white pr-6"
-          initial={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <Kicker className="text-white/80">Operating reality</Kicker>
-          <h2 className="font-display font-semibold text-[clamp(42px,5.3vw,80px)] tracking-[-0.075em] leading-[0.96] my-4">
-            Intelligence without authority is just an experiment.
-          </h2>
-          <p className="max-w-[410px] text-[15px] leading-[1.6] text-[#dce4f0]">
-            Our engagements are structured around the moments where automated intent meets human accountability.
-          </p>
-        </motion.div>
-        
-        <div className="absolute z-10 right-[4%] top-[34px] text-white/70 text-[10px] tracking-[0.12em] [writing-mode:vertical-rl]">
-          PULSE // COGNIRISE
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
+          <motion.div
+            initial={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Kicker className="text-white/80">Methodologies & Frameworks</Kicker>
+            <h2 className="font-display font-semibold text-[clamp(42px,5.3vw,80px)] tracking-[-0.075em] leading-[0.96] my-4 max-w-[600px]">
+              {featuredFramework?.title ?? "The Agent Authority Model."}
+            </h2>
+            <p className="max-w-[450px] text-[15px] leading-[1.6] text-[#dce4f0] mb-10">
+              {featuredFramework?.teaser ?? "A deterministic way to set how much authority each agent handover may exercise on its own."}
+            </p>
+            <BrandButton href="/methodologies/agent-authority-model" variant="inverse">Read the methodology</BrandButton>
+          </motion.div>
+
+          <motion.div
+            className="hidden lg:flex flex-col gap-4 pl-10 border-l border-white/20"
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="text-xs uppercase tracking-widest text-white/50 mb-2">Framework Applications</div>
+            {[
+              { title: "Levels of Autonomy", desc: "Define explicit boundaries for model operation." },
+              { title: "The Authority Matrix", desc: "Map capability against enterprise risk." },
+              { title: "Promotion Evidence", desc: "Deterministic requirements for agent escalation." }
+            ].map(item => (
+              <div key={item.title} className="pb-4 border-b border-white/10 last:border-0 last:pb-0">
+                <strong className="block text-lg font-display text-[hsl(var(--brand-pink))] mb-1">{item.title}</strong>
+                <span className="text-sm text-[#dce4f0]">{item.desc}</span>
+              </div>
+            ))}
+          </motion.div>
         </div>
       </section>
+      )}
 
       {/* MODEL */}
       <section id="service-lines" className="px-6 md:px-[4.8vw] py-[82px] lg:py-[125px]">

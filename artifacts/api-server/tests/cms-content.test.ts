@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  CreateDocumentBody,
   cmsPublicRoute,
+  initialCmsContent,
   UpdateDocumentMarketAvailabilityBody,
+  UpdateDocumentBody,
   UpdateNavigationSettingsSchema,
   validateCmsContent,
   validateCmsSnapshot,
@@ -123,4 +126,144 @@ test("market availability accepts only the governed three-state decision", () =>
     UpdateDocumentMarketAvailabilityBody.safeParse({ decision: "hidden" }).success,
     false,
   );
+});
+
+test("agent authority is a governed framework with a canonical methodology route", () => {
+  const heroMediaId = "00000000-0000-4000-8000-000000000002";
+  const framework = {
+    ...governance,
+    template: "agent-authority" as const,
+    teaser: "Govern each handover according to its exposure.",
+    handoverExplanation: "Knowledge, Decision and Action describe individual handovers, not permanent agent classes.",
+    methodology: [{ type: "paragraph" as const, text: "Exposure sets the ceiling and approved evidence earns any climb." }],
+    workedExample: {
+      sector: "Travel & hospitality",
+      title: "Passenger re-accommodation",
+      handover: "action" as const,
+      reversibility: "R3" as const,
+      reach: "H2" as const,
+      exposureBand: "E2" as const,
+      oversight: "On the loop, with a stated intervention window",
+      detail: "The duty manager owns the handover.",
+      requestedAuthority: "on-loop" as const,
+      interventionWindow: "Before released-seat inventory expires.",
+      accountableRole: "Duty Manager, Operations Control Centre",
+      promotionEvidence: "An approved body of clean rebookings.",
+      automaticDemotion: "Any involuntary downgrade.",
+    },
+    sectorExamples: [],
+    heroMediaId,
+  };
+  assert.equal(validateCmsContent("framework", framework, "publish").success, true);
+  assert.equal(cmsPublicRoute("framework", "agent-authority-model", framework), "/methodologies/agent-authority-model");
+  const contradictory = validateCmsContent("framework", {
+    ...framework,
+    workedExample: {
+      ...framework.workedExample,
+      exposureBand: "E5",
+      oversight: "In the loop + external safety sign-off",
+    },
+  }, "publish");
+  assert.equal(contradictory.success, false);
+  assert.match(contradictory.errors.join(" "), /exposure must be E2/);
+
+  const withoutPinnedHero = validateCmsContent("framework", { ...framework, heroMediaId: undefined }, "publish");
+  assert.equal(withoutPinnedHero.success, false);
+  assert.match(withoutPinnedHero.errors.join(" "), /hero media/i);
+
+  const createRequest = CreateDocumentBody.safeParse({
+    kind: "framework",
+    slug: "agent-authority-model",
+    title: "Agent Authority Model",
+    content: framework,
+    mediaIds: [heroMediaId],
+    markets: ["uae"],
+  });
+  assert.equal(createRequest.success, true);
+  assert.deepEqual(createRequest.success ? createRequest.data.content : null, framework);
+  assert.equal(
+    createRequest.success ? typeof createRequest.data.content.verificationDate : "invalid",
+    "string",
+  );
+  assert.equal(
+    createRequest.success
+      ? validateCmsSnapshot("framework", {
+          slug: createRequest.data.slug,
+          title: createRequest.data.title,
+          summary: createRequest.data.summary,
+          content: createRequest.data.content,
+          seo: createRequest.data.seo,
+          mediaIds: createRequest.data.mediaIds ?? [],
+          markets: createRequest.data.markets,
+        }, "draft").success
+      : false,
+    true,
+  );
+
+  const updateRequest = UpdateDocumentBody.safeParse({
+    content: {
+      ...framework,
+      teaser: "An edited governed teaser.",
+    },
+    revisionNumber: 2,
+  });
+  assert.equal(updateRequest.success, true);
+  assert.equal(
+    updateRequest.success ? updateRequest.data.content?.template : null,
+    "agent-authority",
+  );
+  assert.equal(
+    updateRequest.success ? updateRequest.data.content?.teaser : null,
+    "An edited governed teaser.",
+  );
+  assert.equal(
+    updateRequest.success ? typeof updateRequest.data.content?.reviewDate : "invalid",
+    "string",
+  );
+  assert.equal(
+    createRequest.success && updateRequest.success
+      ? validateCmsSnapshot("framework", {
+          slug: createRequest.data.slug,
+          title: createRequest.data.title,
+          summary: createRequest.data.summary,
+          content: updateRequest.data.content,
+          seo: createRequest.data.seo,
+          mediaIds: createRequest.data.mediaIds ?? [],
+          markets: createRequest.data.markets,
+        }, "draft").success
+      : false,
+    true,
+  );
+});
+
+test("the admin framework initializer survives request parsing and draft validation", () => {
+  const initialContent = initialCmsContent("framework");
+  assert.deepEqual(initialContent, {
+    schemaVersion: 1,
+    template: "agent-authority",
+  });
+
+  const request = CreateDocumentBody.safeParse({
+    kind: "framework",
+    slug: "new-framework",
+    title: "New framework",
+    content: initialContent,
+    markets: ["uae"],
+  });
+  assert.equal(request.success, true);
+  assert.equal(
+    request.success
+      ? validateCmsSnapshot("framework", {
+          slug: request.data.slug,
+          title: request.data.title,
+          summary: request.data.summary,
+          content: request.data.content,
+          seo: request.data.seo,
+          mediaIds: request.data.mediaIds ?? [],
+          markets: request.data.markets,
+        }, "draft").success
+      : false,
+    true,
+  );
+  assert.equal(validateCmsContent("framework", initialContent, "publish").success, false);
 });
