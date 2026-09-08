@@ -1,6 +1,11 @@
-import { useRef, useState, type KeyboardEvent } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { assetUrl } from "@/lib/assets";
+import {
+  SpatialDisclosure,
+  SpatialDisclosureItem,
+  SpatialDisclosurePanel,
+  SpatialDisclosureTrigger,
+} from "@/components/ui/spatial-disclosure";
 
 const stages = [
   {
@@ -33,7 +38,7 @@ const stages = [
     highlight: true,
     image: "/images/cognirise/blueprint-demonstrate.jpg",
     imageAlt:
-      "A client team closely testing a working prototype on a large tablet in a bright studio.",
+      "A client team testing a working prototype on a large tablet in a bright studio.",
     imagePosition: "50% 45%",
   },
   {
@@ -71,33 +76,6 @@ const stages = [
 ];
 
 export function BlueprintJourney() {
-  const [activeStage, setActiveStage] = useState(2);
-  const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const reducedMotion = useReducedMotion();
-  const active = stages[activeStage - 1];
-
-  const selectAdjacent = (
-    event: KeyboardEvent<HTMLButtonElement>,
-    id: number,
-  ) => {
-    if (event.key === "Escape") {
-      event.preventDefault();
-      setActiveStage(2);
-      buttonRefs.current[1]?.focus();
-      return;
-    }
-
-    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
-      return;
-    }
-
-    event.preventDefault();
-    const backwards = event.key === "ArrowLeft" || event.key === "ArrowUp";
-    const next = backwards ? (id === 1 ? 4 : id - 1) : id === 4 ? 1 : id + 1;
-    setActiveStage(next);
-    buttonRefs.current[next - 1]?.focus();
-  };
-
   return (
     <section
       id="delivery-blueprint"
@@ -113,7 +91,6 @@ export function BlueprintJourney() {
           <h2
             id="blueprint-heading"
             className="mt-5 max-w-[760px] font-display text-[clamp(42px,5vw,72px)] font-semibold leading-[0.97] tracking-[-0.08em]"
-            style={{ fontSize: "clamp(42px, 5vw, 72px)" }}
           >
             From a sharp question to{" "}
             <em className="not-italic text-[hsl(var(--brand-pink))]">
@@ -130,178 +107,180 @@ export function BlueprintJourney() {
         </div>
       </div>
 
-      <div
-        className="mt-12 lg:mt-[72px]"
-        onMouseLeave={() => setActiveStage(2)}
-      >
-        <div
-          className="grid grid-cols-2 border-y border-[#102957] lg:grid-cols-4"
-          role="tablist"
-          aria-label="Cognirise delivery stages"
+      <div className="mt-12 lg:mt-[72px]">
+        <style>{`
+          .blueprint-disclosure { --bp-ink: #102957; --bp-paper: #fdfcfb; --bp-line: #cbd3e1; }
+          .blueprint-row { display: flex; flex-direction: column; border: 1px solid var(--bp-ink); border-radius: 4px; overflow: hidden; background: #071936; }
+          .blueprint-item {
+            position: relative;
+            isolation: isolate;
+            display: grid;
+            grid-template-rows: 1fr 0fr;
+            min-width: 0;
+            flex: 1 1 0;
+            overflow: hidden;
+            background: #071936;
+            color: white;
+            transition: flex 0.75s cubic-bezier(0.16, 1, 0.3, 1), grid-template-rows 0.58s cubic-bezier(0.16, 1, 0.3, 1);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+          }
+          .blueprint-item:last-child { border-bottom: 0; border-right: 0; }
+          .blueprint-row:has(.blueprint-item.active) .blueprint-item { flex-grow: 0.7; }
+          .blueprint-row:has(.blueprint-item.active) .blueprint-item.active {
+            flex-grow: 1.8;
+            grid-template-rows: minmax(100px, 1fr) auto;
+          }
+
+          .blueprint-visual { position: absolute; z-index: -3; inset: 0; margin: 0; overflow: hidden; background: #071936; }
+          .blueprint-visual img {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: saturate(1.02) contrast(0.99) brightness(1.04);
+            transform: scale(1.08);
+            transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
+          }
+          .blueprint-item.active .blueprint-visual img {
+            filter: saturate(1.08) contrast(1) brightness(1.02);
+            transform: scale(1);
+          }
+          .blueprint-visual:after {
+            content: ""; position: absolute; z-index: 2; inset: 0;
+            background: linear-gradient(0deg, rgba(7,25,54,0.95) 0%, rgba(7,25,54,0.6) 35%, transparent 70%);
+            opacity: 0.9; pointer-events: none;
+            transition: opacity 0.5s ease, background 0.5s ease;
+          }
+          .blueprint-item.active .blueprint-visual:after {
+            background: linear-gradient(0deg, rgba(7,25,54,0.98) 0%, rgba(7,25,54,0.85) 55%, transparent 90%);
+            opacity: 1;
+          }
+          .blueprint-visual:before {
+            content: ""; position: absolute; z-index: 1; inset: 0;
+            background: var(--bp-accent, #7659df); mix-blend-mode: overlay; opacity: 0.15;
+            transition: opacity 0.45s ease;
+          }
+          .blueprint-item.active .blueprint-visual:before { opacity: 0.35; }
+
+          .blueprint-trigger {
+            appearance: none; border: 0; background: transparent; color: white;
+            width: 100%; min-width: 0; padding: 25px 24px 20px;
+            display: grid; grid-template-columns: 1fr; grid-template-rows: auto auto auto; gap: 6px;
+            text-align: left; cursor: pointer; align-self: end;
+          }
+          .blueprint-trigger:focus-visible { outline: 3px solid hsl(var(--brand-coral)); outline-offset: -4px; }
+
+          .blueprint-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+          .blueprint-num { font: 700 12px/1 Inter, sans-serif; letter-spacing: 0.12em; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+          .blueprint-time { font: 600 11px/1 Inter, sans-serif; letter-spacing: 0.05em; color: rgba(255,255,255,0.75); text-transform: uppercase; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+
+          .blueprint-title { font: 600 clamp(24px, 2.5vw, 32px)/1.02 Comfortaa, sans-serif; letter-spacing: -0.05em; margin: 0; text-shadow: 0 2px 12px rgba(0,0,0,0.6); transition: color 0.3s; }
+          .blueprint-subtitle { font-size: 14px; color: rgba(255,255,255,0.85); margin: 0; text-shadow: 0 1px 8px rgba(0,0,0,0.6); font-weight: 500; transition: color 0.3s; }
+
+          .blueprint-item.active .blueprint-title { color: white; text-shadow: 0 2px 16px rgba(0,0,0,0.9); }
+          .blueprint-item.active .blueprint-subtitle { color: rgba(255,255,255,0.95); }
+
+          .blueprint-panel { display: grid; grid-template-rows: 0fr; min-height: 0; transition: grid-template-rows 0.58s cubic-bezier(0.16, 1, 0.3, 1); }
+          .blueprint-item.active .blueprint-panel { grid-template-rows: 1fr; }
+          .blueprint-panel-inner { min-height: 0; overflow: hidden; }
+          .blueprint-panel-content { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+          .blueprint-tagline { font: 600 18px/1.2 Comfortaa, sans-serif; letter-spacing: -0.03em; color: white; margin: 0; text-shadow: 0 1px 8px rgba(0,0,0,0.5); }
+          .blueprint-description { font-size: 13.5px; line-height: 1.5; color: rgba(255,255,255,0.85); margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+
+          .blueprint-outcome-box { margin-top: 4px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.15); }
+          .blueprint-outcome-label { display: block; font: 700 9px/1 Inter, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bp-accent, #7659df); margin-bottom: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+          .blueprint-outcome { font-size: 12.5px; font-weight: 600; line-height: 1.4; color: white; margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+
+          @media (min-width: 1024px) {
+            .blueprint-row { flex-direction: row; height: 560px; }
+            .blueprint-item { border-bottom: 0; border-right: 1px solid rgba(255,255,255,0.15); }
+            .blueprint-tagline { font-size: 21px; }
+            .blueprint-description { font-size: 14.5px; }
+            .blueprint-outcome { font-size: 13.5px; }
+            .blueprint-trigger { padding: 30px 28px 24px; }
+            .blueprint-panel-content { padding: 0 28px 28px; }
+          }
+          @media (max-width: 1023px) {
+            .blueprint-item { min-height: 220px; grid-template-rows: minmax(220px, 1fr) 0fr; }
+            .blueprint-row:has(.blueprint-item.active) .blueprint-item { flex-grow: 1; min-height: 140px; }
+            .blueprint-row:has(.blueprint-item.active) .blueprint-item.active { grid-template-rows: minmax(140px, 1fr) auto; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .blueprint-item, .blueprint-panel, .blueprint-visual img, .blueprint-visual:after, .blueprint-visual:before { transition: none !important; }
+          }
+        `}</style>
+
+        <SpatialDisclosure
+          mode="editorial"
+          orientation="horizontal"
+          allowCollapse
+          preview
+          previewOverridesSelection
+          previewExpands
+          defaultValue="2"
+          className="blueprint-row"
         >
-          {stages.map((stage, index) => {
-            const selected = stage.id === activeStage;
-            return (
-              <button
-                key={stage.id}
-                ref={(node) => {
-                  buttonRefs.current[index] = node;
-                }}
-                type="button"
-                id={`blueprint-tab-${stage.id}`}
-                role="tab"
-                aria-selected={selected}
-                aria-controls="blueprint-detail"
-                tabIndex={selected ? 0 : -1}
-                onMouseEnter={() => setActiveStage(stage.id)}
-                onFocus={() => setActiveStage(stage.id)}
-                onClick={() => setActiveStage(stage.id)}
-                onKeyDown={(event) => selectAdjacent(event, stage.id)}
-                className={`relative min-h-[104px] border-[#cbd3e1] px-3 py-5 text-left outline-none transition-colors focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[hsl(var(--brand-coral))] sm:px-5 lg:min-h-[92px] lg:border-r lg:px-6 lg:last:border-r-0 ${
-                  index % 2 === 0 ? "border-r" : ""
-                } ${index < 2 ? "border-b lg:border-b-0" : ""} ${
-                  selected ? "bg-[#f4f1fb]" : "hover:bg-[#f8f6fa]"
-                }`}
-              >
-                <span
-                  className="block text-[10px] font-bold tracking-[0.12em]"
-                  style={{ color: stage.accent }}
-                >
-                  {stage.num}
-                </span>
-                <span className="mt-2 block font-display text-[17px] font-semibold leading-none tracking-[-0.045em] text-[#102957] lg:text-[22px]">
-                  {stage.title}
-                </span>
-                <span className="mt-2 block text-[11px] leading-tight text-[#647491] lg:hidden">
-                  {stage.subtitle}
-                </span>
-                <span
-                  className={`absolute inset-x-0 bottom-0 h-[3px] ${
-                    selected || stage.highlight ? "opacity-100" : "opacity-0"
-                  }`}
-                  style={{
-                    background: stage.highlight
-                      ? "linear-gradient(90deg, #7659df, #db509e)"
-                      : stage.accent,
-                  }}
-                />
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-7 grid grid-cols-2 gap-1.5 overflow-hidden bg-[#f8f5f1] sm:gap-2 lg:grid-cols-4 lg:gap-1">
-          {stages.map((stage) => {
-            const selected = stage.id === activeStage;
-            return (
-              <figure
-                key={stage.id}
-                onMouseEnter={() => setActiveStage(stage.id)}
-                onClick={() => setActiveStage(stage.id)}
-                className={`group relative m-0 min-h-[210px] cursor-pointer overflow-hidden bg-[#102957] sm:min-h-[260px] lg:min-h-[360px] ${
-                  selected ? "z-10" : ""
-                }`}
-              >
-                <motion.img
-                  src={assetUrl(stage.image)}
-                  alt={stage.imageAlt}
-                  width={1024}
-                  height={1024}
-                  loading="lazy"
-                  decoding="async"
-                  animate={{
-                    scale: selected && !reducedMotion ? 1.025 : 1,
-                    opacity: selected ? 1 : 0.78,
-                  }}
-                  transition={{ duration: reducedMotion ? 0 : 0.45 }}
-                  className="absolute inset-0 h-full w-full select-none object-cover"
-                  style={{ objectPosition: stage.imagePosition }}
-                />
-                <div
-                  className={`pointer-events-none absolute inset-0 transition-opacity ${
-                    selected ? "opacity-100" : "opacity-0"
-                  }`}
-                  style={{
-                    boxShadow: `inset 0 -5px 0 ${stage.accent}, inset 0 0 0 1px rgba(255,255,255,.35)`,
-                  }}
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#071936]/35 via-transparent to-white/5" />
-              </figure>
-            );
-          })}
-        </div>
-
-        <div className="relative mt-5 grid grid-cols-4 items-start gap-0" aria-label="Delivery timing">
-          <div
-            className="absolute left-[6%] right-[6%] top-[7px] h-[2px]"
-            style={{
-              background:
-                "linear-gradient(90deg, #1765dd 0%, #7659df 32%, #db509e 65%, #ff775d 100%)",
-            }}
-          />
           {stages.map((stage) => (
-            <div key={stage.id} className="relative px-1 text-center">
-              <span
-                className={`mx-auto mb-3 block h-4 w-4 rounded-full border-[4px] border-[#fdfcfb] ${
-                  stage.highlight
-                    ? "scale-125 shadow-[0_0_0_3px_rgba(219,80,158,0.18)]"
-                    : "bg-[#102957]"
-                }`}
-                style={stage.highlight ? { backgroundColor: stage.accent } : undefined}
-              />
-              <span
-                className={`block text-[9px] font-bold leading-tight sm:text-[11px] lg:text-[12px] ${
-                  stage.highlight ? "text-[#a82d78]" : "text-[#536887]"
-                }`}
-              >
-                {stage.time}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div
-          id="blueprint-detail"
-          role="tabpanel"
-          aria-labelledby={`blueprint-tab-${active.id}`}
-          className="mt-9 min-h-[230px] border-t border-[#102957] pt-7 lg:min-h-[180px]"
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={active.id}
-              initial={reducedMotion ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
-              transition={{ duration: reducedMotion ? 0 : 0.22 }}
-              className="grid grid-cols-1 gap-6 lg:grid-cols-[0.78fr_1.22fr] lg:gap-[7vw]"
+            <SpatialDisclosureItem
+              key={stage.id}
+              id={String(stage.id)}
+              className={({ isActive, isSelected, isPreview }) =>
+                `blueprint-item ${isActive ? "active" : ""} ${
+                  isSelected ? "selected" : ""
+                } ${isPreview ? "preview" : ""}`
+              }
+              style={{ "--bp-accent": stage.accent } as CSSProperties}
             >
-              <div>
-                <span
-                  className="text-[10px] font-bold uppercase tracking-[0.12em]"
-                  style={{ color: active.accent }}
-                >
-                  {active.num} / {active.time}
-                </span>
-                <h3 className="mt-3 font-display text-[clamp(27px,3vw,44px)] font-semibold leading-[1.02] tracking-[-0.065em] text-[#102957]">
-                  {active.tagline}
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 gap-5 border-t border-[#cbd3e1] pt-5 sm:grid-cols-[1.25fr_0.75fr]">
-                <p className="m-0 text-[15px] leading-[1.65] text-[#405777]">
-                  {active.description}
-                </p>
-                <div>
-                  <span className="block text-[9px] font-bold uppercase tracking-[0.12em] text-[#77859c]">
-                    What you have in hand
-                  </span>
-                  <p className="mb-0 mt-2 text-[12px] font-semibold leading-[1.5] text-[#102957]">
-                    {active.outcome}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+              {() => (
+                <>
+                  <figure className="blueprint-visual">
+                    <img
+                      src={assetUrl(stage.image)}
+                      alt={stage.imageAlt}
+                      className="w-full h-full object-cover"
+                      style={{ objectPosition: stage.imagePosition }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </figure>
+                  <SpatialDisclosureTrigger
+                    id={String(stage.id)}
+                    className="blueprint-trigger"
+                    data-testid={`blueprint-trigger-${stage.id}`}
+                  >
+                    <div className="blueprint-meta">
+                      <span
+                        className="blueprint-num"
+                        style={{ color: stage.accent }}
+                      >
+                        {stage.num}
+                      </span>
+                      <span className="blueprint-time">{stage.time}</span>
+                    </div>
+                    <h3 className="blueprint-title">{stage.title}</h3>
+                    <p className="blueprint-subtitle">{stage.subtitle}</p>
+                  </SpatialDisclosureTrigger>
+                  <SpatialDisclosurePanel
+                    id={String(stage.id)}
+                    className="blueprint-panel"
+                    data-testid={`blueprint-panel-${stage.id}`}
+                  >
+                    <div className="blueprint-panel-inner">
+                      <div className="blueprint-panel-content">
+                        <h4 className="blueprint-tagline">{stage.tagline}</h4>
+                        <p className="blueprint-description">{stage.description}</p>
+                        <div className="blueprint-outcome-box">
+                          <span className="blueprint-outcome-label">
+                            What you have in hand
+                          </span>
+                          <p className="blueprint-outcome">{stage.outcome}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </SpatialDisclosurePanel>
+                </>
+              )}
+            </SpatialDisclosureItem>
+          ))}
+        </SpatialDisclosure>
       </div>
     </section>
   );
