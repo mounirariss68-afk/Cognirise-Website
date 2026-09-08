@@ -197,3 +197,17 @@ mtime_ms = 1788900416052
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/bdb2341d-6d3f-4e3c-9530-7e37aa008483/a5e43e26-0fe9-4f03-95e8-4e1ffcee5de0"
 storage_version_token = "1788900426493134"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "PVbuMHdtXPmbo4BNMXLcJ"
+uri = "file://attached_assets/generated_images/pulse-industries-final-candidates/pulse-industry-public-sector-redesigned.png"
+type = "image"
+title = "Public Sector — Redesigned Citizen Service Centre"
+description = "Native 1536×1024 redesign showing recognizable citizen-service delivery, visible case processing, public routes, staffed service bays, document issuance, and completed civic journeys."
+logical_id = "4393449a-08fe-4f40-b976-f8c20c80c23e"
+content_hash = "sha256:7b481c849f4a38af1bac432016504f6c255cb0209a3599fd7e69ca9c63679323"
+size = 2727925
+mtime_ms = 1788900634206
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/4393449a-08fe-4f40-b976-f8c20c80c23e/fad44cdf-e60f-497f-baae-87f05b867d6a"
+storage_version_token = "1788900660237416"
+content_type = "image/png"
