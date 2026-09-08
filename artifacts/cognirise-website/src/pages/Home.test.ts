@@ -19,6 +19,6 @@ test("does not retain the legacy edge-striped homepage CTA", () => {
 test("keeps expanded industry copy legible without redundant explore or close labels", () => {
   assert.doesNotMatch(source, /home-industry-affordance/);
   assert.doesNotMatch(source, /\{isActive \? "Close" : "Explore"\}/);
-  assert.match(source, /\.home-industry-item\.active \.home-industry-visual:after\{background:linear-gradient\(90deg,rgba\(253,252,251,\.97\)/);
-  assert.match(source, /\.home-industry-item\.active \.home-industry-orientation,.home-industry-item\.active \.home-industry-detail\{color:rgba\(16,41,87,\.96\)/);
+  assert.match(source, /\.home-industry-item\.active \.home-industry-visual:after\{background:linear-gradient\(90deg,rgba\(253,252,251,\.96\)[\s\S]*transparent 62%\)/);
+  assert.match(source, /\.home-industry-item\.active \.home-industry-orientation,.home-industry-item\.active \.home-industry-detail\{max-width:34ch;color:rgba\(16,41,87,\.96\)/);
 });
