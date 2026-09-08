@@ -133,14 +133,14 @@ export function BlueprintJourney() {
 
           .blueprint-visual { position: absolute; z-index: -3; inset: 0; margin: 0; overflow: hidden; background: #071936; }
           .blueprint-visual img {
-            width: 100%; height: 100%; object-fit: cover;
+            position: absolute; left: 50%; top: 0;
+            width: clamp(560px, 46vw, 720px); max-width: none; height: 100%; object-fit: cover;
             filter: saturate(1.02) contrast(0.99) brightness(1.04);
-            transform: scale(1);
-            transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
+            transform: translateX(-50%);
+            transition: filter 0.45s ease;
           }
           .blueprint-item.active .blueprint-visual img {
             filter: saturate(1.08) contrast(1) brightness(1.02);
-            transform: scale(1.04);
           }
           .blueprint-visual:after {
             content: ""; position: absolute; z-index: 2; inset: 0;
@@ -193,13 +193,15 @@ export function BlueprintJourney() {
           .blueprint-outcome { font-size: 12.5px; font-weight: 600; line-height: 1.4; color: white; margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
 
           @media (min-width: 1024px) {
+            .blueprint-disclosure { --blueprint-active-width: calc((90.4vw - 3px) * 0.4615); }
             .blueprint-row { flex-direction: row; height: 560px; }
             .blueprint-item { border-bottom: 0; border-right: 1px solid rgba(255,255,255,0.15); }
             .blueprint-tagline { font-size: 21px; }
             .blueprint-description { font-size: 14.5px; }
             .blueprint-outcome { font-size: 13.5px; }
             .blueprint-trigger { padding: 30px 28px 24px; }
-            .blueprint-panel-content { padding: 0 28px 28px; }
+            .blueprint-trigger > * { width: calc(var(--blueprint-active-width) - 56px); }
+            .blueprint-panel-content { width: calc(var(--blueprint-active-width) - 56px); padding: 0 28px 28px; }
           }
           @media (max-width: 1023px) {
             .blueprint-item { min-height: 220px; grid-template-rows: minmax(220px, 1fr) 0fr; }
@@ -219,7 +221,7 @@ export function BlueprintJourney() {
           previewOverridesSelection
           previewExpands
           defaultValue="2"
-          className="blueprint-row"
+          className="blueprint-disclosure blueprint-row"
         >
           {stages.map((stage) => (
             <SpatialDisclosureItem

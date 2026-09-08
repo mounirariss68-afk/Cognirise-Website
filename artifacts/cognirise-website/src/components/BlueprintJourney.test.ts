@@ -34,8 +34,11 @@ test("BlueprintJourney makes the full image card a hover and click target", () =
   assert.match(source, /\.blueprint-panel\s*\{[\s\S]*pointer-events: none;/);
 });
 
-test("BlueprintJourney zooms images in one direction as cards expand", () => {
-  assert.match(source, /\.blueprint-visual img\s*\{[\s\S]*transform: scale\(1\);/);
-  assert.match(source, /\.blueprint-item\.active \.blueprint-visual img\s*\{[\s\S]*transform: scale\(1\.04\);/);
-  assert.doesNotMatch(source, /transform: scale\(1\.08\)/);
+test("BlueprintJourney keeps image crop and text measure stable while cards expand", () => {
+  assert.match(source, /\.blueprint-visual img\s*\{[\s\S]*width: clamp\(560px, 46vw, 720px\)/);
+  assert.match(source, /transform: translateX\(-50%\)/);
+  assert.doesNotMatch(source, /transform: scale\(/);
+  assert.match(source, /--blueprint-active-width:/);
+  assert.match(source, /\.blueprint-trigger > \* \{ width: calc\(var\(--blueprint-active-width\) - 56px\); \}/);
+  assert.match(source, /\.blueprint-panel-content \{ width: calc\(var\(--blueprint-active-width\) - 56px\);/);
 });
