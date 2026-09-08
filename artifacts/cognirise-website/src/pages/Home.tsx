@@ -15,7 +15,7 @@ import {
   SpatialDisclosurePanel,
   SpatialDisclosureTrigger,
 } from "@/components/ui/spatial-disclosure";
-import { ArrowRight, ArrowUpRight, Plus } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 const Kicker = ({ children, className = "text-[#102957]" }: { children: React.ReactNode, className?: string }) => (
   <div className={`flex items-center gap-3 text-[10px] tracking-[0.12em] uppercase font-semibold ${className}`}>
@@ -444,12 +444,10 @@ export default function Home() {
           .home-industry-visual:before{content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(120deg,var(--hi-accent),transparent 54%);mix-blend-mode:color;opacity:.1;transition:opacity .45s ease}
           .home-industry-item.active .home-industry-visual:before{opacity:.18}
           .home-industry-visual:after{content:"";position:absolute;z-index:2;inset:0;background:linear-gradient(180deg,rgba(253,252,251,.12),rgba(253,252,251,0) 38%,rgba(253,252,251,.96) 100%),linear-gradient(90deg,rgba(253,252,251,.14),transparent 76%)}
-          .home-industry-trigger{appearance:none;border:0;background:transparent;color:inherit;width:100%;min-width:0;padding:25px 27px 22px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto auto;gap:10px;text-align:left;cursor:pointer}
+          .home-industry-item.active .home-industry-visual:after{background:linear-gradient(90deg,rgba(253,252,251,.97) 0%,rgba(253,252,251,.92) 38%,rgba(253,252,251,.7) 62%,rgba(253,252,251,.18) 82%,transparent 100%),linear-gradient(180deg,rgba(253,252,251,.06),transparent 42%,rgba(253,252,251,.92) 100%)}
+          .home-industry-trigger{appearance:none;border:0;background:transparent;color:inherit;width:100%;min-width:0;padding:25px 27px 22px;display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr auto auto;gap:10px;text-align:left;cursor:pointer}
           .home-industry-trigger:focus-visible{outline:3px solid var(--hi-coral);outline-offset:-4px}
           .home-industry-number{font:700 10px/1 Inter,sans-serif;letter-spacing:.13em;color:rgba(16,41,87,.68)}
-          .home-industry-affordance{display:inline-flex;align-items:center;gap:7px;font:700 9px/1 Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--hi-ink)}
-          .home-industry-affordance svg{color:#db509e;transition:transform .38s cubic-bezier(.16,1,.3,1)}
-          .home-industry-item.active .home-industry-affordance svg{transform:rotate(45deg)}
           .home-industry-title{grid-column:1/-1;align-self:end;margin:0;font:600 clamp(21px,2.05vw,31px)/1.02 Comfortaa,sans-serif;letter-spacing:-.065em;text-wrap:balance;text-shadow:0 1px 16px rgba(255,255,255,.92)}
           .home-industry-orientation{grid-column:1/-1;margin:0;max-width:510px;font-size:12px;line-height:1.48;color:rgba(16,41,87,.78)}
           .home-industry-panel{display:grid;grid-template-rows:0fr;min-height:0;transition:grid-template-rows .58s cubic-bezier(.16,1,.3,1)}
@@ -457,6 +455,8 @@ export default function Home() {
           .home-industry-panel-inner{min-height:0;overflow:hidden}
           .home-industry-panel-content{padding:0 27px 25px}
           .home-industry-detail{max-width:620px;margin:0 0 13px;font-size:12px;line-height:1.52;color:rgba(16,41,87,.76)}
+          .home-industry-item.active .home-industry-title{color:#102957;text-shadow:0 1px 18px rgba(255,255,255,1)}
+          .home-industry-item.active .home-industry-orientation,.home-industry-item.active .home-industry-detail{color:rgba(16,41,87,.96);font-weight:500;text-shadow:0 1px 12px rgba(255,255,255,.95)}
           .home-industry-link{display:inline-flex;align-items:center;gap:8px;border-bottom:1px solid rgba(16,41,87,.58);padding-bottom:4px;font-size:11px;font-weight:700;color:var(--hi-ink);transition:color .2s,border-color .2s}
           .home-industry-link:hover{color:var(--hi-coral);border-color:var(--hi-coral)}
           @media(min-width:768px) and (max-width:1100px){
@@ -478,7 +478,7 @@ export default function Home() {
             .home-industry-panel-content{padding:0 21px 24px}
             .home-industry-title{font-size:28px}
           }
-          @media(prefers-reduced-motion:reduce){.home-industry-item,.home-industry-panel,.home-industry-visual img,.home-industry-visual:before,.home-industry-affordance svg,.home-industry-link{transition:none!important}}
+          @media(prefers-reduced-motion:reduce){.home-industry-item,.home-industry-panel,.home-industry-visual img,.home-industry-visual:before,.home-industry-link{transition:none!important}}
         `}</style>
         <div className="border-t border-[#102957] pt-6 flex flex-col lg:flex-row justify-between gap-8 lg:gap-8 items-start lg:items-end">
           <div>
@@ -510,7 +510,7 @@ export default function Home() {
                   data-industry={industry.slug}
                   className={({ isActive, isSelected, isPreview }) => `home-industry-item ${isActive ? "active" : ""} ${isSelected ? "selected" : ""} ${isPreview ? "preview" : ""}`}
                 >
-                  {({ isActive }) => (
+                  {() => (
                     <>
                       <figure className="home-industry-visual">
                         <PulseImage
@@ -525,10 +525,6 @@ export default function Home() {
                         data-testid={`home-industry-trigger-${industry.id}`}
                       >
                         <span className="home-industry-number">{industry.id}</span>
-                        <span className="home-industry-affordance" aria-hidden="true">
-                          {isActive ? "Close" : "Explore"}
-                          <Plus size={14} />
-                        </span>
                         <h3 className="home-industry-title">{industry.name}</h3>
                         <p className="home-industry-orientation">{industry.orientation}</p>
                       </SpatialDisclosureTrigger>
