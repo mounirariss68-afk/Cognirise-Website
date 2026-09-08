@@ -155,3 +155,17 @@ mtime_ms = 1788895986708
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/726d4e52-b937-436c-9399-bd08020b3a4d/406095f7-780b-41fd-8dcd-c8575e8aa474"
 storage_version_token = "1788895997450621"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "V7n6TYQnunx3Il5Ai2EpI"
+uri = "file://attached_assets/generated_images/pulse-industries-final-candidates/pulse-industry-family-selected-review.jpg"
+type = "image"
+title = "Cognirise Pulse Industries — Selected Design-Brief Execution"
+description = "Nine selected native 1536×1024 candidates. Each implements a distinct industry brief and operational event while retaining the shared Cognirise Pulse palette, materials, realism, and energy language."
+logical_id = "2f09cfaa-9d13-4e82-a456-d74d8a1429ff"
+content_hash = "sha256:9f7b1a17e5e3f7cec4dea1b22aab7e8db9f930580d96eac486a9a050215260d5"
+size = 780959
+mtime_ms = 1788899207693
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/2f09cfaa-9d13-4e82-a456-d74d8a1429ff/d0dc97a0-a5b9-41e1-b240-7b7d93033607"
+storage_version_token = "1788899225605037"
+content_type = "image/jpeg"
