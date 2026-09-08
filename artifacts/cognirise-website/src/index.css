@@ -417,3 +417,32 @@
     transition: none !important;
   }
 }
+
+.autodata-pipeline-interactive {
+  display: none;
+}
+
+.autodata-pipeline-linear {
+  display: block;
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .autodata-pipeline-interactive {
+    display: grid;
+    grid-template-columns: minmax(0, .35fr) minmax(0, 1fr);
+  }
+
+  .autodata-pipeline-linear {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .autodata-pipeline-interactive {
+    display: none !important;
+  }
+
+  .autodata-pipeline-linear {
+    display: block !important;
+  }
+}

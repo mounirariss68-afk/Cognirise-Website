@@ -66,11 +66,7 @@ export const ALLIANCE_PLATFORMS: Record<AlliancePlatform["slug"], AlliancePlatfo
     mechanism: "Teams bring data into AutoData, choose and configure a preparation pipeline, run automated processing, and export the resulting AI-ready dataset with stage outputs and a pipeline report.",
     heroImage: "/images/cognirise/alliance-datatoolpack.jpg",
     heroAlt: "Irregular translucent data fragments moving through luminous processing planes and emerging as a structured dataset.",
-    facts: [
-      { value: "30+", label: "native connectors listed across data sources", sourceUrl: "https://datatoolpack.com/" },
-      { value: "3", label: "supported upload formats: CSV, JSON and Parquet", sourceUrl: "https://datatoolpack.com/" },
-      { value: "1 route", label: "from profiling to AI-ready export", sourceUrl: "https://autodata.datatoolpack.com/" },
-    ],
+    facts: [],
     workflow: [
       { label: "01 / Profile", title: "Understand the dataset", description: "Inspect structure, quality, missing values and distributions before preparation decisions are applied." },
       { label: "02 / Prepare", title: "Clean and transform", description: "Standardize formats, handle missing data, numericalize values, reduce noise and prepare useful features." },
@@ -79,18 +75,18 @@ export const ALLIANCE_PLATFORMS: Record<AlliancePlatform["slug"], AlliancePlatfo
     ],
     differentiators: [
       { title: "Preset pipeline automation", description: "Multiple preparation steps can run through configured workflows rather than disconnected point tools." },
-      { title: "Connectors at the intake edge", description: "AutoData lists native connectors across databases, warehouses, storage, streaming and SaaS alongside file upload." },
+      { title: "Connector pathways at the intake edge", description: "Integration planning can cover databases, warehouses, storage, streams and file-based intake, subject to partner-supported options." },
       { title: "Outputs retain the preparation story", description: "Stage files and a pipeline report make the path from raw input to prepared output more visible." },
     ],
     contribution: "Cognirise identifies the data product and quality boundary, connects AutoData to the relevant source and destination systems, and places its outputs inside governed analytics, model and CogniOS delivery workflows. Datatoolpack remains the product owner.",
     sources: [
-      { label: "Datatoolpack AutoData overview", url: "https://datatoolpack.com/", supports: "Profiling, cleaning, feature engineering, anomaly detection, pipeline automation, AI-ready export and 30+ connectors." },
+      { label: "Datatoolpack AutoData overview", url: "https://datatoolpack.com/", supports: "Profiling, cleaning, feature engineering, anomaly detection, pipeline automation and AI-ready export." },
       { label: "AutoData pipeline", url: "https://autodata.datatoolpack.com/", supports: "Pipeline stages, transformations, stage CSV outputs and pipeline report." },
     ],
     verifiedOn: "6 September 2026",
     meta: {
-      title: "Datatoolpack AutoData Alliance | Cognirise",
-      description: "Explore automated data profiling, cleaning, transformation, anomaly detection, pipeline automation and AI-ready export through AutoData.",
+      title: "Datatoolpack AutoData Model-Readiness Layer | Cognirise",
+      description: "Explore how AutoData prepares heterogeneous raw data for existing ML and AutoML platforms through a deterministic, replayable eight-stage pipeline.",
       socialImage: "/images/cognirise/alliance-datatoolpack.jpg",
     },
   },
