@@ -47,6 +47,7 @@ export function SpatialDisclosure({
   preview: previewEnabled,
   previewOverridesSelection = false,
   previewExpands = false,
+  previewClearDelay = 0,
   className,
 }: {
   children: ReactNode;
@@ -59,6 +60,7 @@ export function SpatialDisclosure({
   preview?: boolean;
   previewOverridesSelection?: boolean;
   previewExpands?: boolean;
+  previewClearDelay?: number;
   className?: string;
 }) {
   const [uncontrolled, setUncontrolled] = useState<string | null>(defaultValue);
@@ -73,6 +75,7 @@ export function SpatialDisclosure({
   }, [isControlled, onChange]);
 
   const [previewIndex, setPreviewIndex] = useState<string | null>(null);
+  const previewClearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeIndex = resolveSpatialDisclosureActiveIndex(
     selectedIndex,
     previewIndex,
@@ -108,7 +111,23 @@ export function SpatialDisclosure({
   }, [selectedIndex, allowCollapse, setSelectedIndex]);
 
   const preview = useCallback((id: string | null) => {
+    if (previewClearTimer.current) {
+      clearTimeout(previewClearTimer.current);
+      previewClearTimer.current = null;
+    }
     setPreviewIndex(id);
+  }, []);
+
+  const schedulePreviewClear = useCallback(() => {
+    if (previewClearTimer.current) clearTimeout(previewClearTimer.current);
+    previewClearTimer.current = setTimeout(() => {
+      setPreviewIndex(null);
+      previewClearTimer.current = null;
+    }, previewClearDelay);
+  }, [previewClearDelay]);
+
+  useEffect(() => () => {
+    if (previewClearTimer.current) clearTimeout(previewClearTimer.current);
   }, []);
 
   const onKeyDown = useCallback((e: KeyboardEvent<HTMLElement>, id: string) => {
@@ -173,7 +192,13 @@ export function SpatialDisclosure({
       <div
         className={className}
         data-spatial-disclosure={instanceId}
-        onMouseLeave={() => preview(null)}
+        onMouseEnter={() => {
+          if (previewClearTimer.current) {
+            clearTimeout(previewClearTimer.current);
+            previewClearTimer.current = null;
+          }
+        }}
+        onMouseLeave={schedulePreviewClear}
         onBlurCapture={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget as Node)) {
             preview(null);

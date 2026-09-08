@@ -34,6 +34,7 @@ export function ServiceLineTiles({ className = "", variant = "full" }: { classNa
       allowCollapse={true}
       previewOverridesSelection
       previewExpands
+      previewClearDelay={90}
       className={`cps-line-component cps-line-${variant} ${className}`}
     >
       <style>{`
@@ -43,11 +44,10 @@ export function ServiceLineTiles({ className = "", variant = "full" }: { classNa
         .cps-line-component :focus-visible{outline:3px solid var(--coral);outline-offset:4px}
         .cps-line-component h3{font-family:Comfortaa,sans-serif}
         .cps-tiles{display:flex;flex-direction:column;gap:16px}
-        .cps-tile{position:relative;min-width:0;background:var(--paper);border:1px solid var(--line);overflow:hidden;display:flex;flex:1 1 0%;flex-direction:column;transition:background .85s cubic-bezier(.19,1,.22,1)}
+        .cps-tile{position:relative;min-width:0;background:var(--paper);border:1px solid var(--line);overflow:hidden;display:flex;flex:1 1 0%;flex-direction:column;cursor:pointer;transition:background .7s cubic-bezier(.19,1,.22,1)}
         .cps-tile:after{content:"";position:absolute;z-index:4;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg,#7659df,var(--pink),var(--coral));transform:scaleY(0);transform-origin:top;transition:transform .18s ease;pointer-events:none}
         .cps-tile.active:after{transform:scaleY(1)}
         .cps-tile:hover:not(.active){background:#f8f9fc}
-        .cps-tile:hover:not(.active) .cps-tile-visual img{transform:scale(1.03)}
         .cps-tile-left{position:relative;z-index:2;display:flex;flex-direction:column;width:100%}
         .cps-tile-btn{appearance:none;background:transparent;border:none;text-align:left;width:100%;padding:0;cursor:pointer;outline:none;color:inherit;flex-shrink:0;font:inherit}
         .cps-tile-btn:focus-visible{outline:3px solid var(--coral);outline-offset:-3px}
@@ -65,29 +65,30 @@ export function ServiceLineTiles({ className = "", variant = "full" }: { classNa
         .cps-tile-desc{display:flex;flex-direction:column;gap:16px;margin-bottom:28px}
         .cps-tile-desc strong,.cps-tile-dests-wrap strong{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--pink);display:block;margin-bottom:8px}
         .cps-tile-desc p{font-size:13px;line-height:1.55;color:#526886;margin:0}
-        .cps-tile-dests{display:flex;flex-direction:column;gap:8px}
-        .cps-tile-dest{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#fff;border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink);transition:border-color .2s ease,color .2s ease}
-        .cps-tile-dest:hover{border-color:var(--pink);color:var(--pink)}
+        .cps-tile-dests{display:flex;flex-wrap:wrap;align-items:center;gap:7px 18px}
+        .cps-tile-dest{display:inline-flex;align-items:center;gap:6px;width:max-content;max-width:100%;padding:2px 0;font-size:12px;line-height:1.35;font-weight:650;color:var(--ink);text-decoration:underline;text-decoration-color:rgba(220,80,159,.35);text-decoration-thickness:1px;text-underline-offset:4px;transition:color .2s ease,text-decoration-color .2s ease}
+        .cps-tile-dest svg{flex:0 0 auto}
+        .cps-tile-dest:hover{color:var(--pink);text-decoration-color:var(--pink)}
         .cps-tile-visual{position:relative;z-index:1;height:200px;overflow:hidden;background:#f3f1f7}
-        .cps-tile-visual img{display:block;position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;opacity:1;visibility:visible;transition:transform .85s cubic-bezier(.19,1,.22,1),filter .85s cubic-bezier(.19,1,.22,1)}
-        .cps-tile.active .cps-tile-visual img{transform:scale(1.035)}
+        .cps-tile-visual img{display:block;position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;opacity:1;visibility:visible;transition:transform .7s cubic-bezier(.19,1,.22,1),filter .7s cubic-bezier(.19,1,.22,1)}
+        .cps-tile.active .cps-tile-visual img{transform:scale(1.02)}
         .cps-tile[data-service="consulting-engineering"] .cps-tile-visual img{filter:brightness(1.12) saturate(.9)}
         .cps-tile-visual:after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(8,26,58,.1),transparent 30%);pointer-events:none}
         @media (min-width:1024px){
           .cps-tiles{flex-direction:row;height:660px}
           .cps-line-summary .cps-tiles{height:560px}
-          .cps-tile{display:block;flex:0 0 auto;width:calc(18.519% - 5.926px);transition:width .85s cubic-bezier(.19,1,.22,1),background .85s cubic-bezier(.19,1,.22,1);will-change:width}
+          .cps-tile{display:block;flex:0 0 auto;width:calc(18.519% - 5.926px);transition:width .7s cubic-bezier(.19,1,.22,1),background .7s cubic-bezier(.19,1,.22,1);will-change:width}
           .cps-tile.active{width:calc(62.963% - 20.148px);background:#fff}
           .cps-tiles.all-collapsed .cps-tile{width:calc(33.333% - 10.667px)}
-          .cps-tile-left{position:absolute;inset:0;height:100%;transition:width .85s cubic-bezier(.19,1,.22,1)}
+          .cps-tile-left{position:absolute;inset:0;height:100%;transition:width .7s cubic-bezier(.19,1,.22,1)}
           .cps-tile.active .cps-tile-left{width:50%}
           .cps-tile-header{padding:32px 32px 24px;gap:14px;height:250px}
           .cps-tile.active .cps-tile-header{height:190px}
           .cps-tile-copy-inner{display:flex;position:absolute;inset:0;padding:0 32px 32px;opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .5s ease .2s,transform .5s ease .2s,visibility .5s ease .2s;min-width:340px;overflow-y:auto;animation:none!important}
           .cps-tile.active .cps-tile-copy-inner{opacity:1;visibility:visible;transform:translateY(0)}
-          .cps-tile-visual{position:absolute;inset:250px 0 0;height:auto;transition:inset .85s cubic-bezier(.19,1,.22,1)}
+          .cps-tile-visual{position:absolute;inset:250px 0 0;height:auto;transition:inset .7s cubic-bezier(.19,1,.22,1)}
           .cps-tile.active .cps-tile-visual{inset:0 0 0 50%}
-          .cps-tile-visual:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.95) 10%,rgba(255,255,255,.4) 25%,transparent 45%);opacity:0;transition:opacity .85s cubic-bezier(.19,1,.22,1);pointer-events:none;z-index:2}
+          .cps-tile-visual:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.95) 10%,rgba(255,255,255,.4) 25%,transparent 45%);opacity:0;transition:opacity .7s cubic-bezier(.19,1,.22,1);pointer-events:none;z-index:2}
           .cps-tile[data-service="consulting-engineering"] .cps-tile-visual:before{background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.98) 17%,rgba(255,255,255,.76) 34%,rgba(255,255,255,.26) 52%,transparent 68%)}
           .cps-tile.active .cps-tile-visual:before{opacity:1}
         }
@@ -100,7 +101,7 @@ export function ServiceLineTiles({ className = "", variant = "full" }: { classNa
 }
 
 function SpatialDisclosureTiles({ variant }: { variant: "full" | "summary" }) {
-  const { activeIndex } = useSpatialDisclosure();
+  const { activeIndex, preview, toggle } = useSpatialDisclosure();
 
   return (
     <div
@@ -118,6 +119,11 @@ function SpatialDisclosureTiles({ variant }: { variant: "full" | "summary" }) {
             id={id}
             className={({ isActive, isSelected }) => `cps-tile ${isActive ? "active" : ""} ${isSelected ? "selected" : ""}`}
             data-service={service.id}
+            onMouseEnter={() => preview(id)}
+            onClick={(event) => {
+              if ((event.target as HTMLElement).closest("a, button")) return;
+              toggle(id);
+            }}
           >
             {({ isActive }) => (
               <>
@@ -178,15 +184,18 @@ function SpatialDisclosureTiles({ variant }: { variant: "full" | "summary" }) {
                           <div className="cps-tile-dests-wrap mt-auto">
                             <strong>Explore</strong>
                             <div className="cps-tile-dests">
-                              <Link
-                                href={service.destinations[0][1]}
-                                className="cps-tile-dest group"
-                                tabIndex={isActive ? 0 : -1}
-                                data-testid={`service-link-${service.id}`}
-                              >
-                                {service.destinations[0][0]}
-                                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                              </Link>
+                               {service.destinations.map(([label, url], destinationIndex) => (
+                                 <Link
+                                   href={url}
+                                   key={label}
+                                   className="cps-tile-dest group"
+                                   tabIndex={isActive ? 0 : -1}
+                                   data-testid={`service-link-${service.id}-${destinationIndex}`}
+                                 >
+                                   {label}
+                                   <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                                 </Link>
+                               ))}
                             </div>
                           </div>
                         </>

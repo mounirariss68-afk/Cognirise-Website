@@ -132,6 +132,7 @@ try {
         const panel = document.getElementById(id);
         return panel?.getAttribute("aria-hidden") === "true" && panel?.hasAttribute("inert");
       }),
+      destinationCounts: controls.map((id) => document.getElementById(id)?.querySelectorAll("a").length ?? 0),
     };
   })()`);
 
@@ -142,6 +143,19 @@ try {
   assert.equal(initial.uniqueControls, 3);
   assert.equal(initial.controlsResolveOnce, true);
   assert.equal(initial.panelsHiddenAndInert, true);
+  assert.deepEqual(initial.destinationCounts, [3, 1, 5]);
+
+  await evaluate(`(() => {
+    document.querySelectorAll(".cps-tile-visual")[2].click();
+    return true;
+  })()`);
+  await delay(50);
+  const imageClickSelection = await evaluate(
+    `document.querySelectorAll('[data-testid^="service-trigger-"]')[2].getAttribute("aria-expanded")`,
+  );
+  assert.equal(imageClickSelection, "true", "Clicking the image region did not activate its service card");
+  await evaluate(`document.querySelectorAll(".cps-tile-visual")[2].click(); true`);
+  await delay(50);
 
   await evaluate("document.activeElement?.blur(); true");
   let reachedServiceTrigger = false;
@@ -175,10 +189,11 @@ try {
   await evaluate(`(() => {
     const triggers = [...document.querySelectorAll('[data-testid^="service-trigger-"]')];
     triggers[0].click();
-    triggers[1].dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    document.querySelectorAll(".cps-tile-visual")[1]
+      .dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
     return true;
   })()`);
-  await delay(50);
+  await delay(120);
   const selected = await evaluate(`(() => {
     const triggers = [...document.querySelectorAll('[data-testid^="service-trigger-"]')];
     const firstPanel = document.getElementById(triggers[0].getAttribute("aria-controls"));
@@ -208,7 +223,7 @@ try {
     root.dispatchEvent(new MouseEvent("mouseout", { bubbles: true, relatedTarget: document.body }));
     return true;
   })()`);
-  await delay(50);
+  await delay(120);
   const restoredSelection = await evaluate(`(() => {
     const trigger = document.querySelector('[data-testid^="service-trigger-"]');
     const panel = document.getElementById(trigger.getAttribute("aria-controls"));
@@ -267,6 +282,8 @@ try {
       rowSizes: [...document.querySelectorAll(".home-industry-row")]
         .map((row) => row.querySelectorAll(".home-industry-item").length),
       publicSectorHref: document.querySelector('[data-testid="home-industry-panel-05"] a')?.getAttribute("href"),
+      serviceDestinationCounts: [...document.querySelectorAll('[data-testid^="service-trigger-"]')]
+        .map((trigger) => document.getElementById(trigger.getAttribute("aria-controls"))?.querySelectorAll("a").length ?? 0),
     };
   })()`);
   assert.equal(homeInitial.count, 6);
@@ -275,6 +292,7 @@ try {
   assert.equal(homeInitial.imageCount, 6);
   assert.deepEqual(homeInitial.rowSizes, [3, 3]);
   assert.equal(homeInitial.publicSectorHref, "/industries/public-sector");
+  assert.deepEqual(homeInitial.serviceDestinationCounts, [3, 1, 5]);
 
   await evaluate(`document.querySelector('[data-testid="home-industry-trigger-01"]').click(); true`);
   await delay(800);

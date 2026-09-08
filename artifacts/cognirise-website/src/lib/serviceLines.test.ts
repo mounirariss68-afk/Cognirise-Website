@@ -35,6 +35,17 @@ test("service tiles expose selection, panels, keyboard navigation and reduced mo
   assert.match(source, /activeIndex === null/);
   assert.match(source, /all-collapsed/);
   assert.match(source, /prefers-reduced-motion:reduce/);
+  assert.match(source, /onMouseEnter=\{\(\) => preview\(id\)\}/);
+  assert.match(source, /closest\("a, button"\)/);
+  assert.doesNotMatch(source, /hover:not\(\.active\) \.cps-tile-visual img/);
+});
+
+test("both service tile variants render every available destination as compact text links", async () => {
+  const source = await readFile(new URL("../components/ServiceLineTiles.tsx", import.meta.url), "utf8");
+  assert.equal(source.match(/service\.destinations\.map/g)?.length, 2);
+  assert.doesNotMatch(source, /service\.destinations\[0\]/);
+  assert.match(source, /text-decoration:underline/);
+  assert.doesNotMatch(source, /\.cps-tile-dest\{[^}]*border:/);
 });
 
 test("service tiles use Pulse raster illustrations instead of generated vector drawings", async () => {
