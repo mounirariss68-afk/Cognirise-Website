@@ -127,3 +127,17 @@ mtime_ms = 1788894757434
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/0aa69d1f-6c6b-468f-b882-ffd9f85212d0/51ac6d61-b7fd-4215-9427-9f97ccc69ee0"
 storage_version_token = "1788894768057656"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "-v0RgMvoVD69LW9vsnuZc"
+uri = "file://attached_assets/generated_images/pulse-industries-hires/pulse-industry-family-review-v2.jpg"
+type = "image"
+title = "Pulse Industry Family — High-Resolution Revision"
+description = "Nine native 1536×1024 landscape masters with bolder Pulse filaments. Includes revised Financial Services and Public Sector plus Manufacturing, Defense, and Retail & CPG."
+logical_id = "2399ef21-907f-4171-8bde-669bdeb81790"
+content_hash = "sha256:1b69f5f43ebc578bd316417a8da42d12fa7b7e9d7e7e99d39d42aae7fe0be646"
+size = 827069
+mtime_ms = 1788895356589
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/2399ef21-907f-4171-8bde-669bdeb81790/d71d5737-0c84-49d1-a1f6-632fb24f6580"
+storage_version_token = "1788895368708125"
+content_type = "image/jpeg"
