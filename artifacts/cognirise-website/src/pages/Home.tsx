@@ -4,6 +4,7 @@ import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { useRef, useState } from "react";
 import { BlueprintJourney } from "@/components/BlueprintJourney";
+import { HeroFilm } from "@/components/HeroFilm";
 import { ServiceLineTiles } from "@/components/ServiceLineTiles";
 import { BrandButton } from "@/components/ui/brand-button";
 import { PulseImage } from "@/components/ui/pulse-image";
@@ -135,23 +136,7 @@ export default function Home() {
             animate={{ opacity: 1, clipPath: "polygon(10% 0, 100% 0, 100% 91%, 0 100%, 0 12%)" }}
             transition={{ duration: prefersReducedMotion ? 0 : 1.2, ease: [0.2, 0.7, 0.2, 1] }}
           >
-            <PulseImage
-              src={assetUrl("/images/cognirise/pulse-hero.jpg")}
-              alt="A luminous directional vector cutting through deep navy operational space." 
-              className="w-full h-full object-cover"
-              eager
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#071936]/40 via-transparent to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/50 via-transparent to-transparent" />
-            
-            <div className="absolute z-10 right-[-10px] top-[50px] font-display font-semibold text-[clamp(58px,9.2vw,150px)] leading-[0.8] text-white tracking-[-0.1em] mix-blend-overlay opacity-80 pointer-events-none">
-              pulse
-            </div>
-            
-            <div className="absolute z-10 left-6 lg:left-[34px] bottom-6 lg:bottom-[29px] text-white text-[10px] tracking-[0.12em] uppercase">
-              <span className="block opacity-75 mb-1.5">Operating context</span>
-              Direction and speed
-            </div>
+            <HeroFilm />
           </motion.div>
         </div>
       </section>
