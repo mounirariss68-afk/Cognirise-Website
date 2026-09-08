@@ -169,3 +169,17 @@ mtime_ms = 1788899207693
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/2f09cfaa-9d13-4e82-a456-d74d8a1429ff/d0dc97a0-a5b9-41e1-b240-7b7d93033607"
 storage_version_token = "1788899225605037"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "fQNTdudhZ5-72Ta2aSSph"
+uri = "file://attached_assets/generated_images/pulse-industries-final-candidates/pulse-industry-four-refinements-review.jpg"
+type = "image"
+title = "Pulse Industries — Four Refined Candidates"
+description = "Revised Travel & Hospitality, Public Sector, Education, and Defense masters. Each is native 1536×1024 and keeps the previously approved five images unchanged."
+logical_id = "6208cf60-8c4c-4216-8867-a92203ce1ca1"
+content_hash = "sha256:6d5e0b43c950c28c05d4d29b4cee28fd790a1a2b8e27dc1487726e4877bd9701"
+size = 405021
+mtime_ms = 1788899775985
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/6208cf60-8c4c-4216-8867-a92203ce1ca1/9469ecbe-18fb-4854-9347-28ece394fded"
+storage_version_token = "1788899787962874"
+content_type = "image/jpeg"
