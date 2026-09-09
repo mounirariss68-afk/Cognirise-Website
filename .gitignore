@@ -47,3 +47,11 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Presentation-import inspection output (the source PPTX remains tracked)
+/attached_assets/imported_slides/
+/src/data/slides-manifest.json
+
+# Local task-verification captures
+/attached_assets/image_1788953406327.png
+/screenshots/task-200-*.jpg
