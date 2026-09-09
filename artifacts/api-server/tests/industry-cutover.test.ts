@@ -12,7 +12,10 @@ import {
   resolveMigrationMedia,
 } from "../../../scripts/src/cms/migration";
 import type { InventoryRecord } from "../../../scripts/src/cms/common";
-import { pulseIndustryMedia } from "../../../scripts/src/cms/industry-media";
+import {
+  industryPublicationPinAction,
+  pulseIndustryMedia,
+} from "../../../scripts/src/cms/industry-media";
 
 type Inventory = {
   expectedCounts: Record<string, number>;
@@ -122,7 +125,11 @@ test("the governed inventory produces six publishable industry cutover records i
   assert.equal(new Set(industries.map((operation) => operation.slug)).size, 6);
   assert.equal(new Set(industries.map((operation) => operation.idempotencyKey)).size, 6);
   assert.ok(industries.every((operation) =>
-    operation.idempotencyKey.startsWith("cms-industry-contract-v8:")
+    operation.idempotencyKey.startsWith(
+      operation.slug === "financial-services"
+        ? "cms-industry-contract-v12:"
+        : "cms-industry-contract-v8:",
+    )
   ));
 
   const media = mediaMigrationOperations(inventory.records);
@@ -132,6 +139,11 @@ test("the governed inventory produces six publishable industry cutover records i
   );
 
   for (const operation of industries) {
+    const approvedMedia = pulseIndustryMedia.find((item) => item.slug === operation.slug);
+    assert.ok(approvedMedia);
+    assert.deepEqual(operation.mediaPaths, [approvedMedia.publicPath]);
+    assert.equal((operation.payload.content as { image?: string }).image, approvedMedia.publicPath);
+    assert.equal((operation.payload.content as { imageAlt?: string }).imageAlt, approvedMedia.altText);
     const resolved = resolveMigrationMedia(operation, candidateByPath);
     const validation = validateCmsSnapshot("industry", resolved, "publish");
     assert.equal(validation.success, true, validation.success ? undefined : validation.errors.join("; "));
@@ -168,4 +180,57 @@ test("the Pulse industry family governs nine native-wide assets but associates o
     assert.equal(operation.height, 1024);
     assert.equal(operation.altText, item.altText);
   }
+
+  const industryPaths = new Set(
+    migrationOperations(inventory.records)
+      .filter((operation) => operation.kind === "industry")
+      .flatMap((operation) => operation.mediaPaths),
+  );
+  assert.deepEqual(
+    [...industryPaths].sort(),
+    associated.map((item) => item.publicPath).sort(),
+  );
+  assert.ok(unassociated.every((item) => !industryPaths.has(item.publicPath)));
+});
+
+test("compiled industry fallbacks use the approved Pulse PNG family", () => {
+  const source = readFileSync(
+    path.resolve(process.cwd(), "../cognirise-website/src/content/industries.ts"),
+    "utf8",
+  );
+  for (const item of pulseIndustryMedia.filter((candidate) => candidate.slug)) {
+    assert.match(source, new RegExp(item.publicPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.match(source, new RegExp(item.altText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+  assert.doesNotMatch(
+    source,
+    /pulse-industry-(financial|telecoms|travel|energy|public-sector|education)\.jpg/,
+  );
+});
+
+test("only an absent exact reference can be restored on an approved Pulse publication", () => {
+  const base = {
+    workflowState: "approved",
+    mediaIds: ["approved-asset"],
+    heroMediaId: "approved-asset",
+    expectedAssetId: "approved-asset",
+    expectedVersionId: "approved-version",
+  };
+  assert.equal(industryPublicationPinAction({
+    ...base,
+    referenceVersionIds: [],
+  }), "insert-reference");
+  assert.equal(industryPublicationPinAction({
+    ...base,
+    referenceVersionIds: ["approved-version"],
+  }), "complete");
+  assert.equal(industryPublicationPinAction({
+    ...base,
+    referenceVersionIds: ["another-version"],
+  }), "blocked");
+  assert.equal(industryPublicationPinAction({
+    ...base,
+    heroMediaId: "another-asset",
+    referenceVersionIds: [],
+  }), "blocked");
 });

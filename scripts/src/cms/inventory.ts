@@ -14,6 +14,7 @@ import {
 import { extractArticles, extractVariable } from "./source-extract.js";
 import { validateCmsContent } from "@workspace/api-zod";
 import { caseStudyRecords, CASE_STUDY_TAXONOMY_COUNTS } from "./case-studies.js";
+import { pulseIndustryMediaBySlug } from "./industry-media.js";
 
 const args = process.argv.slice(2);
 const shouldWrite = args.includes("--write");
@@ -204,20 +205,30 @@ function articleRecords(items: Record<string, SourceObject>, file: string) {
 
 function industryRecords(items: SourceObject[], file: string) {
   return items.map((item): InventoryRecord => {
-    const { slug, ...content } = item;
+    const slug = String(item.slug);
+    const approvedMedia = pulseIndustryMediaBySlug.get(slug);
+    if (!approvedMedia) {
+      throw new Error(`${slug}: no approved Pulse industry-media association exists.`);
+    }
+    const content: SourceObject = {
+      ...item,
+      image: approvedMedia.publicPath,
+      imageAlt: approvedMedia.altText,
+    };
+    delete content.slug;
     const validation = validateCmsContent("industry", content, "draft");
     if (!validation.success) throw new Error(`${item.name}: ${validation.errors.join("; ")}`);
     return {
-      externalId: stableId("industry", path.join(websiteRoot, file), String(slug)),
+      externalId: stableId("industry", path.join(websiteRoot, file), slug),
       type: "industry",
       name: String(item.name),
       sourceFile: file,
       route: `/industries/${slug}`,
       fields: {
-        slug: String(slug),
+        slug,
         summary: String(item.dek),
         content,
-        mediaPaths: [String(item.image)],
+        mediaPaths: [approvedMedia.publicPath],
       },
       review: review([
         "Confirm opportunity, build capabilities, selected-work disclosure, hero-media rights, alt text, verification date, source classifications, and source URLs before publication.",
@@ -353,12 +364,12 @@ async function main() {
     throw new Error("The public website no longer matches the governed 5 partner / 5 platform / 3 article / 6 industry manifest.");
   }
   if (caseStudies.length !== 21) throw new Error(`Expected 21 governed case studies, found ${caseStudies.length}.`);
-   if (assets.length !== 69) throw new Error(`Expected 60 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
+   if (assets.length !== 74) throw new Error(`Expected 65 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
 
   const stable = {
     schemaVersion: 2,
     source: relative(websiteRoot),
-     expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, caseStudies: 21, caseStudyTaxonomy: CASE_STUDY_TAXONOMY_COUNTS, industries: 6, frameworks: 1, websiteAssets: 60, linkedinAssets: 9, assets: 69 },
+     expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, caseStudies: 21, caseStudyTaxonomy: CASE_STUDY_TAXONOMY_COUNTS, industries: 6, frameworks: 1, websiteAssets: 65, linkedinAssets: 9, assets: 74 },
     explicitOmissions: {
       povDocuments: "No genuine public POV documents are present in the current website.",
       employees: "No additional public employee profiles are present in the current website.",

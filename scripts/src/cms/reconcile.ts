@@ -21,6 +21,7 @@ import {
   requiresPublishedCaseSnapshot,
   type ExpectedReceipt,
 } from "./receipt-reconciliation.js";
+import { runReconciliationLifecycle } from "./reconcile-order.js";
 
 interface Inventory {
   schemaVersion: number;
@@ -54,6 +55,17 @@ function run(command: string, args: string[]) {
       ));
     });
   });
+}
+
+async function reconcilePublishedIndustryMedia() {
+  await run("pnpm", [
+    "--filter",
+    "@workspace/scripts",
+    "cms:publish-industry-images",
+    "--",
+    "--apply-db",
+    "--target=development",
+  ]);
 }
 
 async function inspectReconciliationState(
@@ -224,7 +236,7 @@ async function main() {
       // edition has subsequent revisions, import records a preservation
       // receipt rather than replacing that editorial history.
       tolerateDigestDrift: governedLegacyExternalIds.has(operation.externalId)
-        || operation.idempotencyKey.startsWith("cms-industry-contract-v8:")
+        || operation.kind === "industry"
         || operation.idempotencyKey.startsWith("cms-case-study-baseline-v1:")
         || operation.idempotencyKey.startsWith("cms-case-study-baseline-v2:"),
       publishCase: Boolean(operation.kind === "case-study"
@@ -269,48 +281,58 @@ async function main() {
   try {
     const before = await inspectReconciliationState(expected, database);
     const initialImport = before.existingCount === 0;
-    if (before.state === "complete") {
+    if (before.state !== "complete") {
+      console.log(
+        initialImport
+          ? `CMS cutover is absent; uploading and importing ${before.missingCount} governed development operations.`
+          : `CMS reconciliation: missing=${before.missingCount} invalid=${before.invalid.length} conflicts=${before.conflicts.length}; verifying and repairing without replacing valid immutable versions.`,
+      );
+    }
+    const after = await runReconciliationLifecycle({
+      beforeIsComplete: before.state === "complete",
+      initialImport,
+      importInventory: async () => {
+        await run("pnpm", [
+          "--filter",
+          "@workspace/scripts",
+          "cms:import",
+          "--",
+          "--apply-db",
+          "--target=development",
+        ]);
+      },
+      inspectAfterImport: () => inspectReconciliationState(expected, database),
+      validateAfterImport: (next) => {
+        if (next.conflicts.length) {
+          const details = next.conflicts
+            .map((conflict) => `${conflict.idempotencyKey} (stored ${conflict.actualDigest}, inventory ${conflict.expectedDigest})`)
+            .join("; ");
+          console.warn(
+            `CMS reconciliation preserved ${next.conflicts.length} previously imported operation(s) whose inventory changed. Resolve each intentional replacement with an explicitly versioned operation: ${details}`,
+          );
+        }
+        if (next.state !== "complete") {
+          throw new Error(
+            `CMS cutover reconciliation remained incomplete: missing=${next.missingCount} invalid=${next.invalid.length} conflicts=${next.conflicts.length}. ${next.invalid.join("; ")}`,
+          );
+        }
+      },
+      verifyInitialBaseline: async () => {
+        await run("pnpm", [
+          "--filter",
+          "@workspace/scripts",
+          "cms:verify",
+          "--",
+          "--db",
+        ]);
+      },
+      publishIndustryMedia: reconcilePublishedIndustryMedia,
+    });
+    if (!after) {
       console.log(
         `CMS media reconciliation completed: missing=0 invalid=0 conflicts=${before.conflicts.length} created=0 repaired=0 reused=${before.existingCount}.`,
       );
       return;
-    }
-    console.log(
-      initialImport
-        ? `CMS cutover is absent; uploading and importing ${before.missingCount} governed development operations.`
-        : `CMS reconciliation: missing=${before.missingCount} invalid=${before.invalid.length} conflicts=${before.conflicts.length}; verifying and repairing without replacing valid immutable versions.`,
-    );
-    await run("pnpm", [
-      "--filter",
-      "@workspace/scripts",
-      "cms:import",
-      "--",
-      "--apply-db",
-      "--target=development",
-    ]);
-
-    const after = await inspectReconciliationState(expected, database);
-    if (after.conflicts.length) {
-      const details = after.conflicts
-        .map((conflict) => `${conflict.idempotencyKey} (stored ${conflict.actualDigest}, inventory ${conflict.expectedDigest})`)
-        .join("; ");
-      console.warn(
-        `CMS reconciliation preserved ${after.conflicts.length} previously imported operation(s) whose inventory changed. Resolve each intentional replacement with an explicitly versioned operation: ${details}`,
-      );
-    }
-    if (after.state !== "complete") {
-      throw new Error(
-        `CMS cutover reconciliation remained incomplete: missing=${after.missingCount} invalid=${after.invalid.length} conflicts=${after.conflicts.length}. ${after.invalid.join("; ")}`,
-      );
-    }
-    if (initialImport) {
-      await run("pnpm", [
-        "--filter",
-        "@workspace/scripts",
-        "cms:verify",
-        "--",
-        "--db",
-      ]);
     }
     console.log(
       `CMS media reconciliation completed: missing=0 invalid=0 conflicts=${after.conflicts.length} created=${after.existingCount - before.existingCount} repaired=${before.invalid.length} reused=${before.existingCount - before.invalid.length}.`,

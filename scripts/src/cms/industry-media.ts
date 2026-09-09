@@ -85,3 +85,29 @@ export const pulseIndustryMedia: PulseIndustryMediaDefinition[] = [
 export const pulseIndustryMediaByFilename = new Map(
   pulseIndustryMedia.map((item) => [item.filename, item]),
 );
+
+export const pulseIndustryMediaBySlug = new Map(
+  pulseIndustryMedia.flatMap((item) => item.slug ? [[item.slug, item] as const] : []),
+);
+
+export function industryPublicationPinAction(input: {
+  workflowState: string | null | undefined;
+  mediaIds: unknown;
+  heroMediaId: unknown;
+  expectedAssetId: string;
+  expectedVersionId: string;
+  referenceVersionIds: Array<string | null>;
+}): "complete" | "insert-reference" | "blocked" {
+  if (
+    input.workflowState !== "approved"
+    || !Array.isArray(input.mediaIds)
+    || input.mediaIds.length !== 1
+    || input.mediaIds[0] !== input.expectedAssetId
+    || input.heroMediaId !== input.expectedAssetId
+  ) return "blocked";
+  if (input.referenceVersionIds.length === 0) return "insert-reference";
+  return input.referenceVersionIds.length === 1
+    && input.referenceVersionIds[0] === input.expectedVersionId
+    ? "complete"
+    : "blocked";
+}

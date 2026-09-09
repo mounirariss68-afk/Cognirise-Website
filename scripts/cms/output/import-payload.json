@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-09T14:55:20.346Z",
-  "manifestDigest": "6d56d7c2bbbd5f7ffc888b7d64f346feb2a72e16e39c8621cfa15136b2b057da",
+  "generatedAt": "2026-09-09T16:42:42.589Z",
+  "manifestDigest": "0bb98edeee018e31e871a5b15f57769ffc50d5f93ecfa202c75a3bd1d1e35db5",
   "dryRun": true,
   "mode": "payload-only",
   "note": "No storage or database call was made. Use --apply-db --target=development to import governed drafts.",
@@ -3122,8 +3122,8 @@
           "selectedWork": {
             "description": "Selected work should show the mandate, control boundary and measured operational outcome without exposing client-confidential decisions or data."
           },
-          "image": "/images/cognirise/industries/pulse-industry-financial.jpg",
-          "imageAlt": "A cinematic financial landscape crossed by controlled luminous routes.",
+          "image": "/images/cognirise/industries/pulse-industry-financial-services.png",
+          "imageAlt": "Transparent custody chambers and luminous governed transaction paths converging through a financial operations landscape.",
           "variant": "ledger",
           "pressures": [
             {
@@ -3205,10 +3205,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/industries/pulse-industry-financial.jpg"
+        "/images/cognirise/industries/pulse-industry-financial-services.png"
       ],
       "idempotencyKey": "cms-industry-contract-v12:industry:b60f973e571d3059824d",
-      "requestDigest": "b9185c5710d86f457a59bd051816c9d0ca1e04a70d2a049fc2ae7632e4006b41"
+      "requestDigest": "cf0807ed65eb3d803a42694e52cfdd2b746c54e61776512ca9f1955a59aca9d7"
     },
     {
       "externalId": "industry:37a17e1c80062ece7c5c",
@@ -3245,8 +3245,8 @@
           "selectedWork": {
             "description": "Selected work should identify the operating domain, autonomy level, intervention boundary and service or efficiency result."
           },
-          "image": "/images/cognirise/industries/pulse-industry-telecoms.jpg",
-          "imageAlt": "A cinematic telecommunications network carrying luminous signals across an operating landscape.",
+          "image": "/images/cognirise/industries/pulse-industry-telecoms-network.png",
+          "imageAlt": "Distributed communications nodes linked by luminous signals across a wide network landscape.",
           "variant": "network",
           "pressures": [
             {
@@ -3328,10 +3328,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/industries/pulse-industry-telecoms.jpg"
+        "/images/cognirise/industries/pulse-industry-telecoms-network.png"
       ],
       "idempotencyKey": "cms-industry-contract-v8:industry:37a17e1c80062ece7c5c",
-      "requestDigest": "0335fb8876fb598587535e3fd27e878c60d4ddca818d7575081720c4215125c1"
+      "requestDigest": "69b30e28a615e2e36899d529dd1ed23d5880ae3d9c128cd2a3450019e109f732"
     },
     {
       "externalId": "industry:eb42d39013fdf2f822eb",
@@ -3368,8 +3368,8 @@
           "selectedWork": {
             "description": "Selected work should describe the disrupted journey, systems coordinated, human hand-off and evidenced recovery outcome."
           },
-          "image": "/images/cognirise/industries/pulse-industry-travel.jpg",
-          "imageAlt": "Multiple illuminated routes converging through a cinematic travel environment.",
+          "image": "/images/cognirise/industries/pulse-industry-travel-hospitality.png",
+          "imageAlt": "Luminous passenger routes rerouting through a layered terminal as an aircraft departs in the distance.",
           "variant": "journey",
           "pressures": [
             {
@@ -3451,10 +3451,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/industries/pulse-industry-travel.jpg"
+        "/images/cognirise/industries/pulse-industry-travel-hospitality.png"
       ],
       "idempotencyKey": "cms-industry-contract-v8:industry:eb42d39013fdf2f822eb",
-      "requestDigest": "45d7f20db5fb17552b152dc7c3dc3ac62e5ac140bae15fc61f589ac14c32d402"
+      "requestDigest": "7e53a978b2758dccea8251a4b00a178245baf57482d3389681b2d1c8c4a5216a"
     },
     {
       "externalId": "industry:4382ac13aa186ee8959b",
@@ -3491,8 +3491,8 @@
           "selectedWork": {
             "description": "Selected work should name the asset scope, safety boundary, workflow integration and verified site-level result."
           },
-          "image": "/images/cognirise/industries/pulse-industry-energy.jpg",
-          "imageAlt": "A luminous route moving through a cinematic energy landscape at dusk.",
+          "image": "/images/cognirise/industries/pulse-industry-energy-resources.png",
+          "imageAlt": "Luminous operational signals moving through geological layers and field infrastructure toward a controlled intervention.",
           "variant": "field",
           "pressures": [
             {
@@ -3574,10 +3574,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/industries/pulse-industry-energy.jpg"
+        "/images/cognirise/industries/pulse-industry-energy-resources.png"
       ],
       "idempotencyKey": "cms-industry-contract-v8:industry:4382ac13aa186ee8959b",
-      "requestDigest": "5e452394c3650250e88e7213e92c958c6f7fb25bc3559fd3610eac533735636e"
+      "requestDigest": "2b0760b97621371f763f0c653dd55e2c18d5226dd04312932245771834bcadc9"
     },
     {
       "externalId": "industry:e201f6f730b8afa45524",
@@ -3614,8 +3614,8 @@
           "selectedWork": {
             "description": "Selected work should state the public-value objective, affected service, governance controls and accessible outcome evidence."
           },
-          "image": "/images/cognirise/industries/pulse-industry-public-sector.jpg",
-          "imageAlt": "Citizens moving through a bright monumental civic space connected by a luminous service route.",
+          "image": "/images/cognirise/industries/pulse-industry-public-sector-services.png",
+          "imageAlt": "Citizens receiving documents and support at an accessible civic service centre linked by luminous service routes.",
           "variant": "ledger",
           "pressures": [
             {
@@ -3697,10 +3697,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/industries/pulse-industry-public-sector.jpg"
+        "/images/cognirise/industries/pulse-industry-public-sector-services.png"
       ],
       "idempotencyKey": "cms-industry-contract-v8:industry:e201f6f730b8afa45524",
-      "requestDigest": "4d4edb422a3508b008b3e24d05b538790443cfebb24b5419244c6c21690049b6"
+      "requestDigest": "6a887aab7e308a3251e4909923cb2fc0418a40a598a766e0fdf7427d2b2713f7"
     },
     {
       "externalId": "industry:8c90ace640ac504ab64a",
@@ -3749,8 +3749,8 @@
           "selectedWork": {
             "description": "Cognirise brings consulting, engineering, data, platform and change capabilities together to redesign a complete institutional journey and establish the shared layer that lets successful use cases scale."
           },
-          "image": "/images/cognirise/industries/pulse-industry-education.jpg",
-          "imageAlt": "A cinematic learning environment connected by luminous knowledge pathways.",
+          "image": "/images/cognirise/industries/pulse-industry-education-learning.png",
+          "imageAlt": "Students learning individually and in groups across a stepped campus connected by luminous knowledge paths.",
           "variant": "network",
           "pressures": [
             {
@@ -4017,10 +4017,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/industries/pulse-industry-education.jpg"
+        "/images/cognirise/industries/pulse-industry-education-learning.png"
       ],
       "idempotencyKey": "cms-industry-contract-v8:industry:8c90ace640ac504ab64a",
-      "requestDigest": "8bf1f03b266c7619eefac37652e152cab70eeb9ec1c8ee464036d679672c6031"
+      "requestDigest": "3f1e3802a582487e3f644478675de872664641de10a87563820713289c4200d1"
     },
     {
       "externalId": "framework:agent-authority-model-v1",
@@ -4609,6 +4609,141 @@
         "e51ec73a7802095046c66940902a86067d79a81bee6f461e572e6e2b39b77230",
         "c6505b966783811ff50d845df7bf72ec8804ce18c84e08456789b8b522ba1b01"
       ]
+    },
+    {
+      "externalId": "asset:647067ba5384f4725e2d",
+      "idempotencyKey": "cms-media-binary-v1:asset:647067ba5384f4725e2d:4f134ce564e6459c894da3608100d8a602ad3426f17728d6e043b2e2871e6724",
+      "filename": "canon-1.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/canon-1.jpg",
+      "publicPath": "/images/cognirise/canon-1.jpg",
+      "checksum": "4f134ce564e6459c894da3608100d8a602ad3426f17728d6e043b2e2871e6724",
+      "mimeType": "image/jpeg",
+      "byteSize": 117062,
+      "width": 1024,
+      "height": 1024,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/content/idao.ts"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "canon 1",
+      "credit": "Rights holder pending editorial review",
+      "rightsStatus": "needs-review",
+      "accessibilityStatus": "approved",
+      "sourceReviewApproved": false,
+      "requestDigest": "3066fbf6ff0bef3bb2b29a753fd1530ee991027f749254a734ff3e567a0be2bb",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
+    },
+    {
+      "externalId": "asset:9fed45a0a563fa629dee",
+      "idempotencyKey": "cms-media-binary-v1:asset:9fed45a0a563fa629dee:e4bac128199128d490baf88a12c47dcc1e33c85c6a22bae53953b4ede7db4c6f",
+      "filename": "canon-2.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/canon-2.jpg",
+      "publicPath": "/images/cognirise/canon-2.jpg",
+      "checksum": "e4bac128199128d490baf88a12c47dcc1e33c85c6a22bae53953b4ede7db4c6f",
+      "mimeType": "image/jpeg",
+      "byteSize": 136949,
+      "width": 1024,
+      "height": 1024,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/content/idao.ts"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "canon 2",
+      "credit": "Rights holder pending editorial review",
+      "rightsStatus": "needs-review",
+      "accessibilityStatus": "approved",
+      "sourceReviewApproved": false,
+      "requestDigest": "04f02c8bc6d87bb2129f5556337541d218abe87dbe9c4df6e15a4d2228d7d2c0",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
+    },
+    {
+      "externalId": "asset:39e87f4dac6e71782f3b",
+      "idempotencyKey": "cms-media-binary-v1:asset:39e87f4dac6e71782f3b:fe594c3d7b508a8c9d311b5ac9ddfac88dd8e166141c79a4faaaabba1fdb3dcf",
+      "filename": "canon-3.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/canon-3.jpg",
+      "publicPath": "/images/cognirise/canon-3.jpg",
+      "checksum": "fe594c3d7b508a8c9d311b5ac9ddfac88dd8e166141c79a4faaaabba1fdb3dcf",
+      "mimeType": "image/jpeg",
+      "byteSize": 164774,
+      "width": 1024,
+      "height": 1024,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/content/idao.ts"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "canon 3",
+      "credit": "Rights holder pending editorial review",
+      "rightsStatus": "needs-review",
+      "accessibilityStatus": "approved",
+      "sourceReviewApproved": false,
+      "requestDigest": "f597c20b5c18b8e46b6d49dc8e620827f69564bf095c2b29fc04c601eef76442",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
+    },
+    {
+      "externalId": "asset:a42b64cfc0f0ee26d8f2",
+      "idempotencyKey": "cms-media-binary-v1:asset:a42b64cfc0f0ee26d8f2:2297eb4ae2ec2f6f946d3d4066fe1467d215a60cb74e785aedb526e1394c2266",
+      "filename": "canon-4.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/canon-4.jpg",
+      "publicPath": "/images/cognirise/canon-4.jpg",
+      "checksum": "2297eb4ae2ec2f6f946d3d4066fe1467d215a60cb74e785aedb526e1394c2266",
+      "mimeType": "image/jpeg",
+      "byteSize": 172978,
+      "width": 1024,
+      "height": 1024,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/content/idao.ts"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "canon 4",
+      "credit": "Rights holder pending editorial review",
+      "rightsStatus": "needs-review",
+      "accessibilityStatus": "approved",
+      "sourceReviewApproved": false,
+      "requestDigest": "149f9fddb705d4c2f5bb6a473cdbf4d1290a35d75760d89009b61f59c6fc8c52",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
+    },
+    {
+      "externalId": "asset:1bfbe8d44e94268f99d2",
+      "idempotencyKey": "cms-media-binary-v1:asset:1bfbe8d44e94268f99d2:ba22a9ddb5bbb7806b7b033acb9e8a20862e5e932b67206970e02f2a33b1d1bb",
+      "filename": "canon-5.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/canon-5.jpg",
+      "publicPath": "/images/cognirise/canon-5.jpg",
+      "checksum": "ba22a9ddb5bbb7806b7b033acb9e8a20862e5e932b67206970e02f2a33b1d1bb",
+      "mimeType": "image/jpeg",
+      "byteSize": 146432,
+      "width": 1024,
+      "height": 1024,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/content/idao.ts"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "canon 5",
+      "credit": "Rights holder pending editorial review",
+      "rightsStatus": "needs-review",
+      "accessibilityStatus": "approved",
+      "sourceReviewApproved": false,
+      "requestDigest": "f50a48028b6a5e27c94e8b492ea6f28e4d9a6683db6cf702d38b89f8e0033b6b",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
       "externalId": "asset:c0ed4904df64037b6051",
@@ -5725,9 +5860,7 @@
       "width": 1024,
       "height": 1024,
       "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/content/industries.ts"
-      ],
+      "usages": [],
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
@@ -5750,6 +5883,7 @@
       ],
       "acceptedPriorRequestDigests": [
         "bc8b35472743e5b57a381ddecff2f03b6f3bbfb877f68df9833e9edf66f578bf",
+        "1118f22ef0b995be1925d80be1579155bb60ed36104a375d53f453140bbb04cb",
         "6d658f66a1682787cef3e37ceed352846c593549bf37656f182391186c656669"
       ]
     },
@@ -5805,9 +5939,7 @@
       "width": 1024,
       "height": 1024,
       "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/content/industries.ts"
-      ],
+      "usages": [],
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
@@ -5830,6 +5962,7 @@
       ],
       "acceptedPriorRequestDigests": [
         "09bc167deee2f45d36970618e5448c8e023bf50aa7df07111812fad9c852d5e2",
+        "91efab2381db0f09332e09047f298c0ab112a7a46968d86d7d464c83e623e466",
         "d3144955a96ab6a7db029ec1733ca98bf2fce17003d2bb418e701bae6bb41929"
       ]
     },
@@ -5885,9 +6018,7 @@
       "width": 1024,
       "height": 1024,
       "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/content/industries.ts"
-      ],
+      "usages": [],
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
@@ -5910,6 +6041,7 @@
       ],
       "acceptedPriorRequestDigests": [
         "527180481008843e52360fb131efc623eab6df8754e818e565456565dc2a83aa",
+        "ee581ccbd127611c0f039847e123405676edcdcd14266af4fd957c553ae9ae61",
         "5cde71cc64804aa4183b5534768936adb6a7de6192e42f01739ef0adab16ce87"
       ]
     },
@@ -6005,9 +6137,7 @@
       "width": 1024,
       "height": 1024,
       "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/content/industries.ts"
-      ],
+      "usages": [],
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
@@ -6030,6 +6160,7 @@
       ],
       "acceptedPriorRequestDigests": [
         "0afc3dcc9c0b15d07d88c432232e68825146a285246b7892769a852a03fdd809",
+        "6a603a206f8b7aa13d785f6f9698afe11c7c9d545f68ad4319506daf16597a11",
         "5d104aae42d1b6075ab73e4fe9485bd787f77faf4d1c14694a93e85aee910f30"
       ]
     },
@@ -6125,9 +6256,7 @@
       "width": 1024,
       "height": 1024,
       "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/content/industries.ts"
-      ],
+      "usages": [],
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
@@ -6150,6 +6279,7 @@
       ],
       "acceptedPriorRequestDigests": [
         "3ebc5b530822ac476cde6bf1cb03e3734c08f9306693986fa7ac0eee723fceb0",
+        "4e935d9f498d059f2f98dd1b6d40426065dc72257a5691dfbefbc4f909c33843",
         "24d07abed3cfa58ffe2a3ce0f21d26fa4db038a412576b2b912132856d30a526"
       ]
     },
@@ -6205,9 +6335,7 @@
       "width": 1024,
       "height": 1024,
       "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/content/industries.ts"
-      ],
+      "usages": [],
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
@@ -6230,6 +6358,7 @@
       ],
       "acceptedPriorRequestDigests": [
         "ef5cb214a01fa48e0f066b9457e76c42ea5af865faaf431d10b3a8b586ddd39a",
+        "383867db49aace87065b0269c6c7bcdfbbb3fd17745ba16fa0054d09aa5c7879",
         "9d0a98231ed78a339f31791c4b29e46005fc316ce2b1d45420b9bc6da68ac4de"
       ]
     },

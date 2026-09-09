@@ -5,6 +5,7 @@ import {
   copyPublishedCasePayload,
   historicalCasePinReceiptIsValid,
   planCasePublicationRefreshEntry,
+  planPublishedPinRepair,
   planCaseVisualRefresh,
 } from "./case-visual-refresh.js";
 

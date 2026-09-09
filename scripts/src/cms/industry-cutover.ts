@@ -8,7 +8,10 @@ import {
   type InventoryRecord,
   repositoryRoot,
 } from "./common.js";
-import { pulseIndustryMedia } from "./industry-media.js";
+import {
+  industryPublicationPinAction,
+  pulseIndustryMedia,
+} from "./industry-media.js";
 import {
   mediaMigrationOperations,
   migrationOperations,
@@ -26,6 +29,7 @@ const APPROVED_AT = "2026-09-08";
 const CUTOVER_PREFIX = "cms-industry-pulse-cutover-v2";
 const LEGACY_CUTOVER_PREFIX = "cms-industry-pulse-cutover-v1";
 const MEDIA_APPROVAL_PREFIX = "cms-industry-pulse-media-approval-v2";
+const REFERENCE_REPAIR_PREFIX = "cms-industry-pulse-reference-repair-v1";
 
 interface Inventory {
   schemaVersion: number;
@@ -93,6 +97,18 @@ async function loadPlan() {
       : undefined;
     if (definition.slug && !contentOperation) {
       throw new Error(`The governed inventory is missing the ${definition.slug} content baseline.`);
+    }
+    const content = contentOperation?.payload.content as Record<string, unknown> | undefined;
+    if (
+      contentOperation
+      && (
+        contentOperation.mediaPaths.length !== 1
+        || contentOperation.mediaPaths[0] !== definition.publicPath
+        || content?.image !== definition.publicPath
+        || content?.imageAlt !== definition.altText
+      )
+    ) {
+      throw new Error(`${definition.slug}: the governed content baseline is not pinned to its approved Pulse PNG.`);
     }
     return { definition, operation, contentOperation };
   });
@@ -179,7 +195,9 @@ async function approveMedia(
     let version = await client.query(
       `SELECT id::text,checksum,byte_size,width,height,metadata
          FROM cms_media_versions
-        WHERE asset_id=$1 AND storage_key=$2`,
+        WHERE asset_id=$1 AND storage_key=$2
+        ORDER BY version_number DESC
+        LIMIT 1`,
       [media.asset_id, storageKey],
     );
     if (!version.rowCount) {
@@ -214,7 +232,8 @@ async function approveMedia(
     await client.query(
       `UPDATE cms_media_assets
           SET status='active',alt_text=$2,credit='Cognirise',updated_at=now()
-        WHERE id=$1`,
+        WHERE id=$1
+          AND (status<>'active' OR alt_text IS DISTINCT FROM $2 OR credit IS DISTINCT FROM 'Cognirise')`,
       [media.asset_id, item.definition.altText],
     );
     const approvalRequestId = `${MEDIA_APPROVAL_PREFIX}:${item.operation.checksum.slice(0, 24)}`;
@@ -265,6 +284,7 @@ async function applyCutover(
     const approvedMedia = await approveMedia(client, admin, plan, approvedStorageKeys);
     let published = 0;
     let replayed = 0;
+    let repaired = 0;
 
     for (const item of plan.filter((candidate) => candidate.definition.slug)) {
       const slug = item.definition.slug!;
@@ -307,17 +327,135 @@ async function applyCutover(
         if (!sourceRevisionId) {
           throw new Error(`Cutover receipt for ${slug} is missing its immutable source revision identity.`);
         }
+        const recordedVersionId = typeof auditMetadata?.mediaVersionId === "string"
+          ? auditMetadata.mediaVersionId
+          : null;
+        if (!recordedVersionId) {
+          throw new Error(`Cutover receipt for ${slug} is missing its immutable media-version identity.`);
+        }
         const replayDigest = resultDigest({
           slug,
           checksum: item.operation.checksum,
-          mediaVersionId: media.versionId,
+          mediaVersionId: recordedVersionId,
           publicPath: item.definition.publicPath,
           sourceRevisionId,
         });
         if (receipt.rows[0].request_digest !== replayDigest) {
           throw new Error(`Cutover receipt conflict for ${slug}.`);
         }
-        replayed++;
+        if (!edition.published_revision_id) {
+          throw new Error(`${slug} has a cutover receipt but no published revision.`);
+        }
+        const currentRevision = await client.query(
+          `SELECT id::text,payload,workflow_state
+             FROM cms_revisions
+            WHERE id=$1 AND edition_id=$2`,
+          [edition.published_revision_id, edition.edition_id],
+        );
+        if (currentRevision.rowCount !== 1) {
+          throw new Error(`${slug} has no valid current published revision to repair.`);
+        }
+        const current = currentRevision.rows[0] as {
+          id: string;
+          payload: { mediaIds?: unknown; content?: Record<string, unknown> };
+          workflow_state: string;
+        };
+        const currentReferences = await client.query(
+          `SELECT media_version_id::text
+             FROM cms_media_references
+            WHERE document_id=$1 AND field_path=$2 AND asset_id=$3`,
+          [edition.document_id, `revision:${current.id}`, media.assetId],
+        );
+        const pinAction = industryPublicationPinAction({
+          workflowState: current.workflow_state,
+          mediaIds: current.payload?.mediaIds,
+          heroMediaId: current.payload?.content?.heroMediaId,
+          expectedAssetId: media.assetId,
+          expectedVersionId: media.versionId,
+          referenceVersionIds: currentReferences.rows.map((reference) =>
+            typeof reference.media_version_id === "string"
+              ? reference.media_version_id
+              : null
+          ),
+        });
+        if (pinAction === "blocked") {
+          throw new Error(`${slug} published media differs from the approved Pulse association; preserving publication for editorial review.`);
+        }
+        if (pinAction === "insert-reference") {
+          const repairKey = `${REFERENCE_REPAIR_PREFIX}:${slug}:${current.id}`;
+          const repairDigest = resultDigest({
+            slug,
+            revisionId: current.id,
+            mediaId: media.assetId,
+            mediaVersionId: media.versionId,
+            checksum: item.operation.checksum,
+          });
+          const repairReceipt = await client.query(
+            `SELECT operation,subject_id,request_digest
+               FROM cms_operation_receipts
+              WHERE idempotency_key=$1`,
+            [repairKey],
+          );
+          if (
+            repairReceipt.rowCount
+            && (
+              repairReceipt.rows[0].operation !== "cms.industry.pulse-media-reference-repaired"
+              || repairReceipt.rows[0].subject_id !== current.id
+              || repairReceipt.rows[0].request_digest !== repairDigest
+            )
+          ) {
+            throw new Error(`Reference-repair receipt conflict for ${slug}.`);
+          }
+          await client.query(
+            `INSERT INTO cms_media_references
+              (asset_id,media_version_id,document_id,field_path)
+             VALUES ($1,$2,$3,$4)
+             ON CONFLICT (document_id,field_path,asset_id) DO NOTHING`,
+            [media.assetId, media.versionId, edition.document_id, `revision:${current.id}`],
+          );
+          if (!repairReceipt.rowCount) {
+            await client.query(
+              `INSERT INTO cms_operation_receipts
+                (idempotency_key,operation,subject_id,request_digest,result_digest)
+               VALUES ($1,'cms.industry.pulse-media-reference-repaired',$2,$3,$4)`,
+              [
+                repairKey,
+                current.id,
+                repairDigest,
+                resultDigest({
+                  documentId: edition.document_id,
+                  editionId: edition.edition_id,
+                  revisionId: current.id,
+                  mediaId: media.assetId,
+                  mediaVersionId: media.versionId,
+                }),
+              ],
+            );
+            await client.query(
+              `INSERT INTO cms_audit_events
+                (actor_user_id,actor_label,action,target_type,target_id,request_id,metadata)
+               VALUES ($1,$2,'cms.industry.pulse-media-reference-repaired','document',$3,$4,$5)
+               ON CONFLICT (request_id) DO NOTHING`,
+              [
+                admin.id,
+                admin.email,
+                edition.document_id,
+                repairKey,
+                {
+                  market: "uae",
+                  locale: "en",
+                  revisionId: current.id,
+                  mediaId: media.assetId,
+                  mediaVersionId: media.versionId,
+                  reason: "Restored the missing immutable reference for an approved Pulse industry asset",
+                },
+              ],
+            );
+          }
+          repaired++;
+        } else {
+          replayed++;
+        }
         continue;
       }
       let sourceRevision;
@@ -462,7 +600,7 @@ async function applyCutover(
     }
     await verifyCutover(plan, client);
     await client.query("COMMIT");
-    console.log(`Pulse industry cutover applied: media=9 published=${published} replayed=${replayed} unassociated=3.`);
+    console.log(`Pulse industry cutover applied: media=9 published=${published} repaired=${repaired} replayed=${replayed} unassociated=3.`);
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -488,7 +626,11 @@ async function verifyCutover(
            FROM cms_media_assets a
            JOIN LATERAL (
              SELECT * FROM cms_media_versions
-              WHERE asset_id=a.id ORDER BY version_number DESC LIMIT 1
+               WHERE asset_id=a.id
+                 AND checksum=$1
+                 AND metadata->>'accessibilityStatus'='approved'
+                 AND metadata->>'rightsStatus'='approved-use'
+               ORDER BY version_number DESC LIMIT 1
            ) v ON true
           WHERE a.checksum=$1`,
         [item.operation.checksum],
@@ -557,22 +699,19 @@ async function verifyCutover(
       }
       const history = await client.query(
         `SELECT count(DISTINCT r.id)::int revision_count,
-                count(DISTINCT r.id) FILTER (WHERE r.revision_number=1)::int original_revision_count,
-                count(DISTINCT ref.id) FILTER (WHERE ref.asset_id<>$2)::int preserved_reference_count
+                count(DISTINCT r.id) FILTER (WHERE r.revision_number=1)::int original_revision_count
            FROM cms_documents d
            JOIN cms_market_editions e ON e.document_id=d.id AND e.market='uae'
            JOIN cms_revisions r ON r.edition_id=e.id
-           LEFT JOIN cms_media_references ref ON ref.document_id=d.id
           WHERE d.kind='industry' AND d.canonical_slug=$1`,
-        [item.definition.slug, row.asset_id],
+        [item.definition.slug],
       );
       const preserved = history.rows[0] as Record<string, unknown>;
       if (
         Number(preserved.revision_count) < 2
         || Number(preserved.original_revision_count) !== 1
-        || Number(preserved.preserved_reference_count) < 1
       ) {
-        throw new Error(`Original revision or media preservation failed for ${item.definition.slug}.`);
+        throw new Error(`Original revision preservation failed for ${item.definition.slug}.`);
       }
       associated++;
     }

@@ -49,7 +49,7 @@ export const INDUSTRIES: IndustryContent[] = [
       { title: "AI-native operating redesign", body: "Rework priority journeys around measurable value, human authority and production controls." },
     ],
     selectedWork: { description: "Selected work should show the mandate, control boundary and measured operational outcome without exposing client-confidential decisions or data." },
-    image: "/images/cognirise/industries/pulse-industry-financial.jpg", imageAlt: "A cinematic financial landscape crossed by controlled luminous routes.", variant: "ledger",
+    image: "/images/cognirise/industries/pulse-industry-financial-services.png", imageAlt: "Transparent custody chambers and luminous governed transaction paths converging through a financial operations landscape.", variant: "ledger",
     pressures: [
       { title: "Validation before velocity", body: "Non-deterministic systems still have to meet established model-risk expectations: clear purpose, testing, monitoring and accountable challenge." },
       { title: "Concentration is an operating risk", body: "Dependence on a small set of cloud, data and model providers can amplify third-party and systemic exposure." },
@@ -81,7 +81,7 @@ export const INDUSTRIES: IndustryContent[] = [
       { title: "Sovereign AI infrastructure", body: "Design model, data and orchestration layers around residency, resilience and unit economics." },
     ],
     selectedWork: { description: "Selected work should identify the operating domain, autonomy level, intervention boundary and service or efficiency result." },
-    image: "/images/cognirise/industries/pulse-industry-telecoms.jpg", imageAlt: "A cinematic telecommunications network carrying luminous signals across an operating landscape.", variant: "network",
+    image: "/images/cognirise/industries/pulse-industry-telecoms-network.png", imageAlt: "Distributed communications nodes linked by luminous signals across a wide network landscape.", variant: "network",
     pressures: [
       { title: "Fragmented operating context", body: "Alarms, customer state and commercial systems rarely present one reliable version of an incident." },
       { title: "Autonomy has levels", body: "A certified domain or use case is not an autonomous network. Scope and intervention boundaries must remain explicit." },
@@ -113,7 +113,7 @@ export const INDUSTRIES: IndustryContent[] = [
       { title: "AI-native journey engineering", body: "Redesign disrupted journeys end to end and instrument resolution, cost and trust outcomes." },
     ],
     selectedWork: { description: "Selected work should describe the disrupted journey, systems coordinated, human hand-off and evidenced recovery outcome." },
-    image: "/images/cognirise/industries/pulse-industry-travel.jpg", imageAlt: "Multiple illuminated routes converging through a cinematic travel environment.", variant: "journey",
+    image: "/images/cognirise/industries/pulse-industry-travel-hospitality.png", imageAlt: "Luminous passenger routes rerouting through a layered terminal as an aircraft departs in the distance.", variant: "journey",
     pressures: [
       { title: "Disruption compresses time", body: "A useful system must assemble options and constraints while a traveller is still waiting—not in a report after the event." },
       { title: "Inventory remains fragmented", body: "Air, hotel, loyalty and partner systems limit what can be promised and fulfilled in one interaction." },
@@ -145,7 +145,7 @@ export const INDUSTRIES: IndustryContent[] = [
       { title: "Responsible industrial AI", body: "Engineer monitoring, permits, operating envelopes and accountable approval into delivery." },
     ],
     selectedWork: { description: "Selected work should name the asset scope, safety boundary, workflow integration and verified site-level result." },
-    image: "/images/cognirise/industries/pulse-industry-energy.jpg", imageAlt: "A luminous route moving through a cinematic energy landscape at dusk.", variant: "field",
+    image: "/images/cognirise/industries/pulse-industry-energy-resources.png", imageAlt: "Luminous operational signals moving through geological layers and field infrastructure toward a controlled intervention.", variant: "field",
     pressures: [
       { title: "Context is physically distributed", body: "Engineering records, telemetry, inspection evidence and field knowledge live at different speeds and in different systems." },
       { title: "Safety limits the action space", body: "Recommendations must respect permits, operating envelopes and accountable human authority." },
@@ -177,7 +177,7 @@ export const INDUSTRIES: IndustryContent[] = [
       { title: "Public-service engineering", body: "Redesign journeys from policy intent to resolved case and measure outcomes across channels." },
     ],
     selectedWork: { description: "Selected work should state the public-value objective, affected service, governance controls and accessible outcome evidence." },
-    image: "/images/cognirise/industries/pulse-industry-public-sector.jpg", imageAlt: "Citizens moving through a bright monumental civic space connected by a luminous service route.", variant: "ledger",
+    image: "/images/cognirise/industries/pulse-industry-public-sector-services.png", imageAlt: "Citizens receiving documents and support at an accessible civic service centre linked by luminous service routes.", variant: "ledger",
     pressures: [
       { title: "Legitimacy before velocity", body: "Decisions that affect people need named authority, traceable evidence, clear explanations and a practical route to human review." },
       { title: "Accessibility is part of the system", body: "A digital service succeeds only when people across languages, abilities and levels of digital confidence can complete the journey." },
@@ -212,7 +212,7 @@ export const INDUSTRIES: IndustryContent[] = [
       { title: "Evidence and scale", body: "Measure learning, research speed, service quality, equity, cost and risk; scale only when evidence warrants it." },
     ],
     selectedWork: { description: "Cognirise brings consulting, engineering, data, platform and change capabilities together to redesign a complete institutional journey and establish the shared layer that lets successful use cases scale." },
-    image: "/images/cognirise/industries/pulse-industry-education.jpg", imageAlt: "A cinematic learning environment connected by luminous knowledge pathways.", variant: "network",
+    image: "/images/cognirise/industries/pulse-industry-education-learning.png", imageAlt: "Students learning individually and in groups across a stepped campus connected by luminous knowledge paths.", variant: "network",
     pressures: [
       { title: "Agentic AI is an institutional system", body: "Value depends on coordinated workflows, trusted data, secure tool access, capability building and accountable leadership—not an IT project alone." },
       { title: "Learning design leads adoption", body: "Tools should provoke reasoning, practice and reflection rather than substitute for durable learning." },
