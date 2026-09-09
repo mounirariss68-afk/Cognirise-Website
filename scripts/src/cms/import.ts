@@ -244,6 +244,7 @@ async function applyDatabase(
           [asset] = await tx.insert(cmsMediaAssetsTable).values({
             storageKey: durableStorageKey,
             filename: operation.filename,
+            originalFilename: operation.filename,
             mediaType: operation.mimeType,
             byteSize: operation.byteSize,
             checksum: operation.checksum,

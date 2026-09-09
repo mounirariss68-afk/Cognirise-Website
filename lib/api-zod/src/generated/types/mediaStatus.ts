@@ -13,5 +13,6 @@ export const MediaStatus = {
   pending: 'pending',
   review: 'review',
   ready: 'ready',
+  rejected: 'rejected',
   failed: 'failed',
 } as const;

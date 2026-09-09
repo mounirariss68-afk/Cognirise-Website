@@ -255,7 +255,9 @@ export async function downloadMediaObject(objectPath: string, range?: { start: n
   if (!objectPath.startsWith(`${prefix}/cms-media/`) || objectPath.includes("..")) {
     throw new Error("Invalid object path.");
   }
-  return bucket.file(objectPath).createReadStream(range);
+  const file = bucket.file(objectPath);
+  await file.getMetadata();
+  return file.createReadStream(range);
 }
 
 export async function inspectMediaObject(objectPath: string, expectedType: string) {

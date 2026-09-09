@@ -9,6 +9,7 @@ import {
   FinalizeMediaUploadBody,
   ListMediaQueryParams,
   RequestMediaUploadBody,
+  ReviewMediaBody,
 } from "@workspace/api-zod";
 import {
   apiMediaStatus,
@@ -18,6 +19,7 @@ import {
   isValidMediaClassification,
   media,
   mediaStorage,
+  protectedMediaDownloadSql,
   protectedMediaFileSql,
   protectedMediaDelivery,
   selectMedia,
@@ -111,6 +113,10 @@ test("active and ready media are usable while pending and failed stay explicit",
   assert.equal(isPreviewableMediaStatus("pending-review"), true);
   assert.equal(isPreviewableMediaStatus("pending"), false);
   assert.equal(apiMediaStatus("pending-review"), "review");
+  assert.equal(apiMediaStatus("rejected"), "rejected");
+  assert.equal(ReviewMediaBody.safeParse({ decision: "approve" }).success, true);
+  assert.equal(ReviewMediaBody.safeParse({ decision: "reject" }).success, true);
+  assert.equal(ReviewMediaBody.safeParse({ decision: "publish" }).success, false);
 
   const base = {
     id: "asset-id",
@@ -147,6 +153,9 @@ test("active and ready media are usable while pending and failed stay explicit",
   const failed = media({ ...base, status: "failed" });
   assert.equal(failed.status, "failed");
   assert.equal(failed.publicUrl, null);
+  const rejected = media({ ...base, status: "rejected" });
+  assert.equal(rejected.status, "rejected");
+  assert.equal(rejected.publicUrl, null);
 });
 
 test("published media URLs identify the immutable approved version", () => {
@@ -222,6 +231,8 @@ test("protected media selection exposes latest version byte size for ranges", ()
   assert.match(selectMedia, /SELECT id,width,height,metadata FROM cms_media_versions/);
   assert.match(protectedMediaFileSql, /COALESCE\(v\.byte_size,a\.byte_size\) byte_size/);
   assert.match(protectedMediaFileSql, /SELECT storage_key,byte_size,metadata FROM cms_media_versions/);
+  assert.match(protectedMediaDownloadSql, /ORDER BY version_number ASC LIMIT 1/);
+  assert.match(protectedMediaDownloadSql, /a\.original_filename filename,a\.media_type/);
 });
 
 test("caption edits append metadata-only versions without moving pinned references", () => {
@@ -231,6 +242,172 @@ test("caption edits append metadata-only versions without moving pinned referenc
   assert.match(appendMediaMetadataVersionSql, /\$2::jsonb/);
   assert.doesNotMatch(appendMediaMetadataVersionSql, /UPDATE cms_media_versions/);
   assert.doesNotMatch(appendMediaMetadataVersionSql, /cms_media_references/);
+});
+
+test("publisher-only review decisions enforce valid transitions and write audit events", {
+  concurrency: false,
+}, async (t) => {
+  const now = new Date("2026-09-09T00:00:00Z");
+  const assetId = "00000000-0000-4000-8000-000000000201";
+  const rejectedAssetId = "00000000-0000-4000-8000-000000000202";
+  const auditFailureAssetId = "00000000-0000-4000-8000-000000000203";
+  const statuses = new Map([
+    [assetId, "pending-review"],
+    [rejectedAssetId, "pending-review"],
+    [auditFailureAssetId, "pending-review"],
+  ]);
+  const audits: Array<{ action: string; assetId: string; metadata: unknown }> = [];
+
+  t.mock.method(pool, "query", async (sql: unknown, values?: unknown[]) => {
+    const statement = String(sql);
+    if (statement.includes("FROM cms_sessions s")) {
+      const editorDigest = security.hashToken("editor-token");
+      const role = values?.[0] === editorDigest ? "editor" : "publisher";
+      return {
+        rowCount: 1,
+        rows: [{
+          id: `${role}-session`,
+          token_digest: values?.[0],
+          mfa_satisfied_at: now,
+          expires_at: new Date(now.getTime() + 60_000),
+          created_at: now,
+          user_id: `${role}-user`,
+          name: role,
+          email: `${role}@example.com`,
+          role,
+          status: "active",
+          last_login_at: null,
+          user_created_at: now,
+          user_updated_at: now,
+          must_rotate: false,
+          mfa_enabled: true,
+        }],
+      };
+    }
+    return { rowCount: 0, rows: [] };
+  });
+  t.mock.method(pool, "connect", async () => {
+    let transactionStatuses = new Map(statuses);
+    const pendingAudits: typeof audits = [];
+    return {
+      query: async (sql: unknown, values?: unknown[]) => {
+        const statement = String(sql);
+        if (statement === "BEGIN") {
+          transactionStatuses = new Map(statuses);
+          return { rowCount: null, rows: [] };
+        }
+        if (statement === "COMMIT") {
+          for (const [id, status] of transactionStatuses) statuses.set(id, status);
+          audits.push(...pendingAudits);
+          return { rowCount: null, rows: [] };
+        }
+        if (statement === "ROLLBACK") return { rowCount: null, rows: [] };
+        if (statement.includes("UPDATE cms_media_assets") && statement.includes("status='pending-review'")) {
+          const id = String(values?.[0]);
+          if (transactionStatuses.get(id) !== "pending-review") return { rowCount: 0, rows: [] };
+          transactionStatuses.set(id, String(values?.[1]));
+          return { rowCount: 1, rows: [{ id }] };
+        }
+        if (statement.includes("SELECT a.*,v.id version_id")) {
+          const id = String(values?.[0]);
+          const status = transactionStatuses.get(id);
+          return status
+            ? {
+                rowCount: 1,
+                rows: [{
+                  id,
+                  version_id: `${id.slice(0, -3)}101`,
+                  filename: id === rejectedAssetId ? "reject-me.pdf" : "approve-me.png",
+                  storage_key: `private/cms-media/${id}`,
+                  media_type: id === rejectedAssetId ? "application/pdf" : "image/png",
+                  byte_size: 1024,
+                  checksum: "checksum",
+                  status,
+                  collection: "website",
+                  linkedin_asset_kind: null,
+                  campaign_metadata: null,
+                  motion_metadata: null,
+                  alt_text: "Governed asset",
+                  credit: "Cognirise",
+                  width: 100,
+                  height: 50,
+                  metadata: {},
+                  created_at: now,
+                  updated_at: now,
+                }],
+              }
+            : { rowCount: 0, rows: [] };
+        }
+        if (statement.includes("INSERT INTO cms_audit_events")) {
+          if (String(values?.[3]) === auditFailureAssetId) throw new Error("audit unavailable");
+          pendingAudits.push({
+            action: String(values?.[2]),
+            assetId: String(values?.[3]),
+            metadata: values?.[4],
+          });
+          return { rowCount: 1, rows: [] };
+        }
+        return { rowCount: 0, rows: [] };
+      },
+      release() {},
+    } as never;
+  });
+
+  const app = express();
+  app.use(express.json());
+  app.use(cookieParser());
+  app.use("/api", mediaRouter);
+  const server = app.listen(0, "127.0.0.1");
+  await new Promise<void>((resolve) => server.once("listening", resolve));
+  t.after(() => new Promise<void>((resolve, reject) =>
+    server.close((error) => error ? reject(error) : resolve())
+  ));
+  const address = server.address();
+  assert.ok(address && typeof address !== "string");
+  const origin = `http://127.0.0.1:${address.port}`;
+  const review = async (token: string, id: string, decision: "approve" | "reject") => {
+    const csrf = auth.csrfForSession(security.hashToken(token));
+    return fetch(`${origin}/api/media/${id}/review`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        origin,
+        "x-csrf-token": csrf,
+        cookie: `${auth.SESSION_COOKIE}=${token}; ${auth.CSRF_COOKIE}=${csrf}`,
+      },
+      body: JSON.stringify({ decision }),
+    });
+  };
+
+  const forbidden = await review("editor-token", assetId, "approve");
+  assert.equal(forbidden.status, 403);
+  assert.equal(statuses.get(assetId), "pending-review");
+
+  const approved = await review("publisher-token", assetId, "approve");
+  assert.equal(approved.status, 200);
+  assert.equal((await approved.json() as { status: string }).status, "ready");
+  assert.equal(statuses.get(assetId), "active");
+
+  const repeated = await review("publisher-token", assetId, "reject");
+  assert.equal(repeated.status, 409);
+  assert.equal(statuses.get(assetId), "active");
+
+  const rejected = await review("publisher-token", rejectedAssetId, "reject");
+  assert.equal(rejected.status, 200);
+  const rejectedBody = await rejected.json() as { status: string; publicUrl: string | null };
+  assert.equal(rejectedBody.status, "rejected");
+  assert.equal(rejectedBody.publicUrl, null);
+  assert.deepEqual(audits.map(({ action, assetId: id }) => [action, id]), [
+    ["media.approved", assetId],
+    ["media.rejected", rejectedAssetId],
+  ]);
+  assert.deepEqual(audits[0].metadata, {
+    previousStatus: "pending-review",
+    nextStatus: "active",
+  });
+  const failedAudit = await review("publisher-token", auditFailureAssetId, "approve");
+  assert.equal(failedAudit.status, 500);
+  assert.equal(statuses.get(auditFailureAssetId), "pending-review");
 });
 
 test("distinct assets promote identical bytes to isolated immutable keys", {
@@ -253,6 +430,7 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
     id,
     storage_key: storageKey,
     filename: "governed.png",
+    original_filename: "uploaded-original.png",
     media_type: "image/png",
     byte_size: verifiedBytes.length,
     checksum: "pending",
@@ -271,6 +449,7 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
   ]);
   const persistedFinalKeys = new Set<string>();
   let deliveredKey: string | undefined;
+  let deliveryFailure: "missing" | "stream" | null = null;
 
   t.mock.method(mediaStorage, "promote", async (path: string) => {
     const verified = Buffer.from(objects.get(path)!);
@@ -289,6 +468,14 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
   t.mock.method(mediaStorage, "deleteStaging", async () => {});
   t.mock.method(protectedMediaDelivery, "download", async (path: string) => {
     deliveredKey = path;
+    if (deliveryFailure === "missing") throw new Error("object missing");
+    if (deliveryFailure === "stream") {
+      return new Readable({
+        read() {
+          this.destroy(new Error("stream interrupted"));
+        },
+      });
+    }
     return Readable.from(objects.get(path)!);
   });
   t.mock.method(pool, "query", async (sql: unknown, values?: unknown[]) => {
@@ -321,7 +508,7 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
     }
     if (statement.includes("UPDATE cms_media_assets SET storage_key")) {
       const asset = assets.get(String(values![0]))!;
-      Object.assign(asset, { storage_key: values![1], checksum: values![2], status: "active" });
+      Object.assign(asset, { storage_key: values![1], checksum: values![2], status: "pending-review" });
       return { rowCount: 1, rows: [asset] };
     }
     if (statement.includes("INSERT INTO cms_media_versions")) {
@@ -330,8 +517,18 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
       assert.ok(values![1] !== stagingKey && values![1] !== secondStagingKey);
       return { rowCount: 1, rows: [] };
     }
-    if (statement === protectedMediaFileSql) {
-      return { rowCount: 1, rows: [{ storage_key: finalKey, byte_size: objects.get(finalKey)!.length, media_type: "image/png" }] };
+    if (statement === protectedMediaFileSql || statement === protectedMediaDownloadSql) {
+      const asset = assets.get(String(values?.[0]));
+      return asset
+        ? { rowCount: 1, rows: [{
+            storage_key: finalKey,
+            byte_size: objects.get(finalKey)!.length,
+            media_type: "image/png",
+            filename: statement === protectedMediaDownloadSql
+              ? asset.original_filename
+              : asset.filename,
+          }] }
+        : { rowCount: 0, rows: [] };
     }
     if (statement.includes("SELECT a.*,v.id version_id")) {
       return { rowCount: 1, rows: [{ ...assets.get(String(values![0]))!, version_id: versionId, width: 100, height: 50, metadata: {} }] };
@@ -364,6 +561,7 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
     body: JSON.stringify({ objectPath: stagingKey }),
   });
   assert.equal(finalized.status, 200);
+  assert.equal((await finalized.json() as { status: string }).status, "review");
   const secondFinalized = await fetch(`${origin}/api/media/${secondAssetId}/finalize`, {
     method: "POST",
     headers,
@@ -384,6 +582,44 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
   assert.equal(delivered.status, 200);
   assert.equal(await delivered.text(), "verified image bytes");
   assert.equal(deliveredKey, finalKey);
+
+  const download = await fetch(`${origin}/api/media/${assetId}/download`, {
+    headers: {
+      range: "bytes=0-7",
+      cookie: `${auth.SESSION_COOKIE}=session-token`,
+    },
+  });
+  assert.equal(download.status, 206);
+  assert.equal(download.headers.get("content-range"), `bytes 0-7/${verifiedBytes.length}`);
+  assert.equal(download.headers.get("content-type"), "image/png");
+  assert.match(download.headers.get("content-disposition") ?? "", /attachment; filename="uploaded-original\.png"/);
+  assert.equal(await download.text(), "verified");
+  deliveryFailure = "missing";
+  const unavailable = await fetch(`${origin}/api/media/${assetId}/download`, {
+    headers: { cookie: `${auth.SESSION_COOKIE}=session-token` },
+  });
+  assert.equal(unavailable.status, 404);
+  assert.deepEqual(await unavailable.json(), { error: "Media object not found." });
+  deliveryFailure = "stream";
+  await assert.rejects(async () => {
+    const interrupted = await fetch(`${origin}/api/media/${assetId}/download`, {
+      headers: { cookie: `${auth.SESSION_COOKIE}=session-token` },
+    });
+    await interrupted.arrayBuffer();
+  });
+  deliveryFailure = null;
+  assert.equal(
+    (await fetch(`${origin}/api/media/${assetId}/download`, {
+      headers: { cookie: `${auth.SESSION_COOKIE}=session-token` },
+    })).status,
+    200,
+  );
+  assert.equal(
+    (await fetch(`${origin}/api/media/00000000-0000-4000-8000-000000000099/download`, {
+      headers: { cookie: `${auth.SESSION_COOKIE}=session-token` },
+    })).status,
+    404,
+  );
 });
 
 test("ffprobe accepts checked-in playable MP4 and WebM and rejects empty containers", async () => {

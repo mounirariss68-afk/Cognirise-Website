@@ -1340,6 +1340,7 @@ export const MediaStatus = {
   pending: 'pending',
   review: 'review',
   ready: 'ready',
+  rejected: 'rejected',
   failed: 'failed',
 } as const;
 
@@ -1601,6 +1602,18 @@ export interface MediaFinalizeInput {
   linkedinAssetKind?: LinkedInAssetKind;
   campaignMetadata?: MediaCampaignMetadata;
   motionMetadata?: MotionMetadata;
+}
+
+export type MediaReviewDecisionDecision = typeof MediaReviewDecisionDecision[keyof typeof MediaReviewDecisionDecision];
+
+
+export const MediaReviewDecisionDecision = {
+  approve: 'approve',
+  reject: 'reject',
+} as const;
+
+export interface MediaReviewDecision {
+  decision: MediaReviewDecisionDecision;
 }
 
 export interface MediaUpdate {

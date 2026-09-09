@@ -132,6 +132,8 @@ export * from './mediaAssetPage';
 export * from './mediaCampaignMetadata';
 export * from './mediaCollection';
 export * from './mediaFinalizeInput';
+export * from './mediaReviewDecision';
+export * from './mediaReviewDecisionDecision';
 export * from './mediaStatus';
 export * from './mediaUpdate';
 export * from './mediaUpload';

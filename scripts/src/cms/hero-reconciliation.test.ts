@@ -66,6 +66,8 @@ test("the executable is development-only, append-only, and receipt governed", as
   assert.match(source, /REPLIT_DEPLOYMENT === "1"/);
   assert.match(source, /--target=development/);
   assert.match(source, /cms_operation_receipts/);
+  assert.match(source, /\(storage_key,filename,original_filename,media_type/);
+  assert.match(source, /VALUES \(\$1,\$2,\$2,\$3/);
   assert.match(source, /media_version_id/);
   assert.match(source, /version_number=1/);
   assert.match(source, /collection.*motion/);

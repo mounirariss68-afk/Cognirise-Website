@@ -955,6 +955,73 @@ paths:
           description: Requested byte range is not satisfiable
           headers:
             Content-Range: { schema: { type: string } }
+  /media/{mediaId}/download:
+    get:
+      operationId: downloadMedia
+      tags: [media]
+      summary: Download protected media using its original filename and byte-range support
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/MediaId"
+      responses:
+        "200":
+          description: Complete media attachment
+          headers:
+            Content-Disposition: { schema: { type: string } }
+          content:
+            image/jpeg: {}
+            image/png: {}
+            image/webp: {}
+            image/avif: {}
+            application/pdf: {}
+            video/mp4: {}
+            video/webm: {}
+        "206":
+          description: Requested attachment byte range
+          headers:
+            Accept-Ranges: { schema: { type: string, enum: [bytes] } }
+            Content-Range: { schema: { type: string } }
+            Content-Disposition: { schema: { type: string } }
+          content:
+            image/jpeg: {}
+            image/png: {}
+            image/webp: {}
+            image/avif: {}
+            application/pdf: {}
+            video/mp4: {}
+            video/webm: {}
+        "416":
+          description: Requested byte range is not satisfiable
+          headers:
+            Content-Range: { schema: { type: string } }
+  /media/{mediaId}/review:
+    post:
+      operationId: reviewMedia
+      tags: [media]
+      summary: Approve or reject an awaiting-review media asset
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - $ref: "#/components/parameters/MediaId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaReviewDecision"
+      responses:
+        "200":
+          description: Reviewed media asset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaAsset"
+        "403":
+          description: Publisher permission required
+        "409":
+          $ref: "#/components/responses/Conflict"
   /media/{mediaId}/finalize:
     post:
       operationId: finalizeMediaUpload
@@ -2397,7 +2464,7 @@ components:
 
     MediaStatus:
       type: string
-      enum: [pending, review, ready, failed]
+      enum: [pending, review, ready, rejected, failed]
     PublicHeroSlot:
       type: string
       enum: [homepage, industries]
@@ -2566,6 +2633,14 @@ components:
           $ref: "#/components/schemas/MediaCampaignMetadata"
         motionMetadata:
           $ref: "#/components/schemas/MotionMetadata"
+    MediaReviewDecision:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [approve, reject]
     MediaUpdate:
       type: object
       additionalProperties: false

@@ -4857,7 +4857,7 @@ export const ListMediaResponse = zod.object({
   "x": zod.number().min(listMediaResponseTwoItemsItemFocalPointOneXMin).max(listMediaResponseTwoItemsItemFocalPointOneXMax),
   "y": zod.number().min(listMediaResponseTwoItemsItemFocalPointOneYMin).max(listMediaResponseTwoItemsItemFocalPointOneYMax)
 }),zod.null()]).optional(),
-  "status": zod.enum(['pending', 'review', 'ready', 'failed']),
+  "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -5051,7 +5051,7 @@ export const RequestMediaUploadResponse = zod.object({
   "x": zod.number().min(requestMediaUploadResponseMediaFocalPointOneXMin).max(requestMediaUploadResponseMediaFocalPointOneXMax),
   "y": zod.number().min(requestMediaUploadResponseMediaFocalPointOneYMin).max(requestMediaUploadResponseMediaFocalPointOneYMax)
 }),zod.null()]).optional(),
-  "status": zod.enum(['pending', 'review', 'ready', 'failed']),
+  "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -5171,7 +5171,7 @@ export const GetMediaResponse = zod.object({
   "x": zod.number().min(getMediaResponseFocalPointOneXMin).max(getMediaResponseFocalPointOneXMax),
   "y": zod.number().min(getMediaResponseFocalPointOneYMin).max(getMediaResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
-  "status": zod.enum(['pending', 'review', 'ready', 'failed']),
+  "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -5378,7 +5378,7 @@ export const UpdateMediaResponse = zod.object({
   "x": zod.number().min(updateMediaResponseFocalPointOneXMin).max(updateMediaResponseFocalPointOneXMax),
   "y": zod.number().min(updateMediaResponseFocalPointOneYMin).max(updateMediaResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
-  "status": zod.enum(['pending', 'review', 'ready', 'failed']),
+  "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -5403,6 +5403,135 @@ export const GetMediaFileParams = zod.object({
 })
 
 export const GetMediaFileResponse = zod.unknown()
+
+
+/**
+ * @summary Download protected media using its original filename and byte-range support
+ */
+export const DownloadMediaParams = zod.object({
+  "mediaId": zod.coerce.string()
+})
+
+export const DownloadMediaResponse = zod.unknown()
+
+
+/**
+ * @summary Approve or reject an awaiting-review media asset
+ */
+export const ReviewMediaParams = zod.object({
+  "mediaId": zod.coerce.string()
+})
+
+export const ReviewMediaBody = zod.object({
+  "decision": zod.enum(['approve', 'reject'])
+})
+
+export const reviewMediaResponseSizeMin = 0;
+export const reviewMediaResponseSizeMultipleOf = 1;
+
+export const reviewMediaResponseWidthMultipleOf = 1;
+
+export const reviewMediaResponseHeightMultipleOf = 1;
+
+export const reviewMediaResponseDurationMin = 0;
+
+export const reviewMediaResponseCampaignMetadataOneCampaignMax = 120;
+
+
+export const reviewMediaResponseCampaignMetadataOneCampaignRegExp = new RegExp('\\S');
+export const reviewMediaResponseCampaignMetadataOneEditionMax = 80;
+
+
+export const reviewMediaResponseCampaignMetadataOneEditionRegExp = new RegExp('\\S');
+export const reviewMediaResponseCampaignMetadataOneTitleMax = 160;
+
+
+export const reviewMediaResponseCampaignMetadataOneTitleRegExp = new RegExp('\\S');
+export const reviewMediaResponseCampaignMetadataOnePurposeMax = 300;
+
+
+export const reviewMediaResponseCampaignMetadataOnePurposeRegExp = new RegExp('\\S');
+export const reviewMediaResponseCampaignMetadataOnePulseSourceMax = 160;
+
+
+export const reviewMediaResponseCampaignMetadataOnePulseSourceRegExp = new RegExp('\\S');
+export const reviewMediaResponseCampaignMetadataOneApprovedUseMax = 300;
+
+
+export const reviewMediaResponseCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
+export const reviewMediaResponseMotionMetadataOneGroupIdMax = 120;
+
+
+export const reviewMediaResponseMotionMetadataOneGroupIdRegExp = new RegExp('\\S');
+
+
+export const reviewMediaResponseMotionMetadataOneAutoplayDefault = false;
+export const reviewMediaResponseMotionMetadataOneLoopDefault = false;
+export const reviewMediaResponseMotionMetadataOneAccessibilityTranscriptMax = 10000;
+
+
+export const reviewMediaResponseMotionMetadataOneAccessibilityTranscriptRegExp = new RegExp('\\S');
+export const reviewMediaResponseMotionMetadataOneAccessibilityAudioDescriptionMax = 2000;
+
+
+export const reviewMediaResponseMotionMetadataOneAccessibilityAudioDescriptionRegExp = new RegExp('\\S');
+export const reviewMediaResponseFocalPointOneXMin = 0;
+export const reviewMediaResponseFocalPointOneXMax = 1;
+
+export const reviewMediaResponseFocalPointOneYMin = 0;
+export const reviewMediaResponseFocalPointOneYMax = 1;
+
+
+
+export const ReviewMediaResponse = zod.object({
+  "id": zod.string(),
+  "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
+  "filename": zod.string(),
+  "objectPath": zod.string(),
+  "publicUrl": zod.string().nullish(),
+  "mimeType": zod.string(),
+  "size": zod.number().min(reviewMediaResponseSizeMin).multipleOf(reviewMediaResponseSizeMultipleOf),
+  "width": zod.number().min(1).multipleOf(reviewMediaResponseWidthMultipleOf).nullish(),
+  "height": zod.number().min(1).multipleOf(reviewMediaResponseHeightMultipleOf).nullish(),
+  "duration": zod.number().min(reviewMediaResponseDurationMin).nullish(),
+  "checksum": zod.string().nullish(),
+  "altText": zod.string().nullish(),
+  "caption": zod.string().nullish(),
+  "credit": zod.string().nullish(),
+  "collection": zod.enum(['website', 'linkedin', 'motion']),
+  "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
+  "campaignMetadata": zod.union([zod.object({
+  "campaign": zod.string().min(1).max(reviewMediaResponseCampaignMetadataOneCampaignMax).regex(reviewMediaResponseCampaignMetadataOneCampaignRegExp).optional(),
+  "edition": zod.string().min(1).max(reviewMediaResponseCampaignMetadataOneEditionMax).regex(reviewMediaResponseCampaignMetadataOneEditionRegExp).optional(),
+  "title": zod.string().min(1).max(reviewMediaResponseCampaignMetadataOneTitleMax).regex(reviewMediaResponseCampaignMetadataOneTitleRegExp).optional(),
+  "purpose": zod.string().min(1).max(reviewMediaResponseCampaignMetadataOnePurposeMax).regex(reviewMediaResponseCampaignMetadataOnePurposeRegExp).optional(),
+  "pulseSource": zod.string().min(1).max(reviewMediaResponseCampaignMetadataOnePulseSourceMax).regex(reviewMediaResponseCampaignMetadataOnePulseSourceRegExp).optional(),
+  "approvedUse": zod.string().min(1).max(reviewMediaResponseCampaignMetadataOneApprovedUseMax).regex(reviewMediaResponseCampaignMetadataOneApprovedUseRegExp).optional()
+}),zod.null()]).optional(),
+  "motionMetadata": zod.union([zod.object({
+  "groupId": zod.string().min(1).max(reviewMediaResponseMotionMetadataOneGroupIdMax).regex(reviewMediaResponseMotionMetadataOneGroupIdRegExp),
+  "variant": zod.enum(['landscape', 'portrait', 'square', 'mobile', 'desktop']),
+  "posterMediaId": zod.string().min(1).optional(),
+  "reducedMotionMediaId": zod.string().min(1).optional(),
+  "autoplay": zod.boolean().default(reviewMediaResponseMotionMetadataOneAutoplayDefault),
+  "loop": zod.boolean().default(reviewMediaResponseMotionMetadataOneLoopDefault),
+  "accessibility": zod.object({
+  "decorative": zod.boolean(),
+  "hasAudio": zod.boolean(),
+  "captionsMediaId": zod.string().min(1).optional(),
+  "transcript": zod.string().min(1).max(reviewMediaResponseMotionMetadataOneAccessibilityTranscriptMax).regex(reviewMediaResponseMotionMetadataOneAccessibilityTranscriptRegExp).optional(),
+  "audioDescription": zod.string().min(1).max(reviewMediaResponseMotionMetadataOneAccessibilityAudioDescriptionMax).regex(reviewMediaResponseMotionMetadataOneAccessibilityAudioDescriptionRegExp).optional()
+})
+}),zod.null()]).optional(),
+  "focalPoint": zod.union([zod.object({
+  "x": zod.number().min(reviewMediaResponseFocalPointOneXMin).max(reviewMediaResponseFocalPointOneXMax),
+  "y": zod.number().min(reviewMediaResponseFocalPointOneYMin).max(reviewMediaResponseFocalPointOneYMax)
+}),zod.null()]).optional(),
+  "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
+  "createdBy": zod.string().optional(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
 
 
 /**
@@ -5595,7 +5724,7 @@ export const FinalizeMediaUploadResponse = zod.object({
   "x": zod.number().min(finalizeMediaUploadResponseFocalPointOneXMin).max(finalizeMediaUploadResponseFocalPointOneXMax),
   "y": zod.number().min(finalizeMediaUploadResponseFocalPointOneYMin).max(finalizeMediaUploadResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
-  "status": zod.enum(['pending', 'review', 'ready', 'failed']),
+  "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()

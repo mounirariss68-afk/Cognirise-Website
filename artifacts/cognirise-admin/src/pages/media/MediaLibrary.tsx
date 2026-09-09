@@ -4,12 +4,14 @@ import {
   getGetDocumentRevisionQueryKey,
   getGetMediaQueryKey,
   getListMediaQueryKey,
+  useGetSession,
   useGetDocumentRevision,
   useListDocuments,
   useFinalizeMediaUpload,
   useGetMedia,
   useListMedia,
   useRequestMediaUpload,
+  useReviewMedia,
   useSubmitDocument,
   useUpdateDocument,
   useUpdateMedia,
@@ -17,6 +19,9 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
+  Check,
+  Download,
+  Eye,
   FileImage,
   ImageOff,
   LayoutGrid,
@@ -27,6 +32,7 @@ import {
   PlaySquare,
   Search,
   UploadCloud,
+  X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useLocation } from "wouter";
@@ -413,6 +419,9 @@ function statusPresentation(status: string) {
   if (status === "review") {
     return { label: "Awaiting review", className: "bg-amber-500/10 text-amber-700" };
   }
+  if (status === "rejected") {
+    return { label: "Rejected", className: "bg-slate-500/10 text-slate-700" };
+  }
   if (status === "failed") {
     return { label: "Failed", className: "bg-red-500/10 text-red-700" };
   }
@@ -447,10 +456,11 @@ function AssetPreview({
   const isPreviewable = asset.status === "ready" || asset.status === "active" || asset.status === "review";
   const canRender = isPreviewable && Boolean(asset.publicUrl) && !broken;
   const isVideo = asset.collection === "motion" || asset.mimeType === "video/mp4" || asset.mimeType === "video/webm";
+  const isImage = asset.mimeType.startsWith("image/");
 
   return (
     <div className={`relative flex items-center justify-center overflow-hidden bg-muted ${className}`}>
-      {canRender ? (
+      {canRender && (isVideo || isImage) ? (
         isVideo ? (
           <video
             src={asset.publicUrl ?? undefined}
@@ -522,12 +532,27 @@ export default function MediaLibrary() {
   const [motionVariant, setMotionVariant] = useState<MotionVariant>("landscape");
   const [motionFlags, setMotionFlags] = useState({ autoplay: false, loop: false, decorative: false, hasAudio: false });
   const [editingAsset, setEditingAsset] = useState<ExtendedMediaAsset | null>(null);
+  const [reviewAsset, setReviewAsset] = useState<ExtendedMediaAsset | null>(null);
+  const [reviewDecision, setReviewDecision] = useState<"approve" | "reject" | null>(null);
+  const [downloadingAssetId, setDownloadingAssetId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const requestUpload = useRequestMediaUpload();
   const finalizeUpload = useFinalizeMediaUpload();
   const updateMedia = useUpdateMedia();
+  const reviewMedia = useReviewMedia();
+  const { data: session } = useGetSession();
+  const canReview = session?.user?.role === "administrator" || session?.user?.role === "publisher";
+
+  const websiteCount = useListMedia({ page: 1, pageSize: 1, collection: "website" });
+  const linkedinCount = useListMedia({ page: 1, pageSize: 1, collection: "linkedin" });
+  const motionCount = useListMedia({ page: 1, pageSize: 1, collection: "motion" });
+  const collectionCounts: Record<MediaCollection, number | undefined> = {
+    website: websiteCount.data?.total,
+    linkedin: linkedinCount.data?.total,
+    motion: motionCount.data?.total,
+  };
 
   // These contract fields are intentionally supplied ahead of generated client regeneration.
   const listParams = {
@@ -713,6 +738,106 @@ export default function MediaLibrary() {
     }
   };
 
+  const handleDownload = async (asset: ExtendedMediaAsset) => {
+    if (!asset.publicUrl || !["review", "ready", "active"].includes(asset.status)) {
+      toast({
+        title: "File unavailable",
+        description: `${asset.filename} is not available to download.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    setDownloadingAssetId(asset.id);
+    const downloadUrl = `/api/media/${encodeURIComponent(asset.id)}/download`;
+    try {
+      const preflight = await fetch(downloadUrl, {
+        credentials: "include",
+        headers: { Range: "bytes=0-0" },
+      });
+      if (!preflight.ok) throw new Error();
+      await preflight.body?.cancel();
+      const anchor = document.createElement("a");
+      anchor.href = downloadUrl;
+      anchor.download = asset.filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      toast({ title: "Download started", description: asset.filename });
+    } catch {
+      toast({
+        title: "Download unavailable",
+        description: `${asset.filename} could not be retrieved. The file may be missing from storage.`,
+        variant: "destructive",
+      });
+    } finally {
+      setDownloadingAssetId(null);
+    }
+  };
+
+  const submitReview = async () => {
+    if (!reviewAsset || !reviewDecision) return;
+    try {
+      const updated = await reviewMedia.mutateAsync({
+        mediaId: reviewAsset.id,
+        data: { decision: reviewDecision },
+      });
+      queryClient.setQueriesData(
+        { queryKey: getListMediaQueryKey() },
+        (current: typeof data) => current
+          ? { ...current, items: current.items.map((item) => item.id === updated.id ? updated : item) }
+          : current,
+      );
+      await queryClient.invalidateQueries({ queryKey: getListMediaQueryKey() });
+      toast({
+        title: reviewDecision === "approve" ? "Asset approved" : "Asset rejected",
+        description: reviewDecision === "approve"
+          ? `${reviewAsset.filename} is now Available.`
+          : `${reviewAsset.filename} has been removed from the review queue.`,
+      });
+      setReviewDecision(null);
+      setReviewAsset(null);
+    } catch (error: unknown) {
+      const detail = typeof error === "object" && error && "data" in error
+        && typeof error.data === "object" && error.data && "error" in error.data
+        ? String(error.data.error)
+        : "The review decision could not be saved.";
+      toast({ title: "Review failed", description: detail, variant: "destructive" });
+    }
+  };
+
+  const assetActions = (asset: ExtendedMediaAsset, compact = false) => {
+    const downloadable = Boolean(asset.publicUrl) && ["review", "ready", "active"].includes(asset.status);
+    return (
+      <div className={`flex ${compact ? "flex-col items-end" : "flex-wrap"} gap-2`}>
+        {asset.status === "review" && canReview && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setReviewDecision(null);
+              setReviewAsset(asset);
+            }}
+          >
+            <Eye className="h-3.5 w-3.5" />
+            Review
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!downloadable || downloadingAssetId === asset.id}
+          onClick={() => handleDownload(asset)}
+          aria-label={`Download ${asset.filename}`}
+        >
+          {downloadingAssetId === asset.id
+            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            : <Download className="h-3.5 w-3.5" />}
+          Download
+        </Button>
+      </div>
+    );
+  };
+
   const campaignForm = (
     <div className="grid gap-4 sm:grid-cols-2">
       {CAMPAIGN_FIELDS.map((field) => (
@@ -870,15 +995,18 @@ export default function MediaLibrary() {
       </div>
 
       <Tabs value={collection} onValueChange={selectCollection} className="mb-3">
-        <TabsList>
-          <TabsTrigger value="website" className="gap-2">
-            <FileImage className="h-4 w-4" /> Website
+        <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-3">
+          <TabsTrigger value="website" className="h-auto min-w-0 justify-between gap-2 border border-border bg-card px-4 py-3 data-[state=active]:border-primary">
+            <span className="flex min-w-0 items-center gap-2"><FileImage className="h-4 w-4" /> Website</span>
+            <span className="rounded bg-muted px-2 py-0.5 text-xs font-mono">{collectionCounts.website ?? "—"}</span>
           </TabsTrigger>
-          <TabsTrigger value="linkedin" className="gap-2">
-            <Linkedin className="h-4 w-4" /> LinkedIn
+          <TabsTrigger value="linkedin" className="h-auto min-w-0 justify-between gap-2 border border-border bg-card px-4 py-3 data-[state=active]:border-primary">
+            <span className="flex min-w-0 items-center gap-2"><Linkedin className="h-4 w-4" /> LinkedIn</span>
+            <span className="rounded bg-muted px-2 py-0.5 text-xs font-mono">{collectionCounts.linkedin ?? "—"}</span>
           </TabsTrigger>
-          <TabsTrigger value="motion" className="gap-2">
-            <PlaySquare className="h-4 w-4" /> Videos &amp; animations
+          <TabsTrigger value="motion" className="h-auto min-w-0 justify-between gap-2 border border-border bg-card px-4 py-3 data-[state=active]:border-primary">
+            <span className="flex min-w-0 items-center gap-2"><PlaySquare className="h-4 w-4 shrink-0" /> <span className="truncate">Videos &amp; animations</span></span>
+            <span className="rounded bg-muted px-2 py-0.5 text-xs font-mono">{collectionCounts.motion ?? "—"}</span>
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -1002,6 +1130,10 @@ export default function MediaLibrary() {
                       <p className="truncate text-[10px] font-mono text-muted-foreground" title={asset.credit || undefined}>
                         {asset.credit ? `Credit: ${asset.credit}` : "Credit not recorded"}
                       </p>
+                      {asset.status === "review" && !canReview && (
+                        <p className="text-[10px] font-mono text-amber-700">Awaiting a publisher review</p>
+                      )}
+                      {assetActions(asset)}
                     </div>
                   </article>
                 );
@@ -1018,7 +1150,7 @@ export default function MediaLibrary() {
                     {collection === "motion" && <th className="px-4 py-3 font-medium">Video metadata</th>}
                     <th className="px-4 py-3 font-medium">Accessibility / rights</th>
                     <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 text-right font-medium">Uploaded</th>
+                    <th className="px-4 py-3 text-right font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -1069,8 +1201,12 @@ export default function MediaLibrary() {
                           <p className="mt-1 truncate text-[10px] font-mono text-muted-foreground">{asset.credit ? `Credit: ${asset.credit}` : "Credit not recorded"}</p>
                         </td>
                         <td className="px-4 py-3"><StatusBadge status={asset.status} /></td>
-                        <td className="px-4 py-3 text-right text-xs font-mono text-muted-foreground">
-                          {format(new Date(asset.createdAt), "MMM d, yyyy")}
+                        <td className="px-4 py-3 text-right">
+                          <p className="mb-2 text-xs font-mono text-muted-foreground">{format(new Date(asset.createdAt), "MMM d, yyyy")}</p>
+                          {asset.status === "review" && !canReview && (
+                            <p className="mb-2 text-[10px] font-mono text-amber-700">Awaiting publisher review</p>
+                          )}
+                          {assetActions(asset, true)}
                         </td>
                       </tr>
                     );
@@ -1193,6 +1329,80 @@ export default function MediaLibrary() {
               {updateMedia.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save metadata
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(reviewAsset)}
+        onOpenChange={(open) => {
+          if (!open && !reviewMedia.isPending) {
+            setReviewDecision(null);
+            setReviewAsset(null);
+          }
+        }}
+      >
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Review media asset</DialogTitle>
+            <DialogDescription>
+              Inspect the preview and governed metadata before making this asset available.
+            </DialogDescription>
+          </DialogHeader>
+          {reviewAsset && (
+            <div className="space-y-4 py-2">
+              <AssetPreview
+                asset={reviewAsset}
+                className="aspect-video max-h-80 rounded-md border border-border"
+                broken={Boolean(brokenPreviews[reviewAsset.id])}
+                onError={() => setBrokenPreviews((current) => ({ ...current, [reviewAsset.id]: true }))}
+              />
+              <div className="grid gap-3 rounded-md border border-border bg-muted/20 p-4 text-sm sm:grid-cols-2">
+                <div><p className="text-[10px] font-mono uppercase text-muted-foreground">Filename</p><p className="break-all font-medium">{reviewAsset.filename}</p></div>
+                <div><p className="text-[10px] font-mono uppercase text-muted-foreground">Type and size</p><p>{reviewAsset.mimeType} • {(reviewAsset.size / 1024 / 1024).toFixed(2)} MB</p></div>
+                <div><p className="text-[10px] font-mono uppercase text-muted-foreground">Collection</p><p>{reviewAsset.collection === "motion" ? "Videos & animations" : reviewAsset.collection === "linkedin" ? "LinkedIn" : "Website"}</p></div>
+                <div><p className="text-[10px] font-mono uppercase text-muted-foreground">Status</p><StatusBadge status={reviewAsset.status} /></div>
+                <div className="sm:col-span-2"><p className="text-[10px] font-mono uppercase text-muted-foreground">Alt text / accessibility</p><p>{reviewAsset.altText || "Not provided"}</p></div>
+                <div className="sm:col-span-2"><p className="text-[10px] font-mono uppercase text-muted-foreground">Usage</p><p>{reviewAsset.caption || reviewAsset.campaignMetadata?.approvedUse || "Not provided"}</p></div>
+                <div className="sm:col-span-2"><p className="text-[10px] font-mono uppercase text-muted-foreground">Credit / rights</p><p>{reviewAsset.credit || "Not recorded"}</p></div>
+              </div>
+              {reviewDecision && (
+                <div role="alert" className={`rounded-md border p-4 text-sm ${reviewDecision === "reject" ? "border-destructive/40 bg-destructive/5" : "border-emerald-500/40 bg-emerald-500/5"}`}>
+                  <p className="font-medium">
+                    {reviewDecision === "approve" ? "Approve this asset?" : "Reject this asset?"}
+                  </p>
+                  <p className="mt-1 text-muted-foreground">
+                    {reviewDecision === "approve"
+                      ? "It will move to Available and can be assigned to governed content."
+                      : "It will leave the review queue and remain unavailable for content assignment."}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
+            {reviewDecision ? (
+              <>
+                <Button variant="ghost" onClick={() => setReviewDecision(null)} disabled={reviewMedia.isPending}>Back</Button>
+                <Button
+                  variant={reviewDecision === "reject" ? "destructive" : "default"}
+                  onClick={submitReview}
+                  disabled={reviewMedia.isPending}
+                >
+                  {reviewMedia.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Confirm {reviewDecision === "approve" ? "approval" : "rejection"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setReviewDecision("reject")}>
+                  <X className="h-4 w-4" /> Reject
+                </Button>
+                <Button onClick={() => setReviewDecision("approve")}>
+                  <Check className="h-4 w-4" /> Approve
+                </Button>
+              </>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

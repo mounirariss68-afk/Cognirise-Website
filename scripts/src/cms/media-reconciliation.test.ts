@@ -54,6 +54,7 @@ test("the executable reconciliation uploads and verifies durable objects without
   assert.match(reconcile, /metadata\.md5Hash === sourceMd5/);
   assert.match(importer, /repairsIncompleteVersion/);
   assert.match(importer, /binaryStillMatches/);
+  assert.match(importer, /originalFilename: operation\.filename/);
   assert.match(importer, /preserving its earlier inventory receipt digest/);
 });
 

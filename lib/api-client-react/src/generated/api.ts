@@ -65,6 +65,7 @@ import type {
   MediaAsset,
   MediaAssetPage,
   MediaFinalizeInput,
+  MediaReviewDecision,
   MediaUpdate,
   MediaUpload,
   MediaUploadInput,
@@ -3552,6 +3553,155 @@ export function useGetMediaFile<TData = Awaited<ReturnType<typeof getMediaFile>>
 
 
 
+
+export const getDownloadMediaUrl = (mediaId: string,) => {
+
+
+
+
+  return `/api/media/${mediaId}/download`
+}
+
+/**
+ * @summary Download protected media using its original filename and byte-range support
+ */
+export const downloadMedia = async (mediaId: string, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getDownloadMediaUrl(mediaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getDownloadMediaQueryKey = (mediaId: string,) => {
+    return [
+    `/api/media/${mediaId}/download`
+    ] as const;
+    }
+
+
+export const getDownloadMediaQueryOptions = <TData = Awaited<ReturnType<typeof downloadMedia>>, TError = ErrorType<void>>(mediaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDownloadMediaQueryKey(mediaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof downloadMedia>>> = ({ signal }) => downloadMedia(mediaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: mediaId !== null && mediaId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof downloadMedia>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type DownloadMediaQueryResult = NonNullable<Awaited<ReturnType<typeof downloadMedia>>>
+export type DownloadMediaQueryError = ErrorType<void>
+
+
+/**
+ * @summary Download protected media using its original filename and byte-range support
+ */
+
+export function useDownloadMedia<TData = Awaited<ReturnType<typeof downloadMedia>>, TError = ErrorType<void>>(
+ mediaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getDownloadMediaQueryOptions(mediaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getReviewMediaUrl = (mediaId: string,) => {
+
+
+
+
+  return `/api/media/${mediaId}/review`
+}
+
+/**
+ * @summary Approve or reject an awaiting-review media asset
+ */
+export const reviewMedia = async (mediaId: string,
+    mediaReviewDecision: MediaReviewDecision, options?: Parameters<typeof customFetch>[1]): Promise<MediaAsset> => {
+
+  return customFetch<MediaAsset>(getReviewMediaUrl(mediaId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(mediaReviewDecision)
+  }
+);}
+
+
+
+
+
+export const getReviewMediaMutationOptions = <TError = ErrorType<void | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewMedia>>, TError,{mediaId: string;data: BodyType<MediaReviewDecision>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reviewMedia>>, TError,{mediaId: string;data: BodyType<MediaReviewDecision>}, TContext> => {
+
+const mutationKey = ['reviewMedia'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reviewMedia>>, {mediaId: string;data: BodyType<MediaReviewDecision>}> = (props) => {
+          const {mediaId,data} = props ?? {};
+
+          return  reviewMedia(mediaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReviewMediaMutationResult = NonNullable<Awaited<ReturnType<typeof reviewMedia>>>
+    export type ReviewMediaMutationBody = BodyType<MediaReviewDecision>
+    export type ReviewMediaMutationError = ErrorType<void | ConflictResponse>
+
+    /**
+ * @summary Approve or reject an awaiting-review media asset
+ */
+export const useReviewMedia = <TError = ErrorType<void | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewMedia>>, TError,{mediaId: string;data: BodyType<MediaReviewDecision>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reviewMedia>>,
+        TError,
+        {mediaId: string;data: BodyType<MediaReviewDecision>},
+        TContext
+      > => {
+      return useMutation(getReviewMediaMutationOptions(options));
+    }
 
 export const getFinalizeMediaUploadUrl = (mediaId: string,) => {
 

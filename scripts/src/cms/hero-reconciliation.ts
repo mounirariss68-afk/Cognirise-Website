@@ -137,9 +137,9 @@ async function reconcileMedia(
       }
       asset = await client.query(
         `INSERT INTO cms_media_assets
-          (storage_key,filename,media_type,byte_size,checksum,alt_text,credit,collection,
+           (storage_key,filename,original_filename,media_type,byte_size,checksum,alt_text,credit,collection,
            motion_metadata,status,uploaded_by_user_id)
-         VALUES ($1,$2,$3,$4,$5,$6,'Cognirise',$7,$8,'active',$9)
+          VALUES ($1,$2,$2,$3,$4,$5,$6,'Cognirise',$7,$8,'active',$9)
          RETURNING id::text,storage_key,filename,media_type,byte_size,checksum,status,
                    collection,motion_metadata`,
         [

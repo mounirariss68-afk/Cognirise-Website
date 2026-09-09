@@ -1,9 +1,11 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response } from "express";
+import { pipeline } from "node:stream/promises";
 import { pool } from "@workspace/db";
 import {
   ListMediaQueryParams,
   RequestMediaUploadBody,
   FinalizeMediaUploadBody,
+  ReviewMediaBody,
   UpdateMediaBody,
 } from "@workspace/api-zod";
 import {
@@ -65,9 +67,10 @@ export function isPreviewableMediaStatus(status: unknown): boolean {
   return isUsableMediaStatus(status) || status === "pending-review";
 }
 
-export function apiMediaStatus(status: unknown): "pending" | "review" | "ready" | "failed" {
+export function apiMediaStatus(status: unknown): "pending" | "review" | "ready" | "rejected" | "failed" {
   if (isUsableMediaStatus(status)) return "ready";
   if (status === "pending-review") return "review";
+  if (status === "rejected") return "rejected";
   if (status === "failed") return "failed";
   return "pending";
 }
@@ -112,11 +115,22 @@ export const selectMedia = `SELECT a.*,v.id version_id,v.width,v.height,v.metada
 
 export const protectedMediaFileSql = `SELECT COALESCE(v.storage_key,a.storage_key) storage_key,
        COALESCE(v.byte_size,a.byte_size) byte_size,
+       a.filename,
        CASE WHEN v.metadata->>'rendition'='webp-1600' THEN 'image/webp' ELSE a.media_type END media_type
      FROM cms_media_assets a
      LEFT JOIN LATERAL (
        SELECT storage_key,byte_size,metadata FROM cms_media_versions
        WHERE asset_id=a.id ORDER BY version_number DESC LIMIT 1
+     ) v ON true
+      WHERE a.id=$1 AND a.status IN ('active','ready','pending-review')`;
+
+export const protectedMediaDownloadSql = `SELECT COALESCE(v.storage_key,a.storage_key) storage_key,
+       COALESCE(v.byte_size,a.byte_size) byte_size,
+       a.original_filename filename,a.media_type
+     FROM cms_media_assets a
+     LEFT JOIN LATERAL (
+       SELECT storage_key,byte_size FROM cms_media_versions
+       WHERE asset_id=a.id ORDER BY version_number ASC LIMIT 1
      ) v ON true
       WHERE a.id=$1 AND a.status IN ('active','ready','pending-review')`;
 
@@ -182,9 +196,9 @@ router.post("/media/upload-requests", requireCsrf, requireEditor, asyncRoute(asy
     const upload = await mediaStorage.createUpload(id, input.mimeType, input.checksum);
     const result = await pool.query(
       `INSERT INTO cms_media_assets(
-         storage_key,filename,media_type,byte_size,checksum,status,uploaded_by_user_id,
+         storage_key,filename,original_filename,media_type,byte_size,checksum,status,uploaded_by_user_id,
          collection,linkedin_asset_kind,campaign_metadata,motion_metadata)
-       VALUES ($1,$2,$3,$4,$5,'pending',$6,$7,$8,$9,$10) RETURNING *`,
+       VALUES ($1,$2,$2,$3,$4,$5,'pending',$6,$7,$8,$9,$10) RETURNING *`,
       [
         upload.objectPath, input.filename, input.mimeType, input.size,
         input.checksum ?? "pending", auth.user.id, input.collection ?? "website",
@@ -200,9 +214,9 @@ router.post("/media/upload-requests", requireCsrf, requireEditor, asyncRoute(asy
   }
 }));
 
-router.get("/media/:mediaId/file", asyncRoute(async (req, res) => {
+async function deliverProtectedMedia(req: Request, res: Response, attachment: boolean) {
   const result = await pool.query(
-    protectedMediaFileSql,
+    attachment ? protectedMediaDownloadSql : protectedMediaFileSql,
     [req.params.mediaId],
   );
   if (!result.rowCount) {
@@ -211,6 +225,14 @@ router.get("/media/:mediaId/file", asyncRoute(async (req, res) => {
   }
   try {
     res.set("Cache-Control", "no-store, private");
+    if (attachment) {
+      const filename = String(result.rows[0].filename ?? "download")
+        .replace(/[\r\n"]/g, "_");
+      res.set(
+        "Content-Disposition",
+        `attachment; filename="${filename.replace(/[^\x20-\x7E]/g, "_")}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      );
+    }
     const size = Number(result.rows[0].byte_size);
     const range = parseByteRange(req.headers.range, size);
     res.set("Accept-Ranges", "bytes");
@@ -221,14 +243,77 @@ router.get("/media/:mediaId/file", asyncRoute(async (req, res) => {
     res.type(result.rows[0].media_type);
     res.set("Content-Length", String(range ? range.end - range.start + 1 : size));
     if (range) res.status(206).set("Content-Range", `bytes ${range.start}-${range.end}/${size}`);
-    protectedMediaDelivery.download(result.rows[0].storage_key, range ?? undefined).then((stream) => stream.pipe(res)).catch(() => {
-      if (!res.headersSent) res.status(404).json({ error: "Media object not found." });
-      else res.destroy();
-    });
+    const stream = await protectedMediaDelivery.download(
+      result.rows[0].storage_key,
+      range ?? undefined,
+    );
+    await pipeline(stream, res);
   } catch {
-    res.status(503).json({ error: "Media storage is temporarily unavailable." });
+    if (!res.headersSent) res.status(404).json({ error: "Media object not found." });
+    else res.destroy();
   }
+}
+
+router.get("/media/:mediaId/file", asyncRoute(async (req, res) => {
+  await deliverProtectedMedia(req, res, false);
 }));
+
+router.get("/media/:mediaId/download", asyncRoute(async (req, res) => {
+  await deliverProtectedMedia(req, res, true);
+}));
+
+router.post(
+  "/media/:mediaId/review",
+  requireCsrf,
+  requirePublisher,
+  asyncRoute(async (req, res) => {
+    const parsed = ReviewMediaBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Choose approve or reject." });
+      return;
+    }
+    const auth = res.locals.auth as AuthContext;
+    const mediaId = String(req.params.mediaId);
+    const nextStatus = parsed.data.decision === "approve" ? "active" : "rejected";
+    const action = `media.${parsed.data.decision === "approve" ? "approved" : "rejected"}`;
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const result = await client.query(
+        `UPDATE cms_media_assets
+            SET status=$2,updated_at=now()
+          WHERE id=$1 AND status='pending-review'
+        RETURNING id`,
+        [mediaId, nextStatus],
+      );
+      if (!result.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "Only an awaiting-review asset can be reviewed." });
+        return;
+      }
+      await client.query(
+        `INSERT INTO cms_audit_events
+          (actor_user_id,actor_label,action,target_type,target_id,metadata)
+         VALUES ($1,$2,$3,'media',$4,$5)`,
+        [
+          auth.user.id,
+          auth.user.email,
+          action,
+          mediaId,
+          { previousStatus: "pending-review", nextStatus },
+        ],
+      );
+      const reviewed = await client.query(`${selectMedia} WHERE a.id=$1`, [mediaId]);
+      await client.query("COMMIT");
+      res.json(media(reviewed.rows[0]));
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }),
+);
 
 router.get(
   "/media/:mediaId",
@@ -408,7 +493,7 @@ router.post("/media/:mediaId/finalize", requireCsrf, requireEditor, asyncRoute(a
        collection=$6,linkedin_asset_kind=$7,
        campaign_metadata=COALESCE($8,campaign_metadata),
         motion_metadata=$9,
-       status='active',updated_at=now() WHERE id=$1 RETURNING *`,
+        status='pending-review',updated_at=now() WHERE id=$1 RETURNING *`,
       [
         req.params.mediaId,
         promoted.storageKey,

@@ -247,6 +247,7 @@ export const cmsMediaAssetsTable = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     storageKey: text("storage_key").notNull(),
     filename: text("filename").notNull(),
+    originalFilename: text("original_filename").notNull(),
     mediaType: text("media_type").notNull(),
     byteSize: integer("byte_size").notNull(),
     checksum: text("checksum").notNull(),

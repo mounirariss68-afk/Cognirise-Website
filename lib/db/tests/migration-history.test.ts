@@ -17,6 +17,7 @@ const expectedMigrations = [
   { idx: 12, when: 1788909800000, tag: "0012_cms_preview_revision" },
   { idx: 13, when: 1788909800001, tag: "0013_cms_motion_media" },
   { idx: 14, when: 1788909800002, tag: "0014_cms_media_metadata_versions" },
+  { idx: 15, when: 1788959300000, tag: "0015_cms_media_original_filename" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {
@@ -25,7 +26,7 @@ test("registers migrations in ordered Drizzle history", async () => {
   };
 
   assert.deepEqual(
-    journal.entries.slice(-7).map(({ idx, when, tag }) => ({ idx, when, tag })),
+    journal.entries.slice(-8).map(({ idx, when, tag }) => ({ idx, when, tag })),
     expectedMigrations,
   );
   assert.equal(new Set(journal.entries.map((entry) => entry.idx)).size, journal.entries.length);

@@ -19,6 +19,10 @@ test("media library separates website, LinkedIn, and video collections in list a
   assert.match(source, /<TabsTrigger value="website"/);
   assert.match(source, /<TabsTrigger value="linkedin"/);
   assert.match(source, /<TabsTrigger value="motion"/);
+  assert.match(source, /grid-cols-1 gap-2 bg-transparent p-0 sm:grid-cols-3/);
+  assert.match(source, /collectionCounts\.website/);
+  assert.match(source, /collectionCounts\.linkedin/);
+  assert.match(source, /collectionCounts\.motion/);
   assert.match(source, /<SelectItem value="motion">Videos &amp; animations<\/SelectItem>/);
   assert.match(source, /<SelectItem value="post">Post image<\/SelectItem>/);
   assert.match(source, /<SelectItem value="header">Profile header<\/SelectItem>/);
@@ -76,7 +80,7 @@ test("LinkedIn-only campaign metadata is captured during finalization and remain
   assert.match(source, /setQueriesData/);
 });
 
-test("grid and list previews render review assets while replacing pending, failed, missing and broken images with explicit states", async () => {
+test("grid, list, and review previews render assets while replacing pending, failed, missing and broken files with explicit states", async () => {
   const source = await readFile(new URL("src/pages/media/MediaLibrary.tsx", adminRoot), "utf8");
 
   assert.match(source, /asset\.status === "pending"/);
@@ -86,7 +90,37 @@ test("grid and list previews render review assets while replacing pending, faile
   assert.match(source, /"Preview unavailable"/);
   assert.match(source, /"File unavailable"/);
   assert.match(source, /onError=\{onError\}/);
-  assert.equal((source.match(/<AssetPreview/g) ?? []).length, 2);
+  assert.equal((source.match(/<AssetPreview/g) ?? []).length, 3);
+});
+
+test("authorized governance owners can inspect, approve, or reject awaiting-review assets", async () => {
+  const source = await readFile(new URL("src/pages/media/MediaLibrary.tsx", adminRoot), "utf8");
+
+  assert.match(source, /useGetSession/);
+  assert.match(source, /session\?\.user\?\.role === "administrator"/);
+  assert.match(source, /session\?\.user\?\.role === "publisher"/);
+  assert.match(source, /useReviewMedia/);
+  assert.match(source, /Review media asset/);
+  assert.match(source, /Inspect the preview and governed metadata/);
+  assert.match(source, /data: \{ decision: reviewDecision \}/);
+  assert.match(source, /Confirm \{reviewDecision === "approve" \? "approval" : "rejection"\}/);
+  assert.match(source, /Awaiting a publisher review/);
+  assert.match(source, /Asset approved/);
+  assert.match(source, /Asset rejected/);
+});
+
+test("grid and list views label protected per-asset downloads and report unavailable files", async () => {
+  const source = await readFile(new URL("src/pages/media/MediaLibrary.tsx", adminRoot), "utf8");
+
+  assert.match(source, /const downloadUrl = `\/api\/media\/\$\{encodeURIComponent\(asset\.id\)\}\/download`/);
+  assert.match(source, /headers: \{ Range: "bytes=0-0" \}/);
+  assert.match(source, /preflight\.body\?\.cancel\(\)/);
+  assert.match(source, /anchor\.download = asset\.filename/);
+  assert.match(source, /Download unavailable/);
+  assert.match(source, /The file may be missing from storage/);
+  assert.match(source, /aria-label=\{`Download \$\{asset\.filename\}`\}/);
+  assert.match(source, /\{assetActions\(asset\)\}/);
+  assert.match(source, /\{assetActions\(asset, true\)\}/);
 });
 
 test("video workspace stages governed Homepage and Industries hero revisions without a publish bypass", async () => {
