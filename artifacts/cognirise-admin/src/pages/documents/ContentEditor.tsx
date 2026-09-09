@@ -171,7 +171,16 @@ export function ContentEditor({ kind, value, onChange, errors }: {
           <Field label="CTA label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan" } : undefined)} />
           <Field label="CTA link" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Learn more", href: next } : undefined)} />
         </div>
-        <MediaField label="Hero image" value={value.heroMedia} onChange={(next) => set("heroMedia", next)} />
+        <MediaField
+          label="Hero image"
+          value={value.heroMedia}
+          legacyMediaId={value.heroMediaId}
+          onChange={(next) => {
+            const updated: Content = { ...value, heroMedia: next };
+            delete updated.heroMediaId;
+            onChange(updated);
+          }}
+        />
         <Area label="Summary" required error={fieldErrors.summary} value={value.summary ?? ""} onChange={(next) => set("summary", next)} />
         <StringList label="Capabilities" value={value.capabilities} onChange={(next) => set("capabilities", next)} />
         <StringList label="Differentiators" value={value.differentiators} onChange={(next) => set("differentiators", next)} />

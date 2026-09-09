@@ -247,7 +247,19 @@ async function deliverProtectedMedia(req: Request, res: Response, attachment: bo
       result.rows[0].storage_key,
       range ?? undefined,
     );
-    await pipeline(stream, res);
+    const originalListeners = new Map(
+      stream.eventNames().map((event) => [event, stream.listeners(event)]),
+    );
+    try {
+      await pipeline(stream, res);
+    } finally {
+      for (const event of stream.eventNames()) {
+        const retained = originalListeners.get(event) ?? [];
+        for (const listener of stream.listeners(event)) {
+          if (!retained.includes(listener)) stream.removeListener(event, listener);
+        }
+      }
+    }
   } catch {
     if (!res.headersSent) res.status(404).json({ error: "Media object not found." });
     else res.destroy();

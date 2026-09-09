@@ -25,9 +25,10 @@ export type MediaSelection = {
   altText?: string;
 };
 
-export function MediaField({ label, value, onChange, accept = "image", required = false, role = "hero" }: {
+export function MediaField({ label, value, legacyMediaId, onChange, accept = "image", required = false, role = "hero" }: {
   label: string;
   value?: MediaSelection;
+  legacyMediaId?: string;
   onChange: (selection: MediaSelection | undefined) => void;
   accept?: "image" | "pdf";
   required?: boolean;
@@ -41,15 +42,16 @@ export function MediaField({ label, value, onChange, accept = "image", required 
   const finalizeUpload = useFinalizeMediaUpload();
   const params = { page: 1, pageSize: 100, search: search || undefined, collection: "website" as const };
   const media = useListMedia(params, { query: { queryKey: getListMediaQueryKey(params), enabled: open || Boolean(value) } });
-  const exact = useGetMedia(value?.mediaId ?? "", {
-    query: { queryKey: getGetMediaQueryKey(value?.mediaId ?? ""), enabled: Boolean(value?.mediaId) },
+  const selectedMediaId = value?.mediaId ?? legacyMediaId ?? "";
+  const exact = useGetMedia(selectedMediaId, {
+    query: { queryKey: getGetMediaQueryKey(selectedMediaId), enabled: Boolean(selectedMediaId) },
   });
   const assets = ((media.data?.items ?? []) as Asset[]).filter((asset) =>
     ["ready", "active"].includes(asset.status)
     && Boolean(asset.versionId)
     && (accept === "pdf" ? asset.mimeType === "application/pdf" : asset.mimeType.startsWith("image/")),
   );
-  const selected = (exact.data as Asset | undefined) ?? assets.find((asset) => asset.id === value?.mediaId);
+  const selected = (exact.data as Asset | undefined) ?? assets.find((asset) => asset.id === selectedMediaId);
   const upload = async (file: File) => {
     if (!file.type.startsWith("image/") && accept !== "pdf") return;
     const requested = await requestUpload.mutateAsync({ data: {
@@ -71,7 +73,10 @@ export function MediaField({ label, value, onChange, accept = "image", required 
           ) : <ImageIcon className="h-8 w-8 text-muted-foreground" />}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{selected.filename}</p>
-            <p className="text-xs text-muted-foreground">{selected.width && selected.height ? `${selected.width} × ${selected.height} · ` : ""}Pinned version {value?.mediaVersionId.slice(0, 8)}</p>
+            <p className="text-xs text-muted-foreground">
+              {selected.width && selected.height ? `${selected.width} × ${selected.height} · ` : ""}
+              {value?.mediaVersionId ? `Pinned version ${value.mediaVersionId.slice(0, 8)}` : "Saved legacy asset"}
+            </p>
           </div>
           <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)} data-testid={`button-replace-${label.toLowerCase().replaceAll(" ", "-")}`}>Replace</Button>
           <Button type="button" size="icon" variant="ghost" onClick={() => onChange(undefined)} aria-label={`Remove ${label}`} data-testid={`button-remove-${label.toLowerCase().replaceAll(" ", "-")}`}><X className="h-4 w-4" /></Button>
@@ -113,7 +118,7 @@ export function MediaField({ label, value, onChange, accept = "image", required 
                 data-testid={`button-select-media-${asset.id}`}
               >
                 <div className="flex h-28 items-center justify-center bg-muted">
-                  {asset.publicUrl && asset.mimeType.startsWith("image/") ? <img src={asset.publicUrl} alt={asset.altText || asset.filename} className="h-full w-full object-cover" /> : <ImageIcon className="h-8 w-8 text-muted-foreground" />}
+                  {asset.publicUrl && asset.mimeType.startsWith("image/") ? <img src={asset.publicUrl} alt={asset.altText || asset.filename} loading="lazy" className="h-full w-full object-cover" /> : <ImageIcon className="h-8 w-8 text-muted-foreground" />}
                 </div>
                 <div className="p-2">
                   <p className="truncate text-sm font-medium">{asset.filename}</p>

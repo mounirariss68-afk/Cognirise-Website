@@ -474,8 +474,7 @@ export default function DocumentDetail() {
       toast({ title: "Preview unavailable", description: "Save a valid edition revision first.", variant: "destructive" });
       return;
     }
-    const prefix = import.meta.env.DEV ? "/cognirise-website" : "";
-    window.open(`${prefix}${result.data.previewUrl}`, "_blank", "noopener,noreferrer");
+    window.open(result.data.previewUrl, "_blank", "noopener,noreferrer");
   };
   
   // Data for comparison

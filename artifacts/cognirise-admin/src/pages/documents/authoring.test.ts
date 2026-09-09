@@ -17,6 +17,8 @@ test("guided editor exposes readiness and exact edition controls", async () => {
   assert.match(detail, /useCreateDocumentEditionOverride/);
   assert.match(detail, /revision\.market === selectedMarket && revision\.locale === selectedLocale/);
   assert.match(detail, /useGetDocument\(id!, documentParams/);
+  assert.match(detail, /window\.open\(result\.data\.previewUrl/);
+  assert.doesNotMatch(detail, /\/cognirise-website/);
   assert.doesNotMatch(detail, /UAE\/English edition/);
 });
 
@@ -25,6 +27,8 @@ test("content editor chooses governed media instead of accepting copied IDs", as
   const mediaField = await readFile(new URL("src/pages/documents/MediaField.tsx", adminRoot), "utf8");
   assert.match(editor, /<MediaField label="Case-study hero image"/);
   assert.doesNotMatch(editor, /label="Hero media ID"/);
+  assert.match(editor, /legacyMediaId=\{value\.heroMediaId\}/);
+  assert.match(mediaField, /value\?\.mediaId \?\? legacyMediaId/);
   assert.match(mediaField, /\["ready", "active"\]\.includes/);
   assert.match(mediaField, /versionId/);
   assert.match(mediaField, /mediaVersionId: asset\.versionId/);
