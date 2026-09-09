@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-08T21:21:51.982Z",
-  "manifestDigest": "885f2e737696c5c0f844d80048af960e92788f86e5fb9d3a7046533d7a2ada5c",
+  "generatedAt": "2026-09-09T10:37:41.771Z",
+  "manifestDigest": "efddfe838b9c8fd636a966f78f0983fb6482a5e1e5523041a0502460efa186d8",
   "dryRun": true,
   "mode": "payload-only",
   "note": "No storage or database call was made. Use --apply-db --target=development to import governed drafts.",
@@ -1123,6 +1123,24 @@
           "thesis": "The model estate—not the chatbot—is where trust is won.",
           "accent": "trust is won.",
           "dek": "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
+          "opportunity": "Turn fragmented controls and exception-heavy operations into faster, traceable decisions that improve customer outcomes without weakening model-risk discipline.",
+          "capabilities": [
+            {
+              "title": "Governed decision agents",
+              "body": "Build bounded agents for onboarding, fraud and operations with approvals, explanations and complete evidence trails."
+            },
+            {
+              "title": "Sovereign intelligence platforms",
+              "body": "Connect models and data inside residency, security and third-party-risk boundaries."
+            },
+            {
+              "title": "AI-native operating redesign",
+              "body": "Rework priority journeys around measurable value, human authority and production controls."
+            }
+          ],
+          "selectedWork": {
+            "description": "Selected work should show the mandate, control boundary and measured operational outcome without exposing client-confidential decisions or data."
+          },
           "image": "/images/cognirise/industries/pulse-industry-financial.jpg",
           "imageAlt": "A cinematic financial landscape crossed by controlled luminous routes.",
           "variant": "ledger",
@@ -1208,8 +1226,8 @@
       "mediaPaths": [
         "/images/cognirise/industries/pulse-industry-financial.jpg"
       ],
-      "idempotencyKey": "cms-inventory-v2:industry:b60f973e571d3059824d",
-      "requestDigest": "73ffba392a19d77c01d3a4ddcc92d2250e412ba894e13300d9b61993d6fa8b54"
+      "idempotencyKey": "cms-industry-contract-v6:industry:b60f973e571d3059824d",
+      "requestDigest": "23ca27593c8546b58c272a350260008f3c12a0596754b83dbe95a249cc2385f2"
     },
     {
       "externalId": "industry:37a17e1c80062ece7c5c",
@@ -1228,6 +1246,24 @@
           "thesis": "Autonomy is earned one closed loop at a time.",
           "accent": "closed loop",
           "dek": "Network intelligence matters when it can observe, decide and act inside a bounded domain—with service impact, energy use and human override visible.",
+          "opportunity": "Convert network and service signals into bounded action, reducing resolution time and energy cost while keeping operating ownership visible.",
+          "capabilities": [
+            {
+              "title": "Agentic network operations",
+              "body": "Build observe-decide-act loops for named incident, assurance and optimisation domains."
+            },
+            {
+              "title": "Service intelligence",
+              "body": "Equip teams with connected customer, network and policy context for higher-quality resolution."
+            },
+            {
+              "title": "Sovereign AI infrastructure",
+              "body": "Design model, data and orchestration layers around residency, resilience and unit economics."
+            }
+          ],
+          "selectedWork": {
+            "description": "Selected work should identify the operating domain, autonomy level, intervention boundary and service or efficiency result."
+          },
           "image": "/images/cognirise/industries/pulse-industry-telecoms.jpg",
           "imageAlt": "A cinematic telecommunications network carrying luminous signals across an operating landscape.",
           "variant": "network",
@@ -1313,8 +1349,8 @@
       "mediaPaths": [
         "/images/cognirise/industries/pulse-industry-telecoms.jpg"
       ],
-      "idempotencyKey": "cms-inventory-v2:industry:37a17e1c80062ece7c5c",
-      "requestDigest": "8669356289eaa75791e8ef5ef6935380bfc0608b0c9e4cf5c1266e6453ac0cbe"
+      "idempotencyKey": "cms-industry-contract-v6:industry:37a17e1c80062ece7c5c",
+      "requestDigest": "4e61a6e16d8be920813b8466387b73cbfea4e799c18721a82c090e6fa813a109"
     },
     {
       "externalId": "industry:eb42d39013fdf2f822eb",
@@ -1333,6 +1369,24 @@
           "thesis": "The real test arrives when the journey breaks.",
           "accent": "journey breaks.",
           "dek": "Personalisation is visible. Recovery is valuable. The decisive capability is coordinated action across inventory, policy, customer context and frontline judgment when plans change.",
+          "opportunity": "Protect revenue and loyalty by coordinating recovery while a traveller is still waiting, not after fragmented hand-offs have compounded the disruption.",
+          "capabilities": [
+            {
+              "title": "Disruption recovery agents",
+              "body": "Build policy-aware agents that assemble viable options across inventory, partners and customer context."
+            },
+            {
+              "title": "Frontline decision support",
+              "body": "Give teams useful context, recommended actions and a clear path to exercise judgment."
+            },
+            {
+              "title": "AI-native journey engineering",
+              "body": "Redesign disrupted journeys end to end and instrument resolution, cost and trust outcomes."
+            }
+          ],
+          "selectedWork": {
+            "description": "Selected work should describe the disrupted journey, systems coordinated, human hand-off and evidenced recovery outcome."
+          },
           "image": "/images/cognirise/industries/pulse-industry-travel.jpg",
           "imageAlt": "Multiple illuminated routes converging through a cinematic travel environment.",
           "variant": "journey",
@@ -1418,8 +1472,8 @@
       "mediaPaths": [
         "/images/cognirise/industries/pulse-industry-travel.jpg"
       ],
-      "idempotencyKey": "cms-inventory-v2:industry:eb42d39013fdf2f822eb",
-      "requestDigest": "52f9fb5789c76932c573b2ee0ff02ef46c46b2b0d5b2af1e81154b009a383f0d"
+      "idempotencyKey": "cms-industry-contract-v6:industry:eb42d39013fdf2f822eb",
+      "requestDigest": "b882ffdb10a782f048d9fa32a5896b0e3fc18a18bef6c41b1dadeec6108bcd4a"
     },
     {
       "externalId": "industry:4382ac13aa186ee8959b",
@@ -1438,6 +1492,24 @@
           "thesis": "In physical operations, confidence needs a field address.",
           "accent": "field address.",
           "dek": "A prediction has no operating value until the right team can connect it to asset history, safety boundaries, work orders and available parts.",
+          "opportunity": "Translate asset intelligence into safer, better-timed field decisions that reduce avoidable downtime and inspection effort.",
+          "capabilities": [
+            {
+              "title": "Industrial knowledge agents",
+              "body": "Connect engineering authority, asset history and field evidence for faster diagnosis and planning."
+            },
+            {
+              "title": "Decision-to-work orchestration",
+              "body": "Link predictions to safe work orders, parts, capacity and production constraints."
+            },
+            {
+              "title": "Responsible industrial AI",
+              "body": "Engineer monitoring, permits, operating envelopes and accountable approval into delivery."
+            }
+          ],
+          "selectedWork": {
+            "description": "Selected work should name the asset scope, safety boundary, workflow integration and verified site-level result."
+          },
           "image": "/images/cognirise/industries/pulse-industry-energy.jpg",
           "imageAlt": "A luminous route moving through a cinematic energy landscape at dusk.",
           "variant": "field",
@@ -1523,8 +1595,8 @@
       "mediaPaths": [
         "/images/cognirise/industries/pulse-industry-energy.jpg"
       ],
-      "idempotencyKey": "cms-inventory-v2:industry:4382ac13aa186ee8959b",
-      "requestDigest": "3305357c8881e7b3d98127f32b4a124a2b8e7a744f47e30c480e6210584b7484"
+      "idempotencyKey": "cms-industry-contract-v6:industry:4382ac13aa186ee8959b",
+      "requestDigest": "5e452394c3650250e88e7213e92c958c6f7fb25bc3559fd3610eac533735636e"
     },
     {
       "externalId": "industry:e201f6f730b8afa45524",
@@ -1543,6 +1615,24 @@
           "thesis": "Public value is earned at the point of service.",
           "accent": "point of service.",
           "dek": "Public institutions create durable value when intelligence makes services clearer, faster and more accountable—without weakening accessibility, privacy, due process or human authority.",
+          "opportunity": "Make high-friction services easier to complete and operate while strengthening sovereignty, accessibility and public accountability.",
+          "capabilities": [
+            {
+              "title": "Sovereign service platforms",
+              "body": "Build bilingual intelligence services within defined identity, residency, access and retention boundaries."
+            },
+            {
+              "title": "Governed casework agents",
+              "body": "Support intake, triage and decisions with explanations, contestability and named human authority."
+            },
+            {
+              "title": "Public-service engineering",
+              "body": "Redesign journeys from policy intent to resolved case and measure outcomes across channels."
+            }
+          ],
+          "selectedWork": {
+            "description": "Selected work should state the public-value objective, affected service, governance controls and accessible outcome evidence."
+          },
           "image": "/images/cognirise/industries/pulse-industry-public-sector.jpg",
           "imageAlt": "Citizens moving through a bright monumental civic space connected by a luminous service route.",
           "variant": "ledger",
@@ -1628,8 +1718,8 @@
       "mediaPaths": [
         "/images/cognirise/industries/pulse-industry-public-sector.jpg"
       ],
-      "idempotencyKey": "cms-inventory-v2:industry:e201f6f730b8afa45524",
-      "requestDigest": "659a216ba6f00200d77cd1a338ad28de7f0ade19d3ac7b4e7625650fdd1e0476"
+      "idempotencyKey": "cms-industry-contract-v6:industry:e201f6f730b8afa45524",
+      "requestDigest": "4d4edb422a3508b008b3e24d05b538790443cfebb24b5419244c6c21690049b6"
     },
     {
       "externalId": "industry:8c90ace640ac504ab64a",
@@ -1648,6 +1738,24 @@
           "thesis": "Learning gains need more than a convincing answer.",
           "accent": "more than a convincing answer.",
           "dek": "Education systems create durable value when AI supports defined learning and teaching work with appropriate evidence, privacy safeguards and educator judgment—not when fluent output is treated as proof of learning.",
+          "opportunity": "Return time to educators and improve targeted learner support while preserving privacy, safeguarding and trustworthy evidence of learning.",
+          "capabilities": [
+            {
+              "title": "Teaching-workflow agents",
+              "body": "Build curriculum-grounded assistance for preparation, feedback and administrative work with educator review."
+            },
+            {
+              "title": "Protected learning platforms",
+              "body": "Design age-appropriate, sovereign data and model services with explicit learner-data controls."
+            },
+            {
+              "title": "Evidence-led AI delivery",
+              "body": "Evaluate tools against learning, teaching and equity outcomes before expanding their authority or reach."
+            }
+          ],
+          "selectedWork": {
+            "description": "Selected work should identify the learning or teaching objective, learner protections, educator authority and evaluation evidence."
+          },
           "image": "/images/cognirise/industries/pulse-industry-education.jpg",
           "imageAlt": "A cinematic learning environment connected by luminous knowledge pathways.",
           "variant": "network",
@@ -1733,8 +1841,130 @@
       "mediaPaths": [
         "/images/cognirise/industries/pulse-industry-education.jpg"
       ],
-      "idempotencyKey": "cms-inventory-v2:industry:8c90ace640ac504ab64a",
-      "requestDigest": "af6a79d34a00324007f60b7f8e915ef73a5c59279bc0918a4e9f7be50844d822"
+      "idempotencyKey": "cms-industry-contract-v6:industry:8c90ace640ac504ab64a",
+      "requestDigest": "9c02f24979d636df4150fb106c93761dc317fe4e0c9e0eb158f5069b3943f237"
+    },
+    {
+      "externalId": "framework:agent-authority-model-v1",
+      "kind": "framework",
+      "slug": "agent-authority-model",
+      "title": "The Agent Authority Model",
+      "payload": {
+        "slug": "agent-authority-model",
+        "title": "The Agent Authority Model",
+        "summary": "A deterministic way to set how much authority each agent handover may exercise on its own.",
+        "content": {
+          "schemaVersion": 1,
+          "template": "agent-authority",
+          "teaser": "A deterministic way to set how much authority each agent handover may exercise on its own.",
+          "handoverExplanation": "Govern the handover, not the agent. Knowledge, Decision and Action describe individual moments when an agent passes something to a person, another agent or a system. One agent can make several handovers, and each can carry a different exposure and authority ceiling.",
+          "methodology": [
+            {
+              "type": "heading",
+              "level": 2,
+              "text": "Exposure sets the ceiling"
+            },
+            {
+              "type": "paragraph",
+              "text": "Classify what is handed over, then score reversibility from R1 to R4 and reach from H1 to H5. The more severe answer determines E1 to E5 and therefore the permitted oversight."
+            },
+            {
+              "type": "list",
+              "style": "bullet",
+              "items": [
+                "E1: out of the loop for internal, reversible handovers.",
+                "E2: on the loop, with a stated intervention window.",
+                "E3: in the loop before the handover acts.",
+                "E4: in the loop with an independent second control.",
+                "E5: in the loop with external safety sign-off."
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "text": "Evidence earns the climb"
+            },
+            {
+              "type": "paragraph",
+              "text": "Name one accountable operating role, the evidence required for promotion and the conditions that automatically demote the handover. Authority requested above the ceiling must sit in an approved artefact such as a template, whitelist, rule set or blocking gate rather than in the model itself."
+            }
+          ],
+          "workedExample": {
+            "sector": "Travel & hospitality",
+            "title": "Airline disruption re-accommodation",
+            "handover": "action",
+            "reversibility": "R3",
+            "reach": "H2",
+            "exposureBand": "E2",
+            "oversight": "On the loop, with a stated intervention window",
+            "detail": "The agent rebooks one passenger and issues a boarding pass. Reversal needs the passenger or receiving carrier, so the intervention window must be shorter than the time the released seat remains available. The accountable role is the Duty Manager, Operations Control Centre.",
+            "requestedAuthority": "on-loop",
+            "interventionWindow": "Before the released-seat inventory expires.",
+            "accountableRole": "Duty Manager, Operations Control Centre",
+            "promotionEvidence": "500 consecutive rebookings with zero disputed reversals and no complaint uplift against the manual control.",
+            "automaticDemotion": "Any involuntary downgrade or caused missed connection."
+          },
+          "sectorExamples": [
+            {
+              "sector": "Telecoms",
+              "title": "Telecom tariff answer",
+              "handover": "knowledge",
+              "reversibility": "R1",
+              "reach": "H1",
+              "exposureBand": "E1",
+              "oversight": "Out of the loop",
+              "detail": "A person receives information; no customer record or system state changes."
+            },
+            {
+              "sector": "Financial services",
+              "title": "Credit decline and adverse-action reason",
+              "handover": "decision",
+              "reversibility": "R4",
+              "reach": "H3",
+              "exposureBand": "E3",
+              "oversight": "In the loop",
+              "detail": "The decision fixes a consequential outcome and creates a regulator-inspectable record."
+            }
+          ],
+          "cta": {
+            "label": "Start a Value Scan",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 0,
+          "sources": [
+            {
+              "label": "Cognirise Agent Authority Model, approved source presentation",
+              "accessedAt": "2026-09-06"
+            },
+            {
+              "label": "EU AI Act, Article 14 — Human oversight",
+              "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+              "accessedAt": "2026-09-06"
+            },
+            {
+              "label": "NIST AI Risk Management Framework",
+              "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "seo": {
+          "noIndex": false
+        },
+        "mediaIds": [],
+        "markets": [
+          "uae"
+        ]
+      },
+      "mediaPaths": [
+        "/images/cognirise/cognirise-pulse-governance.jpg"
+      ],
+      "idempotencyKey": "cms-inventory-v2:framework:agent-authority-model-v1",
+      "requestDigest": "6e3a5a0eff155430af14392d7baa04dce2c0237ea96de80d6b2beae8afd96d72"
     }
   ],
   "availabilityOperations": [
@@ -1969,6 +2199,94 @@
       "requestDigest": "6597e4c062ef3117511cd63dea71c722fc6544ca90c0f090c394715be8433f59"
     },
     {
+      "externalId": "asset:e0f679e84ec041a70072",
+      "idempotencyKey": "cms-media-inventory-v3:asset:e0f679e84ec041a70072",
+      "filename": "blueprint-activate.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-activate.jpg",
+      "publicPath": "/images/cognirise/blueprint-activate.jpg",
+      "checksum": "6aad7d2952da062355fb5cb7985d24d8a03d203e7cb4bff7822680f53620d4fc",
+      "mimeType": "image/jpeg",
+      "byteSize": 238397,
+      "width": 1024,
+      "height": 1024,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "blueprint activate",
+      "credit": "Rights holder pending editorial review",
+      "requestDigest": "6cc90cf60a1bec9507770dcf0843cca9a8c048ba1c75ec0d618e36e3ecd9d217"
+    },
+    {
+      "externalId": "asset:c326eca100d2e1a40b03",
+      "idempotencyKey": "cms-media-inventory-v3:asset:c326eca100d2e1a40b03",
+      "filename": "blueprint-demonstrate.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-demonstrate.jpg",
+      "publicPath": "/images/cognirise/blueprint-demonstrate.jpg",
+      "checksum": "d3adffb9f47209ad444accc42645636c87e6f02ed33532fe801cd6e64f3d9eaa",
+      "mimeType": "image/jpeg",
+      "byteSize": 116731,
+      "width": 1024,
+      "height": 1024,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "blueprint demonstrate",
+      "credit": "Rights holder pending editorial review",
+      "requestDigest": "144fb007a17b2532d414f853377e6b60d31715dd83fec6cd291bdabaa86fe281"
+    },
+    {
+      "externalId": "asset:e4efa6dd910f7f8183a8",
+      "idempotencyKey": "cms-media-inventory-v3:asset:e4efa6dd910f7f8183a8",
+      "filename": "blueprint-innovate.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-innovate.jpg",
+      "publicPath": "/images/cognirise/blueprint-innovate.jpg",
+      "checksum": "75712a6d757cbd3806a1729bdff4c5a8dfe832afa6675ffb3fd61af0169bf82d",
+      "mimeType": "image/jpeg",
+      "byteSize": 99878,
+      "width": 1024,
+      "height": 1024,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "blueprint innovate",
+      "credit": "Rights holder pending editorial review",
+      "requestDigest": "17d9387126479e2a940db945acf5d1dd927eac561f687e3b8501c46fc60496b8"
+    },
+    {
+      "externalId": "asset:1d309dbdc530df4f40bc",
+      "idempotencyKey": "cms-media-inventory-v3:asset:1d309dbdc530df4f40bc",
+      "filename": "blueprint-operate.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-operate.jpg",
+      "publicPath": "/images/cognirise/blueprint-operate.jpg",
+      "checksum": "c1ca56e88503a2891b03a71e75252317b7dc064c2b2ee7f4d113bfa039386706",
+      "mimeType": "image/jpeg",
+      "byteSize": 130308,
+      "width": 1024,
+      "height": 1024,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "blueprint operate",
+      "credit": "Rights holder pending editorial review",
+      "requestDigest": "e51ec73a7802095046c66940902a86067d79a81bee6f461e572e6e2b39b77230"
+    },
+    {
       "externalId": "asset:f6a19919d1de6e4dd655",
       "idempotencyKey": "cms-media-inventory-v3:asset:f6a19919d1de6e4dd655",
       "filename": "cognirise-pulse-governance.jpg",
@@ -1982,6 +2300,7 @@
       "cmsOwnership": "cms-candidate",
       "usages": [
         "artifacts/cognirise-website/src/components/ServiceLineTiles.tsx",
+        "artifacts/cognirise-website/src/pages/AgentAuthorityModel.tsx",
         "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
         "artifacts/cognirise-website/src/pages/EngineeringWithAI.tsx",
         "artifacts/cognirise-website/src/pages/Home.tsx"
@@ -1991,7 +2310,7 @@
       "campaignMetadata": null,
       "altText": "cognirise pulse governance",
       "credit": "Rights holder pending editorial review",
-      "requestDigest": "e04eb4356721ca843961bcd4230edc82d6aecb22baf8e241420c156f6e6191b7"
+      "requestDigest": "f2abf3c5e1c34b55d82ce199ce40866156b2112cb94fcee6dd9b9c8385a0e54b"
     },
     {
       "externalId": "asset:756471849fafbe93e1b9",
@@ -2373,6 +2692,28 @@
       "requestDigest": "ef5cb214a01fa48e0f066b9457e76c42ea5af865faaf431d10b3a8b586ddd39a"
     },
     {
+      "externalId": "asset:f0cfed6f9106f7ba3cfb",
+      "idempotencyKey": "cms-media-inventory-v3:asset:f0cfed6f9106f7ba3cfb",
+      "filename": "industries-hero-flight-poster.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries-hero-flight-poster.jpg",
+      "publicPath": "/images/cognirise/industries-hero-flight-poster.jpg",
+      "checksum": "8dc1a95eee36be6078ed133290b024ce556e34742d1ab08b21a76ceb7aba0f45",
+      "mimeType": "image/jpeg",
+      "byteSize": 121728,
+      "width": 1280,
+      "height": 720,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "industries hero flight poster",
+      "credit": "Rights holder pending editorial review",
+      "requestDigest": "54862006fbbf5a0f05a5f73ffaae2452fa94091d9152b027ad145e476f6f9ec2"
+    },
+    {
       "externalId": "asset:5d8da6b74c77327bf3a1",
       "idempotencyKey": "cms-media-inventory-v3:asset:5d8da6b74c77327bf3a1",
       "filename": "pulse-breakthrough.jpg",
@@ -2386,7 +2727,7 @@
       "cmsOwnership": "cms-candidate",
       "usages": [
         "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
-        "artifacts/cognirise-website/src/pages/Home.tsx",
+        "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
         "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
         "artifacts/cognirise-website/src/pages/WorkProof.tsx"
       ],
@@ -2395,7 +2736,7 @@
       "campaignMetadata": null,
       "altText": "pulse breakthrough",
       "credit": "Rights holder pending editorial review",
-      "requestDigest": "1ec871dddfb294ac9166a7168abee91129b190abd75019dd9cfc92b031ad6777"
+      "requestDigest": "a48fdd302ec13b49991b1999d1868c1415867425f3f53125a62e018c16da6dce"
     },
     {
       "externalId": "asset:1aa85e3f80b4199ec833",
@@ -2421,6 +2762,28 @@
       "requestDigest": "74532cd89eefbe9030ccc34d06fb7e203f2792b3267038e160ed3351895f64a6"
     },
     {
+      "externalId": "asset:3f7475f39be770ae060c",
+      "idempotencyKey": "cms-media-inventory-v3:asset:3f7475f39be770ae060c",
+      "filename": "pulse-hero-film-poster.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/pulse-hero-film-poster.jpg",
+      "publicPath": "/images/cognirise/pulse-hero-film-poster.jpg",
+      "checksum": "683363c9af7db310aff4bc1bf015ffc06cf63b82a7cf22ebee41af786e1e49c8",
+      "mimeType": "image/jpeg",
+      "byteSize": 184124,
+      "width": 1280,
+      "height": 720,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/components/HeroFilm.tsx"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "pulse hero film poster",
+      "credit": "Rights holder pending editorial review",
+      "requestDigest": "62b4479fffc80d53c9340a1a5e284ac49dbd988a9d568bf5926c84a74566146a"
+    },
+    {
       "externalId": "asset:302ea3c4bf1fbfb78fed",
       "idempotencyKey": "cms-media-inventory-v3:asset:302ea3c4bf1fbfb78fed",
       "filename": "pulse-hero.jpg",
@@ -2433,15 +2796,14 @@
       "height": 1024,
       "cmsOwnership": "cms-candidate",
       "usages": [
-        "artifacts/cognirise-website/src/components/layout/Shell.tsx",
-        "artifacts/cognirise-website/src/pages/Home.tsx"
+        "artifacts/cognirise-website/src/components/layout/Shell.tsx"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
       "altText": "pulse hero",
       "credit": "Rights holder pending editorial review",
-      "requestDigest": "41b2ad264547742ed04c7a39696ac4af331b499100ee971af254a062ce967f33"
+      "requestDigest": "a98e6f764d8075ffd1937770ad5d27aff3e393108c2616a5caff277618bb575a"
     },
     {
       "externalId": "asset:963a3139d76ebb1cbd21",
@@ -2481,15 +2843,13 @@
       "width": 1024,
       "height": 1024,
       "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx"
-      ],
+      "usages": [],
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
       "altText": "site financial",
       "credit": "Rights holder pending editorial review",
-      "requestDigest": "c4711c2777b4d5ec401149b7dd6f3a83d858937f51bd16e677c616f19a1c70be"
+      "requestDigest": "a27b44e8f8ae972852a5334f5c4efe5ad6e94fa8bcee8c01cec3a627de5fdf24"
     },
     {
       "externalId": "asset:24cc90e2f42d888d21c8",
@@ -2527,7 +2887,6 @@
       "cmsOwnership": "cms-candidate",
       "usages": [
         "artifacts/cognirise-website/src/components/ServiceLineTiles.tsx",
-        "artifacts/cognirise-website/src/pages/IndustriesOverview.tsx",
         "artifacts/cognirise-website/src/pages/InsightArticle.tsx",
         "artifacts/cognirise-website/src/pages/InsightsEditorial.tsx"
       ],
@@ -2536,7 +2895,7 @@
       "campaignMetadata": null,
       "altText": "site infrastructure",
       "credit": "Rights holder pending editorial review",
-      "requestDigest": "b70a96f41e2e1b609bdb9f3b2fa4678f64f7a64c8d3e321f1e5c1ca51002f697"
+      "requestDigest": "f3863782ead065ad611dd234bd8641b9262a36c7738662ad5a43f07ec103739e"
     },
     {
       "externalId": "asset:166331f8bc21e20ab360",

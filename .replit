@@ -27,3 +27,23 @@ packages = ["libreoffice", "blender", "xorg.xorgserver", "mesa"]
 
 [userenv.development]
 VITE_CMS_CUTOVER_INDUSTRIES = "true"
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
+localPort = 8081
+externalPort = 8081
+
+[[ports]]
+localPort = 18741
+externalPort = 80
+
+[[ports]]
+localPort = 22090
+externalPort = 3001
+
+[[ports]]
+localPort = 26081
+externalPort = 3000

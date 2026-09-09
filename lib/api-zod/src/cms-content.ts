@@ -177,6 +177,14 @@ export const industryContentSchema = z.object({
   thesis: z.string().trim().min(1).max(240),
   accent: z.string().trim().min(1).max(120),
   dek: z.string().trim().min(1).max(2_000),
+  opportunity: z.string().trim().min(1).max(1_000),
+  capabilities: z.array(z.object({
+    title: z.string().trim().min(1).max(160),
+    body: z.string().trim().min(1).max(1_000),
+  }).strict()).min(2).max(8),
+  selectedWork: z.object({
+    description: z.string().trim().min(1).max(1_000),
+  }).strict(),
   image: safeAssetPath,
   imageAlt: z.string().trim().min(1).max(300),
   variant: z.enum(["ledger", "network", "journey", "field", "factory"]),
@@ -295,6 +303,7 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   if (kind === "industry") {
     const industry = value as IndustryContent;
     if (industry.pressures.length < 3) errors.push("At least three operating pressures are required.");
+    if (industry.capabilities.length < 2) errors.push("At least two build capabilities are required.");
     if (!industry.imageAlt) errors.push("Industry hero imagery requires alternative text.");
   }
   if (kind === "framework") {

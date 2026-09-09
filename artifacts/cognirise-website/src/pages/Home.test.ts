@@ -16,9 +16,8 @@ test("does not retain the legacy edge-striped homepage CTA", () => {
   assert.doesNotMatch(source, /bg-gradient-to-b/);
 });
 
-test("keeps expanded industry copy legible without redundant explore or close labels", () => {
-  assert.doesNotMatch(source, /home-industry-affordance/);
-  assert.doesNotMatch(source, /\{isActive \? "Close" : "Explore"\}/);
-  assert.match(source, /\.home-industry-item\.active \.home-industry-visual:after\{background:linear-gradient\(90deg,rgba\(253,252,251,\.96\)[\s\S]*transparent 62%\)/);
-  assert.match(source, /\.home-industry-item\.active \.home-industry-orientation,.home-industry-item\.active \.home-industry-detail\{max-width:34ch;color:rgba\(16,41,87,\.96\)/);
+test("uses the shared CMS-backed industry picker", () => {
+  assert.match(source, /import \{ IndustryPicker \} from "@\/components\/IndustryPicker"/);
+  assert.match(source, /<IndustryPicker id="home-industries" \/>/);
+  assert.doesNotMatch(source, /useCmsCollection\("industry"/);
 });

@@ -9,6 +9,9 @@ export type IndustryContent = {
   thesis: string;
   accent: string;
   dek: string;
+  opportunity: string;
+  capabilities: { title: string; body: string }[];
+  selectedWork: { description: string };
   image: string;
   imageAlt: string;
   variant: "ledger" | "network" | "journey" | "field" | "factory";
@@ -31,6 +34,13 @@ export const INDUSTRIES: IndustryContent[] = [
     schemaVersion: 1, slug: "financial-services", legacyPath: "/industries/banking", name: "Financial Services", shortName: "Finance",
     thesis: "The model estate—not the chatbot—is where trust is won.",
     accent: "trust is won.", dek: "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
+    opportunity: "Turn fragmented controls and exception-heavy operations into faster, traceable decisions that improve customer outcomes without weakening model-risk discipline.",
+    capabilities: [
+      { title: "Governed decision agents", body: "Build bounded agents for onboarding, fraud and operations with approvals, explanations and complete evidence trails." },
+      { title: "Sovereign intelligence platforms", body: "Connect models and data inside residency, security and third-party-risk boundaries." },
+      { title: "AI-native operating redesign", body: "Rework priority journeys around measurable value, human authority and production controls." },
+    ],
+    selectedWork: { description: "Selected work should show the mandate, control boundary and measured operational outcome without exposing client-confidential decisions or data." },
     image: "/images/cognirise/industries/pulse-industry-financial.jpg", imageAlt: "A cinematic financial landscape crossed by controlled luminous routes.", variant: "ledger",
     pressures: [
       { title: "Validation before velocity", body: "Non-deterministic systems still have to meet established model-risk expectations: clear purpose, testing, monitoring and accountable challenge." },
@@ -56,6 +66,13 @@ export const INDUSTRIES: IndustryContent[] = [
   {
     schemaVersion: 1, slug: "telecoms", legacyPath: "/industries/telecoms", name: "Telecoms", shortName: "Telecoms",
     thesis: "Autonomy is earned one closed loop at a time.", accent: "closed loop", dek: "Network intelligence matters when it can observe, decide and act inside a bounded domain—with service impact, energy use and human override visible.",
+    opportunity: "Convert network and service signals into bounded action, reducing resolution time and energy cost while keeping operating ownership visible.",
+    capabilities: [
+      { title: "Agentic network operations", body: "Build observe-decide-act loops for named incident, assurance and optimisation domains." },
+      { title: "Service intelligence", body: "Equip teams with connected customer, network and policy context for higher-quality resolution." },
+      { title: "Sovereign AI infrastructure", body: "Design model, data and orchestration layers around residency, resilience and unit economics." },
+    ],
+    selectedWork: { description: "Selected work should identify the operating domain, autonomy level, intervention boundary and service or efficiency result." },
     image: "/images/cognirise/industries/pulse-industry-telecoms.jpg", imageAlt: "A cinematic telecommunications network carrying luminous signals across an operating landscape.", variant: "network",
     pressures: [
       { title: "Fragmented operating context", body: "Alarms, customer state and commercial systems rarely present one reliable version of an incident." },
@@ -81,6 +98,13 @@ export const INDUSTRIES: IndustryContent[] = [
   {
     schemaVersion: 1, slug: "travel-hospitality", legacyPath: "/industries/travel", name: "Travel & Hospitality", shortName: "Travel",
     thesis: "The real test arrives when the journey breaks.", accent: "journey breaks.", dek: "Personalisation is visible. Recovery is valuable. The decisive capability is coordinated action across inventory, policy, customer context and frontline judgment when plans change.",
+    opportunity: "Protect revenue and loyalty by coordinating recovery while a traveller is still waiting, not after fragmented hand-offs have compounded the disruption.",
+    capabilities: [
+      { title: "Disruption recovery agents", body: "Build policy-aware agents that assemble viable options across inventory, partners and customer context." },
+      { title: "Frontline decision support", body: "Give teams useful context, recommended actions and a clear path to exercise judgment." },
+      { title: "AI-native journey engineering", body: "Redesign disrupted journeys end to end and instrument resolution, cost and trust outcomes." },
+    ],
+    selectedWork: { description: "Selected work should describe the disrupted journey, systems coordinated, human hand-off and evidenced recovery outcome." },
     image: "/images/cognirise/industries/pulse-industry-travel.jpg", imageAlt: "Multiple illuminated routes converging through a cinematic travel environment.", variant: "journey",
     pressures: [
       { title: "Disruption compresses time", body: "A useful system must assemble options and constraints while a traveller is still waiting—not in a report after the event." },
@@ -106,6 +130,13 @@ export const INDUSTRIES: IndustryContent[] = [
   {
     schemaVersion: 1, slug: "energy-resources", legacyPath: "/industries/energy", name: "Energy & Resources", shortName: "Energy",
     thesis: "In physical operations, confidence needs a field address.", accent: "field address.", dek: "A prediction has no operating value until the right team can connect it to asset history, safety boundaries, work orders and available parts.",
+    opportunity: "Translate asset intelligence into safer, better-timed field decisions that reduce avoidable downtime and inspection effort.",
+    capabilities: [
+      { title: "Industrial knowledge agents", body: "Connect engineering authority, asset history and field evidence for faster diagnosis and planning." },
+      { title: "Decision-to-work orchestration", body: "Link predictions to safe work orders, parts, capacity and production constraints." },
+      { title: "Responsible industrial AI", body: "Engineer monitoring, permits, operating envelopes and accountable approval into delivery." },
+    ],
+    selectedWork: { description: "Selected work should name the asset scope, safety boundary, workflow integration and verified site-level result." },
     image: "/images/cognirise/industries/pulse-industry-energy.jpg", imageAlt: "A luminous route moving through a cinematic energy landscape at dusk.", variant: "field",
     pressures: [
       { title: "Context is physically distributed", body: "Engineering records, telemetry, inspection evidence and field knowledge live at different speeds and in different systems." },
@@ -131,6 +162,13 @@ export const INDUSTRIES: IndustryContent[] = [
   {
     schemaVersion: 1, slug: "public-sector", legacyPath: "/industries/manufacturing", name: "Public Sector", shortName: "Public Sector",
     thesis: "Public value is earned at the point of service.", accent: "point of service.", dek: "Public institutions create durable value when intelligence makes services clearer, faster and more accountable—without weakening accessibility, privacy, due process or human authority.",
+    opportunity: "Make high-friction services easier to complete and operate while strengthening sovereignty, accessibility and public accountability.",
+    capabilities: [
+      { title: "Sovereign service platforms", body: "Build bilingual intelligence services within defined identity, residency, access and retention boundaries." },
+      { title: "Governed casework agents", body: "Support intake, triage and decisions with explanations, contestability and named human authority." },
+      { title: "Public-service engineering", body: "Redesign journeys from policy intent to resolved case and measure outcomes across channels." },
+    ],
+    selectedWork: { description: "Selected work should state the public-value objective, affected service, governance controls and accessible outcome evidence." },
     image: "/images/cognirise/industries/pulse-industry-public-sector.jpg", imageAlt: "Citizens moving through a bright monumental civic space connected by a luminous service route.", variant: "ledger",
     pressures: [
       { title: "Legitimacy before velocity", body: "Decisions that affect people need named authority, traceable evidence, clear explanations and a practical route to human review." },
@@ -156,6 +194,13 @@ export const INDUSTRIES: IndustryContent[] = [
   {
     schemaVersion: 1, slug: "education", legacyPath: "/industries/education", name: "Education", shortName: "Education",
     thesis: "Learning gains need more than a convincing answer.", accent: "more than a convincing answer.", dek: "Education systems create durable value when AI supports defined learning and teaching work with appropriate evidence, privacy safeguards and educator judgment—not when fluent output is treated as proof of learning.",
+    opportunity: "Return time to educators and improve targeted learner support while preserving privacy, safeguarding and trustworthy evidence of learning.",
+    capabilities: [
+      { title: "Teaching-workflow agents", body: "Build curriculum-grounded assistance for preparation, feedback and administrative work with educator review." },
+      { title: "Protected learning platforms", body: "Design age-appropriate, sovereign data and model services with explicit learner-data controls." },
+      { title: "Evidence-led AI delivery", body: "Evaluate tools against learning, teaching and equity outcomes before expanding their authority or reach." },
+    ],
+    selectedWork: { description: "Selected work should identify the learning or teaching objective, learner protections, educator authority and evaluation evidence." },
     image: "/images/cognirise/industries/pulse-industry-education.jpg", imageAlt: "A cinematic learning environment connected by luminous knowledge pathways.", variant: "network",
     pressures: [
       { title: "Learning evidence remains the test", body: "Useful tools need evaluation against learning, teaching and equity outcomes in their actual context—not engagement or output quality alone." },

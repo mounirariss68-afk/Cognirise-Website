@@ -1,0 +1,26 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { readFileSync } from "node:fs";
+
+const source = readFileSync(new URL("./IndustryPicker.tsx", import.meta.url), "utf8");
+
+test("is CMS-backed and provides explicit delivery states", () => {
+  assert.match(source, /useCmsCollection\("industry", INDUSTRIES/);
+  assert.match(source, /role="status"/);
+  assert.match(source, /role="alert"/);
+  assert.match(source, /No industry points of view are currently published/);
+});
+
+test("previews disclosures without making their triggers navigation links", () => {
+  assert.match(source, /mode="editorial"[\s\S]*previewOverridesSelection[\s\S]*previewExpands/);
+  assert.match(source, /<SpatialDisclosureTrigger/);
+  assert.doesNotMatch(source, /<SpatialDisclosureTrigger[^>]*asChild/);
+  assert.match(source, /<Link href=\{industry\.href\} className="home-industry-link"/);
+});
+
+test("preserves responsive visuals and reduced-motion behavior", () => {
+  assert.match(source, /@media\(max-width:767px\)/);
+  assert.match(source, /@media\(prefers-reduced-motion:reduce\)/);
+  assert.match(source, /\.home-industry-item\.active \.home-industry-visual:after/);
+  assert.match(source, /\.home-industry-item\.active \.home-industry-orientation,.home-industry-item\.active \.home-industry-detail/);
+});

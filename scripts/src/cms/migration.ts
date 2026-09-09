@@ -57,8 +57,87 @@ export interface PersonGovernanceOperation {
   requestDigest: string;
 }
 
+export function industryBaselineAction(
+  revisions: ReadonlyArray<{
+    id: string;
+    revisionNumber: number;
+    reason: string | null;
+    workflowState: string;
+    hasOpportunity: boolean;
+    provenanceValid: boolean;
+    payloadFamilyDigest: string;
+    matchesContractPayload: boolean;
+    hasValidMediaPin: boolean;
+    hasKnownV3UnpinnedRef: boolean;
+    priorHasValidMediaPin: boolean;
+  }>,
+  publishedRevisionId: string | null | undefined,
+  publicationState: string | null | undefined,
+): "append-and-publish" | "repair-v3-media" | "reuse-complete" | "preserve-editorial" {
+  if (!revisions.length || publicationState !== "published") return "preserve-editorial";
+  const ordered = [...revisions].sort((left, right) => left.revisionNumber - right.revisionNumber);
+  const latest = ordered.at(-1)!;
+  if (
+    publishedRevisionId !== latest.id
+    || latest.workflowState !== "approved"
+    || ordered.some((revision, index) =>
+      revision.revisionNumber !== index + 1 || !revision.provenanceValid
+    )
+  ) return "preserve-editorial";
+
+  const inventoryReason = "Inventory migration; pending editorial review.";
+  const imageCutoverReason = "Approved Cognirise Pulse industry-image cutover; previous revisions and media preserved.";
+  const v3Reason = "Approved broadened industry content contract baseline v3; prior revisions preserved.";
+  const legacy = ordered.filter((revision) => !revision.hasOpportunity);
+  const governedLegacy = legacy.length > 0 && legacy.every((revision, index) => {
+    if (index === 0) {
+      return revision.reason === inventoryReason
+        && (revision.workflowState === "draft" || revision.workflowState === "approved");
+    }
+    return revision.reason === imageCutoverReason
+      && revision.workflowState === "approved"
+      && revision.payloadFamilyDigest === legacy[0].payloadFamilyDigest;
+  });
+  if (!governedLegacy) return "preserve-editorial";
+  if (!latest.hasOpportunity) {
+    return ordered.length === legacy.length && latest.hasValidMediaPin
+      ? "append-and-publish"
+      : "preserve-editorial";
+  }
+  const exactV3 = ordered.length === legacy.length + 1
+    && latest.reason === v3Reason
+    && latest.matchesContractPayload;
+  if (!exactV3) return "preserve-editorial";
+  if (latest.hasValidMediaPin) return "reuse-complete";
+  return latest.hasKnownV3UnpinnedRef && latest.priorHasValidMediaPin
+    ? "repair-v3-media"
+    : "preserve-editorial";
+}
+
 const digest = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
+
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, item]) => [key, canonicalize(item)]),
+    );
+  }
+  return value;
+}
+
+export const canonicalResultDigest = (value: unknown) => digest(canonicalize(value));
+
+export function matchesGovernedCutoverSource(
+  priorRevisionId: string,
+  recordedSourceRevisionId: unknown,
+) {
+  return typeof recordedSourceRevisionId === "undefined"
+    || recordedSourceRevisionId === priorRevisionId;
+}
 
 function slugify(value: string) {
   const slug = value
@@ -93,7 +172,11 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
   return {
     ...request,
     mediaPaths,
-    idempotencyKey: `cms-inventory-v2:${record.externalId}`,
+    // Industry contract expansions use a versioned receipt so corrected
+    // reconciliation can preserve every earlier immutable baseline and receipt.
+    idempotencyKey: record.type === "industry"
+      ? `cms-industry-contract-v6:${record.externalId}`
+      : `cms-inventory-v2:${record.externalId}`,
     requestDigest: digest(request),
   };
 }

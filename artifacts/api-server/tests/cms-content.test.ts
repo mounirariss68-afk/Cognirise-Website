@@ -128,6 +128,50 @@ test("market availability accepts only the governed three-state decision", () =>
   );
 });
 
+test("industry publication requires the broadened value and delivery contract", () => {
+  const industry = {
+    ...governance,
+    legacyPath: "/industries/example",
+    name: "Example industry",
+    shortName: "Example",
+    thesis: "A governed thesis.",
+    accent: "governed thesis.",
+    dek: "A concise editorial summary.",
+    opportunity: "Create measurable value from a priority operating constraint.",
+    capabilities: [
+      { title: "Agentic platform", body: "Build bounded agents connected to production workflows." },
+      { title: "Responsible delivery", body: "Embed evidence, oversight and controls in delivery." },
+    ],
+    selectedWork: {
+      description: "Show the mandate, boundary and evidenced outcome.",
+    },
+    image: "/images/example.png",
+    imageAlt: "A descriptive industry scene.",
+    variant: "ledger",
+    pressures: [
+      { title: "One", body: "First pressure." },
+      { title: "Two", body: "Second pressure." },
+      { title: "Three", body: "Third pressure." },
+    ],
+    reversal: { title: "A reversal", body: "A documented consequence." },
+    myth: { claim: "A claim", verdict: "A governed verdict." },
+    gcc: "A specific regional context.",
+    service: { label: "AI Platforms", href: "/what-we-do", firstMove: "Map one decision." },
+    uses: [{ use: "Priority workflow", evidence: "Measured evidence", boundary: "Human approval" }],
+    sources: [{
+      label: "Official guidance",
+      publisher: "Public authority",
+      kind: "Official source",
+      url: "https://example.com/guidance",
+    }],
+  };
+  assert.equal(validateCmsContent("industry", industry, "publish").success, true);
+  const { opportunity: _opportunity, ...withoutOpportunity } = industry;
+  assert.equal(validateCmsContent("industry", withoutOpportunity, "publish").success, false);
+  assert.equal(validateCmsContent("industry", { ...industry, capabilities: [industry.capabilities[0]] }, "publish").success, false);
+  assert.equal(validateCmsContent("industry", { ...industry, selectedWork: {} }, "publish").success, false);
+});
+
 test("agent authority is a governed framework with a canonical methodology route", () => {
   const heroMediaId = "00000000-0000-4000-8000-000000000002";
   const framework = {

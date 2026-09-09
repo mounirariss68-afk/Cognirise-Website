@@ -1,8 +1,15 @@
 import type { CmsDocumentKind } from "@workspace/api-zod";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  addIndustryCapability,
+  changeIndustryCapability,
+  industryCapabilities,
+  removeIndustryCapability,
+} from "./capability-fields";
 
 type Content = Record<string, any>;
 
@@ -110,6 +117,7 @@ export function ContentEditor({ kind, value, onChange, errors }: {
   errors: string[];
 }) {
   const set = (key: string, next: unknown) => onChange({ ...value, schemaVersion: 1, [key]: next });
+  const capabilities = industryCapabilities(value.capabilities);
   const common = (
     <section className="space-y-4 border-t pt-6">
       <h3 className="font-semibold">Governance and ordering</h3>
@@ -216,6 +224,68 @@ export function ContentEditor({ kind, value, onChange, errors }: {
         </div>
         <Area label="Opening thesis" value={value.thesis ?? ""} onChange={(next) => set("thesis", next)} />
         <Area label="Editorial summary" value={value.dek ?? ""} onChange={(next) => set("dek", next)} />
+        <Area label="Value-led opportunity" value={value.opportunity ?? ""} onChange={(next) => set("opportunity", next)} placeholder="The client opportunity and value at stake" />
+        <section className="space-y-3" aria-labelledby="industry-capabilities-heading">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 id="industry-capabilities-heading" className="font-semibold">What Cognirise can build</h3>
+              <p className="text-sm text-muted-foreground">Add 2–8 capabilities, each with a title and concise description.</p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => set("capabilities", addIndustryCapability(value.capabilities))}
+              disabled={capabilities.length >= 8}
+              data-testid="button-add-industry-capability"
+            >
+              Add capability
+            </Button>
+          </div>
+          <div className="space-y-4">
+            {capabilities.map((capability, index) => {
+              const titleId = `industry-capability-${index}-title`;
+              const bodyId = `industry-capability-${index}-body`;
+              return (
+                <fieldset key={index} className="space-y-4 rounded-md border p-4" data-testid={`group-industry-capability-${index}`}>
+                  <legend className="px-1 text-sm font-medium">Capability {index + 1}</legend>
+                  <div className="space-y-2">
+                    <Label htmlFor={titleId}>Title</Label>
+                    <Input
+                      id={titleId}
+                      value={capability.title}
+                      onChange={(event) => set("capabilities", changeIndustryCapability(value.capabilities, index, "title", event.target.value))}
+                      placeholder="Capability title"
+                      data-testid={`input-industry-capability-title-${index}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={bodyId}>Description</Label>
+                    <Textarea
+                      id={bodyId}
+                      rows={4}
+                      value={capability.body}
+                      onChange={(event) => set("capabilities", changeIndustryCapability(value.capabilities, index, "body", event.target.value))}
+                      placeholder="Concise capability description"
+                      data-testid={`textarea-industry-capability-body-${index}`}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => set("capabilities", removeIndustryCapability(value.capabilities, index))}
+                    aria-label={`Remove capability ${index + 1}`}
+                    data-testid={`button-remove-industry-capability-${index}`}
+                  >
+                    Remove capability
+                  </Button>
+                </fieldset>
+              );
+            })}
+          </div>
+        </section>
+        <Area label="Selected work section description" value={value.selectedWork?.description ?? ""} onChange={(next) => set("selectedWork", { description: next })} placeholder="What evidence and disclosure this section should contain" />
         <Area label="Operating pressures" value={pairLines(value.pressures, "title", "body")} onChange={(next) => set("pressures", parsePairs(next, "title", "body"))} placeholder="Pressure title | Explanation (3–5 required)" rows={6} />
         <Area label="Documented reversal" value={value.reversal ? `${value.reversal.title} | ${value.reversal.body}` : ""} onChange={(next) => { const [title, ...body] = next.split("|"); set("reversal", { title: title.trim(), body: body.join("|").trim() }); }} placeholder="Title | Explanation" />
         <Area label="Myth and verdict" value={value.myth ? `${value.myth.claim} | ${value.myth.verdict}` : ""} onChange={(next) => { const [claim, ...verdict] = next.split("|"); set("myth", { claim: claim.trim(), verdict: verdict.join("|").trim() }); }} placeholder="Myth | Verdict" />

@@ -189,7 +189,11 @@ async function main() {
     expected.set(operation.idempotencyKey, {
       requestDigest: operation.requestDigest,
       subjectType: "document",
-      tolerateDigestDrift: governedLegacyExternalIds.has(operation.externalId),
+      // Versioned industry baselines receive a new receipt. If an earlier
+      // edition has subsequent revisions, import records a preservation
+      // receipt rather than replacing that editorial history.
+      tolerateDigestDrift: governedLegacyExternalIds.has(operation.externalId)
+        || operation.idempotencyKey.startsWith("cms-industry-contract-v6:"),
     });
   }
   for (const operation of mediaMigrationOperations(inventory.records)

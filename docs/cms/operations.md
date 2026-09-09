@@ -6,7 +6,7 @@ Daily: review failed publishes, overdue evidence/review dates, media upload fail
 
 ## Media catalog reconciliation
 
-The approved catalog is 32 CMS-managed website raster images plus exactly nine
+The approved catalog is 38 CMS-managed website raster images plus exactly nine
 LinkedIn PNGs: six `post` images and three `header` images in the `linkedin`
 collection. SVG/ZIP masters, logos, and code-owned UI imagery are intentionally
 excluded. Each operation carries collection, LinkedIn kind where applicable,
@@ -48,6 +48,34 @@ The cutover creates a new approved revision for each of the six existing
 industries, pins the exact immutable media version, and preserves every previous
 revision, media asset, and media version. Do not run it before the complete
 family receives explicit visual approval.
+
+Before enabling the industry switch, verify that all six published revisions
+also satisfy the current required industry content contract: a value-led
+`opportunity`, at least two titled `capabilities`, and
+`selectedWork.description`. The `cms-industry-contract-v6:` inventory baseline
+is idempotent. It appends at `max(revision_number) + 1` only when the edition is
+published, points to its latest revision, and its complete history consists
+solely of the receipt/audit-backed inventory migration and approved Pulse
+image cutovers with the expected stored-result, stored content-digest, revision
+order, and payload-copy relationship. Canonical key ordering prevents JSONB
+object ordering from appearing as content drift. Legacy cutover audits without
+`sourceRevisionId` require their exact receipt and payload chain; a present
+source ID must match.
+Revision 1 is checked against its own immutable migration result, and each Pulse
+revision must copy its predecessor except for hero/media IDs; historical
+`content.image` is not compared with today’s fallback path. The current
+hero must be active/ready and referenced through its approved immutable media
+version; v4 copies both IDs and never creates an unpinned reference. The complete
+snapshot is publish-validated before the pointer moves. An exact valid v3
+broadened publication is reused without another revision. The known v3 defect
+is repairable only when that exact provenance-backed snapshot matches today’s
+contract after media normalization, has one matching
+unpinned reference and immediately follows the governed Pulse revision with its
+active/ready immutable pin. V6 then appends the v3 content with only hero/media
+IDs replaced by the prior Pulse pin and records explicit repair audit metadata.
+Any other missing pin, provenance gap, payload change, reason/state/sequence
+difference, or pointer mismatch records a preservation receipt without
+publishing or overwriting.
 
 Once the transaction verifies successfully, enable the existing
 `VITE_CMS_CUTOVER_INDUSTRIES=true` environment gate for the target environment

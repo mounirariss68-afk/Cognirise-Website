@@ -13,7 +13,13 @@ test("publishes exactly six complete, distinct industry records", () => {
   assert.equal(INDUSTRIES.length, 6);
   assert.equal(new Set(INDUSTRIES.map((item) => item.slug)).size, 6);
   assert.equal(new Set(INDUSTRIES.map((item) => item.thesis)).size, 6);
+  assert.equal(new Set(INDUSTRIES.map((item) => item.opportunity)).size, 6);
+  assert.equal(new Set(INDUSTRIES.map((item) => item.selectedWork.description)).size, 6);
   for (const item of INDUSTRIES) {
+    assert.ok(item.opportunity);
+    assert.ok(item.capabilities.length >= 2);
+    assert.ok(item.capabilities.every((capability) => capability.title && capability.body));
+    assert.ok(item.selectedWork.description);
     assert.equal(item.pressures.length, 3);
     assert.ok(item.reversal.body);
     assert.ok(item.myth.verdict);
@@ -54,6 +60,10 @@ test("renders all six migrated CMS industry payloads without compiled fallback",
   assert.equal(operations.length, 6);
 
   for (const operation of operations) {
+    const compiled = INDUSTRIES.find((industry) => industry.slug === operation.slug);
+    assert.ok(compiled);
+    const { slug: _slug, ...compiledContent } = compiled;
+    assert.deepEqual(operation.payload.content, compiledContent);
     const validation = validateCmsContent("industry", operation.payload.content, "publish");
     assert.equal(validation.success, true, validation.success ? undefined : validation.errors.join("; "));
     const html = renderToStaticMarkup(createElement(
@@ -64,7 +74,7 @@ test("renders all six migrated CMS industry payloads without compiled fallback",
       }),
     ));
     assert.ok(html.includes(operation.payload.content.name.replaceAll("&", "&amp;")));
-    assert.match(html, /Visible source trail/);
+    assert.match(html, /source trail/i);
     assert.doesNotMatch(html, /under review/i);
   }
 });

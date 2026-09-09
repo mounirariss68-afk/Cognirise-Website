@@ -12,6 +12,9 @@ import {
 import {
   mediaMigrationOperations,
   migrationOperations,
+  canonicalResultDigest,
+  matchesGovernedCutoverSource,
+  industryBaselineAction,
   personAvailabilityOperations,
   personGovernanceOperations,
   resolveMigrationMedia,
@@ -325,9 +328,400 @@ async function applyDatabase(
         }
         const [conflict] = await tx.select({ id: cmsDocumentsTable.id }).from(cmsDocumentsTable)
           .where(eq(cmsDocumentsTable.canonicalSlug, operation.slug));
-        if (conflict) throw new Error(`Slug ${operation.slug} is already owned by a non-migration document.`);
-
         const resolvedPayload = resolveMigrationMedia(operation, mediaByPath);
+        if (conflict) {
+          if (operation.kind !== "industry" || !operation.idempotencyKey.startsWith("cms-industry-contract-v6:")) {
+            throw new Error(`Slug ${operation.slug} is already owned by a non-migration document.`);
+          }
+          const [edition] = await tx.select({
+            id: cmsMarketEditionsTable.id,
+            publishedRevisionId: cmsMarketEditionsTable.publishedRevisionId,
+            publicationState: cmsMarketEditionsTable.publicationState,
+          })
+            .from(cmsMarketEditionsTable)
+            .where(and(
+              eq(cmsMarketEditionsTable.documentId, conflict.id),
+              eq(cmsMarketEditionsTable.market, "uae"),
+            ));
+          if (!edition) throw new Error(`The existing ${operation.slug} industry has no UAE edition.`);
+          const revisions = await tx.select({
+            id: cmsRevisionsTable.id,
+            revisionNumber: cmsRevisionsTable.revisionNumber,
+            reason: cmsRevisionsTable.reason,
+            workflowState: cmsRevisionsTable.workflowState,
+            payload: cmsRevisionsTable.payload,
+            contentDigest: cmsRevisionsTable.contentDigest,
+          }).from(cmsRevisionsTable)
+            .where(eq(cmsRevisionsTable.editionId, edition.id))
+            .orderBy(desc(cmsRevisionsTable.revisionNumber));
+          const publishedRevision = revisions.find((revision) =>
+            String(revision.id) === String(edition.publishedRevisionId)
+          );
+          const publishedPayload = publishedRevision?.payload as {
+            content?: Record<string, unknown>;
+            mediaIds?: unknown[];
+          } | undefined;
+          const publishedMediaIds = Array.isArray(publishedPayload?.mediaIds)
+            ? publishedPayload.mediaIds.filter((id): id is string => typeof id === "string")
+            : [];
+          const publishedHeroId = typeof publishedPayload?.content?.heroMediaId === "string"
+            ? publishedPayload.content.heroMediaId
+            : null;
+          const publishedReferences = publishedRevision
+            ? await tx.select({
+                assetId: cmsMediaReferencesTable.assetId,
+                mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
+                status: cmsMediaAssetsTable.status,
+              }).from(cmsMediaReferencesTable)
+                .innerJoin(cmsMediaAssetsTable, eq(cmsMediaAssetsTable.id, cmsMediaReferencesTable.assetId))
+                .where(and(
+                  eq(cmsMediaReferencesTable.documentId, conflict.id),
+                  eq(cmsMediaReferencesTable.fieldPath, `revision:${publishedRevision.id}`),
+                ))
+            : [];
+          const pinnedMedia = publishedRevision && publishedMediaIds.length === 1
+            ? await tx.select({
+                assetId: cmsMediaReferencesTable.assetId,
+                mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
+                status: cmsMediaAssetsTable.status,
+                versionId: cmsMediaVersionsTable.id,
+              }).from(cmsMediaReferencesTable)
+                .innerJoin(cmsMediaAssetsTable, eq(cmsMediaAssetsTable.id, cmsMediaReferencesTable.assetId))
+                .innerJoin(cmsMediaVersionsTable, and(
+                  eq(cmsMediaVersionsTable.id, cmsMediaReferencesTable.mediaVersionId),
+                  eq(cmsMediaVersionsTable.assetId, cmsMediaReferencesTable.assetId),
+                ))
+                .where(and(
+                  eq(cmsMediaReferencesTable.documentId, conflict.id),
+                  eq(cmsMediaReferencesTable.fieldPath, `revision:${publishedRevision.id}`),
+                  eq(cmsMediaReferencesTable.assetId, publishedMediaIds[0]),
+                ))
+            : [];
+          const approvedPin = pinnedMedia.length === 1
+            && publishedHeroId === publishedMediaIds[0]
+            && (pinnedMedia[0].status === "active" || pinnedMedia[0].status === "ready")
+            && Boolean(pinnedMedia[0].mediaVersionId)
+            && pinnedMedia[0].mediaVersionId === pinnedMedia[0].versionId
+            ? pinnedMedia[0]
+            : null;
+          const immediatelyPriorRevision = publishedRevision
+            ? revisions.find((revision) =>
+                revision.revisionNumber === publishedRevision.revisionNumber - 1
+              )
+            : undefined;
+          const priorPayload = immediatelyPriorRevision?.payload as {
+            content?: Record<string, unknown>;
+            mediaIds?: unknown[];
+          } | undefined;
+          const priorMediaIds = Array.isArray(priorPayload?.mediaIds)
+            ? priorPayload.mediaIds.filter((id): id is string => typeof id === "string")
+            : [];
+          const priorHeroId = typeof priorPayload?.content?.heroMediaId === "string"
+            ? priorPayload.content.heroMediaId
+            : null;
+          const priorPinnedMedia = immediatelyPriorRevision && priorMediaIds.length === 1
+            ? await tx.select({
+                assetId: cmsMediaReferencesTable.assetId,
+                mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
+                status: cmsMediaAssetsTable.status,
+                versionId: cmsMediaVersionsTable.id,
+              }).from(cmsMediaReferencesTable)
+                .innerJoin(cmsMediaAssetsTable, eq(cmsMediaAssetsTable.id, cmsMediaReferencesTable.assetId))
+                .innerJoin(cmsMediaVersionsTable, and(
+                  eq(cmsMediaVersionsTable.id, cmsMediaReferencesTable.mediaVersionId),
+                  eq(cmsMediaVersionsTable.assetId, cmsMediaReferencesTable.assetId),
+                ))
+                .where(and(
+                  eq(cmsMediaReferencesTable.documentId, conflict.id),
+                  eq(cmsMediaReferencesTable.fieldPath, `revision:${immediatelyPriorRevision.id}`),
+                  eq(cmsMediaReferencesTable.assetId, priorMediaIds[0]),
+                ))
+            : [];
+          const priorApprovedPin = priorPinnedMedia.length === 1
+            && priorHeroId === priorMediaIds[0]
+            && (priorPinnedMedia[0].status === "active" || priorPinnedMedia[0].status === "ready")
+            && Boolean(priorPinnedMedia[0].mediaVersionId)
+            && priorPinnedMedia[0].mediaVersionId === priorPinnedMedia[0].versionId
+            ? priorPinnedMedia[0]
+            : null;
+          const allReceipts = await tx.select().from(cmsOperationReceiptsTable);
+          const allAudits = await tx.select().from(cmsAuditEventsTable);
+          const receiptByKey = new Map(allReceipts.map((item) => [item.idempotencyKey, item]));
+          const auditByRequest = new Map(allAudits.flatMap((item) =>
+            item.requestId ? [[item.requestId, item] as const] : []
+          ));
+          const normalizedPayloadDigest = (
+            payload: unknown,
+            removeContract: boolean,
+          ) => {
+            const normalized = structuredClone(payload) as {
+              content?: Record<string, unknown>;
+              mediaIds?: unknown[];
+            };
+            normalized.mediaIds = [];
+            if (normalized.content) {
+              delete normalized.content.heroMediaId;
+              if (removeContract) {
+                delete normalized.content.opportunity;
+                delete normalized.content.capabilities;
+                delete normalized.content.selectedWork;
+              }
+            }
+            return canonicalResultDigest(normalized);
+          };
+          const expectedContractDigest = normalizedPayloadDigest(resolvedPayload, false);
+          const classifiedRevisions = revisions.map((revision) => {
+            const revisionId = String(revision.id);
+            const revisionPayload = revision.payload as { content?: Record<string, unknown> };
+            const hasOpportunity = typeof revisionPayload?.content?.opportunity !== "undefined";
+            let provenanceValid = false;
+            if (revision.revisionNumber === 1) {
+              const key = `cms-inventory-v2:${operation.externalId}`;
+              const receipt = receiptByKey.get(key);
+              const audit = auditByRequest.get(key);
+              provenanceValid = receipt?.operation === "cms.inventory.import"
+                && receipt.subjectId === String(conflict.id)
+                && receipt.resultDigest === resultDigest({
+                  documentId: conflict.id,
+                  editionId: edition.id,
+                  revisionId: revision.id,
+                })
+                && audit?.action === "cms.inventory.imported"
+                && audit.targetType === "industry"
+                && audit.targetId === String(conflict.id)
+                && (audit.metadata as Record<string, unknown> | null)?.revisionId === revisionId
+                && typeof revision.contentDigest === "string";
+            } else if (!hasOpportunity) {
+              const receipt = allReceipts.find((item) =>
+                item.operation === "cms.industry.pulse-media-cutover"
+                && item.subjectId === revisionId
+                && (
+                  item.idempotencyKey === `cms-industry-pulse-cutover-v1:${operation.slug}`
+                  || item.idempotencyKey === `cms-industry-pulse-cutover-v2:${operation.slug}`
+                )
+              );
+              const audit = receipt ? auditByRequest.get(receipt.idempotencyKey) : undefined;
+              const metadata = audit?.metadata as Record<string, unknown> | null;
+              provenanceValid = Boolean(receipt)
+                && audit?.action === "document.published"
+                && audit.targetType === "document"
+                && audit.targetId === String(conflict.id)
+                && metadata?.revisionId === revisionId
+                && matchesGovernedCutoverSource(
+                  String(
+                    revisions.find((candidate) =>
+                      candidate.revisionNumber === revision.revisionNumber - 1
+                    )?.id ?? "",
+                  ),
+                  metadata?.sourceRevisionId,
+                )
+                && receipt?.resultDigest === resultDigest({
+                  documentId: conflict.id,
+                  editionId: edition.id,
+                  revisionId,
+                  mediaId: metadata?.mediaId,
+                  mediaVersionId: metadata?.mediaVersionId,
+                })
+                && typeof revision.contentDigest === "string";
+            } else {
+              const key = `cms-industry-contract-v3:${operation.externalId}`;
+              const receipt = receiptByKey.get(key);
+              const audit = auditByRequest.get(key);
+              const metadata = audit?.metadata as Record<string, unknown> | null;
+              provenanceValid = receipt?.operation === "cms.inventory.industry-contract-baseline-published"
+                && receipt.subjectId === String(conflict.id)
+                && receipt.resultDigest === resultDigest({
+                  documentId: conflict.id,
+                  editionId: edition.id,
+                  revisionId,
+                })
+                && audit?.action === "cms.inventory.industry-contract-baseline-published"
+                && audit.targetType === "industry"
+                && audit.targetId === String(conflict.id)
+                && metadata?.revisionId === revisionId
+                && typeof revision.contentDigest === "string";
+            }
+            return {
+              id: String(revision.id),
+              revisionNumber: revision.revisionNumber,
+              reason: revision.reason,
+              workflowState: revision.workflowState,
+              hasOpportunity,
+              provenanceValid,
+              payloadFamilyDigest: normalizedPayloadDigest(revision.payload, true),
+              matchesContractPayload: normalizedPayloadDigest(revision.payload, false) === expectedContractDigest,
+              hasValidMediaPin: revisionId === String(edition.publishedRevisionId) && Boolean(approvedPin),
+              hasKnownV3UnpinnedRef: revisionId === String(edition.publishedRevisionId)
+                && publishedReferences.length === 1
+                && publishedReferences[0].mediaVersionId === null
+                && publishedMediaIds.length === 1
+                && String(publishedReferences[0].assetId) === publishedMediaIds[0]
+                && publishedHeroId === publishedMediaIds[0],
+              priorHasValidMediaPin: revisionId === String(edition.publishedRevisionId)
+                && Boolean(priorApprovedPin),
+            };
+          });
+          const baselineAction = industryBaselineAction(
+            classifiedRevisions,
+            edition.publishedRevisionId ? String(edition.publishedRevisionId) : null,
+            edition.publicationState,
+          );
+          if (baselineAction === "append-and-publish" || baselineAction === "repair-v3-media") {
+            const publicationPin = baselineAction === "repair-v3-media"
+              ? priorApprovedPin
+              : approvedPin;
+            if (!publicationPin) {
+              throw new Error(`${operation.slug} has no approved immutable hero-media pin; preserving publication.`);
+            }
+            const nextRevisionNumber = Math.max(...revisions.map((revision) => revision.revisionNumber)) + 1;
+            const publicationPayload = structuredClone(
+              baselineAction === "repair-v3-media" ? publishedPayload : resolvedPayload,
+            ) as {
+              content: Record<string, unknown>;
+              mediaIds: string[];
+            };
+            publicationPayload.mediaIds = [String(publicationPin.assetId)];
+            publicationPayload.content.heroMediaId = String(publicationPin.assetId);
+            const readiness = validateCmsSnapshot("industry", publicationPayload, "publish");
+            if (!readiness.success) {
+              throw new Error(`${operation.slug} is not publication-ready: ${readiness.errors.join("; ")}`);
+            }
+            const [revision] = await tx.insert(cmsRevisionsTable).values({
+              editionId: edition.id,
+              revisionNumber: nextRevisionNumber,
+              payloadVersion: 1,
+              payload: readiness.data,
+              contentDigest: resultDigest(readiness.data),
+              workflowState: "draft",
+              createdByUserId: serviceAccount.id,
+              reason: baselineAction === "repair-v3-media"
+                ? "Approved v4 repair of the known v3 industry hero-media pin defect; prior revisions preserved."
+                : "Approved broadened industry content contract baseline v4; prior revisions and hero-media pin preserved.",
+            }).returning({ id: cmsRevisionsTable.id });
+            if (!revision) throw new Error(`Could not append the ${operation.slug} contract baseline.`);
+            await tx.insert(cmsMediaReferencesTable).values({
+              assetId: publicationPin.assetId,
+              mediaVersionId: publicationPin.mediaVersionId,
+              documentId: conflict.id,
+              fieldPath: `revision:${revision.id}`,
+            });
+            await tx.update(cmsRevisionsTable).set({
+              workflowState: "approved",
+              approvedByUserId: serviceAccount.id,
+              approvedAt: new Date(),
+            }).where(eq(cmsRevisionsTable.id, revision.id));
+            await tx.update(cmsMarketEditionsTable).set({
+              publicationState: "published",
+              parityComplete: true,
+              publishedRevisionId: revision.id,
+              publishedAt: new Date(),
+              updatedAt: new Date(),
+            }).where(eq(cmsMarketEditionsTable.id, edition.id));
+            await tx.insert(cmsOperationReceiptsTable).values({
+              idempotencyKey: operation.idempotencyKey,
+              operation: baselineAction === "repair-v3-media"
+                ? "cms.inventory.industry-contract-v3-media-repaired"
+                : "cms.inventory.industry-contract-baseline-published",
+              subjectId: String(conflict.id),
+              requestDigest: operation.requestDigest,
+              resultDigest: resultDigest({
+                documentId: conflict.id,
+                editionId: edition.id,
+                revisionId: revision.id,
+                mediaId: publicationPin.assetId,
+                mediaVersionId: publicationPin.mediaVersionId,
+              }),
+            });
+            await tx.insert(cmsAuditEventsTable).values({
+              actorUserId: serviceAccount.id,
+              actorLabel: "cms-inventory-migration",
+              action: baselineAction === "repair-v3-media"
+                ? "cms.inventory.industry-contract-v3-media-repaired"
+                : "cms.inventory.industry-contract-baseline-published",
+              targetType: "industry",
+              targetId: String(conflict.id),
+              requestId: operation.idempotencyKey,
+              metadata: {
+                market: "uae",
+                locale: "en",
+                revisionId: String(revision.id),
+                previousRevisionId: String(revisions[0].id),
+                workflowState: "approved",
+                publicationState: "published",
+                reason: baselineAction === "repair-v3-media"
+                  ? "Known v3 unpinned square-JPG reference replaced in a new immutable revision using the prior approved Pulse pin"
+                  : "Approved broadened industry content contract baseline v4 with immutable hero-media pin",
+                repairedRevisionId: baselineAction === "repair-v3-media"
+                  ? String(publishedRevision!.id)
+                  : undefined,
+                pinSourceRevisionId: baselineAction === "repair-v3-media"
+                  ? String(immediatelyPriorRevision!.id)
+                  : String(publishedRevision!.id),
+                mediaId: String(publicationPin.assetId),
+                mediaVersionId: String(publicationPin.mediaVersionId),
+              },
+            });
+          } else if (baselineAction === "reuse-complete") {
+            await tx.insert(cmsOperationReceiptsTable).values({
+              idempotencyKey: operation.idempotencyKey,
+              operation: "cms.inventory.industry-contract-baseline-reused",
+              subjectId: String(conflict.id),
+              requestDigest: operation.requestDigest,
+              resultDigest: resultDigest({
+                documentId: conflict.id,
+                editionId: edition.id,
+                revisionId: String(publishedRevision!.id),
+                mediaVersionId: String(approvedPin!.mediaVersionId),
+              }),
+            });
+            await tx.insert(cmsAuditEventsTable).values({
+              actorUserId: serviceAccount.id,
+              actorLabel: "cms-inventory-migration",
+              action: "cms.inventory.industry-contract-baseline-reused",
+              targetType: "industry",
+              targetId: String(conflict.id),
+              requestId: operation.idempotencyKey,
+              metadata: {
+                market: "uae",
+                locale: "en",
+                revisionId: String(publishedRevision!.id),
+                mediaId: String(approvedPin!.assetId),
+                mediaVersionId: String(approvedPin!.mediaVersionId),
+              },
+            });
+          } else {
+            // A later revision is editorial authority. Record the versioned
+            // baseline as intentionally preserved; never replace or publish it.
+            await tx.insert(cmsOperationReceiptsTable).values({
+              idempotencyKey: operation.idempotencyKey,
+              operation: "cms.inventory.industry-contract-editorial-preserved",
+              subjectId: String(conflict.id),
+              requestDigest: operation.requestDigest,
+              resultDigest: resultDigest({
+                documentId: conflict.id,
+                preservedRevisionId: String(revisions[0]?.id ?? ""),
+                preservedRevisionNumber: revisions[0]?.revisionNumber ?? 0,
+              }),
+            });
+            await tx.insert(cmsAuditEventsTable).values({
+              actorUserId: serviceAccount.id,
+              actorLabel: "cms-inventory-migration",
+              action: "cms.inventory.industry-contract-editorial-preserved",
+              targetType: "industry",
+              targetId: String(conflict.id),
+              requestId: operation.idempotencyKey,
+              metadata: {
+                market: "uae",
+                locale: "en",
+                preservedRevisionId: String(revisions[0]?.id ?? ""),
+                preservedRevisionNumber: revisions[0]?.revisionNumber ?? 0,
+              },
+            });
+          }
+          created++;
+          continue;
+        }
+
         const [document] = await tx.insert(cmsDocumentsTable).values({
           kind: operation.kind,
           canonicalSlug: operation.slug,
