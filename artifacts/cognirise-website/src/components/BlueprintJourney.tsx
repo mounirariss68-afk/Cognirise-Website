@@ -16,7 +16,9 @@ const stages = [
     time: "1 day",
     tagline: "Don’t boil the ocean.",
     description:
-      "Frame the highest-value opportunity and the decision it needs to unlock. We keep discovery deliberately narrow so effort moves toward proof, not an expanding scope.",
+      "We frame the highest-value opportunity, the people it serves and the decision the work must unlock. Controlled inputs and a deliberately narrow scope move effort toward proof, not an expanding brief.",
+    clientRole:
+      "Bring the priority, operating context and the people accountable for the decision.",
     outcome: "A prioritised opportunity and a clear decision boundary.",
     accent: "#7659df",
     image: "/images/cognirise/blueprint-innovate.jpg",
@@ -32,7 +34,9 @@ const stages = [
     time: "48 hours",
     tagline: "See it before you buy it.",
     description:
-      "In 48 hours, stakeholders get a tangible, decision-ready prototype they can see and test—enough to validate value and direction before committing to a larger build.",
+      "Within 48 hours, we turn the agreed decision boundary into a tangible prototype. Stakeholders test the important journey and evaluate value, usability and direction before committing to a larger build.",
+    clientRole:
+      "Test the critical journey, challenge assumptions and make the proceed, reshape or stop decision.",
     outcome: "A working proof stakeholders can test, challenge and decide on.",
     accent: "#db509e",
     highlight: true,
@@ -49,7 +53,9 @@ const stages = [
     time: "2–4 weeks (MVP)",
     tagline: "Human judgement. Agent scale.",
     description:
-      "Forward-deployed engineers turn the validated direction into a governed MVP, combining accountable human judgement with the speed and scale of agents.",
+      "In 2–4 weeks, forward-deployed engineers turn the validated direction into a governed MVP. Requirements stay traceable as the team builds, evaluates and secures the capability for real use.",
+    clientRole:
+      "Provide timely product decisions, access to subject experts and approval at agreed stage gates.",
     outcome: "A usable MVP with the engineering and controls needed to operate.",
     accent: "#e74f91",
     image: "/images/cognirise/blueprint-activate.jpg",
@@ -65,13 +71,53 @@ const stages = [
     time: "4–12 weeks",
     tagline: "No lock-in. Full ownership.",
     description:
-      "We harden the capability, transfer the operating knowledge and leave it in your environment. Your team owns the system and the path to scale it.",
+      "We harden the capability, establish observability and data governance, and transfer the operating knowledge. Security, accessibility and handover discipline prepare your team to own and scale it.",
+    clientRole:
+      "Nominate operational owners, rehearse support and governance, and accept the capability against agreed evidence.",
     outcome: "A client-owned capability, operating model and scale plan.",
     accent: "#ff775d",
     image: "/images/cognirise/blueprint-operate.jpg",
     imageAlt:
       "Client leaders transferring ownership as connected teams work across a multi-level operations hub.",
     imagePosition: "50% 48%",
+  },
+];
+
+const canonLayers = [
+  {
+    num: "01",
+    title: "Governed lifecycle",
+    summary: "The pace comes from knowing what must be true at every stage.",
+    detail:
+      "Each engagement moves through controlled inputs and outputs, standard structures and templates, and explicit stage gates. That shared route reduces reinvention while keeping scope and decisions visible.",
+  },
+  {
+    num: "02",
+    title: "Reusable intelligence",
+    summary: "Proprietary prompt libraries, models, skills and accelerators create a repeatable starting point.",
+    detail:
+      "Teams begin with governed, reusable intelligence rather than a blank page. It speeds analysis and production without replacing the judgement needed to fit the work to the client’s context.",
+  },
+  {
+    num: "03",
+    title: "Traceable execution",
+    summary: "The brief, journeys, requirements and evaluation evidence stay connected.",
+    detail:
+      "Requirement traceability links what is built to the need it serves. Controlled outputs and recorded decisions make progress easier to review, challenge and change without losing the thread.",
+  },
+  {
+    num: "04",
+    title: "Human decision gates",
+    summary: "People remain accountable for direction, risk and release.",
+    detail:
+      "Named decision-makers approve the moments that matter. The system accelerates the work between gates; it does not make consequential client decisions or silently widen its own authority.",
+  },
+  {
+    num: "05",
+    title: "Assurance by design",
+    summary: "Evaluation and operational readiness are built into delivery, not added at the end.",
+    detail:
+      "Security, accessibility, data governance and observability are considered from the first proof. Evidence, known limitations and handover discipline travel with the capability as it moves toward operation.",
   },
 ];
 
@@ -191,6 +237,9 @@ export function BlueprintJourney() {
           .blueprint-outcome-box { margin-top: 4px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.15); }
           .blueprint-outcome-label { display: block; font: 700 9px/1 Inter, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bp-accent, #7659df); margin-bottom: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
           .blueprint-outcome { font-size: 12.5px; font-weight: 600; line-height: 1.4; color: white; margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+           .blueprint-client { padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15); }
+           .blueprint-client-label { display: block; font: 700 9px/1 Inter, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-bottom: 6px; }
+           .blueprint-client-copy { font-size: 12.5px; line-height: 1.45; color: rgba(255,255,255,0.9); margin: 0; }
 
           @media (min-width: 1024px) {
             .blueprint-disclosure { --blueprint-active-width: calc((90.4vw - 3px) * 0.4615); }
@@ -272,6 +321,12 @@ export function BlueprintJourney() {
                       <div className="blueprint-panel-content">
                         <h4 className="blueprint-tagline">{stage.tagline}</h4>
                         <p className="blueprint-description">{stage.description}</p>
+                         <div className="blueprint-client">
+                           <span className="blueprint-client-label">
+                             Your role
+                           </span>
+                           <p className="blueprint-client-copy">{stage.clientRole}</p>
+                         </div>
                         <div className="blueprint-outcome-box">
                           <span className="blueprint-outcome-label">
                             What you have in hand
@@ -287,6 +342,72 @@ export function BlueprintJourney() {
           ))}
         </SpatialDisclosure>
       </div>
+
+       <div
+         className="mt-16 border-t border-[#102957] pt-7 lg:mt-24"
+         aria-labelledby="delivery-canon-heading"
+       >
+         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-[7vw]">
+           <div>
+             <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#102957]">
+               <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
+               The delivery canon
+             </div>
+             <h3
+               id="delivery-canon-heading"
+               className="mt-5 max-w-[590px] font-display text-[clamp(34px,4vw,58px)] font-semibold leading-[0.98] tracking-[-0.075em]"
+             >
+               Speed without{" "}
+               <em className="not-italic text-[hsl(var(--brand-violet))]">
+                 shortcuts.
+               </em>
+             </h3>
+           </div>
+           <div className="self-end border-t border-[#cbd3e1] pt-6">
+             <p className="m-0 max-w-[620px] text-[16px] leading-[1.65] text-[#405777]">
+               A decision-ready prototype within 48 hours and an MVP within
+               2–4 weeks are possible because the route is repeatable. Our
+               proprietary canon governs how work is framed, produced,
+               reviewed and handed over—so acceleration does not come at the
+               expense of control.
+             </p>
+           </div>
+         </div>
+
+         <div className="mt-10 grid grid-cols-1 border-t border-[#cbd3e1] lg:mt-14 lg:grid-cols-5">
+           {canonLayers.map((layer, index) => (
+             <details
+               key={layer.num}
+               className="group border-b border-[#cbd3e1] lg:border-r lg:last:border-r-0"
+               data-testid={`delivery-canon-layer-${layer.num}`}
+             >
+               <summary
+                 className="min-h-[210px] cursor-pointer list-none px-5 py-6 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[hsl(var(--brand-coral))] [&::-webkit-details-marker]:hidden"
+                 data-testid={`button-delivery-canon-${layer.num}`}
+               >
+                 <span className="flex items-center justify-between">
+                   <span className="text-[10px] font-bold tracking-[0.12em] text-[hsl(var(--brand-pink))]">
+                     {layer.num}
+                   </span>
+                   <span aria-hidden="true" className="text-xl font-light text-[#536887]">
+                     +
+                   </span>
+                 </span>
+                 <h4 className="mt-8 font-display text-[22px] font-semibold leading-[1.05] tracking-[-0.05em] text-[#102957]">
+                   {layer.title}
+                 </h4>
+                 <p className="mt-4 text-[13px] leading-[1.55] text-[#536887]">
+                   {layer.summary}
+                 </p>
+               </summary>
+               <div className="px-5 pb-7 text-[13px] leading-[1.6] text-[#405777]">
+                 <span className="sr-only">{`${index + 1} of ${canonLayers.length}. `}</span>
+                 {layer.detail}
+               </div>
+             </details>
+           ))}
+         </div>
+       </div>
     </section>
   );
 }

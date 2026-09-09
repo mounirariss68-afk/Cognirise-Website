@@ -42,3 +42,66 @@ test("BlueprintJourney keeps image crop and text measure stable while cards expa
   assert.match(source, /\.blueprint-trigger > \* \{ width: calc\(var\(--blueprint-active-width\) - 56px\); \}/);
   assert.match(source, /\.blueprint-panel-content \{ width: calc\(var\(--blueprint-active-width\) - 56px\);/);
 });
+
+test("BlueprintJourney preserves the IDAO stage order and timing commitments", () => {
+  const innovate = source.indexOf('title: "Innovate"');
+  const demonstrate = source.indexOf('title: "Demonstrate"');
+  const activate = source.indexOf('title: "Activate"');
+  const operate = source.indexOf('title: "Operate"');
+
+  assert.ok(innovate < demonstrate);
+  assert.ok(demonstrate < activate);
+  assert.ok(activate < operate);
+  assert.match(source, /time: "48 hours"/);
+  assert.match(source, /time: "2–4 weeks \(MVP\)"/);
+  assert.match(source, /prototype within 48 hours/);
+  assert.match(source, /MVP within\s+2–4 weeks/);
+});
+
+test("each IDAO stage explains the client role and tangible outcome", () => {
+  assert.equal((source.match(/clientRole:/g) ?? []).length, 4);
+  assert.equal((source.match(/outcome:/g) ?? []).length, 4);
+  assert.match(source, />\s*Your role\s*</);
+  assert.match(source, />\s*What you have in hand\s*</);
+});
+
+test("the public delivery canon includes the required credibility layers", () => {
+  for (const concept of [
+    "Governed lifecycle",
+    "Reusable intelligence",
+    "Traceable execution",
+    "Human decision gates",
+    "Assurance by design",
+    "prompt libraries",
+    "models, skills and accelerators",
+    "standard structures and templates",
+    "Requirement traceability",
+    "Security, accessibility, data governance and observability",
+    "handover discipline",
+  ]) {
+    assert.match(source, new RegExp(concept, "i"));
+  }
+});
+
+test("the delivery canon uses accessible native disclosures", () => {
+  assert.match(source, /aria-labelledby="delivery-canon-heading"/);
+  assert.match(source, /<details/);
+  assert.match(source, /<summary/);
+  assert.match(source, /focus-visible:outline/);
+});
+
+test("the public IDAO section does not expose named delivery vendors", () => {
+  const forbiddenVendors = [
+    "Anthropic",
+    "Claude",
+    "OpenAI",
+    "Perplexity",
+    "Langfuse",
+    "LangSmith",
+    "Replit",
+  ];
+
+  for (const vendor of forbiddenVendors) {
+    assert.doesNotMatch(source, new RegExp(`\\b${vendor}\\b`, "i"));
+  }
+});
