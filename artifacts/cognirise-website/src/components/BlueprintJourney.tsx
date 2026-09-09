@@ -1,125 +1,12 @@
 import type { CSSProperties } from "react";
 import { assetUrl } from "@/lib/assets";
+import { IDAO_CANON_LAYERS, IDAO_STAGES } from "@/content/idao";
 import {
   SpatialDisclosure,
   SpatialDisclosureItem,
   SpatialDisclosurePanel,
   SpatialDisclosureTrigger,
 } from "@/components/ui/spatial-disclosure";
-
-const stages = [
-  {
-    id: 1,
-    num: "01",
-    title: "Innovate",
-    subtitle: "Spot the value",
-    time: "1 day",
-    tagline: "Don’t boil the ocean.",
-    description:
-      "We frame the highest-value opportunity, the people it serves and the decision the work must unlock. Controlled inputs and a deliberately narrow scope move effort toward proof, not an expanding brief.",
-    clientRole:
-      "Bring the priority, operating context and the people accountable for the decision.",
-    outcome: "A prioritised opportunity and a clear decision boundary.",
-    accent: "#7659df",
-    image: "/images/cognirise/blueprint-innovate.jpg",
-    imageAlt:
-      "A mixed client and Cognirise team prioritising opportunities together around a workshop table.",
-    imagePosition: "50% 48%",
-  },
-  {
-    id: 2,
-    num: "02",
-    title: "Demonstrate",
-    subtitle: "Prototype",
-    time: "48 hours",
-    tagline: "See it before you buy it.",
-    description:
-      "Within 48 hours, we turn the agreed decision boundary into a tangible prototype. Stakeholders test the important journey and evaluate value, usability and direction before committing to a larger build.",
-    clientRole:
-      "Test the critical journey, challenge assumptions and make the proceed, reshape or stop decision.",
-    outcome: "A working proof stakeholders can test, challenge and decide on.",
-    accent: "#db509e",
-    highlight: true,
-    image: "/images/cognirise/blueprint-demonstrate.jpg",
-    imageAlt:
-      "A client team testing a working prototype on a large tablet in a bright studio.",
-    imagePosition: "50% 45%",
-  },
-  {
-    id: 3,
-    num: "03",
-    title: "Activate",
-    subtitle: "Build the solution",
-    time: "2–4 weeks (MVP)",
-    tagline: "Human judgement. Agent scale.",
-    description:
-      "In 2–4 weeks, forward-deployed engineers turn the validated direction into a governed MVP. Requirements stay traceable as the team builds, evaluates and secures the capability for real use.",
-    clientRole:
-      "Provide timely product decisions, access to subject experts and approval at agreed stage gates.",
-    outcome: "A usable MVP with the engineering and controls needed to operate.",
-    accent: "#e74f91",
-    image: "/images/cognirise/blueprint-activate.jpg",
-    imageAlt:
-      "A forward-deployed engineer and client product owner reviewing orchestrated agent workflows and human approval gates for a live MVP.",
-    imagePosition: "50% 52%",
-  },
-  {
-    id: 4,
-    num: "04",
-    title: "Operate",
-    subtitle: "Scale & operationalize",
-    time: "4–12 weeks",
-    tagline: "No lock-in. Full ownership.",
-    description:
-      "We harden the capability, establish observability and data governance, and transfer the operating knowledge. Security, accessibility and handover discipline prepare your team to own and scale it.",
-    clientRole:
-      "Nominate operational owners, rehearse support and governance, and accept the capability against agreed evidence.",
-    outcome: "A client-owned capability, operating model and scale plan.",
-    accent: "#ff775d",
-    image: "/images/cognirise/blueprint-operate.jpg",
-    imageAlt:
-      "Client leaders transferring ownership as connected teams work across a multi-level operations hub.",
-    imagePosition: "50% 48%",
-  },
-];
-
-const canonLayers = [
-  {
-    num: "01",
-    title: "Governed lifecycle",
-    summary: "The pace comes from knowing what must be true at every stage.",
-    detail:
-      "Each engagement moves through controlled inputs and outputs, standard structures and templates, and explicit stage gates. That shared route reduces reinvention while keeping scope and decisions visible.",
-  },
-  {
-    num: "02",
-    title: "Reusable intelligence",
-    summary: "Proprietary prompt libraries, models, skills and accelerators create a repeatable starting point.",
-    detail:
-      "Teams begin with governed, reusable intelligence rather than a blank page. It speeds analysis and production without replacing the judgement needed to fit the work to the client’s context.",
-  },
-  {
-    num: "03",
-    title: "Traceable execution",
-    summary: "The brief, journeys, requirements and evaluation evidence stay connected.",
-    detail:
-      "Requirement traceability links what is built to the need it serves. Controlled outputs and recorded decisions make progress easier to review, challenge and change without losing the thread.",
-  },
-  {
-    num: "04",
-    title: "Human decision gates",
-    summary: "People remain accountable for direction, risk and release.",
-    detail:
-      "Named decision-makers approve the moments that matter. The system accelerates the work between gates; it does not make consequential client decisions or silently widen its own authority.",
-  },
-  {
-    num: "05",
-    title: "Assurance by design",
-    summary: "Evaluation and operational readiness are built into delivery, not added at the end.",
-    detail:
-      "Security, accessibility, data governance and observability are considered from the first proof. Evidence, known limitations and handover discipline travel with the capability as it moves toward operation.",
-  },
-];
 
 export function BlueprintJourney() {
   return (
@@ -272,7 +159,7 @@ export function BlueprintJourney() {
           defaultValue="2"
           className="blueprint-disclosure blueprint-row"
         >
-          {stages.map((stage) => (
+          {IDAO_STAGES.map((stage) => (
             <SpatialDisclosureItem
               key={stage.id}
               id={String(stage.id)}
@@ -375,7 +262,7 @@ export function BlueprintJourney() {
          </div>
 
          <div className="mt-10 grid grid-cols-1 border-t border-[#cbd3e1] lg:mt-14 lg:grid-cols-5">
-           {canonLayers.map((layer, index) => (
+            {IDAO_CANON_LAYERS.map((layer, index) => (
              <details
                key={layer.num}
                className="group border-b border-[#cbd3e1] lg:border-r lg:last:border-r-0"
@@ -401,7 +288,7 @@ export function BlueprintJourney() {
                  </p>
                </summary>
                <div className="px-5 pb-7 text-[13px] leading-[1.6] text-[#405777]">
-                 <span className="sr-only">{`${index + 1} of ${canonLayers.length}. `}</span>
+                  <span className="sr-only">{`${index + 1} of ${IDAO_CANON_LAYERS.length}. `}</span>
                  {layer.detail}
                </div>
              </details>

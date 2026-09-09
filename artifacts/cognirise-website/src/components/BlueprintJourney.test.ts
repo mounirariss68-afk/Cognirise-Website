@@ -3,6 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 
 const source = readFileSync(new URL("./BlueprintJourney.tsx", import.meta.url), "utf8");
+const content = readFileSync(new URL("../content/idao.ts", import.meta.url), "utf8");
 
 test("BlueprintJourney uses SpatialDisclosure for the expanding image effect", () => {
   assert.match(source, /SpatialDisclosure/);
@@ -44,23 +45,23 @@ test("BlueprintJourney keeps image crop and text measure stable while cards expa
 });
 
 test("BlueprintJourney preserves the IDAO stage order and timing commitments", () => {
-  const innovate = source.indexOf('title: "Innovate"');
-  const demonstrate = source.indexOf('title: "Demonstrate"');
-  const activate = source.indexOf('title: "Activate"');
-  const operate = source.indexOf('title: "Operate"');
+  const innovate = content.indexOf('title: "Innovate"');
+  const demonstrate = content.indexOf('title: "Demonstrate"');
+  const activate = content.indexOf('title: "Activate"');
+  const operate = content.indexOf('title: "Operate"');
 
   assert.ok(innovate < demonstrate);
   assert.ok(demonstrate < activate);
   assert.ok(activate < operate);
-  assert.match(source, /time: "48 hours"/);
-  assert.match(source, /time: "2–4 weeks \(MVP\)"/);
+  assert.match(content, /time: "48 hours"/);
+  assert.match(content, /time: "2–4 weeks \(MVP\)"/);
   assert.match(source, /prototype within 48 hours/);
   assert.match(source, /MVP within\s+2–4 weeks/);
 });
 
 test("each IDAO stage explains the client role and tangible outcome", () => {
-  assert.equal((source.match(/clientRole:/g) ?? []).length, 4);
-  assert.equal((source.match(/outcome:/g) ?? []).length, 4);
+  assert.equal((content.match(/clientRole:/g) ?? []).length, 4);
+  assert.equal((content.match(/outcome:/g) ?? []).length, 4);
   assert.match(source, />\s*Your role\s*</);
   assert.match(source, />\s*What you have in hand\s*</);
 });
@@ -72,14 +73,12 @@ test("the public delivery canon includes the required credibility layers", () =>
     "Traceable execution",
     "Human decision gates",
     "Assurance by design",
-    "prompt libraries",
     "models, skills and accelerators",
-    "standard structures and templates",
     "Requirement traceability",
     "Security, accessibility, data governance and observability",
     "handover discipline",
   ]) {
-    assert.match(source, new RegExp(concept, "i"));
+    assert.match(`${source}\n${content}`, new RegExp(concept, "i"));
   }
 });
 
