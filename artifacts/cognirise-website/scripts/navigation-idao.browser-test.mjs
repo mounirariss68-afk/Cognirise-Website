@@ -144,7 +144,7 @@ try {
     };
   })()`);
 
-  assert.match(desktopParent.activeText, /Frameworks & Methodologies/);
+  assert.match(desktopParent.activeText, /How we do it/);
   assert.equal(desktopParent.expanded, "true");
   assert.equal(desktopParent.current, null);
   assert.notEqual(desktopParent.focusRing, "none");
@@ -167,7 +167,7 @@ try {
   assert.equal(await evaluate("document.activeElement?.textContent?.trim()"), "Agent Authority Model");
   await pressKey("Escape", "Escape", 27);
   await delay(50);
-  assert.match(await evaluate("document.activeElement?.textContent?.replace(/\\s+/g, ' ').trim()"), /Frameworks & Methodologies/);
+  assert.match(await evaluate("document.activeElement?.textContent?.replace(/\\s+/g, ' ').trim()"), /How we do it/);
   assert.equal(await evaluate("document.activeElement?.getAttribute('aria-expanded')"), "false");
 
   await navigate("/what-we-do?source=navigation-test");
@@ -204,11 +204,11 @@ try {
   await navigate("/methodologies/idao");
   await evaluate(`document.querySelector('[aria-label="Open menu"]').click()`);
   await delay(50);
-  await evaluate(`document.querySelector('[aria-label="Expand Frameworks & Methodologies"]').click()`);
+  await evaluate(`document.querySelector('[aria-label="Expand How we do it"]').click()`);
   await delay(50);
 
   const mobile = await evaluate(`(() => {
-    const button = document.querySelector('[aria-label="Collapse Frameworks & Methodologies"]');
+    const button = document.querySelector('[aria-label="Collapse How we do it"]');
     const list = document.getElementById("mobile-menu-methodologies");
     const what = [...document.querySelectorAll("nav a")].find((link) => link.textContent?.trim() === "What we do" && link.offsetParent);
     return {

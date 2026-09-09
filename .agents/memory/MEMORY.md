@@ -18,3 +18,4 @@
 - [Perceptual loop validation](perceptual-loop-validation.md) — Similar boundary pixels do not prove a smooth loop; visual motion continuity outranks the metric.
 - [Hero media ownership](hero-media-ownership.md) — Page-specific hero films need dedicated assets; never overwrite another route’s approved media through shared paths.
 - [Platforms hero fidelity](platforms-hero-fidelity.md) — Retain the approved cinematic footage unless a replacement matches its layered CogniOS identity at materially higher fidelity.
+- [Homepage anchor test timing](homepage-anchor-test-timing.md) — Repeated same-hash browser checks must let the prior animated scroll fully settle before resetting position.

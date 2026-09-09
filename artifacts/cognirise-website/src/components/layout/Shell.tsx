@@ -140,7 +140,7 @@ const navigation: NavigationItem[] = [
   },
   {
     id: "methodologies",
-    label: "Frameworks & Methodologies",
+    label: "How we do it",
     href: "/methodologies/idao",
     items: [
       { id: "methodologies.idao", label: "IDAO", href: "/methodologies/idao" },

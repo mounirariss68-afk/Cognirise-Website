@@ -178,7 +178,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Kicker className="text-white/80">Methodologies & Frameworks</Kicker>
+            <Kicker className="text-white/80">How we do it</Kicker>
             <h2 className="font-display font-semibold text-[clamp(42px,5.3vw,80px)] tracking-[-0.075em] leading-[0.96] my-4 max-w-[600px]">
               {featuredFramework?.title ?? "The Agent Authority Model."}
             </h2>

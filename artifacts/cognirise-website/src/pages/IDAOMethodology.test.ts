@@ -18,7 +18,7 @@ test("routes IDAO and redirects retired service overviews to the homepage practi
 
 test("navigation makes What we do direct and exposes both methodologies in order", () => {
   assert.match(shell, /id: "what-we-do",[\s\S]*?href: "\/",\s*\}/);
-  assert.match(shell, /label: "Frameworks & Methodologies"[\s\S]*?label: "IDAO"[\s\S]*?label: "Agent Authority Model"/);
+  assert.match(shell, /label: "How we do it"[\s\S]*?label: "IDAO"[\s\S]*?label: "Agent Authority Model"/);
   assert.match(shell, /aria-expanded/);
   assert.match(shell, /aria-current/);
   assert.match(shell, /aria-current=\{!item\.items && isCurrentDestination\(item\.href\) \? "page" : undefined\}/);
