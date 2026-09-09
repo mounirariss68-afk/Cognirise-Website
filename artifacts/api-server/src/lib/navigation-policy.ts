@@ -46,7 +46,7 @@ export async function publishedNavigationPolicy(market: string, locale: string) 
         WHERE market=$1 AND locale=$2`,
       [candidate.market, candidate.locale],
     );
-    if (!result.rowCount) continue;
+    if (!result.rowCount || !result.rows[0]) continue;
     const parsed = NavigationPolicySnapshotSchema.safeParse({
       items: result.rows[0].items,
       pages: result.rows[0].pages,

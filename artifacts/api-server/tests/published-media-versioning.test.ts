@@ -152,9 +152,7 @@ test("public media stays on the revision pin when a newer asset version appears"
     }
     if (statement.includes("SELECT a.*,v.id version_id")) {
       assert.match(statement, /v\.id=ref\.media_version_id/);
-    const version = [...versions.values()].find((candidate) =>
-      candidate.storageKey === storageKey
-    );
+      const version = versions.get(publishedRevision.versionId);
       assert.ok(version);
       return {
         rowCount: 1,
@@ -172,9 +170,7 @@ test("public media stays on the revision pin when a newer asset version appears"
     }
     if (statement.includes("SELECT v.storage_key")) {
       const [requestedAssetId, requestedVersionId] = values?.map(String) ?? [];
-    const version = [...versions.values()].find((candidate) =>
-      candidate.storageKey === storageKey
-    );
+      const version = versions.get(requestedVersionId);
       const authorized = requestedAssetId === assetId &&
         requestedVersionId === publishedRevision.versionId &&
         version;
@@ -192,9 +188,7 @@ test("public media stays on the revision pin when a newer asset version appears"
         : { rowCount: 0, rows: [] };
     }
     if (statement.includes("SELECT COALESCE(v.storage_key,a.storage_key) storage_key")) {
-    const version = [...versions.values()].find((candidate) =>
-      candidate.storageKey === storageKey
-    );
+      const version = versions.get(publishedRevision.versionId);
       return version
         ? {
             rowCount: 1,
