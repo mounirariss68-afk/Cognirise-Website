@@ -128,20 +128,28 @@ async function syncMediaReferences(
   client: { query: (sql: string, values?: unknown[]) => Promise<any> },
   documentId: string,
   revisionId: string,
-  mediaIds: unknown,
+  snapshot: Record<string, any>,
 ) {
-  for (const assetId of Array.isArray(mediaIds) ? mediaIds : []) {
+  const exactVersions = new Map<string, string>();
+  const hero = snapshot.content?.hero;
+  if (hero && typeof hero === "object") {
+    exactVersions.set(String(hero.posterMediaId), String(hero.posterMediaVersionId));
+    for (const source of Array.isArray(hero.sources) ? hero.sources : []) {
+      exactVersions.set(String(source.mediaId), String(source.mediaVersionId));
+    }
+  }
+  for (const assetId of Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds : []) {
+    const exactVersionId = exactVersions.get(String(assetId)) ?? null;
     await client.query(
       `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
-       SELECT asset.id,version.id,$2,$3
+       SELECT asset.id,version.id,$3,$4
          FROM cms_media_assets asset
-         JOIN LATERAL (
-           SELECT id FROM cms_media_versions
-            WHERE asset_id=asset.id ORDER BY version_number DESC LIMIT 1
-         ) version ON true
-        WHERE asset.id=$1 AND asset.status IN ('active','ready')
+          JOIN LATERAL (SELECT id FROM cms_media_versions
+             WHERE asset_id=asset.id AND ($2::uuid IS NULL OR id=$2)
+             ORDER BY version_number DESC LIMIT 1) version ON true
+         WHERE asset.id=$1 AND asset.status IN ('active','ready')
        ON CONFLICT DO NOTHING`,
-      [assetId, documentId, `revision:${revisionId}`],
+      [assetId, exactVersionId, documentId, `revision:${revisionId}`],
     );
   }
 }
@@ -227,7 +235,7 @@ router.post(
           client,
           String(root.rows[0].id),
           String(revision.rows[0].id),
-          snapshot.mediaIds,
+          snapshot,
         );
       }
       await client.query("COMMIT");
@@ -421,7 +429,7 @@ router.patch(
     }
     const id = String(req.params.documentId);
     const current = await getDocument(id);
-    if (!current || !["draft", "in-review", "approved"].includes(current.status)) {
+    if (!current || !["draft", "in-review", "approved", "published"].includes(current.status)) {
       res.status(409).json({ error: "Only an editable document can be updated." });
       return;
     }
@@ -465,7 +473,7 @@ router.patch(
           FROM cms_revisions WHERE edition_id=$1 RETURNING id`,
         [edition.rows[0].id, snapshot, digest(snapshot), auth.user.id],
       );
-      await syncMediaReferences(client, id, String(revision.rows[0].id), snapshot.mediaIds);
+       await syncMediaReferences(client, id, String(revision.rows[0].id), snapshot);
       await client.query(
         `UPDATE cms_documents SET canonical_slug=$2,title=$3,updated_at=now() WHERE id=$1`,
         [id, next.slug, next.title],
@@ -566,17 +574,31 @@ router.post(
       return;
     }
     const id = String(req.params.documentId);
-    const result = await pool.query(
-      `UPDATE cms_revisions r SET workflow_state='in-review'
-       FROM cms_market_editions e WHERE r.edition_id=e.id AND e.document_id=$1
+    const candidate = await pool.query(
+      `SELECT r.id,r.payload,d.kind FROM cms_revisions r
+       JOIN cms_market_editions e ON e.id=r.edition_id
+       JOIN cms_documents d ON d.id=e.document_id
+       WHERE e.document_id=$1
        AND r.revision_number=(SELECT max(x.revision_number) FROM cms_revisions x
-                              WHERE x.edition_id=r.edition_id) RETURNING r.id`,
+                              WHERE x.edition_id=r.edition_id)`,
       [id],
     );
-    if (!result.rowCount) {
+    if (!candidate.rowCount) {
       res.status(409).json({ error: "Document has no draft revision." });
       return;
     }
+    for (const row of candidate.rows) {
+      const validation = validateSnapshot(row.kind, row.payload, "draft");
+      if (!validation.success) {
+        res.status(422).json({ error: "Review governance validation failed.", details: validation.errors });
+        return;
+      }
+    }
+    await pool.query(
+      `UPDATE cms_revisions SET workflow_state='in-review'
+       WHERE id::text=ANY($1::text[])`,
+      [candidate.rows.map((row) => String(row.id))],
+    );
     await audit(res.locals.auth as AuthContext, "document.submitted", "document", id, parsed.data);
     res.json(await getDocument(id));
   }),
@@ -585,7 +607,7 @@ router.post(
 router.post(
   "/documents/:documentId/publish",
   requireCsrf,
-  requireAdministrator,
+  requirePublisher,
   asyncRoute(async (req, res) => {
     const parsed = PublishDocumentBody.safeParse(req.body);
     if (!parsed.success) {
@@ -614,24 +636,40 @@ router.post(
       return;
     }
     const mediaIds = validation.data.mediaIds;
+    const hero = revision.rows[0].kind === "site-configuration"
+      ? (validation.data.content as Record<string, any>).hero as Record<string, any>
+      : null;
+    const expectedVersions = new Map<string, string>(hero ? [
+      [hero.posterMediaId, hero.posterMediaVersionId] as [string, string],
+      ...hero.sources.map((source: { mediaId: string; mediaVersionId: string }) =>
+        [source.mediaId, source.mediaVersionId] as [string, string]),
+    ] : []);
+    const expectedMediaTypes = new Map<string, readonly string[]>(hero ? [
+      [hero.posterMediaId, ["image/jpeg", "image/png", "image/webp", "image/avif"]],
+      ...hero.sources.map((source: { mediaId: string; mimeType: string }) =>
+        [source.mediaId, [source.mimeType]] as [string, string[]]),
+    ] : []);
     if (mediaIds.length) {
       await client.query(
         `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
-         SELECT asset.id,version.id,$2,$3
+          SELECT asset.id,version.id,$2,$3
            FROM cms_media_assets asset
            JOIN LATERAL (
              SELECT id FROM cms_media_versions
-              WHERE asset_id=asset.id ORDER BY version_number DESC LIMIT 1
+               WHERE asset_id=asset.id
+                 AND ($4::jsonb->>asset.id::text IS NULL OR id::text=$4::jsonb->>asset.id::text)
+               ORDER BY version_number DESC LIMIT 1
            ) version ON true
           WHERE asset.id::text=ANY($1::text[])
             AND asset.status IN ('active','ready')
          ON CONFLICT DO NOTHING`,
-        [mediaIds, id, `revision:${parsed.data.revisionId}`],
+         [mediaIds, id, `revision:${parsed.data.revisionId}`, Object.fromEntries(expectedVersions)],
       );
     }
     const readyMedia = mediaIds.length
       ? await client.query(
-          `SELECT a.id::text id,COALESCE(pinned.id,latest.id)::text version_id
+           `SELECT a.id::text id,COALESCE(pinned.id,latest.id)::text version_id,
+                   a.media_type
              FROM cms_media_assets a
              JOIN cms_media_references ref ON ref.asset_id=a.id
                AND ref.document_id=$2 AND ref.field_path=$3
@@ -648,6 +686,14 @@ router.post(
       : { rows: [] };
     const readyIds = new Set(readyMedia.rows.map((row: { id: string }) => row.id));
     const unavailable = mediaIds.filter((mediaId) => !readyIds.has(mediaId));
+    for (const row of readyMedia.rows) {
+      const expected = expectedVersions.get(String(row.id));
+      if (expected && expected !== String(row.version_id)) unavailable.push(String(row.id));
+      const expectedTypes = expectedMediaTypes.get(String(row.id));
+      if (expectedTypes && !expectedTypes.includes(String(row.media_type))) {
+        unavailable.push(String(row.id));
+      }
+    }
     if (unavailable.length) {
       await client.query("ROLLBACK");
       res.status(422).json({ error: "Publication references unavailable media.", details: unavailable });
@@ -749,7 +795,7 @@ router.post(
       pool,
       id,
       String(revision.rows[0].id),
-      old.rows[0].payload?.mediaIds,
+      old.rows[0].payload,
     );
     await audit(auth, "document.rolled_back", "document", id);
     res.json(await getDocument(id));

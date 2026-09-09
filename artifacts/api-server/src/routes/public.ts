@@ -11,7 +11,7 @@ import {
 import { asyncRoute, throttle } from "../lib/http";
 import { pageOf } from "../lib/cms";
 import { SlidingWindowThrottle } from "../lib/security";
-import { downloadMediaObject } from "../lib/object-storage";
+import { downloadMediaObject, parseByteRange } from "../lib/object-storage";
 
 const router: IRouter = Router();
 export const publicMediaDelivery = {
@@ -59,6 +59,98 @@ export function publicMediaUrl(assetId: string, versionId: string) {
   return `/api/public/media/${assetId}/${versionId}`;
 }
 
+const HERO_SLOTS = new Set(["homepage", "industries"]);
+const HERO_MIME_TYPES = new Set(["video/mp4", "video/webm"]);
+
+type HeroSource = { mediaId: string; mediaVersionId: string; mimeType: string };
+
+function validateHeroPayload(payload: unknown): {
+  posterMediaId: string;
+  posterMediaVersionId: string;
+  sources: HeroSource[];
+} | null {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return null;
+  const nested = (payload as Record<string, unknown>).content;
+  const content = nested && typeof nested === "object" && !Array.isArray(nested)
+    ? nested as Record<string, unknown>
+    : payload as Record<string, unknown>;
+  const hero = content.hero;
+  if (!hero || typeof hero !== "object" || Array.isArray(hero)) return null;
+  const value = hero as Record<string, unknown>;
+  if (
+    Object.keys(value).sort().join(",") !== "posterMediaId,posterMediaVersionId,sources" ||
+    typeof value.posterMediaId !== "string" ||
+    typeof value.posterMediaVersionId !== "string" ||
+    !Array.isArray(value.sources) ||
+    value.sources.length !== 2
+  ) return null;
+  const sources: HeroSource[] = [];
+  for (const source of value.sources) {
+    if (!source || typeof source !== "object" || Array.isArray(source)) return null;
+    const item = source as Record<string, unknown>;
+    if (
+      Object.keys(item).sort().join(",") !== "mediaId,mediaVersionId,mimeType" ||
+      typeof item.mediaId !== "string" ||
+      typeof item.mediaVersionId !== "string" ||
+      typeof item.mimeType !== "string" ||
+      !HERO_MIME_TYPES.has(item.mimeType)
+    ) return null;
+    sources.push({
+      mediaId: item.mediaId,
+      mediaVersionId: item.mediaVersionId,
+      mimeType: item.mimeType,
+    });
+  }
+  if (
+    new Set(sources.map((source) => source.mimeType)).size !== 2 ||
+    sources.some((source) => source.mediaId === value.posterMediaId) ||
+    new Set([
+      value.posterMediaId,
+      ...sources.map((source) => source.mediaId),
+    ]).size !== 3
+  ) return null;
+  return {
+    posterMediaId: value.posterMediaId,
+    posterMediaVersionId: value.posterMediaVersionId,
+    sources,
+  };
+}
+
+export function heroFilmPayload(slot: string, payload: unknown, rows: Array<Record<string, any>>) {
+  if (!HERO_SLOTS.has(slot)) return null;
+  const hero = validateHeroPayload(payload);
+  if (!hero || rows.length !== 3) return null;
+  const expected = [
+    { id: hero.posterMediaId, versionId: hero.posterMediaVersionId, mimeType: null },
+    ...hero.sources.map((source) => ({
+      id: source.mediaId,
+      versionId: source.mediaVersionId,
+      mimeType: source.mimeType,
+    })),
+  ];
+  const assets = expected.map((wanted) => rows.find((row) =>
+    String(row.id) === wanted.id && String(row.version_id) === wanted.versionId &&
+    (wanted.mimeType == null ? String(row.media_type).startsWith("image/") : row.media_type === wanted.mimeType)
+  ));
+  if (assets.some((asset) => !asset) || new Set(assets.map((asset) => String(asset!.id))).size !== 3) return null;
+  const poster = assets[0]!;
+  return {
+    slot,
+    poster: {
+      mediaId: String(poster.id),
+      mediaVersionId: String(poster.version_id),
+      url: publicMediaUrl(String(poster.id), String(poster.version_id)),
+      mimeType: poster.media_type,
+    },
+    sources: assets.slice(1).map((asset) => ({
+      mediaId: String(asset!.id),
+      mediaVersionId: String(asset!.version_id),
+      url: publicMediaUrl(String(asset!.id), String(asset!.version_id)),
+      mimeType: asset!.media_type,
+    })),
+  };
+}
+
 async function published(row: Record<string, any>) {
   const validation = validateCmsSnapshot(row.kind as CmsDocumentKind, row.payload, "publish");
   if (!validation.success) {
@@ -86,8 +178,14 @@ async function published(row: Record<string, any>) {
     media: assets.rows.map((asset) => ({
        id: String(asset.id), versionId: String(asset.version_id),
        url: publicMediaUrl(String(asset.id), String(asset.version_id)), mimeType: asset.media_type,
-      width: asset.width ?? null, height: asset.height ?? null, altText: asset.alt_text ?? null,
-      caption: asset.metadata?.caption ?? null, credit: asset.credit ?? null,
+      width: asset.width ?? null, height: asset.height ?? null,
+       duration: Object.hasOwn(asset.metadata ?? {}, "duration") ? asset.metadata.duration : null,
+       caption: Object.hasOwn(asset.metadata ?? {}, "caption") ? asset.metadata.caption : null,
+       altText: Object.hasOwn(asset.metadata ?? {}, "altText") ? asset.metadata.altText : asset.alt_text ?? null,
+       credit: Object.hasOwn(asset.metadata ?? {}, "credit") ? asset.metadata.credit : asset.credit ?? null,
+       motionMetadata: Object.hasOwn(asset.metadata ?? {}, "motionMetadata")
+         ? asset.metadata.motionMetadata
+         : asset.motion_metadata ?? null,
     })),
     market: row.market,
     locale: row.locale,
@@ -165,6 +263,76 @@ router.get(
   }),
 );
 
+router.get("/public/hero-films/:slot", asyncRoute(async (req, res) => {
+  const slot = String(req.params.slot);
+  const market = typeof req.query.market === "string" ? req.query.market : "uae";
+  const locale = typeof req.query.locale === "string" ? req.query.locale : "en";
+  if (!HERO_SLOTS.has(slot)) {
+    res.status(404).json({ error: "Public hero film not found." });
+    return;
+  }
+  const candidates = await marketCandidates(market, locale);
+  if (!candidates) {
+    res.status(404).json({ error: "Public hero film not found." });
+    return;
+  }
+  const result = await pool.query(
+    `SELECT d.id,e.market,e.locale,e.published_at,e.updated_at,
+            r.id revision_id,r.revision_number,r.payload
+       FROM cms_documents d
+       JOIN cms_market_editions e ON e.document_id=d.id
+       JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
+         AND r.workflow_state='approved'
+      WHERE d.kind='site-configuration'
+        AND d.canonical_slug=$1
+        AND e.market=ANY($2::text[]) AND e.locale=$3
+        AND e.publication_state='published' AND e.published_at<=now()
+        AND ${PUBLIC_PAYLOAD_SQL}
+      ORDER BY array_position($2::text[],e.market),e.updated_at DESC,e.id
+      LIMIT 1`,
+    [`site-${slot}-hero`, candidates, locale],
+  );
+  if (!result.rowCount) {
+    res.status(404).json({ error: "Public hero film not found." });
+    return;
+  }
+  const row = result.rows[0];
+  const validation = validateCmsSnapshot("site-configuration", row.payload, "publish");
+  if (!validation.success) {
+    res.status(404).json({ error: "Public hero film not found." });
+    return;
+  }
+  const shape = validateHeroPayload(validation.data);
+  if (!shape) {
+    res.status(404).json({ error: "Public hero film not found." });
+    return;
+  }
+  const ids = [shape.posterMediaId, ...shape.sources.map((source) => source.mediaId)];
+  const assets = await pool.query(
+    `SELECT a.id,a.media_type,a.status,v.id version_id
+       FROM cms_media_references ref
+       JOIN cms_media_assets a ON a.id=ref.asset_id AND a.status IN ('active','ready')
+       JOIN cms_media_versions v ON v.id=ref.media_version_id AND v.asset_id=a.id
+      WHERE ref.document_id=$1 AND ref.field_path=$2
+        AND a.id::text=ANY($3::text[])`,
+    [String(row.id), `revision:${String(row.revision_id)}`, ids],
+  );
+  const hero = heroFilmPayload(slot, row.payload, assets.rows);
+  if (!hero) {
+    res.status(404).json({ error: "Public hero film not found." });
+    return;
+  }
+  res.json({
+    ...hero,
+    market: row.market,
+    locale: row.locale,
+    requestedMarket: market,
+    usedFallback: row.market !== market,
+    revision: row.revision_number,
+    publishedAt: row.published_at,
+  });
+}));
+
 router.get(
   "/public/content/:market/:locale/:kind/:slug",
   asyncRoute(async (req, res) => {
@@ -213,7 +381,7 @@ router.get(
 
 router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
   const asset = await pool.query(
-    `SELECT v.storage_key,
+    `SELECT v.storage_key,v.byte_size,
        CASE WHEN v.metadata->>'rendition'='webp-1600' THEN 'image/webp' ELSE a.media_type END media_type
        FROM cms_media_assets a
        JOIN cms_media_versions v ON v.asset_id=a.id AND v.id=$2
@@ -231,8 +399,17 @@ router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
     [req.params.mediaId, req.params.versionId],
   );
   if (!asset.rowCount) { res.status(404).json({ error: "Public media not found." }); return; }
+  const size = Number(asset.rows[0].byte_size);
+  const range = parseByteRange(req.headers.range, size);
+  res.set("Accept-Ranges", "bytes");
+  if (range === "invalid") {
+    res.status(416).set("Content-Range", `bytes */${size}`).end();
+    return;
+  }
   res.type(asset.rows[0].media_type);
-  const stream = await publicMediaDelivery.download(asset.rows[0].storage_key);
+  res.set("Content-Length", String(range ? range.end - range.start + 1 : size));
+  if (range) res.status(206).set("Content-Range", `bytes ${range.start}-${range.end}/${size}`);
+  const stream = await publicMediaDelivery.download(asset.rows[0].storage_key, range ?? undefined);
   stream.on("error", () => res.destroy());
   stream.pipe(res);
 }));

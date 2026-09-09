@@ -678,7 +678,7 @@ export const ListDocumentsQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listDocumentsQueryPageMultipleOf).default(listDocumentsQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listDocumentsQueryPageSizeMax).multipleOf(listDocumentsQueryPageSizeMultipleOf).default(listDocumentsQueryPageSizeDefault),
   "search": zod.coerce.string().max(listDocumentsQuerySearchMax).optional(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']).optional(),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']).optional(),
   "status": zod.enum(['draft', 'in-review', 'approved', 'scheduled', 'published', 'archived']).optional(),
   "market": zod.coerce.string().optional()
 })
@@ -717,6 +717,9 @@ export const listDocumentsResponseTwoItemsItemContentFiveSourcesItemUrlRegExp = 
 export const listDocumentsResponseTwoItemsItemContentSixOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMin = 2;
+export const listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMax = 2;
+
 export const listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf = 1;
 
 
@@ -729,7 +732,7 @@ export const ListDocumentsResponse = zod.object({
 }).and(zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string().regex(listDocumentsResponseTwoItemsItemSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -943,6 +946,18 @@ export const ListDocumentsResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMin).max(listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -985,7 +1000,7 @@ export const createDocumentBodySeoNoIndexDefault = false;
 
 
 export const CreateDocumentBody = zod.object({
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string().max(createDocumentBodySlugMax).regex(createDocumentBodySlugRegExp),
   "title": zod.string().min(1).max(createDocumentBodyTitleMax),
   "summary": zod.string().max(createDocumentBodySummaryMax).optional(),
@@ -1025,13 +1040,16 @@ export const createDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp(
 export const createDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const createDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentSevenHeroSourcesMin = 2;
+export const createDocumentResponseContentSevenHeroSourcesMax = 2;
+
 export const createDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const CreateDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string().regex(createDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1245,6 +1263,18 @@ export const CreateDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(createDocumentResponseContentSevenHeroSourcesMin).max(createDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -1298,13 +1328,16 @@ export const getDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^h
 export const getDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const getDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentSevenHeroSourcesMin = 2;
+export const getDocumentResponseContentSevenHeroSourcesMax = 2;
+
 export const getDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const GetDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string().regex(getDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1518,6 +1551,18 @@ export const GetDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(getDocumentResponseContentSevenHeroSourcesMin).max(getDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -1605,13 +1650,16 @@ export const updateDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp(
 export const updateDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentSevenHeroSourcesMin = 2;
+export const updateDocumentResponseContentSevenHeroSourcesMax = 2;
+
 export const updateDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const UpdateDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string().regex(updateDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1825,6 +1873,18 @@ export const UpdateDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(updateDocumentResponseContentSevenHeroSourcesMin).max(updateDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -1899,6 +1959,9 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveSources
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSourcesMin = 2;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSourcesMax = 2;
+
 
 
 export const ListDocumentRevisionsResponse = zod.object({
@@ -2128,6 +2191,18 @@ export const ListDocumentRevisionsResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSourcesMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -2242,6 +2317,9 @@ export const getDocumentRevisionResponseSnapshotContentFiveSourcesItemUrlRegExp 
 export const getDocumentRevisionResponseSnapshotContentSixOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMin = 2;
+export const getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMax = 2;
+
 
 
 export const GetDocumentRevisionResponse = zod.object({
@@ -2465,6 +2543,18 @@ export const GetDocumentRevisionResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMin).max(getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -2522,13 +2612,16 @@ export const submitDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp(
 export const submitDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentSevenHeroSourcesMin = 2;
+export const submitDocumentResponseContentSevenHeroSourcesMax = 2;
+
 export const submitDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const SubmitDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string().regex(submitDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -2742,6 +2835,18 @@ export const SubmitDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(submitDocumentResponseContentSevenHeroSourcesMin).max(submitDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -2804,13 +2909,16 @@ export const publishDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp
 export const publishDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentSevenHeroSourcesMin = 2;
+export const publishDocumentResponseContentSevenHeroSourcesMax = 2;
+
 export const publishDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const PublishDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string().regex(publishDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3024,6 +3132,18 @@ export const PublishDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(publishDocumentResponseContentSevenHeroSourcesMin).max(publishDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -3086,13 +3206,16 @@ export const rollbackDocumentResponseContentFiveSourcesItemUrlRegExp = new RegEx
 export const rollbackDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentSevenHeroSourcesMin = 2;
+export const rollbackDocumentResponseContentSevenHeroSourcesMax = 2;
+
 export const rollbackDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const RollbackDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string().regex(rollbackDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3306,6 +3429,18 @@ export const RollbackDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(rollbackDocumentResponseContentSevenHeroSourcesMin).max(rollbackDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -3367,13 +3502,16 @@ export const archiveDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp
 export const archiveDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentSevenHeroSourcesMin = 2;
+export const archiveDocumentResponseContentSevenHeroSourcesMax = 2;
+
 export const archiveDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const ArchiveDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string().regex(archiveDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3587,6 +3725,18 @@ export const ArchiveDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(archiveDocumentResponseContentSevenHeroSourcesMin).max(archiveDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -3648,13 +3798,16 @@ export const restoreDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp
 export const restoreDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentSevenHeroSourcesMin = 2;
+export const restoreDocumentResponseContentSevenHeroSourcesMax = 2;
+
 export const restoreDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const RestoreDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string().regex(restoreDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3868,6 +4021,18 @@ export const RestoreDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(restoreDocumentResponseContentSevenHeroSourcesMin).max(restoreDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -3920,6 +4085,9 @@ export const previewDocumentResponseDocumentContentFiveSourcesItemUrlRegExp = ne
 export const previewDocumentResponseDocumentContentSixOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentSevenHeroSourcesMin = 2;
+export const previewDocumentResponseDocumentContentSevenHeroSourcesMax = 2;
+
 export const previewDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -4138,6 +4306,18 @@ export const PreviewDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(previewDocumentResponseDocumentContentSevenHeroSourcesMin).max(previewDocumentResponseDocumentContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
@@ -4340,7 +4520,7 @@ export const ListMediaQueryParams = zod.object({
   "pageSize": zod.coerce.number().min(1).max(listMediaQueryPageSizeMax).multipleOf(listMediaQueryPageSizeMultipleOf).default(listMediaQueryPageSizeDefault),
   "search": zod.coerce.string().max(listMediaQuerySearchMax).optional(),
   "mimeType": zod.coerce.string().optional(),
-  "collection": zod.enum(['website', 'linkedin']).optional(),
+  "collection": zod.enum(['website', 'linkedin', 'motion']).optional(),
   "linkedinAssetKind": zod.enum(['post', 'header']).optional()
 })
 
@@ -4360,6 +4540,8 @@ export const listMediaResponseTwoItemsItemSizeMultipleOf = 1;
 export const listMediaResponseTwoItemsItemWidthMultipleOf = 1;
 
 export const listMediaResponseTwoItemsItemHeightMultipleOf = 1;
+
+export const listMediaResponseTwoItemsItemDurationMin = 0;
 
 export const listMediaResponseTwoItemsItemCampaignMetadataOneCampaignMax = 120;
 
@@ -4385,6 +4567,22 @@ export const listMediaResponseTwoItemsItemCampaignMetadataOneApprovedUseMax = 30
 
 
 export const listMediaResponseTwoItemsItemCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
+export const listMediaResponseTwoItemsItemMotionMetadataOneGroupIdMax = 120;
+
+
+export const listMediaResponseTwoItemsItemMotionMetadataOneGroupIdRegExp = new RegExp('\\S');
+
+
+export const listMediaResponseTwoItemsItemMotionMetadataOneAutoplayDefault = false;
+export const listMediaResponseTwoItemsItemMotionMetadataOneLoopDefault = false;
+export const listMediaResponseTwoItemsItemMotionMetadataOneAccessibilityTranscriptMax = 10000;
+
+
+export const listMediaResponseTwoItemsItemMotionMetadataOneAccessibilityTranscriptRegExp = new RegExp('\\S');
+export const listMediaResponseTwoItemsItemMotionMetadataOneAccessibilityAudioDescriptionMax = 2000;
+
+
+export const listMediaResponseTwoItemsItemMotionMetadataOneAccessibilityAudioDescriptionRegExp = new RegExp('\\S');
 export const listMediaResponseTwoItemsItemFocalPointOneXMin = 0;
 export const listMediaResponseTwoItemsItemFocalPointOneXMax = 1;
 
@@ -4401,6 +4599,7 @@ export const ListMediaResponse = zod.object({
 }).and(zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
+  "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
   "filename": zod.string(),
   "objectPath": zod.string(),
   "publicUrl": zod.string().nullish(),
@@ -4408,11 +4607,12 @@ export const ListMediaResponse = zod.object({
   "size": zod.number().min(listMediaResponseTwoItemsItemSizeMin).multipleOf(listMediaResponseTwoItemsItemSizeMultipleOf),
   "width": zod.number().min(1).multipleOf(listMediaResponseTwoItemsItemWidthMultipleOf).nullish(),
   "height": zod.number().min(1).multipleOf(listMediaResponseTwoItemsItemHeightMultipleOf).nullish(),
+  "duration": zod.number().min(listMediaResponseTwoItemsItemDurationMin).nullish(),
   "checksum": zod.string().nullish(),
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
   "credit": zod.string().nullish(),
-  "collection": zod.enum(['website', 'linkedin']),
+  "collection": zod.enum(['website', 'linkedin', 'motion']),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
   "campaign": zod.string().min(1).max(listMediaResponseTwoItemsItemCampaignMetadataOneCampaignMax).regex(listMediaResponseTwoItemsItemCampaignMetadataOneCampaignRegExp).optional(),
@@ -4421,6 +4621,21 @@ export const ListMediaResponse = zod.object({
   "purpose": zod.string().min(1).max(listMediaResponseTwoItemsItemCampaignMetadataOnePurposeMax).regex(listMediaResponseTwoItemsItemCampaignMetadataOnePurposeRegExp).optional(),
   "pulseSource": zod.string().min(1).max(listMediaResponseTwoItemsItemCampaignMetadataOnePulseSourceMax).regex(listMediaResponseTwoItemsItemCampaignMetadataOnePulseSourceRegExp).optional(),
   "approvedUse": zod.string().min(1).max(listMediaResponseTwoItemsItemCampaignMetadataOneApprovedUseMax).regex(listMediaResponseTwoItemsItemCampaignMetadataOneApprovedUseRegExp).optional()
+}),zod.null()]).optional(),
+  "motionMetadata": zod.union([zod.object({
+  "groupId": zod.string().min(1).max(listMediaResponseTwoItemsItemMotionMetadataOneGroupIdMax).regex(listMediaResponseTwoItemsItemMotionMetadataOneGroupIdRegExp),
+  "variant": zod.enum(['landscape', 'portrait', 'square', 'mobile', 'desktop']),
+  "posterMediaId": zod.string().min(1).optional(),
+  "reducedMotionMediaId": zod.string().min(1).optional(),
+  "autoplay": zod.boolean().default(listMediaResponseTwoItemsItemMotionMetadataOneAutoplayDefault),
+  "loop": zod.boolean().default(listMediaResponseTwoItemsItemMotionMetadataOneLoopDefault),
+  "accessibility": zod.object({
+  "decorative": zod.boolean(),
+  "hasAudio": zod.boolean(),
+  "captionsMediaId": zod.string().min(1).optional(),
+  "transcript": zod.string().min(1).max(listMediaResponseTwoItemsItemMotionMetadataOneAccessibilityTranscriptMax).regex(listMediaResponseTwoItemsItemMotionMetadataOneAccessibilityTranscriptRegExp).optional(),
+  "audioDescription": zod.string().min(1).max(listMediaResponseTwoItemsItemMotionMetadataOneAccessibilityAudioDescriptionMax).regex(listMediaResponseTwoItemsItemMotionMetadataOneAccessibilityAudioDescriptionRegExp).optional()
+})
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(listMediaResponseTwoItemsItemFocalPointOneXMin).max(listMediaResponseTwoItemsItemFocalPointOneXMax),
@@ -4441,7 +4656,7 @@ export const requestMediaUploadBodyFilenameMax = 255;
 
 export const requestMediaUploadBodyMimeTypeMax = 120;
 
-export const requestMediaUploadBodySizeMax = 52428800;
+export const requestMediaUploadBodySizeMax = 262144000;
 export const requestMediaUploadBodySizeMultipleOf = 1;
 
 export const requestMediaUploadBodyCampaignMetadataCampaignMax = 120;
@@ -4468,6 +4683,22 @@ export const requestMediaUploadBodyCampaignMetadataApprovedUseMax = 300;
 
 
 export const requestMediaUploadBodyCampaignMetadataApprovedUseRegExp = new RegExp('\\S');
+export const requestMediaUploadBodyMotionMetadataGroupIdMax = 120;
+
+
+export const requestMediaUploadBodyMotionMetadataGroupIdRegExp = new RegExp('\\S');
+
+
+export const requestMediaUploadBodyMotionMetadataAutoplayDefault = false;
+export const requestMediaUploadBodyMotionMetadataLoopDefault = false;
+export const requestMediaUploadBodyMotionMetadataAccessibilityTranscriptMax = 10000;
+
+
+export const requestMediaUploadBodyMotionMetadataAccessibilityTranscriptRegExp = new RegExp('\\S');
+export const requestMediaUploadBodyMotionMetadataAccessibilityAudioDescriptionMax = 2000;
+
+
+export const requestMediaUploadBodyMotionMetadataAccessibilityAudioDescriptionRegExp = new RegExp('\\S');
 
 
 export const RequestMediaUploadBody = zod.object({
@@ -4475,7 +4706,7 @@ export const RequestMediaUploadBody = zod.object({
   "mimeType": zod.string().min(1).max(requestMediaUploadBodyMimeTypeMax),
   "size": zod.number().min(1).max(requestMediaUploadBodySizeMax).multipleOf(requestMediaUploadBodySizeMultipleOf),
   "checksum": zod.string().optional(),
-  "collection": zod.enum(['website', 'linkedin']).optional(),
+  "collection": zod.enum(['website', 'linkedin', 'motion']).optional(),
   "linkedinAssetKind": zod.enum(['post', 'header']).optional(),
   "campaignMetadata": zod.object({
   "campaign": zod.string().min(1).max(requestMediaUploadBodyCampaignMetadataCampaignMax).regex(requestMediaUploadBodyCampaignMetadataCampaignRegExp).optional(),
@@ -4484,6 +4715,21 @@ export const RequestMediaUploadBody = zod.object({
   "purpose": zod.string().min(1).max(requestMediaUploadBodyCampaignMetadataPurposeMax).regex(requestMediaUploadBodyCampaignMetadataPurposeRegExp).optional(),
   "pulseSource": zod.string().min(1).max(requestMediaUploadBodyCampaignMetadataPulseSourceMax).regex(requestMediaUploadBodyCampaignMetadataPulseSourceRegExp).optional(),
   "approvedUse": zod.string().min(1).max(requestMediaUploadBodyCampaignMetadataApprovedUseMax).regex(requestMediaUploadBodyCampaignMetadataApprovedUseRegExp).optional()
+}).optional(),
+  "motionMetadata": zod.object({
+  "groupId": zod.string().min(1).max(requestMediaUploadBodyMotionMetadataGroupIdMax).regex(requestMediaUploadBodyMotionMetadataGroupIdRegExp),
+  "variant": zod.enum(['landscape', 'portrait', 'square', 'mobile', 'desktop']),
+  "posterMediaId": zod.string().min(1).optional(),
+  "reducedMotionMediaId": zod.string().min(1).optional(),
+  "autoplay": zod.boolean().default(requestMediaUploadBodyMotionMetadataAutoplayDefault),
+  "loop": zod.boolean().default(requestMediaUploadBodyMotionMetadataLoopDefault),
+  "accessibility": zod.object({
+  "decorative": zod.boolean(),
+  "hasAudio": zod.boolean(),
+  "captionsMediaId": zod.string().min(1).optional(),
+  "transcript": zod.string().min(1).max(requestMediaUploadBodyMotionMetadataAccessibilityTranscriptMax).regex(requestMediaUploadBodyMotionMetadataAccessibilityTranscriptRegExp).optional(),
+  "audioDescription": zod.string().min(1).max(requestMediaUploadBodyMotionMetadataAccessibilityAudioDescriptionMax).regex(requestMediaUploadBodyMotionMetadataAccessibilityAudioDescriptionRegExp).optional()
+})
 }).optional()
 })
 
@@ -4493,6 +4739,8 @@ export const requestMediaUploadResponseMediaSizeMultipleOf = 1;
 export const requestMediaUploadResponseMediaWidthMultipleOf = 1;
 
 export const requestMediaUploadResponseMediaHeightMultipleOf = 1;
+
+export const requestMediaUploadResponseMediaDurationMin = 0;
 
 export const requestMediaUploadResponseMediaCampaignMetadataOneCampaignMax = 120;
 
@@ -4518,6 +4766,22 @@ export const requestMediaUploadResponseMediaCampaignMetadataOneApprovedUseMax = 
 
 
 export const requestMediaUploadResponseMediaCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
+export const requestMediaUploadResponseMediaMotionMetadataOneGroupIdMax = 120;
+
+
+export const requestMediaUploadResponseMediaMotionMetadataOneGroupIdRegExp = new RegExp('\\S');
+
+
+export const requestMediaUploadResponseMediaMotionMetadataOneAutoplayDefault = false;
+export const requestMediaUploadResponseMediaMotionMetadataOneLoopDefault = false;
+export const requestMediaUploadResponseMediaMotionMetadataOneAccessibilityTranscriptMax = 10000;
+
+
+export const requestMediaUploadResponseMediaMotionMetadataOneAccessibilityTranscriptRegExp = new RegExp('\\S');
+export const requestMediaUploadResponseMediaMotionMetadataOneAccessibilityAudioDescriptionMax = 2000;
+
+
+export const requestMediaUploadResponseMediaMotionMetadataOneAccessibilityAudioDescriptionRegExp = new RegExp('\\S');
 export const requestMediaUploadResponseMediaFocalPointOneXMin = 0;
 export const requestMediaUploadResponseMediaFocalPointOneXMax = 1;
 
@@ -4529,6 +4793,7 @@ export const requestMediaUploadResponseMediaFocalPointOneYMax = 1;
 export const RequestMediaUploadResponse = zod.object({
   "media": zod.object({
   "id": zod.string(),
+  "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
   "filename": zod.string(),
   "objectPath": zod.string(),
   "publicUrl": zod.string().nullish(),
@@ -4536,11 +4801,12 @@ export const RequestMediaUploadResponse = zod.object({
   "size": zod.number().min(requestMediaUploadResponseMediaSizeMin).multipleOf(requestMediaUploadResponseMediaSizeMultipleOf),
   "width": zod.number().min(1).multipleOf(requestMediaUploadResponseMediaWidthMultipleOf).nullish(),
   "height": zod.number().min(1).multipleOf(requestMediaUploadResponseMediaHeightMultipleOf).nullish(),
+  "duration": zod.number().min(requestMediaUploadResponseMediaDurationMin).nullish(),
   "checksum": zod.string().nullish(),
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
   "credit": zod.string().nullish(),
-  "collection": zod.enum(['website', 'linkedin']),
+  "collection": zod.enum(['website', 'linkedin', 'motion']),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
   "campaign": zod.string().min(1).max(requestMediaUploadResponseMediaCampaignMetadataOneCampaignMax).regex(requestMediaUploadResponseMediaCampaignMetadataOneCampaignRegExp).optional(),
@@ -4549,6 +4815,21 @@ export const RequestMediaUploadResponse = zod.object({
   "purpose": zod.string().min(1).max(requestMediaUploadResponseMediaCampaignMetadataOnePurposeMax).regex(requestMediaUploadResponseMediaCampaignMetadataOnePurposeRegExp).optional(),
   "pulseSource": zod.string().min(1).max(requestMediaUploadResponseMediaCampaignMetadataOnePulseSourceMax).regex(requestMediaUploadResponseMediaCampaignMetadataOnePulseSourceRegExp).optional(),
   "approvedUse": zod.string().min(1).max(requestMediaUploadResponseMediaCampaignMetadataOneApprovedUseMax).regex(requestMediaUploadResponseMediaCampaignMetadataOneApprovedUseRegExp).optional()
+}),zod.null()]).optional(),
+  "motionMetadata": zod.union([zod.object({
+  "groupId": zod.string().min(1).max(requestMediaUploadResponseMediaMotionMetadataOneGroupIdMax).regex(requestMediaUploadResponseMediaMotionMetadataOneGroupIdRegExp),
+  "variant": zod.enum(['landscape', 'portrait', 'square', 'mobile', 'desktop']),
+  "posterMediaId": zod.string().min(1).optional(),
+  "reducedMotionMediaId": zod.string().min(1).optional(),
+  "autoplay": zod.boolean().default(requestMediaUploadResponseMediaMotionMetadataOneAutoplayDefault),
+  "loop": zod.boolean().default(requestMediaUploadResponseMediaMotionMetadataOneLoopDefault),
+  "accessibility": zod.object({
+  "decorative": zod.boolean(),
+  "hasAudio": zod.boolean(),
+  "captionsMediaId": zod.string().min(1).optional(),
+  "transcript": zod.string().min(1).max(requestMediaUploadResponseMediaMotionMetadataOneAccessibilityTranscriptMax).regex(requestMediaUploadResponseMediaMotionMetadataOneAccessibilityTranscriptRegExp).optional(),
+  "audioDescription": zod.string().min(1).max(requestMediaUploadResponseMediaMotionMetadataOneAccessibilityAudioDescriptionMax).regex(requestMediaUploadResponseMediaMotionMetadataOneAccessibilityAudioDescriptionRegExp).optional()
+})
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(requestMediaUploadResponseMediaFocalPointOneXMin).max(requestMediaUploadResponseMediaFocalPointOneXMax),
@@ -4580,6 +4861,8 @@ export const getMediaResponseWidthMultipleOf = 1;
 
 export const getMediaResponseHeightMultipleOf = 1;
 
+export const getMediaResponseDurationMin = 0;
+
 export const getMediaResponseCampaignMetadataOneCampaignMax = 120;
 
 
@@ -4604,6 +4887,22 @@ export const getMediaResponseCampaignMetadataOneApprovedUseMax = 300;
 
 
 export const getMediaResponseCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
+export const getMediaResponseMotionMetadataOneGroupIdMax = 120;
+
+
+export const getMediaResponseMotionMetadataOneGroupIdRegExp = new RegExp('\\S');
+
+
+export const getMediaResponseMotionMetadataOneAutoplayDefault = false;
+export const getMediaResponseMotionMetadataOneLoopDefault = false;
+export const getMediaResponseMotionMetadataOneAccessibilityTranscriptMax = 10000;
+
+
+export const getMediaResponseMotionMetadataOneAccessibilityTranscriptRegExp = new RegExp('\\S');
+export const getMediaResponseMotionMetadataOneAccessibilityAudioDescriptionMax = 2000;
+
+
+export const getMediaResponseMotionMetadataOneAccessibilityAudioDescriptionRegExp = new RegExp('\\S');
 export const getMediaResponseFocalPointOneXMin = 0;
 export const getMediaResponseFocalPointOneXMax = 1;
 
@@ -4614,6 +4913,7 @@ export const getMediaResponseFocalPointOneYMax = 1;
 
 export const GetMediaResponse = zod.object({
   "id": zod.string(),
+  "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
   "filename": zod.string(),
   "objectPath": zod.string(),
   "publicUrl": zod.string().nullish(),
@@ -4621,11 +4921,12 @@ export const GetMediaResponse = zod.object({
   "size": zod.number().min(getMediaResponseSizeMin).multipleOf(getMediaResponseSizeMultipleOf),
   "width": zod.number().min(1).multipleOf(getMediaResponseWidthMultipleOf).nullish(),
   "height": zod.number().min(1).multipleOf(getMediaResponseHeightMultipleOf).nullish(),
+  "duration": zod.number().min(getMediaResponseDurationMin).nullish(),
   "checksum": zod.string().nullish(),
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
   "credit": zod.string().nullish(),
-  "collection": zod.enum(['website', 'linkedin']),
+  "collection": zod.enum(['website', 'linkedin', 'motion']),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
   "campaign": zod.string().min(1).max(getMediaResponseCampaignMetadataOneCampaignMax).regex(getMediaResponseCampaignMetadataOneCampaignRegExp).optional(),
@@ -4634,6 +4935,21 @@ export const GetMediaResponse = zod.object({
   "purpose": zod.string().min(1).max(getMediaResponseCampaignMetadataOnePurposeMax).regex(getMediaResponseCampaignMetadataOnePurposeRegExp).optional(),
   "pulseSource": zod.string().min(1).max(getMediaResponseCampaignMetadataOnePulseSourceMax).regex(getMediaResponseCampaignMetadataOnePulseSourceRegExp).optional(),
   "approvedUse": zod.string().min(1).max(getMediaResponseCampaignMetadataOneApprovedUseMax).regex(getMediaResponseCampaignMetadataOneApprovedUseRegExp).optional()
+}),zod.null()]).optional(),
+  "motionMetadata": zod.union([zod.object({
+  "groupId": zod.string().min(1).max(getMediaResponseMotionMetadataOneGroupIdMax).regex(getMediaResponseMotionMetadataOneGroupIdRegExp),
+  "variant": zod.enum(['landscape', 'portrait', 'square', 'mobile', 'desktop']),
+  "posterMediaId": zod.string().min(1).optional(),
+  "reducedMotionMediaId": zod.string().min(1).optional(),
+  "autoplay": zod.boolean().default(getMediaResponseMotionMetadataOneAutoplayDefault),
+  "loop": zod.boolean().default(getMediaResponseMotionMetadataOneLoopDefault),
+  "accessibility": zod.object({
+  "decorative": zod.boolean(),
+  "hasAudio": zod.boolean(),
+  "captionsMediaId": zod.string().min(1).optional(),
+  "transcript": zod.string().min(1).max(getMediaResponseMotionMetadataOneAccessibilityTranscriptMax).regex(getMediaResponseMotionMetadataOneAccessibilityTranscriptRegExp).optional(),
+  "audioDescription": zod.string().min(1).max(getMediaResponseMotionMetadataOneAccessibilityAudioDescriptionMax).regex(getMediaResponseMotionMetadataOneAccessibilityAudioDescriptionRegExp).optional()
+})
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(getMediaResponseFocalPointOneXMin).max(getMediaResponseFocalPointOneXMax),
@@ -4685,6 +5001,22 @@ export const updateMediaBodyCampaignMetadataOneApprovedUseMax = 300;
 
 
 export const updateMediaBodyCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
+export const updateMediaBodyMotionMetadataOneGroupIdMax = 120;
+
+
+export const updateMediaBodyMotionMetadataOneGroupIdRegExp = new RegExp('\\S');
+
+
+export const updateMediaBodyMotionMetadataOneAutoplayDefault = false;
+export const updateMediaBodyMotionMetadataOneLoopDefault = false;
+export const updateMediaBodyMotionMetadataOneAccessibilityTranscriptMax = 10000;
+
+
+export const updateMediaBodyMotionMetadataOneAccessibilityTranscriptRegExp = new RegExp('\\S');
+export const updateMediaBodyMotionMetadataOneAccessibilityAudioDescriptionMax = 2000;
+
+
+export const updateMediaBodyMotionMetadataOneAccessibilityAudioDescriptionRegExp = new RegExp('\\S');
 export const updateMediaBodyFocalPointOneXMin = 0;
 export const updateMediaBodyFocalPointOneXMax = 1;
 
@@ -4698,7 +5030,7 @@ export const UpdateMediaBody = zod.object({
   "altText": zod.string().max(updateMediaBodyAltTextMax).nullish(),
   "caption": zod.string().max(updateMediaBodyCaptionMax).nullish(),
   "credit": zod.string().max(updateMediaBodyCreditMax).nullish(),
-  "collection": zod.enum(['website', 'linkedin']).optional(),
+  "collection": zod.enum(['website', 'linkedin', 'motion']).optional(),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
   "campaign": zod.string().min(1).max(updateMediaBodyCampaignMetadataOneCampaignMax).regex(updateMediaBodyCampaignMetadataOneCampaignRegExp).optional(),
@@ -4707,6 +5039,21 @@ export const UpdateMediaBody = zod.object({
   "purpose": zod.string().min(1).max(updateMediaBodyCampaignMetadataOnePurposeMax).regex(updateMediaBodyCampaignMetadataOnePurposeRegExp).optional(),
   "pulseSource": zod.string().min(1).max(updateMediaBodyCampaignMetadataOnePulseSourceMax).regex(updateMediaBodyCampaignMetadataOnePulseSourceRegExp).optional(),
   "approvedUse": zod.string().min(1).max(updateMediaBodyCampaignMetadataOneApprovedUseMax).regex(updateMediaBodyCampaignMetadataOneApprovedUseRegExp).optional()
+}),zod.null()]).optional(),
+  "motionMetadata": zod.union([zod.object({
+  "groupId": zod.string().min(1).max(updateMediaBodyMotionMetadataOneGroupIdMax).regex(updateMediaBodyMotionMetadataOneGroupIdRegExp),
+  "variant": zod.enum(['landscape', 'portrait', 'square', 'mobile', 'desktop']),
+  "posterMediaId": zod.string().min(1).optional(),
+  "reducedMotionMediaId": zod.string().min(1).optional(),
+  "autoplay": zod.boolean().default(updateMediaBodyMotionMetadataOneAutoplayDefault),
+  "loop": zod.boolean().default(updateMediaBodyMotionMetadataOneLoopDefault),
+  "accessibility": zod.object({
+  "decorative": zod.boolean(),
+  "hasAudio": zod.boolean(),
+  "captionsMediaId": zod.string().min(1).optional(),
+  "transcript": zod.string().min(1).max(updateMediaBodyMotionMetadataOneAccessibilityTranscriptMax).regex(updateMediaBodyMotionMetadataOneAccessibilityTranscriptRegExp).optional(),
+  "audioDescription": zod.string().min(1).max(updateMediaBodyMotionMetadataOneAccessibilityAudioDescriptionMax).regex(updateMediaBodyMotionMetadataOneAccessibilityAudioDescriptionRegExp).optional()
+})
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(updateMediaBodyFocalPointOneXMin).max(updateMediaBodyFocalPointOneXMax),
@@ -4720,6 +5067,8 @@ export const updateMediaResponseSizeMultipleOf = 1;
 export const updateMediaResponseWidthMultipleOf = 1;
 
 export const updateMediaResponseHeightMultipleOf = 1;
+
+export const updateMediaResponseDurationMin = 0;
 
 export const updateMediaResponseCampaignMetadataOneCampaignMax = 120;
 
@@ -4745,6 +5094,22 @@ export const updateMediaResponseCampaignMetadataOneApprovedUseMax = 300;
 
 
 export const updateMediaResponseCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
+export const updateMediaResponseMotionMetadataOneGroupIdMax = 120;
+
+
+export const updateMediaResponseMotionMetadataOneGroupIdRegExp = new RegExp('\\S');
+
+
+export const updateMediaResponseMotionMetadataOneAutoplayDefault = false;
+export const updateMediaResponseMotionMetadataOneLoopDefault = false;
+export const updateMediaResponseMotionMetadataOneAccessibilityTranscriptMax = 10000;
+
+
+export const updateMediaResponseMotionMetadataOneAccessibilityTranscriptRegExp = new RegExp('\\S');
+export const updateMediaResponseMotionMetadataOneAccessibilityAudioDescriptionMax = 2000;
+
+
+export const updateMediaResponseMotionMetadataOneAccessibilityAudioDescriptionRegExp = new RegExp('\\S');
 export const updateMediaResponseFocalPointOneXMin = 0;
 export const updateMediaResponseFocalPointOneXMax = 1;
 
@@ -4755,6 +5120,7 @@ export const updateMediaResponseFocalPointOneYMax = 1;
 
 export const UpdateMediaResponse = zod.object({
   "id": zod.string(),
+  "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
   "filename": zod.string(),
   "objectPath": zod.string(),
   "publicUrl": zod.string().nullish(),
@@ -4762,11 +5128,12 @@ export const UpdateMediaResponse = zod.object({
   "size": zod.number().min(updateMediaResponseSizeMin).multipleOf(updateMediaResponseSizeMultipleOf),
   "width": zod.number().min(1).multipleOf(updateMediaResponseWidthMultipleOf).nullish(),
   "height": zod.number().min(1).multipleOf(updateMediaResponseHeightMultipleOf).nullish(),
+  "duration": zod.number().min(updateMediaResponseDurationMin).nullish(),
   "checksum": zod.string().nullish(),
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
   "credit": zod.string().nullish(),
-  "collection": zod.enum(['website', 'linkedin']),
+  "collection": zod.enum(['website', 'linkedin', 'motion']),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
   "campaign": zod.string().min(1).max(updateMediaResponseCampaignMetadataOneCampaignMax).regex(updateMediaResponseCampaignMetadataOneCampaignRegExp).optional(),
@@ -4775,6 +5142,21 @@ export const UpdateMediaResponse = zod.object({
   "purpose": zod.string().min(1).max(updateMediaResponseCampaignMetadataOnePurposeMax).regex(updateMediaResponseCampaignMetadataOnePurposeRegExp).optional(),
   "pulseSource": zod.string().min(1).max(updateMediaResponseCampaignMetadataOnePulseSourceMax).regex(updateMediaResponseCampaignMetadataOnePulseSourceRegExp).optional(),
   "approvedUse": zod.string().min(1).max(updateMediaResponseCampaignMetadataOneApprovedUseMax).regex(updateMediaResponseCampaignMetadataOneApprovedUseRegExp).optional()
+}),zod.null()]).optional(),
+  "motionMetadata": zod.union([zod.object({
+  "groupId": zod.string().min(1).max(updateMediaResponseMotionMetadataOneGroupIdMax).regex(updateMediaResponseMotionMetadataOneGroupIdRegExp),
+  "variant": zod.enum(['landscape', 'portrait', 'square', 'mobile', 'desktop']),
+  "posterMediaId": zod.string().min(1).optional(),
+  "reducedMotionMediaId": zod.string().min(1).optional(),
+  "autoplay": zod.boolean().default(updateMediaResponseMotionMetadataOneAutoplayDefault),
+  "loop": zod.boolean().default(updateMediaResponseMotionMetadataOneLoopDefault),
+  "accessibility": zod.object({
+  "decorative": zod.boolean(),
+  "hasAudio": zod.boolean(),
+  "captionsMediaId": zod.string().min(1).optional(),
+  "transcript": zod.string().min(1).max(updateMediaResponseMotionMetadataOneAccessibilityTranscriptMax).regex(updateMediaResponseMotionMetadataOneAccessibilityTranscriptRegExp).optional(),
+  "audioDescription": zod.string().min(1).max(updateMediaResponseMotionMetadataOneAccessibilityAudioDescriptionMax).regex(updateMediaResponseMotionMetadataOneAccessibilityAudioDescriptionRegExp).optional()
+})
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(updateMediaResponseFocalPointOneXMin).max(updateMediaResponseFocalPointOneXMax),
@@ -4795,6 +5177,16 @@ export const DeleteMediaParams = zod.object({
 })
 
 export const DeleteMediaResponse = zod.void()
+
+
+/**
+ * @summary Download protected preview media with byte-range support
+ */
+export const GetMediaFileParams = zod.object({
+  "mediaId": zod.coerce.string()
+})
+
+export const GetMediaFileResponse = zod.unknown()
 
 
 /**
@@ -4835,6 +5227,22 @@ export const finalizeMediaUploadBodyCampaignMetadataApprovedUseMax = 300;
 
 
 export const finalizeMediaUploadBodyCampaignMetadataApprovedUseRegExp = new RegExp('\\S');
+export const finalizeMediaUploadBodyMotionMetadataGroupIdMax = 120;
+
+
+export const finalizeMediaUploadBodyMotionMetadataGroupIdRegExp = new RegExp('\\S');
+
+
+export const finalizeMediaUploadBodyMotionMetadataAutoplayDefault = false;
+export const finalizeMediaUploadBodyMotionMetadataLoopDefault = false;
+export const finalizeMediaUploadBodyMotionMetadataAccessibilityTranscriptMax = 10000;
+
+
+export const finalizeMediaUploadBodyMotionMetadataAccessibilityTranscriptRegExp = new RegExp('\\S');
+export const finalizeMediaUploadBodyMotionMetadataAccessibilityAudioDescriptionMax = 2000;
+
+
+export const finalizeMediaUploadBodyMotionMetadataAccessibilityAudioDescriptionRegExp = new RegExp('\\S');
 
 
 export const FinalizeMediaUploadBody = zod.object({
@@ -4843,7 +5251,7 @@ export const FinalizeMediaUploadBody = zod.object({
   "altText": zod.string().max(finalizeMediaUploadBodyAltTextMax).optional(),
   "caption": zod.string().max(finalizeMediaUploadBodyCaptionMax).optional(),
   "credit": zod.string().max(finalizeMediaUploadBodyCreditMax).optional(),
-  "collection": zod.enum(['website', 'linkedin']).optional(),
+  "collection": zod.enum(['website', 'linkedin', 'motion']).optional(),
   "linkedinAssetKind": zod.enum(['post', 'header']).optional(),
   "campaignMetadata": zod.object({
   "campaign": zod.string().min(1).max(finalizeMediaUploadBodyCampaignMetadataCampaignMax).regex(finalizeMediaUploadBodyCampaignMetadataCampaignRegExp).optional(),
@@ -4852,6 +5260,21 @@ export const FinalizeMediaUploadBody = zod.object({
   "purpose": zod.string().min(1).max(finalizeMediaUploadBodyCampaignMetadataPurposeMax).regex(finalizeMediaUploadBodyCampaignMetadataPurposeRegExp).optional(),
   "pulseSource": zod.string().min(1).max(finalizeMediaUploadBodyCampaignMetadataPulseSourceMax).regex(finalizeMediaUploadBodyCampaignMetadataPulseSourceRegExp).optional(),
   "approvedUse": zod.string().min(1).max(finalizeMediaUploadBodyCampaignMetadataApprovedUseMax).regex(finalizeMediaUploadBodyCampaignMetadataApprovedUseRegExp).optional()
+}).optional(),
+  "motionMetadata": zod.object({
+  "groupId": zod.string().min(1).max(finalizeMediaUploadBodyMotionMetadataGroupIdMax).regex(finalizeMediaUploadBodyMotionMetadataGroupIdRegExp),
+  "variant": zod.enum(['landscape', 'portrait', 'square', 'mobile', 'desktop']),
+  "posterMediaId": zod.string().min(1).optional(),
+  "reducedMotionMediaId": zod.string().min(1).optional(),
+  "autoplay": zod.boolean().default(finalizeMediaUploadBodyMotionMetadataAutoplayDefault),
+  "loop": zod.boolean().default(finalizeMediaUploadBodyMotionMetadataLoopDefault),
+  "accessibility": zod.object({
+  "decorative": zod.boolean(),
+  "hasAudio": zod.boolean(),
+  "captionsMediaId": zod.string().min(1).optional(),
+  "transcript": zod.string().min(1).max(finalizeMediaUploadBodyMotionMetadataAccessibilityTranscriptMax).regex(finalizeMediaUploadBodyMotionMetadataAccessibilityTranscriptRegExp).optional(),
+  "audioDescription": zod.string().min(1).max(finalizeMediaUploadBodyMotionMetadataAccessibilityAudioDescriptionMax).regex(finalizeMediaUploadBodyMotionMetadataAccessibilityAudioDescriptionRegExp).optional()
+})
 }).optional()
 })
 
@@ -4861,6 +5284,8 @@ export const finalizeMediaUploadResponseSizeMultipleOf = 1;
 export const finalizeMediaUploadResponseWidthMultipleOf = 1;
 
 export const finalizeMediaUploadResponseHeightMultipleOf = 1;
+
+export const finalizeMediaUploadResponseDurationMin = 0;
 
 export const finalizeMediaUploadResponseCampaignMetadataOneCampaignMax = 120;
 
@@ -4886,6 +5311,22 @@ export const finalizeMediaUploadResponseCampaignMetadataOneApprovedUseMax = 300;
 
 
 export const finalizeMediaUploadResponseCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
+export const finalizeMediaUploadResponseMotionMetadataOneGroupIdMax = 120;
+
+
+export const finalizeMediaUploadResponseMotionMetadataOneGroupIdRegExp = new RegExp('\\S');
+
+
+export const finalizeMediaUploadResponseMotionMetadataOneAutoplayDefault = false;
+export const finalizeMediaUploadResponseMotionMetadataOneLoopDefault = false;
+export const finalizeMediaUploadResponseMotionMetadataOneAccessibilityTranscriptMax = 10000;
+
+
+export const finalizeMediaUploadResponseMotionMetadataOneAccessibilityTranscriptRegExp = new RegExp('\\S');
+export const finalizeMediaUploadResponseMotionMetadataOneAccessibilityAudioDescriptionMax = 2000;
+
+
+export const finalizeMediaUploadResponseMotionMetadataOneAccessibilityAudioDescriptionRegExp = new RegExp('\\S');
 export const finalizeMediaUploadResponseFocalPointOneXMin = 0;
 export const finalizeMediaUploadResponseFocalPointOneXMax = 1;
 
@@ -4896,6 +5337,7 @@ export const finalizeMediaUploadResponseFocalPointOneYMax = 1;
 
 export const FinalizeMediaUploadResponse = zod.object({
   "id": zod.string(),
+  "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
   "filename": zod.string(),
   "objectPath": zod.string(),
   "publicUrl": zod.string().nullish(),
@@ -4903,11 +5345,12 @@ export const FinalizeMediaUploadResponse = zod.object({
   "size": zod.number().min(finalizeMediaUploadResponseSizeMin).multipleOf(finalizeMediaUploadResponseSizeMultipleOf),
   "width": zod.number().min(1).multipleOf(finalizeMediaUploadResponseWidthMultipleOf).nullish(),
   "height": zod.number().min(1).multipleOf(finalizeMediaUploadResponseHeightMultipleOf).nullish(),
+  "duration": zod.number().min(finalizeMediaUploadResponseDurationMin).nullish(),
   "checksum": zod.string().nullish(),
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
   "credit": zod.string().nullish(),
-  "collection": zod.enum(['website', 'linkedin']),
+  "collection": zod.enum(['website', 'linkedin', 'motion']),
   "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
   "campaignMetadata": zod.union([zod.object({
   "campaign": zod.string().min(1).max(finalizeMediaUploadResponseCampaignMetadataOneCampaignMax).regex(finalizeMediaUploadResponseCampaignMetadataOneCampaignRegExp).optional(),
@@ -4916,6 +5359,21 @@ export const FinalizeMediaUploadResponse = zod.object({
   "purpose": zod.string().min(1).max(finalizeMediaUploadResponseCampaignMetadataOnePurposeMax).regex(finalizeMediaUploadResponseCampaignMetadataOnePurposeRegExp).optional(),
   "pulseSource": zod.string().min(1).max(finalizeMediaUploadResponseCampaignMetadataOnePulseSourceMax).regex(finalizeMediaUploadResponseCampaignMetadataOnePulseSourceRegExp).optional(),
   "approvedUse": zod.string().min(1).max(finalizeMediaUploadResponseCampaignMetadataOneApprovedUseMax).regex(finalizeMediaUploadResponseCampaignMetadataOneApprovedUseRegExp).optional()
+}),zod.null()]).optional(),
+  "motionMetadata": zod.union([zod.object({
+  "groupId": zod.string().min(1).max(finalizeMediaUploadResponseMotionMetadataOneGroupIdMax).regex(finalizeMediaUploadResponseMotionMetadataOneGroupIdRegExp),
+  "variant": zod.enum(['landscape', 'portrait', 'square', 'mobile', 'desktop']),
+  "posterMediaId": zod.string().min(1).optional(),
+  "reducedMotionMediaId": zod.string().min(1).optional(),
+  "autoplay": zod.boolean().default(finalizeMediaUploadResponseMotionMetadataOneAutoplayDefault),
+  "loop": zod.boolean().default(finalizeMediaUploadResponseMotionMetadataOneLoopDefault),
+  "accessibility": zod.object({
+  "decorative": zod.boolean(),
+  "hasAudio": zod.boolean(),
+  "captionsMediaId": zod.string().min(1).optional(),
+  "transcript": zod.string().min(1).max(finalizeMediaUploadResponseMotionMetadataOneAccessibilityTranscriptMax).regex(finalizeMediaUploadResponseMotionMetadataOneAccessibilityTranscriptRegExp).optional(),
+  "audioDescription": zod.string().min(1).max(finalizeMediaUploadResponseMotionMetadataOneAccessibilityAudioDescriptionMax).regex(finalizeMediaUploadResponseMotionMetadataOneAccessibilityAudioDescriptionRegExp).optional()
+})
 }),zod.null()]).optional(),
   "focalPoint": zod.union([zod.object({
   "x": zod.number().min(finalizeMediaUploadResponseFocalPointOneXMin).max(finalizeMediaUploadResponseFocalPointOneXMax),
@@ -5303,7 +5761,7 @@ export const listPublishedContentQueryPageSizeMultipleOf = 1;
 export const ListPublishedContentQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listPublishedContentQueryPageMultipleOf).default(listPublishedContentQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listPublishedContentQueryPageSizeMax).multipleOf(listPublishedContentQueryPageSizeMultipleOf).default(listPublishedContentQueryPageSizeDefault),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']).optional(),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']).optional(),
   "market": zod.coerce.string(),
   "locale": zod.coerce.string().optional()
 })
@@ -5334,7 +5792,7 @@ export const ListPublishedContentResponse = zod.object({
 }).and(zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string(),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -5378,7 +5836,7 @@ export const ListPublishedContentResponse = zod.object({
 export const GetPublishedContentParams = zod.object({
   "market": zod.coerce.string(),
   "locale": zod.coerce.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.coerce.string()
 })
 
@@ -5392,7 +5850,7 @@ export const getPublishedContentResponseRevisionMultipleOf = 1;
 
 export const GetPublishedContentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
   "slug": zod.string(),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -5434,6 +5892,51 @@ export const GetPublishedMediaParams = zod.object({
 })
 
 export const GetPublishedMediaResponse = zod.unknown()
+
+
+/**
+ * @summary Get the immutable governed hero film set for a public slot
+ */
+export const GetPublicHeroFilmParams = zod.object({
+  "slot": zod.enum(['homepage', 'industries'])
+})
+
+export const getPublicHeroFilmQueryMarketDefault = `uae`;
+export const getPublicHeroFilmQueryLocaleDefault = `en`;
+
+export const GetPublicHeroFilmQueryParams = zod.object({
+  "market": zod.coerce.string().default(getPublicHeroFilmQueryMarketDefault),
+  "locale": zod.coerce.string().default(getPublicHeroFilmQueryLocaleDefault)
+})
+
+export const getPublicHeroFilmResponseSourcesMin = 2;
+export const getPublicHeroFilmResponseSourcesMax = 2;
+
+export const getPublicHeroFilmResponseRevisionMultipleOf = 1;
+
+
+
+export const GetPublicHeroFilmResponse = zod.object({
+  "slot": zod.enum(['homepage', 'industries']),
+  "poster": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "url": zod.string(),
+  "mimeType": zod.enum(['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'])
+}),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "url": zod.string(),
+  "mimeType": zod.enum(['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'])
+})).min(getPublicHeroFilmResponseSourcesMin).max(getPublicHeroFilmResponseSourcesMax),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "requestedMarket": zod.string(),
+  "usedFallback": zod.boolean(),
+  "revision": zod.number().min(1).multipleOf(getPublicHeroFilmResponseRevisionMultipleOf),
+  "publishedAt": zod.coerce.date()
+})
 
 
 /**

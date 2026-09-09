@@ -8,6 +8,7 @@
 import type { LinkedInAssetKind } from './linkedInAssetKind';
 import type { MediaCampaignMetadata } from './mediaCampaignMetadata';
 import type { MediaCollection } from './mediaCollection';
+import type { MotionMetadata } from './motionMetadata';
 
 export interface MediaUploadInput {
   /**
@@ -22,11 +23,12 @@ export interface MediaUploadInput {
   mimeType: string;
   /**
      * @minimum 1
-     * @maximum 52428800
+     * @maximum 262144000
      */
   size: number;
   checksum?: string;
   collection?: MediaCollection;
   linkedinAssetKind?: LinkedInAssetKind;
   campaignMetadata?: MediaCampaignMetadata;
+  motionMetadata?: MotionMetadata;
 }

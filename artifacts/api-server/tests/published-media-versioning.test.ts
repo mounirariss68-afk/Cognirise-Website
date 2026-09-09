@@ -14,12 +14,14 @@ test("public media stays on the revision pin when a newer asset version appears"
     { pool },
     { default: app },
     { publicMediaDelivery },
+    { protectedMediaDelivery },
     auth,
     security,
   ] = await Promise.all([
     import("@workspace/db"),
     import("../src/app.ts"),
     import("../src/routes/public.ts"),
+    import("../src/routes/media.ts"),
     import("../src/lib/auth.ts"),
     import("../src/lib/security.ts"),
   ]);
@@ -41,12 +43,22 @@ test("public media stays on the revision pin when a newer asset version appears"
       storageKey: "private/cms-media/asset/v1.png",
       bytes: "approved-version-one",
       width: 1200,
+      metadata: {
+        caption: "Approved artwork",
+        altText: "Approved artwork",
+        credit: "Cognirise",
+        motionMetadata: null,
+        focalPoint: null,
+      },
     }],
   ]);
   const pendingRevisionId = "00000000-0000-4000-8000-000000000013";
   const documentId = "00000000-0000-4000-8000-000000000201";
   let missingReferenceInserted = false;
   let publishedRevision = revisions.first;
+  let latestVersion = revisions.first;
+  let assetAltText: string | null = "Approved artwork";
+  let assetCredit: string | null = "Cognirise";
   const now = new Date("2026-09-07T00:00:00Z");
   const snapshot = {
     slug: "pinned-platform",
@@ -141,9 +153,9 @@ test("public media stays on the revision pin when a newer asset version appears"
           media_type: "image/png",
           width: version.width,
           height: 630,
-          metadata: { caption: "Approved artwork" },
-          alt_text: "Approved artwork",
-          credit: "Cognirise",
+          metadata: version.metadata,
+          alt_text: assetAltText,
+          credit: assetCredit,
         }],
       };
     }
@@ -156,7 +168,24 @@ test("public media stays on the revision pin when a newer asset version appears"
       return authorized
         ? {
             rowCount: 1,
-            rows: [{ storage_key: version.storageKey, media_type: "image/png" }],
+            rows: [{
+              storage_key: version.storageKey,
+              media_type: "image/png",
+              byte_size: Buffer.byteLength(version.bytes),
+            }],
+          }
+        : { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("SELECT COALESCE(v.storage_key,a.storage_key) storage_key")) {
+      const version = versions.get(publishedRevision.versionId);
+      return version
+        ? {
+            rowCount: 1,
+            rows: [{
+              storage_key: version.storageKey,
+              media_type: "image/png",
+              byte_size: Buffer.byteLength(version.bytes),
+            }],
           }
         : { rowCount: 0, rows: [] };
     }
@@ -186,8 +215,67 @@ test("public media stays on the revision pin when a newer asset version appears"
     return { rowCount: 0, rows: [] };
   });
   const transactionClient = {
-    async query(sql: unknown) {
+    async query(sql: unknown, values?: unknown[]) {
       const statement = String(sql);
+      if (statement === "BEGIN" || statement === "COMMIT" || statement === "ROLLBACK") {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT a.*,v.metadata") && statement.includes("FOR UPDATE OF a")) {
+        const version = versions.get(latestVersion.versionId)!;
+        return {
+          rowCount: 1,
+          rows: [{
+            id: assetId,
+            collection: "website",
+            linkedin_asset_kind: null,
+            media_type: "image/png",
+            motion_metadata: null,
+            alt_text: assetAltText,
+            credit: assetCredit,
+            metadata: version.metadata,
+          }],
+        };
+      }
+      if (statement.includes("UPDATE cms_media_assets SET filename")) {
+        assetAltText = values?.[2] ? values?.[3] as string | null : assetAltText;
+        assetCredit = values?.[4] ? values?.[5] as string | null : assetCredit;
+        return { rowCount: 1, rows: [{ id: assetId }] };
+      }
+      if (statement.includes("INSERT INTO cms_media_versions(")) {
+        const prior = versions.get(latestVersion.versionId)!;
+        versions.set(revisions.second.versionId, {
+          ...prior,
+          metadata: values?.[1] as Record<string, unknown>,
+        });
+        latestVersion = revisions.second;
+        return { rowCount: 1, rows: [] };
+      }
+      if (statement.includes("SELECT a.*,v.id version_id,v.width,v.height,v.metadata")) {
+        const version = versions.get(latestVersion.versionId)!;
+        return {
+          rowCount: 1,
+          rows: [{
+            id: assetId,
+            filename: "asset.png",
+            storage_key: version.storageKey,
+            media_type: "image/png",
+            byte_size: Buffer.byteLength(version.bytes),
+            checksum: "checksum",
+            status: "active",
+            collection: "website",
+            linkedin_asset_kind: null,
+            campaign_metadata: null,
+            motion_metadata: null,
+            alt_text: assetAltText,
+            credit: assetCredit,
+            width: version.width,
+            height: 630,
+            metadata: version.metadata,
+            created_at: now,
+            updated_at: now,
+          }],
+        };
+      }
       if (statement.includes("SELECT r.id,r.edition_id,r.payload,d.kind")) {
         return {
           rowCount: 1,
@@ -218,13 +306,18 @@ test("public media stays on the revision pin when a newer asset version appears"
     release() {},
   };
   t.mock.method(pool, "connect", async () => transactionClient as never);
-  t.mock.method(publicMediaDelivery, "download", async (storageKey: string) => {
+  t.mock.method(publicMediaDelivery, "download", async (
+    storageKey: string,
+    range?: { start: number; end: number },
+  ) => {
     const version = [...versions.values()].find((candidate) =>
       candidate.storageKey === storageKey
     );
     if (!version) throw new Error("Missing test object");
-    return Readable.from(version.bytes);
+    const bytes = Buffer.from(version.bytes);
+    return Readable.from(range ? bytes.subarray(range.start, range.end + 1) : bytes);
   });
+  t.mock.method(protectedMediaDelivery, "download", publicMediaDelivery.download);
 
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
@@ -246,20 +339,72 @@ test("public media stays on the revision pin when a newer asset version appears"
     media: Array<{ versionId: string; url: string }>;
   };
   assert.equal(firstContent.media[0].versionId, revisions.first.versionId);
-  assert.equal(
-    await (await fetch(`${origin}${firstContent.media[0].url}`)).text(),
-    "approved-version-one",
-  );
-
-  versions.set(revisions.second.versionId, {
-    storageKey: "private/cms-media/asset/v2.png",
-    bytes: "approved-version-two",
-    width: 1600,
+  const firstMedia = await fetch(`${origin}${firstContent.media[0].url}`);
+  assert.equal(firstMedia.headers.get("content-type"), "image/png");
+  assert.equal(await firstMedia.text(), "approved-version-one");
+  const partial = await fetch(`${origin}${firstContent.media[0].url}`, {
+    headers: { range: "bytes=9-15" },
   });
+  assert.equal(partial.status, 206);
+  assert.equal(partial.headers.get("accept-ranges"), "bytes");
+  assert.equal(partial.headers.get("content-range"), "bytes 9-15/20");
+  assert.equal(partial.headers.get("content-type"), "image/png");
+  assert.equal(await partial.text(), "version");
+  const unsatisfiable = await fetch(`${origin}${firstContent.media[0].url}`, {
+    headers: { range: "bytes=20-" },
+  });
+  assert.equal(unsatisfiable.status, 416);
+  assert.equal(unsatisfiable.headers.get("content-range"), "bytes */20");
+
+  const csrf = auth.csrfForSession(security.hashToken("session-token"));
+  const protectedPartial = await fetch(`${origin}/api/media/${assetId}/file`, {
+    headers: {
+      range: "bytes=-3",
+      cookie: `${auth.SESSION_COOKIE}=session-token; ${auth.CSRF_COOKIE}=${csrf}`,
+    },
+  });
+  assert.equal(protectedPartial.status, 206);
+  assert.equal(protectedPartial.headers.get("content-range"), "bytes 17-19/20");
+  assert.equal(protectedPartial.headers.get("content-type"), "image/png");
+  assert.equal(await protectedPartial.text(), "one");
+
+  const metadataPatch = await fetch(`${origin}/api/media/${assetId}`, {
+    method: "PATCH",
+    headers: {
+      "content-type": "application/json",
+      origin,
+      "x-csrf-token": csrf,
+      cookie: `${auth.SESSION_COOKIE}=session-token; ${auth.CSRF_COOKIE}=${csrf}`,
+    },
+    body: JSON.stringify({
+      caption: "Revised caption",
+      altText: null,
+      credit: "Revised credit",
+    }),
+  });
+  assert.equal(metadataPatch.status, 200);
+  const patched = await metadataPatch.json() as {
+    caption: string; altText: null; credit: string;
+  };
+  assert.equal(patched.caption, "Revised caption");
+  assert.equal(patched.altText, null);
+  assert.equal(patched.credit, "Revised credit");
+  const metadataVersion = versions.get(revisions.second.versionId)!;
+  assert.deepEqual(metadataVersion.metadata, {
+    caption: "Revised caption",
+    altText: null,
+    credit: "Revised credit",
+    motionMetadata: null,
+    focalPoint: null,
+  });
+
   const unchangedContent = await (await fetch(contentUrl)).json() as {
-    media: Array<{ versionId: string; url: string }>;
+    media: Array<{ versionId: string; url: string; altText: string | null; caption: string; credit: string }>;
   };
   assert.equal(unchangedContent.media[0].versionId, revisions.first.versionId);
+  assert.equal(unchangedContent.media[0].altText, "Approved artwork");
+  assert.equal(unchangedContent.media[0].caption, "Approved artwork");
+  assert.equal(unchangedContent.media[0].credit, "Cognirise");
   assert.equal(
     await (await fetch(`${origin}${unchangedContent.media[0].url}`)).text(),
     "approved-version-one",
@@ -267,19 +412,21 @@ test("public media stays on the revision pin when a newer asset version appears"
 
   publishedRevision = revisions.second;
   const republishedContent = await (await fetch(contentUrl)).json() as {
-    media: Array<{ versionId: string; url: string }>;
+    media: Array<{ versionId: string; url: string; altText: null; caption: string; credit: string }>;
   };
   assert.equal(republishedContent.media[0].versionId, revisions.second.versionId);
+  assert.equal(republishedContent.media[0].altText, null);
+  assert.equal(republishedContent.media[0].caption, "Revised caption");
+  assert.equal(republishedContent.media[0].credit, "Revised credit");
   assert.equal(
     await (await fetch(`${origin}${republishedContent.media[0].url}`)).text(),
-    "approved-version-two",
+    "approved-version-one",
   );
   const unapproved = await fetch(
     `${origin}/api/public/media/${assetId}/00000000-0000-4000-8000-000000000103`,
   );
   assert.equal(unapproved.status, 404);
 
-  const csrf = auth.csrfForSession(security.hashToken("session-token"));
   const publish = await fetch(`${origin}/api/documents/${documentId}/publish`, {
     method: "POST",
     headers: {

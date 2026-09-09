@@ -45,6 +45,7 @@ import type {
   EnquiryInput,
   EnquiryReceipt,
   GetDashboardKpisParams,
+  GetPublicHeroFilmParams,
   GetPublicSitemapParams,
   HealthStatus,
   ListAuditEventsParams,
@@ -77,6 +78,8 @@ import type {
   PasswordChangeInput,
   PasswordReset,
   PasswordResetInput,
+  PublicHeroFilm,
+  PublicHeroSlot,
   PublicationInput,
   PublishedContent,
   PublishedContentPage,
@@ -3473,6 +3476,83 @@ export const useDeleteMedia = <TError = ErrorType<ConflictResponse>,
       return useMutation(getDeleteMediaMutationOptions(options));
     }
 
+export const getGetMediaFileUrl = (mediaId: string,) => {
+
+
+
+
+  return `/api/media/${mediaId}/file`
+}
+
+/**
+ * @summary Download protected preview media with byte-range support
+ */
+export const getMediaFile = async (mediaId: string, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getGetMediaFileUrl(mediaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMediaFileQueryKey = (mediaId: string,) => {
+    return [
+    `/api/media/${mediaId}/file`
+    ] as const;
+    }
+
+
+export const getGetMediaFileQueryOptions = <TData = Awaited<ReturnType<typeof getMediaFile>>, TError = ErrorType<void>>(mediaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMediaFile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMediaFileQueryKey(mediaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMediaFile>>> = ({ signal }) => getMediaFile(mediaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: mediaId !== null && mediaId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMediaFile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMediaFileQueryResult = NonNullable<Awaited<ReturnType<typeof getMediaFile>>>
+export type GetMediaFileQueryError = ErrorType<void>
+
+
+/**
+ * @summary Download protected preview media with byte-range support
+ */
+
+export function useGetMediaFile<TData = Awaited<ReturnType<typeof getMediaFile>>, TError = ErrorType<void>>(
+ mediaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMediaFile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMediaFileQueryOptions(mediaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getFinalizeMediaUploadUrl = (mediaId: string,) => {
 
 
@@ -4439,7 +4519,7 @@ export const getGetPublishedMediaQueryKey = (mediaId: string,
     }
 
 
-export const getGetPublishedMediaQueryOptions = <TData = Awaited<ReturnType<typeof getPublishedMedia>>, TError = ErrorType<NotFoundResponse>>(mediaId: string,
+export const getGetPublishedMediaQueryOptions = <TData = Awaited<ReturnType<typeof getPublishedMedia>>, TError = ErrorType<NotFoundResponse | void>>(mediaId: string,
     versionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublishedMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
@@ -4459,20 +4539,109 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type GetPublishedMediaQueryResult = NonNullable<Awaited<ReturnType<typeof getPublishedMedia>>>
-export type GetPublishedMediaQueryError = ErrorType<NotFoundResponse>
+export type GetPublishedMediaQueryError = ErrorType<NotFoundResponse | void>
 
 
 /**
  * @summary Download the immutable media version approved with published content
  */
 
-export function useGetPublishedMedia<TData = Awaited<ReturnType<typeof getPublishedMedia>>, TError = ErrorType<NotFoundResponse>>(
+export function useGetPublishedMedia<TData = Awaited<ReturnType<typeof getPublishedMedia>>, TError = ErrorType<NotFoundResponse | void>>(
  mediaId: string,
     versionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublishedMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetPublishedMediaQueryOptions(mediaId,versionId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetPublicHeroFilmUrl = (slot: PublicHeroSlot,
+    params?: GetPublicHeroFilmParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/hero-films/${slot}?${stringifiedParams}` : `/api/public/hero-films/${slot}`
+}
+
+/**
+ * @summary Get the immutable governed hero film set for a public slot
+ */
+export const getPublicHeroFilm = async (slot: PublicHeroSlot,
+    params?: GetPublicHeroFilmParams, options?: Parameters<typeof customFetch>[1]): Promise<PublicHeroFilm> => {
+
+  return customFetch<PublicHeroFilm>(getGetPublicHeroFilmUrl(slot,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicHeroFilmQueryKey = (slot: PublicHeroSlot,
+    params?: GetPublicHeroFilmParams,) => {
+    return [
+    `/api/public/hero-films/${slot}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetPublicHeroFilmQueryOptions = <TData = Awaited<ReturnType<typeof getPublicHeroFilm>>, TError = ErrorType<NotFoundResponse>>(slot: PublicHeroSlot,
+    params?: GetPublicHeroFilmParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicHeroFilm>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicHeroFilmQueryKey(slot,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicHeroFilm>>> = ({ signal }) => getPublicHeroFilm(slot,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: slot !== null && slot !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicHeroFilm>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicHeroFilmQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicHeroFilm>>>
+export type GetPublicHeroFilmQueryError = ErrorType<NotFoundResponse>
+
+
+/**
+ * @summary Get the immutable governed hero film set for a public slot
+ */
+
+export function useGetPublicHeroFilm<TData = Awaited<ReturnType<typeof getPublicHeroFilm>>, TError = ErrorType<NotFoundResponse>>(
+ slot: PublicHeroSlot,
+    params?: GetPublicHeroFilmParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicHeroFilm>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicHeroFilmQueryOptions(slot,params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

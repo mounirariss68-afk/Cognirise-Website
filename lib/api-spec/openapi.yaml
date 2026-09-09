@@ -918,6 +918,43 @@ paths:
           description: Media deleted
         "409":
           $ref: "#/components/responses/Conflict"
+  /media/{mediaId}/file:
+    get:
+      operationId: getMediaFile
+      tags: [media]
+      summary: Download protected preview media with byte-range support
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/MediaId"
+      responses:
+        "200":
+          description: Complete media bytes
+          content:
+            image/jpeg: {}
+            image/png: {}
+            image/webp: {}
+            image/avif: {}
+            application/pdf: {}
+            video/mp4: {}
+            video/webm: {}
+        "206":
+          description: Requested byte range
+          headers:
+            Accept-Ranges: { schema: { type: string, enum: [bytes] } }
+            Content-Range: { schema: { type: string } }
+          content:
+            image/jpeg: {}
+            image/png: {}
+            image/webp: {}
+            image/avif: {}
+            application/pdf: {}
+            video/mp4: {}
+            video/webm: {}
+        "416":
+          description: Requested byte range is not satisfiable
+          headers:
+            Content-Range: { schema: { type: string } }
   /media/{mediaId}/finalize:
     post:
       operationId: finalizeMediaUpload
@@ -1263,6 +1300,51 @@ paths:
             image/webp: {}
             image/avif: {}
             application/pdf: {}
+            video/mp4: {}
+            video/webm: {}
+        "206":
+          description: Requested byte range
+          headers:
+            Accept-Ranges: { schema: { type: string, enum: [bytes] } }
+            Content-Range: { schema: { type: string } }
+          content:
+            image/jpeg: {}
+            image/png: {}
+            image/webp: {}
+            image/avif: {}
+            application/pdf: {}
+            video/mp4: {}
+            video/webm: {}
+        "416":
+          description: Requested byte range is not satisfiable
+          headers:
+            Content-Range: { schema: { type: string } }
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /public/hero-films/{slot}:
+    get:
+      operationId: getPublicHeroFilm
+      tags: [public]
+      summary: Get the immutable governed hero film set for a public slot
+      parameters:
+        - name: slot
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/PublicHeroSlot"
+        - name: market
+          in: query
+          schema: { type: string, default: uae }
+        - name: locale
+          in: query
+          schema: { type: string, default: en }
+      responses:
+        "200":
+          description: Governed MP4/WebM and poster set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicHeroFilm"
         "404":
           $ref: "#/components/responses/NotFound"
   /public/sitemap:
@@ -1742,7 +1824,7 @@ components:
 
     DocumentKind:
       type: string
-      enum: [person, partner, platform, publication, case-study, industry, framework]
+      enum: [person, partner, platform, publication, case-study, industry, framework, site-configuration]
     DocumentStatus:
       type: string
       enum: [draft, in-review, approved, scheduled, published, archived]
@@ -1755,6 +1837,7 @@ components:
         - $ref: "#/components/schemas/CmsPublicationContent"
         - $ref: "#/components/schemas/CmsCaseStudyContent"
         - $ref: "#/components/schemas/CmsFrameworkContent"
+        - $ref: "#/components/schemas/CmsSiteConfigurationContent"
     CmsPersonContent:
       type: object
       required: [schemaVersion]
@@ -1877,6 +1960,33 @@ components:
         verificationDate: { type: string, format: date }
         reviewDate: { type: string, format: date }
         relatedIds: { type: array, items: { type: string } }
+    CmsSiteConfigurationContent:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, page, hero]
+      properties:
+        schemaVersion: { type: number, enum: [1] }
+        page: { type: string, enum: [homepage, industries] }
+        hero:
+          type: object
+          additionalProperties: false
+          required: [posterMediaId, posterMediaVersionId, sources]
+          properties:
+            posterMediaId: { type: string }
+            posterMediaVersionId: { type: string }
+            sources:
+              type: array
+              minItems: 2
+              maxItems: 2
+              description: Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.
+              items:
+                type: object
+                additionalProperties: false
+                required: [mediaId, mediaVersionId, mimeType]
+                properties:
+                  mediaId: { type: string }
+                  mediaVersionId: { type: string }
+                  mimeType: { type: string, enum: [video/mp4, video/webm] }
     CmsFrameworkExample:
       type: object
       additionalProperties: false
@@ -2253,9 +2363,40 @@ components:
     MediaStatus:
       type: string
       enum: [pending, review, ready, failed]
+    PublicHeroSlot:
+      type: string
+      enum: [homepage, industries]
+    PublicHeroMedia:
+      type: object
+      required: [mediaId, mediaVersionId, url, mimeType]
+      properties:
+        mediaId: { type: string }
+        mediaVersionId: { type: string }
+        url: { type: string }
+        mimeType: { type: string, enum: [image/jpeg, image/png, image/webp, video/mp4, video/webm] }
+    PublicHeroFilm:
+      type: object
+      required: [slot, poster, sources, market, locale, requestedMarket, usedFallback, revision, publishedAt]
+      properties:
+        slot:
+          $ref: "#/components/schemas/PublicHeroSlot"
+        poster:
+          $ref: "#/components/schemas/PublicHeroMedia"
+        sources:
+          type: array
+          minItems: 2
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/PublicHeroMedia"
+        market: { type: string }
+        locale: { type: string }
+        requestedMarket: { type: string }
+        usedFallback: { type: boolean }
+        revision: { type: number, multipleOf: 1, minimum: 1 }
+        publishedAt: { type: string, format: date-time }
     MediaCollection:
       type: string
-      enum: [website, linkedin]
+      enum: [website, linkedin, motion]
     LinkedInAssetKind:
       type: string
       enum: [post, header]
@@ -2269,11 +2410,39 @@ components:
         purpose: { type: string, minLength: 1, maxLength: 300, pattern: '\S' }
         pulseSource: { type: string, minLength: 1, maxLength: 160, pattern: '\S' }
         approvedUse: { type: string, minLength: 1, maxLength: 300, pattern: '\S' }
+    MotionAccessibility:
+      type: object
+      additionalProperties: false
+      required: [decorative, hasAudio]
+      properties:
+        decorative: { type: boolean }
+        hasAudio: { type: boolean }
+        captionsMediaId: { type: string, minLength: 1 }
+        transcript: { type: string, minLength: 1, maxLength: 10000, pattern: '\S' }
+        audioDescription: { type: string, minLength: 1, maxLength: 2000, pattern: '\S' }
+    MotionMetadata:
+      type: object
+      additionalProperties: false
+      required: [groupId, variant, accessibility]
+      properties:
+        groupId: { type: string, minLength: 1, maxLength: 120, pattern: '\S' }
+        variant:
+          type: string
+          enum: [landscape, portrait, square, mobile, desktop]
+        posterMediaId: { type: string, minLength: 1 }
+        reducedMotionMediaId: { type: string, minLength: 1 }
+        autoplay: { type: boolean, default: false }
+        loop: { type: boolean, default: false }
+        accessibility:
+          $ref: "#/components/schemas/MotionAccessibility"
     MediaAsset:
       type: object
-      required: [id, filename, objectPath, mimeType, size, collection, status, createdAt, updatedAt]
+      required: [id, versionId, filename, objectPath, mimeType, size, collection, status, createdAt, updatedAt]
       properties:
         id: { type: string }
+        versionId:
+          type: string
+          description: Immutable latest media version selected by this record.
         filename: { type: string }
         objectPath: { type: string }
         publicUrl: { type: ["string", "null"] }
@@ -2281,6 +2450,7 @@ components:
         size: { type: number, multipleOf: 1, minimum: 0 }
         width: { type: ["number", "null"], multipleOf: 1, minimum: 1 }
         height: { type: ["number", "null"], multipleOf: 1, minimum: 1 }
+        duration: { type: ["number", "null"], minimum: 0 }
         checksum: { type: ["string", "null"] }
         altText: { type: ["string", "null"] }
         caption: { type: ["string", "null"] }
@@ -2294,6 +2464,10 @@ components:
         campaignMetadata:
           anyOf:
             - $ref: "#/components/schemas/MediaCampaignMetadata"
+            - type: "null"
+        motionMetadata:
+          anyOf:
+            - $ref: "#/components/schemas/MotionMetadata"
             - type: "null"
         focalPoint:
           anyOf:
@@ -2317,7 +2491,7 @@ components:
       properties:
         filename: { type: string, minLength: 1, maxLength: 255 }
         mimeType: { type: string, minLength: 1, maxLength: 120 }
-        size: { type: number, multipleOf: 1, minimum: 1, maximum: 52428800 }
+        size: { type: number, multipleOf: 1, minimum: 1, maximum: 262144000 }
         checksum: { type: string }
         collection:
           $ref: "#/components/schemas/MediaCollection"
@@ -2325,6 +2499,8 @@ components:
           $ref: "#/components/schemas/LinkedInAssetKind"
         campaignMetadata:
           $ref: "#/components/schemas/MediaCampaignMetadata"
+        motionMetadata:
+          $ref: "#/components/schemas/MotionMetadata"
     MediaUpload:
       type: object
       required: [media, uploadUrl, method, headers, expiresAt]
@@ -2353,6 +2529,8 @@ components:
           $ref: "#/components/schemas/LinkedInAssetKind"
         campaignMetadata:
           $ref: "#/components/schemas/MediaCampaignMetadata"
+        motionMetadata:
+          $ref: "#/components/schemas/MotionMetadata"
     MediaUpdate:
       type: object
       additionalProperties: false
@@ -2370,6 +2548,10 @@ components:
         campaignMetadata:
           anyOf:
             - $ref: "#/components/schemas/MediaCampaignMetadata"
+            - type: "null"
+        motionMetadata:
+          anyOf:
+            - $ref: "#/components/schemas/MotionMetadata"
             - type: "null"
         focalPoint:
           anyOf:

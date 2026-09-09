@@ -12,4 +12,5 @@ export type MediaCollection = typeof MediaCollection[keyof typeof MediaCollectio
 export const MediaCollection = {
   website: 'website',
   linkedin: 'linkedin',
+  motion: 'motion',
 } as const;

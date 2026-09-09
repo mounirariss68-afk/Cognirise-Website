@@ -92,6 +92,20 @@
       "when": 1788909800000,
       "tag": "0012_cms_preview_revision",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1788909800001,
+      "tag": "0013_cms_motion_media",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1788909800002,
+      "tag": "0014_cms_media_metadata_versions",
+      "breakpoints": true
     }
   ]
 }

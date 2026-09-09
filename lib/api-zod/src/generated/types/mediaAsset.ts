@@ -10,9 +10,12 @@ import type { LinkedInAssetKind } from './linkedInAssetKind';
 import type { MediaCampaignMetadata } from './mediaCampaignMetadata';
 import type { MediaCollection } from './mediaCollection';
 import type { MediaStatus } from './mediaStatus';
+import type { MotionMetadata } from './motionMetadata';
 
 export interface MediaAsset {
   id: string;
+  /** Immutable latest media version selected by this record. */
+  versionId: string;
   filename: string;
   objectPath: string;
   /** @nullable */
@@ -30,6 +33,11 @@ export interface MediaAsset {
      * @nullable
      */
   height?: number | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  duration?: number | null;
   /** @nullable */
   checksum?: string | null;
   /** @nullable */
@@ -41,6 +49,7 @@ export interface MediaAsset {
   collection: MediaCollection;
   linkedinAssetKind?: LinkedInAssetKind | null;
   campaignMetadata?: MediaCampaignMetadata | null;
+  motionMetadata?: MotionMetadata | null;
   focalPoint?: FocalPoint | null;
   status: MediaStatus;
   createdBy?: string;

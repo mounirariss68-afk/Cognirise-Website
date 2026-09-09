@@ -21,7 +21,14 @@ const governance = {
   relatedIds: [],
 };
 
-test("publication requires a known variant and governed article body", () => {
+const heroIds = {
+  poster: "00000000-0000-4000-8000-000000000001",
+  posterVersion: "00000000-0000-4000-8000-000000000011",
+  mp4: "00000000-0000-4000-8000-000000000002",
+  mp4Version: "00000000-0000-4000-8000-000000000012",
+  webm: "00000000-0000-4000-8000-000000000003",
+  webmVersion: "00000000-0000-4000-8000-000000000013",
+};
   const valid = validateCmsContent("publication", {
     ...governance,
     variant: "article",
@@ -39,31 +46,71 @@ test("publication requires a known variant and governed article body", () => {
 });
 
 test("POVs require a ready PDF reference before publication", () => {
-  const result = validateCmsContent("publication", {
-    ...governance,
-    variant: "pov",
-    teaser: "A document teaser.",
-    body: [],
-    author: "Editorial practice",
-    publicationDate: "2026-09-06",
-    topics: [],
-    sectors: [],
-    platformIds: [],
-  }, "publish");
+  const result = validateCmsSnapshot("platform", {
+    slug: "new-platform",
+    title: "New platform",
+    content: {
+      ...governance,
+      category: "Specialist",
+      summary: "A governed platform summary.",
+      template: "standard",
+      heroMediaId: mediaId,
+      sections: [],
+      capabilities: [],
+      differentiators: [],
+      unexpected: true,
+    },
+    mediaIds: [],
+    markets: ["uae"],
+  }, "draft");
+
+  const base = {
+    schemaVersion: 1,
+    page: "industries",
+    hero: {
+      posterMediaId: heroIds.poster,
+      posterMediaVersionId: heroIds.posterVersion,
+      sources: [
+        { mediaId: heroIds.mp4, mediaVersionId: heroIds.mp4Version, mimeType: "video/mp4" },
+        { mediaId: heroIds.webm, mediaVersionId: heroIds.webmVersion, mimeType: "video/webm" },
+      ],
+    },
+  };
   assert.equal(result.success, false);
   assert.match(result.errors.join(" "), /PDF/);
 });
 
 test("unsafe profile links are rejected at the shared boundary", () => {
-  const result = validateCmsContent("person", {
-    ...governance,
-    role: "advisor",
-    title: "Advisor",
-    biography: "A complete approved biography.",
-    focusAreas: [],
-    profileLinks: [{ label: "Unsafe", url: "javascript:alert(1)" }],
-    approvedFallback: "initials",
+  const result = validateCmsSnapshot("platform", {
+    slug: "new-platform",
+    title: "New platform",
+    content: {
+      ...governance,
+      category: "Specialist",
+      summary: "A governed platform summary.",
+      template: "standard",
+      heroMediaId: mediaId,
+      sections: [],
+      capabilities: [],
+      differentiators: [],
+      unexpected: true,
+    },
+    mediaIds: [],
+    markets: ["uae"],
   }, "draft");
+
+  const base = {
+    schemaVersion: 1,
+    page: "industries",
+    hero: {
+      posterMediaId: heroIds.poster,
+      posterMediaVersionId: heroIds.posterVersion,
+      sources: [
+        { mediaId: heroIds.mp4, mediaVersionId: heroIds.mp4Version, mimeType: "video/mp4" },
+        { mediaId: heroIds.webm, mediaVersionId: heroIds.webmVersion, mimeType: "video/webm" },
+      ],
+    },
+  };
   assert.equal(result.success, false);
 });
 
@@ -103,6 +150,19 @@ test("snapshot contract normalizes media authority and rejects unknown fields", 
     mediaIds: [],
     markets: ["uae"],
   }, "draft");
+
+  const base = {
+    schemaVersion: 1,
+    page: "industries",
+    hero: {
+      posterMediaId: heroIds.poster,
+      posterMediaVersionId: heroIds.posterVersion,
+      sources: [
+        { mediaId: heroIds.mp4, mediaVersionId: heroIds.mp4Version, mimeType: "video/mp4" },
+        { mediaId: heroIds.webm, mediaVersionId: heroIds.webmVersion, mimeType: "video/webm" },
+      ],
+    },
+  };
   assert.equal(result.success, false);
 });
 

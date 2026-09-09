@@ -2,6 +2,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { assetUrl } from "@/lib/assets";
 import { PulseImage } from "@/components/ui/pulse-image";
+import { usePublishedHeroFilm } from "@/lib/cms";
 
 const PHRASES = [
   { id: "p1", main: "Intelligence", highlight: "becomes momentum." },
@@ -17,6 +18,15 @@ export function HeroFilm() {
   const [videoUnavailable, setVideoUnavailable] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const film = usePublishedHeroFilm("homepage", {
+    mp4: assetUrl("/videos/cognirise/pulse-hero-motion.mp4"),
+    webm: assetUrl("/videos/cognirise/pulse-hero-motion.webm"),
+    poster: assetUrl("/images/cognirise/pulse-hero-film-poster.jpg"),
+  });
+
+  useEffect(() => {
+    setVideoUnavailable(false);
+  }, [film.mp4, film.webm, film.poster]);
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -27,7 +37,7 @@ export function HeroFilm() {
     }, 5000);
     
     return () => clearInterval(interval);
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, film.mp4, film.webm]);
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -53,7 +63,7 @@ export function HeroFilm() {
     return (
       <div className="w-full h-full relative">
         <PulseImage
-          src={assetUrl("/images/cognirise/pulse-hero-film-poster.jpg")}
+          src={film.poster}
           alt="Cognirise AI-native advisory and engineering." 
           className="w-full h-full object-cover"
           eager
@@ -87,11 +97,12 @@ export function HeroFilm() {
         aria-hidden="true"
         tabIndex={-1}
         onError={() => setVideoUnavailable(true)}
-        poster={assetUrl("/images/cognirise/pulse-hero-film-poster.jpg")}
+        key={`${film.mp4}:${film.webm}:${film.poster}`}
+        poster={film.poster}
         className="absolute inset-0 w-full h-full object-cover"
       >
-        <source src={assetUrl("/videos/cognirise/pulse-hero-motion.mp4")} type="video/mp4" />
-        <source src={assetUrl("/videos/cognirise/pulse-hero-motion.webm")} type="video/webm" />
+        <source src={film.mp4} type="video/mp4" />
+        <source src={film.webm} type="video/webm" />
       </video>
 
       <p className="sr-only">

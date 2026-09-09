@@ -8,6 +8,7 @@
 import type { LinkedInAssetKind } from './linkedInAssetKind';
 import type { MediaCampaignMetadata } from './mediaCampaignMetadata';
 import type { MediaCollection } from './mediaCollection';
+import type { MotionMetadata } from './motionMetadata';
 
 export interface MediaFinalizeInput {
   /** @minLength 1 */
@@ -22,4 +23,5 @@ export interface MediaFinalizeInput {
   collection?: MediaCollection;
   linkedinAssetKind?: LinkedInAssetKind;
   campaignMetadata?: MediaCampaignMetadata;
+  motionMetadata?: MotionMetadata;
 }

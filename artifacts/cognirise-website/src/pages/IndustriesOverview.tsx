@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { IndustryPicker } from "@/components/IndustryPicker";
+import { useEffect, useRef, useState } from "react";
+import { contentRecord, useCmsCollection, usePublishedHeroFilm } from "@/lib/cms";
 
 function IndustriesHeroFilm() {
   const [videoReady, setVideoReady] = useState(false);
@@ -11,7 +12,12 @@ function IndustriesHeroFilm() {
   const [reducedMotion, setReducedMotion] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
-  const poster = assetUrl("/images/cognirise/industries-hero-flight-poster.jpg");
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const film = usePublishedHeroFilm("industries", {
+    mp4: assetUrl("/videos/cognirise/industries-hero-flight.mp4"),
+    webm: assetUrl("/videos/cognirise/industries-hero-flight.webm"),
+    poster: assetUrl("/images/cognirise/industries-hero-flight-poster.jpg"),
+  });
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -21,27 +27,52 @@ function IndustriesHeroFilm() {
     return () => query.removeEventListener("change", updatePreference);
   }, []);
 
+  useEffect(() => {
+    setVideoReady(false);
+    setVideoFailed(false);
+  }, [film.mp4, film.webm, film.poster]);
+
+  useEffect(() => {
+    if (reducedMotion) return;
+    const playbackAttempt = window.setTimeout(() => {
+      const video = videoRef.current;
+      if (!video || !video.paused) return;
+      void video.play().catch(() => setVideoFailed(true));
+    }, 250);
+    const loadingGuard = window.setTimeout(() => {
+      if ((videoRef.current?.readyState ?? 0) < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        setVideoFailed(true);
+      }
+    }, 8000);
+    return () => {
+      window.clearTimeout(playbackAttempt);
+      window.clearTimeout(loadingGuard);
+    };
+  }, [reducedMotion, film.mp4, film.webm]);
+
   return (
     <div
       className={`io-hero-film ${videoReady && !videoFailed ? "is-ready" : ""}`}
-      style={{ backgroundImage: `url("${poster}")` }}
+      style={{ backgroundImage: `url("${film.poster}")` }}
     >
       {!reducedMotion && !videoFailed && (
         <video
+          ref={videoRef}
+          key={`${film.mp4}:${film.webm}:${film.poster}`}
           className="io-hero-video"
           autoPlay
           muted
           loop
           playsInline
           preload="metadata"
-          poster={poster}
+          poster={film.poster}
           aria-hidden="true"
           tabIndex={-1}
           onPlaying={() => setVideoReady(true)}
           onError={() => setVideoFailed(true)}
         >
-          <source src={assetUrl("/videos/cognirise/industries-hero-flight.mp4")} type="video/mp4" />
-          <source src={assetUrl("/videos/cognirise/industries-hero-flight.webm")} type="video/webm" />
+          <source src={film.mp4} type="video/mp4" />
+          <source src={film.webm} type="video/webm" />
         </video>
       )}
       <p className="io-film-messages" aria-label="Pressure reveals the route. Intelligence finds its place. Move consequential work into production.">

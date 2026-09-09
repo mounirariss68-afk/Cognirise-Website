@@ -42,6 +42,7 @@ export default function DocumentDetail() {
 
   const { data: session } = useGetSession();
   const isAdministrator = session?.user?.role === "administrator";
+  const canPublish = isAdministrator || session?.user?.role === "publisher";
 
   const { data: doc, isLoading } = useGetDocument(id!, { query: { enabled: !!id, queryKey: getGetDocumentQueryKey(id!) } });
   
@@ -284,7 +285,7 @@ export default function DocumentDetail() {
               <Send className="w-3.5 h-3.5 mr-2" /> Submit Review
             </Button>
           )}
-          {isAdministrator && ["approved", "in-review", "draft"].includes(doc.status) && (
+           {canPublish && ["approved", "in-review", "draft"].includes(doc.status) && (
             <Button size="sm" onClick={() => { setPublishRevisionId(latestRevId || null); setPublishOpen(true); }} disabled={hasUnsaved || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
               <Globe className="w-3.5 h-3.5 mr-2" /> Publish...
             </Button>

@@ -1,4 +1,4 @@
-import { getGetPublishedContentQueryKey, useGetPublishedContent, useListPublishedContent } from "@workspace/api-client-react";
+import { getGetPublicHeroFilmQueryKey, getGetPublishedContentQueryKey, useGetPublishedContent, useGetPublicHeroFilm, useListPublishedContent } from "@workspace/api-client-react";
 import type { DocumentKind, PublishedContent } from "@workspace/api-client-react";
 import {
   type CmsContent,
@@ -23,6 +23,7 @@ export type CmsContentByKind = {
   industry: IndustryContent;
   framework: FrameworkContent;
 };
+export type WebsiteCmsDocumentKind = Exclude<CmsDocumentKind, "site-configuration">;
 export type CmsRecord<T extends CmsContent = CmsContent> = T & {
   id: string;
   slug: string;
@@ -35,6 +36,11 @@ export type CmsRecord<T extends CmsContent = CmsContent> = T & {
 };
 export type CmsDeliveryState = "cms" | "compiled-fallback" | "intentional-empty" | "loading" | "api-error" | "contract-error";
 export type CmsEntryRenderPolicy = "cms" | "compiled-fallback" | "loading" | "unavailable";
+export type HeroFilmSources = {
+  mp4: string;
+  webm: string;
+  poster: string;
+};
 
 export function cmsEntryRenderPolicy(
   isAuthoritative: boolean,
@@ -47,7 +53,40 @@ export function cmsEntryRenderPolicy(
 }
 
 const env = import.meta.env ?? {};
-const CUTOVER: Record<CmsDocumentKind, boolean> = {
+export type PublishedHeroFilmResponse = {
+  slot: string;
+  poster: { id: string; versionId: string; url: string; mimeType: string };
+  sources: Array<{ id: string; versionId: string; url: string; mimeType: string }>;
+};
+
+export function resolvePublishedHeroFilm(
+  published: PublishedHeroFilmResponse | undefined,
+  fallback: HeroFilmSources,
+): HeroFilmSources {
+  const mp4 = published?.sources.find((source) => source.mimeType === "video/mp4");
+  const webm = published?.sources.find((source) => source.mimeType === "video/webm");
+  const poster = published?.poster;
+  return mp4 && webm && poster?.mimeType.startsWith("image/")
+    ? { mp4: mp4.url, webm: webm.url, poster: poster.url }
+    : fallback;
+}
+
+export function usePublishedHeroFilm(
+  slot: "homepage" | "industries",
+  fallback: HeroFilmSources,
+): HeroFilmSources {
+  const { market } = useMarketStore();
+  const params = { market, locale: "en" };
+  const query = useGetPublicHeroFilm(slot, params, {
+    query: {
+      enabled: Boolean(market),
+      queryKey: getGetPublicHeroFilmQueryKey(slot, params),
+    },
+  });
+  return resolvePublishedHeroFilm(query.data as PublishedHeroFilmResponse | undefined, fallback);
+}
+
+const CUTOVER: Record<WebsiteCmsDocumentKind, boolean> = {
   person: env.VITE_CMS_CUTOVER_PEOPLE === "true",
   partner: env.VITE_CMS_CUTOVER_PARTNERS === "true",
   platform: env.VITE_CMS_CUTOVER_PLATFORMS === "true",
@@ -57,7 +96,7 @@ const CUTOVER: Record<CmsDocumentKind, boolean> = {
   framework: env.VITE_CMS_CUTOVER_FRAMEWORKS === "true",
 };
 
-export function contentRecord<K extends CmsDocumentKind>(item: PublishedContent, kind: K): CmsRecord<CmsContentByKind[K]> {
+export function contentRecord<K extends WebsiteCmsDocumentKind>(item: PublishedContent, kind: K): CmsRecord<CmsContentByKind[K]> {
   const content = { ...(item.content as CmsContent) } as CmsContent & {
     heroMediaId?: string;
     image?: string;
@@ -94,7 +133,7 @@ export function stringList(value: unknown, fallback: string[]): string[] {
 }
 
 export function useCmsCollection<T>(
-  kind: DocumentKind,
+  kind: Exclude<DocumentKind, "site-configuration">,
   fallback: T[],
   mapper: (item: PublishedContent, index: number) => T | null,
 ) {
@@ -104,7 +143,7 @@ export function useCmsCollection<T>(
   const contractErrors = validations?.flatMap((result) => result.success ? [] : result.errors) ?? [];
   const validItems = query.data?.items.filter((_item, index) => validations?.[index]?.success) ?? [];
   const mapped = validItems.map(mapper).filter((item): item is T => item !== null);
-  const cutover = CUTOVER[kind as CmsDocumentKind];
+  const cutover = CUTOVER[kind];
   let delivery: CmsDeliveryState;
   if (query.isPending) delivery = "loading";
   else if (query.isError) delivery = "api-error";
@@ -131,12 +170,12 @@ export function useCmsCollection<T>(
   };
 }
 
-export function useCmsEntry(kind: CmsDocumentKind, slug: string) {
+export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
   const { market } = useMarketStore();
   // Collection landing narratives are intentionally code-owned; only entity
   // details are CMS-owned. Do not model landings as sentinel entity records.
   const codeOwnedLanding = ["about", "advisors", "partners", "platforms", "insights", "work"].includes(slug);
-  const cutover = CUTOVER[kind as CmsDocumentKind];
+  const cutover = CUTOVER[kind];
   const cutoverGated = kind === "framework" && !cutover;
   const query = useGetPublishedContent(market, "en", kind as DocumentKind, slug, {
     query: {

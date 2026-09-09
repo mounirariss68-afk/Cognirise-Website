@@ -11,7 +11,7 @@ import {
 } from "./agent-authority";
 
 export const CMS_CONTRACT_VERSION = 1 as const;
-export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study", "industry", "framework"] as const;
+export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study", "industry", "framework", "site-configuration"] as const;
 export type CmsDocumentKind = (typeof cmsDocumentKinds)[number];
 export type CmsValidationMode = "draft" | "publish";
 
@@ -21,6 +21,9 @@ export function initialCmsContent(kind: CmsDocumentKind): CmsContent {
       schemaVersion: CMS_CONTRACT_VERSION,
       template: "agent-authority",
     } as CmsContent;
+  }
+  if (kind === "site-configuration") {
+    return { schemaVersion: CMS_CONTRACT_VERSION } as CmsContent;
   }
 
   return { schemaVersion: CMS_CONTRACT_VERSION } as CmsContent;
@@ -253,6 +256,11 @@ export const frameworkContentSchema = z.object({
   ...governance,
 }).strict();
 
+const heroMediaReferenceSchema = z.object({
+  mediaId: z.string().uuid(),
+  mediaVersionId: z.string().uuid(),
+  mimeType: z.enum(["video/mp4", "video/webm"]),
+}).strict();
 export const cmsContentSchemas = {
   person: personContentSchema,
   partner: partnerContentSchema,
@@ -261,6 +269,7 @@ export const cmsContentSchemas = {
   "case-study": caseStudyContentSchema,
   industry: industryContentSchema,
   framework: frameworkContentSchema,
+  "site-configuration": siteConfigurationContentSchema,
 } as const;
 
 export type PersonContent = z.infer<typeof personContentSchema>;
@@ -270,14 +279,18 @@ export type PublicationContent = z.infer<typeof publicationContentSchema>;
 export type CaseStudyContent = z.infer<typeof caseStudyContentSchema>;
 export type IndustryContent = z.infer<typeof industryContentSchema>;
 export type FrameworkContent = z.infer<typeof frameworkContentSchema>;
-export type CmsContent = PersonContent | PartnerContent | PlatformContent | PublicationContent | CaseStudyContent | IndustryContent | FrameworkContent;
+
+export type SiteConfigurationContent = z.infer<typeof siteConfigurationContentSchema>;
+export type CmsContent = PersonContent | PartnerContent | PlatformContent | PublicationContent | CaseStudyContent | IndustryContent | FrameworkContent | SiteConfigurationContent;
 
 function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   const errors: string[] = [];
-  if (value.visibility !== "public") errors.push("Only public content can be published.");
-  if (!value.sources.length) errors.push("At least one source is required.");
-  if (!value.verificationDate) errors.push("A verification date is required.");
-  if (!value.reviewDate) errors.push("A review date is required.");
+  if (kind === "site-configuration") return errors;
+  const governed = value as Exclude<CmsContent, SiteConfigurationContent>;
+  if (governed.visibility !== "public") errors.push("Only public content can be published.");
+  if (!governed.sources.length) errors.push("At least one source is required.");
+  if (!governed.verificationDate) errors.push("A verification date is required.");
+  if (!governed.reviewDate) errors.push("A review date is required.");
   if (kind === "person") {
     const person = value as PersonContent;
     if (!person.identityMediaId && !person.approvedFallback) errors.push("An approved identity image or fallback is required.");
@@ -391,7 +404,7 @@ export function validateCmsSnapshot(
   }
   const content = validateCmsContent(kind, snapshot.data.content, mode);
   if (!content.success) return content;
-  const mediaIds = new Set(snapshot.data.mediaIds);
+  const mediaIds = new Set(kind === "site-configuration" ? [] : snapshot.data.mediaIds);
   const record = content.data as Record<string, unknown>;
   for (const field of ["identityMediaId", "logoMediaId", "heroMediaId", "pdfMediaId"]) {
     if (typeof record[field] === "string") mediaIds.add(record[field] as string);
@@ -400,6 +413,13 @@ export function validateCmsSnapshot(
   if (social && typeof social === "object" && typeof (social as Record<string, unknown>).imageMediaId === "string") {
     mediaIds.add((social as Record<string, unknown>).imageMediaId as string);
   }
+  if (kind === "site-configuration") {
+    const hero = record.hero as Record<string, unknown>;
+    mediaIds.add(hero.posterMediaId as string);
+    for (const source of hero.sources as Array<Record<string, unknown>>) {
+      mediaIds.add(source.mediaId as string);
+    }
+  }
   return {
     success: true as const,
     data: { ...snapshot.data, content: content.data, mediaIds: [...mediaIds] },
@@ -407,7 +427,8 @@ export function validateCmsSnapshot(
 }
 
 export function cmsPublicRoute(kind: CmsDocumentKind, slug: string, content: CmsContent): string | null {
-  if (content.visibility !== "public") return null;
+  if (kind === "site-configuration") return null;
+  if ((content as Exclude<CmsContent, SiteConfigurationContent>).visibility !== "public") return null;
   if (kind === "person" || kind === "partner") return null;
   if (kind === "platform") return `/platforms/${slug}`;
   if (kind === "publication") return `/insights/${slug}`;
@@ -418,3 +439,30 @@ export function cmsPublicRoute(kind: CmsDocumentKind, slug: string, content: Cms
     ? `/work/${slug}`
     : null;
 }
+
+export const siteConfigurationContentSchema = z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
+  page: z.enum(["homepage", "industries"]),
+  hero: z.object({
+    posterMediaId: z.string().uuid(),
+    posterMediaVersionId: z.string().uuid(),
+    sources: z.array(heroMediaReferenceSchema).length(2),
+  }).strict(),
+}).strict().superRefine((value, context) => {
+  const mimeTypes = value.hero.sources.map((source) => source.mimeType);
+  if (new Set(mimeTypes).size !== 2) {
+    context.addIssue({
+      code: "custom",
+      path: ["hero", "sources"],
+      message: "Hero sources require exactly one MP4 and one WebM.",
+    });
+  }
+  const assetIds = [value.hero.posterMediaId, ...value.hero.sources.map((source) => source.mediaId)];
+  if (new Set(assetIds).size !== 3) {
+    context.addIssue({
+      code: "custom",
+      path: ["hero"],
+      message: "Poster, MP4, and WebM must be three distinct media assets.",
+    });
+  }
+});

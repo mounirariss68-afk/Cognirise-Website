@@ -21,7 +21,7 @@ timeoutMs = 120000
 
 [nix]
 channel = "stable-25_05"
-packages = ["libreoffice", "blender", "xorg.xorgserver", "mesa"]
+packages = ["libreoffice", "blender", "xorg.xorgserver", "mesa", "ffmpeg"]
 
 [userenv]
 

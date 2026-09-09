@@ -428,6 +428,7 @@ export const DocumentKind = {
   'case-study': 'case-study',
   industry: 'industry',
   framework: 'framework',
+  'site-configuration': 'site-configuration',
 } as const;
 
 export type DocumentStatus = typeof DocumentStatus[keyof typeof DocumentStatus];
@@ -866,10 +867,56 @@ export interface CmsFrameworkContent {
   relatedIds?: string[];
 }
 
+export type CmsSiteConfigurationContentSchemaVersion = typeof CmsSiteConfigurationContentSchemaVersion[keyof typeof CmsSiteConfigurationContentSchemaVersion];
+
+
+export const CmsSiteConfigurationContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export type CmsSiteConfigurationContentPage = typeof CmsSiteConfigurationContentPage[keyof typeof CmsSiteConfigurationContentPage];
+
+
+export const CmsSiteConfigurationContentPage = {
+  homepage: 'homepage',
+  industries: 'industries',
+} as const;
+
+export type CmsSiteConfigurationContentHeroSourcesItemMimeType = typeof CmsSiteConfigurationContentHeroSourcesItemMimeType[keyof typeof CmsSiteConfigurationContentHeroSourcesItemMimeType];
+
+
+export const CmsSiteConfigurationContentHeroSourcesItemMimeType = {
+  'video/mp4': 'video/mp4',
+  'video/webm': 'video/webm',
+} as const;
+
+export type CmsSiteConfigurationContentHeroSourcesItem = {
+  mediaId: string;
+  mediaVersionId: string;
+  mimeType: CmsSiteConfigurationContentHeroSourcesItemMimeType;
+};
+
+export type CmsSiteConfigurationContentHero = {
+  posterMediaId: string;
+  posterMediaVersionId: string;
+  /**
+     * Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.
+     * @minItems 2
+     * @maxItems 2
+     */
+  sources: CmsSiteConfigurationContentHeroSourcesItem[];
+};
+
+export interface CmsSiteConfigurationContent {
+  schemaVersion: CmsSiteConfigurationContentSchemaVersion;
+  page: CmsSiteConfigurationContentPage;
+  hero: CmsSiteConfigurationContentHero;
+}
+
 /**
  * Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
  */
-export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent;
+export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent | CmsSiteConfigurationContent;
 
 export interface SeoMetadata {
   title: string;
@@ -1187,12 +1234,56 @@ export const MediaStatus = {
   failed: 'failed',
 } as const;
 
+export type PublicHeroSlot = typeof PublicHeroSlot[keyof typeof PublicHeroSlot];
+
+
+export const PublicHeroSlot = {
+  homepage: 'homepage',
+  industries: 'industries',
+} as const;
+
+export type PublicHeroMediaMimeType = typeof PublicHeroMediaMimeType[keyof typeof PublicHeroMediaMimeType];
+
+
+export const PublicHeroMediaMimeType = {
+  'image/jpeg': 'image/jpeg',
+  'image/png': 'image/png',
+  'image/webp': 'image/webp',
+  'video/mp4': 'video/mp4',
+  'video/webm': 'video/webm',
+} as const;
+
+export interface PublicHeroMedia {
+  mediaId: string;
+  mediaVersionId: string;
+  url: string;
+  mimeType: PublicHeroMediaMimeType;
+}
+
+export interface PublicHeroFilm {
+  slot: PublicHeroSlot;
+  poster: PublicHeroMedia;
+  /**
+     * @minItems 2
+     * @maxItems 2
+     */
+  sources: PublicHeroMedia[];
+  market: string;
+  locale: string;
+  requestedMarket: string;
+  usedFallback: boolean;
+  /** @minimum 1 */
+  revision: number;
+  publishedAt: string;
+}
+
 export type MediaCollection = typeof MediaCollection[keyof typeof MediaCollection];
 
 
 export const MediaCollection = {
   website: 'website',
   linkedin: 'linkedin',
+  motion: 'motion',
 } as const;
 
 export type LinkedInAssetKind = typeof LinkedInAssetKind[keyof typeof LinkedInAssetKind];
@@ -1242,6 +1333,53 @@ export interface MediaCampaignMetadata {
   approvedUse?: string;
 }
 
+export interface MotionAccessibility {
+  decorative: boolean;
+  hasAudio: boolean;
+  /** @minLength 1 */
+  captionsMediaId?: string;
+  /**
+     * @minLength 1
+     * @maxLength 10000
+     * @pattern \S
+     */
+  transcript?: string;
+  /**
+     * @minLength 1
+     * @maxLength 2000
+     * @pattern \S
+     */
+  audioDescription?: string;
+}
+
+export type MotionMetadataVariant = typeof MotionMetadataVariant[keyof typeof MotionMetadataVariant];
+
+
+export const MotionMetadataVariant = {
+  landscape: 'landscape',
+  portrait: 'portrait',
+  square: 'square',
+  mobile: 'mobile',
+  desktop: 'desktop',
+} as const;
+
+export interface MotionMetadata {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     * @pattern \S
+     */
+  groupId: string;
+  variant: MotionMetadataVariant;
+  /** @minLength 1 */
+  posterMediaId?: string;
+  /** @minLength 1 */
+  reducedMotionMediaId?: string;
+  autoplay?: boolean;
+  loop?: boolean;
+  accessibility: MotionAccessibility;
+}
+
 export interface FocalPoint {
   /**
      * @minimum 0
@@ -1257,6 +1395,8 @@ export interface FocalPoint {
 
 export interface MediaAsset {
   id: string;
+  /** Immutable latest media version selected by this record. */
+  versionId: string;
   filename: string;
   objectPath: string;
   /** @nullable */
@@ -1274,6 +1414,11 @@ export interface MediaAsset {
      * @nullable
      */
   height?: number | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  duration?: number | null;
   /** @nullable */
   checksum?: string | null;
   /** @nullable */
@@ -1285,6 +1430,7 @@ export interface MediaAsset {
   collection: MediaCollection;
   linkedinAssetKind?: LinkedInAssetKind | null;
   campaignMetadata?: MediaCampaignMetadata | null;
+  motionMetadata?: MotionMetadata | null;
   focalPoint?: FocalPoint | null;
   status: MediaStatus;
   createdBy?: string;
@@ -1305,13 +1451,14 @@ export interface MediaUploadInput {
   mimeType: string;
   /**
      * @minimum 1
-     * @maximum 52428800
+     * @maximum 262144000
      */
   size: number;
   checksum?: string;
   collection?: MediaCollection;
   linkedinAssetKind?: LinkedInAssetKind;
   campaignMetadata?: MediaCampaignMetadata;
+  motionMetadata?: MotionMetadata;
 }
 
 export type MediaUploadMethod = typeof MediaUploadMethod[keyof typeof MediaUploadMethod];
@@ -1344,6 +1491,7 @@ export interface MediaFinalizeInput {
   collection?: MediaCollection;
   linkedinAssetKind?: LinkedInAssetKind;
   campaignMetadata?: MediaCampaignMetadata;
+  motionMetadata?: MotionMetadata;
 }
 
 export interface MediaUpdate {
@@ -1370,6 +1518,7 @@ export interface MediaUpdate {
   collection?: MediaCollection;
   linkedinAssetKind?: LinkedInAssetKind | null;
   campaignMetadata?: MediaCampaignMetadata | null;
+  motionMetadata?: MotionMetadata | null;
   focalPoint?: FocalPoint | null;
 }
 
@@ -1860,6 +2009,11 @@ page?: PageParameter;
 pageSize?: PageSizeParameter;
 kind?: DocumentKind;
 market: string;
+locale?: string;
+};
+
+export type GetPublicHeroFilmParams = {
+market?: string;
 locale?: string;
 };
 

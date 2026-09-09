@@ -9,6 +9,7 @@ import type { FocalPoint } from './focalPoint';
 import type { LinkedInAssetKind } from './linkedInAssetKind';
 import type { MediaCampaignMetadata } from './mediaCampaignMetadata';
 import type { MediaCollection } from './mediaCollection';
+import type { MotionMetadata } from './motionMetadata';
 
 export interface MediaUpdate {
   /**
@@ -34,5 +35,6 @@ export interface MediaUpdate {
   collection?: MediaCollection;
   linkedinAssetKind?: LinkedInAssetKind | null;
   campaignMetadata?: MediaCampaignMetadata | null;
+  motionMetadata?: MotionMetadata | null;
   focalPoint?: FocalPoint | null;
 }

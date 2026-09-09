@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { contentRecord } from "./cms";
+import { contentRecord, resolvePublishedHeroFilm, type HeroFilmSources } from "./cms";
+
+const localFilm: HeroFilmSources = {
+  mp4: "/videos/local.mp4",
+  webm: "/videos/local.webm",
+  poster: "/images/local.jpg",
+};
 
 test("industry records render the pinned CMS hero instead of the compiled legacy image", () => {
   const record = contentRecord({
@@ -57,4 +63,43 @@ test("compiled industry imagery remains available when no published hero is pres
 
   assert.equal(record.image, "/images/compiled-public-sector.jpg");
   assert.equal(record.imageAlt, "Compiled fallback");
+});
+
+test("published hero film resolves only a complete governed source set", () => {
+  const resolved = resolvePublishedHeroFilm({
+    slot: "home",
+    poster: { id: "poster-id", versionId: "v1", mimeType: "image/jpeg", url: "/api/public/media/poster/version" },
+    sources: [
+      { id: "mp4-id", mimeType: "video/mp4", url: "/api/public/media/mp4/version" },
+      { id: "webm-id", mimeType: "video/webm", url: "/api/public/media/webm/version" },
+    ],
+  }, localFilm);
+
+  assert.deepEqual(resolved, {
+    mp4: "/api/public/media/mp4/version",
+    webm: "/api/public/media/webm/version",
+    poster: "/api/public/media/poster/version",
+  });
+});
+
+test("hero film retains checked-in sources for incomplete or invalid published media", () => {
+  const incomplete = resolvePublishedHeroFilm({
+    slot: "home",
+    poster: { id: "poster-id", versionId: "v1", mimeType: "image/jpeg", url: "/api/public/media/poster/version" },
+    sources: [
+      { id: "mp4-id", mimeType: "video/mp4", url: "/api/public/media/mp4/version" },
+    ],
+  }, localFilm);
+  const wrongType = resolvePublishedHeroFilm({
+    slot: "home",
+    poster: { id: "poster-id", versionId: "v1", mimeType: "image/jpeg", url: "/api/public/media/poster/version" },
+    sources: [
+      { id: "mp4-id", mimeType: "video/mp4", url: "/api/public/media/mp4/version" },
+      { id: "webm-id", mimeType: "video/quicktime", url: "/api/public/media/webm/version" },
+    ],
+  }, localFilm);
+
+  assert.equal(incomplete, localFilm);
+  assert.equal(wrongType, localFilm);
+  assert.equal(resolvePublishedHeroFilm(undefined, localFilm), localFilm);
 });

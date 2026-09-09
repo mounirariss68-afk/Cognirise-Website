@@ -11,8 +11,9 @@ import type { CmsPartnerContent } from './cmsPartnerContent';
 import type { CmsPersonContent } from './cmsPersonContent';
 import type { CmsPlatformContent } from './cmsPlatformContent';
 import type { CmsPublicationContent } from './cmsPublicationContent';
+import type { CmsSiteConfigurationContent } from './cmsSiteConfigurationContent';
 
 /**
  * Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
  */
-export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent;
+export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent | CmsSiteConfigurationContent;

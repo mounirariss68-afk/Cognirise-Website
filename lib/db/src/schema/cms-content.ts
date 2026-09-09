@@ -255,6 +255,7 @@ export const cmsMediaAssetsTable = pgTable(
     collection: text("collection").notNull().default("website"),
     linkedinAssetKind: text("linkedin_asset_kind"),
     campaignMetadata: jsonb("campaign_metadata").$type<Record<string, unknown>>(),
+    motionMetadata: jsonb("motion_metadata").$type<Record<string, unknown>>(),
     status: text("status").notNull().default("active"),
     uploadedByUserId: uuid("uploaded_by_user_id").references(
       () => cmsUsersTable.id,
@@ -273,11 +274,11 @@ export const cmsMediaAssetsTable = pgTable(
     ),
     check(
       "cms_media_assets_collection_check",
-      sql`${table.collection} IN ('website', 'linkedin')`,
+      sql`${table.collection} IN ('website', 'linkedin', 'motion')`,
     ),
     check(
       "cms_media_assets_collection_kind_check",
-      sql`(${table.collection} = 'website' AND ${table.linkedinAssetKind} IS NULL)
+      sql`(${table.collection} IN ('website', 'motion') AND ${table.linkedinAssetKind} IS NULL)
         OR (${table.collection} = 'linkedin' AND ${table.linkedinAssetKind} IN ('post', 'header'))`,
     ),
   ],
@@ -306,7 +307,7 @@ export const cmsMediaVersionsTable = pgTable(
       table.versionNumber,
     ),
     unique("cms_media_versions_id_asset_uidx").on(table.id, table.assetId),
-    uniqueIndex("cms_media_versions_storage_key_uidx").on(table.storageKey),
+    index("cms_media_versions_storage_key_idx").on(table.storageKey),
   ],
 );
 
