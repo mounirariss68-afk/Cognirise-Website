@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useRoute } from "wouter";
-import { type CmsDocumentKind, type FrameworkContent, validateCmsSnapshot } from "@workspace/api-zod";
+import { type CmsDocumentKind, type FrameworkContent, type OfficeContent, validateCmsSnapshot } from "@workspace/api-zod";
 import NotFound from "@/pages/not-found";
 import { applyMetadata } from "@/lib/metadata";
 import { AgentAuthorityLayout } from "@/pages/AgentAuthorityModel";
 import type { CmsRecord } from "@/lib/cms";
 import { normalizeFrameworkPreviewContent } from "@/lib/framework-preview";
+import { OfficeContactCard } from "@/components/OfficeContactCard";
 
 type Preview = {
   kind: CmsDocumentKind;
@@ -91,6 +92,27 @@ export default function CmsPreview() {
         </header>
         {warningPanel}
         <AgentAuthorityLayout framework={framework} preview />
+      </main>
+    );
+  }
+
+  if (preview.kind === "office" && validation.success) {
+    const office = validation.data.content as OfficeContent;
+    return (
+      <main className="min-h-screen bg-background">
+        <header className="sticky top-0 z-50 border-b border-amber-300 bg-amber-50 px-6 py-4 text-amber-950">
+          <div className="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-3">
+            <strong>Protected draft preview — not published</strong>
+            <span className="font-mono text-xs uppercase">{preview.market} / {preview.locale} · revision {preview.revisionNumber}</span>
+          </div>
+        </header>
+        {warningPanel}
+        <section className="px-6 py-24">
+          <div className="mx-auto max-w-[720px] bg-[hsl(var(--secondary))] p-12 border border-border">
+            <h3 className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-6">Global Offices</h3>
+            <OfficeContactCard city={office.city} address={office.address} phone={office.phone} />
+          </div>
+        </section>
       </main>
     );
   }

@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { BrandButton } from "@/components/ui/brand-button";
 import { getMarketLocationLabel, OFFICE_LOCATIONS, useMarketStore } from "@/store/market";
 import { contentRecord, useCmsCollection, usePublishedContactEmail } from "@/lib/cms";
+import { OfficeContactCard } from "@/components/OfficeContactCard";
 
 const officeFallback: Array<{ city: string; address: string; phone?: string; order: number }> = Object.values(OFFICE_LOCATIONS).map((office, order) => ({
   ...office,
@@ -49,15 +50,7 @@ export default function Contact() {
               {offices.data
                 .toSorted((left, right) => left.order - right.order)
                 .map((office) => (
-                  <div key={`${office.city}-${office.address}`}>
-                    <h4 className="font-bold mb-2">{office.city}</h4>
-                    <p className="max-w-[32rem] text-sm leading-6 text-muted-foreground">{office.address}</p>
-                     {office.phone ? (
-                       <a href={`tel:${office.phone}`} className="mt-2 inline-block text-sm text-[hsl(var(--brand-coral))] hover:underline">
-                         {office.phone}
-                       </a>
-                     ) : null}
-                  </div>
+                  <OfficeContactCard key={`${office.city}-${office.address}`} {...office} />
                 ))}
             </div>
 
