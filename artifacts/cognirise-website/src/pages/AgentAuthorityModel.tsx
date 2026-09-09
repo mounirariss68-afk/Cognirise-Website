@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import type { FrameworkContent } from "@workspace/api-zod";
@@ -127,92 +127,230 @@ function GovernedNarrative({ blocks }: { blocks: FrameworkContent["methodology"]
 
 function MatrixExplorer() {
   const [selected, setSelected] = useState<{ r: RScore; h: HScore }>({ r: 3, h: 2 });
+  const chartScrollRef = useRef<HTMLDivElement>(null);
   const band = getEBand(selected.r, selected.h);
   const ceiling = getCeiling(band);
+  const exposureColumns = [
+    { band: 1, rule: "R1–R2 and H1", meaning: "Internal, reversible" },
+    { band: 2, rule: "R3, or H2", meaning: "One person is affected" },
+    { band: 3, rule: "R4, or H3", meaning: "A regulator can see it" },
+    { band: 4, rule: "H4", meaning: "Public reach" },
+    { band: 5, rule: "H5", meaning: "Safety, health, or essential service" },
+  ] as const;
+  const authorityRows = [
+    { title: "Human out of the loop", detail: "No one present" },
+    { title: "Human on the loop", detail: "Monitored and can be stopped" },
+    { title: "Human in the loop", detail: "Approved before it acts" },
+  ] as const;
+  const selectedCeilingRow = band === 1 ? 0 : band === 2 ? 1 : 2;
 
-  const move = (event: React.KeyboardEvent<HTMLButtonElement>, r: RScore, h: HScore) => {
-    const offsets: Record<string, [number, number]> = {
-      ArrowLeft: [0, -1],
-      ArrowRight: [0, 1],
-      ArrowUp: [-1, 0],
-      ArrowDown: [1, 0],
-    };
-    const offset = offsets[event.key];
-    if (!offset) return;
+  const moveAxis = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    axis: "r" | "h",
+    value: number,
+  ) => {
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
     event.preventDefault();
-    const nextR = Math.min(4, Math.max(1, r + offset[0])) as RScore;
-    const nextH = Math.min(5, Math.max(1, h + offset[1])) as HScore;
-    setSelected({ r: nextR, h: nextH });
-    document.querySelector<HTMLButtonElement>(`[data-matrix-cell="r${nextR}-h${nextH}"]`)?.focus();
+    const delta = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
+    const maximum = axis === "r" ? 4 : 5;
+    const next = Math.min(maximum, Math.max(1, value + delta));
+    setSelected((current) => ({
+      ...current,
+      [axis]: next,
+    }));
+    document.querySelector<HTMLButtonElement>(`[data-authority-score="${axis}${next}"]`)?.focus();
   };
 
+  useEffect(() => {
+    const keepSelectedBandVisible = () => {
+      const container = chartScrollRef.current;
+      if (!container || container.scrollWidth <= container.clientWidth) return;
+      const authorityAxisWidth = 174;
+      const plotWidth = container.scrollWidth - authorityAxisWidth;
+      const selectedCenter = authorityAxisWidth + ((band - 0.5) / 5) * plotWidth;
+      const visiblePlotCenter = authorityAxisWidth + (container.clientWidth - authorityAxisWidth) / 2;
+      container.scrollLeft = Math.max(0, selectedCenter - visiblePlotCenter);
+    };
+    keepSelectedBandVisible();
+    window.addEventListener("resize", keepSelectedBandVisible);
+    return () => window.removeEventListener("resize", keepSelectedBandVisible);
+  }, [band]);
+
   return (
-    <div className="grid gap-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
-      <div className="overflow-x-auto pb-2">
-        <table className="w-full min-w-[610px] border-separate border-spacing-1" aria-label="Exposure band matrix">
-          <caption className="sr-only">
-            Select a reversibility and reach combination. Use arrow keys to move between cells.
-          </caption>
-          <thead>
-            <tr>
-              <th className="p-2 text-left text-[10px] uppercase tracking-[0.1em] text-white/55">Undo ↓ / Reach →</th>
-              {([1, 2, 3, 4, 5] as HScore[]).map((h) => (
-                <th key={h} scope="col" className="p-2 text-center text-[11px] text-white/70">H{h}</th>
+    <figure
+      id="authority-diagram"
+      className="border border-white/15 bg-[#0b2247] p-5 sm:p-7 lg:p-9"
+      aria-labelledby="authority-diagram-title"
+      aria-describedby="authority-diagram-description"
+    >
+      <figcaption className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
+        <div>
+          <p id="authority-diagram-title" className="font-display text-[clamp(25px,3vw,38px)] font-semibold tracking-[-0.05em] text-white">
+            Exposure sets the ceiling.
+          </p>
+          <p id="authority-diagram-description" className="mt-2 max-w-[510px] text-sm leading-[1.6] text-[#b9c7db]">
+            Set reversibility and reach. Their more severe result places the handover on the horizontal axis; the
+            stepped line shows the most authority the agent may hold.
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div role="group" aria-label="Reversibility score" className="border border-white/15 p-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/60">Reversibility</span>
+              <span className="text-[10px] text-white">R{selected.r}</span>
+            </div>
+            <div className="grid grid-cols-4 gap-1">
+              {([1, 2, 3, 4] as RScore[]).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  data-authority-score={`r${r}`}
+                  aria-pressed={selected.r === r}
+                  aria-label={`R${r}: ${REVERSIBILITY_LABELS[r]}`}
+                  onClick={() => setSelected((current) => ({ ...current, r }))}
+                  onKeyDown={(event) => moveAxis(event, "r", r)}
+                  className={`min-h-10 border text-xs font-bold motion-safe:transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-coral))] ${
+                    selected.r === r ? "border-white bg-white text-[#102957]" : "border-white/20 bg-white/5 text-white hover:bg-white/10"
+                  }`}
+                >
+                  R{r}
+                </button>
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {([1, 2, 3, 4] as RScore[]).map((r) => (
-              <tr key={r}>
-                <th scope="row" className="p-2 text-left text-[11px] text-white/70">R{r}</th>
-                {([1, 2, 3, 4, 5] as HScore[]).map((h) => {
-                  const cellBand = getEBand(r, h);
-                  const active = selected.r === r && selected.h === h;
-                  return (
-                    <td key={h}>
-                      <button
-                        type="button"
-                        data-matrix-cell={`r${r}-h${h}`}
-                        aria-label={`R${r}, H${h}, exposure E${cellBand}`}
-                        aria-pressed={active}
-                        onClick={() => setSelected({ r, h })}
-                        onKeyDown={(event) => move(event, r, h)}
-                        className={`min-h-14 w-full border p-2 text-sm font-bold transition ${
-                          active
-                            ? "scale-[1.04] border-white bg-white text-[#102957]"
-                            : cellBand === 5
-                              ? "border-[#ff927e]/50 bg-[#ff775d]/80 text-white hover:bg-[#ff775d]"
-                              : cellBand === 4
-                                ? "border-[#e774b3]/50 bg-[#db509e]/75 text-white hover:bg-[#db509e]"
-                                : "border-white/20 bg-white/10 text-white hover:bg-white/20"
-                        } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-coral))]`}
-                      >
-                        E{cellBand}
-                      </button>
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </div>
+            <p className="mt-2 min-h-8 text-[10px] leading-[1.4] text-white/55">{REVERSIBILITY_LABELS[selected.r]}</p>
+          </div>
+
+          <div role="group" aria-label="Reach score" className="border border-white/15 p-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/60">Reach</span>
+              <span className="text-[10px] text-white">H{selected.h}</span>
+            </div>
+            <div className="grid grid-cols-5 gap-1">
+              {([1, 2, 3, 4, 5] as HScore[]).map((h) => (
+                <button
+                  key={h}
+                  type="button"
+                  data-authority-score={`h${h}`}
+                  aria-pressed={selected.h === h}
+                  aria-label={`H${h}: ${REACH_LABELS[h]}`}
+                  onClick={() => setSelected((current) => ({ ...current, h }))}
+                  onKeyDown={(event) => moveAxis(event, "h", h)}
+                  className={`min-h-10 border text-xs font-bold motion-safe:transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-coral))] ${
+                    selected.h === h ? "border-white bg-white text-[#102957]" : "border-white/20 bg-white/5 text-white hover:bg-white/10"
+                  }`}
+                >
+                  H{h}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 min-h-8 text-[10px] leading-[1.4] text-white/55">{REACH_LABELS[selected.h]}</p>
+          </div>
+        </div>
+      </figcaption>
+
+      <div ref={chartScrollRef} className="mt-8 overflow-x-auto pb-3" data-authority-chart-scroll>
+        <div className="min-w-[790px]">
+          <div className="mb-2 ml-[174px] flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em]">
+            <span className="text-white/55">How alone it acts ↑</span>
+            <span className="text-[#ffad9d]">Above the ceiling: authority sits in an approved artefact</span>
+          </div>
+
+          <div className="grid grid-cols-[158px_1fr] gap-4">
+            <div className="sticky left-0 z-20 grid h-[300px] grid-rows-3 bg-[#0b2247]">
+              {authorityRows.map((row) => (
+                <div key={row.title} className="flex flex-col justify-center border-b border-white/15 pr-3 text-right last:border-b-0">
+                  <strong className="text-[11px] text-white">{row.title}</strong>
+                  <span className="mt-1 text-[9px] leading-[1.35] text-white/50">{row.detail}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="relative h-[300px] border border-white/35" aria-label="Authority ceiling by exposure band">
+              <div className="absolute inset-0 grid grid-cols-5 grid-rows-3">
+                {authorityRows.flatMap((_, rowIndex) =>
+                  exposureColumns.map(({ band: columnBand }) => {
+                    const ceilingRow = columnBand === 1 ? 0 : columnBand === 2 ? 1 : 2;
+                    const permitted = rowIndex >= ceilingRow;
+                    return (
+                      <div
+                        key={`${rowIndex}-${columnBand}`}
+                        className={`border-b border-r border-white/20 last:border-r-0 ${
+                          permitted ? "bg-white/[0.12]" : "bg-[#ff775d]/[0.07]"
+                        } ${band === columnBand ? "ring-1 ring-inset ring-white/25" : ""}`}
+                      />
+                    );
+                  }),
+                )}
+              </div>
+
+              <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 500 300" preserveAspectRatio="none" aria-hidden="true">
+                <path
+                  d="M0 2 H100 V100 H200 V200 H500"
+                  fill="none"
+                  stroke="hsl(var(--brand-pink))"
+                  strokeWidth="4"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </svg>
+
+              <div className="pointer-events-none absolute left-[42%] top-[54%] -translate-x-1/2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#ff9fcf]">
+                The ceiling
+              </div>
+              <div className="pointer-events-none absolute bottom-4 left-3 text-[9px] font-bold uppercase tracking-[0.12em] text-white/50">
+                Authority permitted
+              </div>
+              <div className="pointer-events-none absolute bottom-4 right-3 text-[9px] text-white/55">
+                E4: second control · E5: external safety sign-off
+              </div>
+
+              <div
+                data-selected-band={`e${band}`}
+                className="pointer-events-none absolute z-10 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-[5px] border-white bg-[hsl(var(--brand-coral))] shadow-[0_0_0_5px_rgba(255,119,93,0.22)] motion-safe:transition-all"
+                style={{
+                  left: `${(band - 0.5) * 20}%`,
+                  top: `${selectedCeilingRow * (100 / 3)}%`,
+                }}
+                aria-hidden="true"
+              />
+            </div>
+
+            <div aria-hidden="true" />
+            <div className="grid grid-cols-5">
+              {exposureColumns.map((column) => (
+                <div key={column.band} className={`border-r border-white/15 px-2 pt-3 text-center last:border-r-0 ${band === column.band ? "bg-white/[0.06]" : ""}`}>
+                  <strong className="block text-sm text-white">E{column.band}</strong>
+                  <span className="mt-1 block text-[9px] font-semibold text-[#ff9fcf]">{column.rule}</span>
+                  <span className="mt-1 block text-[9px] leading-[1.35] text-white/50">{column.meaning}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="ml-[174px] mt-4 text-center text-[9px] font-bold uppercase tracking-[0.13em] text-white/60">
+            What it costs to be wrong →
+          </p>
+        </div>
       </div>
-      <div aria-live="polite" className="border-l-2 border-[hsl(var(--brand-pink))] pl-6">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/55">Selected operating condition</p>
-        <p className="mt-3 font-display text-[clamp(36px,5vw,64px)] font-semibold tracking-[-0.07em] text-white">
-          R{selected.r} + H{selected.h} → E{band}
-        </p>
-        <p className="mt-4 text-[15px] leading-[1.6] text-[#dce4f0]">
-          <strong className="text-white">Reversibility:</strong> {REVERSIBILITY_LABELS[selected.r]}
-        </p>
-        <p className="mt-3 text-[15px] leading-[1.6] text-[#dce4f0]">
-          <strong className="text-white">Reach:</strong> {REACH_LABELS[selected.h]}
-        </p>
-        <p className="mt-5 bg-white/10 p-4 text-sm font-semibold leading-[1.5] text-white">
-          Permitted oversight ceiling: {OVERSIGHT_LABELS[ceiling]}.
-        </p>
+
+      <div aria-live="polite" className="mt-5 grid gap-5 border-t border-white/20 pt-5 md:grid-cols-[0.7fr_1.3fr] md:items-center">
+        <div>
+          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/55">Selected operating condition</p>
+          <p className="mt-1 font-display text-[clamp(32px,4vw,52px)] font-semibold tracking-[-0.07em] text-white">
+            R{selected.r} + H{selected.h} → E{band}
+          </p>
+        </div>
+        <div className="border-l-2 border-[hsl(var(--brand-pink))] pl-4">
+          <p className="text-sm font-semibold leading-[1.55] text-white">
+            Permitted authority: {OVERSIGHT_LABELS[ceiling]}.
+          </p>
+          <p className="mt-2 text-xs leading-[1.55] text-[#b9c7db]">
+            The highlighted point sits on the ceiling. Any authority above it must be carried by an approved template,
+            whitelist, rule set, or blocking gate—not by the agent.
+          </p>
+        </div>
       </div>
-    </div>
+    </figure>
   );
 }
 
@@ -349,7 +487,7 @@ export default function AgentAuthorityModel() {
         </ol>
       </section>
 
-      <section className="bg-[#071936] px-6 py-20 text-white md:px-[4.8vw] lg:py-28">
+      <section id="authority-ceiling" className="scroll-mt-20 bg-[#071936] px-6 py-20 text-white md:px-[4.8vw] lg:py-28">
         <div className="mb-12 grid gap-8 lg:grid-cols-[1fr_0.8fr] lg:items-end">
           <div>
             <Kicker inverse>Two axes · one ceiling</Kicker>
