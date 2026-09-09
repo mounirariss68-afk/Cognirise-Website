@@ -7,6 +7,7 @@ import {
   repositoryRoot,
 } from "./common.js";
 import {
+  historicalMediaReceipts,
   mediaMigrationOperations,
   migrationOperations,
   personAvailabilityOperations,
@@ -15,19 +16,15 @@ import {
 import { validateCmsSnapshot } from "@workspace/api-zod";
 import { mapWithConcurrency } from "./media-reconciliation.js";
 import { objectStorageClient } from "./object-storage.js";
+import {
+  inspectReceiptCoverage,
+  type ExpectedReceipt,
+} from "./receipt-reconciliation.js";
 
 interface Inventory {
   schemaVersion: number;
   manifestDigest: string;
   records: InventoryRecord[];
-}
-
-interface ExpectedReceipt {
-  requestDigest: string;
-  subjectType: "document" | "media";
-  tolerateDigestDrift?: boolean;
-  media?: ReturnType<typeof mediaMigrationOperations>[number];
-  publishCase?: boolean;
 }
 
 async function loadDatabase() {
@@ -78,20 +75,13 @@ async function inspectReconciliationState(
     subjectId: cmsOperationReceiptsTable.subjectId,
     operation: cmsOperationReceiptsTable.operation,
   }).from(cmsOperationReceiptsTable);
-  const relevantReceipts = receipts.filter((receipt) => expected.has(receipt.idempotencyKey));
-  const conflicts: Array<{ idempotencyKey: string; expectedDigest: string; actualDigest: string }> = [];
+  const coverage = inspectReceiptCoverage(expected, receipts);
+  const { conflicts, missingCount, relevantReceipts } = coverage;
 
   const documentIds: string[] = [];
   const mediaIds: string[] = [];
   for (const receipt of relevantReceipts) {
     const operation = expected.get(receipt.idempotencyKey)!;
-    if (receipt.requestDigest !== operation.requestDigest && !operation.tolerateDigestDrift) {
-      conflicts.push({
-        idempotencyKey: receipt.idempotencyKey,
-        expectedDigest: operation.requestDigest,
-        actualDigest: receipt.requestDigest,
-      });
-    }
     if (operation.subjectType === "document") documentIds.push(receipt.subjectId);
     else mediaIds.push(receipt.subjectId);
   }
@@ -115,7 +105,7 @@ async function inspectReconciliationState(
         .orderBy(desc(cmsMediaVersionsTable.versionNumber))
       : [],
   ]);
-  const invalid: string[] = [];
+  const invalid = [...coverage.invalid];
   if (documents.length !== uniqueDocumentIds.length) {
     invalid.push(`receipt subjects: found ${documents.length}/${uniqueDocumentIds.length} documents`);
   }
@@ -198,9 +188,10 @@ async function inspectReconciliationState(
   }
 
   const existingCount = relevantReceipts.length;
-  const missingCount = expected.size - existingCount;
   return {
-    state: missingCount === 0 && invalid.length === 0 ? "complete" as const : "pending" as const,
+    state: missingCount === 0 && invalid.length === 0 && conflicts.length === 0
+      ? "complete" as const
+      : "pending" as const,
     existingCount,
     missingCount,
     conflicts,
@@ -222,11 +213,6 @@ async function main() {
   }
 
   const expected = new Map<string, ExpectedReceipt>();
-  const governedCaseMediaPaths = new Set(
-    migrationOperations(inventory.records)
-      .filter((operation) => operation.kind === "case-study" && operation.mediaPaths.length === 1)
-      .map((operation) => operation.mediaPaths[0]),
-  );
   const governedLegacyExternalIds = new Set(
     personGovernanceOperations(inventory.records).map((operation) => operation.externalId),
   );
@@ -253,8 +239,16 @@ async function main() {
     expected.set(operation.idempotencyKey, {
       requestDigest: operation.requestDigest,
       subjectType: "media",
-      tolerateDigestDrift: governedCaseMediaPaths.has(operation.publicPath),
       media: operation,
+    });
+  }
+  for (const receipt of historicalMediaReceipts(inventory.records)) {
+    expected.set(receipt.idempotencyKey, {
+      requestDigest: receipt.requestDigest,
+      acceptedRequestDigests: receipt.acceptedRequestDigests,
+      subjectType: "media",
+      optional: true,
+      sameSubjectAs: receipt.replacementIdempotencyKey,
     });
   }
   for (const operation of personAvailabilityOperations(inventory.records)) {

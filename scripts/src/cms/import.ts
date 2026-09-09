@@ -27,6 +27,10 @@ import {
 import { mapWithConcurrency } from "./media-reconciliation.js";
 import { objectStorageClient } from "./object-storage.js";
 import { mediaMetadataUpdate, shouldUpdateMediaMetadata } from "./media-metadata.js";
+import {
+  mediaRefreshReceiptDigestIsAccepted,
+  resolveMediaImportAssetId,
+} from "./media-import-lineage.js";
 import { PUBLIC_MARKET_BASELINE } from "./market-baseline.js";
 import {
   caseMediaRefreshKey,
@@ -199,13 +203,39 @@ async function applyDatabase(
       for (const operation of mediaOperations.filter((item) => item.cmsOwnership === "cms-candidate")) {
         const [receipt] = await tx.select().from(cmsOperationReceiptsTable)
           .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.idempotencyKey));
+        const historicalReceipts: Array<{
+          receipt: typeof receipt;
+          acceptedDigests: string[];
+        }> = [];
+        for (const expectedHistorical of operation.historicalReceipts) {
+          const [historicalReceipt] = await tx.select().from(cmsOperationReceiptsTable)
+            .where(eq(
+              cmsOperationReceiptsTable.idempotencyKey,
+              expectedHistorical.idempotencyKey,
+            ));
+          if (historicalReceipt) {
+            historicalReceipts.push({
+              receipt: historicalReceipt,
+              acceptedDigests: expectedHistorical.acceptedRequestDigests,
+            });
+          }
+        }
         const durableStorageKey = storageKeys.get(operation.publicPath);
         if (!durableStorageKey || durableStorageKey.startsWith("deferred/")) {
           throw new Error(`No verified durable object is available for ${operation.publicPath}.`);
         }
-        let [asset] = receipt
-          ? await tx.select().from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.id, receipt.subjectId))
-          : await tx.select().from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.checksum, operation.checksum));
+        const lineageAssetId = resolveMediaImportAssetId({
+          currentReceipt: receipt,
+          historicalReceipts,
+        });
+        let [asset] = lineageAssetId
+          ? await tx.select().from(cmsMediaAssetsTable)
+            .where(eq(cmsMediaAssetsTable.id, lineageAssetId))
+          : await tx.select().from(cmsMediaAssetsTable)
+            .where(eq(cmsMediaAssetsTable.checksum, operation.checksum));
+        if (lineageAssetId && !asset) {
+          throw new Error(`${operation.externalId}: media receipt subject is missing.`);
+        }
         const governedCase = governedCaseByMediaPath.get(operation.publicPath);
         const refreshKey = governedCase
           ? caseMediaRefreshKey(operation.externalId, operation.checksum)
@@ -216,7 +246,11 @@ async function applyDatabase(
           : [];
         if (refreshReceipt && (
           refreshReceipt.subjectId !== String(asset?.id)
-          || refreshReceipt.requestDigest !== operation.requestDigest
+          || !mediaRefreshReceiptDigestIsAccepted({
+            actualDigest: refreshReceipt.requestDigest,
+            currentDigest: operation.requestDigest,
+            acceptedPriorDigests: operation.acceptedPriorRequestDigests,
+          })
         )) throw new Error(`${operation.externalId}: governed media refresh receipt conflicts with the current operation.`);
         const approvedCaseRefresh = Boolean(
           governedCase

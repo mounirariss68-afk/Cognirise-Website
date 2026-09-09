@@ -23,9 +23,9 @@
     },
     "industries": 6,
     "frameworks": 1,
-    "websiteAssets": 59,
+    "websiteAssets": 60,
     "linkedinAssets": 9,
-    "assets": 68
+    "assets": 69
   },
   "explicitOmissions": {
     "povDocuments": "No genuine public POV documents are present in the current website.",
@@ -4141,7 +4141,7 @@
         "width": 1024,
         "height": 1024,
         "usages": [
-          "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+          "artifacts/cognirise-website/src/content/idao.ts"
         ],
         "cmsOwnership": "cms-candidate",
         "collection": "website",
@@ -4179,7 +4179,7 @@
         "width": 1024,
         "height": 1024,
         "usages": [
-          "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+          "artifacts/cognirise-website/src/content/idao.ts"
         ],
         "cmsOwnership": "cms-candidate",
         "collection": "website",
@@ -4217,7 +4217,7 @@
         "width": 1024,
         "height": 1024,
         "usages": [
-          "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+          "artifacts/cognirise-website/src/content/idao.ts"
         ],
         "cmsOwnership": "cms-candidate",
         "collection": "website",
@@ -4255,7 +4255,7 @@
         "width": 1024,
         "height": 1024,
         "usages": [
-          "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+          "artifacts/cognirise-website/src/content/idao.ts"
         ],
         "cmsOwnership": "cms-candidate",
         "collection": "website",
@@ -5158,6 +5158,44 @@
       "digest": "3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034"
     },
     {
+      "externalId": "asset:d29810a11351aa5a573f",
+      "type": "asset",
+      "name": "idao-human-agent-team.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/idao-human-agent-team.png",
+      "fields": {
+        "publicPath": "/images/cognirise/idao-human-agent-team.png",
+        "bytes": 330032,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "4f1f75ca2f9f424ff8e21f8a40cb54e3d075cf64b89264b7ec1b5ec79108a3b5",
+        "width": 528,
+        "height": 512,
+        "usages": [
+          "artifacts/cognirise-website/src/pages/IDAOMethodology.tsx"
+        ],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "idao human agent team",
+          "decorative": false
+        },
+        "rights": {
+          "status": "needs-review",
+          "owner": "Rights holder pending editorial review",
+          "source": "/images/cognirise/idao-human-agent-team.png"
+        }
+      },
+      "review": {
+        "status": "needs-review",
+        "reasons": [
+          "Confirm rights holder, source, license, and descriptive alt text before media import."
+        ]
+      },
+      "digest": "4f1f75ca2f9f424ff8e21f8a40cb54e3d075cf64b89264b7ec1b5ec79108a3b5"
+    },
+    {
       "externalId": "asset:cfa67b78e45f66ac9561",
       "type": "asset",
       "name": "pulse-industry-defense-protection.png",
@@ -5781,7 +5819,6 @@
         "usages": [
           "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
           "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
-          "artifacts/cognirise-website/src/pages/IDAOMethodology.tsx",
           "artifacts/cognirise-website/src/pages/WorkProof.tsx"
         ],
         "cmsOwnership": "cms-candidate",
@@ -6637,7 +6674,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "870e84a92c44e6a7e9d3f6ec58954575d2d4cb7fdc769afe5c7f4a4a7cc1d1ed",
-  "generatedAt": "2026-09-09T12:28:27.687Z",
+  "manifestDigest": "7fd039062dbe3857b72f800320b314591c26d87491f886fcfdd82a3cd1664102",
+  "generatedAt": "2026-09-09T13:07:15.717Z",
   "dryRun": false
 }

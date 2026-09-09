@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { type CmsDocumentKind, validateCmsSnapshot } from "@workspace/api-zod";
 import { InventoryRecord } from "./common.js";
+import { acceptedLegacyMediaReceiptDigests } from "./media-receipt-history.js";
 
 export type MigratableRecord = InventoryRecord & {
   type: "person" | "partner" | "platform" | "article" | "case-study" | "industry" | "framework";
@@ -36,9 +37,19 @@ export interface MediaMigrationOperation {
   altText: string;
   credit: string;
   requestDigest: string;
+  historicalReceipts: HistoricalMediaReceipt[];
+  acceptedPriorRequestDigests: string[];
   rightsStatus?: string;
   accessibilityStatus?: string;
   sourceReviewApproved?: boolean;
+}
+
+export interface HistoricalMediaReceipt {
+  externalId: string;
+  idempotencyKey: string;
+  replacementIdempotencyKey: string;
+  requestDigest: string;
+  acceptedRequestDigests: string[];
 }
 
 export interface PersonAvailabilityOperation {
@@ -133,6 +144,28 @@ function canonicalize(value: unknown): unknown {
 }
 
 export const canonicalResultDigest = (value: unknown) => digest(canonicalize(value));
+
+const acceptedMediaReplacementHistory = new Map<string, {
+  checksum: string;
+  priorRequestDigest: string;
+}>([
+  ["asset:756471849fafbe93e1b9", { checksum: "883ed6bb9c1e30549f290b696ed59fc4a74888d1ed5a544f567d6c850fb7fc50", priorRequestDigest: "02fc1d2a5261b118e1018f9935ae26a4efc07f1ce412a13581e51cdc52b26a07" }],
+  ["asset:5d8da6b74c77327bf3a1", { checksum: "a798b751527e5ffe41958651d0c0c5e55a04a920b12a56f1e4de019c73dfc35e", priorRequestDigest: "92fb47068ed29b37f2e425b8f783ea63fc4633e01f2b5098a2d0d15b64ad4bd7" }],
+  ["asset:1aa85e3f80b4199ec833", { checksum: "6ee4af35cc0bc38f7cb278ce2fbfe3304463bf7f9886605ad6c315348919f050", priorRequestDigest: "bc8af22a70af669b3c134df22e1090e87e172ff9c24c3b2c00fce2a4fbbb1d61" }],
+  ["asset:963a3139d76ebb1cbd21", { checksum: "fc856d336a4780e5c7568f0cb1b9e96dda8ee7d4fd1f7967df9ce37c0be3a781", priorRequestDigest: "e38c7d76ba5cbb2d7556433092e9bc474fb2ebc0fc123e99d14d3b8e5d05a56e" }],
+  ["asset:8e7e9479de6f42bcf2bc", { checksum: "6df89ba5ba9d3fc17254be728e5f658d626284dd08a1f69aec9cf47e7b9a504f", priorRequestDigest: "db7a1d993b894bea2ce6052ca48dd0bedae825cd4ae81285c16a39c4a1b41cbd" }],
+  ["asset:5510debf4e4390420a56", { checksum: "75c105711b2c2d910aa0c19502947137c73624f6fbe6e78ac73f744ff591777d", priorRequestDigest: "2940d16740ef323cb372cede15faaa907ce1c0e10c2dbfe0bceade69f09e43bb" }],
+  ["asset:1702a55d5a824fce8b1f", { checksum: "b6b763fec567e5117f55a47364797fe9b5c4ea4d6806e1f87c0a58cf1fac7efc", priorRequestDigest: "ab1d172ecaa94981eb2b86d98107449beecfd3ee33325d633fd836fd4f971cb7" }],
+  ["asset:f6a19919d1de6e4dd655", { checksum: "7f462ae555d626662aa17f0654b0308cf1d869d704bb3032351ccf2ac03d35b7", priorRequestDigest: "e04eb4356721ca843961bcd4230edc82d6aecb22baf8e241420c156f6e6191b7" }],
+  ["asset:cb22af24054d18218ace", { checksum: "3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034", priorRequestDigest: "ec8c8ba3fc38d21f998fc6e854e0bb13f658bf0c0460e6b8900993a73bfc6fdf" }],
+  ["asset:302ea3c4bf1fbfb78fed", { checksum: "0c0053392fe1823f2aafe053711bd07114cb4153dd8552a362a5ac2b2c8653b4", priorRequestDigest: "41b2ad264547742ed04c7a39696ac4af331b499100ee971af254a062ce967f33" }],
+  ["asset:ac50e1fb2480a2f9caf5", { checksum: "1d1e44ef9c90cc89d22f5676cb6bbdb86cb5b02972e5d5ffcc05dca88b53be99", priorRequestDigest: "8640e8f6766123034d127a98d7019da239e4f734eb0703461ec4681096a43e6e" }],
+]);
+
+export function historicalMediaReceipts(records: InventoryRecord[]): HistoricalMediaReceipt[] {
+  return mediaMigrationOperations(records)
+    .flatMap((operation) => operation.historicalReceipts);
+}
 
 export function matchesGovernedCutoverSource(
   priorRevisionId: string,
@@ -279,9 +312,15 @@ export function mediaMigrationOperations(records: InventoryRecord[]): MediaMigra
     if (fields.collection === "linkedin" && linkedinAssetKind !== "post" && linkedinAssetKind !== "header") {
       throw new Error(`${record.externalId}: LinkedIn media must be classified as post or header.`);
     }
+    const replacementHistory = acceptedMediaReplacementHistory.get(record.externalId);
+    if (replacementHistory && replacementHistory.checksum !== fields.checksum) {
+      throw new Error(
+        `${record.externalId}: the governed binary changed again; add a new explicit media replacement operation.`,
+      );
+    }
     const operation = {
       externalId: record.externalId,
-      idempotencyKey: `cms-media-inventory-v3:${record.externalId}`,
+      idempotencyKey: `cms-media-binary-v1:${record.externalId}:${fields.checksum}`,
       filename: record.name,
       sourceFile: record.sourceFile,
       publicPath: fields.publicPath,
@@ -307,24 +346,47 @@ export function mediaMigrationOperations(records: InventoryRecord[]): MediaMigra
         : (typeof accessibility.altText === "string" && accessibility.altText.trim() ? "approved" : "needs-review"),
       sourceReviewApproved: record.review.status === "approved",
     };
-    // Keep the v3 receipt digest stable for already-imported website binaries.
-    // Classification lives in mutable asset fields/version metadata and does
-    // not manufacture a replacement immutable binary version.
-    const legacyDigestShape = {
+    const binaryDigestShape = {
       externalId: operation.externalId,
       idempotencyKey: operation.idempotencyKey,
-      filename: operation.filename,
-      sourceFile: operation.sourceFile,
-      publicPath: operation.publicPath,
       checksum: operation.checksum,
       mimeType: operation.mimeType,
       byteSize: operation.byteSize,
       width: operation.width,
       height: operation.height,
-      cmsOwnership: operation.cmsOwnership,
-      usages: operation.usages,
     };
-    return { ...operation, requestDigest: digest(legacyDigestShape) };
+    const inventoryReceiptKey = `cms-media-inventory-v3:${operation.externalId}`;
+    const inventoryDigests = acceptedLegacyMediaReceiptDigests.get(inventoryReceiptKey);
+    const historicalReceipts: HistoricalMediaReceipt[] = inventoryDigests ? [{
+      externalId: operation.externalId,
+      idempotencyKey: inventoryReceiptKey,
+      replacementIdempotencyKey: operation.idempotencyKey,
+      requestDigest: inventoryDigests[0],
+      acceptedRequestDigests: [...inventoryDigests],
+    }] : [];
+    if (replacementHistory) {
+      const replacementReceiptKey =
+        `cms-media-replacement-v1:${operation.externalId}:${operation.checksum}`;
+      const replacementDigests = acceptedLegacyMediaReceiptDigests.get(replacementReceiptKey);
+      if (replacementDigests) {
+        historicalReceipts.push({
+          externalId: operation.externalId,
+          idempotencyKey: replacementReceiptKey,
+          replacementIdempotencyKey: operation.idempotencyKey,
+          requestDigest: replacementDigests[0],
+          acceptedRequestDigests: [...replacementDigests],
+        });
+      }
+    }
+    const acceptedPriorRequestDigests = [
+      ...new Set(historicalReceipts.flatMap((receipt) => receipt.acceptedRequestDigests)),
+    ];
+    return {
+      ...operation,
+      requestDigest: digest(binaryDigestShape),
+      historicalReceipts,
+      acceptedPriorRequestDigests,
+    };
   });
 }
 
