@@ -31,6 +31,10 @@ export function applyMetadata(metadata: PageMetadata) {
   setMeta('meta[name="robots"]', "content", metadata.noIndex ? "noindex,nofollow" : "index,follow");
 
   let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (metadata.canonicalUrl === null) {
+    canonical?.remove();
+    return;
+  }
   if (!canonical) {
     canonical = document.createElement("link");
     canonical.rel = "canonical";

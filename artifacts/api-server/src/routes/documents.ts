@@ -25,9 +25,35 @@ import { audit, pageOf } from "../lib/cms";
 import { asyncRoute } from "../lib/http";
 import { hashToken, randomToken } from "../lib/security";
 import { canChangeCanonicalSlug } from "../lib/policy";
+import { downloadMediaObject } from "../lib/object-storage";
 
 const router: IRouter = Router();
+export const previewMediaDelivery = {
+  download: downloadMediaObject,
+};
 router.use("/documents", authenticate, requireMfa);
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function previewMediaIds(payload: unknown): string[] {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return [];
+  const snapshot = payload as Record<string, unknown>;
+  const content = snapshot.content && typeof snapshot.content === "object" && !Array.isArray(snapshot.content)
+    ? snapshot.content as Record<string, unknown>
+    : {};
+  const social = content.social && typeof content.social === "object" && !Array.isArray(content.social)
+    ? content.social as Record<string, unknown>
+    : {};
+  const candidates = [
+    ...(Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds : []),
+    content.identityMediaId,
+    content.logoMediaId,
+    content.heroMediaId,
+    content.pdfMediaId,
+    social.imageMediaId,
+  ];
+  return [...new Set(candidates.filter((value): value is string => typeof value === "string" && UUID.test(value)))].slice(0, 50);
+}
 
 const documentSelect = `
   SELECT d.id,d.kind,d.canonical_slug,d.title,d.owner_id,d.status root_status,
@@ -813,23 +839,34 @@ router.get(
       res.status(404).json({ error: "Document has no market edition." });
       return;
     }
-    const token = randomToken();
-    const expiresAt = new Date(Date.now() + 10 * 60_000);
-    await pool.query(
-      `INSERT INTO cms_preview_sessions(token_digest,edition_id,created_by_user_id,expires_at)
-       VALUES ($1,$2,$3,$4)`,
-      [hashToken(token), edition.rows[0].id, (res.locals.auth as AuthContext).user.id, expiresAt],
-    );
     const revision = await pool.query(
       `SELECT id,payload,revision_number FROM cms_revisions
-       WHERE edition_id=$1 ORDER BY revision_number DESC,created_at DESC,id DESC LIMIT 1`,
+        WHERE edition_id=$1
+        ORDER BY revision_number DESC,created_at DESC,id DESC LIMIT 1`,
       [edition.rows[0].id],
     );
     if (!revision.rowCount) {
       res.status(404).json({ error: "Document has no revision." });
       return;
     }
+    const token = randomToken();
+    const expiresAt = new Date(Date.now() + 10 * 60_000);
+    await pool.query(
+      `INSERT INTO cms_preview_sessions(token_digest,edition_id,revision_id,created_by_user_id,expires_at)
+        VALUES ($1,$2,$3,$4,$5)`,
+      [
+        hashToken(token),
+        edition.rows[0].id,
+        revision.rows[0].id,
+        (res.locals.auth as AuthContext).user.id,
+        expiresAt,
+      ],
+    );
     const validation = validateSnapshot(document.kind, revision.rows[0].payload, "draft");
+    res.set({
+      "Cache-Control": "no-store, private",
+      "X-Robots-Tag": "noindex, nofollow, noarchive",
+    });
     res.json({
       document: revision.rows[0].payload,
       previewUrl: `/preview/${token}`,
@@ -849,15 +886,12 @@ router.get(
   requireMfa,
   asyncRoute(async (req, res) => {
     const preview = await pool.query(
-      `SELECT d.kind,e.market,e.locale,r.id revision_id,r.payload,r.revision_number
+      `SELECT d.id document_id,d.kind,e.market,e.locale,r.id revision_id,r.payload,r.revision_number
          FROM cms_preview_sessions p
          JOIN cms_market_editions e ON e.id=p.edition_id
          JOIN cms_documents d ON d.id=e.document_id
-         JOIN LATERAL (
-           SELECT * FROM cms_revisions WHERE edition_id=e.id
-           ORDER BY revision_number DESC LIMIT 1
-         ) r ON true
-        WHERE p.token_digest=$1 AND p.expires_at>now()`,
+         JOIN cms_revisions r ON r.id=p.revision_id AND r.edition_id=e.id
+        WHERE p.token_digest=$1 AND p.expires_at>now() AND p.revoked_at IS NULL`,
       [hashToken(String(req.params.token))],
     );
     if (!preview.rowCount) {
@@ -870,10 +904,22 @@ router.get(
     });
     const row = preview.rows[0];
     const validation = validateSnapshot(row.kind, row.payload, "draft");
-    const mediaIds = validation.success ? validation.data.mediaIds : [];
+    const mediaIds = validation.success ? validation.data.mediaIds : previewMediaIds(row.payload);
     const availableMedia = mediaIds.length ? await pool.query(
-      `SELECT id FROM cms_media_assets WHERE id::text=ANY($1::text[]) AND status IN ('active','ready')`,
-      [mediaIds],
+      `SELECT a.id,v.id version_id,v.width,v.height,v.metadata,
+          a.media_type,a.alt_text,a.credit
+         FROM cms_media_references ref
+         JOIN cms_media_assets a ON a.id=ref.asset_id
+         JOIN cms_media_versions v ON v.id=ref.media_version_id AND v.asset_id=a.id
+        WHERE ref.document_id=$1
+          AND ref.field_path=$2
+          AND a.id::text=ANY($3::text[])
+          AND a.status IN ('active','ready')`,
+      [
+        String(row.document_id),
+        `revision:${String(row.revision_id)}`,
+        mediaIds,
+      ],
     ) : { rows: [] };
     const availableIds = new Set(availableMedia.rows.map((asset) => String(asset.id)));
     res.json({
@@ -884,9 +930,61 @@ router.get(
       revisionId: String(row.revision_id),
       revisionNumber: row.revision_number,
       usedFallback: false,
+      media: availableMedia.rows.map((asset) => ({
+        id: String(asset.id),
+        versionId: String(asset.version_id),
+        url: `/api/preview/${encodeURIComponent(String(req.params.token))}/media/${String(asset.id)}/${String(asset.version_id)}`,
+        mimeType: asset.media_type,
+        width: asset.width ?? null,
+        height: asset.height ?? null,
+        altText: asset.alt_text ?? null,
+        caption: asset.metadata?.caption ?? null,
+        credit: asset.credit ?? null,
+      })),
       missingMediaIds: mediaIds.filter((id) => !availableIds.has(id)),
       validationWarnings: validation.success ? [] : validation.errors,
     });
+  }),
+);
+
+router.get(
+  "/preview/:token/media/:mediaId/:versionId",
+  authenticate,
+  requireMfa,
+  asyncRoute(async (req, res) => {
+    const asset = await pool.query(
+      `SELECT v.storage_key,r.payload,
+          CASE WHEN v.metadata->>'rendition'='webp-1600' THEN 'image/webp' ELSE a.media_type END media_type
+         FROM cms_preview_sessions p
+         JOIN cms_market_editions e ON e.id=p.edition_id
+         JOIN cms_documents d ON d.id=e.document_id
+         JOIN cms_revisions r ON r.id=p.revision_id AND r.edition_id=e.id
+         JOIN cms_media_references ref ON ref.document_id=d.id
+           AND ref.field_path='revision:'||r.id::text
+         JOIN cms_media_assets a ON a.id=ref.asset_id
+         JOIN cms_media_versions v ON v.asset_id=a.id AND v.id=ref.media_version_id
+        WHERE p.token_digest=$1 AND p.expires_at>now()
+          AND p.revoked_at IS NULL
+          AND a.id=$2 AND v.id=$3 AND a.status IN ('active','ready')
+        LIMIT 1`,
+      [
+        hashToken(String(req.params.token)),
+        req.params.mediaId,
+        req.params.versionId,
+      ],
+    );
+    if (!asset.rowCount || !previewMediaIds(asset.rows[0].payload).includes(String(req.params.mediaId))) {
+      res.status(404).json({ error: "Preview media not found or expired." });
+      return;
+    }
+    res.set({
+      "Cache-Control": "no-store, private",
+      "X-Robots-Tag": "noindex, nofollow, noarchive",
+    });
+    res.type(asset.rows[0].media_type);
+    const stream = await previewMediaDelivery.download(asset.rows[0].storage_key);
+    stream.on("error", () => res.destroy());
+    stream.pipe(res);
   }),
 );
 

@@ -10,7 +10,7 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { cmsUsersTable } from "./cms-auth";
-import { cmsDocumentsTable, cmsMarketEditionsTable } from "./cms-content";
+import { cmsDocumentsTable, cmsMarketEditionsTable, cmsRevisionsTable } from "./cms-content";
 
 /** Append-only record of security, editorial, and publishing decisions. */
 export const cmsAuditEventsTable = pgTable(
@@ -54,6 +54,9 @@ export const cmsPreviewSessionsTable = pgTable(
     editionId: uuid("edition_id")
       .notNull()
       .references(() => cmsMarketEditionsTable.id, { onDelete: "cascade" }),
+    revisionId: uuid("revision_id")
+      .notNull()
+      .references(() => cmsRevisionsTable.id, { onDelete: "cascade" }),
     createdByUserId: uuid("created_by_user_id")
       .notNull()
       .references(() => cmsUsersTable.id, { onDelete: "cascade" }),
@@ -68,6 +71,7 @@ export const cmsPreviewSessionsTable = pgTable(
       table.editionId,
       table.expiresAt,
     ),
+    index("cms_preview_sessions_revision_idx").on(table.revisionId),
   ],
 );
 

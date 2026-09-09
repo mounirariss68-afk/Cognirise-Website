@@ -265,7 +265,7 @@ export default function DocumentDetail() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={openPreview} className="font-mono uppercase tracking-wider text-xs mr-2">
-            <Eye className="w-3.5 h-3.5 mr-2" /> Preview
+            <Eye className="w-3.5 h-3.5 mr-2" /> {doc.kind === "framework" ? "Preview buyer view" : "Preview"}
           </Button>
 
           <Button 

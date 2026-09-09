@@ -14,6 +14,7 @@ const expectedMigrations = [
   { idx: 9, when: 1788747983001, tag: "0009_cms_person_market_availability_staging" },
   { idx: 10, when: 1788747983002, tag: "0010_cms_media_collections" },
   { idx: 11, when: 1788747983003, tag: "0011_cms_revision_media_versions" },
+  { idx: 12, when: 1788909800000, tag: "0012_cms_preview_revision" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {
@@ -22,7 +23,7 @@ test("registers migrations in ordered Drizzle history", async () => {
   };
 
   assert.deepEqual(
-    journal.entries.slice(-4).map(({ idx, when, tag }) => ({ idx, when, tag })),
+    journal.entries.slice(-5).map(({ idx, when, tag }) => ({ idx, when, tag })),
     expectedMigrations,
   );
   assert.equal(new Set(journal.entries.map((entry) => entry.idx)).size, journal.entries.length);
@@ -169,6 +170,14 @@ test("upgrades a migration-0007 database and resolves staged availability only a
     migrationsSchema: schema,
     migrationsTable: "__drizzle_migrations",
   });
+
+  const mediaIdentityConstraint = await migrationPool.query<{ contype: string }>(
+    `SELECT contype
+       FROM pg_constraint
+      WHERE conrelid='cms_media_versions'::regclass
+        AND conname='cms_media_versions_id_asset_uidx'`,
+  );
+  assert.deepEqual(mediaIdentityConstraint.rows, [{ contype: "u" }]);
 
   const applied = await adminPool.query<{ created_at: string }>(
     `SELECT "created_at" FROM "${schema}"."__drizzle_migrations" ORDER BY "created_at"`,

@@ -131,17 +131,17 @@ export function useCmsCollection<T>(
   };
 }
 
-export function useCmsEntry(kind: DocumentKind, slug: string) {
+export function useCmsEntry(kind: CmsDocumentKind, slug: string) {
   const { market } = useMarketStore();
   // Collection landing narratives are intentionally code-owned; only entity
   // details are CMS-owned. Do not model landings as sentinel entity records.
   const codeOwnedLanding = ["about", "advisors", "partners", "platforms", "insights", "work"].includes(slug);
   const cutover = CUTOVER[kind as CmsDocumentKind];
   const cutoverGated = kind === "framework" && !cutover;
-  const query = useGetPublishedContent(market, "en", kind, slug, {
+  const query = useGetPublishedContent(market, "en", kind as DocumentKind, slug, {
     query: {
       enabled: !codeOwnedLanding && !cutoverGated,
-      queryKey: getGetPublishedContentQueryKey(market, "en", kind, slug),
+      queryKey: getGetPublishedContentQueryKey(market, "en", kind as DocumentKind, slug),
     },
   });
   const validation = query.data

@@ -6,7 +6,7 @@ import { AgentAuthorityAssessment } from "@/components/AgentAuthorityAssessment"
 import { BrandButton } from "@/components/ui/brand-button";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { assetUrl } from "@/lib/assets";
-import { cmsEntryRenderPolicy, contentRecord, text, useCmsEntry } from "@/lib/cms";
+import { type CmsRecord, cmsEntryRenderPolicy, contentRecord, text, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import {
   type HScore,
@@ -114,7 +114,7 @@ function GovernedNarrative({ blocks }: { blocks: FrameworkContent["methodology"]
           return <h3 key={index} className="mt-7 first:mt-0 font-display text-2xl font-semibold tracking-[-0.04em]">{block.text}</h3>;
         }
         if (block.type === "list") {
-          return <ul key={index} className="mt-4 list-disc space-y-2 pl-5 text-sm leading-[1.6] text-[#405777]">{block.items.map((item) => <li key={item}>{item}</li>)}</ul>;
+          return <ul key={index} className="mt-4 list-disc space-y-2 pl-5 text-sm leading-[1.6] text-[#405777]">{(Array.isArray(block.items) ? block.items : []).map((item) => <li key={item}>{item}</li>)}</ul>;
         }
         if (block.type === "quote") {
           return <blockquote key={index} className="mt-4 text-lg font-semibold leading-[1.55] text-[#30486d]">{block.text}</blockquote>;
@@ -354,12 +354,18 @@ function MatrixExplorer() {
   );
 }
 
-export default function AgentAuthorityModel() {
+type AgentAuthorityLayoutProps = {
+  framework: CmsRecord<FrameworkContent> | null;
+  renderPolicy?: "cms" | "compiled-fallback" | "loading" | "unavailable";
+  preview?: boolean;
+};
+
+export function AgentAuthorityLayout({
+  framework,
+  renderPolicy = "cms",
+  preview = false,
+}: AgentAuthorityLayoutProps) {
   const reducedMotion = useReducedMotion();
-  const query = useCmsEntry("framework", "agent-authority-model");
-  const renderPolicy = cmsEntryRenderPolicy(query.isAuthoritative, query.delivery);
-  const cmsRecord = query.data ? contentRecord(query.data, "framework") : null;
-  const framework = cmsRecord?.template === "agent-authority" ? cmsRecord : null;
   const heroMedia = framework?.heroMediaId
     ? framework.media?.find((media) => media.id === framework.heroMediaId)
     : undefined;
@@ -367,31 +373,42 @@ export default function AgentAuthorityModel() {
   const teaser = text(framework?.teaser, COMPILED.teaser);
   const explanation = text(framework?.handoverExplanation, COMPILED.handoverExplanation);
   const workedExample = framework?.workedExample;
-  const workedR = (Number(workedExample?.reversibility.slice(1)) || 3) as RScore;
-  const workedH = (Number(workedExample?.reach.slice(1)) || 2) as HScore;
+  const workedR = (Number(workedExample?.reversibility?.slice(1)) || 3) as RScore;
+  const workedH = (Number(workedExample?.reach?.slice(1)) || 2) as HScore;
   const workedBand = getEBand(workedR, workedH);
   const workedCeiling = getCeiling(workedBand);
-  const sectorExamples = framework
+  const sectorExamples = Array.isArray(framework?.sectorExamples)
     ? framework.sectorExamples.map((example) => {
-      const rScore = Number(example.reversibility.slice(1)) as RScore;
-      const hScore = Number(example.reach.slice(1)) as HScore;
+      const rScore = (Number(typeof example.reversibility === "string" ? example.reversibility.slice(1) : 1) || 1) as RScore;
+      const hScore = (Number(typeof example.reach === "string" ? example.reach.slice(1) : 1) || 1) as HScore;
       const exampleBand = getEBand(rScore, hScore);
       return {
-        sector: example.sector,
-        example: example.title,
-        type: `${example.handover.charAt(0).toUpperCase()}${example.handover.slice(1)}`,
+        sector: text(example.sector, "Unspecified sector"),
+        example: text(example.title, "Untitled handover"),
+        type: typeof example.handover === "string"
+          ? `${example.handover.charAt(0).toUpperCase()}${example.handover.slice(1)}`
+          : "Unspecified",
         band: `E${exampleBand}`,
         authority: OVERSIGHT_LABELS[getCeiling(exampleBand)],
       };
     })
     : SECTOR_EXAMPLES;
-  const sources = framework ? framework.sources : COMPILED_SOURCES;
-  const cta = framework?.cta ?? { label: "Bring us one process", href: "/value-scan" };
-  useDynamicMetadata(metadataFromSeo(framework?.seo, {
+  const sources = Array.isArray(framework?.sources) && framework.sources.length ? framework.sources : COMPILED_SOURCES;
+  const cta = framework?.cta && typeof framework.cta.label === "string" && typeof framework.cta.href === "string"
+    ? framework.cta
+    : { label: "Bring us one process", href: "/value-scan" };
+  const imageUrl = heroMedia?.url ?? `${window.location.origin}${assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")}`;
+  useDynamicMetadata(preview ? {
+    title: `Draft preview: ${title} | Cognirise`,
+    description: "Protected CMS draft preview.",
+    canonicalUrl: null,
+    imageUrl,
+    noIndex: true,
+  } : metadataFromSeo(framework?.seo, {
     title: `${title} | Cognirise`,
     description: teaser,
     canonicalUrl: `${window.location.origin}/methodologies/agent-authority-model`,
-    imageUrl: heroMedia?.url ?? `${window.location.origin}${assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")}`,
+    imageUrl,
   }));
 
   if (renderPolicy === "loading") {
@@ -667,4 +684,13 @@ export default function AgentAuthorityModel() {
       </section>
     </article>
   );
+}
+
+export default function AgentAuthorityModel() {
+  const query = useCmsEntry("framework", "agent-authority-model");
+  const renderPolicy = cmsEntryRenderPolicy(query.isAuthoritative, query.delivery);
+  const cmsRecord = query.data ? contentRecord(query.data, "framework") : null;
+  const framework = cmsRecord?.template === "agent-authority" ? cmsRecord : null;
+
+  return <AgentAuthorityLayout framework={framework} renderPolicy={renderPolicy} />;
 }
