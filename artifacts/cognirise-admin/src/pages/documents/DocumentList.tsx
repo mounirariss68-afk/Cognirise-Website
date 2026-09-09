@@ -180,7 +180,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto h-full flex flex-col">
+    <div className="p-8 max-w-7xl mx-auto min-h-full flex flex-col">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight capitalize text-foreground">{getKindLabel(kind)}s</h1>
@@ -203,8 +203,8 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
         />
       )}
 
-      <div className="bg-card border border-border rounded-xl shadow-sm flex flex-col flex-1 overflow-hidden">
-        <div className="p-4 border-b border-border flex items-center gap-4 bg-muted/20">
+      <div className="bg-card border border-border rounded-xl shadow-sm flex min-h-[24rem] max-h-[70vh] flex-col overflow-hidden">
+        <div className="p-4 border-b border-border flex flex-wrap items-center gap-4 bg-muted/20 shrink-0">
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input 
@@ -229,7 +229,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
           </Select>
         </div>
 
-        <div className="flex-1 overflow-auto">
+        <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
           <Table>
             <TableHeader className="bg-muted/30 sticky top-0 backdrop-blur-sm z-10">
               <TableRow className="border-border">
