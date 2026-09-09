@@ -61,6 +61,7 @@ function Kicker({ children, inverse = false }: { children: React.ReactNode; inve
 export default function IDAOMethodology() {
   const reducedMotion = useReducedMotion();
   const [activeTeamMember, setActiveTeamMember] = useState<(typeof DELIVERY_TEAM)[number]["id"]>("senior-leaders");
+  const [expandedCanonLayers, setExpandedCanonLayers] = useState<Set<string>>(() => new Set());
   const activeTeamDetail = DELIVERY_TEAM.find((item) => item.id === activeTeamMember) ?? DELIVERY_TEAM[0];
 
   return (
@@ -114,99 +115,92 @@ export default function IDAOMethodology() {
           </p>
         </div>
 
-        <div className="relative mt-14 overflow-hidden bg-[#f3f5f8] lg:mt-20">
-          <div className="grid min-h-[720px] lg:grid-cols-[0.82fr_1.18fr_0.82fr]">
+        <div className="relative mt-14 overflow-hidden bg-[#f3f5f8] lg:mt-20 border border-[#cbd3e1] rounded-sm">
+          <div className="grid lg:grid-cols-[0.85fr_1.1fr_0.85fr]">
             <div className="z-10 flex flex-col border-[#cbd3e1] lg:border-r">
-              <div className="border-b border-[#cbd3e1] p-6 lg:p-8">
+              <div className="border-b border-[#cbd3e1] p-5 lg:p-6 bg-white/50">
                 <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#7659df]">Human intelligence</span>
-                <h3 className="mt-3 font-display text-[30px] font-semibold tracking-[-0.06em]">Judgement in context.</h3>
+                <h3 className="mt-2 font-display text-[24px] font-semibold tracking-[-0.05em]">Judgement in context.</h3>
               </div>
               {DELIVERY_TEAM.filter((item) => item.side === "Human").map((item) => {
                 const isActive = item.id === activeTeamMember;
                 return (
-                  <div key={item.id} className="flex flex-1 flex-col">
-                    <button
-                      type="button"
-                      aria-pressed={isActive}
-                      aria-expanded={isActive}
-                      aria-controls={`${item.id}-mobile-detail delivery-team-detail`}
-                      onClick={() => setActiveTeamMember(item.id)}
-                      className={`group flex-1 border-b border-[#cbd3e1] p-6 text-left transition-colors focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[hsl(var(--brand-coral))] lg:p-8 ${isActive ? "bg-[#102957] text-white" : "hover:bg-white"}`}
-                    >
-                      <span className="text-[10px] font-bold uppercase tracking-[0.13em]" style={{ color: isActive ? "#d7cfff" : item.accent }}>{item.label}</span>
-                      <strong className="mt-4 block font-display text-[24px] leading-[1.08] tracking-[-0.05em]">{item.title}</strong>
-                      <span className={`mt-4 block text-[13px] leading-[1.55] ${isActive ? "text-white/75" : "text-[#536887]"}`}>{item.summary}</span>
-                      <span className="mt-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em]">View role <ArrowRight size={14} aria-hidden="true" /></span>
-                    </button>
-                    <div id={`${item.id}-mobile-detail`} className={`${isActive ? "block" : "hidden"} border-b border-[#cbd3e1] bg-white p-6 text-[14px] leading-[1.65] text-[#405777] lg:hidden`}>
-                      {item.detail}
-                    </div>
-                  </div>
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={isActive}
+                    aria-expanded={isActive}
+                    aria-controls="delivery-team-detail"
+                    onPointerEnter={(event) => {
+                      if (event.pointerType === "mouse") setActiveTeamMember(item.id);
+                    }}
+                    onFocus={() => setActiveTeamMember(item.id)}
+                    onClick={() => setActiveTeamMember(item.id)}
+                    className={`group relative flex-1 border-b border-[#cbd3e1] p-5 text-left transition-colors focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[hsl(var(--brand-coral))] lg:p-6 ${isActive ? "bg-[#102957] text-white" : "hover:bg-white"}`}
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-[0.13em]" style={{ color: isActive ? "#d7cfff" : item.accent }}>{item.label}</span>
+                    <strong className="mt-2 block font-display text-[20px] leading-[1.1] tracking-[-0.04em]">{item.title}</strong>
+                    <span className={`mt-2 block text-[13px] leading-[1.55] ${isActive ? "text-white/75" : "text-[#536887]"}`}>{item.summary}</span>
+                  </button>
                 );
               })}
             </div>
 
-            <div className="relative order-first flex min-h-[500px] items-end justify-center overflow-hidden bg-[#fdfcfb] px-4 pt-10 lg:order-none lg:min-h-0">
-              <div className="absolute inset-x-0 top-7 text-center">
+            <div className="relative order-first flex min-h-[430px] flex-col items-center justify-end overflow-hidden bg-[#fdfcfb] pt-8 lg:order-none lg:min-h-[500px]">
+              <div className="absolute inset-x-0 top-6 text-center z-20">
                 <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#647491]">The IDAO delivery system</span>
-                <p className="mt-2 font-display text-[24px] font-semibold tracking-[-0.05em] text-[#102957]">Human authority · Agent leverage</p>
+                <p className="mt-1 font-display text-[20px] font-semibold tracking-[-0.04em] text-[#102957]">Human authority · Agent leverage</p>
               </div>
               <motion.img
                 key="human-agent-team"
                 src={assetUrl("/images/cognirise/idao-human-agent-team.png")}
                 alt="A single figure divided into a human leader and an AI agent, representing the combined Cognirise delivery team."
-                className="relative z-10 max-h-[610px] w-full max-w-[620px] object-contain object-bottom drop-shadow-[0_28px_35px_rgba(16,41,87,0.12)]"
+                className="relative z-10 mt-12 max-h-[400px] w-full max-w-[460px] object-contain object-bottom drop-shadow-[0_20px_25px_rgba(16,41,87,0.1)] lg:mt-16 lg:max-h-[455px]"
                 initial={reducedMotion ? false : { opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: reducedMotion ? 0 : 0.7 }}
               />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#f3f5f8] to-transparent" />
             </div>
 
             <div className="z-10 flex flex-col border-[#cbd3e1] lg:border-l">
-              <div className="border-b border-[#cbd3e1] p-6 lg:p-8">
+              <div className="border-b border-[#cbd3e1] p-5 lg:p-6 bg-white/50">
                 <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#db509e]">Agent intelligence</span>
-                <h3 className="mt-3 font-display text-[30px] font-semibold tracking-[-0.06em]">Scale with control.</h3>
+                <h3 className="mt-2 font-display text-[24px] font-semibold tracking-[-0.05em]">Scale with control.</h3>
               </div>
               {DELIVERY_TEAM.filter((item) => item.side === "Agent").map((item) => {
                 const isActive = item.id === activeTeamMember;
                 return (
-                  <div key={item.id} className="flex flex-1 flex-col">
-                    <button
-                      type="button"
-                      aria-pressed={isActive}
-                      aria-expanded={isActive}
-                      aria-controls={`${item.id}-mobile-detail delivery-team-detail`}
-                      onClick={() => setActiveTeamMember(item.id)}
-                      className={`group flex-1 border-b border-[#cbd3e1] p-6 text-left transition-colors focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[hsl(var(--brand-coral))] lg:p-8 ${isActive ? "bg-[#102957] text-white" : "hover:bg-white"}`}
-                    >
-                      <span className="text-[10px] font-bold uppercase tracking-[0.13em]" style={{ color: isActive ? "#ffb1d4" : item.accent }}>{item.label}</span>
-                      <strong className="mt-4 block font-display text-[24px] leading-[1.08] tracking-[-0.05em]">{item.title}</strong>
-                      <span className={`mt-4 block text-[13px] leading-[1.55] ${isActive ? "text-white/75" : "text-[#536887]"}`}>{item.summary}</span>
-                      <span className="mt-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em]">View role <ArrowRight size={14} aria-hidden="true" /></span>
-                    </button>
-                    <div id={`${item.id}-mobile-detail`} className={`${isActive ? "block" : "hidden"} border-b border-[#cbd3e1] bg-white p-6 text-[14px] leading-[1.65] text-[#405777] lg:hidden`}>
-                      {item.detail}
-                    </div>
-                  </div>
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={isActive}
+                    aria-expanded={isActive}
+                    aria-controls="delivery-team-detail"
+                    onPointerEnter={(event) => {
+                      if (event.pointerType === "mouse") setActiveTeamMember(item.id);
+                    }}
+                    onFocus={() => setActiveTeamMember(item.id)}
+                    onClick={() => setActiveTeamMember(item.id)}
+                    className={`group relative flex-1 border-b border-[#cbd3e1] p-5 text-left transition-colors focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[hsl(var(--brand-coral))] lg:p-6 ${isActive ? "bg-[#102957] text-white" : "hover:bg-white"}`}
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-[0.13em]" style={{ color: isActive ? "#ffb1d4" : item.accent }}>{item.label}</span>
+                    <strong className="mt-2 block font-display text-[20px] leading-[1.1] tracking-[-0.04em]">{item.title}</strong>
+                    <span className={`mt-2 block text-[13px] leading-[1.55] ${isActive ? "text-white/75" : "text-[#536887]"}`}>{item.summary}</span>
+                  </button>
                 );
               })}
             </div>
           </div>
-
           <motion.div
             id="delivery-team-detail"
             role="status"
             aria-live="polite"
-            className="hidden border-t border-[#102957] bg-white md:grid-cols-[0.3fr_0.7fr] lg:grid"
+            className="border-t border-[#cbd3e1] bg-[#102957] p-5 text-white lg:px-7 lg:py-6"
           >
-            <motion.div key={`${activeTeamDetail.id}-label`} initial={reducedMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: reducedMotion ? 0 : 0.2 }} className="contents">
-              <div className="p-6 md:p-8">
-                <span className="text-[10px] font-bold uppercase tracking-[0.13em]" style={{ color: activeTeamDetail.accent }}>{activeTeamDetail.side} capability</span>
-                <strong className="mt-3 block font-display text-[27px] tracking-[-0.055em]">{activeTeamDetail.label}</strong>
-              </div>
-              <p className="border-t border-[#cbd3e1] p-6 text-[16px] leading-[1.65] text-[#405777] md:border-l md:border-t-0 md:p-8">{activeTeamDetail.detail}</p>
+            <motion.div key={activeTeamDetail.id} initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : 0.2 }}>
+              <span className="text-[10px] font-bold uppercase tracking-[0.13em]" style={{ color: activeTeamDetail.accent }}>{activeTeamDetail.label} capability</span>
+              <p className="mt-2 max-w-[1100px] text-[14px] leading-[1.6] text-[#d6deed]">{activeTeamDetail.detail}</p>
             </motion.div>
           </motion.div>
         </div>
@@ -283,16 +277,16 @@ export default function IDAOMethodology() {
                     <p className="mt-3 text-sm font-semibold leading-[1.6] text-[#30486d]">{stage.outcome}</p>
                   </div>
                 </div>
-                <details className="group mt-8 border-y border-[#cbd3e1]">
-                  <summary className="flex cursor-pointer list-none items-center justify-between py-5 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[hsl(var(--brand-coral))] [&::-webkit-details-marker]:hidden">
-                    Decision gate and evidence
-                    <span className="text-xl font-light group-open:rotate-45" aria-hidden="true">+</span>
-                  </summary>
-                  <div className="grid gap-5 pb-6 text-sm leading-[1.6] text-[#405777] md:grid-cols-2">
-                    <p><strong className="block text-[#102957]">The gate</strong>{stage.decisionGate}</p>
-                    <p><strong className="block text-[#102957]">Evidence to progress</strong>{stage.evidence}</p>
+                <div className="mt-8 border-t border-[#cbd3e1] pt-6 grid gap-6 md:grid-cols-2">
+                  <div>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.13em] text-[#647491]">Decision gate</h4>
+                    <p className="mt-3 text-sm leading-[1.6] text-[#405777]">{stage.decisionGate}</p>
                   </div>
-                </details>
+                  <div>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.13em] text-[#647491]">Evidence to progress</h4>
+                    <p className="mt-3 text-sm leading-[1.6] text-[#405777]">{stage.evidence}</p>
+                  </div>
+                </div>
               </div>
             </motion.li>
           ))}
@@ -304,26 +298,77 @@ export default function IDAOMethodology() {
         </div>
       </section>
 
-      <section className="bg-[#102957] px-6 py-20 text-white md:px-[4.8vw] lg:py-28" aria-labelledby="canon-heading">
+      <section className="bg-[#f3f5f8] px-6 py-20 text-[#102957] md:px-[4.8vw] lg:py-28" aria-labelledby="canon-heading">
         <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-[8vw]">
           <div>
-            <Kicker inverse>The delivery canon</Kicker>
+            <Kicker>The delivery canon</Kicker>
             <h2 id="canon-heading" className="mt-6 font-display text-[clamp(44px,6vw,88px)] font-semibold leading-[0.92] tracking-[-0.09em]">Speed without shortcuts.</h2>
           </div>
-          <div className="self-end border-t border-white/25 pt-6">
-            <p className="text-[18px] leading-[1.65] text-[#d6deed]">A decision-ready prototype within <strong className="text-white">48 hours</strong> and a governed MVP within <strong className="text-white">2–4 weeks</strong> are possible because teams do not begin from a blank page. A reusable delivery system governs how work is framed, produced, evaluated and handed over.</p>
+          <div className="self-end border-t border-[#cbd3e1] pt-6">
+            <p className="text-[18px] leading-[1.65] text-[#405777]">A decision-ready prototype within <strong className="text-[#102957]">48 hours</strong> and a governed MVP within <strong className="text-[#102957]">2–4 weeks</strong> are possible because teams do not begin from a blank page. A reusable delivery system governs how work is framed, produced, evaluated and handed over.</p>
           </div>
         </div>
-        <div className="mt-14 grid border-t border-white/25 lg:grid-cols-5">
+        <style>{`
+          @media (min-width: 1024px) {
+            .idao-canon-grid { grid-template-rows: repeat(7, auto); }
+            .idao-canon-card {
+              display: grid;
+              grid-row: span 7;
+              grid-template-rows: subgrid;
+            }
+          }
+        `}</style>
+        <div className="idao-canon-grid mt-14 grid items-start gap-x-8 gap-y-10 border-t border-[#cbd3e1] pt-10 md:grid-cols-2 lg:grid-cols-5 lg:gap-y-0">
           {IDAO_CANON_LAYERS.map((layer) => (
-            <details key={layer.num} className="group border-b border-white/25 lg:border-r lg:last:border-r-0">
-              <summary className="min-h-[230px] cursor-pointer list-none px-5 py-6 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[hsl(var(--brand-coral))] [&::-webkit-details-marker]:hidden">
-                <span className="flex items-center justify-between text-[10px] font-bold tracking-[0.12em] text-[#ff91c4]"><span>{layer.num}</span><span className="text-xl font-light text-white/60 group-open:rotate-45" aria-hidden="true">+</span></span>
-                <h3 className="mt-8 font-display text-[23px] font-semibold leading-[1.05] tracking-[-0.05em]">{layer.title}</h3>
-                <p className="mt-4 text-[13px] leading-[1.55] text-white/70">{layer.summary}</p>
-              </summary>
-              <p className="px-5 pb-7 text-[13px] leading-[1.65] text-white/80">{layer.detail}</p>
-            </details>
+            <div key={layer.num} className="idao-canon-card flex flex-col">
+              <div
+                role="img"
+                aria-label={layer.imageAlt}
+                className="aspect-[4/3] rounded-sm border border-[#cbd3e1] bg-white bg-cover bg-center"
+                style={{ backgroundImage: `url("${assetUrl(layer.image)}")` }}
+              />
+              <div className="mt-6 flex items-center justify-between text-[10px] font-bold tracking-[0.12em] text-[hsl(var(--brand-pink))]">
+                <span>{layer.num}</span>
+              </div>
+              <h3 className="mt-4 font-display text-[23px] font-semibold leading-[1.05] tracking-[-0.05em]">{layer.title}</h3>
+              <p className="mt-3 text-[13px] leading-[1.55] text-[#536887]">{layer.summary}</p>
+              <div className="mt-4 border-t border-[#cbd3e1] pt-4 text-[13px] leading-[1.65] text-[#405777]">
+                <p>{layer.detail}</p>
+              </div>
+              {(() => {
+                const isExpanded = expandedCanonLayers.has(layer.num);
+                const panelId = `canon-examples-${layer.num}`;
+                return (
+                  <>
+                    <button
+                      type="button"
+                      aria-expanded={isExpanded}
+                      aria-controls={panelId}
+                      onClick={() => setExpandedCanonLayers((current) => {
+                        const next = new Set(current);
+                        if (next.has(layer.num)) next.delete(layer.num);
+                        else next.add(layer.num);
+                        return next;
+                      })}
+                      className="mt-2 flex w-fit items-center py-1 text-left text-[10px] font-normal text-[#71809a] transition-colors hover:text-[#102957] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--brand-coral))]"
+                    >
+                      <span>{isExpanded ? "Collapse ×" : "Expand +"}</span>
+                    </button>
+                    <div id={panelId} hidden={!isExpanded} className="mt-4 rounded-sm border border-[#cbd3e1] bg-white p-4">
+                  <span className="mb-3 block text-[9px] font-bold uppercase tracking-[0.12em] text-[#647491]">Across IDAO</span>
+                  <ul className="space-y-2">
+                    {layer.examples.map((example) => (
+                      <li key={example.stage} className="grid grid-cols-[78px_1fr] gap-3 text-[11.5px] leading-[1.45] text-[#405777]">
+                        <strong className="text-[#7659df]">{example.stage}</strong>
+                        <span>{example.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           ))}
         </div>
       </section>

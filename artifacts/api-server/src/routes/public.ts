@@ -16,6 +16,7 @@ import { pageOf } from "../lib/cms";
 import { SlidingWindowThrottle } from "../lib/security";
 import { downloadMediaObject, parseByteRange } from "../lib/object-storage";
 import { isPublicContentVisible } from "../lib/policy";
+import { PUBLIC_KIND_CONFIGURATION_SQL } from "../lib/document-lifecycle-sql";
 
 const router: IRouter = Router();
 const PUBLIC_IMMUTABLE_MEDIA_CACHE_CONTROL = "public, max-age=31536000, immutable";
@@ -256,16 +257,7 @@ router.get(
       [kind, candidates, market, pageSize, (page - 1) * pageSize],
     );
     const configuration = kind
-      ? await pool.query(
-          `SELECT EXISTS (
-             SELECT 1
-               FROM cms_documents d
-               JOIN cms_market_editions e ON e.document_id=d.id
-               JOIN cms_revisions r ON r.edition_id=e.id
-              WHERE d.kind=$1 AND r.workflow_state='approved' AND r.approved_at IS NOT NULL
-           ) AS is_configured`,
-          [kind],
-        )
+      ? await pool.query(PUBLIC_KIND_CONFIGURATION_SQL, [kind])
       : { rows: [{ is_configured: true }] };
     try {
       const eligibleRows = result.rows.flatMap((row) => {

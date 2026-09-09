@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { assetUrl } from "@/lib/assets";
-import { IDAO_CANON_LAYERS, IDAO_STAGES } from "@/content/idao";
+import { IDAO_STAGES } from "@/content/idao";
 import {
   SpatialDisclosure,
   SpatialDisclosureItem,
@@ -230,71 +230,6 @@ export function BlueprintJourney() {
         </SpatialDisclosure>
       </div>
 
-       <div
-         className="mt-16 border-t border-[#102957] pt-7 lg:mt-24"
-         aria-labelledby="delivery-canon-heading"
-       >
-         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-[7vw]">
-           <div>
-             <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#102957]">
-               <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-               The delivery canon
-             </div>
-             <h3
-               id="delivery-canon-heading"
-               className="mt-5 max-w-[590px] font-display text-[clamp(34px,4vw,58px)] font-semibold leading-[0.98] tracking-[-0.075em]"
-             >
-               Speed without{" "}
-               <em className="not-italic text-[hsl(var(--brand-violet))]">
-                 shortcuts.
-               </em>
-             </h3>
-           </div>
-           <div className="self-end border-t border-[#cbd3e1] pt-6">
-             <p className="m-0 max-w-[620px] text-[16px] leading-[1.65] text-[#405777]">
-               A decision-ready prototype within 48 hours and an MVP within
-               2–4 weeks are possible because the route is repeatable. Our
-               proprietary canon governs how work is framed, produced,
-               reviewed and handed over—so acceleration does not come at the
-               expense of control.
-             </p>
-           </div>
-         </div>
-
-         <div className="mt-10 grid grid-cols-1 border-t border-[#cbd3e1] lg:mt-14 lg:grid-cols-5">
-            {IDAO_CANON_LAYERS.map((layer, index) => (
-             <details
-               key={layer.num}
-               className="group border-b border-[#cbd3e1] lg:border-r lg:last:border-r-0"
-               data-testid={`delivery-canon-layer-${layer.num}`}
-             >
-               <summary
-                 className="min-h-[210px] cursor-pointer list-none px-5 py-6 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[hsl(var(--brand-coral))] [&::-webkit-details-marker]:hidden"
-                 data-testid={`button-delivery-canon-${layer.num}`}
-               >
-                 <span className="flex items-center justify-between">
-                   <span className="text-[10px] font-bold tracking-[0.12em] text-[hsl(var(--brand-pink))]">
-                     {layer.num}
-                   </span>
-                   <span aria-hidden="true" className="text-xl font-light text-[#536887]">
-                     +
-                   </span>
-                 </span>
-                 <h4 className="mt-8 font-display text-[22px] font-semibold leading-[1.05] tracking-[-0.05em] text-[#102957]">
-                   {layer.title}
-                 </h4>
-                 <p className="mt-4 text-[13px] leading-[1.55] text-[#536887]">
-                   {layer.summary}
-                 </p>
-               </summary>
-               <div className="px-5 pb-7 text-[13px] leading-[1.6] text-[#405777]">
-                  <span className="sr-only">{`${index + 1} of ${IDAO_CANON_LAYERS.length}. `}</span>
-                 {layer.detail}
-               </div>
-             </details>
-           ))}
-         </div>
-       </div>
     </section>
   );
 }

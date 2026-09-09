@@ -34,6 +34,45 @@ test("a receipted refresh replay does nothing", () => {
   });
 });
 
+test("a valid historical publication pin survives an approved binary upgrade", () => {
+  assert.deepEqual(planPublishedPinRepair({
+    mediaId: "asset-1",
+    references: [{ assetId: "asset-1", mediaVersionId: "version-1" }],
+    pinnedVersionExists: true,
+  }), { action: "preserve" });
+  assert.deepEqual(planCaseVisualRefresh({
+    ...valid,
+    currentVersionNumber: 1,
+    currentChecksum: "version-1-checksum",
+    expectedChecksum: "version-2-checksum",
+  }), { action: "append", nextVersionNumber: 2 });
+  assert.deepEqual(planCaseVisualRefresh({
+    ...valid,
+    receiptExists: true,
+    currentVersionNumber: 2,
+    currentChecksum: "version-2-checksum",
+    expectedChecksum: "version-2-checksum",
+  }), { action: "replay" });
+});
+
+test("pin repair only targets a genuinely missing reference", () => {
+  assert.deepEqual(planPublishedPinRepair({
+    mediaId: "asset-1",
+    references: [],
+    pinnedVersionExists: false,
+  }), { action: "repair" });
+  assert.equal(planPublishedPinRepair({
+    mediaId: "asset-1",
+    references: [{ assetId: "asset-2", mediaVersionId: "version-1" }],
+    pinnedVersionExists: true,
+  }).action, "fail");
+  assert.equal(planPublishedPinRepair({
+    mediaId: "asset-1",
+    references: [{ assetId: "asset-1", mediaVersionId: "missing-version" }],
+    pinnedVersionExists: false,
+  }).action, "fail");
+});
+
 test("a refresh copies the published payload rather than mutating it", () => {
   const published = {
     content: { title: "Editor's title", evidence: [{ approved: true }] },

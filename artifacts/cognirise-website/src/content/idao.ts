@@ -121,6 +121,14 @@ export const IDAO_CANON_LAYERS = [
     summary: "The pace comes from knowing what must be true at every stage.",
     detail:
       "Each engagement moves through controlled inputs and outputs, shared structures and explicit stage gates. That repeatable route reduces reinvention while keeping scope, evidence and decisions visible.",
+    examples: [
+      { stage: "Innovate", text: "The opportunity frame names the owner, outcome and proof boundary before work begins." },
+      { stage: "Demonstrate", text: "Prototype findings are recorded against the questions the demonstration was designed to answer." },
+      { stage: "Activate", text: "Release readiness is earned through accepted evaluation and control evidence." },
+      { stage: "Operate", text: "Live signals reopen the route when an assumption needs to be reshaped." },
+    ],
+    image: "/images/cognirise/canon-1.jpg",
+    imageAlt: "A delicate line-art path passing through sequential control gates.",
   },
   {
     num: "02",
@@ -128,6 +136,14 @@ export const IDAO_CANON_LAYERS = [
     summary: "Governed models, skills and accelerators create a repeatable starting point.",
     detail:
       "Teams begin with reusable intelligence rather than a blank page. It speeds analysis and production without replacing the judgement needed to fit the work to the client’s context.",
+    examples: [
+      { stage: "Innovate", text: "Reusable framing structures help the team compare opportunities without flattening local context." },
+      { stage: "Demonstrate", text: "Governed skills accelerate research, prototyping and evaluation inside the agreed boundary." },
+      { stage: "Activate", text: "Proven delivery patterns give engineers a controlled starting point for the MVP." },
+      { stage: "Operate", text: "Reusable operating routines support monitoring, intervention and continuous improvement." },
+    ],
+    image: "/images/cognirise/canon-2.jpg",
+    imageAlt: "Intricate array of modular, glowing geometric components assembling into a structure.",
   },
   {
     num: "03",
@@ -135,6 +151,14 @@ export const IDAO_CANON_LAYERS = [
     summary: "The brief, journeys, requirements and evaluation evidence stay connected.",
     detail:
       "Requirement traceability links what is built to the need it serves. Controlled outputs and recorded decisions make progress easier to review, challenge and change without losing the thread.",
+    examples: [
+      { stage: "Innovate", text: "The value hypothesis is linked to the workflow, people and baseline signals it concerns." },
+      { stage: "Demonstrate", text: "Prototype observations remain connected to the assumptions they support or challenge." },
+      { stage: "Activate", text: "Requirements link through implementation to evaluation results and accepted limitations." },
+      { stage: "Operate", text: "A live issue can be followed back to its requirement, decision and original value case." },
+    ],
+    image: "/images/cognirise/canon-3.jpg",
+    imageAlt: "A continuous thread connecting blueprints and data points across a multi-layered plane.",
   },
   {
     num: "04",
@@ -142,6 +166,14 @@ export const IDAO_CANON_LAYERS = [
     summary: "People remain accountable for direction, risk and release.",
     detail:
       "Named decision-makers approve the moments that matter. The system accelerates the work between gates; it does not make consequential client decisions or silently widen its own authority.",
+    examples: [
+      { stage: "Innovate", text: "An accountable leader chooses the opportunity and agrees what evidence would justify progress." },
+      { stage: "Demonstrate", text: "Stakeholders make the proceed, reshape or stop decision after testing the proof." },
+      { stage: "Activate", text: "Named owners approve scope changes, accepted limitations and release readiness." },
+      { stage: "Operate", text: "Client operators retain authority over intervention, governance and the improvement backlog." },
+    ],
+    image: "/images/cognirise/canon-4.jpg",
+    imageAlt: "An intersection where algorithmic streams meet a distinct manual activation node.",
   },
   {
     num: "05",
@@ -149,5 +181,13 @@ export const IDAO_CANON_LAYERS = [
     summary: "Evaluation and operational readiness are built into delivery, not added at the end.",
     detail:
       "Security, accessibility, data governance and observability are considered from the first proof. Evidence, known limitations and handover discipline travel with the capability as it moves toward operation.",
+    examples: [
+      { stage: "Innovate", text: "Risk, data sensitivity and affected people shape the proof boundary from the outset." },
+      { stage: "Demonstrate", text: "The prototype tests usability, feasibility and governance assumptions—not only the happy path." },
+      { stage: "Activate", text: "Security, accessibility, behaviour and data handling are evaluated before release." },
+      { stage: "Operate", text: "Observable performance, tested support routines and known limitations accompany handover." },
+    ],
+    image: "/images/cognirise/canon-5.jpg",
+    imageAlt: "A shielded technical structure with embedded validation markers.",
   },
 ] as const;

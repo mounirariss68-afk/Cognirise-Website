@@ -71,6 +71,26 @@ test("published offices with later drafts archive, restore, and never use perman
     if (statement.includes("INSERT INTO cms_audit_events")) {
       return { rowCount: 1, rows: [] };
     }
+    if (statement.includes("FROM market_editions WHERE enabled=true")) {
+      return {
+        rowCount: 1,
+        rows: [{
+          code: "uae",
+          default_locale: "en",
+          fallback_market_code: null,
+          fallback_locale: null,
+          is_canonical: true,
+        }],
+      };
+    }
+    if (statement.includes("WITH selected AS")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("AS is_configured")) {
+      assert.match(statement, /publication_event\.action='document\.published'/);
+      assert.match(statement, /publication_event\.metadata->>'scheduled'/);
+      return { rowCount: 1, rows: [{ is_configured: true }] };
+    }
     if (statement.includes("SELECT d.id,d.kind")) {
       return {
         rowCount: 1,
@@ -167,4 +187,14 @@ test("published offices with later drafts archive, restore, and never use perman
   assert.equal(restoredDocument.canPermanentlyDelete, false);
   assert.equal(restoredDocument.publishedRevisionId, null);
   assert.equal(restoreCount, 1);
+
+  const publicOffices = await fetch(
+    `${origin}/api/public/content?market=uae&locale=en&kind=office`,
+  );
+  assert.equal(publicOffices.status, 200);
+  assert.equal(
+    (await publicOffices.json() as { isConfigured: boolean }).isConfigured,
+    true,
+    "restoring the last published office must not reactivate compiled fallback",
+  );
 });

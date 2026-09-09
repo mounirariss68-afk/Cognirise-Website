@@ -38,9 +38,11 @@ test("IDAO renders every stage from one shared, substantive content model", () =
   for (const stage of ["Innovate", "Demonstrate", "Activate", "Operate"]) {
     assert.match(content, new RegExp(`title: "${stage}"`));
   }
-  for (const field of ["purpose", "time", "keyWork", "clientRole", "decisionGate", "outcome", "evidence", "image", "imageAlt"]) {
+  for (const field of ["purpose", "time", "keyWork", "clientRole", "decisionGate", "outcome", "evidence"]) {
     assert.equal(content.match(new RegExp(`${field}:`, "g"))?.length, 4);
   }
+  assert.equal(content.match(new RegExp(`image:`, "g"))?.length, 9);
+  assert.equal(content.match(new RegExp(`imageAlt:`, "g"))?.length, 9);
   assert.match(page, /IDAO_STAGES\.map/);
   assert.match(blueprint, /IDAO_STAGES\.map/);
   assert.match(page, /Every stage earns the next/);
@@ -84,8 +86,17 @@ test("IDAO explains progression, loops, assurance and ownership", () => {
   ]) {
     assert.match(`${page}\n${content}`, new RegExp(concept, "i"));
   }
-  assert.match(page, /<details/);
-  assert.match(page, /focus-visible:outline/);
+  assert.doesNotMatch(page, /<details/);
+  assert.match(page, /Across IDAO/);
+  assert.match(page, /expandedCanonLayers/);
+  assert.match(page, /aria-expanded=\{isExpanded\}/);
+  assert.match(page, /hidden=\{!isExpanded\}/);
+  assert.match(page, /Expand \+/);
+  assert.match(page, /Collapse ×/);
+  assert.match(page, /grid-template-rows: subgrid/);
+  assert.match(page, /idao-canon-card/);
+  assert.match(page, /className="mt-2 flex w-fit items-center py-1 text-left text-\[10px\] font-normal/);
+  assert.doesNotMatch(page, /ChevronDown/);
   assert.match(page, /useReducedMotion/);
 });
 
@@ -105,10 +116,16 @@ test("IDAO opens with an accessible four-part human and agent delivery system", 
   assert.match(page, /alt="A single figure divided into a human leader and an AI agent/);
   assert.equal((page.match(/aria-pressed=\{isActive\}/g) ?? []).length, 2);
   assert.equal((page.match(/aria-expanded=\{isActive\}/g) ?? []).length, 2);
-  assert.equal((page.match(/aria-controls=\{`\$\{item\.id\}-mobile-detail delivery-team-detail`\}/g) ?? []).length, 2);
+  assert.equal((page.match(/aria-controls="delivery-team-detail"/g) ?? []).length, 2);
   assert.doesNotMatch(page, /id="delivery-team-detail"\s+key=/);
-  assert.match(page, /\$\{item\.id\}-mobile-detail/);
-  assert.match(page, /lg:hidden/);
+  assert.match(page, /onFocus=\{/);
+  assert.match(page, /onPointerEnter=\{/);
+  assert.match(page, /event\.pointerType === "mouse"/);
+  assert.match(page, /onClick=\{/);
   assert.match(page, /aria-live="polite"/);
+  assert.match(page, /lg:min-h-\[500px\]/);
+  assert.match(page, /lg:max-h-\[455px\]/);
+  assert.match(page, /max-w-\[1100px\]/);
+  assert.doesNotMatch(page, /lg:absolute lg:bottom-0/);
   assert.match(page, /focus-visible:outline/);
 });

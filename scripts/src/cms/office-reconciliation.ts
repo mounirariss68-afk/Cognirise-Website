@@ -175,7 +175,7 @@ async function reconcileOffice(
       actor.email,
       document.rows[0].id,
       receiptKey,
-      { revisionId: revision.rows[0].id, reason: "Confirmed office baseline" },
+      { revisionId: revision.rows[0].id, reason: "Confirmed office baseline", scheduled: false },
     ],
   );
   return "published";

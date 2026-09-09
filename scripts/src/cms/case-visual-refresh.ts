@@ -5,6 +5,11 @@ export type CaseVisualRefreshPlan =
   | { action: "replay" }
   | { action: "fail"; reason: string };
 
+export type PublishedPinRepairPlan =
+  | { action: "repair" }
+  | { action: "preserve" }
+  | { action: "fail"; reason: string };
+
 export type CasePublicationRefreshEntryPlan =
   | { action: "inspect-published" }
   | { action: "fresh-install" }
@@ -117,4 +122,48 @@ export function caseRefreshAssetBinaryUpdate(operation: {
     byteSize: operation.byteSize,
     checksum: operation.checksum,
   };
+}
+
+export function planPublishedPinRepair(input: {
+  mediaId: string;
+  references: Array<{ assetId: string; mediaVersionId: string | null }>;
+  pinnedVersionExists: boolean;
+}): PublishedPinRepairPlan {
+  if (!input.references.length) return { action: "repair" };
+  if (input.references.length !== 1) {
+    return { action: "fail", reason: "published revision has multiple media references" };
+  }
+  const [reference] = input.references;
+  if (reference.assetId !== input.mediaId || !reference.mediaVersionId) {
+    return { action: "fail", reason: "published revision media reference is invalid" };
+  }
+  if (!input.pinnedVersionExists) {
+    return { action: "fail", reason: "published revision immutable media version is missing" };
+  }
+  return { action: "preserve" };
+}
+
+export function publishedRevisionPinnedMediaVersion<T extends { id: string }>(input: {
+  revisionId: string;
+  versions: T[];
+  audits: Array<{ action: string; metadata: unknown }>;
+}): T | null {
+  const approvedActions = new Set([
+    "cms.inventory.case-study-summary-published",
+    "cms.inventory.case-visual-refresh-published",
+  ]);
+  const versionIds = new Set(input.audits.flatMap((audit) => {
+    if (!approvedActions.has(audit.action)
+      || !audit.metadata
+      || typeof audit.metadata !== "object"
+      || Array.isArray(audit.metadata)) return [];
+    const metadata = audit.metadata as Record<string, unknown>;
+    return metadata.revisionId === input.revisionId
+      && typeof metadata.mediaVersionId === "string"
+      ? [metadata.mediaVersionId]
+      : [];
+  }));
+  if (versionIds.size !== 1) return null;
+  const [versionId] = versionIds;
+  return input.versions.find((version) => version.id === versionId) ?? null;
 }

@@ -55,8 +55,7 @@ test("BlueprintJourney preserves the IDAO stage order and timing commitments", (
   assert.ok(activate < operate);
   assert.match(content, /time: "48 hours"/);
   assert.match(content, /time: "2–4 weeks \(MVP\)"/);
-  assert.match(source, /prototype within 48 hours/);
-  assert.match(source, /MVP within\s+2–4 weeks/);
+  assert.match(source, /prototype in 48 hours/);
 });
 
 test("each IDAO stage explains the client role and tangible outcome", () => {
@@ -66,27 +65,10 @@ test("each IDAO stage explains the client role and tangible outcome", () => {
   assert.match(source, />\s*What you have in hand\s*</);
 });
 
-test("the public delivery canon includes the required credibility layers", () => {
-  for (const concept of [
-    "Governed lifecycle",
-    "Reusable intelligence",
-    "Traceable execution",
-    "Human decision gates",
-    "Assurance by design",
-    "models, skills and accelerators",
-    "Requirement traceability",
-    "Security, accessibility, data governance and observability",
-    "handover discipline",
-  ]) {
-    assert.match(`${source}\n${content}`, new RegExp(concept, "i"));
-  }
-});
-
-test("the delivery canon uses accessible native disclosures", () => {
-  assert.match(source, /aria-labelledby="delivery-canon-heading"/);
-  assert.match(source, /<details/);
-  assert.match(source, /<summary/);
-  assert.match(source, /focus-visible:outline/);
+test("the homepage blueprint does not duplicate the IDAO delivery canon", () => {
+  assert.doesNotMatch(source, /IDAO_CANON_LAYERS/);
+  assert.doesNotMatch(source, /delivery-canon-heading/);
+  assert.doesNotMatch(source, /The delivery canon/);
 });
 
 test("the public IDAO section does not expose named delivery vendors", () => {
