@@ -6240,3 +6240,4 @@ export const RecordAnalyticsConsentResponse = zod.object({
   "recordedAt": zod.coerce.date()
 })
 
+
