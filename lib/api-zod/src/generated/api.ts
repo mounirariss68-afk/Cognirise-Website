@@ -721,9 +721,13 @@ export const listDocumentsResponseTwoItemsItemContentSixSourcesItemUrlRegExp = n
 export const listDocumentsResponseTwoItemsItemContentSevenOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const listDocumentsResponseTwoItemsItemContentEightHeroSourcesMin = 2;
-export const listDocumentsResponseTwoItemsItemContentEightHeroSourcesMax = 2;
+export const listDocumentsResponseTwoItemsItemContentEightOneHeroSourcesMin = 2;
+export const listDocumentsResponseTwoItemsItemContentEightOneHeroSourcesMax = 2;
 
+export const listDocumentsResponseTwoItemsItemContentEightTwoContactEmailMax = 254;
+
+
+export const listDocumentsResponseTwoItemsItemContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf = 1;
 
 
@@ -981,7 +985,7 @@ export const ListDocumentsResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -991,9 +995,13 @@ export const ListDocumentsResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(listDocumentsResponseTwoItemsItemContentEightHeroSourcesMin).max(listDocumentsResponseTwoItemsItemContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(listDocumentsResponseTwoItemsItemContentEightOneHeroSourcesMin).max(listDocumentsResponseTwoItemsItemContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(listDocumentsResponseTwoItemsItemContentEightTwoContactEmailMax).regex(listDocumentsResponseTwoItemsItemContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -1080,9 +1088,13 @@ export const createDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('
 export const createDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const createDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const createDocumentResponseContentEightHeroSourcesMin = 2;
-export const createDocumentResponseContentEightHeroSourcesMax = 2;
+export const createDocumentResponseContentEightOneHeroSourcesMin = 2;
+export const createDocumentResponseContentEightOneHeroSourcesMax = 2;
 
+export const createDocumentResponseContentEightTwoContactEmailMax = 254;
+
+
+export const createDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const createDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -1334,7 +1346,7 @@ export const CreateDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -1344,9 +1356,13 @@ export const CreateDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(createDocumentResponseContentEightHeroSourcesMin).max(createDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(createDocumentResponseContentEightOneHeroSourcesMin).max(createDocumentResponseContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(createDocumentResponseContentEightTwoContactEmailMax).regex(createDocumentResponseContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -1404,9 +1420,13 @@ export const getDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^ht
 export const getDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const getDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const getDocumentResponseContentEightHeroSourcesMin = 2;
-export const getDocumentResponseContentEightHeroSourcesMax = 2;
+export const getDocumentResponseContentEightOneHeroSourcesMin = 2;
+export const getDocumentResponseContentEightOneHeroSourcesMax = 2;
 
+export const getDocumentResponseContentEightTwoContactEmailMax = 254;
+
+
+export const getDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const getDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -1658,7 +1678,7 @@ export const GetDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -1668,9 +1688,13 @@ export const GetDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(getDocumentResponseContentEightHeroSourcesMin).max(getDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(getDocumentResponseContentEightOneHeroSourcesMin).max(getDocumentResponseContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(getDocumentResponseContentEightTwoContactEmailMax).regex(getDocumentResponseContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -1762,9 +1786,13 @@ export const updateDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('
 export const updateDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const updateDocumentResponseContentEightHeroSourcesMin = 2;
-export const updateDocumentResponseContentEightHeroSourcesMax = 2;
+export const updateDocumentResponseContentEightOneHeroSourcesMin = 2;
+export const updateDocumentResponseContentEightOneHeroSourcesMax = 2;
 
+export const updateDocumentResponseContentEightTwoContactEmailMax = 254;
+
+
+export const updateDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const updateDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -2016,7 +2044,7 @@ export const UpdateDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -2026,9 +2054,13 @@ export const UpdateDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(updateDocumentResponseContentEightHeroSourcesMin).max(updateDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(updateDocumentResponseContentEightOneHeroSourcesMin).max(updateDocumentResponseContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(updateDocumentResponseContentEightTwoContactEmailMax).regex(updateDocumentResponseContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -2107,9 +2139,13 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixSourcesI
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightHeroSourcesMin = 2;
-export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightHeroSourcesMax = 2;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightOneHeroSourcesMin = 2;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightOneHeroSourcesMax = 2;
 
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightTwoContactEmailMax = 254;
+
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 
 
 export const ListDocumentRevisionsResponse = zod.object({
@@ -2370,7 +2406,7 @@ export const ListDocumentRevisionsResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -2380,9 +2416,13 @@ export const ListDocumentRevisionsResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightHeroSourcesMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightOneHeroSourcesMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightTwoContactEmailMax).regex(listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -2500,9 +2540,13 @@ export const getDocumentRevisionResponseSnapshotContentSixSourcesItemUrlRegExp =
 export const getDocumentRevisionResponseSnapshotContentSevenOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const getDocumentRevisionResponseSnapshotContentEightHeroSourcesMin = 2;
-export const getDocumentRevisionResponseSnapshotContentEightHeroSourcesMax = 2;
+export const getDocumentRevisionResponseSnapshotContentEightOneHeroSourcesMin = 2;
+export const getDocumentRevisionResponseSnapshotContentEightOneHeroSourcesMax = 2;
 
+export const getDocumentRevisionResponseSnapshotContentEightTwoContactEmailMax = 254;
+
+
+export const getDocumentRevisionResponseSnapshotContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 
 
 export const GetDocumentRevisionResponse = zod.object({
@@ -2757,7 +2801,7 @@ export const GetDocumentRevisionResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -2767,9 +2811,13 @@ export const GetDocumentRevisionResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(getDocumentRevisionResponseSnapshotContentEightHeroSourcesMin).max(getDocumentRevisionResponseSnapshotContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(getDocumentRevisionResponseSnapshotContentEightOneHeroSourcesMin).max(getDocumentRevisionResponseSnapshotContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(getDocumentRevisionResponseSnapshotContentEightTwoContactEmailMax).regex(getDocumentRevisionResponseSnapshotContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -2830,9 +2878,13 @@ export const submitDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('
 export const submitDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const submitDocumentResponseContentEightHeroSourcesMin = 2;
-export const submitDocumentResponseContentEightHeroSourcesMax = 2;
+export const submitDocumentResponseContentEightOneHeroSourcesMin = 2;
+export const submitDocumentResponseContentEightOneHeroSourcesMax = 2;
 
+export const submitDocumentResponseContentEightTwoContactEmailMax = 254;
+
+
+export const submitDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const submitDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -3084,7 +3136,7 @@ export const SubmitDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -3094,9 +3146,13 @@ export const SubmitDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(submitDocumentResponseContentEightHeroSourcesMin).max(submitDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(submitDocumentResponseContentEightOneHeroSourcesMin).max(submitDocumentResponseContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(submitDocumentResponseContentEightTwoContactEmailMax).regex(submitDocumentResponseContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -3163,9 +3219,13 @@ export const publishDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp(
 export const publishDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const publishDocumentResponseContentEightHeroSourcesMin = 2;
-export const publishDocumentResponseContentEightHeroSourcesMax = 2;
+export const publishDocumentResponseContentEightOneHeroSourcesMin = 2;
+export const publishDocumentResponseContentEightOneHeroSourcesMax = 2;
 
+export const publishDocumentResponseContentEightTwoContactEmailMax = 254;
+
+
+export const publishDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const publishDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -3417,7 +3477,7 @@ export const PublishDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -3427,9 +3487,13 @@ export const PublishDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(publishDocumentResponseContentEightHeroSourcesMin).max(publishDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(publishDocumentResponseContentEightOneHeroSourcesMin).max(publishDocumentResponseContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(publishDocumentResponseContentEightTwoContactEmailMax).regex(publishDocumentResponseContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -3496,9 +3560,13 @@ export const rollbackDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp
 export const rollbackDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const rollbackDocumentResponseContentEightHeroSourcesMin = 2;
-export const rollbackDocumentResponseContentEightHeroSourcesMax = 2;
+export const rollbackDocumentResponseContentEightOneHeroSourcesMin = 2;
+export const rollbackDocumentResponseContentEightOneHeroSourcesMax = 2;
 
+export const rollbackDocumentResponseContentEightTwoContactEmailMax = 254;
+
+
+export const rollbackDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const rollbackDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -3750,7 +3818,7 @@ export const RollbackDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -3760,9 +3828,13 @@ export const RollbackDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(rollbackDocumentResponseContentEightHeroSourcesMin).max(rollbackDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(rollbackDocumentResponseContentEightOneHeroSourcesMin).max(rollbackDocumentResponseContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(rollbackDocumentResponseContentEightTwoContactEmailMax).regex(rollbackDocumentResponseContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -3828,9 +3900,13 @@ export const archiveDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp(
 export const archiveDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const archiveDocumentResponseContentEightHeroSourcesMin = 2;
-export const archiveDocumentResponseContentEightHeroSourcesMax = 2;
+export const archiveDocumentResponseContentEightOneHeroSourcesMin = 2;
+export const archiveDocumentResponseContentEightOneHeroSourcesMax = 2;
 
+export const archiveDocumentResponseContentEightTwoContactEmailMax = 254;
+
+
+export const archiveDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const archiveDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -4082,7 +4158,7 @@ export const ArchiveDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -4092,9 +4168,13 @@ export const ArchiveDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(archiveDocumentResponseContentEightHeroSourcesMin).max(archiveDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(archiveDocumentResponseContentEightOneHeroSourcesMin).max(archiveDocumentResponseContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(archiveDocumentResponseContentEightTwoContactEmailMax).regex(archiveDocumentResponseContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -4160,9 +4240,13 @@ export const restoreDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp(
 export const restoreDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const restoreDocumentResponseContentEightHeroSourcesMin = 2;
-export const restoreDocumentResponseContentEightHeroSourcesMax = 2;
+export const restoreDocumentResponseContentEightOneHeroSourcesMin = 2;
+export const restoreDocumentResponseContentEightOneHeroSourcesMax = 2;
 
+export const restoreDocumentResponseContentEightTwoContactEmailMax = 254;
+
+
+export const restoreDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const restoreDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -4414,7 +4498,7 @@ export const RestoreDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -4424,9 +4508,13 @@ export const RestoreDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(restoreDocumentResponseContentEightHeroSourcesMin).max(restoreDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(restoreDocumentResponseContentEightOneHeroSourcesMin).max(restoreDocumentResponseContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(restoreDocumentResponseContentEightTwoContactEmailMax).regex(restoreDocumentResponseContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -4483,9 +4571,13 @@ export const previewDocumentResponseDocumentContentSixSourcesItemUrlRegExp = new
 export const previewDocumentResponseDocumentContentSevenOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const previewDocumentResponseDocumentContentEightHeroSourcesMin = 2;
-export const previewDocumentResponseDocumentContentEightHeroSourcesMax = 2;
+export const previewDocumentResponseDocumentContentEightOneHeroSourcesMin = 2;
+export const previewDocumentResponseDocumentContentEightOneHeroSourcesMax = 2;
 
+export const previewDocumentResponseDocumentContentEightTwoContactEmailMax = 254;
+
+
+export const previewDocumentResponseDocumentContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const previewDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -4735,7 +4827,7 @@ export const PreviewDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
@@ -4745,9 +4837,13 @@ export const PreviewDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(previewDocumentResponseDocumentContentEightHeroSourcesMin).max(previewDocumentResponseDocumentContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(previewDocumentResponseDocumentContentEightOneHeroSourcesMin).max(previewDocumentResponseDocumentContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
-})]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(previewDocumentResponseDocumentContentEightTwoContactEmailMax).regex(previewDocumentResponseDocumentContentEightTwoContactEmailRegExp)
+})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -6494,6 +6590,36 @@ export const GetPublicHeroFilmResponse = zod.object({
   "requestedMarket": zod.string(),
   "usedFallback": zod.boolean(),
   "revision": zod.number().min(1).multipleOf(getPublicHeroFilmResponseRevisionMultipleOf),
+  "publishedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get the governed public contact email
+ */
+export const getPublicContactConfigurationQueryMarketDefault = `uae`;
+export const getPublicContactConfigurationQueryLocaleDefault = `en`;
+
+export const GetPublicContactConfigurationQueryParams = zod.object({
+  "market": zod.coerce.string().default(getPublicContactConfigurationQueryMarketDefault),
+  "locale": zod.coerce.string().default(getPublicContactConfigurationQueryLocaleDefault)
+})
+
+export const getPublicContactConfigurationResponseContactEmailMax = 254;
+
+
+export const getPublicContactConfigurationResponseContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const getPublicContactConfigurationResponseRevisionMultipleOf = 1;
+
+
+
+export const GetPublicContactConfigurationResponse = zod.object({
+  "contactEmail": zod.string().max(getPublicContactConfigurationResponseContactEmailMax).regex(getPublicContactConfigurationResponseContactEmailRegExp),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "requestedMarket": zod.string(),
+  "usedFallback": zod.boolean(),
+  "revision": zod.number().min(1).multipleOf(getPublicContactConfigurationResponseRevisionMultipleOf),
   "publishedAt": zod.coerce.date()
 })
 

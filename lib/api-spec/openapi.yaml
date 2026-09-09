@@ -1425,6 +1425,27 @@ paths:
                 $ref: "#/components/schemas/PublicHeroFilm"
         "404":
           $ref: "#/components/responses/NotFound"
+  /public/contact-configuration:
+    get:
+      operationId: getPublicContactConfiguration
+      tags: [public]
+      summary: Get the governed public contact email
+      parameters:
+        - name: market
+          in: query
+          schema: { type: string, default: uae }
+        - name: locale
+          in: query
+          schema: { type: string, default: en }
+      responses:
+        "200":
+          description: Published contact configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicContactConfiguration"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /public/sitemap:
     get:
       operationId: getPublicSitemap
@@ -2078,32 +2099,40 @@ components:
         reviewDate: { type: string, format: date }
         relatedIds: { type: array, items: { type: string } }
     CmsSiteConfigurationContent:
-      type: object
-      additionalProperties: false
-      required: [schemaVersion, page, hero]
-      properties:
-        schemaVersion: { type: number, enum: [1] }
-        page: { type: string, enum: [homepage, industries] }
-        hero:
-          type: object
+      oneOf:
+        - type: object
           additionalProperties: false
-          required: [posterMediaId, posterMediaVersionId, sources]
+          required: [schemaVersion, page, hero]
           properties:
-            posterMediaId: { type: string }
-            posterMediaVersionId: { type: string }
-            sources:
-              type: array
-              minItems: 2
-              maxItems: 2
-              description: Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.
-              items:
-                type: object
-                additionalProperties: false
-                required: [mediaId, mediaVersionId, mimeType]
-                properties:
-                  mediaId: { type: string }
-                  mediaVersionId: { type: string }
-                  mimeType: { type: string, enum: [video/mp4, video/webm] }
+            schemaVersion: { type: number, enum: [1] }
+            page: { type: string, enum: [homepage, industries] }
+            hero:
+              type: object
+              additionalProperties: false
+              required: [posterMediaId, posterMediaVersionId, sources]
+              properties:
+                posterMediaId: { type: string }
+                posterMediaVersionId: { type: string }
+                sources:
+                  type: array
+                  minItems: 2
+                  maxItems: 2
+                  description: Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [mediaId, mediaVersionId, mimeType]
+                    properties:
+                      mediaId: { type: string }
+                      mediaVersionId: { type: string }
+                      mimeType: { type: string, enum: [video/mp4, video/webm] }
+        - type: object
+          additionalProperties: false
+          required: [schemaVersion, configuration, contactEmail]
+          properties:
+            schemaVersion: { type: number, enum: [1] }
+            configuration: { type: string, enum: [contact-email] }
+            contactEmail: { type: string, pattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$', maxLength: 254 }
     CmsFrameworkExample:
       type: object
       additionalProperties: false
@@ -2508,6 +2537,18 @@ components:
           maxItems: 2
           items:
             $ref: "#/components/schemas/PublicHeroMedia"
+        market: { type: string }
+        locale: { type: string }
+        requestedMarket: { type: string }
+        usedFallback: { type: boolean }
+        revision: { type: number, multipleOf: 1, minimum: 1 }
+        publishedAt: { type: string, format: date-time }
+    PublicContactConfiguration:
+      type: object
+      additionalProperties: false
+      required: [contactEmail, market, locale, requestedMarket, usedFallback, revision, publishedAt]
+      properties:
+        contactEmail: { type: string, pattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$', maxLength: 254 }
         market: { type: string }
         locale: { type: string }
         requestedMarket: { type: string }

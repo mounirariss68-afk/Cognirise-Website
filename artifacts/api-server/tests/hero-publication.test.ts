@@ -12,6 +12,9 @@ test("generic review and publication validate site configuration and pin request
   assert.match(source, /source\.mediaVersionId/);
   assert.match(source, /id::text=\$4::jsonb->>asset\.id::text/);
   assert.match(source, /Publication references unavailable media/);
+  assert.match(source, /isCmsConfigurationIdentityValid\(row\.kind, row\.canonical_slug, row\.payload\)/);
+  assert.match(source, /isCmsConfigurationIdentityValid\([\s\S]*?revision\.rows\[0\]\.kind,[\s\S]*?revision\.rows\[0\]\.canonical_slug,[\s\S]*?revision\.rows\[0\]\.payload/);
+  assert.match(source, /isCmsConfigurationIdentityValid\([\s\S]*?old\.rows\[0\]\.kind,[\s\S]*?old\.rows\[0\]\.canonical_slug,[\s\S]*?old\.rows\[0\]\.payload/);
 });
 
 test("public hero selection remains bound to the approved published revision", async () => {

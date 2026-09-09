@@ -5,12 +5,30 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
-import type { CmsSiteConfigurationContentHero } from './cmsSiteConfigurationContentHero';
-import type { CmsSiteConfigurationContentPage } from './cmsSiteConfigurationContentPage';
-import type { CmsSiteConfigurationContentSchemaVersion } from './cmsSiteConfigurationContentSchemaVersion';
 
-export interface CmsSiteConfigurationContent {
-  schemaVersion: CmsSiteConfigurationContentSchemaVersion;
-  page: CmsSiteConfigurationContentPage;
-  hero: CmsSiteConfigurationContentHero;
-}
+export type CmsSiteConfigurationContent = {
+  schemaVersion: 1;
+  page: 'homepage' | 'industries';
+  hero: {
+  posterMediaId: string;
+  posterMediaVersionId: string;
+  /**
+     * Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.
+     * @minItems 2
+     * @maxItems 2
+     */
+  sources: ({
+  mediaId: string;
+  mediaVersionId: string;
+  mimeType: 'video/mp4' | 'video/webm';
+})[];
+};
+} | {
+  schemaVersion: 1;
+  configuration: 'contact-email';
+  /**
+     * @maxLength 254
+     * @pattern ^[^@\s]+@[^@\s]+\.[^@\s]+$
+     */
+  contactEmail: string;
+};

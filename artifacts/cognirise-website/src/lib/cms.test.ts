@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { contentRecord, resolvePublishedHeroFilm, type HeroFilmSources } from "./cms";
+import {
+  COMPILED_CONTACT_EMAIL,
+  contentRecord,
+  resolvePublishedContactEmail,
+  resolvePublishedHeroFilm,
+  type HeroFilmSources,
+} from "./cms";
 
 const localFilm: HeroFilmSources = {
   mp4: "/videos/local.mp4",
@@ -102,4 +108,10 @@ test("hero film retains checked-in sources for incomplete or invalid published m
   assert.equal(incomplete, localFilm);
   assert.equal(wrongType, localFilm);
   assert.equal(resolvePublishedHeroFilm(undefined, localFilm), localFilm);
+});
+
+test("published contact email resolves one value or the safe compiled fallback", () => {
+  assert.equal(resolvePublishedContactEmail({ contactEmail: "team@cognirise.ai" }), "team@cognirise.ai");
+  assert.equal(resolvePublishedContactEmail(undefined), COMPILED_CONTACT_EMAIL);
+  assert.equal(resolvePublishedContactEmail({ contactEmail: "   " }), COMPILED_CONTACT_EMAIL);
 });

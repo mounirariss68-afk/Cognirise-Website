@@ -16,3 +16,16 @@ test("Contact renders the ordered published office collection from the CMS", asy
   assert.doesNotMatch(contact, /OFFICE_LOCATIONS\.dubai\.address/);
   assert.match(cms, /office: true/);
 });
+
+test("Contact uses one governed contact email value for its label and mail link", async () => {
+  const [contact, cms] = await Promise.all([
+    readFile(new URL("src/pages/Contact.tsx", websiteRoot), "utf8"),
+    readFile(new URL("src/lib/cms.ts", websiteRoot), "utf8"),
+  ]);
+  assert.match(contact, /const contactEmail = usePublishedContactEmail\(\)/);
+  assert.match(contact, /href=\{`mailto:\$\{contactEmail\}`\}/);
+  assert.match(contact, />\{contactEmail\}<\/a>/);
+  assert.doesNotMatch(contact, /mailto:hello@cognirise\.ai/);
+  assert.match(cms, /COMPILED_CONTACT_EMAIL = "hello@cognirise\.ai"/);
+  assert.match(cms, /useGetPublicContactConfiguration/);
+});

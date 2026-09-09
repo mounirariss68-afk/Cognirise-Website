@@ -1,4 +1,4 @@
-import { getGetPublicHeroFilmQueryKey, getGetPublishedContentQueryKey, useGetPublishedContent, useGetPublicHeroFilm, useListPublishedContent } from "@workspace/api-client-react";
+import { getGetPublicContactConfigurationQueryKey, getGetPublicHeroFilmQueryKey, getGetPublishedContentQueryKey, useGetPublishedContent, useGetPublicContactConfiguration, useGetPublicHeroFilm, useListPublishedContent } from "@workspace/api-client-react";
 import type { DocumentKind, PublishedContent } from "@workspace/api-client-react";
 import {
   type CmsContent,
@@ -43,6 +43,29 @@ export type HeroFilmSources = {
   webm: string;
   poster: string;
 };
+
+export const COMPILED_CONTACT_EMAIL = "hello@cognirise.ai";
+
+export function resolvePublishedContactEmail(
+  published: { contactEmail?: unknown } | undefined,
+): string {
+  return typeof published?.contactEmail === "string" && published.contactEmail.trim()
+    ? published.contactEmail
+    : COMPILED_CONTACT_EMAIL;
+}
+
+export function usePublishedContactEmail(): string {
+  const { market } = useMarketStore();
+  const params = { market, locale: "en" };
+  const query = useGetPublicContactConfiguration(params, {
+    query: {
+      enabled: Boolean(market),
+      queryKey: getGetPublicContactConfigurationQueryKey(params),
+      retry: false,
+    },
+  });
+  return resolvePublishedContactEmail(query.data);
+}
 
 export function cmsEntryRenderPolicy(
   isAuthoritative: boolean,

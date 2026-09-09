@@ -345,7 +345,27 @@ export const CMS_HERO_DOCUMENT_SLUGS: Record<CmsHeroFilmSlot, string> = {
   industries: "site-industries-hero",
 };
 
-export const siteConfigurationContentSchema = z.object({
+export const CMS_CONTACT_EMAIL_DOCUMENT_SLUG = "site-contact-email" as const;
+
+export function isCmsConfigurationIdentityValid(
+  kind: CmsDocumentKind,
+  slug: string,
+  input: unknown,
+) {
+  if (kind !== "site-configuration") return true;
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return slug !== CMS_CONTACT_EMAIL_DOCUMENT_SLUG;
+  }
+  const value = input as Record<string, unknown>;
+  const nested = value.content;
+  const content = nested && typeof nested === "object" && !Array.isArray(nested)
+    ? nested as Record<string, unknown>
+    : value;
+  const isContactEmail = content.configuration === "contact-email";
+  return (slug === CMS_CONTACT_EMAIL_DOCUMENT_SLUG) === isContactEmail;
+}
+
+const heroSiteConfigurationContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
   page: z.enum(CMS_HERO_FILM_SLOTS),
   hero: z.object({
@@ -371,6 +391,17 @@ export const siteConfigurationContentSchema = z.object({
     });
   }
 });
+
+export const contactEmailConfigurationContentSchema = z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
+  configuration: z.literal("contact-email"),
+  contactEmail: z.string().trim().email("Enter a valid email address.").max(254),
+}).strict();
+
+export const siteConfigurationContentSchema = z.union([
+  heroSiteConfigurationContentSchema,
+  contactEmailConfigurationContentSchema,
+]);
 
 export const cmsContentSchemas = {
   person: personContentSchema,
@@ -539,10 +570,22 @@ export function validateCmsSnapshot(
     mediaIds.add((social as Record<string, unknown>).imageMediaId as string);
   }
   if (kind === "site-configuration") {
-    const hero = record.hero as Record<string, unknown>;
-    mediaIds.add(hero.posterMediaId as string);
-    for (const source of hero.sources as Array<Record<string, unknown>>) {
-      mediaIds.add(source.mediaId as string);
+    const hero = record.hero;
+    if (hero && typeof hero === "object" && !Array.isArray(hero)) {
+      const heroRecord = hero as Record<string, unknown>;
+      if (typeof heroRecord.posterMediaId === "string") mediaIds.add(heroRecord.posterMediaId);
+      if (Array.isArray(heroRecord.sources)) {
+        for (const source of heroRecord.sources) {
+          if (
+            source &&
+            typeof source === "object" &&
+            !Array.isArray(source) &&
+            typeof (source as Record<string, unknown>).mediaId === "string"
+          ) {
+            mediaIds.add((source as Record<string, unknown>).mediaId as string);
+          }
+        }
+      }
     }
   }
   return {

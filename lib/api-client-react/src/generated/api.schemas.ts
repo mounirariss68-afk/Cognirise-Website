@@ -996,36 +996,10 @@ export interface CmsOfficeContent {
   relatedIds?: string[];
 }
 
-export type CmsSiteConfigurationContentSchemaVersion = typeof CmsSiteConfigurationContentSchemaVersion[keyof typeof CmsSiteConfigurationContentSchemaVersion];
-
-
-export const CmsSiteConfigurationContentSchemaVersion = {
-  NUMBER_1: 1,
-} as const;
-
-export type CmsSiteConfigurationContentPage = typeof CmsSiteConfigurationContentPage[keyof typeof CmsSiteConfigurationContentPage];
-
-
-export const CmsSiteConfigurationContentPage = {
-  homepage: 'homepage',
-  industries: 'industries',
-} as const;
-
-export type CmsSiteConfigurationContentHeroSourcesItemMimeType = typeof CmsSiteConfigurationContentHeroSourcesItemMimeType[keyof typeof CmsSiteConfigurationContentHeroSourcesItemMimeType];
-
-
-export const CmsSiteConfigurationContentHeroSourcesItemMimeType = {
-  'video/mp4': 'video/mp4',
-  'video/webm': 'video/webm',
-} as const;
-
-export type CmsSiteConfigurationContentHeroSourcesItem = {
-  mediaId: string;
-  mediaVersionId: string;
-  mimeType: CmsSiteConfigurationContentHeroSourcesItemMimeType;
-};
-
-export type CmsSiteConfigurationContentHero = {
+export type CmsSiteConfigurationContent = {
+  schemaVersion: 1;
+  page: 'homepage' | 'industries';
+  hero: {
   posterMediaId: string;
   posterMediaVersionId: string;
   /**
@@ -1033,14 +1007,21 @@ export type CmsSiteConfigurationContentHero = {
      * @minItems 2
      * @maxItems 2
      */
-  sources: CmsSiteConfigurationContentHeroSourcesItem[];
+  sources: ({
+  mediaId: string;
+  mediaVersionId: string;
+  mimeType: 'video/mp4' | 'video/webm';
+})[];
 };
-
-export interface CmsSiteConfigurationContent {
-  schemaVersion: CmsSiteConfigurationContentSchemaVersion;
-  page: CmsSiteConfigurationContentPage;
-  hero: CmsSiteConfigurationContentHero;
-}
+} | {
+  schemaVersion: 1;
+  configuration: 'contact-email';
+  /**
+     * @maxLength 254
+     * @pattern ^[^@\s]+@[^@\s]+\.[^@\s]+$
+     */
+  contactEmail: string;
+};
 
 /**
  * Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
@@ -1400,6 +1381,21 @@ export interface PublicHeroFilm {
      * @maxItems 2
      */
   sources: PublicHeroMedia[];
+  market: string;
+  locale: string;
+  requestedMarket: string;
+  usedFallback: boolean;
+  /** @minimum 1 */
+  revision: number;
+  publishedAt: string;
+}
+
+export interface PublicContactConfiguration {
+  /**
+     * @maxLength 254
+     * @pattern ^[^@\s]+@[^@\s]+\.[^@\s]+$
+     */
+  contactEmail: string;
   market: string;
   locale: string;
   requestedMarket: string;
@@ -2177,6 +2173,11 @@ locale?: string;
 };
 
 export type GetPublicHeroFilmParams = {
+market?: string;
+locale?: string;
+};
+
+export type GetPublicContactConfigurationParams = {
 market?: string;
 locale?: string;
 };

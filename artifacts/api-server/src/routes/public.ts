@@ -3,6 +3,8 @@ import { pool } from "@workspace/db";
 import {
   CMS_HERO_DOCUMENT_SLUGS,
   CMS_HERO_FILM_SLOTS,
+  CMS_CONTACT_EMAIL_DOCUMENT_SLUG,
+  contactEmailConfigurationContentSchema,
   cmsPublicRoute,
   type CmsHeroFilmSlot,
   type CmsContent,
@@ -363,6 +365,53 @@ router.get("/public/hero-films/:slot", asyncRoute(async (req, res) => {
   }
   res.json({
     ...hero,
+    market: row.market,
+    locale: row.locale,
+    requestedMarket: market,
+    usedFallback: row.market !== market,
+    revision: row.revision_number,
+    publishedAt: row.published_at,
+  });
+}));
+
+router.get("/public/contact-configuration", asyncRoute(async (req, res) => {
+  const market = typeof req.query.market === "string" ? req.query.market : "uae";
+  const locale = typeof req.query.locale === "string" ? req.query.locale : "en";
+  const candidates = await marketCandidates(market, locale);
+  if (!candidates) {
+    res.status(404).json({ error: "Market or locale is unavailable." });
+    return;
+  }
+  const result = await pool.query(
+    `SELECT d.id,e.market,e.locale,e.published_at,e.updated_at,
+            r.id revision_id,r.revision_number,r.payload
+       FROM cms_documents d
+       JOIN cms_market_editions e ON e.document_id=d.id
+       JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
+         AND r.workflow_state='approved'
+      WHERE d.kind='site-configuration' AND d.status<>'archived'
+        AND d.canonical_slug=$1
+        AND e.market=ANY($2::text[]) AND e.locale=$3
+        AND e.publication_state='published' AND e.published_at<=now()
+      ORDER BY array_position($2::text[],e.market),e.updated_at DESC,e.id
+      LIMIT 1`,
+    [CMS_CONTACT_EMAIL_DOCUMENT_SLUG, candidates, locale],
+  );
+  if (!result.rowCount) {
+    res.status(404).json({ error: "Public contact configuration not found." });
+    return;
+  }
+  const row = result.rows[0];
+  const validation = validateCmsSnapshot("site-configuration", row.payload, "publish");
+  const contact = validation.success
+    ? contactEmailConfigurationContentSchema.safeParse(validation.data.content)
+    : null;
+  if (!contact?.success) {
+    res.status(404).json({ error: "Public contact configuration not found." });
+    return;
+  }
+  res.json({
+    contactEmail: contact.data.contactEmail,
     market: row.market,
     locale: row.locale,
     requestedMarket: market,

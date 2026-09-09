@@ -4,6 +4,7 @@ import {
   CreateDocumentBody,
   cmsPublicRoute,
   initialCmsContent,
+  isCmsConfigurationIdentityValid,
   NAVIGATION_ITEM_IDS,
   NavigationSettingsSchema,
   UpdateDocumentMarketAvailabilityBody,
@@ -56,6 +57,39 @@ test("offices are publishable, ordered content with required city and address fi
     false,
   );
   assert.equal(cmsPublicRoute("office", "office-dubai", valid.success ? valid.data : {}), null);
+});
+
+test("contact site configuration requires a strict valid email", () => {
+  const valid = validateCmsContent("site-configuration", {
+    schemaVersion: 1,
+    configuration: "contact-email",
+    contactEmail: "contact@cognirise.ai",
+  }, "publish");
+  assert.equal(valid.success, true);
+  const invalid = validateCmsContent("site-configuration", {
+    schemaVersion: 1,
+    configuration: "contact-email",
+    contactEmail: "not-an-email",
+  }, "draft");
+  assert.equal(invalid.success, false);
+  assert.match(invalid.errors.join(" "), /valid email address/i);
+  const contact = valid.success ? valid.data : {};
+  const hero = {
+    schemaVersion: 1,
+    page: "homepage",
+    hero: {
+      posterMediaId: heroIds.poster,
+      posterMediaVersionId: heroIds.posterVersion,
+      sources: [
+        { mediaId: heroIds.mp4, mediaVersionId: heroIds.mp4Version, mimeType: "video/mp4" },
+        { mediaId: heroIds.webm, mediaVersionId: heroIds.webmVersion, mimeType: "video/webm" },
+      ],
+    },
+  };
+  assert.equal(isCmsConfigurationIdentityValid("site-configuration", "site-contact-email", contact), true);
+  assert.equal(isCmsConfigurationIdentityValid("site-configuration", "site-homepage-hero", contact), false);
+  assert.equal(isCmsConfigurationIdentityValid("site-configuration", "site-contact-email", hero), false);
+  assert.equal(isCmsConfigurationIdentityValid("site-configuration", "site-homepage-hero", hero), true);
 });
 
 test("publication requires a known variant and governed article body", () => {

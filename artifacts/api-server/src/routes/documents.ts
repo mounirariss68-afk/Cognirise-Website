@@ -10,6 +10,7 @@ import {
   RollbackDocumentBody,
   SubmitDocumentBody,
   UpdateDocumentBody,
+  isCmsConfigurationIdentityValid,
   validateCmsSnapshot,
 } from "@workspace/api-zod";
 import {
@@ -187,6 +188,12 @@ router.post(
     const parsed = CreateDocumentBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: "Invalid document.", details: parsed.error.issues });
+      return;
+    }
+    if (
+      !isCmsConfigurationIdentityValid(parsed.data.kind, parsed.data.slug, parsed.data.content)
+    ) {
+      res.status(409).json({ error: "Contact email configuration must use its canonical singleton slug." });
       return;
     }
     const validated = validateSnapshot(parsed.data.kind, payload(parsed.data), "draft");
@@ -432,6 +439,12 @@ router.patch(
     }
     const auth = res.locals.auth as AuthContext;
     const next = { ...current, ...parsed.data };
+    if (
+      !isCmsConfigurationIdentityValid(current.kind, next.slug, next.content)
+    ) {
+      res.status(409).json({ error: "Contact email configuration must use its canonical singleton slug." });
+      return;
+    }
     const validated = validateSnapshot(current.kind, payload(next), "draft");
     if (!validated.success) {
       res.status(422).json({ error: "Content contract validation failed.", details: validated.errors });
@@ -557,7 +570,7 @@ router.post(
     }
     const id = String(req.params.documentId);
     const candidate = await pool.query(
-      `SELECT r.id,r.payload,d.kind FROM cms_revisions r
+      `SELECT r.id,r.payload,d.kind,d.canonical_slug FROM cms_revisions r
        JOIN cms_market_editions e ON e.id=r.edition_id
        JOIN cms_documents d ON d.id=e.document_id
        WHERE e.document_id=$1
@@ -570,6 +583,10 @@ router.post(
       return;
     }
     for (const row of candidate.rows) {
+      if (!isCmsConfigurationIdentityValid(row.kind, row.canonical_slug, row.payload)) {
+        res.status(409).json({ error: "Site configuration does not match its canonical singleton identity." });
+        return;
+      }
       const validation = validateSnapshot(row.kind, row.payload, "draft");
       if (!validation.success) {
         res.status(422).json({ error: "Review governance validation failed.", details: validation.errors });
@@ -602,13 +619,22 @@ router.post(
     try {
     await client.query("BEGIN");
     const revision = await client.query(
-      `SELECT r.id,r.edition_id,r.payload,d.kind FROM cms_revisions r JOIN cms_market_editions e
+      `SELECT r.id,r.edition_id,r.payload,d.kind,d.canonical_slug FROM cms_revisions r JOIN cms_market_editions e
         ON e.id=r.edition_id JOIN cms_documents d ON d.id=e.document_id WHERE r.id=$1 AND e.document_id=$2`,
       [parsed.data.revisionId, id],
     );
     if (!revision.rowCount) {
       await client.query("ROLLBACK");
       res.status(409).json({ error: "The selected revision does not exist." });
+      return;
+    }
+    if (!isCmsConfigurationIdentityValid(
+      revision.rows[0].kind,
+      revision.rows[0].canonical_slug,
+      revision.rows[0].payload,
+    )) {
+      await client.query("ROLLBACK");
+      res.status(409).json({ error: "Site configuration does not match its canonical singleton identity." });
       return;
     }
     const validation = validateSnapshot(revision.rows[0].kind, revision.rows[0].payload, "publish");
@@ -741,12 +767,22 @@ router.post(
     const id = String(req.params.documentId);
     const auth = res.locals.auth as AuthContext;
     const old = await pool.query(
-      `SELECT r.payload,r.edition_id FROM cms_revisions r JOIN cms_market_editions e
-       ON e.id=r.edition_id WHERE r.id=$1 AND e.document_id=$2`,
+      `SELECT r.payload,r.edition_id,d.kind,d.canonical_slug FROM cms_revisions r
+       JOIN cms_market_editions e ON e.id=r.edition_id
+       JOIN cms_documents d ON d.id=e.document_id
+       WHERE r.id=$1 AND e.document_id=$2`,
       [parsed.data.revisionId, id],
     );
     if (!old.rowCount) {
       res.status(409).json({ error: "The selected revision does not exist." });
+      return;
+    }
+    if (!isCmsConfigurationIdentityValid(
+      old.rows[0].kind,
+      old.rows[0].canonical_slug,
+      old.rows[0].payload,
+    )) {
+      res.status(409).json({ error: "Site configuration does not match its canonical singleton identity." });
       return;
     }
     const revision = await pool.query(

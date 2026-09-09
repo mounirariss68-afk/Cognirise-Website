@@ -6,7 +6,7 @@ import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, Sid
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Loader2, LayoutDashboard, Users, UserSquare2, Component, Newspaper, Briefcase, Factory, PanelsTopLeft, Image as ImageIcon, Globe, Inbox, ShieldAlert, LogOut, ChevronUp, Lock, ListTree, MapPin } from "lucide-react";
+import { Loader2, LayoutDashboard, Users, UserSquare2, Component, Newspaper, Briefcase, Factory, PanelsTopLeft, Image as ImageIcon, Globe, Inbox, ShieldAlert, LogOut, ChevronUp, Lock, ListTree, MapPin, Mail } from "lucide-react";
 import { CogniriseBrand } from "@/components/brand/CogniriseBrand";
 
 function AppSidebar() {
@@ -54,6 +54,7 @@ function AppSidebar() {
       items: [
         { title: "Media Library", url: "/media", icon: ImageIcon },
         { title: "Market Editions", url: "/markets", icon: Globe },
+        { title: "Contact Email", url: "/contact-settings", icon: Mail },
         ...(isAdministrator ? [{ title: "Website Navigation", url: "/navigation", icon: ListTree }] : []),
       ]
     },

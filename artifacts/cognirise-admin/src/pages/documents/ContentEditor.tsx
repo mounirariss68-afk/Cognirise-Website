@@ -204,6 +204,25 @@ export function ContentEditor({ kind, value, onChange, errors }: {
         />
       </>}
 
+      {kind === "site-configuration" && !value.page && <>
+        <div className="space-y-2">
+          <Field
+            label="Public website contact email"
+            type="email"
+            value={value.contactEmail}
+            onChange={(next) => onChange({
+              schemaVersion: 1,
+              configuration: "contact-email",
+              contactEmail: next,
+            })}
+            placeholder="hello@cognirise.ai"
+          />
+          <p className="text-sm text-muted-foreground">
+            This address appears on the public Contact page only after this revision is approved and published.
+          </p>
+        </div>
+      </>}
+
       {kind === "platform" && <>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Category" value={value.category} onChange={(next) => set("category", next)} />

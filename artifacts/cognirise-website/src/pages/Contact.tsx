@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { BrandButton } from "@/components/ui/brand-button";
 import { getMarketLocationLabel, OFFICE_LOCATIONS, useMarketStore } from "@/store/market";
-import { contentRecord, useCmsCollection } from "@/lib/cms";
+import { contentRecord, useCmsCollection, usePublishedContactEmail } from "@/lib/cms";
 
 const officeFallback = Object.values(OFFICE_LOCATIONS).map((office, order) => ({
   ...office,
@@ -10,6 +10,7 @@ const officeFallback = Object.values(OFFICE_LOCATIONS).map((office, order) => ({
 
 export default function Contact() {
   const { market } = useMarketStore();
+  const contactEmail = usePublishedContactEmail();
   const offices = useCmsCollection("office", officeFallback, (item) => {
     const office = contentRecord(item, "office");
     return {
@@ -56,7 +57,7 @@ export default function Contact() {
 
             <div className="mt-12 pt-8 border-t border-border">
               <h4 className="font-bold mb-2">Email</h4>
-              <a href="mailto:hello@cognirise.ai" className="text-sm text-[hsl(var(--brand-coral))] hover:underline">hello@cognirise.ai</a>
+              <a href={`mailto:${contactEmail}`} className="text-sm text-[hsl(var(--brand-coral))] hover:underline">{contactEmail}</a>
             </div>
           </div>
         </div>

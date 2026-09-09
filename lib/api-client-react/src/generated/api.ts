@@ -45,6 +45,7 @@ import type {
   EnquiryInput,
   EnquiryReceipt,
   GetDashboardKpisParams,
+  GetPublicContactConfigurationParams,
   GetPublicHeroFilmParams,
   GetPublicSitemapParams,
   HealthStatus,
@@ -79,6 +80,7 @@ import type {
   PasswordChangeInput,
   PasswordReset,
   PasswordResetInput,
+  PublicContactConfiguration,
   PublicHeroFilm,
   PublicHeroSlot,
   PublicationInput,
@@ -4792,6 +4794,90 @@ export function useGetPublicHeroFilm<TData = Awaited<ReturnType<typeof getPublic
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetPublicHeroFilmQueryOptions(slot,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetPublicContactConfigurationUrl = (params?: GetPublicContactConfigurationParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/contact-configuration?${stringifiedParams}` : `/api/public/contact-configuration`
+}
+
+/**
+ * @summary Get the governed public contact email
+ */
+export const getPublicContactConfiguration = async (params?: GetPublicContactConfigurationParams, options?: Parameters<typeof customFetch>[1]): Promise<PublicContactConfiguration> => {
+
+  return customFetch<PublicContactConfiguration>(getGetPublicContactConfigurationUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicContactConfigurationQueryKey = (params?: GetPublicContactConfigurationParams,) => {
+    return [
+    `/api/public/contact-configuration`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetPublicContactConfigurationQueryOptions = <TData = Awaited<ReturnType<typeof getPublicContactConfiguration>>, TError = ErrorType<NotFoundResponse>>(params?: GetPublicContactConfigurationParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicContactConfiguration>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicContactConfigurationQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicContactConfiguration>>> = ({ signal }) => getPublicContactConfiguration(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicContactConfiguration>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicContactConfigurationQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicContactConfiguration>>>
+export type GetPublicContactConfigurationQueryError = ErrorType<NotFoundResponse>
+
+
+/**
+ * @summary Get the governed public contact email
+ */
+
+export function useGetPublicContactConfiguration<TData = Awaited<ReturnType<typeof getPublicContactConfiguration>>, TError = ErrorType<NotFoundResponse>>(
+ params?: GetPublicContactConfigurationParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicContactConfiguration>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicContactConfigurationQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
