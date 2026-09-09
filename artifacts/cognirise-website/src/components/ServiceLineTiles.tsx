@@ -13,7 +13,7 @@ import { PulseImage } from "@/components/ui/pulse-image";
 import { trackEvent } from "@/lib/analytics";
 import { useMarketStore } from "@/store/market";
 
-type ServiceLineTilesSource = "homepage" | "services_overview";
+type ServiceLineTilesSource = "homepage";
 
 const SERVICE_VISUALS: Record<string, { img: string; pos: string }> = {
   "consulting-engineering": {

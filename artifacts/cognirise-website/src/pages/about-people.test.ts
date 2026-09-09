@@ -53,5 +53,5 @@ test("redirects the legacy advisors route without advertising it", async () => {
   assert.doesNotMatch(shell, /href: "\/advisors"/);
   assert.match(shell, /href: "\/about#board-of-advisors"/);
   assert.doesNotMatch(sitemap, /\/advisors/);
-  assert.match(publicSitemap, /pathname !== "\/advisors"/);
+  assert.match(publicSitemap, /retiredPaths[\s\S]*"\/advisors"/);
 });

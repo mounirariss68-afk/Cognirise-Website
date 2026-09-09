@@ -58,7 +58,7 @@ export const INDUSTRIES: IndustryContent[] = [
     reversal: { title: "Automation can move work in the wrong direction.", body: "Publicly reported customer-service reversals at Klarna and Commonwealth Bank show why containment or headcount claims are not the same as sustained service quality." },
     myth: { claim: "“A chatbot proves the bank is AI-native.”", verdict: "No. The harder evidence sits in governed fraud, credit, onboarding, collections and operations—where decisions can be tested and traced." },
     gcc: "Regional ambition is high, but public, comparable evidence of realised AI value remains limited. The credible route is to publish controls and measured outcomes together.",
-    service: { label: "Sovereign AI Solutions", href: "/what-we-do#sovereign-solutions", firstMove: "Map one exception-heavy, evidence-heavy decision." },
+    service: { label: "Sovereign AI Solutions", href: "/#service-lines", firstMove: "Map one exception-heavy, evidence-heavy decision." },
     uses: [
       { use: "Onboarding and KYC", evidence: "Measured process outcomes", boundary: "Human approval and complete evidence trail" },
       { use: "Fraud and credit models", evidence: "Established analytical practice", boundary: "Independent validation and drift monitoring" },
@@ -90,7 +90,7 @@ export const INDUSTRIES: IndustryContent[] = [
     reversal: { title: "Containment is not customer resolution.", body: "Public frustration with automated support shows why call avoidance cannot be reported as value without resolution quality and repeat-contact measures." },
     myth: { claim: "“Level 4 means the whole network runs itself.”", verdict: "No. Industry certifications apply to defined scenarios and domains; broad autonomy remains an operating programme, not a switch." },
     gcc: "Gulf operators combine sovereign-cloud investment, national AI programmes and advanced mobile infrastructure. Data residency and operating ownership remain the binding constraints.",
-    service: { label: "AI Platforms", href: "/what-we-do#ai-platforms", firstMove: "Close one high-volume incident or service loop." },
+    service: { label: "AI Platforms", href: "/#service-lines", firstMove: "Close one high-volume incident or service loop." },
     uses: [
       { use: "Incident triage", evidence: "Company-reported operational results", boundary: "Named domain and human override" },
       { use: "Agent assistance", evidence: "Company and vendor metrics", boundary: "Resolution and repeat-contact measures" },
@@ -122,7 +122,7 @@ export const INDUSTRIES: IndustryContent[] = [
     reversal: { title: "A seamless demo can conceal a broken hand-off.", body: "When automated advice cannot change a booking, honour policy or transfer context, it adds another queue rather than removing one." },
     myth: { claim: "“Hyper-personalisation is the main prize.”", verdict: "Not during disruption. Reliable recovery, operational coordination and a clear human hand-off protect more trust." },
     gcc: "Rapid aviation and tourism growth raises the value of multilingual service and integrated operations—but targets should not be presented as realised outcomes.",
-    service: { label: "Consulting & Engineering with AI", href: "/what-we-do#consulting-engineering", firstMove: "Trace one disruption from signal to resolved journey." },
+    service: { label: "Consulting & Engineering with AI", href: "/#service-lines", firstMove: "Trace one disruption from signal to resolved journey." },
     uses: [
       { use: "Disruption recovery", evidence: "Operational use cases", boundary: "Policy-aware options and accountable approval" },
       { use: "Frontline assistance", evidence: "Company-reported pilots", boundary: "Context transfer and staff discretion" },

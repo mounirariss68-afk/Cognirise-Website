@@ -5,9 +5,14 @@ import { readFileSync } from "node:fs";
 const source = readFileSync(new URL("./Home.tsx", import.meta.url), "utf8");
 
 test("uses the shared Pulse action family for prominent homepage CTAs", () => {
-  assert.match(source, /<BrandButton href="\/what-we-do">Explore our practice<\/BrandButton>/);
+  assert.match(source, /<BrandButton href="\/#service-lines">Explore our practice<\/BrandButton>/);
   assert.match(source, /<BrandButton href="\/about">Meet the team<\/BrandButton>/);
   assert.match(source, /<BrandButton href="\/contact" variant="inverse">Book a consultation<\/BrandButton>/);
+});
+
+test("promotes both public methodologies", () => {
+  assert.match(source, /href="\/methodologies\/idao"[^>]*>Explore IDAO/);
+  assert.match(source, /href="\/methodologies\/agent-authority-model"[^>]*>Agent Authority Model/);
 });
 
 test("does not retain the legacy edge-striped homepage CTA", () => {

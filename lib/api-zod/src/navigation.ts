@@ -2,11 +2,9 @@ import { z } from "zod";
 
 export const NAVIGATION_ITEM_REGISTRY = [
   { id: "what-we-do", label: "What we do" },
-  { id: "what-we-do.overview", label: "Overview", parentId: "what-we-do" },
-  { id: "what-we-do.consulting-engineering", label: "Consulting & Engineering", parentId: "what-we-do" },
-  { id: "what-we-do.sovereign-solutions", label: "Sovereign Solutions", parentId: "what-we-do" },
-  { id: "what-we-do.ai-platforms", label: "AI Platforms", parentId: "what-we-do" },
-  { id: "what-we-do.agent-authority", label: "Agent Authority Model", parentId: "what-we-do" },
+  { id: "methodologies", label: "Frameworks & Methodologies" },
+  { id: "methodologies.idao", label: "IDAO", parentId: "methodologies" },
+  { id: "methodologies.agent-authority", label: "Agent Authority Model", parentId: "methodologies" },
   { id: "platforms", label: "Platforms" },
   { id: "platforms.overview", label: "Platform Overview", parentId: "platforms" },
   { id: "platforms.cognios", label: "CogniOS", parentId: "platforms" },

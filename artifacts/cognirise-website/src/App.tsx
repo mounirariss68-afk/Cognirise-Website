@@ -23,7 +23,6 @@ function AnchoredRedirect({ to, anchor }: { to: string; anchor: string }) {
 }
 // Pages
 import Home from "@/pages/Home";
-import ServicesOverview from "@/pages/ServicesOverview";
 import AgenticTransformation from "@/pages/AgenticTransformation";
 import DataAIFoundations from "@/pages/DataAIFoundations";
 import EngineeringWithAI from "@/pages/EngineeringWithAI";
@@ -61,6 +60,7 @@ import ValueScan from "@/pages/ValueScan";
 import CmsPreview from "@/pages/CmsPreview";
 
 import AgentAuthorityModel from "@/pages/AgentAuthorityModel";
+import IDAOMethodology from "@/pages/IDAOMethodology";
 
 export function Router() {
   return (
@@ -69,10 +69,11 @@ export function Router() {
         <Route path="/" component={Home} />
         
         {/* Methodologies */}
+        <Route path="/methodologies/idao" component={IDAOMethodology} />
         <Route path="/methodologies/agent-authority-model" component={AgentAuthorityModel} />
 
         {/* Services */}
-        <Route path="/what-we-do" component={ServicesOverview} />
+        <Route path="/what-we-do"><AnchoredRedirect to="/" anchor="service-lines" /></Route>
         <Route path="/what-we-do/agentic-enterprise-transformation" component={AgenticTransformation} />
         <Route path="/what-we-do/data-ai-foundations" component={DataAIFoundations} />
         <Route path="/what-we-do/engineering-with-ai" component={EngineeringWithAI} />
@@ -80,7 +81,7 @@ export function Router() {
         <Route path="/what-we-do/digital-ai-workforce" component={DigitalAIWorkforce} />
         
         {/* Legacy aliases */}
-        <Route path="/services"><Redirect to="/what-we-do" /></Route>
+        <Route path="/services"><AnchoredRedirect to="/" anchor="service-lines" /></Route>
         
         {/* Platforms */}
         <Route path="/platforms" component={PlatformsOverview} />

@@ -273,7 +273,7 @@ export default function AgenticTransformation() {
           </div>
           <p>Go deeper through the three service lines, with specialist capabilities supporting each route.</p>
         </div>
-        <Link href="/what-we-do" className="at-service-photo">
+        <Link href="/#service-lines" className="at-service-photo">
           <img src={assetUrl("/images/cognirise/site-services.jpg")} alt="A colourful current travelling through a layered architectural environment." />
           <div className="at-service-caption">
             <div className="at-kicker">Connected capability</div>

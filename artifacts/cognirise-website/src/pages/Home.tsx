@@ -102,7 +102,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
-              <BrandButton href="/what-we-do">Explore our practice</BrandButton>
+              <BrandButton href="/#service-lines">Explore our practice</BrandButton>
             </motion.div>
           </motion.div>
           
@@ -185,7 +185,10 @@ export default function Home() {
             <p className="max-w-[450px] text-[15px] leading-[1.6] text-[#dce4f0] mb-10">
               {featuredFramework?.teaser ?? "A deterministic way to set how much authority each agent handover may exercise on its own."}
             </p>
-            <BrandButton href="/methodologies/agent-authority-model" variant="inverse">Read the methodology</BrandButton>
+            <div className="flex flex-wrap gap-4">
+              <BrandButton href="/methodologies/idao" variant="inverse">Explore IDAO</BrandButton>
+              <BrandButton href="/methodologies/agent-authority-model" variant="inverse">Agent Authority Model</BrandButton>
+            </div>
           </motion.div>
 
           <motion.div

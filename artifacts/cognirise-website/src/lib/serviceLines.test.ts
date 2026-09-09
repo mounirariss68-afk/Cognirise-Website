@@ -10,9 +10,7 @@ test("defines exactly the three approved service lines", () => {
 
 test("service touchpoints use the canonical model instead of four or five-item presentations", async () => {
   const sources = await Promise.all([
-    ["../pages/ServicesOverview.tsx", "SERVICE_LINES"],
     ["../pages/Home.tsx", "ServiceLineTiles"],
-    ["../components/layout/Shell.tsx", "SERVICE_LINE_LABELS"],
     ["../pages/ValueScan.tsx", "SERVICE_LINE_LABELS"],
   ].map(async ([path, model]) => ({
     source: await readFile(new URL(path, import.meta.url), "utf8"),
@@ -62,10 +60,9 @@ test("AI Platforms destinations stay stacked as one link per row at every viewpo
 });
 
 test("service interest analytics distinguish card activation from destination navigation", async () => {
-  const [tiles, home, overview] = await Promise.all([
+  const [tiles, home] = await Promise.all([
     readFile(new URL("../components/ServiceLineTiles.tsx", import.meta.url), "utf8"),
     readFile(new URL("../pages/Home.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../pages/ServicesOverview.tsx", import.meta.url), "utf8"),
   ]);
   assert.match(tiles, /trackEvent\("service_card_activated"/);
   assert.match(tiles, /trackEvent\("service_destination_clicked"/);
@@ -73,7 +70,6 @@ test("service interest analytics distinguish card activation from destination na
   assert.match(tiles, /destination/);
   assert.match(tiles, /source/);
   assert.match(home, /source="homepage"/);
-  assert.match(overview, /source="services_overview"/);
 });
 
 test("service tiles use Pulse raster illustrations instead of generated vector drawings", async () => {

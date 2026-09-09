@@ -3150,7 +3150,7 @@
           "gcc": "Regional ambition is high, but public, comparable evidence of realised AI value remains limited. The credible route is to publish controls and measured outcomes together.",
           "service": {
             "label": "Sovereign AI Solutions",
-            "href": "/what-we-do#sovereign-solutions",
+            "href": "/#service-lines",
             "firstMove": "Map one exception-heavy, evidence-heavy decision."
           },
           "uses": [
@@ -3273,7 +3273,7 @@
           "gcc": "Gulf operators combine sovereign-cloud investment, national AI programmes and advanced mobile infrastructure. Data residency and operating ownership remain the binding constraints.",
           "service": {
             "label": "AI Platforms",
-            "href": "/what-we-do#ai-platforms",
+            "href": "/#service-lines",
             "firstMove": "Close one high-volume incident or service loop."
           },
           "uses": [
@@ -3396,7 +3396,7 @@
           "gcc": "Rapid aviation and tourism growth raises the value of multilingual service and integrated operations—but targets should not be presented as realised outcomes.",
           "service": {
             "label": "Consulting & Engineering with AI",
-            "href": "/what-we-do#consulting-engineering",
+            "href": "/#service-lines",
             "firstMove": "Trace one disruption from signal to resolved journey."
           },
           "uses": [
@@ -5051,8 +5051,7 @@
       "usages": [
         "artifacts/cognirise-website/src/components/ServiceLineTiles.tsx",
         "artifacts/cognirise-website/src/pages/DigitalAIWorkforce.tsx",
-        "artifacts/cognirise-website/src/pages/Home.tsx",
-        "artifacts/cognirise-website/src/pages/ServicesOverview.tsx"
+        "artifacts/cognirise-website/src/pages/Home.tsx"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
@@ -5479,7 +5478,7 @@
       "usages": [
         "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
         "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
-        "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
+        "artifacts/cognirise-website/src/pages/IDAOMethodology.tsx",
         "artifacts/cognirise-website/src/pages/WorkProof.tsx"
       ],
       "collection": "website",
@@ -5736,7 +5735,6 @@
       "cmsOwnership": "cms-candidate",
       "usages": [
         "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
-        "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
         "artifacts/cognirise-website/src/pages/ValueScan.tsx"
       ],
       "collection": "website",

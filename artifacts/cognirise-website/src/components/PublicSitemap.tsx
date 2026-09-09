@@ -4,13 +4,15 @@ import { useMarketStore } from "@/store/market";
 import { ALLIANCE_PLATFORM_LIST } from "@/lib/alliancePlatforms";
 
 export const STATIC_SITEMAP_PATHS = [
+  "/methodologies/idao",
   "/methodologies/agent-authority-model",
   ...ALLIANCE_PLATFORM_LIST.map(({ slug }) => `/platforms/${slug}`),
 ];
 
 export function mergeSitemapItems(items: Array<{ url: string }>, origin: string) {
+  const retiredPaths = new Set(["/advisors", "/services", "/what-we-do"]);
   const merged = [
-    ...items.filter((entry) => new URL(entry.url, origin).pathname !== "/advisors"),
+    ...items.filter((entry) => !retiredPaths.has(new URL(entry.url, origin).pathname)),
     ...STATIC_SITEMAP_PATHS.map((path) => ({ url: `${origin}${path}` })),
   ];
   return merged.filter((entry, index) => {

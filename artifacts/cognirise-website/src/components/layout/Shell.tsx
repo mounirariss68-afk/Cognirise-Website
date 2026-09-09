@@ -6,18 +6,19 @@ import { useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
 import { setAnalyticsConsent, useAnalyticsConsent } from "@/lib/analytics";
-import { SERVICE_LINE_LABELS } from "@/lib/serviceLines";
 import { ALLIANCE_PLATFORMS } from "@/lib/alliancePlatforms";
 import { useGetPublicNavigationSettings } from "@workspace/api-client-react";
+import { handleSamePageHashNavigation } from "@/lib/hashNavigation";
+import { isCurrentRouteDestination, routePath } from "@/lib/routeState";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/": {
     title: "Cognirise | Intelligence That Moves Work",
     description: "Cognirise redesigns consequential enterprise work around people, data, controls and intelligent execution.",
   },
-  "/what-we-do": {
-    title: "Consulting, Sovereign AI & AI Platforms | Cognirise",
-    description: `Explore ${SERVICE_LINE_LABELS.join(", ")}.`,
+  "/methodologies/idao": {
+    title: "IDAO Methodology | Cognirise",
+    description: "Innovate, Demonstrate, Activate and Operate: Cognirise's methodology for moving consequential work from opportunity to sustained operation.",
   },
   "/what-we-do/agentic-enterprise-transformation": {
     title: "Agentic Transformation Capability | Consulting & Engineering with AI",
@@ -135,13 +136,15 @@ const navigation: NavigationItem[] = [
   {
     id: "what-we-do",
     label: "What we do",
-    href: "/what-we-do",
+    href: "/",
+  },
+  {
+    id: "methodologies",
+    label: "Frameworks & Methodologies",
+    href: "/methodologies/idao",
     items: [
-      { id: "what-we-do.overview", label: "Overview", href: "/what-we-do" },
-      { id: "what-we-do.consulting-engineering", label: SERVICE_LINE_LABELS[0], href: "/what-we-do#consulting-engineering" },
-      { id: "what-we-do.sovereign-solutions", label: SERVICE_LINE_LABELS[1], href: "/what-we-do#sovereign-solutions" },
-      { id: "what-we-do.ai-platforms", label: SERVICE_LINE_LABELS[2], href: "/what-we-do#ai-platforms" },
-      { id: "what-we-do.agent-authority", label: "Agent Authority Model", href: "/methodologies/agent-authority-model" },
+      { id: "methodologies.idao", label: "IDAO", href: "/methodologies/idao" },
+      { id: "methodologies.agent-authority", label: "Agent Authority Model", href: "/methodologies/agent-authority-model" },
     ]
   },
   {
@@ -241,6 +244,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousPathRef = useRef(window.location.pathname);
+  const currentPath = routePath(location);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -268,12 +272,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, [location]);
 
   useEffect(() => {
-    const articleTitle = location.startsWith("/insights/") && "AI Transformation Perspective | Cognirise";
-    const allianceSlug = location.match(/^\/platforms\/(lupitor|datatoolpack|bunjee-ai)$/)?.[1] as keyof typeof ALLIANCE_PLATFORMS | undefined;
+    const articleTitle = currentPath.startsWith("/insights/") && "AI Transformation Perspective | Cognirise";
+    const allianceSlug = currentPath.match(/^\/platforms\/(lupitor|datatoolpack|bunjee-ai)$/)?.[1] as keyof typeof ALLIANCE_PLATFORMS | undefined;
     const alliance = allianceSlug ? ALLIANCE_PLATFORMS[allianceSlug] : undefined;
-    const meta = alliance?.meta ?? pageMeta[location] ?? {
+    const meta = alliance?.meta ?? pageMeta[currentPath] ?? {
       title: articleTitle || "Page Not Found | Cognirise",
-      description: location.startsWith("/insights/")
+      description: currentPath.startsWith("/insights/")
         ? "A Cognirise perspective on building governed AI-native organisations and production-ready intelligent work."
         : "The requested Cognirise page could not be found.",
     };
@@ -308,13 +312,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
     setMeta('meta[property="og:description"]', "content", meta.description, true);
     setMeta('meta[name="twitter:title"]', "content", meta.title, true);
     setMeta('meta[name="twitter:description"]', "content", meta.description, true);
-    const canonical = window.location.origin + location;
+    const canonical = window.location.origin + currentPath;
     const socialImage = alliance ? window.location.origin + alliance.meta.socialImage : window.location.origin + "/images/cognirise/pulse-hero.jpg";
     setMeta('meta[property="og:url"]', "content", canonical, true);
     setMeta('meta[property="og:image"]', "content", socialImage, true);
     setMeta('meta[name="twitter:image"]', "content", socialImage, true);
     setLink("canonical", canonical);
-  }, [location]);
+  }, [currentPath]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -337,8 +341,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
   };
 
   const isCurrentSection = (itemHref: string) => {
-    if (itemHref === "/") return location === "/";
-    return location.startsWith(itemHref);
+    const pathname = itemHref.split("#")[0];
+    if (pathname === "/") return currentPath === "/";
+    if (pathname === "/methodologies/idao") return currentPath.startsWith("/methodologies/");
+    return currentPath.startsWith(pathname);
+  };
+
+  const isCurrentDestination = (itemHref: string) => {
+    return isCurrentRouteDestination(itemHref, location, window.location.hash);
   };
 
   return (
@@ -359,7 +369,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <ul className="flex items-center gap-2">
               {visibleNavigation.map((item) => (
                 <li
-                  key={item.href}
+                  key={item.id}
                   className="relative h-full flex items-center px-4"
                   onMouseEnter={() => item.items ? handleMouseEnter(item.label) : handleMouseLeave()}
                   onMouseLeave={handleMouseLeave}
@@ -370,9 +380,22 @@ export function Shell({ children }: { children: React.ReactNode }) {
                     }
                   }}
                 >
-                  <Link href={item.href} className="group py-2 flex items-center gap-1.5 focus-visible:outline-none">
+                  <Link
+                    id={`desktop-nav-${item.id}`}
+                    href={item.href}
+                    className="group flex items-center gap-1.5 py-2 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-4"
+                    aria-expanded={item.items ? activeDropdown === item.label : undefined}
+                    aria-controls={item.items ? `desktop-menu-${item.id}` : undefined}
+                    aria-current={!item.items && isCurrentDestination(item.href) ? "page" : undefined}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") {
+                        setActiveDropdown(null);
+                        event.currentTarget.focus();
+                      }
+                    }}
+                  >
                     <span
-                      className={`text-[13px] font-bold tracking-wide transition-colors ${
+                      className={`whitespace-nowrap text-[13px] font-bold tracking-wide transition-colors ${
                         isCurrentSection(item.href) ? "text-[hsl(var(--brand-pink))]" : "text-[hsl(var(--brand-deep))] group-hover:text-[hsl(var(--brand-pink))]"
                       }`}
                     >
@@ -384,7 +407,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   </Link>
 
                   {item.items && activeDropdown === item.label && (
-                    <div className="absolute top-[100%] pt-6 left-0 min-w-[260px] animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                    <div id={`desktop-menu-${item.id}`} className="absolute top-[100%] pt-6 left-0 min-w-[260px] animate-in fade-in slide-in-from-top-2 duration-200 z-50">
                       <div className="bg-white border border-border shadow-xl p-6 relative">
                         {/* Top accent line */}
                         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
@@ -394,11 +417,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
                             <li key={subItem.href}>
                               <Link 
                                 href={subItem.href}
-                                className={`group flex items-center gap-3 text-sm font-semibold transition-colors focus-visible:outline-none ${
-                                  location === subItem.href ? "text-[hsl(var(--brand-pink))]" : "text-[hsl(var(--brand-deep))] hover:text-[hsl(var(--brand-pink))]"
+                                aria-current={isCurrentDestination(subItem.href) ? "page" : undefined}
+                                className={`group flex items-center gap-3 rounded-sm text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2 ${
+                                   isCurrentDestination(subItem.href) ? "text-[hsl(var(--brand-pink))]" : "text-[hsl(var(--brand-deep))] hover:text-[hsl(var(--brand-pink))]"
                                 }`}
+                                onKeyDown={(event) => {
+                                  if (event.key === "Escape") {
+                                    document.getElementById(`desktop-nav-${item.id}`)?.focus();
+                                    setActiveDropdown(null);
+                                  }
+                                }}
                               >
-                                <div className={`w-0 overflow-hidden transition-all group-hover:w-3 ${location === subItem.href ? "w-3" : ""}`}>
+                                <div className={`w-0 overflow-hidden transition-all group-hover:w-3 ${isCurrentDestination(subItem.href) ? "w-3" : ""}`}>
                                   <div className="h-[2px] w-3 bg-[hsl(var(--brand-coral))]" />
                                 </div>
                                 {subItem.label}
@@ -432,7 +462,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </div>
 
           <button
-            className="xl:hidden p-2 -mr-2 relative z-50 text-[hsl(var(--brand-deep))] focus-visible:outline-none"
+            className="xl:hidden p-2 -mr-2 relative z-50 rounded-sm text-[hsl(var(--brand-deep))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]"
             onClick={() => setIsOpen(!isOpen)}
             aria-label={isOpen ? "Close menu" : "Open menu"}
             aria-expanded={isOpen}
@@ -449,18 +479,23 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="fixed inset-0 top-[72px] md:top-[82px] z-40 bg-white px-6 py-8 overflow-y-auto xl:hidden animate-in fade-in duration-200">
           <nav className="flex flex-col gap-2 pb-12">
             {visibleNavigation.map((item) => (
-              <div key={item.href} className="flex flex-col border-b border-border last:border-0">
+              <div key={item.id} className="flex flex-col border-b border-border last:border-0">
                 <div className="flex items-center justify-between py-4">
                   <Link
                     href={item.href}
-                    className={`text-xl font-display font-semibold transition-colors focus-visible:outline-none ${isCurrentSection(item.href) ? 'text-[hsl(var(--brand-pink))]' : 'text-[hsl(var(--brand-deep))]'}`}
+                    aria-current={!item.items && isCurrentDestination(item.href) ? "page" : undefined}
+                    className={`rounded-sm text-xl font-display font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2 ${isCurrentSection(item.href) ? 'text-[hsl(var(--brand-pink))]' : 'text-[hsl(var(--brand-deep))]'}`}
                   >
                     {item.label}
                   </Link>
                   {item.items && (
-                    <button 
-                      className="p-2 -mr-2 focus-visible:outline-none"
+                    <button
+                      type="button"
                       onClick={() => setMobileExpanded(mobileExpanded === item.label ? null : item.label)}
+                      aria-label={`${mobileExpanded === item.label ? "Collapse" : "Expand"} ${item.label}`}
+                      aria-expanded={mobileExpanded === item.label}
+                      aria-controls={`mobile-menu-${item.id}`}
+                      className="p-2 -mr-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]"
                     >
                       {mobileExpanded === item.label ? 
                         <ChevronDown className="h-5 w-5 text-[hsl(var(--brand-pink))]" /> : 
@@ -471,13 +506,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 </div>
                 
                 {item.items && mobileExpanded === item.label && (
-                  <ul className="flex flex-col gap-3 pb-6 pl-4 border-l border-border/50 ml-2">
+                  <ul id={`mobile-menu-${item.id}`} className="flex flex-col gap-3 pb-6 pl-4 border-l border-border/50 ml-2">
                     {item.items.map((subItem) => (
                       <li key={subItem.href}>
                         <Link 
                           href={subItem.href}
-                          className={`text-sm font-semibold transition-colors focus-visible:outline-none ${
-                            location === subItem.href ? "text-[hsl(var(--brand-pink))]" : "text-muted-foreground hover:text-[hsl(var(--brand-deep))]"
+                          aria-current={isCurrentDestination(subItem.href) ? "page" : undefined}
+                          className={`rounded-sm text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2 ${
+                             isCurrentDestination(subItem.href) ? "text-[hsl(var(--brand-pink))]" : "text-muted-foreground hover:text-[hsl(var(--brand-deep))]"
                           }`}
                         >
                           {subItem.label}
@@ -544,10 +580,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <div>
               <h4 className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-6">Capability</h4>
               <ul className="flex flex-col gap-3 text-sm text-white/80 font-semibold">
-                <li><Link href="/what-we-do" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Services</Link></li>
+                <li><a href="/#service-lines" onClick={(event) => handleSamePageHashNavigation(event, "/#service-lines")} className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">What we do</a></li>
                 <li><Link href="/platforms" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Platforms</Link></li>
                 <li><Link href="/industries" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Industries</Link></li>
-                 <li><Link href="/methodologies/agent-authority-model" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Agent Authority Model</Link></li>
+                <li><Link href="/methodologies/idao" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">IDAO methodology</Link></li>
+                <li><Link href="/methodologies/agent-authority-model" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Agent Authority Model</Link></li>
                 <li><Link href="/work" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Work</Link></li>
               </ul>
             </div>

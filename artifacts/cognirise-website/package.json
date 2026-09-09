@@ -11,7 +11,8 @@
     "test": "pnpm run typecheck && tsx --test src/**/*.test.ts src/**/*.test.tsx",
     "test:browser": "node scripts/spatial-disclosure.browser-test.mjs",
     "test:autodata-browser": "node scripts/autodata.browser-test.mjs",
-    "test:authority-browser": "node scripts/authority-ceiling.browser-test.mjs"
+    "test:authority-browser": "node scripts/authority-ceiling.browser-test.mjs",
+    "test:navigation-browser": "node scripts/navigation-idao.browser-test.mjs"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",

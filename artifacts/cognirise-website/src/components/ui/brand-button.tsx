@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 import { trackEvent } from "@/lib/analytics";
 import { useMarketStore } from "@/store/market";
+import { handleSamePageHashNavigation } from "@/lib/hashNavigation";
 
 interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -80,28 +81,41 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
 
     if (href) {
       const anchorProps = props as React.AnchorHTMLAttributes<HTMLAnchorElement>;
+      const onAnchorClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+        if (isUnavailable) {
+          event.preventDefault();
+          return;
+        }
+        trackEvent("cta_click", market, {
+          label: typeof children === "string" ? children : undefined,
+          destination: href,
+        });
+        anchorProps.onClick?.(event);
+        if (!event.defaultPrevented) handleSamePageHashNavigation(event, href);
+      };
+      const sharedAnchorProps = {
+        ...anchorProps,
+        ref: ref as React.ForwardedRef<HTMLAnchorElement>,
+        href,
+        className: getClasses(),
+        "aria-busy": isLoading || undefined,
+        "aria-disabled": isUnavailable || undefined,
+        tabIndex: isUnavailable ? -1 : anchorProps.tabIndex,
+        onClick: onAnchorClick,
+        style: { ...anchorProps.style, color: forcedTextColor },
+      };
+
+      if (href.includes("#")) {
+        return (
+          <a {...sharedAnchorProps}>
+            {renderContent()}
+          </a>
+        );
+      }
 
       return (
         <Link
-          {...anchorProps}
-          ref={ref as React.ForwardedRef<HTMLAnchorElement>}
-          href={href}
-          className={getClasses()}
-          aria-busy={isLoading || undefined}
-          aria-disabled={isUnavailable || undefined}
-          tabIndex={isUnavailable ? -1 : anchorProps.tabIndex}
-          onClick={(event) => {
-            if (isUnavailable) {
-              event.preventDefault();
-              return;
-            }
-            trackEvent("cta_click", market, {
-              label: typeof children === "string" ? children : undefined,
-              destination: href,
-            });
-            anchorProps.onClick?.(event);
-          }}
-          style={{ ...anchorProps.style, color: forcedTextColor }}
+          {...sharedAnchorProps}
         >
           {renderContent()}
         </Link>
