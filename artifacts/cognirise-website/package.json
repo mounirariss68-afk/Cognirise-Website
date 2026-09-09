@@ -12,6 +12,7 @@
     "test:browser": "node scripts/spatial-disclosure.browser-test.mjs",
     "test:autodata-browser": "node scripts/autodata.browser-test.mjs",
     "test:authority-browser": "node scripts/authority-ceiling.browser-test.mjs",
+    "test:case-studies-browser": "node scripts/case-study-rail.browser-test.mjs",
     "test:navigation-browser": "node scripts/navigation-idao.browser-test.mjs"
   },
   "devDependencies": {

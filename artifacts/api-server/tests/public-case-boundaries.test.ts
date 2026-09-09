@@ -106,8 +106,10 @@ test("public case collection, detail, sitemap, and media enforce disclosure boun
 
   const collection = await (await fetch(
     `${origin}/api/public/content?market=uae&locale=en&kind=case-study&page=1&pageSize=20`,
-  )).json() as { items: Array<{ slug: string }> };
+  )).json() as { items: Array<{ slug: string; summary: string; content: Record<string, unknown> }> };
   assert.deepEqual(collection.items.map((item) => item.slug), ["summary-case", "full-case"]);
+  assert.doesNotMatch(collection.items[0].summary, /\b(?:pilot|proof[- ]of[- ]concept|production[- ]status)\b/i);
+  assert.equal(collection.items[0].content.deliveryStage, "pilot", "internal governance metadata must remain intact");
 
   assert.equal((await fetch(`${origin}/api/public/content/uae/en/case-study/summary-case`)).status, 404);
   assert.equal((await fetch(`${origin}/api/public/content/uae/en/case-study/full-case`)).status, 200);

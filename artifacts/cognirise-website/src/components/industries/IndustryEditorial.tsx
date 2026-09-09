@@ -8,7 +8,7 @@ import type { IndustryContent } from "@/content/industries";
 import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { IndustryEvidenceRail, type PublicCaseStudy } from "@/components/work/case-study-ui";
 
-function useSelectedWorkHashTarget() {
+function useSelectedWorkHashTarget(caseCount: number) {
   React.useEffect(() => {
     if (typeof window === "undefined" || window.location.hash !== "#selected-work") return;
 
@@ -24,7 +24,7 @@ function useSelectedWorkHashTarget() {
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, []);
+  }, [caseCount]);
 }
 
 export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
@@ -54,7 +54,7 @@ export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
 
 export function IndustryEditorialView({ view, cases = [] }: { view: IndustryContent; cases?: PublicCaseStudy[] }) {
   const { market } = useMarketStore();
-  useSelectedWorkHashTarget();
+  useSelectedWorkHashTarget(cases.length);
   const thesisParts = view.thesis.split(" — ");
   const opportunityValue = view.opportunity as unknown as string | { title: string; body: string };
   const opportunity = typeof opportunityValue === "string"

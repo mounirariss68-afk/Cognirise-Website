@@ -5,6 +5,14 @@ export type CaseVisualRefreshPlan =
   | { action: "replay" }
   | { action: "fail"; reason: string };
 
+export type CasePublicationRefreshEntryPlan =
+  | { action: "inspect-published" }
+  | { action: "fresh-install" }
+  | { action: "replay" }
+  | { action: "fail"; reason: string };
+
+export type CaseMediaPinState = "valid" | "historical" | "missing" | "conflict";
+
 export function caseMediaRefreshKey(externalId: string, checksum: string) {
   return `cms-case-media-refresh-v1:${externalId}:${checksum}`;
 }
@@ -15,6 +23,58 @@ export function casePublicationRefreshKey(externalId: string, checksum: string) 
 
 export function caseRefreshDigest(value: unknown) {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
+}
+
+export function planCasePublicationRefreshEntry(input: {
+  refreshReceiptDigest: string | null;
+  expectedRefreshDigest: string;
+  documentKind: string | null;
+}): CasePublicationRefreshEntryPlan {
+  if (input.refreshReceiptDigest) {
+    return input.refreshReceiptDigest === input.expectedRefreshDigest
+      ? { action: "replay" }
+      : { action: "fail", reason: "publication refresh receipt conflicts" };
+  }
+  if (!input.documentKind) return { action: "fresh-install" };
+  if (input.documentKind !== "case-study") {
+    return { action: "fail", reason: "current case document gate failed" };
+  }
+  return { action: "inspect-published" };
+}
+
+export function assessCaseMediaPin(input: {
+  expectedAssetId: string;
+  expectedChecksum: string;
+  references: Array<{ assetId: string; mediaVersionId: string | null }>;
+  pinnedVersion: {
+    id: string;
+    assetId: string;
+    checksum: string;
+    storageKey: string;
+  } | null;
+}): CaseMediaPinState {
+  if (!input.references.length) return "missing";
+  if (input.references.length !== 1) return "conflict";
+  const [reference] = input.references;
+  if (
+    reference.assetId !== input.expectedAssetId
+    || !reference.mediaVersionId
+    || !input.pinnedVersion
+    || input.pinnedVersion.id !== reference.mediaVersionId
+    || input.pinnedVersion.assetId !== input.expectedAssetId
+    || input.pinnedVersion.storageKey.startsWith("deferred/")
+  ) return "conflict";
+  return input.pinnedVersion.checksum === input.expectedChecksum ? "valid" : "historical";
+}
+
+export function historicalCasePinReceiptIsValid(input: {
+  receiptRequestDigest: string | null;
+  expectedRequestDigest: string;
+  receiptSubjectId: string | null;
+  publishedRevisionId: string;
+}) {
+  return input.receiptRequestDigest === input.expectedRequestDigest
+    && input.receiptSubjectId === input.publishedRevisionId;
 }
 
 export function planCaseVisualRefresh(input: {

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 import {
   historicalMediaReceipts,
@@ -240,9 +241,34 @@ test("the importer can recreate one accepted missing legacy subject without rewr
 
 test("a pre-versioning governed refresh receipt remains valid without rewriting it", () => {
   const { operation } = replacementExpectations();
+  const priorChecksumQualifiedDigest = createHash("sha256").update(JSON.stringify({
+    externalId: operation.externalId,
+    idempotencyKey: `cms-media-inventory-v3:${operation.externalId}`,
+    checksum: operation.checksum,
+    mimeType: operation.mimeType,
+    byteSize: operation.byteSize,
+    width: operation.width,
+    height: operation.height,
+  })).digest("hex");
+  const legacyInventoryDigest = createHash("sha256").update(JSON.stringify({
+    externalId: operation.externalId,
+    idempotencyKey: `cms-media-inventory-v3:${operation.externalId}`,
+    filename: operation.filename,
+    sourceFile: operation.sourceFile,
+    publicPath: operation.publicPath,
+    checksum: operation.checksum,
+    mimeType: operation.mimeType,
+    byteSize: operation.byteSize,
+    width: operation.width,
+    height: operation.height,
+    cmsOwnership: operation.cmsOwnership,
+    usages: operation.usages,
+  })).digest("hex");
   assert.equal(operation.acceptedPriorRequestDigests.length > 0, true);
+  assert.equal(operation.acceptedPriorRequestDigests.includes(priorChecksumQualifiedDigest), true);
+  assert.equal(operation.acceptedPriorRequestDigests.includes(legacyInventoryDigest), true);
   assert.equal(mediaRefreshReceiptDigestIsAccepted({
-    actualDigest: operation.acceptedPriorRequestDigests[0],
+    actualDigest: legacyInventoryDigest,
     currentDigest: operation.requestDigest,
     acceptedPriorDigests: operation.acceptedPriorRequestDigests,
   }), true);

@@ -43,6 +43,10 @@ test("every baseline summary satisfies the public contract and carries slide-onl
       fields: record.fields,
     });
     assert.doesNotMatch(serializedPublicFields, /\b(?:Türkiye|Turkey|UAE|Netherlands|Nepal|Istanbul)\b/i);
+    const content = record.fields.content as Record<string, any>;
+    const publicExplanation = [record.fields.summary, content.mandate, content.work, content.outcomes].join(" ");
+    assert.doesNotMatch(publicExplanation, /\b(?:pilot|poc|proof[- ]of[- ]concept|production[- ]status|demo(?:nstration)?|unverified|not observed|not claimed)\b/i);
+    assert.ok(String(record.fields.summary).length > 140);
   }
 });
 
@@ -52,7 +56,7 @@ test("case studies carry distinct approved-safe visual fixtures and deterministi
   assert.equal(new Set(mediaPaths).size, 21);
   const labels = records.flatMap((record) => {
     const visual = (record.fields.content as Record<string, any>).visual;
-    assert.match(visual.caption, /anonymized fixture/i);
+    assert.match(visual.caption, /→/);
     assert.ok(visual.altText.length > 20);
     assert.equal(visual.fixtureLabels.length, 3);
     return visual.fixtureLabels;
@@ -77,5 +81,5 @@ test("case-study migrations use a versioned receipt and remain idempotent", () =
   assert.deepEqual(first, second);
   assert.equal(first.length, 21);
   assert.ok(first.every((operation) => operation.kind === "case-study"));
-  assert.ok(first.every((operation) => operation.idempotencyKey.startsWith("cms-case-study-baseline-v1:")));
+  assert.ok(first.every((operation) => operation.idempotencyKey.startsWith("cms-case-study-baseline-v2:")));
 });

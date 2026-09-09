@@ -241,15 +241,15 @@ export function ContentEditor({ kind, value, onChange, errors }: {
           <Choice label="Case variant" value={value.variant ?? "summary"} options={["summary", "full"]} onChange={(next) => set("variant", next)} />
           <Choice label="Disclosure" value={value.disclosure ?? "restricted"} options={["named", "anonymized", "restricted"]} onChange={(next) => set("disclosure", next)} />
           <Choice label="Sector" value={value.sector ?? ""} options={["Financial Services", "Telecoms", "Travel & Hospitality", "Public Sector", "Manufacturing & Industrial", "Life Sciences", "Retail & Consumer", "Professional Services", "Security & AI Infrastructure"]} onChange={(next) => set("sector", next)} />
-          <Choice label="Engagement type" value={value.engagementType ?? ""} options={["client-delivery", "product-demonstration", "concept", "proposal-prototype"]} onChange={(next) => set("engagementType", next)} />
-          <Choice label="Delivery stage" value={value.deliveryStage ?? ""} options={["production", "pilot", "proof-of-concept", "mvp", "demo", "concept", "proposal"]} onChange={(next) => set("deliveryStage", next)} />
-          <Choice label="Impact classification" value={value.impactClassification ?? ""} options={["observed", "pilot-demo", "simulated", "projected", "unavailable"]} onChange={(next) => set("impactClassification", next)} />
-          <Choice label="Public evidence status" value={value.publicEvidenceStatus ?? "needs-review"} options={["approved", "needs-review", "restricted"]} onChange={(next) => set("publicEvidenceStatus", next)} />
+          <Choice label="Internal engagement type" value={value.engagementType ?? ""} options={["client-delivery", "product-demonstration", "concept", "proposal-prototype"]} onChange={(next) => set("engagementType", next)} />
+          <Choice label="Internal delivery stage" value={value.deliveryStage ?? ""} options={["production", "pilot", "proof-of-concept", "mvp", "demo", "concept", "proposal"]} onChange={(next) => set("deliveryStage", next)} />
+          <Choice label="Internal impact classification" value={value.impactClassification ?? ""} options={["observed", "pilot-demo", "simulated", "projected", "unavailable"]} onChange={(next) => set("impactClassification", next)} />
+          <Choice label="Internal evidence approval" value={value.publicEvidenceStatus ?? "needs-review"} options={["approved", "needs-review", "restricted"]} onChange={(next) => set("publicEvidenceStatus", next)} />
           <Field label="Hero media ID" value={value.heroMediaId} onChange={(next) => set("heroMediaId", next || undefined)} />
           <Field label="Organization descriptor" value={value.organizationDescriptor} onChange={(next) => set("organizationDescriptor", next)} />
           <Choice label="Reconstruction template" value={value.visual?.template ?? ""} options={["knowledge-assistant", "analytics-dashboard", "workflow-console", "commerce-experience", "governance-console", "operations-console"]} onChange={(next) => set("visual", { ...value.visual, kind: "illustrative-interface-reconstruction", template: next })} />
         </div>
-        <Area label="Impact statement" value={value.impactStatement ?? ""} onChange={(next) => set("impactStatement", next)} />
+        <Area label="Public capability statement" value={value.impactStatement ?? ""} onChange={(next) => set("impactStatement", next)} />
         <Area label="Disclosure note" value={value.disclosureNote ?? ""} onChange={(next) => set("disclosureNote", next)} />
         <Area label="Related website industries" value={lines(value.relatedIndustries)} onChange={(next) => set("relatedIndustries", stringLines(next))} placeholder="financial-services, telecoms, travel-hospitality, energy-resources, public-sector or education; one per line" />
         <Area label="Visual caption" value={value.visual?.caption ?? ""} onChange={(next) => set("visual", { ...value.visual, kind: "illustrative-interface-reconstruction", caption: next })} />

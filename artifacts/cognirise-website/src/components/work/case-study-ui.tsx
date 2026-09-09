@@ -74,6 +74,23 @@ type LooseCase = CmsRecord & {
 
 export type PublicCaseStudy = LooseCase;
 
+export function horizontalCarouselAction(input: {
+  deltaX: number;
+  deltaY: number;
+  shiftKey: boolean;
+  canScrollPrevious: boolean;
+  canScrollNext: boolean;
+}): "previous" | "next" | null {
+  const horizontalDelta = Math.abs(input.deltaX) >= 8 && Math.abs(input.deltaX) > Math.abs(input.deltaY)
+    ? input.deltaX
+    : input.shiftKey && Math.abs(input.deltaY) >= 8
+      ? input.deltaY
+      : 0;
+  if (!horizontalDelta) return null;
+  if (horizontalDelta > 0) return input.canScrollNext ? "next" : null;
+  return input.canScrollPrevious ? "previous" : null;
+}
+
 const value = (item: LooseCase, key: "stage" | "impact") =>
   key === "stage" ? item.deliveryStage || item.stage || "Delivery record" : item.impactStatement || item.qualifiedImpact || item.impact || item.outcomes?.[0] || "";
 
@@ -94,8 +111,9 @@ function PulseInterface({ item, compact = false }: { item: LooseCase; compact?: 
       <figure className={`case-rendition ${compact ? "is-compact" : ""}`}>
         <img
           src={rendition.url}
-          alt={rendition.altText || item.visual?.altText || "Illustrative interface reconstruction"}
+          alt={item.visual?.altText || rendition.altText || "Illustrative interface reconstruction"}
           loading={compact ? "lazy" : "eager"}
+          draggable={false}
         />
         <figcaption>{rendition.caption || item.visual?.caption || "Illustrative reconstruction using anonymized fixture data."}</figcaption>
         {item.visual?.textEquivalent && <span className="sr-only">{item.visual.textEquivalent}</span>}
@@ -123,7 +141,40 @@ function PulseInterface({ item, compact = false }: { item: LooseCase; compact?: 
   );
 }
 
-function WorkCard({ item, onOpen }: { item: LooseCase; onOpen: (trigger: HTMLButtonElement) => void }) {
+function publicExplanation(item: LooseCase) {
+  const work = item.work?.find((block) => block.type === "paragraph" && block.text)?.text;
+  return [item.mandate || item.objective, work, item.controls?.[0]].filter(Boolean).join(" ");
+}
+
+function WorkCard({ item, onOpen, editorial = false }: { item: LooseCase; onOpen?: (trigger: HTMLButtonElement) => void; editorial?: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const detailsId = `case-details-${item.slug}`;
+
+  if (editorial) {
+    return (
+      <article className={`work-card work-card--editorial ${expanded ? "is-expanded" : ""}`} data-testid={`card-case-${item.slug}`}>
+        <header className="work-card__intro">
+          <div className="work-card__meta"><span>{item.organizationDescriptor || item.descriptor || item.summary}</span></div>
+          <h3>{item.title}</h3>
+          <p data-testid={`case-explanation-${item.slug}`}>{publicExplanation(item)}</p>
+          <button className="work-card__toggle" type="button" aria-controls={detailsId} aria-expanded={expanded} onClick={() => setExpanded(!expanded)} data-testid={`button-toggle-case-${item.slug}`}>
+            {expanded ? "Collapse" : "Expand"} <ArrowRight size={12} className={`transition-transform duration-200 ${expanded ? "-rotate-90" : "rotate-90"}`} />
+          </button>
+        </header>
+        {expanded && (
+          <div className="work-card__details" id={detailsId}>
+            <section><small>01 / Objective</small><h4>The mandate</h4><p>{item.objective || item.mandate}</p></section>
+            <section><small>02 / Work</small><h4>What changed</h4><p>{item.work?.find((block) => block.text)?.text || item.context}</p></section>
+            <section><small>03 / Controls</small><h4>How it stayed bounded</h4><ul>{item.controls?.map((ctrl, i) => <li key={i}>{ctrl}</li>)}</ul></section>
+            <section><small>04 / Impact</small><h4>What can be said</h4><p>{value(item, "impact")}</p></section>
+          </div>
+        )}
+        <div className="work-card__visual">
+          <PulseInterface item={item} compact={!expanded} />
+        </div>
+      </article>
+    );
+  }
   return (
     <article className="work-card" data-testid={`card-case-${item.slug}`}>
       <PulseInterface item={item} compact />
@@ -131,7 +182,7 @@ function WorkCard({ item, onOpen }: { item: LooseCase; onOpen: (trigger: HTMLBut
       <h3>{item.title}</h3>
       <p>{item.objective || item.mandate}</p>
       {value(item, "impact") && <div className="work-card__impact"><small>Qualified impact · {item.impactClassification || "published"}</small><strong>{value(item, "impact")}</strong></div>}
-      <button type="button" onClick={(event) => onOpen(event.currentTarget)} data-testid={`button-open-case-${item.slug}`}>{typeof item.openAction === "object" ? item.openAction.label || "Open the record" : item.openAction || "Open the record"} <ArrowRight size={16} /></button>
+      <button type="button" onClick={(event) => onOpen?.(event.currentTarget)} data-testid={`button-open-case-${item.slug}`}>{typeof item.openAction === "object" ? item.openAction.label || "Open the record" : item.openAction || "Open the record"} <ArrowRight size={16} /></button>
     </article>
   );
 }
@@ -219,35 +270,48 @@ export function WorkLibrary({ cases }: { cases: LooseCase[] }) {
 export function IndustryEvidenceRail({ cases, industrySlug }: { cases: LooseCase[]; industrySlug: string }) {
   const { market } = useMarketStore();
   const related = directlyRelatedCases(cases, industrySlug);
-  const [activeSlug, setActiveSlug] = useState<string | null>(null);
-  const returnFocus = useRef<HTMLButtonElement | null>(null);
+  const carouselRoot = useRef<HTMLDivElement | null>(null);
+  const previousControl = useRef<HTMLButtonElement | null>(null);
+  const nextControl = useRef<HTMLButtonElement | null>(null);
+  const horizontalWheelLocked = useRef(false);
   useEffect(() => {
-    const sync = () => setActiveSlug(new URL(window.location.href).searchParams.get("case"));
-    sync();
-    window.addEventListener("popstate", sync);
-    return () => window.removeEventListener("popstate", sync);
-  }, []);
+    const root = carouselRoot.current;
+    if (!root) return;
+    const handleHorizontalWheel = (event: WheelEvent) => {
+      const previous = previousControl.current;
+      const next = nextControl.current;
+      const action = horizontalCarouselAction({
+        deltaX: event.deltaX,
+        deltaY: event.deltaY,
+        shiftKey: event.shiftKey,
+        canScrollPrevious: Boolean(previous && !previous.disabled),
+        canScrollNext: Boolean(next && !next.disabled),
+      });
+      const isHorizontalIntent = Math.abs(event.deltaX) >= 8 && Math.abs(event.deltaX) > Math.abs(event.deltaY)
+        || event.shiftKey && Math.abs(event.deltaY) >= 8;
+      if (!isHorizontalIntent) return;
+      event.preventDefault();
+      if (!action || horizontalWheelLocked.current) return;
+      const control = action === "next" ? next : previous;
+      if (!control) return;
+      horizontalWheelLocked.current = true;
+      control.click();
+      window.setTimeout(() => { horizontalWheelLocked.current = false; }, 320);
+    };
+    root.addEventListener("wheel", handleHorizontalWheel, { passive: false });
+    return () => root.removeEventListener("wheel", handleHorizontalWheel);
+  }, [related.length]);
   if (!related.length) return null;
-  const active = related.find((item) => item.slug === activeSlug);
-  const open = (item: LooseCase, trigger: HTMLButtonElement) => {
-    returnFocus.current = trigger;
-    setCaseQuery(item.slug);
-    setActiveSlug(item.slug);
-    trackEvent("case_card_open", market, { slug: item.slug, sector: caseSectors(item)[0] || "unclassified", stage: value(item, "stage") });
-  };
-  const close = () => {
-    setCaseQuery(undefined, "replace");
-    setActiveSlug(null);
-    window.requestAnimationFrame(() => returnFocus.current?.focus());
-  };
   return (
     <section className="industry-case-rail" id="selected-work" tabIndex={-1} aria-labelledby="industry-cases-title">
-      <div><span className="ind-kicker">Directly related work</span><h2 id="industry-cases-title">Evidence from the operating record.</h2></div>
-      <Carousel opts={{ align: "start", loop: false }} aria-label="Related case studies">
-        <CarouselContent>{related.map((item) => <CarouselItem className="basis-[86%] md:basis-[61%]" key={item.slug}><WorkCard item={item} onOpen={(trigger) => open(item, trigger)} /></CarouselItem>)}</CarouselContent>
-        <div className="industry-case-rail__controls"><CarouselPrevious className="static translate-y-0" /><CarouselNext className="static translate-y-0" /></div>
+       <div className="industry-case-rail__heading"><span className="ind-kicker">Directly related work</span><h2 id="industry-cases-title">Case studies</h2><p>Solutions developed around real operating work, with the information flow and decision controls made visible.</p></div>
+       <Carousel ref={carouselRoot} opts={{ align: "start", loop: false, containScroll: "trimSnaps", watchDrag: true }} aria-label="Related case studies">
+         <div className="industry-case-rail__controls">
+           <CarouselPrevious ref={previousControl} aria-label="Previous slide" className="static translate-y-0" />
+           <CarouselNext ref={nextControl} aria-label="Next slide" className="static translate-y-0" />
+         </div>
+         <CarouselContent>{related.map((item, index) => <CarouselItem className="industry-case-rail__slide" aria-label={`${index + 1} of ${related.length}`} key={item.slug}><WorkCard item={item} editorial /></CarouselItem>)}</CarouselContent>
       </Carousel>
-      <CaseSummaryDialog active={active} market={market} onClose={close} />
     </section>
   );
 }

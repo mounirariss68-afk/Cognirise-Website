@@ -196,7 +196,7 @@ async function verifyDatabase(records: InventoryRecord[]) {
         if (revision.contentDigest !== resultDigest(validation.data)) {
           throw new Error(`Revision digest mismatch for ${operation.externalId}.`);
         }
-        if (!isSummaryCase && JSON.stringify(canonical(validation.data.content)) !== JSON.stringify(canonical({
+        if (JSON.stringify(canonical(validation.data.content)) !== JSON.stringify(canonical({
           ...(operation.payload.content as Record<string, unknown>),
           ...(operation.mediaPaths[0] && (operation.kind === "platform" || operation.kind === "publication" || operation.kind === "industry" || operation.kind === "framework")
             ? { heroMediaId: mediaByPath.get(operation.mediaPaths[0]) }

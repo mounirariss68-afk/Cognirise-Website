@@ -162,23 +162,24 @@ export function stringList(value: unknown, fallback: string[]): string[] {
 }
 
 export function useCmsCollection<T>(
-  kind: Exclude<DocumentKind, "site-configuration">,
+  kind: WebsiteCmsDocumentKind,
   fallback: T[],
   mapper: (item: PublishedContent, index: number) => T | null,
 ) {
   const { market } = useMarketStore();
-  const query = useListPublishedContent({ kind, market, locale: "en", pageSize: 100 });
-  const validations = query.data?.items.map((item) => validateCmsContent(kind as CmsDocumentKind, item.content, "publish"));
+  const query = useListPublishedContent({ kind: kind as DocumentKind, market, locale: "en", pageSize: 100 });
+  const response = query.data as (typeof query.data & { isConfigured?: boolean }) | undefined;
+  const validations = response?.items.map((item) => validateCmsContent(kind as CmsDocumentKind, item.content, "publish"));
   const contractErrors = validations?.flatMap((result) => result.success ? [] : result.errors) ?? [];
-  const validItems = query.data?.items.filter((_item, index) => validations?.[index]?.success) ?? [];
+  const validItems = response?.items.filter((_item, index) => validations?.[index]?.success) ?? [];
   const mapped = validItems.map(mapper).filter((item): item is T => item !== null);
-  const cutover = cmsCollectionIsCutOver(kind, query.data?.isConfigured);
+  const cutover = cmsCollectionIsCutOver(kind, response?.isConfigured);
   const delivery = cmsCollectionDelivery(kind, {
     isPending: query.isPending,
     isError: query.isError,
     hasContractErrors: Boolean(contractErrors.length),
     hasItems: Boolean(mapped.length),
-    isConfigured: query.data?.isConfigured,
+    isConfigured: response?.isConfigured,
   });
   const useFallback = !cutover && delivery !== "cms";
   const issue = query.isError

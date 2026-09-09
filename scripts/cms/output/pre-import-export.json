@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "target": "development",
-  "capturedAt": "2026-09-09T11:45:27.309Z",
-  "manifestDigest": "58bb77a86ff895fac4c9b643f94d1962b065c8c8e1645c4cefa50b2500011463",
+  "capturedAt": "2026-09-09T14:52:03.700Z",
+  "manifestDigest": "602e480b565271b997629ea1e21f3546e112add043599a319ed8a607b8890067",
   "before": {
-    "documents": 50,
-    "editions": 50,
-    "revisions": 94,
-    "media": 68,
-    "receipts": 196,
-    "audits": 253
+    "documents": 53,
+    "editions": 53,
+    "revisions": 123,
+    "media": 69,
+    "receipts": 365,
+    "audits": 422
   },
   "localAssets": [
     {
@@ -49,107 +49,107 @@
     },
     {
       "publicPath": "/images/cognirise/cases/01-making-industrial-knowledge-self-service.png",
-      "checksum": "12f3a418ca81f6cc1065f03d0fe2a96982470badb2ac20b6104f0b5c3a3c1038",
+      "checksum": "df3faecb49f9d159b40aea1b9df48677a859e6a8df37c3d125ab244cbe51ccd0",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/02-connecting-pharmacy-operations-signals.png",
-      "checksum": "f9e1295a1a9433a634e9a3957cc7aa05d6775e4b7993e2cfaf0ec637d0c8eda2",
+      "checksum": "22215d4005cbf0701590414bf59e373ee814a866c5bfcd96b8c36c4c06182809",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/03-coaching-a-distributed-field-team.png",
-      "checksum": "1acffd0be19b797c1667eda0f8412641bde0ab58eb900b23bf069a9025be599e",
+      "checksum": "6ace31c8e97c2f2005908d85fdb18f74a645f59c05333ee6c1a73e43716289ff",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/04-taking-a-specialist-retailer-online.png",
-      "checksum": "937f92f5651240f16454daec241f0e6e0545dcaca44fda60994d69ed4d97b721",
+      "checksum": "0f2fe082244ebda7a225713fae7e10ad8f3e50f53ba2ae4f036c3dc5dbee989f",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/05-making-market-information-searchable.png",
-      "checksum": "94dad438f310a0b3af5225835e90b53ae1f6a7baa0166e5bfd6bb88b7bc9e08c",
+      "checksum": "d622199bf9a853b61d3255e7ff5638549b75a19b4a8e06d53e1ca874ca4f8728",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/06-automating-recurring-tax-preparation.png",
-      "checksum": "b5d93cdcee7aa2fd7f996d0e8fc047209a537950a70e60712ab5c391acaaa85b",
+      "checksum": "d599158118c07ba7f802083320f4bf0c2e1530ad7b59c5afea9260afe64f4b44",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/07-creating-accountable-agent-delegation.png",
-      "checksum": "8b4253c4099c0bb7330033a9af3a1a6af4ffdde467c40659437de813565b35d9",
+      "checksum": "2df44d6df16188f2852c86ea63ea67881408f4d89b0a38798b38fe45d28a3b0e",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/08-governing-a-single-fee-schedule.png",
-      "checksum": "d5c97398cc48eb2e669f0513dc8c8d15c4e9d240add43fb59c905e2be96500ab",
+      "checksum": "2b242a4ee761b65e514f15345bc3e4ae962ad487c13facdba7562d65b980556d",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/09-preparing-embedded-emissions-data.png",
-      "checksum": "95bd660bf08a57687e5b92647458f88ea26fbcd4eeb7339112762cf7b0b0791c",
+      "checksum": "44ec716506ecbe632fddff1cfc7d30ae31f6a7eba0023eca44fc36b616abadb6",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/10-accelerating-governed-vehicle-offers.png",
-      "checksum": "b6b54ca7947b00d458b6b668fc01494b715c7d68b7705d3165650552c309e564",
+      "checksum": "2a44eda7a5d9c389b7859a05b9f59caa2e641458a50b6ac6a62948598d4c12ee",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/11-answering-general-investment-questions.png",
-      "checksum": "51aecaea081e7c56f6babaabe17386b87800d041b411827b5b3d58db68bca7ed",
+      "checksum": "81ece7b6ecce7595a770510091c25735e67ab2efe5129c4632d475fb794a7ee4",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/12-creating-a-governed-ai-workspace.png",
-      "checksum": "7e9eb67db936861fd8f138d94d1d739da5ee7380f7a7b734580ad102e3d5ca31",
+      "checksum": "7bfe3e0c6fad3e00a57cf80d86524f0ee9c0fae78b3ec023282f720edd21e34e",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/13-prototyping-agentic-public-services.png",
-      "checksum": "ad680dc43d81c0f9893f8487bbd19ec5b88c8f026fb7ba15e441bb3487a070d3",
+      "checksum": "7447d83325e4f1e090a876af59f068d96e435f924e41095e77bab191f17c67e2",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/14-checking-calls-through-risk-gates.png",
-      "checksum": "cc90bcacd5ef50e63f53b3f37be0ffdb020c569964623505bf4372d46ace7207",
+      "checksum": "a2c8ba18b49eceb65c2d2141a0f329ea3b3233ba1a39b1726d7ec3ca65734dfe",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/15-orchestrating-data-centre-incidents.png",
-      "checksum": "03b0b6933136d6e12e6d9f9fc5a513f0786ec80092a2edd89114a52dcfb8ce9e",
+      "checksum": "a32b9fbb2ddfd02b1a1e953ea362622bfa1b9bc5650af9777577786353df95ad",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/16-finding-a-second-life-for-hotel-assets.png",
-      "checksum": "a2074f29da410011444d29835f2940be779fe2e8171a59aa81afc67531a104da",
+      "checksum": "f5ceecc5fb289447606004a2fde288e0e0d33d37ba779dc44d7d7632b6ab22af",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/17-proving-browser-side-encrypted-storage.png",
-      "checksum": "e04e3191f83f49b13806f2fae7e3b76130424fd49f7bda5e0b9a83db6ca9b7a1",
+      "checksum": "4e4747dee6729b56f9ed5e1a7f3642ccb5c554719484b0961026e504446c816e",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/18-recommending-room-aware-audio-systems.png",
-      "checksum": "57c5858891dc409acfeff257c27340e3ef9f96117608a5d436a9cfb6bdc0c6da",
+      "checksum": "9923b42a8d5ec91142ff01f2106ffc35c166daf9e2b6c9fb073a99cbee66f5ee",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/19-monitoring-portfolio-early-warning-signals.png",
-      "checksum": "fede195dea3ea808b78be6cb7a0323cc9d430d2f9fa3581618c7f50fb601fd3e",
+      "checksum": "320c7aa38d080f334fff64c78c8fb14e6412017e629d0df129e9710ef36ebe4c",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/20-diagnosing-production-line-faults.png",
-      "checksum": "94b143c732ac00ce8b3a754a5313a3e328acdca16fb14df862a92404b6e01714",
+      "checksum": "ec465e2fb55274c25333004ec6e703b3b0717b37b9bf6acff74f770718f65d31",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/cases/21-tracing-provision-movements-earlier.png",
-      "checksum": "3bc65e71080efee9e79f64894ba93cc3a72e08f7d1c7bdca254d36363351a969",
+      "checksum": "fe791c345f02f15295424067e48bbe056651f9af143d3c4ef2fd70ace2f5adb6",
       "ownership": "cms-candidate"
     },
     {
@@ -165,6 +165,11 @@
     {
       "publicPath": "/images/cognirise/cognirise-pulse-people.jpg",
       "checksum": "3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034",
+      "ownership": "cms-candidate"
+    },
+    {
+      "publicPath": "/images/cognirise/idao-human-agent-team.png",
+      "checksum": "4f1f75ca2f9f424ff8e21f8a40cb54e3d075cf64b89264b7ec1b5ec79108a3b5",
       "ownership": "cms-candidate"
     },
     {

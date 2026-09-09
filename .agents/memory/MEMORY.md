@@ -21,3 +21,4 @@
 - [Media replacement receipts](media-replacement-receipts.md) — Version binary replacements while accepting only exact known legacy receipt states on the same asset lineage.
 - [Homepage anchor test timing](homepage-anchor-test-timing.md) — Repeated same-hash browser checks must let the prior animated scroll fully settle before resetting position.
 - [CMS removal authority](cms-removal-authority.md) — Decide archive versus permanent delete from all editions and publication history, never the latest editorial status.
+- [Carousel input affordances](carousel-input-affordances.md) — Tall media rails need controls above the card and image-safe drag; do not rely on horizontal wheel automation alone.

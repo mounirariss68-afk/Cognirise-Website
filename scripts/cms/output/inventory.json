@@ -1086,7 +1086,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "making-industrial-knowledge-self-service",
-        "summary": "Industrial materials producer: Reduce dependence on a small group of process experts for routine technical questions.",
+        "summary": "Reduce dependence on a small group of process experts for routine technical questions. A bilingual assistant searches the approved technical corpus, returns a sourced answer and routes uncertain questions to a process expert.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -1096,7 +1096,7 @@
           "engagementType": "client-delivery",
           "deliveryStage": "proof-of-concept",
           "impactClassification": "pilot-demo",
-          "impactStatement": "Proof-of-concept users could query the working assistant directly; no production efficiency outcome has been verified.",
+          "impactStatement": "Teams can retrieve controlled process guidance with the supporting source and escalation route visible.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -1104,9 +1104,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative knowledge assistant for an anonymized industrial materials producer.",
-            "textEquivalent": "A bilingual, corpus-grounded assistant with controlled answer sourcing was reconstructed for evaluation. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Batch recipe lookup → Line 04 / changeover → Verified 18 / 22.",
+            "altText": "Cognirise Pulse workflow for making industrial knowledge self-service, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A bilingual assistant searches the approved technical corpus, returns a sourced answer and routes uncertain questions to a process expert. The visual follows Batch recipe lookup, Line 04 / changeover, Verified 18 / 22 through a human or policy checkpoint to the resulting capability.",
             "template": "knowledge-assistant",
             "fixtureLabels": [
               "Batch recipe lookup",
@@ -1123,7 +1123,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A bilingual, corpus-grounded assistant with controlled answer sourcing was reconstructed for evaluation."
+              "text": "A bilingual assistant searches the approved technical corpus, returns a sourced answer and routes uncertain questions to a process expert."
             }
           ],
           "controls": [
@@ -1131,11 +1131,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "Proof-of-concept users could query the working assistant directly; no production efficiency outcome has been verified."
+            "Teams can retrieve controlled process guidance with the supporting source and escalation route visible."
           ],
           "evidence": [
             {
-              "statement": "Proof-of-concept users could query the working assistant directly; no production efficiency outcome has been verified.",
+              "statement": "Teams can retrieve controlled process guidance with the supporting source and escalation route visible.",
               "source": {
                 "label": "Approved source presentation, slide 1",
                 "accessedAt": "2026-09-06"
@@ -1177,7 +1177,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "connecting-pharmacy-operations-signals",
-        "summary": "Pharmacy distribution cooperative: Connect service, sales and inventory signals that were reviewed in separate workflows.",
+        "summary": "Connect service, sales and inventory signals that were reviewed in separate workflows. A shared analytics flow joins service language, anomaly, demand and inventory signals, then sends exceptions to an accountable reviewer.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -1187,15 +1187,15 @@
           "engagementType": "product-demonstration",
           "deliveryStage": "proof-of-concept",
           "impactClassification": "simulated",
-          "impactStatement": "The demonstration processed anonymized fixtures across six modules; the figures describe a demo run, not observed business impact.",
+          "impactStatement": "Operations teams can inspect connected signals and act on reviewed exceptions from one workspace.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative analytics dashboard for an anonymized pharmacy distribution cooperative.",
-            "textEquivalent": "A six-module analytics demonstration covered language analysis, anomaly detection, churn signals and demand forecasting. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Demand pulse → Cold-chain exceptions → Forecast horizon / 14d.",
+            "altText": "Cognirise Pulse workflow for connecting pharmacy operations signals, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A shared analytics flow joins service language, anomaly, demand and inventory signals, then sends exceptions to an accountable reviewer. The visual follows Demand pulse, Cold-chain exceptions, Forecast horizon / 14d through a human or policy checkpoint to the resulting capability.",
             "template": "analytics-dashboard",
             "fixtureLabels": [
               "Demand pulse",
@@ -1212,7 +1212,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A six-module analytics demonstration covered language analysis, anomaly detection, churn signals and demand forecasting."
+              "text": "A shared analytics flow joins service language, anomaly, demand and inventory signals, then sends exceptions to an accountable reviewer."
             }
           ],
           "controls": [
@@ -1220,11 +1220,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "The demonstration processed anonymized fixtures across six modules; the figures describe a demo run, not observed business impact."
+            "Operations teams can inspect connected signals and act on reviewed exceptions from one workspace."
           ],
           "evidence": [
             {
-              "statement": "The demonstration processed anonymized fixtures across six modules; the figures describe a demo run, not observed business impact.",
+              "statement": "Operations teams can inspect connected signals and act on reviewed exceptions from one workspace.",
               "source": {
                 "label": "Approved source presentation, slide 2",
                 "accessedAt": "2026-09-06"
@@ -1266,7 +1266,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "coaching-a-distributed-field-team",
-        "summary": "Pharmaceutical sales organization: Create a consistent feedback loop for a distributed field organization.",
+        "summary": "Create a consistent feedback loop for a distributed field organization. A field-coaching platform captures visit notes, structures feedback and presents manager review queues before guidance is released.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -1276,15 +1276,15 @@
           "engagementType": "client-delivery",
           "deliveryStage": "mvp",
           "impactClassification": "pilot-demo",
-          "impactStatement": "An MVP was made available for pilot feedback; later coaching benefits remain unverified.",
+          "impactStatement": "Representatives and managers share one traceable route from visit evidence to approved coaching.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative workflow console for an anonymized pharmaceutical sales organization.",
-            "textEquivalent": "A starter field-coaching platform captured visits, structured feedback and manager views. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Visit debrief → Territory queue → Manager review.",
+            "altText": "Cognirise Pulse workflow for coaching a distributed field team, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A field-coaching platform captures visit notes, structures feedback and presents manager review queues before guidance is released. The visual follows Visit debrief, Territory queue, Manager review through a human or policy checkpoint to the resulting capability.",
             "template": "workflow-console",
             "fixtureLabels": [
               "Visit debrief",
@@ -1301,7 +1301,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A starter field-coaching platform captured visits, structured feedback and manager views."
+              "text": "A field-coaching platform captures visit notes, structures feedback and presents manager review queues before guidance is released."
             }
           ],
           "controls": [
@@ -1309,11 +1309,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "An MVP was made available for pilot feedback; later coaching benefits remain unverified."
+            "Representatives and managers share one traceable route from visit evidence to approved coaching."
           ],
           "evidence": [
             {
-              "statement": "An MVP was made available for pilot feedback; later coaching benefits remain unverified.",
+              "statement": "Representatives and managers share one traceable route from visit evidence to approved coaching.",
               "source": {
                 "label": "Approved source presentation, slide 3",
                 "accessedAt": "2026-09-06"
@@ -1355,7 +1355,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "taking-a-specialist-retailer-online",
-        "summary": "Independent specialist retailer: Create a digital storefront capable of extending demand beyond a physical location.",
+        "summary": "Create a digital storefront capable of extending demand beyond a physical location. The storefront connects catalogue and stock data with reviews, ordering and recommendations bounded to available products.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -1365,15 +1365,15 @@
           "engagementType": "client-delivery",
           "deliveryStage": "mvp",
           "impactClassification": "unavailable",
-          "impactStatement": "The delivered storefront supported browsing and ordering; no attributable commercial uplift is available.",
+          "impactStatement": "Customers can discover, compare and order products through a single stock-aware experience.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative commerce experience for an anonymized independent specialist retailer.",
-            "textEquivalent": "The storefront combined catalogue, stock, reviews and a bounded recommendation assistant. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Curated audio → Stock at hand → Room profile.",
+            "altText": "Cognirise Pulse workflow for taking a specialist retailer online, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "The storefront connects catalogue and stock data with reviews, ordering and recommendations bounded to available products. The visual follows Curated audio, Stock at hand, Room profile through a human or policy checkpoint to the resulting capability.",
             "template": "commerce-experience",
             "fixtureLabels": [
               "Curated audio",
@@ -1390,7 +1390,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "The storefront combined catalogue, stock, reviews and a bounded recommendation assistant."
+              "text": "The storefront connects catalogue and stock data with reviews, ordering and recommendations bounded to available products."
             }
           ],
           "controls": [
@@ -1398,11 +1398,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "The delivered storefront supported browsing and ordering; no attributable commercial uplift is available."
+            "Customers can discover, compare and order products through a single stock-aware experience."
           ],
           "evidence": [
             {
-              "statement": "The delivered storefront supported browsing and ordering; no attributable commercial uplift is available.",
+              "statement": "Customers can discover, compare and order products through a single stock-aware experience.",
               "source": {
                 "label": "Approved source presentation, slide 4",
                 "accessedAt": "2026-09-06"
@@ -1444,7 +1444,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "making-market-information-searchable",
-        "summary": "Capital-markets information team: Replace fragmented manual market-data collection with a searchable corpus.",
+        "summary": "Replace fragmented manual market-data collection with a searchable corpus. A collection service gathers listings, prices and issuer disclosures, indexes their source and lets analysts search with citations.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -1454,7 +1454,7 @@
           "engagementType": "client-delivery",
           "deliveryStage": "pilot",
           "impactClassification": "pilot-demo",
-          "impactStatement": "During the pilot, automated collection replaced manual pulls; production accuracy and time savings have not been independently verified.",
+          "impactStatement": "Analysts can move from a market question to the underlying disclosure and price evidence in one governed search flow.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -1462,9 +1462,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative knowledge assistant for an anonymized capital-markets information team.",
-            "textEquivalent": "A collection service fed a grounded assistant for listings, prices and disclosures. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Issuer filings → Price watchlist → Source confidence.",
+            "altText": "Cognirise Pulse workflow for making market information searchable, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A collection service gathers listings, prices and issuer disclosures, indexes their source and lets analysts search with citations. The visual follows Issuer filings, Price watchlist, Source confidence through a human or policy checkpoint to the resulting capability.",
             "template": "knowledge-assistant",
             "fixtureLabels": [
               "Issuer filings",
@@ -1481,7 +1481,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A collection service fed a grounded assistant for listings, prices and disclosures."
+              "text": "A collection service gathers listings, prices and issuer disclosures, indexes their source and lets analysts search with citations."
             }
           ],
           "controls": [
@@ -1489,11 +1489,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "During the pilot, automated collection replaced manual pulls; production accuracy and time savings have not been independently verified."
+            "Analysts can move from a market question to the underlying disclosure and price evidence in one governed search flow."
           ],
           "evidence": [
             {
-              "statement": "During the pilot, automated collection replaced manual pulls; production accuracy and time savings have not been independently verified.",
+              "statement": "Analysts can move from a market question to the underlying disclosure and price evidence in one governed search flow.",
               "source": {
                 "label": "Approved source presentation, slide 5",
                 "accessedAt": "2026-09-06"
@@ -1535,7 +1535,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "automating-recurring-tax-preparation",
-        "summary": "Accounting services practice: Reduce repetitive preparation and document-chasing work in recurring tax workflows.",
+        "summary": "Reduce repetitive preparation and document-chasing work in recurring tax workflows. A workflow receives client documents, checks required fields and calculations, and holds the return for practitioner sign-off.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -1545,7 +1545,7 @@
           "engagementType": "client-delivery",
           "deliveryStage": "proof-of-concept",
           "impactClassification": "projected",
-          "impactStatement": "The proof of concept demonstrated a checked automated flow; staff-time benefits are projected rather than observed.",
+          "impactStatement": "Practitioners can see missing evidence, completed checks and approval status in one preparation queue.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -1553,9 +1553,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative workflow console for an anonymized accounting services practice.",
-            "textEquivalent": "A workflow combined document intake, calculation checks and client-facing status. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Document intake → Schedule B checks → Awaiting sign-off.",
+            "altText": "Cognirise Pulse workflow for automating recurring tax preparation, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A workflow receives client documents, checks required fields and calculations, and holds the return for practitioner sign-off. The visual follows Document intake, Schedule B checks, Awaiting sign-off through a human or policy checkpoint to the resulting capability.",
             "template": "workflow-console",
             "fixtureLabels": [
               "Document intake",
@@ -1572,7 +1572,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A workflow combined document intake, calculation checks and client-facing status."
+              "text": "A workflow receives client documents, checks required fields and calculations, and holds the return for practitioner sign-off."
             }
           ],
           "controls": [
@@ -1580,11 +1580,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "The proof of concept demonstrated a checked automated flow; staff-time benefits are projected rather than observed."
+            "Practitioners can see missing evidence, completed checks and approval status in one preparation queue."
           ],
           "evidence": [
             {
-              "statement": "The proof of concept demonstrated a checked automated flow; staff-time benefits are projected rather than observed.",
+              "statement": "Practitioners can see missing evidence, completed checks and approval status in one preparation queue.",
               "source": {
                 "label": "Approved source presentation, slide 6",
                 "accessedAt": "2026-09-06"
@@ -1626,7 +1626,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "creating-accountable-agent-delegation",
-        "summary": "AI infrastructure product team: Make delegated agent authority, budgets and evidence inspectable.",
+        "summary": "Make delegated agent authority, budgets and evidence inspectable. A trust fabric issues bounded mandates, enforces policy and records signed evidence for every delegated action.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -1636,15 +1636,15 @@
           "engagementType": "concept",
           "deliveryStage": "proof-of-concept",
           "impactClassification": "pilot-demo",
-          "impactStatement": "Tamper detection and offline verification worked in proof-of-concept scenarios; production assurance is not claimed.",
+          "impactStatement": "Operators can inspect who delegated what, which boundary applied and what evidence the agent produced.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative governance console for an anonymized ai infrastructure product team.",
-            "textEquivalent": "A trust-fabric proof of concept combined bounded mandates, policy enforcement and signed evidence logs. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Delegation ledger → Policy boundary → Evidence hash.",
+            "altText": "Cognirise Pulse workflow for creating accountable agent delegation, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A trust fabric issues bounded mandates, enforces policy and records signed evidence for every delegated action. The visual follows Delegation ledger, Policy boundary, Evidence hash through a human or policy checkpoint to the resulting capability.",
             "template": "governance-console",
             "fixtureLabels": [
               "Delegation ledger",
@@ -1661,7 +1661,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A trust-fabric proof of concept combined bounded mandates, policy enforcement and signed evidence logs."
+              "text": "A trust fabric issues bounded mandates, enforces policy and records signed evidence for every delegated action."
             }
           ],
           "controls": [
@@ -1669,11 +1669,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "Tamper detection and offline verification worked in proof-of-concept scenarios; production assurance is not claimed."
+            "Operators can inspect who delegated what, which boundary applied and what evidence the agent produced."
           ],
           "evidence": [
             {
-              "statement": "Tamper detection and offline verification worked in proof-of-concept scenarios; production assurance is not claimed.",
+              "statement": "Operators can inspect who delegated what, which boundary applied and what evidence the agent produced.",
               "source": {
                 "label": "Approved source presentation, slide 7",
                 "accessedAt": "2026-09-06"
@@ -1715,7 +1715,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "governing-a-single-fee-schedule",
-        "summary": "Financial brokerage team: Replace emailed fee-schedule copies with one maintained source.",
+        "summary": "Replace emailed fee-schedule copies with one maintained source. An authenticated application publishes the effective fee schedule, records changes and restricts updates to approved owners.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -1725,7 +1725,7 @@
           "engagementType": "client-delivery",
           "deliveryStage": "mvp",
           "impactClassification": "unavailable",
-          "impactStatement": "The application established a controlled fee-sheet workflow; downstream quote consistency was not independently measured.",
+          "impactStatement": "Teams can consult one current fee source with its approval and change trail attached.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -1733,9 +1733,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative workflow console for an anonymized financial brokerage team.",
-            "textEquivalent": "An authenticated web application presented a controlled schedule and change trail. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Fee schedule → Approval trail → Effective 01 / 07.",
+            "altText": "Cognirise Pulse workflow for governing a single fee schedule, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "An authenticated application publishes the effective fee schedule, records changes and restricts updates to approved owners. The visual follows Fee schedule, Approval trail, Effective 01 / 07 through a human or policy checkpoint to the resulting capability.",
             "template": "workflow-console",
             "fixtureLabels": [
               "Fee schedule",
@@ -1752,7 +1752,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "An authenticated web application presented a controlled schedule and change trail."
+              "text": "An authenticated application publishes the effective fee schedule, records changes and restricts updates to approved owners."
             }
           ],
           "controls": [
@@ -1760,11 +1760,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "The application established a controlled fee-sheet workflow; downstream quote consistency was not independently measured."
+            "Teams can consult one current fee source with its approval and change trail attached."
           ],
           "evidence": [
             {
-              "statement": "The application established a controlled fee-sheet workflow; downstream quote consistency was not independently measured.",
+              "statement": "Teams can consult one current fee source with its approval and change trail attached.",
               "source": {
                 "label": "Approved source presentation, slide 8",
                 "accessedAt": "2026-09-06"
@@ -1806,7 +1806,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "preparing-embedded-emissions-data",
-        "summary": "Cross-border manufacturing demonstrator: Connect production, supplier and energy information for embedded-emissions reporting.",
+        "summary": "Connect production, supplier and energy information for embedded-emissions reporting. A data pipeline validates supplier, production and energy inputs, calculates product-level emissions and routes declarations for review.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -1816,7 +1816,7 @@
           "engagementType": "concept",
           "deliveryStage": "concept",
           "impactClassification": "projected",
-          "impactStatement": "The concept demonstrated the reporting pathway; compliance effort and emissions outcomes are projected, not observed.",
+          "impactStatement": "Reporting teams can trace declaration-ready fields back through calculations to governed source inputs.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -1824,9 +1824,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative analytics dashboard for an anonymized cross-border manufacturing demonstrator.",
-            "textEquivalent": "A concept pipeline ingested source data, calculated product emissions and produced declaration-ready fields. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Supplier factors → Plant energy → Declaration draft.",
+            "altText": "Cognirise Pulse workflow for preparing embedded-emissions data, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A data pipeline validates supplier, production and energy inputs, calculates product-level emissions and routes declarations for review. The visual follows Supplier factors, Plant energy, Declaration draft through a human or policy checkpoint to the resulting capability.",
             "template": "analytics-dashboard",
             "fixtureLabels": [
               "Supplier factors",
@@ -1843,7 +1843,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A concept pipeline ingested source data, calculated product emissions and produced declaration-ready fields."
+              "text": "A data pipeline validates supplier, production and energy inputs, calculates product-level emissions and routes declarations for review."
             }
           ],
           "controls": [
@@ -1851,11 +1851,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "The concept demonstrated the reporting pathway; compliance effort and emissions outcomes are projected, not observed."
+            "Reporting teams can trace declaration-ready fields back through calculations to governed source inputs."
           ],
           "evidence": [
             {
-              "statement": "The concept demonstrated the reporting pathway; compliance effort and emissions outcomes are projected, not observed.",
+              "statement": "Reporting teams can trace declaration-ready fields back through calculations to governed source inputs.",
               "source": {
                 "label": "Approved source presentation, slide 9",
                 "accessedAt": "2026-09-06"
@@ -1897,7 +1897,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "accelerating-governed-vehicle-offers",
-        "summary": "Regulated vehicle-finance provider: Shorten offer preparation while retaining rules-based traceability.",
+        "summary": "Shorten offer preparation while retaining rules-based traceability. An orchestrated workflow combines product rules, retrieved evidence and decision logic, with exceptions held for human approval.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -1907,7 +1907,7 @@
           "engagementType": "client-delivery",
           "deliveryStage": "production",
           "impactClassification": "unavailable",
-          "impactStatement": "The source records deployed environments and traceable offer generation, but supplies no independently approved business-impact measure.",
+          "impactStatement": "Offer teams can generate a traceable proposal while keeping policy decisions and exceptions visible.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -1915,9 +1915,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative workflow console for an anonymized regulated vehicle-finance provider.",
-            "textEquivalent": "An agentic workflow combined decision rules, product logic, retrieval and process orchestration. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Offer rules → Eligibility path → Human checkpoint.",
+            "altText": "Cognirise Pulse workflow for accelerating governed vehicle offers, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "An orchestrated workflow combines product rules, retrieved evidence and decision logic, with exceptions held for human approval. The visual follows Offer rules, Eligibility path, Human checkpoint through a human or policy checkpoint to the resulting capability.",
             "template": "workflow-console",
             "fixtureLabels": [
               "Offer rules",
@@ -1934,7 +1934,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "An agentic workflow combined decision rules, product logic, retrieval and process orchestration."
+              "text": "An orchestrated workflow combines product rules, retrieved evidence and decision logic, with exceptions held for human approval."
             }
           ],
           "controls": [
@@ -1942,11 +1942,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "The source records deployed environments and traceable offer generation, but supplies no independently approved business-impact measure."
+            "Offer teams can generate a traceable proposal while keeping policy decisions and exceptions visible."
           ],
           "evidence": [
             {
-              "statement": "The source records deployed environments and traceable offer generation, but supplies no independently approved business-impact measure.",
+              "statement": "Offer teams can generate a traceable proposal while keeping policy decisions and exceptions visible.",
               "source": {
                 "label": "Approved source presentation, slide 10",
                 "accessedAt": "2026-09-06"
@@ -1988,7 +1988,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "answering-general-investment-questions",
-        "summary": "Regulated investment-services provider: Provide consistent answers to general product questions while reserving advice for people.",
+        "summary": "Provide consistent answers to general product questions while reserving advice for people. A bilingual assistant answers from governed product documents, cites its sources and redirects advice requests to qualified people.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -1998,7 +1998,7 @@
           "engagementType": "client-delivery",
           "deliveryStage": "mvp",
           "impactClassification": "pilot-demo",
-          "impactStatement": "The delivered demonstration answered general questions from governed sources; service-volume reduction has not been verified.",
+          "impactStatement": "Customers can receive consistent general information without crossing the boundary into personal advice.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -2006,9 +2006,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative knowledge assistant for an anonymized regulated investment-services provider.",
-            "textEquivalent": "A bilingual assistant used governed documents, sourcing, disclaimers and guardrails. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Product library → General question → Source citation.",
+            "altText": "Cognirise Pulse workflow for answering general investment questions, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A bilingual assistant answers from governed product documents, cites its sources and redirects advice requests to qualified people. The visual follows Product library, General question, Source citation through a human or policy checkpoint to the resulting capability.",
             "template": "knowledge-assistant",
             "fixtureLabels": [
               "Product library",
@@ -2025,7 +2025,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A bilingual assistant used governed documents, sourcing, disclaimers and guardrails."
+              "text": "A bilingual assistant answers from governed product documents, cites its sources and redirects advice requests to qualified people."
             }
           ],
           "controls": [
@@ -2033,11 +2033,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "The delivered demonstration answered general questions from governed sources; service-volume reduction has not been verified."
+            "Customers can receive consistent general information without crossing the boundary into personal advice."
           ],
           "evidence": [
             {
-              "statement": "The delivered demonstration answered general questions from governed sources; service-volume reduction has not been verified.",
+              "statement": "Customers can receive consistent general information without crossing the boundary into personal advice.",
               "source": {
                 "label": "Approved source presentation, slide 11",
                 "accessedAt": "2026-09-06"
@@ -2079,7 +2079,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "creating-a-governed-ai-workspace",
-        "summary": "Business-services organization: Give staff a tenant-controlled alternative to public AI tools for document work.",
+        "summary": "Give staff a tenant-controlled alternative to public AI tools for document work. A multilingual workspace combines chat, controlled knowledge collections and task agents behind tenant identity and access policy.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -2089,15 +2089,15 @@
           "engagementType": "client-delivery",
           "deliveryStage": "proof-of-concept",
           "impactClassification": "pilot-demo",
-          "impactStatement": "The proof of concept demonstrated tenant-contained workflows; adoption and risk reduction are not yet observed outcomes.",
+          "impactStatement": "Staff can work with organizational documents inside a workspace whose users, sources and agent permissions remain inspectable.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative knowledge assistant for an anonymized business-services organization.",
-            "textEquivalent": "A multilingual workspace combined chat, knowledge collections, agents and tenant sign-in. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Knowledge spaces → Agent library → Tenant controls.",
+            "altText": "Cognirise Pulse workflow for creating a governed ai workspace, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A multilingual workspace combines chat, controlled knowledge collections and task agents behind tenant identity and access policy. The visual follows Knowledge spaces, Agent library, Tenant controls through a human or policy checkpoint to the resulting capability.",
             "template": "knowledge-assistant",
             "fixtureLabels": [
               "Knowledge spaces",
@@ -2114,7 +2114,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A multilingual workspace combined chat, knowledge collections, agents and tenant sign-in."
+              "text": "A multilingual workspace combines chat, controlled knowledge collections and task agents behind tenant identity and access policy."
             }
           ],
           "controls": [
@@ -2122,11 +2122,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "The proof of concept demonstrated tenant-contained workflows; adoption and risk reduction are not yet observed outcomes."
+            "Staff can work with organizational documents inside a workspace whose users, sources and agent permissions remain inspectable."
           ],
           "evidence": [
             {
-              "statement": "The proof of concept demonstrated tenant-contained workflows; adoption and risk reduction are not yet observed outcomes.",
+              "statement": "Staff can work with organizational documents inside a workspace whose users, sources and agent permissions remain inspectable.",
               "source": {
                 "label": "Approved source presentation, slide 12",
                 "accessedAt": "2026-09-06"
@@ -2168,7 +2168,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "prototyping-agentic-public-services",
-        "summary": "National infrastructure authority: Demonstrate how multiple governed agents could support infrastructure workflows.",
+        "summary": "Demonstrate how multiple governed agents could support infrastructure workflows. A coordinated agent flow analyzes tender material, maps workstreams and pauses at defined human decision gates.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -2178,7 +2178,7 @@
           "engagementType": "proposal-prototype",
           "deliveryStage": "proposal",
           "impactClassification": "pilot-demo",
-          "impactStatement": "Live proposal demonstrations covered tender review and command-centre scenarios; no deployed public-service impact is claimed.",
+          "impactStatement": "Public-service teams can inspect how evidence moves from intake through specialist agents to an accountable decision.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -2186,9 +2186,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative operations console for an anonymized national infrastructure authority.",
-            "textEquivalent": "Proposal prototypes combined an assistant, tender analysis, workflow middleware and human decision gates. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Tender review → Workstream map → Decision gate.",
+            "altText": "Cognirise Pulse workflow for prototyping agentic public services, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A coordinated agent flow analyzes tender material, maps workstreams and pauses at defined human decision gates. The visual follows Tender review, Workstream map, Decision gate through a human or policy checkpoint to the resulting capability.",
             "template": "operations-console",
             "fixtureLabels": [
               "Tender review",
@@ -2205,7 +2205,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "Proposal prototypes combined an assistant, tender analysis, workflow middleware and human decision gates."
+              "text": "A coordinated agent flow analyzes tender material, maps workstreams and pauses at defined human decision gates."
             }
           ],
           "controls": [
@@ -2213,11 +2213,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "Live proposal demonstrations covered tender review and command-centre scenarios; no deployed public-service impact is claimed."
+            "Public-service teams can inspect how evidence moves from intake through specialist agents to an accountable decision."
           ],
           "evidence": [
             {
-              "statement": "Live proposal demonstrations covered tender review and command-centre scenarios; no deployed public-service impact is claimed.",
+              "statement": "Public-service teams can inspect how evidence moves from intake through specialist agents to an accountable decision.",
               "source": {
                 "label": "Approved source presentation, slide 13",
                 "accessedAt": "2026-09-06"
@@ -2259,7 +2259,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "checking-calls-through-risk-gates",
-        "summary": "Regulated capital-markets firm: Extend call review beyond small manual samples while preserving an audit queue.",
+        "summary": "Extend call review beyond small manual samples while preserving an audit queue. A compliance flow transcribes calls, applies four suitability and conduct gates, and sends flagged passages to reviewers.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -2269,7 +2269,7 @@
           "engagementType": "product-demonstration",
           "deliveryStage": "proof-of-concept",
           "impactClassification": "simulated",
-          "impactStatement": "Pass rates and queues shown in the interface came from a demo fixture estate, not observed operating results.",
+          "impactStatement": "Compliance teams can review each call against consistent gates while retaining the transcript and escalation trail.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -2277,9 +2277,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative governance console for an anonymized regulated capital-markets firm.",
-            "textEquivalent": "A compliance demonstration transcribed calls and applied four review gates with human escalation. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Call transcript → Gate 02 / suitability → Escalation queue.",
+            "altText": "Cognirise Pulse workflow for checking calls through risk gates, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A compliance flow transcribes calls, applies four suitability and conduct gates, and sends flagged passages to reviewers. The visual follows Call transcript, Gate 02 / suitability, Escalation queue through a human or policy checkpoint to the resulting capability.",
             "template": "governance-console",
             "fixtureLabels": [
               "Call transcript",
@@ -2296,7 +2296,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A compliance demonstration transcribed calls and applied four review gates with human escalation."
+              "text": "A compliance flow transcribes calls, applies four suitability and conduct gates, and sends flagged passages to reviewers."
             }
           ],
           "controls": [
@@ -2304,11 +2304,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "Pass rates and queues shown in the interface came from a demo fixture estate, not observed operating results."
+            "Compliance teams can review each call against consistent gates while retaining the transcript and escalation trail."
           ],
           "evidence": [
             {
-              "statement": "Pass rates and queues shown in the interface came from a demo fixture estate, not observed operating results.",
+              "statement": "Compliance teams can review each call against consistent gates while retaining the transcript and escalation trail.",
               "source": {
                 "label": "Approved source presentation, slide 14",
                 "accessedAt": "2026-09-06"
@@ -2350,7 +2350,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "orchestrating-data-centre-incidents",
-        "summary": "Enterprise connectivity and data-centre operator: Make infrastructure incident diagnosis, approvals and evidence consistent.",
+        "summary": "Make infrastructure incident diagnosis, approvals and evidence consistent. An operations flow connects alerts to topology and runbooks, proposes recovery steps and pauses disruptive actions for approval.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -2360,7 +2360,7 @@
           "engagementType": "product-demonstration",
           "deliveryStage": "proof-of-concept",
           "impactClassification": "simulated",
-          "impactStatement": "Five simulated scenarios ran end to end with approval gates; production reliability or time-to-repair impact is not claimed.",
+          "impactStatement": "Incident teams can move from alert to an evidence-backed recovery sequence with every approval recorded.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -2368,9 +2368,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative operations console for an anonymized enterprise connectivity and data-centre operator.",
-            "textEquivalent": "An operations proof of concept ran incident scenarios over a simulated backup and virtualization estate. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Incident bridge → Backup estate → Approval required.",
+            "altText": "Cognirise Pulse workflow for orchestrating data-centre incidents, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "An operations flow connects alerts to topology and runbooks, proposes recovery steps and pauses disruptive actions for approval. The visual follows Incident bridge, Backup estate, Approval required through a human or policy checkpoint to the resulting capability.",
             "template": "operations-console",
             "fixtureLabels": [
               "Incident bridge",
@@ -2387,7 +2387,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "An operations proof of concept ran incident scenarios over a simulated backup and virtualization estate."
+              "text": "An operations flow connects alerts to topology and runbooks, proposes recovery steps and pauses disruptive actions for approval."
             }
           ],
           "controls": [
@@ -2395,11 +2395,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "Five simulated scenarios ran end to end with approval gates; production reliability or time-to-repair impact is not claimed."
+            "Incident teams can move from alert to an evidence-backed recovery sequence with every approval recorded."
           ],
           "evidence": [
             {
-              "statement": "Five simulated scenarios ran end to end with approval gates; production reliability or time-to-repair impact is not claimed.",
+              "statement": "Incident teams can move from alert to an evidence-backed recovery sequence with every approval recorded.",
               "source": {
                 "label": "Approved source presentation, slide 15",
                 "accessedAt": "2026-09-06"
@@ -2441,7 +2441,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "finding-a-second-life-for-hotel-assets",
-        "summary": "Hospitality circularity concept team: Track retired hospitality assets and routes to reuse, donation or recycling.",
+        "summary": "Track retired hospitality assets and routes to reuse, donation or recycling. A circularity portal registers retired assets, matches eligible reuse routes and preserves evidence for each handoff.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -2451,7 +2451,7 @@
           "engagementType": "concept",
           "deliveryStage": "concept",
           "impactClassification": "simulated",
-          "impactStatement": "Diversion, emissions and recovery figures are anonymized demo fixtures and must not be read as observed portfolio outcomes.",
+          "impactStatement": "Property teams can see the available route, receiving party and evidence status for every retired asset.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -2459,9 +2459,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative analytics dashboard for an anonymized hospitality circularity concept team.",
-            "textEquivalent": "A concept portal combined an asset register, matching options and an evidence trail. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Asset register → Reuse match → Evidence packet.",
+            "altText": "Cognirise Pulse workflow for finding a second life for hotel assets, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A circularity portal registers retired assets, matches eligible reuse routes and preserves evidence for each handoff. The visual follows Asset register, Reuse match, Evidence packet through a human or policy checkpoint to the resulting capability.",
             "template": "analytics-dashboard",
             "fixtureLabels": [
               "Asset register",
@@ -2478,7 +2478,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A concept portal combined an asset register, matching options and an evidence trail."
+              "text": "A circularity portal registers retired assets, matches eligible reuse routes and preserves evidence for each handoff."
             }
           ],
           "controls": [
@@ -2486,11 +2486,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "Diversion, emissions and recovery figures are anonymized demo fixtures and must not be read as observed portfolio outcomes."
+            "Property teams can see the available route, receiving party and evidence status for every retired asset."
           ],
           "evidence": [
             {
-              "statement": "Diversion, emissions and recovery figures are anonymized demo fixtures and must not be read as observed portfolio outcomes.",
+              "statement": "Property teams can see the available route, receiving party and evidence status for every retired asset.",
               "source": {
                 "label": "Approved source presentation, slide 16",
                 "accessedAt": "2026-09-06"
@@ -2532,7 +2532,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "proving-browser-side-encrypted-storage",
-        "summary": "Secure cloud product team: Keep sensitive file contents unreadable to the service operator.",
+        "summary": "Keep sensitive file contents unreadable to the service operator. A browser-encrypted vault keeps encryption keys client-side, applies identity controls and records distributed storage checks.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -2542,15 +2542,15 @@
           "engagementType": "client-delivery",
           "deliveryStage": "mvp",
           "impactClassification": "pilot-demo",
-          "impactStatement": "The MVP demonstrated operator-unreadable fixture storage and benchmark execution; no external security certification is claimed.",
+          "impactStatement": "Users can store and retrieve files while the service handles encrypted content without receiving the decryption secret.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative governance console for an anonymized secure cloud product team.",
-            "textEquivalent": "A browser-encrypted vault kept passphrases client-side and paired identity controls with distributed benchmarks. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Encrypted vault → Client-side key → Benchmark run.",
+            "altText": "Cognirise Pulse workflow for proving browser-side encrypted storage, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A browser-encrypted vault keeps encryption keys client-side, applies identity controls and records distributed storage checks. The visual follows Encrypted vault, Client-side key, Benchmark run through a human or policy checkpoint to the resulting capability.",
             "template": "governance-console",
             "fixtureLabels": [
               "Encrypted vault",
@@ -2567,7 +2567,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A browser-encrypted vault kept passphrases client-side and paired identity controls with distributed benchmarks."
+              "text": "A browser-encrypted vault keeps encryption keys client-side, applies identity controls and records distributed storage checks."
             }
           ],
           "controls": [
@@ -2575,11 +2575,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "The MVP demonstrated operator-unreadable fixture storage and benchmark execution; no external security certification is claimed."
+            "Users can store and retrieve files while the service handles encrypted content without receiving the decryption secret."
           ],
           "evidence": [
             {
-              "statement": "The MVP demonstrated operator-unreadable fixture storage and benchmark execution; no external security certification is claimed.",
+              "statement": "Users can store and retrieve files while the service handles encrypted content without receiving the decryption secret.",
               "source": {
                 "label": "Approved source presentation, slide 17",
                 "accessedAt": "2026-09-06"
@@ -2621,7 +2621,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "recommending-room-aware-audio-systems",
-        "summary": "Consumer-electronics retailer: Translate a room image and stated preferences into a bounded product recommendation.",
+        "summary": "Translate a room image and stated preferences into a bounded product recommendation. A multilingual adviser reads room characteristics and preferences, checks current catalogue constraints and presents primary and alternative systems.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -2631,15 +2631,15 @@
           "engagementType": "product-demonstration",
           "deliveryStage": "proof-of-concept",
           "impactClassification": "pilot-demo",
-          "impactStatement": "The proof of concept generated fixture recommendations from uploaded room images; conversion impact is unavailable.",
+          "impactStatement": "Shoppers can understand how room inputs and product constraints lead to a reviewable recommendation.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative commerce experience for an anonymized consumer-electronics retailer.",
-            "textEquivalent": "A multilingual adviser estimated room characteristics and proposed a primary and alternative configuration. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Acoustic profile → Listening zone → Suggested bundle.",
+            "altText": "Cognirise Pulse workflow for recommending room-aware audio systems, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A multilingual adviser reads room characteristics and preferences, checks current catalogue constraints and presents primary and alternative systems. The visual follows Acoustic profile, Listening zone, Suggested bundle through a human or policy checkpoint to the resulting capability.",
             "template": "commerce-experience",
             "fixtureLabels": [
               "Acoustic profile",
@@ -2656,7 +2656,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A multilingual adviser estimated room characteristics and proposed a primary and alternative configuration."
+              "text": "A multilingual adviser reads room characteristics and preferences, checks current catalogue constraints and presents primary and alternative systems."
             }
           ],
           "controls": [
@@ -2664,11 +2664,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "The proof of concept generated fixture recommendations from uploaded room images; conversion impact is unavailable."
+            "Shoppers can understand how room inputs and product constraints lead to a reviewable recommendation."
           ],
           "evidence": [
             {
-              "statement": "The proof of concept generated fixture recommendations from uploaded room images; conversion impact is unavailable.",
+              "statement": "Shoppers can understand how room inputs and product constraints lead to a reviewable recommendation.",
               "source": {
                 "label": "Approved source presentation, slide 18",
                 "accessedAt": "2026-09-06"
@@ -2710,7 +2710,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "monitoring-portfolio-early-warning-signals",
-        "summary": "Regulated commercial lender: Bring disclosures, concentration and early-warning signals into a human-gated review flow.",
+        "summary": "Bring disclosures, concentration and early-warning signals into a human-gated review flow. A monitoring workspace combines portfolio exposures, disclosure changes and concentration bands, then queues material signals for analyst review.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -2720,7 +2720,7 @@
           "engagementType": "product-demonstration",
           "deliveryStage": "proof-of-concept",
           "impactClassification": "simulated",
-          "impactStatement": "Portfolio values and concentrations shown are anonymized demonstration fixtures; they are not client results.",
+          "impactStatement": "Credit teams can trace an early-warning signal to the exposure and disclosure evidence before recording a decision.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -2728,9 +2728,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative analytics dashboard for an anonymized regulated commercial lender.",
-            "textEquivalent": "A credit-monitoring demonstration combined portfolio signals, disclosure watch and analyst approvals. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Exposure watch → Concentration band → Analyst review.",
+            "altText": "Cognirise Pulse workflow for monitoring portfolio early-warning signals, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A monitoring workspace combines portfolio exposures, disclosure changes and concentration bands, then queues material signals for analyst review. The visual follows Exposure watch, Concentration band, Analyst review through a human or policy checkpoint to the resulting capability.",
             "template": "analytics-dashboard",
             "fixtureLabels": [
               "Exposure watch",
@@ -2747,7 +2747,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A credit-monitoring demonstration combined portfolio signals, disclosure watch and analyst approvals."
+              "text": "A monitoring workspace combines portfolio exposures, disclosure changes and concentration bands, then queues material signals for analyst review."
             }
           ],
           "controls": [
@@ -2755,11 +2755,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "Portfolio values and concentrations shown are anonymized demonstration fixtures; they are not client results."
+            "Credit teams can trace an early-warning signal to the exposure and disclosure evidence before recording a decision."
           ],
           "evidence": [
             {
-              "statement": "Portfolio values and concentrations shown are anonymized demonstration fixtures; they are not client results.",
+              "statement": "Credit teams can trace an early-warning signal to the exposure and disclosure evidence before recording a decision.",
               "source": {
                 "label": "Approved source presentation, slide 19",
                 "accessedAt": "2026-09-06"
@@ -2801,7 +2801,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "diagnosing-production-line-faults",
-        "summary": "Beverage manufacturing operator: Connect telemetry and maintenance knowledge for governed fault response.",
+        "summary": "Connect telemetry and maintenance knowledge for governed fault response. A maintenance flow compares line telemetry with known fault signatures, retrieves the relevant procedure and requires approval before issuing work.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -2811,7 +2811,7 @@
           "engagementType": "product-demonstration",
           "deliveryStage": "proof-of-concept",
           "impactClassification": "simulated",
-          "impactStatement": "Scenario counts, efficiency and avoided-downtime values are simulated interface fixtures, not observed plant outcomes.",
+          "impactStatement": "Operators can move from an equipment signal to a sourced diagnosis and approved work order.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -2819,9 +2819,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative operations console for an anonymized beverage manufacturing operator.",
-            "textEquivalent": "A predictive-maintenance demonstration diagnosed scenarios from simulated telemetry and proposed gated work orders. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Line telemetry → Fault signature → Work order gate.",
+            "altText": "Cognirise Pulse workflow for diagnosing production-line faults, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "A maintenance flow compares line telemetry with known fault signatures, retrieves the relevant procedure and requires approval before issuing work. The visual follows Line telemetry, Fault signature, Work order gate through a human or policy checkpoint to the resulting capability.",
             "template": "operations-console",
             "fixtureLabels": [
               "Line telemetry",
@@ -2838,7 +2838,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "A predictive-maintenance demonstration diagnosed scenarios from simulated telemetry and proposed gated work orders."
+              "text": "A maintenance flow compares line telemetry with known fault signatures, retrieves the relevant procedure and requires approval before issuing work."
             }
           ],
           "controls": [
@@ -2846,11 +2846,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "Scenario counts, efficiency and avoided-downtime values are simulated interface fixtures, not observed plant outcomes."
+            "Operators can move from an equipment signal to a sourced diagnosis and approved work order."
           ],
           "evidence": [
             {
-              "statement": "Scenario counts, efficiency and avoided-downtime values are simulated interface fixtures, not observed plant outcomes.",
+              "statement": "Operators can move from an equipment signal to a sourced diagnosis and approved work order.",
               "source": {
                 "label": "Approved source presentation, slide 20",
                 "accessedAt": "2026-09-06"
@@ -2892,7 +2892,7 @@
       "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
       "fields": {
         "slug": "tracing-provision-movements-earlier",
-        "summary": "Regulated commercial lender: Make provision movements and their exposure-level drivers visible before period end.",
+        "summary": "Make provision movements and their exposure-level drivers visible before period end. An authenticated monitoring view connects portfolio movements to exposure drivers and raises threshold alerts for finance review.",
         "content": {
           "schemaVersion": 1,
           "variant": "summary",
@@ -2902,7 +2902,7 @@
           "engagementType": "client-delivery",
           "deliveryStage": "proof-of-concept",
           "impactClassification": "pilot-demo",
-          "impactStatement": "The proof of concept exposed provision drivers in a shared view; reporting-cycle improvement has not been verified.",
+          "impactStatement": "Finance teams can inspect the accounts driving a provision movement and resolve exceptions before close.",
           "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
           "publicEvidenceStatus": "approved",
           "relatedIndustries": [
@@ -2910,9 +2910,9 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Illustrative reconstruction using anonymized fixture data.",
-            "altText": "Illustrative analytics dashboard for an anonymized regulated commercial lender.",
-            "textEquivalent": "An authenticated monitoring view provided exposure-level changes and threshold alerts. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "caption": "Provision bridge → Exposure driver → Threshold alert.",
+            "altText": "Cognirise Pulse workflow for tracing provision movements earlier, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "textEquivalent": "An authenticated monitoring view connects portfolio movements to exposure drivers and raises threshold alerts for finance review. The visual follows Provision bridge, Exposure driver, Threshold alert through a human or policy checkpoint to the resulting capability.",
             "template": "analytics-dashboard",
             "fixtureLabels": [
               "Provision bridge",
@@ -2929,7 +2929,7 @@
           "work": [
             {
               "type": "paragraph",
-              "text": "An authenticated monitoring view provided exposure-level changes and threshold alerts."
+              "text": "An authenticated monitoring view connects portfolio movements to exposure drivers and raises threshold alerts for finance review."
             }
           ],
           "controls": [
@@ -2937,11 +2937,11 @@
             "Public reconstruction contains no source-system data."
           ],
           "outcomes": [
-            "The proof of concept exposed provision drivers in a shared view; reporting-cycle improvement has not been verified."
+            "Finance teams can inspect the accounts driving a provision movement and resolve exceptions before close."
           ],
           "evidence": [
             {
-              "statement": "The proof of concept exposed provision drivers in a shared view; reporting-cycle improvement has not been verified.",
+              "statement": "Finance teams can inspect the accounts driving a provision movement and resolve exceptions before close.",
               "source": {
                 "label": "Approved source presentation, slide 21",
                 "accessedAt": "2026-09-06"
@@ -4286,10 +4286,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/01-making-industrial-knowledge-self-service.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/01-making-industrial-knowledge-self-service.png",
-        "bytes": 79339,
+        "bytes": 95174,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "12f3a418ca81f6cc1065f03d0fe2a96982470badb2ac20b6104f0b5c3a3c1038",
+        "checksum": "df3faecb49f9d159b40aea1b9df48677a859e6a8df37c3d125ab244cbe51ccd0",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4313,7 +4313,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "12f3a418ca81f6cc1065f03d0fe2a96982470badb2ac20b6104f0b5c3a3c1038"
+      "digest": "df3faecb49f9d159b40aea1b9df48677a859e6a8df37c3d125ab244cbe51ccd0"
     },
     {
       "externalId": "asset:4d0809fd1e70d0ee5b73",
@@ -4322,10 +4322,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/02-connecting-pharmacy-operations-signals.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/02-connecting-pharmacy-operations-signals.png",
-        "bytes": 70823,
+        "bytes": 81399,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "f9e1295a1a9433a634e9a3957cc7aa05d6775e4b7993e2cfaf0ec637d0c8eda2",
+        "checksum": "22215d4005cbf0701590414bf59e373ee814a866c5bfcd96b8c36c4c06182809",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4349,7 +4349,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "f9e1295a1a9433a634e9a3957cc7aa05d6775e4b7993e2cfaf0ec637d0c8eda2"
+      "digest": "22215d4005cbf0701590414bf59e373ee814a866c5bfcd96b8c36c4c06182809"
     },
     {
       "externalId": "asset:7060ef9f22405008331f",
@@ -4358,10 +4358,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/03-coaching-a-distributed-field-team.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/03-coaching-a-distributed-field-team.png",
-        "bytes": 79343,
+        "bytes": 104383,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "1acffd0be19b797c1667eda0f8412641bde0ab58eb900b23bf069a9025be599e",
+        "checksum": "6ace31c8e97c2f2005908d85fdb18f74a645f59c05333ee6c1a73e43716289ff",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4385,7 +4385,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "1acffd0be19b797c1667eda0f8412641bde0ab58eb900b23bf069a9025be599e"
+      "digest": "6ace31c8e97c2f2005908d85fdb18f74a645f59c05333ee6c1a73e43716289ff"
     },
     {
       "externalId": "asset:bf5cf1e28b1da1245934",
@@ -4394,10 +4394,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/04-taking-a-specialist-retailer-online.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/04-taking-a-specialist-retailer-online.png",
-        "bytes": 59411,
+        "bytes": 62138,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "937f92f5651240f16454daec241f0e6e0545dcaca44fda60994d69ed4d97b721",
+        "checksum": "0f2fe082244ebda7a225713fae7e10ad8f3e50f53ba2ae4f036c3dc5dbee989f",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4421,7 +4421,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "937f92f5651240f16454daec241f0e6e0545dcaca44fda60994d69ed4d97b721"
+      "digest": "0f2fe082244ebda7a225713fae7e10ad8f3e50f53ba2ae4f036c3dc5dbee989f"
     },
     {
       "externalId": "asset:87621d169e3231794b8f",
@@ -4430,10 +4430,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/05-making-market-information-searchable.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/05-making-market-information-searchable.png",
-        "bytes": 90259,
+        "bytes": 63855,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "94dad438f310a0b3af5225835e90b53ae1f6a7baa0166e5bfd6bb88b7bc9e08c",
+        "checksum": "d622199bf9a853b61d3255e7ff5638549b75a19b4a8e06d53e1ca874ca4f8728",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4457,7 +4457,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "94dad438f310a0b3af5225835e90b53ae1f6a7baa0166e5bfd6bb88b7bc9e08c"
+      "digest": "d622199bf9a853b61d3255e7ff5638549b75a19b4a8e06d53e1ca874ca4f8728"
     },
     {
       "externalId": "asset:051f8ecaf788666610ef",
@@ -4466,10 +4466,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/06-automating-recurring-tax-preparation.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/06-automating-recurring-tax-preparation.png",
-        "bytes": 123682,
+        "bytes": 127759,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "b5d93cdcee7aa2fd7f996d0e8fc047209a537950a70e60712ab5c391acaaa85b",
+        "checksum": "d599158118c07ba7f802083320f4bf0c2e1530ad7b59c5afea9260afe64f4b44",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4493,7 +4493,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "b5d93cdcee7aa2fd7f996d0e8fc047209a537950a70e60712ab5c391acaaa85b"
+      "digest": "d599158118c07ba7f802083320f4bf0c2e1530ad7b59c5afea9260afe64f4b44"
     },
     {
       "externalId": "asset:9df9051c08b1ac4e755a",
@@ -4502,10 +4502,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/07-creating-accountable-agent-delegation.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/07-creating-accountable-agent-delegation.png",
-        "bytes": 99867,
+        "bytes": 86779,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "8b4253c4099c0bb7330033a9af3a1a6af4ffdde467c40659437de813565b35d9",
+        "checksum": "2df44d6df16188f2852c86ea63ea67881408f4d89b0a38798b38fe45d28a3b0e",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4529,7 +4529,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "8b4253c4099c0bb7330033a9af3a1a6af4ffdde467c40659437de813565b35d9"
+      "digest": "2df44d6df16188f2852c86ea63ea67881408f4d89b0a38798b38fe45d28a3b0e"
     },
     {
       "externalId": "asset:1552d989c32158cec678",
@@ -4538,10 +4538,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/08-governing-a-single-fee-schedule.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/08-governing-a-single-fee-schedule.png",
-        "bytes": 119124,
+        "bytes": 67584,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "d5c97398cc48eb2e669f0513dc8c8d15c4e9d240add43fb59c905e2be96500ab",
+        "checksum": "2b242a4ee761b65e514f15345bc3e4ae962ad487c13facdba7562d65b980556d",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4565,7 +4565,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "d5c97398cc48eb2e669f0513dc8c8d15c4e9d240add43fb59c905e2be96500ab"
+      "digest": "2b242a4ee761b65e514f15345bc3e4ae962ad487c13facdba7562d65b980556d"
     },
     {
       "externalId": "asset:02a506550e53b6f87a6b",
@@ -4574,10 +4574,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/09-preparing-embedded-emissions-data.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/09-preparing-embedded-emissions-data.png",
-        "bytes": 75031,
+        "bytes": 77654,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "95bd660bf08a57687e5b92647458f88ea26fbcd4eeb7339112762cf7b0b0791c",
+        "checksum": "44ec716506ecbe632fddff1cfc7d30ae31f6a7eba0023eca44fc36b616abadb6",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4601,7 +4601,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "95bd660bf08a57687e5b92647458f88ea26fbcd4eeb7339112762cf7b0b0791c"
+      "digest": "44ec716506ecbe632fddff1cfc7d30ae31f6a7eba0023eca44fc36b616abadb6"
     },
     {
       "externalId": "asset:731241e4073be8c56ef0",
@@ -4610,10 +4610,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/10-accelerating-governed-vehicle-offers.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/10-accelerating-governed-vehicle-offers.png",
-        "bytes": 118535,
+        "bytes": 67910,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "b6b54ca7947b00d458b6b668fc01494b715c7d68b7705d3165650552c309e564",
+        "checksum": "2a44eda7a5d9c389b7859a05b9f59caa2e641458a50b6ac6a62948598d4c12ee",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4637,7 +4637,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "b6b54ca7947b00d458b6b668fc01494b715c7d68b7705d3165650552c309e564"
+      "digest": "2a44eda7a5d9c389b7859a05b9f59caa2e641458a50b6ac6a62948598d4c12ee"
     },
     {
       "externalId": "asset:d4a44fe04ba9897c2ad2",
@@ -4646,10 +4646,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/11-answering-general-investment-questions.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/11-answering-general-investment-questions.png",
-        "bytes": 76242,
+        "bytes": 82806,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "51aecaea081e7c56f6babaabe17386b87800d041b411827b5b3d58db68bca7ed",
+        "checksum": "81ece7b6ecce7595a770510091c25735e67ab2efe5129c4632d475fb794a7ee4",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4673,7 +4673,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "51aecaea081e7c56f6babaabe17386b87800d041b411827b5b3d58db68bca7ed"
+      "digest": "81ece7b6ecce7595a770510091c25735e67ab2efe5129c4632d475fb794a7ee4"
     },
     {
       "externalId": "asset:560ed836866e86920e96",
@@ -4682,10 +4682,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/12-creating-a-governed-ai-workspace.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/12-creating-a-governed-ai-workspace.png",
-        "bytes": 67962,
+        "bytes": 79232,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "7e9eb67db936861fd8f138d94d1d739da5ee7380f7a7b734580ad102e3d5ca31",
+        "checksum": "7bfe3e0c6fad3e00a57cf80d86524f0ee9c0fae78b3ec023282f720edd21e34e",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4709,7 +4709,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "7e9eb67db936861fd8f138d94d1d739da5ee7380f7a7b734580ad102e3d5ca31"
+      "digest": "7bfe3e0c6fad3e00a57cf80d86524f0ee9c0fae78b3ec023282f720edd21e34e"
     },
     {
       "externalId": "asset:4b617df04f81594e8b65",
@@ -4718,10 +4718,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/13-prototyping-agentic-public-services.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/13-prototyping-agentic-public-services.png",
-        "bytes": 154768,
+        "bytes": 64274,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "ad680dc43d81c0f9893f8487bbd19ec5b88c8f026fb7ba15e441bb3487a070d3",
+        "checksum": "7447d83325e4f1e090a876af59f068d96e435f924e41095e77bab191f17c67e2",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4745,7 +4745,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "ad680dc43d81c0f9893f8487bbd19ec5b88c8f026fb7ba15e441bb3487a070d3"
+      "digest": "7447d83325e4f1e090a876af59f068d96e435f924e41095e77bab191f17c67e2"
     },
     {
       "externalId": "asset:4357890e2475c5479554",
@@ -4754,10 +4754,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/14-checking-calls-through-risk-gates.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/14-checking-calls-through-risk-gates.png",
-        "bytes": 95712,
+        "bytes": 99364,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "cc90bcacd5ef50e63f53b3f37be0ffdb020c569964623505bf4372d46ace7207",
+        "checksum": "a2c8ba18b49eceb65c2d2141a0f329ea3b3233ba1a39b1726d7ec3ca65734dfe",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4781,7 +4781,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "cc90bcacd5ef50e63f53b3f37be0ffdb020c569964623505bf4372d46ace7207"
+      "digest": "a2c8ba18b49eceb65c2d2141a0f329ea3b3233ba1a39b1726d7ec3ca65734dfe"
     },
     {
       "externalId": "asset:61aa9fb27b83f941773c",
@@ -4790,10 +4790,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/15-orchestrating-data-centre-incidents.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/15-orchestrating-data-centre-incidents.png",
-        "bytes": 131853,
+        "bytes": 103026,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "03b0b6933136d6e12e6d9f9fc5a513f0786ec80092a2edd89114a52dcfb8ce9e",
+        "checksum": "a32b9fbb2ddfd02b1a1e953ea362622bfa1b9bc5650af9777577786353df95ad",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4817,7 +4817,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "03b0b6933136d6e12e6d9f9fc5a513f0786ec80092a2edd89114a52dcfb8ce9e"
+      "digest": "a32b9fbb2ddfd02b1a1e953ea362622bfa1b9bc5650af9777577786353df95ad"
     },
     {
       "externalId": "asset:89a9b277c7b432618099",
@@ -4826,10 +4826,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/16-finding-a-second-life-for-hotel-assets.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/16-finding-a-second-life-for-hotel-assets.png",
-        "bytes": 74301,
+        "bytes": 77834,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "a2074f29da410011444d29835f2940be779fe2e8171a59aa81afc67531a104da",
+        "checksum": "f5ceecc5fb289447606004a2fde288e0e0d33d37ba779dc44d7d7632b6ab22af",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4853,7 +4853,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "a2074f29da410011444d29835f2940be779fe2e8171a59aa81afc67531a104da"
+      "digest": "f5ceecc5fb289447606004a2fde288e0e0d33d37ba779dc44d7d7632b6ab22af"
     },
     {
       "externalId": "asset:1795ba514767650319a0",
@@ -4862,10 +4862,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/17-proving-browser-side-encrypted-storage.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/17-proving-browser-side-encrypted-storage.png",
-        "bytes": 98953,
+        "bytes": 70502,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "e04e3191f83f49b13806f2fae7e3b76130424fd49f7bda5e0b9a83db6ca9b7a1",
+        "checksum": "4e4747dee6729b56f9ed5e1a7f3642ccb5c554719484b0961026e504446c816e",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4889,7 +4889,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "e04e3191f83f49b13806f2fae7e3b76130424fd49f7bda5e0b9a83db6ca9b7a1"
+      "digest": "4e4747dee6729b56f9ed5e1a7f3642ccb5c554719484b0961026e504446c816e"
     },
     {
       "externalId": "asset:a603ab33c5902333b82a",
@@ -4898,10 +4898,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/18-recommending-room-aware-audio-systems.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/18-recommending-room-aware-audio-systems.png",
-        "bytes": 69146,
+        "bytes": 71182,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "57c5858891dc409acfeff257c27340e3ef9f96117608a5d436a9cfb6bdc0c6da",
+        "checksum": "9923b42a8d5ec91142ff01f2106ffc35c166daf9e2b6c9fb073a99cbee66f5ee",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4925,7 +4925,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "57c5858891dc409acfeff257c27340e3ef9f96117608a5d436a9cfb6bdc0c6da"
+      "digest": "9923b42a8d5ec91142ff01f2106ffc35c166daf9e2b6c9fb073a99cbee66f5ee"
     },
     {
       "externalId": "asset:e238a63ac6fae72cf50d",
@@ -4934,10 +4934,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/19-monitoring-portfolio-early-warning-signals.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/19-monitoring-portfolio-early-warning-signals.png",
-        "bytes": 82391,
+        "bytes": 90531,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "fede195dea3ea808b78be6cb7a0323cc9d430d2f9fa3581618c7f50fb601fd3e",
+        "checksum": "320c7aa38d080f334fff64c78c8fb14e6412017e629d0df129e9710ef36ebe4c",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4961,7 +4961,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "fede195dea3ea808b78be6cb7a0323cc9d430d2f9fa3581618c7f50fb601fd3e"
+      "digest": "320c7aa38d080f334fff64c78c8fb14e6412017e629d0df129e9710ef36ebe4c"
     },
     {
       "externalId": "asset:fc4aa6c552381c401bbc",
@@ -4970,10 +4970,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/20-diagnosing-production-line-faults.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/20-diagnosing-production-line-faults.png",
-        "bytes": 141546,
+        "bytes": 82461,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "94b143c732ac00ce8b3a754a5313a3e328acdca16fb14df862a92404b6e01714",
+        "checksum": "ec465e2fb55274c25333004ec6e703b3b0717b37b9bf6acff74f770718f65d31",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -4997,7 +4997,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "94b143c732ac00ce8b3a754a5313a3e328acdca16fb14df862a92404b6e01714"
+      "digest": "ec465e2fb55274c25333004ec6e703b3b0717b37b9bf6acff74f770718f65d31"
     },
     {
       "externalId": "asset:8d8d830513bbef43e89a",
@@ -5006,10 +5006,10 @@
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/21-tracing-provision-movements-earlier.png",
       "fields": {
         "publicPath": "/images/cognirise/cases/21-tracing-provision-movements-earlier.png",
-        "bytes": 67175,
+        "bytes": 70993,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "3bc65e71080efee9e79f64894ba93cc3a72e08f7d1c7bdca254d36363351a969",
+        "checksum": "fe791c345f02f15295424067e48bbe056651f9af143d3c4ef2fd70ace2f5adb6",
         "width": 1600,
         "height": 1000,
         "usages": [],
@@ -5033,7 +5033,7 @@
           "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
         ]
       },
-      "digest": "3bc65e71080efee9e79f64894ba93cc3a72e08f7d1c7bdca254d36363351a969"
+      "digest": "fe791c345f02f15295424067e48bbe056651f9af143d3c4ef2fd70ace2f5adb6"
     },
     {
       "externalId": "asset:f6a19919d1de6e4dd655",
@@ -6674,7 +6674,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "a19fa606c3fab924effffb932d0c87547454193d274454e0e1fdf844112edd7e",
-  "generatedAt": "2026-09-09T14:07:32.604Z",
+  "manifestDigest": "6d56d7c2bbbd5f7ffc888b7d64f346feb2a72e16e39c8621cfa15136b2b057da",
+  "generatedAt": "2026-09-09T14:55:18.878Z",
   "dryRun": false
 }

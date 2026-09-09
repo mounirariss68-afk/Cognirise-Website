@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { type CmsDocumentKind, validateCmsSnapshot } from "@workspace/api-zod";
 import { InventoryRecord } from "./common.js";
 import { acceptedLegacyMediaReceiptDigests } from "./media-receipt-history.js";
+import { caseStudyRecords } from "./case-studies.js";
 
 export type MigratableRecord = InventoryRecord & {
   type: "person" | "partner" | "platform" | "article" | "case-study" | "industry" | "framework";
@@ -291,7 +292,7 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
         ? `cms-industry-contract-v12:${record.externalId}`
         : `cms-industry-contract-v8:${record.externalId}`
       : record.type === "case-study"
-        ? `cms-case-study-baseline-v1:${record.externalId}`
+        ? `cms-case-study-baseline-v2:${record.externalId}`
         : `cms-inventory-v2:${record.externalId}`,
     requestDigest: digest(request),
   };
@@ -416,7 +417,7 @@ export function mediaMigrationOperations(records: InventoryRecord[]): MediaMigra
       campaignMetadata: fields.campaignMetadata && typeof fields.campaignMetadata === "object"
         ? fields.campaignMetadata as Record<string, unknown>
         : null,
-      altText: accessibility.altText,
+      altText: caseVisualByPath.get(fields.publicPath)?.altText || accessibility.altText,
       credit: rights.owner,
       rightsStatus: typeof rights.status === "string" ? rights.status : undefined,
       accessibilityStatus: typeof accessibility.status === "string"
@@ -435,6 +436,20 @@ export function mediaMigrationOperations(records: InventoryRecord[]): MediaMigra
     };
     const inventoryReceiptKey = `cms-media-inventory-v3:${operation.externalId}`;
     const inventoryDigests = acceptedLegacyMediaReceiptDigests.get(inventoryReceiptKey);
+    const legacyInventoryDigest = digest({
+      externalId: operation.externalId,
+      idempotencyKey: inventoryReceiptKey,
+      filename: operation.filename,
+      sourceFile: operation.sourceFile,
+      publicPath: operation.publicPath,
+      checksum: operation.checksum,
+      mimeType: operation.mimeType,
+      byteSize: operation.byteSize,
+      width: operation.width,
+      height: operation.height,
+      cmsOwnership: operation.cmsOwnership,
+      usages: operation.usages,
+    });
     const historicalReceipts: HistoricalMediaReceipt[] = inventoryDigests ? [{
       externalId: operation.externalId,
       idempotencyKey: inventoryReceiptKey,
@@ -457,7 +472,14 @@ export function mediaMigrationOperations(records: InventoryRecord[]): MediaMigra
       }
     }
     const acceptedPriorRequestDigests = [
-      ...new Set(historicalReceipts.flatMap((receipt) => receipt.acceptedRequestDigests)),
+      ...new Set([
+        ...historicalReceipts.flatMap((receipt) => receipt.acceptedRequestDigests),
+        ...(inventoryDigests ? [legacyInventoryDigest] : []),
+        ...(inventoryDigests ? [digest({
+          ...binaryDigestShape,
+          idempotencyKey: inventoryReceiptKey,
+        })] : []),
+      ]),
     ];
     return {
       ...operation,
@@ -471,3 +493,11 @@ export function mediaMigrationOperations(records: InventoryRecord[]): MediaMigra
 export function resultDigest(value: unknown) {
   return digest(value);
 }
+
+const caseVisualByPath = new Map(caseStudyRecords().map((record) => {
+  const fields = record.fields as {
+    mediaPaths: string[];
+    content: { visual: { altText: string } };
+  };
+  return [fields.mediaPaths[0], fields.content.visual] as const;
+}));
