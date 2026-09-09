@@ -14,3 +14,6 @@
 - [Website browser validation routing](website-browser-validation-routing.md) — Use the root dev-domain target so SPA assets and API requests reach their separate managed workflows.
 - [App Storage one-off scripts](app-storage-one-off-scripts.md) — Shell-run CMS jobs lack Google ADC; use Replit sidecar auth and keep object reads outside database transactions.
 - [Governed preview capabilities](governed-preview-capabilities.md) — Pin previews by revision ID, serve draft media only through the capability, and force metadata independently of draft SEO.
+- [Composite image animation](composite-image-animation.md) — Isolate clean artwork from designed page screenshots before image-to-video generation so baked typography never enters footage.
+- [Perceptual loop validation](perceptual-loop-validation.md) — Similar boundary pixels do not prove a smooth loop; visual motion continuity outranks the metric.
+- [Hero media ownership](hero-media-ownership.md) — Page-specific hero films need dedicated assets; never overwrite another route’s approved media through shared paths.
