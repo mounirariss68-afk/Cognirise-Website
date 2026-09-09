@@ -494,11 +494,11 @@ export function AgentAuthorityLayout({
         </div>
         <ol className="mt-14 grid border-l border-t border-[#cbd3e1] lg:grid-cols-3">
           {HANDOVERS.map((item, index) => (
-            <li key={item.type} className="border-b border-r border-[#cbd3e1] p-6 lg:min-h-[285px] lg:p-8">
+            <li key={item.type} className="border-b border-r border-[#cbd3e1] p-6 lg:flex lg:min-h-[285px] lg:flex-col lg:p-8">
               <span className="text-[10px] font-bold tracking-[0.12em] text-[hsl(var(--brand-pink))]">0{index + 1}</span>
               <h3 className="mt-10 font-display text-[30px] font-semibold tracking-[-0.06em]">{item.type}</h3>
               <p className="mt-3 text-sm leading-[1.55] text-[#405777]">{item.rule}</p>
-              <p className="mt-7 border-t border-[#dce2eb] pt-4 text-xs font-semibold leading-[1.5] text-[#102957]">{item.example}</p>
+              <p className="mt-7 border-t border-[#dce2eb] pt-4 text-xs font-semibold leading-[1.5] text-[#102957] lg:mt-auto">{item.example}</p>
             </li>
           ))}
         </ol>
