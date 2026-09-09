@@ -1,7 +1,10 @@
 import { Router, type IRouter } from "express";
 import { pool } from "@workspace/db";
 import {
+  CMS_HERO_DOCUMENT_SLUGS,
+  CMS_HERO_FILM_SLOTS,
   cmsPublicRoute,
+  type CmsHeroFilmSlot,
   type CmsContent,
   type CmsDocumentKind,
   GetPublicSitemapQueryParams,
@@ -12,6 +15,7 @@ import { asyncRoute, throttle } from "../lib/http";
 import { pageOf } from "../lib/cms";
 import { SlidingWindowThrottle } from "../lib/security";
 import { downloadMediaObject, parseByteRange } from "../lib/object-storage";
+import { isPublicContentVisible } from "../lib/policy";
 
 const router: IRouter = Router();
 const PUBLIC_IMMUTABLE_MEDIA_CACHE_CONTROL = "public, max-age=31536000, immutable";
@@ -21,7 +25,9 @@ export const publicMediaDelivery = {
 const PUBLIC_PAYLOAD_SQL = `(r.payload->>'visibility' IS NULL OR r.payload->>'visibility'='public')
   AND (r.payload->'content'->>'visibility' IS NULL OR r.payload->'content'->>'visibility'='public')
   AND (r.payload->>'confidential' IS NULL OR r.payload->>'confidential' NOT IN ('true','restricted'))
-  AND (r.payload->'content'->>'confidential' IS NULL OR r.payload->'content'->>'confidential' NOT IN ('true','restricted'))`;
+  AND (r.payload->'content'->>'confidential' IS NULL OR r.payload->'content'->>'confidential' NOT IN ('true','restricted'))
+  AND (r.payload->'content'->>'disclosure' IS NULL OR r.payload->'content'->>'disclosure'<>'restricted')
+  AND (d.kind<>'case-study' OR r.payload->'content'->>'publicEvidenceStatus'='approved')`;
 const publicLimiter = new SlidingWindowThrottle(240, 60_000);
 router.use(
   "/public",
@@ -30,6 +36,18 @@ router.use(
 
 class PublicContractError extends Error {}
 
+function publicSnapshot(row: Record<string, any>) {
+  if (!isPublicContentVisible(String(row.kind), row.payload)) return null;
+  const validation = validateCmsSnapshot(row.kind as CmsDocumentKind, row.payload, "publish");
+  if (!validation.success) return null;
+  if (
+    row.kind === "case-study" &&
+    (validation.data.content as Record<string, unknown>).disclosure === "restricted"
+  ) {
+    return null;
+  }
+  return validation.data;
+}
 async function marketCandidates(requestedMarket: string, requestedLocale: string) {
   if (requestedLocale !== "en") return null;
   const result = await pool.query(
@@ -60,7 +78,7 @@ export function publicMediaUrl(assetId: string, versionId: string) {
   return `/api/public/media/${assetId}/${versionId}`;
 }
 
-const HERO_SLOTS = new Set(["homepage", "industries"]);
+const HERO_SLOTS = new Set<string>(CMS_HERO_FILM_SLOTS);
 const HERO_MIME_TYPES = new Set(["video/mp4", "video/webm"]);
 
 type HeroSource = { mediaId: string; mediaVersionId: string; mimeType: string };
@@ -152,12 +170,10 @@ export function heroFilmPayload(slot: string, payload: unknown, rows: Array<Reco
   };
 }
 
-async function published(row: Record<string, any>) {
-  const validation = validateCmsSnapshot(row.kind as CmsDocumentKind, row.payload, "publish");
-  if (!validation.success) {
-    throw new PublicContractError(`Published revision ${row.revision_number} is invalid: ${validation.errors.join("; ")}`);
+async function published(row: Record<string, any>, snapshot = publicSnapshot(row)) {
+  if (!snapshot) {
+    throw new PublicContractError(`Published revision ${row.revision_number} is not eligible for public delivery.`);
   }
-  const snapshot = validation.data;
   const mediaIds = Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds.map(String) : [];
   const assets = await pool.query(
     `SELECT a.*,v.id version_id,v.width,v.height,v.metadata
@@ -226,11 +242,11 @@ router.get(
           WHERE d.status<>'archived' AND e.publication_state='published'
             AND e.published_at<=now() AND ($1::text IS NULL OR d.kind=$1)
              AND e.market=ANY($2::text[])
-             AND (d.kind<>'person' OR NOT EXISTS (
-               SELECT 1 FROM cms_person_market_availability a
-               JOIN market_editions requested ON requested.id=a.market_edition_id
-               WHERE a.document_id=d.id AND requested.code=$3 AND a.published_decision='off'
-             ))
+              AND (d.kind<>'person' OR NOT EXISTS (
+                SELECT 1 FROM cms_person_market_availability a
+                JOIN market_editions requested ON requested.id=a.market_edition_id
+                WHERE a.document_id=d.id AND requested.code=$3 AND a.published_decision='off'
+              ))
             AND ${PUBLIC_PAYLOAD_SQL}
        )
        SELECT *,count(*) OVER() total_count,$3::text requested_market
@@ -240,13 +256,29 @@ router.get(
       [kind, candidates, market, pageSize, (page - 1) * pageSize],
     );
     try {
-      const items = await Promise.all(result.rows.map((row) => published(row)));
+      const eligibleRows = result.rows.flatMap((row) => {
+        const snapshot = publicSnapshot(row);
+        if (!snapshot) {
+          req.log.error(
+            { kind: row.kind, documentId: String(row.id), revision: row.revision_number },
+            "Excluded ineligible published CMS content",
+          );
+          return [];
+        }
+        return [{ row, snapshot }];
+      });
+      const items = await Promise.all(
+        eligibleRows.map(({ row, snapshot }) => published(row, snapshot)),
+      );
       res.json({
         ...pageOf(
-        items,
-        Number(result.rows[0]?.total_count ?? 0),
-        page,
-        pageSize,
+          items,
+          Math.max(
+            items.length,
+            Number(result.rows[0]?.total_count ?? 0) - (result.rows.length - items.length),
+          ),
+          page,
+          pageSize,
         ),
         market: items[0]?.market ?? market,
         locale,
@@ -273,10 +305,11 @@ router.get("/public/hero-films/:slot", asyncRoute(async (req, res) => {
     return;
   }
   const candidates = await marketCandidates(market, locale);
-  if (!candidates) {
-    res.status(404).json({ error: "Public hero film not found." });
-    return;
-  }
+    if (!candidates) {
+      res.status(404).json({ error: "Market or locale is unavailable." });
+      return;
+    }
+  const documentSlug = CMS_HERO_DOCUMENT_SLUGS[slot as CmsHeroFilmSlot];
   const result = await pool.query(
     `SELECT d.id,e.market,e.locale,e.published_at,e.updated_at,
             r.id revision_id,r.revision_number,r.payload
@@ -291,7 +324,7 @@ router.get("/public/hero-films/:slot", asyncRoute(async (req, res) => {
         AND ${PUBLIC_PAYLOAD_SQL}
       ORDER BY array_position($2::text[],e.market),e.updated_at DESC,e.id
       LIMIT 1`,
-    [`site-${slot}-hero`, candidates, locale],
+    [documentSlug, candidates, locale],
   );
   if (!result.rowCount) {
     res.status(404).json({ error: "Public hero film not found." });
@@ -368,7 +401,12 @@ router.get(
       return;
     }
     try {
-      res.json(await published(result.rows[0]));
+      const snapshot = hasPublicDetailRoute(result.rows[0]);
+      if (!snapshot) {
+        res.status(404).json({ error: "Published content not found." });
+        return;
+      }
+      res.json(await published(result.rows[0], snapshot));
     } catch (error) {
       if (error instanceof PublicContractError) {
         req.log.error({ err: error, kind, slug, market }, "Invalid published CMS content");
@@ -382,7 +420,7 @@ router.get(
 
 router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
   const asset = await pool.query(
-    `SELECT v.storage_key,v.byte_size,
+    `SELECT v.storage_key,v.byte_size,d.kind,r.payload,
        CASE WHEN v.metadata->>'rendition'='webp-1600' THEN 'image/webp' ELSE a.media_type END media_type
        FROM cms_media_assets a
        JOIN cms_media_versions v ON v.asset_id=a.id AND v.id=$2
@@ -396,11 +434,13 @@ router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
        WHERE a.id=$1 AND a.status IN ('active','ready') AND d.status<>'archived'
         AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE(r.payload->'mediaIds','[]'::jsonb)) media_id
           WHERE media_id=a.id::text)
-       AND ${PUBLIC_PAYLOAD_SQL} LIMIT 1`,
+        AND ${PUBLIC_PAYLOAD_SQL}`,
     [req.params.mediaId, req.params.versionId],
   );
   if (!asset.rowCount) { res.status(404).json({ error: "Public media not found." }); return; }
-  const size = Number(asset.rows[0].byte_size);
+  const publicAsset = asset.rows.find((row) => publicSnapshot(row));
+  if (!publicAsset) { res.status(404).json({ error: "Public media not found." }); return; }
+  const size = Number(publicAsset.byte_size);
   const range = parseByteRange(req.headers.range, size);
   res.set("Cache-Control", PUBLIC_IMMUTABLE_MEDIA_CACHE_CONTROL);
   res.set("Accept-Ranges", "bytes");
@@ -408,10 +448,10 @@ router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
     res.status(416).set("Content-Range", `bytes */${size}`).end();
     return;
   }
-  res.type(asset.rows[0].media_type);
+  res.type(publicAsset.media_type);
   res.set("Content-Length", String(range ? range.end - range.start + 1 : size));
   if (range) res.status(206).set("Content-Range", `bytes ${range.start}-${range.end}/${size}`);
-  const stream = await publicMediaDelivery.download(asset.rows[0].storage_key, range ?? undefined);
+  const stream = await publicMediaDelivery.download(publicAsset.storage_key, range ?? undefined);
   stream.on("error", () => res.destroy());
   stream.pipe(res);
 }));
@@ -435,13 +475,14 @@ router.get(
             AND ${PUBLIC_PAYLOAD_SQL}`,
       [parsed.data.market ?? null],
     );
+
     const items = result.rows.flatMap((row) => {
-      const validation = validateCmsSnapshot(row.kind as CmsDocumentKind, row.payload, "publish");
-      if (!validation.success) return [];
+      const snapshot = publicSnapshot(row);
+      if (!snapshot) return [];
       const route = cmsPublicRoute(
         row.kind as CmsDocumentKind,
-        validation.data.slug,
-        validation.data.content as CmsContent,
+        snapshot.slug,
+        snapshot.content as CmsContent,
       );
       if (!route) return [];
       const suffix = row.market === "uae" ? "" : `?market=${encodeURIComponent(row.market)}`;
@@ -457,3 +498,15 @@ router.get(
 );
 
 export default router;
+
+function hasPublicDetailRoute(row: Record<string, any>) {
+  const snapshot = publicSnapshot(row);
+  if (!snapshot) return null;
+  if (
+    row.kind === "case-study" &&
+    (snapshot.content as Record<string, unknown>).variant !== "full"
+  ) {
+    return null;
+  }
+  return snapshot;
+}

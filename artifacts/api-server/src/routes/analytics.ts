@@ -19,6 +19,11 @@ const eventNames = new Set([
   "web_vital",
   "service_card_activated",
   "service_destination_clicked",
+  "case_card_open",
+  "case_sector_filter",
+  "case_visual_enlarge",
+  "case_detail_visit",
+  "case_cta",
 ]);
 const propertyKeys = new Set(["cta", "utm_source", "lcp", "inp", "cls"]);
 const serviceLineIds = new Set([
@@ -150,6 +155,9 @@ function sanitizeEventProperties(
   input: Record<string, unknown> | undefined,
 ): Record<string, string | number> | null {
   const properties = input ?? {};
+  if (eventName.startsWith("case_")) {
+    return sanitizeCaseEventProperties(eventName, properties);
+  }
   if (
     eventName === "service_card_activated" ||
     eventName === "service_destination_clicked"
@@ -185,4 +193,79 @@ function sanitizeEventProperties(
         : typeof value === "string"),
     ),
   ) as Record<string, string | number>;
+}
+
+const casePropertyKeys: Record<string, ReadonlySet<string>> = {
+  case_card_open: new Set(["id", "case_id", "slug", "case_slug", "sector", "stage"]),
+  case_sector_filter: new Set(["sector", "stage", "action"]),
+  case_visual_enlarge: new Set(["id", "case_id", "slug", "case_slug", "sector", "stage"]),
+  case_detail_visit: new Set(["id", "case_id", "slug", "case_slug", "sector", "stage"]),
+  case_cta: new Set(["id", "case_id", "slug", "case_slug", "sector", "stage", "action"]),
+};
+const safeCaseId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const safeCaseSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const caseSectors = new Set([
+  "Financial Services",
+  "Telecoms",
+  "Travel & Hospitality",
+  "Public Sector",
+  "Manufacturing & Industrial",
+  "Life Sciences",
+  "Retail & Consumer",
+  "Professional Services",
+  "Security & AI Infrastructure",
+  "financial-services",
+  "telecoms",
+  "travel-hospitality",
+  "energy-resources",
+  "public-sector",
+  "education",
+  "unclassified",
+  "all",
+]);
+const caseStages = new Set([
+  "production",
+  "pilot",
+  "proof-of-concept",
+  "mvp",
+  "demo",
+  "concept",
+  "proposal",
+  "all",
+]);
+const caseActions = new Set([
+  "apply",
+  "clear",
+  "open",
+  "enlarge",
+  "visit",
+  "contact",
+  "value-scan",
+  "/contact",
+  "/value-scan",
+]);
+
+function sanitizeCaseEventProperties(
+  eventName: string,
+  properties: Record<string, unknown>,
+): Record<string, string> | null {
+  const allowed = casePropertyKeys[eventName];
+  if (!allowed) return null;
+  const output: Record<string, string> = {};
+  for (const [key, value] of Object.entries(properties)) {
+    if (!allowed.has(key)) continue;
+    if (typeof value !== "string") return null;
+    const valid = key === "id" || key === "case_id"
+      ? safeCaseId.test(value)
+      : key === "slug" || key === "case_slug"
+        ? value.length <= 120 && safeCaseSlug.test(value)
+        : key === "sector"
+          ? caseSectors.has(value)
+          : key === "stage"
+            ? caseStages.has(value)
+            : caseActions.has(value);
+    if (!valid) return null;
+    output[key] = value;
+  }
+  return Object.keys(output).length ? output : null;
 }

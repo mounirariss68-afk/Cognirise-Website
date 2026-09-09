@@ -29,6 +29,8 @@ const heroIds = {
   webm: "00000000-0000-4000-8000-000000000003",
   webmVersion: "00000000-0000-4000-8000-000000000013",
 };
+
+test("publication requires a known variant and governed article body", () => {
   const valid = validateCmsContent("publication", {
     ...governance,
     variant: "article",
@@ -46,71 +48,31 @@ const heroIds = {
 });
 
 test("POVs require a ready PDF reference before publication", () => {
-  const result = validateCmsSnapshot("platform", {
-    slug: "new-platform",
-    title: "New platform",
-    content: {
-      ...governance,
-      category: "Specialist",
-      summary: "A governed platform summary.",
-      template: "standard",
-      heroMediaId: mediaId,
-      sections: [],
-      capabilities: [],
-      differentiators: [],
-      unexpected: true,
-    },
-    mediaIds: [],
-    markets: ["uae"],
-  }, "draft");
-
-  const base = {
-    schemaVersion: 1,
-    page: "industries",
-    hero: {
-      posterMediaId: heroIds.poster,
-      posterMediaVersionId: heroIds.posterVersion,
-      sources: [
-        { mediaId: heroIds.mp4, mediaVersionId: heroIds.mp4Version, mimeType: "video/mp4" },
-        { mediaId: heroIds.webm, mediaVersionId: heroIds.webmVersion, mimeType: "video/webm" },
-      ],
-    },
-  };
+  const result = validateCmsContent("publication", {
+    ...governance,
+    variant: "pov",
+    teaser: "A document teaser.",
+    body: [],
+    author: "Editorial practice",
+    publicationDate: "2026-09-06",
+    topics: [],
+    sectors: [],
+    platformIds: [],
+  }, "publish");
   assert.equal(result.success, false);
   assert.match(result.errors.join(" "), /PDF/);
 });
 
 test("unsafe profile links are rejected at the shared boundary", () => {
-  const result = validateCmsSnapshot("platform", {
-    slug: "new-platform",
-    title: "New platform",
-    content: {
-      ...governance,
-      category: "Specialist",
-      summary: "A governed platform summary.",
-      template: "standard",
-      heroMediaId: mediaId,
-      sections: [],
-      capabilities: [],
-      differentiators: [],
-      unexpected: true,
-    },
-    mediaIds: [],
-    markets: ["uae"],
+  const result = validateCmsContent("person", {
+    ...governance,
+    role: "advisor",
+    title: "Advisor",
+    biography: "A complete approved biography.",
+    focusAreas: [],
+    profileLinks: [{ label: "Unsafe", url: "javascript:alert(1)" }],
+    approvedFallback: "initials",
   }, "draft");
-
-  const base = {
-    schemaVersion: 1,
-    page: "industries",
-    hero: {
-      posterMediaId: heroIds.poster,
-      posterMediaVersionId: heroIds.posterVersion,
-      sources: [
-        { mediaId: heroIds.mp4, mediaVersionId: heroIds.mp4Version, mimeType: "video/mp4" },
-        { mediaId: heroIds.webm, mediaVersionId: heroIds.webmVersion, mimeType: "video/webm" },
-      ],
-    },
-  };
   assert.equal(result.success, false);
 });
 
@@ -119,6 +81,23 @@ test("restricted and summary cases never receive public detail routes", () => {
     ...governance,
     variant: "full" as const,
     disclosure: "restricted" as const,
+    sector: "Financial Services" as const,
+    organizationDescriptor: "Regulated financial institution",
+    engagementType: "client-delivery" as const,
+    deliveryStage: "proof-of-concept" as const,
+    impactClassification: "pilot-demo" as const,
+    impactStatement: "The proof of concept demonstrated the workflow; production impact is unavailable.",
+    disclosureNote: "Identity and interface data are withheld.",
+    publicEvidenceStatus: "approved" as const,
+    relatedIndustries: ["financial-services" as const],
+    visual: {
+      kind: "illustrative-interface-reconstruction" as const,
+      caption: "Illustrative reconstruction.",
+      altText: "An anonymized workflow interface.",
+      textEquivalent: "A workflow with a human approval gate.",
+      template: "workflow-console" as const,
+      fixtureLabels: ["Example organization"],
+    },
     mandate: "A mandate.",
     constraints: [],
     work: [{ type: "paragraph" as const, text: "The approved work." }],
@@ -129,6 +108,61 @@ test("restricted and summary cases never receive public detail routes", () => {
   assert.equal(cmsPublicRoute("case-study", "restricted-case", restricted), null);
   assert.equal(cmsPublicRoute("case-study", "summary-case", { ...restricted, variant: "summary", disclosure: "anonymized" }), null);
   assert.equal(cmsPublicRoute("case-study", "full-case", { ...restricted, disclosure: "anonymized" }), "/work/full-case");
+});
+
+test("case-study publication enforces anonymization, evidence and conservative impact labels", () => {
+  const caseStudy = {
+    ...governance,
+    variant: "summary" as const,
+    disclosure: "anonymized" as const,
+    sector: "Manufacturing & Industrial" as const,
+    organizationDescriptor: "Industrial operator",
+    engagementType: "product-demonstration" as const,
+    deliveryStage: "proof-of-concept" as const,
+    impactClassification: "simulated" as const,
+    impactStatement: "Scenario results are simulated interface fixtures, not production outcomes.",
+    disclosureNote: "Organization identity and interface values are withheld.",
+    publicEvidenceStatus: "approved" as const,
+    relatedIndustries: ["energy-resources" as const],
+    visual: {
+      kind: "illustrative-interface-reconstruction" as const,
+      caption: "Illustrative reconstruction using fixture data.",
+      altText: "An anonymized operations console.",
+      textEquivalent: "A simulated alert moves to a human approval gate.",
+      template: "operations-console" as const,
+      fixtureLabels: ["Example site", "Sample incident"],
+    },
+    mandate: "Demonstrate a governed incident workflow.",
+    constraints: [],
+    work: [],
+    controls: [],
+    outcomes: [],
+    evidence: [{ statement: "The scenario completed in a demonstration.", source: governance.sources[0], approved: true }],
+  };
+  assert.equal(validateCmsSnapshot("case-study", {
+    slug: "governed-case",
+    title: "A governed case",
+    summary: "An anonymized industrial operator tested a governed workflow.",
+    content: caseStudy,
+    mediaIds: [],
+    markets: ["uae"],
+  }, "publish").success, true);
+  assert.equal(validateCmsContent("case-study", { ...caseStudy, disclosure: "named" }, "publish").success, false);
+  assert.equal(validateCmsContent("case-study", { ...caseStudy, publicEvidenceStatus: "needs-review" }, "publish").success, false);
+  const unqualified = validateCmsContent("case-study", {
+    ...caseStudy,
+    impactClassification: "observed",
+  }, "publish");
+  assert.equal(unqualified.success, false);
+  assert.match(unqualified.errors.join(" "), /Non-production impact/);
+  assert.equal(validateCmsContent("case-study", {
+    ...caseStudy,
+    relatedIndustries: ["retail"],
+  }, "draft").success, false);
+  assert.equal(validateCmsContent("case-study", {
+    ...caseStudy,
+    visual: { ...caseStudy.visual, altText: "" },
+  }, "publish").success, false);
 });
 
 test("snapshot contract normalizes media authority and rejects unknown fields", () => {
@@ -150,8 +184,11 @@ test("snapshot contract normalizes media authority and rejects unknown fields", 
     mediaIds: [],
     markets: ["uae"],
   }, "draft");
+  assert.equal(result.success, false);
+});
 
-  const base = {
+test("site configuration pins the poster and both video source versions", () => {
+  const content = {
     schemaVersion: 1,
     page: "industries",
     hero: {
@@ -163,7 +200,27 @@ test("snapshot contract normalizes media authority and rejects unknown fields", 
       ],
     },
   };
-  assert.equal(result.success, false);
+  const result = validateCmsSnapshot("site-configuration", {
+    slug: "industries-hero",
+    title: "Industries hero",
+    content,
+    mediaIds: [],
+    markets: ["uae"],
+  }, "publish");
+  assert.equal(result.success, true);
+  if (!result.success) return;
+  assert.deepEqual(
+    new Set(result.data.mediaIds),
+    new Set([heroIds.poster, heroIds.mp4, heroIds.webm]),
+  );
+  assert.equal(cmsPublicRoute("site-configuration", "industries-hero", result.data.content), null);
+  assert.equal(validateCmsContent("site-configuration", {
+    ...content,
+    hero: {
+      ...content.hero,
+      sources: content.hero.sources.map((source) => ({ ...source, mimeType: "video/mp4" })),
+    },
+  }, "publish").success, false);
 });
 
 test("navigation settings accept only known unique menu item IDs", () => {

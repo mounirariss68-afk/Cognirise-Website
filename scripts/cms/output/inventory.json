@@ -9,14 +9,25 @@
     "partners": 5,
     "platforms": 5,
     "articles": 3,
+    "caseStudies": 21,
+    "caseStudyTaxonomy": {
+      "Financial Services": 8,
+      "Telecoms": 1,
+      "Travel & Hospitality": 1,
+      "Public Sector": 1,
+      "Manufacturing & Industrial": 3,
+      "Life Sciences": 2,
+      "Retail & Consumer": 2,
+      "Professional Services": 1,
+      "Security & AI Infrastructure": 2
+    },
     "industries": 6,
     "frameworks": 1,
-    "websiteAssets": 38,
+    "websiteAssets": 59,
     "linkedinAssets": 9,
-    "assets": 47
+    "assets": 68
   },
   "explicitOmissions": {
-    "caseStudies": "No genuine public case-study records are present in the current website.",
     "povDocuments": "No genuine public POV documents are present in the current website.",
     "employees": "No additional public employee profiles are present in the current website.",
     "nonUaeEditions": "No approved non-UAE editions or translations are present.",
@@ -1065,6 +1076,1903 @@
         "status": "needs-review",
         "reasons": [
           "Confirm author, publication date, source, verification date, review date, hero rights, SEO, and social metadata."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-01",
+      "type": "case-study",
+      "name": "Making industrial knowledge self-service",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "making-industrial-knowledge-self-service",
+        "summary": "Industrial materials producer: Reduce dependence on a small group of process experts for routine technical questions.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Manufacturing & Industrial",
+          "organizationDescriptor": "Industrial materials producer",
+          "engagementType": "client-delivery",
+          "deliveryStage": "proof-of-concept",
+          "impactClassification": "pilot-demo",
+          "impactStatement": "Proof-of-concept users could query the working assistant directly; no production efficiency outcome has been verified.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "energy-resources"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative knowledge assistant for an anonymized industrial materials producer.",
+            "textEquivalent": "A bilingual, corpus-grounded assistant with controlled answer sourcing was reconstructed for evaluation. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "knowledge-assistant",
+            "fixtureLabels": [
+              "Batch recipe lookup",
+              "Line 04 / changeover",
+              "Verified 18 / 22"
+            ]
+          },
+          "mandate": "Reduce dependence on a small group of process experts for routine technical questions.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A bilingual, corpus-grounded assistant with controlled answer sourcing was reconstructed for evaluation."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "Proof-of-concept users could query the working assistant directly; no production efficiency outcome has been verified."
+          ],
+          "evidence": [
+            {
+              "statement": "Proof-of-concept users could query the working assistant directly; no production efficiency outcome has been verified.",
+              "source": {
+                "label": "Approved source presentation, slide 1",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 0,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 1",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/01-making-industrial-knowledge-self-service.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-02",
+      "type": "case-study",
+      "name": "Connecting pharmacy operations signals",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "connecting-pharmacy-operations-signals",
+        "summary": "Pharmacy distribution cooperative: Connect service, sales and inventory signals that were reviewed in separate workflows.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Life Sciences",
+          "organizationDescriptor": "Pharmacy distribution cooperative",
+          "engagementType": "product-demonstration",
+          "deliveryStage": "proof-of-concept",
+          "impactClassification": "simulated",
+          "impactStatement": "The demonstration processed anonymized fixtures across six modules; the figures describe a demo run, not observed business impact.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative analytics dashboard for an anonymized pharmacy distribution cooperative.",
+            "textEquivalent": "A six-module analytics demonstration covered language analysis, anomaly detection, churn signals and demand forecasting. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "analytics-dashboard",
+            "fixtureLabels": [
+              "Demand pulse",
+              "Cold-chain exceptions",
+              "Forecast horizon / 14d"
+            ]
+          },
+          "mandate": "Connect service, sales and inventory signals that were reviewed in separate workflows.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A six-module analytics demonstration covered language analysis, anomaly detection, churn signals and demand forecasting."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "The demonstration processed anonymized fixtures across six modules; the figures describe a demo run, not observed business impact."
+          ],
+          "evidence": [
+            {
+              "statement": "The demonstration processed anonymized fixtures across six modules; the figures describe a demo run, not observed business impact.",
+              "source": {
+                "label": "Approved source presentation, slide 2",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 1,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 2",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/02-connecting-pharmacy-operations-signals.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-03",
+      "type": "case-study",
+      "name": "Coaching a distributed field team",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "coaching-a-distributed-field-team",
+        "summary": "Pharmaceutical sales organization: Create a consistent feedback loop for a distributed field organization.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Life Sciences",
+          "organizationDescriptor": "Pharmaceutical sales organization",
+          "engagementType": "client-delivery",
+          "deliveryStage": "mvp",
+          "impactClassification": "pilot-demo",
+          "impactStatement": "An MVP was made available for pilot feedback; later coaching benefits remain unverified.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative workflow console for an anonymized pharmaceutical sales organization.",
+            "textEquivalent": "A starter field-coaching platform captured visits, structured feedback and manager views. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "workflow-console",
+            "fixtureLabels": [
+              "Visit debrief",
+              "Territory queue",
+              "Manager review"
+            ]
+          },
+          "mandate": "Create a consistent feedback loop for a distributed field organization.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A starter field-coaching platform captured visits, structured feedback and manager views."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "An MVP was made available for pilot feedback; later coaching benefits remain unverified."
+          ],
+          "evidence": [
+            {
+              "statement": "An MVP was made available for pilot feedback; later coaching benefits remain unverified.",
+              "source": {
+                "label": "Approved source presentation, slide 3",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 2,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 3",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/03-coaching-a-distributed-field-team.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-04",
+      "type": "case-study",
+      "name": "Taking a specialist retailer online",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "taking-a-specialist-retailer-online",
+        "summary": "Independent specialist retailer: Create a digital storefront capable of extending demand beyond a physical location.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Retail & Consumer",
+          "organizationDescriptor": "Independent specialist retailer",
+          "engagementType": "client-delivery",
+          "deliveryStage": "mvp",
+          "impactClassification": "unavailable",
+          "impactStatement": "The delivered storefront supported browsing and ordering; no attributable commercial uplift is available.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative commerce experience for an anonymized independent specialist retailer.",
+            "textEquivalent": "The storefront combined catalogue, stock, reviews and a bounded recommendation assistant. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "commerce-experience",
+            "fixtureLabels": [
+              "Curated audio",
+              "Stock at hand",
+              "Room profile"
+            ]
+          },
+          "mandate": "Create a digital storefront capable of extending demand beyond a physical location.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "The storefront combined catalogue, stock, reviews and a bounded recommendation assistant."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "The delivered storefront supported browsing and ordering; no attributable commercial uplift is available."
+          ],
+          "evidence": [
+            {
+              "statement": "The delivered storefront supported browsing and ordering; no attributable commercial uplift is available.",
+              "source": {
+                "label": "Approved source presentation, slide 4",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 3,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 4",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/04-taking-a-specialist-retailer-online.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-05",
+      "type": "case-study",
+      "name": "Making market information searchable",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "making-market-information-searchable",
+        "summary": "Capital-markets information team: Replace fragmented manual market-data collection with a searchable corpus.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Financial Services",
+          "organizationDescriptor": "Capital-markets information team",
+          "engagementType": "client-delivery",
+          "deliveryStage": "pilot",
+          "impactClassification": "pilot-demo",
+          "impactStatement": "During the pilot, automated collection replaced manual pulls; production accuracy and time savings have not been independently verified.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative knowledge assistant for an anonymized capital-markets information team.",
+            "textEquivalent": "A collection service fed a grounded assistant for listings, prices and disclosures. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "knowledge-assistant",
+            "fixtureLabels": [
+              "Issuer filings",
+              "Price watchlist",
+              "Source confidence"
+            ]
+          },
+          "mandate": "Replace fragmented manual market-data collection with a searchable corpus.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A collection service fed a grounded assistant for listings, prices and disclosures."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "During the pilot, automated collection replaced manual pulls; production accuracy and time savings have not been independently verified."
+          ],
+          "evidence": [
+            {
+              "statement": "During the pilot, automated collection replaced manual pulls; production accuracy and time savings have not been independently verified.",
+              "source": {
+                "label": "Approved source presentation, slide 5",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 4,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 5",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/05-making-market-information-searchable.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-06",
+      "type": "case-study",
+      "name": "Automating recurring tax preparation",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "automating-recurring-tax-preparation",
+        "summary": "Accounting services practice: Reduce repetitive preparation and document-chasing work in recurring tax workflows.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Financial Services",
+          "organizationDescriptor": "Accounting services practice",
+          "engagementType": "client-delivery",
+          "deliveryStage": "proof-of-concept",
+          "impactClassification": "projected",
+          "impactStatement": "The proof of concept demonstrated a checked automated flow; staff-time benefits are projected rather than observed.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative workflow console for an anonymized accounting services practice.",
+            "textEquivalent": "A workflow combined document intake, calculation checks and client-facing status. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "workflow-console",
+            "fixtureLabels": [
+              "Document intake",
+              "Schedule B checks",
+              "Awaiting sign-off"
+            ]
+          },
+          "mandate": "Reduce repetitive preparation and document-chasing work in recurring tax workflows.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A workflow combined document intake, calculation checks and client-facing status."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "The proof of concept demonstrated a checked automated flow; staff-time benefits are projected rather than observed."
+          ],
+          "evidence": [
+            {
+              "statement": "The proof of concept demonstrated a checked automated flow; staff-time benefits are projected rather than observed.",
+              "source": {
+                "label": "Approved source presentation, slide 6",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 5,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 6",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/06-automating-recurring-tax-preparation.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-07",
+      "type": "case-study",
+      "name": "Creating accountable agent delegation",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "creating-accountable-agent-delegation",
+        "summary": "AI infrastructure product team: Make delegated agent authority, budgets and evidence inspectable.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Security & AI Infrastructure",
+          "organizationDescriptor": "AI infrastructure product team",
+          "engagementType": "concept",
+          "deliveryStage": "proof-of-concept",
+          "impactClassification": "pilot-demo",
+          "impactStatement": "Tamper detection and offline verification worked in proof-of-concept scenarios; production assurance is not claimed.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative governance console for an anonymized ai infrastructure product team.",
+            "textEquivalent": "A trust-fabric proof of concept combined bounded mandates, policy enforcement and signed evidence logs. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "governance-console",
+            "fixtureLabels": [
+              "Delegation ledger",
+              "Policy boundary",
+              "Evidence hash"
+            ]
+          },
+          "mandate": "Make delegated agent authority, budgets and evidence inspectable.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A trust-fabric proof of concept combined bounded mandates, policy enforcement and signed evidence logs."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "Tamper detection and offline verification worked in proof-of-concept scenarios; production assurance is not claimed."
+          ],
+          "evidence": [
+            {
+              "statement": "Tamper detection and offline verification worked in proof-of-concept scenarios; production assurance is not claimed.",
+              "source": {
+                "label": "Approved source presentation, slide 7",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 6,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 7",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/07-creating-accountable-agent-delegation.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-08",
+      "type": "case-study",
+      "name": "Governing a single fee schedule",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "governing-a-single-fee-schedule",
+        "summary": "Financial brokerage team: Replace emailed fee-schedule copies with one maintained source.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Financial Services",
+          "organizationDescriptor": "Financial brokerage team",
+          "engagementType": "client-delivery",
+          "deliveryStage": "mvp",
+          "impactClassification": "unavailable",
+          "impactStatement": "The application established a controlled fee-sheet workflow; downstream quote consistency was not independently measured.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative workflow console for an anonymized financial brokerage team.",
+            "textEquivalent": "An authenticated web application presented a controlled schedule and change trail. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "workflow-console",
+            "fixtureLabels": [
+              "Fee schedule",
+              "Approval trail",
+              "Effective 01 / 07"
+            ]
+          },
+          "mandate": "Replace emailed fee-schedule copies with one maintained source.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "An authenticated web application presented a controlled schedule and change trail."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "The application established a controlled fee-sheet workflow; downstream quote consistency was not independently measured."
+          ],
+          "evidence": [
+            {
+              "statement": "The application established a controlled fee-sheet workflow; downstream quote consistency was not independently measured.",
+              "source": {
+                "label": "Approved source presentation, slide 8",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 7,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 8",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/08-governing-a-single-fee-schedule.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-09",
+      "type": "case-study",
+      "name": "Preparing embedded-emissions data",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "preparing-embedded-emissions-data",
+        "summary": "Cross-border manufacturing demonstrator: Connect production, supplier and energy information for embedded-emissions reporting.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Manufacturing & Industrial",
+          "organizationDescriptor": "Cross-border manufacturing demonstrator",
+          "engagementType": "concept",
+          "deliveryStage": "concept",
+          "impactClassification": "projected",
+          "impactStatement": "The concept demonstrated the reporting pathway; compliance effort and emissions outcomes are projected, not observed.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "energy-resources"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative analytics dashboard for an anonymized cross-border manufacturing demonstrator.",
+            "textEquivalent": "A concept pipeline ingested source data, calculated product emissions and produced declaration-ready fields. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "analytics-dashboard",
+            "fixtureLabels": [
+              "Supplier factors",
+              "Plant energy",
+              "Declaration draft"
+            ]
+          },
+          "mandate": "Connect production, supplier and energy information for embedded-emissions reporting.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A concept pipeline ingested source data, calculated product emissions and produced declaration-ready fields."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "The concept demonstrated the reporting pathway; compliance effort and emissions outcomes are projected, not observed."
+          ],
+          "evidence": [
+            {
+              "statement": "The concept demonstrated the reporting pathway; compliance effort and emissions outcomes are projected, not observed.",
+              "source": {
+                "label": "Approved source presentation, slide 9",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 8,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 9",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/09-preparing-embedded-emissions-data.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-10",
+      "type": "case-study",
+      "name": "Accelerating governed vehicle offers",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "accelerating-governed-vehicle-offers",
+        "summary": "Regulated vehicle-finance provider: Shorten offer preparation while retaining rules-based traceability.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Financial Services",
+          "organizationDescriptor": "Regulated vehicle-finance provider",
+          "engagementType": "client-delivery",
+          "deliveryStage": "production",
+          "impactClassification": "unavailable",
+          "impactStatement": "The source records deployed environments and traceable offer generation, but supplies no independently approved business-impact measure.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative workflow console for an anonymized regulated vehicle-finance provider.",
+            "textEquivalent": "An agentic workflow combined decision rules, product logic, retrieval and process orchestration. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "workflow-console",
+            "fixtureLabels": [
+              "Offer rules",
+              "Eligibility path",
+              "Human checkpoint"
+            ]
+          },
+          "mandate": "Shorten offer preparation while retaining rules-based traceability.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "An agentic workflow combined decision rules, product logic, retrieval and process orchestration."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "The source records deployed environments and traceable offer generation, but supplies no independently approved business-impact measure."
+          ],
+          "evidence": [
+            {
+              "statement": "The source records deployed environments and traceable offer generation, but supplies no independently approved business-impact measure.",
+              "source": {
+                "label": "Approved source presentation, slide 10",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 9,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 10",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/10-accelerating-governed-vehicle-offers.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-11",
+      "type": "case-study",
+      "name": "Answering general investment questions",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "answering-general-investment-questions",
+        "summary": "Regulated investment-services provider: Provide consistent answers to general product questions while reserving advice for people.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Financial Services",
+          "organizationDescriptor": "Regulated investment-services provider",
+          "engagementType": "client-delivery",
+          "deliveryStage": "mvp",
+          "impactClassification": "pilot-demo",
+          "impactStatement": "The delivered demonstration answered general questions from governed sources; service-volume reduction has not been verified.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative knowledge assistant for an anonymized regulated investment-services provider.",
+            "textEquivalent": "A bilingual assistant used governed documents, sourcing, disclaimers and guardrails. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "knowledge-assistant",
+            "fixtureLabels": [
+              "Product library",
+              "General question",
+              "Source citation"
+            ]
+          },
+          "mandate": "Provide consistent answers to general product questions while reserving advice for people.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A bilingual assistant used governed documents, sourcing, disclaimers and guardrails."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "The delivered demonstration answered general questions from governed sources; service-volume reduction has not been verified."
+          ],
+          "evidence": [
+            {
+              "statement": "The delivered demonstration answered general questions from governed sources; service-volume reduction has not been verified.",
+              "source": {
+                "label": "Approved source presentation, slide 11",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 10,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 11",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/11-answering-general-investment-questions.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-12",
+      "type": "case-study",
+      "name": "Creating a governed AI workspace",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "creating-a-governed-ai-workspace",
+        "summary": "Business-services organization: Give staff a tenant-controlled alternative to public AI tools for document work.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Professional Services",
+          "organizationDescriptor": "Business-services organization",
+          "engagementType": "client-delivery",
+          "deliveryStage": "proof-of-concept",
+          "impactClassification": "pilot-demo",
+          "impactStatement": "The proof of concept demonstrated tenant-contained workflows; adoption and risk reduction are not yet observed outcomes.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative knowledge assistant for an anonymized business-services organization.",
+            "textEquivalent": "A multilingual workspace combined chat, knowledge collections, agents and tenant sign-in. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "knowledge-assistant",
+            "fixtureLabels": [
+              "Knowledge spaces",
+              "Agent library",
+              "Tenant controls"
+            ]
+          },
+          "mandate": "Give staff a tenant-controlled alternative to public AI tools for document work.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A multilingual workspace combined chat, knowledge collections, agents and tenant sign-in."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "The proof of concept demonstrated tenant-contained workflows; adoption and risk reduction are not yet observed outcomes."
+          ],
+          "evidence": [
+            {
+              "statement": "The proof of concept demonstrated tenant-contained workflows; adoption and risk reduction are not yet observed outcomes.",
+              "source": {
+                "label": "Approved source presentation, slide 12",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 11,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 12",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/12-creating-a-governed-ai-workspace.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-13",
+      "type": "case-study",
+      "name": "Prototyping agentic public services",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "prototyping-agentic-public-services",
+        "summary": "National infrastructure authority: Demonstrate how multiple governed agents could support infrastructure workflows.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Public Sector",
+          "organizationDescriptor": "National infrastructure authority",
+          "engagementType": "proposal-prototype",
+          "deliveryStage": "proposal",
+          "impactClassification": "pilot-demo",
+          "impactStatement": "Live proposal demonstrations covered tender review and command-centre scenarios; no deployed public-service impact is claimed.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "public-sector"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative operations console for an anonymized national infrastructure authority.",
+            "textEquivalent": "Proposal prototypes combined an assistant, tender analysis, workflow middleware and human decision gates. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "operations-console",
+            "fixtureLabels": [
+              "Tender review",
+              "Workstream map",
+              "Decision gate"
+            ]
+          },
+          "mandate": "Demonstrate how multiple governed agents could support infrastructure workflows.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "Proposal prototypes combined an assistant, tender analysis, workflow middleware and human decision gates."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "Live proposal demonstrations covered tender review and command-centre scenarios; no deployed public-service impact is claimed."
+          ],
+          "evidence": [
+            {
+              "statement": "Live proposal demonstrations covered tender review and command-centre scenarios; no deployed public-service impact is claimed.",
+              "source": {
+                "label": "Approved source presentation, slide 13",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 12,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 13",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/13-prototyping-agentic-public-services.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-14",
+      "type": "case-study",
+      "name": "Checking calls through risk gates",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "checking-calls-through-risk-gates",
+        "summary": "Regulated capital-markets firm: Extend call review beyond small manual samples while preserving an audit queue.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Financial Services",
+          "organizationDescriptor": "Regulated capital-markets firm",
+          "engagementType": "product-demonstration",
+          "deliveryStage": "proof-of-concept",
+          "impactClassification": "simulated",
+          "impactStatement": "Pass rates and queues shown in the interface came from a demo fixture estate, not observed operating results.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative governance console for an anonymized regulated capital-markets firm.",
+            "textEquivalent": "A compliance demonstration transcribed calls and applied four review gates with human escalation. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "governance-console",
+            "fixtureLabels": [
+              "Call transcript",
+              "Gate 02 / suitability",
+              "Escalation queue"
+            ]
+          },
+          "mandate": "Extend call review beyond small manual samples while preserving an audit queue.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A compliance demonstration transcribed calls and applied four review gates with human escalation."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "Pass rates and queues shown in the interface came from a demo fixture estate, not observed operating results."
+          ],
+          "evidence": [
+            {
+              "statement": "Pass rates and queues shown in the interface came from a demo fixture estate, not observed operating results.",
+              "source": {
+                "label": "Approved source presentation, slide 14",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 13,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 14",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/14-checking-calls-through-risk-gates.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-15",
+      "type": "case-study",
+      "name": "Orchestrating data-centre incidents",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "orchestrating-data-centre-incidents",
+        "summary": "Enterprise connectivity and data-centre operator: Make infrastructure incident diagnosis, approvals and evidence consistent.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Telecoms",
+          "organizationDescriptor": "Enterprise connectivity and data-centre operator",
+          "engagementType": "product-demonstration",
+          "deliveryStage": "proof-of-concept",
+          "impactClassification": "simulated",
+          "impactStatement": "Five simulated scenarios ran end to end with approval gates; production reliability or time-to-repair impact is not claimed.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "telecoms"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative operations console for an anonymized enterprise connectivity and data-centre operator.",
+            "textEquivalent": "An operations proof of concept ran incident scenarios over a simulated backup and virtualization estate. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "operations-console",
+            "fixtureLabels": [
+              "Incident bridge",
+              "Backup estate",
+              "Approval required"
+            ]
+          },
+          "mandate": "Make infrastructure incident diagnosis, approvals and evidence consistent.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "An operations proof of concept ran incident scenarios over a simulated backup and virtualization estate."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "Five simulated scenarios ran end to end with approval gates; production reliability or time-to-repair impact is not claimed."
+          ],
+          "evidence": [
+            {
+              "statement": "Five simulated scenarios ran end to end with approval gates; production reliability or time-to-repair impact is not claimed.",
+              "source": {
+                "label": "Approved source presentation, slide 15",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 14,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 15",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/15-orchestrating-data-centre-incidents.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-16",
+      "type": "case-study",
+      "name": "Finding a second life for hotel assets",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "finding-a-second-life-for-hotel-assets",
+        "summary": "Hospitality circularity concept team: Track retired hospitality assets and routes to reuse, donation or recycling.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Travel & Hospitality",
+          "organizationDescriptor": "Hospitality circularity concept team",
+          "engagementType": "concept",
+          "deliveryStage": "concept",
+          "impactClassification": "simulated",
+          "impactStatement": "Diversion, emissions and recovery figures are anonymized demo fixtures and must not be read as observed portfolio outcomes.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "travel-hospitality"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative analytics dashboard for an anonymized hospitality circularity concept team.",
+            "textEquivalent": "A concept portal combined an asset register, matching options and an evidence trail. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "analytics-dashboard",
+            "fixtureLabels": [
+              "Asset register",
+              "Reuse match",
+              "Evidence packet"
+            ]
+          },
+          "mandate": "Track retired hospitality assets and routes to reuse, donation or recycling.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A concept portal combined an asset register, matching options and an evidence trail."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "Diversion, emissions and recovery figures are anonymized demo fixtures and must not be read as observed portfolio outcomes."
+          ],
+          "evidence": [
+            {
+              "statement": "Diversion, emissions and recovery figures are anonymized demo fixtures and must not be read as observed portfolio outcomes.",
+              "source": {
+                "label": "Approved source presentation, slide 16",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 15,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 16",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/16-finding-a-second-life-for-hotel-assets.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-17",
+      "type": "case-study",
+      "name": "Proving browser-side encrypted storage",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "proving-browser-side-encrypted-storage",
+        "summary": "Secure cloud product team: Keep sensitive file contents unreadable to the service operator.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Security & AI Infrastructure",
+          "organizationDescriptor": "Secure cloud product team",
+          "engagementType": "client-delivery",
+          "deliveryStage": "mvp",
+          "impactClassification": "pilot-demo",
+          "impactStatement": "The MVP demonstrated operator-unreadable fixture storage and benchmark execution; no external security certification is claimed.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative governance console for an anonymized secure cloud product team.",
+            "textEquivalent": "A browser-encrypted vault kept passphrases client-side and paired identity controls with distributed benchmarks. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "governance-console",
+            "fixtureLabels": [
+              "Encrypted vault",
+              "Client-side key",
+              "Benchmark run"
+            ]
+          },
+          "mandate": "Keep sensitive file contents unreadable to the service operator.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A browser-encrypted vault kept passphrases client-side and paired identity controls with distributed benchmarks."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "The MVP demonstrated operator-unreadable fixture storage and benchmark execution; no external security certification is claimed."
+          ],
+          "evidence": [
+            {
+              "statement": "The MVP demonstrated operator-unreadable fixture storage and benchmark execution; no external security certification is claimed.",
+              "source": {
+                "label": "Approved source presentation, slide 17",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 16,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 17",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/17-proving-browser-side-encrypted-storage.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-18",
+      "type": "case-study",
+      "name": "Recommending room-aware audio systems",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "recommending-room-aware-audio-systems",
+        "summary": "Consumer-electronics retailer: Translate a room image and stated preferences into a bounded product recommendation.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Retail & Consumer",
+          "organizationDescriptor": "Consumer-electronics retailer",
+          "engagementType": "product-demonstration",
+          "deliveryStage": "proof-of-concept",
+          "impactClassification": "pilot-demo",
+          "impactStatement": "The proof of concept generated fixture recommendations from uploaded room images; conversion impact is unavailable.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative commerce experience for an anonymized consumer-electronics retailer.",
+            "textEquivalent": "A multilingual adviser estimated room characteristics and proposed a primary and alternative configuration. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "commerce-experience",
+            "fixtureLabels": [
+              "Acoustic profile",
+              "Listening zone",
+              "Suggested bundle"
+            ]
+          },
+          "mandate": "Translate a room image and stated preferences into a bounded product recommendation.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A multilingual adviser estimated room characteristics and proposed a primary and alternative configuration."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "The proof of concept generated fixture recommendations from uploaded room images; conversion impact is unavailable."
+          ],
+          "evidence": [
+            {
+              "statement": "The proof of concept generated fixture recommendations from uploaded room images; conversion impact is unavailable.",
+              "source": {
+                "label": "Approved source presentation, slide 18",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 17,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 18",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/18-recommending-room-aware-audio-systems.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-19",
+      "type": "case-study",
+      "name": "Monitoring portfolio early-warning signals",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "monitoring-portfolio-early-warning-signals",
+        "summary": "Regulated commercial lender: Bring disclosures, concentration and early-warning signals into a human-gated review flow.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Financial Services",
+          "organizationDescriptor": "Regulated commercial lender",
+          "engagementType": "product-demonstration",
+          "deliveryStage": "proof-of-concept",
+          "impactClassification": "simulated",
+          "impactStatement": "Portfolio values and concentrations shown are anonymized demonstration fixtures; they are not client results.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative analytics dashboard for an anonymized regulated commercial lender.",
+            "textEquivalent": "A credit-monitoring demonstration combined portfolio signals, disclosure watch and analyst approvals. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "analytics-dashboard",
+            "fixtureLabels": [
+              "Exposure watch",
+              "Concentration band",
+              "Analyst review"
+            ]
+          },
+          "mandate": "Bring disclosures, concentration and early-warning signals into a human-gated review flow.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A credit-monitoring demonstration combined portfolio signals, disclosure watch and analyst approvals."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "Portfolio values and concentrations shown are anonymized demonstration fixtures; they are not client results."
+          ],
+          "evidence": [
+            {
+              "statement": "Portfolio values and concentrations shown are anonymized demonstration fixtures; they are not client results.",
+              "source": {
+                "label": "Approved source presentation, slide 19",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 18,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 19",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/19-monitoring-portfolio-early-warning-signals.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-20",
+      "type": "case-study",
+      "name": "Diagnosing production-line faults",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "diagnosing-production-line-faults",
+        "summary": "Beverage manufacturing operator: Connect telemetry and maintenance knowledge for governed fault response.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Manufacturing & Industrial",
+          "organizationDescriptor": "Beverage manufacturing operator",
+          "engagementType": "product-demonstration",
+          "deliveryStage": "proof-of-concept",
+          "impactClassification": "simulated",
+          "impactStatement": "Scenario counts, efficiency and avoided-downtime values are simulated interface fixtures, not observed plant outcomes.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "energy-resources"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative operations console for an anonymized beverage manufacturing operator.",
+            "textEquivalent": "A predictive-maintenance demonstration diagnosed scenarios from simulated telemetry and proposed gated work orders. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "operations-console",
+            "fixtureLabels": [
+              "Line telemetry",
+              "Fault signature",
+              "Work order gate"
+            ]
+          },
+          "mandate": "Connect telemetry and maintenance knowledge for governed fault response.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "A predictive-maintenance demonstration diagnosed scenarios from simulated telemetry and proposed gated work orders."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "Scenario counts, efficiency and avoided-downtime values are simulated interface fixtures, not observed plant outcomes."
+          ],
+          "evidence": [
+            {
+              "statement": "Scenario counts, efficiency and avoided-downtime values are simulated interface fixtures, not observed plant outcomes.",
+              "source": {
+                "label": "Approved source presentation, slide 20",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 19,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 20",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/20-diagnosing-production-line-faults.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
+      "externalId": "case-study:slide-21",
+      "type": "case-study",
+      "name": "Tracing provision movements earlier",
+      "sourceFile": "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx",
+      "fields": {
+        "slug": "tracing-provision-movements-earlier",
+        "summary": "Regulated commercial lender: Make provision movements and their exposure-level drivers visible before period end.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "summary",
+          "disclosure": "anonymized",
+          "sector": "Financial Services",
+          "organizationDescriptor": "Regulated commercial lender",
+          "engagementType": "client-delivery",
+          "deliveryStage": "proof-of-concept",
+          "impactClassification": "pilot-demo",
+          "impactStatement": "The proof of concept exposed provision drivers in a shared view; reporting-cycle improvement has not been verified.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Illustrative reconstruction using anonymized fixture data.",
+            "altText": "Illustrative analytics dashboard for an anonymized regulated commercial lender.",
+            "textEquivalent": "An authenticated monitoring view provided exposure-level changes and threshold alerts. Labels and values are anonymized fixtures rather than a client-system capture.",
+            "template": "analytics-dashboard",
+            "fixtureLabels": [
+              "Provision bridge",
+              "Exposure driver",
+              "Threshold alert"
+            ]
+          },
+          "mandate": "Make provision movements and their exposure-level drivers visible before period end.",
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "An authenticated monitoring view provided exposure-level changes and threshold alerts."
+            }
+          ],
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "outcomes": [
+            "The proof of concept exposed provision drivers in a shared view; reporting-cycle improvement has not been verified."
+          ],
+          "evidence": [
+            {
+              "statement": "The proof of concept exposed provision drivers in a shared view; reporting-cycle improvement has not been verified.",
+              "source": {
+                "label": "Approved source presentation, slide 21",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 20,
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 21",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "verificationDate": "2026-09-06",
+          "reviewDate": "2027-03-06",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/21-tracing-provision-movements-earlier.png"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
         ]
       }
     },
@@ -2384,6 +4292,762 @@
       "digest": "c1ca56e88503a2891b03a71e75252317b7dc064c2b2ee7f4d113bfa039386706"
     },
     {
+      "externalId": "asset:c0ed4904df64037b6051",
+      "type": "asset",
+      "name": "01-making-industrial-knowledge-self-service.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/01-making-industrial-knowledge-self-service.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/01-making-industrial-knowledge-self-service.png",
+        "bytes": 79339,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "12f3a418ca81f6cc1065f03d0fe2a96982470badb2ac20b6104f0b5c3a3c1038",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "01 making industrial knowledge self service",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "12f3a418ca81f6cc1065f03d0fe2a96982470badb2ac20b6104f0b5c3a3c1038"
+    },
+    {
+      "externalId": "asset:4d0809fd1e70d0ee5b73",
+      "type": "asset",
+      "name": "02-connecting-pharmacy-operations-signals.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/02-connecting-pharmacy-operations-signals.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/02-connecting-pharmacy-operations-signals.png",
+        "bytes": 70823,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "f9e1295a1a9433a634e9a3957cc7aa05d6775e4b7993e2cfaf0ec637d0c8eda2",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "02 connecting pharmacy operations signals",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "f9e1295a1a9433a634e9a3957cc7aa05d6775e4b7993e2cfaf0ec637d0c8eda2"
+    },
+    {
+      "externalId": "asset:7060ef9f22405008331f",
+      "type": "asset",
+      "name": "03-coaching-a-distributed-field-team.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/03-coaching-a-distributed-field-team.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/03-coaching-a-distributed-field-team.png",
+        "bytes": 79343,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "1acffd0be19b797c1667eda0f8412641bde0ab58eb900b23bf069a9025be599e",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "03 coaching a distributed field team",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "1acffd0be19b797c1667eda0f8412641bde0ab58eb900b23bf069a9025be599e"
+    },
+    {
+      "externalId": "asset:bf5cf1e28b1da1245934",
+      "type": "asset",
+      "name": "04-taking-a-specialist-retailer-online.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/04-taking-a-specialist-retailer-online.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/04-taking-a-specialist-retailer-online.png",
+        "bytes": 59411,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "937f92f5651240f16454daec241f0e6e0545dcaca44fda60994d69ed4d97b721",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "04 taking a specialist retailer online",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "937f92f5651240f16454daec241f0e6e0545dcaca44fda60994d69ed4d97b721"
+    },
+    {
+      "externalId": "asset:87621d169e3231794b8f",
+      "type": "asset",
+      "name": "05-making-market-information-searchable.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/05-making-market-information-searchable.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/05-making-market-information-searchable.png",
+        "bytes": 90259,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "94dad438f310a0b3af5225835e90b53ae1f6a7baa0166e5bfd6bb88b7bc9e08c",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "05 making market information searchable",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "94dad438f310a0b3af5225835e90b53ae1f6a7baa0166e5bfd6bb88b7bc9e08c"
+    },
+    {
+      "externalId": "asset:051f8ecaf788666610ef",
+      "type": "asset",
+      "name": "06-automating-recurring-tax-preparation.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/06-automating-recurring-tax-preparation.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/06-automating-recurring-tax-preparation.png",
+        "bytes": 123682,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "b5d93cdcee7aa2fd7f996d0e8fc047209a537950a70e60712ab5c391acaaa85b",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "06 automating recurring tax preparation",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "b5d93cdcee7aa2fd7f996d0e8fc047209a537950a70e60712ab5c391acaaa85b"
+    },
+    {
+      "externalId": "asset:9df9051c08b1ac4e755a",
+      "type": "asset",
+      "name": "07-creating-accountable-agent-delegation.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/07-creating-accountable-agent-delegation.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/07-creating-accountable-agent-delegation.png",
+        "bytes": 99867,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "8b4253c4099c0bb7330033a9af3a1a6af4ffdde467c40659437de813565b35d9",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "07 creating accountable agent delegation",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "8b4253c4099c0bb7330033a9af3a1a6af4ffdde467c40659437de813565b35d9"
+    },
+    {
+      "externalId": "asset:1552d989c32158cec678",
+      "type": "asset",
+      "name": "08-governing-a-single-fee-schedule.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/08-governing-a-single-fee-schedule.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/08-governing-a-single-fee-schedule.png",
+        "bytes": 119124,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "d5c97398cc48eb2e669f0513dc8c8d15c4e9d240add43fb59c905e2be96500ab",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "08 governing a single fee schedule",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "d5c97398cc48eb2e669f0513dc8c8d15c4e9d240add43fb59c905e2be96500ab"
+    },
+    {
+      "externalId": "asset:02a506550e53b6f87a6b",
+      "type": "asset",
+      "name": "09-preparing-embedded-emissions-data.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/09-preparing-embedded-emissions-data.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/09-preparing-embedded-emissions-data.png",
+        "bytes": 75031,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "95bd660bf08a57687e5b92647458f88ea26fbcd4eeb7339112762cf7b0b0791c",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "09 preparing embedded emissions data",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "95bd660bf08a57687e5b92647458f88ea26fbcd4eeb7339112762cf7b0b0791c"
+    },
+    {
+      "externalId": "asset:731241e4073be8c56ef0",
+      "type": "asset",
+      "name": "10-accelerating-governed-vehicle-offers.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/10-accelerating-governed-vehicle-offers.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/10-accelerating-governed-vehicle-offers.png",
+        "bytes": 118535,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "b6b54ca7947b00d458b6b668fc01494b715c7d68b7705d3165650552c309e564",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "10 accelerating governed vehicle offers",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "b6b54ca7947b00d458b6b668fc01494b715c7d68b7705d3165650552c309e564"
+    },
+    {
+      "externalId": "asset:d4a44fe04ba9897c2ad2",
+      "type": "asset",
+      "name": "11-answering-general-investment-questions.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/11-answering-general-investment-questions.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/11-answering-general-investment-questions.png",
+        "bytes": 76242,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "51aecaea081e7c56f6babaabe17386b87800d041b411827b5b3d58db68bca7ed",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "11 answering general investment questions",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "51aecaea081e7c56f6babaabe17386b87800d041b411827b5b3d58db68bca7ed"
+    },
+    {
+      "externalId": "asset:560ed836866e86920e96",
+      "type": "asset",
+      "name": "12-creating-a-governed-ai-workspace.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/12-creating-a-governed-ai-workspace.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/12-creating-a-governed-ai-workspace.png",
+        "bytes": 67962,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "7e9eb67db936861fd8f138d94d1d739da5ee7380f7a7b734580ad102e3d5ca31",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "12 creating a governed ai workspace",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "7e9eb67db936861fd8f138d94d1d739da5ee7380f7a7b734580ad102e3d5ca31"
+    },
+    {
+      "externalId": "asset:4b617df04f81594e8b65",
+      "type": "asset",
+      "name": "13-prototyping-agentic-public-services.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/13-prototyping-agentic-public-services.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/13-prototyping-agentic-public-services.png",
+        "bytes": 154768,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "ad680dc43d81c0f9893f8487bbd19ec5b88c8f026fb7ba15e441bb3487a070d3",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "13 prototyping agentic public services",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "ad680dc43d81c0f9893f8487bbd19ec5b88c8f026fb7ba15e441bb3487a070d3"
+    },
+    {
+      "externalId": "asset:4357890e2475c5479554",
+      "type": "asset",
+      "name": "14-checking-calls-through-risk-gates.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/14-checking-calls-through-risk-gates.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/14-checking-calls-through-risk-gates.png",
+        "bytes": 95712,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "cc90bcacd5ef50e63f53b3f37be0ffdb020c569964623505bf4372d46ace7207",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "14 checking calls through risk gates",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "cc90bcacd5ef50e63f53b3f37be0ffdb020c569964623505bf4372d46ace7207"
+    },
+    {
+      "externalId": "asset:61aa9fb27b83f941773c",
+      "type": "asset",
+      "name": "15-orchestrating-data-centre-incidents.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/15-orchestrating-data-centre-incidents.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/15-orchestrating-data-centre-incidents.png",
+        "bytes": 131853,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "03b0b6933136d6e12e6d9f9fc5a513f0786ec80092a2edd89114a52dcfb8ce9e",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "15 orchestrating data centre incidents",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "03b0b6933136d6e12e6d9f9fc5a513f0786ec80092a2edd89114a52dcfb8ce9e"
+    },
+    {
+      "externalId": "asset:89a9b277c7b432618099",
+      "type": "asset",
+      "name": "16-finding-a-second-life-for-hotel-assets.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/16-finding-a-second-life-for-hotel-assets.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/16-finding-a-second-life-for-hotel-assets.png",
+        "bytes": 74301,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "a2074f29da410011444d29835f2940be779fe2e8171a59aa81afc67531a104da",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "16 finding a second life for hotel assets",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "a2074f29da410011444d29835f2940be779fe2e8171a59aa81afc67531a104da"
+    },
+    {
+      "externalId": "asset:1795ba514767650319a0",
+      "type": "asset",
+      "name": "17-proving-browser-side-encrypted-storage.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/17-proving-browser-side-encrypted-storage.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/17-proving-browser-side-encrypted-storage.png",
+        "bytes": 98953,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "e04e3191f83f49b13806f2fae7e3b76130424fd49f7bda5e0b9a83db6ca9b7a1",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "17 proving browser side encrypted storage",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "e04e3191f83f49b13806f2fae7e3b76130424fd49f7bda5e0b9a83db6ca9b7a1"
+    },
+    {
+      "externalId": "asset:a603ab33c5902333b82a",
+      "type": "asset",
+      "name": "18-recommending-room-aware-audio-systems.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/18-recommending-room-aware-audio-systems.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/18-recommending-room-aware-audio-systems.png",
+        "bytes": 69146,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "57c5858891dc409acfeff257c27340e3ef9f96117608a5d436a9cfb6bdc0c6da",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "18 recommending room aware audio systems",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "57c5858891dc409acfeff257c27340e3ef9f96117608a5d436a9cfb6bdc0c6da"
+    },
+    {
+      "externalId": "asset:e238a63ac6fae72cf50d",
+      "type": "asset",
+      "name": "19-monitoring-portfolio-early-warning-signals.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/19-monitoring-portfolio-early-warning-signals.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/19-monitoring-portfolio-early-warning-signals.png",
+        "bytes": 82391,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "fede195dea3ea808b78be6cb7a0323cc9d430d2f9fa3581618c7f50fb601fd3e",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "19 monitoring portfolio early warning signals",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "fede195dea3ea808b78be6cb7a0323cc9d430d2f9fa3581618c7f50fb601fd3e"
+    },
+    {
+      "externalId": "asset:fc4aa6c552381c401bbc",
+      "type": "asset",
+      "name": "20-diagnosing-production-line-faults.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/20-diagnosing-production-line-faults.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/20-diagnosing-production-line-faults.png",
+        "bytes": 141546,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "94b143c732ac00ce8b3a754a5313a3e328acdca16fb14df862a92404b6e01714",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "20 diagnosing production line faults",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "94b143c732ac00ce8b3a754a5313a3e328acdca16fb14df862a92404b6e01714"
+    },
+    {
+      "externalId": "asset:8d8d830513bbef43e89a",
+      "type": "asset",
+      "name": "21-tracing-provision-movements-earlier.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/21-tracing-provision-movements-earlier.png",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/21-tracing-provision-movements-earlier.png",
+        "bytes": 67175,
+        "extension": ".png",
+        "mimeType": "image/png",
+        "checksum": "3bc65e71080efee9e79f64894ba93cc3a72e08f7d1c7bdca254d36363351a969",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "21 tracing provision movements earlier",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Deterministic Cognirise Pulse fixture reconstruction"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "3bc65e71080efee9e79f64894ba93cc3a72e08f7d1c7bdca254d36363351a969"
+    },
+    {
       "externalId": "asset:f6a19919d1de6e4dd655",
       "type": "asset",
       "name": "cognirise-pulse-governance.jpg",
@@ -2537,7 +5201,7 @@
         }
       },
       "review": {
-        "status": "needs-review",
+        "status": "approved",
         "reasons": [
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
@@ -2575,7 +5239,7 @@
         }
       },
       "review": {
-        "status": "needs-review",
+        "status": "approved",
         "reasons": [
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
@@ -2651,7 +5315,7 @@
         }
       },
       "review": {
-        "status": "needs-review",
+        "status": "approved",
         "reasons": [
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
@@ -2727,7 +5391,7 @@
         }
       },
       "review": {
-        "status": "needs-review",
+        "status": "approved",
         "reasons": [
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
@@ -2803,7 +5467,7 @@
         }
       },
       "review": {
-        "status": "needs-review",
+        "status": "approved",
         "reasons": [
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
@@ -2841,7 +5505,7 @@
         }
       },
       "review": {
-        "status": "needs-review",
+        "status": "approved",
         "reasons": [
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
@@ -2917,7 +5581,7 @@
         }
       },
       "review": {
-        "status": "needs-review",
+        "status": "approved",
         "reasons": [
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
@@ -2955,7 +5619,7 @@
         }
       },
       "review": {
-        "status": "needs-review",
+        "status": "approved",
         "reasons": [
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
@@ -3031,7 +5695,7 @@
         }
       },
       "review": {
-        "status": "needs-review",
+        "status": "approved",
         "reasons": [
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
@@ -3987,7 +6651,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "92912c69bbcaeb1a7676820b51905ce7ab04b4f1dd144b2a847c290c0a7b3eb8",
-  "generatedAt": "2026-09-09T11:17:23.257Z",
+  "manifestDigest": "9b49f984f482eb69fbec6651c414f947afe2bc33bbff1f56f43cd505c3e445e3",
+  "generatedAt": "2026-09-09T11:55:48.848Z",
   "dryRun": false
 }

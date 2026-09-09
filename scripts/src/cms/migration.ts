@@ -3,13 +3,13 @@ import { type CmsDocumentKind, validateCmsSnapshot } from "@workspace/api-zod";
 import { InventoryRecord } from "./common.js";
 
 export type MigratableRecord = InventoryRecord & {
-  type: "person" | "partner" | "platform" | "article" | "industry" | "framework";
+  type: "person" | "partner" | "platform" | "article" | "case-study" | "industry" | "framework";
 };
 
 export interface MigrationOperation {
   externalId: string;
   idempotencyKey: string;
-  kind: "person" | "partner" | "platform" | "publication" | "industry" | "framework";
+  kind: "person" | "partner" | "platform" | "publication" | "case-study" | "industry" | "framework";
   slug: string;
   title: string;
   payload: Record<string, unknown>;
@@ -36,6 +36,9 @@ export interface MediaMigrationOperation {
   altText: string;
   credit: string;
   requestDigest: string;
+  rightsStatus?: string;
+  accessibilityStatus?: string;
+  sourceReviewApproved?: boolean;
 }
 
 export interface PersonAvailabilityOperation {
@@ -176,7 +179,9 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
     // reconciliation can preserve every earlier immutable baseline and receipt.
     idempotencyKey: record.type === "industry"
       ? `cms-industry-contract-v7:${record.externalId}`
-      : `cms-inventory-v2:${record.externalId}`,
+      : record.type === "case-study"
+        ? `cms-case-study-baseline-v1:${record.externalId}`
+        : `cms-inventory-v2:${record.externalId}`,
     requestDigest: digest(request),
   };
 }
@@ -296,6 +301,11 @@ export function mediaMigrationOperations(records: InventoryRecord[]): MediaMigra
         : null,
       altText: accessibility.altText,
       credit: rights.owner,
+      rightsStatus: typeof rights.status === "string" ? rights.status : undefined,
+      accessibilityStatus: typeof accessibility.status === "string"
+        ? accessibility.status
+        : (typeof accessibility.altText === "string" && accessibility.altText.trim() ? "approved" : "needs-review"),
+      sourceReviewApproved: record.review.status === "approved",
     };
     // Keep the v3 receipt digest stable for already-imported website binaries.
     // Classification lives in mutable asset fields/version metadata and does

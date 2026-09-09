@@ -46,6 +46,10 @@ import {
   type HeroAssetRecord,
   type HeroAssetSelection,
 } from "./hero-assignment";
+import {
+  CMS_HERO_DOCUMENT_SLUGS,
+  type CmsHeroFilmSlot,
+} from "@workspace/api-zod";
 
 type MediaCollection = "website" | "linkedin" | "motion";
 type LinkedInAssetKind = "post" | "header";
@@ -96,7 +100,7 @@ type ExtendedMediaAsset = {
   motionMetadata?: MotionMetadata | null;
 };
 
-type HeroSlot = "homepage" | "industries";
+type HeroSlot = CmsHeroFilmSlot;
 
 function HeroAssignments() {
   const [, setLocation] = useLocation();
@@ -118,8 +122,12 @@ function HeroAssignments() {
     kind: "site-configuration",
   });
   const media = useListMedia({ page: 1, pageSize: 100, search: search || undefined });
-  const homepageDocument = documents.data?.items.find((item) => item.slug === "site-homepage-hero");
-  const industriesDocument = documents.data?.items.find((item) => item.slug === "site-industries-hero");
+  const homepageDocument = documents.data?.items.find(
+    (item) => item.slug === CMS_HERO_DOCUMENT_SLUGS.homepage,
+  );
+  const industriesDocument = documents.data?.items.find(
+    (item) => item.slug === CMS_HERO_DOCUMENT_SLUGS.industries,
+  );
   const homepagePublished = useGetDocumentRevision(
     homepageDocument?.id ?? "",
     homepageDocument?.publishedRevisionId ?? "",
@@ -249,7 +257,7 @@ function HeroAssignments() {
         : await createDocument.mutateAsync({
             data: {
               kind: "site-configuration",
-              slug: `site-${slot}-hero`,
+              slug: CMS_HERO_DOCUMENT_SLUGS[slot],
               title: `${slot === "homepage" ? "Homepage" : "Industries"} hero`,
               content,
               mediaIds,

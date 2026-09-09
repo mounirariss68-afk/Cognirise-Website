@@ -13,6 +13,7 @@ import {
 } from "./common.js";
 import { extractArticles, extractVariable } from "./source-extract.js";
 import { validateCmsContent } from "@workspace/api-zod";
+import { caseStudyRecords, CASE_STUDY_TAXONOMY_COUNTS } from "./case-studies.js";
 
 const args = process.argv.slice(2);
 const shouldWrite = args.includes("--write");
@@ -325,8 +326,9 @@ async function main() {
   const articles = articleRecords(await extractArticles(articleFile, "articles"), articleFile);
   const industries = industryRecords(await extractVariable(industryFile, "INDUSTRIES") as SourceObject[], industryFile);
   const frameworks = frameworkRecords();
+  const caseStudies = caseStudyRecords();
   const assets = [...await assetRecords(), ...await linkedinAssetRecords()];
-  const records = [...people, ...partners, ...platforms, ...articles, ...industries, ...frameworks, ...assets];
+  const records = [...people, ...partners, ...platforms, ...articles, ...caseStudies, ...industries, ...frameworks, ...assets];
 
   const expectedPeople = [
     ["Mounir Ariss", "founder", "CEO & Co-founder", "show"],
@@ -350,14 +352,14 @@ async function main() {
   if (partners.length !== 5 || platforms.length !== 5 || articles.length !== 3 || industries.length !== 6) {
     throw new Error("The public website no longer matches the governed 5 partner / 5 platform / 3 article / 6 industry manifest.");
   }
-  if (assets.length !== 47) throw new Error(`Expected 38 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
+  if (caseStudies.length !== 21) throw new Error(`Expected 21 governed case studies, found ${caseStudies.length}.`);
+   if (assets.length !== 68) throw new Error(`Expected 59 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
 
   const stable = {
     schemaVersion: 2,
     source: relative(websiteRoot),
-    expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, industries: 6, frameworks: 1, websiteAssets: 38, linkedinAssets: 9, assets: 47 },
+     expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, caseStudies: 21, caseStudyTaxonomy: CASE_STUDY_TAXONOMY_COUNTS, industries: 6, frameworks: 1, websiteAssets: 59, linkedinAssets: 9, assets: 68 },
     explicitOmissions: {
-      caseStudies: "No genuine public case-study records are present in the current website.",
       povDocuments: "No genuine public POV documents are present in the current website.",
       employees: "No additional public employee profiles are present in the current website.",
       nonUaeEditions: "No approved non-UAE editions or translations are present.",

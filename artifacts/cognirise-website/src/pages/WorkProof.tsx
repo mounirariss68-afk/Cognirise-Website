@@ -7,6 +7,7 @@ import { contentRecord, text, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { SpatialDisclosure, SpatialDisclosureItem, SpatialDisclosureTrigger, SpatialDisclosurePanel } from "@/components/ui/spatial-disclosure";
 import { PulseImage } from "@/components/ui/pulse-image";
+import { WorkLibrary, type PublicCaseStudy } from "@/components/work/case-study-ui";
 
 const patternFallback = [{
   title: "One process under pressure.",
@@ -15,6 +16,10 @@ const patternFallback = [{
 
 export default function WorkProof() {
   const { market } = useMarketStore();
+  const caseStudies = useCmsCollection<PublicCaseStudy>("case-study", [], (item) => {
+    const record = contentRecord(item, "case-study") as PublicCaseStudy;
+    return record.disclosure === "restricted" ? null : record;
+  });
   const patterns = useCmsCollection("case-study", patternFallback, (item) => {
     const content = contentRecord(item, "case-study");
     return { title: item.title, copy: content.outcomes[0] || item.summary || "" };
@@ -248,6 +253,8 @@ export default function WorkProof() {
           </div>
         </div>
       </section>
+
+      <WorkLibrary cases={caseStudies.data} />
       
       <section className="wp-note">
         <div className="wp-note-head">

@@ -6,6 +6,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
+import { setMaxListeners } from "node:events";
 
 const allowedTypes = new Set([
   "image/jpeg",

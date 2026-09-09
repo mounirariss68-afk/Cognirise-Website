@@ -99,7 +99,44 @@ test("service-interest events persist fixed dimensions only with analytics conse
   assert.equal(noConsent.status, 202);
   assert.deepEqual(await noConsent.json(), { accepted: false, id: null });
 
-  assert.equal(inserts.length, 2);
+  const caseEvents = [
+    ["case_card_open", {
+      case_id: "00000000-0000-4000-8000-000000000001",
+      case_slug: "governed-case",
+      sector: "Travel & Hospitality",
+      stage: "pilot",
+      mandate: "confidential content must never persist",
+    }],
+    ["case_sector_filter", { sector: "Financial Services", action: "apply", stage: "pilot" }],
+    ["case_visual_enlarge", {
+      case_id: "00000000-0000-4000-8000-000000000001",
+      case_slug: "governed-case",
+      stage: "pilot",
+    }],
+    ["case_detail_visit", { case_slug: "governed-case", sector: "Travel & Hospitality", stage: "pilot" }],
+    ["case_cta", { case_slug: "governed-case", stage: "pilot", action: "contact" }],
+  ] as const;
+  for (const [name, properties] of caseEvents) {
+    const response = await send({
+      ...baseEvent,
+      visitorId: "consented-visitor",
+      name,
+      properties,
+    });
+    assert.deepEqual(await response.json(), {
+      accepted: true,
+      id: `event-${inserts.length}`,
+    });
+  }
+  const contentLeak = await send({
+    ...baseEvent,
+    visitorId: "consented-visitor",
+    name: "case_cta",
+    properties: { case_slug: "governed-case", action: "Contact us about £4.2m!" },
+  });
+  assert.deepEqual(await contentLeak.json(), { accepted: false, id: null });
+
+  assert.equal(inserts.length, 7);
   assert.deepEqual(inserts[0]?.[7], {
     service_line: "consulting-engineering",
     source: "homepage",
@@ -108,5 +145,16 @@ test("service-interest events persist fixed dimensions only with analytics conse
     service_line: "ai-platforms",
     destination: "/platforms/lupitor",
     source: "services_overview",
+  });
+  assert.deepEqual(inserts[2]?.[7], {
+    case_id: "00000000-0000-4000-8000-000000000001",
+    case_slug: "governed-case",
+    sector: "Travel & Hospitality",
+    stage: "pilot",
+  });
+  assert.deepEqual(inserts[6]?.[7], {
+    case_slug: "governed-case",
+    stage: "pilot",
+    action: "contact",
   });
 });

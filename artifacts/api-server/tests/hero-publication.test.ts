@@ -22,6 +22,229 @@ test("public hero selection remains bound to the approved published revision", a
   assert.match(source, /ref\.field_path=\$2/);
 });
 
+test("publishing both hero slots makes their canonical revision-pinned media public", {
+  concurrency: false,
+}, async (t) => {
+  const priorDatabaseUrl = process.env.DATABASE_URL;
+  const priorSessionSecret = process.env.SESSION_SECRET;
+  process.env.DATABASE_URL = "postgres://test.invalid/cognirise";
+  process.env.SESSION_SECRET = "public-hero-test-session-secret-long-enough";
+
+  const [{ pool }, { default: app }, auth, security] = await Promise.all([
+    import("@workspace/db"),
+    import("../src/app.ts"),
+    import("../src/lib/auth.ts"),
+    import("../src/lib/security.ts"),
+  ]);
+  const fixtures = {
+    homepage: heroFixture("homepage", 1),
+    industries: heroFixture("industries", 2),
+  } as const;
+  const requestedSlugs: string[] = [];
+  const publishedSlugs = new Set<string>();
+  const now = new Date("2026-09-09T00:00:00Z");
+
+  t.mock.method(pool, "query", async (sql: unknown, values?: unknown[]) => {
+    const statement = String(sql);
+    if (statement.includes("FROM cms_sessions s")) {
+      return {
+        rowCount: 1,
+        rows: [{
+          id: "session-id",
+          token_digest: values?.[0] ?? security.hashToken("session-token"),
+          mfa_satisfied_at: now,
+          expires_at: new Date(now.getTime() + 60_000),
+          created_at: now,
+          user_id: "user-id",
+          name: "Publisher",
+          email: "publisher@example.com",
+          role: "administrator",
+          status: "active",
+          last_login_at: null,
+          user_created_at: now,
+          user_updated_at: now,
+          must_rotate: false,
+          mfa_enabled: true,
+        }],
+      };
+    }
+    if (statement.includes("FROM market_editions WHERE enabled=true")) {
+      return {
+        rowCount: 1,
+        rows: [{
+          code: "uae",
+          default_locale: "en",
+          fallback_market_code: null,
+          fallback_locale: null,
+          is_canonical: true,
+        }],
+      };
+    }
+    if (statement.includes("d.kind='site-configuration'")) {
+      const slug = String(values?.[0]);
+      requestedSlugs.push(slug);
+      const fixture = Object.values(fixtures).find((candidate) => candidate.slug === slug);
+      return fixture && publishedSlugs.has(slug)
+        ? { rowCount: 1, rows: [fixture.row] }
+        : { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("FROM cms_media_references ref")) {
+      const fixture = Object.values(fixtures).find(
+        (candidate) => candidate.row.id === String(values?.[0]),
+      );
+      return fixture
+        ? { rowCount: fixture.media.length, rows: fixture.media }
+        : { rowCount: 0, rows: [] };
+    }
+    return { rowCount: 0, rows: [] };
+  });
+  t.mock.method(pool, "connect", async () => ({
+    async query(sql: unknown, values?: unknown[]) {
+      const statement = String(sql);
+      if (statement.includes("SELECT r.id,r.edition_id,r.payload,d.kind")) {
+        const fixture = Object.values(fixtures).find(
+          (candidate) =>
+            candidate.row.revision_id === String(values?.[0]) &&
+            candidate.row.id === String(values?.[1]),
+        );
+        return fixture
+          ? {
+              rowCount: 1,
+              rows: [{
+                id: fixture.row.revision_id,
+                edition_id: fixture.editionId,
+                payload: fixture.row.payload,
+                kind: "site-configuration",
+              }],
+            }
+          : { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT a.id::text id,COALESCE(pinned.id,latest.id)")) {
+        const fixture = Object.values(fixtures).find(
+          (candidate) => candidate.row.id === String(values?.[1]),
+        );
+        return fixture
+          ? { rowCount: fixture.media.length, rows: fixture.media }
+          : { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("UPDATE cms_market_editions SET publication_state")) {
+        const fixture = Object.values(fixtures).find(
+          (candidate) => candidate.row.revision_id === String(values?.[3]),
+        );
+        if (fixture) publishedSlugs.add(fixture.slug);
+      }
+      return { rowCount: 1, rows: [] };
+    },
+    release() {},
+  }) as never);
+
+  const server = app.listen(0, "127.0.0.1");
+  await new Promise<void>((resolve) => server.once("listening", resolve));
+  t.after(async () => {
+    await new Promise<void>((resolveClose, reject) =>
+      server.close((error) => (error ? reject(error) : resolveClose()))
+    );
+    if (priorDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+    else process.env.DATABASE_URL = priorDatabaseUrl;
+    if (priorSessionSecret === undefined) delete process.env.SESSION_SECRET;
+    else process.env.SESSION_SECRET = priorSessionSecret;
+  });
+  const address = server.address();
+  assert.ok(address && typeof address !== "string");
+  const origin = `http://127.0.0.1:${address.port}`;
+  const csrf = auth.csrfForSession(security.hashToken("session-token"));
+  const publishHeaders = {
+    "content-type": "application/json",
+    origin,
+    "x-csrf-token": csrf,
+    cookie: `${auth.SESSION_COOKIE}=session-token; ${auth.CSRF_COOKIE}=${csrf}`,
+  };
+
+  for (const slot of ["homepage", "industries"] as const) {
+    const fixture = fixtures[slot];
+    const publication = await fetch(`${origin}/api/documents/${fixture.row.id}/publish`, {
+      method: "POST",
+      headers: publishHeaders,
+      body: JSON.stringify({ revisionId: fixture.row.revision_id }),
+    });
+    assert.equal(publication.status, 200);
+    const response = await fetch(`${origin}/api/public/hero-films/${slot}?market=uae&locale=en`);
+    assert.equal(response.status, 200);
+    const payload = await response.json() as {
+      slot: string;
+      poster: { mediaId: string; mediaVersionId: string; url: string };
+      sources: Array<{ mediaId: string; mediaVersionId: string; url: string }>;
+    };
+    assert.equal(payload.slot, slot);
+    assert.deepEqual(
+      [payload.poster, ...payload.sources].map(({ mediaId, mediaVersionId }) => ({
+        mediaId,
+        mediaVersionId,
+      })),
+      fixture.identities,
+    );
+    assert.deepEqual(
+      [payload.poster, ...payload.sources].map(({ url }) => url),
+      fixture.identities.map(
+        ({ mediaId, mediaVersionId }) => `/api/public/media/${mediaId}/${mediaVersionId}`,
+      ),
+    );
+  }
+  assert.deepEqual(requestedSlugs, ["site-homepage-hero", "site-industries-hero"]);
+
+  function heroFixture(slot: "homepage" | "industries", ordinal: number) {
+    const slug = `site-${slot}-hero`;
+    const ids = [1, 2, 3].map(
+      (offset) => `00000000-0000-4000-8000-${String(ordinal * 10 + offset).padStart(12, "0")}`,
+    );
+    const versions = [1, 2, 3].map(
+      (offset) => `00000000-0000-4000-9000-${String(ordinal * 10 + offset).padStart(12, "0")}`,
+    );
+    const identities = ids.map((mediaId, index) => ({
+      mediaId,
+      mediaVersionId: versions[index],
+    }));
+    const payload = {
+      slug,
+      title: `${slot} hero`,
+      content: {
+        schemaVersion: 1,
+        page: slot,
+        hero: {
+          posterMediaId: ids[0],
+          posterMediaVersionId: versions[0],
+          sources: [
+            { mediaId: ids[1], mediaVersionId: versions[1], mimeType: "video/mp4" },
+            { mediaId: ids[2], mediaVersionId: versions[2], mimeType: "video/webm" },
+          ],
+        },
+      },
+      mediaIds: ids,
+      markets: ["uae"],
+    };
+    return {
+      slug,
+      editionId: `00000000-0000-4000-c000-${String(ordinal).padStart(12, "0")}`,
+      identities,
+      row: {
+        id: `00000000-0000-4000-a000-${String(ordinal).padStart(12, "0")}`,
+        market: "uae",
+        locale: "en",
+        published_at: new Date("2026-09-09T00:00:00Z"),
+        updated_at: new Date("2026-09-09T00:00:00Z"),
+        revision_id: `00000000-0000-4000-b000-${String(ordinal).padStart(12, "0")}`,
+        revision_number: 2,
+        payload,
+      },
+      media: [
+        { id: ids[0], version_id: versions[0], media_type: "image/jpeg", status: "active" },
+        { id: ids[1], version_id: versions[1], media_type: "video/mp4", status: "active" },
+        { id: ids[2], version_id: versions[2], media_type: "video/webm", status: "active" },
+      ],
+    };
+  }
+});
+
 test("hero publication rolls back without moving the pointer on a stored MIME mismatch", {
   concurrency: false,
 }, async (t) => {

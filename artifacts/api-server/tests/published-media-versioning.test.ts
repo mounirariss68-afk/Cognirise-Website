@@ -172,6 +172,8 @@ test("public media stays on the revision pin when a newer asset version appears"
               storage_key: version.storageKey,
               media_type: "image/png",
               byte_size: Buffer.byteLength(version.bytes),
+              kind: "platform",
+              payload: snapshot,
             }],
           }
         : { rowCount: 0, rows: [] };

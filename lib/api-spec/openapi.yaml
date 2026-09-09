@@ -1932,11 +1932,24 @@ components:
         relatedIds: { type: array, items: { type: string } }
     CmsCaseStudyContent:
       type: object
-      required: [schemaVersion]
+      additionalProperties: false
+      required: [schemaVersion, variant, disclosure, sector, organizationDescriptor, engagementType, deliveryStage, impactClassification, impactStatement, disclosureNote, publicEvidenceStatus, relatedIndustries, visual, mandate]
       properties:
         schemaVersion: { type: number, enum: [1] }
         variant: { type: string, enum: [summary, full] }
         disclosure: { type: string, enum: [named, anonymized, restricted] }
+        sector: { type: string, enum: [Financial Services, Telecoms, Travel & Hospitality, Public Sector, Manufacturing & Industrial, Life Sciences, Retail & Consumer, Professional Services, Security & AI Infrastructure] }
+        organizationDescriptor: { type: string }
+        engagementType: { type: string, enum: [client-delivery, product-demonstration, concept, proposal-prototype] }
+        deliveryStage: { type: string, enum: [production, pilot, proof-of-concept, mvp, demo, concept, proposal] }
+        impactClassification: { type: string, enum: [observed, pilot-demo, simulated, projected, unavailable] }
+        impactStatement: { type: string }
+        disclosureNote: { type: string }
+        publicEvidenceStatus: { type: string, enum: [approved, needs-review, restricted] }
+        relatedIndustries:
+          type: array
+          items: { type: string, enum: [financial-services, telecoms, travel-hospitality, energy-resources, public-sector, education] }
+        visual: { $ref: "#/components/schemas/CmsCaseStudyVisual" }
         mandate: { type: string }
         context: { type: string }
         constraints: { type: array, items: { type: string } }
@@ -1951,6 +1964,17 @@ components:
         verificationDate: { type: string, format: date }
         reviewDate: { type: string, format: date }
         relatedIds: { type: array, items: { type: string } }
+    CmsCaseStudyVisual:
+      type: object
+      additionalProperties: false
+      required: [kind, caption, altText, textEquivalent, template, fixtureLabels]
+      properties:
+        kind: { type: string, enum: [illustrative-interface-reconstruction] }
+        caption: { type: string }
+        altText: { type: string }
+        textEquivalent: { type: string }
+        template: { type: string, enum: [knowledge-assistant, analytics-dashboard, workflow-console, commerce-experience, governance-console, operations-console] }
+        fixtureLabels: { type: array, minItems: 1, items: { type: string } }
     CmsFrameworkContent:
       type: object
       additionalProperties: false
@@ -2886,7 +2910,20 @@ components:
         sessionId: { type: string }
         name:
           type: string
-          pattern: '^[a-z][a-z0-9_.-]{1,79}$'
+          enum:
+            - page_view
+            - cta_click
+            - value_scan_submit
+            - newsletter_subscribe
+            - publication_view
+            - web_vital
+            - service_card_activated
+            - service_destination_clicked
+            - case_card_open
+            - case_sector_filter
+            - case_visual_enlarge
+            - case_detail_visit
+            - case_cta
         occurredAt: { type: string, format: date-time }
         page: { type: string, maxLength: 500 }
         referrer: { type: ["string", "null"], maxLength: 1000 }

@@ -151,6 +151,47 @@ export const caseStudyContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
   variant: z.enum(["summary", "full"]),
   disclosure: z.enum(["named", "anonymized", "restricted"]),
+  sector: z.enum([
+    "Financial Services",
+    "Telecoms",
+    "Travel & Hospitality",
+    "Public Sector",
+    "Manufacturing & Industrial",
+    "Life Sciences",
+    "Retail & Consumer",
+    "Professional Services",
+    "Security & AI Infrastructure",
+  ]),
+  organizationDescriptor: z.string().trim().min(1).max(240),
+  engagementType: z.enum(["client-delivery", "product-demonstration", "concept", "proposal-prototype"]),
+  deliveryStage: z.enum(["production", "pilot", "proof-of-concept", "mvp", "demo", "concept", "proposal"]),
+  impactClassification: z.enum(["observed", "pilot-demo", "simulated", "projected", "unavailable"]),
+  impactStatement: z.string().trim().min(1).max(2_000),
+  disclosureNote: z.string().trim().min(1).max(1_000),
+  publicEvidenceStatus: z.enum(["approved", "needs-review", "restricted"]),
+  relatedIndustries: z.array(z.enum([
+    "financial-services",
+    "telecoms",
+    "travel-hospitality",
+    "energy-resources",
+    "public-sector",
+    "education",
+  ])).max(6).default([]),
+  visual: z.object({
+    kind: z.literal("illustrative-interface-reconstruction"),
+    caption: z.string().trim().min(1).max(500),
+    altText: z.string().trim().min(1).max(500),
+    textEquivalent: z.string().trim().min(1).max(2_000),
+    template: z.enum([
+      "knowledge-assistant",
+      "analytics-dashboard",
+      "workflow-console",
+      "commerce-experience",
+      "governance-console",
+      "operations-console",
+    ]),
+    fixtureLabels: z.array(z.string().trim().min(1).max(120)).min(1).max(20),
+  }).strict(),
   mandate: z.string().trim().min(1).max(2_000),
   context: z.string().trim().max(4_000).optional(),
   constraints: stringList,
@@ -290,9 +331,16 @@ const heroMediaReferenceSchema = z.object({
   mimeType: z.enum(["video/mp4", "video/webm"]),
 }).strict();
 
+export const CMS_HERO_FILM_SLOTS = ["homepage", "industries"] as const;
+export type CmsHeroFilmSlot = (typeof CMS_HERO_FILM_SLOTS)[number];
+export const CMS_HERO_DOCUMENT_SLUGS: Record<CmsHeroFilmSlot, string> = {
+  homepage: "site-homepage-hero",
+  industries: "site-industries-hero",
+};
+
 export const siteConfigurationContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
-  page: z.enum(["homepage", "industries"]),
+  page: z.enum(CMS_HERO_FILM_SLOTS),
   hero: z.object({
     posterMediaId: z.string().uuid(),
     posterMediaVersionId: z.string().uuid(),
@@ -366,6 +414,11 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   if (kind === "case-study") {
     const caseStudy = value as CaseStudyContent;
     if (caseStudy.disclosure === "restricted") errors.push("Restricted case studies cannot be published publicly.");
+    if (caseStudy.variant === "summary" && caseStudy.disclosure !== "anonymized") errors.push("A public case-study summary must be anonymized.");
+    if (caseStudy.publicEvidenceStatus !== "approved") errors.push("Public case-study evidence must be approved.");
+    if (caseStudy.deliveryStage !== "production" && caseStudy.impactClassification === "observed") {
+      errors.push("Non-production impact must be explicitly qualified as pilot/demo, simulated, projected, or unavailable.");
+    }
     if (caseStudy.variant === "full" && !caseStudy.work.length) errors.push("A full case study requires a work narrative.");
     if (caseStudy.evidence.some((claim) => !claim.approved)) errors.push("Every case-study evidence statement must be approved.");
   }
@@ -460,6 +513,12 @@ export function validateCmsSnapshot(
   }
   const content = validateCmsContent(kind, snapshot.data.content, mode);
   if (!content.success) return content;
+  if (mode === "publish" && kind === "case-study") {
+    const caseStudy = content.data as CaseStudyContent;
+    if (caseStudy.variant === "summary" && !snapshot.data.summary?.trim()) {
+      return { success: false as const, errors: ["A public case-study summary is required and must be anonymized."] };
+    }
+  }
   const mediaIds = new Set(kind === "site-configuration" ? [] : snapshot.data.mediaIds);
   const record = content.data as Record<string, unknown>;
   for (const field of ["identityMediaId", "logoMediaId", "heroMediaId", "pdfMediaId"]) {

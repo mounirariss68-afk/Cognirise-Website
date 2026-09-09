@@ -694,11 +694,22 @@ export const CmsCaseStudyContentDisclosure = {
   restricted: 'restricted',
 } as const;
 
+export type CmsCaseStudyContentSector = typeof CmsCaseStudyContentSector[keyof typeof CmsCaseStudyContentSector];
 export interface CmsCaseStudyContent {
   schemaVersion: CmsCaseStudyContentSchemaVersion;
-  variant?: CmsCaseStudyContentVariant;
-  disclosure?: CmsCaseStudyContentDisclosure;
-  mandate?: string;
+  variant: CmsCaseStudyContentVariant;
+  disclosure: CmsCaseStudyContentDisclosure;
+  sector: CmsCaseStudyContentSector;
+  organizationDescriptor: string;
+  engagementType: CmsCaseStudyContentEngagementType;
+  deliveryStage: CmsCaseStudyContentDeliveryStage;
+  impactClassification: CmsCaseStudyContentImpactClassification;
+  impactStatement: string;
+  disclosureNote: string;
+  publicEvidenceStatus: CmsCaseStudyContentPublicEvidenceStatus;
+  relatedIndustries: CmsCaseStudyContentRelatedIndustriesItem[];
+  visual: CmsCaseStudyVisual;
+  mandate: string;
   context?: string;
   constraints?: string[];
   work?: CmsRichBlock[];
@@ -1808,13 +1819,13 @@ export interface Sitemap {
   generatedAt: string;
 }
 
+export type AnalyticsEventInputName = typeof AnalyticsEventInputName[keyof typeof AnalyticsEventInputName];
 export type AnalyticsEventInputProperties = { [key: string]: unknown };
 
 export interface AnalyticsEventInput {
   visitorId: string;
   sessionId: string;
-  /** @pattern ^[a-z][a-z0-9_.-]{1,79}$ */
-  name: string;
+  name: AnalyticsEventInputName;
   occurredAt: string;
   /** @maxLength 500 */
   page: string;
@@ -2022,3 +2033,108 @@ market?: string;
 locale?: string;
 };
 
+
+export type CmsCaseStudyContentDeliveryStage = typeof CmsCaseStudyContentDeliveryStage[keyof typeof CmsCaseStudyContentDeliveryStage];
+
+export type CmsCaseStudyContentPublicEvidenceStatus = typeof CmsCaseStudyContentPublicEvidenceStatus[keyof typeof CmsCaseStudyContentPublicEvidenceStatus];
+
+export const CmsCaseStudyVisualKind = {
+  'illustrative-interface-reconstruction': 'illustrative-interface-reconstruction',
+} as const;
+
+export type CmsCaseStudyVisualKind = typeof CmsCaseStudyVisualKind[keyof typeof CmsCaseStudyVisualKind];
+
+export type CmsCaseStudyVisualTemplate = typeof CmsCaseStudyVisualTemplate[keyof typeof CmsCaseStudyVisualTemplate];
+
+export const CmsCaseStudyContentImpactClassification = {
+  observed: 'observed',
+  'pilot-demo': 'pilot-demo',
+  simulated: 'simulated',
+  projected: 'projected',
+  unavailable: 'unavailable',
+} as const;
+
+export type CmsCaseStudyContentRelatedIndustriesItem = typeof CmsCaseStudyContentRelatedIndustriesItem[keyof typeof CmsCaseStudyContentRelatedIndustriesItem];
+
+export const CmsCaseStudyContentRelatedIndustriesItem = {
+  'financial-services': 'financial-services',
+  telecoms: 'telecoms',
+  'travel-hospitality': 'travel-hospitality',
+  'energy-resources': 'energy-resources',
+  'public-sector': 'public-sector',
+  education: 'education',
+} as const;
+
+export const CmsCaseStudyContentDeliveryStage = {
+  production: 'production',
+  pilot: 'pilot',
+  'proof-of-concept': 'proof-of-concept',
+  mvp: 'mvp',
+  demo: 'demo',
+  concept: 'concept',
+  proposal: 'proposal',
+} as const;
+
+export const AnalyticsEventInputName = {
+  page_view: 'page_view',
+  cta_click: 'cta_click',
+  value_scan_submit: 'value_scan_submit',
+  newsletter_subscribe: 'newsletter_subscribe',
+  publication_view: 'publication_view',
+  web_vital: 'web_vital',
+  service_card_activated: 'service_card_activated',
+  service_destination_clicked: 'service_destination_clicked',
+  case_card_open: 'case_card_open',
+  case_sector_filter: 'case_sector_filter',
+  case_visual_enlarge: 'case_visual_enlarge',
+  case_detail_visit: 'case_detail_visit',
+  case_cta: 'case_cta',
+} as const;
+
+export type CmsCaseStudyContentImpactClassification = typeof CmsCaseStudyContentImpactClassification[keyof typeof CmsCaseStudyContentImpactClassification];
+
+export const CmsCaseStudyContentEngagementType = {
+  'client-delivery': 'client-delivery',
+  'product-demonstration': 'product-demonstration',
+  concept: 'concept',
+  'proposal-prototype': 'proposal-prototype',
+} as const;
+
+export const CmsCaseStudyContentPublicEvidenceStatus = {
+  approved: 'approved',
+  'needs-review': 'needs-review',
+  restricted: 'restricted',
+} as const;
+
+export const CmsCaseStudyVisualTemplate = {
+  'knowledge-assistant': 'knowledge-assistant',
+  'analytics-dashboard': 'analytics-dashboard',
+  'workflow-console': 'workflow-console',
+  'commerce-experience': 'commerce-experience',
+  'governance-console': 'governance-console',
+  'operations-console': 'operations-console',
+} as const;
+
+export type CmsCaseStudyContentEngagementType = typeof CmsCaseStudyContentEngagementType[keyof typeof CmsCaseStudyContentEngagementType];
+
+export interface CmsCaseStudyVisual {
+  kind: CmsCaseStudyVisualKind;
+  caption: string;
+  altText: string;
+  textEquivalent: string;
+  template: CmsCaseStudyVisualTemplate;
+  /** @minItems 1 */
+  fixtureLabels: string[];
+}
+
+export const CmsCaseStudyContentSector = {
+  Financial_Services: 'Financial Services',
+  Telecoms: 'Telecoms',
+  'Travel_&_Hospitality': 'Travel & Hospitality',
+  Public_Sector: 'Public Sector',
+  'Manufacturing_&_Industrial': 'Manufacturing & Industrial',
+  Life_Sciences: 'Life Sciences',
+  'Retail_&_Consumer': 'Retail & Consumer',
+  Professional_Services: 'Professional Services',
+  'Security_&_AI_Infrastructure': 'Security & AI Infrastructure',
+} as const;

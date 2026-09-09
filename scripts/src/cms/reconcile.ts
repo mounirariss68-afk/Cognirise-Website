@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { desc, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import {
   type InventoryRecord,
   repositoryRoot,
@@ -12,6 +12,7 @@ import {
   personAvailabilityOperations,
   personGovernanceOperations,
 } from "./migration.js";
+import { validateCmsSnapshot } from "@workspace/api-zod";
 import { mapWithConcurrency } from "./media-reconciliation.js";
 import { objectStorageClient } from "./object-storage.js";
 
@@ -26,6 +27,7 @@ interface ExpectedReceipt {
   subjectType: "document" | "media";
   tolerateDigestDrift?: boolean;
   media?: ReturnType<typeof mediaMigrationOperations>[number];
+  publishCase?: boolean;
 }
 
 async function loadDatabase() {
@@ -62,6 +64,9 @@ async function inspectReconciliationState(
 ) {
   const {
     cmsDocumentsTable,
+    cmsMarketEditionsTable,
+    cmsRevisionsTable,
+    cmsMediaReferencesTable,
     cmsMediaAssetsTable,
     cmsMediaVersionsTable,
     cmsOperationReceiptsTable,
@@ -71,6 +76,7 @@ async function inspectReconciliationState(
     idempotencyKey: cmsOperationReceiptsTable.idempotencyKey,
     requestDigest: cmsOperationReceiptsTable.requestDigest,
     subjectId: cmsOperationReceiptsTable.subjectId,
+    operation: cmsOperationReceiptsTable.operation,
   }).from(cmsOperationReceiptsTable);
   const relevantReceipts = receipts.filter((receipt) => expected.has(receipt.idempotencyKey));
   const conflicts: Array<{ idempotencyKey: string; expectedDigest: string; actualDigest: string }> = [];
@@ -157,6 +163,40 @@ async function inspectReconciliationState(
   });
   invalid.push(...mediaInvalid.filter((item): item is string => Boolean(item)));
 
+  for (const receipt of relevantReceipts) {
+    const expectation = expected.get(receipt.idempotencyKey);
+    if (!expectation?.publishCase || expectation.subjectType !== "document"
+      || receipt.operation === "cms.inventory.case-study-baseline-preserved") continue;
+    const [edition] = await db.select({
+      id: cmsMarketEditionsTable.id,
+      publicationState: cmsMarketEditionsTable.publicationState,
+      publishedRevisionId: cmsMarketEditionsTable.publishedRevisionId,
+    }).from(cmsMarketEditionsTable).where(inArray(cmsMarketEditionsTable.documentId, [receipt.subjectId]));
+    if (!edition || edition.publicationState !== "published" || !edition.publishedRevisionId) {
+      invalid.push(`${receipt.idempotencyKey}: publication incomplete`);
+      continue;
+    }
+    const [revision] = await db.select({
+      payload: cmsRevisionsTable.payload,
+      workflowState: cmsRevisionsTable.workflowState,
+    }).from(cmsRevisionsTable).where(inArray(cmsRevisionsTable.id, [edition.publishedRevisionId]));
+    const validation = revision ? validateCmsSnapshot("case-study", revision.payload, "publish") : null;
+    const payload = revision?.payload as { mediaIds?: unknown[]; content?: Record<string, unknown> } | undefined;
+    const mediaId = Array.isArray(payload?.mediaIds) && payload.mediaIds.length === 1 && typeof payload.mediaIds[0] === "string"
+      ? payload.mediaIds[0] : null;
+    const [reference] = mediaId ? await db.select({
+      mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
+    }).from(cmsMediaReferencesTable).where(and(
+      eq(cmsMediaReferencesTable.documentId, receipt.subjectId),
+      eq(cmsMediaReferencesTable.fieldPath, `revision:${edition.publishedRevisionId}`),
+      eq(cmsMediaReferencesTable.assetId, mediaId),
+    )) : [];
+    if (!revision || revision.workflowState !== "approved" || !validation?.success
+      || !reference?.mediaVersionId) {
+      invalid.push(`${receipt.idempotencyKey}: approved summary or immutable media pin is incomplete`);
+    }
+  }
+
   const existingCount = relevantReceipts.length;
   const missingCount = expected.size - existingCount;
   return {
@@ -182,6 +222,11 @@ async function main() {
   }
 
   const expected = new Map<string, ExpectedReceipt>();
+  const governedCaseMediaPaths = new Set(
+    migrationOperations(inventory.records)
+      .filter((operation) => operation.kind === "case-study" && operation.mediaPaths.length === 1)
+      .map((operation) => operation.mediaPaths[0]),
+  );
   const governedLegacyExternalIds = new Set(
     personGovernanceOperations(inventory.records).map((operation) => operation.externalId),
   );
@@ -193,7 +238,14 @@ async function main() {
       // edition has subsequent revisions, import records a preservation
       // receipt rather than replacing that editorial history.
       tolerateDigestDrift: governedLegacyExternalIds.has(operation.externalId)
-        || operation.idempotencyKey.startsWith("cms-industry-contract-v7:"),
+        || operation.idempotencyKey.startsWith("cms-industry-contract-v7:")
+        || operation.idempotencyKey.startsWith("cms-case-study-baseline-v1:"),
+      publishCase: Boolean(operation.kind === "case-study"
+        && operation.mediaPaths.length === 1
+        && operation.payload.content
+        && (operation.payload.content as Record<string, unknown>).variant === "summary"
+        && (operation.payload.content as Record<string, unknown>).disclosure === "anonymized"
+        && (operation.payload.content as Record<string, unknown>).publicEvidenceStatus === "approved"),
     });
   }
   for (const operation of mediaMigrationOperations(inventory.records)
@@ -201,6 +253,7 @@ async function main() {
     expected.set(operation.idempotencyKey, {
       requestDigest: operation.requestDigest,
       subjectType: "media",
+      tolerateDigestDrift: governedCaseMediaPaths.has(operation.publicPath),
       media: operation,
     });
   }

@@ -45,7 +45,6 @@ export const GetNavigationSettingsResponse = zod.object({
  */
 
 
-
 export const UpdateNavigationSettingsBody = zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
@@ -87,7 +86,6 @@ export const submitEnquiryBodySourcePageMax = 200;
 export const submitEnquiryBodyWebsiteMax = 0;
 
 
-
 export const SubmitEnquiryBody = zod.object({
   "name": zod.string().min(submitEnquiryBodyNameMin).max(submitEnquiryBodyNameMax),
   "email": zod.string().max(submitEnquiryBodyEmailMax).regex(submitEnquiryBodyEmailRegExp),
@@ -118,7 +116,6 @@ export const subscribeNewsletterBodyEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+
 export const subscribeNewsletterBodySourcePageMax = 200;
 
 export const subscribeNewsletterBodyWebsiteMax = 0;
-
 
 
 export const SubscribeNewsletterBody = zod.object({
@@ -231,7 +228,6 @@ export const loginBodyEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
 export const loginBodyPasswordMax = 128;
 
 
-
 export const LoginBody = zod.object({
   "email": zod.string().max(loginBodyEmailMax).regex(loginBodyEmailRegExp),
   "password": zod.string().min(1).max(loginBodyPasswordMax)
@@ -339,7 +335,6 @@ export const confirmMfaResponseOneSessionOneUserEmailRegExp = new RegExp('^[^@\\
 export const confirmMfaResponseTwoRecoveryCodesItemRegExp = new RegExp('^[A-Z0-9]{4,}(?:-[A-Z0-9]{4,})*$');
 
 
-
 export const ConfirmMfaResponse = zod.object({
   "authenticated": zod.boolean(),
   "session": zod.union([zod.object({
@@ -380,7 +375,6 @@ export const recoverAuthBodyEmailMax = 254;
 export const recoverAuthBodyEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const recoverAuthBodyRecoveryCodeMin = 8;
 export const recoverAuthBodyRecoveryCodeMax = 64;
-
 
 
 export const RecoverAuthBody = zod.object({
@@ -459,7 +453,6 @@ export const changePasswordBodyCurrentPasswordMax = 128;
 
 export const changePasswordBodyNewPasswordMin = 12;
 export const changePasswordBodyNewPasswordMax = 128;
-
 
 
 export const ChangePasswordBody = zod.object({
@@ -602,7 +595,6 @@ export const getDashboardKpisResponsePublishFailuresMin = 0;
 export const getDashboardKpisResponsePublishFailuresMultipleOf = 1;
 
 
-
 export const GetDashboardKpisResponse = zod.object({
   "documents": zod.object({
   "draft": zod.number().min(getDashboardKpisResponseDocumentsDraftMin).multipleOf(getDashboardKpisResponseDocumentsDraftMultipleOf),
@@ -673,7 +665,6 @@ export const listDocumentsQueryPageSizeMultipleOf = 1;
 export const listDocumentsQuerySearchMax = 200;
 
 
-
 export const ListDocumentsQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listDocumentsQueryPageMultipleOf).default(listDocumentsQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listDocumentsQueryPageSizeMax).multipleOf(listDocumentsQueryPageSizeMultipleOf).default(listDocumentsQueryPageSizeDefault),
@@ -721,7 +712,6 @@ export const listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMin = 2;
 export const listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMax = 2;
 
 export const listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf = 1;
-
 
 
 export const ListDocumentsResponse = zod.object({
@@ -859,9 +849,26 @@ export const ListDocumentsResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -1046,7 +1053,6 @@ export const createDocumentResponseContentSevenHeroSourcesMax = 2;
 export const createDocumentResponseRevisionNumberMultipleOf = 1;
 
 
-
 export const CreateDocumentResponse = zod.object({
   "id": zod.string(),
   "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
@@ -1176,9 +1182,26 @@ export const CreateDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -1334,7 +1357,6 @@ export const getDocumentResponseContentSevenHeroSourcesMax = 2;
 export const getDocumentResponseRevisionNumberMultipleOf = 1;
 
 
-
 export const GetDocumentResponse = zod.object({
   "id": zod.string(),
   "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
@@ -1464,9 +1486,26 @@ export const GetDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -1608,7 +1647,6 @@ export const updateDocumentBodySeoNoIndexDefault = false;
 export const updateDocumentBodyRevisionNumberMultipleOf = 1;
 
 
-
 export const UpdateDocumentBody = zod.object({
   "slug": zod.string().max(updateDocumentBodySlugMax).regex(updateDocumentBodySlugRegExp).optional(),
   "title": zod.string().min(1).max(updateDocumentBodyTitleMax).optional(),
@@ -1654,7 +1692,6 @@ export const updateDocumentResponseContentSevenHeroSourcesMin = 2;
 export const updateDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const updateDocumentResponseRevisionNumberMultipleOf = 1;
-
 
 
 export const UpdateDocumentResponse = zod.object({
@@ -1786,9 +1823,26 @@ export const UpdateDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -1963,7 +2017,6 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSo
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSourcesMax = 2;
 
 
-
 export const ListDocumentRevisionsResponse = zod.object({
   "page": zod.number().min(1).multipleOf(listDocumentRevisionsResponseOnePageMultipleOf),
   "pageSize": zod.number().min(1).multipleOf(listDocumentRevisionsResponseOnePageSizeMultipleOf),
@@ -2104,9 +2157,26 @@ export const ListDocumentRevisionsResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -2321,7 +2391,6 @@ export const getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMin = 2;
 export const getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMax = 2;
 
 
-
 export const GetDocumentRevisionResponse = zod.object({
   "id": zod.string(),
   "documentId": zod.string(),
@@ -2456,9 +2525,26 @@ export const GetDocumentRevisionResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -2582,7 +2668,6 @@ export const SubmitDocumentParams = zod.object({
 export const submitDocumentBodyNoteMax = 1000;
 
 
-
 export const SubmitDocumentBody = zod.object({
   "note": zod.string().max(submitDocumentBodyNoteMax).optional(),
   "reviewerIds": zod.array(zod.string()).optional()
@@ -2616,7 +2701,6 @@ export const submitDocumentResponseContentSevenHeroSourcesMin = 2;
 export const submitDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const submitDocumentResponseRevisionNumberMultipleOf = 1;
-
 
 
 export const SubmitDocumentResponse = zod.object({
@@ -2748,9 +2832,26 @@ export const SubmitDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -2879,7 +2980,6 @@ export const PublishDocumentParams = zod.object({
 export const publishDocumentBodyNoteMax = 1000;
 
 
-
 export const PublishDocumentBody = zod.object({
   "revisionId": zod.string(),
   "note": zod.string().max(publishDocumentBodyNoteMax).optional()
@@ -2913,7 +3013,6 @@ export const publishDocumentResponseContentSevenHeroSourcesMin = 2;
 export const publishDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const publishDocumentResponseRevisionNumberMultipleOf = 1;
-
 
 
 export const PublishDocumentResponse = zod.object({
@@ -3045,9 +3144,26 @@ export const PublishDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -3176,7 +3292,6 @@ export const RollbackDocumentParams = zod.object({
 export const rollbackDocumentBodyNoteMax = 1000;
 
 
-
 export const RollbackDocumentBody = zod.object({
   "revisionId": zod.string(),
   "note": zod.string().max(rollbackDocumentBodyNoteMax).optional()
@@ -3210,7 +3325,6 @@ export const rollbackDocumentResponseContentSevenHeroSourcesMin = 2;
 export const rollbackDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const rollbackDocumentResponseRevisionNumberMultipleOf = 1;
-
 
 
 export const RollbackDocumentResponse = zod.object({
@@ -3342,9 +3456,26 @@ export const RollbackDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -3473,7 +3604,6 @@ export const ArchiveDocumentParams = zod.object({
 export const archiveDocumentBodyReasonMax = 1000;
 
 
-
 export const ArchiveDocumentBody = zod.object({
   "reason": zod.string().max(archiveDocumentBodyReasonMax).optional()
 })
@@ -3506,7 +3636,6 @@ export const archiveDocumentResponseContentSevenHeroSourcesMin = 2;
 export const archiveDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const archiveDocumentResponseRevisionNumberMultipleOf = 1;
-
 
 
 export const ArchiveDocumentResponse = zod.object({
@@ -3638,9 +3767,26 @@ export const ArchiveDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -3769,7 +3915,6 @@ export const RestoreDocumentParams = zod.object({
 export const restoreDocumentBodyReasonMax = 1000;
 
 
-
 export const RestoreDocumentBody = zod.object({
   "reason": zod.string().max(restoreDocumentBodyReasonMax).optional()
 })
@@ -3802,7 +3947,6 @@ export const restoreDocumentResponseContentSevenHeroSourcesMin = 2;
 export const restoreDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const restoreDocumentResponseRevisionNumberMultipleOf = 1;
-
 
 
 export const RestoreDocumentResponse = zod.object({
@@ -3934,9 +4078,26 @@ export const RestoreDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -4091,7 +4252,6 @@ export const previewDocumentResponseDocumentContentSevenHeroSourcesMax = 2;
 export const previewDocumentResponseRevisionNumberMultipleOf = 1;
 
 
-
 export const PreviewDocumentResponse = zod.object({
   "document": zod.object({
   "slug": zod.string(),
@@ -4219,9 +4379,26 @@ export const PreviewDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "variant": zod.enum(['summary', 'full']).optional(),
-  "disclosure": zod.enum(['named', 'anonymized', 'restricted']).optional(),
-  "mandate": zod.string().optional(),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
   "context": zod.string().optional(),
   "constraints": zod.array(zod.string()).optional(),
   "work": zod.array(zod.object({
@@ -4350,7 +4527,6 @@ export const listMarketEditionsQueryPageSizeMax = 100;
 export const listMarketEditionsQueryPageSizeMultipleOf = 1;
 
 
-
 export const ListMarketEditionsQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listMarketEditionsQueryPageMultipleOf).default(listMarketEditionsQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listMarketEditionsQueryPageSizeMax).multipleOf(listMarketEditionsQueryPageSizeMultipleOf).default(listMarketEditionsQueryPageSizeDefault)
@@ -4365,7 +4541,6 @@ export const listMarketEditionsResponseOneTotalMultipleOf = 1;
 
 export const listMarketEditionsResponseOneTotalPagesMin = 0;
 export const listMarketEditionsResponseOneTotalPagesMultipleOf = 1;
-
 
 
 export const ListMarketEditionsResponse = zod.object({
@@ -4402,7 +4577,6 @@ export const createMarketEditionBodyFallbackMarketCodeMax = 16;
 
 export const createMarketEditionBodyFallbackLocaleMin = 2;
 export const createMarketEditionBodyFallbackLocaleMax = 35;
-
 
 
 export const CreateMarketEditionBody = zod.object({
@@ -4466,7 +4640,6 @@ export const updateMarketEditionBodyDefaultLocaleMax = 35;
 export const updateMarketEditionBodyFallbackMarketCodeMax = 16;
 
 
-
 export const UpdateMarketEditionBody = zod.object({
   "code": zod.string().regex(updateMarketEditionBodyCodeRegExp).optional(),
   "displayName": zod.string().min(1).max(updateMarketEditionBodyDisplayNameMax).optional(),
@@ -4512,7 +4685,6 @@ export const listMediaQueryPageSizeMax = 100;
 export const listMediaQueryPageSizeMultipleOf = 1;
 
 export const listMediaQuerySearchMax = 200;
-
 
 
 export const ListMediaQueryParams = zod.object({
@@ -4588,7 +4760,6 @@ export const listMediaResponseTwoItemsItemFocalPointOneXMax = 1;
 
 export const listMediaResponseTwoItemsItemFocalPointOneYMin = 0;
 export const listMediaResponseTwoItemsItemFocalPointOneYMax = 1;
-
 
 
 export const ListMediaResponse = zod.object({
@@ -4789,7 +4960,6 @@ export const requestMediaUploadResponseMediaFocalPointOneYMin = 0;
 export const requestMediaUploadResponseMediaFocalPointOneYMax = 1;
 
 
-
 export const RequestMediaUploadResponse = zod.object({
   "media": zod.object({
   "id": zod.string(),
@@ -4910,7 +5080,6 @@ export const getMediaResponseFocalPointOneYMin = 0;
 export const getMediaResponseFocalPointOneYMax = 1;
 
 
-
 export const GetMediaResponse = zod.object({
   "id": zod.string(),
   "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
@@ -5024,7 +5193,6 @@ export const updateMediaBodyFocalPointOneYMin = 0;
 export const updateMediaBodyFocalPointOneYMax = 1;
 
 
-
 export const UpdateMediaBody = zod.object({
   "filename": zod.string().min(1).max(updateMediaBodyFilenameMax).optional(),
   "altText": zod.string().max(updateMediaBodyAltTextMax).nullish(),
@@ -5115,7 +5283,6 @@ export const updateMediaResponseFocalPointOneXMax = 1;
 
 export const updateMediaResponseFocalPointOneYMin = 0;
 export const updateMediaResponseFocalPointOneYMax = 1;
-
 
 
 export const UpdateMediaResponse = zod.object({
@@ -5334,7 +5501,6 @@ export const finalizeMediaUploadResponseFocalPointOneYMin = 0;
 export const finalizeMediaUploadResponseFocalPointOneYMax = 1;
 
 
-
 export const FinalizeMediaUploadResponse = zod.object({
   "id": zod.string(),
   "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
@@ -5397,7 +5563,6 @@ export const listSubmissionsQueryPageSizeMax = 100;
 export const listSubmissionsQueryPageSizeMultipleOf = 1;
 
 export const listSubmissionsQuerySearchMax = 200;
-
 
 
 export const ListSubmissionsQueryParams = zod.object({
@@ -5481,7 +5646,6 @@ export const UpdateSubmissionParams = zod.object({
 export const updateSubmissionBodyNotesMax = 4000;
 
 
-
 export const UpdateSubmissionBody = zod.object({
   "status": zod.enum(['new', 'open', 'contacted', 'resolved', 'spam', 'unsubscribed']).optional(),
   "ownerId": zod.string().nullish(),
@@ -5522,7 +5686,6 @@ export const listUsersQueryPageSizeMax = 100;
 export const listUsersQueryPageSizeMultipleOf = 1;
 
 export const listUsersQuerySearchMax = 200;
-
 
 
 export const ListUsersQueryParams = zod.object({
@@ -5619,7 +5782,6 @@ export const updateUserBodyNameMin = 2;
 export const updateUserBodyNameMax = 120;
 
 
-
 export const UpdateUserBody = zod.object({
   "name": zod.string().min(updateUserBodyNameMin).max(updateUserBodyNameMax).optional(),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']).optional(),
@@ -5680,7 +5842,6 @@ export const revokeUserSessionsResponseRevokedCountMin = 0;
 export const revokeUserSessionsResponseRevokedCountMultipleOf = 1;
 
 
-
 export const RevokeUserSessionsResponse = zod.object({
   "revokedCount": zod.number().min(revokeUserSessionsResponseRevokedCountMin).multipleOf(revokeUserSessionsResponseRevokedCountMultipleOf),
   "revokedAt": zod.coerce.date()
@@ -5696,7 +5857,6 @@ export const listAuditEventsQueryPageMultipleOf = 1;
 export const listAuditEventsQueryPageSizeDefault = 25;
 export const listAuditEventsQueryPageSizeMax = 100;
 export const listAuditEventsQueryPageSizeMultipleOf = 1;
-
 
 
 export const ListAuditEventsQueryParams = zod.object({
@@ -5757,7 +5917,6 @@ export const listPublishedContentQueryPageSizeMax = 100;
 export const listPublishedContentQueryPageSizeMultipleOf = 1;
 
 
-
 export const ListPublishedContentQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listPublishedContentQueryPageMultipleOf).default(listPublishedContentQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listPublishedContentQueryPageSizeMax).multipleOf(listPublishedContentQueryPageSizeMultipleOf).default(listPublishedContentQueryPageSizeDefault),
@@ -5781,7 +5940,6 @@ export const listPublishedContentResponseTwoItemsItemMediaItemWidthMultipleOf = 
 export const listPublishedContentResponseTwoItemsItemMediaItemHeightMultipleOf = 1;
 
 export const listPublishedContentResponseTwoItemsItemRevisionMultipleOf = 1;
-
 
 
 export const ListPublishedContentResponse = zod.object({
@@ -5845,7 +6003,6 @@ export const getPublishedContentResponseMediaItemWidthMultipleOf = 1;
 export const getPublishedContentResponseMediaItemHeightMultipleOf = 1;
 
 export const getPublishedContentResponseRevisionMultipleOf = 1;
-
 
 
 export const GetPublishedContentResponse = zod.object({
@@ -5915,7 +6072,6 @@ export const getPublicHeroFilmResponseSourcesMax = 2;
 export const getPublicHeroFilmResponseRevisionMultipleOf = 1;
 
 
-
 export const GetPublicHeroFilmResponse = zod.object({
   "slot": zod.enum(['homepage', 'industries']),
   "poster": zod.object({
@@ -5951,7 +6107,6 @@ export const getPublicSitemapResponseItemsItemPriorityMin = 0;
 export const getPublicSitemapResponseItemsItemPriorityMax = 1;
 
 
-
 export const GetPublicSitemapResponse = zod.object({
   "items": zod.array(zod.object({
   "url": zod.string(),
@@ -5965,12 +6120,9 @@ export const GetPublicSitemapResponse = zod.object({
 })),
   "generatedAt": zod.coerce.date()
 })
-
-
 /**
  * @summary Record a consent-aware first-party event
  */
-export const recordAnalyticsEventBodyNameRegExp = new RegExp('^[a-z][a-z0-9_.-]{1,79}$');
 export const recordAnalyticsEventBodyPageMax = 500;
 
 export const recordAnalyticsEventBodyReferrerMax = 1000;
@@ -5980,11 +6132,10 @@ export const recordAnalyticsEventBodyMarketMax = 35;
 export const recordAnalyticsEventBodyConsentVersionMax = 40;
 
 
-
 export const RecordAnalyticsEventBody = zod.object({
   "visitorId": zod.string(),
   "sessionId": zod.string(),
-  "name": zod.string().regex(recordAnalyticsEventBodyNameRegExp),
+  "name": zod.enum(['page_view', 'cta_click', 'value_scan_submit', 'newsletter_subscribe', 'publication_view', 'web_vital', 'service_card_activated', 'service_destination_clicked', 'case_card_open', 'case_sector_filter', 'case_visual_enlarge', 'case_detail_visit', 'case_cta']),
   "occurredAt": zod.coerce.date(),
   "page": zod.string().max(recordAnalyticsEventBodyPageMax),
   "referrer": zod.string().max(recordAnalyticsEventBodyReferrerMax).nullish(),
@@ -6007,7 +6158,6 @@ export const recordAnalyticsConsentBodyVersionMax = 40;
 export const recordAnalyticsConsentBodySourceMax = 100;
 
 
-
 export const RecordAnalyticsConsentBody = zod.object({
   "visitorId": zod.string(),
   "version": zod.string().min(1).max(recordAnalyticsConsentBodyVersionMax),
@@ -6024,5 +6174,4 @@ export const RecordAnalyticsConsentResponse = zod.object({
   "marketing": zod.boolean(),
   "recordedAt": zod.coerce.date()
 })
-
 

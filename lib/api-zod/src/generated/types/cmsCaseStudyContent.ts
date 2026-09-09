@@ -5,9 +5,16 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { CmsCaseStudyContentDeliveryStage } from './cmsCaseStudyContentDeliveryStage';
 import type { CmsCaseStudyContentDisclosure } from './cmsCaseStudyContentDisclosure';
+import type { CmsCaseStudyContentEngagementType } from './cmsCaseStudyContentEngagementType';
+import type { CmsCaseStudyContentImpactClassification } from './cmsCaseStudyContentImpactClassification';
+import type { CmsCaseStudyContentPublicEvidenceStatus } from './cmsCaseStudyContentPublicEvidenceStatus';
+import type { CmsCaseStudyContentRelatedIndustriesItem } from './cmsCaseStudyContentRelatedIndustriesItem';
 import type { CmsCaseStudyContentSchemaVersion } from './cmsCaseStudyContentSchemaVersion';
+import type { CmsCaseStudyContentSector } from './cmsCaseStudyContentSector';
 import type { CmsCaseStudyContentVariant } from './cmsCaseStudyContentVariant';
+import type { CmsCaseStudyVisual } from './cmsCaseStudyVisual';
 import type { CmsEvidence } from './cmsEvidence';
 import type { CmsRichBlock } from './cmsRichBlock';
 import type { CmsSource } from './cmsSource';
@@ -15,9 +22,19 @@ import type { CmsVisibility } from './cmsVisibility';
 
 export interface CmsCaseStudyContent {
   schemaVersion: CmsCaseStudyContentSchemaVersion;
-  variant?: CmsCaseStudyContentVariant;
-  disclosure?: CmsCaseStudyContentDisclosure;
-  mandate?: string;
+  variant: CmsCaseStudyContentVariant;
+  disclosure: CmsCaseStudyContentDisclosure;
+  sector: CmsCaseStudyContentSector;
+  organizationDescriptor: string;
+  engagementType: CmsCaseStudyContentEngagementType;
+  deliveryStage: CmsCaseStudyContentDeliveryStage;
+  impactClassification: CmsCaseStudyContentImpactClassification;
+  impactStatement: string;
+  disclosureNote: string;
+  publicEvidenceStatus: CmsCaseStudyContentPublicEvidenceStatus;
+  relatedIndustries: CmsCaseStudyContentRelatedIndustriesItem[];
+  visual: CmsCaseStudyVisual;
+  mandate: string;
   context?: string;
   constraints?: string[];
   work?: CmsRichBlock[];

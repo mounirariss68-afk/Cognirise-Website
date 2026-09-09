@@ -13,6 +13,7 @@ import {
   migrationOperations,
   resultDigest,
 } from "./migration.js";
+import { CASE_STUDY_TAXONOMY_COUNTS } from "./case-studies.js";
 
 const args = process.argv.slice(2);
 const inventoryPath = args.find((argument) => argument.startsWith("--inventory="))?.slice(12) ?? "scripts/cms/output/inventory.json";
@@ -58,6 +59,8 @@ async function verifyDatabase(records: InventoryRecord[]) {
     pool,
   } = await import("@workspace/db");
   try {
+    const caseMediaPaths = new Set(caseStudyMediaPaths(records));
+    const mediaOperations = mediaMigrationOperations(records);
     return await db.transaction(async (tx) => {
       const [canonicalMarket] = await tx.select().from(marketEditionsTable)
         .where(eq(marketEditionsTable.code, "uae"));
@@ -82,28 +85,19 @@ async function verifyDatabase(records: InventoryRecord[]) {
       const mediaByPath = new Map<string, string>();
       let durableMediaObjects = 0;
       let mediaReceiptConflicts = 0;
-      for (const operation of mediaMigrationOperations(records).filter((item) => item.cmsOwnership === "cms-candidate")) {
+      for (const operation of mediaOperations.filter((item) => item.cmsOwnership === "cms-candidate")) {
         const [asset] = await tx.select({
           id: cmsMediaAssetsTable.id,
           status: cmsMediaAssetsTable.status,
           checksum: cmsMediaAssetsTable.checksum,
           byteSize: cmsMediaAssetsTable.byteSize,
           storageKey: cmsMediaAssetsTable.storageKey,
-          altText: cmsMediaAssetsTable.altText,
-          credit: cmsMediaAssetsTable.credit,
-          collection: cmsMediaAssetsTable.collection,
-          linkedinAssetKind: cmsMediaAssetsTable.linkedinAssetKind,
-          campaignMetadata: cmsMediaAssetsTable.campaignMetadata,
         }).from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.checksum, operation.checksum));
         if (
           !asset ||
-          asset.status !== "pending-review" ||
-          asset.byteSize !== operation.byteSize ||
-          asset.altText !== operation.altText ||
-          asset.credit !== operation.credit ||
-          asset.collection !== operation.collection ||
-          asset.linkedinAssetKind !== operation.linkedinAssetKind ||
-          JSON.stringify(canonical(asset.campaignMetadata)) !== JSON.stringify(canonical(operation.campaignMetadata))
+           !((caseMediaPaths.has(operation.publicPath) && (asset.status === "active" || asset.status === "ready"))
+             || (!caseMediaPaths.has(operation.publicPath) && asset.status === "pending-review")) ||
+          asset.byteSize !== operation.byteSize
         ) {
           throw new Error(`Missing pending-review media parity for ${operation.publicPath}.`);
         }
@@ -141,6 +135,8 @@ async function verifyDatabase(records: InventoryRecord[]) {
 
       const approvedRevisionIds: string[] = [];
       const draftRevisionIds: string[] = [];
+      const publishedSummaryExternalIds: string[] = [];
+      let publishedSummaryMediaReady = true;
       for (const operation of migrationOperations(records)) {
         const [document] = await tx.select({
           id: cmsDocumentsTable.id,
@@ -159,9 +155,19 @@ async function verifyDatabase(records: InventoryRecord[]) {
           eq(cmsMarketEditionsTable.documentId, document.id),
           eq(cmsMarketEditionsTable.market, "uae"),
         ));
-        if (!edition || edition.locale !== "en" || edition.publicationState !== "draft" || edition.publishedRevisionId) {
+        const isSummaryCase = operation.kind === "case-study" && operation.mediaPaths.length === 1;
+        if (!edition || edition.locale !== "en"
+          || (isSummaryCase
+            ? edition.publicationState !== "published" || !edition.publishedRevisionId
+            : edition.publicationState !== "draft" || edition.publishedRevisionId)) {
           throw new Error(`Missing isolated UAE/English draft parity for ${operation.externalId}.`);
         }
+        const revisionPredicate = isSummaryCase
+          ? eq(cmsRevisionsTable.id, edition.publishedRevisionId!)
+          : and(
+              eq(cmsRevisionsTable.editionId, edition.id),
+              eq(cmsRevisionsTable.revisionNumber, 1),
+            );
         const [revision] = await tx.select({
           id: cmsRevisionsTable.id,
           payload: cmsRevisionsTable.payload,
@@ -169,22 +175,19 @@ async function verifyDatabase(records: InventoryRecord[]) {
           workflowState: cmsRevisionsTable.workflowState,
           createdByUserId: cmsRevisionsTable.createdByUserId,
           approvedByUserId: cmsRevisionsTable.approvedByUserId,
-        }).from(cmsRevisionsTable).where(and(
-          eq(cmsRevisionsTable.editionId, edition.id),
-          eq(cmsRevisionsTable.revisionNumber, 1),
-        ));
+        }).from(cmsRevisionsTable).where(revisionPredicate);
         if (
           !revision ||
-          revision.workflowState !== "draft" ||
+          (isSummaryCase ? revision.workflowState !== "approved" : revision.workflowState !== "draft") ||
           revision.createdByUserId !== serviceAccount.id ||
-          revision.approvedByUserId
+          (isSummaryCase ? !revision.approvedByUserId : revision.approvedByUserId)
         ) throw new Error(`Missing unapproved draft revision parity for ${operation.externalId}.`);
-        const validation = validateCmsSnapshot(operation.kind as CmsDocumentKind, revision.payload, "draft");
+        const validation = validateCmsSnapshot(operation.kind as CmsDocumentKind, revision.payload, isSummaryCase ? "publish" : "draft");
         if (!validation.success) throw new Error(`${operation.externalId}: ${validation.errors.join("; ")}`);
         if (revision.contentDigest !== resultDigest(validation.data)) {
           throw new Error(`Revision digest mismatch for ${operation.externalId}.`);
         }
-        if (JSON.stringify(canonical(validation.data.content)) !== JSON.stringify(canonical({
+        if (!isSummaryCase && JSON.stringify(canonical(validation.data.content)) !== JSON.stringify(canonical({
           ...(operation.payload.content as Record<string, unknown>),
           ...(operation.mediaPaths[0] && (operation.kind === "platform" || operation.kind === "publication" || operation.kind === "industry" || operation.kind === "framework")
             ? { heroMediaId: mediaByPath.get(operation.mediaPaths[0]) }
@@ -196,7 +199,10 @@ async function verifyDatabase(records: InventoryRecord[]) {
         }
         const references = await tx.select({ assetId: cmsMediaReferencesTable.assetId })
           .from(cmsMediaReferencesTable)
-          .where(eq(cmsMediaReferencesTable.documentId, document.id));
+          .where(and(
+            eq(cmsMediaReferencesTable.documentId, document.id),
+            eq(cmsMediaReferencesTable.fieldPath, `revision:${revision.id}`),
+          ));
         if (references.length !== expectedMedia.length) throw new Error(`Media-reference parity mismatch for ${operation.externalId}.`);
         const [receipt] = await tx.select({
           requestDigest: cmsOperationReceiptsTable.requestDigest,
@@ -214,15 +220,42 @@ async function verifyDatabase(records: InventoryRecord[]) {
           receipt.requestDigest !== operation.requestDigest ||
           receipt.subjectId !== String(document.id) ||
           !audit ||
-          audit.action !== "cms.inventory.imported" ||
+          audit.action !== (isSummaryCase
+            ? "cms.inventory.case-study-summary-published"
+            : "cms.inventory.imported") ||
           audit.targetId !== String(document.id)
         ) throw new Error(`Receipt/audit parity mismatch for ${operation.externalId}.`);
-        draftRevisionIds.push(String(revision.id));
+        if (isSummaryCase) approvedRevisionIds.push(String(revision.id));
+        else draftRevisionIds.push(String(revision.id));
+        if (isSummaryCase) {
+          publishedSummaryExternalIds.push(operation.externalId);
+          const [publishedReference] = await tx.select({
+            mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
+          }).from(cmsMediaReferencesTable).where(and(
+            eq(cmsMediaReferencesTable.documentId, document.id),
+            eq(cmsMediaReferencesTable.fieldPath, `revision:${revision.id}`),
+          ));
+          const [publishedMediaVersion] = publishedReference?.mediaVersionId
+            ? await tx.select({
+                checksum: cmsMediaVersionsTable.checksum,
+                storageKey: cmsMediaVersionsTable.storageKey,
+              }).from(cmsMediaVersionsTable)
+                .where(eq(cmsMediaVersionsTable.id, publishedReference.mediaVersionId))
+            : [];
+          const expectedCaseMedia = mediaOperations.find((item) =>
+            item.publicPath === operation.mediaPaths[0]
+          );
+          if (!publishedMediaVersion
+            || publishedMediaVersion.checksum !== expectedCaseMedia?.checksum
+            || publishedMediaVersion.storageKey.startsWith("deferred/")) {
+            publishedSummaryMediaReady = false;
+          }
+        }
       }
       return {
         documents: migrationOperations(records).length,
         editions: migrationOperations(records).length,
-        revisions: draftRevisionIds.length,
+        revisions: draftRevisionIds.length + approvedRevisionIds.length,
         media: mediaByPath.size,
         durableMediaObjects,
         mediaReceiptConflicts,
@@ -231,11 +264,20 @@ async function verifyDatabase(records: InventoryRecord[]) {
         audits: migrationOperations(records).length + mediaByPath.size,
         approvedRevisionIds,
         draftRevisionIds,
+        publishedSummaryExternalIds,
+        publishedSummaryMediaReady,
       };
     });
   } finally {
     await pool.end();
   }
+}
+
+function caseStudyMediaPaths(records: InventoryRecord[]) {
+  return new Set(records.filter((record) => record.type === "case-study")
+    .flatMap((record) => Array.isArray(record.fields.mediaPaths)
+      ? record.fields.mediaPaths.filter((path): path is string => typeof path === "string")
+      : []));
 }
 
 async function main() {
@@ -260,6 +302,7 @@ async function main() {
     industry: inventory.expectedCounts.industries,
     framework: inventory.expectedCounts.frameworks,
     asset: inventory.expectedCounts.assets,
+    "case-study": inventory.expectedCounts.caseStudies,
   };
   for (const [type, expected] of Object.entries(expectedByType)) {
     if (typeof expected !== "number") {
@@ -267,6 +310,23 @@ async function main() {
       continue;
     }
     if (count(type) !== expected) errors.push(`Expected ${expected} ${type} records, found ${count(type)}.`);
+  }
+  const expectedTaxonomy = CASE_STUDY_TAXONOMY_COUNTS;
+  if (inventory.expectedCounts.caseStudies !== 21) {
+    errors.push(`Expected exactly 21 case studies, found ${inventory.expectedCounts.caseStudies ?? "missing"}.`);
+  }
+  const actualTaxonomy = Object.fromEntries(Object.keys(expectedTaxonomy).map((sector) => [
+    sector,
+    inventory.records.filter((record) =>
+      record.type === "case-study"
+      && (record.fields.content as Record<string, unknown> | undefined)?.sector === sector,
+    ).length,
+  ]));
+  if (JSON.stringify(actualTaxonomy) !== JSON.stringify(expectedTaxonomy)) {
+    errors.push(`Case-study taxonomy mismatch: expected ${JSON.stringify(expectedTaxonomy)}, found ${JSON.stringify(actualTaxonomy)}.`);
+  }
+  if (JSON.stringify(inventory.expectedCounts.caseStudyTaxonomy) !== JSON.stringify(expectedTaxonomy)) {
+    errors.push("Inventory expectedCounts.caseStudyTaxonomy does not match the controlled taxonomy.");
   }
   const operations = migrationOperations(inventory.records);
   const mediaOperations = mediaMigrationOperations(inventory.records);
@@ -304,13 +364,21 @@ async function main() {
     },
     release: {
       approvedRevisionIds: database?.approvedRevisionIds ?? [],
-      cmsAuthoritativeCollections: [],
+      cmsAuthoritativeCollections: database?.publishedSummaryExternalIds.length === 21
+        ? ["case-studies"]
+        : [],
       compiledFallbackCollections: ["people", "partners", "platforms", "publications", "case-studies", "industries", "frameworks"],
-      fallbackRemovalDecisions: "No fallback was removed; all migrated content remains an unapproved draft.",
-      mediaReadiness: database && database.durableMediaObjects === database.media
-        ? "Candidate objects are present but remain pending rights and accessibility review."
-        : "Candidate metadata is present; durable object upload, rights, and accessibility remain unresolved.",
-      unresolvedDrafts: operations.map((operation) => operation.externalId),
+      fallbackRemovalDecisions: database
+        ? database.publishedSummaryExternalIds.length === 21
+          ? "Case-study summary fallbacks are eligible for removal; all other collections remain compiled fallbacks."
+          : "No fallback was removed; published case-study summary coverage is incomplete."
+        : "Dry run only; no fallback was removed and no database publication was verified.",
+      mediaReadiness: database
+        ? database.publishedSummaryMediaReady && database.durableMediaObjects === database.media
+          ? "Verified durable media and immutable pins are ready for published case-study summaries; editorial rights and accessibility remain governed in CMS."
+          : "Verified database state still has incomplete durable media or immutable summary pins."
+        : "Not verified in dry run; durable media, immutable pins, rights, and accessibility require database verification.",
+      unresolvedDrafts: database ? database.draftRevisionIds : [],
       candidatePublicUrls: publicUrls,
     },
     rollback: {

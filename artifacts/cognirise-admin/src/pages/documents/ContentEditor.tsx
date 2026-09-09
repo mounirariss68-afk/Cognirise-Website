@@ -229,8 +229,22 @@ export function ContentEditor({ kind, value, onChange, errors }: {
         <div className="grid gap-4 sm:grid-cols-2">
           <Choice label="Case variant" value={value.variant ?? "summary"} options={["summary", "full"]} onChange={(next) => set("variant", next)} />
           <Choice label="Disclosure" value={value.disclosure ?? "restricted"} options={["named", "anonymized", "restricted"]} onChange={(next) => set("disclosure", next)} />
+          <Choice label="Sector" value={value.sector ?? ""} options={["Financial Services", "Telecoms", "Travel & Hospitality", "Public Sector", "Manufacturing & Industrial", "Life Sciences", "Retail & Consumer", "Professional Services", "Security & AI Infrastructure"]} onChange={(next) => set("sector", next)} />
+          <Choice label="Engagement type" value={value.engagementType ?? ""} options={["client-delivery", "product-demonstration", "concept", "proposal-prototype"]} onChange={(next) => set("engagementType", next)} />
+          <Choice label="Delivery stage" value={value.deliveryStage ?? ""} options={["production", "pilot", "proof-of-concept", "mvp", "demo", "concept", "proposal"]} onChange={(next) => set("deliveryStage", next)} />
+          <Choice label="Impact classification" value={value.impactClassification ?? ""} options={["observed", "pilot-demo", "simulated", "projected", "unavailable"]} onChange={(next) => set("impactClassification", next)} />
+          <Choice label="Public evidence status" value={value.publicEvidenceStatus ?? "needs-review"} options={["approved", "needs-review", "restricted"]} onChange={(next) => set("publicEvidenceStatus", next)} />
           <Field label="Hero media ID" value={value.heroMediaId} onChange={(next) => set("heroMediaId", next || undefined)} />
+          <Field label="Organization descriptor" value={value.organizationDescriptor} onChange={(next) => set("organizationDescriptor", next)} />
+          <Choice label="Reconstruction template" value={value.visual?.template ?? ""} options={["knowledge-assistant", "analytics-dashboard", "workflow-console", "commerce-experience", "governance-console", "operations-console"]} onChange={(next) => set("visual", { ...value.visual, kind: "illustrative-interface-reconstruction", template: next })} />
         </div>
+        <Area label="Impact statement" value={value.impactStatement ?? ""} onChange={(next) => set("impactStatement", next)} />
+        <Area label="Disclosure note" value={value.disclosureNote ?? ""} onChange={(next) => set("disclosureNote", next)} />
+        <Area label="Related website industries" value={lines(value.relatedIndustries)} onChange={(next) => set("relatedIndustries", stringLines(next))} placeholder="financial-services, telecoms, travel-hospitality, energy-resources, public-sector or education; one per line" />
+        <Area label="Visual caption" value={value.visual?.caption ?? ""} onChange={(next) => set("visual", { ...value.visual, kind: "illustrative-interface-reconstruction", caption: next })} />
+        <Area label="Visual alternative text" value={value.visual?.altText ?? ""} onChange={(next) => set("visual", { ...value.visual, kind: "illustrative-interface-reconstruction", altText: next })} />
+        <Area label="Visual text equivalent" value={value.visual?.textEquivalent ?? ""} onChange={(next) => set("visual", { ...value.visual, kind: "illustrative-interface-reconstruction", textEquivalent: next })} />
+        <Area label="Anonymized fixture labels" value={lines(value.visual?.fixtureLabels)} onChange={(next) => set("visual", { ...value.visual, kind: "illustrative-interface-reconstruction", fixtureLabels: stringLines(next) })} placeholder="One public-safe interface label per line" />
         <Area label="Mandate" value={value.mandate ?? ""} onChange={(next) => set("mandate", next)} />
         <Area label="Context" value={value.context ?? ""} onChange={(next) => set("context", next)} />
         <Area label="Constraints" value={lines(value.constraints)} onChange={(next) => set("constraints", stringLines(next))} />

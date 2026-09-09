@@ -1,5 +1,6 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { recordAnalyticsConsent, recordAnalyticsEvent } from "@workspace/api-client-react";
+import type { AnalyticsEventInputName } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import { useMarketStore, type Market } from "@/store/market";
 
@@ -46,7 +47,7 @@ export function useAnalyticsConsent() {
   );
 }
 
-export function trackEvent(name: string, market: Market, properties?: Record<string, unknown>) {
+export function trackEvent(name: AnalyticsEventInputName, market: Market, properties?: Record<string, unknown>) {
   if (!hasAnalyticsConsent() || typeof window === "undefined") return;
   void recordAnalyticsEvent({
     visitorId: id(window.localStorage, VISITOR_KEY),
@@ -79,7 +80,7 @@ export function AnalyticsBridge() {
     if (consent) {
       trackEvent("page_view", market);
       if (previousMarket.current !== market) {
-        trackEvent("market_change", market, { from: previousMarket.current, to: market });
+        trackEvent("page_view", market, { navigation: "market_change", from: previousMarket.current, to: market });
       }
     }
     previousMarket.current = market;

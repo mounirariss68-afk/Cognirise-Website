@@ -5,13 +5,13 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { AnalyticsEventInputName } from './analyticsEventInputName';
 import type { AnalyticsEventInputProperties } from './analyticsEventInputProperties';
 
 export interface AnalyticsEventInput {
   visitorId: string;
   sessionId: string;
-  /** @pattern ^[a-z][a-z0-9_.-]{1,79}$ */
-  name: string;
+  name: AnalyticsEventInputName;
   occurredAt: Date;
   /** @maxLength 500 */
   page: string;

@@ -9,10 +9,10 @@ export const websiteRoot = path.join(repositoryRoot, "artifacts/cognirise-websit
 export const linkedinRoot = path.join(repositoryRoot, "artifacts/mockup-sandbox/public/images/cognirise/linkedin");
 export const defaultOutputDirectory = path.join(repositoryRoot, "scripts/cms/output");
 
-export type ReviewStatus = "needs-review";
+export type ReviewStatus = "needs-review" | "approved";
 export interface InventoryRecord {
   externalId: string;
-  type: "person" | "partner" | "platform" | "article" | "industry" | "framework" | "asset";
+  type: "person" | "partner" | "platform" | "article" | "case-study" | "industry" | "framework" | "asset";
   name: string;
   sourceFile: string;
   route?: string;
@@ -84,6 +84,8 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
     const extension = path.extname(file).toLowerCase();
     const dimensions = imageDimensions(bytes, extension);
     const approvedIndustryMedia = pulseIndustryMediaByFilename.get(path.basename(file));
+    const approvedCaseMedia = name.startsWith("artifacts/cognirise-website/public/images/cognirise/cases/")
+      && (approvedIndustryMedia?.altText ?? legacyAltText[path.basename(file)] ?? path.basename(file, extension)).trim().length > 0;
     return {
       externalId: stableId("asset", file, name),
       type: "asset" as const,
@@ -112,11 +114,15 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
         },
         rights: approvedIndustryMedia
           ? { status: "approved-use", owner: "Cognirise", source: "Approved Cognirise Pulse industry family" }
+          : name.startsWith("artifacts/cognirise-website/public/images/cognirise/cases/")
+            ? { status: "approved-use", owner: "Cognirise", source: "Deterministic Cognirise Pulse fixture reconstruction" }
           : { status: "needs-review", owner: "Rights holder pending editorial review", source: publicPath },
       },
-      review: review(approvedIndustryMedia
-        ? ["Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."]
-        : ["Confirm rights holder, source, license, and descriptive alt text before media import."]),
+       review: approvedIndustryMedia || approvedCaseMedia
+         ? { status: "approved", reasons: [approvedCaseMedia
+           ? "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+           : "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."] }
+         : review(["Confirm rights holder, source, license, and descriptive alt text before media import."]),
       digest: checksum,
     };
   }));

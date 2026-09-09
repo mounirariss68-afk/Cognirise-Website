@@ -7,6 +7,7 @@
  */
 
 export * from './analyticsEventInput';
+export * from './analyticsEventInputName';
 export * from './analyticsEventInputProperties';
 export * from './analyticsReceipt';
 export * from './apiError';
@@ -21,9 +22,18 @@ export * from './authBootstrapInput';
 export * from './authResult';
 export * from './badRequestResponse';
 export * from './cmsCaseStudyContent';
+export * from './cmsCaseStudyContentDeliveryStage';
 export * from './cmsCaseStudyContentDisclosure';
+export * from './cmsCaseStudyContentEngagementType';
+export * from './cmsCaseStudyContentImpactClassification';
+export * from './cmsCaseStudyContentPublicEvidenceStatus';
+export * from './cmsCaseStudyContentRelatedIndustriesItem';
 export * from './cmsCaseStudyContentSchemaVersion';
+export * from './cmsCaseStudyContentSector';
 export * from './cmsCaseStudyContentVariant';
+export * from './cmsCaseStudyVisual';
+export * from './cmsCaseStudyVisualKind';
+export * from './cmsCaseStudyVisualTemplate';
 export * from './cmsEvidence';
 export * from './cmsFrameworkContent';
 export * from './cmsFrameworkContentSchemaVersion';

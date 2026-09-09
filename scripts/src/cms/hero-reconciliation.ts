@@ -9,7 +9,7 @@ import {
   type GovernedHeroMedia,
   type HeroSlot,
 } from "./hero-media.js";
-import { validateCmsSnapshot } from "@workspace/api-zod";
+import { CMS_HERO_DOCUMENT_SLUGS, validateCmsSnapshot } from "@workspace/api-zod";
 import { objectStorageClient } from "./object-storage.js";
 import { repositoryRoot } from "./common.js";
 
@@ -247,7 +247,7 @@ async function reconcileConfiguration(
 ) {
   const legacyReceiptKey = `${PREFIX}:configuration:${slot}`;
   const receiptKey = `${CONFIGURATION_V2_PREFIX}:configuration:${slot}`;
-  const slug = `site-${slot}-hero`;
+  const slug = CMS_HERO_DOCUMENT_SLUGS[slot];
   const title = `${slot === "homepage" ? "Homepage" : "Industries"} hero`;
   const payload = heroConfigurationSnapshot(slot, governed);
   const validation = validateCmsSnapshot("site-configuration", payload, "publish");
