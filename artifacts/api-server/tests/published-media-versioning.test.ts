@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { getEventListeners } from "node:events";
 import { Readable } from "node:stream";
 import test from "node:test";
 
@@ -38,7 +39,12 @@ test("public media stays on the revision pin when a newer asset version appears"
       versionId: "00000000-0000-4000-8000-000000000102",
     },
   };
-  const versions = new Map([
+  const versions = new Map<string, {
+    storageKey: string;
+    bytes: string | Buffer;
+    width: number;
+    metadata: Record<string, unknown>;
+  }>([
     [revisions.first.versionId, {
       storageKey: "private/cms-media/asset/v1.png",
       bytes: "approved-version-one",
@@ -59,6 +65,9 @@ test("public media stays on the revision pin when a newer asset version appears"
   let latestVersion = revisions.first;
   let assetAltText: string | null = "Approved artwork";
   let assetCredit: string | null = "Cognirise";
+  let slowNextDownload = false;
+  const deliveredStreams: Readable[] = [];
+  const storageErrorListeners = new Map<Readable, (error: Error) => void>();
   const now = new Date("2026-09-07T00:00:00Z");
   const snapshot = {
     slug: "pinned-platform",
@@ -317,7 +326,21 @@ test("public media stays on the revision pin when a newer asset version appears"
     );
     if (!version) throw new Error("Missing test object");
     const bytes = Buffer.from(version.bytes);
-    return Readable.from(range ? bytes.subarray(range.start, range.end + 1) : bytes);
+    const selected = range ? bytes.subarray(range.start, range.end + 1) : bytes;
+    const stream = slowNextDownload
+      ? Readable.from((async function* () {
+          for (let offset = 0; offset < selected.length; offset += 16 * 1024) {
+            await new Promise((resolve) => setTimeout(resolve, 2));
+            yield selected.subarray(offset, offset + 16 * 1024);
+          }
+        })())
+      : Readable.from(selected);
+    const storageErrorListener = () => {};
+    stream.on("error", storageErrorListener);
+    storageErrorListeners.set(stream, storageErrorListener);
+    slowNextDownload = false;
+    deliveredStreams.push(stream);
+    return stream;
   });
   t.mock.method(protectedMediaDelivery, "download", publicMediaDelivery.download);
 
@@ -365,6 +388,48 @@ test("public media stays on the revision pin when a newer asset version appears"
   });
   assert.equal(unsatisfiable.status, 416);
   assert.equal(unsatisfiable.headers.get("content-range"), "bytes */20");
+
+  const approvedVersion = versions.get(revisions.first.versionId)!;
+  const approvedBytes = approvedVersion.bytes;
+  approvedVersion.bytes = Buffer.alloc(1536 * 1024 * 3, 0x5a);
+  const warnings: Error[] = [];
+  const onWarning = (warning: Error) => warnings.push(warning);
+  process.on("warning", onWarning);
+  try {
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const response = await fetch(`${origin}${firstContent.media[0].url}`);
+      assert.equal(response.status, 200);
+      assert.equal((await response.arrayBuffer()).byteLength, 1536 * 1024 * 3);
+    }
+
+    slowNextDownload = true;
+    const controller = new AbortController();
+    const abortResponse = await fetch(`${origin}${firstContent.media[0].url}`, {
+      signal: controller.signal,
+    });
+    const abortedBody = abortResponse.arrayBuffer();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    controller.abort();
+    await assert.rejects(abortedBody, { name: "AbortError" });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(deliveredStreams.at(-1)?.destroyed, true);
+
+    const afterAbort = await fetch(`${origin}${firstContent.media[0].url}`);
+    assert.equal(afterAbort.status, 200);
+    assert.equal((await afterAbort.arrayBuffer()).byteLength, 1536 * 1024 * 3);
+  } finally {
+    process.off("warning", onWarning);
+    approvedVersion.bytes = approvedBytes;
+  }
+  assert.equal(
+    warnings.some((warning) => warning.name === "MaxListenersExceededWarning"),
+    false,
+  );
+  for (const stream of deliveredStreams) {
+    assert.deepEqual(getEventListeners(stream, "error"), [storageErrorListeners.get(stream)]);
+    assert.equal(getEventListeners(stream, "close").length, 0);
+    assert.equal(getEventListeners(stream, "end").length, 0);
+  }
 
   const csrf = auth.csrfForSession(security.hashToken("session-token"));
   const protectedPartial = await fetch(`${origin}/api/media/${assetId}/file`, {

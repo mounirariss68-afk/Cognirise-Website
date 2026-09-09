@@ -23,3 +23,4 @@
 - [CMS removal authority](cms-removal-authority.md) — Decide archive versus permanent delete from all editions and publication history, never the latest editorial status.
 - [Carousel input affordances](carousel-input-affordances.md) — Tall media rails need controls above the card and image-safe drag; do not rely on horizontal wheel automation alone.
 - [Pulse artwork text hygiene](pulse-artwork-text-hygiene.md) — Blueprint-like raster scenes need semantic surface replacement, not simple text erasure, plus final visual inspection.
+- [Media stream listener cleanup](media-stream-listener-cleanup.md) — Node pipeline handles aborts but can retain listeners; clean only listeners added during delivery.

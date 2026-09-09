@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { pipeline } from "node:stream/promises";
 import { pool } from "@workspace/db";
 import {
   CMS_HERO_DOCUMENT_SLUGS,
@@ -312,10 +313,10 @@ router.get("/public/hero-films/:slot", asyncRoute(async (req, res) => {
     return;
   }
   const candidates = await marketCandidates(market, locale);
-    if (!candidates) {
-      res.status(404).json({ error: "Market or locale is unavailable." });
-      return;
-    }
+  if (!candidates) {
+    res.status(404).json({ error: "Market or locale is unavailable." });
+    return;
+  }
   const documentSlug = CMS_HERO_DOCUMENT_SLUGS[slot as CmsHeroFilmSlot];
   const result = await pool.query(
     `SELECT d.id,e.market,e.locale,e.published_at,e.updated_at,
@@ -506,8 +507,23 @@ router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
   res.set("Content-Length", String(range ? range.end - range.start + 1 : size));
   if (range) res.status(206).set("Content-Range", `bytes ${range.start}-${range.end}/${size}`);
   const stream = await publicMediaDelivery.download(publicAsset.storage_key, range ?? undefined);
-  stream.on("error", () => res.destroy());
-  stream.pipe(res);
+
+  const originalListeners = new Map(
+    stream.eventNames().map((event) => [event, stream.listeners(event)]),
+  );
+  try {
+    await pipeline(stream, res);
+  } catch {
+    if (!res.headersSent) res.status(404).json({ error: "Media object not found." });
+    else res.destroy();
+  } finally {
+    for (const event of stream.eventNames()) {
+      const retained = originalListeners.get(event) ?? [];
+      for (const listener of stream.listeners(event)) {
+        if (!retained.includes(listener)) stream.removeListener(event, listener);
+      }
+    }
+  }
 }));
 
 router.get(
