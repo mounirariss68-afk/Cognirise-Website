@@ -139,7 +139,6 @@ export function Router() {
         {/* Company */}
         <Route path="/about" component={AboutPeople} />
         <Route path="/partners" component={Partners} />
-        <Route path="/advisors"><AnchoredRedirect to="/about" anchor="board-of-advisors" /></Route>
         <Route path="/faq" component={FAQ} />
         <Route path="/contact" component={Contact} />
         <Route path="/value-scan" component={ValueScan} />

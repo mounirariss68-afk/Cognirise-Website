@@ -187,7 +187,6 @@ const navigation: NavigationItem[] = [
     items: [
       { id: "about.leadership", label: "Our Team", href: "/about" },
       { id: "about.partners", label: "Partners", href: "/partners" },
-      { id: "about.advisors", label: "Board of Advisors", href: "/about#board-of-advisors" },
       { id: "about.faq", label: "FAQ", href: "/faq" },
       { id: "about.contact", label: "Contact", href: "/contact" },
     ]

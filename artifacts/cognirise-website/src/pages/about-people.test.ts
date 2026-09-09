@@ -39,19 +39,21 @@ test("retains Gökhan as a disabled fallback and uses one source-free profile pa
   assert.doesNotMatch(source, /\bsource(?:s)?\b|accessed August|Profile per/i);
 });
 
-test("redirects the legacy advisors route without advertising it", async () => {
-  const [app, shell, sitemap, publicSitemap] = await Promise.all([
+test("retires the advisors destination while retaining the board on Our Team", async () => {
+  const [app, shell, aboutPeople, sitemap, publicSitemap] = await Promise.all([
     readFile(new URL("src/App.tsx", websiteRoot), "utf8"),
     readFile(new URL("src/components/layout/Shell.tsx", websiteRoot), "utf8"),
+    readFile(new URL("src/pages/AboutPeople.tsx", websiteRoot), "utf8"),
     readFile(new URL("public/sitemap.xml", websiteRoot), "utf8"),
     readFile(new URL("src/components/PublicSitemap.tsx", websiteRoot), "utf8"),
   ]);
 
-  assert.match(app, /path="\/advisors"><AnchoredRedirect to="\/about" anchor="board-of-advisors"/);
-  assert.match(app, /search \? `\?\$\{search\}` : ""\}#\$\{anchor\}/);
-  assert.doesNotMatch(shell, /"\/advisors"\s*:/);
-  assert.doesNotMatch(shell, /href: "\/advisors"/);
-  assert.match(shell, /href: "\/about#board-of-advisors"/);
+  assert.doesNotMatch(app, /path="\/advisors"/);
+  assert.match(app, /<Route component=\{NotFound\} \/>/);
+  assert.doesNotMatch(shell, /about\.advisors|href: "\/advisors"|href: "\/about#board-of-advisors"/);
+  assert.match(shell, /about\.leadership[\s\S]*about\.partners[\s\S]*about\.faq[\s\S]*about\.contact/);
+  assert.match(aboutPeople, /id="board-of-advisors"[\s\S]*<ProfileList profiles=\{advisors\}/);
   assert.doesNotMatch(sitemap, /\/advisors/);
-  assert.match(publicSitemap, /retiredPaths[\s\S]*"\/advisors"/);
+  assert.match(publicSitemap, /path !== "\/advisors"/);
+  assert.doesNotMatch(publicSitemap, /retiredPaths/);
 });

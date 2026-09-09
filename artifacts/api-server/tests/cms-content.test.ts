@@ -4,6 +4,8 @@ import {
   CreateDocumentBody,
   cmsPublicRoute,
   initialCmsContent,
+  NAVIGATION_ITEM_IDS,
+  NavigationSettingsSchema,
   UpdateDocumentMarketAvailabilityBody,
   UpdateDocumentBody,
   UpdateNavigationSettingsSchema,
@@ -223,7 +225,8 @@ test("site configuration pins the poster and both video source versions", () => 
   }, "publish").success, false);
 });
 
-test("navigation settings accept only known unique menu item IDs", () => {
+test("navigation settings accept only active unique menu item IDs", () => {
+  assert.equal(NAVIGATION_ITEM_IDS.includes("about.advisors"), false);
   assert.equal(UpdateNavigationSettingsSchema.safeParse({
     items: [{ id: "platforms", enabled: false }, { id: "platforms.cognios", enabled: true }],
   }).success, true);
@@ -232,6 +235,13 @@ test("navigation settings accept only known unique menu item IDs", () => {
   }).success, false);
   assert.equal(UpdateNavigationSettingsSchema.safeParse({
     items: [{ id: "external.unsafe", enabled: false }],
+  }).success, false);
+  assert.equal(UpdateNavigationSettingsSchema.safeParse({
+    items: [{ id: "about.advisors", enabled: true }],
+  }).success, false);
+  assert.equal(NavigationSettingsSchema.safeParse({
+    items: [{ id: "about.advisors", enabled: true }],
+    updatedAt: null,
   }).success, false);
 });
 

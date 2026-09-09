@@ -10,9 +10,13 @@ export const STATIC_SITEMAP_PATHS = [
 ];
 
 export function mergeSitemapItems(items: Array<{ url: string }>, origin: string) {
-  const retiredPaths = new Set(["/advisors", "/services", "/what-we-do"]);
+  const redirectPaths = new Set(["/services", "/what-we-do"]);
+  const routableItems = items.filter((entry) => {
+    const path = new URL(entry.url, origin).pathname;
+    return path !== "/advisors" && !redirectPaths.has(path);
+  });
   const merged = [
-    ...items.filter((entry) => !retiredPaths.has(new URL(entry.url, origin).pathname)),
+    ...routableItems,
     ...STATIC_SITEMAP_PATHS.map((path) => ({ url: `${origin}${path}` })),
   ];
   return merged.filter((entry, index) => {

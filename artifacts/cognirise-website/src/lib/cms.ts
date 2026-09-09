@@ -174,7 +174,7 @@ export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
   const { market } = useMarketStore();
   // Collection landing narratives are intentionally code-owned; only entity
   // details are CMS-owned. Do not model landings as sentinel entity records.
-  const codeOwnedLanding = ["about", "advisors", "partners", "platforms", "insights", "work"].includes(slug);
+  const codeOwnedLanding = ["about", "partners", "platforms", "insights", "work"].includes(slug);
   const cutover = CUTOVER[kind];
   const cutoverGated = kind === "framework" && !cutover;
   const query = useGetPublishedContent(market, "en", kind as DocumentKind, slug, {

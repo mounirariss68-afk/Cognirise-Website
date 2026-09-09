@@ -26,7 +26,6 @@ export const NAVIGATION_ITEM_REGISTRY = [
   { id: "about", label: "About" },
   { id: "about.leadership", label: "Firm & Leadership", parentId: "about" },
   { id: "about.partners", label: "Partners", parentId: "about" },
-  { id: "about.advisors", label: "Advisors", parentId: "about" },
   { id: "about.faq", label: "FAQ", parentId: "about" },
   { id: "about.contact", label: "Contact", parentId: "about" },
 ] as const;
