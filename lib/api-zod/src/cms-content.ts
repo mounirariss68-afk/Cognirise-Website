@@ -11,7 +11,7 @@ import {
 } from "./agent-authority";
 
 export const CMS_CONTRACT_VERSION = 1 as const;
-export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study", "industry", "framework", "site-configuration"] as const;
+export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study", "industry", "framework", "office", "site-configuration"] as const;
 export type CmsDocumentKind = (typeof cmsDocumentKinds)[number];
 export type CmsValidationMode = "draft" | "publish";
 
@@ -106,6 +106,13 @@ export const partnerContentSchema = z.object({
   website: safeExternalUrl.optional(),
   logoMediaId: z.string().uuid().optional(),
   relationshipStatus: z.enum(["active", "prospective", "paused", "ended"]),
+  ...governance,
+}).strict();
+
+export const officeContentSchema = z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
+  city: z.string().trim().min(1).max(160),
+  address: z.string().trim().min(1).max(1_000),
   ...governance,
 }).strict();
 
@@ -373,6 +380,7 @@ export const cmsContentSchemas = {
   "case-study": caseStudyContentSchema,
   industry: industryContentSchema,
   framework: frameworkContentSchema,
+  office: officeContentSchema,
   "site-configuration": siteConfigurationContentSchema,
 } as const;
 
@@ -383,15 +391,17 @@ export type PublicationContent = z.infer<typeof publicationContentSchema>;
 export type CaseStudyContent = z.infer<typeof caseStudyContentSchema>;
 export type IndustryContent = z.infer<typeof industryContentSchema>;
 export type FrameworkContent = z.infer<typeof frameworkContentSchema>;
+export type OfficeContent = z.infer<typeof officeContentSchema>;
 
 export type SiteConfigurationContent = z.infer<typeof siteConfigurationContentSchema>;
-export type CmsContent = PersonContent | PartnerContent | PlatformContent | PublicationContent | CaseStudyContent | IndustryContent | FrameworkContent | SiteConfigurationContent;
+export type CmsContent = PersonContent | PartnerContent | PlatformContent | PublicationContent | CaseStudyContent | IndustryContent | FrameworkContent | OfficeContent | SiteConfigurationContent;
 
 function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   const errors: string[] = [];
   if (kind === "site-configuration") return errors;
   const governed = value as Exclude<CmsContent, SiteConfigurationContent>;
   if (governed.visibility !== "public") errors.push("Only public content can be published.");
+  if (kind === "office") return errors;
   if (!governed.sources.length) errors.push("At least one source is required.");
   if (!governed.verificationDate) errors.push("A verification date is required.");
   if (!governed.reviewDate) errors.push("A review date is required.");
@@ -544,7 +554,7 @@ export function validateCmsSnapshot(
 export function cmsPublicRoute(kind: CmsDocumentKind, slug: string, content: CmsContent): string | null {
   if (kind === "site-configuration") return null;
   if ((content as Exclude<CmsContent, SiteConfigurationContent>).visibility !== "public") return null;
-  if (kind === "person" || kind === "partner") return null;
+  if (kind === "person" || kind === "partner" || kind === "office") return null;
   if (kind === "platform") return `/platforms/${slug}`;
   if (kind === "publication") return `/insights/${slug}`;
   if (kind === "industry") return `/industries/${slug}`;

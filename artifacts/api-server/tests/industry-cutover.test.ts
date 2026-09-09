@@ -122,7 +122,7 @@ test("the governed inventory produces six publishable industry cutover records i
   assert.equal(new Set(industries.map((operation) => operation.slug)).size, 6);
   assert.equal(new Set(industries.map((operation) => operation.idempotencyKey)).size, 6);
   assert.ok(industries.every((operation) =>
-    operation.idempotencyKey.startsWith("cms-industry-contract-v7:")
+    operation.idempotencyKey.startsWith("cms-industry-contract-v8:")
   ));
 
   const media = mediaMigrationOperations(inventory.records);

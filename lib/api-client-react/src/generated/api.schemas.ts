@@ -428,6 +428,7 @@ export const DocumentKind = {
   'case-study': 'case-study',
   industry: 'industry',
   framework: 'framework',
+  office: 'office',
   'site-configuration': 'site-configuration',
 } as const;
 
@@ -976,6 +977,25 @@ export interface CmsFrameworkContent {
   relatedIds?: string[];
 }
 
+export type CmsOfficeContentSchemaVersion = typeof CmsOfficeContentSchemaVersion[keyof typeof CmsOfficeContentSchemaVersion];
+
+
+export const CmsOfficeContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export interface CmsOfficeContent {
+  schemaVersion: CmsOfficeContentSchemaVersion;
+  city: string;
+  address: string;
+  visibility?: CmsVisibility;
+  order?: number;
+  sources?: CmsSource[];
+  verificationDate?: string;
+  reviewDate?: string;
+  relatedIds?: string[];
+}
+
 export type CmsSiteConfigurationContentSchemaVersion = typeof CmsSiteConfigurationContentSchemaVersion[keyof typeof CmsSiteConfigurationContentSchemaVersion];
 
 
@@ -1025,7 +1045,7 @@ export interface CmsSiteConfigurationContent {
 /**
  * Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
  */
-export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent | CmsSiteConfigurationContent;
+export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent | CmsOfficeContent | CmsSiteConfigurationContent;
 
 export interface SeoMetadata {
   title: string;
@@ -1052,6 +1072,8 @@ export interface Document {
   markets: string[];
   /** @minimum 1 */
   revisionNumber: number;
+  /** True only when permanent deletion is allowed; previously published offices must be archived. */
+  canPermanentlyDelete: boolean;
   /** @nullable */
   currentRevisionId?: string | null;
   /** @nullable */
@@ -1893,6 +1915,8 @@ export type PublishedContentPage = PageMetadata & {
   locale: string;
   requestedMarket: string;
   usedFallback: boolean;
+  /** True once this content kind has an approved publication history, including archived records. */
+  isConfigured: boolean;
 };
 
 export type SitemapEntryChangeFrequency = typeof SitemapEntryChangeFrequency[keyof typeof SitemapEntryChangeFrequency];

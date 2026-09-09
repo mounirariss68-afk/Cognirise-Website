@@ -50,6 +50,7 @@ function Router() {
       <Route path="/case-studies" component={() => <AppLayout><DocumentList kind="case-study" /></AppLayout>} />
       <Route path="/industries" component={() => <AppLayout><DocumentList kind="industry" /></AppLayout>} />
       <Route path="/frameworks" component={() => <AppLayout><DocumentList kind="framework" /></AppLayout>} />
+      <Route path="/offices" component={() => <AppLayout><DocumentList kind="office" /></AppLayout>} />
       
       {/* Content detail */}
       <Route path="/content/:id" component={() => <AppLayout><DocumentDetail /></AppLayout>} />

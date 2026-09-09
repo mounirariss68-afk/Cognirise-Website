@@ -1,15 +1,25 @@
 import { Link } from "wouter";
 import { BrandButton } from "@/components/ui/brand-button";
-import { useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, OFFICE_LOCATIONS, useMarketStore } from "@/store/market";
+import { contentRecord, useCmsCollection } from "@/lib/cms";
+
+const officeFallback = Object.values(OFFICE_LOCATIONS).map((office, order) => ({
+  ...office,
+  order,
+}));
 
 export default function Contact() {
   const { market } = useMarketStore();
+  const offices = useCmsCollection("office", officeFallback, (item) => {
+    const office = contentRecord(item, "office");
+    return {
+      city: office.city,
+      address: office.address,
+      order: office.order,
+    };
+  });
   
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
+  const marketLocation = getMarketLocationLabel(market);
 
   return (
     <div className="flex flex-col">
@@ -34,18 +44,14 @@ export default function Contact() {
             <h3 className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-6">Global Offices</h3>
             
             <div className="space-y-8">
-              <div>
-                <h4 className="font-bold mb-2">Dubai</h4>
-                <p className="text-sm text-muted-foreground">Dubai International Financial Centre (DIFC)<br />United Arab Emirates</p>
-              </div>
-              <div>
-                <h4 className="font-bold mb-2">Riyadh</h4>
-                <p className="text-sm text-muted-foreground">King Abdullah Financial District (KAFD)<br />Kingdom of Saudi Arabia</p>
-              </div>
-              <div>
-                <h4 className="font-bold mb-2">London</h4>
-                <p className="text-sm text-muted-foreground">The City<br />United Kingdom</p>
-              </div>
+              {offices.data
+                .toSorted((left, right) => left.order - right.order)
+                .map((office) => (
+                  <div key={`${office.city}-${office.address}`}>
+                    <h4 className="font-bold mb-2">{office.city}</h4>
+                    <p className="max-w-[32rem] text-sm leading-6 text-muted-foreground">{office.address}</p>
+                  </div>
+                ))}
             </div>
 
             <div className="mt-12 pt-8 border-t border-border">

@@ -32,6 +32,32 @@ const heroIds = {
   webmVersion: "00000000-0000-4000-8000-000000000013",
 };
 
+test("offices are publishable, ordered content with required city and address fields", () => {
+  const valid = validateCmsContent("office", {
+    schemaVersion: 1,
+    city: "Dubai",
+    address: "Office 1914, The Binary by Omniyat, Business Bay, PO Box 71515, Dubai, UAE",
+    visibility: "public",
+    order: 0,
+    sources: [],
+    relatedIds: [],
+  }, "publish");
+  assert.equal(valid.success, true);
+  assert.equal(
+    validateCmsContent("office", {
+      schemaVersion: 1,
+      city: "",
+      address: "",
+      visibility: "public",
+      order: 0,
+      sources: [],
+      relatedIds: [],
+    }, "publish").success,
+    false,
+  );
+  assert.equal(cmsPublicRoute("office", "office-dubai", valid.success ? valid.data : {}), null);
+});
+
 test("publication requires a known variant and governed article body", () => {
   const valid = validateCmsContent("publication", {
     ...governance,

@@ -7,3 +7,4 @@ pnpm run typecheck:libs
 pnpm --filter @workspace/db prepare-schema-push
 pnpm --filter db push-force
 pnpm --filter @workspace/scripts cms:reconcile
+pnpm --filter @workspace/scripts cms:reconcile-offices -- --apply-db --target=development

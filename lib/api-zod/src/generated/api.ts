@@ -678,7 +678,7 @@ export const ListDocumentsQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listDocumentsQueryPageMultipleOf).default(listDocumentsQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listDocumentsQueryPageSizeMax).multipleOf(listDocumentsQueryPageSizeMultipleOf).default(listDocumentsQueryPageSizeDefault),
   "search": zod.coerce.string().max(listDocumentsQuerySearchMax).optional(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']).optional(),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']).optional(),
   "status": zod.enum(['draft', 'in-review', 'approved', 'scheduled', 'published', 'archived']).optional(),
   "market": zod.coerce.string().optional()
 })
@@ -718,8 +718,11 @@ export const listDocumentsResponseTwoItemsItemContentFiveSourcesItemUrlRegExp = 
 export const listDocumentsResponseTwoItemsItemContentSixOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMin = 2;
-export const listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMax = 2;
+export const listDocumentsResponseTwoItemsItemContentSevenOrderMultipleOf = 1;
+
+export const listDocumentsResponseTwoItemsItemContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentEightHeroSourcesMin = 2;
+export const listDocumentsResponseTwoItemsItemContentEightHeroSourcesMax = 2;
 
 export const listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf = 1;
 
@@ -733,7 +736,7 @@ export const ListDocumentsResponse = zod.object({
 }).and(zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string().regex(listDocumentsResponseTwoItemsItemSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -966,6 +969,20 @@ export const ListDocumentsResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(listDocumentsResponseTwoItemsItemContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(listDocumentsResponseTwoItemsItemContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -974,7 +991,7 @@ export const ListDocumentsResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMin).max(listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(listDocumentsResponseTwoItemsItemContentEightHeroSourcesMin).max(listDocumentsResponseTwoItemsItemContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -987,6 +1004,7 @@ export const ListDocumentsResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf),
+  "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -1018,7 +1036,7 @@ export const createDocumentBodySeoNoIndexDefault = false;
 
 
 export const CreateDocumentBody = zod.object({
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string().max(createDocumentBodySlugMax).regex(createDocumentBodySlugRegExp),
   "title": zod.string().min(1).max(createDocumentBodyTitleMax),
   "summary": zod.string().max(createDocumentBodySummaryMax).optional(),
@@ -1059,8 +1077,11 @@ export const createDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp(
 export const createDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const createDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const createDocumentResponseContentSevenHeroSourcesMin = 2;
-export const createDocumentResponseContentSevenHeroSourcesMax = 2;
+export const createDocumentResponseContentSevenOrderMultipleOf = 1;
+
+export const createDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentEightHeroSourcesMin = 2;
+export const createDocumentResponseContentEightHeroSourcesMax = 2;
 
 export const createDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -1068,7 +1089,7 @@ export const createDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const CreateDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string().regex(createDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1301,6 +1322,20 @@ export const CreateDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(createDocumentResponseContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentResponseContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -1309,7 +1344,7 @@ export const CreateDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(createDocumentResponseContentSevenHeroSourcesMin).max(createDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(createDocumentResponseContentEightHeroSourcesMin).max(createDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -1322,6 +1357,7 @@ export const CreateDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(createDocumentResponseRevisionNumberMultipleOf),
+  "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -1365,8 +1401,11 @@ export const getDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^h
 export const getDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const getDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const getDocumentResponseContentSevenHeroSourcesMin = 2;
-export const getDocumentResponseContentSevenHeroSourcesMax = 2;
+export const getDocumentResponseContentSevenOrderMultipleOf = 1;
+
+export const getDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentEightHeroSourcesMin = 2;
+export const getDocumentResponseContentEightHeroSourcesMax = 2;
 
 export const getDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -1374,7 +1413,7 @@ export const getDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const GetDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string().regex(getDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1607,6 +1646,20 @@ export const GetDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(getDocumentResponseContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(getDocumentResponseContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -1615,7 +1668,7 @@ export const GetDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(getDocumentResponseContentSevenHeroSourcesMin).max(getDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(getDocumentResponseContentEightHeroSourcesMin).max(getDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -1628,6 +1681,7 @@ export const GetDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(getDocumentResponseRevisionNumberMultipleOf),
+  "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -1705,8 +1759,11 @@ export const updateDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp(
 export const updateDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const updateDocumentResponseContentSevenHeroSourcesMin = 2;
-export const updateDocumentResponseContentSevenHeroSourcesMax = 2;
+export const updateDocumentResponseContentSevenOrderMultipleOf = 1;
+
+export const updateDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentEightHeroSourcesMin = 2;
+export const updateDocumentResponseContentEightHeroSourcesMax = 2;
 
 export const updateDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -1714,7 +1771,7 @@ export const updateDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const UpdateDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string().regex(updateDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1947,6 +2004,20 @@ export const UpdateDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(updateDocumentResponseContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(updateDocumentResponseContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -1955,7 +2026,7 @@ export const UpdateDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(updateDocumentResponseContentSevenHeroSourcesMin).max(updateDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(updateDocumentResponseContentEightHeroSourcesMin).max(updateDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -1968,6 +2039,7 @@ export const UpdateDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(updateDocumentResponseRevisionNumberMultipleOf),
+  "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -2032,8 +2104,11 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveSources
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSourcesMin = 2;
-export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSourcesMax = 2;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenOrderMultipleOf = 1;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightHeroSourcesMin = 2;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightHeroSourcesMax = 2;
 
 
 
@@ -2283,6 +2358,20 @@ export const ListDocumentRevisionsResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -2291,7 +2380,7 @@ export const ListDocumentRevisionsResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSourcesMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightHeroSourcesMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -2408,8 +2497,11 @@ export const getDocumentRevisionResponseSnapshotContentFiveSourcesItemUrlRegExp 
 export const getDocumentRevisionResponseSnapshotContentSixOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMin = 2;
-export const getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMax = 2;
+export const getDocumentRevisionResponseSnapshotContentSevenOrderMultipleOf = 1;
+
+export const getDocumentRevisionResponseSnapshotContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentEightHeroSourcesMin = 2;
+export const getDocumentRevisionResponseSnapshotContentEightHeroSourcesMax = 2;
 
 
 
@@ -2653,6 +2745,20 @@ export const GetDocumentRevisionResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(getDocumentRevisionResponseSnapshotContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(getDocumentRevisionResponseSnapshotContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -2661,7 +2767,7 @@ export const GetDocumentRevisionResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMin).max(getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(getDocumentRevisionResponseSnapshotContentEightHeroSourcesMin).max(getDocumentRevisionResponseSnapshotContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -2721,8 +2827,11 @@ export const submitDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp(
 export const submitDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const submitDocumentResponseContentSevenHeroSourcesMin = 2;
-export const submitDocumentResponseContentSevenHeroSourcesMax = 2;
+export const submitDocumentResponseContentSevenOrderMultipleOf = 1;
+
+export const submitDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentEightHeroSourcesMin = 2;
+export const submitDocumentResponseContentEightHeroSourcesMax = 2;
 
 export const submitDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -2730,7 +2839,7 @@ export const submitDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const SubmitDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string().regex(submitDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -2963,6 +3072,20 @@ export const SubmitDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(submitDocumentResponseContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(submitDocumentResponseContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -2971,7 +3094,7 @@ export const SubmitDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(submitDocumentResponseContentSevenHeroSourcesMin).max(submitDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(submitDocumentResponseContentEightHeroSourcesMin).max(submitDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -2984,6 +3107,7 @@ export const SubmitDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(submitDocumentResponseRevisionNumberMultipleOf),
+  "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -3036,8 +3160,11 @@ export const publishDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp
 export const publishDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const publishDocumentResponseContentSevenHeroSourcesMin = 2;
-export const publishDocumentResponseContentSevenHeroSourcesMax = 2;
+export const publishDocumentResponseContentSevenOrderMultipleOf = 1;
+
+export const publishDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentEightHeroSourcesMin = 2;
+export const publishDocumentResponseContentEightHeroSourcesMax = 2;
 
 export const publishDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -3045,7 +3172,7 @@ export const publishDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const PublishDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string().regex(publishDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3278,6 +3405,20 @@ export const PublishDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(publishDocumentResponseContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(publishDocumentResponseContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -3286,7 +3427,7 @@ export const PublishDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(publishDocumentResponseContentSevenHeroSourcesMin).max(publishDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(publishDocumentResponseContentEightHeroSourcesMin).max(publishDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -3299,6 +3440,7 @@ export const PublishDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(publishDocumentResponseRevisionNumberMultipleOf),
+  "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -3351,8 +3493,11 @@ export const rollbackDocumentResponseContentFiveSourcesItemUrlRegExp = new RegEx
 export const rollbackDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const rollbackDocumentResponseContentSevenHeroSourcesMin = 2;
-export const rollbackDocumentResponseContentSevenHeroSourcesMax = 2;
+export const rollbackDocumentResponseContentSevenOrderMultipleOf = 1;
+
+export const rollbackDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentEightHeroSourcesMin = 2;
+export const rollbackDocumentResponseContentEightHeroSourcesMax = 2;
 
 export const rollbackDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -3360,7 +3505,7 @@ export const rollbackDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const RollbackDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string().regex(rollbackDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3593,6 +3738,20 @@ export const RollbackDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(rollbackDocumentResponseContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rollbackDocumentResponseContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -3601,7 +3760,7 @@ export const RollbackDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(rollbackDocumentResponseContentSevenHeroSourcesMin).max(rollbackDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(rollbackDocumentResponseContentEightHeroSourcesMin).max(rollbackDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -3614,6 +3773,7 @@ export const RollbackDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(rollbackDocumentResponseRevisionNumberMultipleOf),
+  "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -3665,8 +3825,11 @@ export const archiveDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp
 export const archiveDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const archiveDocumentResponseContentSevenHeroSourcesMin = 2;
-export const archiveDocumentResponseContentSevenHeroSourcesMax = 2;
+export const archiveDocumentResponseContentSevenOrderMultipleOf = 1;
+
+export const archiveDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentEightHeroSourcesMin = 2;
+export const archiveDocumentResponseContentEightHeroSourcesMax = 2;
 
 export const archiveDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -3674,7 +3837,7 @@ export const archiveDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const ArchiveDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string().regex(archiveDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3907,6 +4070,20 @@ export const ArchiveDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(archiveDocumentResponseContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(archiveDocumentResponseContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -3915,7 +4092,7 @@ export const ArchiveDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(archiveDocumentResponseContentSevenHeroSourcesMin).max(archiveDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(archiveDocumentResponseContentEightHeroSourcesMin).max(archiveDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -3928,6 +4105,7 @@ export const ArchiveDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(archiveDocumentResponseRevisionNumberMultipleOf),
+  "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -3979,8 +4157,11 @@ export const restoreDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp
 export const restoreDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const restoreDocumentResponseContentSevenHeroSourcesMin = 2;
-export const restoreDocumentResponseContentSevenHeroSourcesMax = 2;
+export const restoreDocumentResponseContentSevenOrderMultipleOf = 1;
+
+export const restoreDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentEightHeroSourcesMin = 2;
+export const restoreDocumentResponseContentEightHeroSourcesMax = 2;
 
 export const restoreDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -3988,7 +4169,7 @@ export const restoreDocumentResponseRevisionNumberMultipleOf = 1;
 
 export const RestoreDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string().regex(restoreDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -4221,6 +4402,20 @@ export const RestoreDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(restoreDocumentResponseContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(restoreDocumentResponseContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -4229,7 +4424,7 @@ export const RestoreDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(restoreDocumentResponseContentSevenHeroSourcesMin).max(restoreDocumentResponseContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(restoreDocumentResponseContentEightHeroSourcesMin).max(restoreDocumentResponseContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -4242,6 +4437,7 @@ export const RestoreDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(restoreDocumentResponseRevisionNumberMultipleOf),
+  "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -4284,8 +4480,11 @@ export const previewDocumentResponseDocumentContentFiveSourcesItemUrlRegExp = ne
 export const previewDocumentResponseDocumentContentSixOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const previewDocumentResponseDocumentContentSevenHeroSourcesMin = 2;
-export const previewDocumentResponseDocumentContentSevenHeroSourcesMax = 2;
+export const previewDocumentResponseDocumentContentSevenOrderMultipleOf = 1;
+
+export const previewDocumentResponseDocumentContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentEightHeroSourcesMin = 2;
+export const previewDocumentResponseDocumentContentEightHeroSourcesMax = 2;
 
 export const previewDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -4524,6 +4723,20 @@ export const PreviewDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
+  "city": zod.string(),
+  "address": zod.string(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(previewDocumentResponseDocumentContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(previewDocumentResponseDocumentContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
   "page": zod.enum(['homepage', 'industries']),
   "hero": zod.object({
   "posterMediaId": zod.string(),
@@ -4532,7 +4745,7 @@ export const PreviewDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "mimeType": zod.enum(['video/mp4', 'video/webm'])
-})).min(previewDocumentResponseDocumentContentSevenHeroSourcesMin).max(previewDocumentResponseDocumentContentSevenHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})).min(previewDocumentResponseDocumentContentEightHeroSourcesMin).max(previewDocumentResponseDocumentContentEightHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
 })
 })]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
@@ -6106,7 +6319,7 @@ export const listPublishedContentQueryPageSizeMultipleOf = 1;
 export const ListPublishedContentQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listPublishedContentQueryPageMultipleOf).default(listPublishedContentQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listPublishedContentQueryPageSizeMax).multipleOf(listPublishedContentQueryPageSizeMultipleOf).default(listPublishedContentQueryPageSizeDefault),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']).optional(),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']).optional(),
   "market": zod.coerce.string(),
   "locale": zod.coerce.string().optional()
 })
@@ -6137,7 +6350,7 @@ export const ListPublishedContentResponse = zod.object({
 }).and(zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string(),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -6171,7 +6384,8 @@ export const ListPublishedContentResponse = zod.object({
   "market": zod.string(),
   "locale": zod.string(),
   "requestedMarket": zod.string(),
-  "usedFallback": zod.boolean()
+  "usedFallback": zod.boolean(),
+  "isConfigured": zod.boolean().describe('True once this content kind has an approved publication history, including archived records.')
 }))
 
 
@@ -6181,7 +6395,7 @@ export const ListPublishedContentResponse = zod.object({
 export const GetPublishedContentParams = zod.object({
   "market": zod.coerce.string(),
   "locale": zod.coerce.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.coerce.string()
 })
 
@@ -6195,7 +6409,7 @@ export const getPublishedContentResponseRevisionMultipleOf = 1;
 
 export const GetPublishedContentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
   "slug": zod.string(),
   "title": zod.string(),
   "summary": zod.string().nullish(),

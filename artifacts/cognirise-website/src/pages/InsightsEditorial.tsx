@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useSubscribeNewsletter } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
@@ -40,11 +40,7 @@ export default function InsightsEditorial() {
   const searchParams = new URLSearchParams(searchString);
   const activeTopic = searchParams.get("topic") || "all";
   
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
+  const marketLocation = getMarketLocationLabel(market);
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

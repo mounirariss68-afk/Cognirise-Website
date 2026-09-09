@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { ArrowDown, ArrowRight } from "lucide-react";
-import { useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { ArchitectureStage } from "@/components/cognios/ArchitectureStage";
 import { scrollToSection } from "@/lib/motion";
@@ -8,11 +8,7 @@ import { scrollToSection } from "@/lib/motion";
 export default function CogniOSPlatform() {
   const { market } = useMarketStore();
   
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
+  const marketLocation = getMarketLocationLabel(market);
 
 
   const products = [

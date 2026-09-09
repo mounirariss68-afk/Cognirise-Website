@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { BrandButton } from "@/components/ui/brand-button";
-import { useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, MARKET_OPTIONS, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
 import { setAnalyticsConsent, useAnalyticsConsent } from "@/lib/analytics";
@@ -118,7 +118,7 @@ const pageMeta: Record<string, { title: string; description: string }> = {
   },
   "/contact": {
     title: "Contact Us | Cognirise",
-    description: "Connect with our team to discuss an operating problem.",
+    description: "Connect with Cognirise or contact our confirmed offices in Dubai, Riyadh and London.",
   },
   "/value-scan": {
     title: "Book an AI Value Scan | Cognirise",
@@ -445,15 +445,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
           <div className="hidden items-center gap-6 xl:flex relative z-50">
             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              {['uae', 'ksa', 'turkiye', 'europe'].map((m) => (
-                <div key={m} className="flex items-center gap-2">
+              {MARKET_OPTIONS.map((option, index) => (
+                <div key={option.id} className="flex items-center gap-2">
                   <button 
-                    onClick={() => setMarket(m as any)} 
-                    className={`transition-colors hover:text-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:text-[hsl(var(--brand-pink))] ${market === m ? "text-[hsl(var(--brand-deep))]" : ""}`}
+                    onClick={() => setMarket(option.id)}
+                    aria-label={`View ${option.label} market content`}
+                    aria-pressed={market === option.id}
+                    className={`transition-colors hover:text-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:text-[hsl(var(--brand-pink))] ${market === option.id ? "text-[hsl(var(--brand-deep))]" : ""}`}
                   >
-                    {m === 'turkiye' ? 'TR' : m === 'europe' ? 'EU' : m.toUpperCase()}
+                    {option.compactLabel}
                   </button>
-                  {m !== 'europe' && <span className="opacity-30">/</span>}
+                  {index < MARKET_OPTIONS.length - 1 && <span className="opacity-30">/</span>}
                 </div>
               ))}
             </div>
@@ -529,15 +531,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </nav>
           
           <div className="pb-12 border-t border-border pt-8">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-4">Select Region</span>
+            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-4">Select market</span>
             <div className="flex flex-wrap gap-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              {['uae', 'ksa', 'turkiye', 'europe'].map((m) => (
+              {MARKET_OPTIONS.map((option) => (
                 <button 
-                  key={m}
-                  onClick={() => { setMarket(m as any); setIsOpen(false); }}
-                  className={`transition-colors focus-visible:outline-none ${market === m ? "text-[hsl(var(--brand-pink))]" : "hover:text-[hsl(var(--brand-deep))]"}`}
+                  key={option.id}
+                  onClick={() => { setMarket(option.id); setIsOpen(false); }}
+                  aria-pressed={market === option.id}
+                  className={`transition-colors focus-visible:outline-none ${market === option.id ? "text-[hsl(var(--brand-pink))]" : "hover:text-[hsl(var(--brand-deep))]"}`}
                 >
-                  {m === 'turkiye' ? 'Türkiye' : m}
+                  {option.label}
                 </button>
               ))}
             </div>
@@ -568,10 +571,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <div className="text-sm text-white/70 max-w-[280px]">
                 <p>Intelligence that moves work.</p>
                 <p className="mt-4 font-semibold text-white/90">
-                  {market === "uae" ? "Dubai · United Arab Emirates" :
-                   market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-                   market === "turkiye" ? "Istanbul · Türkiye" :
-                   "London · Europe"}
+                  Market view · {getMarketLocationLabel(market)}
                 </p>
               </div>
             </div>

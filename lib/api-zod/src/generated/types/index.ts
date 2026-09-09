@@ -50,6 +50,8 @@ export * from './cmsFrameworkWorkedExampleReach';
 export * from './cmsFrameworkWorkedExampleRequestedAuthority';
 export * from './cmsFrameworkWorkedExampleReversibility';
 export * from './cmsLink';
+export * from './cmsOfficeContent';
+export * from './cmsOfficeContentSchemaVersion';
 export * from './cmsPartnerContent';
 export * from './cmsPartnerContentFactsItem';
 export * from './cmsPartnerContentRelationshipStatus';

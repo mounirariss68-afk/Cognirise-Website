@@ -17,5 +17,6 @@ export const DocumentKind = {
   'case-study': 'case-study',
   industry: 'industry',
   framework: 'framework',
+  office: 'office',
   'site-configuration': 'site-configuration',
 } as const;

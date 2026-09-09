@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { ArrowDown, ArrowRight, Plus } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
-import { useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { scrollToSection } from "@/lib/motion";
 import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
@@ -34,11 +34,7 @@ export default function PlatformsOverview() {
     description: "Discover the platform architecture connecting enterprise knowledge, agents and accountability.",
   }));
   
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
+  const marketLocation = getMarketLocationLabel(market);
 
   const categories = ["Foundation & Orchestration", "Specialist Engines"];
   const matrix = categories.map((category) => ({

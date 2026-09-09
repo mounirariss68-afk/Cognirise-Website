@@ -1,18 +1,14 @@
 import { Link } from "wouter";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
-import { useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
 
 export default function EngineeringWithAI() {
   const { market } = useMarketStore();
   
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
+  const marketLocation = getMarketLocationLabel(market);
 
   return (
     <div className="flex flex-col">

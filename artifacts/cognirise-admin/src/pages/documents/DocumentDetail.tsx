@@ -7,6 +7,7 @@ import {
   usePublishDocument,
   useArchiveDocument,
   useRestoreDocument,
+  useDeleteDocument,
   useListDocumentRevisions,
   useRollbackDocument,
   usePreviewDocument,
@@ -24,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Send, Globe, Archive, ChevronLeft, CheckCircle2, AlertTriangle, Eye, RotateCcw, Save, GitCompare } from "lucide-react";
+import { Loader2, Send, Globe, Archive, ChevronLeft, CheckCircle2, AlertTriangle, Eye, RotateCcw, Save, GitCompare, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -32,6 +33,17 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ContentEditor } from "./ContentEditor";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { officeLifecycleAction } from "./office-lifecycle";
 
 export default function DocumentDetail() {
   const [, params] = useRoute("/content/:id");
@@ -51,6 +63,7 @@ export default function DocumentDetail() {
   const publishDoc = usePublishDocument();
   const archiveDoc = useArchiveDocument();
   const restoreDoc = useRestoreDocument();
+  const deleteDoc = useDeleteDocument();
   const rollbackDoc = useRollbackDocument();
 
   // Load preview info explicitly if authenticated & needed
@@ -72,6 +85,7 @@ export default function DocumentDetail() {
   
   // Dialog states
   const [publishOpen, setPublishOpen] = useState(false);
+  const [removeOfficeOpen, setRemoveOfficeOpen] = useState(false);
   const [publishRevisionId, setPublishRevisionId] = useState<string | null>(null);
 
   // Comparison states
@@ -212,6 +226,39 @@ export default function DocumentDetail() {
     });
   };
 
+  const handleRemoveOffice = () => {
+    if (!doc || doc.kind !== "office") return;
+    const requiresArchive = officeLifecycleAction(doc) === "archive";
+    const options = {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          predicate: (query) => String(query.queryKey[0]).includes("documents")
+            || String(query.queryKey[0]).includes("published"),
+        });
+        toast({
+          title: requiresArchive ? "Office removed from the website" : "Office deleted",
+          description: requiresArchive
+            ? "The published record was archived so its audit history can be recovered."
+            : "The unpublished office record was permanently deleted.",
+        });
+        setRemoveOfficeOpen(false);
+        setLocation("/offices");
+      },
+      onError: (err: any) => {
+        toast({
+          title: "Office removal failed",
+          description: err.error || err.message,
+          variant: "destructive",
+        });
+      },
+    };
+    if (requiresArchive) {
+      archiveDoc.mutate({ documentId: id!, data: {} }, options);
+    } else {
+      deleteDoc.mutate({ documentId: id! }, options);
+    }
+  };
+
   const handleRevCheckbox = (checked: boolean, revId: string) => {
     if (checked) {
       if (selectedRevs.length >= 2) {
@@ -290,17 +337,26 @@ export default function DocumentDetail() {
               <Globe className="w-3.5 h-3.5 mr-2" /> Publish...
             </Button>
           )}
-          {isAdministrator && (
-            doc.status !== "archived" ? (
+          {isAdministrator && doc.kind === "office" && doc.status !== "archived" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setRemoveOfficeOpen(true)}
+              disabled={archiveDoc.isPending || deleteDoc.isPending}
+              className="font-mono uppercase tracking-wider text-xs text-destructive hover:text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" /> Remove office
+            </Button>
+          )}
+          {isAdministrator && doc.status === "archived" ? (
+            <Button variant="outline" size="sm" onClick={() => handleAction("restore")} disabled={restoreDoc.isPending} className="font-mono uppercase tracking-wider text-xs">
+              <RotateCcw className="mr-2 h-4 w-4" /> Restore as draft
+            </Button>
+          ) : isAdministrator && doc.kind !== "office" ? (
                <Button variant="ghost" size="sm" onClick={() => handleAction("archive")} className="text-muted-foreground hover:text-destructive" title="Archive Document">
                  <Archive className="w-4 h-4" />
                </Button>
-            ) : (
-               <Button variant="outline" size="sm" onClick={() => handleAction("restore")} disabled={restoreDoc.isPending} className="font-mono uppercase tracking-wider text-xs">
-                 <RotateCcw className="mr-2 h-4 w-4" /> Restore as draft
-               </Button>
-            )
-          )}
+          ) : null}
         </div>
       </header>
 
@@ -515,6 +571,29 @@ export default function DocumentDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={removeOfficeOpen} onOpenChange={setRemoveOfficeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {content.city || doc.title}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {!doc.canPermanentlyDelete
+                ? "This office will disappear from the public website. Its published history will be archived so an administrator can restore it later."
+                : "This unpublished office and its revision history will be permanently deleted. This cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveOffice}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {archiveDoc.isPending || deleteDoc.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Remove office
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={compareModalOpen} onOpenChange={setCompareModalOpen}>
         <DialogContent className="max-w-5xl h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">

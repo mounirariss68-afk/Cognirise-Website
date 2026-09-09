@@ -25,6 +25,8 @@ export interface Document {
   markets: string[];
   /** @minimum 1 */
   revisionNumber: number;
+  /** True only when permanent deletion is allowed; previously published offices must be archived. */
+  canPermanentlyDelete: boolean;
   /** @nullable */
   currentRevisionId?: string | null;
   /** @nullable */

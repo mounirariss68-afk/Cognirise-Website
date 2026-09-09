@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { ArrowDown, ArrowRight, Plus } from "lucide-react";
-import { useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
 import { contentRecord, text, useCmsCollection, useCmsEntry } from "@/lib/cms";
@@ -31,11 +31,7 @@ export default function WorkProof() {
   }));
   const featuredPattern = patterns.data[0];
   
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
+  const marketLocation = getMarketLocationLabel(market);
 
   const goTo = scrollToSection;
 

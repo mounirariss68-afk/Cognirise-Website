@@ -59,6 +59,22 @@ const documentSelect = `
   SELECT d.id,d.kind,d.canonical_slug,d.title,d.owner_id,d.status root_status,
     d.created_at,d.updated_at,
     ARRAY(SELECT DISTINCT market FROM cms_market_editions WHERE document_id=d.id) markets,
+    (
+      NOT EXISTS (
+        SELECT 1 FROM cms_market_editions deletion_edition
+         WHERE deletion_edition.document_id=d.id
+           AND deletion_edition.publication_state IN ('published','scheduled')
+      )
+      AND (
+        d.kind<>'office'
+        OR NOT EXISTS (
+          SELECT 1 FROM cms_audit_events publication_event
+           WHERE publication_event.target_type='document'
+             AND publication_event.target_id=d.id
+             AND publication_event.action='document.published'
+        )
+      )
+    ) can_permanently_delete,
     x.edition_id,x.revision_id,x.revision_number,x.payload,x.workflow_state,
     x.publication_state,x.publish_at,x.published_at,x.published_revision_id
   FROM cms_documents d
@@ -101,6 +117,7 @@ function mapDocument(row: Record<string, any>) {
     mediaIds: payload.mediaIds ?? [],
     markets: row.markets ?? [],
     revisionNumber: row.revision_number ?? 1,
+    canPermanentlyDelete: Boolean(row.can_permanently_delete),
     currentRevisionId: row.revision_id ? String(row.revision_id) : null,
     publishedRevisionId: row.published_revision_id ? String(row.published_revision_id) : null,
     scheduledAt: row.publish_at,
@@ -499,7 +516,13 @@ router.delete(
     const result = await pool.query(
       `DELETE FROM cms_documents d WHERE d.id=$1 AND NOT EXISTS(
        SELECT 1 FROM cms_market_editions e WHERE e.document_id=d.id
-       AND e.publication_state IN ('published','scheduled')) RETURNING id`,
+        AND e.publication_state IN ('published','scheduled'))
+        AND (d.kind<>'office' OR NOT EXISTS(
+          SELECT 1 FROM cms_audit_events publication_event
+           WHERE publication_event.target_type='document'
+             AND publication_event.target_id=d.id
+             AND publication_event.action='document.published'
+        )) RETURNING id`,
       [id],
     );
     if (!result.rowCount) {

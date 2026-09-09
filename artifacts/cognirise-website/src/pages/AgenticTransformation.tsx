@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { ArrowDown, ArrowRight, Minus, Plus } from "lucide-react";
 import { useState } from "react";
-import { useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
 
@@ -9,11 +9,7 @@ export default function AgenticTransformation() {
   const [openStep, setOpenStep] = useState<number>(0);
   const { market } = useMarketStore();
   
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
+  const marketLocation = getMarketLocationLabel(market);
 
   const journey = [
     ["01", "Frame the work", "Bring one process under pressure. We find where time, risk, hand-offs and decisions are constraining the outcome."],

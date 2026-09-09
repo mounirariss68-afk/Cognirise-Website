@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
-import { useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { useRef, useState } from "react";
 import { BlueprintJourney } from "@/components/BlueprintJourney";
@@ -35,11 +35,7 @@ export default function Home() {
     ? featuredFramework.media?.find((media) => media.id === featuredFramework.heroMediaId)
     : undefined;
   
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
+  const marketLocation = getMarketLocationLabel(market);
 
   const { scrollYProgress: heroScrollProgress } = useScroll({
     target: heroRef,

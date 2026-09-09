@@ -14,4 +14,6 @@ export type PublishedContentPage = PageMetadata & {
   locale: string;
   requestedMarket: string;
   usedFallback: boolean;
+  /** True once this content kind has an approved publication history, including archived records. */
+  isConfigured: boolean;
 };

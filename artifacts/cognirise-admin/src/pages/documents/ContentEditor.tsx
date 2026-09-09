@@ -193,6 +193,17 @@ export function ContentEditor({ kind, value, onChange, errors }: {
         <Area label="Evidence" value={evidenceLines(value.evidence)} onChange={(next) => set("evidence", parseEvidence(next))} placeholder="Statement | Source label | https://... | approved or needs-review" />
       </>}
 
+      {kind === "office" && <>
+        <Field label="City" value={value.city} onChange={(next) => set("city", next)} placeholder="Dubai" />
+        <Area
+          label="Full postal address"
+          value={value.address ?? ""}
+          onChange={(next) => set("address", next)}
+          placeholder="Office, building, street, city, country"
+          rows={4}
+        />
+      </>}
+
       {kind === "platform" && <>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Category" value={value.category} onChange={(next) => set("category", next)} />

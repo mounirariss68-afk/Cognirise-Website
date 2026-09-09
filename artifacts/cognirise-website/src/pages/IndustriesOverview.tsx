@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
-import { useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { IndustryPicker } from "@/components/IndustryPicker";
 import { useEffect, useRef, useState } from "react";
@@ -88,11 +88,7 @@ function IndustriesHeroFilm() {
 export default function IndustriesOverview() {
   const { market } = useMarketStore();
   
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
+  const marketLocation = getMarketLocationLabel(market);
 
   return (
     <div className="io">

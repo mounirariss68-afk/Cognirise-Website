@@ -10,6 +10,7 @@ import {
   type CaseStudyContent,
   type IndustryContent,
   type FrameworkContent,
+  type OfficeContent,
   validateCmsContent,
 } from "@workspace/api-zod";
 import { useMarketStore } from "@/store/market";
@@ -22,6 +23,7 @@ export type CmsContentByKind = {
   "case-study": CaseStudyContent;
   industry: IndustryContent;
   framework: FrameworkContent;
+  office: OfficeContent;
 };
 export type WebsiteCmsDocumentKind = Exclude<CmsDocumentKind, "site-configuration">;
 export type CmsRecord<T extends CmsContent = CmsContent> = T & {
@@ -94,7 +96,34 @@ const CUTOVER: Record<WebsiteCmsDocumentKind, boolean> = {
   "case-study": env.VITE_CMS_CUTOVER_CASE_STUDIES === "true",
   industry: env.VITE_CMS_CUTOVER_INDUSTRIES === "true",
   framework: env.VITE_CMS_CUTOVER_FRAMEWORKS === "true",
+  office: true,
 };
+
+export function cmsCollectionIsCutOver(
+  kind: WebsiteCmsDocumentKind,
+  isConfigured = true,
+): boolean {
+  return CUTOVER[kind] && (kind !== "office" || isConfigured);
+}
+
+export function cmsCollectionDelivery(
+  kind: WebsiteCmsDocumentKind,
+  state: {
+    isPending: boolean;
+    isError: boolean;
+    hasContractErrors: boolean;
+    hasItems: boolean;
+    isConfigured?: boolean;
+  },
+): CmsDeliveryState {
+  if (state.isPending) return "loading";
+  if (state.isError) return "api-error";
+  if (state.hasContractErrors) return "contract-error";
+  if (state.hasItems) return "cms";
+  return cmsCollectionIsCutOver(kind, state.isConfigured)
+    ? "intentional-empty"
+    : "compiled-fallback";
+}
 
 export function contentRecord<K extends WebsiteCmsDocumentKind>(item: PublishedContent, kind: K): CmsRecord<CmsContentByKind[K]> {
   const content = { ...(item.content as CmsContent) } as CmsContent & {
@@ -143,13 +172,14 @@ export function useCmsCollection<T>(
   const contractErrors = validations?.flatMap((result) => result.success ? [] : result.errors) ?? [];
   const validItems = query.data?.items.filter((_item, index) => validations?.[index]?.success) ?? [];
   const mapped = validItems.map(mapper).filter((item): item is T => item !== null);
-  const cutover = CUTOVER[kind];
-  let delivery: CmsDeliveryState;
-  if (query.isPending) delivery = "loading";
-  else if (query.isError) delivery = "api-error";
-  else if (contractErrors.length) delivery = "contract-error";
-  else if (mapped.length) delivery = "cms";
-  else delivery = cutover ? "intentional-empty" : "compiled-fallback";
+  const cutover = cmsCollectionIsCutOver(kind, query.data?.isConfigured);
+  const delivery = cmsCollectionDelivery(kind, {
+    isPending: query.isPending,
+    isError: query.isError,
+    hasContractErrors: Boolean(contractErrors.length),
+    hasItems: Boolean(mapped.length),
+    isConfigured: query.data?.isConfigured,
+  });
   const useFallback = !cutover && delivery !== "cms";
   const issue = query.isError
     ? `CMS request failed for ${kind}.`

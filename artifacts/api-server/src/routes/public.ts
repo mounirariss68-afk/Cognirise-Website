@@ -255,6 +255,18 @@ router.get(
          LIMIT $4 OFFSET $5`,
       [kind, candidates, market, pageSize, (page - 1) * pageSize],
     );
+    const configuration = kind
+      ? await pool.query(
+          `SELECT EXISTS (
+             SELECT 1
+               FROM cms_documents d
+               JOIN cms_market_editions e ON e.document_id=d.id
+               JOIN cms_revisions r ON r.edition_id=e.id
+              WHERE d.kind=$1 AND r.workflow_state='approved' AND r.approved_at IS NOT NULL
+           ) AS is_configured`,
+          [kind],
+        )
+      : { rows: [{ is_configured: true }] };
     try {
       const eligibleRows = result.rows.flatMap((row) => {
         const snapshot = publicSnapshot(row);
@@ -284,6 +296,7 @@ router.get(
         locale,
         requestedMarket: market,
         usedFallback: items.some((item) => item.usedFallback),
+        isConfigured: Boolean(configuration.rows[0]?.is_configured),
       });
     } catch (error) {
       if (error instanceof PublicContractError) {

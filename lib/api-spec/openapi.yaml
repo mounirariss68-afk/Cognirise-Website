@@ -1902,7 +1902,7 @@ components:
 
     DocumentKind:
       type: string
-      enum: [person, partner, platform, publication, case-study, industry, framework, site-configuration]
+      enum: [person, partner, platform, publication, case-study, industry, framework, office, site-configuration]
     DocumentStatus:
       type: string
       enum: [draft, in-review, approved, scheduled, published, archived]
@@ -1915,6 +1915,7 @@ components:
         - $ref: "#/components/schemas/CmsPublicationContent"
         - $ref: "#/components/schemas/CmsCaseStudyContent"
         - $ref: "#/components/schemas/CmsFrameworkContent"
+        - $ref: "#/components/schemas/CmsOfficeContent"
         - $ref: "#/components/schemas/CmsSiteConfigurationContent"
     CmsPersonContent:
       type: object
@@ -1949,6 +1950,20 @@ components:
         website: { type: string, pattern: '^https?://.+' }
         logoMediaId: { type: string }
         relationshipStatus: { type: string, enum: [active, prospective, paused, ended] }
+        visibility: { $ref: "#/components/schemas/CmsVisibility" }
+        order: { type: number, multipleOf: 1 }
+        sources: { type: array, items: { $ref: "#/components/schemas/CmsSource" } }
+        verificationDate: { type: string, format: date }
+        reviewDate: { type: string, format: date }
+        relatedIds: { type: array, items: { type: string } }
+    CmsOfficeContent:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, city, address]
+      properties:
+        schemaVersion: { type: number, enum: [1] }
+        city: { type: string }
+        address: { type: string }
         visibility: { $ref: "#/components/schemas/CmsVisibility" }
         order: { type: number, multipleOf: 1 }
         sources: { type: array, items: { $ref: "#/components/schemas/CmsSource" } }
@@ -2160,7 +2175,7 @@ components:
         items: { type: array, items: { type: string } }
     Document:
       type: object
-      required: [id, kind, slug, title, status, content, markets, revisionNumber, createdAt, updatedAt]
+      required: [id, kind, slug, title, status, content, markets, revisionNumber, canPermanentlyDelete, createdAt, updatedAt]
       properties:
         id: { type: string }
         kind:
@@ -2181,6 +2196,9 @@ components:
           type: array
           items: { type: string }
         revisionNumber: { type: number, multipleOf: 1, minimum: 1 }
+        canPermanentlyDelete:
+          type: boolean
+          description: True only when permanent deletion is allowed; previously published offices must be archived.
         currentRevisionId: { type: ["string", "null"] }
         publishedRevisionId: { type: ["string", "null"] }
         scheduledAt: { type: ["string", "null"], format: date-time }
@@ -2936,7 +2954,7 @@ components:
       allOf:
         - $ref: "#/components/schemas/PageMetadata"
         - type: object
-          required: [items, market, locale, requestedMarket, usedFallback]
+          required: [items, market, locale, requestedMarket, usedFallback, isConfigured]
           properties:
             items:
               type: array
@@ -2946,6 +2964,9 @@ components:
             locale: { type: string }
             requestedMarket: { type: string }
             usedFallback: { type: boolean }
+            isConfigured:
+              type: boolean
+              description: True once this content kind has an approved publication history, including archived records.
     Sitemap:
       type: object
       required: [items, generatedAt]

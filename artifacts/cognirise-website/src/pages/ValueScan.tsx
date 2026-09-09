@@ -3,7 +3,7 @@ import { ArrowDown, ArrowRight, Check } from "lucide-react";
 import { Link } from "wouter";
 import { useSubmitEnquiry } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
 import { SERVICE_LINE_LABELS } from "@/lib/serviceLines";
@@ -28,11 +28,7 @@ export default function ValueScan() {
   const { toast } = useToast();
   const { market } = useMarketStore();
   
-  const marketLocation = 
-    market === "uae" ? "Dubai · United Arab Emirates" :
-    market === "ksa" ? "Riyadh · Kingdom of Saudi Arabia" :
-    market === "turkiye" ? "Istanbul · Türkiye" :
-    "London · Europe";
+  const marketLocation = getMarketLocationLabel(market);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData(prev => ({
