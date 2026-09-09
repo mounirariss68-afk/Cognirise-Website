@@ -113,6 +113,7 @@ export const officeContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
   city: z.string().trim().min(1).max(160),
   address: z.string().trim().min(1).max(1_000),
+  phone: z.string().trim().min(1).max(80).optional(),
   ...governance,
 }).strict();
 

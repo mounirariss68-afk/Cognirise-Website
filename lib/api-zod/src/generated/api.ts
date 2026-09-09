@@ -718,6 +718,12 @@ export const listDocumentsResponseTwoItemsItemContentFiveSourcesItemUrlRegExp = 
 export const listDocumentsResponseTwoItemsItemContentSixOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentSevenCityMax = 160;
+
+export const listDocumentsResponseTwoItemsItemContentSevenAddressMax = 1000;
+
+export const listDocumentsResponseTwoItemsItemContentSevenPhoneMax = 80;
+
 export const listDocumentsResponseTwoItemsItemContentSevenOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -973,8 +979,9 @@ export const ListDocumentsResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSevenCityMax),
+  "address": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSevenAddressMax),
+  "phone": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(listDocumentsResponseTwoItemsItemContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -1085,6 +1092,12 @@ export const createDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp(
 export const createDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const createDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentSevenCityMax = 160;
+
+export const createDocumentResponseContentSevenAddressMax = 1000;
+
+export const createDocumentResponseContentSevenPhoneMax = 80;
+
 export const createDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const createDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -1334,8 +1347,9 @@ export const CreateDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(createDocumentResponseContentSevenCityMax),
+  "address": zod.string().min(1).max(createDocumentResponseContentSevenAddressMax),
+  "phone": zod.string().min(1).max(createDocumentResponseContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(createDocumentResponseContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -1417,6 +1431,12 @@ export const getDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^h
 export const getDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const getDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentSevenCityMax = 160;
+
+export const getDocumentResponseContentSevenAddressMax = 1000;
+
+export const getDocumentResponseContentSevenPhoneMax = 80;
+
 export const getDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const getDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -1666,8 +1686,9 @@ export const GetDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(getDocumentResponseContentSevenCityMax),
+  "address": zod.string().min(1).max(getDocumentResponseContentSevenAddressMax),
+  "phone": zod.string().min(1).max(getDocumentResponseContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(getDocumentResponseContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -1783,6 +1804,12 @@ export const updateDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp(
 export const updateDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentSevenCityMax = 160;
+
+export const updateDocumentResponseContentSevenAddressMax = 1000;
+
+export const updateDocumentResponseContentSevenPhoneMax = 80;
+
 export const updateDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -2032,8 +2059,9 @@ export const UpdateDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(updateDocumentResponseContentSevenCityMax),
+  "address": zod.string().min(1).max(updateDocumentResponseContentSevenAddressMax),
+  "phone": zod.string().min(1).max(updateDocumentResponseContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(updateDocumentResponseContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -2136,6 +2164,12 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveSources
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenCityMax = 160;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenAddressMax = 1000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenPhoneMax = 80;
+
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -2394,8 +2428,9 @@ export const ListDocumentRevisionsResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenCityMax),
+  "address": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenAddressMax),
+  "phone": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -2537,6 +2572,12 @@ export const getDocumentRevisionResponseSnapshotContentFiveSourcesItemUrlRegExp 
 export const getDocumentRevisionResponseSnapshotContentSixOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentSevenCityMax = 160;
+
+export const getDocumentRevisionResponseSnapshotContentSevenAddressMax = 1000;
+
+export const getDocumentRevisionResponseSnapshotContentSevenPhoneMax = 80;
+
 export const getDocumentRevisionResponseSnapshotContentSevenOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -2789,8 +2830,9 @@ export const GetDocumentRevisionResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSevenCityMax),
+  "address": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSevenAddressMax),
+  "phone": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(getDocumentRevisionResponseSnapshotContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -2875,6 +2917,12 @@ export const submitDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp(
 export const submitDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentSevenCityMax = 160;
+
+export const submitDocumentResponseContentSevenAddressMax = 1000;
+
+export const submitDocumentResponseContentSevenPhoneMax = 80;
+
 export const submitDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -3124,8 +3172,9 @@ export const SubmitDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(submitDocumentResponseContentSevenCityMax),
+  "address": zod.string().min(1).max(submitDocumentResponseContentSevenAddressMax),
+  "phone": zod.string().min(1).max(submitDocumentResponseContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(submitDocumentResponseContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -3216,6 +3265,12 @@ export const publishDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp
 export const publishDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentSevenCityMax = 160;
+
+export const publishDocumentResponseContentSevenAddressMax = 1000;
+
+export const publishDocumentResponseContentSevenPhoneMax = 80;
+
 export const publishDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -3465,8 +3520,9 @@ export const PublishDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(publishDocumentResponseContentSevenCityMax),
+  "address": zod.string().min(1).max(publishDocumentResponseContentSevenAddressMax),
+  "phone": zod.string().min(1).max(publishDocumentResponseContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(publishDocumentResponseContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -3557,6 +3613,12 @@ export const rollbackDocumentResponseContentFiveSourcesItemUrlRegExp = new RegEx
 export const rollbackDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentSevenCityMax = 160;
+
+export const rollbackDocumentResponseContentSevenAddressMax = 1000;
+
+export const rollbackDocumentResponseContentSevenPhoneMax = 80;
+
 export const rollbackDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -3806,8 +3868,9 @@ export const RollbackDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(rollbackDocumentResponseContentSevenCityMax),
+  "address": zod.string().min(1).max(rollbackDocumentResponseContentSevenAddressMax),
+  "phone": zod.string().min(1).max(rollbackDocumentResponseContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(rollbackDocumentResponseContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -3897,6 +3960,12 @@ export const archiveDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp
 export const archiveDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentSevenCityMax = 160;
+
+export const archiveDocumentResponseContentSevenAddressMax = 1000;
+
+export const archiveDocumentResponseContentSevenPhoneMax = 80;
+
 export const archiveDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -4146,8 +4215,9 @@ export const ArchiveDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(archiveDocumentResponseContentSevenCityMax),
+  "address": zod.string().min(1).max(archiveDocumentResponseContentSevenAddressMax),
+  "phone": zod.string().min(1).max(archiveDocumentResponseContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(archiveDocumentResponseContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -4237,6 +4307,12 @@ export const restoreDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp
 export const restoreDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentSevenCityMax = 160;
+
+export const restoreDocumentResponseContentSevenAddressMax = 1000;
+
+export const restoreDocumentResponseContentSevenPhoneMax = 80;
+
 export const restoreDocumentResponseContentSevenOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -4486,8 +4562,9 @@ export const RestoreDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(restoreDocumentResponseContentSevenCityMax),
+  "address": zod.string().min(1).max(restoreDocumentResponseContentSevenAddressMax),
+  "phone": zod.string().min(1).max(restoreDocumentResponseContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(restoreDocumentResponseContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -4568,6 +4645,12 @@ export const previewDocumentResponseDocumentContentFiveSourcesItemUrlRegExp = ne
 export const previewDocumentResponseDocumentContentSixOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentSevenCityMax = 160;
+
+export const previewDocumentResponseDocumentContentSevenAddressMax = 1000;
+
+export const previewDocumentResponseDocumentContentSevenPhoneMax = 80;
+
 export const previewDocumentResponseDocumentContentSevenOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -4815,8 +4898,9 @@ export const PreviewDocumentResponse = zod.object({
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
   "schemaVersion": zod.literal(1),
-  "city": zod.string(),
-  "address": zod.string(),
+  "city": zod.string().min(1).max(previewDocumentResponseDocumentContentSevenCityMax),
+  "address": zod.string().min(1).max(previewDocumentResponseDocumentContentSevenAddressMax),
+  "phone": zod.string().min(1).max(previewDocumentResponseDocumentContentSevenPhoneMax).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(previewDocumentResponseDocumentContentSevenOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({

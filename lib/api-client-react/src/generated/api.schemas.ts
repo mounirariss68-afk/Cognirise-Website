@@ -986,8 +986,21 @@ export const CmsOfficeContentSchemaVersion = {
 
 export interface CmsOfficeContent {
   schemaVersion: CmsOfficeContentSchemaVersion;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
   city: string;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
   address: string;
+  /**
+     * @minLength 1
+     * @maxLength 80
+     */
+  phone?: string;
   visibility?: CmsVisibility;
   order?: number;
   sources?: CmsSource[];

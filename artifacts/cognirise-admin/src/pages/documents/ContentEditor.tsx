@@ -202,6 +202,7 @@ export function ContentEditor({ kind, value, onChange, errors }: {
           placeholder="Office, building, street, city, country"
           rows={4}
         />
+        <Field label="Phone number (optional)" type="tel" value={value.phone} onChange={(next) => set("phone", next || undefined)} placeholder="+971 4 123 4567" />
       </>}
 
       {kind === "site-configuration" && !value.page && <>

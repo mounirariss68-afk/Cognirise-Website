@@ -38,12 +38,25 @@ test("offices are publishable, ordered content with required city and address fi
     schemaVersion: 1,
     city: "Dubai",
     address: "Office 1914, The Binary by Omniyat, Business Bay, PO Box 71515, Dubai, UAE",
+    phone: "+971 4 123 4567",
     visibility: "public",
     order: 0,
     sources: [],
     relatedIds: [],
   }, "publish");
   assert.equal(valid.success, true);
+  assert.equal(valid.success && valid.data.phone, "+971 4 123 4567");
+  assert.equal(validateCmsContent("office", {
+    schemaVersion: 1,
+    city: "Vienna",
+    address: "Example street 1, 1010 Vienna, Austria",
+  }, "publish").success, true, "phone remains optional at publication");
+  assert.equal(validateCmsContent("office", {
+    schemaVersion: 1,
+    city: "London",
+    address: "Example street, London, United Kingdom",
+    phone: "1".repeat(81),
+  }, "draft").success, false, "phone is bounded");
   assert.equal(
     validateCmsContent("office", {
       schemaVersion: 1,

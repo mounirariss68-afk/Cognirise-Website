@@ -13,6 +13,9 @@ test("Contact renders the ordered published office collection from the CMS", asy
   assert.match(contact, /useCmsCollection\("office"/);
   assert.match(contact, /contentRecord\(item, "office"\)/);
   assert.match(contact, /\.toSorted\(\(left, right\) => left\.order - right\.order\)/);
+  assert.match(contact, /phone: office\.phone/);
+  assert.match(contact, /office\.phone \? \(/);
+  assert.match(contact, /href=\{`tel:\$\{office\.phone\}`\}/);
   assert.doesNotMatch(contact, /OFFICE_LOCATIONS\.dubai\.address/);
   assert.match(cms, /office: true/);
 });

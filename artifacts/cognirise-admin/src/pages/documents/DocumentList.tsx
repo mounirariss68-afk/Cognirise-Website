@@ -15,6 +15,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Search, Filter, MoreHorizontal, ArrowRight } from "lucide-react";
@@ -28,12 +29,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { useGetSession } from "@workspace/api-client-react";
 import { PeopleMarketMatrix } from "./PeopleMarketMatrix";
+import { officeCreationContent, officeSlug } from "./office-creation";
 import { initialCmsContent } from "@workspace/api-zod";
 
 const createDocSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().trim().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required").regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid slug format (e.g. my-post-name)"),
   market: z.string().min(1, "Market is required"),
+  address: z.string().trim().optional(),
+  phone: z.string().trim().max(80, "Phone number must be 80 characters or fewer").optional(),
+});
+
+const officeCreateDocSchema = createDocSchema.extend({
+  title: z.string().trim().min(1, "Office name or city is required"),
+  address: z.string().trim().min(1, "Full postal address is required"),
 });
 
 export default function DocumentList({ kind }: { kind: DocumentKind }) {
@@ -46,6 +55,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<DocumentStatus | undefined>();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [slugWasEdited, setSlugWasEdited] = useState(false);
 
   const canCreate = session?.user?.role !== "viewer";
   const canManageAvailability = session?.user?.role === "editor"
@@ -83,11 +93,13 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   const createDocument = useCreateDocument();
 
   const form = useForm<z.infer<typeof createDocSchema>>({
-    resolver: zodResolver(createDocSchema),
+    resolver: zodResolver(kind === "office" ? officeCreateDocSchema : createDocSchema),
     defaultValues: {
       title: "",
       slug: "",
       market: "",
+      address: "",
+      phone: "",
     }
   });
 
@@ -112,23 +124,27 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   };
 
   const onSubmitCreate = (values: z.infer<typeof createDocSchema>) => {
+    const content = kind === "office" ? officeCreationContent(values) : initialCmsContent(kind);
     createDocument.mutate({
       data: {
         kind,
         title: values.title,
         slug: values.slug,
         markets: [values.market],
-        content: initialCmsContent(kind)
+        content,
       }
     }, {
       onSuccess: (newDoc) => {
         queryClient.invalidateQueries({ queryKey: getListDocumentsQueryKey({ kind, page, pageSize: 20, search: search || undefined, status }) });
         toast({ title: "Created successfully" });
         setIsCreateOpen(false);
+        form.reset({ title: "", slug: "", market: primaryMarket?.code ?? "", address: "", phone: "" });
+        setSlugWasEdited(false);
         setLocation(`/content/${newDoc.id}`);
       },
       onError: (error) => {
-        toast({ title: "Creation failed", variant: "destructive", description: (error as any).error || (error as any).message || "A conflict occurred" });
+        const apiError = error as any;
+        toast({ title: "Creation failed", variant: "destructive", description: apiError.data?.error || apiError.error || apiError.message || "Check the office details and try again." });
       }
     });
   };
@@ -268,12 +284,23 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
         )}
       </div>
 
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+      <Dialog
+        open={isCreateOpen}
+        onOpenChange={(open) => {
+          setIsCreateOpen(open);
+          if (!open && !createDocument.isPending) {
+            form.reset({ title: "", slug: "", market: primaryMarket?.code ?? "", address: "", phone: "" });
+            setSlugWasEdited(false);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Create {getKindLabel(kind)}</DialogTitle>
             <DialogDescription className="font-mono text-xs">
-              Initialize an incomplete governed draft. Fill the type-specific fields on the next screen before review.
+              {kind === "office"
+                ? "Create a complete office draft. You can continue editing it before review."
+                : "Initialize an incomplete governed draft. Fill the type-specific fields on the next screen before review."}
             </DialogDescription>
           </DialogHeader>
           
@@ -284,9 +311,18 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-mono text-xs uppercase tracking-wider">Title</FormLabel>
+                    <FormLabel className="font-mono text-xs uppercase tracking-wider">{kind === "office" ? "Office name / city" : "Title"}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Internal Document Title" {...field} />
+                      <Input
+                        placeholder={kind === "office" ? "Amsterdam" : "Internal Document Title"}
+                        {...field}
+                        onChange={(event) => {
+                          field.onChange(event);
+                          if (kind === "office" && !slugWasEdited) {
+                            form.setValue("slug", officeSlug(event.target.value), { shouldValidate: form.formState.isSubmitted });
+                          }
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -300,12 +336,49 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                   <FormItem>
                     <FormLabel className="font-mono text-xs uppercase tracking-wider">URL Slug</FormLabel>
                     <FormControl>
-                      <Input placeholder="my-document-name" className="font-mono text-sm" {...field} />
+                      <Input
+                        placeholder={kind === "office" ? "amsterdam" : "my-document-name"}
+                        className="font-mono text-sm"
+                        {...field}
+                        onChange={(event) => {
+                          setSlugWasEdited(true);
+                          field.onChange(event);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {kind === "office" && <>
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-mono text-xs uppercase tracking-wider">Full postal address</FormLabel>
+                      <FormControl>
+                        <Textarea rows={4} placeholder="Office, building, street, city, postcode, country" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-mono text-xs uppercase tracking-wider">Phone number (optional)</FormLabel>
+                      <FormControl>
+                        <Input type="tel" placeholder="+31 20 123 4567" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>}
 
               <FormField
                 control={form.control}

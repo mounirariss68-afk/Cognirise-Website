@@ -238,6 +238,10 @@ router.post(
       res.status(201).json(document);
     } catch (error) {
       await client.query("ROLLBACK");
+      if (typeof error === "object" && error !== null && "code" in error && error.code === "23505") {
+        res.status(409).json({ error: "That URL slug is already in use. Choose a different slug and try again." });
+        return;
+      }
       throw error;
     } finally {
       client.release();

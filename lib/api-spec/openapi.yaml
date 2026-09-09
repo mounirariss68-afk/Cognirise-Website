@@ -1983,8 +1983,9 @@ components:
       required: [schemaVersion, city, address]
       properties:
         schemaVersion: { type: number, enum: [1] }
-        city: { type: string }
-        address: { type: string }
+        city: { type: string, minLength: 1, maxLength: 160 }
+        address: { type: string, minLength: 1, maxLength: 1000 }
+        phone: { type: string, minLength: 1, maxLength: 80 }
         visibility: { $ref: "#/components/schemas/CmsVisibility" }
         order: { type: number, multipleOf: 1 }
         sources: { type: array, items: { $ref: "#/components/schemas/CmsSource" } }
