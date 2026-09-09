@@ -2,13 +2,12 @@ import { Link } from "wouter";
 import { ArrowDown, ArrowRight, Plus } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useMarketStore } from "@/store/market";
-import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
 import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { ALLIANCE_PLATFORM_LIST } from "@/lib/alliancePlatforms";
 import { SpatialDisclosure, SpatialDisclosureItem, SpatialDisclosureTrigger, SpatialDisclosurePanel } from "@/components/ui/spatial-disclosure";
-import { PulseImage } from "@/components/ui/pulse-image";
+import { PlatformsHeroMedia } from "@/components/platforms/platforms-hero-media";
 
 const platformFallback = [
   { name: "CogniOS", description: "The core operating system for governed enterprise intelligence.", link: "/platforms/cognios", category: "Foundation & Orchestration" },
@@ -74,19 +73,15 @@ export default function PlatformsOverview() {
             </div>
           </div>
           
-          <div className="relative h-[400px] lg:h-[640px] clip-diagonal-bottom bg-[hsl(var(--brand-deep))]">
-            <PulseImage
-              src={assetUrl("/images/cognirise/site-cognios.jpg")}
-              alt="A network of luminous paths connecting within a larger structure." 
-              className="absolute inset-0 h-full w-full object-cover opacity-90 scale-105"
-            />
+          <div className="platforms-hero-cut relative h-[400px] lg:h-[640px] bg-[hsl(var(--brand-deep))]">
+            <PlatformsHeroMedia />
             <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))] via-transparent to-transparent opacity-70" />
             
             <div className="absolute right-0 top-12 z-10 text-[100px] lg:text-[145px] font-display font-semibold leading-none text-white opacity-20 mix-blend-overlay tracking-tight pointer-events-none">
               system
             </div>
             
-            <div className="absolute bottom-8 left-8 z-20 text-[10px] uppercase tracking-widest text-white">
+            <div className="absolute bottom-[12%] left-[13%] z-20 text-[10px] uppercase tracking-widest text-white sm:bottom-[11%] sm:left-[12%]">
               <span className="mb-2 block opacity-75">CogniOS Ecosystem</span>
               One governed flow
             </div>

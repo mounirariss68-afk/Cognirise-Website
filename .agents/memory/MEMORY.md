@@ -17,3 +17,4 @@
 - [Composite image animation](composite-image-animation.md) — Isolate clean artwork from designed page screenshots before image-to-video generation so baked typography never enters footage.
 - [Perceptual loop validation](perceptual-loop-validation.md) — Similar boundary pixels do not prove a smooth loop; visual motion continuity outranks the metric.
 - [Hero media ownership](hero-media-ownership.md) — Page-specific hero films need dedicated assets; never overwrite another route’s approved media through shared paths.
+- [Platforms hero fidelity](platforms-hero-fidelity.md) — Retain the approved cinematic footage unless a replacement matches its layered CogniOS identity at materially higher fidelity.

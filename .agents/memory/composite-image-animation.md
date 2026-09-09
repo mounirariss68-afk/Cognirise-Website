@@ -7,4 +7,4 @@ When a video reference is a composed page screenshot, use the clean underlying a
 
 **Why:** Image-to-video models treat visible page typography and layout as part of the scene, reproducing distorted or persistent letterforms even when the prompt forbids text.
 
-**How to apply:** Confirm the source frame contains only the visual field, matches the requested video ratio without bars, and has no captions or logos before starting an expensive generation.
+**How to apply:** Confirm the source frame contains only the visual field, matches the requested video ratio without bars, and has no captions or logos before starting an expensive generation. If the generator cannot emit the source ratio, choose the closest orientation, then crop the generated master to the intended composition before web export and inspect a contact sheet for empty bands.

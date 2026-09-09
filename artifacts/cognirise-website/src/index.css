@@ -159,6 +159,29 @@
   clip-path: polygon(0 8%, 100% 0, 100% 100%, 9% 92%);
 }
 
+.platforms-hero-cut {
+  clip-path: polygon(0 8%, 100% 0, 100% 100%, 9% 92%);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.platforms-hero-fallback {
+  opacity: .9;
+  transform: scale(1.05);
+}
+
+.platforms-hero-video {
+  opacity: .9;
+  background: hsl(var(--brand-deep));
+  transform: scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .platforms-hero-video {
+    display: none;
+  }
+}
+
 .autodata-stack-card {
   min-height: 300px;
 }
