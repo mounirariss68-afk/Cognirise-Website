@@ -239,3 +239,17 @@ mtime_ms = 1788901590599
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/765f9bf6-8dbb-41d0-bc68-18ef1304f6c4/59b6c522-73c2-40cb-983b-5b4e6d6cd979"
 storage_version_token = "1788901613559224"
 content_type = "image/png"
+
+[[outputs]]
+id = "nyK1AIy70GoXeFlhpfqm0"
+uri = "file://deliverables/cognirise-five-industry-images.zip"
+type = "unspecified"
+title = "Cognirise Five Industry Images"
+description = "Download the approved 1024×1024 PNG image family for Banking, Defense, Education, Energy & Resources, and Travel & Hospitality, plus the concise design direction."
+logical_id = "82456dc7-7c6c-48d3-ba03-217f0e316fb3"
+content_hash = "sha256:755d1b74babf1d8347bb70b8e3bfae44e8e5c172376078ca425e94816860d2b6"
+size = 8762339
+mtime_ms = 1788949243726
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/82456dc7-7c6c-48d3-ba03-217f0e316fb3/fa1f0eef-98e0-4be6-8a1b-fd143e4a4f43"
+storage_version_token = "1788949258724285"
+content_type = "application/octet-stream"
