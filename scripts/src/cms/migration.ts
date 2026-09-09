@@ -104,13 +104,13 @@ export function industryBaselineAction(
       ? "append-and-publish"
       : "preserve-editorial";
   }
-  const exactV3 = ordered.length === legacy.length + 1
-    && latest.reason === v3Reason
-    && latest.matchesContractPayload;
-  if (!exactV3) return "preserve-editorial";
-  if (latest.hasValidMediaPin) return "reuse-complete";
-  return latest.hasKnownV3UnpinnedRef && latest.priorHasValidMediaPin
-    ? "repair-v3-media"
+  if (latest.matchesContractPayload && latest.hasValidMediaPin) return "reuse-complete";
+  if (latest.hasKnownV3UnpinnedRef && latest.reason === v3Reason) {
+    if (!latest.priorHasValidMediaPin) return "preserve-editorial";
+    return latest.matchesContractPayload ? "repair-v3-media" : "append-and-publish";
+  }
+  return latest.provenanceValid && latest.hasValidMediaPin
+    ? "append-and-publish"
     : "preserve-editorial";
 }
 
@@ -175,7 +175,7 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
     // Industry contract expansions use a versioned receipt so corrected
     // reconciliation can preserve every earlier immutable baseline and receipt.
     idempotencyKey: record.type === "industry"
-      ? `cms-industry-contract-v6:${record.externalId}`
+      ? `cms-industry-contract-v7:${record.externalId}`
       : `cms-inventory-v2:${record.externalId}`,
     requestDigest: digest(request),
   };

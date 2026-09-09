@@ -63,6 +63,28 @@ function parseIndustrySources(value: string) {
     return { label, publisher, kind, url, ...(accessedAt ? { accessedAt } : {}) };
   }).filter((item) => item.label && item.publisher && item.kind && item.url);
 }
+function educationDomainLines(value: unknown) {
+  return Array.isArray(value)
+    ? value.map((item) => `${item.title ?? ""} | ${item.body ?? ""} | ${(item.examples ?? []).join(" ;; ")}`).join("\n")
+    : "";
+}
+function parseEducationDomains(value: string) {
+  return stringLines(value).map((line) => {
+    const [title, body, ...examples] = line.split("|").map((part) => part.trim());
+    return { title, body, examples: examples.join("|").split(";;").map((item) => item.trim()).filter(Boolean) };
+  }).filter((item) => item.title && item.body && item.examples.length);
+}
+function educationSignalLines(value: unknown) {
+  return Array.isArray(value)
+    ? value.map((item) => `${item.institution ?? ""} | ${item.signal ?? ""} | ${item.implication ?? ""} | ${(item.sourceUrls ?? []).join(" ;; ")}`).join("\n")
+    : "";
+}
+function parseEducationSignals(value: string) {
+  return stringLines(value).map((line) => {
+    const [institution, signal, implication, ...urls] = line.split("|").map((part) => part.trim());
+    return { institution, signal, implication, sourceUrls: urls.join("|").split(";;").map((item) => item.trim()).filter(Boolean) };
+  }).filter((item) => item.institution && item.signal && item.implication && item.sourceUrls.length);
+}
 function richLines(value: unknown) {
   return Array.isArray(value)
     ? value.map((block) => `${block.type === "heading" ? `H${block.level ?? 2}` : block.type === "list" ? "LIST" : block.type === "quote" ? "QUOTE" : "P"}: ${block.text ?? (block.items ?? []).join("; ")}`).join("\n")
@@ -118,6 +140,14 @@ export function ContentEditor({ kind, value, onChange, errors }: {
 }) {
   const set = (key: string, next: unknown) => onChange({ ...value, schemaVersion: 1, [key]: next });
   const capabilities = industryCapabilities(value.capabilities);
+  const educationPov = value.educationPov ?? {
+    convictions: [],
+    valueDomains: [],
+    signals: [],
+    targetState: [],
+    roadmap: [],
+    leadershipTest: "",
+  };
   const common = (
     <section className="space-y-4 border-t pt-6">
       <h3 className="font-semibold">Governance and ordering</h3>
@@ -293,6 +323,16 @@ export function ContentEditor({ kind, value, onChange, errors }: {
         <Area label="Relevant service and first move" value={value.service ? `${value.service.label} | ${value.service.href} | ${value.service.firstMove}` : ""} onChange={(next) => set("service", parseTriples(next, "label", "href", "firstMove")[0] ?? {})} placeholder="Service label | /internal-path | First move" />
         <Area label="Use-case evidence" value={tripleLines(value.uses, "use", "evidence", "boundary")} onChange={(next) => set("uses", parseTriples(next, "use", "evidence", "boundary"))} placeholder="Use case | Evidence class | Required boundary" rows={6} />
         <Area label="Industry source trail" value={industrySourceLines(value.sources)} onChange={(next) => set("sources", parseIndustrySources(next))} placeholder="Label | Publisher | Official source / Independent study / Company-reported / Vendor claim | https://... | YYYY-MM-DD" rows={7} />
+        {(value.educationPov || value.legacyPath === "/industries/education") && <section className="space-y-4 rounded-md border p-4">
+          <h3 className="font-semibold">Higher education POV structure</h3>
+          <p className="text-sm text-muted-foreground">Edit each line as Title | Description. This specialist structure is used only by the Education page.</p>
+          <Area label="Five convictions" value={pairLines(educationPov.convictions, "title", "body")} onChange={(next) => set("educationPov", { ...educationPov, convictions: parsePairs(next, "title", "body") })} rows={7} />
+          <Area label="Three value domains" value={educationDomainLines(educationPov.valueDomains)} onChange={(next) => set("educationPov", { ...educationPov, valueDomains: parseEducationDomains(next) })} placeholder="Title | Description | Example one ;; Example two" rows={8} />
+          <Area label="Institutional signals" value={educationSignalLines(educationPov.signals)} onChange={(next) => set("educationPov", { ...educationPov, signals: parseEducationSignals(next) })} placeholder="Institution | Signal | Implication | https://source.one ;; https://source.two" rows={9} />
+          <Area label="Six target-state capabilities" value={pairLines(educationPov.targetState, "title", "body")} onChange={(next) => set("educationPov", { ...educationPov, targetState: parsePairs(next, "title", "body") })} rows={8} />
+          <Area label="Roadmap" value={tripleLines(educationPov.roadmap, "horizon", "title", "body")} onChange={(next) => set("educationPov", { ...educationPov, roadmap: parseTriples(next, "horizon", "title", "body") })} placeholder="0–90 days | Establish direction | Description" rows={5} />
+          <Area label="Leadership test" value={educationPov.leadershipTest} onChange={(next) => set("educationPov", { ...educationPov, leadershipTest: next })} />
+        </section>}
       </>}
 
       {kind === "framework" && <>

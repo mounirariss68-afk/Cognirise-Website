@@ -1676,88 +1676,94 @@
       "route": "/industries/education",
       "fields": {
         "slug": "education",
-        "summary": "Education systems create durable value when AI supports defined learning and teaching work with appropriate evidence, privacy safeguards and educator judgment—not when fluent output is treated as proof of learning.",
+        "summary": "Move beyond isolated copilots to a shared institutional layer that advances teaching, research, student success and operations—with academic mission, evidence and human purpose at the centre.",
         "content": {
           "schemaVersion": 1,
           "legacyPath": "/industries/education",
           "name": "Education",
           "shortName": "Education",
-          "thesis": "Learning gains need more than a convincing answer.",
-          "accent": "more than a convincing answer.",
-          "dek": "Education systems create durable value when AI supports defined learning and teaching work with appropriate evidence, privacy safeguards and educator judgment—not when fluent output is treated as proof of learning.",
-          "opportunity": "Return time to educators and improve targeted learner support while preserving privacy, safeguarding and trustworthy evidence of learning.",
+          "thesis": "Build the institution-wide agentic AI operating system.",
+          "accent": "institution-wide",
+          "dek": "Move beyond isolated copilots to a shared institutional layer that advances teaching, research, student success and operations—with academic mission, evidence and human purpose at the centre.",
+          "opportunity": "Coordinate specialised agents across trusted university knowledge, core systems and complete institutional journeys—so experimentation becomes measurable academic, research and service value.",
           "capabilities": [
             {
-              "title": "Teaching-workflow agents",
-              "body": "Build curriculum-grounded assistance for preparation, feedback and administrative work with educator review."
+              "title": "Mission and portfolio",
+              "body": "Select use cases against academic value, research impact, student outcomes and public purpose; stop low-value experiments early."
             },
             {
-              "title": "Protected learning platforms",
-              "body": "Design age-appropriate, sovereign data and model services with explicit learner-data controls."
+              "title": "Academic redesign",
+              "body": "Create course-grounded assistants, authentic assessment, AI literacy and explicit discipline-level expectations."
             },
             {
-              "title": "Evidence-led AI delivery",
-              "body": "Evaluate tools against learning, teaching and equity outcomes before expanding their authority or reach."
+              "title": "Governance and assurance",
+              "body": "Define proportionate risk tiers, accountability, privacy, procurement, intellectual property, human review and incident response."
+            },
+            {
+              "title": "Agent platform, data and tools",
+              "body": "Give agents secure identities, trusted knowledge and approved tool access while preserving interoperability and model choice."
+            },
+            {
+              "title": "People and change",
+              "body": "Develop role-based capability for students, faculty, researchers, professional staff, executives and governing boards."
+            },
+            {
+              "title": "Evidence and scale",
+              "body": "Measure learning, research speed, service quality, equity, cost and risk; scale only when evidence warrants it."
             }
           ],
           "selectedWork": {
-            "description": "Selected work should identify the learning or teaching objective, learner protections, educator authority and evaluation evidence."
+            "description": "Cognirise brings consulting, engineering, data, platform and change capabilities together to redesign a complete institutional journey and establish the shared layer that lets successful use cases scale."
           },
           "image": "/images/cognirise/industries/pulse-industry-education.jpg",
           "imageAlt": "A cinematic learning environment connected by luminous knowledge pathways.",
           "variant": "network",
           "pressures": [
             {
-              "title": "Learning evidence remains the test",
-              "body": "Useful tools need evaluation against learning, teaching and equity outcomes in their actual context—not engagement or output quality alone."
+              "title": "Agentic AI is an institutional system",
+              "body": "Value depends on coordinated workflows, trusted data, secure tool access, capability building and accountable leadership—not an IT project alone."
             },
             {
-              "title": "Learner data requires stewardship",
-              "body": "Student records, age-appropriate access, privacy and security controls shape what can be used and how it can be governed."
+              "title": "Learning design leads adoption",
+              "body": "Tools should provoke reasoning, practice and reflection rather than substitute for durable learning."
             },
             {
-              "title": "Educator judgment stays accountable",
-              "body": "AI can support preparation and feedback, but assessment, safeguarding and consequential decisions require clear human responsibility."
+              "title": "Value extends beyond content generation",
+              "body": "Course-grounded tutoring, research acceleration, advising and workflow redesign offer more defensible value than generic essay production."
             }
           ],
           "reversal": {
-            "title": "A polished response can obscure a learning gap.",
-            "body": "When learners can submit generated work without understanding, output quality may rise while teachers lose the evidence needed to judge progress and provide support."
+            "title": "Move the unit of innovation from the tool to the journey.",
+            "body": "Redesign the complete learner, researcher or employee journey and measure outcomes, not usage."
           },
           "myth": {
-            "claim": "“Generative AI personalises learning by default.”",
-            "verdict": "No. Personalisation depends on sound pedagogy, reliable context, evaluation and educator oversight; a tailored-looking response is not evidence of learning."
+            "claim": "“The university with the most pilots will lead.”",
+            "verdict": "The advantage belongs to the institution that turns experimentation into an academically led, securely enabled and measurable capability."
           },
-          "gcc": "Regional digital-education ambitions create scope for responsible experimentation. Credible progress still depends on local curriculum alignment, learner protections, teacher capability and evidence that outcomes improve.",
+          "gcc": "The UAE and Saudi Arabia can translate national AI ambition into talent, applied research and public value. Universities should treat agentic AI as a contribution to national capability—not only an efficiency agenda.",
           "service": {
-            "label": "Data & AI Foundations",
-            "href": "/what-we-do/data-ai-foundations",
-            "firstMove": "Map one learning or teaching workflow where evidence, privacy and educator authority must stay connected."
+            "label": "Consulting & Engineering with AI",
+            "href": "/what-we-do#consulting-engineering",
+            "firstMove": "Identify and redesign one measurable institutional journey."
           },
           "uses": [
             {
-              "use": "Teacher preparation",
-              "evidence": "Guidance-led emerging practice",
-              "boundary": "Educator review, approved materials and learner-data controls"
+              "use": "Teaching and assessment",
+              "evidence": "Course-grounded tutoring, adaptive practice, simulations and authentic assessment",
+              "boundary": "Designed around faculty intent and measured learning"
             },
             {
-              "use": "Learner assistance",
-              "evidence": "Early deployment evidence",
-              "boundary": "Age-appropriate access, disclosure and learning evaluation"
+              "use": "Research and discovery",
+              "evidence": "Literature discovery, coding, analysis, modelling and research administration",
+              "boundary": "Expert accountability for methods, sources and reproducibility"
             },
             {
-              "use": "Assessment support",
-              "evidence": "Established analytical practice",
-              "boundary": "Human judgment, contestability and academic-integrity controls"
+              "use": "Student success and operations",
+              "evidence": "Advising, registration, careers, finance, HR, scheduling and accreditation",
+              "boundary": "Complete journeys with reliable data and human ownership"
             }
           ],
           "sources": [
-            {
-              "label": "Guidance for generative AI in education and research",
-              "publisher": "UNESCO",
-              "kind": "Official source",
-              "url": "https://www.unesco.org/en/articles/guidance-generative-ai-education-and-research"
-            },
             {
               "label": "OECD Digital Education Outlook 2026",
               "publisher": "OECD",
@@ -1765,14 +1771,217 @@
               "url": "https://www.oecd.org/en/publications/oecd-digital-education-outlook-2026_062a7394-en.html"
             },
             {
-              "label": "Artificial Intelligence and the Future of Teaching and Learning",
-              "publisher": "US Department of Education",
+              "label": "Course-specific physics tutor study",
+              "publisher": "Harvard Gazette",
+              "kind": "Independent study",
+              "url": "https://news.harvard.edu/gazette/story/2024/09/professor-tailored-ai-tutor-to-physics-course-engagement-doubled/"
+            },
+            {
+              "label": "AI for Teaching and Learning 2026",
+              "publisher": "Yale University",
               "kind": "Official source",
-              "url": "https://www.ed.gov/media/document/ai-reportpdf-43861.pdf"
+              "url": "https://ai.yale.edu/ai-for-teaching-and-learning-2026"
+            },
+            {
+              "label": "AI in Teaching",
+              "publisher": "Caltech",
+              "kind": "Official source",
+              "url": "https://aiinteaching.caltech.edu/"
+            },
+            {
+              "label": "AI and Education",
+              "publisher": "MIT",
+              "kind": "Official source",
+              "url": "https://aiandeducation.mit.edu/"
+            },
+            {
+              "label": "AI Meets Education at Stanford",
+              "publisher": "Stanford University",
+              "kind": "Official source",
+              "url": "https://aimes.stanford.edu/"
+            },
+            {
+              "label": "Advancing Responsible AI",
+              "publisher": "University of California",
+              "kind": "Official source",
+              "url": "https://ai.universityofcalifornia.edu/"
+            },
+            {
+              "label": "UAE Strategy for Artificial Intelligence 2031",
+              "publisher": "UAE Artificial Intelligence Office",
+              "kind": "Official source",
+              "url": "https://ai.gov.ae/strategy/"
+            },
+            {
+              "label": "NOVA institutional transformation project",
+              "publisher": "UAE Ministry of Education",
+              "kind": "Official source",
+              "url": "https://www.moe.gov.ae/en/mediacenter/news/pages/Ministry-of-Education-launches-NOVA-project-to-advance-comprehensive-AI-driven-institutional-transformation-in-line-with-UA.aspx"
+            },
+            {
+              "label": "National Strategy for Data and AI",
+              "publisher": "Saudi Data & AI Authority",
+              "kind": "Official source",
+              "url": "https://sdaia.gov.sa/en/SDAIA/SdaiaStrategies/Pages/NationalStrategyForDataAndAI.aspx"
+            },
+            {
+              "label": "Saudi Academic AI Qualifications Framework",
+              "publisher": "Saudi Data & AI Authority",
+              "kind": "Official source",
+              "url": "https://sdaia.gov.sa/en/Research/Pages/EducationIntelligence.aspx"
             }
           ],
-          "verificationDate": "2026-09-06",
-          "reviewDate": "2027-03-06",
+          "educationPov": {
+            "convictions": [
+              {
+                "title": "An institutional system, not an IT project",
+                "body": "Coordinate workflows, trusted data, secure tool access, capability building and accountable leadership across the university."
+              },
+              {
+                "title": "Learning design leads technology",
+                "body": "Use AI to provoke reasoning, practice and reflection—not to substitute faster task completion for durable learning."
+              },
+              {
+                "title": "Value reaches beyond generation",
+                "body": "Prioritise course-grounded tutoring, research acceleration, advising and workflow redesign over generic content production."
+              },
+              {
+                "title": "Confidence enables innovation",
+                "body": "Clear rules, secure environments, proportionate risk tiers and evaluation let useful experimentation move faster."
+              },
+              {
+                "title": "Universities advance national capability",
+                "body": "In the UAE and Saudi Arabia, institutions can convert national ambition into talent, applied research and measurable public value."
+              }
+            ],
+            "valueDomains": [
+              {
+                "title": "Teaching and assessment",
+                "body": "Create course-grounded assistants for tailored explanations, adaptive practice, simulations, translation and formative feedback. Redesign assessment around authentic problem-solving, oral defence, applied projects, reflection and evidence of process.",
+                "examples": [
+                  "Harvard’s 194-student controlled study reported roughly twice the learning gains in preliminary analysis for a scaffolded, course-specific physics tutor.",
+                  "Yale examples include grounded tutors, language feedback, clinical interviewing practice and AI-assisted inquiry."
+                ]
+              },
+              {
+                "title": "Research and discovery",
+                "body": "Support literature discovery, coding, data analysis, modelling, experiment design and dissemination, then connect specialist agents with ethics, finance, submissions and research-performance systems.",
+                "examples": [
+                  "A Caltech-reported scientist-trained agent reduced a neurological data-cleaning task from weeks to about an hour while preserving a trace of expert instruction.",
+                  "MIT and Caltech programmes position AI inside research training and scientific discovery."
+                ]
+              },
+              {
+                "title": "Student success and operations",
+                "body": "Augment recruitment, admissions, advising, registration, careers and lifelong learning alongside finance, procurement, HR, scheduling, quality assurance and accreditation.",
+                "examples": [
+                  "A student-success agent can detect a permitted signal, explain options, schedule support and document the intervention.",
+                  "The UAE Ministry of Education’s NOVA initiative connects AI with unified workflows, decision insight and service improvement."
+                ]
+              }
+            ],
+            "signals": [
+              {
+                "institution": "Harvard",
+                "signal": "Evidence-led, course-specific learning design",
+                "implication": "Test tools against learning outcomes—not novelty.",
+                "sourceUrls": [
+                  "https://www.harvard.edu/ai/teaching-resources/",
+                  "https://news.harvard.edu/gazette/story/2024/09/professor-tailored-ai-tutor-to-physics-course-engagement-doubled/"
+                ]
+              },
+              {
+                "institution": "MIT",
+                "signal": "Academic model and research training",
+                "implication": "Treat AI as a question for the whole educational mission.",
+                "sourceUrls": [
+                  "https://aiandeducation.mit.edu/",
+                  "https://openlearning.mit.edu/mit-faculty/residential-digital-innovations/ai-use-cases-teaching-mit"
+                ]
+              },
+              {
+                "institution": "Stanford",
+                "signal": "Literacy, grants and structured experimentation",
+                "implication": "Pair broad engagement with capability building and human oversight.",
+                "sourceUrls": [
+                  "https://aimes.stanford.edu/"
+                ]
+              },
+              {
+                "institution": "Yale",
+                "signal": "Discipline-specific teaching use cases",
+                "implication": "Design around course context, authentic practice and faculty intent.",
+                "sourceUrls": [
+                  "https://provost.yale.edu/news/resources-teaching-and-learning-ai",
+                  "https://ai.yale.edu/ai-for-teaching-and-learning-2026"
+                ]
+              },
+              {
+                "institution": "Caltech",
+                "signal": "AI for science and integrity caution",
+                "implication": "Accelerate expert workflows while avoiding unreliable detection shortcuts.",
+                "sourceUrls": [
+                  "https://aiinteaching.caltech.edu/",
+                  "https://www.ai4science.caltech.edu/",
+                  "https://giving.caltech.edu/news/Point72-Gift-Funds-AI-Research-Program-at-Caltech"
+                ]
+              },
+              {
+                "institution": "University of California",
+                "signal": "System-wide responsible-AI coordination",
+                "implication": "Create common principles, risk processes and transparency at scale.",
+                "sourceUrls": [
+                  "https://ai.universityofcalifornia.edu/"
+                ]
+              }
+            ],
+            "targetState": [
+              {
+                "title": "Mission and portfolio",
+                "body": "Choose use cases against academic value, research impact, student outcomes and public purpose."
+              },
+              {
+                "title": "Academic redesign",
+                "body": "Build course-grounded assistance, authentic assessment, AI literacy and discipline-level expectations."
+              },
+              {
+                "title": "Governance and assurance",
+                "body": "Set proportionate risk tiers, decision rights, privacy, procurement, IP, review and incident response."
+              },
+              {
+                "title": "Agent platform, data and tools",
+                "body": "Provide secure identities, trusted knowledge, approved actions, interoperability and model choice."
+              },
+              {
+                "title": "People and change",
+                "body": "Develop role-based capability across students, faculty, researchers, staff, executives and boards."
+              },
+              {
+                "title": "Evidence and scale",
+                "body": "Measure learning, research speed, service quality, equity, cost and risk before expanding."
+              }
+            ],
+            "roadmap": [
+              {
+                "horizon": "0–90 days",
+                "title": "Establish direction",
+                "body": "Name executive and academic owners, publish interim principles, inventory current use, identify sensitive data and select a small portfolio of measurable use cases."
+              },
+              {
+                "horizon": "3–9 months",
+                "title": "Build the foundation",
+                "body": "Launch secure access, faculty and staff development, risk assessment, evaluation standards and two or three redesigned end-to-end journeys."
+              },
+              {
+                "horizon": "9–18 months",
+                "title": "Scale what works",
+                "body": "Integrate successful use cases with core systems, institutionalise assurance, publish impact evidence and retire duplicative tools."
+              }
+            ],
+            "leadershipTest": "Can the institution state what an agent may know, what it may do, when it must escalate, who is accountable and what evidence will justify scale? If not, it has a collection of tools—not an agentic operating system."
+          },
+          "verificationDate": "2026-09-09",
+          "reviewDate": "2027-03-09",
           "visibility": "public",
           "order": 6,
           "relatedIds": []
@@ -3078,8 +3287,7 @@
           "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
           "artifacts/cognirise-website/src/pages/Home.tsx",
           "artifacts/cognirise-website/src/pages/InsightArticle.tsx",
-          "artifacts/cognirise-website/src/pages/InsightsEditorial.tsx",
-          "artifacts/cognirise-website/src/pages/PlatformsOverview.tsx"
+          "artifacts/cognirise-website/src/pages/InsightsEditorial.tsx"
         ],
         "cmsOwnership": "cms-candidate",
         "collection": "website",
@@ -3779,7 +3987,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "efddfe838b9c8fd636a966f78f0983fb6482a5e1e5523041a0502460efa186d8",
-  "generatedAt": "2026-09-09T10:37:40.693Z",
+  "manifestDigest": "92912c69bbcaeb1a7676820b51905ce7ab04b4f1dd144b2a847c290c0a7b3eb8",
+  "generatedAt": "2026-09-09T11:17:23.257Z",
   "dryRun": false
 }

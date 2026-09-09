@@ -172,6 +172,33 @@ const industrySourceSchema = z.object({
   accessedAt: optionalDate,
 }).strict();
 
+const titledBodySchema = z.object({
+  title: z.string().trim().min(1).max(160),
+  body: z.string().trim().min(1).max(1_000),
+}).strict();
+
+const educationPovSchema = z.object({
+  convictions: z.array(titledBodySchema).length(5),
+  valueDomains: z.array(z.object({
+    title: z.string().trim().min(1).max(160),
+    body: z.string().trim().min(1).max(2_000),
+    examples: z.array(z.string().trim().min(1).max(500)).min(1).max(6),
+  }).strict()).length(3),
+  signals: z.array(z.object({
+    institution: z.string().trim().min(1).max(120),
+    signal: z.string().trim().min(1).max(500),
+    implication: z.string().trim().min(1).max(500),
+    sourceUrls: z.array(safeExternalUrl).min(1).max(4),
+  }).strict()).min(6).max(10),
+  targetState: z.array(titledBodySchema).length(6),
+  roadmap: z.array(z.object({
+    horizon: z.string().trim().min(1).max(80),
+    title: z.string().trim().min(1).max(160),
+    body: z.string().trim().min(1).max(1_000),
+  }).strict()).length(3),
+  leadershipTest: z.string().trim().min(1).max(1_000),
+}).strict();
+
 export const industryContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
   legacyPath: safeInternalPath,
@@ -215,6 +242,7 @@ export const industryContentSchema = z.object({
     boundary: z.string().trim().min(1).max(500),
   }).strict()).min(1).max(12),
   sources: z.array(industrySourceSchema).min(1).max(30),
+  educationPov: educationPovSchema.optional(),
   heroMediaId: z.string().uuid().optional(),
   verificationDate: date,
   reviewDate: date,

@@ -89,7 +89,7 @@ test("the versioned industry baseline never replaces later editorial revisions",
   }, ...governedChain.map((revision) => ({
     ...revision,
     hasValidMediaPin: false,
-  }))], "r4", "published"), "preserve-editorial");
+  }))], "r4", "published"), "append-and-publish");
   assert.equal(industryBaselineAction([{
     ...v3,
     hasValidMediaPin: false,
@@ -122,7 +122,7 @@ test("the governed inventory produces six publishable industry cutover records i
   assert.equal(new Set(industries.map((operation) => operation.slug)).size, 6);
   assert.equal(new Set(industries.map((operation) => operation.idempotencyKey)).size, 6);
   assert.ok(industries.every((operation) =>
-    operation.idempotencyKey.startsWith("cms-industry-contract-v6:")
+    operation.idempotencyKey.startsWith("cms-industry-contract-v7:")
   ));
 
   const media = mediaMigrationOperations(inventory.records);

@@ -193,7 +193,7 @@ async function main() {
       // edition has subsequent revisions, import records a preservation
       // receipt rather than replacing that editorial history.
       tolerateDigestDrift: governedLegacyExternalIds.has(operation.externalId)
-        || operation.idempotencyKey.startsWith("cms-industry-contract-v6:"),
+        || operation.idempotencyKey.startsWith("cms-industry-contract-v7:"),
     });
   }
   for (const operation of mediaMigrationOperations(inventory.records)

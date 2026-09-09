@@ -330,7 +330,7 @@ async function applyDatabase(
           .where(eq(cmsDocumentsTable.canonicalSlug, operation.slug));
         const resolvedPayload = resolveMigrationMedia(operation, mediaByPath);
         if (conflict) {
-          if (operation.kind !== "industry" || !operation.idempotencyKey.startsWith("cms-industry-contract-v6:")) {
+          if (operation.kind !== "industry" || !operation.idempotencyKey.startsWith("cms-industry-contract-v7:")) {
             throw new Error(`Slug ${operation.slug} is already owned by a non-migration document.`);
           }
           const [edition] = await tx.select({
@@ -524,22 +524,26 @@ async function applyDatabase(
                 })
                 && typeof revision.contentDigest === "string";
             } else {
-              const key = `cms-industry-contract-v3:${operation.externalId}`;
-              const receipt = receiptByKey.get(key);
-              const audit = auditByRequest.get(key);
+              const receipt = allReceipts.find((item) => {
+                const candidateAudit = auditByRequest.get(item.idempotencyKey);
+                const candidateMetadata = candidateAudit?.metadata as Record<string, unknown> | null;
+                return item.subjectId === String(conflict.id)
+                  && item.idempotencyKey.startsWith("cms-industry-contract-v")
+                  && item.operation.startsWith("cms.inventory.industry-contract")
+                  && candidateMetadata?.revisionId === revisionId;
+              });
+              const audit = receipt ? auditByRequest.get(receipt.idempotencyKey) : undefined;
               const metadata = audit?.metadata as Record<string, unknown> | null;
-              provenanceValid = receipt?.operation === "cms.inventory.industry-contract-baseline-published"
-                && receipt.subjectId === String(conflict.id)
-                && receipt.resultDigest === resultDigest({
-                  documentId: conflict.id,
-                  editionId: edition.id,
-                  revisionId,
-                })
-                && audit?.action === "cms.inventory.industry-contract-baseline-published"
-                && audit.targetType === "industry"
-                && audit.targetId === String(conflict.id)
-                && metadata?.revisionId === revisionId
-                && typeof revision.contentDigest === "string";
+              provenanceValid = receipt
+                ? Boolean(
+                    receipt.subjectId === String(conflict.id)
+                    && audit?.action?.startsWith("cms.inventory.industry-contract")
+                    && audit.targetType === "industry"
+                    && audit.targetId === String(conflict.id)
+                    && metadata?.revisionId === revisionId
+                    && typeof revision.contentDigest === "string"
+                  )
+                : false;
             }
             return {
               id: String(revision.id),
@@ -567,7 +571,7 @@ async function applyDatabase(
             edition.publicationState,
           );
           if (baselineAction === "append-and-publish" || baselineAction === "repair-v3-media") {
-            const publicationPin = baselineAction === "repair-v3-media"
+            const publicationPin = baselineAction === "repair-v3-media" || (!approvedPin && priorApprovedPin)
               ? priorApprovedPin
               : approvedPin;
             if (!publicationPin) {
@@ -596,7 +600,7 @@ async function applyDatabase(
               createdByUserId: serviceAccount.id,
               reason: baselineAction === "repair-v3-media"
                 ? "Approved v4 repair of the known v3 industry hero-media pin defect; prior revisions preserved."
-                : "Approved broadened industry content contract baseline v4; prior revisions and hero-media pin preserved.",
+                : "Approved Education POV content baseline v7; prior revisions and hero-media pin preserved.",
             }).returning({ id: cmsRevisionsTable.id });
             if (!revision) throw new Error(`Could not append the ${operation.slug} contract baseline.`);
             await tx.insert(cmsMediaReferencesTable).values({
@@ -650,7 +654,7 @@ async function applyDatabase(
                 publicationState: "published",
                 reason: baselineAction === "repair-v3-media"
                   ? "Known v3 unpinned square-JPG reference replaced in a new immutable revision using the prior approved Pulse pin"
-                  : "Approved broadened industry content contract baseline v4 with immutable hero-media pin",
+                  : "Approved Education POV content baseline v7 with immutable hero-media pin",
                 repairedRevisionId: baselineAction === "repair-v3-media"
                   ? String(publishedRevision!.id)
                   : undefined,

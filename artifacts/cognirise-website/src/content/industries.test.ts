@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Router } from "wouter";
 import { validateCmsContent } from "@workspace/api-zod";
 import { IndustryEditorialView } from "@/components/industries/IndustryEditorial";
+import { EducationEditorialView } from "@/components/industries/EducationEditorial";
 import { INDUSTRIES } from "./industries";
 
 test("publishes exactly six complete, distinct industry records", () => {
@@ -77,4 +78,33 @@ test("renders all six migrated CMS industry payloads without compiled fallback",
     assert.match(html, /source trail/i);
     assert.doesNotMatch(html, /under review/i);
   }
+});
+
+test("publishes the specialist higher education POV with balanced themes and supplied evidence", () => {
+  const education = INDUSTRIES.find((industry) => industry.slug === "education");
+  assert.ok(education?.educationPov);
+  assert.equal(education.educationPov.convictions.length, 5);
+  assert.equal(education.educationPov.valueDomains.length, 3);
+  assert.equal(education.educationPov.targetState.length, 6);
+  assert.deepEqual(education.educationPov.roadmap.map((step) => step.horizon), ["0–90 days", "3–9 months", "9–18 months"]);
+
+  const copy = JSON.stringify(education).toLowerCase();
+  for (const theme of ["teaching", "assessment", "research", "student success", "operations", "agent platform", "people and change", "evidence and scale", "uae", "saudi"]) {
+    assert.ok(copy.includes(theme), `missing Education theme: ${theme}`);
+  }
+  for (const institution of ["harvard", "yale", "caltech", "mit", "stanford", "university of california"]) {
+    assert.ok(copy.includes(institution), `missing institutional signal: ${institution}`);
+  }
+
+  const html = renderToStaticMarkup(createElement(
+    Router,
+    { ssrPath: "/industries/education" },
+    createElement(EducationEditorialView, { view: education }),
+  ));
+  assert.match(html, /From isolated copilots to coordinated institutional action/i);
+  assert.match(html, /Teaching and assessment/i);
+  assert.match(html, /Research and discovery/i);
+  assert.match(html, /Student success and operations/i);
+  assert.match(html, /Identify and redesign one measurable institutional journey/i);
+  assert.doesNotMatch(html, /Operating pressures|governed capability|required boundary|supporting evidence and operating guardrails|route to a governed build/i);
 });
