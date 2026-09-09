@@ -18,6 +18,7 @@ import { mapWithConcurrency } from "./media-reconciliation.js";
 import { objectStorageClient } from "./object-storage.js";
 import {
   inspectReceiptCoverage,
+  requiresPublishedCaseSnapshot,
   type ExpectedReceipt,
 } from "./receipt-reconciliation.js";
 
@@ -155,8 +156,7 @@ async function inspectReconciliationState(
 
   for (const receipt of relevantReceipts) {
     const expectation = expected.get(receipt.idempotencyKey);
-    if (!expectation?.publishCase || expectation.subjectType !== "document"
-      || receipt.operation === "cms.inventory.case-study-baseline-preserved") continue;
+    if (!requiresPublishedCaseSnapshot(expectation, receipt)) continue;
     const [edition] = await db.select({
       id: cmsMarketEditionsTable.id,
       publicationState: cmsMarketEditionsTable.publicationState,

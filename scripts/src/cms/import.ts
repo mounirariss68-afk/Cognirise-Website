@@ -30,6 +30,7 @@ import { mediaMetadataUpdate, shouldUpdateMediaMetadata } from "./media-metadata
 import {
   mediaRefreshReceiptDigestIsAccepted,
   resolveMediaImportAssetId,
+  resolveMissingLegacyMediaSubjectRecoveryId,
 } from "./media-import-lineage.js";
 import { PUBLIC_MARKET_BASELINE } from "./market-baseline.js";
 import {
@@ -234,7 +235,14 @@ async function applyDatabase(
           : await tx.select().from(cmsMediaAssetsTable)
             .where(eq(cmsMediaAssetsTable.checksum, operation.checksum));
         if (lineageAssetId && !asset) {
-          throw new Error(`${operation.externalId}: media receipt subject is missing.`);
+          const recoveryAssetId = resolveMissingLegacyMediaSubjectRecoveryId({
+            currentReceipt: receipt,
+            historicalReceipts,
+          });
+          if (recoveryAssetId !== lineageAssetId) {
+            throw new Error(`${operation.externalId}: media receipt subject recovery is inconsistent.`);
+          }
+          console.warn(`${operation.externalId}: restoring the missing subject of one accepted legacy media receipt.`);
         }
         const governedCase = governedCaseByMediaPath.get(operation.publicPath);
         const refreshKey = governedCase
@@ -276,6 +284,7 @@ async function applyDatabase(
         }
         if (!asset) {
           [asset] = await tx.insert(cmsMediaAssetsTable).values({
+            ...(lineageAssetId ? { id: lineageAssetId } : {}),
             storageKey: durableStorageKey,
             filename: operation.filename,
             originalFilename: operation.filename,
@@ -429,6 +438,145 @@ async function applyDatabase(
             metadata: { status: "pending-review", sourcePath: operation.publicPath },
           });
         }
+      }
+
+      for (const operation of operations.filter((item) =>
+        item.kind === "case-study" && item.mediaPaths.length === 1
+      )) {
+        const [publicationReceipt] = await tx.select().from(cmsOperationReceiptsTable)
+          .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.idempotencyKey));
+        if (publicationReceipt?.operation !== "cms.inventory.case-study-summary-published") continue;
+        const mediaOperation = mediaOperations.find((item) =>
+          item.publicPath === operation.mediaPaths[0] && item.cmsOwnership === "cms-candidate"
+        );
+        if (!mediaOperation
+          || !mediaOperation.sourceReviewApproved
+          || mediaOperation.rightsStatus !== "approved-use"
+          || mediaOperation.accessibilityStatus === "needs-review") {
+          throw new Error(`${operation.externalId}: published case media no longer passes governance gates.`);
+        }
+        const mediaId = mediaByPath.get(mediaOperation.publicPath);
+        if (!mediaId) throw new Error(`${operation.externalId}: published case media is unavailable.`);
+        const [document] = await tx.select({
+          id: cmsDocumentsTable.id,
+          kind: cmsDocumentsTable.kind,
+        }).from(cmsDocumentsTable)
+          .where(eq(cmsDocumentsTable.id, publicationReceipt.subjectId));
+        if (!document || document.kind !== "case-study") {
+          throw new Error(`${operation.externalId}: published case receipt subject is invalid.`);
+        }
+        const [edition] = await tx.select({
+          id: cmsMarketEditionsTable.id,
+          publicationState: cmsMarketEditionsTable.publicationState,
+          publishedRevisionId: cmsMarketEditionsTable.publishedRevisionId,
+        }).from(cmsMarketEditionsTable).where(and(
+          eq(cmsMarketEditionsTable.documentId, document.id),
+          eq(cmsMarketEditionsTable.market, "uae"),
+        ));
+        if (!edition || edition.publicationState !== "published" || !edition.publishedRevisionId) {
+          throw new Error(`${operation.externalId}: published case edition is incomplete.`);
+        }
+        const [publishedRevision] = await tx.select({
+          id: cmsRevisionsTable.id,
+          payload: cmsRevisionsTable.payload,
+          workflowState: cmsRevisionsTable.workflowState,
+        }).from(cmsRevisionsTable)
+          .where(eq(cmsRevisionsTable.id, edition.publishedRevisionId));
+        const readiness = publishedRevision
+          ? validateCmsSnapshot("case-study", publishedRevision.payload, "publish")
+          : null;
+        const publishedPayload = publishedRevision?.payload as {
+          mediaIds?: unknown[];
+        } | undefined;
+        if (!publishedRevision
+          || publishedRevision.workflowState !== "approved"
+          || !readiness?.success
+          || !Array.isArray(publishedPayload?.mediaIds)
+          || publishedPayload.mediaIds.length !== 1
+          || publishedPayload.mediaIds[0] !== mediaId) {
+          throw new Error(`${operation.externalId}: published case snapshot is not repairable.`);
+        }
+        const [mediaVersion] = await tx.select({
+          id: cmsMediaVersionsTable.id,
+          metadata: cmsMediaVersionsTable.metadata,
+        }).from(cmsMediaVersionsTable).where(and(
+          eq(cmsMediaVersionsTable.assetId, mediaId),
+          eq(cmsMediaVersionsTable.checksum, mediaOperation.checksum),
+        )).orderBy(desc(cmsMediaVersionsTable.versionNumber)).limit(1);
+        if (!mediaVersion) {
+          throw new Error(`${operation.externalId}: published case immutable media version is missing.`);
+        }
+        const references = await tx.select({
+          assetId: cmsMediaReferencesTable.assetId,
+          mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
+        }).from(cmsMediaReferencesTable).where(and(
+          eq(cmsMediaReferencesTable.documentId, document.id),
+          eq(cmsMediaReferencesTable.fieldPath, `revision:${publishedRevision.id}`),
+        ));
+        const validReference = references.length === 1
+          && references[0].assetId === mediaId
+          && references[0].mediaVersionId === mediaVersion.id;
+        const repairKey =
+          `cms-case-study-pin-repair-v1:${operation.externalId}:${mediaOperation.checksum}`;
+        const repairDigest = resultDigest({
+          documentId: document.id,
+          revisionId: publishedRevision.id,
+          mediaId,
+          mediaVersionId: mediaVersion.id,
+          checksum: mediaOperation.checksum,
+        });
+        const [repairReceipt] = await tx.select().from(cmsOperationReceiptsTable)
+          .where(eq(cmsOperationReceiptsTable.idempotencyKey, repairKey));
+        if (repairReceipt && (
+          repairReceipt.subjectId !== String(document.id)
+          || repairReceipt.requestDigest !== repairDigest
+          || !validReference
+        )) {
+          throw new Error(`${operation.externalId}: published case pin repair receipt conflicts.`);
+        }
+        if (validReference) continue;
+        if (references.length) {
+          throw new Error(`${operation.externalId}: published case has a conflicting media reference.`);
+        }
+        await tx.insert(cmsMediaReferencesTable).values({
+          assetId: mediaId,
+          mediaVersionId: mediaVersion.id,
+          documentId: document.id,
+          fieldPath: `revision:${publishedRevision.id}`,
+        });
+        await tx.update(cmsMediaAssetsTable).set({
+          status: "active",
+          updatedAt: new Date(),
+        }).where(eq(cmsMediaAssetsTable.id, mediaId));
+        await tx.update(cmsMediaVersionsTable).set({
+          metadata: {
+            ...(mediaVersion.metadata as Record<string, unknown> | null),
+            accessibilityStatus: "approved",
+            rightsStatus: "approved-use",
+            sourceReview: "approved",
+          },
+        }).where(eq(cmsMediaVersionsTable.id, mediaVersion.id));
+        await tx.insert(cmsOperationReceiptsTable).values({
+          idempotencyKey: repairKey,
+          operation: "cms.inventory.case-study-pin-repaired",
+          subjectId: String(document.id),
+          requestDigest: repairDigest,
+          resultDigest: repairDigest,
+        });
+        await tx.insert(cmsAuditEventsTable).values({
+          actorUserId: serviceAccount.id,
+          actorLabel: "cms-inventory-migration",
+          action: "cms.inventory.case-study-pin-repaired",
+          targetType: "case-study",
+          targetId: String(document.id),
+          requestId: repairKey,
+          metadata: {
+            revisionId: String(publishedRevision.id),
+            mediaId,
+            mediaVersionId: String(mediaVersion.id),
+            sourcePath: mediaOperation.publicPath,
+          },
+        });
       }
 
       for (const operation of operations.filter((item) =>

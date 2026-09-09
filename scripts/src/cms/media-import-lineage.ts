@@ -26,6 +26,22 @@ export function resolveMediaImportAssetId(input: {
   return input.currentReceipt?.subjectId ?? historicalReceipts[0]?.receipt.subjectId;
 }
 
+export function resolveMissingLegacyMediaSubjectRecoveryId(input: {
+  currentReceipt?: MediaReceiptLineage;
+  historicalReceipts?: Array<{
+    receipt: MediaReceiptLineage;
+    acceptedDigests: string[];
+  }>;
+}) {
+  if (input.currentReceipt) {
+    throw new Error("Current media receipt subject is missing.");
+  }
+  if (input.historicalReceipts?.length !== 1) {
+    throw new Error("Missing media subject has ambiguous replacement history.");
+  }
+  return resolveMediaImportAssetId(input);
+}
+
 export function mediaRefreshReceiptDigestIsAccepted(input: {
   actualDigest: string;
   currentDigest: string;

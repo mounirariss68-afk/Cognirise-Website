@@ -18,6 +18,15 @@ export interface ReceiptSummaryInput {
   operation?: string;
 }
 
+export function requiresPublishedCaseSnapshot(
+  expectation: ExpectedReceipt | undefined,
+  receipt: ReceiptSummaryInput,
+) {
+  return expectation?.publishCase === true
+    && expectation.subjectType === "document"
+    && receipt.operation === "cms.inventory.case-study-summary-published";
+}
+
 export function inspectReceiptCoverage(
   expected: Map<string, ExpectedReceipt>,
   receipts: ReceiptSummaryInput[],

@@ -6,12 +6,14 @@ import {
 } from "./migration.js";
 import {
   inspectReceiptCoverage,
+  requiresPublishedCaseSnapshot,
   type ExpectedReceipt,
   type ReceiptSummaryInput,
 } from "./receipt-reconciliation.js";
 import {
   mediaRefreshReceiptDigestIsAccepted,
   resolveMediaImportAssetId,
+  resolveMissingLegacyMediaSubjectRecoveryId,
 } from "./media-import-lineage.js";
 import type { InventoryRecord } from "./common.js";
 
@@ -194,6 +196,48 @@ test("the importer rejects unknown history and split receipt lineage", () => {
   );
 });
 
+test("the importer can recreate one accepted missing legacy subject without rewriting its receipt", () => {
+  const { historical: [historical] } = replacementExpectations();
+  const historicalReceipt = {
+    subjectId: "deleted-legacy-media",
+    requestDigest: historical.requestDigest,
+  };
+  assert.equal(resolveMissingLegacyMediaSubjectRecoveryId({
+    historicalReceipts: [{
+      receipt: historicalReceipt,
+      acceptedDigests: historical.acceptedRequestDigests,
+    }],
+  }), historicalReceipt.subjectId);
+  assert.throws(
+    () => resolveMissingLegacyMediaSubjectRecoveryId({
+      currentReceipt: {
+        subjectId: "deleted-current-media",
+        requestDigest: "current",
+      },
+      historicalReceipts: [{
+        receipt: historicalReceipt,
+        acceptedDigests: historical.acceptedRequestDigests,
+      }],
+    }),
+    /Current media receipt subject is missing/,
+  );
+  assert.throws(
+    () => resolveMissingLegacyMediaSubjectRecoveryId({
+      historicalReceipts: [
+        {
+          receipt: historicalReceipt,
+          acceptedDigests: historical.acceptedRequestDigests,
+        },
+        {
+          receipt: historicalReceipt,
+          acceptedDigests: historical.acceptedRequestDigests,
+        },
+      ],
+    }),
+    /ambiguous replacement history/,
+  );
+});
+
 test("a pre-versioning governed refresh receipt remains valid without rewriting it", () => {
   const { operation } = replacementExpectations();
   assert.equal(operation.acceptedPriorRequestDigests.length > 0, true);
@@ -206,6 +250,32 @@ test("a pre-versioning governed refresh receipt remains valid without rewriting 
     actualDigest: "unknown-digest",
     currentDigest: operation.requestDigest,
     acceptedPriorDigests: operation.acceptedPriorRequestDigests,
+  }), false);
+});
+
+test("case publication validation follows the immutable receipt outcome", () => {
+  const expectation: ExpectedReceipt = {
+    requestDigest: "case-digest",
+    subjectType: "document",
+    publishCase: true,
+  };
+  assert.equal(requiresPublishedCaseSnapshot(expectation, {
+    idempotencyKey: "case",
+    requestDigest: "case-digest",
+    subjectId: "case-document",
+    operation: "cms.inventory.case-study-summary-published",
+  }), true);
+  assert.equal(requiresPublishedCaseSnapshot(expectation, {
+    idempotencyKey: "case",
+    requestDigest: "case-digest",
+    subjectId: "case-document",
+    operation: "cms.inventory.import",
+  }), false);
+  assert.equal(requiresPublishedCaseSnapshot(expectation, {
+    idempotencyKey: "case",
+    requestDigest: "case-digest",
+    subjectId: "case-document",
+    operation: "cms.inventory.case-study-baseline-preserved",
   }), false);
 });
 
