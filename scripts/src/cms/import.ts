@@ -27,6 +27,7 @@ import {
 import { mapWithConcurrency } from "./media-reconciliation.js";
 import { objectStorageClient } from "./object-storage.js";
 import { mediaMetadataUpdate, shouldUpdateMediaMetadata } from "./media-metadata.js";
+import { PUBLIC_MARKET_BASELINE } from "./market-baseline.js";
 import {
   caseMediaRefreshKey,
   casePublicationRefreshKey,
@@ -158,18 +159,22 @@ async function applyDatabase(
       audits: (await db.select().from(cmsAuditEventsTable)).length,
     };
     const imported = await db.transaction(async (tx) => {
-      await tx.insert(marketEditionsTable).values({
-        code: "uae",
-        displayName: "United Arab Emirates",
-        defaultLocale: "en",
-        isCanonical: true,
-        enabled: true,
-      }).onConflictDoNothing({ target: marketEditionsTable.code });
-      const [canonicalMarket] = await tx.select().from(marketEditionsTable)
-        .where(eq(marketEditionsTable.code, "uae"));
-      if (!canonicalMarket || canonicalMarket.defaultLocale !== "en" || !canonicalMarket.isCanonical
-        || !canonicalMarket.enabled || canonicalMarket.fallbackMarketCode || canonicalMarket.fallbackLocale) {
-        throw new Error("Existing UAE market configuration conflicts with the canonical English-only cutover.");
+      await tx.insert(marketEditionsTable).values(
+        PUBLIC_MARKET_BASELINE.map((market) => ({ ...market })),
+      ).onConflictDoNothing({ target: marketEditionsTable.code });
+      const configuredMarkets = await tx.select().from(marketEditionsTable);
+      const configuredMarketByCode = new Map(configuredMarkets.map((market) => [market.code, market]));
+      for (const expected of PUBLIC_MARKET_BASELINE) {
+        const actual = configuredMarketByCode.get(expected.code);
+        if (!actual
+          || actual.displayName !== expected.displayName
+          || actual.defaultLocale !== expected.defaultLocale
+          || actual.fallbackMarketCode !== expected.fallbackMarketCode
+          || actual.fallbackLocale !== expected.fallbackLocale
+          || actual.isCanonical !== expected.isCanonical
+          || actual.enabled !== expected.enabled) {
+          throw new Error(`Existing ${expected.code} market configuration conflicts with the governed public market baseline.`);
+        }
       }
       const [serviceAccount] = await tx.insert(cmsUsersTable).values({
         email: "cms-inventory-migration@service.invalid",
@@ -586,7 +591,7 @@ async function applyDatabase(
             replayed++;
             continue;
           }
-          if (operation.kind !== "industry" || !operation.idempotencyKey.startsWith("cms-industry-contract-v7:")) {
+          if (operation.kind !== "industry" || !operation.idempotencyKey.startsWith("cms-industry-contract-v8:")) {
             throw new Error(`Slug ${operation.slug} is already owned by a non-migration document.`);
           }
           const [edition] = await tx.select({
@@ -856,7 +861,7 @@ async function applyDatabase(
               createdByUserId: serviceAccount.id,
               reason: baselineAction === "repair-v3-media"
                 ? "Approved v4 repair of the known v3 industry hero-media pin defect; prior revisions preserved."
-                : "Approved Education POV content baseline v7; prior revisions and hero-media pin preserved.",
+                : "Approved market-isolated industry content baseline v8; prior revisions and hero-media pin preserved.",
             }).returning({ id: cmsRevisionsTable.id });
             if (!revision) throw new Error(`Could not append the ${operation.slug} contract baseline.`);
             await tx.insert(cmsMediaReferencesTable).values({

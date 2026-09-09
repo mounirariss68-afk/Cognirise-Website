@@ -178,7 +178,7 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
     // Industry contract expansions use a versioned receipt so corrected
     // reconciliation can preserve every earlier immutable baseline and receipt.
     idempotencyKey: record.type === "industry"
-      ? `cms-industry-contract-v7:${record.externalId}`
+      ? `cms-industry-contract-v8:${record.externalId}`
       : record.type === "case-study"
         ? `cms-case-study-baseline-v1:${record.externalId}`
         : `cms-inventory-v2:${record.externalId}`,

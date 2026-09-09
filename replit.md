@@ -34,7 +34,7 @@ _Describe the high-level user-facing capabilities of this app once they exist._
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Never present the UAE and Saudi Arabia together in website or CMS copy. UAE editions may mention only the UAE; Saudi editions may mention only Saudi Arabia. Other markets must use their own or neutral copy.
 
 ## Gotchas
 

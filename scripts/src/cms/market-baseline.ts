@@ -1,0 +1,38 @@
+export const PUBLIC_MARKET_BASELINE = [
+  {
+    code: "uae",
+    displayName: "United Arab Emirates",
+    defaultLocale: "en",
+    fallbackMarketCode: null,
+    fallbackLocale: null,
+    isCanonical: true,
+    enabled: true,
+  },
+  {
+    code: "ksa",
+    displayName: "Saudi Arabia",
+    defaultLocale: "en",
+    fallbackMarketCode: "uae",
+    fallbackLocale: "en",
+    isCanonical: false,
+    enabled: true,
+  },
+  {
+    code: "turkiye",
+    displayName: "Türkiye",
+    defaultLocale: "en",
+    fallbackMarketCode: "uae",
+    fallbackLocale: "en",
+    isCanonical: false,
+    enabled: true,
+  },
+  {
+    code: "europe",
+    displayName: "Europe",
+    defaultLocale: "en",
+    fallbackMarketCode: "uae",
+    fallbackLocale: "en",
+    isCanonical: false,
+    enabled: true,
+  },
+] as const;

@@ -3,13 +3,74 @@ import { ArrowRight, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 import { BrandButton } from "@/components/ui/brand-button";
 import { assetUrl } from "@/lib/assets";
-import { useMarketStore } from "@/store/market";
+import { useMarketStore, type Market } from "@/store/market";
 import type { IndustryContent } from "@/content/industries";
 
-export function EducationEditorialView({ view }: { view: IndustryContent }) {
-  const { market } = useMarketStore();
+const SAUDI_EDUCATION_SOURCES: IndustryContent["sources"] = [
+  { label: "National Strategy for Data and AI", publisher: "Saudi Data & AI Authority", kind: "Official source", url: "https://sdaia.gov.sa/en/SDAIA/SdaiaStrategies/Pages/NationalStrategyForDataAndAI.aspx" },
+  { label: "Saudi Academic AI Qualifications Framework", publisher: "Saudi Data & AI Authority", kind: "Official source", url: "https://sdaia.gov.sa/en/Research/Pages/EducationIntelligence.aspx" },
+];
+
+const MARKET_LABELS: Record<Market, string> = {
+  uae: "UAE",
+  ksa: "Saudi Arabia",
+  turkiye: "Türkiye",
+  europe: "Europe",
+};
+
+function isUaeSource(source: IndustryContent["sources"][number]) {
+  return /\bUAE\b|United Arab Emirates/i.test(`${source.label} ${source.publisher}`);
+}
+
+function isSaudiSource(source: IndustryContent["sources"][number]) {
+  return /\bSaudi\b/i.test(`${source.label} ${source.publisher}`);
+}
+
+export function resolveEducationMarketContent(view: IndustryContent, market: Market) {
+  const globalSources = view.sources.filter((source) => !isUaeSource(source) && !isSaudiSource(source));
+  if (market === "uae") {
+    return {
+      label: MARKET_LABELS[market],
+      regionalBody: view.gcc,
+      convictionBody: "In the UAE, institutions can convert national ambition into talent, applied research and measurable public value.",
+      supportingExample: "The UAE Ministry of Education’s NOVA initiative connects AI with unified workflows, decision insight and service improvement.",
+      sources: view.sources.filter((source) => !isSaudiSource(source)),
+    };
+  }
+  if (market === "ksa") {
+    return {
+      label: MARKET_LABELS[market],
+      regionalBody: "Saudi Arabia can translate national AI ambition into talent, applied research and public value. Universities should treat agentic AI as a contribution to national capability—not only an efficiency agenda.",
+      convictionBody: "In Saudi Arabia, institutions can convert national ambition into talent, applied research and measurable public value.",
+      supportingExample: "Saudi Arabia’s Academic AI Qualifications Framework connects education pathways with the AI capabilities institutions and the national economy need.",
+      sources: [...globalSources, ...SAUDI_EDUCATION_SOURCES],
+    };
+  }
+  return {
+    label: MARKET_LABELS[market],
+    regionalBody: "Universities can translate national AI ambition into talent, applied research and public value. Agentic AI should contribute to national capability—not only an efficiency agenda.",
+    convictionBody: "Institutions can convert national ambition into talent, applied research and measurable public value.",
+    supportingExample: "A student-success agent can connect a permitted signal with timely support, coordinated action and an accountable outcome.",
+    sources: globalSources,
+  };
+}
+
+export function EducationEditorialView({ view, marketOverride }: { view: IndustryContent; marketOverride?: Market }) {
+  const { market: selectedMarket } = useMarketStore();
+  const market = marketOverride ?? selectedMarket;
   const pov = view.educationPov;
   if (!pov) return null;
+  const regional = resolveEducationMarketContent(view, market);
+  const convictions = pov.convictions.map((item, index) =>
+    index === pov.convictions.length - 1
+      ? { ...item, body: regional.convictionBody }
+      : item
+  );
+  const valueDomains = pov.valueDomains.map((item, index) =>
+    index === pov.valueDomains.length - 1
+      ? { ...item, examples: item.examples.map((example, exampleIndex) => exampleIndex === item.examples.length - 1 ? regional.supportingExample : example) }
+      : item
+  );
   return (
     <main className="edu">
       <style>{`
@@ -29,17 +90,17 @@ export function EducationEditorialView({ view }: { view: IndustryContent }) {
         @media(prefers-reduced-motion:reduce){.edu *{scroll-behavior:auto!important}}
       `}</style>
       <section className="edu-hero" aria-labelledby="education-title">
-        <div><div className="edu-kicker">{market.toUpperCase()} / Higher education</div><h1 id="education-title">{view.thesis}</h1><p>{view.dek}</p></div>
+        <div><div className="edu-kicker">{regional.label} / Higher education</div><h1 id="education-title">{view.thesis}</h1><p>{view.dek}</p></div>
         <figure className="edu-image"><img src={assetUrl(view.image)} alt={view.imageAlt} /><span>Institution-wide perspective</span></figure>
       </section>
       <section className="edu-opportunity" aria-labelledby="education-opportunity"><div><div className="edu-kicker">The strategic shift</div><h2 id="education-opportunity">From isolated copilots to coordinated institutional action.</h2></div><p>{view.opportunity}</p></section>
-      <section className="edu-section edu-convictions" aria-labelledby="education-convictions"><div className="edu-head"><div><div className="edu-kicker">Five convictions</div><h2 id="education-convictions">Lead as a university.</h2></div><p className="edu-lead">Academic mission and human purpose set the direction. Technology, operating design and assurance make that direction executable.</p></div><div className="edu-grid">{pov.convictions.map((item, index) => <article className="edu-card" key={item.title}><span>0{index + 1}</span><h3>{item.title}</h3><p>{item.body}</p></article>)}</div></section>
-      <section className="edu-section edu-domains" aria-labelledby="education-domains"><div className="edu-head"><div><div className="edu-kicker">Where value becomes tangible</div><h2 id="education-domains">Redesign complete institutional journeys.</h2></div><p className="edu-lead">The strongest opportunities connect specialist assistance with trusted context, core systems and accountable people.</p></div><div className="edu-grid">{pov.valueDomains.map((item, index) => <article className="edu-card" key={item.title}><span>0{index + 1}</span><h3>{item.title}</h3><p>{item.body}</p><ul>{item.examples.map((example) => <li key={example}>{example}</li>)}</ul></article>)}</div></section>
+      <section className="edu-section edu-convictions" aria-labelledby="education-convictions"><div className="edu-head"><div><div className="edu-kicker">Five convictions</div><h2 id="education-convictions">Lead as a university.</h2></div><p className="edu-lead">Academic mission and human purpose set the direction. Technology, operating design and assurance make that direction executable.</p></div><div className="edu-grid">{convictions.map((item, index) => <article className="edu-card" key={item.title}><span>0{index + 1}</span><h3>{item.title}</h3><p>{item.body}</p></article>)}</div></section>
+      <section className="edu-section edu-domains" aria-labelledby="education-domains"><div className="edu-head"><div><div className="edu-kicker">Where value becomes tangible</div><h2 id="education-domains">Redesign complete institutional journeys.</h2></div><p className="edu-lead">The strongest opportunities connect specialist assistance with trusted context, core systems and accountable people.</p></div><div className="edu-grid">{valueDomains.map((item, index) => <article className="edu-card" key={item.title}><span>0{index + 1}</span><h3>{item.title}</h3><p>{item.body}</p><ul>{item.examples.map((example) => <li key={example}>{example}</li>)}</ul></article>)}</div></section>
       <section className="edu-signals" aria-labelledby="education-signals"><div className="edu-kicker">Institutional signals</div><h2 id="education-signals">What leading institutions make visible.</h2><p>These external examples are not Cognirise client work. Preliminary and institution-reported evidence is identified in the description.</p><div className="edu-signal-list">{pov.signals.map((item) => <article className="edu-signal" key={item.institution}><h3>{item.institution}</h3><p>{item.signal}</p><p>{item.implication}</p><div className="edu-signal-links">{item.sourceUrls.map((url, index) => <a href={url} target="_blank" rel="noreferrer" aria-label={`${item.institution} source ${index + 1}`} key={url}><ExternalLink size={16} aria-hidden="true" /></a>)}</div></article>)}</div></section>
       <section className="edu-section edu-target" aria-labelledby="education-target"><div className="edu-head"><div><div className="edu-kicker">The target state</div><h2 id="education-target">One shared layer. Six reinforcing capabilities.</h2></div><p className="edu-lead">A federated institutional layer supports specialised teaching, research, student-service and administrative agents without locking strategy to one product or provider.</p></div><div className="edu-grid">{pov.targetState.map((item, index) => <article className="edu-card" key={item.title}><span>0{index + 1}</span><h3>{item.title}</h3><p>{item.body}</p></article>)}</div></section>
-      <section className="edu-region" aria-labelledby="education-region"><div><div className="edu-kicker">UAE and Saudi Arabia</div><h2 id="education-region">Turn national ambition into institutional capability.</h2></div><p>{view.gcc}</p></section>
+      <section className="edu-region" aria-labelledby="education-region"><div><div className="edu-kicker">{regional.label}</div><h2 id="education-region">Turn national ambition into institutional capability.</h2></div><p>{regional.regionalBody}</p></section>
       <section className="edu-roadmap" aria-labelledby="education-roadmap"><div className="edu-kicker">A practical sequence</div><h2 id="education-roadmap">Establish. Build. Scale.</h2><div className="edu-roadmap-grid">{pov.roadmap.map((step) => <article className="edu-step" key={step.horizon}><strong>{step.horizon}</strong><h3>{step.title}</h3><p>{step.body}</p></article>)}</div><aside className="edu-test"><div className="edu-kicker">Leadership test</div><p>{pov.leadershipTest}</p></aside></section>
-      <section className="edu-sources" aria-labelledby="education-sources"><div className="edu-kicker">Evidence and source trail</div><h2 id="education-sources">Read the sources behind this view.</h2><div className="edu-source-list">{view.sources.map((source) => <a className="edu-source" href={source.url} target="_blank" rel="noreferrer" key={source.url}><strong>{source.label}</strong><span>{source.publisher} · {source.kind}</span><ExternalLink size={15} aria-hidden="true" /></a>)}</div></section>
+      <section className="edu-sources" aria-labelledby="education-sources"><div className="edu-kicker">Evidence and source trail</div><h2 id="education-sources">Read the sources behind this view.</h2><div className="edu-source-list">{regional.sources.map((source) => <a className="edu-source" href={source.url} target="_blank" rel="noreferrer" key={source.url}><strong>{source.label}</strong><span>{source.publisher} · {source.kind}</span><ExternalLink size={15} aria-hidden="true" /></a>)}</div></section>
       <section className="edu-cta" aria-labelledby="education-cta"><div><div className="edu-kicker">A practical first move</div><h2 id="education-cta">{view.service.firstMove}</h2><p>Bring academic, research, service, technology and change leaders around one journey. Leave with a measurable redesign and a route from one successful use case to institution-wide capability.</p></div><aside><Link href={view.service.href}>Connect consulting, engineering, data, platform and change <ArrowRight size={14} /></Link><BrandButton href="/value-scan">Start a Value Scan</BrandButton></aside></section>
     </main>
   );

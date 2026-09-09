@@ -3039,7 +3039,7 @@
           "gcc": "Regional ambition is high, but public, comparable evidence of realised AI value remains limited. The credible route is to publish controls and measured outcomes together.",
           "service": {
             "label": "Sovereign AI Solutions",
-            "href": "/what-we-do#sovereign-solutions",
+            "href": "/#service-lines",
             "firstMove": "Map one exception-heavy, evidence-heavy decision."
           },
           "uses": [
@@ -3159,7 +3159,7 @@
           "gcc": "Gulf operators combine sovereign-cloud investment, national AI programmes and advanced mobile infrastructure. Data residency and operating ownership remain the binding constraints.",
           "service": {
             "label": "AI Platforms",
-            "href": "/what-we-do#ai-platforms",
+            "href": "/#service-lines",
             "firstMove": "Close one high-volume incident or service loop."
           },
           "uses": [
@@ -3279,7 +3279,7 @@
           "gcc": "Rapid aviation and tourism growth raises the value of multilingual service and integrated operations—but targets should not be presented as realised outcomes.",
           "service": {
             "label": "Consulting & Engineering with AI",
-            "href": "/what-we-do#consulting-engineering",
+            "href": "/#service-lines",
             "firstMove": "Trace one disruption from signal to resolved journey."
           },
           "uses": [
@@ -3648,7 +3648,7 @@
             "claim": "“The university with the most pilots will lead.”",
             "verdict": "The advantage belongs to the institution that turns experimentation into an academically led, securely enabled and measurable capability."
           },
-          "gcc": "The UAE and Saudi Arabia can translate national AI ambition into talent, applied research and public value. Universities should treat agentic AI as a contribution to national capability—not only an efficiency agenda.",
+          "gcc": "The UAE can translate national AI ambition into talent, applied research and public value. Universities should treat agentic AI as a contribution to national capability—not only an efficiency agenda.",
           "service": {
             "label": "Consulting & Engineering with AI",
             "href": "/what-we-do#consulting-engineering",
@@ -3725,18 +3725,6 @@
               "publisher": "UAE Ministry of Education",
               "kind": "Official source",
               "url": "https://www.moe.gov.ae/en/mediacenter/news/pages/Ministry-of-Education-launches-NOVA-project-to-advance-comprehensive-AI-driven-institutional-transformation-in-line-with-UA.aspx"
-            },
-            {
-              "label": "National Strategy for Data and AI",
-              "publisher": "Saudi Data & AI Authority",
-              "kind": "Official source",
-              "url": "https://sdaia.gov.sa/en/SDAIA/SdaiaStrategies/Pages/NationalStrategyForDataAndAI.aspx"
-            },
-            {
-              "label": "Saudi Academic AI Qualifications Framework",
-              "publisher": "Saudi Data & AI Authority",
-              "kind": "Official source",
-              "url": "https://sdaia.gov.sa/en/Research/Pages/EducationIntelligence.aspx"
             }
           ],
           "educationPov": {
@@ -3759,7 +3747,7 @@
               },
               {
                 "title": "Universities advance national capability",
-                "body": "In the UAE and Saudi Arabia, institutions can convert national ambition into talent, applied research and measurable public value."
+                "body": "Universities can convert national ambition into talent, applied research and measurable public value."
               }
             ],
             "valueDomains": [
@@ -5145,8 +5133,7 @@
         "usages": [
           "artifacts/cognirise-website/src/components/ServiceLineTiles.tsx",
           "artifacts/cognirise-website/src/pages/DigitalAIWorkforce.tsx",
-          "artifacts/cognirise-website/src/pages/Home.tsx",
-          "artifacts/cognirise-website/src/pages/ServicesOverview.tsx"
+          "artifacts/cognirise-website/src/pages/Home.tsx"
         ],
         "cmsOwnership": "cms-candidate",
         "collection": "website",
@@ -5794,7 +5781,7 @@
         "usages": [
           "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
           "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
-          "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
+          "artifacts/cognirise-website/src/pages/IDAOMethodology.tsx",
           "artifacts/cognirise-website/src/pages/WorkProof.tsx"
         ],
         "cmsOwnership": "cms-candidate",
@@ -6181,7 +6168,6 @@
         "height": 1024,
         "usages": [
           "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
-          "artifacts/cognirise-website/src/pages/ServicesOverview.tsx",
           "artifacts/cognirise-website/src/pages/ValueScan.tsx"
         ],
         "cmsOwnership": "cms-candidate",
@@ -6651,7 +6637,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "9b49f984f482eb69fbec6651c414f947afe2bc33bbff1f56f43cd505c3e445e3",
-  "generatedAt": "2026-09-09T11:55:48.848Z",
+  "manifestDigest": "870e84a92c44e6a7e9d3f6ec58954575d2d4cb7fdc769afe5c7f4a4a7cc1d1ed",
+  "generatedAt": "2026-09-09T12:28:27.687Z",
   "dryRun": false
 }

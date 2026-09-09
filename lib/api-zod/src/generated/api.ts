@@ -45,6 +45,7 @@ export const GetNavigationSettingsResponse = zod.object({
  */
 
 
+
 export const UpdateNavigationSettingsBody = zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
@@ -86,6 +87,7 @@ export const submitEnquiryBodySourcePageMax = 200;
 export const submitEnquiryBodyWebsiteMax = 0;
 
 
+
 export const SubmitEnquiryBody = zod.object({
   "name": zod.string().min(submitEnquiryBodyNameMin).max(submitEnquiryBodyNameMax),
   "email": zod.string().max(submitEnquiryBodyEmailMax).regex(submitEnquiryBodyEmailRegExp),
@@ -116,6 +118,7 @@ export const subscribeNewsletterBodyEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+
 export const subscribeNewsletterBodySourcePageMax = 200;
 
 export const subscribeNewsletterBodyWebsiteMax = 0;
+
 
 
 export const SubscribeNewsletterBody = zod.object({
@@ -228,6 +231,7 @@ export const loginBodyEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
 export const loginBodyPasswordMax = 128;
 
 
+
 export const LoginBody = zod.object({
   "email": zod.string().max(loginBodyEmailMax).regex(loginBodyEmailRegExp),
   "password": zod.string().min(1).max(loginBodyPasswordMax)
@@ -335,6 +339,7 @@ export const confirmMfaResponseOneSessionOneUserEmailRegExp = new RegExp('^[^@\\
 export const confirmMfaResponseTwoRecoveryCodesItemRegExp = new RegExp('^[A-Z0-9]{4,}(?:-[A-Z0-9]{4,})*$');
 
 
+
 export const ConfirmMfaResponse = zod.object({
   "authenticated": zod.boolean(),
   "session": zod.union([zod.object({
@@ -375,6 +380,7 @@ export const recoverAuthBodyEmailMax = 254;
 export const recoverAuthBodyEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const recoverAuthBodyRecoveryCodeMin = 8;
 export const recoverAuthBodyRecoveryCodeMax = 64;
+
 
 
 export const RecoverAuthBody = zod.object({
@@ -453,6 +459,7 @@ export const changePasswordBodyCurrentPasswordMax = 128;
 
 export const changePasswordBodyNewPasswordMin = 12;
 export const changePasswordBodyNewPasswordMax = 128;
+
 
 
 export const ChangePasswordBody = zod.object({
@@ -595,6 +602,7 @@ export const getDashboardKpisResponsePublishFailuresMin = 0;
 export const getDashboardKpisResponsePublishFailuresMultipleOf = 1;
 
 
+
 export const GetDashboardKpisResponse = zod.object({
   "documents": zod.object({
   "draft": zod.number().min(getDashboardKpisResponseDocumentsDraftMin).multipleOf(getDashboardKpisResponseDocumentsDraftMultipleOf),
@@ -665,6 +673,7 @@ export const listDocumentsQueryPageSizeMultipleOf = 1;
 export const listDocumentsQuerySearchMax = 200;
 
 
+
 export const ListDocumentsQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listDocumentsQueryPageMultipleOf).default(listDocumentsQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listDocumentsQueryPageSizeMax).multipleOf(listDocumentsQueryPageSizeMultipleOf).default(listDocumentsQueryPageSizeDefault),
@@ -701,6 +710,7 @@ export const listDocumentsResponseTwoItemsItemContentFourReadingTimeMinutesMulti
 export const listDocumentsResponseTwoItemsItemContentFourOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const listDocumentsResponseTwoItemsItemContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const listDocumentsResponseTwoItemsItemContentFiveOrderMultipleOf = 1;
 
@@ -712,6 +722,7 @@ export const listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMin = 2;
 export const listDocumentsResponseTwoItemsItemContentSevenHeroSourcesMax = 2;
 
 export const listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf = 1;
+
 
 
 export const ListDocumentsResponse = zod.object({
@@ -1040,6 +1051,7 @@ export const createDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
 export const createDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const createDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const createDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const createDocumentResponseContentFiveOrderMultipleOf = 1;
 
@@ -1051,6 +1063,7 @@ export const createDocumentResponseContentSevenHeroSourcesMin = 2;
 export const createDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const createDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const CreateDocumentResponse = zod.object({
@@ -1344,6 +1357,7 @@ export const getDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
 export const getDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const getDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const getDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const getDocumentResponseContentFiveOrderMultipleOf = 1;
 
@@ -1355,6 +1369,7 @@ export const getDocumentResponseContentSevenHeroSourcesMin = 2;
 export const getDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const getDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const GetDocumentResponse = zod.object({
@@ -1647,6 +1662,7 @@ export const updateDocumentBodySeoNoIndexDefault = false;
 export const updateDocumentBodyRevisionNumberMultipleOf = 1;
 
 
+
 export const UpdateDocumentBody = zod.object({
   "slug": zod.string().max(updateDocumentBodySlugMax).regex(updateDocumentBodySlugRegExp).optional(),
   "title": zod.string().min(1).max(updateDocumentBodyTitleMax).optional(),
@@ -1681,6 +1697,7 @@ export const updateDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
 export const updateDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const updateDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const updateDocumentResponseContentFiveOrderMultipleOf = 1;
 
@@ -1692,6 +1709,7 @@ export const updateDocumentResponseContentSevenHeroSourcesMin = 2;
 export const updateDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const updateDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const UpdateDocumentResponse = zod.object({
@@ -2006,6 +2024,7 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFourReading
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFourOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveOrderMultipleOf = 1;
 
@@ -2015,6 +2034,7 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOrderMul
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSourcesMin = 2;
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenHeroSourcesMax = 2;
+
 
 
 export const ListDocumentRevisionsResponse = zod.object({
@@ -2380,6 +2400,7 @@ export const getDocumentRevisionResponseSnapshotContentFourReadingTimeMinutesMul
 export const getDocumentRevisionResponseSnapshotContentFourOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const getDocumentRevisionResponseSnapshotContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const getDocumentRevisionResponseSnapshotContentFiveOrderMultipleOf = 1;
 
@@ -2389,6 +2410,7 @@ export const getDocumentRevisionResponseSnapshotContentSixOrderMultipleOf = 1;
 export const getDocumentRevisionResponseSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMin = 2;
 export const getDocumentRevisionResponseSnapshotContentSevenHeroSourcesMax = 2;
+
 
 
 export const GetDocumentRevisionResponse = zod.object({
@@ -2668,6 +2690,7 @@ export const SubmitDocumentParams = zod.object({
 export const submitDocumentBodyNoteMax = 1000;
 
 
+
 export const SubmitDocumentBody = zod.object({
   "note": zod.string().max(submitDocumentBodyNoteMax).optional(),
   "reviewerIds": zod.array(zod.string()).optional()
@@ -2690,6 +2713,7 @@ export const submitDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
 export const submitDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const submitDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const submitDocumentResponseContentFiveOrderMultipleOf = 1;
 
@@ -2701,6 +2725,7 @@ export const submitDocumentResponseContentSevenHeroSourcesMin = 2;
 export const submitDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const submitDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const SubmitDocumentResponse = zod.object({
@@ -2980,6 +3005,7 @@ export const PublishDocumentParams = zod.object({
 export const publishDocumentBodyNoteMax = 1000;
 
 
+
 export const PublishDocumentBody = zod.object({
   "revisionId": zod.string(),
   "note": zod.string().max(publishDocumentBodyNoteMax).optional()
@@ -3002,6 +3028,7 @@ export const publishDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
 export const publishDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const publishDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const publishDocumentResponseContentFiveOrderMultipleOf = 1;
 
@@ -3013,6 +3040,7 @@ export const publishDocumentResponseContentSevenHeroSourcesMin = 2;
 export const publishDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const publishDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const PublishDocumentResponse = zod.object({
@@ -3292,6 +3320,7 @@ export const RollbackDocumentParams = zod.object({
 export const rollbackDocumentBodyNoteMax = 1000;
 
 
+
 export const RollbackDocumentBody = zod.object({
   "revisionId": zod.string(),
   "note": zod.string().max(rollbackDocumentBodyNoteMax).optional()
@@ -3314,6 +3343,7 @@ export const rollbackDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1
 export const rollbackDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const rollbackDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const rollbackDocumentResponseContentFiveOrderMultipleOf = 1;
 
@@ -3325,6 +3355,7 @@ export const rollbackDocumentResponseContentSevenHeroSourcesMin = 2;
 export const rollbackDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const rollbackDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const RollbackDocumentResponse = zod.object({
@@ -3604,6 +3635,7 @@ export const ArchiveDocumentParams = zod.object({
 export const archiveDocumentBodyReasonMax = 1000;
 
 
+
 export const ArchiveDocumentBody = zod.object({
   "reason": zod.string().max(archiveDocumentBodyReasonMax).optional()
 })
@@ -3625,6 +3657,7 @@ export const archiveDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
 export const archiveDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const archiveDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const archiveDocumentResponseContentFiveOrderMultipleOf = 1;
 
@@ -3636,6 +3669,7 @@ export const archiveDocumentResponseContentSevenHeroSourcesMin = 2;
 export const archiveDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const archiveDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const ArchiveDocumentResponse = zod.object({
@@ -3915,6 +3949,7 @@ export const RestoreDocumentParams = zod.object({
 export const restoreDocumentBodyReasonMax = 1000;
 
 
+
 export const RestoreDocumentBody = zod.object({
   "reason": zod.string().max(restoreDocumentBodyReasonMax).optional()
 })
@@ -3936,6 +3971,7 @@ export const restoreDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
 export const restoreDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const restoreDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const restoreDocumentResponseContentFiveOrderMultipleOf = 1;
 
@@ -3947,6 +3983,7 @@ export const restoreDocumentResponseContentSevenHeroSourcesMin = 2;
 export const restoreDocumentResponseContentSevenHeroSourcesMax = 2;
 
 export const restoreDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const RestoreDocumentResponse = zod.object({
@@ -4239,6 +4276,7 @@ export const previewDocumentResponseDocumentContentFourReadingTimeMinutesMultipl
 export const previewDocumentResponseDocumentContentFourOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
 export const previewDocumentResponseDocumentContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const previewDocumentResponseDocumentContentFiveOrderMultipleOf = 1;
 
@@ -4250,6 +4288,7 @@ export const previewDocumentResponseDocumentContentSevenHeroSourcesMin = 2;
 export const previewDocumentResponseDocumentContentSevenHeroSourcesMax = 2;
 
 export const previewDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const PreviewDocumentResponse = zod.object({
@@ -4527,6 +4566,7 @@ export const listMarketEditionsQueryPageSizeMax = 100;
 export const listMarketEditionsQueryPageSizeMultipleOf = 1;
 
 
+
 export const ListMarketEditionsQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listMarketEditionsQueryPageMultipleOf).default(listMarketEditionsQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listMarketEditionsQueryPageSizeMax).multipleOf(listMarketEditionsQueryPageSizeMultipleOf).default(listMarketEditionsQueryPageSizeDefault)
@@ -4541,6 +4581,7 @@ export const listMarketEditionsResponseOneTotalMultipleOf = 1;
 
 export const listMarketEditionsResponseOneTotalPagesMin = 0;
 export const listMarketEditionsResponseOneTotalPagesMultipleOf = 1;
+
 
 
 export const ListMarketEditionsResponse = zod.object({
@@ -4577,6 +4618,7 @@ export const createMarketEditionBodyFallbackMarketCodeMax = 16;
 
 export const createMarketEditionBodyFallbackLocaleMin = 2;
 export const createMarketEditionBodyFallbackLocaleMax = 35;
+
 
 
 export const CreateMarketEditionBody = zod.object({
@@ -4640,6 +4682,7 @@ export const updateMarketEditionBodyDefaultLocaleMax = 35;
 export const updateMarketEditionBodyFallbackMarketCodeMax = 16;
 
 
+
 export const UpdateMarketEditionBody = zod.object({
   "code": zod.string().regex(updateMarketEditionBodyCodeRegExp).optional(),
   "displayName": zod.string().min(1).max(updateMarketEditionBodyDisplayNameMax).optional(),
@@ -4685,6 +4728,7 @@ export const listMediaQueryPageSizeMax = 100;
 export const listMediaQueryPageSizeMultipleOf = 1;
 
 export const listMediaQuerySearchMax = 200;
+
 
 
 export const ListMediaQueryParams = zod.object({
@@ -4760,6 +4804,7 @@ export const listMediaResponseTwoItemsItemFocalPointOneXMax = 1;
 
 export const listMediaResponseTwoItemsItemFocalPointOneYMin = 0;
 export const listMediaResponseTwoItemsItemFocalPointOneYMax = 1;
+
 
 
 export const ListMediaResponse = zod.object({
@@ -4960,6 +5005,7 @@ export const requestMediaUploadResponseMediaFocalPointOneYMin = 0;
 export const requestMediaUploadResponseMediaFocalPointOneYMax = 1;
 
 
+
 export const RequestMediaUploadResponse = zod.object({
   "media": zod.object({
   "id": zod.string(),
@@ -5080,6 +5126,7 @@ export const getMediaResponseFocalPointOneYMin = 0;
 export const getMediaResponseFocalPointOneYMax = 1;
 
 
+
 export const GetMediaResponse = zod.object({
   "id": zod.string(),
   "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
@@ -5193,6 +5240,7 @@ export const updateMediaBodyFocalPointOneYMin = 0;
 export const updateMediaBodyFocalPointOneYMax = 1;
 
 
+
 export const UpdateMediaBody = zod.object({
   "filename": zod.string().min(1).max(updateMediaBodyFilenameMax).optional(),
   "altText": zod.string().max(updateMediaBodyAltTextMax).nullish(),
@@ -5283,6 +5331,7 @@ export const updateMediaResponseFocalPointOneXMax = 1;
 
 export const updateMediaResponseFocalPointOneYMin = 0;
 export const updateMediaResponseFocalPointOneYMax = 1;
+
 
 
 export const UpdateMediaResponse = zod.object({
@@ -5501,6 +5550,7 @@ export const finalizeMediaUploadResponseFocalPointOneYMin = 0;
 export const finalizeMediaUploadResponseFocalPointOneYMax = 1;
 
 
+
 export const FinalizeMediaUploadResponse = zod.object({
   "id": zod.string(),
   "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
@@ -5563,6 +5613,7 @@ export const listSubmissionsQueryPageSizeMax = 100;
 export const listSubmissionsQueryPageSizeMultipleOf = 1;
 
 export const listSubmissionsQuerySearchMax = 200;
+
 
 
 export const ListSubmissionsQueryParams = zod.object({
@@ -5646,6 +5697,7 @@ export const UpdateSubmissionParams = zod.object({
 export const updateSubmissionBodyNotesMax = 4000;
 
 
+
 export const UpdateSubmissionBody = zod.object({
   "status": zod.enum(['new', 'open', 'contacted', 'resolved', 'spam', 'unsubscribed']).optional(),
   "ownerId": zod.string().nullish(),
@@ -5686,6 +5738,7 @@ export const listUsersQueryPageSizeMax = 100;
 export const listUsersQueryPageSizeMultipleOf = 1;
 
 export const listUsersQuerySearchMax = 200;
+
 
 
 export const ListUsersQueryParams = zod.object({
@@ -5782,6 +5835,7 @@ export const updateUserBodyNameMin = 2;
 export const updateUserBodyNameMax = 120;
 
 
+
 export const UpdateUserBody = zod.object({
   "name": zod.string().min(updateUserBodyNameMin).max(updateUserBodyNameMax).optional(),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']).optional(),
@@ -5842,6 +5896,7 @@ export const revokeUserSessionsResponseRevokedCountMin = 0;
 export const revokeUserSessionsResponseRevokedCountMultipleOf = 1;
 
 
+
 export const RevokeUserSessionsResponse = zod.object({
   "revokedCount": zod.number().min(revokeUserSessionsResponseRevokedCountMin).multipleOf(revokeUserSessionsResponseRevokedCountMultipleOf),
   "revokedAt": zod.coerce.date()
@@ -5857,6 +5912,7 @@ export const listAuditEventsQueryPageMultipleOf = 1;
 export const listAuditEventsQueryPageSizeDefault = 25;
 export const listAuditEventsQueryPageSizeMax = 100;
 export const listAuditEventsQueryPageSizeMultipleOf = 1;
+
 
 
 export const ListAuditEventsQueryParams = zod.object({
@@ -5917,6 +5973,7 @@ export const listPublishedContentQueryPageSizeMax = 100;
 export const listPublishedContentQueryPageSizeMultipleOf = 1;
 
 
+
 export const ListPublishedContentQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listPublishedContentQueryPageMultipleOf).default(listPublishedContentQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listPublishedContentQueryPageSizeMax).multipleOf(listPublishedContentQueryPageSizeMultipleOf).default(listPublishedContentQueryPageSizeDefault),
@@ -5940,6 +5997,7 @@ export const listPublishedContentResponseTwoItemsItemMediaItemWidthMultipleOf = 
 export const listPublishedContentResponseTwoItemsItemMediaItemHeightMultipleOf = 1;
 
 export const listPublishedContentResponseTwoItemsItemRevisionMultipleOf = 1;
+
 
 
 export const ListPublishedContentResponse = zod.object({
@@ -6003,6 +6061,7 @@ export const getPublishedContentResponseMediaItemWidthMultipleOf = 1;
 export const getPublishedContentResponseMediaItemHeightMultipleOf = 1;
 
 export const getPublishedContentResponseRevisionMultipleOf = 1;
+
 
 
 export const GetPublishedContentResponse = zod.object({
@@ -6072,6 +6131,7 @@ export const getPublicHeroFilmResponseSourcesMax = 2;
 export const getPublicHeroFilmResponseRevisionMultipleOf = 1;
 
 
+
 export const GetPublicHeroFilmResponse = zod.object({
   "slot": zod.enum(['homepage', 'industries']),
   "poster": zod.object({
@@ -6107,6 +6167,7 @@ export const getPublicSitemapResponseItemsItemPriorityMin = 0;
 export const getPublicSitemapResponseItemsItemPriorityMax = 1;
 
 
+
 export const GetPublicSitemapResponse = zod.object({
   "items": zod.array(zod.object({
   "url": zod.string(),
@@ -6120,6 +6181,8 @@ export const GetPublicSitemapResponse = zod.object({
 })),
   "generatedAt": zod.coerce.date()
 })
+
+
 /**
  * @summary Record a consent-aware first-party event
  */
@@ -6130,6 +6193,7 @@ export const recordAnalyticsEventBodyReferrerMax = 1000;
 export const recordAnalyticsEventBodyMarketMax = 35;
 
 export const recordAnalyticsEventBodyConsentVersionMax = 40;
+
 
 
 export const RecordAnalyticsEventBody = zod.object({
@@ -6156,6 +6220,7 @@ export const RecordAnalyticsEventResponse = zod.object({
 export const recordAnalyticsConsentBodyVersionMax = 40;
 
 export const recordAnalyticsConsentBodySourceMax = 100;
+
 
 
 export const RecordAnalyticsConsentBody = zod.object({

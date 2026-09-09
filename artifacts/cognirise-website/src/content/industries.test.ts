@@ -89,9 +89,10 @@ test("publishes the specialist higher education POV with balanced themes and sup
   assert.deepEqual(education.educationPov.roadmap.map((step) => step.horizon), ["0–90 days", "3–9 months", "9–18 months"]);
 
   const copy = JSON.stringify(education).toLowerCase();
-  for (const theme of ["teaching", "assessment", "research", "student success", "operations", "agent platform", "people and change", "evidence and scale", "uae", "saudi"]) {
+  for (const theme of ["teaching", "assessment", "research", "student success", "operations", "agent platform", "people and change", "evidence and scale", "uae"]) {
     assert.ok(copy.includes(theme), `missing Education theme: ${theme}`);
   }
+  assert.doesNotMatch(copy, /saudi/i);
   for (const institution of ["harvard", "yale", "caltech", "mit", "stanford", "university of california"]) {
     assert.ok(copy.includes(institution), `missing institutional signal: ${institution}`);
   }
@@ -107,4 +108,34 @@ test("publishes the specialist higher education POV with balanced themes and sup
   assert.match(html, /Student success and operations/i);
   assert.match(html, /Identify and redesign one measurable institutional journey/i);
   assert.doesNotMatch(html, /Operating pressures|governed capability|required boundary|supporting evidence and operating guardrails|route to a governed build/i);
+});
+
+test("keeps UAE and Saudi Education editions strictly separated", () => {
+  const education = INDUSTRIES.find((industry) => industry.slug === "education");
+  assert.ok(education);
+
+  const uaeHtml = renderToStaticMarkup(createElement(
+    Router,
+    { ssrPath: "/industries/education?market=uae" },
+    createElement(EducationEditorialView, { view: education, marketOverride: "uae" }),
+  ));
+  assert.match(uaeHtml, /\bUAE\b/);
+  assert.doesNotMatch(uaeHtml, /Saudi/i);
+
+  const saudiHtml = renderToStaticMarkup(createElement(
+    Router,
+    { ssrPath: "/industries/education?market=ksa" },
+    createElement(EducationEditorialView, { view: education, marketOverride: "ksa" }),
+  ));
+  assert.match(saudiHtml, /Saudi Arabia/);
+  assert.doesNotMatch(saudiHtml, /\bUAE\b|United Arab Emirates/i);
+
+  for (const market of ["turkiye", "europe"] as const) {
+    const neutralHtml = renderToStaticMarkup(createElement(
+      Router,
+      { ssrPath: `/industries/education?market=${market}` },
+      createElement(EducationEditorialView, { view: education, marketOverride: market }),
+    ));
+    assert.doesNotMatch(neutralHtml, /\bUAE\b|United Arab Emirates|Saudi/i);
+  }
 });

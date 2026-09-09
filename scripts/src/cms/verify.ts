@@ -14,6 +14,7 @@ import {
   resultDigest,
 } from "./migration.js";
 import { CASE_STUDY_TAXONOMY_COUNTS } from "./case-studies.js";
+import { PUBLIC_MARKET_BASELINE } from "./market-baseline.js";
 
 const args = process.argv.slice(2);
 const inventoryPath = args.find((argument) => argument.startsWith("--inventory="))?.slice(12) ?? "scripts/cms/output/inventory.json";
@@ -62,11 +63,19 @@ async function verifyDatabase(records: InventoryRecord[]) {
     const caseMediaPaths = new Set(caseStudyMediaPaths(records));
     const mediaOperations = mediaMigrationOperations(records);
     return await db.transaction(async (tx) => {
-      const [canonicalMarket] = await tx.select().from(marketEditionsTable)
-        .where(eq(marketEditionsTable.code, "uae"));
-      if (!canonicalMarket || canonicalMarket.defaultLocale !== "en" || !canonicalMarket.isCanonical
-        || !canonicalMarket.enabled || canonicalMarket.fallbackMarketCode || canonicalMarket.fallbackLocale) {
-        throw new Error("Canonical UAE/English market configuration parity failed.");
+      const configuredMarkets = await tx.select().from(marketEditionsTable);
+      const configuredMarketByCode = new Map(configuredMarkets.map((market) => [market.code, market]));
+      for (const expected of PUBLIC_MARKET_BASELINE) {
+        const actual = configuredMarketByCode.get(expected.code);
+        if (!actual
+          || actual.displayName !== expected.displayName
+          || actual.defaultLocale !== expected.defaultLocale
+          || actual.fallbackMarketCode !== expected.fallbackMarketCode
+          || actual.fallbackLocale !== expected.fallbackLocale
+          || actual.isCanonical !== expected.isCanonical
+          || actual.enabled !== expected.enabled) {
+          throw new Error(`${expected.code} public market configuration parity failed.`);
+        }
       }
       const [serviceAccount] = await tx.select({ id: cmsUsersTable.id })
         .from(cmsUsersTable)

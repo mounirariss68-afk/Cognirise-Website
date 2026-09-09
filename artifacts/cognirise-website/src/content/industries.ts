@@ -220,7 +220,7 @@ export const INDUSTRIES: IndustryContent[] = [
     ],
     reversal: { title: "Move the unit of innovation from the tool to the journey.", body: "Redesign the complete learner, researcher or employee journey and measure outcomes, not usage." },
     myth: { claim: "“The university with the most pilots will lead.”", verdict: "The advantage belongs to the institution that turns experimentation into an academically led, securely enabled and measurable capability." },
-    gcc: "The UAE and Saudi Arabia can translate national AI ambition into talent, applied research and public value. Universities should treat agentic AI as a contribution to national capability—not only an efficiency agenda.",
+    gcc: "The UAE can translate national AI ambition into talent, applied research and public value. Universities should treat agentic AI as a contribution to national capability—not only an efficiency agenda.",
     service: { label: "Consulting & Engineering with AI", href: "/what-we-do#consulting-engineering", firstMove: "Identify and redesign one measurable institutional journey." },
     uses: [
       { use: "Teaching and assessment", evidence: "Course-grounded tutoring, adaptive practice, simulations and authentic assessment", boundary: "Designed around faculty intent and measured learning" },
@@ -237,8 +237,6 @@ export const INDUSTRIES: IndustryContent[] = [
       { label: "Advancing Responsible AI", publisher: "University of California", kind: "Official source", url: "https://ai.universityofcalifornia.edu/" },
       { label: "UAE Strategy for Artificial Intelligence 2031", publisher: "UAE Artificial Intelligence Office", kind: "Official source", url: "https://ai.gov.ae/strategy/" },
       { label: "NOVA institutional transformation project", publisher: "UAE Ministry of Education", kind: "Official source", url: "https://www.moe.gov.ae/en/mediacenter/news/pages/Ministry-of-Education-launches-NOVA-project-to-advance-comprehensive-AI-driven-institutional-transformation-in-line-with-UA.aspx" },
-      { label: "National Strategy for Data and AI", publisher: "Saudi Data & AI Authority", kind: "Official source", url: "https://sdaia.gov.sa/en/SDAIA/SdaiaStrategies/Pages/NationalStrategyForDataAndAI.aspx" },
-      { label: "Saudi Academic AI Qualifications Framework", publisher: "Saudi Data & AI Authority", kind: "Official source", url: "https://sdaia.gov.sa/en/Research/Pages/EducationIntelligence.aspx" },
     ],
     educationPov: {
       convictions: [
@@ -246,7 +244,7 @@ export const INDUSTRIES: IndustryContent[] = [
         { title: "Learning design leads technology", body: "Use AI to provoke reasoning, practice and reflection—not to substitute faster task completion for durable learning." },
         { title: "Value reaches beyond generation", body: "Prioritise course-grounded tutoring, research acceleration, advising and workflow redesign over generic content production." },
         { title: "Confidence enables innovation", body: "Clear rules, secure environments, proportionate risk tiers and evaluation let useful experimentation move faster." },
-        { title: "Universities advance national capability", body: "In the UAE and Saudi Arabia, institutions can convert national ambition into talent, applied research and measurable public value." },
+        { title: "Universities advance national capability", body: "Universities can convert national ambition into talent, applied research and measurable public value." },
       ],
       valueDomains: [
         { title: "Teaching and assessment", body: "Create course-grounded assistants for tailored explanations, adaptive practice, simulations, translation and formative feedback. Redesign assessment around authentic problem-solving, oral defence, applied projects, reflection and evidence of process.", examples: ["Harvard’s 194-student controlled study reported roughly twice the learning gains in preliminary analysis for a scaffolded, course-specific physics tutor.", "Yale examples include grounded tutors, language feedback, clinical interviewing practice and AI-assisted inquiry."] },
