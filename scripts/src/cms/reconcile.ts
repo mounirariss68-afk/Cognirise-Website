@@ -19,6 +19,7 @@ import { objectStorageClient } from "./object-storage.js";
 import {
   inspectReceiptCoverage,
   requiresPublishedCaseSnapshot,
+  toleratesDocumentReceiptDigestDrift,
   type ExpectedReceipt,
 } from "./receipt-reconciliation.js";
 import { runReconciliationLifecycle } from "./reconcile-order.js";
@@ -235,10 +236,10 @@ async function main() {
       // Versioned industry baselines receive a new receipt. If an earlier
       // edition has subsequent revisions, import records a preservation
       // receipt rather than replacing that editorial history.
-      tolerateDigestDrift: governedLegacyExternalIds.has(operation.externalId)
-        || operation.idempotencyKey.startsWith("cms-industry-contract-v8:")
-        || operation.idempotencyKey.startsWith("cms-case-study-baseline-v1:")
-        || operation.idempotencyKey.startsWith("cms-case-study-baseline-v2:"),
+      tolerateDigestDrift: toleratesDocumentReceiptDigestDrift(
+        operation,
+        governedLegacyExternalIds,
+      ),
       publishCase: Boolean(operation.kind === "case-study"
         && operation.mediaPaths.length === 1
         && operation.payload.content

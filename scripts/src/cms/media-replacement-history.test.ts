@@ -8,6 +8,7 @@ import {
 import {
   inspectReceiptCoverage,
   requiresPublishedCaseSnapshot,
+  toleratesDocumentReceiptDigestDrift,
   type ExpectedReceipt,
   type ReceiptSummaryInput,
 } from "./receipt-reconciliation.js";
@@ -303,6 +304,30 @@ test("case publication validation follows the immutable receipt outcome", () => 
     subjectId: "case-document",
     operation: "cms.inventory.case-study-baseline-preserved",
   }), false);
+});
+
+test("intentional governed industry digest drift remains reconcilable across contract versions", () => {
+  const idempotencyKey = "cms-industry-contract-v12:industry:financial-services";
+  const tolerateDigestDrift = toleratesDocumentReceiptDigestDrift({
+    externalId: "industry:financial-services",
+    idempotencyKey,
+    kind: "industry",
+  }, new Set());
+  const coverage = inspectReceiptCoverage(new Map([
+    [idempotencyKey, {
+      requestDigest: "current-inventory-digest",
+      subjectType: "document",
+      tolerateDigestDrift,
+    }],
+  ]), [{
+    idempotencyKey,
+    requestDigest: "preserved-receipt-digest",
+    subjectId: "financial-services-document",
+  }]);
+
+  assert.equal(tolerateDigestDrift, true);
+  assert.deepEqual(coverage.conflicts, []);
+  assert.equal(coverage.missingCount, 0);
 });
 
 test("a base-version current-binary receipt upgrades on the existing asset", () => {

@@ -18,6 +18,16 @@ export interface ReceiptSummaryInput {
   operation?: string;
 }
 
+export function toleratesDocumentReceiptDigestDrift(
+  operation: { externalId: string; idempotencyKey: string; kind: string },
+  governedExternalIds: ReadonlySet<string>,
+) {
+  return governedExternalIds.has(operation.externalId)
+    || operation.kind === "industry"
+    || operation.idempotencyKey.startsWith("cms-case-study-baseline-v1:")
+    || operation.idempotencyKey.startsWith("cms-case-study-baseline-v2:");
+}
+
 export function requiresPublishedCaseSnapshot(
   expectation: ExpectedReceipt | undefined,
   receipt: ReceiptSummaryInput,
