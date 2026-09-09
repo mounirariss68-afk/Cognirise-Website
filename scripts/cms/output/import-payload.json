@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-09T12:28:29.177Z",
-  "manifestDigest": "870e84a92c44e6a7e9d3f6ec58954575d2d4cb7fdc769afe5c7f4a4a7cc1d1ed",
+  "generatedAt": "2026-09-09T14:07:34.866Z",
+  "manifestDigest": "a19fa606c3fab924effffb932d0c87547454193d274454e0e1fdf844112edd7e",
   "dryRun": true,
   "mode": "payload-only",
   "note": "No storage or database call was made. Use --apply-db --target=development to import governed drafts.",
@@ -3101,7 +3101,7 @@
           "legacyPath": "/industries/banking",
           "name": "Financial Services",
           "shortName": "Finance",
-          "thesis": "The model estate—not the chatbot—is where trust is won.",
+          "thesis": "The model estate — not the chatbot — is where trust is won.",
           "accent": "trust is won.",
           "dek": "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
           "opportunity": "Turn fragmented controls and exception-heavy operations into faster, traceable decisions that improve customer outcomes without weakening model-risk discipline.",
@@ -3207,8 +3207,8 @@
       "mediaPaths": [
         "/images/cognirise/industries/pulse-industry-financial.jpg"
       ],
-      "idempotencyKey": "cms-industry-contract-v8:industry:b60f973e571d3059824d",
-      "requestDigest": "9fdbb2074d54c29b3f794933cce064dec8278defea219aa74c586c792c12df3c"
+      "idempotencyKey": "cms-industry-contract-v12:industry:b60f973e571d3059824d",
+      "requestDigest": "b9185c5710d86f457a59bd051816c9d0ca1e04a70d2a049fc2ae7632e4006b41"
     },
     {
       "externalId": "industry:37a17e1c80062ece7c5c",
@@ -4311,7 +4311,7 @@
   "mediaOperations": [
     {
       "externalId": "asset:eaa35ae39186f9be0518",
-      "idempotencyKey": "cms-media-inventory-v3:asset:eaa35ae39186f9be0518",
+      "idempotencyKey": "cms-media-binary-v1:asset:eaa35ae39186f9be0518:dc596527cd69e4c429bb4d9a74fa1ce4217d33fb756a941a55a465c999610546",
       "filename": "alliance-bunjee.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/alliance-bunjee.jpg",
       "publicPath": "/images/cognirise/alliance-bunjee.jpg",
@@ -4332,11 +4332,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "ff06540afdd28e57d1d7ad3773c9e17cce3becfa3a94f1da9e9ae3c633abec0f"
+      "requestDigest": "30ac100e6e27c36141b6da61d265a5334704fb154a9998d2a5b807dfb56fdef8",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:eaa35ae39186f9be0518",
+          "idempotencyKey": "cms-media-inventory-v3:asset:eaa35ae39186f9be0518",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:eaa35ae39186f9be0518:dc596527cd69e4c429bb4d9a74fa1ce4217d33fb756a941a55a465c999610546",
+          "requestDigest": "ff06540afdd28e57d1d7ad3773c9e17cce3becfa3a94f1da9e9ae3c633abec0f",
+          "acceptedRequestDigests": [
+            "ff06540afdd28e57d1d7ad3773c9e17cce3becfa3a94f1da9e9ae3c633abec0f"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "ff06540afdd28e57d1d7ad3773c9e17cce3becfa3a94f1da9e9ae3c633abec0f"
+      ]
     },
     {
       "externalId": "asset:1702a55d5a824fce8b1f",
-      "idempotencyKey": "cms-media-inventory-v3:asset:1702a55d5a824fce8b1f",
+      "idempotencyKey": "cms-media-binary-v1:asset:1702a55d5a824fce8b1f:b6b763fec567e5117f55a47364797fe9b5c4ea4d6806e1f87c0a58cf1fac7efc",
       "filename": "alliance-datatoolpack.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/alliance-datatoolpack.jpg",
       "publicPath": "/images/cognirise/alliance-datatoolpack.jpg",
@@ -4358,11 +4372,37 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "43ad631e3c076fadb31277e583da743ff0c78dc9fff2fb23d4ed8bfd2e4f3f69"
+      "requestDigest": "bf5d44b041571ff4ffd211fc67e69c9d1b4cccf57d6b92894cb0e70dbe9ce59c",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:1702a55d5a824fce8b1f",
+          "idempotencyKey": "cms-media-inventory-v3:asset:1702a55d5a824fce8b1f",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1702a55d5a824fce8b1f:b6b763fec567e5117f55a47364797fe9b5c4ea4d6806e1f87c0a58cf1fac7efc",
+          "requestDigest": "43ad631e3c076fadb31277e583da743ff0c78dc9fff2fb23d4ed8bfd2e4f3f69",
+          "acceptedRequestDigests": [
+            "43ad631e3c076fadb31277e583da743ff0c78dc9fff2fb23d4ed8bfd2e4f3f69",
+            "ab1d172ecaa94981eb2b86d98107449beecfd3ee33325d633fd836fd4f971cb7"
+          ]
+        },
+        {
+          "externalId": "asset:1702a55d5a824fce8b1f",
+          "idempotencyKey": "cms-media-replacement-v1:asset:1702a55d5a824fce8b1f:b6b763fec567e5117f55a47364797fe9b5c4ea4d6806e1f87c0a58cf1fac7efc",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1702a55d5a824fce8b1f:b6b763fec567e5117f55a47364797fe9b5c4ea4d6806e1f87c0a58cf1fac7efc",
+          "requestDigest": "fe51492134c98412ce973a2fb27f4c63f109036bc369e27b4109be2f1ea2bac5",
+          "acceptedRequestDigests": [
+            "fe51492134c98412ce973a2fb27f4c63f109036bc369e27b4109be2f1ea2bac5"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "43ad631e3c076fadb31277e583da743ff0c78dc9fff2fb23d4ed8bfd2e4f3f69",
+        "ab1d172ecaa94981eb2b86d98107449beecfd3ee33325d633fd836fd4f971cb7",
+        "fe51492134c98412ce973a2fb27f4c63f109036bc369e27b4109be2f1ea2bac5"
+      ]
     },
     {
       "externalId": "asset:4c4436fd877268245369",
-      "idempotencyKey": "cms-media-inventory-v3:asset:4c4436fd877268245369",
+      "idempotencyKey": "cms-media-binary-v1:asset:4c4436fd877268245369:a301bd790154bf25492e6216d41205a8bb914c9d7a926f6b9dce49b5f01ebecf",
       "filename": "alliance-lupitor.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/alliance-lupitor.jpg",
       "publicPath": "/images/cognirise/alliance-lupitor.jpg",
@@ -4383,11 +4423,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "6597e4c062ef3117511cd63dea71c722fc6544ca90c0f090c394715be8433f59"
+      "requestDigest": "19dba748a1fd07546e61638a7d455229de283efdc069fb82effcb02f552c719d",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:4c4436fd877268245369",
+          "idempotencyKey": "cms-media-inventory-v3:asset:4c4436fd877268245369",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:4c4436fd877268245369:a301bd790154bf25492e6216d41205a8bb914c9d7a926f6b9dce49b5f01ebecf",
+          "requestDigest": "6597e4c062ef3117511cd63dea71c722fc6544ca90c0f090c394715be8433f59",
+          "acceptedRequestDigests": [
+            "6597e4c062ef3117511cd63dea71c722fc6544ca90c0f090c394715be8433f59"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "6597e4c062ef3117511cd63dea71c722fc6544ca90c0f090c394715be8433f59"
+      ]
     },
     {
       "externalId": "asset:e0f679e84ec041a70072",
-      "idempotencyKey": "cms-media-inventory-v3:asset:e0f679e84ec041a70072",
+      "idempotencyKey": "cms-media-binary-v1:asset:e0f679e84ec041a70072:6aad7d2952da062355fb5cb7985d24d8a03d203e7cb4bff7822680f53620d4fc",
       "filename": "blueprint-activate.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-activate.jpg",
       "publicPath": "/images/cognirise/blueprint-activate.jpg",
@@ -4398,7 +4452,7 @@
       "height": 1024,
       "cmsOwnership": "cms-candidate",
       "usages": [
-        "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+        "artifacts/cognirise-website/src/content/idao.ts"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
@@ -4408,11 +4462,27 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "6cc90cf60a1bec9507770dcf0843cca9a8c048ba1c75ec0d618e36e3ecd9d217"
+      "requestDigest": "bd1c96e19f1c37f4e4cc729be66a485c0d0a5b5de21cb442bb8b7bdb6bcc608b",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:e0f679e84ec041a70072",
+          "idempotencyKey": "cms-media-inventory-v3:asset:e0f679e84ec041a70072",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:e0f679e84ec041a70072:6aad7d2952da062355fb5cb7985d24d8a03d203e7cb4bff7822680f53620d4fc",
+          "requestDigest": "4e4d644daf99056e9338c8e905efc319467bf874d54645b96cf3854e08a6270b",
+          "acceptedRequestDigests": [
+            "4e4d644daf99056e9338c8e905efc319467bf874d54645b96cf3854e08a6270b",
+            "6cc90cf60a1bec9507770dcf0843cca9a8c048ba1c75ec0d618e36e3ecd9d217"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "4e4d644daf99056e9338c8e905efc319467bf874d54645b96cf3854e08a6270b",
+        "6cc90cf60a1bec9507770dcf0843cca9a8c048ba1c75ec0d618e36e3ecd9d217"
+      ]
     },
     {
       "externalId": "asset:c326eca100d2e1a40b03",
-      "idempotencyKey": "cms-media-inventory-v3:asset:c326eca100d2e1a40b03",
+      "idempotencyKey": "cms-media-binary-v1:asset:c326eca100d2e1a40b03:d3adffb9f47209ad444accc42645636c87e6f02ed33532fe801cd6e64f3d9eaa",
       "filename": "blueprint-demonstrate.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-demonstrate.jpg",
       "publicPath": "/images/cognirise/blueprint-demonstrate.jpg",
@@ -4423,7 +4493,7 @@
       "height": 1024,
       "cmsOwnership": "cms-candidate",
       "usages": [
-        "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+        "artifacts/cognirise-website/src/content/idao.ts"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
@@ -4433,11 +4503,27 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "144fb007a17b2532d414f853377e6b60d31715dd83fec6cd291bdabaa86fe281"
+      "requestDigest": "b8c76d209d0c30de011558fcc05a4bfd4b912e1bea898c903a41bb42e727524e",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:c326eca100d2e1a40b03",
+          "idempotencyKey": "cms-media-inventory-v3:asset:c326eca100d2e1a40b03",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:c326eca100d2e1a40b03:d3adffb9f47209ad444accc42645636c87e6f02ed33532fe801cd6e64f3d9eaa",
+          "requestDigest": "103c7e1352ebb816ca5c5ccf82315866d37fb0ab6575bb1dc1bc9cf60cbe693b",
+          "acceptedRequestDigests": [
+            "103c7e1352ebb816ca5c5ccf82315866d37fb0ab6575bb1dc1bc9cf60cbe693b",
+            "144fb007a17b2532d414f853377e6b60d31715dd83fec6cd291bdabaa86fe281"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "103c7e1352ebb816ca5c5ccf82315866d37fb0ab6575bb1dc1bc9cf60cbe693b",
+        "144fb007a17b2532d414f853377e6b60d31715dd83fec6cd291bdabaa86fe281"
+      ]
     },
     {
       "externalId": "asset:e4efa6dd910f7f8183a8",
-      "idempotencyKey": "cms-media-inventory-v3:asset:e4efa6dd910f7f8183a8",
+      "idempotencyKey": "cms-media-binary-v1:asset:e4efa6dd910f7f8183a8:75712a6d757cbd3806a1729bdff4c5a8dfe832afa6675ffb3fd61af0169bf82d",
       "filename": "blueprint-innovate.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-innovate.jpg",
       "publicPath": "/images/cognirise/blueprint-innovate.jpg",
@@ -4448,7 +4534,7 @@
       "height": 1024,
       "cmsOwnership": "cms-candidate",
       "usages": [
-        "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+        "artifacts/cognirise-website/src/content/idao.ts"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
@@ -4458,11 +4544,27 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "17d9387126479e2a940db945acf5d1dd927eac561f687e3b8501c46fc60496b8"
+      "requestDigest": "5d6b4b580554d2d2fde5a20cbda7c47d6ddcc714bff87944532be4c564079dd4",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:e4efa6dd910f7f8183a8",
+          "idempotencyKey": "cms-media-inventory-v3:asset:e4efa6dd910f7f8183a8",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:e4efa6dd910f7f8183a8:75712a6d757cbd3806a1729bdff4c5a8dfe832afa6675ffb3fd61af0169bf82d",
+          "requestDigest": "d342d2eaf176ad770e98777377945134d23e9e60d3bd8cbaeb931f8ac247ed7a",
+          "acceptedRequestDigests": [
+            "d342d2eaf176ad770e98777377945134d23e9e60d3bd8cbaeb931f8ac247ed7a",
+            "17d9387126479e2a940db945acf5d1dd927eac561f687e3b8501c46fc60496b8"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "d342d2eaf176ad770e98777377945134d23e9e60d3bd8cbaeb931f8ac247ed7a",
+        "17d9387126479e2a940db945acf5d1dd927eac561f687e3b8501c46fc60496b8"
+      ]
     },
     {
       "externalId": "asset:1d309dbdc530df4f40bc",
-      "idempotencyKey": "cms-media-inventory-v3:asset:1d309dbdc530df4f40bc",
+      "idempotencyKey": "cms-media-binary-v1:asset:1d309dbdc530df4f40bc:c1ca56e88503a2891b03a71e75252317b7dc064c2b2ee7f4d113bfa039386706",
       "filename": "blueprint-operate.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/blueprint-operate.jpg",
       "publicPath": "/images/cognirise/blueprint-operate.jpg",
@@ -4473,7 +4575,7 @@
       "height": 1024,
       "cmsOwnership": "cms-candidate",
       "usages": [
-        "artifacts/cognirise-website/src/components/BlueprintJourney.tsx"
+        "artifacts/cognirise-website/src/content/idao.ts"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
@@ -4483,11 +4585,27 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "e51ec73a7802095046c66940902a86067d79a81bee6f461e572e6e2b39b77230"
+      "requestDigest": "1fcb143de85c00667285276374bd4b8b0ae76243d66ccb4333bfde88f6146ec0",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:1d309dbdc530df4f40bc",
+          "idempotencyKey": "cms-media-inventory-v3:asset:1d309dbdc530df4f40bc",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1d309dbdc530df4f40bc:c1ca56e88503a2891b03a71e75252317b7dc064c2b2ee7f4d113bfa039386706",
+          "requestDigest": "8277e3e60dea98107764606db1822412da46325563517157cb0fbefa8dc8c931",
+          "acceptedRequestDigests": [
+            "8277e3e60dea98107764606db1822412da46325563517157cb0fbefa8dc8c931",
+            "e51ec73a7802095046c66940902a86067d79a81bee6f461e572e6e2b39b77230"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "8277e3e60dea98107764606db1822412da46325563517157cb0fbefa8dc8c931",
+        "e51ec73a7802095046c66940902a86067d79a81bee6f461e572e6e2b39b77230"
+      ]
     },
     {
       "externalId": "asset:c0ed4904df64037b6051",
-      "idempotencyKey": "cms-media-inventory-v3:asset:c0ed4904df64037b6051",
+      "idempotencyKey": "cms-media-binary-v1:asset:c0ed4904df64037b6051:12f3a418ca81f6cc1065f03d0fe2a96982470badb2ac20b6104f0b5c3a3c1038",
       "filename": "01-making-industrial-knowledge-self-service.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/01-making-industrial-knowledge-self-service.png",
       "publicPath": "/images/cognirise/cases/01-making-industrial-knowledge-self-service.png",
@@ -4506,11 +4624,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "b8aeccf02d5d9b94048235e9b5cc3ffc27a499c211d3ce77d98ccfa555c9d067"
+      "requestDigest": "35f4cc1b145e64377b85655f1247c56717f95914dd91a17b52967638d8c53764",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:c0ed4904df64037b6051",
+          "idempotencyKey": "cms-media-inventory-v3:asset:c0ed4904df64037b6051",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:c0ed4904df64037b6051:12f3a418ca81f6cc1065f03d0fe2a96982470badb2ac20b6104f0b5c3a3c1038",
+          "requestDigest": "b8aeccf02d5d9b94048235e9b5cc3ffc27a499c211d3ce77d98ccfa555c9d067",
+          "acceptedRequestDigests": [
+            "b8aeccf02d5d9b94048235e9b5cc3ffc27a499c211d3ce77d98ccfa555c9d067"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "b8aeccf02d5d9b94048235e9b5cc3ffc27a499c211d3ce77d98ccfa555c9d067"
+      ]
     },
     {
       "externalId": "asset:4d0809fd1e70d0ee5b73",
-      "idempotencyKey": "cms-media-inventory-v3:asset:4d0809fd1e70d0ee5b73",
+      "idempotencyKey": "cms-media-binary-v1:asset:4d0809fd1e70d0ee5b73:f9e1295a1a9433a634e9a3957cc7aa05d6775e4b7993e2cfaf0ec637d0c8eda2",
       "filename": "02-connecting-pharmacy-operations-signals.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/02-connecting-pharmacy-operations-signals.png",
       "publicPath": "/images/cognirise/cases/02-connecting-pharmacy-operations-signals.png",
@@ -4529,11 +4661,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "0039e2a06deb697f144d14e2ba4e01f41e0795bf40022dd3cef6845eab4076b1"
+      "requestDigest": "1925f7fb84321eb9fbbb951d143237cba2a31f6e7b651af168b9eb83aa885b72",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:4d0809fd1e70d0ee5b73",
+          "idempotencyKey": "cms-media-inventory-v3:asset:4d0809fd1e70d0ee5b73",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:4d0809fd1e70d0ee5b73:f9e1295a1a9433a634e9a3957cc7aa05d6775e4b7993e2cfaf0ec637d0c8eda2",
+          "requestDigest": "0039e2a06deb697f144d14e2ba4e01f41e0795bf40022dd3cef6845eab4076b1",
+          "acceptedRequestDigests": [
+            "0039e2a06deb697f144d14e2ba4e01f41e0795bf40022dd3cef6845eab4076b1"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "0039e2a06deb697f144d14e2ba4e01f41e0795bf40022dd3cef6845eab4076b1"
+      ]
     },
     {
       "externalId": "asset:7060ef9f22405008331f",
-      "idempotencyKey": "cms-media-inventory-v3:asset:7060ef9f22405008331f",
+      "idempotencyKey": "cms-media-binary-v1:asset:7060ef9f22405008331f:1acffd0be19b797c1667eda0f8412641bde0ab58eb900b23bf069a9025be599e",
       "filename": "03-coaching-a-distributed-field-team.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/03-coaching-a-distributed-field-team.png",
       "publicPath": "/images/cognirise/cases/03-coaching-a-distributed-field-team.png",
@@ -4552,11 +4698,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "f1d5834c0efd203c6a04e33d2941b2e49d2a4b8e783a7f37b7eacb11917971a9"
+      "requestDigest": "9fc275981381b422bfb5db4c1702f1af870240e6ecc41ef9817299554a637f73",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:7060ef9f22405008331f",
+          "idempotencyKey": "cms-media-inventory-v3:asset:7060ef9f22405008331f",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:7060ef9f22405008331f:1acffd0be19b797c1667eda0f8412641bde0ab58eb900b23bf069a9025be599e",
+          "requestDigest": "f1d5834c0efd203c6a04e33d2941b2e49d2a4b8e783a7f37b7eacb11917971a9",
+          "acceptedRequestDigests": [
+            "f1d5834c0efd203c6a04e33d2941b2e49d2a4b8e783a7f37b7eacb11917971a9"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "f1d5834c0efd203c6a04e33d2941b2e49d2a4b8e783a7f37b7eacb11917971a9"
+      ]
     },
     {
       "externalId": "asset:bf5cf1e28b1da1245934",
-      "idempotencyKey": "cms-media-inventory-v3:asset:bf5cf1e28b1da1245934",
+      "idempotencyKey": "cms-media-binary-v1:asset:bf5cf1e28b1da1245934:937f92f5651240f16454daec241f0e6e0545dcaca44fda60994d69ed4d97b721",
       "filename": "04-taking-a-specialist-retailer-online.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/04-taking-a-specialist-retailer-online.png",
       "publicPath": "/images/cognirise/cases/04-taking-a-specialist-retailer-online.png",
@@ -4575,11 +4735,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "e06e874c990864f2a31382f837e3a0fdce3fd2f2fa5b2e4baccac037ff1b414c"
+      "requestDigest": "31634bdba25a256eebf89b83d035de914dd8c61062711022bd0b748fa24295c3",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:bf5cf1e28b1da1245934",
+          "idempotencyKey": "cms-media-inventory-v3:asset:bf5cf1e28b1da1245934",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:bf5cf1e28b1da1245934:937f92f5651240f16454daec241f0e6e0545dcaca44fda60994d69ed4d97b721",
+          "requestDigest": "e06e874c990864f2a31382f837e3a0fdce3fd2f2fa5b2e4baccac037ff1b414c",
+          "acceptedRequestDigests": [
+            "e06e874c990864f2a31382f837e3a0fdce3fd2f2fa5b2e4baccac037ff1b414c"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "e06e874c990864f2a31382f837e3a0fdce3fd2f2fa5b2e4baccac037ff1b414c"
+      ]
     },
     {
       "externalId": "asset:87621d169e3231794b8f",
-      "idempotencyKey": "cms-media-inventory-v3:asset:87621d169e3231794b8f",
+      "idempotencyKey": "cms-media-binary-v1:asset:87621d169e3231794b8f:94dad438f310a0b3af5225835e90b53ae1f6a7baa0166e5bfd6bb88b7bc9e08c",
       "filename": "05-making-market-information-searchable.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/05-making-market-information-searchable.png",
       "publicPath": "/images/cognirise/cases/05-making-market-information-searchable.png",
@@ -4598,11 +4772,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "1d82f34b95f018a29fb595248604c557ade098ae3733b982575637653edd6ca5"
+      "requestDigest": "ea0d73fcc0a3c85cf97fd33a99eb7e4d7d84571b3d2d34006161a717671ca9a9",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:87621d169e3231794b8f",
+          "idempotencyKey": "cms-media-inventory-v3:asset:87621d169e3231794b8f",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:87621d169e3231794b8f:94dad438f310a0b3af5225835e90b53ae1f6a7baa0166e5bfd6bb88b7bc9e08c",
+          "requestDigest": "1d82f34b95f018a29fb595248604c557ade098ae3733b982575637653edd6ca5",
+          "acceptedRequestDigests": [
+            "1d82f34b95f018a29fb595248604c557ade098ae3733b982575637653edd6ca5"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "1d82f34b95f018a29fb595248604c557ade098ae3733b982575637653edd6ca5"
+      ]
     },
     {
       "externalId": "asset:051f8ecaf788666610ef",
-      "idempotencyKey": "cms-media-inventory-v3:asset:051f8ecaf788666610ef",
+      "idempotencyKey": "cms-media-binary-v1:asset:051f8ecaf788666610ef:b5d93cdcee7aa2fd7f996d0e8fc047209a537950a70e60712ab5c391acaaa85b",
       "filename": "06-automating-recurring-tax-preparation.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/06-automating-recurring-tax-preparation.png",
       "publicPath": "/images/cognirise/cases/06-automating-recurring-tax-preparation.png",
@@ -4621,11 +4809,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "9269b19763bfea866bfac234be49e8a05e4b370ac27a0a5b6e3097c861a5f48a"
+      "requestDigest": "e43b6b457fffbf1447c529c00d253034ef4d31949a5e23de5508d0f793004d20",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:051f8ecaf788666610ef",
+          "idempotencyKey": "cms-media-inventory-v3:asset:051f8ecaf788666610ef",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:051f8ecaf788666610ef:b5d93cdcee7aa2fd7f996d0e8fc047209a537950a70e60712ab5c391acaaa85b",
+          "requestDigest": "9269b19763bfea866bfac234be49e8a05e4b370ac27a0a5b6e3097c861a5f48a",
+          "acceptedRequestDigests": [
+            "9269b19763bfea866bfac234be49e8a05e4b370ac27a0a5b6e3097c861a5f48a"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "9269b19763bfea866bfac234be49e8a05e4b370ac27a0a5b6e3097c861a5f48a"
+      ]
     },
     {
       "externalId": "asset:9df9051c08b1ac4e755a",
-      "idempotencyKey": "cms-media-inventory-v3:asset:9df9051c08b1ac4e755a",
+      "idempotencyKey": "cms-media-binary-v1:asset:9df9051c08b1ac4e755a:8b4253c4099c0bb7330033a9af3a1a6af4ffdde467c40659437de813565b35d9",
       "filename": "07-creating-accountable-agent-delegation.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/07-creating-accountable-agent-delegation.png",
       "publicPath": "/images/cognirise/cases/07-creating-accountable-agent-delegation.png",
@@ -4644,11 +4846,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "ef746f0277463b2509487c4e864a96c225e1e304b0f8b7d6699a6c3b8edcbff8"
+      "requestDigest": "5e9d170d770e7a3c861047fb95caa3ef92a4adb124f48a506fcc41ae01b4e9aa",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:9df9051c08b1ac4e755a",
+          "idempotencyKey": "cms-media-inventory-v3:asset:9df9051c08b1ac4e755a",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:9df9051c08b1ac4e755a:8b4253c4099c0bb7330033a9af3a1a6af4ffdde467c40659437de813565b35d9",
+          "requestDigest": "ef746f0277463b2509487c4e864a96c225e1e304b0f8b7d6699a6c3b8edcbff8",
+          "acceptedRequestDigests": [
+            "ef746f0277463b2509487c4e864a96c225e1e304b0f8b7d6699a6c3b8edcbff8"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "ef746f0277463b2509487c4e864a96c225e1e304b0f8b7d6699a6c3b8edcbff8"
+      ]
     },
     {
       "externalId": "asset:1552d989c32158cec678",
-      "idempotencyKey": "cms-media-inventory-v3:asset:1552d989c32158cec678",
+      "idempotencyKey": "cms-media-binary-v1:asset:1552d989c32158cec678:d5c97398cc48eb2e669f0513dc8c8d15c4e9d240add43fb59c905e2be96500ab",
       "filename": "08-governing-a-single-fee-schedule.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/08-governing-a-single-fee-schedule.png",
       "publicPath": "/images/cognirise/cases/08-governing-a-single-fee-schedule.png",
@@ -4667,11 +4883,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "fc76ab48e5d54782a4575bd2b1c1eff1138754cd00c86de022006de2bc592b30"
+      "requestDigest": "71007aaca44b974b09332db33f5ea6ac18dea318557822b5cda360bd9b2525bc",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:1552d989c32158cec678",
+          "idempotencyKey": "cms-media-inventory-v3:asset:1552d989c32158cec678",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1552d989c32158cec678:d5c97398cc48eb2e669f0513dc8c8d15c4e9d240add43fb59c905e2be96500ab",
+          "requestDigest": "fc76ab48e5d54782a4575bd2b1c1eff1138754cd00c86de022006de2bc592b30",
+          "acceptedRequestDigests": [
+            "fc76ab48e5d54782a4575bd2b1c1eff1138754cd00c86de022006de2bc592b30"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "fc76ab48e5d54782a4575bd2b1c1eff1138754cd00c86de022006de2bc592b30"
+      ]
     },
     {
       "externalId": "asset:02a506550e53b6f87a6b",
-      "idempotencyKey": "cms-media-inventory-v3:asset:02a506550e53b6f87a6b",
+      "idempotencyKey": "cms-media-binary-v1:asset:02a506550e53b6f87a6b:95bd660bf08a57687e5b92647458f88ea26fbcd4eeb7339112762cf7b0b0791c",
       "filename": "09-preparing-embedded-emissions-data.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/09-preparing-embedded-emissions-data.png",
       "publicPath": "/images/cognirise/cases/09-preparing-embedded-emissions-data.png",
@@ -4690,11 +4920,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "cf72c3113b60cc0d7ce4b3f225fa563c32970fb417dfb323182a4f4d43b65e70"
+      "requestDigest": "e6271f334a55260c18cb7e66f632b65512e39d35759fd8d934246892031db966",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:02a506550e53b6f87a6b",
+          "idempotencyKey": "cms-media-inventory-v3:asset:02a506550e53b6f87a6b",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:02a506550e53b6f87a6b:95bd660bf08a57687e5b92647458f88ea26fbcd4eeb7339112762cf7b0b0791c",
+          "requestDigest": "cf72c3113b60cc0d7ce4b3f225fa563c32970fb417dfb323182a4f4d43b65e70",
+          "acceptedRequestDigests": [
+            "cf72c3113b60cc0d7ce4b3f225fa563c32970fb417dfb323182a4f4d43b65e70"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "cf72c3113b60cc0d7ce4b3f225fa563c32970fb417dfb323182a4f4d43b65e70"
+      ]
     },
     {
       "externalId": "asset:731241e4073be8c56ef0",
-      "idempotencyKey": "cms-media-inventory-v3:asset:731241e4073be8c56ef0",
+      "idempotencyKey": "cms-media-binary-v1:asset:731241e4073be8c56ef0:b6b54ca7947b00d458b6b668fc01494b715c7d68b7705d3165650552c309e564",
       "filename": "10-accelerating-governed-vehicle-offers.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/10-accelerating-governed-vehicle-offers.png",
       "publicPath": "/images/cognirise/cases/10-accelerating-governed-vehicle-offers.png",
@@ -4713,11 +4957,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "fe0a033fbdad717a1d34311b652edabc40455f8f754af1ba821b82c2935bef27"
+      "requestDigest": "28fc67d09a74c7c17388ccc5ce971d78eeb0b50e90f19b3a001968322a586549",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:731241e4073be8c56ef0",
+          "idempotencyKey": "cms-media-inventory-v3:asset:731241e4073be8c56ef0",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:731241e4073be8c56ef0:b6b54ca7947b00d458b6b668fc01494b715c7d68b7705d3165650552c309e564",
+          "requestDigest": "fe0a033fbdad717a1d34311b652edabc40455f8f754af1ba821b82c2935bef27",
+          "acceptedRequestDigests": [
+            "fe0a033fbdad717a1d34311b652edabc40455f8f754af1ba821b82c2935bef27"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "fe0a033fbdad717a1d34311b652edabc40455f8f754af1ba821b82c2935bef27"
+      ]
     },
     {
       "externalId": "asset:d4a44fe04ba9897c2ad2",
-      "idempotencyKey": "cms-media-inventory-v3:asset:d4a44fe04ba9897c2ad2",
+      "idempotencyKey": "cms-media-binary-v1:asset:d4a44fe04ba9897c2ad2:51aecaea081e7c56f6babaabe17386b87800d041b411827b5b3d58db68bca7ed",
       "filename": "11-answering-general-investment-questions.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/11-answering-general-investment-questions.png",
       "publicPath": "/images/cognirise/cases/11-answering-general-investment-questions.png",
@@ -4736,11 +4994,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "66dc2b974633b5e40ac909ddf79cd4b572589d4b929ea71d548cc651bd6a975c"
+      "requestDigest": "0b82940de4ba858e0bbf068476c7c72bb4092e6f1356a03dca2eb7198184b7ec",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:d4a44fe04ba9897c2ad2",
+          "idempotencyKey": "cms-media-inventory-v3:asset:d4a44fe04ba9897c2ad2",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:d4a44fe04ba9897c2ad2:51aecaea081e7c56f6babaabe17386b87800d041b411827b5b3d58db68bca7ed",
+          "requestDigest": "66dc2b974633b5e40ac909ddf79cd4b572589d4b929ea71d548cc651bd6a975c",
+          "acceptedRequestDigests": [
+            "66dc2b974633b5e40ac909ddf79cd4b572589d4b929ea71d548cc651bd6a975c"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "66dc2b974633b5e40ac909ddf79cd4b572589d4b929ea71d548cc651bd6a975c"
+      ]
     },
     {
       "externalId": "asset:560ed836866e86920e96",
-      "idempotencyKey": "cms-media-inventory-v3:asset:560ed836866e86920e96",
+      "idempotencyKey": "cms-media-binary-v1:asset:560ed836866e86920e96:7e9eb67db936861fd8f138d94d1d739da5ee7380f7a7b734580ad102e3d5ca31",
       "filename": "12-creating-a-governed-ai-workspace.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/12-creating-a-governed-ai-workspace.png",
       "publicPath": "/images/cognirise/cases/12-creating-a-governed-ai-workspace.png",
@@ -4759,11 +5031,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "5bca763e3e1d140f703942fe8ff24ceb1d4abb52f5ebdb9fb889aea067f2ac3a"
+      "requestDigest": "c7cc1035c321cf193e4517859bf8b77c1fcb5ea32fade21df76549382f03ea39",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:560ed836866e86920e96",
+          "idempotencyKey": "cms-media-inventory-v3:asset:560ed836866e86920e96",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:560ed836866e86920e96:7e9eb67db936861fd8f138d94d1d739da5ee7380f7a7b734580ad102e3d5ca31",
+          "requestDigest": "5bca763e3e1d140f703942fe8ff24ceb1d4abb52f5ebdb9fb889aea067f2ac3a",
+          "acceptedRequestDigests": [
+            "5bca763e3e1d140f703942fe8ff24ceb1d4abb52f5ebdb9fb889aea067f2ac3a"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "5bca763e3e1d140f703942fe8ff24ceb1d4abb52f5ebdb9fb889aea067f2ac3a"
+      ]
     },
     {
       "externalId": "asset:4b617df04f81594e8b65",
-      "idempotencyKey": "cms-media-inventory-v3:asset:4b617df04f81594e8b65",
+      "idempotencyKey": "cms-media-binary-v1:asset:4b617df04f81594e8b65:ad680dc43d81c0f9893f8487bbd19ec5b88c8f026fb7ba15e441bb3487a070d3",
       "filename": "13-prototyping-agentic-public-services.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/13-prototyping-agentic-public-services.png",
       "publicPath": "/images/cognirise/cases/13-prototyping-agentic-public-services.png",
@@ -4782,11 +5068,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "63b542d53503e708a890dff4cb6ef43ce06fab879ff2459fdf6762ed8cd8f60e"
+      "requestDigest": "c45bd09ab4782dce816f961596aa948ae6fc8435f07469f7161bbe7aca9b6b89",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:4b617df04f81594e8b65",
+          "idempotencyKey": "cms-media-inventory-v3:asset:4b617df04f81594e8b65",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:4b617df04f81594e8b65:ad680dc43d81c0f9893f8487bbd19ec5b88c8f026fb7ba15e441bb3487a070d3",
+          "requestDigest": "63b542d53503e708a890dff4cb6ef43ce06fab879ff2459fdf6762ed8cd8f60e",
+          "acceptedRequestDigests": [
+            "63b542d53503e708a890dff4cb6ef43ce06fab879ff2459fdf6762ed8cd8f60e"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "63b542d53503e708a890dff4cb6ef43ce06fab879ff2459fdf6762ed8cd8f60e"
+      ]
     },
     {
       "externalId": "asset:4357890e2475c5479554",
-      "idempotencyKey": "cms-media-inventory-v3:asset:4357890e2475c5479554",
+      "idempotencyKey": "cms-media-binary-v1:asset:4357890e2475c5479554:cc90bcacd5ef50e63f53b3f37be0ffdb020c569964623505bf4372d46ace7207",
       "filename": "14-checking-calls-through-risk-gates.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/14-checking-calls-through-risk-gates.png",
       "publicPath": "/images/cognirise/cases/14-checking-calls-through-risk-gates.png",
@@ -4805,11 +5105,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "2561ad62f1e352f7808e8333ea493e06379d8d25c9a1a9ddb81aa8bacfc15dad"
+      "requestDigest": "5c5b35bd0afb979308936971ffd091a38ba0c24fa47ceed799ba2e2c9509841b",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:4357890e2475c5479554",
+          "idempotencyKey": "cms-media-inventory-v3:asset:4357890e2475c5479554",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:4357890e2475c5479554:cc90bcacd5ef50e63f53b3f37be0ffdb020c569964623505bf4372d46ace7207",
+          "requestDigest": "2561ad62f1e352f7808e8333ea493e06379d8d25c9a1a9ddb81aa8bacfc15dad",
+          "acceptedRequestDigests": [
+            "2561ad62f1e352f7808e8333ea493e06379d8d25c9a1a9ddb81aa8bacfc15dad"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "2561ad62f1e352f7808e8333ea493e06379d8d25c9a1a9ddb81aa8bacfc15dad"
+      ]
     },
     {
       "externalId": "asset:61aa9fb27b83f941773c",
-      "idempotencyKey": "cms-media-inventory-v3:asset:61aa9fb27b83f941773c",
+      "idempotencyKey": "cms-media-binary-v1:asset:61aa9fb27b83f941773c:03b0b6933136d6e12e6d9f9fc5a513f0786ec80092a2edd89114a52dcfb8ce9e",
       "filename": "15-orchestrating-data-centre-incidents.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/15-orchestrating-data-centre-incidents.png",
       "publicPath": "/images/cognirise/cases/15-orchestrating-data-centre-incidents.png",
@@ -4828,11 +5142,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "436e7aeb78bb26ff8f3229a1be5f6ec9e6663cfcf8d7ae578082b5eac05a55c7"
+      "requestDigest": "0ee43944266909715bfb015fffad8aeac4577b24418dd3d862cbac22f92bc7ba",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:61aa9fb27b83f941773c",
+          "idempotencyKey": "cms-media-inventory-v3:asset:61aa9fb27b83f941773c",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:61aa9fb27b83f941773c:03b0b6933136d6e12e6d9f9fc5a513f0786ec80092a2edd89114a52dcfb8ce9e",
+          "requestDigest": "436e7aeb78bb26ff8f3229a1be5f6ec9e6663cfcf8d7ae578082b5eac05a55c7",
+          "acceptedRequestDigests": [
+            "436e7aeb78bb26ff8f3229a1be5f6ec9e6663cfcf8d7ae578082b5eac05a55c7"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "436e7aeb78bb26ff8f3229a1be5f6ec9e6663cfcf8d7ae578082b5eac05a55c7"
+      ]
     },
     {
       "externalId": "asset:89a9b277c7b432618099",
-      "idempotencyKey": "cms-media-inventory-v3:asset:89a9b277c7b432618099",
+      "idempotencyKey": "cms-media-binary-v1:asset:89a9b277c7b432618099:a2074f29da410011444d29835f2940be779fe2e8171a59aa81afc67531a104da",
       "filename": "16-finding-a-second-life-for-hotel-assets.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/16-finding-a-second-life-for-hotel-assets.png",
       "publicPath": "/images/cognirise/cases/16-finding-a-second-life-for-hotel-assets.png",
@@ -4851,11 +5179,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "1aa6624f930c6b2298c296694b29aeeceebf14a413c2e20b6c03d6f284356649"
+      "requestDigest": "cdea1c24c7014077c01d839f3f5c7137e4ba6cd1ca74a725972d590e50e7a95b",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:89a9b277c7b432618099",
+          "idempotencyKey": "cms-media-inventory-v3:asset:89a9b277c7b432618099",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:89a9b277c7b432618099:a2074f29da410011444d29835f2940be779fe2e8171a59aa81afc67531a104da",
+          "requestDigest": "1aa6624f930c6b2298c296694b29aeeceebf14a413c2e20b6c03d6f284356649",
+          "acceptedRequestDigests": [
+            "1aa6624f930c6b2298c296694b29aeeceebf14a413c2e20b6c03d6f284356649"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "1aa6624f930c6b2298c296694b29aeeceebf14a413c2e20b6c03d6f284356649"
+      ]
     },
     {
       "externalId": "asset:1795ba514767650319a0",
-      "idempotencyKey": "cms-media-inventory-v3:asset:1795ba514767650319a0",
+      "idempotencyKey": "cms-media-binary-v1:asset:1795ba514767650319a0:e04e3191f83f49b13806f2fae7e3b76130424fd49f7bda5e0b9a83db6ca9b7a1",
       "filename": "17-proving-browser-side-encrypted-storage.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/17-proving-browser-side-encrypted-storage.png",
       "publicPath": "/images/cognirise/cases/17-proving-browser-side-encrypted-storage.png",
@@ -4874,11 +5216,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "49a55cfa3e40ac3c1d64eaa1f1506354cee46d798cc1fca6869cfe2b6d1c6847"
+      "requestDigest": "863e732ba3fc2cd5daf168329a737d667184eee9750690ef7393327144070124",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:1795ba514767650319a0",
+          "idempotencyKey": "cms-media-inventory-v3:asset:1795ba514767650319a0",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1795ba514767650319a0:e04e3191f83f49b13806f2fae7e3b76130424fd49f7bda5e0b9a83db6ca9b7a1",
+          "requestDigest": "49a55cfa3e40ac3c1d64eaa1f1506354cee46d798cc1fca6869cfe2b6d1c6847",
+          "acceptedRequestDigests": [
+            "49a55cfa3e40ac3c1d64eaa1f1506354cee46d798cc1fca6869cfe2b6d1c6847"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "49a55cfa3e40ac3c1d64eaa1f1506354cee46d798cc1fca6869cfe2b6d1c6847"
+      ]
     },
     {
       "externalId": "asset:a603ab33c5902333b82a",
-      "idempotencyKey": "cms-media-inventory-v3:asset:a603ab33c5902333b82a",
+      "idempotencyKey": "cms-media-binary-v1:asset:a603ab33c5902333b82a:57c5858891dc409acfeff257c27340e3ef9f96117608a5d436a9cfb6bdc0c6da",
       "filename": "18-recommending-room-aware-audio-systems.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/18-recommending-room-aware-audio-systems.png",
       "publicPath": "/images/cognirise/cases/18-recommending-room-aware-audio-systems.png",
@@ -4897,11 +5253,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "d726c4117f20817a0ce8bc393c3914fa2d92732aa767f06c084fbfea668eea4b"
+      "requestDigest": "e960911fab5fdae197d59a5238eff5114e5fecc7bdc29038bdf83edf560bdb4f",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:a603ab33c5902333b82a",
+          "idempotencyKey": "cms-media-inventory-v3:asset:a603ab33c5902333b82a",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:a603ab33c5902333b82a:57c5858891dc409acfeff257c27340e3ef9f96117608a5d436a9cfb6bdc0c6da",
+          "requestDigest": "d726c4117f20817a0ce8bc393c3914fa2d92732aa767f06c084fbfea668eea4b",
+          "acceptedRequestDigests": [
+            "d726c4117f20817a0ce8bc393c3914fa2d92732aa767f06c084fbfea668eea4b"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "d726c4117f20817a0ce8bc393c3914fa2d92732aa767f06c084fbfea668eea4b"
+      ]
     },
     {
       "externalId": "asset:e238a63ac6fae72cf50d",
-      "idempotencyKey": "cms-media-inventory-v3:asset:e238a63ac6fae72cf50d",
+      "idempotencyKey": "cms-media-binary-v1:asset:e238a63ac6fae72cf50d:fede195dea3ea808b78be6cb7a0323cc9d430d2f9fa3581618c7f50fb601fd3e",
       "filename": "19-monitoring-portfolio-early-warning-signals.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/19-monitoring-portfolio-early-warning-signals.png",
       "publicPath": "/images/cognirise/cases/19-monitoring-portfolio-early-warning-signals.png",
@@ -4920,11 +5290,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "d4b7dacaa2973c601dc70f6f8a575679f4ee3add49cfc03e0b460808af26f20a"
+      "requestDigest": "7c13cf9dec69cc5bd90be0103f61374a7b1ddd462f1559c7ef838a8d5a8436fe",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:e238a63ac6fae72cf50d",
+          "idempotencyKey": "cms-media-inventory-v3:asset:e238a63ac6fae72cf50d",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:e238a63ac6fae72cf50d:fede195dea3ea808b78be6cb7a0323cc9d430d2f9fa3581618c7f50fb601fd3e",
+          "requestDigest": "d4b7dacaa2973c601dc70f6f8a575679f4ee3add49cfc03e0b460808af26f20a",
+          "acceptedRequestDigests": [
+            "d4b7dacaa2973c601dc70f6f8a575679f4ee3add49cfc03e0b460808af26f20a"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "d4b7dacaa2973c601dc70f6f8a575679f4ee3add49cfc03e0b460808af26f20a"
+      ]
     },
     {
       "externalId": "asset:fc4aa6c552381c401bbc",
-      "idempotencyKey": "cms-media-inventory-v3:asset:fc4aa6c552381c401bbc",
+      "idempotencyKey": "cms-media-binary-v1:asset:fc4aa6c552381c401bbc:94b143c732ac00ce8b3a754a5313a3e328acdca16fb14df862a92404b6e01714",
       "filename": "20-diagnosing-production-line-faults.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/20-diagnosing-production-line-faults.png",
       "publicPath": "/images/cognirise/cases/20-diagnosing-production-line-faults.png",
@@ -4943,11 +5327,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "7840459d0a04008fa1a5becbd580fc0333f3b079add913a5b58018e8b570fe71"
+      "requestDigest": "e9faf4c6b670594d32afc4a0773198d6f4cd33c3a9fd69d0dfa0663df1488b2b",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:fc4aa6c552381c401bbc",
+          "idempotencyKey": "cms-media-inventory-v3:asset:fc4aa6c552381c401bbc",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:fc4aa6c552381c401bbc:94b143c732ac00ce8b3a754a5313a3e328acdca16fb14df862a92404b6e01714",
+          "requestDigest": "7840459d0a04008fa1a5becbd580fc0333f3b079add913a5b58018e8b570fe71",
+          "acceptedRequestDigests": [
+            "7840459d0a04008fa1a5becbd580fc0333f3b079add913a5b58018e8b570fe71"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "7840459d0a04008fa1a5becbd580fc0333f3b079add913a5b58018e8b570fe71"
+      ]
     },
     {
       "externalId": "asset:8d8d830513bbef43e89a",
-      "idempotencyKey": "cms-media-inventory-v3:asset:8d8d830513bbef43e89a",
+      "idempotencyKey": "cms-media-binary-v1:asset:8d8d830513bbef43e89a:3bc65e71080efee9e79f64894ba93cc3a72e08f7d1c7bdca254d36363351a969",
       "filename": "21-tracing-provision-movements-earlier.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/21-tracing-provision-movements-earlier.png",
       "publicPath": "/images/cognirise/cases/21-tracing-provision-movements-earlier.png",
@@ -4966,11 +5364,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "470b572b559546fc5e7d60d672b594e306b825e9fab674ac99a7b73fef5efaa4"
+      "requestDigest": "398fb9045ca0a953d946f5b8b4a4e5a79ac907d2ea11d1cd9a27c6278901f904",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:8d8d830513bbef43e89a",
+          "idempotencyKey": "cms-media-inventory-v3:asset:8d8d830513bbef43e89a",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:8d8d830513bbef43e89a:3bc65e71080efee9e79f64894ba93cc3a72e08f7d1c7bdca254d36363351a969",
+          "requestDigest": "470b572b559546fc5e7d60d672b594e306b825e9fab674ac99a7b73fef5efaa4",
+          "acceptedRequestDigests": [
+            "470b572b559546fc5e7d60d672b594e306b825e9fab674ac99a7b73fef5efaa4"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "470b572b559546fc5e7d60d672b594e306b825e9fab674ac99a7b73fef5efaa4"
+      ]
     },
     {
       "externalId": "asset:f6a19919d1de6e4dd655",
-      "idempotencyKey": "cms-media-inventory-v3:asset:f6a19919d1de6e4dd655",
+      "idempotencyKey": "cms-media-binary-v1:asset:f6a19919d1de6e4dd655:7f462ae555d626662aa17f0654b0308cf1d869d704bb3032351ccf2ac03d35b7",
       "filename": "cognirise-pulse-governance.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cognirise-pulse-governance.jpg",
       "publicPath": "/images/cognirise/cognirise-pulse-governance.jpg",
@@ -4995,11 +5407,37 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "f2abf3c5e1c34b55d82ce199ce40866156b2112cb94fcee6dd9b9c8385a0e54b"
+      "requestDigest": "66030314747ba25f78eeabdd375782dbe3d012607f92a53c78fabfd7d593494b",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:f6a19919d1de6e4dd655",
+          "idempotencyKey": "cms-media-inventory-v3:asset:f6a19919d1de6e4dd655",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:f6a19919d1de6e4dd655:7f462ae555d626662aa17f0654b0308cf1d869d704bb3032351ccf2ac03d35b7",
+          "requestDigest": "f2abf3c5e1c34b55d82ce199ce40866156b2112cb94fcee6dd9b9c8385a0e54b",
+          "acceptedRequestDigests": [
+            "f2abf3c5e1c34b55d82ce199ce40866156b2112cb94fcee6dd9b9c8385a0e54b",
+            "e04eb4356721ca843961bcd4230edc82d6aecb22baf8e241420c156f6e6191b7"
+          ]
+        },
+        {
+          "externalId": "asset:f6a19919d1de6e4dd655",
+          "idempotencyKey": "cms-media-replacement-v1:asset:f6a19919d1de6e4dd655:7f462ae555d626662aa17f0654b0308cf1d869d704bb3032351ccf2ac03d35b7",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:f6a19919d1de6e4dd655:7f462ae555d626662aa17f0654b0308cf1d869d704bb3032351ccf2ac03d35b7",
+          "requestDigest": "597e8e3a125b28fdd30229321df7dcd63ef7048289cb30d9a2e323f2695d17a2",
+          "acceptedRequestDigests": [
+            "597e8e3a125b28fdd30229321df7dcd63ef7048289cb30d9a2e323f2695d17a2"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "f2abf3c5e1c34b55d82ce199ce40866156b2112cb94fcee6dd9b9c8385a0e54b",
+        "e04eb4356721ca843961bcd4230edc82d6aecb22baf8e241420c156f6e6191b7",
+        "597e8e3a125b28fdd30229321df7dcd63ef7048289cb30d9a2e323f2695d17a2"
+      ]
     },
     {
       "externalId": "asset:756471849fafbe93e1b9",
-      "idempotencyKey": "cms-media-inventory-v3:asset:756471849fafbe93e1b9",
+      "idempotencyKey": "cms-media-binary-v1:asset:756471849fafbe93e1b9:883ed6bb9c1e30549f290b696ed59fc4a74888d1ed5a544f567d6c850fb7fc50",
       "filename": "cognirise-pulse-outcomes.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cognirise-pulse-outcomes.jpg",
       "publicPath": "/images/cognirise/cognirise-pulse-outcomes.jpg",
@@ -5022,11 +5460,37 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "6f2f990ac15a7b8175e98a727d09c94bc2cf65abd6a0f361690b5c81b47d078e"
+      "requestDigest": "e175ab8284fe12ac42adef598ce12346e7c6ac4aae254d40df59910612c59755",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:756471849fafbe93e1b9",
+          "idempotencyKey": "cms-media-inventory-v3:asset:756471849fafbe93e1b9",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:756471849fafbe93e1b9:883ed6bb9c1e30549f290b696ed59fc4a74888d1ed5a544f567d6c850fb7fc50",
+          "requestDigest": "6f2f990ac15a7b8175e98a727d09c94bc2cf65abd6a0f361690b5c81b47d078e",
+          "acceptedRequestDigests": [
+            "6f2f990ac15a7b8175e98a727d09c94bc2cf65abd6a0f361690b5c81b47d078e",
+            "02fc1d2a5261b118e1018f9935ae26a4efc07f1ce412a13581e51cdc52b26a07"
+          ]
+        },
+        {
+          "externalId": "asset:756471849fafbe93e1b9",
+          "idempotencyKey": "cms-media-replacement-v1:asset:756471849fafbe93e1b9:883ed6bb9c1e30549f290b696ed59fc4a74888d1ed5a544f567d6c850fb7fc50",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:756471849fafbe93e1b9:883ed6bb9c1e30549f290b696ed59fc4a74888d1ed5a544f567d6c850fb7fc50",
+          "requestDigest": "c503347772761de66288d8ea345093aa3518f278b3556f257211834b3f200b58",
+          "acceptedRequestDigests": [
+            "c503347772761de66288d8ea345093aa3518f278b3556f257211834b3f200b58"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "6f2f990ac15a7b8175e98a727d09c94bc2cf65abd6a0f361690b5c81b47d078e",
+        "02fc1d2a5261b118e1018f9935ae26a4efc07f1ce412a13581e51cdc52b26a07",
+        "c503347772761de66288d8ea345093aa3518f278b3556f257211834b3f200b58"
+      ]
     },
     {
       "externalId": "asset:cb22af24054d18218ace",
-      "idempotencyKey": "cms-media-inventory-v3:asset:cb22af24054d18218ace",
+      "idempotencyKey": "cms-media-binary-v1:asset:cb22af24054d18218ace:3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034",
       "filename": "cognirise-pulse-people.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cognirise-pulse-people.jpg",
       "publicPath": "/images/cognirise/cognirise-pulse-people.jpg",
@@ -5049,11 +5513,76 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "a5f542011cc3cf5eddebf584ccab51c634bd682c9bdb9337d036be0c628ffa30"
+      "requestDigest": "57b19328e2d082e924286b1d450d71c5c4154ffdd3d37f7f6a5a8a3fa124410f",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:cb22af24054d18218ace",
+          "idempotencyKey": "cms-media-inventory-v3:asset:cb22af24054d18218ace",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:cb22af24054d18218ace:3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034",
+          "requestDigest": "a5f542011cc3cf5eddebf584ccab51c634bd682c9bdb9337d036be0c628ffa30",
+          "acceptedRequestDigests": [
+            "a5f542011cc3cf5eddebf584ccab51c634bd682c9bdb9337d036be0c628ffa30",
+            "ec8c8ba3fc38d21f998fc6e854e0bb13f658bf0c0460e6b8900993a73bfc6fdf"
+          ]
+        },
+        {
+          "externalId": "asset:cb22af24054d18218ace",
+          "idempotencyKey": "cms-media-replacement-v1:asset:cb22af24054d18218ace:3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:cb22af24054d18218ace:3dc35c3b9d50a5782b2a30487f0e903cd716f9e6e803686f0b8c1dbaa1bca034",
+          "requestDigest": "6c752d1cb48114c70e563d48a2bd018206e23fce8d93bed1012e629f51af6af6",
+          "acceptedRequestDigests": [
+            "6c752d1cb48114c70e563d48a2bd018206e23fce8d93bed1012e629f51af6af6"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "a5f542011cc3cf5eddebf584ccab51c634bd682c9bdb9337d036be0c628ffa30",
+        "ec8c8ba3fc38d21f998fc6e854e0bb13f658bf0c0460e6b8900993a73bfc6fdf",
+        "6c752d1cb48114c70e563d48a2bd018206e23fce8d93bed1012e629f51af6af6"
+      ]
+    },
+    {
+      "externalId": "asset:d29810a11351aa5a573f",
+      "idempotencyKey": "cms-media-binary-v1:asset:d29810a11351aa5a573f:4f1f75ca2f9f424ff8e21f8a40cb54e3d075cf64b89264b7ec1b5ec79108a3b5",
+      "filename": "idao-human-agent-team.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/idao-human-agent-team.png",
+      "publicPath": "/images/cognirise/idao-human-agent-team.png",
+      "checksum": "4f1f75ca2f9f424ff8e21f8a40cb54e3d075cf64b89264b7ec1b5ec79108a3b5",
+      "mimeType": "image/png",
+      "byteSize": 330032,
+      "width": 528,
+      "height": 512,
+      "cmsOwnership": "cms-candidate",
+      "usages": [
+        "artifacts/cognirise-website/src/pages/IDAOMethodology.tsx"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "idao human agent team",
+      "credit": "Rights holder pending editorial review",
+      "rightsStatus": "needs-review",
+      "accessibilityStatus": "approved",
+      "sourceReviewApproved": false,
+      "requestDigest": "0097f071f649ec00d9bef40251db94c9d91bc67dca4cc8a80d22d5fa0efafcee",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:d29810a11351aa5a573f",
+          "idempotencyKey": "cms-media-inventory-v3:asset:d29810a11351aa5a573f",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:d29810a11351aa5a573f:4f1f75ca2f9f424ff8e21f8a40cb54e3d075cf64b89264b7ec1b5ec79108a3b5",
+          "requestDigest": "e91f8f7551d6728451bf5133308ee9ee1a85debf037afbcc9b66d5a2b94eabbe",
+          "acceptedRequestDigests": [
+            "e91f8f7551d6728451bf5133308ee9ee1a85debf037afbcc9b66d5a2b94eabbe"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "e91f8f7551d6728451bf5133308ee9ee1a85debf037afbcc9b66d5a2b94eabbe"
+      ]
     },
     {
       "externalId": "asset:cfa67b78e45f66ac9561",
-      "idempotencyKey": "cms-media-inventory-v3:asset:cfa67b78e45f66ac9561",
+      "idempotencyKey": "cms-media-binary-v1:asset:cfa67b78e45f66ac9561:ab57adbe16350bd3b16ec1865a3bf7dc410dd55f196fe338da61969c9e56a969",
       "filename": "pulse-industry-defense-protection.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-defense-protection.png",
       "publicPath": "/images/cognirise/industries/pulse-industry-defense-protection.png",
@@ -5074,11 +5603,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "59cd18c32dbf24fe31c79ce15cafdafcd02ada8241b5da8c59922391b1204ba3"
+      "requestDigest": "affffca3cf97c328e9b171aaa713b23fd9fb5b98fd27302febc4744a1933d061",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:cfa67b78e45f66ac9561",
+          "idempotencyKey": "cms-media-inventory-v3:asset:cfa67b78e45f66ac9561",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:cfa67b78e45f66ac9561:ab57adbe16350bd3b16ec1865a3bf7dc410dd55f196fe338da61969c9e56a969",
+          "requestDigest": "59cd18c32dbf24fe31c79ce15cafdafcd02ada8241b5da8c59922391b1204ba3",
+          "acceptedRequestDigests": [
+            "59cd18c32dbf24fe31c79ce15cafdafcd02ada8241b5da8c59922391b1204ba3"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "59cd18c32dbf24fe31c79ce15cafdafcd02ada8241b5da8c59922391b1204ba3"
+      ]
     },
     {
       "externalId": "asset:bbbaa7ea7a2547b64df3",
-      "idempotencyKey": "cms-media-inventory-v3:asset:bbbaa7ea7a2547b64df3",
+      "idempotencyKey": "cms-media-binary-v1:asset:bbbaa7ea7a2547b64df3:5a162d8e0f96b2cf4ff8773033aa9a4fe67988e478070be4b6449c964d00c5b3",
       "filename": "pulse-industry-education-learning.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-learning.png",
       "publicPath": "/images/cognirise/industries/pulse-industry-education-learning.png",
@@ -5099,11 +5642,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "714be8eaac0b2d686eba85d8349c26a4ecd6593be130e48c0650dd677a06020c"
+      "requestDigest": "58fd0c490430d6dcf847eaf1f08d631e91c34910d29888d35ff49c4f0d047c90",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:bbbaa7ea7a2547b64df3",
+          "idempotencyKey": "cms-media-inventory-v3:asset:bbbaa7ea7a2547b64df3",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:bbbaa7ea7a2547b64df3:5a162d8e0f96b2cf4ff8773033aa9a4fe67988e478070be4b6449c964d00c5b3",
+          "requestDigest": "714be8eaac0b2d686eba85d8349c26a4ecd6593be130e48c0650dd677a06020c",
+          "acceptedRequestDigests": [
+            "714be8eaac0b2d686eba85d8349c26a4ecd6593be130e48c0650dd677a06020c"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "714be8eaac0b2d686eba85d8349c26a4ecd6593be130e48c0650dd677a06020c"
+      ]
     },
     {
       "externalId": "asset:142ae134e579aa22b3fa",
-      "idempotencyKey": "cms-media-inventory-v3:asset:142ae134e579aa22b3fa",
+      "idempotencyKey": "cms-media-binary-v1:asset:142ae134e579aa22b3fa:c46f7f761b52660fa218a376b0f157d5d4b8f9aca86eb83fb750af7f16d6dc42",
       "filename": "pulse-industry-education.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education.jpg",
       "publicPath": "/images/cognirise/industries/pulse-industry-education.jpg",
@@ -5124,11 +5681,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "bc8b35472743e5b57a381ddecff2f03b6f3bbfb877f68df9833e9edf66f578bf"
+      "requestDigest": "3640275dff562b7ad09e877b1c58a4aa4e806d87705e15ece96ff26765d40793",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:142ae134e579aa22b3fa",
+          "idempotencyKey": "cms-media-inventory-v3:asset:142ae134e579aa22b3fa",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:142ae134e579aa22b3fa:c46f7f761b52660fa218a376b0f157d5d4b8f9aca86eb83fb750af7f16d6dc42",
+          "requestDigest": "bc8b35472743e5b57a381ddecff2f03b6f3bbfb877f68df9833e9edf66f578bf",
+          "acceptedRequestDigests": [
+            "bc8b35472743e5b57a381ddecff2f03b6f3bbfb877f68df9833e9edf66f578bf"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "bc8b35472743e5b57a381ddecff2f03b6f3bbfb877f68df9833e9edf66f578bf"
+      ]
     },
     {
       "externalId": "asset:32801370fdaa16c78c12",
-      "idempotencyKey": "cms-media-inventory-v3:asset:32801370fdaa16c78c12",
+      "idempotencyKey": "cms-media-binary-v1:asset:32801370fdaa16c78c12:ec728d1f5f3085326b09eb2bb0909c32b9167da0f9659ffcbb0b4595d802aa31",
       "filename": "pulse-industry-energy-resources.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-energy-resources.png",
       "publicPath": "/images/cognirise/industries/pulse-industry-energy-resources.png",
@@ -5149,11 +5720,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "edcad3d3173115104a27cf36f4a6c9968276fab2f98c1605eaf4ad9ab0a47109"
+      "requestDigest": "c417e10ce7dbfbe83f13cf71e06f511916ee0351f6bc37a975a0fe507e821d40",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:32801370fdaa16c78c12",
+          "idempotencyKey": "cms-media-inventory-v3:asset:32801370fdaa16c78c12",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:32801370fdaa16c78c12:ec728d1f5f3085326b09eb2bb0909c32b9167da0f9659ffcbb0b4595d802aa31",
+          "requestDigest": "edcad3d3173115104a27cf36f4a6c9968276fab2f98c1605eaf4ad9ab0a47109",
+          "acceptedRequestDigests": [
+            "edcad3d3173115104a27cf36f4a6c9968276fab2f98c1605eaf4ad9ab0a47109"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "edcad3d3173115104a27cf36f4a6c9968276fab2f98c1605eaf4ad9ab0a47109"
+      ]
     },
     {
       "externalId": "asset:fcf7c186aab2468bef23",
-      "idempotencyKey": "cms-media-inventory-v3:asset:fcf7c186aab2468bef23",
+      "idempotencyKey": "cms-media-binary-v1:asset:fcf7c186aab2468bef23:d0398015c4cc624a5eaf3f850c837a5a9b6bd84766634789a0ce325739e2fabb",
       "filename": "pulse-industry-energy.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-energy.jpg",
       "publicPath": "/images/cognirise/industries/pulse-industry-energy.jpg",
@@ -5174,11 +5759,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "09bc167deee2f45d36970618e5448c8e023bf50aa7df07111812fad9c852d5e2"
+      "requestDigest": "31b7990aff9b7f553dd36ae20044810c55cfa3b91f3917901f217a50a9e65728",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:fcf7c186aab2468bef23",
+          "idempotencyKey": "cms-media-inventory-v3:asset:fcf7c186aab2468bef23",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:fcf7c186aab2468bef23:d0398015c4cc624a5eaf3f850c837a5a9b6bd84766634789a0ce325739e2fabb",
+          "requestDigest": "09bc167deee2f45d36970618e5448c8e023bf50aa7df07111812fad9c852d5e2",
+          "acceptedRequestDigests": [
+            "09bc167deee2f45d36970618e5448c8e023bf50aa7df07111812fad9c852d5e2"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "09bc167deee2f45d36970618e5448c8e023bf50aa7df07111812fad9c852d5e2"
+      ]
     },
     {
       "externalId": "asset:1e6df259a2603a5fb96c",
-      "idempotencyKey": "cms-media-inventory-v3:asset:1e6df259a2603a5fb96c",
+      "idempotencyKey": "cms-media-binary-v1:asset:1e6df259a2603a5fb96c:c3e273ee9fbade51617899dde33a49f19a2d2e8804486c91226013d0ad4f2b82",
       "filename": "pulse-industry-financial-services.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-financial-services.png",
       "publicPath": "/images/cognirise/industries/pulse-industry-financial-services.png",
@@ -5199,11 +5798,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "824317998d50d4cfc0d40087ed2db3b277645e440b262ea56da540d16349d794"
+      "requestDigest": "a63ef672d92be3a2d6356a0f7b3adb346f0399ea42e0172065d7d84d4447559f",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:1e6df259a2603a5fb96c",
+          "idempotencyKey": "cms-media-inventory-v3:asset:1e6df259a2603a5fb96c",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1e6df259a2603a5fb96c:c3e273ee9fbade51617899dde33a49f19a2d2e8804486c91226013d0ad4f2b82",
+          "requestDigest": "824317998d50d4cfc0d40087ed2db3b277645e440b262ea56da540d16349d794",
+          "acceptedRequestDigests": [
+            "824317998d50d4cfc0d40087ed2db3b277645e440b262ea56da540d16349d794"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "824317998d50d4cfc0d40087ed2db3b277645e440b262ea56da540d16349d794"
+      ]
     },
     {
       "externalId": "asset:5936a9b4c6ac5c729fda",
-      "idempotencyKey": "cms-media-inventory-v3:asset:5936a9b4c6ac5c729fda",
+      "idempotencyKey": "cms-media-binary-v1:asset:5936a9b4c6ac5c729fda:4be720fc3fa0f9c57d4c2d39237292d0bcb0c0f62407a04368c88d9460c81fe0",
       "filename": "pulse-industry-financial.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-financial.jpg",
       "publicPath": "/images/cognirise/industries/pulse-industry-financial.jpg",
@@ -5224,11 +5837,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "527180481008843e52360fb131efc623eab6df8754e818e565456565dc2a83aa"
+      "requestDigest": "4fefc14aeabd4a0616577f096eb097c9da217a7f93f81aea2ca5327bf9e2ad2f",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:5936a9b4c6ac5c729fda",
+          "idempotencyKey": "cms-media-inventory-v3:asset:5936a9b4c6ac5c729fda",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:5936a9b4c6ac5c729fda:4be720fc3fa0f9c57d4c2d39237292d0bcb0c0f62407a04368c88d9460c81fe0",
+          "requestDigest": "527180481008843e52360fb131efc623eab6df8754e818e565456565dc2a83aa",
+          "acceptedRequestDigests": [
+            "527180481008843e52360fb131efc623eab6df8754e818e565456565dc2a83aa"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "527180481008843e52360fb131efc623eab6df8754e818e565456565dc2a83aa"
+      ]
     },
     {
       "externalId": "asset:10710c6450dd72bf00ff",
-      "idempotencyKey": "cms-media-inventory-v3:asset:10710c6450dd72bf00ff",
+      "idempotencyKey": "cms-media-binary-v1:asset:10710c6450dd72bf00ff:727af375484e4c4c7c24188c140f68a1a6fd20cfd99c7a5016f96ecb30a2cef4",
       "filename": "pulse-industry-manufacturing-production.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-manufacturing-production.png",
       "publicPath": "/images/cognirise/industries/pulse-industry-manufacturing-production.png",
@@ -5249,11 +5876,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "989b2f6f46d2ff4779627684e48712dad3c5069e73b242d492b1bf8785740c90"
+      "requestDigest": "ec8fd9f6dd41bce2750bad5266e3220dedf43b06286387a57e956126be323c06",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:10710c6450dd72bf00ff",
+          "idempotencyKey": "cms-media-inventory-v3:asset:10710c6450dd72bf00ff",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:10710c6450dd72bf00ff:727af375484e4c4c7c24188c140f68a1a6fd20cfd99c7a5016f96ecb30a2cef4",
+          "requestDigest": "989b2f6f46d2ff4779627684e48712dad3c5069e73b242d492b1bf8785740c90",
+          "acceptedRequestDigests": [
+            "989b2f6f46d2ff4779627684e48712dad3c5069e73b242d492b1bf8785740c90"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "989b2f6f46d2ff4779627684e48712dad3c5069e73b242d492b1bf8785740c90"
+      ]
     },
     {
       "externalId": "asset:1f2bc243d3d62cb6da04",
-      "idempotencyKey": "cms-media-inventory-v3:asset:1f2bc243d3d62cb6da04",
+      "idempotencyKey": "cms-media-binary-v1:asset:1f2bc243d3d62cb6da04:942dfbcb83fc0264f06f4ba60e7511670973fe75b14ada8d3b144a155918ec4b",
       "filename": "pulse-industry-public-sector-services.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-public-sector-services.png",
       "publicPath": "/images/cognirise/industries/pulse-industry-public-sector-services.png",
@@ -5274,11 +5915,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "dbdcf634521fd5acc1ae37a646ac3c4dfc0b8abdcebefa197d65e049034c98f8"
+      "requestDigest": "e5c6ee5029f6a1d9357de181d89bedc486fca513c250f2930297ff15b4d94b92",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:1f2bc243d3d62cb6da04",
+          "idempotencyKey": "cms-media-inventory-v3:asset:1f2bc243d3d62cb6da04",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1f2bc243d3d62cb6da04:942dfbcb83fc0264f06f4ba60e7511670973fe75b14ada8d3b144a155918ec4b",
+          "requestDigest": "dbdcf634521fd5acc1ae37a646ac3c4dfc0b8abdcebefa197d65e049034c98f8",
+          "acceptedRequestDigests": [
+            "dbdcf634521fd5acc1ae37a646ac3c4dfc0b8abdcebefa197d65e049034c98f8"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "dbdcf634521fd5acc1ae37a646ac3c4dfc0b8abdcebefa197d65e049034c98f8"
+      ]
     },
     {
       "externalId": "asset:ce6e9786500aa02af86d",
-      "idempotencyKey": "cms-media-inventory-v3:asset:ce6e9786500aa02af86d",
+      "idempotencyKey": "cms-media-binary-v1:asset:ce6e9786500aa02af86d:63169082b985e74463d34177d228583f07a5f55f15d0fde97328133a9e440f85",
       "filename": "pulse-industry-public-sector.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-public-sector.jpg",
       "publicPath": "/images/cognirise/industries/pulse-industry-public-sector.jpg",
@@ -5299,11 +5954,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "0afc3dcc9c0b15d07d88c432232e68825146a285246b7892769a852a03fdd809"
+      "requestDigest": "67a1d6e0654508fd5259bd5596418852137c5b1a911bce45527cb21583d3363e",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:ce6e9786500aa02af86d",
+          "idempotencyKey": "cms-media-inventory-v3:asset:ce6e9786500aa02af86d",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:ce6e9786500aa02af86d:63169082b985e74463d34177d228583f07a5f55f15d0fde97328133a9e440f85",
+          "requestDigest": "0afc3dcc9c0b15d07d88c432232e68825146a285246b7892769a852a03fdd809",
+          "acceptedRequestDigests": [
+            "0afc3dcc9c0b15d07d88c432232e68825146a285246b7892769a852a03fdd809"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "0afc3dcc9c0b15d07d88c432232e68825146a285246b7892769a852a03fdd809"
+      ]
     },
     {
       "externalId": "asset:8ae105105458a57d3366",
-      "idempotencyKey": "cms-media-inventory-v3:asset:8ae105105458a57d3366",
+      "idempotencyKey": "cms-media-binary-v1:asset:8ae105105458a57d3366:aa462c52b3c18ead38262e19c5369f106e42e54a0d45f727fa6e78d80f89a355",
       "filename": "pulse-industry-retail-cpg-demand.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-retail-cpg-demand.png",
       "publicPath": "/images/cognirise/industries/pulse-industry-retail-cpg-demand.png",
@@ -5324,11 +5993,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "77e913492f2bc7f290d27ed95d605afecf35a99b6ba0064e6614c18fd2b17088"
+      "requestDigest": "6c759533441c228bdf8156eb79368098ccf132307eef27c860c10dc0889f67e6",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:8ae105105458a57d3366",
+          "idempotencyKey": "cms-media-inventory-v3:asset:8ae105105458a57d3366",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:8ae105105458a57d3366:aa462c52b3c18ead38262e19c5369f106e42e54a0d45f727fa6e78d80f89a355",
+          "requestDigest": "77e913492f2bc7f290d27ed95d605afecf35a99b6ba0064e6614c18fd2b17088",
+          "acceptedRequestDigests": [
+            "77e913492f2bc7f290d27ed95d605afecf35a99b6ba0064e6614c18fd2b17088"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "77e913492f2bc7f290d27ed95d605afecf35a99b6ba0064e6614c18fd2b17088"
+      ]
     },
     {
       "externalId": "asset:bfe072a6104263c97bd2",
-      "idempotencyKey": "cms-media-inventory-v3:asset:bfe072a6104263c97bd2",
+      "idempotencyKey": "cms-media-binary-v1:asset:bfe072a6104263c97bd2:d96cabad74c82ce7074b24027d02bf0ad9baa46c29db6281a63ddc859cb41602",
       "filename": "pulse-industry-telecoms-network.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-telecoms-network.png",
       "publicPath": "/images/cognirise/industries/pulse-industry-telecoms-network.png",
@@ -5349,11 +6032,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "ad05909bbab37fcc1a812443a19ec3393da40617a4ba12f95663cbd0be667208"
+      "requestDigest": "dbfcdcc37f732a2b3e6c2de5c031c50cd370d5b606084bbfb4311d0b68d705b1",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:bfe072a6104263c97bd2",
+          "idempotencyKey": "cms-media-inventory-v3:asset:bfe072a6104263c97bd2",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:bfe072a6104263c97bd2:d96cabad74c82ce7074b24027d02bf0ad9baa46c29db6281a63ddc859cb41602",
+          "requestDigest": "ad05909bbab37fcc1a812443a19ec3393da40617a4ba12f95663cbd0be667208",
+          "acceptedRequestDigests": [
+            "ad05909bbab37fcc1a812443a19ec3393da40617a4ba12f95663cbd0be667208"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "ad05909bbab37fcc1a812443a19ec3393da40617a4ba12f95663cbd0be667208"
+      ]
     },
     {
       "externalId": "asset:1f857b96d54e29e56146",
-      "idempotencyKey": "cms-media-inventory-v3:asset:1f857b96d54e29e56146",
+      "idempotencyKey": "cms-media-binary-v1:asset:1f857b96d54e29e56146:35e13aabf861ec5d2700fea7b81ceb00672a74d367bd030d2d3ca03fd6e2d733",
       "filename": "pulse-industry-telecoms.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-telecoms.jpg",
       "publicPath": "/images/cognirise/industries/pulse-industry-telecoms.jpg",
@@ -5374,11 +6071,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "3ebc5b530822ac476cde6bf1cb03e3734c08f9306693986fa7ac0eee723fceb0"
+      "requestDigest": "44380906d90fd3d7f86e87bb8c0b55fcd306c1d2139323a619a2254e507d7be7",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:1f857b96d54e29e56146",
+          "idempotencyKey": "cms-media-inventory-v3:asset:1f857b96d54e29e56146",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1f857b96d54e29e56146:35e13aabf861ec5d2700fea7b81ceb00672a74d367bd030d2d3ca03fd6e2d733",
+          "requestDigest": "3ebc5b530822ac476cde6bf1cb03e3734c08f9306693986fa7ac0eee723fceb0",
+          "acceptedRequestDigests": [
+            "3ebc5b530822ac476cde6bf1cb03e3734c08f9306693986fa7ac0eee723fceb0"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "3ebc5b530822ac476cde6bf1cb03e3734c08f9306693986fa7ac0eee723fceb0"
+      ]
     },
     {
       "externalId": "asset:aae9100da7c6f1f8fca7",
-      "idempotencyKey": "cms-media-inventory-v3:asset:aae9100da7c6f1f8fca7",
+      "idempotencyKey": "cms-media-binary-v1:asset:aae9100da7c6f1f8fca7:0b0c4f31e80e84026616024e948c403785150ae4e6cdf9efc6fec2e360bbb7ce",
       "filename": "pulse-industry-travel-hospitality.png",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-travel-hospitality.png",
       "publicPath": "/images/cognirise/industries/pulse-industry-travel-hospitality.png",
@@ -5399,11 +6110,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "55c4ab6955996a3f6482d18dea113b458e38ea0d548664a62c12989d89e978cc"
+      "requestDigest": "7f8498b03ee3e51dbe6229dfb6a9dd9fe96d201e4db7cb5a98a40a96d371986b",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:aae9100da7c6f1f8fca7",
+          "idempotencyKey": "cms-media-inventory-v3:asset:aae9100da7c6f1f8fca7",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:aae9100da7c6f1f8fca7:0b0c4f31e80e84026616024e948c403785150ae4e6cdf9efc6fec2e360bbb7ce",
+          "requestDigest": "55c4ab6955996a3f6482d18dea113b458e38ea0d548664a62c12989d89e978cc",
+          "acceptedRequestDigests": [
+            "55c4ab6955996a3f6482d18dea113b458e38ea0d548664a62c12989d89e978cc"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "55c4ab6955996a3f6482d18dea113b458e38ea0d548664a62c12989d89e978cc"
+      ]
     },
     {
       "externalId": "asset:970056b64f6910389d7f",
-      "idempotencyKey": "cms-media-inventory-v3:asset:970056b64f6910389d7f",
+      "idempotencyKey": "cms-media-binary-v1:asset:970056b64f6910389d7f:c5d787e4b692481e5213aa4f218626e5f776c8eaa5f171548c46594877c10204",
       "filename": "pulse-industry-travel.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-travel.jpg",
       "publicPath": "/images/cognirise/industries/pulse-industry-travel.jpg",
@@ -5424,11 +6149,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "ef5cb214a01fa48e0f066b9457e76c42ea5af865faaf431d10b3a8b586ddd39a"
+      "requestDigest": "a93f040fcdf2c4ddb50527e45528135469ee34918be65231dc34d8e8cac65773",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:970056b64f6910389d7f",
+          "idempotencyKey": "cms-media-inventory-v3:asset:970056b64f6910389d7f",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:970056b64f6910389d7f:c5d787e4b692481e5213aa4f218626e5f776c8eaa5f171548c46594877c10204",
+          "requestDigest": "ef5cb214a01fa48e0f066b9457e76c42ea5af865faaf431d10b3a8b586ddd39a",
+          "acceptedRequestDigests": [
+            "ef5cb214a01fa48e0f066b9457e76c42ea5af865faaf431d10b3a8b586ddd39a"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "ef5cb214a01fa48e0f066b9457e76c42ea5af865faaf431d10b3a8b586ddd39a"
+      ]
     },
     {
       "externalId": "asset:f0cfed6f9106f7ba3cfb",
-      "idempotencyKey": "cms-media-inventory-v3:asset:f0cfed6f9106f7ba3cfb",
+      "idempotencyKey": "cms-media-binary-v1:asset:f0cfed6f9106f7ba3cfb:8dc1a95eee36be6078ed133290b024ce556e34742d1ab08b21a76ceb7aba0f45",
       "filename": "industries-hero-flight-poster.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries-hero-flight-poster.jpg",
       "publicPath": "/images/cognirise/industries-hero-flight-poster.jpg",
@@ -5449,11 +6188,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "54862006fbbf5a0f05a5f73ffaae2452fa94091d9152b027ad145e476f6f9ec2"
+      "requestDigest": "34d49a235772ce12fc19ac4a04cde11c756f146bddeffa399d91f2b85cf54906",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:f0cfed6f9106f7ba3cfb",
+          "idempotencyKey": "cms-media-inventory-v3:asset:f0cfed6f9106f7ba3cfb",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:f0cfed6f9106f7ba3cfb:8dc1a95eee36be6078ed133290b024ce556e34742d1ab08b21a76ceb7aba0f45",
+          "requestDigest": "54862006fbbf5a0f05a5f73ffaae2452fa94091d9152b027ad145e476f6f9ec2",
+          "acceptedRequestDigests": [
+            "54862006fbbf5a0f05a5f73ffaae2452fa94091d9152b027ad145e476f6f9ec2"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "54862006fbbf5a0f05a5f73ffaae2452fa94091d9152b027ad145e476f6f9ec2"
+      ]
     },
     {
       "externalId": "asset:5d8da6b74c77327bf3a1",
-      "idempotencyKey": "cms-media-inventory-v3:asset:5d8da6b74c77327bf3a1",
+      "idempotencyKey": "cms-media-binary-v1:asset:5d8da6b74c77327bf3a1:a798b751527e5ffe41958651d0c0c5e55a04a920b12a56f1e4de019c73dfc35e",
       "filename": "pulse-breakthrough.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/pulse-breakthrough.jpg",
       "publicPath": "/images/cognirise/pulse-breakthrough.jpg",
@@ -5466,7 +6219,6 @@
       "usages": [
         "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
         "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
-        "artifacts/cognirise-website/src/pages/IDAOMethodology.tsx",
         "artifacts/cognirise-website/src/pages/WorkProof.tsx"
       ],
       "collection": "website",
@@ -5477,11 +6229,41 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "5d966ea48ec0a9b83cb9ab41a9fa7a48ce319462383b573e9e3b0b831eb87a5a"
+      "requestDigest": "c0efd02ecab8191c51c8464458ba439a34fc8538d2a708a85947701d3b269064",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:5d8da6b74c77327bf3a1",
+          "idempotencyKey": "cms-media-inventory-v3:asset:5d8da6b74c77327bf3a1",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:5d8da6b74c77327bf3a1:a798b751527e5ffe41958651d0c0c5e55a04a920b12a56f1e4de019c73dfc35e",
+          "requestDigest": "9c465008711fcea5d03ff404f9410b06e369aab7880f315e3cb0d3bd39df7b5f",
+          "acceptedRequestDigests": [
+            "9c465008711fcea5d03ff404f9410b06e369aab7880f315e3cb0d3bd39df7b5f",
+            "5d966ea48ec0a9b83cb9ab41a9fa7a48ce319462383b573e9e3b0b831eb87a5a",
+            "92fb47068ed29b37f2e425b8f783ea63fc4633e01f2b5098a2d0d15b64ad4bd7"
+          ]
+        },
+        {
+          "externalId": "asset:5d8da6b74c77327bf3a1",
+          "idempotencyKey": "cms-media-replacement-v1:asset:5d8da6b74c77327bf3a1:a798b751527e5ffe41958651d0c0c5e55a04a920b12a56f1e4de019c73dfc35e",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:5d8da6b74c77327bf3a1:a798b751527e5ffe41958651d0c0c5e55a04a920b12a56f1e4de019c73dfc35e",
+          "requestDigest": "7d29e3619d3b159fd05d797a219593f3783268aad8ad5702edb62beda2178695",
+          "acceptedRequestDigests": [
+            "7d29e3619d3b159fd05d797a219593f3783268aad8ad5702edb62beda2178695",
+            "f353dcf119df05b6e04026fc6b01d8528f1592af16fbea5f3dcbe22fbae3fe2e"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "9c465008711fcea5d03ff404f9410b06e369aab7880f315e3cb0d3bd39df7b5f",
+        "5d966ea48ec0a9b83cb9ab41a9fa7a48ce319462383b573e9e3b0b831eb87a5a",
+        "92fb47068ed29b37f2e425b8f783ea63fc4633e01f2b5098a2d0d15b64ad4bd7",
+        "7d29e3619d3b159fd05d797a219593f3783268aad8ad5702edb62beda2178695",
+        "f353dcf119df05b6e04026fc6b01d8528f1592af16fbea5f3dcbe22fbae3fe2e"
+      ]
     },
     {
       "externalId": "asset:1aa85e3f80b4199ec833",
-      "idempotencyKey": "cms-media-inventory-v3:asset:1aa85e3f80b4199ec833",
+      "idempotencyKey": "cms-media-binary-v1:asset:1aa85e3f80b4199ec833:6ee4af35cc0bc38f7cb278ce2fbfe3304463bf7f9886605ad6c315348919f050",
       "filename": "pulse-convergence.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/pulse-convergence.jpg",
       "publicPath": "/images/cognirise/pulse-convergence.jpg",
@@ -5503,11 +6285,37 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "74532cd89eefbe9030ccc34d06fb7e203f2792b3267038e160ed3351895f64a6"
+      "requestDigest": "ad17431cbd6dd2e11c9414d6634b5d3c7d123ab9ba41d3df6c293a07c3419c06",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:1aa85e3f80b4199ec833",
+          "idempotencyKey": "cms-media-inventory-v3:asset:1aa85e3f80b4199ec833",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1aa85e3f80b4199ec833:6ee4af35cc0bc38f7cb278ce2fbfe3304463bf7f9886605ad6c315348919f050",
+          "requestDigest": "74532cd89eefbe9030ccc34d06fb7e203f2792b3267038e160ed3351895f64a6",
+          "acceptedRequestDigests": [
+            "74532cd89eefbe9030ccc34d06fb7e203f2792b3267038e160ed3351895f64a6",
+            "bc8af22a70af669b3c134df22e1090e87e172ff9c24c3b2c00fce2a4fbbb1d61"
+          ]
+        },
+        {
+          "externalId": "asset:1aa85e3f80b4199ec833",
+          "idempotencyKey": "cms-media-replacement-v1:asset:1aa85e3f80b4199ec833:6ee4af35cc0bc38f7cb278ce2fbfe3304463bf7f9886605ad6c315348919f050",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1aa85e3f80b4199ec833:6ee4af35cc0bc38f7cb278ce2fbfe3304463bf7f9886605ad6c315348919f050",
+          "requestDigest": "d8d3e4add287469e2eeede737074de4c93c02192a5b89cec8721ed00da7e0c48",
+          "acceptedRequestDigests": [
+            "d8d3e4add287469e2eeede737074de4c93c02192a5b89cec8721ed00da7e0c48"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "74532cd89eefbe9030ccc34d06fb7e203f2792b3267038e160ed3351895f64a6",
+        "bc8af22a70af669b3c134df22e1090e87e172ff9c24c3b2c00fce2a4fbbb1d61",
+        "d8d3e4add287469e2eeede737074de4c93c02192a5b89cec8721ed00da7e0c48"
+      ]
     },
     {
       "externalId": "asset:3f7475f39be770ae060c",
-      "idempotencyKey": "cms-media-inventory-v3:asset:3f7475f39be770ae060c",
+      "idempotencyKey": "cms-media-binary-v1:asset:3f7475f39be770ae060c:683363c9af7db310aff4bc1bf015ffc06cf63b82a7cf22ebee41af786e1e49c8",
       "filename": "pulse-hero-film-poster.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/pulse-hero-film-poster.jpg",
       "publicPath": "/images/cognirise/pulse-hero-film-poster.jpg",
@@ -5528,11 +6336,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "62b4479fffc80d53c9340a1a5e284ac49dbd988a9d568bf5926c84a74566146a"
+      "requestDigest": "7702198bf25a38ef1ff9636e4f1bb870363e67f31cd416600bf7ce34ed238bf9",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:3f7475f39be770ae060c",
+          "idempotencyKey": "cms-media-inventory-v3:asset:3f7475f39be770ae060c",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:3f7475f39be770ae060c:683363c9af7db310aff4bc1bf015ffc06cf63b82a7cf22ebee41af786e1e49c8",
+          "requestDigest": "62b4479fffc80d53c9340a1a5e284ac49dbd988a9d568bf5926c84a74566146a",
+          "acceptedRequestDigests": [
+            "62b4479fffc80d53c9340a1a5e284ac49dbd988a9d568bf5926c84a74566146a"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "62b4479fffc80d53c9340a1a5e284ac49dbd988a9d568bf5926c84a74566146a"
+      ]
     },
     {
       "externalId": "asset:302ea3c4bf1fbfb78fed",
-      "idempotencyKey": "cms-media-inventory-v3:asset:302ea3c4bf1fbfb78fed",
+      "idempotencyKey": "cms-media-binary-v1:asset:302ea3c4bf1fbfb78fed:0c0053392fe1823f2aafe053711bd07114cb4153dd8552a362a5ac2b2c8653b4",
       "filename": "pulse-hero.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/pulse-hero.jpg",
       "publicPath": "/images/cognirise/pulse-hero.jpg",
@@ -5553,11 +6375,37 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "a98e6f764d8075ffd1937770ad5d27aff3e393108c2616a5caff277618bb575a"
+      "requestDigest": "2c8220c9d2db8fd1d62d9d32c738b3c35ab7c7b6f60b43dfdab111b3cb10999a",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:302ea3c4bf1fbfb78fed",
+          "idempotencyKey": "cms-media-inventory-v3:asset:302ea3c4bf1fbfb78fed",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:302ea3c4bf1fbfb78fed:0c0053392fe1823f2aafe053711bd07114cb4153dd8552a362a5ac2b2c8653b4",
+          "requestDigest": "a98e6f764d8075ffd1937770ad5d27aff3e393108c2616a5caff277618bb575a",
+          "acceptedRequestDigests": [
+            "a98e6f764d8075ffd1937770ad5d27aff3e393108c2616a5caff277618bb575a",
+            "41b2ad264547742ed04c7a39696ac4af331b499100ee971af254a062ce967f33"
+          ]
+        },
+        {
+          "externalId": "asset:302ea3c4bf1fbfb78fed",
+          "idempotencyKey": "cms-media-replacement-v1:asset:302ea3c4bf1fbfb78fed:0c0053392fe1823f2aafe053711bd07114cb4153dd8552a362a5ac2b2c8653b4",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:302ea3c4bf1fbfb78fed:0c0053392fe1823f2aafe053711bd07114cb4153dd8552a362a5ac2b2c8653b4",
+          "requestDigest": "9088100e3af1ccdea4481d367bc3d8981b6b7c82983f8cce6e621a753e580b22",
+          "acceptedRequestDigests": [
+            "9088100e3af1ccdea4481d367bc3d8981b6b7c82983f8cce6e621a753e580b22"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "a98e6f764d8075ffd1937770ad5d27aff3e393108c2616a5caff277618bb575a",
+        "41b2ad264547742ed04c7a39696ac4af331b499100ee971af254a062ce967f33",
+        "9088100e3af1ccdea4481d367bc3d8981b6b7c82983f8cce6e621a753e580b22"
+      ]
     },
     {
       "externalId": "asset:963a3139d76ebb1cbd21",
-      "idempotencyKey": "cms-media-inventory-v3:asset:963a3139d76ebb1cbd21",
+      "idempotencyKey": "cms-media-binary-v1:asset:963a3139d76ebb1cbd21:fc856d336a4780e5c7568f0cb1b9e96dda8ee7d4fd1f7967df9ce37c0be3a781",
       "filename": "site-cognios.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/site-cognios.jpg",
       "publicPath": "/images/cognirise/site-cognios.jpg",
@@ -5581,11 +6429,37 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "15951a7500a3347863968825fb42fd0a6eeca995449fe87582e326e22244f65f"
+      "requestDigest": "5dbd6ced49d1942c95376b1a2dc04b47693aa6647e70379be853e485a71d9c4e",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:963a3139d76ebb1cbd21",
+          "idempotencyKey": "cms-media-inventory-v3:asset:963a3139d76ebb1cbd21",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:963a3139d76ebb1cbd21:fc856d336a4780e5c7568f0cb1b9e96dda8ee7d4fd1f7967df9ce37c0be3a781",
+          "requestDigest": "15951a7500a3347863968825fb42fd0a6eeca995449fe87582e326e22244f65f",
+          "acceptedRequestDigests": [
+            "15951a7500a3347863968825fb42fd0a6eeca995449fe87582e326e22244f65f",
+            "e38c7d76ba5cbb2d7556433092e9bc474fb2ebc0fc123e99d14d3b8e5d05a56e"
+          ]
+        },
+        {
+          "externalId": "asset:963a3139d76ebb1cbd21",
+          "idempotencyKey": "cms-media-replacement-v1:asset:963a3139d76ebb1cbd21:fc856d336a4780e5c7568f0cb1b9e96dda8ee7d4fd1f7967df9ce37c0be3a781",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:963a3139d76ebb1cbd21:fc856d336a4780e5c7568f0cb1b9e96dda8ee7d4fd1f7967df9ce37c0be3a781",
+          "requestDigest": "fc07b8ccb5fb482b1b544c68f5fb859a3eb8b673602b153dc9ae95dfa962d74a",
+          "acceptedRequestDigests": [
+            "fc07b8ccb5fb482b1b544c68f5fb859a3eb8b673602b153dc9ae95dfa962d74a"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "15951a7500a3347863968825fb42fd0a6eeca995449fe87582e326e22244f65f",
+        "e38c7d76ba5cbb2d7556433092e9bc474fb2ebc0fc123e99d14d3b8e5d05a56e",
+        "fc07b8ccb5fb482b1b544c68f5fb859a3eb8b673602b153dc9ae95dfa962d74a"
+      ]
     },
     {
       "externalId": "asset:8e7e9479de6f42bcf2bc",
-      "idempotencyKey": "cms-media-inventory-v3:asset:8e7e9479de6f42bcf2bc",
+      "idempotencyKey": "cms-media-binary-v1:asset:8e7e9479de6f42bcf2bc:6df89ba5ba9d3fc17254be728e5f658d626284dd08a1f69aec9cf47e7b9a504f",
       "filename": "site-financial.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/site-financial.jpg",
       "publicPath": "/images/cognirise/site-financial.jpg",
@@ -5604,11 +6478,37 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "a27b44e8f8ae972852a5334f5c4efe5ad6e94fa8bcee8c01cec3a627de5fdf24"
+      "requestDigest": "919e1fa7365761e610be8549ba2848eb4404002f4816a59955264197bd1b0743",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:8e7e9479de6f42bcf2bc",
+          "idempotencyKey": "cms-media-inventory-v3:asset:8e7e9479de6f42bcf2bc",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:8e7e9479de6f42bcf2bc:6df89ba5ba9d3fc17254be728e5f658d626284dd08a1f69aec9cf47e7b9a504f",
+          "requestDigest": "a27b44e8f8ae972852a5334f5c4efe5ad6e94fa8bcee8c01cec3a627de5fdf24",
+          "acceptedRequestDigests": [
+            "a27b44e8f8ae972852a5334f5c4efe5ad6e94fa8bcee8c01cec3a627de5fdf24",
+            "db7a1d993b894bea2ce6052ca48dd0bedae825cd4ae81285c16a39c4a1b41cbd"
+          ]
+        },
+        {
+          "externalId": "asset:8e7e9479de6f42bcf2bc",
+          "idempotencyKey": "cms-media-replacement-v1:asset:8e7e9479de6f42bcf2bc:6df89ba5ba9d3fc17254be728e5f658d626284dd08a1f69aec9cf47e7b9a504f",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:8e7e9479de6f42bcf2bc:6df89ba5ba9d3fc17254be728e5f658d626284dd08a1f69aec9cf47e7b9a504f",
+          "requestDigest": "433874727c69c72985289e0dd1f322cc9caf191915fa16ee0dd1756635798359",
+          "acceptedRequestDigests": [
+            "433874727c69c72985289e0dd1f322cc9caf191915fa16ee0dd1756635798359"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "a27b44e8f8ae972852a5334f5c4efe5ad6e94fa8bcee8c01cec3a627de5fdf24",
+        "db7a1d993b894bea2ce6052ca48dd0bedae825cd4ae81285c16a39c4a1b41cbd",
+        "433874727c69c72985289e0dd1f322cc9caf191915fa16ee0dd1756635798359"
+      ]
     },
     {
       "externalId": "asset:24cc90e2f42d888d21c8",
-      "idempotencyKey": "cms-media-inventory-v3:asset:24cc90e2f42d888d21c8",
+      "idempotencyKey": "cms-media-binary-v1:asset:24cc90e2f42d888d21c8:c89a938dee3d4daa6dd11ed0dc158a6c7a48812199a167acfc065ab263dd6f4b",
       "filename": "site-government.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/site-government.jpg",
       "publicPath": "/images/cognirise/site-government.jpg",
@@ -5629,11 +6529,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "4b6013ebd2a02af56fd1d06d571e4559394b97dc0bc15ba6211dcf4e2899cd39"
+      "requestDigest": "9a9f3d5867dacf966ba79bc80768fc5a4acc7c07264e92527bb2c1d791b6b50c",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:24cc90e2f42d888d21c8",
+          "idempotencyKey": "cms-media-inventory-v3:asset:24cc90e2f42d888d21c8",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:24cc90e2f42d888d21c8:c89a938dee3d4daa6dd11ed0dc158a6c7a48812199a167acfc065ab263dd6f4b",
+          "requestDigest": "4b6013ebd2a02af56fd1d06d571e4559394b97dc0bc15ba6211dcf4e2899cd39",
+          "acceptedRequestDigests": [
+            "4b6013ebd2a02af56fd1d06d571e4559394b97dc0bc15ba6211dcf4e2899cd39"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "4b6013ebd2a02af56fd1d06d571e4559394b97dc0bc15ba6211dcf4e2899cd39"
+      ]
     },
     {
       "externalId": "asset:5510debf4e4390420a56",
-      "idempotencyKey": "cms-media-inventory-v3:asset:5510debf4e4390420a56",
+      "idempotencyKey": "cms-media-binary-v1:asset:5510debf4e4390420a56:75c105711b2c2d910aa0c19502947137c73624f6fbe6e78ac73f744ff591777d",
       "filename": "site-infrastructure.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/site-infrastructure.jpg",
       "publicPath": "/images/cognirise/site-infrastructure.jpg",
@@ -5656,11 +6570,37 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "f3863782ead065ad611dd234bd8641b9262a36c7738662ad5a43f07ec103739e"
+      "requestDigest": "865ef427d0a56b548c5b46842ea7f7677bac9ef6c7caa2650e4949c4ab48f42b",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:5510debf4e4390420a56",
+          "idempotencyKey": "cms-media-inventory-v3:asset:5510debf4e4390420a56",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:5510debf4e4390420a56:75c105711b2c2d910aa0c19502947137c73624f6fbe6e78ac73f744ff591777d",
+          "requestDigest": "f3863782ead065ad611dd234bd8641b9262a36c7738662ad5a43f07ec103739e",
+          "acceptedRequestDigests": [
+            "f3863782ead065ad611dd234bd8641b9262a36c7738662ad5a43f07ec103739e",
+            "2940d16740ef323cb372cede15faaa907ce1c0e10c2dbfe0bceade69f09e43bb"
+          ]
+        },
+        {
+          "externalId": "asset:5510debf4e4390420a56",
+          "idempotencyKey": "cms-media-replacement-v1:asset:5510debf4e4390420a56:75c105711b2c2d910aa0c19502947137c73624f6fbe6e78ac73f744ff591777d",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:5510debf4e4390420a56:75c105711b2c2d910aa0c19502947137c73624f6fbe6e78ac73f744ff591777d",
+          "requestDigest": "e0dcb62110cfb47634d73cba8feb03d4250172954df51fef438a89c7e05cd08d",
+          "acceptedRequestDigests": [
+            "e0dcb62110cfb47634d73cba8feb03d4250172954df51fef438a89c7e05cd08d"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "f3863782ead065ad611dd234bd8641b9262a36c7738662ad5a43f07ec103739e",
+        "2940d16740ef323cb372cede15faaa907ce1c0e10c2dbfe0bceade69f09e43bb",
+        "e0dcb62110cfb47634d73cba8feb03d4250172954df51fef438a89c7e05cd08d"
+      ]
     },
     {
       "externalId": "asset:166331f8bc21e20ab360",
-      "idempotencyKey": "cms-media-inventory-v3:asset:166331f8bc21e20ab360",
+      "idempotencyKey": "cms-media-binary-v1:asset:166331f8bc21e20ab360:a89ccd0247db245d7ed66ca1ee7d5ad99325d36bcc5e9b5084523081836c2d25",
       "filename": "site-insights.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/site-insights.jpg",
       "publicPath": "/images/cognirise/site-insights.jpg",
@@ -5682,11 +6622,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "7793c0f7473ad0a0927ea07b0c2d08a911c6b043fdce50a39a840f0ab856f49d"
+      "requestDigest": "1fc55fa5b900882ea71fd69c7404588418910bb33b782a147d294588d1c6740c",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:166331f8bc21e20ab360",
+          "idempotencyKey": "cms-media-inventory-v3:asset:166331f8bc21e20ab360",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:166331f8bc21e20ab360:a89ccd0247db245d7ed66ca1ee7d5ad99325d36bcc5e9b5084523081836c2d25",
+          "requestDigest": "7793c0f7473ad0a0927ea07b0c2d08a911c6b043fdce50a39a840f0ab856f49d",
+          "acceptedRequestDigests": [
+            "7793c0f7473ad0a0927ea07b0c2d08a911c6b043fdce50a39a840f0ab856f49d"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "7793c0f7473ad0a0927ea07b0c2d08a911c6b043fdce50a39a840f0ab856f49d"
+      ]
     },
     {
       "externalId": "asset:ca77430e1566676f9498",
-      "idempotencyKey": "cms-media-inventory-v3:asset:ca77430e1566676f9498",
+      "idempotencyKey": "cms-media-binary-v1:asset:ca77430e1566676f9498:7a76c4658558b38c0b4cb2f7e075deb3f9128b2e6951a12a36c771d36a836ba4",
       "filename": "site-leadership.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/site-leadership.jpg",
       "publicPath": "/images/cognirise/site-leadership.jpg",
@@ -5707,11 +6661,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "9c03664e0ab6afb1e360b95f42ab6743e8a1dc891301729ac60c4cfd5ace4243"
+      "requestDigest": "e92bd3b452e05b6c8d75ee568afbeb07e11efe7b2cca5a2147586e126bf7b3d4",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:ca77430e1566676f9498",
+          "idempotencyKey": "cms-media-inventory-v3:asset:ca77430e1566676f9498",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:ca77430e1566676f9498:7a76c4658558b38c0b4cb2f7e075deb3f9128b2e6951a12a36c771d36a836ba4",
+          "requestDigest": "9c03664e0ab6afb1e360b95f42ab6743e8a1dc891301729ac60c4cfd5ace4243",
+          "acceptedRequestDigests": [
+            "9c03664e0ab6afb1e360b95f42ab6743e8a1dc891301729ac60c4cfd5ace4243"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "9c03664e0ab6afb1e360b95f42ab6743e8a1dc891301729ac60c4cfd5ace4243"
+      ]
     },
     {
       "externalId": "asset:ac50e1fb2480a2f9caf5",
-      "idempotencyKey": "cms-media-inventory-v3:asset:ac50e1fb2480a2f9caf5",
+      "idempotencyKey": "cms-media-binary-v1:asset:ac50e1fb2480a2f9caf5:1d1e44ef9c90cc89d22f5676cb6bbdb86cb5b02972e5d5ffcc05dca88b53be99",
       "filename": "site-services.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/site-services.jpg",
       "publicPath": "/images/cognirise/site-services.jpg",
@@ -5733,11 +6701,37 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "15b062d25e368d93d60e6b535b030181828cd1b8df6bada0ee206ce7af2a1f94"
+      "requestDigest": "d6afd0fd1728edbde19af8ecb3f32272b74fc4d618e9664b491c8397078fbb9e",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:ac50e1fb2480a2f9caf5",
+          "idempotencyKey": "cms-media-inventory-v3:asset:ac50e1fb2480a2f9caf5",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:ac50e1fb2480a2f9caf5:1d1e44ef9c90cc89d22f5676cb6bbdb86cb5b02972e5d5ffcc05dca88b53be99",
+          "requestDigest": "15b062d25e368d93d60e6b535b030181828cd1b8df6bada0ee206ce7af2a1f94",
+          "acceptedRequestDigests": [
+            "15b062d25e368d93d60e6b535b030181828cd1b8df6bada0ee206ce7af2a1f94",
+            "8640e8f6766123034d127a98d7019da239e4f734eb0703461ec4681096a43e6e"
+          ]
+        },
+        {
+          "externalId": "asset:ac50e1fb2480a2f9caf5",
+          "idempotencyKey": "cms-media-replacement-v1:asset:ac50e1fb2480a2f9caf5:1d1e44ef9c90cc89d22f5676cb6bbdb86cb5b02972e5d5ffcc05dca88b53be99",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:ac50e1fb2480a2f9caf5:1d1e44ef9c90cc89d22f5676cb6bbdb86cb5b02972e5d5ffcc05dca88b53be99",
+          "requestDigest": "f9e06b8d82dfe9a4fe9e9c8dea739f9d9ebd8227303bd3f29d826249a375fa0d",
+          "acceptedRequestDigests": [
+            "f9e06b8d82dfe9a4fe9e9c8dea739f9d9ebd8227303bd3f29d826249a375fa0d"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "15b062d25e368d93d60e6b535b030181828cd1b8df6bada0ee206ce7af2a1f94",
+        "8640e8f6766123034d127a98d7019da239e4f734eb0703461ec4681096a43e6e",
+        "f9e06b8d82dfe9a4fe9e9c8dea739f9d9ebd8227303bd3f29d826249a375fa0d"
+      ]
     },
     {
       "externalId": "asset:e9746bc3d249a652deb4",
-      "idempotencyKey": "cms-media-inventory-v3:asset:e9746bc3d249a652deb4",
+      "idempotencyKey": "cms-media-binary-v1:asset:e9746bc3d249a652deb4:61c0e28ea60a07c3eed1aecf06446f9c1cb83c607e565ecae076cfd7625c5a71",
       "filename": "site-work-proof.jpg",
       "sourceFile": "artifacts/cognirise-website/public/images/cognirise/site-work-proof.jpg",
       "publicPath": "/images/cognirise/site-work-proof.jpg",
@@ -5759,11 +6753,25 @@
       "rightsStatus": "needs-review",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "d643be98d760066867242ad6e883c99b2f3d474a73db57b32ee4bd84fc538327"
+      "requestDigest": "32402af4cd3bbfdb72ea92ef4ff3c7561c2699fd757ad52ac5658195d0005352",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:e9746bc3d249a652deb4",
+          "idempotencyKey": "cms-media-inventory-v3:asset:e9746bc3d249a652deb4",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:e9746bc3d249a652deb4:61c0e28ea60a07c3eed1aecf06446f9c1cb83c607e565ecae076cfd7625c5a71",
+          "requestDigest": "d643be98d760066867242ad6e883c99b2f3d474a73db57b32ee4bd84fc538327",
+          "acceptedRequestDigests": [
+            "d643be98d760066867242ad6e883c99b2f3d474a73db57b32ee4bd84fc538327"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "d643be98d760066867242ad6e883c99b2f3d474a73db57b32ee4bd84fc538327"
+      ]
     },
     {
       "externalId": "asset:b2ed1d2b2101c2204709",
-      "idempotencyKey": "cms-media-inventory-v3:asset:b2ed1d2b2101c2204709",
+      "idempotencyKey": "cms-media-binary-v1:asset:b2ed1d2b2101c2204709:93d83eaeee9a6e891ff5d2d0e0e76e26f5a4f6e2ac3baad7fd226e9342e833af",
       "filename": "cognirise-linkedin-governance.png",
       "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-governance.png",
       "publicPath": "/linkedin/cognirise-linkedin-governance.png",
@@ -5791,11 +6799,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "2d871a540006b080c1b301c03fd720549a6e221d45d2e2dafbed901e5d68dcbb"
+      "requestDigest": "5357be61aa0f9b0fc534d13fc8979b489651221df569a43e2dfe55846eb1f78b",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:b2ed1d2b2101c2204709",
+          "idempotencyKey": "cms-media-inventory-v3:asset:b2ed1d2b2101c2204709",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:b2ed1d2b2101c2204709:93d83eaeee9a6e891ff5d2d0e0e76e26f5a4f6e2ac3baad7fd226e9342e833af",
+          "requestDigest": "2d871a540006b080c1b301c03fd720549a6e221d45d2e2dafbed901e5d68dcbb",
+          "acceptedRequestDigests": [
+            "2d871a540006b080c1b301c03fd720549a6e221d45d2e2dafbed901e5d68dcbb"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "2d871a540006b080c1b301c03fd720549a6e221d45d2e2dafbed901e5d68dcbb"
+      ]
     },
     {
       "externalId": "asset:825c8a93d04790bbd0bd",
-      "idempotencyKey": "cms-media-inventory-v3:asset:825c8a93d04790bbd0bd",
+      "idempotencyKey": "cms-media-binary-v1:asset:825c8a93d04790bbd0bd:34e11266daafe5976140c2f793db243d197cca220dd9d3f0417234e262607f09",
       "filename": "cognirise-linkedin-judgment.png",
       "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-judgment.png",
       "publicPath": "/linkedin/cognirise-linkedin-judgment.png",
@@ -5823,11 +6845,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "147ee9ece56dedad334be1f445565ad402e7a5415114a235d8f3b281b1b22d3c"
+      "requestDigest": "349ad853af2f9f8a733eb4f0e9d528a47c8791aaba0767b64fdc8aa6643a76d2",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:825c8a93d04790bbd0bd",
+          "idempotencyKey": "cms-media-inventory-v3:asset:825c8a93d04790bbd0bd",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:825c8a93d04790bbd0bd:34e11266daafe5976140c2f793db243d197cca220dd9d3f0417234e262607f09",
+          "requestDigest": "147ee9ece56dedad334be1f445565ad402e7a5415114a235d8f3b281b1b22d3c",
+          "acceptedRequestDigests": [
+            "147ee9ece56dedad334be1f445565ad402e7a5415114a235d8f3b281b1b22d3c"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "147ee9ece56dedad334be1f445565ad402e7a5415114a235d8f3b281b1b22d3c"
+      ]
     },
     {
       "externalId": "asset:8d4c4659e4d1e2863730",
-      "idempotencyKey": "cms-media-inventory-v3:asset:8d4c4659e4d1e2863730",
+      "idempotencyKey": "cms-media-binary-v1:asset:8d4c4659e4d1e2863730:0ca7120bafc7976550fffacb2083ec2f16038de5d4df0f0bea106ae8854a0934",
       "filename": "cognirise-linkedin-orchestration.png",
       "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-orchestration.png",
       "publicPath": "/linkedin/cognirise-linkedin-orchestration.png",
@@ -5855,11 +6891,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "d01c9324bf2940d2332db9056c5818c6a6dc1e2a56aa4e1691fead0a730da024"
+      "requestDigest": "935391833b2e9479f6f5ebb448831266f73ff74a1ab62c72f2887fe81d0006c6",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:8d4c4659e4d1e2863730",
+          "idempotencyKey": "cms-media-inventory-v3:asset:8d4c4659e4d1e2863730",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:8d4c4659e4d1e2863730:0ca7120bafc7976550fffacb2083ec2f16038de5d4df0f0bea106ae8854a0934",
+          "requestDigest": "d01c9324bf2940d2332db9056c5818c6a6dc1e2a56aa4e1691fead0a730da024",
+          "acceptedRequestDigests": [
+            "d01c9324bf2940d2332db9056c5818c6a6dc1e2a56aa4e1691fead0a730da024"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "d01c9324bf2940d2332db9056c5818c6a6dc1e2a56aa4e1691fead0a730da024"
+      ]
     },
     {
       "externalId": "asset:8b8113e72a4ebd0da335",
-      "idempotencyKey": "cms-media-inventory-v3:asset:8b8113e72a4ebd0da335",
+      "idempotencyKey": "cms-media-binary-v1:asset:8b8113e72a4ebd0da335:126fa90ac1aafc3bfef840c530f06a6a8fbe6fb7226303de717d16dadd5063a0",
       "filename": "cognirise-linkedin-transformation.png",
       "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-transformation.png",
       "publicPath": "/linkedin/cognirise-linkedin-transformation.png",
@@ -5887,11 +6937,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "f22c9c69755031984856575a417eed11d6587083269f1d89ecea93fa773ded01"
+      "requestDigest": "6a9ab51d783747c2040ad9163fcbc759344b9cde0cf4ab853a2caa46d4da2685",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:8b8113e72a4ebd0da335",
+          "idempotencyKey": "cms-media-inventory-v3:asset:8b8113e72a4ebd0da335",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:8b8113e72a4ebd0da335:126fa90ac1aafc3bfef840c530f06a6a8fbe6fb7226303de717d16dadd5063a0",
+          "requestDigest": "f22c9c69755031984856575a417eed11d6587083269f1d89ecea93fa773ded01",
+          "acceptedRequestDigests": [
+            "f22c9c69755031984856575a417eed11d6587083269f1d89ecea93fa773ded01"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "f22c9c69755031984856575a417eed11d6587083269f1d89ecea93fa773ded01"
+      ]
     },
     {
       "externalId": "asset:78c77a565b04dfd99fc9",
-      "idempotencyKey": "cms-media-inventory-v3:asset:78c77a565b04dfd99fc9",
+      "idempotencyKey": "cms-media-binary-v1:asset:78c77a565b04dfd99fc9:c492f6c82f90a5c19cab17baaa8a2fe997b4ddb2391c212475adeac21e0c64fe",
       "filename": "cognirise-linkedin-knowledge.png",
       "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-knowledge.png",
       "publicPath": "/linkedin/cognirise-linkedin-knowledge.png",
@@ -5919,11 +6983,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "15237aba00b4cf3c8eb538bddd0e29fc43e0c9f6d847831b171d0e4b149d5db1"
+      "requestDigest": "0347626a342cdb82ab746c3d3e77f479d9dbe669adf2dd185f1da54852b15b05",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:78c77a565b04dfd99fc9",
+          "idempotencyKey": "cms-media-inventory-v3:asset:78c77a565b04dfd99fc9",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:78c77a565b04dfd99fc9:c492f6c82f90a5c19cab17baaa8a2fe997b4ddb2391c212475adeac21e0c64fe",
+          "requestDigest": "15237aba00b4cf3c8eb538bddd0e29fc43e0c9f6d847831b171d0e4b149d5db1",
+          "acceptedRequestDigests": [
+            "15237aba00b4cf3c8eb538bddd0e29fc43e0c9f6d847831b171d0e4b149d5db1"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "15237aba00b4cf3c8eb538bddd0e29fc43e0c9f6d847831b171d0e4b149d5db1"
+      ]
     },
     {
       "externalId": "asset:1466c1c5cc65907d9f3f",
-      "idempotencyKey": "cms-media-inventory-v3:asset:1466c1c5cc65907d9f3f",
+      "idempotencyKey": "cms-media-binary-v1:asset:1466c1c5cc65907d9f3f:11733af887ceb9df5989b462758def32ce916ab2c28592c67cbdaa84f55263a7",
       "filename": "cognirise-linkedin-action.png",
       "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-action.png",
       "publicPath": "/linkedin/cognirise-linkedin-action.png",
@@ -5951,11 +7029,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "b8786835bc77647f005a1ab33019e1e6adbec89bd2aa69b886636e31b9fdad02"
+      "requestDigest": "126c87bcd1587f93199719cfa0a7e58808002df36674543969fe1b3bab01c790",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:1466c1c5cc65907d9f3f",
+          "idempotencyKey": "cms-media-inventory-v3:asset:1466c1c5cc65907d9f3f",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1466c1c5cc65907d9f3f:11733af887ceb9df5989b462758def32ce916ab2c28592c67cbdaa84f55263a7",
+          "requestDigest": "b8786835bc77647f005a1ab33019e1e6adbec89bd2aa69b886636e31b9fdad02",
+          "acceptedRequestDigests": [
+            "b8786835bc77647f005a1ab33019e1e6adbec89bd2aa69b886636e31b9fdad02"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "b8786835bc77647f005a1ab33019e1e6adbec89bd2aa69b886636e31b9fdad02"
+      ]
     },
     {
       "externalId": "asset:c1cc817de69cd0183603",
-      "idempotencyKey": "cms-media-inventory-v3:asset:c1cc817de69cd0183603",
+      "idempotencyKey": "cms-media-binary-v1:asset:c1cc817de69cd0183603:109006e6a03d3c7e98cd2397da4fb761b325882cd5da3b361f6b40a71d47f9e2",
       "filename": "cognirise-linkedin-header-governance.png",
       "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-header-governance.png",
       "publicPath": "/linkedin/cognirise-linkedin-header-governance.png",
@@ -5983,11 +7075,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "e7f923ed8c788bbba6cab7b572ee5dd703adae9ccbee22e6746ec85879455afb"
+      "requestDigest": "f8750c5c88d743d5712503d66bc6555913679e0aa672eeda6af888ac8b763928",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:c1cc817de69cd0183603",
+          "idempotencyKey": "cms-media-inventory-v3:asset:c1cc817de69cd0183603",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:c1cc817de69cd0183603:109006e6a03d3c7e98cd2397da4fb761b325882cd5da3b361f6b40a71d47f9e2",
+          "requestDigest": "e7f923ed8c788bbba6cab7b572ee5dd703adae9ccbee22e6746ec85879455afb",
+          "acceptedRequestDigests": [
+            "e7f923ed8c788bbba6cab7b572ee5dd703adae9ccbee22e6746ec85879455afb"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "e7f923ed8c788bbba6cab7b572ee5dd703adae9ccbee22e6746ec85879455afb"
+      ]
     },
     {
       "externalId": "asset:bd3dcd93e2f9ee1a407c",
-      "idempotencyKey": "cms-media-inventory-v3:asset:bd3dcd93e2f9ee1a407c",
+      "idempotencyKey": "cms-media-binary-v1:asset:bd3dcd93e2f9ee1a407c:67fe71354cefcb675c5ad914711c1e3d102a359f201ebf7d95e87334b4e04146",
       "filename": "cognirise-linkedin-header-judgment.png",
       "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-header-judgment.png",
       "publicPath": "/linkedin/cognirise-linkedin-header-judgment.png",
@@ -6015,11 +7121,25 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "36101d888784e16ccf576d5dae0a7dbd6b0e5bcec97445684edd16bd99d5cd7b"
+      "requestDigest": "cee04577060e0b05284030993ace7af6596d8cc1f151158647bd1b8dd12b28d3",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:bd3dcd93e2f9ee1a407c",
+          "idempotencyKey": "cms-media-inventory-v3:asset:bd3dcd93e2f9ee1a407c",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:bd3dcd93e2f9ee1a407c:67fe71354cefcb675c5ad914711c1e3d102a359f201ebf7d95e87334b4e04146",
+          "requestDigest": "36101d888784e16ccf576d5dae0a7dbd6b0e5bcec97445684edd16bd99d5cd7b",
+          "acceptedRequestDigests": [
+            "36101d888784e16ccf576d5dae0a7dbd6b0e5bcec97445684edd16bd99d5cd7b"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "36101d888784e16ccf576d5dae0a7dbd6b0e5bcec97445684edd16bd99d5cd7b"
+      ]
     },
     {
       "externalId": "asset:0b7fba49942ca5d66ead",
-      "idempotencyKey": "cms-media-inventory-v3:asset:0b7fba49942ca5d66ead",
+      "idempotencyKey": "cms-media-binary-v1:asset:0b7fba49942ca5d66ead:35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3",
       "filename": "cognirise-linkedin-header-rhythm.png",
       "sourceFile": "artifacts/mockup-sandbox/public/images/cognirise/linkedin/cognirise-linkedin-header-rhythm.png",
       "publicPath": "/linkedin/cognirise-linkedin-header-rhythm.png",
@@ -6047,7 +7167,21 @@
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": false,
-      "requestDigest": "2d68a1d84750de911a9e7c669e570f46d0b8f9c7a2888d1dbee7761cf0951144"
+      "requestDigest": "f37cfb8fc11f0bd27eba67fa64ed6104bae5911e751c878a86ac8200f2de2e5a",
+      "historicalReceipts": [
+        {
+          "externalId": "asset:0b7fba49942ca5d66ead",
+          "idempotencyKey": "cms-media-inventory-v3:asset:0b7fba49942ca5d66ead",
+          "replacementIdempotencyKey": "cms-media-binary-v1:asset:0b7fba49942ca5d66ead:35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3",
+          "requestDigest": "2d68a1d84750de911a9e7c669e570f46d0b8f9c7a2888d1dbee7761cf0951144",
+          "acceptedRequestDigests": [
+            "2d68a1d84750de911a9e7c669e570f46d0b8f9c7a2888d1dbee7761cf0951144"
+          ]
+        }
+      ],
+      "acceptedPriorRequestDigests": [
+        "2d68a1d84750de911a9e7c669e570f46d0b8f9c7a2888d1dbee7761cf0951144"
+      ]
     }
   ]
 }

@@ -40,7 +40,7 @@ export type IndustryContent = {
 export const INDUSTRIES: IndustryContent[] = [
   {
     schemaVersion: 1, slug: "financial-services", legacyPath: "/industries/banking", name: "Financial Services", shortName: "Finance",
-    thesis: "The model estate—not the chatbot—is where trust is won.",
+    thesis: "The model estate — not the chatbot — is where trust is won.",
     accent: "trust is won.", dek: "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
     opportunity: "Turn fragmented controls and exception-heavy operations into faster, traceable decisions that improve customer outcomes without weakening model-risk discipline.",
     capabilities: [

@@ -36,6 +36,33 @@ test("does not publish internal research-production language", () => {
   assert.doesNotMatch(published, /editor note|placeholder|tbd|claude/);
 });
 
+test("keeps the approved financial-services hero punctuation in fallback and CMS content", () => {
+  const approvedHeadline = "The model estate — not the chatbot — is where trust is won.";
+  const financialServices = INDUSTRIES.find((industry) => industry.slug === "financial-services");
+  assert.equal(financialServices?.thesis, approvedHeadline);
+
+  const payload = JSON.parse(readFileSync(
+    path.resolve(process.cwd(), "../../scripts/cms/output/import-payload.json"),
+    "utf8",
+  )) as { operations: Array<{ kind: string; slug: string; payload: { content: { thesis?: string } } }> };
+  const published = payload.operations.find(
+    (operation) => operation.kind === "industry" && operation.slug === "financial-services",
+  );
+  assert.equal(published?.payload.content.thesis, approvedHeadline);
+
+  assert.ok(financialServices);
+  const html = renderToStaticMarkup(createElement(
+    Router,
+    { ssrPath: "/industries/financial-services" },
+    createElement(IndustryEditorialView, { view: financialServices }),
+  ));
+  const heroMarkup = html.match(/<h1 id="industry-title">(.+?)<\/h1>/)?.[1];
+  assert.ok(heroMarkup);
+  assert.equal(heroMarkup.replace(/<[^>]+>/g, ""), approvedHeadline);
+  assert.equal((heroMarkup.match(/class="ind-thesis-dash"/g) ?? []).length, 2);
+  assert.match(html, /\.ind-thesis-dash\{[^}]*margin-inline:\.06em/);
+});
+
 test("keeps evidence classifications and source labels visible", () => {
   const allowed = new Set(["Official source", "Independent study", "Company-reported", "Vendor claim"]);
   for (const item of INDUSTRIES) {

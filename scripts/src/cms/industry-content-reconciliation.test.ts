@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { industryBaselineAction } from "./migration.js";
+import {
+  financialServicesPunctuationReconciliationPlan,
+  industryBaselineAction,
+  isApprovedFinancialServicesPunctuationReconciliation,
+} from "./migration.js";
 
 const revision = {
   id: "revision-4",
@@ -63,4 +67,110 @@ test("uses the prior immutable media pin while appending changed content over th
     industryBaselineAction([...legacy, v3WithUnpinnedMedia], revision.id, "published"),
     "append-and-publish",
   );
+});
+
+test("allows only the approved financial-services punctuation correction over preserved editorial content", () => {
+  const published = {
+    content: {
+      thesis: "The model estate—not the chatbot—is where trust is won.",
+      dek: "Unchanged.",
+      heroMediaId: "published-media",
+    },
+    mediaIds: ["published-media"],
+  };
+  const canonical = {
+    content: {
+      thesis: "The model estate — not the chatbot — is where trust is won.",
+      dek: "Unchanged.",
+    },
+    mediaIds: [],
+  };
+  assert.equal(
+    isApprovedFinancialServicesPunctuationReconciliation(published, canonical),
+    true,
+  );
+  assert.equal(
+    isApprovedFinancialServicesPunctuationReconciliation(
+      published,
+      { ...canonical, content: { ...canonical.content, dek: "Changed." } },
+    ),
+    false,
+  );
+});
+
+test("requires an approved latest publication before planning the punctuation correction", () => {
+  const canonicalPayload = {
+    content: {
+      thesis: "The model estate — not the chatbot — is where trust is won.",
+      dek: "Unchanged.",
+    },
+    mediaIds: [],
+  };
+  const eligible = {
+    slug: "financial-services",
+    publicationState: "published",
+    publishedRevisionId: "revision-5",
+    latestRevision: { id: "revision-5", workflowState: "approved" },
+    publishedPayload: {
+      content: {
+        thesis: "The model estate—not the chatbot—is where trust is won.",
+        dek: "Unchanged.",
+      },
+      mediaIds: [],
+    },
+    canonicalPayload,
+    publishedReferences: [],
+  };
+  assert.ok(financialServicesPunctuationReconciliationPlan(eligible));
+  assert.equal(
+    financialServicesPunctuationReconciliationPlan({
+      ...eligible,
+      publishedRevisionId: null,
+      publishedPayload: undefined,
+    }),
+    null,
+  );
+  assert.equal(
+    financialServicesPunctuationReconciliationPlan({
+      ...eligible,
+      publicationState: "draft",
+    }),
+    null,
+  );
+  assert.equal(
+    financialServicesPunctuationReconciliationPlan({
+      ...eligible,
+      latestRevision: { id: "later-editorial-draft", workflowState: "draft" },
+    }),
+    null,
+  );
+});
+
+test("copies current punctuation-only media references without substituting a prior pin", () => {
+  const plan = financialServicesPunctuationReconciliationPlan({
+    slug: "financial-services",
+    publicationState: "published",
+    publishedRevisionId: "revision-5",
+    latestRevision: { id: "revision-5", workflowState: "approved" },
+    publishedPayload: {
+      content: {
+        thesis: "The model estate—not the chatbot—is where trust is won.",
+        dek: "Unchanged.",
+        heroMediaId: "current-media",
+      },
+      mediaIds: ["current-media"],
+    },
+    canonicalPayload: {
+      content: {
+        thesis: "The model estate — not the chatbot — is where trust is won.",
+        dek: "Unchanged.",
+      },
+      mediaIds: [],
+    },
+    publishedReferences: [{ assetId: "current-media", mediaVersionId: null }],
+  });
+  assert.ok(plan);
+  assert.deepEqual(plan.references, [{ assetId: "current-media", mediaVersionId: null }]);
+  assert.equal(plan.payload.content.heroMediaId, "current-media");
+  assert.deepEqual(plan.payload.mediaIds, ["current-media"]);
 });

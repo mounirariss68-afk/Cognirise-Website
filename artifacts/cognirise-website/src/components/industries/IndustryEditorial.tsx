@@ -55,6 +55,7 @@ export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
 export function IndustryEditorialView({ view, cases = [] }: { view: IndustryContent; cases?: PublicCaseStudy[] }) {
   const { market } = useMarketStore();
   useSelectedWorkHashTarget();
+  const thesisParts = view.thesis.split(" — ");
   const opportunityValue = view.opportunity as unknown as string | { title: string; body: string };
   const opportunity = typeof opportunityValue === "string"
     ? { title: "The opportunity", body: opportunityValue }
@@ -65,7 +66,7 @@ export function IndustryEditorialView({ view, cases = [] }: { view: IndustryCont
         .industry{--ink:#102957;--deep:#071936;--paper:#fdfbf7;--soft:#eef0f5;--line:#cbd3e1;--violet:#7659df;--pink:#db509e;--coral:#ff775d;background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;overflow:hidden}
         .industry *{box-sizing:border-box}.industry h1,.industry h2,.industry h3{font-family:Comfortaa,sans-serif}.industry a{color:inherit}.industry :focus-visible{outline:3px solid var(--coral);outline-offset:4px}
         .ind-kicker{font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:10px}.ind-kicker:before{content:"";width:25px;height:2px;background:linear-gradient(90deg,var(--violet),var(--pink),var(--coral))}
-        .ind-hero{padding:34px 4.8vw 50px;display:grid;grid-template-columns:.88fr 1.12fr;gap:5vw;align-items:end;min-height:690px}.ind-copy{padding-bottom:25px}.ind-copy h1{font-size:clamp(50px,6.2vw,96px);line-height:.94;letter-spacing:-.075em;margin:32px 0 28px}.ind-copy h1 em{font-style:normal;color:var(--pink)}.ind-copy p{max-width:570px;color:#405677;font-size:17px;line-height:1.65}.ind-image{height:610px;position:relative;overflow:hidden;clip-path:polygon(10% 0,100% 0,100% 91%,0 100%,0 12%);background:var(--deep)}.ind-image img{width:100%;height:100%;object-fit:cover;animation:ind-reveal 1s ease both}.ind-image:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.46),transparent 50%),linear-gradient(0deg,rgba(7,25,54,.5),transparent 48%)}.ind-image span{position:absolute;z-index:1;left:32px;bottom:30px;color:white;text-transform:uppercase;font-size:10px;letter-spacing:.13em}
+        .ind-hero{padding:34px 4.8vw 50px;display:grid;grid-template-columns:.88fr 1.12fr;gap:5vw;align-items:end;min-height:690px}.ind-copy{padding-bottom:25px}.ind-copy h1{font-size:clamp(50px,6.2vw,96px);line-height:.94;letter-spacing:-.075em;margin:32px 0 28px}.ind-thesis-dash{display:inline-block;letter-spacing:0;margin-inline:.06em}.ind-copy h1 em{font-style:normal;color:var(--pink)}.ind-copy p{max-width:570px;color:#405677;font-size:17px;line-height:1.65}.ind-image{height:610px;position:relative;overflow:hidden;clip-path:polygon(10% 0,100% 0,100% 91%,0 100%,0 12%);background:var(--deep)}.ind-image img{width:100%;height:100%;object-fit:cover;animation:ind-reveal 1s ease both}.ind-image:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.46),transparent 50%),linear-gradient(0deg,rgba(7,25,54,.5),transparent 48%)}.ind-image span{position:absolute;z-index:1;left:32px;bottom:30px;color:white;text-transform:uppercase;font-size:10px;letter-spacing:.13em}
         .ind-opportunity{margin:0 4.8vw;padding:90px 6vw;background:var(--deep);color:white;display:grid;grid-template-columns:.72fr 1.28fr;gap:8vw;align-items:start;position:relative;overflow:hidden}.ind-opportunity:after{content:"OPPORTUNITY";position:absolute;right:-10px;bottom:-12px;font:600 9vw/.8 Comfortaa;color:#ffffff0b}.ind-opportunity>*{position:relative;z-index:1}.ind-opportunity h2,.ind-pressure h2,.ind-capabilities h2,.ind-evidence h2,.ind-gcc h2,.ind-selected h2{font-size:clamp(42px,5vw,72px);line-height:.98;letter-spacing:-.07em;margin:22px 0}.ind-opportunity p{font-size:clamp(20px,2vw,28px);line-height:1.55;color:#d7dfed;margin:0}
         .ind-pressure{padding:130px 4.8vw 110px;display:grid;grid-template-columns:.72fr 1.28fr;gap:8vw}.ind-pressure-list{border-top:1px solid var(--ink)}.ind-pressure article{display:grid;grid-template-columns:55px 1fr;padding:28px 0;border-bottom:1px solid var(--line)}.ind-pressure article span{color:var(--pink);font-size:10px;letter-spacing:.12em}.ind-pressure h3{font-size:24px;letter-spacing:-.04em;margin:0 0 9px}.ind-pressure p{color:#506583;line-height:1.6;margin:0;max-width:560px}
         .ind-capabilities{padding:110px 4.8vw;background:var(--soft)}.ind-capabilities-head{display:grid;grid-template-columns:.72fr 1.28fr;gap:8vw}.ind-capability-list{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:50px}.ind-capability{background:var(--paper);padding:38px 30px;min-height:250px}.ind-capability span{color:var(--pink);font-size:10px;letter-spacing:.12em}.ind-capability h3{font-size:25px;line-height:1.15;letter-spacing:-.04em;margin:25px 0 14px}.ind-capability p{color:#506583;line-height:1.6;margin:0}
@@ -87,7 +88,14 @@ export function IndustryEditorialView({ view, cases = [] }: { view: IndustryCont
       <section className="ind-hero" aria-labelledby="industry-title">
         <div className="ind-copy">
           <div className="ind-kicker">{market.toUpperCase()} / {view.name}</div>
-          <h1 id="industry-title">{view.thesis}</h1>
+          <h1 id="industry-title">
+            {thesisParts.map((part, index) => (
+              <React.Fragment key={`${part}-${index}`}>
+                {index > 0 && <> <span className="ind-thesis-dash">—</span> </>}
+                {part}
+              </React.Fragment>
+            ))}
+          </h1>
           <p>{view.dek}</p>
         </div>
         <figure className="ind-image"><img src={assetUrl(view.image)} alt={view.imageAlt} /><span>01 / industry perspective</span></figure>

@@ -15,6 +15,7 @@ import {
   canonicalResultDigest,
   matchesGovernedCutoverSource,
   industryBaselineAction,
+  financialServicesPunctuationReconciliationPlan,
   personAvailabilityOperations,
   personGovernanceOperations,
   resolveMigrationMedia,
@@ -774,7 +775,14 @@ async function applyDatabase(
             replayed++;
             continue;
           }
-          if (operation.kind !== "industry" || !operation.idempotencyKey.startsWith("cms-industry-contract-v8:")) {
+          const isIndustryContractOperation = operation.kind === "industry" && (
+            operation.idempotencyKey.startsWith("cms-industry-contract-v8:")
+            || (
+              operation.slug === "financial-services"
+              && operation.idempotencyKey.startsWith("cms-industry-contract-v12:")
+            )
+          );
+          if (!isIndustryContractOperation) {
             throw new Error(`Slug ${operation.slug} is already owned by a non-migration document.`);
           }
           const [edition] = await tx.select({
@@ -1009,27 +1017,57 @@ async function applyDatabase(
                 && Boolean(priorApprovedPin),
             };
           });
-          const baselineAction = industryBaselineAction(
+          let baselineAction = industryBaselineAction(
             classifiedRevisions,
             edition.publishedRevisionId ? String(edition.publishedRevisionId) : null,
             edition.publicationState,
           );
+          const punctuationPlan = baselineAction === "preserve-editorial"
+            ? financialServicesPunctuationReconciliationPlan({
+                slug: operation.slug,
+                publicationState: edition.publicationState,
+                publishedRevisionId: edition.publishedRevisionId
+                  ? String(edition.publishedRevisionId)
+                  : null,
+                latestRevision: revisions[0]
+                  ? {
+                      id: String(revisions[0].id),
+                      workflowState: revisions[0].workflowState,
+                    }
+                  : undefined,
+                publishedPayload,
+                canonicalPayload: resolvedPayload,
+                publishedReferences,
+              })
+            : null;
+          const isPunctuationOnly = Boolean(punctuationPlan);
+          if (isPunctuationOnly) {
+            baselineAction = "append-and-publish";
+          }
           if (baselineAction === "append-and-publish" || baselineAction === "repair-v3-media") {
-            const publicationPin = baselineAction === "repair-v3-media" || (!approvedPin && priorApprovedPin)
-              ? priorApprovedPin
-              : approvedPin;
-            if (!publicationPin) {
+            const publicationPin = isPunctuationOnly
+              ? null
+              : baselineAction === "repair-v3-media" || (!approvedPin && priorApprovedPin)
+                ? priorApprovedPin
+                : approvedPin;
+            if (!publicationPin && !isPunctuationOnly) {
               throw new Error(`${operation.slug} has no approved immutable hero-media pin; preserving publication.`);
             }
             const nextRevisionNumber = Math.max(...revisions.map((revision) => revision.revisionNumber)) + 1;
             const publicationPayload = structuredClone(
-              baselineAction === "repair-v3-media" ? publishedPayload : resolvedPayload,
+              isPunctuationOnly
+                ? punctuationPlan!.payload
+                : baselineAction === "repair-v3-media"
+                  ? publishedPayload
+                  : resolvedPayload,
             ) as {
               content: Record<string, unknown>;
               mediaIds: string[];
             };
-            publicationPayload.mediaIds = [String(publicationPin.assetId)];
-            publicationPayload.content.heroMediaId = String(publicationPin.assetId);
+            if (!isPunctuationOnly) {
+              publicationPayload.mediaIds = [String(publicationPin!.assetId)];
+              publicationPayload.content.heroMediaId = String(publicationPin!.assetId);
+            }
             const readiness = validateCmsSnapshot("industry", publicationPayload, "publish");
             if (!readiness.success) {
               throw new Error(`${operation.slug} is not publication-ready: ${readiness.errors.join("; ")}`);
@@ -1044,15 +1082,32 @@ async function applyDatabase(
               createdByUserId: serviceAccount.id,
               reason: baselineAction === "repair-v3-media"
                 ? "Approved v4 repair of the known v3 industry hero-media pin defect; prior revisions preserved."
-                : "Approved market-isolated industry content baseline v8; prior revisions and hero-media pin preserved.",
+                : "Approved financial-services punctuation baseline v12; prior revisions and media state preserved.",
             }).returning({ id: cmsRevisionsTable.id });
             if (!revision) throw new Error(`Could not append the ${operation.slug} contract baseline.`);
-            await tx.insert(cmsMediaReferencesTable).values({
-              assetId: publicationPin.assetId,
-              mediaVersionId: publicationPin.mediaVersionId,
-              documentId: conflict.id,
-              fieldPath: `revision:${revision.id}`,
-            });
+            if (isPunctuationOnly && punctuationPlan!.references.length) {
+              await tx.insert(cmsMediaReferencesTable).values(
+                punctuationPlan!.references.map((reference) => ({
+                  ...reference,
+                  documentId: conflict.id,
+                  fieldPath: `revision:${revision.id}`,
+                })),
+              );
+            } else if (publicationPin) {
+              await tx.insert(cmsMediaReferencesTable).values({
+                assetId: publicationPin.assetId,
+                mediaVersionId: publicationPin.mediaVersionId,
+                documentId: conflict.id,
+                fieldPath: `revision:${revision.id}`,
+              });
+            }
+            const publishedHeroReference = isPunctuationOnly
+              ? punctuationPlan!.references.find((reference) => reference.assetId === publishedHeroId)
+              : undefined;
+            const receiptMediaId = isPunctuationOnly ? publishedHeroId : publicationPin!.assetId;
+            const receiptMediaVersionId = isPunctuationOnly
+              ? publishedHeroReference?.mediaVersionId ?? null
+              : publicationPin!.mediaVersionId;
             await tx.update(cmsRevisionsTable).set({
               workflowState: "approved",
               approvedByUserId: serviceAccount.id,
@@ -1076,8 +1131,8 @@ async function applyDatabase(
                 documentId: conflict.id,
                 editionId: edition.id,
                 revisionId: revision.id,
-                mediaId: publicationPin.assetId,
-                mediaVersionId: publicationPin.mediaVersionId,
+                mediaId: receiptMediaId,
+                mediaVersionId: receiptMediaVersionId,
               }),
             });
             await tx.insert(cmsAuditEventsTable).values({
@@ -1098,15 +1153,15 @@ async function applyDatabase(
                 publicationState: "published",
                 reason: baselineAction === "repair-v3-media"
                   ? "Known v3 unpinned square-JPG reference replaced in a new immutable revision using the prior approved Pulse pin"
-                  : "Approved Education POV content baseline v7 with immutable hero-media pin",
+                  : "Approved financial-services punctuation baseline v12 with prior media state preserved",
                 repairedRevisionId: baselineAction === "repair-v3-media"
                   ? String(publishedRevision!.id)
                   : undefined,
                 pinSourceRevisionId: baselineAction === "repair-v3-media"
                   ? String(immediatelyPriorRevision!.id)
                   : String(publishedRevision!.id),
-                mediaId: String(publicationPin.assetId),
-                mediaVersionId: String(publicationPin.mediaVersionId),
+                mediaId: receiptMediaId ? String(receiptMediaId) : null,
+                mediaVersionId: receiptMediaVersionId ? String(receiptMediaVersionId) : null,
               },
             });
           } else if (baselineAction === "reuse-complete") {

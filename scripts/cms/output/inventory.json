@@ -2990,7 +2990,7 @@
           "legacyPath": "/industries/banking",
           "name": "Financial Services",
           "shortName": "Finance",
-          "thesis": "The model estate—not the chatbot—is where trust is won.",
+          "thesis": "The model estate — not the chatbot — is where trust is won.",
           "accent": "trust is won.",
           "dek": "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
           "opportunity": "Turn fragmented controls and exception-heavy operations into faster, traceable decisions that improve customer outcomes without weakening model-risk discipline.",
@@ -6674,7 +6674,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "7fd039062dbe3857b72f800320b314591c26d87491f886fcfdd82a3cd1664102",
-  "generatedAt": "2026-09-09T13:07:15.717Z",
+  "manifestDigest": "a19fa606c3fab924effffb932d0c87547454193d274454e0e1fdf844112edd7e",
+  "generatedAt": "2026-09-09T14:07:32.604Z",
   "dryRun": false
 }

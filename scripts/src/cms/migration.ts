@@ -128,6 +128,82 @@ export function industryBaselineAction(
     : "preserve-editorial";
 }
 
+export function isApprovedFinancialServicesPunctuationReconciliation(
+  publishedPayload: unknown,
+  canonicalPayload: unknown,
+): boolean {
+  if (
+    !publishedPayload
+    || typeof publishedPayload !== "object"
+    || !canonicalPayload
+    || typeof canonicalPayload !== "object"
+  ) return false;
+  const published = structuredClone(publishedPayload) as {
+    content?: Record<string, unknown>;
+    mediaIds?: unknown[];
+  };
+  const canonical = structuredClone(canonicalPayload) as {
+    content?: Record<string, unknown>;
+    mediaIds?: unknown[];
+  };
+  const previousHeadline = "The model estate—not the chatbot—is where trust is won.";
+  const approvedHeadline = "The model estate — not the chatbot — is where trust is won.";
+  if (
+    published.content?.thesis !== previousHeadline
+    || canonical.content?.thesis !== approvedHeadline
+  ) return false;
+
+  published.content.thesis = approvedHeadline;
+  published.mediaIds = [];
+  canonical.mediaIds = [];
+  delete published.content.heroMediaId;
+  if (canonical.content) delete canonical.content.heroMediaId;
+  return canonicalResultDigest(published) === canonicalResultDigest(canonical);
+}
+
+export function financialServicesPunctuationReconciliationPlan(input: {
+  slug: string;
+  publicationState: string | null | undefined;
+  publishedRevisionId: string | null | undefined;
+  latestRevision: { id: string; workflowState: string } | undefined;
+  publishedPayload: unknown;
+  canonicalPayload: unknown;
+  publishedReferences: ReadonlyArray<{ assetId: string; mediaVersionId: string | null }>;
+}): {
+  payload: { content: Record<string, unknown>; mediaIds: unknown[] };
+  references: Array<{ assetId: string; mediaVersionId: string | null }>;
+} | null {
+  if (
+    input.slug !== "financial-services"
+    || input.publicationState !== "published"
+    || !input.publishedRevisionId
+    || input.latestRevision?.id !== input.publishedRevisionId
+    || input.latestRevision.workflowState !== "approved"
+    || !isApprovedFinancialServicesPunctuationReconciliation(
+      input.publishedPayload,
+      input.canonicalPayload,
+    )
+  ) return null;
+
+  const payload = structuredClone(input.publishedPayload) as {
+    content?: Record<string, unknown>;
+    mediaIds?: unknown[];
+  };
+  if (!payload.content || !Array.isArray(payload.mediaIds)) return null;
+  payload.content.thesis = "The model estate — not the chatbot — is where trust is won.";
+  return {
+    payload: {
+      ...payload,
+      content: payload.content,
+      mediaIds: payload.mediaIds,
+    },
+    references: input.publishedReferences.map(({ assetId, mediaVersionId }) => ({
+      assetId,
+      mediaVersionId,
+    })),
+  };
+}
+
 const digest = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
 
@@ -211,7 +287,9 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
     // Industry contract expansions use a versioned receipt so corrected
     // reconciliation can preserve every earlier immutable baseline and receipt.
     idempotencyKey: record.type === "industry"
-      ? `cms-industry-contract-v8:${record.externalId}`
+      ? record.fields.slug === "financial-services"
+        ? `cms-industry-contract-v12:${record.externalId}`
+        : `cms-industry-contract-v8:${record.externalId}`
       : record.type === "case-study"
         ? `cms-case-study-baseline-v1:${record.externalId}`
         : `cms-inventory-v2:${record.externalId}`,
