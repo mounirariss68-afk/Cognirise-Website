@@ -4,14 +4,14 @@ import { assetUrl } from "@/lib/assets";
 const poster = assetUrl("/media/platforms/cognios-rotation-poster.jpg");
 const fallback = assetUrl("/media/platforms/cognios-rotation-fallback.jpg");
 
-export function PlatformsHeroMedia() {
+export function PlatformsHeroMedia({ fallbackSrc = fallback, fallbackAlt = "A layered CogniOS ecosystem connected by a luminous central spine." }: { fallbackSrc?: string; fallbackAlt?: string } = {}) {
   const [playbackFailed, setPlaybackFailed] = useState(false);
 
   return (
     <div className="platforms-hero-media absolute inset-0" data-playback-failed={playbackFailed}>
       <img
-        src={fallback}
-        alt="A layered CogniOS ecosystem connected by a luminous central spine."
+        src={fallbackSrc}
+        alt={fallbackAlt}
         className="platforms-hero-fallback absolute inset-0 h-full w-full object-cover"
       />
       {!playbackFailed && (

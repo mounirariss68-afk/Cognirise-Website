@@ -22,6 +22,18 @@ tags:
   - { name: analytics, description: First-party analytics and consent }
   - { name: navigation, description: Governed public navigation visibility }
 paths:
+  /public/configuration:
+    get:
+      operationId: getPublicConfiguration
+      tags: [public]
+      summary: Get enabled public markets and locales
+      responses:
+        "200":
+          description: Enabled public configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicConfiguration"
   /healthz:
     get:
       operationId: healthCheck
@@ -39,6 +51,9 @@ paths:
       operationId: getPublicNavigationSettings
       tags: [public, navigation]
       summary: Get published header navigation visibility
+      parameters:
+        - { in: query, name: market, schema: { type: string, default: uae } }
+        - { in: query, name: locale, schema: { type: string, default: en } }
       responses:
         "200":
           description: Navigation visibility
@@ -51,6 +66,9 @@ paths:
       operationId: getNavigationSettings
       tags: [navigation]
       summary: Get editable header navigation visibility
+      parameters:
+        - { in: query, name: market, schema: { type: string, default: uae } }
+        - { in: query, name: locale, schema: { type: string, default: en } }
       security:
         - cookieAuth: []
       responses:
@@ -63,7 +81,7 @@ paths:
     put:
       operationId: updateNavigationSettings
       tags: [navigation]
-      summary: Enable or disable header menu and submenu items
+      summary: Save navigation and page availability as a draft
       security:
         - cookieAuth: []
           csrfToken: []
@@ -75,7 +93,49 @@ paths:
               $ref: "#/components/schemas/UpdateNavigationSettings"
       responses:
         "200":
-          description: Updated navigation visibility
+          description: Updated navigation draft
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NavigationSettings"
+  /navigation/review:
+    post:
+      operationId: reviewNavigationSettings
+      tags: [navigation]
+      summary: Submit navigation and page availability for review
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NavigationEditionSelector"
+      responses:
+        "200":
+          description: Navigation submitted for review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NavigationSettings"
+  /navigation/publish:
+    post:
+      operationId: publishNavigationSettings
+      tags: [navigation]
+      summary: Publish reviewed navigation and page availability
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NavigationEditionSelector"
+      responses:
+        "200":
+          description: Published navigation
           content:
             application/json:
               schema:
@@ -272,29 +332,26 @@ paths:
           $ref: "#/components/responses/Unauthorized"
   /auth/password-reset:
     post:
-      operationId: resetPassword
+      operationId: consumeAccessToken
       tags: [auth]
-      summary: Set a temporary password for a CMS user
-      security:
-        - cookieAuth: []
-          csrfToken: []
+      summary: Consume a one-time invitation or password reset token
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserCredentialUpdate"
+              $ref: "#/components/schemas/AccessTokenConsumption"
       responses:
-        "200":
-          description: User password reset
+        "204":
+          description: Token consumed and password set
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "410":
+          description: Token is invalid, expired, or already consumed
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                $ref: "#/components/schemas/ApiError"
   /auth/password-change:
     post:
       operationId: changePassword
@@ -412,6 +469,9 @@ paths:
         - name: market
           in: query
           schema: { type: string }
+        - name: locale
+          in: query
+          schema: { type: string }
       responses:
         "200":
           description: Paginated documents
@@ -452,6 +512,15 @@ paths:
       summary: Get a document
       security:
         - cookieAuth: []
+      parameters:
+        - name: market
+          in: query
+          required: true
+          schema: { type: string }
+        - name: locale
+          in: query
+          required: true
+          schema: { type: string }
       responses:
         "200":
           description: Document
@@ -513,6 +582,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DocumentRevisionPage"
+  /documents/{documentId}/editions:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    get:
+      operationId: listDocumentEditions
+      tags: [documents]
+      summary: List exact and effective document editions
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Edition matrix
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentEditionMatrix"
+    post:
+      operationId: createDocumentEditionOverride
+      tags: [documents]
+      summary: Create an exact market and locale override from effective content
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditionOverrideInput"
+      responses:
+        "201":
+          description: Override edition created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentRevision"
   /documents/{documentId}/market-availability:
     parameters:
       - $ref: "#/components/parameters/DocumentId"
@@ -623,6 +728,72 @@ paths:
                 $ref: "#/components/schemas/Document"
         "409":
           $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/review-comments:
+    get:
+      operationId: listDocumentReviewComments
+      tags: [documents]
+      summary: List review comments for a document
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+        - name: revisionId
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Review comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReviewComment"
+    post:
+      operationId: addDocumentReviewComment
+      tags: [documents]
+      summary: Add a comment to an exact revision
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewCommentInput"
+      responses:
+        "201":
+          description: Review comment recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewComment"
+  /documents/{documentId}/reject:
+    post:
+      operationId: rejectDocumentRevision
+      tags: [documents]
+      summary: Reject an in-review revision
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewCommentInput"
+      responses:
+        "200":
+          description: Revision rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
   /documents/{documentId}/publish:
     post:
       operationId: publishDocument
@@ -728,6 +899,17 @@ paths:
         - cookieAuth: []
       parameters:
         - $ref: "#/components/parameters/DocumentId"
+        - name: market
+          in: query
+          required: true
+          schema: { type: string }
+        - name: locale
+          in: query
+          required: true
+          schema: { type: string }
+        - name: revisionId
+          in: query
+          schema: { type: string }
       responses:
         "200":
           description: Renderable preview
@@ -1584,6 +1766,23 @@ components:
           schema:
             $ref: "#/components/schemas/ApiError"
   schemas:
+    PublicConfiguration:
+      type: object
+      additionalProperties: false
+      required: [markets]
+      properties:
+        markets:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [code, displayName, defaultLocale, locales, isCanonical]
+            properties:
+              code: { type: string }
+              displayName: { type: string }
+              defaultLocale: { type: string }
+              locales: { type: array, items: { type: string } }
+              isCanonical: { type: boolean }
     ApiError:
       type: object
       required: [error]
@@ -1596,32 +1795,78 @@ components:
     NavigationSetting:
       type: object
       additionalProperties: false
-      required: [id, enabled]
+      required: [id, label, parentId, order, destination, visible]
       properties:
         id: { type: string }
+        label: { type: string }
+        parentId: { type: ["string", "null"] }
+        order: { type: number, multipleOf: 1, minimum: 0 }
+        destination: { type: string }
+        visible: { type: boolean }
+    UpdateNavigationSetting:
+      type: object
+      additionalProperties: false
+      required: [id, label, order, destination, visible]
+      properties:
+        id: { type: string }
+        label: { type: string }
+        parentId:
+          type: ["string", "null"]
+          description: Omit to inherit the registry parent; use null to explicitly place the item at the top level.
+        order: { type: number, multipleOf: 1, minimum: 0 }
+        destination: { type: string }
+        visible: { type: boolean }
+    PageAvailability:
+      type: object
+      additionalProperties: false
+      required: [path, enabled]
+      properties:
+        path: { type: string }
         enabled: { type: boolean }
     NavigationSettings:
       type: object
       additionalProperties: false
-      required: [items, updatedAt]
+      required: [items, pages, requestedMarket, requestedLocale, market, locale, usedFallback, updatedAt]
       properties:
         items:
           type: array
           items:
             $ref: "#/components/schemas/NavigationSetting"
+        pages:
+          type: array
+          items:
+            $ref: "#/components/schemas/PageAvailability"
+        requestedMarket: { type: string }
+        requestedLocale: { type: string }
+        market: { type: string }
+        locale: { type: string }
+        usedFallback: { type: boolean }
+        isConfigured: { type: boolean }
         updatedAt:
           type: ["string", "null"]
           format: date-time
     UpdateNavigationSettings:
       type: object
       additionalProperties: false
-      required: [items]
+      required: [items, pages, market, locale]
       properties:
         items:
           type: array
-          minItems: 1
           items:
-            $ref: "#/components/schemas/NavigationSetting"
+            $ref: "#/components/schemas/UpdateNavigationSetting"
+        pages:
+          type: array
+          items:
+            $ref: "#/components/schemas/PageAvailability"
+        market: { type: string }
+        locale: { type: string }
+    NavigationEditionSelector:
+      type: object
+      additionalProperties: false
+      required: [market, locale]
+      properties:
+        market: { type: string }
+        locale: { type: string }
     HealthStatus:
       type: object
       required: [status]
@@ -1923,10 +2168,22 @@ components:
 
     DocumentKind:
       type: string
-      enum: [person, partner, platform, publication, case-study, industry, framework, office, site-configuration]
+      enum: [person, partner, platform, publication, case-study, industry, framework, office, site-configuration, landing-page]
     DocumentStatus:
       type: string
       enum: [draft, in-review, approved, scheduled, published, archived]
+    CmsImmutableMediaReference:
+      type: object
+      additionalProperties: false
+      description: Immutable reference to the exact governed media version selected by an editor.
+      required: [mediaId, mediaVersionId, role]
+      properties:
+        mediaId: { type: string }
+        mediaVersionId: { type: string }
+        role:
+          type: string
+          enum: [identity, logo, hero, supporting, background, icon, og-image, document]
+        altText: { type: string, minLength: 1, maxLength: 500 }
     CmsStructuredContent:
       description: Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
       oneOf:
@@ -1938,6 +2195,21 @@ components:
         - $ref: "#/components/schemas/CmsFrameworkContent"
         - $ref: "#/components/schemas/CmsOfficeContent"
         - $ref: "#/components/schemas/CmsSiteConfigurationContent"
+        - $ref: "#/components/schemas/CmsLandingPageContent"
+    CmsLandingPageContent:
+      type: object
+      description: Governed reusable landing-page composition.
+      required: [schemaVersion, pagePath, template, narrative, sections]
+      properties:
+        schemaVersion: { type: number, enum: [1] }
+        pagePath: { type: string }
+        template: { type: string, enum: [landing, collection, campaign, legal] }
+        narrative: { type: string }
+        sections: { type: array, items: { type: object, additionalProperties: true } }
+        cta: { type: object, additionalProperties: true }
+        seo: { type: object, additionalProperties: true }
+        legal: { type: object, additionalProperties: true }
+        visualReferences: { type: array, items: { $ref: "#/components/schemas/CmsImmutableMediaReference" } }
     CmsPersonContent:
       type: object
       required: [schemaVersion]
@@ -1950,6 +2222,7 @@ components:
         focusAreas: { type: array, items: { type: object, additionalProperties: false, required: [title, detail], properties: { title: { type: string }, detail: { type: string } } } }
         profileLinks: { type: array, items: { $ref: "#/components/schemas/CmsLink" } }
         identityMediaId: { type: string }
+        identityMedia: { $ref: "#/components/schemas/CmsImmutableMediaReference" }
         approvedFallback: { type: string, enum: [initials, brand-mark] }
         visibility: { $ref: "#/components/schemas/CmsVisibility" }
         order: { type: number, multipleOf: 1 }
@@ -1970,6 +2243,7 @@ components:
         contribution: { type: string }
         website: { type: string, pattern: '^https?://.+' }
         logoMediaId: { type: string }
+        logoMedia: { $ref: "#/components/schemas/CmsImmutableMediaReference" }
         relationshipStatus: { type: string, enum: [active, prospective, paused, ended] }
         visibility: { $ref: "#/components/schemas/CmsVisibility" }
         order: { type: number, multipleOf: 1 }
@@ -2001,6 +2275,7 @@ components:
         summary: { type: string }
         template: { type: string, enum: [standard, cognios-specialist] }
         heroMediaId: { type: string }
+        heroMedia: { $ref: "#/components/schemas/CmsImmutableMediaReference" }
         sections: { type: array, items: { type: object, required: [heading, body], properties: { heading: { type: string }, body: { type: array, items: { $ref: "#/components/schemas/CmsRichBlock" } } } } }
         capabilities: { type: array, items: { type: string } }
         differentiators: { type: array, items: { type: string } }
@@ -2028,6 +2303,8 @@ components:
         platformIds: { type: array, items: { type: string } }
         heroMediaId: { type: string }
         pdfMediaId: { type: string }
+        heroMedia: { $ref: "#/components/schemas/CmsImmutableMediaReference" }
+        pdfMedia: { $ref: "#/components/schemas/CmsImmutableMediaReference" }
         visibility: { $ref: "#/components/schemas/CmsVisibility" }
         order: { type: number, multipleOf: 1 }
         sources: { type: array, items: { $ref: "#/components/schemas/CmsSource" } }
@@ -2062,6 +2339,7 @@ components:
         outcomes: { type: array, items: { type: string } }
         evidence: { type: array, items: { $ref: "#/components/schemas/CmsEvidence" } }
         heroMediaId: { type: string }
+        heroMedia: { $ref: "#/components/schemas/CmsImmutableMediaReference" }
         visibility: { $ref: "#/components/schemas/CmsVisibility" }
         order: { type: number, multipleOf: 1 }
         sources: { type: array, items: { $ref: "#/components/schemas/CmsSource" } }
@@ -2092,6 +2370,7 @@ components:
         workedExample: { $ref: "#/components/schemas/CmsFrameworkWorkedExample" }
         sectorExamples: { type: array, items: { $ref: "#/components/schemas/CmsFrameworkExample" } }
         heroMediaId: { type: string }
+        heroMedia: { $ref: "#/components/schemas/CmsImmutableMediaReference" }
         cta: { $ref: "#/components/schemas/CmsLink" }
         visibility: { $ref: "#/components/schemas/CmsVisibility" }
         order: { type: number, multipleOf: 1 }
@@ -2205,7 +2484,7 @@ components:
         items: { type: array, items: { type: string } }
     Document:
       type: object
-      required: [id, kind, slug, title, status, content, markets, revisionNumber, canPermanentlyDelete, createdAt, updatedAt]
+      required: [id, kind, slug, title, status, content, markets, revisionNumber, canPermanentlyDelete, inherited, effectiveMarket, effectiveLocale, createdAt, updatedAt]
       properties:
         id: { type: string }
         kind:
@@ -2229,6 +2508,11 @@ components:
         canPermanentlyDelete:
           type: boolean
           description: True only when permanent deletion is allowed; previously published offices must be archived.
+        inherited:
+          type: boolean
+          description: True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.
+        effectiveMarket: { type: ["string", "null"] }
+        effectiveLocale: { type: ["string", "null"] }
         currentRevisionId: { type: ["string", "null"] }
         publishedRevisionId: { type: ["string", "null"] }
         scheduledAt: { type: ["string", "null"], format: date-time }
@@ -2264,7 +2548,7 @@ components:
     DocumentUpdate:
       type: object
       additionalProperties: false
-      required: [revisionNumber]
+      required: [market, locale, revisionNumber]
       properties:
         slug: { type: string, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', maxLength: 160 }
         title: { type: string, minLength: 1, maxLength: 200 }
@@ -2278,11 +2562,8 @@ components:
         mediaIds:
           type: array
           items: { type: string }
-        markets:
-          type: array
-          minItems: 1
-          uniqueItems: true
-          items: { type: string }
+        market: { type: string, pattern: '^[a-z][a-z0-9-]{1,15}$' }
+        locale: { type: string, pattern: '^[a-z]{2}(?:-[A-Z]{2})?$' }
         revisionNumber:
           type: number
           multipleOf: 1
@@ -2391,7 +2672,9 @@ components:
     ReviewSubmissionInput:
       type: object
       additionalProperties: false
+      required: [revisionId]
       properties:
+        revisionId: { type: string }
         note: { type: string, maxLength: 1000 }
         reviewerIds:
           type: array
@@ -2414,23 +2697,100 @@ components:
     ArchiveInput:
       type: object
       additionalProperties: false
+      required: [market, locale]
       properties:
+        market: { type: string }
+        locale: { type: string }
         reason: { type: string, maxLength: 1000 }
+    EditionOverrideInput:
+      type: object
+      additionalProperties: false
+      required: [market, locale]
+      properties:
+        market: { type: string }
+        locale: { type: string }
+        sourceRevisionId: { type: string }
     DocumentPreview:
       type: object
-      required: [document, previewUrl, expiresAt, market, locale, revisionNumber, usedFallback, warnings]
+      required: [document, previewUrl, expiresAt, requestedMarket, requestedLocale, market, locale, revisionId, revisionNumber, usedFallback, fallbackReason, navigationPolicyDigest, navigation, warnings]
       properties:
         document:
           $ref: "#/components/schemas/DocumentSnapshot"
         previewUrl: { type: string }
         expiresAt: { type: string, format: date-time }
+        requestedMarket: { type: string }
+        requestedLocale: { type: string }
         market: { type: string }
         locale: { type: string }
+        revisionId: { type: string }
         revisionNumber: { type: number, multipleOf: 1, minimum: 1 }
         usedFallback: { type: boolean }
+        fallbackReason: { type: ["string", "null"] }
+        navigationPolicyDigest: { type: string }
+        navigation:
+          description: Immutable navigation and page-availability snapshot captured when the preview capability was issued.
+          type: object
+          additionalProperties: true
+          required: [market, locale, items, pages]
+          properties:
+            market: { type: string }
+            locale: { type: string }
+            items: { type: array, items: { type: object, additionalProperties: true } }
+            pages: { type: array, items: { type: object, additionalProperties: true } }
         warnings:
           type: array
           items: { type: string }
+    DocumentEdition:
+      type: object
+      additionalProperties: false
+      required: [market, locale, exact, effectiveMarket, effectiveLocale, usedFallback, fallbackReason, publicationState, workflowState, revisionId, revisionNumber, effectivePublicationState, effectiveWorkflowState, effectiveRevisionId, effectiveRevisionNumber, ready, readinessErrors]
+      properties:
+        market: { type: string }
+        locale: { type: string }
+        exact: { type: boolean }
+        effectiveMarket: { type: ["string", "null"] }
+        effectiveLocale: { type: ["string", "null"] }
+        usedFallback: { type: boolean }
+        fallbackReason: { type: ["string", "null"] }
+        publicationState: { type: ["string", "null"] }
+        workflowState: { type: ["string", "null"] }
+        revisionId: { type: ["string", "null"] }
+        revisionNumber: { type: ["number", "null"], multipleOf: 1 }
+        effectivePublicationState: { type: ["string", "null"] }
+        effectiveWorkflowState: { type: ["string", "null"] }
+        effectiveRevisionId: { type: ["string", "null"] }
+        effectiveRevisionNumber: { type: ["number", "null"], multipleOf: 1 }
+        ready: { type: boolean }
+        readinessErrors:
+          type: array
+          items: { type: string }
+    DocumentEditionMatrix:
+      type: object
+      additionalProperties: false
+      required: [documentId, items]
+      properties:
+        documentId: { type: string }
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentEdition"
+    ReviewCommentInput:
+      type: object
+      additionalProperties: false
+      required: [revisionId, body]
+      properties:
+        revisionId: { type: string }
+        body: { type: string, minLength: 1, maxLength: 2000 }
+    ReviewComment:
+      type: object
+      additionalProperties: false
+      required: [id, revisionId, body, authorId, createdAt]
+      properties:
+        id: { type: string }
+        revisionId: { type: string }
+        body: { type: string }
+        authorId: { type: string }
+        createdAt: { type: string, format: date-time }
     DocumentPage:
       allOf:
         - $ref: "#/components/schemas/PageMetadata"
@@ -2814,7 +3174,7 @@ components:
       enum: [invited, active, suspended]
     User:
       type: object
-      required: [id, name, email, role, status, mfaEnabled, mustRotate, createdAt, updatedAt]
+      required: [id, name, email, role, status, marketCodes, mfaEnabled, mustRotate, createdAt, updatedAt]
       properties:
         id: { type: string }
         name: { type: string }
@@ -2823,6 +3183,9 @@ components:
           $ref: "#/components/schemas/UserRole"
         status:
           $ref: "#/components/schemas/UserStatus"
+        marketCodes:
+          type: array
+          items: { type: string, minLength: 2, maxLength: 24 }
         mfaEnabled: { type: boolean }
         mustRotate: { type: boolean }
         lastLoginAt: { type: ["string", "null"], format: date-time }
@@ -2837,16 +3200,20 @@ components:
         email: { type: string, pattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$', maxLength: 254 }
         role:
           $ref: "#/components/schemas/UserRole"
+        marketCodes:
+          type: array
+          uniqueItems: true
+          items: { type: string, minLength: 2, maxLength: 24 }
     UserInvitation:
       type: object
-      required: [id, user, temporaryPassword, expiresAt, createdAt]
+      required: [id, user, delivery, expiresAt, createdAt]
       properties:
         id: { type: string }
         user:
           $ref: "#/components/schemas/User"
-        temporaryPassword:
+        delivery:
           type: string
-          description: One-time credential to copy securely to the invited user.
+          enum: [email]
         expiresAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
     UserUpdate:
@@ -2858,13 +3225,20 @@ components:
           $ref: "#/components/schemas/UserRole"
         status:
           $ref: "#/components/schemas/UserStatus"
-    UserCredentialUpdate:
+        marketCodes:
+          type: array
+          uniqueItems: true
+          items: { type: string, minLength: 2, maxLength: 24 }
+    AccessTokenConsumption:
       type: object
       additionalProperties: false
-      required: [userId, temporaryPassword]
+      required: [token, newPassword]
       properties:
-        userId: { type: string }
-        temporaryPassword:
+        token:
+          type: string
+          minLength: 32
+          maxLength: 256
+        newPassword:
           type: string
           minLength: 12
           maxLength: 128
@@ -2885,16 +3259,15 @@ components:
     PasswordResetInput:
       type: object
       additionalProperties: false
-      properties:
-        sendEmail: { type: boolean, default: true }
+      description: Requests secure email delivery to the user's registered address.
     PasswordReset:
       type: object
-      required: [id, temporaryPassword, expiresAt]
+      required: [id, delivery, expiresAt]
       properties:
         id: { type: string }
-        temporaryPassword:
+        delivery:
           type: string
-          description: One-time credential to copy securely to the user.
+          enum: [email]
         expiresAt: { type: string, format: date-time }
     SessionRevocationInput:
       type: object
@@ -2996,7 +3369,7 @@ components:
       allOf:
         - $ref: "#/components/schemas/PageMetadata"
         - type: object
-          required: [items, market, locale, requestedMarket, usedFallback, isConfigured]
+          required: [items, market, locale, requestedMarket, usedFallback, isConfigured, configuredPagePaths]
           properties:
             items:
               type: array
@@ -3008,7 +3381,11 @@ components:
             usedFallback: { type: boolean }
             isConfigured:
               type: boolean
-              description: True once this content kind has an approved publication history, including archived records.
+              description: True once this content kind has an immediate publication history, including archived records.
+            configuredPagePaths:
+              type: array
+              items: { type: string }
+              description: Landing page paths with an immediate publication in their history. Draft-only pages are excluded.
     Sitemap:
       type: object
       required: [items, generatedAt]

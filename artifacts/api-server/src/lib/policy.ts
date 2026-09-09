@@ -11,6 +11,18 @@ export function roleAtLeast(actual: CmsRole, required: CmsRole): boolean {
   return roleRank[actual] >= roleRank[required];
 }
 
+/**
+ * Administrators are deliberately unrestricted. For every other role an empty
+ * assignment set is deny-all, rather than accidentally becoming global access.
+ */
+export function canAccessAssignedMarket(
+  role: CmsRole,
+  assignments: readonly string[],
+  market: string,
+): boolean {
+  return role === "administrator" || assignments.includes(market);
+}
+
 export function selectMarketWithUaeFallback(
   requestedMarket: string,
   availableMarkets: readonly string[],

@@ -1,6 +1,8 @@
 import { BrandButton } from "@/components/ui/brand-button";
-import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
-import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
+import { contentRecord, useCmsCollection } from "@/lib/cms";
+import { useDynamicMetadata } from "@/lib/metadata";
+import { useGovernedLanding } from "@/components/GovernedLandingRoute";
+import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } from "@/lib/cms";
 
 const partnersFallback = [
   {
@@ -68,6 +70,16 @@ const allianceGroups = [
 ];
 
 export default function Partners() {
+  const governedLanding = useGovernedLanding();
+  const governedHero = governedLanding ? landingNarrative(governedLanding, "hero") : null;
+  const heroEyebrow = landingText(governedLanding, "partners-hero-eyebrow", "Our partners / one accountable ecosystem");
+  const heroHeading = governedHero?.heading || landingText(governedLanding, "partners-hero-heading", "Senior-led. Partner-amplified.");
+  const heroBody = governedHero?.text || landingText(governedLanding, "partners-hero-body", "Cognirise stays deliberately senior and small — and delivers at enterprise scale through two complementary alliance types: engineering partners who extend delivery capacity, and platform partners who bring specialist products into the solution.");
+  const heroMedia = landingMedia(governedLanding, "partners-hero-media", {
+    src: "/images/cognirise/alliance-bunjee.jpg",
+    alt: "Cognirise alliance partners connected through a governed enterprise network.",
+  });
+  const closingCta = landingCta(governedLanding, "partners-closing-cta", { label: "Talk to a partner", href: "/contact" });
   const partnersQuery = useCmsCollection("partner", partnersFallback, (item) => {
     const content = contentRecord(item, "partner");
     const category = content.allianceCategory;
@@ -83,24 +95,33 @@ export default function Partners() {
       source: content.sources.map((source) => source.label).join("; "),
     };
   });
-  const page = useCmsEntry("partner", "partners");
-  useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
-    title: "Partners | Cognirise",
-    description: "The alliance and technology network supporting the Cognirise operating model.",
-  }));
+  const governedSeo = governedLanding ? landingSeo(governedLanding) : undefined;
+  useDynamicMetadata(governedSeo ? {
+    title: governedSeo.title || "Partners | Cognirise",
+    description: governedSeo.description || "The alliance and technology network supporting the Cognirise operating model.",
+    canonicalUrl: governedSeo.canonicalUrl,
+    noIndex: governedSeo.noIndex,
+  } : undefined);
   const partners = partnersQuery.data;
+  const valueHeadline = landingText(
+    governedLanding,
+    "partners-value-headline",
+    "{count} confirmed partners.",
+  ).replace("{count}", String(partners.length));
+  const valueBody = landingText(governedLanding, "partners-value-body", "One accountable team.");
 
   return (
     <main className="overflow-hidden">
       <section className="relative bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12 md:py-32">
         <div className="absolute -left-28 bottom-0 h-96 w-96 rounded-full bg-[hsl(var(--brand-violet))]/25 blur-3xl" />
-        <div className="relative mx-auto max-w-[1440px]">
-          <p className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/55">Our partners / one accountable ecosystem</p>
-          <h1 className="max-w-[1050px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[100px]">Senior-led. <span className="brand-gradient-text">Partner-amplified.</span></h1>
+          <div className="relative mx-auto max-w-[1440px]">
+          <p className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/55">{heroEyebrow}</p>
+          <h1 data-governed-landing={governedLanding?.pagePath} className="max-w-[1050px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[100px]">{heroHeading}</h1>
           <div className="mt-10 grid gap-8 border-t border-white/20 pt-8 md:grid-cols-[1fr_.6fr]">
-            <p className="max-w-[730px] text-lg leading-8 text-white/70">Cognirise stays deliberately senior and small — and delivers at enterprise scale through two complementary alliance types: engineering partners who extend delivery capacity, and platform partners who bring specialist products into the solution.</p>
-            <p className="text-2xl font-semibold">{partners.length} confirmed partners.<br /><span className="text-[hsl(var(--brand-coral))]">One accountable team.</span></p>
+            <p className="max-w-[730px] text-lg leading-8 text-white/70">{heroBody}</p>
+            <p className="text-2xl font-semibold">{valueHeadline}<br /><span className="text-[hsl(var(--brand-coral))]">{valueBody}</span></p>
           </div>
+          <img className="sr-only" src={heroMedia.src} alt={heroMedia.alt} />
         </div>
       </section>
 
@@ -112,8 +133,8 @@ export default function Partners() {
             <header className="mb-16 grid gap-8 border-t border-foreground pt-7 md:grid-cols-[.35fr_1fr]">
               <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">{group.number} / {group.label}</p>
               <div>
-                <h2 id={`${group.id}-partners-heading`} className="max-w-[850px] text-4xl font-semibold leading-none md:text-6xl">{group.title}</h2>
-                <p className="mt-6 max-w-[720px] text-base leading-7 text-muted-foreground">{group.description}</p>
+                <h2 id={`${group.id}-partners-heading`} className="max-w-[850px] text-4xl font-semibold leading-none md:text-6xl">{landingText(governedLanding, `partners-${group.id}-heading`, group.title)}</h2>
+                <p className="mt-6 max-w-[720px] text-base leading-7 text-muted-foreground">{landingText(governedLanding, `partners-${group.id}-body`, group.description)}</p>
               </div>
             </header>
             {groupPartners.map((partner, index) => (
@@ -153,13 +174,13 @@ export default function Partners() {
           </section>
           );
         })}
-        <p className="mt-24 max-w-[900px] border-l-4 border-[hsl(var(--brand-pink))] pl-7 text-xl leading-9">Beyond the confirmed alliance network, Cognirise assembles additional specialist capability per engagement — so every mission gets exactly the engineering depth and platform support it needs.</p>
+        <p className="mt-24 max-w-[900px] border-l-4 border-[hsl(var(--brand-pink))] pl-7 text-xl leading-9">{landingText(governedLanding, "partners-method-body", "Beyond the confirmed alliance network, Cognirise assembles additional specialist capability per engagement — so every mission gets exactly the engineering depth and platform support it needs.")}</p>
       </section>
 
       <section className="bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12">
         <div className="mx-auto flex max-w-[1440px] flex-col justify-between gap-10 md:flex-row md:items-end">
-          <div><h2 className="max-w-[800px] text-4xl font-semibold md:text-6xl">One senior team.<br /><span className="text-[hsl(var(--brand-coral))]">The whole network behind it.</span></h2><p className="mt-5 text-white/65">Tell us the outcome. We’ll bring the right partners to the table — under one accountable lead.</p></div>
-          <BrandButton href="/contact" variant="inverse" data-testid="link-partners-contact">Talk to a partner</BrandButton>
+          <div><p className="mb-6 text-[10px] font-bold uppercase tracking-[.2em] text-white/55">{landingText(governedLanding, "partners-closing-eyebrow", "One accountable ecosystem")}</p><h2 className="max-w-[800px] text-4xl font-semibold md:text-6xl">{landingText(governedLanding, "partners-closing-heading", "One senior team. The whole network behind it.")}</h2><p className="mt-5 text-white/65">{landingText(governedLanding, "partners-closing-body", "Tell us the outcome. We’ll bring the right partners to the table — under one accountable lead.")}</p></div>
+          <BrandButton href={closingCta.href} variant="inverse" data-testid="link-partners-contact">{closingCta.label}</BrandButton>
         </div>
       </section>
     </main>

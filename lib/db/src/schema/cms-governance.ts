@@ -57,6 +57,11 @@ export const cmsPreviewSessionsTable = pgTable(
     revisionId: uuid("revision_id")
       .notNull()
       .references(() => cmsRevisionsTable.id, { onDelete: "cascade" }),
+    requestedMarket: text("requested_market"),
+    requestedLocale: text("requested_locale"),
+    fallbackReason: text("fallback_reason"),
+    navigationPolicyDigest: text("navigation_policy_digest"),
+    navigationSnapshot: jsonb("navigation_snapshot").$type<Record<string, unknown>>(),
     createdByUserId: uuid("created_by_user_id")
       .notNull()
       .references(() => cmsUsersTable.id, { onDelete: "cascade" }),

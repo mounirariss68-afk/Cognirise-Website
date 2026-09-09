@@ -5,10 +5,10 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { PasswordResetDelivery } from './passwordResetDelivery';
 
 export interface PasswordReset {
   id: string;
-  /** One-time credential to copy securely to the user. */
-  temporaryPassword: string;
+  delivery: PasswordResetDelivery;
   expiresAt: Date;
 }

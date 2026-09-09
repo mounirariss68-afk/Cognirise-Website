@@ -1,6 +1,8 @@
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { assetUrl } from "@/lib/assets";
+import { useGovernedLanding } from "@/components/GovernedLandingRoute";
+import { landingCta, landingMedia, landingText } from "@/lib/cms";
 import { contentRecord, useCmsCollection } from "@/lib/cms";
 
 type TeamProfile = {
@@ -124,6 +126,18 @@ function ProfileList({ profiles, label }: { profiles: TeamProfile[]; label: stri
 }
 
 export default function AboutPeople() {
+  const governedLanding = useGovernedLanding();
+  const heroEyebrow = landingText(governedLanding, "about-hero-eyebrow", "Our Team");
+  const heroHeading = landingText(governedLanding, "about-hero-heading", "Judgment stays close to the work.");
+  const heroBody = landingText(governedLanding, "about-hero-body", "The people who frame the decision stay close enough to make it real. Leadership, engineering and accountability belong in the same room.");
+  const leadershipVisual = landingMedia(governedLanding, "about-hero-visual", { src: assetUrl("/images/cognirise/site-leadership.jpg"), alt: "Senior colleagues working together around a detailed physical model." });
+  const leadershipEyebrow = landingText(governedLanding, "about-leadership-eyebrow", "01 / Our Team");
+  const leadershipTitle = landingText(governedLanding, "about-leadership-title", "Leadership Team");
+  const advisoryEyebrow = landingText(governedLanding, "about-advisory-eyebrow", "02 / Counsel at scale");
+  const advisoryTitle = landingText(governedLanding, "about-advisory-title", "Board of Advisors");
+  const advisoryBody = landingText(governedLanding, "about-advisory-body", "Senior leaders who pressure-test our model and keep it grounded in what enterprises actually need.");
+  const closingHeading = landingText(governedLanding, "about-closing-heading", "Bring one process. Meet the people.");
+  const closingCta = landingCta(governedLanding, "about-closing-cta", { label: "Book a value scan", href: "/value-scan" });
   const peopleQuery = useCmsCollection("person", peopleFallback, (item) => {
     const content = contentRecord(item, "person");
     if (content.role !== "founder" && content.role !== "leader" && content.role !== "advisor") return null;
@@ -154,12 +168,12 @@ export default function AboutPeople() {
         <div className="absolute -right-32 top-0 h-[520px] w-[520px] rounded-full bg-[hsl(var(--brand-pink))]/25 blur-3xl" />
         <div className="relative mx-auto grid max-w-[1440px] gap-14 lg:grid-cols-[.92fr_1.08fr] lg:items-end">
           <div>
-            <p className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/60">Our Team</p>
-            <h1 className="max-w-[760px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[104px]">Judgment stays <em className="not-italic text-[hsl(var(--brand-coral))]">close to the work.</em></h1>
-            <p className="mt-8 max-w-[590px] text-lg leading-8 text-white/70">The people who frame the decision stay close enough to make it real. Leadership, engineering and accountability belong in the same room.</p>
+            <p className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/60">{heroEyebrow}</p>
+            <h1 data-governed-landing={governedLanding?.pagePath} className="max-w-[760px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[104px]">{heroHeading}</h1>
+            <p className="mt-8 max-w-[590px] text-lg leading-8 text-white/70">{heroBody}</p>
           </div>
           <figure className="clip-diagonal relative h-[390px] overflow-hidden lg:h-[520px]">
-            <img className="h-full w-full object-cover" src={assetUrl("/images/cognirise/site-leadership.jpg")} alt="Senior colleagues working together around a detailed physical model." />
+            <img className="h-full w-full object-cover" src={leadershipVisual.src} alt={leadershipVisual.alt} />
             <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))]/80 via-transparent to-transparent" />
           </figure>
         </div>
@@ -167,8 +181,8 @@ export default function AboutPeople() {
 
       <section className="mx-auto max-w-[1440px] px-6 py-24 md:px-12 md:py-32" aria-labelledby="leadership-team">
         <div className="mb-14 grid gap-6 md:grid-cols-2">
-          <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">01 / Our Team</p>
-          <h2 id="leadership-team" className="text-4xl font-semibold md:text-6xl">Leadership Team</h2>
+          <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">{leadershipEyebrow}</p>
+          <h2 id="leadership-team" className="text-4xl font-semibold md:text-6xl">{leadershipTitle}</h2>
         </div>
         <ProfileList profiles={leadership} label="Leadership Team" />
       </section>
@@ -176,10 +190,10 @@ export default function AboutPeople() {
       <section id="board-of-advisors" className="scroll-mt-24 bg-secondary px-6 py-24 md:px-12 md:py-32" aria-labelledby="board-of-advisors-heading">
         <div className="mx-auto max-w-[1440px]">
           <div className="mb-14 grid gap-6 md:grid-cols-2">
-            <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">02 / Counsel at scale</p>
+            <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">{advisoryEyebrow}</p>
             <div>
-              <h2 id="board-of-advisors-heading" className="text-4xl font-semibold md:text-6xl">Board of Advisors</h2>
-              <p className="mt-5 max-w-[650px] leading-7 text-muted-foreground">Senior leaders who pressure-test our model and keep it grounded in what enterprises actually need.</p>
+              <h2 id="board-of-advisors-heading" className="text-4xl font-semibold md:text-6xl">{advisoryTitle}</h2>
+              <p className="mt-5 max-w-[650px] leading-7 text-muted-foreground">{advisoryBody}</p>
             </div>
           </div>
           <ProfileList profiles={advisors} label="Board of Advisors" />
@@ -188,8 +202,8 @@ export default function AboutPeople() {
 
       <section className="bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12">
         <div className="mx-auto flex max-w-[1440px] flex-col items-start justify-between gap-8 md:flex-row md:items-end">
-          <h2 className="max-w-[800px] text-5xl font-semibold leading-[.95] md:text-7xl">Bring one process.<br /><span className="text-[hsl(var(--brand-coral))]">Meet the people.</span></h2>
-          <Link href="/value-scan" className="inline-flex items-center gap-4 border border-white px-6 py-4 text-sm font-bold transition hover:bg-white hover:text-[hsl(var(--brand-deep))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-coral))]" data-testid="link-about-value-scan">Book a value scan <ArrowRight size={18} /></Link>
+          <h2 className="max-w-[800px] text-5xl font-semibold leading-[.95] md:text-7xl">{closingHeading}</h2>
+          <Link href={closingCta.href} className="inline-flex items-center gap-4 border border-white px-6 py-4 text-sm font-bold transition hover:bg-white hover:text-[hsl(var(--brand-deep))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-coral))]" data-testid="link-about-value-scan">{closingCta.label} <ArrowRight size={18} /></Link>
         </div>
       </section>
     </main>

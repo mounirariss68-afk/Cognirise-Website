@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowDown, ArrowRight, Check } from "lucide-react";
 import { Link } from "wouter";
-import { useSubmitEnquiry } from "@workspace/api-client-react";
+import { useSubmitEnquiry, type EnquiryInputMarket } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
@@ -65,7 +65,7 @@ export default function ValueScan() {
         email: formData.email,
         organization: formData.company,
         role: formData.role || undefined,
-        market,
+        market: market as EnquiryInputMarket,
         processArea: formData.processArea,
         challenge: challengeContext,
         consent: true,

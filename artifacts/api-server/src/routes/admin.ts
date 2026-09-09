@@ -21,7 +21,8 @@ import {
 } from "../lib/auth";
 import { audit, pageOf } from "../lib/cms";
 import { asyncRoute } from "../lib/http";
-import { hashPassword, randomToken } from "../lib/security";
+import { hashToken, randomToken } from "../lib/security";
+import { AccessDeliveryError, deliverAccessLink } from "../lib/access-delivery";
 
 const router: IRouter = Router();
 router.use(
@@ -37,6 +38,7 @@ function userFromRow(row: Record<string, any>) {
     email: row.email,
     role: row.role,
     status: row.status,
+    marketCodes: row.market_codes ?? [],
     mfaEnabled: Boolean(row.mfa_enabled),
     mustRotate: Boolean(row.must_rotate),
     lastLoginAt: row.last_login_at,
@@ -144,7 +146,9 @@ router.get(
     }
     const { page, pageSize, search, role, status } = parsed.data;
     const result = await pool.query(
-      `SELECT u.*,p.must_rotate,EXISTS(SELECT 1 FROM cms_totp_credentials t WHERE t.user_id=u.id
+      `SELECT u.*,p.must_rotate,COALESCE((SELECT array_agg(a.market_code ORDER BY a.market_code)
+          FROM cms_user_market_assignments a WHERE a.user_id=u.id),'{}') market_codes,
+        EXISTS(SELECT 1 FROM cms_totp_credentials t WHERE t.user_id=u.id
         AND t.verified_at IS NOT NULL AND t.disabled_at IS NULL) mfa_enabled,
          count(*) OVER() total_count FROM cms_users u LEFT JOIN cms_password_credentials p ON p.user_id=u.id
         WHERE ($1::text IS NULL OR display_name ILIKE '%'||$1||'%' OR email ILIKE '%'||$1||'%')
@@ -174,9 +178,16 @@ router.post(
       return;
     }
     const auth = res.locals.auth as AuthContext;
-    const temporaryPassword = `Tmp!${randomToken().slice(0, 18)}a1`;
+    if (!(await marketCodesValid(parsed.data.marketCodes ?? []))) {
+      res.status(400).json({ error: "One or more market assignments are invalid." });
+      return;
+    }
+    const token = randomToken();
+    const expiresAt = new Date(Date.now() + 72 * 60 * 60_000);
+    const client = await pool.connect();
     try {
-      const result = await pool.query(
+      await client.query("BEGIN");
+      const result = await client.query(
         `INSERT INTO cms_users
          (display_name,email,role,status)
          VALUES ($1,lower($2),$3,'invited') RETURNING *`,
@@ -187,28 +198,39 @@ router.post(
         ],
       );
       const user = userFromRow(result.rows[0]);
-      await pool.query(
-        `INSERT INTO cms_password_credentials(user_id,password_hash,must_rotate,temporary_expires_at,changed_at)
-         VALUES ($1,$2,true,now()+interval '72 hours',now())`,
-        [user.id, await hashPassword(temporaryPassword)],
+      await replaceMarketAssignments(client, user.id, parsed.data.marketCodes ?? []);
+      user.marketCodes = parsed.data.marketCodes ?? [];
+      await client.query(
+        `INSERT INTO cms_user_access_tokens
+          (user_id,purpose,token_digest,expires_at,created_by_user_id)
+         VALUES ($1,'invitation',$2,$3,$4)`,
+        [user.id, hashToken(token), expiresAt, auth.user.id],
       );
-      user.mustRotate = true;
+      await deliverAccessLink({
+        email: user.email, name: user.name, purpose: "invitation", token, expiresAt,
+      });
+      await client.query("COMMIT");
       await audit(auth, "user.invited", "user", user.id);
       res.status(201).json({
         id: user.id,
         user,
-        // This service has no mail delivery integration; an administrator must
-        // copy this one-time displayed credential through an approved channel.
-        temporaryPassword,
-        expiresAt: new Date(Date.now() + 72 * 60 * 60_000),
+        delivery: "email",
+        expiresAt,
         createdAt: user.createdAt,
       });
     } catch (error: any) {
+      await client.query("ROLLBACK");
+      if (error instanceof AccessDeliveryError) {
+        res.status(503).json({ error: error.message });
+        return;
+      }
       if (error?.code === "23505") {
         res.status(409).json({ error: "A user with that email already exists." });
         return;
       }
       throw error;
+    } finally {
+      client.release();
     }
   }),
 );
@@ -224,20 +246,38 @@ router.patch(
       return;
     }
     const auth = res.locals.auth as AuthContext;
-    if (req.params.userId === auth.user.id && parsed.data.status === "suspended") {
+    const userId = String(req.params.userId);
+    if (userId === auth.user.id && parsed.data.status === "suspended") {
       res.status(409).json({ error: "You cannot suspend your own account." });
       return;
     }
-    const result = await pool.query(
-      `UPDATE cms_users SET display_name=COALESCE($2,display_name),role=COALESCE($3,role),
-       status=COALESCE($4,status),updated_at=now() WHERE id=$1 RETURNING *`,
-      [
-        req.params.userId,
-        parsed.data.name ?? null,
-        parsed.data.role ?? null,
-        parsed.data.status ?? null,
-      ],
-    );
+    if (userId === auth.user.id && parsed.data.role && parsed.data.role !== "administrator") {
+      res.status(409).json({ error: "You cannot remove your own administrator role." });
+      return;
+    }
+    if (parsed.data.marketCodes !== undefined && !(await marketCodesValid(parsed.data.marketCodes))) {
+      res.status(400).json({ error: "One or more market assignments are invalid." });
+      return;
+    }
+    const client = await pool.connect();
+    await client.query("BEGIN");
+    let result;
+    try {
+      result = await client.query(
+        `UPDATE cms_users SET display_name=COALESCE($2,display_name),role=COALESCE($3,role),
+         status=COALESCE($4,status),updated_at=now() WHERE id=$1 RETURNING *`,
+        [userId, parsed.data.name ?? null, parsed.data.role ?? null, parsed.data.status ?? null],
+      );
+      if (result.rowCount && parsed.data.marketCodes !== undefined) {
+        await replaceMarketAssignments(client, userId, parsed.data.marketCodes);
+      }
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
     if (!result.rowCount) {
       res.status(404).json({ error: "User not found." });
       return;
@@ -245,11 +285,13 @@ router.patch(
     if (parsed.data.status === "suspended") {
       await pool.query(
         "UPDATE cms_sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL",
-        [req.params.userId],
+        [userId],
       );
     }
-    await audit(auth, "user.updated", "user", String(req.params.userId), parsed.data);
-    res.json(userFromRow(result.rows[0]));
+    await audit(auth, "user.updated", "user", userId, parsed.data);
+    const updated = userFromRow(result.rows[0]);
+    updated.marketCodes = parsed.data.marketCodes ?? (await marketAssignments(userId));
+    res.json(updated);
   }),
 );
 
@@ -264,34 +306,96 @@ router.post(
       return;
     }
     const auth = res.locals.auth as AuthContext;
-    const temporaryPassword = `Tmp!${randomToken().slice(0, 18)}a1`;
-    const user = await pool.query("SELECT id FROM cms_users WHERE id=$1", [req.params.userId]);
+    const token = randomToken();
+    const expiresAt = new Date(Date.now() + 60 * 60_000);
+    const user = await pool.query("SELECT id,email,display_name FROM cms_users WHERE id=$1", [req.params.userId]);
     if (!user.rowCount) {
       res.status(404).json({ error: "User not found." });
       return;
     }
-    await pool.query(
-      `INSERT INTO cms_password_credentials(user_id,password_hash,must_rotate,temporary_expires_at,changed_at)
-       VALUES ($1,$2,true,now()+interval '1 hour',now())
-       ON CONFLICT (user_id) DO UPDATE SET password_hash=EXCLUDED.password_hash,
-         must_rotate=true,temporary_expires_at=EXCLUDED.temporary_expires_at,changed_at=now(),
-         password_version=cms_password_credentials.password_version+1`,
-      [req.params.userId, await hashPassword(temporaryPassword)],
-    );
-    await pool.query(
-      "UPDATE cms_sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL",
-      [req.params.userId],
-    );
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(
+        "UPDATE cms_user_access_tokens SET consumed_at=now() WHERE user_id=$1 AND consumed_at IS NULL",
+        [req.params.userId],
+      );
+      await client.query(
+        `INSERT INTO cms_user_access_tokens
+          (user_id,purpose,token_digest,expires_at,created_by_user_id)
+         VALUES ($1,'password-reset',$2,$3,$4)`,
+        [req.params.userId, hashToken(token), expiresAt, auth.user.id],
+      );
+      await deliverAccessLink({
+        email: user.rows[0].email,
+        name: user.rows[0].display_name ?? user.rows[0].email,
+        purpose: "password-reset",
+        token,
+        expiresAt,
+      });
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      if (error instanceof AccessDeliveryError) {
+        res.status(503).json({ error: error.message });
+        return;
+      }
+      throw error;
+    } finally {
+      client.release();
+    }
     await audit(auth, "user.password_reset", "user", String(req.params.userId), {
-      delivery: "administrator-copy",
+      delivery: "email",
     });
     res.status(202).json({
       id: String(req.params.userId),
-      temporaryPassword,
-      expiresAt: new Date(Date.now() + 60 * 60_000),
+      delivery: "email",
+      expiresAt,
     });
   }),
 );
+
+type QueryClient = { query: (sql: string, values?: unknown[]) => Promise<any> };
+
+async function replaceMarketAssignments(client: QueryClient, userId: string, marketCodes: string[]) {
+  const uniqueCodes = [...new Set(marketCodes)];
+  if (uniqueCodes.length) {
+    const valid = await client.query(
+      "SELECT code FROM market_editions WHERE enabled=true AND code=ANY($1::text[])",
+      [uniqueCodes],
+    );
+    if (valid.rowCount !== uniqueCodes.length) {
+      const error = new Error("One or more market assignments are invalid.");
+      (error as any).code = "INVALID_MARKET_ASSIGNMENT";
+      throw error;
+    }
+  }
+  await client.query("DELETE FROM cms_user_market_assignments WHERE user_id=$1", [userId]);
+  for (const code of uniqueCodes) {
+    await client.query(
+      "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,$2)",
+      [userId, code],
+    );
+  }
+}
+
+async function marketAssignments(userId: string): Promise<string[]> {
+  const result = await pool.query(
+    "SELECT market_code FROM cms_user_market_assignments WHERE user_id=$1 ORDER BY market_code",
+    [userId],
+  );
+  return result.rows.map((row) => row.market_code);
+}
+
+async function marketCodesValid(marketCodes: string[]): Promise<boolean> {
+  const uniqueCodes = [...new Set(marketCodes)];
+  if (!uniqueCodes.length) return true;
+  const result = await pool.query(
+    "SELECT code FROM market_editions WHERE enabled=true AND code=ANY($1::text[])",
+    [uniqueCodes],
+  );
+  return result.rowCount === uniqueCodes.length;
+}
 
 router.post(
   "/users/:userId/sessions/revoke",

@@ -27,6 +27,12 @@ export interface Document {
   revisionNumber: number;
   /** True only when permanent deletion is allowed; previously published offices must be archived. */
   canPermanentlyDelete: boolean;
+  /** True when this editorial discovery entry is the effective approved published fallback rather than an exact edition. */
+  inherited: boolean;
+  /** @nullable */
+  effectiveMarket: string | null;
+  /** @nullable */
+  effectiveLocale: string | null;
   /** @nullable */
   currentRevisionId?: string | null;
   /** @nullable */

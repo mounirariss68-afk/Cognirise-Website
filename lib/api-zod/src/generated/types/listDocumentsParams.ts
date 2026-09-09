@@ -28,4 +28,5 @@ search?: SearchParameter;
 kind?: DocumentKind;
 status?: DocumentStatus;
 market?: string;
+locale?: string;
 };

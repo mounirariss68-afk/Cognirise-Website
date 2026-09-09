@@ -19,4 +19,9 @@ export interface UserInvitationInput {
      */
   email: string;
   role: UserRole;
+  /**
+     * @items.minLength 2
+     * @items.maxLength 24
+     */
+  marketCodes?: string[];
 }

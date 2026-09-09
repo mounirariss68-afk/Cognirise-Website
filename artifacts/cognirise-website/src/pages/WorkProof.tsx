@@ -3,10 +3,12 @@ import { ArrowDown, ArrowRight, Plus } from "lucide-react";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
-import { contentRecord, text, useCmsCollection, useCmsEntry } from "@/lib/cms";
-import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
+import { contentRecord, useCmsCollection } from "@/lib/cms";
+import { useDynamicMetadata } from "@/lib/metadata";
 import { SpatialDisclosure, SpatialDisclosureItem, SpatialDisclosureTrigger, SpatialDisclosurePanel } from "@/components/ui/spatial-disclosure";
 import { PulseImage } from "@/components/ui/pulse-image";
+import { useGovernedLanding } from "@/components/GovernedLandingRoute";
+import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } from "@/lib/cms";
 import { WorkLibrary, type PublicCaseStudy } from "@/components/work/case-study-ui";
 
 const patternFallback = [{
@@ -15,6 +17,15 @@ const patternFallback = [{
 }];
 
 export default function WorkProof() {
+  const governedLanding = useGovernedLanding();
+  const governedHero = governedLanding ? landingNarrative(governedLanding, "hero") : null;
+  const heroVisual = landingMedia(governedLanding, "work-hero-visual", { src: assetUrl("/images/cognirise/site-work-proof.jpg"), alt: "A vivid violet-to-coral route moving through a white architectural model." });
+  const proofRouteVisual = landingMedia(governedLanding, "work-proof-route-visual", { src: assetUrl("/images/cognirise/pulse-breakthrough.jpg"), alt: "A violet and coral current cutting through an architectural maze." });
+  const outcomesVisual = landingMedia(governedLanding, "work-outcomes-visual", { src: assetUrl("/images/cognirise/cognirise-pulse-outcomes.jpg"), alt: "A coral route passing through a violet arch and a navy structure." });
+  const patternVisual = landingMedia(governedLanding, "work-pattern-visual", { src: assetUrl("/images/cognirise/site-work-proof.jpg"), alt: "An architectural route joining different operating environments." });
+  const heroProofCta = landingCta(governedLanding, "work-hero-proof-cta", { label: "See the proof model", href: "/work#proof" });
+  const heroProcessCta = landingCta(governedLanding, "work-hero-process-cta", { label: "Bring one process", href: "/value-scan" });
+  const closingCta = landingCta(governedLanding, "work-closing-cta", { label: "Book a value scan", href: "/value-scan" });
   const { market } = useMarketStore();
   const caseStudies = useCmsCollection<PublicCaseStudy>("case-study", [], (item) => {
     const record = contentRecord(item, "case-study") as PublicCaseStudy;
@@ -24,14 +35,36 @@ export default function WorkProof() {
     const content = contentRecord(item, "case-study");
     return { title: item.title, copy: content.outcomes[0] || item.summary || "" };
   });
-  const page = useCmsEntry("case-study", "work");
-  useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
-    title: "How Cognirise Delivers AI Transformation",
-    description: "See how Cognirise frames, builds and governs consequential AI transformation work.",
-  }));
+  const governedSeo = governedLanding ? landingSeo(governedLanding) : undefined;
+  useDynamicMetadata({
+    title: governedSeo?.title || "How Cognirise Delivers AI Transformation",
+    description: governedSeo?.description || "See how Cognirise frames, builds and governs consequential AI transformation work.",
+    canonicalUrl: governedSeo?.canonicalUrl,
+    noIndex: governedSeo?.noIndex,
+  });
   const featuredPattern = patterns.data[0];
+  const proofPrinciples = [
+    ["work-proof-starting-point-label", "Starting point", "work-proof-starting-point-value", "One consequential process"],
+    ["work-proof-surface-label", "What we surface", "work-proof-surface-value", "Constraints before the build"],
+    ["work-proof-change-label", "What changes", "work-proof-change-value", "Working systems, not slides"],
+    ["work-proof-durability-label", "How it lasts", "work-proof-durability-value", "Governance in the flow"],
+  ];
+  const deliveryStages = [
+    ["01", "work-ledger-mandate-heading", "Mandate", "work-ledger-mandate-body", "The priority work, the sponsor question and what a useful change needs to achieve."],
+    ["02", "work-ledger-constraints-heading", "Constraints", "work-ledger-constraints-body", "The data, architecture, security, sovereignty and operating realities that define the possible."],
+    ["03", "work-ledger-build-heading", "Build", "work-ledger-build-body", "Forward-deployed operators and engineers turn the route into a working system with the people who will run it."],
+    ["04", "work-ledger-production-heading", "Governed production", "work-ledger-production-body", "Controls, ownership and accountability are embedded where the work happens—not added at the end."],
+  ];
+  const outcomes = [
+    ["01", "work-outcomes-cost", "Cost"],
+    ["02", "work-outcomes-capacity", "Capacity"],
+    ["03", "work-outcomes-speed", "Speed"],
+    ["04", "work-outcomes-risk", "Risk"],
+  ];
   
   const marketLocation = getMarketLocationLabel(market);
+  const closingHeading = landingText(governedLanding, "work-closing-heading", "Bring one process. Make the proof useful.");
+  const [closingHeadingLead, ...closingHeadingRemainder] = closingHeading.split(/(?<=\.)\s+/);
 
   const goTo = scrollToSection;
 
@@ -157,74 +190,68 @@ export default function WorkProof() {
       `}</style>
       
       <section className="wp-hero">
-        <div className="wp-kicker">{marketLocation} / Work & proof</div>
+        <div className="wp-kicker">{landingText(governedLanding, "work-hero-kicker", `${marketLocation} / Work & proof`)}</div>
         <div className="wp-hero-grid">
           <div className="wp-hero-copy">
-            <h1>Proof lives in the <em>work.</em></h1>
-            <p>Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production—and documents the decisions, controls and outcomes along the way.</p>
-            <button className="wp-primary" onClick={() => goTo("proof")}>See the proof model <ArrowDown size={15} /></button>
-            <Link href="/value-scan" className="wp-under">Bring one process <ArrowRight size={15} /></Link>
+            <h1 data-governed-landing={governedLanding?.pagePath}>{governedHero?.heading ?? <>Proof lives in the <em>work.</em></>}</h1>
+            <p>{governedHero?.text ?? "Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production—and documents the decisions, controls and outcomes along the way."}</p>
+            <button className="wp-primary" onClick={() => heroProofCta.href.startsWith("#") ? goTo(heroProofCta.href.slice(1)) : window.location.assign(heroProofCta.href)}>{heroProofCta.label} <ArrowDown size={15} /></button>
+            <Link href={heroProcessCta.href} className="wp-under">{heroProcessCta.label} <ArrowRight size={15} /></Link>
           </div>
           <div className="wp-hero-art">
-            <PulseImage src={assetUrl('/images/cognirise/site-work-proof.jpg')} alt="A vivid violet-to-coral route moving through a white architectural model." className="w-full h-full object-cover" />
-            <div className="wp-hero-word">proof</div>
-            <div className="wp-caption"><span>01 / work in motion</span>From mandate to governed production</div>
+            <PulseImage src={heroVisual.src} alt={heroVisual.alt} className="w-full h-full object-cover" />
+            <div className="wp-hero-word">{landingText(governedLanding, "work-hero-art-word", "proof")}</div>
+            <div className="wp-caption"><span>{landingText(governedLanding, "work-hero-caption-label", "01 / work in motion")}</span>{landingText(governedLanding, "work-hero-caption-body", "From mandate to governed production")}</div>
           </div>
         </div>
       </section>
       
-      <section className="wp-proof" aria-label="Proof principles">
-        <div><b>Starting point</b><strong>One consequential process</strong></div>
-        <div><b>What we surface</b><strong>Constraints before the build</strong></div>
-        <div><b>What changes</b><strong>Working systems, not slides</strong></div>
-        <div><b>How it lasts</b><strong>Governance in the flow</strong></div>
+      <section className="wp-proof" aria-label={landingText(governedLanding, "work-proof-aria-label", "Proof principles")}>
+        {proofPrinciples.map(([labelSlot, label, valueSlot, value]) => (
+          <div key={labelSlot}><b>{landingText(governedLanding, labelSlot, label)}</b><strong>{landingText(governedLanding, valueSlot, value)}</strong></div>
+        ))}
       </section>
       
       <section className="wp-intro" id="proof">
         <div>
-          <div className="wp-kicker">Evidence, not theatre</div>
-          <h2>Change is only useful when it can be <em>shown.</em></h2>
+          <div className="wp-kicker">{landingText(governedLanding, "work-evidence-kicker", "Evidence, not theatre")}</div>
+          <h2>{landingText(governedLanding, "work-principles-heading", "Change is only useful when it can be shown.")}</h2>
         </div>
         <div className="wp-intro-copy">
-          Every engagement begins with the work under pressure: the decision, process, data and control environment that must move together.
-          <small>Where client details cannot be public, we describe the operating pattern clearly and label it as anonymized. We do not invent names, metrics or results.</small>
+          {landingText(governedLanding, "work-evidence-body", "Every engagement begins with the work under pressure: the decision, process, data and control environment that must move together.")}
+          <small>{landingText(governedLanding, "work-evidence-disclosure", "Where client details cannot be public, we describe the operating pattern clearly and label it as anonymized. We do not invent names, metrics or results.")}</small>
         </div>
       </section>
       
       <section className="wp-image-break">
-        <PulseImage src={assetUrl('/images/cognirise/pulse-breakthrough.jpg')} alt="A violet and coral current cutting through an architectural maze." className="w-full h-full object-cover" />
+        <PulseImage src={proofRouteVisual.src} alt={proofRouteVisual.alt} className="w-full h-full object-cover" />
         <div className="wp-break-copy">
-          <div className="wp-kicker">The proof route</div>
-          <h2>Constraints are part of the brief.</h2>
-          <p>Security, sovereignty, integration, accountability and adoption are not a postscript. They shape the route from the first working session through to production.</p>
+          <div className="wp-kicker">{landingText(governedLanding, "work-proof-route-kicker", "The proof route")}</div>
+          <h2>{landingText(governedLanding, "work-proof-route-heading", "Constraints are part of the brief.")}</h2>
+          <p>{landingText(governedLanding, "work-proof-route-body", "Security, sovereignty, integration, accountability and adoption are not a postscript. They shape the route from the first working session through to production.")}</p>
         </div>
-        <div className="wp-break-no">02 / documented delivery</div>
+        <div className="wp-break-no">{landingText(governedLanding, "work-proof-route-caption", "02 / documented delivery")}</div>
       </section>
       
       <section className="wp-ledger">
         <div className="wp-ledger-head">
           <div>
-            <div className="wp-kicker">How work is evidenced</div>
-            <h2>The delivery record, not the highlight reel.</h2>
+            <div className="wp-kicker">{landingText(governedLanding, "work-ledger-kicker", "How work is evidenced")}</div>
+            <h2>{landingText(governedLanding, "work-ledger-heading", "The delivery record, not the highlight reel.")}</h2>
           </div>
-          <p className="wp-ledger-lead">A useful proof story makes its context, choices and operating controls visible—so leaders can judge what it took to make progress stick.</p>
+          <p className="wp-ledger-lead">{landingText(governedLanding, "work-ledger-body", "A useful proof story makes its context, choices and operating controls visible—so leaders can judge what it took to make progress stick.")}</p>
         </div>
 
         <SpatialDisclosure defaultValue="01" allowCollapse={true} preview className="wp-stages">
-          {[
-            ["01","Mandate","The priority work, the sponsor question and what a useful change needs to achieve."],
-            ["02","Constraints","The data, architecture, security, sovereignty and operating realities that define the possible."],
-            ["03","Build","Forward-deployed operators and engineers turn the route into a working system with the people who will run it."],
-            ["04","Governed production","Controls, ownership and accountability are embedded where the work happens—not added at the end."]
-          ].map(([n,title,copy]) => (
+          {deliveryStages.map(([n, titleSlot, title, copySlot, copy]) => (
             <SpatialDisclosureItem key={n} id={n} className="group border-b border-[#cbd3e1] transition-colors data-[state=active]:bg-[#f2eff9]">
               <SpatialDisclosureTrigger id={n} className="w-full text-left grid grid-cols-[70px_1fr_32px] gap-[20px] items-center p-[25px_8px] max-[760px]:grid-cols-[35px_1fr_32px] max-[760px]:p-[20px_0]">
                 <span className="text-[10px] tracking-[0.1em] text-[#697a96] pt-[7px]">{n}</span>
-                <h3 className="font-semibold text-[clamp(22px,2.4vw,34px)] tracking-[-0.065em] leading-[1.05] m-0 group-hover:text-[hsl(var(--brand-pink))] transition-colors">{title}</h3>
+                <h3 className="font-semibold text-[clamp(22px,2.4vw,34px)] tracking-[-0.065em] leading-[1.05] m-0 group-hover:text-[hsl(var(--brand-pink))] transition-colors">{landingText(governedLanding, titleSlot, title)}</h3>
                 <Plus className="h-5 w-5 justify-self-end text-muted-foreground group-data-[state=active]:rotate-45 group-data-[state=active]:text-[hsl(var(--brand-pink))] transition-transform" />
               </SpatialDisclosureTrigger>
               <SpatialDisclosurePanel id={n} className="data-[state=inactive]:hidden px-[25px] pb-[25px] pl-[98px] max-[760px]:pl-[55px] max-[760px]:px-0">
-                <p className="text-[14px] leading-[1.52] text-[#536887] m-0 max-w-[410px]">{copy}</p>
+                <p className="text-[14px] leading-[1.52] text-[#536887] m-0 max-w-[410px]">{landingText(governedLanding, copySlot, copy)}</p>
               </SpatialDisclosurePanel>
             </SpatialDisclosureItem>
           ))}
@@ -234,18 +261,15 @@ export default function WorkProof() {
       <section className="wp-outcome">
         <div className="wp-outcome-wrap">
           <div className="wp-outcome-copy">
-            <div className="wp-kicker">Four ways work moves</div>
-            <h2>Outcomes with operating consequences.</h2>
-            <p>We look for measurable movement in the forces that matter to an enterprise: cost, capacity, speed and risk. The right evidence depends on the mandate—not a predetermined dashboard.</p>
+            <div className="wp-kicker">{landingText(governedLanding, "work-outcomes-kicker", "Four ways work moves")}</div>
+            <h2>{landingText(governedLanding, "work-outcomes-heading", "Outcomes with operating consequences.")}</h2>
+            <p>{landingText(governedLanding, "work-outcomes-body", "We look for measurable movement in the forces that matter to an enterprise: cost, capacity, speed and risk. The right evidence depends on the mandate—not a predetermined dashboard.")}</p>
             <div className="wp-outcome-grid">
-              <div><span>01</span>Cost</div>
-              <div><span>02</span>Capacity</div>
-              <div><span>03</span>Speed</div>
-              <div><span>04</span>Risk</div>
+              {outcomes.map(([number, slot, label]) => <div key={number}><span>{number}</span>{landingText(governedLanding, slot, label)}</div>)}
             </div>
           </div>
           <div className="wp-outcome-image">
-            <PulseImage src={assetUrl('/images/cognirise/cognirise-pulse-outcomes.jpg')} alt="A coral route passing through a violet arch and a navy structure." className="w-full h-full object-cover" />
+            <PulseImage src={outcomesVisual.src} alt={outcomesVisual.alt} className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
@@ -255,23 +279,23 @@ export default function WorkProof() {
       <section className="wp-note">
         <div className="wp-note-head">
           <div>
-            <div className="wp-kicker">Patterns, clearly labeled</div>
-            <h2>Some work must remain private. The method does not.</h2>
+            <div className="wp-kicker">{landingText(governedLanding, "work-pattern-kicker", "Patterns, clearly labeled")}</div>
+            <h2>{landingText(governedLanding, "work-pattern-heading", "Some work must remain private. The method does not.")}</h2>
           </div>
-          <p>These are anonymized engagement patterns—not named case studies or claimed performance figures.</p>
+          <p>{landingText(governedLanding, "work-pattern-disclaimer", "These are anonymized engagement patterns—not named case studies or claimed performance figures.")}</p>
         </div>
         <div className="wp-note-grid">
           <figure className="wp-note-image">
-            <PulseImage src={assetUrl('/images/cognirise/site-work-proof.jpg')} alt="An architectural route joining different operating environments." className="w-full h-full object-cover" />
+            <PulseImage src={patternVisual.src} alt={patternVisual.alt} className="w-full h-full object-cover" />
             <figcaption>
-              <span>Anonymized engagement pattern</span>
+              <span>{landingText(governedLanding, "work-pattern-caption", "Anonymized engagement pattern")}</span>
                <strong>{featuredPattern.title}</strong>
             </figcaption>
           </figure>
           <aside className="wp-pattern">
             <div>
-              <div className="wp-kicker">What is documented</div>
-              <p>Where work gets stuck. What can change. What must stay controlled.</p>
+              <div className="wp-kicker">{landingText(governedLanding, "work-pattern-panel-kicker", "What is documented")}</div>
+              <p>{landingText(governedLanding, "work-pattern-panel-body", "Where work gets stuck. What can change. What must stay controlled.")}</p>
             </div>
              <small>{featuredPattern.copy}</small>
           </aside>
@@ -280,10 +304,10 @@ export default function WorkProof() {
       
       <section className="wp-start" id="start">
         <div className="wp-start-in">
-          <div className="wp-kicker">The first move</div>
-          <h2>Bring one process.<br /><em>Make the proof useful.</em></h2>
-          <p>Start with work where urgency, complexity and value have already collided. Together we can surface the mandate, constraints and practical route to production.</p>
-          <Link href="/value-scan" className="wp-primary">Book a value scan <ArrowRight size={16} /></Link>
+          <div className="wp-kicker">{landingText(governedLanding, "work-closing-kicker", "The first move")}</div>
+          <h2>{closingHeadingLead}<br /><em>{closingHeadingRemainder.join(" ")}</em></h2>
+          <p>{landingText(governedLanding, "work-closing-body", "Start with work where urgency, complexity and value have already collided. Together we can surface the mandate, constraints and practical route to production.")}</p>
+          <Link href={closingCta.href} className="wp-primary">{closingCta.label} <ArrowRight size={16} /></Link>
         </div>
       </section>
     </main>

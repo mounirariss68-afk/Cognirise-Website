@@ -125,6 +125,37 @@ export const cmsLoginAttemptsTable = pgTable(
   ],
 );
 
+export const cmsUserMarketAssignmentsTable = pgTable(
+  "cms_user_market_assignments",
+  {
+    userId: uuid("user_id").notNull().references(() => cmsUsersTable.id, { onDelete: "cascade" }),
+    marketCode: text("market_code").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("cms_user_market_assignments_user_market_uidx").on(table.userId, table.marketCode),
+    index("cms_user_market_assignments_market_idx").on(table.marketCode),
+  ],
+);
+
+export const cmsUserAccessTokensTable = pgTable(
+  "cms_user_access_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull().references(() => cmsUsersTable.id, { onDelete: "cascade" }),
+    purpose: text("purpose").notNull(),
+    tokenDigest: text("token_digest").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    createdByUserId: uuid("created_by_user_id").references(() => cmsUsersTable.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("cms_user_access_tokens_digest_uidx").on(table.tokenDigest),
+    index("cms_user_access_tokens_user_expiry_idx").on(table.userId, table.expiresAt),
+  ],
+);
+
 export const insertCmsUserSchema = createInsertSchema(cmsUsersTable).omit({
   id: true,
   createdAt: true,
@@ -154,3 +185,5 @@ export type CmsTotpCredential = typeof cmsTotpCredentialsTable.$inferSelect;
 export type CmsRecoveryCode = typeof cmsRecoveryCodesTable.$inferSelect;
 export type CmsSession = typeof cmsSessionsTable.$inferSelect;
 export type CmsLoginAttempt = typeof cmsLoginAttemptsTable.$inferSelect;
+export type CmsUserMarketAssignment = typeof cmsUserMarketAssignmentsTable.$inferSelect;
+export type CmsUserAccessToken = typeof cmsUserAccessTokensTable.$inferSelect;

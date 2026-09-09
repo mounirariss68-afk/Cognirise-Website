@@ -1,4 +1,5 @@
-import { Switch, Route, Redirect, useSearch } from "wouter";
+import { Switch, Route, Redirect, useLocation, useSearch } from "wouter";
+import { useGetPublicNavigationSettings } from "@workspace/api-client-react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
@@ -6,6 +7,8 @@ import NotFound from "@/pages/not-found";
 import { Shell } from "@/components/layout/Shell";
 import { AnalyticsBridge } from "@/lib/analytics";
 import { PublicSitemap } from "@/components/PublicSitemap";
+import { GovernedLandingRoute } from "@/components/GovernedLandingRoute";
+import { useMarketStore } from "@/store/market";
 
 function RedirectWithSearch({ to }: { to: string }) {
   const search = useSearch();
@@ -63,8 +66,24 @@ import AgentAuthorityModel from "@/pages/AgentAuthorityModel";
 import IDAOMethodology from "@/pages/IDAOMethodology";
 
 export function Router() {
+  const [location] = useLocation();
+  const { market, locale } = useMarketStore();
+  const path = location.split(/[?#]/)[0];
+  const isPreview = path.startsWith("/preview/");
+  const policy = useGetPublicNavigationSettings({ market, locale }, {
+    query: { queryKey: ["public-navigation", market, locale], enabled: !isPreview },
+  });
+  // A preview is a capability-scoped composition. CmsPreview fetches its
+  // immutable navigation snapshot and supplies it to Shell; do not consult
+  // the live public policy or page availability for this route.
+  if (isPreview) return <CmsPreview />;
+  const unavailable = policy.data?.isConfigured === true
+    && policy.data.pages.some((page) => page.path === path && !page.enabled);
+  if (policy.isPending) return <Shell><div aria-busy="true" className="min-h-[60vh]" /></Shell>;
+  if (policy.isError) return <Shell><NotFound /></Shell>;
   return (
     <Shell>
+      {unavailable ? <NotFound /> :
       <Switch>
         <Route path="/" component={Home} />
         
@@ -84,7 +103,7 @@ export function Router() {
         <Route path="/services"><AnchoredRedirect to="/" anchor="service-lines" /></Route>
         
         {/* Platforms */}
-        <Route path="/platforms" component={PlatformsOverview} />
+        <Route path="/platforms"><GovernedLandingRoute pagePath="/platforms" compiled={PlatformsOverview} /></Route>
         <Route path="/platforms/cognios" component={CogniOSPlatform} />
         <Route path="/platforms/cognidocs" component={CogniDocs} />
         <Route path="/platforms/cogniagents" component={CogniAgents} />
@@ -131,21 +150,21 @@ export function Router() {
 
 
         {/* Work & Insights */}
-        <Route path="/work" component={WorkProof} />
+        <Route path="/work"><GovernedLandingRoute pagePath="/work" compiled={WorkProof} /></Route>
         <Route path="/work/:slug" component={CaseStudyDetail} />
-        <Route path="/insights" component={InsightsEditorial} />
+        <Route path="/insights"><GovernedLandingRoute pagePath="/insights" compiled={InsightsEditorial} /></Route>
         <Route path="/insights/:slug" component={InsightArticle} />
         
         {/* Company */}
-        <Route path="/about" component={AboutPeople} />
-        <Route path="/partners" component={Partners} />
+        <Route path="/about"><GovernedLandingRoute pagePath="/about" compiled={AboutPeople} /></Route>
+        <Route path="/partners"><GovernedLandingRoute pagePath="/partners" compiled={Partners} /></Route>
         <Route path="/faq" component={FAQ} />
         <Route path="/contact" component={Contact} />
         <Route path="/value-scan" component={ValueScan} />
         <Route path="/preview/:token" component={CmsPreview} />
         
         <Route component={NotFound} />
-      </Switch>
+      </Switch>}
     </Shell>
   );
 }

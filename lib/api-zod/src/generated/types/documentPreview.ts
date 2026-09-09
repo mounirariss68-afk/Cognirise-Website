@@ -5,16 +5,25 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { DocumentPreviewNavigation } from './documentPreviewNavigation';
 import type { DocumentSnapshot } from './documentSnapshot';
 
 export interface DocumentPreview {
   document: DocumentSnapshot;
   previewUrl: string;
   expiresAt: Date;
+  requestedMarket: string;
+  requestedLocale: string;
   market: string;
   locale: string;
+  revisionId: string;
   /** @minimum 1 */
   revisionNumber: number;
   usedFallback: boolean;
+  /** @nullable */
+  fallbackReason: string | null;
+  navigationPolicyDigest: string;
+  /** Immutable navigation and page-availability snapshot captured when the preview capability was issued. */
+  navigation: DocumentPreviewNavigation;
   warnings: string[];
 }

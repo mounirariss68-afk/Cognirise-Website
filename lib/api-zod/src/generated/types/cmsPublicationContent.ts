@@ -5,6 +5,7 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { CmsImmutableMediaReference } from './cmsImmutableMediaReference';
 import type { CmsPublicationContentSchemaVersion } from './cmsPublicationContentSchemaVersion';
 import type { CmsPublicationContentVariant } from './cmsPublicationContentVariant';
 import type { CmsRichBlock } from './cmsRichBlock';
@@ -26,6 +27,8 @@ export interface CmsPublicationContent {
   platformIds?: string[];
   heroMediaId?: string;
   pdfMediaId?: string;
+  heroMedia?: CmsImmutableMediaReference;
+  pdfMedia?: CmsImmutableMediaReference;
   visibility?: CmsVisibility;
   order?: number;
   sources?: CmsSource[];

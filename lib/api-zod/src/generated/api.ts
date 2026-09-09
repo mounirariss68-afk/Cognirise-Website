@@ -9,6 +9,20 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Get enabled public markets and locales
+ */
+export const GetPublicConfigurationResponse = zod.object({
+  "markets": zod.array(zod.object({
+  "code": zod.string(),
+  "displayName": zod.string(),
+  "defaultLocale": zod.string(),
+  "locales": zod.array(zod.string()),
+  "isCanonical": zod.boolean()
+}))
+})
+
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -19,11 +33,38 @@ export const HealthCheckResponse = zod.object({
 /**
  * @summary Get published header navigation visibility
  */
+export const getPublicNavigationSettingsQueryMarketDefault = `uae`;
+export const getPublicNavigationSettingsQueryLocaleDefault = `en`;
+
+export const GetPublicNavigationSettingsQueryParams = zod.object({
+  "market": zod.coerce.string().default(getPublicNavigationSettingsQueryMarketDefault),
+  "locale": zod.coerce.string().default(getPublicNavigationSettingsQueryLocaleDefault)
+})
+
+export const getPublicNavigationSettingsResponseItemsItemOrderMin = 0;
+export const getPublicNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
+
+
+
 export const GetPublicNavigationSettingsResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
+  "label": zod.string(),
+  "parentId": zod.string().nullable(),
+  "order": zod.number().min(getPublicNavigationSettingsResponseItemsItemOrderMin).multipleOf(getPublicNavigationSettingsResponseItemsItemOrderMultipleOf),
+  "destination": zod.string(),
+  "visible": zod.boolean()
+})),
+  "pages": zod.array(zod.object({
+  "path": zod.string(),
   "enabled": zod.boolean()
 })),
+  "requestedMarket": zod.string(),
+  "requestedLocale": zod.string(),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "usedFallback": zod.boolean(),
+  "isConfigured": zod.boolean().optional(),
   "updatedAt": zod.coerce.date().nullable()
 })
 
@@ -31,33 +72,163 @@ export const GetPublicNavigationSettingsResponse = zod.object({
 /**
  * @summary Get editable header navigation visibility
  */
+export const getNavigationSettingsQueryMarketDefault = `uae`;
+export const getNavigationSettingsQueryLocaleDefault = `en`;
+
+export const GetNavigationSettingsQueryParams = zod.object({
+  "market": zod.coerce.string().default(getNavigationSettingsQueryMarketDefault),
+  "locale": zod.coerce.string().default(getNavigationSettingsQueryLocaleDefault)
+})
+
+export const getNavigationSettingsResponseItemsItemOrderMin = 0;
+export const getNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
+
+
+
 export const GetNavigationSettingsResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
+  "label": zod.string(),
+  "parentId": zod.string().nullable(),
+  "order": zod.number().min(getNavigationSettingsResponseItemsItemOrderMin).multipleOf(getNavigationSettingsResponseItemsItemOrderMultipleOf),
+  "destination": zod.string(),
+  "visible": zod.boolean()
+})),
+  "pages": zod.array(zod.object({
+  "path": zod.string(),
   "enabled": zod.boolean()
 })),
+  "requestedMarket": zod.string(),
+  "requestedLocale": zod.string(),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "usedFallback": zod.boolean(),
+  "isConfigured": zod.boolean().optional(),
   "updatedAt": zod.coerce.date().nullable()
 })
 
 
 /**
- * @summary Enable or disable header menu and submenu items
+ * @summary Save navigation and page availability as a draft
  */
+export const updateNavigationSettingsBodyItemsItemOrderMin = 0;
+export const updateNavigationSettingsBodyItemsItemOrderMultipleOf = 1;
 
 
 
 export const UpdateNavigationSettingsBody = zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
+  "label": zod.string(),
+  "parentId": zod.string().nullish().describe('Omit to inherit the registry parent; use null to explicitly place the item at the top level.'),
+  "order": zod.number().min(updateNavigationSettingsBodyItemsItemOrderMin).multipleOf(updateNavigationSettingsBodyItemsItemOrderMultipleOf),
+  "destination": zod.string(),
+  "visible": zod.boolean()
+})),
+  "pages": zod.array(zod.object({
+  "path": zod.string(),
   "enabled": zod.boolean()
-})).min(1)
+})),
+  "market": zod.string(),
+  "locale": zod.string()
 })
+
+export const updateNavigationSettingsResponseItemsItemOrderMin = 0;
+export const updateNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
+
+
 
 export const UpdateNavigationSettingsResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
+  "label": zod.string(),
+  "parentId": zod.string().nullable(),
+  "order": zod.number().min(updateNavigationSettingsResponseItemsItemOrderMin).multipleOf(updateNavigationSettingsResponseItemsItemOrderMultipleOf),
+  "destination": zod.string(),
+  "visible": zod.boolean()
+})),
+  "pages": zod.array(zod.object({
+  "path": zod.string(),
   "enabled": zod.boolean()
 })),
+  "requestedMarket": zod.string(),
+  "requestedLocale": zod.string(),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "usedFallback": zod.boolean(),
+  "isConfigured": zod.boolean().optional(),
+  "updatedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Submit navigation and page availability for review
+ */
+export const ReviewNavigationSettingsBody = zod.object({
+  "market": zod.string(),
+  "locale": zod.string()
+})
+
+export const reviewNavigationSettingsResponseItemsItemOrderMin = 0;
+export const reviewNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
+
+
+
+export const ReviewNavigationSettingsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "parentId": zod.string().nullable(),
+  "order": zod.number().min(reviewNavigationSettingsResponseItemsItemOrderMin).multipleOf(reviewNavigationSettingsResponseItemsItemOrderMultipleOf),
+  "destination": zod.string(),
+  "visible": zod.boolean()
+})),
+  "pages": zod.array(zod.object({
+  "path": zod.string(),
+  "enabled": zod.boolean()
+})),
+  "requestedMarket": zod.string(),
+  "requestedLocale": zod.string(),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "usedFallback": zod.boolean(),
+  "isConfigured": zod.boolean().optional(),
+  "updatedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Publish reviewed navigation and page availability
+ */
+export const PublishNavigationSettingsBody = zod.object({
+  "market": zod.string(),
+  "locale": zod.string()
+})
+
+export const publishNavigationSettingsResponseItemsItemOrderMin = 0;
+export const publishNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
+
+
+
+export const PublishNavigationSettingsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "parentId": zod.string().nullable(),
+  "order": zod.number().min(publishNavigationSettingsResponseItemsItemOrderMin).multipleOf(publishNavigationSettingsResponseItemsItemOrderMultipleOf),
+  "destination": zod.string(),
+  "visible": zod.boolean()
+})),
+  "pages": zod.array(zod.object({
+  "path": zod.string(),
+  "enabled": zod.boolean()
+})),
+  "requestedMarket": zod.string(),
+  "requestedLocale": zod.string(),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "usedFallback": zod.boolean(),
+  "isConfigured": zod.boolean().optional(),
   "updatedAt": zod.coerce.date().nullable()
 })
 
@@ -140,6 +311,9 @@ export const SubscribeNewsletterResponse = zod.object({
  * @summary Get initial account setup state
  */
 export const getAuthBootstrapResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const getAuthBootstrapResponseSessionOneUserMarketCodesItemMin = 2;
+export const getAuthBootstrapResponseSessionOneUserMarketCodesItemMax = 24;
+
 
 
 export const GetAuthBootstrapResponse = zod.object({
@@ -153,6 +327,7 @@ export const GetAuthBootstrapResponse = zod.object({
   "email": zod.string().regex(getAuthBootstrapResponseSessionOneUserEmailRegExp),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
+  "marketCodes": zod.array(zod.string().min(getAuthBootstrapResponseSessionOneUserMarketCodesItemMin).max(getAuthBootstrapResponseSessionOneUserMarketCodesItemMax)),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -190,6 +365,9 @@ export const BootstrapAuthBody = zod.object({
 })
 
 export const bootstrapAuthResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const bootstrapAuthResponseSessionOneUserMarketCodesItemMin = 2;
+export const bootstrapAuthResponseSessionOneUserMarketCodesItemMax = 24;
+
 
 
 export const BootstrapAuthResponse = zod.object({
@@ -202,6 +380,7 @@ export const BootstrapAuthResponse = zod.object({
   "email": zod.string().regex(bootstrapAuthResponseSessionOneUserEmailRegExp),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
+  "marketCodes": zod.array(zod.string().min(bootstrapAuthResponseSessionOneUserMarketCodesItemMin).max(bootstrapAuthResponseSessionOneUserMarketCodesItemMax)),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -238,6 +417,9 @@ export const LoginBody = zod.object({
 })
 
 export const loginResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const loginResponseSessionOneUserMarketCodesItemMin = 2;
+export const loginResponseSessionOneUserMarketCodesItemMax = 24;
+
 
 
 export const LoginResponse = zod.object({
@@ -250,6 +432,7 @@ export const LoginResponse = zod.object({
   "email": zod.string().regex(loginResponseSessionOneUserEmailRegExp),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
+  "marketCodes": zod.array(zod.string().min(loginResponseSessionOneUserMarketCodesItemMin).max(loginResponseSessionOneUserMarketCodesItemMax)),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -281,6 +464,9 @@ export const VerifyMfaBody = zod.object({
 })
 
 export const verifyMfaResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const verifyMfaResponseSessionOneUserMarketCodesItemMin = 2;
+export const verifyMfaResponseSessionOneUserMarketCodesItemMax = 24;
+
 
 
 export const VerifyMfaResponse = zod.object({
@@ -293,6 +479,7 @@ export const VerifyMfaResponse = zod.object({
   "email": zod.string().regex(verifyMfaResponseSessionOneUserEmailRegExp),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
+  "marketCodes": zod.array(zod.string().min(verifyMfaResponseSessionOneUserMarketCodesItemMin).max(verifyMfaResponseSessionOneUserMarketCodesItemMax)),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -336,6 +523,9 @@ export const ConfirmMfaBody = zod.object({
 })
 
 export const confirmMfaResponseOneSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const confirmMfaResponseOneSessionOneUserMarketCodesItemMin = 2;
+export const confirmMfaResponseOneSessionOneUserMarketCodesItemMax = 24;
+
 export const confirmMfaResponseTwoRecoveryCodesItemRegExp = new RegExp('^[A-Z0-9]{4,}(?:-[A-Z0-9]{4,})*$');
 
 
@@ -350,6 +540,7 @@ export const ConfirmMfaResponse = zod.object({
   "email": zod.string().regex(confirmMfaResponseOneSessionOneUserEmailRegExp),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
+  "marketCodes": zod.array(zod.string().min(confirmMfaResponseOneSessionOneUserMarketCodesItemMin).max(confirmMfaResponseOneSessionOneUserMarketCodesItemMax)),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -389,6 +580,9 @@ export const RecoverAuthBody = zod.object({
 })
 
 export const recoverAuthResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const recoverAuthResponseSessionOneUserMarketCodesItemMin = 2;
+export const recoverAuthResponseSessionOneUserMarketCodesItemMax = 24;
+
 
 
 export const RecoverAuthResponse = zod.object({
@@ -401,6 +595,7 @@ export const RecoverAuthResponse = zod.object({
   "email": zod.string().regex(recoverAuthResponseSessionOneUserEmailRegExp),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
+  "marketCodes": zod.array(zod.string().min(recoverAuthResponseSessionOneUserMarketCodesItemMin).max(recoverAuthResponseSessionOneUserMarketCodesItemMax)),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -421,35 +616,24 @@ export const RecoverAuthResponse = zod.object({
 
 
 /**
- * @summary Set a temporary password for a CMS user
+ * @summary Consume a one-time invitation or password reset token
  */
-export const resetPasswordBodyTemporaryPasswordMin = 12;
-export const resetPasswordBodyTemporaryPasswordMax = 128;
+export const consumeAccessTokenBodyTokenMin = 32;
+export const consumeAccessTokenBodyTokenMax = 256;
+
+export const consumeAccessTokenBodyNewPasswordMin = 12;
+export const consumeAccessTokenBodyNewPasswordMax = 128;
 
 
-export const resetPasswordBodyTemporaryPasswordRegExp = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).+$');
+export const consumeAccessTokenBodyNewPasswordRegExp = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).+$');
 
 
-export const ResetPasswordBody = zod.object({
-  "userId": zod.string(),
-  "temporaryPassword": zod.string().min(resetPasswordBodyTemporaryPasswordMin).max(resetPasswordBodyTemporaryPasswordMax).regex(resetPasswordBodyTemporaryPasswordRegExp)
+export const ConsumeAccessTokenBody = zod.object({
+  "token": zod.string().min(consumeAccessTokenBodyTokenMin).max(consumeAccessTokenBodyTokenMax),
+  "newPassword": zod.string().min(consumeAccessTokenBodyNewPasswordMin).max(consumeAccessTokenBodyNewPasswordMax).regex(consumeAccessTokenBodyNewPasswordRegExp)
 })
 
-export const resetPasswordResponseEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
-
-
-export const ResetPasswordResponse = zod.object({
-  "id": zod.string(),
-  "name": zod.string(),
-  "email": zod.string().regex(resetPasswordResponseEmailRegExp),
-  "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
-  "status": zod.enum(['invited', 'active', 'suspended']),
-  "mfaEnabled": zod.boolean(),
-  "mustRotate": zod.boolean(),
-  "lastLoginAt": zod.coerce.date().nullish(),
-  "createdAt": zod.coerce.date(),
-  "updatedAt": zod.coerce.date()
-})
+export const ConsumeAccessTokenResponse = zod.void()
 
 
 /**
@@ -480,6 +664,9 @@ export const LogoutResponse = zod.void()
  * @summary Get the current session
  */
 export const getSessionResponseUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const getSessionResponseUserMarketCodesItemMin = 2;
+export const getSessionResponseUserMarketCodesItemMax = 24;
+
 
 
 export const GetSessionResponse = zod.object({
@@ -490,6 +677,7 @@ export const GetSessionResponse = zod.object({
   "email": zod.string().regex(getSessionResponseUserEmailRegExp),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
+  "marketCodes": zod.array(zod.string().min(getSessionResponseUserMarketCodesItemMin).max(getSessionResponseUserMarketCodesItemMax)),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -678,9 +866,10 @@ export const ListDocumentsQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listDocumentsQueryPageMultipleOf).default(listDocumentsQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listDocumentsQueryPageSizeMax).multipleOf(listDocumentsQueryPageSizeMultipleOf).default(listDocumentsQueryPageSizeDefault),
   "search": zod.coerce.string().max(listDocumentsQuerySearchMax).optional(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']).optional(),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']).optional(),
   "status": zod.enum(['draft', 'in-review', 'approved', 'scheduled', 'published', 'archived']).optional(),
-  "market": zod.coerce.string().optional()
+  "market": zod.coerce.string().optional(),
+  "locale": zod.coerce.string().optional()
 })
 
 export const listDocumentsResponseOnePageMultipleOf = 1;
@@ -694,27 +883,41 @@ export const listDocumentsResponseOneTotalPagesMin = 0;
 export const listDocumentsResponseOneTotalPagesMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+export const listDocumentsResponseTwoItemsItemContentOneIdentityMediaAltTextMax = 500;
+
 export const listDocumentsResponseTwoItemsItemContentOneOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const listDocumentsResponseTwoItemsItemContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const listDocumentsResponseTwoItemsItemContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentTwoLogoMediaAltTextMax = 500;
+
 export const listDocumentsResponseTwoItemsItemContentTwoOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentThreeHeroMediaAltTextMax = 500;
+
 export const listDocumentsResponseTwoItemsItemContentThreeOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const listDocumentsResponseTwoItemsItemContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const listDocumentsResponseTwoItemsItemContentFourHeroMediaAltTextMax = 500;
+
+export const listDocumentsResponseTwoItemsItemContentFourPdfMediaAltTextMax = 500;
 
 export const listDocumentsResponseTwoItemsItemContentFourOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const listDocumentsResponseTwoItemsItemContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentFiveHeroMediaAltTextMax = 500;
+
 export const listDocumentsResponseTwoItemsItemContentFiveOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentSixHeroMediaAltTextMax = 500;
+
 export const listDocumentsResponseTwoItemsItemContentSixOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -734,6 +937,8 @@ export const listDocumentsResponseTwoItemsItemContentEightTwoContactEmailMax = 2
 
 
 export const listDocumentsResponseTwoItemsItemContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const listDocumentsResponseTwoItemsItemContentNineVisualReferencesItemAltTextMax = 500;
+
 export const listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf = 1;
 
 
@@ -746,7 +951,7 @@ export const ListDocumentsResponse = zod.object({
 }).and(zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string().regex(listDocumentsResponseTwoItemsItemSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -766,6 +971,12 @@ export const ListDocumentsResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(listDocumentsResponseTwoItemsItemContentOneOrderMultipleOf).optional(),
@@ -798,6 +1009,12 @@ export const ListDocumentsResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(listDocumentsResponseTwoItemsItemContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(listDocumentsResponseTwoItemsItemContentTwoOrderMultipleOf).optional(),
@@ -815,6 +1032,12 @@ export const ListDocumentsResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -861,6 +1084,18 @@ export const ListDocumentsResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(listDocumentsResponseTwoItemsItemContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -914,6 +1149,12 @@ export const ListDocumentsResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(listDocumentsResponseTwoItemsItemContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -963,6 +1204,12 @@ export const ListDocumentsResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -1008,7 +1255,22 @@ export const ListDocumentsResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(listDocumentsResponseTwoItemsItemContentEightTwoContactEmailMax).regex(listDocumentsResponseTwoItemsItemContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -1020,6 +1282,9 @@ export const ListDocumentsResponse = zod.object({
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
+  "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
+  "effectiveMarket": zod.string().nullable(),
+  "effectiveLocale": zod.string().nullable(),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -1051,7 +1316,7 @@ export const createDocumentBodySeoNoIndexDefault = false;
 
 
 export const CreateDocumentBody = zod.object({
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string().max(createDocumentBodySlugMax).regex(createDocumentBodySlugRegExp),
   "title": zod.string().min(1).max(createDocumentBodyTitleMax),
   "summary": zod.string().max(createDocumentBodySummaryMax).optional(),
@@ -1068,27 +1333,41 @@ export const CreateDocumentBody = zod.object({
 })
 
 export const createDocumentResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+export const createDocumentResponseContentOneIdentityMediaAltTextMax = 500;
+
 export const createDocumentResponseContentOneOrderMultipleOf = 1;
 
 export const createDocumentResponseContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const createDocumentResponseContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const createDocumentResponseContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentTwoLogoMediaAltTextMax = 500;
+
 export const createDocumentResponseContentTwoOrderMultipleOf = 1;
 
 export const createDocumentResponseContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentThreeHeroMediaAltTextMax = 500;
+
 export const createDocumentResponseContentThreeOrderMultipleOf = 1;
 
 export const createDocumentResponseContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const createDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const createDocumentResponseContentFourHeroMediaAltTextMax = 500;
+
+export const createDocumentResponseContentFourPdfMediaAltTextMax = 500;
 
 export const createDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const createDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const createDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentFiveHeroMediaAltTextMax = 500;
+
 export const createDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const createDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentSixHeroMediaAltTextMax = 500;
+
 export const createDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const createDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -1108,13 +1387,15 @@ export const createDocumentResponseContentEightTwoContactEmailMax = 254;
 
 
 export const createDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const createDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
+
 export const createDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const CreateDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string().regex(createDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1134,6 +1415,12 @@ export const CreateDocumentResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentResponseContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(createDocumentResponseContentOneOrderMultipleOf).optional(),
@@ -1166,6 +1453,12 @@ export const CreateDocumentResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(createDocumentResponseContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentResponseContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(createDocumentResponseContentTwoOrderMultipleOf).optional(),
@@ -1183,6 +1476,12 @@ export const CreateDocumentResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentResponseContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -1229,6 +1528,18 @@ export const CreateDocumentResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentResponseContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentResponseContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(createDocumentResponseContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -1282,6 +1593,12 @@ export const CreateDocumentResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentResponseContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(createDocumentResponseContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -1331,6 +1648,12 @@ export const CreateDocumentResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentResponseContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -1376,7 +1699,22 @@ export const CreateDocumentResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(createDocumentResponseContentEightTwoContactEmailMax).regex(createDocumentResponseContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentResponseContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -1388,6 +1726,9 @@ export const CreateDocumentResponse = zod.object({
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(createDocumentResponseRevisionNumberMultipleOf),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
+  "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
+  "effectiveMarket": zod.string().nullable(),
+  "effectiveLocale": zod.string().nullable(),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -1406,28 +1747,47 @@ export const GetDocumentParams = zod.object({
   "documentId": zod.coerce.string()
 })
 
+export const GetDocumentQueryParams = zod.object({
+  "market": zod.coerce.string(),
+  "locale": zod.coerce.string()
+})
+
 export const getDocumentResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+export const getDocumentResponseContentOneIdentityMediaAltTextMax = 500;
+
 export const getDocumentResponseContentOneOrderMultipleOf = 1;
 
 export const getDocumentResponseContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const getDocumentResponseContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const getDocumentResponseContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentTwoLogoMediaAltTextMax = 500;
+
 export const getDocumentResponseContentTwoOrderMultipleOf = 1;
 
 export const getDocumentResponseContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentThreeHeroMediaAltTextMax = 500;
+
 export const getDocumentResponseContentThreeOrderMultipleOf = 1;
 
 export const getDocumentResponseContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const getDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const getDocumentResponseContentFourHeroMediaAltTextMax = 500;
+
+export const getDocumentResponseContentFourPdfMediaAltTextMax = 500;
 
 export const getDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const getDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const getDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentFiveHeroMediaAltTextMax = 500;
+
 export const getDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const getDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentSixHeroMediaAltTextMax = 500;
+
 export const getDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const getDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -1447,13 +1807,15 @@ export const getDocumentResponseContentEightTwoContactEmailMax = 254;
 
 
 export const getDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const getDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
+
 export const getDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const GetDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string().regex(getDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1473,6 +1835,12 @@ export const GetDocumentResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentResponseContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(getDocumentResponseContentOneOrderMultipleOf).optional(),
@@ -1505,6 +1873,12 @@ export const GetDocumentResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(getDocumentResponseContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentResponseContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(getDocumentResponseContentTwoOrderMultipleOf).optional(),
@@ -1522,6 +1896,12 @@ export const GetDocumentResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentResponseContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -1568,6 +1948,18 @@ export const GetDocumentResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentResponseContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentResponseContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(getDocumentResponseContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -1621,6 +2013,12 @@ export const GetDocumentResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentResponseContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(getDocumentResponseContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -1670,6 +2068,12 @@ export const GetDocumentResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentResponseContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -1715,7 +2119,22 @@ export const GetDocumentResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(getDocumentResponseContentEightTwoContactEmailMax).regex(getDocumentResponseContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentResponseContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -1727,6 +2146,9 @@ export const GetDocumentResponse = zod.object({
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(getDocumentResponseRevisionNumberMultipleOf),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
+  "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
+  "effectiveMarket": zod.string().nullable(),
+  "effectiveLocale": zod.string().nullable(),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -1758,6 +2180,8 @@ export const updateDocumentBodySeoTitleMax = 70;
 export const updateDocumentBodySeoDescriptionMax = 170;
 
 export const updateDocumentBodySeoNoIndexDefault = false;
+export const updateDocumentBodyMarketRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
+export const updateDocumentBodyLocaleRegExp = new RegExp('^[a-z]{2}(?:-[A-Z]{2})?$');
 export const updateDocumentBodyRevisionNumberMultipleOf = 1;
 
 
@@ -1775,32 +2199,47 @@ export const UpdateDocumentBody = zod.object({
   "imageId": zod.string().optional()
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
-  "markets": zod.array(zod.string()).min(1).optional(),
+  "market": zod.string().regex(updateDocumentBodyMarketRegExp),
+  "locale": zod.string().regex(updateDocumentBodyLocaleRegExp),
   "revisionNumber": zod.number().min(1).multipleOf(updateDocumentBodyRevisionNumberMultipleOf).describe('Optimistic concurrency version.')
 })
 
 export const updateDocumentResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+export const updateDocumentResponseContentOneIdentityMediaAltTextMax = 500;
+
 export const updateDocumentResponseContentOneOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const updateDocumentResponseContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const updateDocumentResponseContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentTwoLogoMediaAltTextMax = 500;
+
 export const updateDocumentResponseContentTwoOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentThreeHeroMediaAltTextMax = 500;
+
 export const updateDocumentResponseContentThreeOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const updateDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const updateDocumentResponseContentFourHeroMediaAltTextMax = 500;
+
+export const updateDocumentResponseContentFourPdfMediaAltTextMax = 500;
 
 export const updateDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const updateDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentFiveHeroMediaAltTextMax = 500;
+
 export const updateDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentSixHeroMediaAltTextMax = 500;
+
 export const updateDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -1820,13 +2259,15 @@ export const updateDocumentResponseContentEightTwoContactEmailMax = 254;
 
 
 export const updateDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const updateDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
+
 export const updateDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const UpdateDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string().regex(updateDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -1846,6 +2287,12 @@ export const UpdateDocumentResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentResponseContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(updateDocumentResponseContentOneOrderMultipleOf).optional(),
@@ -1878,6 +2325,12 @@ export const UpdateDocumentResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(updateDocumentResponseContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentResponseContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(updateDocumentResponseContentTwoOrderMultipleOf).optional(),
@@ -1895,6 +2348,12 @@ export const UpdateDocumentResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentResponseContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -1941,6 +2400,18 @@ export const UpdateDocumentResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentResponseContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentResponseContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(updateDocumentResponseContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -1994,6 +2465,12 @@ export const UpdateDocumentResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentResponseContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(updateDocumentResponseContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -2043,6 +2520,12 @@ export const UpdateDocumentResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentResponseContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -2088,7 +2571,22 @@ export const UpdateDocumentResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(updateDocumentResponseContentEightTwoContactEmailMax).regex(updateDocumentResponseContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentResponseContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -2100,6 +2598,9 @@ export const UpdateDocumentResponse = zod.object({
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(updateDocumentResponseRevisionNumberMultipleOf),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
+  "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
+  "effectiveMarket": zod.string().nullable(),
+  "effectiveLocale": zod.string().nullable(),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -2140,27 +2641,41 @@ export const listDocumentRevisionsResponseOneTotalPagesMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemNumberMultipleOf = 1;
 
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentOneIdentityMediaAltTextMax = 500;
+
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentOneOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentTwoLogoMediaAltTextMax = 500;
+
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentTwoOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentThreeHeroMediaAltTextMax = 500;
+
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentThreeOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFourHeroMediaAltTextMax = 500;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFourPdfMediaAltTextMax = 500;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFourOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveHeroMediaAltTextMax = 500;
+
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixHeroMediaAltTextMax = 500;
+
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -2180,6 +2695,8 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightTwoCon
 
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentNineVisualReferencesItemAltTextMax = 500;
+
 
 
 export const ListDocumentRevisionsResponse = zod.object({
@@ -2215,6 +2732,12 @@ export const ListDocumentRevisionsResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(listDocumentRevisionsResponseTwoItemsItemSnapshotContentOneOrderMultipleOf).optional(),
@@ -2247,6 +2770,12 @@ export const ListDocumentRevisionsResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(listDocumentRevisionsResponseTwoItemsItemSnapshotContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(listDocumentRevisionsResponseTwoItemsItemSnapshotContentTwoOrderMultipleOf).optional(),
@@ -2264,6 +2793,12 @@ export const ListDocumentRevisionsResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -2310,6 +2845,18 @@ export const ListDocumentRevisionsResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(listDocumentRevisionsResponseTwoItemsItemSnapshotContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -2363,6 +2910,12 @@ export const ListDocumentRevisionsResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -2412,6 +2965,12 @@ export const ListDocumentRevisionsResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -2457,7 +3016,22 @@ export const ListDocumentRevisionsResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightTwoContactEmailMax).regex(listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -2473,6 +3047,459 @@ export const ListDocumentRevisionsResponse = zod.object({
   "createdAt": zod.coerce.date()
 }))
 }))
+
+
+/**
+ * @summary List exact and effective document editions
+ */
+export const ListDocumentEditionsParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const listDocumentEditionsResponseItemsItemRevisionNumberMultipleOf = 1;
+
+export const listDocumentEditionsResponseItemsItemEffectiveRevisionNumberMultipleOf = 1;
+
+
+
+export const ListDocumentEditionsResponse = zod.object({
+  "documentId": zod.string(),
+  "items": zod.array(zod.object({
+  "market": zod.string(),
+  "locale": zod.string(),
+  "exact": zod.boolean(),
+  "effectiveMarket": zod.string().nullable(),
+  "effectiveLocale": zod.string().nullable(),
+  "usedFallback": zod.boolean(),
+  "fallbackReason": zod.string().nullable(),
+  "publicationState": zod.string().nullable(),
+  "workflowState": zod.string().nullable(),
+  "revisionId": zod.string().nullable(),
+  "revisionNumber": zod.number().multipleOf(listDocumentEditionsResponseItemsItemRevisionNumberMultipleOf).nullable(),
+  "effectivePublicationState": zod.string().nullable(),
+  "effectiveWorkflowState": zod.string().nullable(),
+  "effectiveRevisionId": zod.string().nullable(),
+  "effectiveRevisionNumber": zod.number().multipleOf(listDocumentEditionsResponseItemsItemEffectiveRevisionNumberMultipleOf).nullable(),
+  "ready": zod.boolean(),
+  "readinessErrors": zod.array(zod.string())
+}))
+})
+
+
+/**
+ * @summary Create an exact market and locale override from effective content
+ */
+export const CreateDocumentEditionOverrideParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const CreateDocumentEditionOverrideBody = zod.object({
+  "market": zod.string(),
+  "locale": zod.string(),
+  "sourceRevisionId": zod.string().optional()
+})
+
+export const createDocumentEditionOverrideResponseNumberMultipleOf = 1;
+
+export const createDocumentEditionOverrideResponseSnapshotContentOneIdentityMediaAltTextMax = 500;
+
+export const createDocumentEditionOverrideResponseSnapshotContentOneOrderMultipleOf = 1;
+
+export const createDocumentEditionOverrideResponseSnapshotContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentTwoLogoMediaAltTextMax = 500;
+
+export const createDocumentEditionOverrideResponseSnapshotContentTwoOrderMultipleOf = 1;
+
+export const createDocumentEditionOverrideResponseSnapshotContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentThreeHeroMediaAltTextMax = 500;
+
+export const createDocumentEditionOverrideResponseSnapshotContentThreeOrderMultipleOf = 1;
+
+export const createDocumentEditionOverrideResponseSnapshotContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const createDocumentEditionOverrideResponseSnapshotContentFourHeroMediaAltTextMax = 500;
+
+export const createDocumentEditionOverrideResponseSnapshotContentFourPdfMediaAltTextMax = 500;
+
+export const createDocumentEditionOverrideResponseSnapshotContentFourOrderMultipleOf = 1;
+
+export const createDocumentEditionOverrideResponseSnapshotContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
+export const createDocumentEditionOverrideResponseSnapshotContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentFiveHeroMediaAltTextMax = 500;
+
+export const createDocumentEditionOverrideResponseSnapshotContentFiveOrderMultipleOf = 1;
+
+export const createDocumentEditionOverrideResponseSnapshotContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentSixHeroMediaAltTextMax = 500;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixOrderMultipleOf = 1;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentSevenCityMax = 160;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSevenAddressMax = 1000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSevenPhoneMax = 80;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSevenOrderMultipleOf = 1;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentEightOneHeroSourcesMin = 2;
+export const createDocumentEditionOverrideResponseSnapshotContentEightOneHeroSourcesMax = 2;
+
+export const createDocumentEditionOverrideResponseSnapshotContentEightTwoContactEmailMax = 254;
+
+
+export const createDocumentEditionOverrideResponseSnapshotContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const createDocumentEditionOverrideResponseSnapshotContentNineVisualReferencesItemAltTextMax = 500;
+
+
+
+export const CreateDocumentEditionOverrideResponse = zod.object({
+  "id": zod.string(),
+  "documentId": zod.string(),
+  "number": zod.number().min(1).multipleOf(createDocumentEditionOverrideResponseNumberMultipleOf),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "requestedMarket": zod.string().optional(),
+  "usedFallback": zod.boolean().optional(),
+  "snapshot": zod.object({
+  "slug": zod.string(),
+  "title": zod.string(),
+  "summary": zod.string().nullish(),
+  "content": zod.union([zod.object({
+  "schemaVersion": zod.literal(1),
+  "role": zod.enum(['founder', 'leader', 'employee', 'advisor']).optional(),
+  "title": zod.string().optional(),
+  "biography": zod.string().optional(),
+  "contribution": zod.string().optional(),
+  "focusAreas": zod.array(zod.object({
+  "title": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "profileLinks": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+})).optional(),
+  "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(createDocumentEditionOverrideResponseSnapshotContentOneOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentOneSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "allianceCategory": zod.string().optional(),
+  "positioning": zod.string().optional(),
+  "facts": zod.array(zod.object({
+  "value": zod.string(),
+  "label": zod.string()
+})).optional(),
+  "evidence": zod.array(zod.object({
+  "statement": zod.string(),
+  "source": zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentTwoEvidenceItemSourceUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+}),
+  "approved": zod.boolean()
+})).optional(),
+  "coverage": zod.array(zod.string()).optional(),
+  "contribution": zod.string().optional(),
+  "website": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentTwoWebsiteRegExp).optional(),
+  "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(createDocumentEditionOverrideResponseSnapshotContentTwoOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "category": zod.string().optional(),
+  "summary": zod.string().optional(),
+  "template": zod.enum(['standard', 'cognios-specialist']).optional(),
+  "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+}))
+})).optional(),
+  "capabilities": zod.array(zod.string()).optional(),
+  "differentiators": zod.array(zod.string()).optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(createDocumentEditionOverrideResponseSnapshotContentThreeOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "variant": zod.enum(['article', 'pov']).optional(),
+  "teaser": zod.string().optional(),
+  "body": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})).optional(),
+  "author": zod.string().optional(),
+  "publicationDate": zod.coerce.date().optional(),
+  "updatedDate": zod.coerce.date().optional(),
+  "readingTimeMinutes": zod.number().min(1).multipleOf(createDocumentEditionOverrideResponseSnapshotContentFourReadingTimeMinutesMultipleOf).optional(),
+  "topics": zod.array(zod.string()).optional(),
+  "sectors": zod.array(zod.string()).optional(),
+  "platformIds": zod.array(zod.string()).optional(),
+  "heroMediaId": zod.string().optional(),
+  "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(createDocumentEditionOverrideResponseSnapshotContentFourOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentFourSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
+  "context": zod.string().optional(),
+  "constraints": zod.array(zod.string()).optional(),
+  "work": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})).optional(),
+  "controls": zod.array(zod.string()).optional(),
+  "outcomes": zod.array(zod.string()).optional(),
+  "evidence": zod.array(zod.object({
+  "statement": zod.string(),
+  "source": zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentFiveEvidenceItemSourceUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+}),
+  "approved": zod.boolean()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(createDocumentEditionOverrideResponseSnapshotContentFiveOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentFiveSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(createDocumentEditionOverrideResponseSnapshotContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "city": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSevenCityMax),
+  "address": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSevenAddressMax),
+  "phone": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSevenPhoneMax).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(createDocumentEditionOverrideResponseSnapshotContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.union([zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(createDocumentEditionOverrideResponseSnapshotContentEightOneHeroSourcesMin).max(createDocumentEditionOverrideResponseSnapshotContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(createDocumentEditionOverrideResponseSnapshotContentEightTwoContactEmailMax).regex(createDocumentEditionOverrideResponseSnapshotContentEightTwoContactEmailRegExp)
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+  "seo": zod.object({
+  "title": zod.string(),
+  "description": zod.string(),
+  "canonicalUrl": zod.string().nullish(),
+  "noIndex": zod.boolean().optional(),
+  "imageId": zod.string().nullish()
+}).optional(),
+  "mediaIds": zod.array(zod.string()).optional(),
+  "markets": zod.array(zod.string())
+}),
+  "note": zod.string().nullish(),
+  "createdBy": zod.string(),
+  "createdAt": zod.coerce.date()
+})
 
 
 /**
@@ -2548,27 +3575,41 @@ export const GetDocumentRevisionParams = zod.object({
 
 export const getDocumentRevisionResponseNumberMultipleOf = 1;
 
+export const getDocumentRevisionResponseSnapshotContentOneIdentityMediaAltTextMax = 500;
+
 export const getDocumentRevisionResponseSnapshotContentOneOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const getDocumentRevisionResponseSnapshotContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const getDocumentRevisionResponseSnapshotContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentTwoLogoMediaAltTextMax = 500;
+
 export const getDocumentRevisionResponseSnapshotContentTwoOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentThreeHeroMediaAltTextMax = 500;
+
 export const getDocumentRevisionResponseSnapshotContentThreeOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const getDocumentRevisionResponseSnapshotContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const getDocumentRevisionResponseSnapshotContentFourHeroMediaAltTextMax = 500;
+
+export const getDocumentRevisionResponseSnapshotContentFourPdfMediaAltTextMax = 500;
 
 export const getDocumentRevisionResponseSnapshotContentFourOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const getDocumentRevisionResponseSnapshotContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentFiveHeroMediaAltTextMax = 500;
+
 export const getDocumentRevisionResponseSnapshotContentFiveOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentSixHeroMediaAltTextMax = 500;
+
 export const getDocumentRevisionResponseSnapshotContentSixOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -2588,6 +3629,8 @@ export const getDocumentRevisionResponseSnapshotContentEightTwoContactEmailMax =
 
 
 export const getDocumentRevisionResponseSnapshotContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const getDocumentRevisionResponseSnapshotContentNineVisualReferencesItemAltTextMax = 500;
+
 
 
 export const GetDocumentRevisionResponse = zod.object({
@@ -2617,6 +3660,12 @@ export const GetDocumentRevisionResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(getDocumentRevisionResponseSnapshotContentOneOrderMultipleOf).optional(),
@@ -2649,6 +3698,12 @@ export const GetDocumentRevisionResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(getDocumentRevisionResponseSnapshotContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(getDocumentRevisionResponseSnapshotContentTwoOrderMultipleOf).optional(),
@@ -2666,6 +3721,12 @@ export const GetDocumentRevisionResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -2712,6 +3773,18 @@ export const GetDocumentRevisionResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(getDocumentRevisionResponseSnapshotContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -2765,6 +3838,12 @@ export const GetDocumentRevisionResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(getDocumentRevisionResponseSnapshotContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -2814,6 +3893,12 @@ export const GetDocumentRevisionResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -2859,7 +3944,22 @@ export const GetDocumentRevisionResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(getDocumentRevisionResponseSnapshotContentEightTwoContactEmailMax).regex(getDocumentRevisionResponseSnapshotContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -2888,32 +3988,47 @@ export const submitDocumentBodyNoteMax = 1000;
 
 
 export const SubmitDocumentBody = zod.object({
+  "revisionId": zod.string(),
   "note": zod.string().max(submitDocumentBodyNoteMax).optional(),
   "reviewerIds": zod.array(zod.string()).optional()
 })
 
 export const submitDocumentResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+export const submitDocumentResponseContentOneIdentityMediaAltTextMax = 500;
+
 export const submitDocumentResponseContentOneOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const submitDocumentResponseContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const submitDocumentResponseContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentTwoLogoMediaAltTextMax = 500;
+
 export const submitDocumentResponseContentTwoOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentThreeHeroMediaAltTextMax = 500;
+
 export const submitDocumentResponseContentThreeOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const submitDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const submitDocumentResponseContentFourHeroMediaAltTextMax = 500;
+
+export const submitDocumentResponseContentFourPdfMediaAltTextMax = 500;
 
 export const submitDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const submitDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentFiveHeroMediaAltTextMax = 500;
+
 export const submitDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentSixHeroMediaAltTextMax = 500;
+
 export const submitDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -2933,13 +4048,15 @@ export const submitDocumentResponseContentEightTwoContactEmailMax = 254;
 
 
 export const submitDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const submitDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
+
 export const submitDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const SubmitDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string().regex(submitDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -2959,6 +4076,12 @@ export const SubmitDocumentResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(submitDocumentResponseContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(submitDocumentResponseContentOneOrderMultipleOf).optional(),
@@ -2991,6 +4114,12 @@ export const SubmitDocumentResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(submitDocumentResponseContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(submitDocumentResponseContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(submitDocumentResponseContentTwoOrderMultipleOf).optional(),
@@ -3008,6 +4137,12 @@ export const SubmitDocumentResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(submitDocumentResponseContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -3054,6 +4189,18 @@ export const SubmitDocumentResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(submitDocumentResponseContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(submitDocumentResponseContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(submitDocumentResponseContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -3107,6 +4254,12 @@ export const SubmitDocumentResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(submitDocumentResponseContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(submitDocumentResponseContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -3156,6 +4309,12 @@ export const SubmitDocumentResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(submitDocumentResponseContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -3201,7 +4360,22 @@ export const SubmitDocumentResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(submitDocumentResponseContentEightTwoContactEmailMax).regex(submitDocumentResponseContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(submitDocumentResponseContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -3213,6 +4387,479 @@ export const SubmitDocumentResponse = zod.object({
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(submitDocumentResponseRevisionNumberMultipleOf),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
+  "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
+  "effectiveMarket": zod.string().nullable(),
+  "effectiveLocale": zod.string().nullable(),
+  "currentRevisionId": zod.string().nullish(),
+  "publishedRevisionId": zod.string().nullish(),
+  "scheduledAt": zod.coerce.date().nullish(),
+  "publishedAt": zod.coerce.date().nullish(),
+  "createdBy": zod.string().optional(),
+  "updatedBy": zod.string().optional(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List review comments for a document
+ */
+export const ListDocumentReviewCommentsParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const ListDocumentReviewCommentsQueryParams = zod.object({
+  "revisionId": zod.coerce.string().optional()
+})
+
+export const ListDocumentReviewCommentsResponseItem = zod.object({
+  "id": zod.string(),
+  "revisionId": zod.string(),
+  "body": zod.string(),
+  "authorId": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+export const ListDocumentReviewCommentsResponse = zod.array(ListDocumentReviewCommentsResponseItem)
+
+
+/**
+ * @summary Add a comment to an exact revision
+ */
+export const AddDocumentReviewCommentParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const addDocumentReviewCommentBodyBodyMax = 2000;
+
+
+
+export const AddDocumentReviewCommentBody = zod.object({
+  "revisionId": zod.string(),
+  "body": zod.string().min(1).max(addDocumentReviewCommentBodyBodyMax)
+})
+
+export const AddDocumentReviewCommentResponse = zod.object({
+  "id": zod.string(),
+  "revisionId": zod.string(),
+  "body": zod.string(),
+  "authorId": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Reject an in-review revision
+ */
+export const RejectDocumentRevisionParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const rejectDocumentRevisionBodyBodyMax = 2000;
+
+
+
+export const RejectDocumentRevisionBody = zod.object({
+  "revisionId": zod.string(),
+  "body": zod.string().min(1).max(rejectDocumentRevisionBodyBodyMax)
+})
+
+export const rejectDocumentRevisionResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+export const rejectDocumentRevisionResponseContentOneIdentityMediaAltTextMax = 500;
+
+export const rejectDocumentRevisionResponseContentOneOrderMultipleOf = 1;
+
+export const rejectDocumentRevisionResponseContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentTwoLogoMediaAltTextMax = 500;
+
+export const rejectDocumentRevisionResponseContentTwoOrderMultipleOf = 1;
+
+export const rejectDocumentRevisionResponseContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentThreeHeroMediaAltTextMax = 500;
+
+export const rejectDocumentRevisionResponseContentThreeOrderMultipleOf = 1;
+
+export const rejectDocumentRevisionResponseContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const rejectDocumentRevisionResponseContentFourHeroMediaAltTextMax = 500;
+
+export const rejectDocumentRevisionResponseContentFourPdfMediaAltTextMax = 500;
+
+export const rejectDocumentRevisionResponseContentFourOrderMultipleOf = 1;
+
+export const rejectDocumentRevisionResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
+
+export const rejectDocumentRevisionResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentFiveHeroMediaAltTextMax = 500;
+
+export const rejectDocumentRevisionResponseContentFiveOrderMultipleOf = 1;
+
+export const rejectDocumentRevisionResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentSixHeroMediaAltTextMax = 500;
+
+export const rejectDocumentRevisionResponseContentSixOrderMultipleOf = 1;
+
+export const rejectDocumentRevisionResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentSevenCityMax = 160;
+
+export const rejectDocumentRevisionResponseContentSevenAddressMax = 1000;
+
+export const rejectDocumentRevisionResponseContentSevenPhoneMax = 80;
+
+export const rejectDocumentRevisionResponseContentSevenOrderMultipleOf = 1;
+
+export const rejectDocumentRevisionResponseContentSevenSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentEightOneHeroSourcesMin = 2;
+export const rejectDocumentRevisionResponseContentEightOneHeroSourcesMax = 2;
+
+export const rejectDocumentRevisionResponseContentEightTwoContactEmailMax = 254;
+
+
+export const rejectDocumentRevisionResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const rejectDocumentRevisionResponseContentNineVisualReferencesItemAltTextMax = 500;
+
+export const rejectDocumentRevisionResponseRevisionNumberMultipleOf = 1;
+
+
+
+export const RejectDocumentRevisionResponse = zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
+  "slug": zod.string().regex(rejectDocumentRevisionResponseSlugRegExp),
+  "title": zod.string(),
+  "summary": zod.string().nullish(),
+  "status": zod.enum(['draft', 'in-review', 'approved', 'scheduled', 'published', 'archived']),
+  "content": zod.union([zod.object({
+  "schemaVersion": zod.literal(1),
+  "role": zod.enum(['founder', 'leader', 'employee', 'advisor']).optional(),
+  "title": zod.string().optional(),
+  "biography": zod.string().optional(),
+  "contribution": zod.string().optional(),
+  "focusAreas": zod.array(zod.object({
+  "title": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "profileLinks": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+})).optional(),
+  "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(rejectDocumentRevisionResponseContentOneOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentOneSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "allianceCategory": zod.string().optional(),
+  "positioning": zod.string().optional(),
+  "facts": zod.array(zod.object({
+  "value": zod.string(),
+  "label": zod.string()
+})).optional(),
+  "evidence": zod.array(zod.object({
+  "statement": zod.string(),
+  "source": zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentTwoEvidenceItemSourceUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+}),
+  "approved": zod.boolean()
+})).optional(),
+  "coverage": zod.array(zod.string()).optional(),
+  "contribution": zod.string().optional(),
+  "website": zod.string().regex(rejectDocumentRevisionResponseContentTwoWebsiteRegExp).optional(),
+  "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(rejectDocumentRevisionResponseContentTwoOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "category": zod.string().optional(),
+  "summary": zod.string().optional(),
+  "template": zod.enum(['standard', 'cognios-specialist']).optional(),
+  "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+}))
+})).optional(),
+  "capabilities": zod.array(zod.string()).optional(),
+  "differentiators": zod.array(zod.string()).optional(),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(rejectDocumentRevisionResponseContentThreeOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "variant": zod.enum(['article', 'pov']).optional(),
+  "teaser": zod.string().optional(),
+  "body": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})).optional(),
+  "author": zod.string().optional(),
+  "publicationDate": zod.coerce.date().optional(),
+  "updatedDate": zod.coerce.date().optional(),
+  "readingTimeMinutes": zod.number().min(1).multipleOf(rejectDocumentRevisionResponseContentFourReadingTimeMinutesMultipleOf).optional(),
+  "topics": zod.array(zod.string()).optional(),
+  "sectors": zod.array(zod.string()).optional(),
+  "platformIds": zod.array(zod.string()).optional(),
+  "heroMediaId": zod.string().optional(),
+  "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(rejectDocumentRevisionResponseContentFourOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentFourSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "variant": zod.enum(['summary', 'full']),
+  "disclosure": zod.enum(['named', 'anonymized', 'restricted']),
+  "sector": zod.enum(['Financial Services', 'Telecoms', 'Travel & Hospitality', 'Public Sector', 'Manufacturing & Industrial', 'Life Sciences', 'Retail & Consumer', 'Professional Services', 'Security & AI Infrastructure']),
+  "organizationDescriptor": zod.string(),
+  "engagementType": zod.enum(['client-delivery', 'product-demonstration', 'concept', 'proposal-prototype']),
+  "deliveryStage": zod.enum(['production', 'pilot', 'proof-of-concept', 'mvp', 'demo', 'concept', 'proposal']),
+  "impactClassification": zod.enum(['observed', 'pilot-demo', 'simulated', 'projected', 'unavailable']),
+  "impactStatement": zod.string(),
+  "disclosureNote": zod.string(),
+  "publicEvidenceStatus": zod.enum(['approved', 'needs-review', 'restricted']),
+  "relatedIndustries": zod.array(zod.enum(['financial-services', 'telecoms', 'travel-hospitality', 'energy-resources', 'public-sector', 'education'])),
+  "visual": zod.object({
+  "kind": zod.enum(['illustrative-interface-reconstruction']),
+  "caption": zod.string(),
+  "altText": zod.string(),
+  "textEquivalent": zod.string(),
+  "template": zod.enum(['knowledge-assistant', 'analytics-dashboard', 'workflow-console', 'commerce-experience', 'governance-console', 'operations-console']),
+  "fixtureLabels": zod.array(zod.string()).min(1)
+}),
+  "mandate": zod.string(),
+  "context": zod.string().optional(),
+  "constraints": zod.array(zod.string()).optional(),
+  "work": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})).optional(),
+  "controls": zod.array(zod.string()).optional(),
+  "outcomes": zod.array(zod.string()).optional(),
+  "evidence": zod.array(zod.object({
+  "statement": zod.string(),
+  "source": zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentFiveEvidenceItemSourceUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+}),
+  "approved": zod.boolean()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(rejectDocumentRevisionResponseContentFiveOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentFiveSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "template": zod.enum(['agent-authority']),
+  "teaser": zod.string(),
+  "handoverExplanation": zod.string(),
+  "methodology": zod.array(zod.object({
+  "type": zod.enum(['heading', 'paragraph', 'list', 'quote']),
+  "level": zod.union([zod.literal(2),zod.literal(3)]).optional(),
+  "text": zod.string().optional(),
+  "style": zod.enum(['bullet', 'numbered']).optional(),
+  "items": zod.array(zod.string()).optional()
+})),
+  "workedExample": zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string(),
+  "requestedAuthority": zod.enum(['out-of-loop', 'on-loop', 'in-loop', 'in-loop-second', 'in-loop-external']),
+  "interventionWindow": zod.string().optional(),
+  "accountableRole": zod.string(),
+  "promotionEvidence": zod.string(),
+  "automaticDemotion": zod.string(),
+  "authorityArtefact": zod.string().optional()
+}),
+  "sectorExamples": zod.array(zod.object({
+  "sector": zod.string(),
+  "title": zod.string(),
+  "handover": zod.enum(['knowledge', 'decision', 'action']),
+  "reversibility": zod.enum(['R1', 'R2', 'R3', 'R4']),
+  "reach": zod.enum(['H1', 'H2', 'H3', 'H4', 'H5']),
+  "exposureBand": zod.enum(['E1', 'E2', 'E3', 'E4', 'E5']),
+  "oversight": zod.string(),
+  "detail": zod.string()
+})).optional(),
+  "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "cta": zod.object({
+  "label": zod.string(),
+  "url": zod.string()
+}).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(rejectDocumentRevisionResponseContentSixOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentSixSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "city": zod.string().min(1).max(rejectDocumentRevisionResponseContentSevenCityMax),
+  "address": zod.string().min(1).max(rejectDocumentRevisionResponseContentSevenAddressMax),
+  "phone": zod.string().min(1).max(rejectDocumentRevisionResponseContentSevenPhoneMax).optional(),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
+  "order": zod.number().multipleOf(rejectDocumentRevisionResponseContentSevenOrderMultipleOf).optional(),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentSevenSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).optional(),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string()).optional()
+}),zod.union([zod.object({
+  "schemaVersion": zod.literal(1),
+  "page": zod.enum(['homepage', 'industries']),
+  "hero": zod.object({
+  "posterMediaId": zod.string(),
+  "posterMediaVersionId": zod.string(),
+  "sources": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "mimeType": zod.enum(['video/mp4', 'video/webm'])
+})).min(rejectDocumentRevisionResponseContentEightOneHeroSourcesMin).max(rejectDocumentRevisionResponseContentEightOneHeroSourcesMax).describe('Exactly one MP4 source and one WebM source; enforced by the shared runtime validator.')
+})
+}),zod.object({
+  "schemaVersion": zod.literal(1),
+  "configuration": zod.enum(['contact-email']),
+  "contactEmail": zod.string().max(rejectDocumentRevisionResponseContentEightTwoContactEmailMax).regex(rejectDocumentRevisionResponseContentEightTwoContactEmailRegExp)
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+  "seo": zod.object({
+  "title": zod.string(),
+  "description": zod.string(),
+  "canonicalUrl": zod.string().nullish(),
+  "noIndex": zod.boolean().optional(),
+  "imageId": zod.string().nullish()
+}).optional(),
+  "mediaIds": zod.array(zod.string()).optional(),
+  "markets": zod.array(zod.string()),
+  "revisionNumber": zod.number().min(1).multipleOf(rejectDocumentRevisionResponseRevisionNumberMultipleOf),
+  "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
+  "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
+  "effectiveMarket": zod.string().nullable(),
+  "effectiveLocale": zod.string().nullable(),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -3241,27 +4888,41 @@ export const PublishDocumentBody = zod.object({
 })
 
 export const publishDocumentResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+export const publishDocumentResponseContentOneIdentityMediaAltTextMax = 500;
+
 export const publishDocumentResponseContentOneOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const publishDocumentResponseContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const publishDocumentResponseContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentTwoLogoMediaAltTextMax = 500;
+
 export const publishDocumentResponseContentTwoOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentThreeHeroMediaAltTextMax = 500;
+
 export const publishDocumentResponseContentThreeOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const publishDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const publishDocumentResponseContentFourHeroMediaAltTextMax = 500;
+
+export const publishDocumentResponseContentFourPdfMediaAltTextMax = 500;
 
 export const publishDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const publishDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentFiveHeroMediaAltTextMax = 500;
+
 export const publishDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentSixHeroMediaAltTextMax = 500;
+
 export const publishDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -3281,13 +4942,15 @@ export const publishDocumentResponseContentEightTwoContactEmailMax = 254;
 
 
 export const publishDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const publishDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
+
 export const publishDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const PublishDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string().regex(publishDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3307,6 +4970,12 @@ export const PublishDocumentResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(publishDocumentResponseContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(publishDocumentResponseContentOneOrderMultipleOf).optional(),
@@ -3339,6 +5008,12 @@ export const PublishDocumentResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(publishDocumentResponseContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(publishDocumentResponseContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(publishDocumentResponseContentTwoOrderMultipleOf).optional(),
@@ -3356,6 +5031,12 @@ export const PublishDocumentResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(publishDocumentResponseContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -3402,6 +5083,18 @@ export const PublishDocumentResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(publishDocumentResponseContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(publishDocumentResponseContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(publishDocumentResponseContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -3455,6 +5148,12 @@ export const PublishDocumentResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(publishDocumentResponseContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(publishDocumentResponseContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -3504,6 +5203,12 @@ export const PublishDocumentResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(publishDocumentResponseContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -3549,7 +5254,22 @@ export const PublishDocumentResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(publishDocumentResponseContentEightTwoContactEmailMax).regex(publishDocumentResponseContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(publishDocumentResponseContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -3561,6 +5281,9 @@ export const PublishDocumentResponse = zod.object({
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(publishDocumentResponseRevisionNumberMultipleOf),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
+  "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
+  "effectiveMarket": zod.string().nullable(),
+  "effectiveLocale": zod.string().nullable(),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -3589,27 +5312,41 @@ export const RollbackDocumentBody = zod.object({
 })
 
 export const rollbackDocumentResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+export const rollbackDocumentResponseContentOneIdentityMediaAltTextMax = 500;
+
 export const rollbackDocumentResponseContentOneOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const rollbackDocumentResponseContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const rollbackDocumentResponseContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentTwoLogoMediaAltTextMax = 500;
+
 export const rollbackDocumentResponseContentTwoOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentThreeHeroMediaAltTextMax = 500;
+
 export const rollbackDocumentResponseContentThreeOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const rollbackDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const rollbackDocumentResponseContentFourHeroMediaAltTextMax = 500;
+
+export const rollbackDocumentResponseContentFourPdfMediaAltTextMax = 500;
 
 export const rollbackDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const rollbackDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentFiveHeroMediaAltTextMax = 500;
+
 export const rollbackDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentSixHeroMediaAltTextMax = 500;
+
 export const rollbackDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -3629,13 +5366,15 @@ export const rollbackDocumentResponseContentEightTwoContactEmailMax = 254;
 
 
 export const rollbackDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const rollbackDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
+
 export const rollbackDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const RollbackDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string().regex(rollbackDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -3655,6 +5394,12 @@ export const RollbackDocumentResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rollbackDocumentResponseContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(rollbackDocumentResponseContentOneOrderMultipleOf).optional(),
@@ -3687,6 +5432,12 @@ export const RollbackDocumentResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(rollbackDocumentResponseContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rollbackDocumentResponseContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(rollbackDocumentResponseContentTwoOrderMultipleOf).optional(),
@@ -3704,6 +5455,12 @@ export const RollbackDocumentResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rollbackDocumentResponseContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -3750,6 +5507,18 @@ export const RollbackDocumentResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rollbackDocumentResponseContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rollbackDocumentResponseContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(rollbackDocumentResponseContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -3803,6 +5572,12 @@ export const RollbackDocumentResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rollbackDocumentResponseContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(rollbackDocumentResponseContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -3852,6 +5627,12 @@ export const RollbackDocumentResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rollbackDocumentResponseContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -3897,7 +5678,22 @@ export const RollbackDocumentResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(rollbackDocumentResponseContentEightTwoContactEmailMax).regex(rollbackDocumentResponseContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rollbackDocumentResponseContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -3909,6 +5705,9 @@ export const RollbackDocumentResponse = zod.object({
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(rollbackDocumentResponseRevisionNumberMultipleOf),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
+  "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
+  "effectiveMarket": zod.string().nullable(),
+  "effectiveLocale": zod.string().nullable(),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -3932,31 +5731,47 @@ export const archiveDocumentBodyReasonMax = 1000;
 
 
 export const ArchiveDocumentBody = zod.object({
+  "market": zod.string(),
+  "locale": zod.string(),
   "reason": zod.string().max(archiveDocumentBodyReasonMax).optional()
 })
 
 export const archiveDocumentResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+export const archiveDocumentResponseContentOneIdentityMediaAltTextMax = 500;
+
 export const archiveDocumentResponseContentOneOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const archiveDocumentResponseContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const archiveDocumentResponseContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentTwoLogoMediaAltTextMax = 500;
+
 export const archiveDocumentResponseContentTwoOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentThreeHeroMediaAltTextMax = 500;
+
 export const archiveDocumentResponseContentThreeOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const archiveDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const archiveDocumentResponseContentFourHeroMediaAltTextMax = 500;
+
+export const archiveDocumentResponseContentFourPdfMediaAltTextMax = 500;
 
 export const archiveDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const archiveDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentFiveHeroMediaAltTextMax = 500;
+
 export const archiveDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentSixHeroMediaAltTextMax = 500;
+
 export const archiveDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -3976,13 +5791,15 @@ export const archiveDocumentResponseContentEightTwoContactEmailMax = 254;
 
 
 export const archiveDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const archiveDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
+
 export const archiveDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const ArchiveDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string().regex(archiveDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -4002,6 +5819,12 @@ export const ArchiveDocumentResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(archiveDocumentResponseContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(archiveDocumentResponseContentOneOrderMultipleOf).optional(),
@@ -4034,6 +5857,12 @@ export const ArchiveDocumentResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(archiveDocumentResponseContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(archiveDocumentResponseContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(archiveDocumentResponseContentTwoOrderMultipleOf).optional(),
@@ -4051,6 +5880,12 @@ export const ArchiveDocumentResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(archiveDocumentResponseContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -4097,6 +5932,18 @@ export const ArchiveDocumentResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(archiveDocumentResponseContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(archiveDocumentResponseContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(archiveDocumentResponseContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -4150,6 +5997,12 @@ export const ArchiveDocumentResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(archiveDocumentResponseContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(archiveDocumentResponseContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -4199,6 +6052,12 @@ export const ArchiveDocumentResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(archiveDocumentResponseContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -4244,7 +6103,22 @@ export const ArchiveDocumentResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(archiveDocumentResponseContentEightTwoContactEmailMax).regex(archiveDocumentResponseContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(archiveDocumentResponseContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -4256,6 +6130,9 @@ export const ArchiveDocumentResponse = zod.object({
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(archiveDocumentResponseRevisionNumberMultipleOf),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
+  "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
+  "effectiveMarket": zod.string().nullable(),
+  "effectiveLocale": zod.string().nullable(),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -4279,31 +6156,47 @@ export const restoreDocumentBodyReasonMax = 1000;
 
 
 export const RestoreDocumentBody = zod.object({
+  "market": zod.string(),
+  "locale": zod.string(),
   "reason": zod.string().max(restoreDocumentBodyReasonMax).optional()
 })
 
 export const restoreDocumentResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
+export const restoreDocumentResponseContentOneIdentityMediaAltTextMax = 500;
+
 export const restoreDocumentResponseContentOneOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const restoreDocumentResponseContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const restoreDocumentResponseContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentTwoLogoMediaAltTextMax = 500;
+
 export const restoreDocumentResponseContentTwoOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentThreeHeroMediaAltTextMax = 500;
+
 export const restoreDocumentResponseContentThreeOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const restoreDocumentResponseContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const restoreDocumentResponseContentFourHeroMediaAltTextMax = 500;
+
+export const restoreDocumentResponseContentFourPdfMediaAltTextMax = 500;
 
 export const restoreDocumentResponseContentFourOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const restoreDocumentResponseContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentFiveHeroMediaAltTextMax = 500;
+
 export const restoreDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentSixHeroMediaAltTextMax = 500;
+
 export const restoreDocumentResponseContentSixOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -4323,13 +6216,15 @@ export const restoreDocumentResponseContentEightTwoContactEmailMax = 254;
 
 
 export const restoreDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const restoreDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
+
 export const restoreDocumentResponseRevisionNumberMultipleOf = 1;
 
 
 
 export const RestoreDocumentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string().regex(restoreDocumentResponseSlugRegExp),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -4349,6 +6244,12 @@ export const RestoreDocumentResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(restoreDocumentResponseContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(restoreDocumentResponseContentOneOrderMultipleOf).optional(),
@@ -4381,6 +6282,12 @@ export const RestoreDocumentResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(restoreDocumentResponseContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(restoreDocumentResponseContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(restoreDocumentResponseContentTwoOrderMultipleOf).optional(),
@@ -4398,6 +6305,12 @@ export const RestoreDocumentResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(restoreDocumentResponseContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -4444,6 +6357,18 @@ export const RestoreDocumentResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(restoreDocumentResponseContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(restoreDocumentResponseContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(restoreDocumentResponseContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -4497,6 +6422,12 @@ export const RestoreDocumentResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(restoreDocumentResponseContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(restoreDocumentResponseContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -4546,6 +6477,12 @@ export const RestoreDocumentResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(restoreDocumentResponseContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -4591,7 +6528,22 @@ export const RestoreDocumentResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(restoreDocumentResponseContentEightTwoContactEmailMax).regex(restoreDocumentResponseContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(restoreDocumentResponseContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -4603,6 +6555,9 @@ export const RestoreDocumentResponse = zod.object({
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(restoreDocumentResponseRevisionNumberMultipleOf),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
+  "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
+  "effectiveMarket": zod.string().nullable(),
+  "effectiveLocale": zod.string().nullable(),
   "currentRevisionId": zod.string().nullish(),
   "publishedRevisionId": zod.string().nullish(),
   "scheduledAt": zod.coerce.date().nullish(),
@@ -4621,27 +6576,47 @@ export const PreviewDocumentParams = zod.object({
   "documentId": zod.coerce.string()
 })
 
+export const PreviewDocumentQueryParams = zod.object({
+  "market": zod.coerce.string(),
+  "locale": zod.coerce.string(),
+  "revisionId": zod.coerce.string().optional()
+})
+
+export const previewDocumentResponseDocumentContentOneIdentityMediaAltTextMax = 500;
+
 export const previewDocumentResponseDocumentContentOneOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const previewDocumentResponseDocumentContentTwoEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
 export const previewDocumentResponseDocumentContentTwoWebsiteRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentTwoLogoMediaAltTextMax = 500;
+
 export const previewDocumentResponseDocumentContentTwoOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentThreeHeroMediaAltTextMax = 500;
+
 export const previewDocumentResponseDocumentContentThreeOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
 export const previewDocumentResponseDocumentContentFourReadingTimeMinutesMultipleOf = 1;
+
+export const previewDocumentResponseDocumentContentFourHeroMediaAltTextMax = 500;
+
+export const previewDocumentResponseDocumentContentFourPdfMediaAltTextMax = 500;
 
 export const previewDocumentResponseDocumentContentFourOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentFourSourcesItemUrlRegExp = new RegExp('^https?://.+');
 
 export const previewDocumentResponseDocumentContentFiveEvidenceItemSourceUrlRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentFiveHeroMediaAltTextMax = 500;
+
 export const previewDocumentResponseDocumentContentFiveOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentSixHeroMediaAltTextMax = 500;
+
 export const previewDocumentResponseDocumentContentSixOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
@@ -4661,6 +6636,8 @@ export const previewDocumentResponseDocumentContentEightTwoContactEmailMax = 254
 
 
 export const previewDocumentResponseDocumentContentEightTwoContactEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const previewDocumentResponseDocumentContentNineVisualReferencesItemAltTextMax = 500;
+
 export const previewDocumentResponseRevisionNumberMultipleOf = 1;
 
 
@@ -4685,6 +6662,12 @@ export const PreviewDocumentResponse = zod.object({
   "url": zod.string()
 })).optional(),
   "identityMediaId": zod.string().optional(),
+  "identityMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentOneIdentityMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "approvedFallback": zod.enum(['initials', 'brand-mark']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(previewDocumentResponseDocumentContentOneOrderMultipleOf).optional(),
@@ -4717,6 +6700,12 @@ export const PreviewDocumentResponse = zod.object({
   "contribution": zod.string().optional(),
   "website": zod.string().regex(previewDocumentResponseDocumentContentTwoWebsiteRegExp).optional(),
   "logoMediaId": zod.string().optional(),
+  "logoMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentTwoLogoMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "relationshipStatus": zod.enum(['active', 'prospective', 'paused', 'ended']).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(previewDocumentResponseDocumentContentTwoOrderMultipleOf).optional(),
@@ -4734,6 +6723,12 @@ export const PreviewDocumentResponse = zod.object({
   "summary": zod.string().optional(),
   "template": zod.enum(['standard', 'cognios-specialist']).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "sections": zod.array(zod.object({
   "heading": zod.string(),
   "body": zod.array(zod.object({
@@ -4780,6 +6775,18 @@ export const PreviewDocumentResponse = zod.object({
   "platformIds": zod.array(zod.string()).optional(),
   "heroMediaId": zod.string().optional(),
   "pdfMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentFourHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "pdfMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentFourPdfMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(previewDocumentResponseDocumentContentFourOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -4833,6 +6840,12 @@ export const PreviewDocumentResponse = zod.object({
   "approved": zod.boolean()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentFiveHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
   "order": zod.number().multipleOf(previewDocumentResponseDocumentContentFiveOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
@@ -4882,6 +6895,12 @@ export const PreviewDocumentResponse = zod.object({
   "detail": zod.string()
 })).optional(),
   "heroMediaId": zod.string().optional(),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentSixHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
@@ -4927,7 +6946,22 @@ export const PreviewDocumentResponse = zod.object({
   "schemaVersion": zod.literal(1),
   "configuration": zod.enum(['contact-email']),
   "contactEmail": zod.string().max(previewDocumentResponseDocumentContentEightTwoContactEmailMax).regex(previewDocumentResponseDocumentContentEightTwoContactEmailRegExp)
-})])]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
+})]),zod.object({
+  "schemaVersion": zod.literal(1),
+  "pagePath": zod.string(),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "narrative": zod.string(),
+  "sections": zod.array(zod.record(zod.string(), zod.unknown())),
+  "cta": zod.record(zod.string(), zod.unknown()).optional(),
+  "seo": zod.record(zod.string(), zod.unknown()).optional(),
+  "legal": zod.record(zod.string(), zod.unknown()).optional(),
+  "visualReferences": zod.array(zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentNineVisualReferencesItemAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.')).optional()
+}).describe('Governed reusable landing-page composition.')]).describe('Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.'),
   "seo": zod.object({
   "title": zod.string(),
   "description": zod.string(),
@@ -4940,10 +6974,21 @@ export const PreviewDocumentResponse = zod.object({
 }),
   "previewUrl": zod.string(),
   "expiresAt": zod.coerce.date(),
+  "requestedMarket": zod.string(),
+  "requestedLocale": zod.string(),
   "market": zod.string(),
   "locale": zod.string(),
+  "revisionId": zod.string(),
   "revisionNumber": zod.number().min(1).multipleOf(previewDocumentResponseRevisionNumberMultipleOf),
   "usedFallback": zod.boolean(),
+  "fallbackReason": zod.string().nullable(),
+  "navigationPolicyDigest": zod.string(),
+  "navigation": zod.object({
+  "market": zod.string(),
+  "locale": zod.string(),
+  "items": zod.array(zod.record(zod.string(), zod.unknown())),
+  "pages": zod.array(zod.record(zod.string(), zod.unknown()))
+}).describe('Immutable navigation and page-availability snapshot captured when the preview capability was issued.'),
   "warnings": zod.array(zod.string())
 })
 
@@ -6282,6 +8327,9 @@ export const listUsersResponseOneTotalPagesMin = 0;
 export const listUsersResponseOneTotalPagesMultipleOf = 1;
 
 export const listUsersResponseTwoItemsItemEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const listUsersResponseTwoItemsItemMarketCodesItemMin = 2;
+export const listUsersResponseTwoItemsItemMarketCodesItemMax = 24;
+
 
 
 export const ListUsersResponse = zod.object({
@@ -6296,6 +8344,7 @@ export const ListUsersResponse = zod.object({
   "email": zod.string().regex(listUsersResponseTwoItemsItemEmailRegExp),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
+  "marketCodes": zod.array(zod.string().min(listUsersResponseTwoItemsItemMarketCodesItemMin).max(listUsersResponseTwoItemsItemMarketCodesItemMax)),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -6315,15 +8364,22 @@ export const inviteUserBodyEmailMax = 254;
 
 
 export const inviteUserBodyEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const inviteUserBodyMarketCodesItemMin = 2;
+export const inviteUserBodyMarketCodesItemMax = 24;
+
 
 
 export const InviteUserBody = zod.object({
   "name": zod.string().min(inviteUserBodyNameMin).max(inviteUserBodyNameMax),
   "email": zod.string().max(inviteUserBodyEmailMax).regex(inviteUserBodyEmailRegExp),
-  "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer'])
+  "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
+  "marketCodes": zod.array(zod.string().min(inviteUserBodyMarketCodesItemMin).max(inviteUserBodyMarketCodesItemMax)).optional()
 })
 
 export const inviteUserResponseUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const inviteUserResponseUserMarketCodesItemMin = 2;
+export const inviteUserResponseUserMarketCodesItemMax = 24;
+
 
 
 export const InviteUserResponse = zod.object({
@@ -6334,13 +8390,14 @@ export const InviteUserResponse = zod.object({
   "email": zod.string().regex(inviteUserResponseUserEmailRegExp),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
+  "marketCodes": zod.array(zod.string().min(inviteUserResponseUserMarketCodesItemMin).max(inviteUserResponseUserMarketCodesItemMax)),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 }),
-  "temporaryPassword": zod.string().describe('One-time credential to copy securely to the invited user.'),
+  "delivery": zod.enum(['email']),
   "expiresAt": zod.coerce.date(),
   "createdAt": zod.coerce.date()
 })
@@ -6356,15 +8413,22 @@ export const UpdateUserParams = zod.object({
 export const updateUserBodyNameMin = 2;
 export const updateUserBodyNameMax = 120;
 
+export const updateUserBodyMarketCodesItemMin = 2;
+export const updateUserBodyMarketCodesItemMax = 24;
+
 
 
 export const UpdateUserBody = zod.object({
   "name": zod.string().min(updateUserBodyNameMin).max(updateUserBodyNameMax).optional(),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']).optional(),
-  "status": zod.enum(['invited', 'active', 'suspended']).optional()
+  "status": zod.enum(['invited', 'active', 'suspended']).optional(),
+  "marketCodes": zod.array(zod.string().min(updateUserBodyMarketCodesItemMin).max(updateUserBodyMarketCodesItemMax)).optional()
 })
 
 export const updateUserResponseEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+export const updateUserResponseMarketCodesItemMin = 2;
+export const updateUserResponseMarketCodesItemMax = 24;
+
 
 
 export const UpdateUserResponse = zod.object({
@@ -6373,6 +8437,7 @@ export const UpdateUserResponse = zod.object({
   "email": zod.string().regex(updateUserResponseEmailRegExp),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
+  "marketCodes": zod.array(zod.string().min(updateUserResponseMarketCodesItemMin).max(updateUserResponseMarketCodesItemMax)),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -6388,15 +8453,13 @@ export const ResetUserPasswordParams = zod.object({
   "userId": zod.coerce.string()
 })
 
-export const resetUserPasswordBodySendEmailDefault = true;
-
 export const ResetUserPasswordBody = zod.object({
-  "sendEmail": zod.boolean().default(resetUserPasswordBodySendEmailDefault)
-})
+
+}).describe('Requests secure email delivery to the user\'s registered address.')
 
 export const ResetUserPasswordResponse = zod.object({
   "id": zod.string(),
-  "temporaryPassword": zod.string().describe('One-time credential to copy securely to the user.'),
+  "delivery": zod.enum(['email']),
   "expiresAt": zod.coerce.date()
 })
 
@@ -6499,7 +8562,7 @@ export const listPublishedContentQueryPageSizeMultipleOf = 1;
 export const ListPublishedContentQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listPublishedContentQueryPageMultipleOf).default(listPublishedContentQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listPublishedContentQueryPageSizeMax).multipleOf(listPublishedContentQueryPageSizeMultipleOf).default(listPublishedContentQueryPageSizeDefault),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']).optional(),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']).optional(),
   "market": zod.coerce.string(),
   "locale": zod.coerce.string().optional()
 })
@@ -6530,7 +8593,7 @@ export const ListPublishedContentResponse = zod.object({
 }).and(zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string(),
   "title": zod.string(),
   "summary": zod.string().nullish(),
@@ -6565,7 +8628,8 @@ export const ListPublishedContentResponse = zod.object({
   "locale": zod.string(),
   "requestedMarket": zod.string(),
   "usedFallback": zod.boolean(),
-  "isConfigured": zod.boolean().describe('True once this content kind has an approved publication history, including archived records.')
+  "isConfigured": zod.boolean().describe('True once this content kind has an immediate publication history, including archived records.'),
+  "configuredPagePaths": zod.array(zod.string()).describe('Landing page paths with an immediate publication in their history. Draft-only pages are excluded.')
 }))
 
 
@@ -6575,7 +8639,7 @@ export const ListPublishedContentResponse = zod.object({
 export const GetPublishedContentParams = zod.object({
   "market": zod.coerce.string(),
   "locale": zod.coerce.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.coerce.string()
 })
 
@@ -6589,7 +8653,7 @@ export const getPublishedContentResponseRevisionMultipleOf = 1;
 
 export const GetPublishedContentResponse = zod.object({
   "id": zod.string(),
-  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration']),
+  "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
   "slug": zod.string(),
   "title": zod.string(),
   "summary": zod.string().nullish(),

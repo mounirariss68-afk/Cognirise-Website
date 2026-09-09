@@ -14,6 +14,8 @@ export type PublishedContentPage = PageMetadata & {
   locale: string;
   requestedMarket: string;
   usedFallback: boolean;
-  /** True once this content kind has an approved publication history, including archived records. */
+  /** True once this content kind has an immediate publication history, including archived records. */
   isConfigured: boolean;
+  /** Landing page paths with an immediate publication in their history. Draft-only pages are excluded. */
+  configuredPagePaths: string[];
 };

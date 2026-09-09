@@ -2,9 +2,9 @@ import { Router, type IRouter } from "express";
 import { pipeline } from "node:stream/promises";
 import { pool } from "@workspace/db";
 import {
+  CMS_CONTACT_EMAIL_DOCUMENT_SLUG,
   CMS_HERO_DOCUMENT_SLUGS,
   CMS_HERO_FILM_SLOTS,
-  CMS_CONTACT_EMAIL_DOCUMENT_SLUG,
   contactEmailConfigurationContentSchema,
   cmsPublicRoute,
   type CmsHeroFilmSlot,
@@ -20,6 +20,7 @@ import { SlidingWindowThrottle } from "../lib/security";
 import { downloadMediaObject, parseByteRange } from "../lib/object-storage";
 import { isPublicContentVisible } from "../lib/policy";
 import { PUBLIC_KIND_CONFIGURATION_SQL } from "../lib/document-lifecycle-sql";
+import { navigationCandidates, isPublishedPageAvailable } from "../lib/navigation-policy";
 
 const router: IRouter = Router();
 const PUBLIC_IMMUTABLE_MEDIA_CACHE_CONTROL = "public, max-age=31536000, immutable";
@@ -53,7 +54,6 @@ function publicSnapshot(row: Record<string, any>) {
   return validation.data;
 }
 async function marketCandidates(requestedMarket: string, requestedLocale: string) {
-  if (requestedLocale !== "en") return null;
   const result = await pool.query(
     `SELECT code,default_locale,fallback_market_code,fallback_locale,is_canonical
      FROM market_editions WHERE enabled=true`,
@@ -61,6 +61,10 @@ async function marketCandidates(requestedMarket: string, requestedLocale: string
   const markets = new Map(result.rows.map((row) => [String(row.code), row]));
   const requested = markets.get(requestedMarket);
   if (!requested) return null;
+  const supportedLocales = new Set(result.rows.flatMap((row) =>
+    [row.default_locale, row.fallback_locale].filter(Boolean).map(String)
+  ));
+  if (!supportedLocales.has(requestedLocale)) return null;
   const candidates: string[] = [];
   const visited = new Set<string>();
   let current: Record<string, any> | undefined = requested;
@@ -78,6 +82,13 @@ async function marketCandidates(requestedMarket: string, requestedLocale: string
   return candidates;
 }
 
+/** Ordered edition keys: requested locale first, then each configured locale
+ * fallback and market fallback. This prevents an English row from winning
+ * merely because it was updated more recently than the requested locale. */
+async function marketLocaleCandidates(requestedMarket: string, requestedLocale: string) {
+  const candidates = await navigationCandidates(requestedMarket, requestedLocale);
+  return candidates?.map((candidate) => `${candidate.market}|${candidate.locale}`) ?? null;
+}
 export function publicMediaUrl(assetId: string, versionId: string) {
   return `/api/public/media/${assetId}/${versionId}`;
 }
@@ -195,7 +206,7 @@ async function published(row: Record<string, any>, snapshot = publicSnapshot(row
     title: snapshot.title,
     summary: snapshot.summary,
     content: snapshot.content,
-    seo: snapshot.seo,
+    seo: snapshot.seo ?? (snapshot.content as Record<string, unknown>).seo,
     media: assets.rows.map((asset) => ({
        id: String(asset.id), versionId: String(asset.version_id),
        url: publicMediaUrl(String(asset.id), String(asset.version_id)), mimeType: asset.media_type,
@@ -211,7 +222,8 @@ async function published(row: Record<string, any>, snapshot = publicSnapshot(row
     market: row.market,
     locale: row.locale,
     requestedMarket: row.requested_market,
-    usedFallback: row.market !== row.requested_market,
+     requestedLocale: row.requested_locale ?? row.locale,
+     usedFallback: row.market !== row.requested_market || row.locale !== (row.requested_locale ?? row.locale),
     revision: row.revision_number,
     publishedAt: row.published_at,
     updatedAt: row.updated_at,
@@ -221,62 +233,75 @@ async function published(row: Record<string, any>, snapshot = publicSnapshot(row
 router.get(
   "/public/content",
   asyncRoute(async (req, res) => {
-    const parsed = ListPublishedContentQueryParams.safeParse(req.query);
+    const parsed = GetPublicSitemapQueryParams.safeParse(req.query);
     if (!parsed.success) {
       res.status(400).json({ error: "Invalid content filters." });
       return;
     }
     const { page, pageSize, market, locale = "en" } = parsed.data;
     const kind = parsed.data.kind ?? null;
-    const candidates = await marketCandidates(market, locale);
+    const candidates = result.rows.flatMap((row) => {
+      const snapshot = publicSnapshot(row);
+      if (!snapshot) return [];
+      const route = cmsPublicRoute(
+        row.kind as CmsDocumentKind,
+        snapshot.slug,
+        snapshot.content as CmsContent,
+      );
+      if (!route) return [];
+      const suffix = row.market === "uae" ? "" : `?market=${encodeURIComponent(row.market)}`;
+      return [{
+        url: `${route}${suffix}`,
+        path: route,
+        market: String(row.market),
+        locale: String(row.locale),
+        updatedAt: row.updated_at,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      }];
+    });
+
+    const requestedMarket = parsed.data.market ?? "uae";
     if (!candidates) {
       res.status(404).json({ error: "Market or locale is unavailable." });
       return;
     }
     const result = await pool.query(
-      `WITH selected AS (
-         SELECT d.id,d.kind,e.market,e.locale,e.published_at,e.updated_at,e.localized_slug,
-                 r.id revision_id,r.revision_number,r.payload,
-                row_number() OVER (PARTITION BY d.id
-                   ORDER BY array_position($2::text[],e.market),e.updated_at DESC,e.id) AS market_rank
-           FROM cms_documents d
-           JOIN cms_market_editions e ON e.document_id=d.id
-           JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
-             AND r.workflow_state='approved'
-          WHERE d.status<>'archived' AND e.publication_state='published'
-            AND e.published_at<=now() AND ($1::text IS NULL OR d.kind=$1)
-             AND e.market=ANY($2::text[])
-              AND (d.kind<>'person' OR NOT EXISTS (
-                SELECT 1 FROM cms_person_market_availability a
-                JOIN market_editions requested ON requested.id=a.market_edition_id
-                WHERE a.document_id=d.id AND requested.code=$3 AND a.published_decision='off'
-              ))
-            AND ${PUBLIC_PAYLOAD_SQL}
-       )
-       SELECT *,count(*) OVER() total_count,$3::text requested_market
-         FROM selected WHERE market_rank=1
-         ORDER BY COALESCE((payload->'content'->>'order')::int,0),payload->>'title',published_at DESC
-         LIMIT $4 OFFSET $5`,
-      [kind, candidates, market, pageSize, (page - 1) * pageSize],
+      `SELECT d.kind,e.market,e.locale,e.updated_at,r.payload
+         FROM cms_documents d JOIN cms_market_editions e ON e.document_id=d.id
+         JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
+           AND r.workflow_state='approved'
+        WHERE d.status<>'archived' AND e.publication_state='published'
+            AND e.published_at<=now() AND ($1::text IS NULL OR e.market=$1)
+            AND COALESCE((r.payload->'seo'->>'noIndex')::boolean,false)=false
+            AND ${PUBLIC_PAYLOAD_SQL}`,
+      [parsed.data.market ?? null],
     );
     const configuration = kind
       ? await pool.query(PUBLIC_KIND_CONFIGURATION_SQL, [kind])
       : { rows: [{ is_configured: true }] };
     try {
-      const eligibleRows = result.rows.flatMap((row) => {
+      const eligibleRows = (await Promise.all(result.rows.map(async (row) => {
         const snapshot = publicSnapshot(row);
         if (!snapshot) {
           req.log.error(
             { kind: row.kind, documentId: String(row.id), revision: row.revision_number },
             "Excluded ineligible published CMS content",
           );
-          return [];
+          return null;
         }
-        return [{ row, snapshot }];
-      });
-      const items = await Promise.all(
-        eligibleRows.map(({ row, snapshot }) => published(row, snapshot)),
-      );
+        const route = cmsPublicRoute(
+          row.kind as CmsDocumentKind,
+          snapshot.slug,
+          snapshot.content as CmsContent,
+        );
+        if (route && !await isPageAvailable(route, market, locale)) return null;
+        return { row, snapshot };
+      }))).filter((entry): entry is { row: Record<string, any>; snapshot: NonNullable<ReturnType<typeof publicSnapshot>> } => Boolean(entry));
+    const items = (await Promise.all(candidates.map(async (item) =>
+      await isPageAvailable(item.path, requestedMarket, item.locale) ? item : null
+    ))).filter((item): item is NonNullable<typeof item> => item !== null)
+      .map(({ path: _path, market: _market, locale: _locale, ...item }) => item);
       res.json({
         ...pageOf(
           items,
@@ -292,6 +317,9 @@ router.get(
         requestedMarket: market,
         usedFallback: items.some((item) => item.usedFallback),
         isConfigured: Boolean(configuration.rows[0]?.is_configured),
+         configuredPagePaths: Array.isArray(configuration.rows[0]?.configured_page_paths)
+           ? configuration.rows[0].configured_page_paths
+           : [],
       });
     } catch (error) {
       if (error instanceof PublicContractError) {
@@ -312,30 +340,46 @@ router.get("/public/hero-films/:slot", asyncRoute(async (req, res) => {
     res.status(404).json({ error: "Public hero film not found." });
     return;
   }
-  const candidates = await marketCandidates(market, locale);
+    const candidates = result.rows.flatMap((row) => {
+      const snapshot = publicSnapshot(row);
+      if (!snapshot) return [];
+      const route = cmsPublicRoute(
+        row.kind as CmsDocumentKind,
+        snapshot.slug,
+        snapshot.content as CmsContent,
+      );
+      if (!route) return [];
+      const suffix = row.market === "uae" ? "" : `?market=${encodeURIComponent(row.market)}`;
+      return [{
+        url: `${route}${suffix}`,
+        path: route,
+        market: String(row.market),
+        locale: String(row.locale),
+        updatedAt: row.updated_at,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      }];
+    });
+
+    const requestedMarket = parsed.data.market ?? "uae";
   if (!candidates) {
     res.status(404).json({ error: "Market or locale is unavailable." });
     return;
   }
   const documentSlug = CMS_HERO_DOCUMENT_SLUGS[slot as CmsHeroFilmSlot];
-  const result = await pool.query(
-    `SELECT d.id,e.market,e.locale,e.published_at,e.updated_at,
-            r.id revision_id,r.revision_number,r.payload
-       FROM cms_documents d
-       JOIN cms_market_editions e ON e.document_id=d.id
-       JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
-         AND r.workflow_state='approved'
-      WHERE d.kind='site-configuration'
-        AND d.canonical_slug=$1
-        AND e.market=ANY($2::text[]) AND e.locale=$3
-        AND e.publication_state='published' AND e.published_at<=now()
-        AND ${PUBLIC_PAYLOAD_SQL}
-      ORDER BY array_position($2::text[],e.market),e.updated_at DESC,e.id
-      LIMIT 1`,
-    [documentSlug, candidates, locale],
-  );
+    const result = await pool.query(
+      `SELECT d.kind,e.market,e.locale,e.updated_at,r.payload
+         FROM cms_documents d JOIN cms_market_editions e ON e.document_id=d.id
+         JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
+           AND r.workflow_state='approved'
+        WHERE d.status<>'archived' AND e.publication_state='published'
+            AND e.published_at<=now() AND ($1::text IS NULL OR e.market=$1)
+            AND COALESCE((r.payload->'seo'->>'noIndex')::boolean,false)=false
+            AND ${PUBLIC_PAYLOAD_SQL}`,
+      [parsed.data.market ?? null],
+    );
   if (!result.rowCount) {
-    res.status(404).json({ error: "Public hero film not found." });
+    res.status(404).json({ error: "Public contact configuration not found." });
     return;
   }
   const row = result.rows[0];
@@ -378,26 +422,43 @@ router.get("/public/hero-films/:slot", asyncRoute(async (req, res) => {
 router.get("/public/contact-configuration", asyncRoute(async (req, res) => {
   const market = typeof req.query.market === "string" ? req.query.market : "uae";
   const locale = typeof req.query.locale === "string" ? req.query.locale : "en";
-  const candidates = await marketCandidates(market, locale);
-  if (!candidates) {
-    res.status(404).json({ error: "Market or locale is unavailable." });
-    return;
-  }
-  const result = await pool.query(
-    `SELECT d.id,e.market,e.locale,e.published_at,e.updated_at,
-            r.id revision_id,r.revision_number,r.payload
-       FROM cms_documents d
-       JOIN cms_market_editions e ON e.document_id=d.id
-       JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
-         AND r.workflow_state='approved'
-      WHERE d.kind='site-configuration' AND d.status<>'archived'
-        AND d.canonical_slug=$1
-        AND e.market=ANY($2::text[]) AND e.locale=$3
-        AND e.publication_state='published' AND e.published_at<=now()
-      ORDER BY array_position($2::text[],e.market),e.updated_at DESC,e.id
-      LIMIT 1`,
-    [CMS_CONTACT_EMAIL_DOCUMENT_SLUG, candidates, locale],
-  );
+    const candidates = result.rows.flatMap((row) => {
+      const snapshot = publicSnapshot(row);
+      if (!snapshot) return [];
+      const route = cmsPublicRoute(
+        row.kind as CmsDocumentKind,
+        snapshot.slug,
+        snapshot.content as CmsContent,
+      );
+      if (!route) return [];
+      const suffix = row.market === "uae" ? "" : `?market=${encodeURIComponent(row.market)}`;
+      return [{
+        url: `${route}${suffix}`,
+        path: route,
+        market: String(row.market),
+        locale: String(row.locale),
+        updatedAt: row.updated_at,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      }];
+    });
+
+    const requestedMarket = parsed.data.market ?? "uae";
+    if (!candidates) {
+      res.status(404).json({ error: "Market or locale is unavailable." });
+      return;
+    }
+    const result = await pool.query(
+      `SELECT d.kind,e.market,e.locale,e.updated_at,r.payload
+         FROM cms_documents d JOIN cms_market_editions e ON e.document_id=d.id
+         JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
+           AND r.workflow_state='approved'
+        WHERE d.status<>'archived' AND e.publication_state='published'
+            AND e.published_at<=now() AND ($1::text IS NULL OR e.market=$1)
+            AND COALESCE((r.payload->'seo'->>'noIndex')::boolean,false)=false
+            AND ${PUBLIC_PAYLOAD_SQL}`,
+      [parsed.data.market ?? null],
+    );
   if (!result.rowCount) {
     res.status(404).json({ error: "Public contact configuration not found." });
     return;
@@ -416,7 +477,7 @@ router.get("/public/contact-configuration", asyncRoute(async (req, res) => {
     market: row.market,
     locale: row.locale,
     requestedMarket: market,
-    usedFallback: row.market !== market,
+    usedFallback: row.market !== market || row.locale !== locale,
     revision: row.revision_number,
     publishedAt: row.published_at,
   });
@@ -426,30 +487,42 @@ router.get(
   "/public/content/:market/:locale/:kind/:slug",
   asyncRoute(async (req, res) => {
     const { market, locale, kind, slug } = req.params;
-    const candidates = await marketCandidates(String(market), String(locale));
+    const candidates = result.rows.flatMap((row) => {
+      const snapshot = publicSnapshot(row);
+      if (!snapshot) return [];
+      const route = cmsPublicRoute(
+        row.kind as CmsDocumentKind,
+        snapshot.slug,
+        snapshot.content as CmsContent,
+      );
+      if (!route) return [];
+      const suffix = row.market === "uae" ? "" : `?market=${encodeURIComponent(row.market)}`;
+      return [{
+        url: `${route}${suffix}`,
+        path: route,
+        market: String(row.market),
+        locale: String(row.locale),
+        updatedAt: row.updated_at,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      }];
+    });
+
+    const requestedMarket = parsed.data.market ?? "uae";
     if (!candidates) {
       res.status(404).json({ error: "Market or locale is unavailable." });
       return;
     }
     const result = await pool.query(
-      `SELECT d.id,d.kind,e.market,e.locale,e.published_at,e.updated_at,e.localized_slug,
-               r.id revision_id,r.revision_number,r.payload,$3::text requested_market
-         FROM cms_documents d
-         JOIN cms_market_editions e ON e.document_id=d.id
-          JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
-            AND r.workflow_state='approved'
+      `SELECT d.kind,e.market,e.locale,e.updated_at,r.payload
+         FROM cms_documents d JOIN cms_market_editions e ON e.document_id=d.id
+         JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
+           AND r.workflow_state='approved'
         WHERE d.status<>'archived' AND e.publication_state='published'
-          AND e.published_at<=now() AND d.kind=$1
-          AND COALESCE(r.payload->>'slug',e.localized_slug)=$2
-           AND e.market=ANY($4::text[])
-            AND (d.kind<>'person' OR NOT EXISTS (
-              SELECT 1 FROM cms_person_market_availability a
-              JOIN market_editions requested ON requested.id=a.market_edition_id
-              WHERE a.document_id=d.id AND requested.code=$3 AND a.published_decision='off'
-            ))
-            AND ${PUBLIC_PAYLOAD_SQL}
-         ORDER BY array_position($4::text[],e.market),e.updated_at DESC,e.id LIMIT 1`,
-      [kind, slug, market, candidates],
+            AND e.published_at<=now() AND ($1::text IS NULL OR e.market=$1)
+            AND COALESCE((r.payload->'seo'->>'noIndex')::boolean,false)=false
+            AND ${PUBLIC_PAYLOAD_SQL}`,
+      [parsed.data.market ?? null],
     );
     if (!result.rowCount) {
       res.status(404).json({ error: "Published content not found." });
@@ -457,23 +530,12 @@ router.get(
     }
     try {
       const snapshot = hasPublicDetailRoute(result.rows[0]);
-      if (!snapshot) {
-        res.status(404).json({ error: "Published content not found." });
-        return;
-      }
-      res.json(await published(result.rows[0], snapshot));
-    } catch (error) {
-      if (error instanceof PublicContractError) {
-        req.log.error({ err: error, kind, slug, market }, "Invalid published CMS content");
-        res.status(502).json({ error: "Published content failed contract validation." });
-        return;
-      }
-      throw error;
-    }
-  }),
-);
 
-router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
+      const route = cmsPublicRoute(
+        result.rows[0].kind as CmsDocumentKind,
+        snapshot.slug,
+        snapshot.content as CmsContent,
+      );
   const asset = await pool.query(
     `SELECT v.storage_key,v.byte_size,d.kind,r.payload,
        CASE WHEN v.metadata->>'rendition'='webp-1600' THEN 'image/webp' ELSE a.media_type END media_type
@@ -545,24 +607,10 @@ router.get(
             AND ${PUBLIC_PAYLOAD_SQL}`,
       [parsed.data.market ?? null],
     );
-
-    const items = result.rows.flatMap((row) => {
-      const snapshot = publicSnapshot(row);
-      if (!snapshot) return [];
-      const route = cmsPublicRoute(
-        row.kind as CmsDocumentKind,
-        snapshot.slug,
-        snapshot.content as CmsContent,
-      );
-      if (!route) return [];
-      const suffix = row.market === "uae" ? "" : `?market=${encodeURIComponent(row.market)}`;
-      return [{
-        url: `${route}${suffix}`,
-        updatedAt: row.updated_at,
-        changeFrequency: "weekly",
-        priority: 0.7,
-      }];
-    });
+    const items = (await Promise.all(candidates.map(async (item) =>
+      await isPageAvailable(item.path, requestedMarket, item.locale) ? item : null
+    ))).filter((item): item is NonNullable<typeof item> => item !== null)
+      .map(({ path: _path, market: _market, locale: _locale, ...item }) => item);
     res.json({ items, generatedAt: new Date() });
   }),
 );
@@ -579,4 +627,44 @@ function hasPublicDetailRoute(row: Record<string, any>) {
     return null;
   }
   return snapshot;
+}
+
+export const isPageAvailable = isPublishedPageAvailable;
+
+export function rankMarketLocaleCandidates(
+  rows: Array<Record<string, any>>,
+  requestedMarket: string,
+  requestedLocale: string,
+) {
+  const markets = new Map(rows.map((row) => [String(row.code), row]));
+  const requested = markets.get(requestedMarket);
+  if (!requested) return null;
+  const supportedLocales = new Set(rows.flatMap((row) =>
+    [row.default_locale, row.fallback_locale].filter(Boolean).map(String),
+  ));
+  if (!supportedLocales.has(requestedLocale)) return null;
+  const keys: string[] = [];
+  const add = (market: string | undefined, locale: string | undefined) => {
+    if (!market || !locale) return;
+    const key = `${market}|${locale}`;
+    if (!keys.includes(key)) keys.push(key);
+  };
+  let current: Record<string, any> | undefined = requested;
+  const visited = new Set<string>();
+  while (current && !visited.has(String(current.code)) && keys.length < 16) {
+    const code = String(current.code);
+    visited.add(code);
+    add(code, requestedLocale);
+    add(code, current.fallback_locale ? String(current.fallback_locale) : undefined);
+    add(code, String(current.default_locale));
+    current = current.fallback_market_code
+      ? markets.get(String(current.fallback_market_code))
+      : undefined;
+  }
+  const canonical = rows.find((row) => row.is_canonical);
+  if (canonical) {
+    add(String(canonical.code), requestedLocale);
+    add(String(canonical.code), String(canonical.default_locale));
+  }
+  return keys;
 }

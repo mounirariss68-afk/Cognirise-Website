@@ -6,7 +6,7 @@ import { AgentAuthorityAssessment } from "@/components/AgentAuthorityAssessment"
 import { BrandButton } from "@/components/ui/brand-button";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { assetUrl } from "@/lib/assets";
-import { type CmsRecord, cmsEntryRenderPolicy, contentRecord, text, useCmsEntry } from "@/lib/cms";
+import { type CmsRecord, cmsEntryRenderPolicy, contentRecord, resolveCmsMedia, text, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import {
   type HScore,
@@ -366,8 +366,8 @@ export function AgentAuthorityLayout({
   preview = false,
 }: AgentAuthorityLayoutProps) {
   const reducedMotion = useReducedMotion();
-  const heroMedia = framework?.heroMediaId
-    ? framework.media?.find((media) => media.id === framework.heroMediaId)
+  const heroMedia = framework
+    ? resolveCmsMedia(framework.media, framework.heroMedia, framework.heroMediaId)
     : undefined;
   const title = text(framework?.title, COMPILED.title);
   const teaser = text(framework?.teaser, COMPILED.teaser);
@@ -461,7 +461,7 @@ export function AgentAuthorityLayout({
           >
             <PulseImage
               src={heroMedia?.url ?? assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")}
-              alt={heroMedia?.altText || "A luminous gateway marking the boundary between proposed and permitted agent authority."}
+              alt={framework?.heroMedia?.altText || heroMedia?.altText || "A luminous gateway marking the boundary between proposed and permitted agent authority."}
               className="h-full w-full object-cover"
               eager
             />

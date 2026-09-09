@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { User } from './user';
+import type { UserInvitationDelivery } from './userInvitationDelivery';
 
 export interface UserInvitation {
   id: string;
   user: User;
-  /** One-time credential to copy securely to the invited user. */
-  temporaryPassword: string;
+  delivery: UserInvitationDelivery;
   expiresAt: Date;
   createdAt: Date;
 }

@@ -5,9 +5,12 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
-import type { NavigationSetting } from './navigationSetting';
+import type { PageAvailability } from './pageAvailability';
+import type { UpdateNavigationSetting } from './updateNavigationSetting';
 
 export interface UpdateNavigationSettings {
-  /** @minItems 1 */
-  items: NavigationSetting[];
+  items: UpdateNavigationSetting[];
+  pages: PageAvailability[];
+  market: string;
+  locale: string;
 }

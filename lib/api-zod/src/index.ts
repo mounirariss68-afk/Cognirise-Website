@@ -1,8 +1,16 @@
 export * from "./generated/api";
 export * from "./generated/types";
+export * from "./landing-page-slots.generated";
 // Resolve Orval's path/query params name collision while retaining both generated surfaces.
 export { GetPublicHeroFilmParams } from "./generated/api";
 export type { GetPublicHeroFilmParams as GetPublicHeroFilmQuery } from "./generated/types/getPublicHeroFilmParams";
+export { PreviewDocumentParams } from "./generated/api";
+export type { PreviewDocumentParams as PreviewDocumentQuery } from "./generated/types/previewDocumentParams";
+export { ListDocumentReviewCommentsParams } from "./generated/api";
+export type { ListDocumentReviewCommentsParams as ListDocumentReviewCommentsQuery } from "./generated/types/listDocumentReviewCommentsParams";
+export { GetDocumentParams } from "./generated/api";
+export type { GetDocumentParams as GetDocumentPath } from "./generated/types/getDocumentParams";
+export { GetDocumentQueryParams } from "./generated/api";
 export * from "./cms-content";
 export * from "./navigation";
 export * from "./agent-authority";

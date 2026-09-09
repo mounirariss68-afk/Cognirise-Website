@@ -20,8 +20,10 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AccessTokenConsumption,
   AnalyticsEventInput,
   AnalyticsReceipt,
+  ApiError,
   ArchiveInput,
   AuditEventPage,
   AuthBootstrap,
@@ -34,6 +36,7 @@ import type {
   CsrfToken,
   DashboardKpis,
   Document,
+  DocumentEditionMatrix,
   DocumentInput,
   DocumentKind,
   DocumentMarketAvailability,
@@ -42,14 +45,19 @@ import type {
   DocumentRevision,
   DocumentRevisionPage,
   DocumentUpdate,
+  EditionOverrideInput,
   EnquiryInput,
   EnquiryReceipt,
   GetDashboardKpisParams,
+  GetDocumentParams,
+  GetNavigationSettingsParams,
   GetPublicContactConfigurationParams,
   GetPublicHeroFilmParams,
+  GetPublicNavigationSettingsParams,
   GetPublicSitemapParams,
   HealthStatus,
   ListAuditEventsParams,
+  ListDocumentReviewCommentsParams,
   ListDocumentsParams,
   ListMarketEditionsParams,
   ListMediaParams,
@@ -74,12 +82,15 @@ import type {
   MfaConfirmationInput,
   MfaSetup,
   MfaVerificationInput,
+  NavigationEditionSelector,
   NavigationSettings,
   NewsletterSubscriptionInput,
   NotFoundResponse,
   PasswordChangeInput,
   PasswordReset,
   PasswordResetInput,
+  PreviewDocumentParams,
+  PublicConfiguration,
   PublicContactConfiguration,
   PublicHeroFilm,
   PublicHeroSlot,
@@ -87,6 +98,8 @@ import type {
   PublishedContent,
   PublishedContentPage,
   RecoveryInput,
+  ReviewComment,
+  ReviewCommentInput,
   ReviewSubmissionInput,
   RollbackInput,
   Session,
@@ -102,7 +115,6 @@ import type {
   UnauthorizedResponse,
   UpdateNavigationSettings,
   User,
-  UserCredentialUpdate,
   UserInvitation,
   UserInvitationInput,
   UserPage,
@@ -135,6 +147,83 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetPublicConfigurationUrl = () => {
+
+
+
+
+  return `/api/public/configuration`
+}
+
+/**
+ * @summary Get enabled public markets and locales
+ */
+export const getPublicConfiguration = async ( options?: Parameters<typeof customFetch>[1]): Promise<PublicConfiguration> => {
+
+  return customFetch<PublicConfiguration>(getGetPublicConfigurationUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicConfigurationQueryKey = () => {
+    return [
+    `/api/public/configuration`
+    ] as const;
+    }
+
+
+export const getGetPublicConfigurationQueryOptions = <TData = Awaited<ReturnType<typeof getPublicConfiguration>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicConfiguration>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicConfigurationQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicConfiguration>>> = ({ signal }) => getPublicConfiguration({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicConfiguration>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicConfigurationQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicConfiguration>>>
+export type GetPublicConfigurationQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get enabled public markets and locales
+ */
+
+export function useGetPublicConfiguration<TData = Awaited<ReturnType<typeof getPublicConfiguration>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicConfiguration>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicConfigurationQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getHealthCheckUrl = () => {
 
@@ -213,20 +302,27 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
-export const getGetPublicNavigationSettingsUrl = () => {
+export const getGetPublicNavigationSettingsUrl = (params?: GetPublicNavigationSettingsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/public/navigation`
+  return stringifiedParams.length > 0 ? `/api/public/navigation?${stringifiedParams}` : `/api/public/navigation`
 }
 
 /**
  * @summary Get published header navigation visibility
  */
-export const getPublicNavigationSettings = async ( options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
+export const getPublicNavigationSettings = async (params?: GetPublicNavigationSettingsParams, options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
 
-  return customFetch<NavigationSettings>(getGetPublicNavigationSettingsUrl(),
+  return customFetch<NavigationSettings>(getGetPublicNavigationSettingsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -239,23 +335,23 @@ export const getPublicNavigationSettings = async ( options?: Parameters<typeof c
 
 
 
-export const getGetPublicNavigationSettingsQueryKey = () => {
+export const getGetPublicNavigationSettingsQueryKey = (params?: GetPublicNavigationSettingsParams,) => {
     return [
-    `/api/public/navigation`
+    `/api/public/navigation`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetPublicNavigationSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetPublicNavigationSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError = ErrorType<unknown>>(params?: GetPublicNavigationSettingsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetPublicNavigationSettingsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicNavigationSettingsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicNavigationSettings>>> = ({ signal }) => getPublicNavigationSettings({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicNavigationSettings>>> = ({ signal }) => getPublicNavigationSettings(params, { signal, ...requestOptions });
 
 
 
@@ -273,11 +369,11 @@ export type GetPublicNavigationSettingsQueryError = ErrorType<unknown>
  */
 
 export function useGetPublicNavigationSettings<TData = Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: GetPublicNavigationSettingsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetPublicNavigationSettingsQueryOptions(options)
+  const queryOptions = getGetPublicNavigationSettingsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -290,20 +386,27 @@ export function useGetPublicNavigationSettings<TData = Awaited<ReturnType<typeof
 
 
 
-export const getGetNavigationSettingsUrl = () => {
+export const getGetNavigationSettingsUrl = (params?: GetNavigationSettingsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/navigation`
+  return stringifiedParams.length > 0 ? `/api/navigation?${stringifiedParams}` : `/api/navigation`
 }
 
 /**
  * @summary Get editable header navigation visibility
  */
-export const getNavigationSettings = async ( options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
+export const getNavigationSettings = async (params?: GetNavigationSettingsParams, options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
 
-  return customFetch<NavigationSettings>(getGetNavigationSettingsUrl(),
+  return customFetch<NavigationSettings>(getGetNavigationSettingsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -316,23 +419,23 @@ export const getNavigationSettings = async ( options?: Parameters<typeof customF
 
 
 
-export const getGetNavigationSettingsQueryKey = () => {
+export const getGetNavigationSettingsQueryKey = (params?: GetNavigationSettingsParams,) => {
     return [
-    `/api/navigation`
+    `/api/navigation`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetNavigationSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getNavigationSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetNavigationSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getNavigationSettings>>, TError = ErrorType<unknown>>(params?: GetNavigationSettingsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetNavigationSettingsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetNavigationSettingsQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNavigationSettings>>> = ({ signal }) => getNavigationSettings({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNavigationSettings>>> = ({ signal }) => getNavigationSettings(params, { signal, ...requestOptions });
 
 
 
@@ -350,11 +453,11 @@ export type GetNavigationSettingsQueryError = ErrorType<unknown>
  */
 
 export function useGetNavigationSettings<TData = Awaited<ReturnType<typeof getNavigationSettings>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: GetNavigationSettingsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNavigationSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetNavigationSettingsQueryOptions(options)
+  const queryOptions = getGetNavigationSettingsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -376,7 +479,7 @@ export const getUpdateNavigationSettingsUrl = () => {
 }
 
 /**
- * @summary Enable or disable header menu and submenu items
+ * @summary Save navigation and page availability as a draft
  */
 export const updateNavigationSettings = async (updateNavigationSettings: UpdateNavigationSettings, options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
 
@@ -425,7 +528,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UpdateNavigationSettingsMutationError = ErrorType<unknown>
 
     /**
- * @summary Enable or disable header menu and submenu items
+ * @summary Save navigation and page availability as a draft
  */
 export const useUpdateNavigationSettings = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateNavigationSettings>>, TError,{data: BodyType<UpdateNavigationSettings>}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -436,6 +539,148 @@ export const useUpdateNavigationSettings = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getUpdateNavigationSettingsMutationOptions(options));
+    }
+
+export const getReviewNavigationSettingsUrl = () => {
+
+
+
+
+  return `/api/navigation/review`
+}
+
+/**
+ * @summary Submit navigation and page availability for review
+ */
+export const reviewNavigationSettings = async (navigationEditionSelector: NavigationEditionSelector, options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
+
+  return customFetch<NavigationSettings>(getReviewNavigationSettingsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(navigationEditionSelector)
+  }
+);}
+
+
+
+
+
+export const getReviewNavigationSettingsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewNavigationSettings>>, TError,{data: BodyType<NavigationEditionSelector>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reviewNavigationSettings>>, TError,{data: BodyType<NavigationEditionSelector>}, TContext> => {
+
+const mutationKey = ['reviewNavigationSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reviewNavigationSettings>>, {data: BodyType<NavigationEditionSelector>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  reviewNavigationSettings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReviewNavigationSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof reviewNavigationSettings>>>
+    export type ReviewNavigationSettingsMutationBody = BodyType<NavigationEditionSelector>
+    export type ReviewNavigationSettingsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Submit navigation and page availability for review
+ */
+export const useReviewNavigationSettings = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewNavigationSettings>>, TError,{data: BodyType<NavigationEditionSelector>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reviewNavigationSettings>>,
+        TError,
+        {data: BodyType<NavigationEditionSelector>},
+        TContext
+      > => {
+      return useMutation(getReviewNavigationSettingsMutationOptions(options));
+    }
+
+export const getPublishNavigationSettingsUrl = () => {
+
+
+
+
+  return `/api/navigation/publish`
+}
+
+/**
+ * @summary Publish reviewed navigation and page availability
+ */
+export const publishNavigationSettings = async (navigationEditionSelector: NavigationEditionSelector, options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
+
+  return customFetch<NavigationSettings>(getPublishNavigationSettingsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(navigationEditionSelector)
+  }
+);}
+
+
+
+
+
+export const getPublishNavigationSettingsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishNavigationSettings>>, TError,{data: BodyType<NavigationEditionSelector>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publishNavigationSettings>>, TError,{data: BodyType<NavigationEditionSelector>}, TContext> => {
+
+const mutationKey = ['publishNavigationSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishNavigationSettings>>, {data: BodyType<NavigationEditionSelector>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  publishNavigationSettings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublishNavigationSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof publishNavigationSettings>>>
+    export type PublishNavigationSettingsMutationBody = BodyType<NavigationEditionSelector>
+    export type PublishNavigationSettingsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Publish reviewed navigation and page availability
+ */
+export const usePublishNavigationSettings = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishNavigationSettings>>, TError,{data: BodyType<NavigationEditionSelector>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publishNavigationSettings>>,
+        TError,
+        {data: BodyType<NavigationEditionSelector>},
+        TContext
+      > => {
+      return useMutation(getPublishNavigationSettingsMutationOptions(options));
     }
 
 export const getSubmitEnquiryUrl = () => {
@@ -1083,7 +1328,7 @@ export const useRecoverAuth = <TError = ErrorType<UnauthorizedResponse>,
       return useMutation(getRecoverAuthMutationOptions(options));
     }
 
-export const getResetPasswordUrl = () => {
+export const getConsumeAccessTokenUrl = () => {
 
 
 
@@ -1092,16 +1337,16 @@ export const getResetPasswordUrl = () => {
 }
 
 /**
- * @summary Set a temporary password for a CMS user
+ * @summary Consume a one-time invitation or password reset token
  */
-export const resetPassword = async (userCredentialUpdate: UserCredentialUpdate, options?: Parameters<typeof customFetch>[1]): Promise<User> => {
+export const consumeAccessToken = async (accessTokenConsumption: AccessTokenConsumption, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
 
-  return customFetch<User>(getResetPasswordUrl(),
+  return customFetch<void>(getConsumeAccessTokenUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(userCredentialUpdate)
+    body: JSON.stringify(accessTokenConsumption)
   }
 );}
 
@@ -1109,11 +1354,11 @@ export const resetPassword = async (userCredentialUpdate: UserCredentialUpdate, 
 
 
 
-export const getResetPasswordMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,{data: BodyType<UserCredentialUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,{data: BodyType<UserCredentialUpdate>}, TContext> => {
+export const getConsumeAccessTokenMutationOptions = <TError = ErrorType<BadRequestResponse | ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof consumeAccessToken>>, TError,{data: BodyType<AccessTokenConsumption>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof consumeAccessToken>>, TError,{data: BodyType<AccessTokenConsumption>}, TContext> => {
 
-const mutationKey = ['resetPassword'];
+const mutationKey = ['consumeAccessToken'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1123,10 +1368,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetPassword>>, {data: BodyType<UserCredentialUpdate>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof consumeAccessToken>>, {data: BodyType<AccessTokenConsumption>}> = (props) => {
           const {data} = props ?? {};
 
-          return  resetPassword(data,requestOptions)
+          return  consumeAccessToken(data,requestOptions)
         }
 
 
@@ -1136,22 +1381,22 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type ResetPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof resetPassword>>>
-    export type ResetPasswordMutationBody = BodyType<UserCredentialUpdate>
-    export type ResetPasswordMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse>
+    export type ConsumeAccessTokenMutationResult = NonNullable<Awaited<ReturnType<typeof consumeAccessToken>>>
+    export type ConsumeAccessTokenMutationBody = BodyType<AccessTokenConsumption>
+    export type ConsumeAccessTokenMutationError = ErrorType<BadRequestResponse | ApiError>
 
     /**
- * @summary Set a temporary password for a CMS user
+ * @summary Consume a one-time invitation or password reset token
  */
-export const useResetPassword = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,{data: BodyType<UserCredentialUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useConsumeAccessToken = <TError = ErrorType<BadRequestResponse | ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof consumeAccessToken>>, TError,{data: BodyType<AccessTokenConsumption>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof resetPassword>>,
+        Awaited<ReturnType<typeof consumeAccessToken>>,
         TError,
-        {data: BodyType<UserCredentialUpdate>},
+        {data: BodyType<AccessTokenConsumption>},
         TContext
       > => {
-      return useMutation(getResetPasswordMutationOptions(options));
+      return useMutation(getConsumeAccessTokenMutationOptions(options));
     }
 
 export const getChangePasswordUrl = () => {
@@ -1689,20 +1934,29 @@ export const useCreateDocument = <TError = ErrorType<BadRequestResponse>,
       return useMutation(getCreateDocumentMutationOptions(options));
     }
 
-export const getGetDocumentUrl = (documentId: string,) => {
+export const getGetDocumentUrl = (documentId: string,
+    params: GetDocumentParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/documents/${documentId}`
+  return stringifiedParams.length > 0 ? `/api/documents/${documentId}?${stringifiedParams}` : `/api/documents/${documentId}`
 }
 
 /**
  * @summary Get a document
  */
-export const getDocument = async (documentId: string, options?: Parameters<typeof customFetch>[1]): Promise<Document> => {
+export const getDocument = async (documentId: string,
+    params: GetDocumentParams, options?: Parameters<typeof customFetch>[1]): Promise<Document> => {
 
-  return customFetch<Document>(getGetDocumentUrl(documentId),
+  return customFetch<Document>(getGetDocumentUrl(documentId,params),
   {
     ...options,
     method: 'GET'
@@ -1715,23 +1969,25 @@ export const getDocument = async (documentId: string, options?: Parameters<typeo
 
 
 
-export const getGetDocumentQueryKey = (documentId: string,) => {
+export const getGetDocumentQueryKey = (documentId: string,
+    params?: GetDocumentParams,) => {
     return [
-    `/api/documents/${documentId}`
+    `/api/documents/${documentId}`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetDocumentQueryOptions = <TData = Awaited<ReturnType<typeof getDocument>>, TError = ErrorType<NotFoundResponse>>(documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDocument>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetDocumentQueryOptions = <TData = Awaited<ReturnType<typeof getDocument>>, TError = ErrorType<NotFoundResponse>>(documentId: string,
+    params: GetDocumentParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDocument>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetDocumentQueryKey(documentId);
+  const queryKey =  queryOptions?.queryKey ?? getGetDocumentQueryKey(documentId,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDocument>>> = ({ signal }) => getDocument(documentId, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDocument>>> = ({ signal }) => getDocument(documentId,params, { signal, ...requestOptions });
 
 
 
@@ -1749,11 +2005,12 @@ export type GetDocumentQueryError = ErrorType<NotFoundResponse>
  */
 
 export function useGetDocument<TData = Awaited<ReturnType<typeof getDocument>>, TError = ErrorType<NotFoundResponse>>(
- documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDocument>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ documentId: string,
+    params: GetDocumentParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDocument>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetDocumentQueryOptions(documentId,options)
+  const queryOptions = getGetDocumentQueryOptions(documentId,params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -1985,6 +2242,155 @@ export function useListDocumentRevisions<TData = Awaited<ReturnType<typeof listD
 
 
 
+
+export const getListDocumentEditionsUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/editions`
+}
+
+/**
+ * @summary List exact and effective document editions
+ */
+export const listDocumentEditions = async (documentId: string, options?: Parameters<typeof customFetch>[1]): Promise<DocumentEditionMatrix> => {
+
+  return customFetch<DocumentEditionMatrix>(getListDocumentEditionsUrl(documentId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListDocumentEditionsQueryKey = (documentId: string,) => {
+    return [
+    `/api/documents/${documentId}/editions`
+    ] as const;
+    }
+
+
+export const getListDocumentEditionsQueryOptions = <TData = Awaited<ReturnType<typeof listDocumentEditions>>, TError = ErrorType<unknown>>(documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDocumentEditions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListDocumentEditionsQueryKey(documentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDocumentEditions>>> = ({ signal }) => listDocumentEditions(documentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: documentId !== null && documentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listDocumentEditions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListDocumentEditionsQueryResult = NonNullable<Awaited<ReturnType<typeof listDocumentEditions>>>
+export type ListDocumentEditionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List exact and effective document editions
+ */
+
+export function useListDocumentEditions<TData = Awaited<ReturnType<typeof listDocumentEditions>>, TError = ErrorType<unknown>>(
+ documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDocumentEditions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListDocumentEditionsQueryOptions(documentId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateDocumentEditionOverrideUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/editions`
+}
+
+/**
+ * @summary Create an exact market and locale override from effective content
+ */
+export const createDocumentEditionOverride = async (documentId: string,
+    editionOverrideInput: EditionOverrideInput, options?: Parameters<typeof customFetch>[1]): Promise<DocumentRevision> => {
+
+  return customFetch<DocumentRevision>(getCreateDocumentEditionOverrideUrl(documentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(editionOverrideInput)
+  }
+);}
+
+
+
+
+
+export const getCreateDocumentEditionOverrideMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDocumentEditionOverride>>, TError,{documentId: string;data: BodyType<EditionOverrideInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createDocumentEditionOverride>>, TError,{documentId: string;data: BodyType<EditionOverrideInput>}, TContext> => {
+
+const mutationKey = ['createDocumentEditionOverride'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createDocumentEditionOverride>>, {documentId: string;data: BodyType<EditionOverrideInput>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  createDocumentEditionOverride(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateDocumentEditionOverrideMutationResult = NonNullable<Awaited<ReturnType<typeof createDocumentEditionOverride>>>
+    export type CreateDocumentEditionOverrideMutationBody = BodyType<EditionOverrideInput>
+    export type CreateDocumentEditionOverrideMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create an exact market and locale override from effective content
+ */
+export const useCreateDocumentEditionOverride = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDocumentEditionOverride>>, TError,{documentId: string;data: BodyType<EditionOverrideInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createDocumentEditionOverride>>,
+        TError,
+        {documentId: string;data: BodyType<EditionOverrideInput>},
+        TContext
+      > => {
+      return useMutation(getCreateDocumentEditionOverrideMutationOptions(options));
+    }
 
 export const getGetDocumentMarketAvailabilityUrl = (documentId: string,) => {
 
@@ -2364,6 +2770,239 @@ export const useSubmitDocument = <TError = ErrorType<ConflictResponse>,
       return useMutation(getSubmitDocumentMutationOptions(options));
     }
 
+export const getListDocumentReviewCommentsUrl = (documentId: string,
+    params?: ListDocumentReviewCommentsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/documents/${documentId}/review-comments?${stringifiedParams}` : `/api/documents/${documentId}/review-comments`
+}
+
+/**
+ * @summary List review comments for a document
+ */
+export const listDocumentReviewComments = async (documentId: string,
+    params?: ListDocumentReviewCommentsParams, options?: Parameters<typeof customFetch>[1]): Promise<ReviewComment[]> => {
+
+  return customFetch<ReviewComment[]>(getListDocumentReviewCommentsUrl(documentId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListDocumentReviewCommentsQueryKey = (documentId: string,
+    params?: ListDocumentReviewCommentsParams,) => {
+    return [
+    `/api/documents/${documentId}/review-comments`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListDocumentReviewCommentsQueryOptions = <TData = Awaited<ReturnType<typeof listDocumentReviewComments>>, TError = ErrorType<unknown>>(documentId: string,
+    params?: ListDocumentReviewCommentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDocumentReviewComments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListDocumentReviewCommentsQueryKey(documentId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDocumentReviewComments>>> = ({ signal }) => listDocumentReviewComments(documentId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: documentId !== null && documentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listDocumentReviewComments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListDocumentReviewCommentsQueryResult = NonNullable<Awaited<ReturnType<typeof listDocumentReviewComments>>>
+export type ListDocumentReviewCommentsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List review comments for a document
+ */
+
+export function useListDocumentReviewComments<TData = Awaited<ReturnType<typeof listDocumentReviewComments>>, TError = ErrorType<unknown>>(
+ documentId: string,
+    params?: ListDocumentReviewCommentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDocumentReviewComments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListDocumentReviewCommentsQueryOptions(documentId,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAddDocumentReviewCommentUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/review-comments`
+}
+
+/**
+ * @summary Add a comment to an exact revision
+ */
+export const addDocumentReviewComment = async (documentId: string,
+    reviewCommentInput: ReviewCommentInput, options?: Parameters<typeof customFetch>[1]): Promise<ReviewComment> => {
+
+  return customFetch<ReviewComment>(getAddDocumentReviewCommentUrl(documentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(reviewCommentInput)
+  }
+);}
+
+
+
+
+
+export const getAddDocumentReviewCommentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addDocumentReviewComment>>, TError,{documentId: string;data: BodyType<ReviewCommentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addDocumentReviewComment>>, TError,{documentId: string;data: BodyType<ReviewCommentInput>}, TContext> => {
+
+const mutationKey = ['addDocumentReviewComment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addDocumentReviewComment>>, {documentId: string;data: BodyType<ReviewCommentInput>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  addDocumentReviewComment(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddDocumentReviewCommentMutationResult = NonNullable<Awaited<ReturnType<typeof addDocumentReviewComment>>>
+    export type AddDocumentReviewCommentMutationBody = BodyType<ReviewCommentInput>
+    export type AddDocumentReviewCommentMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Add a comment to an exact revision
+ */
+export const useAddDocumentReviewComment = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addDocumentReviewComment>>, TError,{documentId: string;data: BodyType<ReviewCommentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addDocumentReviewComment>>,
+        TError,
+        {documentId: string;data: BodyType<ReviewCommentInput>},
+        TContext
+      > => {
+      return useMutation(getAddDocumentReviewCommentMutationOptions(options));
+    }
+
+export const getRejectDocumentRevisionUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/reject`
+}
+
+/**
+ * @summary Reject an in-review revision
+ */
+export const rejectDocumentRevision = async (documentId: string,
+    reviewCommentInput: ReviewCommentInput, options?: Parameters<typeof customFetch>[1]): Promise<Document> => {
+
+  return customFetch<Document>(getRejectDocumentRevisionUrl(documentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(reviewCommentInput)
+  }
+);}
+
+
+
+
+
+export const getRejectDocumentRevisionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rejectDocumentRevision>>, TError,{documentId: string;data: BodyType<ReviewCommentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof rejectDocumentRevision>>, TError,{documentId: string;data: BodyType<ReviewCommentInput>}, TContext> => {
+
+const mutationKey = ['rejectDocumentRevision'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rejectDocumentRevision>>, {documentId: string;data: BodyType<ReviewCommentInput>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  rejectDocumentRevision(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RejectDocumentRevisionMutationResult = NonNullable<Awaited<ReturnType<typeof rejectDocumentRevision>>>
+    export type RejectDocumentRevisionMutationBody = BodyType<ReviewCommentInput>
+    export type RejectDocumentRevisionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Reject an in-review revision
+ */
+export const useRejectDocumentRevision = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rejectDocumentRevision>>, TError,{documentId: string;data: BodyType<ReviewCommentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof rejectDocumentRevision>>,
+        TError,
+        {documentId: string;data: BodyType<ReviewCommentInput>},
+        TContext
+      > => {
+      return useMutation(getRejectDocumentRevisionMutationOptions(options));
+    }
+
 export const getPublishDocumentUrl = (documentId: string,) => {
 
 
@@ -2652,20 +3291,29 @@ export const useRestoreDocument = <TError = ErrorType<unknown>,
       return useMutation(getRestoreDocumentMutationOptions(options));
     }
 
-export const getPreviewDocumentUrl = (documentId: string,) => {
+export const getPreviewDocumentUrl = (documentId: string,
+    params: PreviewDocumentParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/documents/${documentId}/preview`
+  return stringifiedParams.length > 0 ? `/api/documents/${documentId}/preview?${stringifiedParams}` : `/api/documents/${documentId}/preview`
 }
 
 /**
  * @summary Get a time-limited preview
  */
-export const previewDocument = async (documentId: string, options?: Parameters<typeof customFetch>[1]): Promise<DocumentPreview> => {
+export const previewDocument = async (documentId: string,
+    params: PreviewDocumentParams, options?: Parameters<typeof customFetch>[1]): Promise<DocumentPreview> => {
 
-  return customFetch<DocumentPreview>(getPreviewDocumentUrl(documentId),
+  return customFetch<DocumentPreview>(getPreviewDocumentUrl(documentId,params),
   {
     ...options,
     method: 'GET'
@@ -2678,23 +3326,25 @@ export const previewDocument = async (documentId: string, options?: Parameters<t
 
 
 
-export const getPreviewDocumentQueryKey = (documentId: string,) => {
+export const getPreviewDocumentQueryKey = (documentId: string,
+    params?: PreviewDocumentParams,) => {
     return [
-    `/api/documents/${documentId}/preview`
+    `/api/documents/${documentId}/preview`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getPreviewDocumentQueryOptions = <TData = Awaited<ReturnType<typeof previewDocument>>, TError = ErrorType<unknown>>(documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof previewDocument>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getPreviewDocumentQueryOptions = <TData = Awaited<ReturnType<typeof previewDocument>>, TError = ErrorType<unknown>>(documentId: string,
+    params: PreviewDocumentParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof previewDocument>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getPreviewDocumentQueryKey(documentId);
+  const queryKey =  queryOptions?.queryKey ?? getPreviewDocumentQueryKey(documentId,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof previewDocument>>> = ({ signal }) => previewDocument(documentId, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof previewDocument>>> = ({ signal }) => previewDocument(documentId,params, { signal, ...requestOptions });
 
 
 
@@ -2712,11 +3362,12 @@ export type PreviewDocumentQueryError = ErrorType<unknown>
  */
 
 export function usePreviewDocument<TData = Awaited<ReturnType<typeof previewDocument>>, TError = ErrorType<unknown>>(
- documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof previewDocument>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ documentId: string,
+    params: PreviewDocumentParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof previewDocument>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getPreviewDocumentQueryOptions(documentId,options)
+  const queryOptions = getPreviewDocumentQueryOptions(documentId,params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

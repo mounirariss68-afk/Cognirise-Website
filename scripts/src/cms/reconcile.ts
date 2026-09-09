@@ -236,7 +236,7 @@ async function main() {
       // edition has subsequent revisions, import records a preservation
       // receipt rather than replacing that editorial history.
       tolerateDigestDrift: governedLegacyExternalIds.has(operation.externalId)
-        || operation.kind === "industry"
+        || operation.idempotencyKey.startsWith("cms-industry-contract-v8:")
         || operation.idempotencyKey.startsWith("cms-case-study-baseline-v1:")
         || operation.idempotencyKey.startsWith("cms-case-study-baseline-v2:"),
       publishCase: Boolean(operation.kind === "case-study"

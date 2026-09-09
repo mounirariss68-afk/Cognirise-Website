@@ -16,6 +16,7 @@ import type { CmsCaseStudyContentSector } from './cmsCaseStudyContentSector';
 import type { CmsCaseStudyContentVariant } from './cmsCaseStudyContentVariant';
 import type { CmsCaseStudyVisual } from './cmsCaseStudyVisual';
 import type { CmsEvidence } from './cmsEvidence';
+import type { CmsImmutableMediaReference } from './cmsImmutableMediaReference';
 import type { CmsRichBlock } from './cmsRichBlock';
 import type { CmsSource } from './cmsSource';
 import type { CmsVisibility } from './cmsVisibility';
@@ -42,6 +43,7 @@ export interface CmsCaseStudyContent {
   outcomes?: string[];
   evidence?: CmsEvidence[];
   heroMediaId?: string;
+  heroMedia?: CmsImmutableMediaReference;
   visibility?: CmsVisibility;
   order?: number;
   sources?: CmsSource[];

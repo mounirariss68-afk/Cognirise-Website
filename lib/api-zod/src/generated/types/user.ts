@@ -15,6 +15,11 @@ export interface User {
   email: string;
   role: UserRole;
   status: UserStatus;
+  /**
+     * @items.minLength 2
+     * @items.maxLength 24
+     */
+  marketCodes: string[];
   mfaEnabled: boolean;
   mustRotate: boolean;
   /** @nullable */

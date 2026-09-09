@@ -11,7 +11,7 @@ const SAUDI_EDUCATION_SOURCES: IndustryContent["sources"] = [
   { label: "Saudi Academic AI Qualifications Framework", publisher: "Saudi Data & AI Authority", kind: "Official source", url: "https://sdaia.gov.sa/en/Research/Pages/EducationIntelligence.aspx" },
 ];
 
-const MARKET_LABELS: Record<Market, string> = {
+const MARKET_LABELS: Record<string, string> = {
   uae: "UAE",
   ksa: "Saudi Arabia",
   turkiye: "Türkiye",
@@ -27,10 +27,11 @@ function isSaudiSource(source: IndustryContent["sources"][number]) {
 }
 
 export function resolveEducationMarketContent(view: IndustryContent, market: Market) {
+  const marketLabel = MARKET_LABELS[market] ?? market.toUpperCase();
   const globalSources = view.sources.filter((source) => !isUaeSource(source) && !isSaudiSource(source));
   if (market === "uae") {
     return {
-      label: MARKET_LABELS[market],
+      label: marketLabel,
       regionalBody: view.gcc,
       convictionBody: "In the UAE, institutions can convert national ambition into talent, applied research and measurable public value.",
       supportingExample: "The UAE Ministry of Education’s NOVA initiative connects AI with unified workflows, decision insight and service improvement.",
@@ -39,7 +40,7 @@ export function resolveEducationMarketContent(view: IndustryContent, market: Mar
   }
   if (market === "ksa") {
     return {
-      label: MARKET_LABELS[market],
+      label: marketLabel,
       regionalBody: "Saudi Arabia can translate national AI ambition into talent, applied research and public value. Universities should treat agentic AI as a contribution to national capability—not only an efficiency agenda.",
       convictionBody: "In Saudi Arabia, institutions can convert national ambition into talent, applied research and measurable public value.",
       supportingExample: "Saudi Arabia’s Academic AI Qualifications Framework connects education pathways with the AI capabilities institutions and the national economy need.",
@@ -47,7 +48,7 @@ export function resolveEducationMarketContent(view: IndustryContent, market: Mar
     };
   }
   return {
-    label: MARKET_LABELS[market],
+    label: marketLabel,
     regionalBody: "Universities can translate national AI ambition into talent, applied research and public value. Agentic AI should contribute to national capability—not only an efficiency agenda.",
     convictionBody: "Institutions can convert national ambition into talent, applied research and measurable public value.",
     supportingExample: "A student-success agent can connect a permitted signal with timely support, coordinated action and an accountable outcome.",

@@ -6,12 +6,16 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface UserCredentialUpdate {
-  userId: string;
+export interface AccessTokenConsumption {
+  /**
+     * @minLength 32
+     * @maxLength 256
+     */
+  token: string;
   /**
      * @minLength 12
      * @maxLength 128
      * @pattern ^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).+$
      */
-  temporaryPassword: string;
+  newPassword: string;
 }

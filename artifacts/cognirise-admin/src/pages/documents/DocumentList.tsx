@@ -30,7 +30,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useGetSession } from "@workspace/api-client-react";
 import { PeopleMarketMatrix } from "./PeopleMarketMatrix";
 import { officeCreationContent, officeSlug } from "./office-creation";
-import { initialCmsContent } from "@workspace/api-zod";
+import { initialCmsContent, validateCmsContent } from "@workspace/api-zod";
+import { CONTENT_GUIDANCE, collectContentMediaIds } from "./authoring";
+import { ContentEditor } from "./ContentEditor";
 
 const createDocSchema = z.object({
   title: z.string().trim().min(1, "Title is required"),
@@ -56,6 +58,9 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   const [status, setStatus] = useState<DocumentStatus | undefined>();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [slugWasEdited, setSlugWasEdited] = useState(false);
+  const [createContent, setCreateContent] = useState<Record<string, any>>(
+    () => initialCmsContent(kind) as Record<string, any>,
+  );
 
   const canCreate = session?.user?.role !== "viewer";
   const canManageAvailability = session?.user?.role === "editor"
@@ -89,6 +94,10 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     [marketData?.items],
   );
   const primaryMarket = enabledMarkets.find((market) => market.isCanonical) ?? enabledMarkets[0];
+  const createContentValidation = useMemo(
+    () => validateCmsContent(kind, createContent, "draft"),
+    [kind, createContent],
+  );
 
   const createDocument = useCreateDocument();
 
@@ -109,6 +118,10 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     }
   }, [form, primaryMarket]);
 
+  useEffect(() => {
+    setCreateContent(initialCmsContent(kind) as Record<string, any>);
+  }, [kind]);
+
   const getKindLabel = (k: string) => {
     return k.charAt(0).toUpperCase() + k.slice(1).replace('-', ' ');
   };
@@ -124,14 +137,23 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   };
 
   const onSubmitCreate = (values: z.infer<typeof createDocSchema>) => {
-    const content = kind === "office" ? officeCreationContent(values) : initialCmsContent(kind);
+    if (kind !== "office" && !createContentValidation.success) {
+      toast({
+        title: "Complete the required content fields",
+        description: createContentValidation.errors[0],
+        variant: "destructive",
+      });
+      return;
+    }
+    const contentToCreate = kind === "office" ? officeCreationContent(values) : createContent;
     createDocument.mutate({
       data: {
         kind,
         title: values.title,
         slug: values.slug,
         markets: [values.market],
-        content,
+        content: contentToCreate,
+        mediaIds: collectContentMediaIds(contentToCreate),
       }
     }, {
       onSuccess: (newDoc) => {
@@ -140,11 +162,19 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
         setIsCreateOpen(false);
         form.reset({ title: "", slug: "", market: primaryMarket?.code ?? "", address: "", phone: "" });
         setSlugWasEdited(false);
+        setCreateContent(initialCmsContent(kind) as Record<string, any>);
         setLocation(`/content/${newDoc.id}`);
       },
       onError: (error) => {
         const apiError = error as any;
-        toast({ title: "Creation failed", variant: "destructive", description: apiError.data?.error || apiError.error || apiError.message || "Check the office details and try again." });
+        toast({
+          title: "Creation failed",
+          variant: "destructive",
+          description: apiError.data?.error
+            || apiError.error
+            || apiError.message
+            || (kind === "office" ? "Check the office details and try again." : "Check the required content and try again."),
+        });
       }
     });
   };
@@ -291,16 +321,17 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
           if (!open && !createDocument.isPending) {
             form.reset({ title: "", slug: "", market: primaryMarket?.code ?? "", address: "", phone: "" });
             setSlugWasEdited(false);
+            setCreateContent(initialCmsContent(kind) as Record<string, any>);
           }
         }}
       >
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className={kind === "office" ? "sm:max-w-[425px]" : "max-h-[90vh] overflow-y-auto sm:max-w-[760px]"}>
           <DialogHeader>
             <DialogTitle>Create {getKindLabel(kind)}</DialogTitle>
             <DialogDescription className="font-mono text-xs">
               {kind === "office"
                 ? "Create a complete office draft. You can continue editing it before review."
-                : "Initialize an incomplete governed draft. Fill the type-specific fields on the next screen before review."}
+                : `${CONTENT_GUIDANCE[kind]} Complete the required structured fields to initialize the governed draft.`}
             </DialogDescription>
           </DialogHeader>
           
@@ -328,6 +359,27 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                   </FormItem>
                 )}
               />
+
+              {kind !== "office" && (
+                <div className="border-t pt-4">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Required {getKindLabel(kind)} information
+                    </p>
+                    <Badge variant={createContentValidation.success ? "secondary" : "outline"}>
+                      {createContentValidation.success
+                        ? "Required content ready"
+                        : `${createContentValidation.errors.length} issue${createContentValidation.errors.length === 1 ? "" : "s"} remaining`}
+                    </Badge>
+                  </div>
+                  <ContentEditor
+                    kind={kind}
+                    value={createContent}
+                    onChange={setCreateContent}
+                    errors={createContentValidation.success ? [] : createContentValidation.errors}
+                  />
+                </div>
+              )}
               
               <FormField
                 control={form.control}

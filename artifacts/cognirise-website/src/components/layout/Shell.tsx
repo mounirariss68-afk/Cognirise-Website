@@ -2,12 +2,12 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { BrandButton } from "@/components/ui/brand-button";
-import { getMarketLocationLabel, MARKET_OPTIONS, useMarketStore } from "@/store/market";
+import { configurePublicMarkets, getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
 import { setAnalyticsConsent, useAnalyticsConsent } from "@/lib/analytics";
 import { ALLIANCE_PLATFORMS } from "@/lib/alliancePlatforms";
-import { useGetPublicNavigationSettings } from "@workspace/api-client-react";
+import { useGetPublicConfiguration, useGetPublicNavigationSettings } from "@workspace/api-client-react";
 import { handleSamePageHashNavigation } from "@/lib/hashNavigation";
 import { isCurrentRouteDestination, routePath } from "@/lib/routeState";
 
@@ -131,8 +131,14 @@ const pageMeta: Record<string, { title: string; description: string }> = {
 };
 
 type NavigationItem = { id: string; label: string; href: string; items?: NavigationItem[] };
+export type PreviewNavigationSnapshot = {
+  market?: string;
+  locale?: string;
+  items?: Array<Record<string, unknown>>;
+  pages?: Array<Record<string, unknown>>;
+};
 
-const navigation: NavigationItem[] = [
+const compiledNavigation: NavigationItem[] = [
   {
     id: "what-we-do",
     label: "What we do",
@@ -226,20 +232,84 @@ function AnalyticsPreference() {
   );
 }
 
-export function Shell({ children }: { children: React.ReactNode }) {
+export function Shell({
+  children,
+  navigationOverride,
+}: {
+  children: React.ReactNode;
+  /** Capability-issued navigation. Never persisted or used by public routes. */
+  navigationOverride?: PreviewNavigationSnapshot;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [location, setLocation] = useLocation();
-  const navigationSettings = useGetPublicNavigationSettings();
-  const enabledNavigation = new Map(navigationSettings.data?.items.map((item) => [item.id, item.enabled]) ?? []);
-  const visibleNavigation = navigation
-    .filter((item) => enabledNavigation.get(item.id) ?? true)
-    .map((item) => {
-      const visibleChildren = item.items?.filter((child) => enabledNavigation.get(child.id) ?? true);
-      return { ...item, items: visibleChildren?.length ? visibleChildren : undefined };
-    });
-  const { market, setMarket } = useMarketStore();
+  const { market, locale, setMarket } = useMarketStore();
+  const publicConfiguration = useGetPublicConfiguration();
+  const marketOptions = publicConfiguration.data?.markets ?? [];
+  useEffect(() => {
+    if (!publicConfiguration.data) return;
+    configurePublicMarkets(
+      publicConfiguration.data.markets,
+      publicConfiguration.data.markets.find((option) => option.isCanonical)?.code,
+    );
+  }, [publicConfiguration.data]);
+  const navigationSettings = useGetPublicNavigationSettings({ market, locale }, {
+    query: { queryKey: ["public-navigation", market, locale], enabled: !navigationOverride },
+  });
+  const snapshotItems = navigationOverride?.items ?? [];
+  const snapshotNavigation = navigationOverride
+    ? (() => {
+        const childrenByParent = new Map<string, NavigationItem[]>();
+        const roots: NavigationItem[] = [];
+        for (const raw of snapshotItems) {
+          if (raw.visible === false || raw.enabled === false) continue;
+          const id = String(raw.id ?? raw.item_id ?? "");
+          const parentId = raw.parentId ?? raw.parent_id;
+          const item: NavigationItem = {
+            id,
+            label: String(raw.label ?? ""),
+            href: String(raw.destination ?? raw.href ?? "#"),
+          };
+          const key = parentId == null ? "" : String(parentId);
+          const siblings = childrenByParent.get(key) ?? [];
+          siblings.push(item);
+          childrenByParent.set(key, siblings);
+        }
+        const build = (items: NavigationItem[]): NavigationItem[] => items
+          .sort((a, b) => {
+            const left = snapshotItems.find((raw) => String(raw.id ?? raw.item_id ?? "") === a.id);
+            const right = snapshotItems.find((raw) => String(raw.id ?? raw.item_id ?? "") === b.id);
+            return Number(left?.order ?? left?.sort_order ?? 0) - Number(right?.order ?? right?.sort_order ?? 0);
+          })
+          .map((item) => {
+            const nested = build(childrenByParent.get(item.id) ?? []);
+            return nested.length ? { ...item, items: nested } : item;
+          });
+        return build(childrenByParent.get("") ?? roots);
+      })()
+    : null;
+  const visibleNavigation = snapshotNavigation ?? (navigationSettings.data?.isConfigured
+    ? navigationSettings.data.items
+      .filter((item) => item.visible && !item.parentId)
+      .map((item) => {
+        const children = navigationSettings.data!.items
+          .filter((child) => child.visible && child.parentId === item.id)
+          .sort((a, b) => a.order - b.order)
+          .map((child) => ({ id: child.id, label: child.label, href: child.destination }));
+        return {
+          id: item.id,
+          label: item.label,
+          href: item.destination,
+          items: children.length ? children : undefined,
+        };
+      })
+      .sort((a, b) => {
+        const left = navigationSettings.data!.items.find((item) => item.id === a.id)?.order ?? 0;
+        const right = navigationSettings.data!.items.find((item) => item.id === b.id)?.order ?? 0;
+        return left - right;
+      })
+    : navigationSettings.data?.isConfigured === false ? compiledNavigation : []);
   const [scrolled, setScrolled] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousPathRef = useRef(window.location.pathname);
@@ -445,17 +515,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
           <div className="hidden items-center gap-6 xl:flex relative z-50">
             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              {MARKET_OPTIONS.map((option, index) => (
-                <div key={option.id} className="flex items-center gap-2">
+              {marketOptions.map((option, index) => (
+                <div key={option.code} className="flex items-center gap-2">
                   <button 
-                    onClick={() => setMarket(option.id)}
-                    aria-label={`View ${option.label} market content`}
-                    aria-pressed={market === option.id}
-                    className={`transition-colors hover:text-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:text-[hsl(var(--brand-pink))] ${market === option.id ? "text-[hsl(var(--brand-deep))]" : ""}`}
+                    onClick={() => setMarket(option.code, option.defaultLocale)}
+                    aria-label={`View ${option.displayName} market content`}
+                    aria-pressed={market === option.code}
+                    className={`transition-colors hover:text-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:text-[hsl(var(--brand-pink))] ${market === option.code ? "text-[hsl(var(--brand-deep))]" : ""}`}
                   >
-                    {option.compactLabel}
+                    {option.code.toUpperCase()}
                   </button>
-                  {index < MARKET_OPTIONS.length - 1 && <span className="opacity-30">/</span>}
+                  {index < marketOptions.length - 1 && <span className="opacity-30">/</span>}
                 </div>
               ))}
             </div>
@@ -533,14 +603,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div className="pb-12 border-t border-border pt-8">
             <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-4">Select market</span>
             <div className="flex flex-wrap gap-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              {MARKET_OPTIONS.map((option) => (
+              {marketOptions.map((option) => (
                 <button 
-                  key={option.id}
-                  onClick={() => { setMarket(option.id); setIsOpen(false); }}
-                  aria-pressed={market === option.id}
-                  className={`transition-colors focus-visible:outline-none ${market === option.id ? "text-[hsl(var(--brand-pink))]" : "hover:text-[hsl(var(--brand-deep))]"}`}
+                  key={option.code}
+                  onClick={() => {
+                    if (setMarket(option.code, option.defaultLocale)) setIsOpen(false);
+                  }}
+                  aria-pressed={market === option.code}
+                  className={`transition-colors focus-visible:outline-none ${market === option.code ? "text-[hsl(var(--brand-pink))]" : "hover:text-[hsl(var(--brand-deep))]"}`}
                 >
-                  {option.label}
+                  {option.displayName}
                 </button>
               ))}
             </div>

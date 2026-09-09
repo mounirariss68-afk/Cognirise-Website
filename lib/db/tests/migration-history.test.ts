@@ -18,6 +18,13 @@ const expectedMigrations = [
   { idx: 13, when: 1788909800001, tag: "0013_cms_motion_media" },
   { idx: 14, when: 1788909800002, tag: "0014_cms_media_metadata_versions" },
   { idx: 15, when: 1788959300000, tag: "0015_cms_media_original_filename" },
+  { idx: 16, when: 1788959300001, tag: "0016_cms_user_access_tokens" },
+  { idx: 17, when: 1788959300002, tag: "0017_cms_editorial_workflow" },
+  { idx: 18, when: 1788959300003, tag: "0018_cms_navigation_editions" },
+  { idx: 19, when: 1788959300004, tag: "0019_cms_landing_page_contract" },
+  { idx: 20, when: 1788959300005, tag: "0020_cms_navigation_published_policy" },
+  { idx: 21, when: 1788959300006, tag: "0021_cms_preview_navigation_snapshot" },
+  { idx: 22, when: 1788959300007, tag: "0022_cms_legacy_root_archive_normalization" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {
@@ -26,7 +33,7 @@ test("registers migrations in ordered Drizzle history", async () => {
   };
 
   assert.deepEqual(
-    journal.entries.slice(-8).map(({ idx, when, tag }) => ({ idx, when, tag })),
+    journal.entries.slice(-expectedMigrations.length).map(({ idx, when, tag }) => ({ idx, when, tag })),
     expectedMigrations,
   );
   assert.equal(new Set(journal.entries.map((entry) => entry.idx)).size, journal.entries.length);
@@ -63,22 +70,60 @@ test("upgrades a migration-0007 database and resolves staged availability only a
   const approvedVersionId = randomUUID();
   const missingReferenceAssetId = randomUUID();
   const missingReferenceVersionId = randomUUID();
+  const legacyArchivedDocumentId = randomUUID();
+  const legacyArchivedUaeEditionId = randomUUID();
+  const legacyArchivedKsaEditionId = randomUUID();
   await migrationPool.query(`
-    CREATE TABLE "cms_documents" ("id" uuid PRIMARY KEY);
+    CREATE TABLE "cms_documents" (
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      "kind" text NOT NULL DEFAULT 'case-study',
+      "canonical_slug" text NOT NULL UNIQUE,
+      "title" text NOT NULL DEFAULT 'Test document',
+      "status" text NOT NULL DEFAULT 'active'
+    );
     CREATE TABLE "cms_market_editions" (
-      "id" uuid PRIMARY KEY,
-      "document_id" uuid NOT NULL,
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      "document_id" uuid NOT NULL REFERENCES "cms_documents"("id") ON DELETE CASCADE,
+      "market" text NOT NULL DEFAULT 'uae',
+      "locale" text NOT NULL DEFAULT 'en',
+      "localized_slug" text,
+      "publication_state" text NOT NULL DEFAULT 'draft',
+      "fallback_mode" text NOT NULL DEFAULT 'none',
+      "parity_complete" boolean NOT NULL DEFAULT false,
       "published_revision_id" uuid,
       "published_at" timestamp with time zone
     );
     CREATE TABLE "cms_revisions" (
-      "id" uuid PRIMARY KEY,
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      "edition_id" uuid,
+      "revision_number" integer NOT NULL DEFAULT 1,
+      "payload_version" integer NOT NULL DEFAULT 1,
       "payload" jsonb NOT NULL DEFAULT '{"mediaIds":[]}'::jsonb,
+      "content_digest" text NOT NULL DEFAULT 'fixture',
+      "workflow_state" text NOT NULL DEFAULT 'draft',
+      "created_by_user_id" uuid,
       "approved_at" timestamp with time zone,
+      "reason" text NOT NULL DEFAULT 'fixture',
       "created_at" timestamp with time zone NOT NULL DEFAULT now()
     );
-    CREATE TABLE "market_editions" ("id" uuid PRIMARY KEY);
-    CREATE TABLE "cms_users" ("id" uuid PRIMARY KEY);
+    CREATE TABLE "market_editions" (
+      "id" uuid PRIMARY KEY,
+      "code" text NOT NULL UNIQUE,
+      "display_name" text NOT NULL DEFAULT 'Test market',
+      "default_locale" text NOT NULL DEFAULT 'en',
+      "fallback_market_code" text,
+      "fallback_locale" text,
+      "is_canonical" boolean NOT NULL DEFAULT false,
+      "enabled" boolean NOT NULL DEFAULT true
+    );
+    CREATE TABLE "cms_users" (
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      "email" text NOT NULL UNIQUE DEFAULT 'fixture@example.invalid',
+      "display_name" text,
+      "role" text NOT NULL DEFAULT 'editor',
+      "status" text NOT NULL DEFAULT 'active',
+      "email_verified_at" timestamp with time zone
+    );
     CREATE TABLE "cms_media_assets" (
       "id" uuid PRIMARY KEY,
       "storage_key" text NOT NULL,
@@ -110,9 +155,20 @@ test("upgrades a migration-0007 database and resolves staged availability only a
     INSERT INTO "${schema}"."__drizzle_migrations" ("hash", "created_at")
     VALUES ('migration-0007-fixture', 1788725000000);
   `);
-  await migrationPool.query(`INSERT INTO "cms_documents" ("id") VALUES ($1)`, [
-    publishedDocumentId,
-  ]);
+  await migrationPool.query(
+    `INSERT INTO "cms_documents" ("id", "canonical_slug") VALUES ($1, 'published-document')`,
+    [publishedDocumentId],
+  );
+  await migrationPool.query(
+    `INSERT INTO "cms_documents" ("id", "canonical_slug", "status")
+     VALUES ($1, 'legacy-archived-document', 'archived')`,
+    [legacyArchivedDocumentId],
+  );
+  await migrationPool.query(
+    `INSERT INTO "cms_market_editions" ("id","document_id","market","locale","publication_state")
+     VALUES ($1,$3,'uae','en','published'),($2,$3,'ksa','en','draft')`,
+    [legacyArchivedUaeEditionId, legacyArchivedKsaEditionId, legacyArchivedDocumentId],
+  );
   await migrationPool.query(`INSERT INTO "cms_revisions" ("id") VALUES ($1)`, [
     publishedRevisionId,
   ]);
@@ -189,6 +245,20 @@ test("upgrades a migration-0007 database and resolves staged availability only a
     applied.rows.map((row) => Number(row.created_at)),
     [1788725000000, ...expectedMigrations.map((entry) => entry.when)],
   );
+  const normalizedLegacyArchive = await migrationPool.query<{
+    status: string;
+    market: string;
+    publication_state: string;
+  }>(
+    `SELECT d.status,e.market,e.publication_state
+       FROM cms_documents d JOIN cms_market_editions e ON e.document_id=d.id
+      WHERE d.id=$1 ORDER BY e.market`,
+    [legacyArchivedDocumentId],
+  );
+  assert.deepEqual(normalizedLegacyArchive.rows, [
+    { status: "active", market: "ksa", publication_state: "archived" },
+    { status: "active", market: "uae", publication_state: "archived" },
+  ]);
 
   const mediaReferenceColumns = await adminPool.query<{ column_name: string }>(
     `SELECT column_name
@@ -247,9 +317,10 @@ test("upgrades a migration-0007 database and resolves staged availability only a
   );
   const draftDocumentId = randomUUID();
   const draftReferenceId = randomUUID();
-  await migrationPool.query(`INSERT INTO "cms_documents" ("id") VALUES ($1)`, [
-    draftDocumentId,
-  ]);
+  await migrationPool.query(
+    `INSERT INTO "cms_documents" ("id", "canonical_slug") VALUES ($1, 'draft-document')`,
+    [draftDocumentId],
+  );
   await migrationPool.query(
     `INSERT INTO "cms_media_references"
        ("id", "asset_id", "media_version_id", "document_id", "field_path")
@@ -297,8 +368,14 @@ test("upgrades a migration-0007 database and resolves staged availability only a
   const documentId = randomUUID();
   const marketId = randomUUID();
   const userId = randomUUID();
-  await migrationPool.query(`INSERT INTO "cms_documents" ("id") VALUES ($1)`, [documentId]);
-  await migrationPool.query(`INSERT INTO "market_editions" ("id") VALUES ($1)`, [marketId]);
+  await migrationPool.query(
+    `INSERT INTO "cms_documents" ("id", "canonical_slug") VALUES ($1, 'availability-document')`,
+    [documentId],
+  );
+  await migrationPool.query(
+    `INSERT INTO "market_editions" ("id", "code") VALUES ($1, 'test-market')`,
+    [marketId],
+  );
   await migrationPool.query(`INSERT INTO "cms_users" ("id") VALUES ($1)`, [userId]);
   await migrationPool.query(
     `INSERT INTO "cms_person_market_availability"

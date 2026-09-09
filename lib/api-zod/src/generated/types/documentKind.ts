@@ -19,4 +19,5 @@ export const DocumentKind = {
   framework: 'framework',
   office: 'office',
   'site-configuration': 'site-configuration',
+  'landing-page': 'landing-page',
 } as const;

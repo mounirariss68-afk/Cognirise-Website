@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { CmsEvidence } from './cmsEvidence';
+import type { CmsImmutableMediaReference } from './cmsImmutableMediaReference';
 import type { CmsPartnerContentFactsItem } from './cmsPartnerContentFactsItem';
 import type { CmsPartnerContentRelationshipStatus } from './cmsPartnerContentRelationshipStatus';
 import type { CmsPartnerContentSchemaVersion } from './cmsPartnerContentSchemaVersion';
@@ -23,6 +24,7 @@ export interface CmsPartnerContent {
   /** @pattern ^https?://.+ */
   website?: string;
   logoMediaId?: string;
+  logoMedia?: CmsImmutableMediaReference;
   relationshipStatus?: CmsPartnerContentRelationshipStatus;
   visibility?: CmsVisibility;
   order?: number;

@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface PasswordResetInput {
-  sendEmail?: boolean;
-}
+/**
+ * Requests secure email delivery to the user's registered address.
+ */
+export interface PasswordResetInput { [key: string]: unknown }

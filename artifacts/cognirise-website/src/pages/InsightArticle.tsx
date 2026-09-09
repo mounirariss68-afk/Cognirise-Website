@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import { useMarketStore } from "@/store/market";
 import { BrandButton } from "@/components/ui/brand-button";
-import { contentRecord, useCmsEntry } from "@/lib/cms";
+import { contentRecord, resolveCmsMedia, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 
 const articles = {
@@ -115,15 +115,24 @@ export default function InsightArticle() {
   const cms = useCmsEntry("publication", slug);
   const fallbackArticle = slug in articles ? articles[slug as keyof typeof articles] : undefined;
   const record = cms.data ? contentRecord(cms.data, "publication") : undefined;
+  const heroMedia = record && cms.data
+    ? resolveCmsMedia(cms.data.media, record.heroMedia, record.heroMediaId)
+    : undefined;
+  const pdfMedia = record && cms.data
+    ? resolveCmsMedia(cms.data.media, record.pdfMedia, record.pdfMediaId)
+    : undefined;
+  const socialMedia = record && cms.data
+    ? resolveCmsMedia(cms.data.media, record.social.imageMedia, record.social.imageMediaId)
+    : undefined;
   const article = cms.data ? {
     topic: record?.topics[0] || "Perspective",
     title: cms.data.title,
     date: new Date(`${record?.publicationDate}T00:00:00Z`).toLocaleDateString("en-GB", { dateStyle: "long", timeZone: "UTC" }),
     author: record?.author || "Cognirise",
     readingTime: `${record?.readingTimeMinutes ?? 1} min read`,
-    heroImage: cms.data.media?.[0]?.url || "",
+    heroImage: heroMedia?.url || "",
     content: record?.variant === "pov" ? (
-      <><p className="lead">{record.teaser}</p>{record.pdfMediaId && <p><a href={cms.data.media?.find((media) => media.id === record.pdfMediaId)?.url}>Download the approved POV document</a></p>}</>
+      <><p className="lead">{record.teaser}</p>{pdfMedia && <p><a href={pdfMedia.url}>Download the approved POV document</a></p>}</>
     ) : (
       <>{record?.body.map((block, index) => {
         if (block.type === "heading") return <h3 key={index}>{block.text}</h3>;
@@ -136,7 +145,7 @@ export default function InsightArticle() {
   useDynamicMetadata(cms.data?.seo && metadataFromSeo(cms.data.seo, {
     title: `${cms.data.title} | Cognirise`,
     description: cms.data.summary || "A Cognirise perspective on governed AI-native organisations.",
-    imageUrl: cms.data.media?.[0]?.url,
+    imageUrl: socialMedia?.url || heroMedia?.url,
   }));
 
   if (!match || !slug || (!article && !cms.isPending) || (cms.isAuthoritative && cms.issue)) {

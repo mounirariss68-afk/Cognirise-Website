@@ -173,6 +173,87 @@ test("PostgreSQL preserves office publication authority across archive and resto
       (await client.query(DELETE_DOCUMENT_SQL, [neverPublishedOfficeId])).rowCount,
       1,
     );
+
+    const publishedLandingId = "00000000-0000-4000-8000-000000000301";
+    const publishedLandingEditionId = "00000000-0000-4000-8000-000000000302";
+    const publishedLandingRevisionId = "00000000-0000-4000-8000-000000000303";
+    await client.query(
+      `INSERT INTO cms_documents(id,kind,canonical_slug,title,status)
+       VALUES ($1,'landing-page','about','About','active')`,
+      [publishedLandingId],
+    );
+    await client.query(
+      `INSERT INTO cms_market_editions
+         (id,document_id,market,locale,localized_slug,publication_state,published_revision_id,published_at)
+       VALUES ($1,$2,'uae','en','about','published',$3,now())`,
+      [publishedLandingEditionId, publishedLandingId, publishedLandingRevisionId],
+    );
+    await client.query(
+      `INSERT INTO cms_revisions
+         (id,edition_id,revision_number,payload,workflow_state)
+       VALUES ($1,$2,1,'{"content":{"pagePath":"/about"}}'::jsonb,'approved')`,
+      [publishedLandingRevisionId, publishedLandingEditionId],
+    );
+    await client.query(
+      `INSERT INTO cms_audit_events(target_type,target_id,action,metadata)
+       VALUES ('document',$1,'document.published',jsonb_build_object('revisionId',$2::text))`,
+      [publishedLandingId, publishedLandingRevisionId],
+    );
+    await client.query(
+      `UPDATE cms_market_editions SET publication_state='archived' WHERE id=$1`,
+      [publishedLandingEditionId],
+    );
+
+    const archivedLanding = await client.query(
+      `${DOCUMENT_SELECT_SQL} WHERE d.id=$1`,
+      [publishedLandingId],
+    );
+    assert.equal(archivedLanding.rows[0].can_permanently_delete, false);
+    assert.equal(
+      (await client.query(DELETE_DOCUMENT_SQL, [publishedLandingId])).rowCount,
+      0,
+      "archival must not erase the durable publication-history deletion guard",
+    );
+    assert.equal(
+      (await client.query("SELECT count(*)::int count FROM cms_documents WHERE id=$1", [publishedLandingId]))
+        .rows[0].count,
+      1,
+    );
+    const landingConfiguration = await client.query(
+      PUBLIC_KIND_CONFIGURATION_SQL,
+      ["landing-page"],
+    );
+    assert.equal(landingConfiguration.rows[0].is_configured, true);
+    assert.deepEqual(landingConfiguration.rows[0].configured_page_paths, ["/about"]);
+    assert.equal(
+      (await client.query(
+        `SELECT count(*)::int count
+           FROM cms_market_editions
+          WHERE document_id=$1 AND publication_state='published'`,
+        [publishedLandingId],
+      )).rows[0].count,
+      0,
+      "archived landing content must be unavailable to public published selection",
+    );
+
+    const draftLandingId = "00000000-0000-4000-8000-000000000311";
+    const draftLandingEditionId = "00000000-0000-4000-8000-000000000312";
+    await client.query(
+      `INSERT INTO cms_documents(id,kind,canonical_slug,title,status)
+       VALUES ($1,'landing-page','draft-landing','Draft landing','active')`,
+      [draftLandingId],
+    );
+    await client.query(
+      `INSERT INTO cms_market_editions
+         (id,document_id,market,locale,localized_slug,publication_state)
+       VALUES ($1,$2,'uae','en','draft-landing','draft')`,
+      [draftLandingEditionId, draftLandingId],
+    );
+    assert.equal(
+      (await client.query(DELETE_DOCUMENT_SQL, [draftLandingId])).rowCount,
+      1,
+      "a never-published landing page remains permanently deletable",
+    );
   } finally {
     await client.query("ROLLBACK");
     client.release();

@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useListUsers, useInviteUser, useResetUserPassword, useUpdateUser, getListUsersQueryKey, UserRole, UserInvitation, PasswordReset } from "@workspace/api-client-react";
+import { useListUsers, useInviteUser, useResetUserPassword, useUpdateUser, useListMarketEditions, getListUsersQueryKey, UserInvitation, User } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Users as UsersIcon, ShieldAlert, MoreHorizontal, KeyRound, Ban, CheckCircle2, Copy, Check, Lock } from "lucide-react";
+import { Loader2, Plus, Users as UsersIcon, ShieldAlert, MoreHorizontal, KeyRound, Ban, CheckCircle2, Lock, Settings2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -20,6 +20,7 @@ const inviteSchema = z.object({
   name: z.string().min(2, "Name required"),
   email: z.string().email("Invalid email"),
   role: z.enum(["administrator", "publisher", "editor", "viewer"] as const)
+  ,marketCodes: z.array(z.string())
 });
 
 export default function UserAdmin() {
@@ -27,15 +28,14 @@ export default function UserAdmin() {
   const queryClient = useQueryClient();
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [invitationData, setInvitationData] = useState<UserInvitation | null>(null);
-  const [copiedInvite, setCopiedInvite] = useState(false);
 
-  // Temporary password reset state
   const [isResetOpen, setIsResetOpen] = useState(false);
   const [resetUserId, setResetUserId] = useState<string | null>(null);
-  const [resetData, setResetData] = useState<PasswordReset | null>(null);
-  const [copiedReset, setCopiedReset] = useState(false);
+  const [accessUser, setAccessUser] = useState<User | null>(null);
+  const [accessMarkets, setAccessMarkets] = useState<string[]>([]);
 
   const { data, isLoading, isError, error } = useListUsers({ page: 1, pageSize: 50 }, { query: { queryKey: getListUsersQueryKey({ page: 1, pageSize: 50 }) } });
+  const { data: markets } = useListMarketEditions({ page: 1, pageSize: 100 });
   
   const inviteUser = useInviteUser();
   const resetUserPassword = useResetUserPassword();
@@ -43,8 +43,9 @@ export default function UserAdmin() {
 
   const form = useForm<z.infer<typeof inviteSchema>>({
     resolver: zodResolver(inviteSchema),
-    defaultValues: { name: "", email: "", role: "editor" }
+    defaultValues: { name: "", email: "", role: "editor", marketCodes: [] }
   });
+  const inviteRole = form.watch("role");
 
   const onSubmitInvite = (values: z.infer<typeof inviteSchema>) => {
     inviteUser.mutate({ data: values }, {
@@ -58,15 +59,8 @@ export default function UserAdmin() {
     });
   };
 
-  const handleCopy = (text: string, setCopiedState: React.Dispatch<React.SetStateAction<boolean>>) => {
-    navigator.clipboard.writeText(text);
-    setCopiedState(true);
-    setTimeout(() => setCopiedState(false), 2000);
-  };
-
   const openResetDialog = (userId: string) => {
     setResetUserId(userId);
-    setResetData(null);
     setIsResetOpen(true);
   };
 
@@ -74,13 +68,35 @@ export default function UserAdmin() {
     if (!resetUserId) return;
     resetUserPassword.mutate({ 
       userId: resetUserId,
-      data: { sendEmail: false } 
+      data: {}
     }, {
       onSuccess: (data) => {
-        toast({ title: "Password reset successfully" });
-        setResetData(data);
+        toast({ title: "Reset link sent", description: "A secure one-time link was delivered by email." });
+        setIsResetOpen(false);
       },
       onError: (err) => toast({ title: "Failed to reset password", description: (err as any).error, variant: "destructive" })
+    });
+  };
+
+  const handleRoleChange = (user: User, role: User["role"]) => {
+    updateUser.mutate({ userId: user.id, data: { role } }, {
+      onSuccess: () => {
+        toast({ title: "Role updated" });
+        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ page: 1, pageSize: 50 }) });
+      },
+      onError: (err) => toast({ title: "Update failed", description: (err as any).error, variant: "destructive" }),
+    });
+  };
+
+  const saveMarketAccess = () => {
+    if (!accessUser) return;
+    updateUser.mutate({ userId: accessUser.id, data: { marketCodes: accessMarkets } }, {
+      onSuccess: () => {
+        toast({ title: "Market access updated" });
+        setAccessUser(null);
+        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ page: 1, pageSize: 50 }) });
+      },
+      onError: (err) => toast({ title: "Update failed", description: (err as any).error, variant: "destructive" }),
     });
   };
 
@@ -156,9 +172,20 @@ export default function UserAdmin() {
                       <div className="text-xs text-muted-foreground mt-0.5">{user.email}</div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="font-mono text-[10px] uppercase rounded-sm bg-background border-border">
-                        {user.role}
-                      </Badge>
+                      <Select value={user.role} onValueChange={(role) => handleRoleChange(user, role as User["role"])}>
+                        <SelectTrigger className="h-8 w-36 font-mono text-[10px] uppercase"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="viewer">Viewer</SelectItem>
+                          <SelectItem value="editor">Editor</SelectItem>
+                          <SelectItem value="publisher">Publisher</SelectItem>
+                          <SelectItem value="administrator">Administrator</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <div className="mt-1 text-[10px] text-muted-foreground font-mono">
+                        {user.marketCodes.length
+                          ? user.marketCodes.join(", ").toUpperCase()
+                          : user.role === "administrator" ? "ALL MARKETS" : "NO MARKETS"}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary" className={`font-mono text-[10px] uppercase rounded-sm ${user.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
@@ -189,6 +216,9 @@ export default function UserAdmin() {
                         <DropdownMenuContent align="end" className="font-mono text-xs">
                           <DropdownMenuItem onClick={() => openResetDialog(user.id)}>
                             <KeyRound className="w-3.5 h-3.5 mr-2" /> Reset Password
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setAccessUser(user); setAccessMarkets(user.marketCodes); }}>
+                            <Settings2 className="w-3.5 h-3.5 mr-2" /> Edit Market Access
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => handleToggleStatus(user.id, user.status)}
@@ -222,24 +252,15 @@ export default function UserAdmin() {
             <DialogTitle>{invitationData ? "Invitation Created" : "Invite New User"}</DialogTitle>
             <DialogDescription className="font-mono text-xs">
               {invitationData 
-                ? "Share this temporary password securely with the user."
-                : "Create a user account. You will receive a temporary password to share securely."}
+                ? "A secure one-time invitation link was delivered to the user's email."
+                : "Create a user account and deliver a secure one-time invitation link by email."}
             </DialogDescription>
           </DialogHeader>
           
           {invitationData ? (
             <div className="space-y-4 pt-4">
-              <div className="bg-muted/30 p-4 rounded-md border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-mono font-medium text-foreground">Temporary Password</span>
-                  <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={() => handleCopy(invitationData.temporaryPassword, setCopiedInvite)}>
-                    {copiedInvite ? <Check className="w-3.5 h-3.5 mr-1" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
-                    {copiedInvite ? "Copied" : "Copy"}
-                  </Button>
-                </div>
-                <code className="text-sm font-bold break-all block text-foreground select-all bg-background p-2 rounded border border-border">
-                  {invitationData.temporaryPassword}
-                </code>
+              <div className="bg-emerald-500/10 p-4 rounded-md border border-emerald-500/20 text-sm text-emerald-700">
+                Email delivery confirmed. No credential is shown or stored here.
               </div>
               <p className="text-[10px] text-muted-foreground font-mono text-center">
                 Valid until {format(new Date(invitationData.expiresAt), "MMM d, yyyy HH:mm")}
@@ -259,6 +280,29 @@ export default function UserAdmin() {
                       <FormLabel className="font-mono text-xs uppercase tracking-wider">Full Name</FormLabel>
                       <FormControl><Input {...field} /></FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="marketCodes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-mono text-xs uppercase tracking-wider">Market Access</FormLabel>
+                      <div className="grid grid-cols-2 gap-2 rounded-md border p-3">
+                        {markets?.items.filter((market) => market.enabled).map((market) => (
+                          <label key={market.code} className="flex items-center gap-2 text-sm">
+                            <input type="checkbox" checked={field.value.includes(market.code)}
+                              onChange={(event) => field.onChange(event.target.checked ? [...field.value, market.code] : field.value.filter((code) => code !== market.code))} />
+                            {market.displayName}
+                          </label>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">
+                        {inviteRole === "administrator"
+                          ? "Administrators have all-market access."
+                          : "Select at least one market. No selection grants no market access."}
+                      </p>
                     </FormItem>
                   )}
                 />
@@ -296,7 +340,7 @@ export default function UserAdmin() {
                   <Button variant="ghost" type="button" onClick={() => setIsInviteOpen(false)}>Cancel</Button>
                   <Button type="submit" disabled={inviteUser.isPending}>
                     {inviteUser.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-                    Generate Credentials
+                    Send Invitation
                   </Button>
                 </DialogFooter>
               </form>
@@ -308,52 +352,53 @@ export default function UserAdmin() {
       <Dialog open={isResetOpen} onOpenChange={(open) => {
         if (!open) {
           setIsResetOpen(false);
-          setResetData(null);
         }
       }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Reset Password</DialogTitle>
             <DialogDescription className="font-mono text-xs">
-              {resetData 
-                ? "Share this temporary password securely with the user."
-                : "This will generate a new temporary password for the user. They must use it to log in."}
+              Send a secure one-time password reset link by email. Existing sessions are revoked when the link is consumed.
             </DialogDescription>
           </DialogHeader>
           
-          {resetData ? (
-            <div className="space-y-4 pt-4">
-              <div className="bg-muted/30 p-4 rounded-md border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-mono font-medium text-foreground">Temporary Password</span>
-                  <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={() => handleCopy(resetData.temporaryPassword, setCopiedReset)}>
-                    {copiedReset ? <Check className="w-3.5 h-3.5 mr-1" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
-                    {copiedReset ? "Copied" : "Copy"}
-                  </Button>
-                </div>
-                <code className="text-sm font-bold break-all block text-foreground select-all bg-background p-2 rounded border border-border">
-                  {resetData.temporaryPassword}
-                </code>
-              </div>
-              <p className="text-[10px] text-muted-foreground font-mono text-center">
-                Valid until {format(new Date(resetData.expiresAt), "MMM d, yyyy HH:mm")}
-              </p>
-              <DialogFooter>
-                <Button onClick={() => setIsResetOpen(false)}>Done</Button>
-              </DialogFooter>
-            </div>
-          ) : (
             <div className="pt-4 space-y-4">
-              <p className="text-sm text-foreground">Are you sure you want to generate a new password for this user?</p>
+              <p className="text-sm text-foreground">Are you sure you want to send a reset link to this user?</p>
               <DialogFooter className="pt-4">
                 <Button variant="ghost" type="button" onClick={() => setIsResetOpen(false)}>Cancel</Button>
                 <Button onClick={handleConfirmReset} disabled={resetUserPassword.isPending}>
                   {resetUserPassword.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <KeyRound className="w-4 h-4 mr-2" />}
-                  Confirm Reset
+                  Send Reset Link
                 </Button>
               </DialogFooter>
             </div>
-          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(accessUser)} onOpenChange={(open) => { if (!open) setAccessUser(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Market Access</DialogTitle>
+            <DialogDescription>
+              Limit {accessUser?.name} to assigned markets.
+              {accessUser?.role === "administrator"
+                ? " Administrators have all-market access."
+                : " No selection grants no market access."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-2 py-4">
+            {markets?.items.filter((market) => market.enabled).map((market) => (
+              <label key={market.code} className="flex items-center gap-2 rounded-md border p-3 text-sm">
+                <input type="checkbox" checked={accessMarkets.includes(market.code)}
+                  onChange={(event) => setAccessMarkets(event.target.checked ? [...accessMarkets, market.code] : accessMarkets.filter((code) => code !== market.code))} />
+                {market.displayName}
+              </label>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAccessUser(null)}>Cancel</Button>
+            <Button onClick={saveMarketAccess} disabled={updateUser.isPending}>Save Access</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

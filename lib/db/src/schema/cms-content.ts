@@ -42,6 +42,33 @@ export const cmsDocumentsTable = pgTable(
   ],
 );
 
+export const cmsLandingPageReconciliationTable = pgTable(
+  "cms_landing_page_reconciliation",
+  {
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => cmsDocumentsTable.id, { onDelete: "cascade" }),
+    sourceKey: text("source_key").notNull(),
+    compiledDigest: text("compiled_digest").notNull(),
+    compiledPayload: jsonb("compiled_payload")
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default({}),
+    compiledVisualSources: jsonb("compiled_visual_sources")
+      .$type<string[]>()
+      .notNull()
+      .default([]),
+    reconciledAt: timestamp("reconciled_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.documentId, table.sourceKey] }),
+    index("cms_landing_page_reconciliation_digest_idx").on(
+      table.sourceKey,
+      table.compiledDigest,
+    ),
+  ],
+);
+
 export const cmsMarketEditionsTable = pgTable(
   "cms_market_editions",
   {
@@ -66,12 +93,14 @@ export const cmsMarketEditionsTable = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
-    uniqueIndex("cms_market_editions_document_market_uidx").on(
+    uniqueIndex("cms_market_editions_document_market_locale_uidx").on(
       table.documentId,
       table.market,
+      table.locale,
     ),
-    uniqueIndex("cms_market_editions_market_slug_uidx").on(
+    uniqueIndex("cms_market_editions_market_locale_slug_uidx").on(
       table.market,
+      table.locale,
       table.localizedSlug,
     ),
     index("cms_market_editions_release_idx").on(
@@ -161,6 +190,25 @@ export const cmsRevisionsTable = pgTable(
       table.workflowState,
     ),
     index("cms_revisions_digest_idx").on(table.contentDigest),
+  ],
+);
+
+export const cmsReviewCommentsTable = pgTable(
+  "cms_review_comments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    revisionId: uuid("revision_id").notNull().references(() => cmsRevisionsTable.id, {
+      onDelete: "cascade",
+    }),
+    authorUserId: uuid("author_user_id").notNull().references(() => cmsUsersTable.id, {
+      onDelete: "restrict",
+    }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check("cms_review_comments_body_check", sql`char_length(btrim(${table.body})) BETWEEN 1 AND 2000`),
+    index("cms_review_comments_revision_idx").on(table.revisionId, table.createdAt),
   ],
 );
 
@@ -371,6 +419,7 @@ export type CmsMarketEdition = typeof cmsMarketEditionsTable.$inferSelect;
 export type CmsPersonMarketAvailability =
   typeof cmsPersonMarketAvailabilityTable.$inferSelect;
 export type CmsRevision = typeof cmsRevisionsTable.$inferSelect;
+export type CmsReviewComment = typeof cmsReviewCommentsTable.$inferSelect;
 export type CmsTaxonomy = typeof cmsTaxonomiesTable.$inferSelect;
 export type CmsTaxonomyTerm = typeof cmsTaxonomyTermsTable.$inferSelect;
 export type CmsMediaAsset = typeof cmsMediaAssetsTable.$inferSelect;

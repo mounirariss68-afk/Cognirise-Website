@@ -9,6 +9,7 @@ import type { CmsFrameworkContentSchemaVersion } from './cmsFrameworkContentSche
 import type { CmsFrameworkContentTemplate } from './cmsFrameworkContentTemplate';
 import type { CmsFrameworkExample } from './cmsFrameworkExample';
 import type { CmsFrameworkWorkedExample } from './cmsFrameworkWorkedExample';
+import type { CmsImmutableMediaReference } from './cmsImmutableMediaReference';
 import type { CmsLink } from './cmsLink';
 import type { CmsRichBlock } from './cmsRichBlock';
 import type { CmsSource } from './cmsSource';
@@ -23,6 +24,7 @@ export interface CmsFrameworkContent {
   workedExample: CmsFrameworkWorkedExample;
   sectorExamples?: CmsFrameworkExample[];
   heroMediaId?: string;
+  heroMedia?: CmsImmutableMediaReference;
   cta?: CmsLink;
   visibility?: CmsVisibility;
   order?: number;

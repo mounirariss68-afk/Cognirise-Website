@@ -6,9 +6,17 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { NavigationSetting } from './navigationSetting';
+import type { PageAvailability } from './pageAvailability';
 
 export interface NavigationSettings {
   items: NavigationSetting[];
+  pages: PageAvailability[];
+  requestedMarket: string;
+  requestedLocale: string;
+  market: string;
+  locale: string;
+  usedFallback: boolean;
+  isConfigured?: boolean;
   /** @nullable */
   updatedAt: Date | null;
 }

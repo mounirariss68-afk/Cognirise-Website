@@ -5,6 +5,7 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { CmsImmutableMediaReference } from './cmsImmutableMediaReference';
 import type { CmsLink } from './cmsLink';
 import type { CmsPersonContentApprovedFallback } from './cmsPersonContentApprovedFallback';
 import type { CmsPersonContentFocusAreasItem } from './cmsPersonContentFocusAreasItem';
@@ -22,6 +23,7 @@ export interface CmsPersonContent {
   focusAreas?: CmsPersonContentFocusAreasItem[];
   profileLinks?: CmsLink[];
   identityMediaId?: string;
+  identityMedia?: CmsImmutableMediaReference;
   approvedFallback?: CmsPersonContentApprovedFallback;
   visibility?: CmsVisibility;
   order?: number;

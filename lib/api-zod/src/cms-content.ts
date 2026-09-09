@@ -9,9 +9,14 @@ import {
   getEBand,
   isRequestedAboveCeiling,
 } from "./agent-authority";
+import {
+  landingPageSlotContract,
+  type GovernedLandingPagePath,
+  type GovernedLandingSlotType,
+} from "./landing-page-slots.generated";
 
 export const CMS_CONTRACT_VERSION = 1 as const;
-export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study", "industry", "framework", "office", "site-configuration"] as const;
+export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study", "industry", "framework", "office", "site-configuration", "landing-page"] as const;
 export type CmsDocumentKind = (typeof cmsDocumentKinds)[number];
 export type CmsValidationMode = "draft" | "publish";
 
@@ -25,6 +30,16 @@ export function initialCmsContent(kind: CmsDocumentKind): CmsContent {
   if (kind === "site-configuration") {
     return { schemaVersion: CMS_CONTRACT_VERSION } as CmsContent;
   }
+  if (kind === "landing-page") {
+    return {
+      schemaVersion: CMS_CONTRACT_VERSION,
+      template: "landing",
+      sections: [],
+      seo: {},
+      legal: {},
+      visualReferences: [],
+    } as unknown as CmsContent;
+  }
 
   return { schemaVersion: CMS_CONTRACT_VERSION } as CmsContent;
 }
@@ -36,7 +51,9 @@ function isInitialCmsDraft(kind: CmsDocumentKind, input: unknown): boolean {
   const expectedKeys = Object.keys(expected);
   const receivedKeys = Object.keys(received);
   return receivedKeys.length === expectedKeys.length
-    && expectedKeys.every((key) => received[key] === expected[key]);
+    && expectedKeys.every((key) =>
+      JSON.stringify(received[key]) === JSON.stringify(expected[key])
+    );
 }
 
 const safeExternalUrl = z.string().url().regex(/^https?:\/\//i, "Only HTTP(S) links are allowed.");
@@ -47,6 +64,22 @@ const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD.");
 const optionalDate = date.optional();
 const stringList = z.array(z.string().trim().min(1).max(240)).max(50).default([]);
 const idList = z.array(z.string().uuid()).max(50).default([]);
+
+/** A media selection is an immutable (asset, version) pair.  The asset id is
+ * retained because it is the stable library identity; delivery must always use
+ * mediaVersionId. */
+export const cmsMediaReferenceSchema = z.object({
+  mediaId: z.string().uuid(),
+  mediaVersionId: z.string().uuid(),
+  role: z.enum(["identity", "logo", "hero", "supporting", "background", "icon", "og-image", "document"]),
+  altText: z.string().trim().min(1).max(500).optional(),
+}).strict();
+
+const optionalMediaReference = cmsMediaReferenceSchema.optional();
+
+const legacyMediaId = z.string().uuid().optional().describe(
+  "Deprecated migration input. New selections must use the corresponding immutable media reference.",
+);
 
 export const cmsSourceSchema = z.object({
   label: z.string().trim().min(1).max(240),
@@ -90,7 +123,8 @@ export const personContentSchema = z.object({
     label: z.string().trim().min(1).max(80),
     url: safeLink,
   }).strict()).max(10).default([]),
-  identityMediaId: z.string().uuid().optional(),
+  identityMedia: optionalMediaReference,
+  identityMediaId: legacyMediaId,
   approvedFallback: z.enum(["initials", "brand-mark"]).optional(),
   ...governance,
 }).strict();
@@ -104,7 +138,8 @@ export const partnerContentSchema = z.object({
   coverage: stringList,
   contribution: z.string().trim().max(4_000).optional(),
   website: safeExternalUrl.optional(),
-  logoMediaId: z.string().uuid().optional(),
+  logoMedia: optionalMediaReference,
+  logoMediaId: legacyMediaId,
   relationshipStatus: z.enum(["active", "prospective", "paused", "ended"]),
   ...governance,
 }).strict();
@@ -121,7 +156,8 @@ export const platformContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
   category: z.string().trim().min(1).max(160),
   summary: z.string().trim().min(1).max(2_000),
-  heroMediaId: z.string().uuid().optional(),
+  heroMedia: optionalMediaReference,
+  heroMediaId: legacyMediaId,
   template: z.enum(["standard", "cognios-specialist"]).default("standard"),
   sections: z.array(z.object({
     heading: z.string().trim().min(1).max(240),
@@ -145,12 +181,15 @@ export const publicationContentSchema = z.object({
   topics: stringList,
   sectors: stringList,
   platformIds: idList,
-  heroMediaId: z.string().uuid().optional(),
-  pdfMediaId: z.string().uuid().optional(),
+  heroMedia: optionalMediaReference,
+  heroMediaId: legacyMediaId,
+  pdfMedia: optionalMediaReference,
+  pdfMediaId: legacyMediaId,
   social: z.object({
     title: z.string().trim().max(120).optional(),
     description: z.string().trim().max(300).optional(),
-    imageMediaId: z.string().uuid().optional(),
+    imageMedia: optionalMediaReference,
+    imageMediaId: legacyMediaId,
   }).strict().default({}),
   ...governance,
 }).strict();
@@ -208,7 +247,8 @@ export const caseStudyContentSchema = z.object({
   outcomes: stringList,
   evidence: z.array(cmsEvidenceSchema).max(30).default([]),
   quote: z.object({ text: z.string().trim().min(1).max(2_000), attribution: z.string().trim().max(240).optional() }).strict().optional(),
-  heroMediaId: z.string().uuid().optional(),
+  heroMedia: optionalMediaReference,
+  heroMediaId: legacyMediaId,
   cta: z.object({ label: z.string().trim().min(1).max(120), href: safeLink }).strict().optional(),
   ...governance,
 }).strict();
@@ -292,7 +332,8 @@ export const industryContentSchema = z.object({
   }).strict()).min(1).max(12),
   sources: z.array(industrySourceSchema).min(1).max(30),
   educationPov: educationPovSchema.optional(),
-  heroMediaId: z.string().uuid().optional(),
+  heroMedia: optionalMediaReference,
+  heroMediaId: legacyMediaId,
   verificationDate: date,
   reviewDate: date,
   visibility: z.enum(["public", "hidden", "restricted"]).default("public"),
@@ -328,7 +369,8 @@ export const frameworkContentSchema = z.object({
   methodology: z.array(cmsRichBlockSchema).min(1).max(100),
   workedExample: frameworkWorkedExampleSchema,
   sectorExamples: z.array(frameworkExampleSchema).max(20).default([]),
-  heroMediaId: z.string().uuid().optional(),
+  heroMedia: optionalMediaReference,
+  heroMediaId: legacyMediaId,
   cta: z.object({ label: z.string().trim().min(1).max(120), href: safeLink }).strict().optional(),
   ...governance,
 }).strict();
@@ -404,6 +446,62 @@ export const siteConfigurationContentSchema = z.union([
   contactEmailConfigurationContentSchema,
 ]);
 
+/** Authoritative composition contract for pages whose narrative was previously
+ * compiled into the website. Sections are intentionally governed (not HTML)
+ * so the same payload can be safely rendered by admin previews and the site. */
+const pageSectionIdentity = {
+  id: z.string().trim().min(1).max(80),
+  order: z.number().int().min(0).max(10_000).default(0),
+};
+
+export const cmsSeoSchema = z.object({
+  title: z.string().trim().max(70).optional(),
+  description: z.string().trim().max(180).optional(),
+  canonicalUrl: safeExternalUrl.optional(),
+  noIndex: z.boolean().default(false),
+}).strict();
+
+export const cmsPageSectionSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("narrative"), ...pageSectionIdentity, heading: z.string().trim().max(240).optional(), body: z.array(cmsRichBlockSchema).min(1).max(50) }).strict(),
+  z.object({ type: z.literal("cta"), ...pageSectionIdentity, label: z.string().trim().min(1).max(120), href: safeLink, style: z.enum(["primary", "secondary", "text"]).default("primary") }).strict(),
+  z.object({ type: z.literal("legal"), ...pageSectionIdentity, text: z.string().trim().min(1).max(2_000), required: z.boolean().default(false) }).strict(),
+  z.object({ type: z.literal("media"), ...pageSectionIdentity, references: z.array(cmsMediaReferenceSchema).min(1).max(12) }).strict(),
+  z.object({
+    type: z.literal("migration-media"),
+    ...pageSectionIdentity,
+    sourcePath: z.string().trim().regex(/^(?:\/|https?:\/\/)/),
+    altText: z.string().trim().min(1).max(500),
+    ownership: z.literal("compiled-landing"),
+    resolution: z.literal("unresolved"),
+  }).strict(),
+]);
+
+const cmsLandingPageContentBaseSchema = z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
+  pagePath: safeInternalPath,
+  template: z.enum(["landing", "collection", "campaign", "legal"]),
+  narrative: z.string().trim().min(1).max(2_000),
+  // Compiled landing routes may expose many individually governed microcopy
+  // slots (the Work proof ledger currently exceeds fifty).
+  sections: z.array(cmsPageSectionSchema).min(1).max(100),
+  cta: z.object({ label: z.string().trim().min(1).max(120), href: safeLink, style: z.enum(["primary", "secondary", "text"]).default("primary") }).optional(),
+  seo: cmsSeoSchema.default({}),
+  legal: z.object({ privacy: z.string().trim().max(2_000).optional(), terms: z.string().trim().max(2_000).optional(), disclaimer: z.string().trim().max(2_000).optional() }).strict().default({}),
+  visualReferences: z.array(cmsMediaReferenceSchema).max(30).default([]),
+  ...governance,
+}).strict();
+
+export const cmsLandingPageContentSchema = cmsLandingPageContentBaseSchema.superRefine((value, context) => {
+  const ids = value.sections.map((section) => section.id);
+  if (new Set(ids).size !== ids.length) {
+    context.addIssue({ code: "custom", path: ["sections"], message: "Section IDs must be unique." });
+  }
+  const orders = value.sections.map((section) => section.order);
+  if (new Set(orders).size !== orders.length) {
+    context.addIssue({ code: "custom", path: ["sections"], message: "Section order values must be unique." });
+  }
+});
+
 export const cmsContentSchemas = {
   person: personContentSchema,
   partner: partnerContentSchema,
@@ -414,6 +512,7 @@ export const cmsContentSchemas = {
   framework: frameworkContentSchema,
   office: officeContentSchema,
   "site-configuration": siteConfigurationContentSchema,
+  "landing-page": cmsLandingPageContentSchema,
 } as const;
 
 export type PersonContent = z.infer<typeof personContentSchema>;
@@ -425,8 +524,9 @@ export type IndustryContent = z.infer<typeof industryContentSchema>;
 export type FrameworkContent = z.infer<typeof frameworkContentSchema>;
 export type OfficeContent = z.infer<typeof officeContentSchema>;
 
+export type LandingPageContent = z.infer<typeof cmsLandingPageContentSchema>;
 export type SiteConfigurationContent = z.infer<typeof siteConfigurationContentSchema>;
-export type CmsContent = PersonContent | PartnerContent | PlatformContent | PublicationContent | CaseStudyContent | IndustryContent | FrameworkContent | OfficeContent | SiteConfigurationContent;
+export type CmsContent = PersonContent | PartnerContent | PlatformContent | PublicationContent | CaseStudyContent | IndustryContent | FrameworkContent | OfficeContent | SiteConfigurationContent | LandingPageContent;
 
 function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   const errors: string[] = [];
@@ -439,7 +539,7 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   if (!governed.reviewDate) errors.push("A review date is required.");
   if (kind === "person") {
     const person = value as PersonContent;
-    if (!person.identityMediaId && !person.approvedFallback) errors.push("An approved identity image or fallback is required.");
+    if (!person.identityMedia && !person.identityMediaId && !person.approvedFallback) errors.push("An approved identity image or fallback is required.");
     if (person.role !== "advisor" && !person.biography) errors.push("A biography is required.");
     if (person.role === "advisor" && !person.contribution) errors.push("An advisor contribution is required.");
   }
@@ -451,7 +551,7 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   if (kind === "publication") {
     const publication = value as PublicationContent;
     if (!publication.body.length) errors.push("A publication body is required.");
-    if (publication.variant === "pov" && !publication.pdfMediaId) errors.push("A POV document requires an approved PDF.");
+    if (publication.variant === "pov" && !publication.pdfMedia && !publication.pdfMediaId) errors.push("A POV document requires an approved PDF.");
   }
   if (kind === "case-study") {
     const caseStudy = value as CaseStudyContent;
@@ -472,7 +572,7 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   }
   if (kind === "framework") {
     const framework = value as FrameworkContent;
-    if (!framework.heroMediaId) errors.push("A framework requires approved hero media.");
+    if (!framework.heroMedia && !framework.heroMediaId) errors.push("A framework requires approved hero media.");
     for (const [index, example] of [framework.workedExample, ...framework.sectorExamples].entries()) {
       const rScore = Number(example.reversibility.slice(1)) as RScore;
       const hScore = Number(example.reach.slice(1)) as HScore;
@@ -504,6 +604,48 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
       errors.push("The worked example must name the approved artefact carrying authority above the ceiling.");
     }
   }
+  if (kind === "landing-page") {
+    const landing = value as LandingPageContent;
+    if (!landing.sections.length) errors.push("At least one governed page section is required.");
+    if (new Set(landing.sections.map((section) => section.id)).size !== landing.sections.length) {
+      errors.push("Landing page section ids must be unique.");
+    }
+    if (new Set(landing.sections.map((section) => section.order)).size !== landing.sections.length) {
+      errors.push("Landing page section order values must be unique.");
+    }
+    if (!landing.sections.some((section) => section.type === "cta") && !landing.cta) {
+      errors.push("A landing page requires a governed call to action.");
+    }
+    if (landing.sections.some((section) => section.type === "migration-media")) {
+      errors.push("Compiled landing media must be resolved to an approved immutable media version before publication.");
+    }
+    const contract = landingPageSlotContract[landing.pagePath as GovernedLandingPagePath] as
+      | Record<string, GovernedLandingSlotType>
+      | undefined;
+    if (!contract) {
+      errors.push(`Unknown governed landing page template "${landing.pagePath}".`);
+    } else {
+      const sectionsById = new Map<string, typeof landing.sections>();
+      for (const section of landing.sections) {
+        const matches = sectionsById.get(section.id) ?? [];
+        matches.push(section);
+        sectionsById.set(section.id, matches);
+      }
+      for (const [slotId, inventoryType] of Object.entries(contract)) {
+        // The inventory records the exact draft source type. Publication must
+        // replace migration placeholders with their immutable media equivalent.
+        const expectedType = inventoryType === "migration-media" ? "media" : inventoryType;
+        const matches = sectionsById.get(slotId) ?? [];
+        if (matches.length === 0) {
+          errors.push(`Landing page "${landing.pagePath}" is missing required slot "${slotId}" (${expectedType}).`);
+        } else if (matches.length !== 1) {
+          errors.push(`Landing page "${landing.pagePath}" must contain required slot "${slotId}" exactly once.`);
+        } else if (matches[0].type !== expectedType) {
+          errors.push(`Landing page "${landing.pagePath}" slot "${slotId}" must have type "${expectedType}", received "${matches[0].type}".`);
+        }
+      }
+    }
+  }
   return errors;
 }
 
@@ -511,26 +653,28 @@ export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: 
   if (mode === "draft" && isInitialCmsDraft(kind, input)) {
     return { success: true as const, data: input as CmsContent };
   }
-  const parsed = cmsContentSchemas[kind].safeParse(input);
+  // Editorial drafts intentionally remain saveable while incomplete. Fields that
+  // are present still receive their normal type, length, URL, and enum checks;
+  // publication always evaluates the complete authoritative schema below.
+  const schema = mode === "draft" && kind === "landing-page"
+    ? cmsLandingPageContentBaseSchema.deepPartial()
+    : mode === "draft" && kind !== "site-configuration"
+      ? ((cmsContentSchemas[kind] instanceof z.ZodEffects
+          ? cmsContentSchemas[kind]._def.schema
+          : cmsContentSchemas[kind]) as z.AnyZodObject).deepPartial()
+      : cmsContentSchemas[kind];
+  const parsed = schema.safeParse(input);
   if (!parsed.success) {
     return {
       success: false as const,
-      errors: parsed.error.issues.map((issue) => `${issue.path.join(".") || "content"}: ${issue.message}`),
+      errors: parsed.error.issues.map((issue: z.ZodIssue) => `${issue.path.join(".") || "content"}: ${issue.message}`),
     };
   }
-  const errors = mode === "publish" ? publishErrors(kind, parsed.data) : [];
+  const errors = mode === "publish" ? publishErrors(kind, parsed.data as CmsContent) : [];
   return errors.length
     ? { success: false as const, errors }
     : { success: true as const, data: parsed.data as CmsContent };
 }
-
-export const cmsSeoSchema = z.object({
-  title: z.string().trim().max(70).optional(),
-  description: z.string().trim().max(180).optional(),
-  canonicalUrl: safeExternalUrl.optional(),
-  noIndex: z.boolean().default(false),
-}).strict();
-
 export const cmsSnapshotSchema = z.object({
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(160),
   title: z.string().trim().min(1).max(240),
@@ -541,6 +685,13 @@ export const cmsSnapshotSchema = z.object({
   markets: z.array(z.string().regex(/^[a-z][a-z0-9-]{1,15}$/)).min(1).max(20),
 }).strict();
 
+export type CmsCollectedMediaReference = {
+  mediaId: string;
+  mediaVersionId?: string;
+  fieldPath: string;
+  role?: CmsMediaReferenceContract["role"];
+  altText?: string;
+};
 export function validateCmsSnapshot(
   kind: CmsDocumentKind,
   input: unknown,
@@ -561,33 +712,19 @@ export function validateCmsSnapshot(
       return { success: false as const, errors: ["A public case-study summary is required and must be anonymized."] };
     }
   }
-  const mediaIds = new Set(kind === "site-configuration" ? [] : snapshot.data.mediaIds);
-  const record = content.data as Record<string, unknown>;
-  for (const field of ["identityMediaId", "logoMediaId", "heroMediaId", "pdfMediaId"]) {
-    if (typeof record[field] === "string") mediaIds.add(record[field] as string);
-  }
-  const social = record.social;
-  if (social && typeof social === "object" && typeof (social as Record<string, unknown>).imageMediaId === "string") {
-    mediaIds.add((social as Record<string, unknown>).imageMediaId as string);
-  }
-  if (kind === "site-configuration") {
-    const hero = record.hero;
-    if (hero && typeof hero === "object" && !Array.isArray(hero)) {
-      const heroRecord = hero as Record<string, unknown>;
-      if (typeof heroRecord.posterMediaId === "string") mediaIds.add(heroRecord.posterMediaId);
-      if (Array.isArray(heroRecord.sources)) {
-        for (const source of heroRecord.sources) {
-          if (
-            source &&
-            typeof source === "object" &&
-            !Array.isArray(source) &&
-            typeof (source as Record<string, unknown>).mediaId === "string"
-          ) {
-            mediaIds.add((source as Record<string, unknown>).mediaId as string);
-          }
-        }
-      }
+  const references = collectCmsMediaReferences(kind, content.data, snapshot.data.mediaIds);
+  const mediaIds = new Set(references.map((reference) => reference.mediaId));
+  const exactVersions = new Map<string, string>();
+  for (const reference of references) {
+    if (!reference.mediaVersionId) continue;
+    const existing = exactVersions.get(reference.mediaId);
+    if (existing && existing !== reference.mediaVersionId) {
+      return {
+        success: false as const,
+        errors: [`Media asset ${reference.mediaId} cannot reference multiple versions in one revision.`],
+      };
     }
+    exactVersions.set(reference.mediaId, reference.mediaVersionId);
   }
   return {
     success: true as const,
@@ -603,8 +740,86 @@ export function cmsPublicRoute(kind: CmsDocumentKind, slug: string, content: Cms
   if (kind === "publication") return `/insights/${slug}`;
   if (kind === "industry") return `/industries/${slug}`;
   if (kind === "framework") return `/methodologies/${slug}`;
+  if (kind === "landing-page") return (content as LandingPageContent).pagePath;
   const caseStudy = content as CaseStudyContent;
   return caseStudy.variant === "full" && caseStudy.disclosure !== "restricted"
     ? `/work/${slug}`
     : null;
 }
+
+/** Collect every governed media location from a snapshot.  Legacy ids remain
+ * visible during migration, but only the authoritative reference objects carry
+ * a version. */
+export function collectCmsMediaReferences(
+  kind: CmsDocumentKind,
+  content: unknown,
+  legacyMediaIds: readonly string[] = [],
+): CmsCollectedMediaReference[] {
+  const result: CmsCollectedMediaReference[] = legacyMediaIds.map((mediaId, index) => ({
+    mediaId,
+    fieldPath: `mediaIds.${index}`,
+  }));
+  if (!content || typeof content !== "object" || Array.isArray(content)) return result;
+  const record = content as Record<string, unknown>;
+  const add = (value: unknown, fieldPath: string, legacyRole?: CmsMediaReferenceContract["role"]) => {
+    if (typeof value === "string") {
+      result.push({ mediaId: value, fieldPath, role: legacyRole });
+      return;
+    }
+    if (!value || typeof value !== "object" || Array.isArray(value)) return;
+    const reference = value as Record<string, unknown>;
+    if (typeof reference.mediaId !== "string") return;
+    result.push({
+      mediaId: reference.mediaId,
+      mediaVersionId: typeof reference.mediaVersionId === "string" ? reference.mediaVersionId : undefined,
+      fieldPath,
+      role: typeof reference.role === "string" ? reference.role as CmsMediaReferenceContract["role"] : legacyRole,
+      altText: typeof reference.altText === "string" ? reference.altText : undefined,
+    });
+  };
+  const locations = [
+    ["identityMedia", "identityMediaId", "identity"],
+    ["logoMedia", "logoMediaId", "logo"],
+    ["heroMedia", "heroMediaId", "hero"],
+    ["pdfMedia", "pdfMediaId", "document"],
+  ] as const;
+  for (const [referenceField, legacyField, role] of locations) {
+    add(record[referenceField] ?? record[legacyField], `content.${referenceField}`, role);
+  }
+  if (record.social && typeof record.social === "object" && !Array.isArray(record.social)) {
+    const social = record.social as Record<string, unknown>;
+    add(social.imageMedia ?? social.imageMediaId, "content.social.imageMedia", "og-image");
+  }
+  if (
+    (kind === "site-configuration" || (
+      record.hero && typeof record.hero === "object" &&
+      Object.hasOwn(record.hero as object, "posterMediaVersionId")
+    )) &&
+    record.hero && typeof record.hero === "object"
+  ) {
+    const hero = record.hero as Record<string, unknown>;
+    add({
+      mediaId: hero.posterMediaId,
+      mediaVersionId: hero.posterMediaVersionId,
+      role: "hero",
+    }, "content.hero.poster", "hero");
+    for (const [index, source] of (Array.isArray(hero.sources) ? hero.sources : []).entries()) {
+      add({ ...(source as object), role: "background" }, `content.hero.sources.${index}`, "background");
+    }
+  }
+  if (kind === "landing-page" || Array.isArray(record.visualReferences)) {
+    for (const [index, reference] of (Array.isArray(record.visualReferences) ? record.visualReferences : []).entries()) {
+      add(reference, `content.visualReferences.${index}`);
+    }
+    for (const [sectionIndex, section] of (Array.isArray(record.sections) ? record.sections : []).entries()) {
+      if (!section || typeof section !== "object" || (section as Record<string, unknown>).type !== "media") continue;
+      const references = (section as Record<string, unknown>).references;
+      for (const [referenceIndex, reference] of (Array.isArray(references) ? references : []).entries()) {
+        add(reference, `content.sections.${sectionIndex}.references.${referenceIndex}`);
+      }
+    }
+  }
+  return result;
+}
+
+export type CmsMediaReferenceContract = z.infer<typeof cmsMediaReferenceSchema>;

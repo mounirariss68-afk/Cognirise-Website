@@ -14,6 +14,7 @@ test("person availability stages editor changes and publishes them with governan
     import("../src/lib/security.ts"),
   ]);
   let role: "viewer" | "editor" | "administrator" = "viewer";
+  let marketCodes = ["ksa"];
   let auditCount = 0;
   let publicSelectionChecked = false;
   const now = new Date();
@@ -39,6 +40,9 @@ test("person availability stages editor changes and publishes them with governan
           user_updated_at: now,
           must_rotate: false,
           mfa_enabled: true,
+          // The editor is intentionally assigned to the KSA market exercised
+          // below; the administrator later retains all-market authority.
+          market_codes: marketCodes,
         }],
       };
     }
@@ -126,6 +130,16 @@ test("person availability stages editor changes and publishes them with governan
   assert.equal(auditCount, 0);
 
   role = "editor";
+  marketCodes = [];
+  const unassigned = await fetch(`${origin}/api/documents/person-id/market-availability/market-id`, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify({ decision: "off" }),
+  });
+  assert.equal(unassigned.status, 403);
+  assert.equal(auditCount, 0);
+
+  marketCodes = ["ksa"];
   const updated = await fetch(`${origin}/api/documents/person-id/market-availability/market-id`, {
     method: "PUT",
     headers,

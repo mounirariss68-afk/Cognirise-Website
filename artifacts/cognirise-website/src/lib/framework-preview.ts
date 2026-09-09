@@ -127,6 +127,11 @@ export function normalizeFrameworkPreviewContent(value: unknown): FrameworkConte
     methodology: normalizeMethodology(source.methodology),
     workedExample: normalizeWorkedExample(source.workedExample),
     sectorExamples,
+    heroMedia: record(source.heroMedia)
+      && typeof record(source.heroMedia)?.mediaId === "string"
+      && typeof record(source.heroMedia)?.mediaVersionId === "string"
+      ? source.heroMedia as FrameworkContent["heroMedia"]
+      : undefined,
     heroMediaId: typeof source.heroMediaId === "string" ? source.heroMediaId : undefined,
     cta: record(source.cta) && typeof record(source.cta)?.label === "string" && safeLink(record(source.cta)?.href)
       ? { label: String(record(source.cta)?.label), href: String(safeLink(record(source.cta)?.href)) }

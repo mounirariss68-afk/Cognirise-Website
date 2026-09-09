@@ -7,6 +7,7 @@
  */
 import type { CmsCaseStudyContent } from './cmsCaseStudyContent';
 import type { CmsFrameworkContent } from './cmsFrameworkContent';
+import type { CmsLandingPageContent } from './cmsLandingPageContent';
 import type { CmsOfficeContent } from './cmsOfficeContent';
 import type { CmsPartnerContent } from './cmsPartnerContent';
 import type { CmsPersonContent } from './cmsPersonContent';
@@ -17,4 +18,4 @@ import type { CmsSiteConfigurationContent } from './cmsSiteConfigurationContent'
 /**
  * Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
  */
-export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent | CmsOfficeContent | CmsSiteConfigurationContent;
+export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent | CmsOfficeContent | CmsSiteConfigurationContent | CmsLandingPageContent;

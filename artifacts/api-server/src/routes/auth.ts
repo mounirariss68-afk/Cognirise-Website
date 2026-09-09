@@ -6,21 +6,18 @@ import {
   ChangePasswordBody,
   LoginBody,
   RecoverAuthBody,
-  ResetPasswordBody,
+  ConsumeAccessTokenBody,
   VerifyMfaBody,
 } from "@workspace/api-zod";
 import {
   authenticate,
   clearSessionCookies,
   createSession,
-  getUser,
   publicSession,
   requireCsrf,
   type AuthContext,
   CSRF_COOKIE,
   csrfForSession,
-  requireAdministrator,
-  requireMfa,
 } from "../lib/auth";
 import { asyncRoute, AUTH_ERROR, throttle } from "../lib/http";
 import {
@@ -419,34 +416,67 @@ router.post(
 
 router.post(
   "/auth/password-reset",
-  authenticate,
-  requireCsrf,
-  requireMfa,
-  requireAdministrator,
   asyncRoute(async (req, res) => {
-    const parsed = ResetPasswordBody.safeParse(req.body);
-    if (!parsed.success) {
-      res.status(400).json({ error: "Invalid temporary password." });
+    const parsed = ConsumeAccessTokenBody.safeParse(req.body);
+    if (!parsed.success || !isStrongPassword(parsed.data.newPassword)) {
+      res.status(400).json({ error: "Choose a password of at least 12 characters with upper and lower case, a number, and a symbol." });
       return;
     }
-    const auth = res.locals.auth as AuthContext;
-    const passwordHash = await hashPassword(parsed.data.temporaryPassword);
-    const changed = await pool.query(
-      `UPDATE cms_password_credentials SET password_hash=$2,algorithm='scrypt',
-       password_version=password_version+1,must_rotate=true,temporary_expires_at=now()+interval '1 hour',changed_at=now()
-       WHERE user_id=$1 RETURNING user_id`,
-      [parsed.data.userId, passwordHash],
-    );
-    if (!changed.rowCount) {
-      res.status(404).json({ error: "User not found." });
+    const client = await pool.connect();
+    let consumed: { userId: string; purpose: string } | null = null;
+    try {
+      await client.query("BEGIN");
+      const token = await client.query(
+        `SELECT id,user_id,purpose FROM cms_user_access_tokens
+         WHERE token_digest=$1 AND consumed_at IS NULL AND expires_at>now()
+         FOR UPDATE`,
+        [hashToken(parsed.data.token)],
+      );
+      if (token.rowCount) {
+        const row = token.rows[0];
+        await client.query(
+          `INSERT INTO cms_password_credentials
+            (user_id,password_hash,algorithm,password_version,must_rotate,temporary_expires_at,changed_at)
+           VALUES ($1,$2,'scrypt',1,false,NULL,now())
+           ON CONFLICT (user_id) DO UPDATE SET password_hash=EXCLUDED.password_hash,
+             algorithm='scrypt',password_version=cms_password_credentials.password_version+1,
+             must_rotate=false,temporary_expires_at=NULL,changed_at=now()`,
+          [row.user_id, await hashPassword(parsed.data.newPassword)],
+        );
+        await client.query(
+          "UPDATE cms_user_access_tokens SET consumed_at=now() WHERE id=$1",
+          [row.id],
+        );
+        await client.query(
+          "UPDATE cms_user_access_tokens SET consumed_at=COALESCE(consumed_at,now()) WHERE user_id=$1 AND id<>$2",
+          [row.user_id, row.id],
+        );
+        await client.query(
+          `UPDATE cms_users
+             SET status=CASE WHEN status='invited' THEN 'active' ELSE status END,
+                 email_verified_at=COALESCE(email_verified_at,now()),updated_at=now()
+           WHERE id=$1`,
+          [row.user_id],
+        );
+        await client.query(
+          "UPDATE cms_sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL",
+          [row.user_id],
+        );
+        consumed = { userId: String(row.user_id), purpose: row.purpose };
+      }
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+    if (!consumed) {
+      res.status(410).json({ error: "This access link is invalid, expired, or has already been used." });
       return;
     }
-    await pool.query(
-      "UPDATE cms_sessions SET revoked_at=now() WHERE user_id=$1 AND id<>$2 AND revoked_at IS NULL",
-      [parsed.data.userId, auth.id],
-    );
-    await auditAuth(auth.user.id, "user.password_reset", String(parsed.data.userId));
-    res.json(await getUser(parsed.data.userId));
+    await auditAuth(consumed.userId, `auth.${consumed.purpose}_consumed`);
+    res.status(204).end();
   }),
 );
 

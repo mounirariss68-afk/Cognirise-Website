@@ -152,7 +152,9 @@ test("public media stays on the revision pin when a newer asset version appears"
     }
     if (statement.includes("SELECT a.*,v.id version_id")) {
       assert.match(statement, /v\.id=ref\.media_version_id/);
-      const version = versions.get(publishedRevision.versionId);
+    const version = [...versions.values()].find((candidate) =>
+      candidate.storageKey === storageKey
+    );
       assert.ok(version);
       return {
         rowCount: 1,
@@ -170,7 +172,9 @@ test("public media stays on the revision pin when a newer asset version appears"
     }
     if (statement.includes("SELECT v.storage_key")) {
       const [requestedAssetId, requestedVersionId] = values?.map(String) ?? [];
-      const version = versions.get(requestedVersionId);
+    const version = [...versions.values()].find((candidate) =>
+      candidate.storageKey === storageKey
+    );
       const authorized = requestedAssetId === assetId &&
         requestedVersionId === publishedRevision.versionId &&
         version;
@@ -188,7 +192,9 @@ test("public media stays on the revision pin when a newer asset version appears"
         : { rowCount: 0, rows: [] };
     }
     if (statement.includes("SELECT COALESCE(v.storage_key,a.storage_key) storage_key")) {
-      const version = versions.get(publishedRevision.versionId);
+    const version = [...versions.values()].find((candidate) =>
+      candidate.storageKey === storageKey
+    );
       return version
         ? {
             rowCount: 1,
@@ -295,6 +301,8 @@ test("public media stays on the revision pin when a newer asset version appears"
             edition_id: "edition-id",
             payload: snapshot,
             kind: "platform",
+            workflow_state: "in-review",
+            publication_state: "in-review",
           }],
         };
       }
@@ -309,7 +317,16 @@ test("public media stays on the revision pin when a newer asset version appears"
         assert.equal(missingReferenceInserted, true);
         return {
           rowCount: 1,
-          rows: [{ id: assetId, version_id: revisions.second.versionId }],
+          rows: [{
+            id: assetId,
+            version_id: revisions.second.versionId,
+            status: "active",
+            media_type: "image/png",
+            width: 1200,
+            height: 630,
+            alt_text: "Approved artwork",
+            metadata: versions.get(revisions.second.versionId)?.metadata,
+          }],
         };
       }
       return { rowCount: 1, rows: [] };

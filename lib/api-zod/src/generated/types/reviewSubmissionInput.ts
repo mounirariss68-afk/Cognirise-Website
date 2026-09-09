@@ -7,6 +7,7 @@
  */
 
 export interface ReviewSubmissionInput {
+  revisionId: string;
   /** @maxLength 1000 */
   note?: string;
   reviewerIds?: string[];

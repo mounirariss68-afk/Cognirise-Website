@@ -8,13 +8,20 @@ test("generic review and publication validate site configuration and pin request
   assert.match(source, /validateSnapshot\(row\.kind, row\.payload, "draft"\)/);
   assert.match(source, /validateSnapshot\(revision\.rows\[0\]\.kind, revision\.rows\[0\]\.payload, "publish"\)/);
   assert.match(source, /"\/documents\/:documentId\/publish",[\s\S]*?requirePublisher/);
-  assert.match(source, /hero\.posterMediaVersionId/);
-  assert.match(source, /source\.mediaVersionId/);
+  assert.match(source, /collectCmsMediaReferences/);
+  assert.match(source, /reference\.mediaVersionId/);
   assert.match(source, /id::text=\$4::jsonb->>asset\.id::text/);
   assert.match(source, /Publication references unavailable media/);
-  assert.match(source, /isCmsConfigurationIdentityValid\(row\.kind, row\.canonical_slug, row\.payload\)/);
-  assert.match(source, /isCmsConfigurationIdentityValid\([\s\S]*?revision\.rows\[0\]\.kind,[\s\S]*?revision\.rows\[0\]\.canonical_slug,[\s\S]*?revision\.rows\[0\]\.payload/);
-  assert.match(source, /isCmsConfigurationIdentityValid\([\s\S]*?old\.rows\[0\]\.kind,[\s\S]*?old\.rows\[0\]\.canonical_slug,[\s\S]*?old\.rows\[0\]\.payload/);
+});
+
+test("publication aborts before pointer advancement when review transition loses a race", async () => {
+  const source = await readFile(resolve(process.cwd(), "src/routes/documents.ts"), "utf8");
+  assert.match(source, /const approved = await client\.query\([\s\S]*?workflow_state='in-review'/);
+  assert.match(source, /if \(approved\.rowCount !== 1\) \{[\s\S]*?ROLLBACK[\s\S]*?selected revision is no longer in review/);
+  const transition = source.indexOf("const approved = await client.query");
+  const pointer = source.indexOf("UPDATE cms_market_editions SET publication_state", transition);
+  assert.ok(transition >= 0 && pointer > transition);
+  assert.ok(source.indexOf("if (approved.rowCount !== 1)", transition) < pointer);
 });
 
 test("public hero selection remains bound to the approved published revision", async () => {
@@ -118,6 +125,8 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
                 edition_id: fixture.editionId,
                 payload: fixture.row.payload,
                 kind: "site-configuration",
+                workflow_state: "in-review",
+                publication_state: "in-review",
               }],
             }
           : { rowCount: 0, rows: [] };
@@ -335,6 +344,8 @@ test("hero publication rolls back without moving the pointer on a stored MIME mi
             edition_id: editionId,
             payload: snapshot,
             kind: "site-configuration",
+            workflow_state: "in-review",
+            publication_state: "in-review",
           }],
         };
       }

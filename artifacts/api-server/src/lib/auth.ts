@@ -15,6 +15,7 @@ export interface AuthUser {
   email: string;
   role: CmsRole;
   status: "invited" | "active" | "suspended";
+  marketCodes: string[];
   mfaEnabled: boolean;
   mustRotate: boolean;
   lastLoginAt: Date | null;
@@ -88,7 +89,9 @@ export async function getUser(userId: string): Promise<AuthUser> {
   const result = await pool.query(
     `SELECT u.id,u.display_name name,u.email,u.role,u.status,u.last_login_at,
              u.created_at,u.updated_at,p.must_rotate,
-            EXISTS(SELECT 1 FROM cms_totp_credentials t WHERE t.user_id=u.id
+             COALESCE((SELECT array_agg(a.market_code ORDER BY a.market_code)
+               FROM cms_user_market_assignments a WHERE a.user_id=u.id),'{}') market_codes,
+             EXISTS(SELECT 1 FROM cms_totp_credentials t WHERE t.user_id=u.id
               AND t.verified_at IS NOT NULL AND t.disabled_at IS NULL) mfa_enabled
        FROM cms_users u LEFT JOIN cms_password_credentials p ON p.user_id=u.id WHERE u.id=$1`,
     [userId],
@@ -101,6 +104,7 @@ export async function getUser(userId: string): Promise<AuthUser> {
     email: row.email,
     role: row.role,
     status: row.status,
+    marketCodes: row.market_codes ?? [],
     mfaEnabled: row.mfa_enabled,
     mustRotate: Boolean(row.must_rotate),
     lastLoginAt: row.last_login_at ? new Date(row.last_login_at) : null,
@@ -133,8 +137,10 @@ export async function authenticate(
   const result = await pool.query(
     `SELECT s.id, s.token_digest, s.mfa_satisfied_at, s.created_at, s.expires_at,
             u.id user_id, u.display_name name, u.email, u.role, u.status,
-            u.last_login_at, u.created_at user_created_at,
+             u.last_login_at, u.created_at user_created_at,
              u.updated_at user_updated_at,p.must_rotate,
+             COALESCE((SELECT array_agg(a.market_code ORDER BY a.market_code)
+               FROM cms_user_market_assignments a WHERE a.user_id=u.id),'{}') market_codes,
             EXISTS(SELECT 1 FROM cms_totp_credentials t WHERE t.user_id=u.id
               AND t.verified_at IS NOT NULL AND t.disabled_at IS NULL) mfa_enabled
        FROM cms_sessions s
@@ -159,6 +165,7 @@ export async function authenticate(
       email: row.email,
       role: row.role,
       status: row.status,
+      marketCodes: row.market_codes ?? [],
       mfaEnabled: row.mfa_enabled,
       mustRotate: Boolean(row.must_rotate),
       lastLoginAt: row.last_login_at ? new Date(row.last_login_at) : null,

@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useChangePassword, useGetSession, getGetSessionQueryKey } from "@workspace/api-client-react";
+import { useChangePassword, useConsumeAccessToken, useGetSession, getGetSessionQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CogniriseBrand } from "@/components/brand/CogniriseBrand";
 
 const passwordSchema = z.object({
-  currentPassword: z.string().min(1, "Current password is required"),
+  currentPassword: z.string(),
   newPassword: z.string()
     .min(12, "Must be at least 12 characters")
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).+$/, "Must contain uppercase, lowercase, number, and special character"),
@@ -28,9 +28,13 @@ export default function PasswordSetup() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [authError, setAuthError] = useState<string | null>(null);
+  const token = new URLSearchParams(window.location.search).get("token");
 
-  const { data: session, isLoading } = useGetSession();
+  const { data: session, isLoading } = useGetSession({
+    query: { queryKey: getGetSessionQueryKey(), enabled: !token, retry: false },
+  });
   const changePassword = useChangePassword();
+  const consumeAccessToken = useConsumeAccessToken();
 
   const form = useForm<z.infer<typeof passwordSchema>>({
     resolver: zodResolver(passwordSchema),
@@ -42,7 +46,7 @@ export default function PasswordSetup() {
   });
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!token && !isLoading) {
       if (!session) {
         setLocation("/");
       } else if (!session.user.mustRotate) {
@@ -53,9 +57,9 @@ export default function PasswordSetup() {
         }
       }
     }
-  }, [session, isLoading, setLocation]);
+  }, [session, isLoading, setLocation, token]);
 
-  if (isLoading || !session || !session.user.mustRotate) {
+  if (!token && (isLoading || !session || !session.user.mustRotate)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -65,6 +69,23 @@ export default function PasswordSetup() {
 
   function onSubmit(values: z.infer<typeof passwordSchema>) {
     setAuthError(null);
+    if (token) {
+      consumeAccessToken.mutate(
+        { data: { token, newPassword: values.newPassword } },
+        {
+          onSuccess: () => {
+            toast({ title: "Password set successfully", description: "Sign in with your new password." });
+            setLocation("/");
+          },
+          onError: (err: any) => setAuthError(err.error || "This access link is invalid, expired, or already used."),
+        },
+      );
+      return;
+    }
+    if (!values.currentPassword) {
+      form.setError("currentPassword", { message: "Current password is required" });
+      return;
+    }
     changePassword.mutate(
       { data: { currentPassword: values.currentPassword, newPassword: values.newPassword } },
       {
@@ -99,13 +120,15 @@ export default function PasswordSetup() {
           </div>
           <h1 className="text-2xl font-bold tracking-tight mb-2 text-foreground">Set Your Password</h1>
           <p className="text-muted-foreground text-sm font-mono leading-relaxed tracking-tight">
-            You must change your temporary password to a secure permanent password before continuing.
+            {token
+              ? "Choose a secure password. This invitation or reset link can only be used once."
+              : "You must change your temporary password to a secure permanent password before continuing."}
           </p>
         </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
+            {!token && <FormField
               control={form.control}
               name="currentPassword"
               render={({ field }) => (
@@ -117,8 +140,8 @@ export default function PasswordSetup() {
                   <FormMessage />
                 </FormItem>
               )}
-            />
-            <div className="h-px bg-border my-4" />
+            />}
+            {!token && <div className="h-px bg-border my-4" />}
             <FormField
               control={form.control}
               name="newPassword"
@@ -152,8 +175,8 @@ export default function PasswordSetup() {
               </div>
             )}
 
-            <Button type="submit" className="w-full font-medium mt-6" disabled={changePassword.isPending}>
-              {changePassword.isPending ? (
+            <Button type="submit" className="w-full font-medium mt-6" disabled={changePassword.isPending || consumeAccessToken.isPending}>
+              {changePassword.isPending || consumeAccessToken.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
               ) : (
                 <CheckCircle2 className="w-4 h-4 mr-2" />

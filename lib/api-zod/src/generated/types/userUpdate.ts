@@ -16,4 +16,9 @@ export interface UserUpdate {
   name?: string;
   role?: UserRole;
   status?: UserStatus;
+  /**
+     * @items.minLength 2
+     * @items.maxLength 24
+     */
+  marketCodes?: string[];
 }

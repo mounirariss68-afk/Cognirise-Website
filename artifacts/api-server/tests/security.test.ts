@@ -15,6 +15,7 @@ import {
 } from "../src/lib/security.ts";
 import {
   roleAtLeast,
+  canAccessAssignedMarket,
   selectMarketWithUaeFallback,
   canChangeCanonicalSlug,
   isPublicContentVisible,
@@ -310,6 +311,13 @@ test("published slugs cannot be changed accidentally", () => {
 test("editors cannot publish or administer", () => {
   assert.equal(roleAtLeast("editor", "publisher"), false);
   assert.equal(roleAtLeast("editor", "administrator"), false);
+});
+
+test("market assignment semantics are deny-by-default for non-admins", () => {
+  assert.equal(canAccessAssignedMarket("administrator", [], "ksa"), true);
+  assert.equal(canAccessAssignedMarket("publisher", [], "ksa"), false);
+  assert.equal(canAccessAssignedMarket("editor", ["uae"], "ksa"), false);
+  assert.equal(canAccessAssignedMarket("editor", ["uae"], "uae"), true);
 });
 
 test("credentialless attribution users do not complete initial CMS setup", () => {

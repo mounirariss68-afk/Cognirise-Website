@@ -1,0 +1,2435 @@
+[
+  {
+    "slug": "homepage",
+    "path": "/",
+    "title": "Homepage",
+    "sourceKey": "compiled:/",
+    "snapshot": {
+      "slug": "homepage",
+      "title": "Homepage",
+      "summary": "Cognirise is the AI-native advisory and engineering firm. Senior operators, forward-deployed engineers and governed agents move priority work from strategy into production.",
+      "markets": [
+        "uae"
+      ],
+      "mediaIds": [],
+      "content": {
+        "schemaVersion": 1,
+        "pagePath": "/",
+        "template": "landing",
+        "narrative": "Intelligence becomes momentum.",
+        "sections": [
+          {
+            "type": "narrative",
+            "id": "hero",
+            "heading": "Intelligence becomes momentum.",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Cognirise is the AI-native advisory and engineering firm. Senior operators, forward-deployed engineers and governed agents move priority work from strategy into production."
+              }
+            ],
+            "order": 0
+          },
+          {
+            "type": "narrative",
+            "id": "home-clarity-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We don't create dependencies. Every engagement is designed to transfer capability to your team. Whether we're advising the board or committing code alongside your engineers, our goal is to build an environment you can operate and scale yourselves."
+              }
+            ],
+            "order": 1
+          },
+          {
+            "type": "narrative",
+            "id": "home-clarity-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We leave organisations more capable than we found them."
+              }
+            ],
+            "order": 2
+          },
+          {
+            "type": "narrative",
+            "id": "home-clarity-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Operating conviction"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "type": "narrative",
+            "id": "home-clarity-outcome-architecture",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Architecture"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "type": "narrative",
+            "id": "home-clarity-outcome-assurance",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Assurance"
+              }
+            ],
+            "order": 5
+          },
+          {
+            "type": "narrative",
+            "id": "home-clarity-outcome-engineering",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Engineering"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "type": "narrative",
+            "id": "home-clarity-outcome-risk",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Risk"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "type": "narrative",
+            "id": "home-clarity-outcomes-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We embed our practices into your firm:"
+              }
+            ],
+            "order": 8
+          },
+          {
+            "type": "narrative",
+            "id": "home-convergence-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "You don't need a strategy firm that can't code, or an engineering shop that doesn't understand governance. You need a team that takes the work all the way through."
+              }
+            ],
+            "order": 9
+          },
+          {
+            "type": "cta",
+            "id": "home-convergence-cta",
+            "label": "Meet the team",
+            "href": "/about",
+            "style": "primary",
+            "order": 10
+          },
+          {
+            "type": "narrative",
+            "id": "home-convergence-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We deploy teams who bridge the entire operating gap."
+              }
+            ],
+            "order": 11
+          },
+          {
+            "type": "narrative",
+            "id": "home-convergence-image-caption",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "people + agents"
+              }
+            ],
+            "order": 12
+          },
+          {
+            "type": "narrative",
+            "id": "home-convergence-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Our capability"
+              }
+            ],
+            "order": 13
+          },
+          {
+            "type": "narrative",
+            "id": "home-convergence-service-advisory",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Strategy & operating model advisory"
+              }
+            ],
+            "order": 14
+          },
+          {
+            "type": "narrative",
+            "id": "home-convergence-service-engineering",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Forward-deployed enterprise engineering"
+              }
+            ],
+            "order": 15
+          },
+          {
+            "type": "narrative",
+            "id": "home-convergence-service-platform",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Proprietary CogniOS operating system"
+              }
+            ],
+            "order": 16
+          },
+          {
+            "type": "migration-media",
+            "id": "home-convergence-visual",
+            "sourcePath": "/images/cognirise/pulse-convergence.jpg",
+            "altText": "Depiction of convergence",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 17
+          },
+          {
+            "type": "narrative",
+            "id": "home-firm-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Most AI programmes fail because they treat intelligence as software to be deployed rather than a capability to be governed. We bridge the gap between algorithmic potential and enterprise authority."
+              }
+            ],
+            "order": 18
+          },
+          {
+            "type": "narrative",
+            "id": "home-firm-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We don't sell experimentation. We sell operational reality."
+              }
+            ],
+            "order": 19
+          },
+          {
+            "type": "narrative",
+            "id": "home-firm-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The firm"
+              }
+            ],
+            "order": 20
+          },
+          {
+            "type": "narrative",
+            "id": "home-firm-supporting",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We work with leaders who hold accountability for results, providing the advisory clarity to move and the engineering certainty to hold ground."
+              }
+            ],
+            "order": 21
+          },
+          {
+            "type": "narrative",
+            "id": "home-framework-applications-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Framework Applications"
+              }
+            ],
+            "order": 22
+          },
+          {
+            "type": "narrative",
+            "id": "home-framework-authority-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Map capability against enterprise risk."
+              }
+            ],
+            "order": 23
+          },
+          {
+            "type": "cta",
+            "id": "home-framework-authority-cta",
+            "label": "Agent Authority Model",
+            "href": "/methodologies/agent-authority-model",
+            "style": "primary",
+            "order": 24
+          },
+          {
+            "type": "narrative",
+            "id": "home-framework-authority-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The Authority Matrix"
+              }
+            ],
+            "order": 25
+          },
+          {
+            "type": "narrative",
+            "id": "home-framework-autonomy-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Define explicit boundaries for model operation."
+              }
+            ],
+            "order": 26
+          },
+          {
+            "type": "narrative",
+            "id": "home-framework-autonomy-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Levels of Autonomy"
+              }
+            ],
+            "order": 27
+          },
+          {
+            "type": "cta",
+            "id": "home-framework-idao-cta",
+            "label": "Explore IDAO",
+            "href": "/methodologies/idao",
+            "style": "primary",
+            "order": 28
+          },
+          {
+            "type": "narrative",
+            "id": "home-framework-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "How we do it"
+              }
+            ],
+            "order": 29
+          },
+          {
+            "type": "narrative",
+            "id": "home-framework-promotion-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Deterministic requirements for agent escalation."
+              }
+            ],
+            "order": 30
+          },
+          {
+            "type": "narrative",
+            "id": "home-framework-promotion-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Promotion Evidence"
+              }
+            ],
+            "order": 31
+          },
+          {
+            "type": "narrative",
+            "id": "home-framework-teaser",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "A deterministic way to set how much authority each agent handover may exercise on its own."
+              }
+            ],
+            "order": 32
+          },
+          {
+            "type": "narrative",
+            "id": "home-framework-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The Agent Authority Model."
+              }
+            ],
+            "order": 33
+          },
+          {
+            "type": "migration-media",
+            "id": "home-governance-visual",
+            "sourcePath": "/images/cognirise/cognirise-pulse-governance.jpg",
+            "altText": "Visual representation of operational boundaries.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 34
+          },
+          {
+            "type": "narrative",
+            "id": "home-image-ledger-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We build the path, the controls and the capacity to keep the work moving after the first release."
+              }
+            ],
+            "order": 35
+          },
+          {
+            "type": "narrative",
+            "id": "home-image-ledger-first-caption",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Boundaries you can see."
+              }
+            ],
+            "order": 36
+          },
+          {
+            "type": "narrative",
+            "id": "home-image-ledger-first-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "First condition"
+              }
+            ],
+            "order": 37
+          },
+          {
+            "type": "narrative",
+            "id": "home-image-ledger-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Three conditions for change that holds."
+              }
+            ],
+            "order": 38
+          },
+          {
+            "type": "narrative",
+            "id": "home-image-ledger-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The system in motion"
+              }
+            ],
+            "order": 39
+          },
+          {
+            "type": "narrative",
+            "id": "home-image-ledger-second-caption",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Work that flows."
+              }
+            ],
+            "order": 40
+          },
+          {
+            "type": "narrative",
+            "id": "home-image-ledger-second-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Second condition"
+              }
+            ],
+            "order": 41
+          },
+          {
+            "type": "narrative",
+            "id": "home-image-ledger-third-caption",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "A platform that remembers."
+              }
+            ],
+            "order": 42
+          },
+          {
+            "type": "narrative",
+            "id": "home-image-ledger-third-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Third condition"
+              }
+            ],
+            "order": 43
+          },
+          {
+            "type": "migration-media",
+            "id": "home-people-visual",
+            "sourcePath": "/images/cognirise/cognirise-pulse-people.jpg",
+            "altText": "Visual representation of people and agents in a shared architecture.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 44
+          },
+          {
+            "type": "migration-media",
+            "id": "home-platform-visual",
+            "sourcePath": "/images/cognirise/site-cognios.jpg",
+            "altText": "Visual representation of a durable system.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 45
+          },
+          {
+            "type": "narrative",
+            "id": "home-proof-focus",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Complex enterprise & government"
+              }
+            ],
+            "order": 46
+          },
+          {
+            "type": "narrative",
+            "id": "home-proof-focus-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Focus"
+              }
+            ],
+            "order": 47
+          },
+          {
+            "type": "narrative",
+            "id": "home-proof-model",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Advisory + Engineering"
+              }
+            ],
+            "order": 48
+          },
+          {
+            "type": "narrative",
+            "id": "home-proof-model-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Model"
+              }
+            ],
+            "order": 49
+          },
+          {
+            "type": "narrative",
+            "id": "home-proof-platform",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "CogniOS (Four native engines)"
+              }
+            ],
+            "order": 50
+          },
+          {
+            "type": "narrative",
+            "id": "home-proof-platform-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Platform"
+              }
+            ],
+            "order": 51
+          },
+          {
+            "type": "narrative",
+            "id": "home-proof-presence",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Middle East & Europe"
+              }
+            ],
+            "order": 52
+          },
+          {
+            "type": "narrative",
+            "id": "home-proof-presence-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Presence"
+              }
+            ],
+            "order": 53
+          },
+          {
+            "type": "narrative",
+            "id": "home-service-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We don't hand over a presentation and wish you luck. We deploy senior teams who take accountability for the architecture, the code and the outcome."
+              }
+            ],
+            "order": 54
+          },
+          {
+            "type": "narrative",
+            "id": "home-service-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We combine strategy, engineering and platform."
+              }
+            ],
+            "order": 55
+          },
+          {
+            "type": "narrative",
+            "id": "home-service-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "How we work"
+              }
+            ],
+            "order": 56
+          },
+          {
+            "type": "narrative",
+            "id": "home-start-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Speak with a partner about deploying governed intelligence into your core workflows."
+              }
+            ],
+            "order": 57
+          },
+          {
+            "type": "cta",
+            "id": "home-start-cta",
+            "label": "Book a consultation",
+            "href": "/contact",
+            "style": "primary",
+            "order": 58
+          },
+          {
+            "type": "narrative",
+            "id": "home-start-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Ready for operational reality?"
+              }
+            ],
+            "order": 59
+          },
+          {
+            "type": "narrative",
+            "id": "home-start-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Start"
+              }
+            ],
+            "order": 60
+          },
+          {
+            "type": "cta",
+            "id": "primary-action",
+            "label": "Explore our practice",
+            "href": "/#service-lines",
+            "style": "primary",
+            "order": 61
+          }
+        ],
+        "cta": {
+          "label": "Meet the team",
+          "href": "/about",
+          "style": "primary"
+        },
+        "seo": {
+          "title": "Cognirise | Intelligence That Moves Work",
+          "description": "Cognirise redesigns consequential enterprise work around people, data, controls and intelligent execution."
+        },
+        "legal": {},
+        "visualReferences": [],
+        "visibility": "public",
+        "order": 0,
+        "sources": [
+          {
+            "label": "Compiled Homepage page",
+            "url": "https://www.cognirise.com/"
+          }
+        ],
+        "verificationDate": "2026-09-09",
+        "reviewDate": "2027-03-09",
+        "relatedIds": []
+      }
+    }
+  },
+  {
+    "slug": "about",
+    "path": "/about",
+    "title": "About",
+    "sourceKey": "compiled:/about",
+    "snapshot": {
+      "slug": "about",
+      "title": "About",
+      "summary": "The people who frame the decision stay close enough to make it real. Leadership, engineering and accountability belong in the same room.",
+      "markets": [
+        "uae"
+      ],
+      "mediaIds": [],
+      "content": {
+        "schemaVersion": 1,
+        "pagePath": "/about",
+        "template": "landing",
+        "narrative": "Judgment stays close to the work.",
+        "sections": [
+          {
+            "type": "narrative",
+            "id": "hero",
+            "heading": "Judgment stays close to the work.",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The people who frame the decision stay close enough to make it real. Leadership, engineering and accountability belong in the same room."
+              }
+            ],
+            "order": 0
+          },
+          {
+            "type": "narrative",
+            "id": "about-advisory-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Senior leaders who pressure-test our model and keep it grounded in what enterprises actually need."
+              }
+            ],
+            "order": 1
+          },
+          {
+            "type": "narrative",
+            "id": "about-advisory-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "02 / Counsel at scale"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "type": "narrative",
+            "id": "about-advisory-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Board of Advisors"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "type": "cta",
+            "id": "about-closing-cta",
+            "label": "Book a value scan",
+            "href": "/value-scan",
+            "style": "primary",
+            "order": 4
+          },
+          {
+            "type": "narrative",
+            "id": "about-closing-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Bring one process. Meet the people."
+              }
+            ],
+            "order": 5
+          },
+          {
+            "type": "narrative",
+            "id": "about-hero-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The people who frame the decision stay close enough to make it real. Leadership, engineering and accountability belong in the same room."
+              }
+            ],
+            "order": 6
+          },
+          {
+            "type": "narrative",
+            "id": "about-hero-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Our Team"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "type": "narrative",
+            "id": "about-hero-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Judgment stays close to the work."
+              }
+            ],
+            "order": 8
+          },
+          {
+            "type": "migration-media",
+            "id": "about-hero-visual",
+            "sourcePath": "/images/cognirise/site-leadership.jpg",
+            "altText": "Senior colleagues working together around a detailed physical model.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 9
+          },
+          {
+            "type": "narrative",
+            "id": "about-leadership-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "01 / Our Team"
+              }
+            ],
+            "order": 10
+          },
+          {
+            "type": "narrative",
+            "id": "about-leadership-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Leadership Team"
+              }
+            ],
+            "order": 11
+          }
+        ],
+        "cta": {
+          "label": "Book a value scan",
+          "href": "/value-scan",
+          "style": "primary"
+        },
+        "seo": {
+          "title": "Our Team | Cognirise",
+          "description": "Meet the Cognirise leadership team and Board of Advisors behind our senior-led AI transformation work."
+        },
+        "legal": {},
+        "visualReferences": [],
+        "visibility": "public",
+        "order": 0,
+        "sources": [
+          {
+            "label": "Compiled About page",
+            "url": "https://www.cognirise.com/about"
+          }
+        ],
+        "verificationDate": "2026-09-09",
+        "reviewDate": "2027-03-09",
+        "relatedIds": []
+      }
+    }
+  },
+  {
+    "slug": "partners",
+    "path": "/partners",
+    "title": "Partners",
+    "sourceKey": "compiled:/partners",
+    "snapshot": {
+      "slug": "partners",
+      "title": "Partners",
+      "summary": "Cognirise stays deliberately senior and small — and delivers at enterprise scale through two complementary alliance types: engineering partners who extend delivery capacity, and platform partners who bring specialist products into the solution.",
+      "markets": [
+        "uae"
+      ],
+      "mediaIds": [],
+      "content": {
+        "schemaVersion": 1,
+        "pagePath": "/partners",
+        "template": "landing",
+        "narrative": "Senior-led. Partner-amplified.",
+        "sections": [
+          {
+            "type": "narrative",
+            "id": "hero",
+            "heading": "Senior-led. Partner-amplified.",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Cognirise stays deliberately senior and small — and delivers at enterprise scale through two complementary alliance types: engineering partners who extend delivery capacity, and platform partners who bring specialist products into the solution."
+              }
+            ],
+            "order": 0
+          },
+          {
+            "type": "narrative",
+            "id": "partners-closing-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Tell us the outcome. We’ll bring the right partners to the table — under one accountable lead."
+              }
+            ],
+            "order": 1
+          },
+          {
+            "type": "cta",
+            "id": "partners-closing-cta",
+            "label": "Talk to a partner",
+            "href": "/contact",
+            "style": "primary",
+            "order": 2
+          },
+          {
+            "type": "narrative",
+            "id": "partners-closing-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "One accountable ecosystem"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "type": "narrative",
+            "id": "partners-closing-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "One senior team. The whole network behind it."
+              }
+            ],
+            "order": 4
+          },
+          {
+            "type": "narrative",
+            "id": "partners-engineering-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Engineering partners extend the senior Cognirise field team with platform implementation depth, certified delivery capacity and the specialist muscle to move complex systems into production."
+              }
+            ],
+            "order": 5
+          },
+          {
+            "type": "narrative",
+            "id": "partners-engineering-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The capacity to build at enterprise scale."
+              }
+            ],
+            "order": 6
+          },
+          {
+            "type": "narrative",
+            "id": "partners-hero-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Cognirise stays deliberately senior and small — and delivers at enterprise scale through two complementary alliance types: engineering partners who extend delivery capacity, and platform partners who bring specialist products into the solution."
+              }
+            ],
+            "order": 7
+          },
+          {
+            "type": "narrative",
+            "id": "partners-hero-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Our partners / one accountable ecosystem"
+              }
+            ],
+            "order": 8
+          },
+          {
+            "type": "narrative",
+            "id": "partners-hero-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Senior-led. Partner-amplified."
+              }
+            ],
+            "order": 9
+          },
+          {
+            "type": "migration-media",
+            "id": "partners-hero-media",
+            "sourcePath": "/images/cognirise/alliance-bunjee.jpg",
+            "altText": "Cognirise alliance partners connected through a governed enterprise network.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 10
+          },
+          {
+            "type": "narrative",
+            "id": "partners-method-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Beyond the confirmed alliance network, Cognirise assembles additional specialist capability per engagement — so every mission gets exactly the engineering depth and platform support it needs."
+              }
+            ],
+            "order": 11
+          },
+          {
+            "type": "narrative",
+            "id": "partners-platform-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Platform partners bring focused capabilities that complement CogniOS — from conversational AI and data readiness to organizational intelligence — selected where they strengthen the client outcome."
+              }
+            ],
+            "order": 12
+          },
+          {
+            "type": "narrative",
+            "id": "partners-platform-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Specialist products, connected around the work."
+              }
+            ],
+            "order": 13
+          },
+          {
+            "type": "narrative",
+            "id": "partners-value-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "One accountable team."
+              }
+            ],
+            "order": 14
+          },
+          {
+            "type": "narrative",
+            "id": "partners-value-headline",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "{count} confirmed partners."
+              }
+            ],
+            "order": 15
+          }
+        ],
+        "cta": {
+          "label": "Talk to a partner",
+          "href": "/contact",
+          "style": "primary"
+        },
+        "seo": {
+          "title": "Partners | Cognirise",
+          "description": "The alliance and technology network supporting the Cognirise operating model."
+        },
+        "legal": {},
+        "visualReferences": [],
+        "visibility": "public",
+        "order": 0,
+        "sources": [
+          {
+            "label": "Compiled Partners page",
+            "url": "https://www.cognirise.com/partners"
+          }
+        ],
+        "verificationDate": "2026-09-09",
+        "reviewDate": "2027-03-09",
+        "relatedIds": []
+      }
+    }
+  },
+  {
+    "slug": "platforms",
+    "path": "/platforms",
+    "title": "Platforms",
+    "sourceKey": "compiled:/platforms",
+    "snapshot": {
+      "slug": "platforms",
+      "title": "Platforms",
+      "summary": "Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production. CogniOS connects enterprise knowledge, specialist agents and human accountability under one governed operating system.",
+      "markets": [
+        "uae"
+      ],
+      "mediaIds": [],
+      "content": {
+        "schemaVersion": 1,
+        "pagePath": "/platforms",
+        "template": "landing",
+        "narrative": "Ecosystem for execution.",
+        "sections": [
+          {
+            "type": "narrative",
+            "id": "hero",
+            "heading": "Ecosystem for execution.",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production. CogniOS connects enterprise knowledge, specialist agents and human accountability under one governed operating system."
+              }
+            ],
+            "order": 0
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-alliance-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Platform Alliances"
+              }
+            ],
+            "order": 1
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-closing-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Start with the work where urgency, complexity and value have already collided. In a focused working session, we surface the opportunity, constraints and a practical route to production."
+              }
+            ],
+            "order": 2
+          },
+          {
+            "type": "cta",
+            "id": "platforms-closing-cta",
+            "label": "Book a value scan",
+            "href": "/value-scan",
+            "style": "primary",
+            "order": 3
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-closing-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The first move"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-closing-headline",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Bring one process. Leave with a route."
+              }
+            ],
+            "order": 5
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-ecosystem-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "One governed flow"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-ecosystem-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "CogniOS Ecosystem"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-ecosystem-wordmark",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "system"
+              }
+            ],
+            "order": 8
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-hero-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production. CogniOS connects enterprise knowledge, specialist agents and human accountability under one governed operating system."
+              }
+            ],
+            "order": 9
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-hero-cta",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Bring us one process"
+              }
+            ],
+            "order": 10
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-hero-explore-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Explore capability matrix"
+              }
+            ],
+            "order": 11
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-hero-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Platforms / Dubai · UAE"
+              }
+            ],
+            "order": 12
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-hero-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Ecosystem for execution."
+              }
+            ],
+            "order": 13
+          },
+          {
+            "type": "migration-media",
+            "id": "platforms-hero-visual",
+            "sourcePath": "/media/platforms/cognios-rotation-fallback.jpg",
+            "altText": "A layered CogniOS ecosystem connected by a luminous central spine.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 14
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-matrix-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Capability Matrix"
+              }
+            ],
+            "order": 15
+          },
+          {
+            "type": "narrative",
+            "id": "platforms-matrix-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Connected capabilities."
+              }
+            ],
+            "order": 16
+          }
+        ],
+        "cta": {
+          "label": "Book a value scan",
+          "href": "/value-scan",
+          "style": "primary"
+        },
+        "seo": {
+          "title": "CogniOS Platform Ecosystem | Cognirise",
+          "description": "Discover the platform architecture connecting enterprise knowledge, agents and accountability."
+        },
+        "legal": {},
+        "visualReferences": [],
+        "visibility": "public",
+        "order": 0,
+        "sources": [
+          {
+            "label": "Compiled Platforms page",
+            "url": "https://www.cognirise.com/platforms"
+          }
+        ],
+        "verificationDate": "2026-09-09",
+        "reviewDate": "2027-03-09",
+        "relatedIds": []
+      }
+    }
+  },
+  {
+    "slug": "insights",
+    "path": "/insights",
+    "title": "Insights",
+    "sourceKey": "compiled:/insights",
+    "snapshot": {
+      "slug": "insights",
+      "title": "Insights",
+      "summary": "A reading room for leaders building AI-native organisations: the operating questions behind the strategy, architecture and deployment.",
+      "markets": [
+        "uae"
+      ],
+      "mediaIds": [],
+      "content": {
+        "schemaVersion": 1,
+        "pagePath": "/insights",
+        "template": "landing",
+        "narrative": "Work, made visible.",
+        "sections": [
+          {
+            "type": "narrative",
+            "id": "hero",
+            "heading": "Work, made visible.",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "A reading room for leaders building AI-native organisations: the operating questions behind the strategy, architecture and deployment."
+              }
+            ],
+            "order": 0
+          },
+          {
+            "type": "narrative",
+            "id": "insights-collection-foundations-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Data, security, governance and architecture are not the preamble. They are the work."
+              }
+            ],
+            "order": 1
+          },
+          {
+            "type": "narrative",
+            "id": "insights-collection-foundations-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The conditions for AI that can hold up in production."
+              }
+            ],
+            "order": 2
+          },
+          {
+            "type": "narrative",
+            "id": "insights-collection-foundations-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Collection / foundations"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "type": "migration-media",
+            "id": "insights-collection-foundations-visual",
+            "sourcePath": "/images/cognirise/site-infrastructure.jpg",
+            "altText": "An architectural infrastructure landscape carrying violet and coral light routes.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 4
+          },
+          {
+            "type": "narrative",
+            "id": "insights-collection-workforce-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "What it takes to deploy agents into real operating environments—with people accountable at every decision point."
+              }
+            ],
+            "order": 5
+          },
+          {
+            "type": "narrative",
+            "id": "insights-collection-workforce-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "From agent experiments to a governed digital workforce."
+              }
+            ],
+            "order": 6
+          },
+          {
+            "type": "narrative",
+            "id": "insights-collection-workforce-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Collection / platforms"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "type": "migration-media",
+            "id": "insights-collection-workforce-visual",
+            "sourcePath": "/images/cognirise/site-cognios.jpg",
+            "altText": "Layered translucent platforms flowing with violet and coral intelligence.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 8
+          },
+          {
+            "type": "narrative",
+            "id": "insights-featured-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "AI transformation is not a portfolio of pilots. It is a decision to redesign priority work around people, data, controls and intelligent execution."
+              }
+            ],
+            "order": 9
+          },
+          {
+            "type": "cta",
+            "id": "insights-featured-cta",
+            "label": "Read the point of view",
+            "href": "/insights/ai-should-move-the-business",
+            "style": "primary",
+            "order": 10
+          },
+          {
+            "type": "narrative",
+            "id": "insights-featured-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "AI should move the business—not just assist it."
+              }
+            ],
+            "order": 11
+          },
+          {
+            "type": "migration-media",
+            "id": "insights-hero-visual",
+            "sourcePath": "/images/cognirise/site-insights.jpg",
+            "altText": "Violet and coral architectural planes arranged in a bright white space.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 12
+          },
+          {
+            "type": "narrative",
+            "id": "insights-industry-banking-copy",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Build intelligence into the work without compromising control."
+              }
+            ],
+            "order": 13
+          },
+          {
+            "type": "cta",
+            "id": "insights-industry-banking-route",
+            "label": "Banking & financial services",
+            "href": "/insights?topic=governance",
+            "style": "primary",
+            "order": 14
+          },
+          {
+            "type": "narrative",
+            "id": "insights-industry-energy-copy",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Apply intelligence where safety, scale and continuity meet."
+              }
+            ],
+            "order": 15
+          },
+          {
+            "type": "cta",
+            "id": "insights-industry-energy-route",
+            "label": "Energy & resources",
+            "href": "/insights?topic=operations",
+            "style": "primary",
+            "order": 16
+          },
+          {
+            "type": "narrative",
+            "id": "insights-industry-financial-services-copy",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Governed decisions where trust, evidence and control move together."
+              }
+            ],
+            "order": 17
+          },
+          {
+            "type": "cta",
+            "id": "insights-industry-financial-services-route",
+            "label": "Financial services",
+            "href": "/insights?topic=governance",
+            "style": "primary",
+            "order": 18
+          },
+          {
+            "type": "narrative",
+            "id": "insights-industry-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Different systems. Same demand for movement."
+              }
+            ],
+            "order": 19
+          },
+          {
+            "type": "narrative",
+            "id": "insights-industry-lead",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Sector routes for UAE organisations where progress must be both fast and defensible."
+              }
+            ],
+            "order": 20
+          },
+          {
+            "type": "narrative",
+            "id": "insights-industry-manufacturing-copy",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Connect the operating picture across the enterprise."
+              }
+            ],
+            "order": 21
+          },
+          {
+            "type": "cta",
+            "id": "insights-industry-manufacturing-route",
+            "label": "Manufacturing & conglomerates",
+            "href": "/insights?topic=operations",
+            "style": "primary",
+            "order": 22
+          },
+          {
+            "type": "narrative",
+            "id": "insights-industry-telecoms-copy",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Turn complex operations into a stronger service engine."
+              }
+            ],
+            "order": 23
+          },
+          {
+            "type": "cta",
+            "id": "insights-industry-telecoms-route",
+            "label": "Telecoms",
+            "href": "/insights?topic=operations",
+            "style": "primary",
+            "order": 24
+          },
+          {
+            "type": "narrative",
+            "id": "insights-industry-travel-copy",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Make service moments more responsive, not more remote."
+              }
+            ],
+            "order": 25
+          },
+          {
+            "type": "cta",
+            "id": "insights-industry-travel-route",
+            "label": "Travel & hospitality",
+            "href": "/insights?topic=operations",
+            "style": "primary",
+            "order": 26
+          },
+          {
+            "type": "narrative",
+            "id": "insights-newsletter-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Occasional field notes on AI-native transformation, delivery and the systems that make intelligent work possible."
+              }
+            ],
+            "order": 27
+          },
+          {
+            "type": "narrative",
+            "id": "insights-newsletter-email-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Work email address"
+              }
+            ],
+            "order": 28
+          },
+          {
+            "type": "narrative",
+            "id": "insights-newsletter-email-placeholder",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Your work email"
+              }
+            ],
+            "order": 29
+          },
+          {
+            "type": "narrative",
+            "id": "insights-newsletter-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "A useful signal, when it matters."
+              }
+            ],
+            "order": 30
+          },
+          {
+            "type": "cta",
+            "id": "insights-newsletter-subscribe-cta",
+            "label": "Subscribe",
+            "href": "/insights#subscribe",
+            "style": "primary",
+            "order": 31
+          },
+          {
+            "type": "migration-media",
+            "id": "insights-newsletter-visual",
+            "sourcePath": "/images/cognirise/site-insights.jpg",
+            "altText": "Violet and coral architectural planes framing the Cognirise newsletter.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 32
+          },
+          {
+            "type": "narrative",
+            "id": "insights-signal-focus-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Transformation, sovereign AI and a digital workforce."
+              }
+            ],
+            "order": 33
+          },
+          {
+            "type": "narrative",
+            "id": "insights-signal-focus-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "In focus"
+              }
+            ],
+            "order": 34
+          },
+          {
+            "type": "narrative",
+            "id": "insights-signal-leaders-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Executive clarity, technical depth and operational reality."
+              }
+            ],
+            "order": 35
+          },
+          {
+            "type": "narrative",
+            "id": "insights-signal-leaders-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "For leaders"
+              }
+            ],
+            "order": 36
+          },
+          {
+            "type": "narrative",
+            "id": "insights-signal-market-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Built for consequential work and regulated environments."
+              }
+            ],
+            "order": 37
+          },
+          {
+            "type": "narrative",
+            "id": "insights-signal-market-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "From the UAE"
+              }
+            ],
+            "order": 38
+          },
+          {
+            "type": "narrative",
+            "id": "insights-thematic-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Essays and practical signals for the people accountable for making the work change."
+              }
+            ],
+            "order": 39
+          },
+          {
+            "type": "narrative",
+            "id": "insights-thematic-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Read by the question in front of you."
+              }
+            ],
+            "order": 40
+          }
+        ],
+        "cta": {
+          "label": "Read the point of view",
+          "href": "/insights/ai-should-move-the-business",
+          "style": "primary"
+        },
+        "seo": {
+          "title": "AI Transformation Insights | Cognirise",
+          "description": "Field notes for leaders building AI-native organisations."
+        },
+        "legal": {},
+        "visualReferences": [],
+        "visibility": "public",
+        "order": 0,
+        "sources": [
+          {
+            "label": "Compiled Insights page",
+            "url": "https://www.cognirise.com/insights"
+          }
+        ],
+        "verificationDate": "2026-09-09",
+        "reviewDate": "2027-03-09",
+        "relatedIds": []
+      }
+    }
+  },
+  {
+    "slug": "work",
+    "path": "/work",
+    "title": "Work",
+    "sourceKey": "compiled:/work",
+    "snapshot": {
+      "slug": "work",
+      "title": "Work",
+      "summary": "Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production—and documents the decisions, controls and outcomes along the way.",
+      "markets": [
+        "uae"
+      ],
+      "mediaIds": [],
+      "content": {
+        "schemaVersion": 1,
+        "pagePath": "/work",
+        "template": "landing",
+        "narrative": "Proof lives in the work.",
+        "sections": [
+          {
+            "type": "narrative",
+            "id": "hero",
+            "heading": "Proof lives in the work.",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production—and documents the decisions, controls and outcomes along the way."
+              }
+            ],
+            "order": 0
+          },
+          {
+            "type": "narrative",
+            "id": "work-closing-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Start with work where urgency, complexity and value have already collided. Together we can surface the mandate, constraints and practical route to production."
+              }
+            ],
+            "order": 1
+          },
+          {
+            "type": "cta",
+            "id": "work-closing-cta",
+            "label": "Book a value scan",
+            "href": "/value-scan",
+            "style": "primary",
+            "order": 2
+          },
+          {
+            "type": "narrative",
+            "id": "work-closing-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Bring one process. Make the proof useful."
+              }
+            ],
+            "order": 3
+          },
+          {
+            "type": "narrative",
+            "id": "work-closing-kicker",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The first move"
+              }
+            ],
+            "order": 4
+          },
+          {
+            "type": "narrative",
+            "id": "work-evidence-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Every engagement begins with the work under pressure: the decision, process, data and control environment that must move together."
+              }
+            ],
+            "order": 5
+          },
+          {
+            "type": "narrative",
+            "id": "work-evidence-disclosure",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Where client details cannot be public, we describe the operating pattern clearly and label it as anonymized. We do not invent names, metrics or results."
+              }
+            ],
+            "order": 6
+          },
+          {
+            "type": "narrative",
+            "id": "work-evidence-kicker",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Evidence, not theatre"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "type": "narrative",
+            "id": "work-hero-art-word",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "proof"
+              }
+            ],
+            "order": 8
+          },
+          {
+            "type": "narrative",
+            "id": "work-hero-caption-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "From mandate to governed production"
+              }
+            ],
+            "order": 9
+          },
+          {
+            "type": "narrative",
+            "id": "work-hero-caption-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "01 / work in motion"
+              }
+            ],
+            "order": 10
+          },
+          {
+            "type": "narrative",
+            "id": "work-hero-kicker",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Dubai · UAE / Work & proof"
+              }
+            ],
+            "order": 11
+          },
+          {
+            "type": "cta",
+            "id": "work-hero-process-cta",
+            "label": "Bring one process",
+            "href": "/value-scan",
+            "style": "primary",
+            "order": 12
+          },
+          {
+            "type": "cta",
+            "id": "work-hero-proof-cta",
+            "label": "See the proof model",
+            "href": "/work#proof",
+            "style": "primary",
+            "order": 13
+          },
+          {
+            "type": "migration-media",
+            "id": "work-hero-visual",
+            "sourcePath": "/images/cognirise/site-work-proof.jpg",
+            "altText": "A vivid violet-to-coral route moving through a white architectural model.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 14
+          },
+          {
+            "type": "narrative",
+            "id": "work-ledger-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "A useful proof story makes its context, choices and operating controls visible—so leaders can judge what it took to make progress stick."
+              }
+            ],
+            "order": 15
+          },
+          {
+            "type": "narrative",
+            "id": "work-ledger-build-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Forward-deployed operators and engineers turn the route into a working system with the people who will run it."
+              }
+            ],
+            "order": 16
+          },
+          {
+            "type": "narrative",
+            "id": "work-ledger-build-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Build"
+              }
+            ],
+            "order": 17
+          },
+          {
+            "type": "narrative",
+            "id": "work-ledger-constraints-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The data, architecture, security, sovereignty and operating realities that define the possible."
+              }
+            ],
+            "order": 18
+          },
+          {
+            "type": "narrative",
+            "id": "work-ledger-constraints-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Constraints"
+              }
+            ],
+            "order": 19
+          },
+          {
+            "type": "narrative",
+            "id": "work-ledger-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The delivery record, not the highlight reel."
+              }
+            ],
+            "order": 20
+          },
+          {
+            "type": "narrative",
+            "id": "work-ledger-kicker",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "How work is evidenced"
+              }
+            ],
+            "order": 21
+          },
+          {
+            "type": "narrative",
+            "id": "work-ledger-mandate-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The priority work, the sponsor question and what a useful change needs to achieve."
+              }
+            ],
+            "order": 22
+          },
+          {
+            "type": "narrative",
+            "id": "work-ledger-mandate-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Mandate"
+              }
+            ],
+            "order": 23
+          },
+          {
+            "type": "narrative",
+            "id": "work-ledger-production-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Controls, ownership and accountability are embedded where the work happens—not added at the end."
+              }
+            ],
+            "order": 24
+          },
+          {
+            "type": "narrative",
+            "id": "work-ledger-production-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Governed production"
+              }
+            ],
+            "order": 25
+          },
+          {
+            "type": "narrative",
+            "id": "work-outcomes-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We look for measurable movement in the forces that matter to an enterprise: cost, capacity, speed and risk. The right evidence depends on the mandate—not a predetermined dashboard."
+              }
+            ],
+            "order": 26
+          },
+          {
+            "type": "narrative",
+            "id": "work-outcomes-capacity",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Capacity"
+              }
+            ],
+            "order": 27
+          },
+          {
+            "type": "narrative",
+            "id": "work-outcomes-cost",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Cost"
+              }
+            ],
+            "order": 28
+          },
+          {
+            "type": "narrative",
+            "id": "work-outcomes-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Outcomes with operating consequences."
+              }
+            ],
+            "order": 29
+          },
+          {
+            "type": "narrative",
+            "id": "work-outcomes-kicker",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Four ways work moves"
+              }
+            ],
+            "order": 30
+          },
+          {
+            "type": "narrative",
+            "id": "work-outcomes-risk",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Risk"
+              }
+            ],
+            "order": 31
+          },
+          {
+            "type": "narrative",
+            "id": "work-outcomes-speed",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Speed"
+              }
+            ],
+            "order": 32
+          },
+          {
+            "type": "migration-media",
+            "id": "work-outcomes-visual",
+            "sourcePath": "/images/cognirise/cognirise-pulse-outcomes.jpg",
+            "altText": "A coral route passing through a violet arch and a navy structure.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 33
+          },
+          {
+            "type": "narrative",
+            "id": "work-pattern-caption",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Anonymized engagement pattern"
+              }
+            ],
+            "order": 34
+          },
+          {
+            "type": "narrative",
+            "id": "work-pattern-disclaimer",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "These are anonymized engagement patterns—not named case studies or claimed performance figures."
+              }
+            ],
+            "order": 35
+          },
+          {
+            "type": "narrative",
+            "id": "work-pattern-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Some work must remain private. The method does not."
+              }
+            ],
+            "order": 36
+          },
+          {
+            "type": "narrative",
+            "id": "work-pattern-kicker",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Patterns, clearly labeled"
+              }
+            ],
+            "order": 37
+          },
+          {
+            "type": "narrative",
+            "id": "work-pattern-panel-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Where work gets stuck. What can change. What must stay controlled."
+              }
+            ],
+            "order": 38
+          },
+          {
+            "type": "narrative",
+            "id": "work-pattern-panel-kicker",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "What is documented"
+              }
+            ],
+            "order": 39
+          },
+          {
+            "type": "migration-media",
+            "id": "work-pattern-visual",
+            "sourcePath": "/images/cognirise/site-work-proof.jpg",
+            "altText": "An architectural route joining different operating environments.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 40
+          },
+          {
+            "type": "narrative",
+            "id": "work-principles-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Change is only useful when it can be shown."
+              }
+            ],
+            "order": 41
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-aria-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Proof principles"
+              }
+            ],
+            "order": 42
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-change-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "What changes"
+              }
+            ],
+            "order": 43
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-change-value",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Working systems, not slides"
+              }
+            ],
+            "order": 44
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-durability-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "How it lasts"
+              }
+            ],
+            "order": 45
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-durability-value",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Governance in the flow"
+              }
+            ],
+            "order": 46
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-route-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Security, sovereignty, integration, accountability and adoption are not a postscript. They shape the route from the first working session through to production."
+              }
+            ],
+            "order": 47
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-route-caption",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "02 / documented delivery"
+              }
+            ],
+            "order": 48
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-route-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Constraints are part of the brief."
+              }
+            ],
+            "order": 49
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-route-kicker",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The proof route"
+              }
+            ],
+            "order": 50
+          },
+          {
+            "type": "migration-media",
+            "id": "work-proof-route-visual",
+            "sourcePath": "/images/cognirise/pulse-breakthrough.jpg",
+            "altText": "A violet and coral current cutting through an architectural maze.",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 51
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-starting-point-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Starting point"
+              }
+            ],
+            "order": 52
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-starting-point-value",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "One consequential process"
+              }
+            ],
+            "order": 53
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-surface-label",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "What we surface"
+              }
+            ],
+            "order": 54
+          },
+          {
+            "type": "narrative",
+            "id": "work-proof-surface-value",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Constraints before the build"
+              }
+            ],
+            "order": 55
+          }
+        ],
+        "cta": {
+          "label": "Book a value scan",
+          "href": "/value-scan",
+          "style": "primary"
+        },
+        "seo": {
+          "title": "How Cognirise Delivers AI Transformation",
+          "description": "See how Cognirise frames, builds and governs consequential AI transformation work."
+        },
+        "legal": {},
+        "visualReferences": [],
+        "visibility": "public",
+        "order": 0,
+        "sources": [
+          {
+            "label": "Compiled Work page",
+            "url": "https://www.cognirise.com/work"
+          }
+        ],
+        "verificationDate": "2026-09-09",
+        "reviewDate": "2027-03-09",
+        "relatedIds": []
+      }
+    }
+  }
+]

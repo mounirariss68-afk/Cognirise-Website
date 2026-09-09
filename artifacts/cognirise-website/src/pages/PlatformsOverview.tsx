@@ -3,11 +3,13 @@ import { ArrowDown, ArrowRight, Plus } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { scrollToSection } from "@/lib/motion";
-import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { contentRecord, useCmsCollection } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { ALLIANCE_PLATFORM_LIST } from "@/lib/alliancePlatforms";
 import { SpatialDisclosure, SpatialDisclosureItem, SpatialDisclosureTrigger, SpatialDisclosurePanel } from "@/components/ui/spatial-disclosure";
 import { PlatformsHeroMedia } from "@/components/platforms/platforms-hero-media";
+import { useGovernedLanding } from "@/components/GovernedLandingRoute";
+import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } from "@/lib/cms";
 
 const platformFallback = [
   { name: "CogniOS", description: "The core operating system for governed enterprise intelligence.", link: "/platforms/cognios", category: "Foundation & Orchestration" },
@@ -18,6 +20,10 @@ const platformFallback = [
 ];
 
 export default function PlatformsOverview() {
+  const governedLanding = useGovernedLanding();
+  const governedHero = governedLanding ? landingNarrative(governedLanding, "hero") : null;
+  const heroVisual = landingMedia(governedLanding, "platforms-hero-visual", { src: "/media/platforms/cognios-rotation-fallback.jpg", alt: "A layered CogniOS ecosystem connected by a luminous central spine." });
+  const closingCta = landingCta(governedLanding, "platforms-closing-cta", { label: "Book a value scan", href: "/value-scan" });
   const { market } = useMarketStore();
   const platformsQuery = useCmsCollection("platform", platformFallback, (item) => {
     const content = contentRecord(item, "platform");
@@ -28,11 +34,16 @@ export default function PlatformsOverview() {
       category: content.category,
     };
   });
-  const page = useCmsEntry("platform", "platforms");
-  useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
+  const governedSeo = governedLanding ? landingSeo(governedLanding) : undefined;
+  useDynamicMetadata(governedSeo ? metadataFromSeo({
+    title: governedSeo.title ?? "CogniOS Platform Ecosystem | Cognirise",
+    description: governedSeo.description ?? "Discover the platform architecture connecting enterprise knowledge, agents and accountability.",
+    canonicalUrl: governedSeo.canonicalUrl,
+    noIndex: governedSeo.noIndex,
+  }, {
     title: "CogniOS Platform Ecosystem | Cognirise",
     description: "Discover the platform architecture connecting enterprise knowledge, agents and accountability.",
-  }));
+  }) : undefined);
   
   const marketLocation = getMarketLocationLabel(market);
 
@@ -43,43 +54,43 @@ export default function PlatformsOverview() {
   })).filter((section) => section.products.length);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" data-governed-landing={governedLanding?.pagePath}>
       <section className="px-6 md:px-12 pt-8 md:pt-12 max-w-[1440px] mx-auto w-full">
         <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
           <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-          Platforms / {marketLocation}
+          {landingText(governedLanding, "platforms-hero-eyebrow", `Platforms / ${marketLocation}`)}
         </div>
         
         <div className="grid grid-cols-1 items-end gap-12 pb-12 lg:grid-cols-[0.86fr_1.14fr] lg:gap-16">
           <div className="pb-4 relative z-10">
             <h1 className="text-5xl md:text-6xl lg:text-[93px] leading-[0.94] font-semibold mb-8 max-w-[660px]">
-              Ecosystem for <em className="not-italic text-[hsl(var(--brand-pink))]">execution.</em>
+              {landingText(governedLanding, "platforms-hero-heading", governedHero?.heading ?? "Ecosystem for execution.")}
             </h1>
             <p className="text-base md:text-lg text-muted-foreground max-w-[460px] mb-10 leading-relaxed">
-              Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production. CogniOS connects enterprise knowledge, specialist agents and human accountability under one governed operating system.
+              {landingText(governedLanding, "platforms-hero-body", governedHero?.text ?? "Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production. CogniOS connects enterprise knowledge, specialist agents and human accountability under one governed operating system.")}
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <BrandButton href="/value-scan">Bring us one process</BrandButton>
+              <BrandButton href="/value-scan">{landingText(governedLanding, "platforms-hero-cta", "Bring us one process")}</BrandButton>
               <button 
                 onClick={() => scrollToSection("matrix")}
                 className="group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]"
               >
-                Explore capability matrix <ArrowDown className="h-4 w-4" />
+                {landingText(governedLanding, "platforms-hero-explore-label", "Explore capability matrix")} <ArrowDown className="h-4 w-4" />
               </button>
             </div>
           </div>
           
           <div className="platforms-hero-cut relative h-[400px] lg:h-[640px] bg-[hsl(var(--brand-deep))]">
-            <PlatformsHeroMedia />
+            <PlatformsHeroMedia fallbackSrc={heroVisual.src} fallbackAlt={heroVisual.alt} />
             <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))] via-transparent to-transparent opacity-70" />
             
             <div className="absolute right-0 top-12 z-10 text-[100px] lg:text-[145px] font-display font-semibold leading-none text-white opacity-20 mix-blend-overlay tracking-tight pointer-events-none">
-              system
+              {landingText(governedLanding, "platforms-ecosystem-wordmark", "system")}
             </div>
             
             <div className="absolute bottom-[12%] left-[13%] z-20 text-[10px] uppercase tracking-widest text-white sm:bottom-[11%] sm:left-[12%]">
-              <span className="mb-2 block opacity-75">CogniOS Ecosystem</span>
-              One governed flow
+              <span className="mb-2 block opacity-75">{landingText(governedLanding, "platforms-ecosystem-label", "CogniOS Ecosystem")}</span>
+              {landingText(governedLanding, "platforms-ecosystem-body", "One governed flow")}
             </div>
           </div>
         </div>
@@ -89,10 +100,10 @@ export default function PlatformsOverview() {
         <div className="mb-16">
           <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-6">
             <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-            Capability Matrix
+            {landingText(governedLanding, "platforms-matrix-eyebrow", "Capability Matrix")}
           </div>
           <h2 className="text-4xl md:text-5xl lg:text-[68px] leading-[0.97] font-semibold max-w-[700px]">
-            Connected capabilities.
+             {landingText(governedLanding, "platforms-matrix-heading", "Connected capabilities.")}
           </h2>
         </div>
 
@@ -125,7 +136,7 @@ export default function PlatformsOverview() {
           {/* Alliance Platforms Section */}
           <SpatialDisclosureItem id="alliances" className="border-t border-foreground">
             <SpatialDisclosureTrigger id="alliances" className="w-full flex items-center justify-between text-left group pt-8 pb-8">
-              <h3 className="text-xl font-bold uppercase tracking-widest text-muted-foreground group-hover:text-[hsl(var(--brand-pink))] transition-colors text-[11px] m-0">Platform Alliances</h3>
+              <h3 className="text-xl font-bold uppercase tracking-widest text-muted-foreground group-hover:text-[hsl(var(--brand-pink))] transition-colors text-[11px] m-0">{landingText(governedLanding, "platforms-alliance-heading", "Platform Alliances")}</h3>
               <Plus className="h-6 w-6 text-foreground group-hover:text-[hsl(var(--brand-pink))] transition-transform duration-300 group-data-[state=active]:rotate-45 group-data-[state=active]:text-[hsl(var(--brand-pink))]" />
             </SpatialDisclosureTrigger>
             <SpatialDisclosurePanel id="alliances" className="data-[state=inactive]:hidden pb-12">
@@ -155,16 +166,15 @@ export default function PlatformsOverview() {
         <div className="max-w-[1440px] mx-auto relative z-10">
           <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/60 mb-6">
             <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-            The first move
+            {landingText(governedLanding, "platforms-closing-eyebrow", "The first move")}
           </div>
           <h2 className="text-5xl md:text-7xl lg:text-[110px] leading-[0.88] font-semibold tracking-tight mb-8">
-            Bring one process.<br />
-            <em className="not-italic text-[#ff8470]">Leave with a route.</em>
+            {landingText(governedLanding, "platforms-closing-headline", "Bring one process. Leave with a route.")}
           </h2>
           <p className="text-lg text-white/80 max-w-[515px] mb-12">
-            Start with the work where urgency, complexity and value have already collided. In a focused working session, we surface the opportunity, constraints and a practical route to production.
+            {landingText(governedLanding, "platforms-closing-body", "Start with the work where urgency, complexity and value have already collided. In a focused working session, we surface the opportunity, constraints and a practical route to production.")}
           </p>
-          <BrandButton href="/value-scan" variant="submit">Book a value scan</BrandButton>
+          <BrandButton href={closingCta.href} variant="submit">{closingCta.label}</BrandButton>
         </div>
       </section>
     </div>

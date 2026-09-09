@@ -258,6 +258,8 @@ function HeroAssignments() {
               revisionNumber: document.revisionNumber,
               content,
               mediaIds,
+              market: "uae",
+              locale: "en-US",
             },
           })
         : await createDocument.mutateAsync({
@@ -270,7 +272,10 @@ function HeroAssignments() {
               markets: ["uae"],
             },
           });
-      await submitDocument.mutateAsync({ documentId: updated.id, data: {} });
+      if (!updated.currentRevisionId) {
+        throw new Error("The hero draft did not return a revision to submit.");
+      }
+      await submitDocument.mutateAsync({ documentId: updated.id, data: { revisionId: updated.currentRevisionId } });
       await queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("documents") });
       toast({
         title: `${slot === "homepage" ? "Homepage" : "Industries"} hero submitted`,

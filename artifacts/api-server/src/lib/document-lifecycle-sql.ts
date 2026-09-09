@@ -8,14 +8,11 @@ export const DOCUMENT_SELECT_SQL = `
          WHERE deletion_edition.document_id=d.id
            AND deletion_edition.publication_state IN ('published','scheduled')
       )
-      AND (
-        d.kind<>'office'
-        OR NOT EXISTS (
-          SELECT 1 FROM cms_audit_events publication_event
-           WHERE publication_event.target_type='document'
-             AND publication_event.target_id=d.id::text
-             AND publication_event.action='document.published'
-        )
+      AND NOT EXISTS (
+        SELECT 1 FROM cms_audit_events publication_event
+         WHERE publication_event.target_type='document'
+           AND publication_event.target_id=d.id::text
+           AND publication_event.action='document.published'
       )
     ) can_permanently_delete,
     x.edition_id,x.revision_id,x.revision_number,x.payload,x.workflow_state,
@@ -40,25 +37,30 @@ export const DELETE_DOCUMENT_SQL = `
         WHERE e.document_id=d.id
           AND e.publication_state IN ('published','scheduled')
      )
-     AND (
-       d.kind<>'office'
-       OR NOT EXISTS(
-         SELECT 1 FROM cms_audit_events publication_event
-          WHERE publication_event.target_type='document'
-            AND publication_event.target_id=d.id::text
-            AND publication_event.action='document.published'
-       )
+      AND NOT EXISTS(
+        SELECT 1 FROM cms_audit_events publication_event
+         WHERE publication_event.target_type='document'
+           AND publication_event.target_id=d.id::text
+           AND publication_event.action='document.published'
      )
   RETURNING id`;
 
 export const PUBLIC_KIND_CONFIGURATION_SQL = `
-  SELECT EXISTS (
-    SELECT 1
+  WITH publication_history AS (
+    SELECT published_revision.payload->'content'->>'pagePath' page_path
       FROM cms_audit_events publication_event
       JOIN cms_documents d
         ON d.id::text=publication_event.target_id
+      LEFT JOIN cms_revisions published_revision
+        ON published_revision.id::text=publication_event.metadata->>'revisionId'
      WHERE d.kind=$1
        AND publication_event.target_type='document'
        AND publication_event.action='document.published'
        AND COALESCE(publication_event.metadata->>'scheduled','false')='false'
-  ) AS is_configured`;
+  )
+  SELECT EXISTS (SELECT 1 FROM publication_history) AS is_configured,
+    COALESCE(
+      array_agg(DISTINCT page_path) FILTER (WHERE page_path IS NOT NULL),
+      ARRAY[]::text[]
+    ) AS configured_page_paths
+    FROM publication_history`;

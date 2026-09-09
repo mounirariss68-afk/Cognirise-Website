@@ -49,24 +49,10 @@ test("published offices with later drafts archive, restore, and never use perman
       deleteGuardChecked = statement.includes("publication_event.action='document.published'");
       return { rowCount: 0, rows: [] };
     }
-    if (statement.includes("SET status='archived'")) {
-      rootStatus = "archived";
-      archiveCount += 1;
-      return { rowCount: 1, rows: [{ id: "office-id" }] };
-    }
     if (statement.includes("SET publication_state='archived'")) {
       publicationState = "archived";
-      return { rowCount: 1, rows: [] };
-    }
-    if (statement.includes("SET status='active',archived_at=NULL")) {
-      rootStatus = "active";
-      restoreCount += 1;
+      archiveCount += 1;
       return { rowCount: 1, rows: [{ id: "office-id" }] };
-    }
-    if (statement.includes("SET publication_state='draft'")) {
-      publicationState = "draft";
-      publishedRevisionId = null;
-      return { rowCount: 1, rows: [] };
     }
     if (statement.includes("INSERT INTO cms_audit_events")) {
       return { rowCount: 1, rows: [] };
@@ -133,6 +119,38 @@ test("published offices with later drafts archive, restore, and never use perman
     }
     return { rowCount: 0, rows: [] };
   });
+  t.mock.method(pool, "connect", async () => ({
+    async query(sql: unknown) {
+      const statement = String(sql);
+      if (["BEGIN", "COMMIT", "ROLLBACK"].includes(statement)) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT status FROM cms_documents")) {
+        return { rowCount: 1, rows: [{ status: rootStatus }] };
+      }
+      if (statement.includes("SELECT e.id,e.published_revision_id,d.kind")) {
+        return {
+          rowCount: 1,
+          rows: [{
+            id: "edition-id",
+            published_revision_id: publishedRevisionId,
+            kind: "office",
+            revision_id: "draft-revision-id",
+            revision_number: 2,
+            workflow_state: "draft",
+            payload: {},
+          }],
+        };
+      }
+      if (statement.includes("SET publication_state='draft'")) {
+        publicationState = "draft";
+        restoreCount += 1;
+        return { rowCount: 1, rows: [{ id: "edition-id" }] };
+      }
+      return { rowCount: 0, rows: [] };
+    },
+    release() {},
+  }) as never);
 
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
@@ -166,7 +184,7 @@ test("published offices with later drafts archive, restore, and never use perman
   const archived = await fetch(`${origin}/api/documents/office-id/archive`, {
     method: "POST",
     headers,
-    body: "{}",
+    body: JSON.stringify({ market: "uae", locale: "en" }),
   });
   assert.equal(archived.status, 200);
   assert.equal((await archived.json() as { status: string }).status, "archived");
@@ -175,7 +193,7 @@ test("published offices with later drafts archive, restore, and never use perman
   const restored = await fetch(`${origin}/api/documents/office-id/restore`, {
     method: "POST",
     headers,
-    body: "{}",
+    body: JSON.stringify({ market: "uae", locale: "en" }),
   });
   assert.equal(restored.status, 200);
   const restoredDocument = await restored.json() as {
@@ -185,7 +203,7 @@ test("published offices with later drafts archive, restore, and never use perman
   };
   assert.equal(restoredDocument.status, "draft");
   assert.equal(restoredDocument.canPermanentlyDelete, false);
-  assert.equal(restoredDocument.publishedRevisionId, null);
+  assert.equal(restoredDocument.publishedRevisionId, "published-revision-id");
   assert.equal(restoreCount, 1);
 
   const publicOffices = await fetch(

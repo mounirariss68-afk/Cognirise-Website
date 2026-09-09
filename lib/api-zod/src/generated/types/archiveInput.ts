@@ -7,6 +7,8 @@
  */
 
 export interface ArchiveInput {
+  market: string;
+  locale: string;
   /** @maxLength 1000 */
   reason?: string;
 }

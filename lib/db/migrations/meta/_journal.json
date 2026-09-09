@@ -113,6 +113,55 @@
       "when": 1788959300000,
       "tag": "0015_cms_media_original_filename",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1788959300001,
+      "tag": "0016_cms_user_access_tokens",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1788959300002,
+      "tag": "0017_cms_editorial_workflow",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1788959300003,
+      "tag": "0018_cms_navigation_editions",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788959300004,
+      "tag": "0019_cms_landing_page_contract",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1788959300005,
+      "tag": "0020_cms_navigation_published_policy",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1788959300006,
+      "tag": "0021_cms_preview_navigation_snapshot",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1788959300007,
+      "tag": "0022_cms_legacy_root_archive_normalization",
+      "breakpoints": true
     }
   ]
 }

@@ -1,13 +1,14 @@
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { BlueprintJourney } from "@/components/BlueprintJourney";
 import { HeroFilm } from "@/components/HeroFilm";
 import { ServiceLineTiles } from "@/components/ServiceLineTiles";
+import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import { BrandButton } from "@/components/ui/brand-button";
 import { PulseImage } from "@/components/ui/pulse-image";
-import { cmsEntryRenderPolicy, contentRecord, useCmsEntry } from "@/lib/cms";
+import { cmsEntryRenderPolicy, contentRecord, governedLandingDelivery, landingCta, landingMedia, landingNarrative, landingSections, landingText, landingVisualReferences, resolveCmsMedia, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { IndustryPicker } from "@/components/IndustryPicker";
 
 const Kicker = ({ children, className = "text-[#102957]" }: { children: React.ReactNode, className?: string }) => (
@@ -24,15 +25,43 @@ const SectionHeading = ({ children, className = "" }: { children: React.ReactNod
 );
 
 export default function Home() {
+  const routeLanding = useGovernedLanding();
   const { market } = useMarketStore();
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const frameworkQuery = useCmsEntry("framework", "agent-authority-model");
+  const landingQuery = useCmsCollection("landing-page", [], (item) => contentRecord(item, "landing-page"));
+  const homepage = landingQuery.data.find((page) => page.pagePath === "/" && page.template === "landing");
+  const homepageDelivery = governedLandingDelivery(
+    landingQuery.delivery,
+    landingQuery.configuredPagePaths,
+    "/",
+    Boolean(homepage),
+  );
+  const governedLanding = routeLanding ?? homepage;
+  const heroNarrative = homepage ? landingNarrative(homepage, "hero") : null;
+  const heroCta = homepage?.cta ?? homepage?.sections
+    .slice()
+    .sort((left, right) => left.order - right.order)
+    .find((section) => section.type === "cta");
+  const governedSections = homepage ? landingSections(homepage) : [];
+  const governedVisuals = homepage ? landingVisualReferences(homepage) : [];
+  const governanceVisual = landingMedia(governedLanding, "home-governance-visual", { src: assetUrl("/images/cognirise/cognirise-pulse-governance.jpg"), alt: "Visual representation of operational boundaries." });
+  const peopleVisual = landingMedia(governedLanding, "home-people-visual", { src: assetUrl("/images/cognirise/cognirise-pulse-people.jpg"), alt: "Visual representation of people and agents in a shared architecture." });
+  const platformVisual = landingMedia(governedLanding, "home-platform-visual", { src: assetUrl("/images/cognirise/site-cognios.jpg"), alt: "Visual representation of a durable system." });
+  const convergenceVisual = landingMedia(governedLanding, "home-convergence-visual", { src: assetUrl("/images/cognirise/pulse-convergence.jpg"), alt: "Depiction of convergence" });
+  const frameworkIdaoCta = landingCta(governedLanding, "home-framework-idao-cta", { label: "Explore IDAO", href: "/methodologies/idao" });
+  const frameworkAuthorityCta = landingCta(governedLanding, "home-framework-authority-cta", { label: "Agent Authority Model", href: "/methodologies/agent-authority-model" });
+  const convergenceCta = landingCta(governedLanding, "home-convergence-cta", { label: "Meet the team", href: "/about" });
+  const startCta = landingCta(governedLanding, "home-start-cta", { label: "Book a consultation", href: "/contact" });
+  const visualUrl = (mediaId: string, mediaVersionId: string) =>
+    homepage?.media?.find((media) => media.id === mediaId &&
+      (!mediaVersionId || media.versionId === mediaVersionId))?.url;
   const frameworkRenderPolicy = cmsEntryRenderPolicy(frameworkQuery.isAuthoritative, frameworkQuery.delivery);
   const frameworkRecord = frameworkQuery.data ? contentRecord(frameworkQuery.data, "framework") : null;
   const featuredFramework = frameworkRecord?.template === "agent-authority" ? frameworkRecord : null;
-  const frameworkHero = featuredFramework?.heroMediaId
-    ? featuredFramework.media?.find((media) => media.id === featuredFramework.heroMediaId)
+  const frameworkHero = featuredFramework
+    ? resolveCmsMedia(featuredFramework.media, featuredFramework.heroMedia, featuredFramework.heroMediaId)
     : undefined;
   
   const marketLocation = getMarketLocationLabel(market);
@@ -42,6 +71,16 @@ export default function Home() {
     offset: ["start start", "end start"],
   });
   const yHeroImage = useTransform(heroScrollProgress, [0, 1], [0, prefersReducedMotion ? 0 : 24]);
+
+  if (homepageDelivery === "loading") {
+    return <main className="min-h-[70vh] bg-[#fdfcfb] px-6 py-24 text-[#102957]" aria-busy="true">Loading published homepage…</main>;
+  }
+  if (homepageDelivery !== "cms" && homepageDelivery !== "compiled-fallback") {
+    return <main className="min-h-[70vh] bg-[#fdfcfb] px-6 py-24 text-[#102957]"><h1 className="font-display text-5xl">Homepage unavailable</h1><p className="mt-4">The published homepage could not be delivered.</p></main>;
+  }
+  if (homepageDelivery === "cms" && !homepage) {
+    return <main className="min-h-[70vh] bg-[#fdfcfb] px-6 py-24 text-[#102957]"><h1 className="font-display text-5xl">Homepage unavailable</h1><p className="mt-4">No published homepage edition is available for this market and locale.</p></main>;
+  }
 
   const mConfig = {
     initial: prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 },
@@ -54,10 +93,10 @@ export default function Home() {
   };
 
   const outcomes = [
-    ["01", "Architecture"],
-    ["02", "Engineering"],
-    ["03", "Assurance"],
-    ["04", "Risk"]
+    ["01", landingText(governedLanding, "home-clarity-outcome-architecture", "Architecture")],
+    ["02", landingText(governedLanding, "home-clarity-outcome-engineering", "Engineering")],
+    ["03", landingText(governedLanding, "home-clarity-outcome-assurance", "Assurance")],
+    ["04", landingText(governedLanding, "home-clarity-outcome-risk", "Risk")]
   ];
 
   return (
@@ -81,7 +120,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              Intelligence becomes <em className="not-italic text-[hsl(var(--brand-pink))]">momentum.</em>
+              {heroNarrative?.heading ?? <>Intelligence becomes <em className="not-italic text-[hsl(var(--brand-pink))]">momentum.</em></>}
             </motion.h1>
             
             <motion.p
@@ -90,7 +129,7 @@ export default function Home() {
               animate={{ opacity: 1 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.3, ease: "easeOut" }}
             >
-              <strong className="text-[#102957]">Cognirise is the AI-native advisory and engineering firm.</strong> Senior operators, forward-deployed engineers and governed agents move priority work from strategy into production.
+              {heroNarrative?.text ?? <><strong className="text-[#102957]">Cognirise is the AI-native advisory and engineering firm.</strong> Senior operators, forward-deployed engineers and governed agents move priority work from strategy into production.</>}
             </motion.p>
             
             <motion.div
@@ -98,7 +137,9 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
-              <BrandButton href="/#service-lines">Explore our practice</BrandButton>
+              {heroCta
+                ? <BrandButton href={heroCta.href}>{heroCta.label}</BrandButton>
+                : <BrandButton href="/#service-lines">Explore our practice</BrandButton>}
             </motion.div>
           </motion.div>
           
@@ -117,13 +158,58 @@ export default function Home() {
         </div>
       </section>
 
+      {homepage && governedSections.filter((section) => section.id !== "hero" && section.id !== "primary-action" && !section.id.startsWith("home-")).map((section) => {
+        if (section.type === "narrative") {
+          const copy = section.body.flatMap((block) =>
+            block.type === "paragraph" || block.type === "quote" || block.type === "heading"
+              ? [block.text] : block.items
+          );
+          return (
+            <section key={section.id} id={section.id} className="px-6 md:px-[4.8vw] py-16 border-t border-[#cbd3e1]" aria-label={section.heading ?? section.id}>
+              {section.heading && <SectionHeading>{section.heading}</SectionHeading>}
+              <div className="mt-5 max-w-3xl space-y-3 text-[17px] leading-[1.6] text-[#405777]">
+                {copy.map((paragraph, index) => <p key={`${section.id}-${index}`}>{paragraph}</p>)}
+              </div>
+            </section>
+          );
+        }
+        if (section.type === "media") {
+          return (
+            <section key={section.id} className="px-6 md:px-[4.8vw] py-10 grid gap-4 sm:grid-cols-2" aria-label={section.id}>
+              {section.references.map((reference) => {
+                const url = visualUrl(reference.mediaId, reference.mediaVersionId);
+                return url ? <figure key={`${reference.mediaId}-${reference.mediaVersionId}`}><PulseImage src={url} alt={reference.altText ?? ""} className="w-full aspect-[16/9] object-cover" /></figure> : null;
+              })}
+            </section>
+          );
+        }
+        if (section.type === "legal") {
+          return <section key={section.id} className="px-6 md:px-[4.8vw] py-8 text-xs leading-relaxed text-[#647491]" aria-label="Legal information"><p>{section.text}</p></section>;
+        }
+        if (section.type === "cta") {
+          return <section key={section.id} className="px-6 md:px-[4.8vw] py-8" aria-label={section.label}><BrandButton href={section.href}>{section.label}</BrandButton></section>;
+        }
+        return null;
+      })}
+      {homepage && governedVisuals.length > 0 && governedVisuals.every((reference) => visualUrl(reference.mediaId, reference.mediaVersionId)) && (
+        <meta name="cms-landing-visuals" content={String(governedVisuals.length)} />
+      )}
+      {homepage && homepage.visualReferences.length > 0 && (
+        <section className="px-6 md:px-[4.8vw] py-10 grid gap-4 sm:grid-cols-2" aria-label="Approved landing visuals">
+          {homepage.visualReferences.map((reference) => {
+            const url = visualUrl(reference.mediaId, reference.mediaVersionId);
+            return url ? <PulseImage key={`${reference.mediaId}-${reference.mediaVersionId}`} src={url} alt={reference.altText ?? ""} className="w-full aspect-[16/9] object-cover" /> : null;
+          })}
+        </section>
+      )}
+
       {/* PROOF LEDGER */}
       <section className="mx-6 md:mx-[4.8vw] border-y border-[#102957] grid grid-cols-2 lg:grid-cols-4" aria-label="Cognirise company qualities">
         {[
-          { label: "Model", value: "Advisory + Engineering" },
-          { label: "Focus", value: "Complex enterprise & government" },
-          { label: "Platform", value: "CogniOS (Four native engines)" },
-          { label: "Presence", value: "Middle East & Europe" }
+          { label: landingText(governedLanding, "home-proof-model-label", "Model"), value: landingText(governedLanding, "home-proof-model", "Advisory + Engineering") },
+          { label: landingText(governedLanding, "home-proof-focus-label", "Focus"), value: landingText(governedLanding, "home-proof-focus", "Complex enterprise & government") },
+          { label: landingText(governedLanding, "home-proof-platform-label", "Platform"), value: landingText(governedLanding, "home-proof-platform", "CogniOS (Four native engines)") },
+          { label: landingText(governedLanding, "home-proof-presence-label", "Presence"), value: landingText(governedLanding, "home-proof-presence", "Middle East & Europe") }
         ].map((item, i) => (
           <div key={item.label} className={`p-4 lg:p-[18px_20px] text-[12px] leading-[1.4] border-[#cbd3e1]
             ${i % 2 === 0 ? 'border-r' : ''} 
@@ -138,9 +224,9 @@ export default function Home() {
       {/* STATEMENT */}
       <section className="px-6 md:px-[4.8vw] py-[86px] lg:py-[150px] grid grid-cols-1 lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-[7vw]">
         <motion.div {...mConfig}>
-          <Kicker>The firm</Kicker>
+          <Kicker>{landingText(governedLanding, "home-firm-label", "The firm")}</Kicker>
           <SectionHeading>
-            We don't sell experimentation. <em className="not-italic text-[hsl(var(--brand-coral))]">We sell operational reality.</em>
+             {landingText(governedLanding, "home-firm-heading", "We don't sell experimentation. We sell operational reality.")}
           </SectionHeading>
         </motion.div>
         
@@ -151,8 +237,8 @@ export default function Home() {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.2 }}
         >
-          <p className="mb-0">Most AI programmes fail because they treat intelligence as software to be deployed rather than a capability to be governed. We bridge the gap between algorithmic potential and enterprise authority.</p>
-          <small className="block text-[12px] leading-[1.55] mt-6 text-[#647491]">We work with leaders who hold accountability for results, providing the advisory clarity to move and the engineering certainty to hold ground.</small>
+          <p className="mb-0">{landingText(governedLanding, "home-firm-body", "Most AI programmes fail because they treat intelligence as software to be deployed rather than a capability to be governed. We bridge the gap between algorithmic potential and enterprise authority.")}</p>
+          <small className="block text-[12px] leading-[1.55] mt-6 text-[#647491]">{landingText(governedLanding, "home-firm-supporting", "We work with leaders who hold accountability for results, providing the advisory clarity to move and the engineering certainty to hold ground.")}</small>
         </motion.div>
       </section>
 
@@ -174,16 +260,16 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Kicker className="text-white/80">How we do it</Kicker>
+            <Kicker className="text-white/80">{landingText(governedLanding, "home-framework-label", "How we do it")}</Kicker>
             <h2 className="font-display font-semibold text-[clamp(42px,5.3vw,80px)] tracking-[-0.075em] leading-[0.96] my-4 max-w-[600px]">
-              {featuredFramework?.title ?? "The Agent Authority Model."}
+              {featuredFramework?.title ?? landingText(governedLanding, "home-framework-title", "The Agent Authority Model.")}
             </h2>
             <p className="max-w-[450px] text-[15px] leading-[1.6] text-[#dce4f0] mb-10">
-              {featuredFramework?.teaser ?? "A deterministic way to set how much authority each agent handover may exercise on its own."}
+              {featuredFramework?.teaser ?? landingText(governedLanding, "home-framework-teaser", "A deterministic way to set how much authority each agent handover may exercise on its own.")}
             </p>
             <div className="flex flex-wrap gap-4">
-              <BrandButton href="/methodologies/idao" variant="inverse">Explore IDAO</BrandButton>
-              <BrandButton href="/methodologies/agent-authority-model" variant="inverse">Agent Authority Model</BrandButton>
+              <BrandButton href={frameworkIdaoCta.href} variant="inverse">{frameworkIdaoCta.label}</BrandButton>
+              <BrandButton href={frameworkAuthorityCta.href} variant="inverse">{frameworkAuthorityCta.label}</BrandButton>
             </div>
           </motion.div>
 
@@ -194,11 +280,11 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="text-xs uppercase tracking-widest text-white/50 mb-2">Framework Applications</div>
+            <div className="text-xs uppercase tracking-widest text-white/50 mb-2">{landingText(governedLanding, "home-framework-applications-label", "Framework Applications")}</div>
             {[
-              { title: "Levels of Autonomy", desc: "Define explicit boundaries for model operation." },
-              { title: "The Authority Matrix", desc: "Map capability against enterprise risk." },
-              { title: "Promotion Evidence", desc: "Deterministic requirements for agent escalation." }
+              { title: landingText(governedLanding, "home-framework-autonomy-title", "Levels of Autonomy"), desc: landingText(governedLanding, "home-framework-autonomy-body", "Define explicit boundaries for model operation.") },
+              { title: landingText(governedLanding, "home-framework-authority-title", "The Authority Matrix"), desc: landingText(governedLanding, "home-framework-authority-body", "Map capability against enterprise risk.") },
+              { title: landingText(governedLanding, "home-framework-promotion-title", "Promotion Evidence"), desc: landingText(governedLanding, "home-framework-promotion-body", "Deterministic requirements for agent escalation.") }
             ].map(item => (
               <div key={item.title} className="pb-4 border-b border-white/10 last:border-0 last:pb-0">
                 <strong className="block text-lg font-display text-[hsl(var(--brand-pink))] mb-1">{item.title}</strong>
@@ -214,9 +300,9 @@ export default function Home() {
       <section id="service-lines" className="px-6 md:px-[4.8vw] py-[82px] lg:py-[125px]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-end">
           <motion.div {...mConfig}>
-            <Kicker>How we work</Kicker>
+            <Kicker>{landingText(governedLanding, "home-service-label", "How we work")}</Kicker>
             <h2 className="font-display font-semibold text-[clamp(43px,5vw,72px)] leading-[0.97] tracking-[-0.08em] mt-5 max-w-[700px]">
-              We combine strategy, engineering and platform.
+               {landingText(governedLanding, "home-service-heading", "We combine strategy, engineering and platform.")}
             </h2>
           </motion.div>
           <motion.p 
@@ -226,7 +312,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.2 }}
           >
-            We don't hand over a presentation and wish you luck. We deploy senior teams who take accountability for the architecture, the code and the outcome.
+            {landingText(governedLanding, "home-service-body", "We don't hand over a presentation and wish you luck. We deploy senior teams who take accountability for the architecture, the code and the outcome.")}
           </motion.p>
         </div>
         
@@ -239,12 +325,12 @@ export default function Home() {
       {/* CLARITY */}
       <section className="mx-6 md:mx-[4.8vw] mb-[82px] lg:mb-[122px] border-t border-[#102957] pt-7 grid grid-cols-1 lg:grid-cols-[1.08fr_0.92fr] gap-10 lg:gap-[7vw]">
         <motion.div {...mConfig}>
-          <Kicker>Operating conviction</Kicker>
+          <Kicker>{landingText(governedLanding, "home-clarity-label", "Operating conviction")}</Kicker>
           <h2 className="font-display font-semibold text-[40px] lg:text-[clamp(37px,4.4vw,65px)] leading-[0.98] tracking-[-0.075em] mt-4 mb-6 max-w-[720px]">
-            We leave organisations <em className="not-italic text-[hsl(var(--brand-violet))]">more capable</em> than we found them.
+             {landingText(governedLanding, "home-clarity-heading", "We leave organisations more capable than we found them.")}
           </h2>
           <div className="text-[15px] lg:text-[16px] leading-[1.65] text-[#405777] max-w-[590px]">
-            We don't create dependencies. <strong className="text-[#102957]">Every engagement is designed to transfer capability to your team.</strong> Whether we're advising the board or committing code alongside your engineers, our goal is to build an environment you can operate and scale yourselves.
+            {landingText(governedLanding, "home-clarity-body", "We don't create dependencies. Every engagement is designed to transfer capability to your team. Whether we're advising the board or committing code alongside your engineers, our goal is to build an environment you can operate and scale yourselves.")}
           </div>
         </motion.div>
         
@@ -255,7 +341,7 @@ export default function Home() {
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.3 }}
         >
-          <div className="text-[14px] leading-[1.55] text-[#536887] mb-6">We embed our practices into your firm:</div>
+          <div className="text-[14px] leading-[1.55] text-[#536887] mb-6">{landingText(governedLanding, "home-clarity-outcomes-label", "We embed our practices into your firm:")}</div>
           <div className="grid grid-cols-2 lg:grid-cols-4 border-b border-[#cbd3e1]">
             {outcomes.map(([num, text], i) => (
               <motion.div 
@@ -281,9 +367,9 @@ export default function Home() {
       <section className="px-6 md:px-[4.8vw] pb-[82px] lg:pb-[122px]" aria-label="Cognirise outcomes in motion">
         <div className="py-6 lg:py-[25px] border-t border-[#102957] flex flex-col lg:flex-row items-start lg:items-end justify-between gap-5">
           <motion.div {...mConfig}>
-            <Kicker>The system in motion</Kicker>
+            <Kicker>{landingText(governedLanding, "home-image-ledger-label", "The system in motion")}</Kicker>
             <h2 className="font-display font-semibold text-[41px] lg:text-[clamp(39px,4.7vw,69px)] leading-[0.97] tracking-[-0.08em] mt-4 lg:mt-[18px] max-w-[660px]">
-              Three conditions for change that holds.
+               {landingText(governedLanding, "home-image-ledger-heading", "Three conditions for change that holds.")}
             </h2>
           </motion.div>
           <motion.p
@@ -293,7 +379,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.2 }}
           >
-            We build the path, the controls and the capacity to keep the work moving after the first release.
+            {landingText(governedLanding, "home-image-ledger-body", "We build the path, the controls and the capacity to keep the work moving after the first release.")}
           </motion.p>
         </div>
 
@@ -305,7 +391,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <PulseImage src={assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")} alt="Visual representation of operational boundaries." className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
+            <PulseImage src={governanceVisual.src} alt={governanceVisual.alt} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/75 to-transparent via-[#071936]/20" />
             <motion.figcaption
               className="absolute z-10 left-6 bottom-5 text-white"
@@ -314,8 +400,8 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.3 }}
             >
-              <span className="block text-[10px] uppercase tracking-[0.12em] opacity-75 mb-2">First condition</span>
-              <strong className="font-display font-semibold text-[clamp(25px,3.4vw,48px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">Boundaries you can see.</strong>
+              <span className="block text-[10px] uppercase tracking-[0.12em] opacity-75 mb-2">{landingText(governedLanding, "home-image-ledger-first-label", "First condition")}</span>
+               <strong className="font-display font-semibold text-[clamp(25px,3.4vw,48px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">{landingText(governedLanding, "home-image-ledger-first-caption", "Boundaries you can see.")}</strong>
             </motion.figcaption>
           </motion.figure>
           
@@ -326,7 +412,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
-            <PulseImage src={assetUrl("/images/cognirise/cognirise-pulse-people.jpg")} alt="Visual representation of people and agents in a shared architecture." className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
+            <PulseImage src={peopleVisual.src} alt={peopleVisual.alt} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/75 to-transparent via-[#071936]/20" />
             <motion.figcaption
               className="absolute z-10 left-6 bottom-5 text-white"
@@ -335,8 +421,8 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.4 }}
             >
-              <span className="block text-[10px] uppercase tracking-[0.12em] opacity-75 mb-2">Second condition</span>
-              <strong className="font-display font-semibold text-[clamp(19px,2.2vw,30px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">Work that flows.</strong>
+              <span className="block text-[10px] uppercase tracking-[0.12em] opacity-75 mb-2">{landingText(governedLanding, "home-image-ledger-second-label", "Second condition")}</span>
+               <strong className="font-display font-semibold text-[clamp(19px,2.2vw,30px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">{landingText(governedLanding, "home-image-ledger-second-caption", "Work that flows.")}</strong>
             </motion.figcaption>
           </motion.figure>
           
@@ -347,7 +433,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
-            <PulseImage src={assetUrl("/images/cognirise/site-cognios.jpg")} alt="Visual representation of a durable system." className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
+            <PulseImage src={platformVisual.src} alt={platformVisual.alt} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/75 to-transparent via-[#071936]/20" />
             <motion.figcaption
               className="absolute z-10 left-6 bottom-5 text-white"
@@ -356,8 +442,8 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.5 }}
             >
-              <span className="block text-[10px] uppercase tracking-[0.12em] opacity-75 mb-2">Third condition</span>
-              <strong className="font-display font-semibold text-[clamp(19px,2.2vw,30px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">A platform that remembers.</strong>
+              <span className="block text-[10px] uppercase tracking-[0.12em] opacity-75 mb-2">{landingText(governedLanding, "home-image-ledger-third-label", "Third condition")}</span>
+               <strong className="font-display font-semibold text-[clamp(19px,2.2vw,30px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">{landingText(governedLanding, "home-image-ledger-third-caption", "A platform that remembers.")}</strong>
             </motion.figcaption>
           </motion.figure>
         </div>
@@ -373,19 +459,19 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Kicker>Our capability</Kicker>
+            <Kicker>{landingText(governedLanding, "home-convergence-label", "Our capability")}</Kicker>
             <h2 className="font-display font-semibold text-[43px] lg:text-[clamp(43px,5vw,76px)] leading-[0.97] tracking-[-0.08em] my-5 lg:my-7">
-              We deploy teams who bridge the entire operating gap.
+              {landingText(governedLanding, "home-convergence-heading", "We deploy teams who bridge the entire operating gap.")}
             </h2>
             <p className="text-[16px] leading-[1.6] text-[#3e567b] max-w-[410px]">
-              You don't need a strategy firm that can't code, or an engineering shop that doesn't understand governance. You need a team that takes the work all the way through.
+              {landingText(governedLanding, "home-convergence-body", "You don't need a strategy firm that can't code, or an engineering shop that doesn't understand governance. You need a team that takes the work all the way through.")}
             </p>
             
             <div className="mt-10 border-t border-[#102957]">
               {[
-                { num: "01", text: "Strategy & operating model advisory" },
-                { num: "02", text: "Forward-deployed enterprise engineering" },
-                { num: "03", text: "Proprietary CogniOS operating system" }
+                { num: "01", text: landingText(governedLanding, "home-convergence-service-advisory", "Strategy & operating model advisory") },
+                { num: "02", text: landingText(governedLanding, "home-convergence-service-engineering", "Forward-deployed enterprise engineering") },
+                { num: "03", text: landingText(governedLanding, "home-convergence-service-platform", "Proprietary CogniOS operating system") }
               ].map(item => (
                 <div key={item.num} className="py-3 border-b border-[#cbd3e1] text-[13px] font-semibold">
                   <span className="inline-block text-[hsl(var(--brand-pink))] text-[10px] tracking-[0.1em] w-[54px]">{item.num}</span>
@@ -394,15 +480,15 @@ export default function Home() {
               ))}
             </div>
             <div className="mt-8">
-              <BrandButton href="/about">Meet the team</BrandButton>
+              <BrandButton href={convergenceCta.href}>{convergenceCta.label}</BrandButton>
             </div>
           </motion.div>
           
           <div className="h-[390px] lg:h-auto lg:mt-[-46px] relative overflow-hidden" style={{ clipPath: "polygon(0 8%, 100% 0, 100% 100%, 9% 92%)" }}>
-            <PulseImage src={assetUrl("/images/cognirise/pulse-convergence.jpg")} alt="Depiction of convergence" className="w-full h-full object-cover" />
+             <PulseImage src={convergenceVisual.src} alt={convergenceVisual.alt} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-[#071936]/10" />
             <div className="absolute right-6 bottom-6 text-white text-[10px] tracking-[0.11em] uppercase drop-shadow-md">
-              people + agents
+              {landingText(governedLanding, "home-convergence-image-caption", "people + agents")}
             </div>
           </div>
         </div>
@@ -419,15 +505,15 @@ export default function Home() {
         
         <div className="relative z-10 max-w-[970px]">
           <motion.div {...mConfig}>
-            <Kicker className="text-white/80">Start</Kicker>
+            <Kicker className="text-white/80">{landingText(governedLanding, "home-start-label", "Start")}</Kicker>
             <h2 className="font-display font-semibold text-[58px] lg:text-[clamp(52px,7.5vw,113px)] tracking-[-0.095em] leading-[0.88] my-6">
-              Ready for <em className="not-italic text-[#ff8470]">operational reality?</em>
+               {landingText(governedLanding, "home-start-heading", "Ready for operational reality?")}
             </h2>
             <p className="text-[17px] leading-[1.55] max-w-[480px] text-[#d6deed] mb-8">
-              Speak with a partner about deploying governed intelligence into your core workflows.
+              {landingText(governedLanding, "home-start-body", "Speak with a partner about deploying governed intelligence into your core workflows.")}
             </p>
             
-            <BrandButton href="/contact" variant="inverse">Book a consultation</BrandButton>
+            <BrandButton href={startCta.href} variant="inverse">{startCta.label}</BrandButton>
           </motion.div>
         </div>
       </section>

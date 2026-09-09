@@ -1,12 +1,14 @@
 import { Link, useSearch, useLocation } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { useSubscribeNewsletter } from "@workspace/api-client-react";
+import { useSubscribeNewsletter, type NewsletterSubscriptionInputMarket } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
-import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
-import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
+import { useGovernedLanding } from "@/components/GovernedLandingRoute";
+import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } from "@/lib/cms";
+import { contentRecord, useCmsCollection } from "@/lib/cms";
+import { useDynamicMetadata } from "@/lib/metadata";
 
 const articlesFallback = [
   { number: "01", title: "AI should move the business—not just assist it.", copy: "Redesigning priority work around people, data, controls and intelligent execution.", topics: ["strategy"], url: "/insights/ai-should-move-the-business" },
@@ -15,6 +17,15 @@ const articlesFallback = [
 ];
 
 export default function InsightsEditorial() {
+  const governedLanding = useGovernedLanding();
+  const governedHero = governedLanding ? landingNarrative(governedLanding, "hero") : null;
+  const heroVisual = landingMedia(governedLanding, "insights-hero-visual", { src: assetUrl("/images/cognirise/site-insights.jpg"), alt: "Violet and coral architectural planes arranged in a bright white space." });
+  const featuredCta = landingCta(governedLanding, "insights-featured-cta", { label: "Read the point of view", href: "/insights/ai-should-move-the-business" });
+  const foundationsVisual = landingMedia(governedLanding, "insights-collection-foundations-visual", { src: assetUrl("/images/cognirise/site-infrastructure.jpg"), alt: "An architectural infrastructure landscape carrying violet and coral light routes." });
+  const workforceVisual = landingMedia(governedLanding, "insights-collection-workforce-visual", { src: assetUrl("/images/cognirise/site-cognios.jpg"), alt: "Layered translucent platforms flowing with violet and coral intelligence." });
+  const newsletterCta = landingCta(governedLanding, "insights-newsletter-subscribe-cta", { label: "Subscribe", href: "/insights#subscribe" });
+  const newsletterVisual = landingMedia(governedLanding, "insights-newsletter-visual", { src: assetUrl("/images/cognirise/site-insights.jpg"), alt: "Violet and coral architectural planes framing the Cognirise newsletter." });
+  const governedSeo = governedLanding ? landingSeo(governedLanding) : null;
   const [email, setEmail] = useState("");
   const subscribeNewsletter = useSubscribeNewsletter();
   const { toast } = useToast();
@@ -31,11 +42,12 @@ export default function InsightsEditorial() {
       url: `/insights/${item.slug}`,
     };
   });
-  const page = useCmsEntry("publication", "insights");
-  useDynamicMetadata(page.data?.seo && metadataFromSeo(page.data.seo, {
-    title: "AI Transformation Insights | Cognirise",
-    description: "Field notes for leaders building AI-native organisations.",
-  }));
+  useDynamicMetadata({
+    title: governedSeo?.title || "AI Transformation Insights | Cognirise",
+    description: governedSeo?.description || "Field notes for leaders building AI-native organisations.",
+    canonicalUrl: governedSeo?.canonicalUrl,
+    noIndex: governedSeo?.noIndex,
+  });
   
   const searchParams = new URLSearchParams(searchString);
   const activeTopic = searchParams.get("topic") || "all";
@@ -49,7 +61,7 @@ export default function InsightsEditorial() {
     subscribeNewsletter.mutate({
       data: {
         email,
-        market: market,
+        market: market as NewsletterSubscriptionInputMarket,
         consent: true,
         sourcePage: window.location.pathname,
       }
@@ -79,6 +91,39 @@ export default function InsightsEditorial() {
     { id: "governance", label: "Governance" },
     { id: "operations", label: "Operating Models" },
     { id: "strategy", label: "Strategy" }
+  ];
+
+  const industryRoutes = [
+    {
+      number: "01",
+      cta: landingCta(governedLanding, "insights-industry-banking-route", { label: "Banking & financial services", href: "/insights?topic=governance" }),
+      copy: landingText(governedLanding, "insights-industry-banking-copy", "Build intelligence into the work without compromising control."),
+    },
+    {
+      number: "02",
+      cta: landingCta(governedLanding, "insights-industry-financial-services-route", { label: "Financial services", href: "/insights?topic=governance" }),
+      copy: landingText(governedLanding, "insights-industry-financial-services-copy", "Governed decisions where trust, evidence and control move together."),
+    },
+    {
+      number: "03",
+      cta: landingCta(governedLanding, "insights-industry-telecoms-route", { label: "Telecoms", href: "/insights?topic=operations" }),
+      copy: landingText(governedLanding, "insights-industry-telecoms-copy", "Turn complex operations into a stronger service engine."),
+    },
+    {
+      number: "04",
+      cta: landingCta(governedLanding, "insights-industry-travel-route", { label: "Travel & hospitality", href: "/insights?topic=operations" }),
+      copy: landingText(governedLanding, "insights-industry-travel-copy", "Make service moments more responsive, not more remote."),
+    },
+    {
+      number: "05",
+      cta: landingCta(governedLanding, "insights-industry-energy-route", { label: "Energy & resources", href: "/insights?topic=operations" }),
+      copy: landingText(governedLanding, "insights-industry-energy-copy", "Apply intelligence where safety, scale and continuity meet."),
+    },
+    {
+      number: "06",
+      cta: landingCta(governedLanding, "insights-industry-manufacturing-route", { label: "Manufacturing & conglomerates", href: "/insights?topic=operations" }),
+      copy: landingText(governedLanding, "insights-industry-manufacturing-copy", "Connect the operating picture across the enterprise."),
+    },
   ];
 
   const articles = articlesQuery.data;
@@ -230,21 +275,21 @@ export default function InsightsEditorial() {
         <div className="ie-hero-top">
           <div>
             <div className="ie-kicker">{marketLocation} / points of view</div>
-            <h1>Work, made <em>visible.</em></h1>
+            <h1 data-governed-landing={governedLanding?.pagePath}>{governedHero?.heading ?? <>Work, made <em>visible.</em></>}</h1>
           </div>
-          <p className="ie-intro">A reading room for leaders building AI-native organisations: the operating questions behind the strategy, architecture and deployment.</p>
+          <p className="ie-intro">{governedHero?.text ?? "A reading room for leaders building AI-native organisations: the operating questions behind the strategy, architecture and deployment."}</p>
         </div>
         <div className="ie-hero-rule" />
         <article className="ie-feature">
           <div className="ie-feature-visual">
-            <img src={assetUrl('/images/cognirise/site-insights.jpg')} alt="Violet and coral architectural planes arranged in a bright white space." />
+            <img src={heroVisual.src} alt={heroVisual.alt} />
             <span className="ie-num">01 / featured point of view</span>
           </div>
           <div className="ie-feature-copy">
             <div className="ie-meta">Perspective · Agentic enterprise</div>
-            <h2>AI should move the business—not just assist it.</h2>
-            <p>AI transformation is not a portfolio of pilots. It is a decision to redesign priority work around people, data, controls and intelligent execution.</p>
-            <Link href="/insights/ai-should-move-the-business" className="ie-text-link">Read the point of view <ArrowRight size={15} /></Link>
+            <h2>{landingText(governedLanding, "insights-featured-heading", "AI should move the business—not just assist it.")}</h2>
+            <p>{landingText(governedLanding, "insights-featured-body", "AI transformation is not a portfolio of pilots. It is a decision to redesign priority work around people, data, controls and intelligent execution.")}</p>
+            <Link href={featuredCta.href} className="ie-text-link">{featuredCta.label} <ArrowRight size={15} /></Link>
           </div>
         </article>
       </section>
@@ -284,31 +329,31 @@ export default function InsightsEditorial() {
       </section>
 
       <section className="ie-signal" aria-label="Editorial focus">
-        <div><b>From the {market.toUpperCase()}</b>Built for consequential work and regulated environments.</div>
-        <div><b>For leaders</b>Executive clarity, technical depth and operational reality.</div>
-        <div><b>In focus</b>Transformation, sovereign AI and a digital workforce.</div>
+        <div><b>{landingText(governedLanding, "insights-signal-market-label", `From the ${market.toUpperCase()}`)}</b>{landingText(governedLanding, "insights-signal-market-body", "Built for consequential work and regulated environments.")}</div>
+        <div><b>{landingText(governedLanding, "insights-signal-leaders-label", "For leaders")}</b>{landingText(governedLanding, "insights-signal-leaders-body", "Executive clarity, technical depth and operational reality.")}</div>
+        <div><b>{landingText(governedLanding, "insights-signal-focus-label", "In focus")}</b>{landingText(governedLanding, "insights-signal-focus-body", "Transformation, sovereign AI and a digital workforce.")}</div>
       </section>
       
       <section className="ie-collections">
         <div className="ie-section-head">
           <div>
             <div className="ie-kicker">Thematic collections</div>
-            <h2>Read by the question in front of you.</h2>
+            <h2>{landingText(governedLanding, "insights-thematic-heading", "Read by the question in front of you.")}</h2>
           </div>
-          <p>Essays and practical signals for the people accountable for making the work change.</p>
+          <p>{landingText(governedLanding, "insights-thematic-body", "Essays and practical signals for the people accountable for making the work change.")}</p>
         </div>
         <div className="ie-collection-grid">
           <Link href="/insights/foundations-for-production" className="ie-collection">
-            <img src={assetUrl('/images/cognirise/site-infrastructure.jpg')} alt="An architectural infrastructure landscape carrying violet and coral light routes." />
-            <div className="ie-meta">Collection / foundations</div>
-            <h3>The conditions for AI that can hold up in production.</h3>
-            <p>Data, security, governance and architecture are not the preamble. They are the work.</p>
+            <img src={foundationsVisual.src} alt={foundationsVisual.alt} />
+            <div className="ie-meta">{landingText(governedLanding, "insights-collection-foundations-label", "Collection / foundations")}</div>
+            <h3>{landingText(governedLanding, "insights-collection-foundations-heading", "The conditions for AI that can hold up in production.")}</h3>
+            <p>{landingText(governedLanding, "insights-collection-foundations-body", "Data, security, governance and architecture are not the preamble. They are the work.")}</p>
           </Link>
           <Link href="/insights/governed-digital-workforce" className="ie-collection">
-            <img src={assetUrl('/images/cognirise/site-cognios.jpg')} alt="Layered translucent platforms flowing with violet and coral intelligence." />
-            <div className="ie-meta">Collection / platforms</div>
-            <h3>From agent experiments to a governed digital workforce.</h3>
-            <p>What it takes to deploy agents into real operating environments—with people accountable at every decision point.</p>
+            <img src={workforceVisual.src} alt={workforceVisual.alt} />
+            <div className="ie-meta">{landingText(governedLanding, "insights-collection-workforce-label", "Collection / platforms")}</div>
+            <h3>{landingText(governedLanding, "insights-collection-workforce-heading", "From agent experiments to a governed digital workforce.")}</h3>
+            <p>{landingText(governedLanding, "insights-collection-workforce-body", "What it takes to deploy agents into real operating environments—with people accountable at every decision point.")}</p>
           </Link>
         </div>
       </section>
@@ -317,22 +362,15 @@ export default function InsightsEditorial() {
         <div className="ie-routes-head">
           <div>
             <div className="ie-kicker">Industry points of view</div>
-            <h2>Different systems. Same demand for movement.</h2>
+            <h2>{landingText(governedLanding, "insights-industry-heading", "Different systems. Same demand for movement.")}</h2>
           </div>
-          <p className="ie-routes-lead">Sector routes for {market.toUpperCase()} organisations where progress must be both fast and defensible.</p>
+          <p className="ie-routes-lead">{landingText(governedLanding, "insights-industry-lead", `Sector routes for ${market.toUpperCase()} organisations where progress must be both fast and defensible.`)}</p>
         </div>
         <div className="ie-route-list">
-          {[
-            ["01","Banking & financial services","Build intelligence into the work without compromising control.","governance"],
-            ["02","Financial services","Governed decisions where trust, evidence and control move together.","governance"],
-            ["03","Telecoms","Turn complex operations into a stronger service engine.","operations"],
-            ["04","Travel & hospitality","Make service moments more responsive, not more remote.","operations"],
-            ["05","Energy & resources","Apply intelligence where safety, scale and continuity meet.","operations"],
-            ["06","Manufacturing & conglomerates","Connect the operating picture across the enterprise.","operations"]
-          ].map(([number,title,copy,topic]) => (
-            <Link href={`/insights?topic=${topic}`} className="ie-route" key={title}>
+          {industryRoutes.map(({ number, cta, copy }) => (
+            <Link href={cta.href} className="ie-route" key={number}>
               <span>{number}</span>
-              <h3>{title}</h3>
+              <h3>{cta.label}</h3>
               <p>{copy}</p>
               <ArrowRight size={17} />
             </Link>
@@ -344,8 +382,8 @@ export default function InsightsEditorial() {
         <div className="ie-letter-wrap">
           <div className="ie-letter-copy">
             <div className="ie-kicker">The Cognirise brief</div>
-            <h2>A useful signal, when it matters.</h2>
-            <p>Occasional field notes on AI-native transformation, delivery and the systems that make intelligent work possible.</p>
+            <h2>{landingText(governedLanding, "insights-newsletter-heading", "A useful signal, when it matters.")}</h2>
+            <p>{landingText(governedLanding, "insights-newsletter-body", "Occasional field notes on AI-native transformation, delivery and the systems that make intelligent work possible.")}</p>
             {isSubscribed ? (
               <p className="ie-success" role="status">You are on the list. Watch this space.</p>
             ) : (
@@ -353,20 +391,20 @@ export default function InsightsEditorial() {
                 <input 
                   type="email" 
                   required 
-                  aria-label="Work email address" 
-                  placeholder="Your work email" 
+                  aria-label={landingText(governedLanding, "insights-newsletter-email-label", "Work email address")}
+                  placeholder={landingText(governedLanding, "insights-newsletter-email-placeholder", "Your work email")}
                   value={email} 
                   onChange={event => setEmail(event.target.value)} 
                   disabled={subscribeNewsletter.isPending}
                 />
                 <button type="submit" disabled={subscribeNewsletter.isPending}>
-                  {subscribeNewsletter.isPending ? "Subscribing..." : "Subscribe"} <ArrowRight size={15} />
+                  {subscribeNewsletter.isPending ? "Subscribing..." : newsletterCta.label} <ArrowRight size={15} />
                 </button>
               </form>
             )}
           </div>
           <div className="ie-letter-art">
-            <img src={assetUrl('/images/cognirise/site-insights.jpg')} alt="" />
+            <img src={newsletterVisual.src} alt={newsletterVisual.alt} />
             <div className="ie-letter-art-note">field notes / {market.toUpperCase()}</div>
           </div>
         </div>

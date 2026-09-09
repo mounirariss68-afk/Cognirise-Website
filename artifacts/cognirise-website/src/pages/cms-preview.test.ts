@@ -35,7 +35,8 @@ test("preview capability URLs are absent from public sitemap sources", async () 
   ]);
 
   assert.doesNotMatch(staticSitemap, /\/preview\//);
-  assert.doesNotMatch(dynamicSitemap, /\/preview\//);
+  assert.match(dynamicSitemap, /enabled: !isPreview/);
+  assert.match(dynamicSitemap, /if \(isPreview\) return;/);
 });
 
 test("office previews reuse the public contact card and keep phone optional", async () => {
@@ -44,7 +45,6 @@ test("office previews reuse the public contact card and keep phone optional", as
     readFile(new URL("./Contact.tsx", import.meta.url), "utf8"),
     readFile(new URL("../components/OfficeContactCard.tsx", import.meta.url), "utf8"),
   ]);
-
   assert.match(preview, /preview\.kind === "office"/);
   assert.match(preview, /<OfficeContactCard city=\{office\.city\} address=\{office\.address\} phone=\{office\.phone\} \/>/);
   assert.match(contact, /<OfficeContactCard key=/);

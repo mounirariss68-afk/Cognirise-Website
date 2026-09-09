@@ -8,5 +8,11 @@
 
 export interface NavigationSetting {
   id: string;
-  enabled: boolean;
+  label: string;
+  /** @nullable */
+  parentId: string | null;
+  /** @minimum 0 */
+  order: number;
+  destination: string;
+  visible: boolean;
 }

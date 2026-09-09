@@ -7,6 +7,7 @@ import { AgentAuthorityLayout } from "@/pages/AgentAuthorityModel";
 import type { CmsRecord } from "@/lib/cms";
 import { normalizeFrameworkPreviewContent } from "@/lib/framework-preview";
 import { OfficeContactCard } from "@/components/OfficeContactCard";
+import { Shell, type PreviewNavigationSnapshot } from "@/components/layout/Shell";
 
 type Preview = {
   kind: CmsDocumentKind;
@@ -19,6 +20,7 @@ type Preview = {
   media: CmsRecord<FrameworkContent>["media"];
   missingMediaIds: string[];
   validationWarnings: string[];
+  navigation: PreviewNavigationSnapshot;
 };
 
 function Content({ value }: { value: Record<string, any> }) {
@@ -83,6 +85,7 @@ export default function CmsPreview() {
 
   if (preview.kind === "framework" && framework) {
     return (
+      <Shell navigationOverride={preview.navigation}>
       <main className="min-h-screen bg-background">
         <header className="sticky top-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-3 text-amber-950 sm:px-6 sm:py-4">
           <div className="mx-auto flex max-w-[1100px] flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
@@ -93,6 +96,7 @@ export default function CmsPreview() {
         {warningPanel}
         <AgentAuthorityLayout framework={framework} preview />
       </main>
+      </Shell>
     );
   }
 
@@ -118,6 +122,7 @@ export default function CmsPreview() {
   }
 
   return (
+    <Shell navigationOverride={preview.navigation}>
     <main className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b border-amber-300 bg-amber-50 px-6 py-4 text-amber-950">
         <div className="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-3">
@@ -133,5 +138,6 @@ export default function CmsPreview() {
         <div className="mt-14"><Content value={preview.document.content ?? {}} /></div>
       </article>
     </main>
+    </Shell>
   );
 }

@@ -18,6 +18,7 @@ import {
   DocumentStatus,
   SeoMetadataInput
 } from "@workspace/api-client-react";
+import { getListMarketEditionsQueryKey, useListMarketEditions, getListDocumentEditionsQueryKey, useListDocumentEditions, useCreateDocumentEditionOverride, getListDocumentReviewCommentsQueryKey, useListDocumentReviewComments, useAddDocumentReviewComment, useRejectDocumentRevision } from "@workspace/api-client-react";
 import { type CmsDocumentKind, validateCmsContent } from "@workspace/api-zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { officeLifecycleAction } from "./office-lifecycle";
+import { Check, Circle } from "lucide-react";
+import { collectContentMediaIds, CONTENT_GUIDANCE, documentReadiness, editionAuthoringActions, selectInitialExactEdition } from "./authoring";
 
 export default function DocumentDetail() {
   const [, params] = useRoute("/content/:id");
@@ -52,11 +55,27 @@ export default function DocumentDetail() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: session } = useGetSession();
+  const { data: session, isLoading: isSessionLoading, isError: isSessionError } = useGetSession();
   const isAdministrator = session?.user?.role === "administrator";
   const canPublish = isAdministrator || session?.user?.role === "publisher";
+  const [selectedMarket, setSelectedMarket] = useState("");
+  const [selectedLocale, setSelectedLocale] = useState("");
 
-  const { data: doc, isLoading } = useGetDocument(id!, { query: { enabled: !!id, queryKey: getGetDocumentQueryKey(id!) } });
+  const {
+    data: editionMatrix,
+    isLoading: isEditionMatrixLoading,
+    isError: isEditionMatrixError,
+  } = useListDocumentEditions(id!, {
+    query: { enabled: Boolean(id && session), queryKey: getListDocumentEditionsQueryKey(id!) },
+  });
+  const selectedEdition = editionMatrix?.items.find((edition) => edition.market === selectedMarket && edition.locale === selectedLocale);
+  const documentParams = { market: selectedMarket, locale: selectedLocale };
+  const { data: doc, isLoading: isDocumentLoading, isError: isDocumentError, error: documentError } = useGetDocument(id!, documentParams, {
+    query: {
+      enabled: Boolean(id && selectedEdition?.exact && selectedEdition.revisionId),
+      queryKey: getGetDocumentQueryKey(id!, documentParams),
+    },
+  });
   
   const updateDoc = useUpdateDocument();
   const submitDoc = useSubmitDocument();
@@ -65,20 +84,34 @@ export default function DocumentDetail() {
   const restoreDoc = useRestoreDocument();
   const deleteDoc = useDeleteDocument();
   const rollbackDoc = useRollbackDocument();
-
-  // Load preview info explicitly if authenticated & needed
-  const { refetch: createPreview } = usePreviewDocument(id!, { query: { enabled: false, queryKey: getPreviewDocumentQueryKey(id!) } });
+  const createEditionOverride = useCreateDocumentEditionOverride();
 
   // Revisions data
-  const { data: revisionsData } = useListDocumentRevisions(id!, { query: { enabled: !!id, queryKey: getListDocumentRevisionsQueryKey(id!) } });
+  const { data: revisionsData } = useListDocumentRevisions(id!, { query: { enabled: Boolean(id && selectedEdition?.exact), queryKey: getListDocumentRevisionsQueryKey(id!) } });
 
   // Local state for editor fields
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [content, setContent] = useState<Record<string, any>>({});
   const [seo, setSeo] = useState<SeoMetadataInput>({ title: "", description: "", canonicalUrl: "", noIndex: false });
+  const canEditSelectedMarket = isAdministrator
+    || session?.user?.role === "publisher"
+    || Boolean(session?.user?.marketCodes?.includes(selectedMarket));
+  const [previewRevisionId, setPreviewRevisionId] = useState<string | undefined>();
+  const [selectedRevisionNumber, setSelectedRevisionNumber] = useState<number | undefined>();
+  const [reviewComment, setReviewComment] = useState("");
+  const previewParams = { market: selectedMarket, locale: selectedLocale, revisionId: previewRevisionId };
+  const { refetch: createPreview } = usePreviewDocument(id!, previewParams, {
+    query: { enabled: false, queryKey: getPreviewDocumentQueryKey(id!, previewParams) },
+  });
+  const reviewCommentsParams = { revisionId: previewRevisionId };
+  const { data: reviewComments } = useListDocumentReviewComments(id!, reviewCommentsParams, {
+    query: { enabled: Boolean(previewRevisionId), queryKey: getListDocumentReviewCommentsQueryKey(id!, reviewCommentsParams) },
+  });
+  const addReviewComment = useAddDocumentReviewComment();
+  const rejectRevision = useRejectDocumentRevision();
   
-  const initialized = useRef(false);
+  const hydratedEditionKey = useRef("");
   const lastSaved = useRef({ title: "", summary: "", content: {} as Record<string, any>, seo: {} as any });
 
   const [hasUnsaved, setHasUnsaved] = useState(false);
@@ -93,7 +126,18 @@ export default function DocumentDetail() {
   const [compareModalOpen, setCompareModalOpen] = useState(false);
 
   useEffect(() => {
-    if (doc && !initialized.current) {
+    if (!selectedMarket && session && editionMatrix) {
+      const initial = selectInitialExactEdition(editionMatrix.items, session.user.role, session.user.marketCodes);
+      if (initial) {
+        setSelectedMarket(initial.market);
+        setSelectedLocale(initial.locale);
+      }
+    }
+  }, [editionMatrix, selectedMarket, session]);
+
+  useEffect(() => {
+    if (doc && selectedMarket && selectedLocale) {
+      const responseKey = `${selectedMarket}:${selectedLocale}`;
       setTitle(doc.title);
       setSummary(doc.summary || "");
       const nextContent = (doc.content || {}) as Record<string, any>;
@@ -106,21 +150,21 @@ export default function DocumentDetail() {
       } : { title: "", description: "", canonicalUrl: "", noIndex: false };
       
       setSeo(formattedSeo);
-      
       lastSaved.current = { title: doc.title, summary: doc.summary || "", content: nextContent, seo: formattedSeo };
-      initialized.current = true;
+      hydratedEditionKey.current = responseKey;
+      setHasUnsaved(false);
     }
-  }, [doc]);
+  }, [doc, selectedLocale, selectedMarket]);
 
   // Check for unsaved changes against lastSaved ref
   useEffect(() => {
-    if (!initialized.current) return;
+    if (hydratedEditionKey.current !== `${selectedMarket}:${selectedLocale}`) return;
     const isDirty = title !== lastSaved.current.title || 
                     summary !== lastSaved.current.summary || 
                     JSON.stringify(content) !== JSON.stringify(lastSaved.current.content) ||
                     JSON.stringify(seo) !== JSON.stringify(lastSaved.current.seo);
     setHasUnsaved(isDirty);
-  }, [title, summary, content, seo]);
+  }, [title, summary, content, seo, selectedLocale, selectedMarket]);
 
   // Before unload protection
   useEffect(() => {
@@ -138,9 +182,33 @@ export default function DocumentDetail() {
     () => doc ? validateCmsContent(doc.kind as CmsDocumentKind, content, "draft") : { success: false as const, errors: [] },
     [content, doc],
   );
+  const marketParams = { page: 1, pageSize: 100 };
+  const { data: marketData } = useListMarketEditions(marketParams, {
+    query: { queryKey: getListMarketEditionsQueryKey(marketParams) },
+  });
+  const sortedRevisions = [...(revisionsData?.items ?? [])].sort((a, b) => b.number - a.number || String(b.createdAt).localeCompare(String(a.createdAt)));
+  const editionRevisions = sortedRevisions.filter((revision) => revision.market === selectedMarket && revision.locale === selectedLocale);
+  const selectedMarketConfig = marketData?.items.find((market) => market.code === selectedMarket);
+  useEffect(() => {
+    setPreviewRevisionId(selectedEdition?.revisionId ?? undefined);
+    setSelectedRevisionNumber(selectedEdition?.revisionNumber ?? undefined);
+  }, [selectedEdition?.revisionId, selectedEdition?.revisionNumber]);
+  const mediaIds = useMemo(() => collectContentMediaIds(content), [content]);
+  const readiness = useMemo(
+    () => doc ? documentReadiness(doc.kind as CmsDocumentKind, title, content, mediaIds) : [],
+    [content, doc, mediaIds, title],
+  );
+  const editionIsArchived = doc?.status === "archived";
+  const authoringActions = editionAuthoringActions(
+    selectedEdition,
+    canEditSelectedMarket && !editionIsArchived,
+    canPublish && !editionIsArchived,
+    hasUnsaved,
+  );
 
   const handleSave = () => {
     if (!doc) return;
+    const targetParams = { market: selectedMarket, locale: selectedLocale };
     
     if (!contentValidation.success) {
       toast({ title: "Structured content is incomplete", description: contentValidation.errors[0], variant: "destructive" });
@@ -153,17 +221,23 @@ export default function DocumentDetail() {
         title,
         summary: summary || null,
         content: contentValidation.data,
+        mediaIds,
+        market: selectedMarket,
+        locale: selectedLocale,
         seo,
-        revisionNumber: doc.revisionNumber
+        revisionNumber: selectedRevisionNumber ?? selectedEdition?.revisionNumber ?? editionRevisions[0]?.number ?? doc.revisionNumber
       }
     }, {
       onSuccess: (updated) => {
+        setSelectedRevisionNumber(updated.revisionNumber);
+        if (updated.currentRevisionId) setPreviewRevisionId(updated.currentRevisionId);
         lastSaved.current = { title, summary, content: contentValidation.data as Record<string, any>, seo };
         setHasUnsaved(false);
-        queryClient.setQueryData(getGetDocumentQueryKey(id!), (old: any) => old ? { ...old, ...updated } : old);
+        queryClient.setQueryData(getGetDocumentQueryKey(id!, targetParams), updated);
         queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
+        queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
         queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("documents") || String(query.queryKey[0]).includes("published") });
-        toast({ title: "Saved successfully" });
+        toast({ title: `${selectedMarket.toUpperCase()} edition saved successfully` });
       },
       onError: (err) => {
         toast({ title: "Save failed", description: (err as any).error, variant: "destructive" });
@@ -175,14 +249,129 @@ export default function DocumentDetail() {
     setSeo(prev => ({ ...prev, [field]: value }));
   };
 
-  if (!id) return null;
+  const selectEdition = (market: string, locale: string) => {
+    if (hasUnsaved && !window.confirm("Discard unsaved changes and switch editions?")) return;
+    const target = editionMatrix?.items.find((item) => item.market === market && item.locale === locale);
+    if (!target) return;
+    hydratedEditionKey.current = "";
+    setHasUnsaved(false);
+    setSelectedMarket(market);
+    setSelectedLocale(locale);
+    setPreviewRevisionId(target.exact ? target.revisionId ?? undefined : undefined);
+    setSelectedRevisionNumber(target.exact ? target.revisionNumber ?? undefined : undefined);
+  };
 
-  if (isLoading || !doc) {
+  const createOverride = () => {
+    if (!selectedEdition || selectedEdition.exact) return;
+    const targetMarket = selectedEdition.market;
+    const targetLocale = selectedEdition.locale;
+    createEditionOverride.mutate({ documentId: id!, data: {
+      market: targetMarket,
+      locale: targetLocale,
+      sourceRevisionId: selectedEdition.effectiveRevisionId ?? undefined,
+    } }, {
+      onSuccess: (revision) => {
+        hydratedEditionKey.current = "";
+        setSelectedMarket(targetMarket);
+        setSelectedLocale(targetLocale);
+        setPreviewRevisionId(revision.id);
+        setSelectedRevisionNumber(revision.number);
+        queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
+        queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
+        toast({ title: `${targetMarket.toUpperCase()} · ${targetLocale} override created` });
+      },
+      onError: (error: any) => toast({ title: "Edition creation failed", description: error.error || error.message, variant: "destructive" }),
+    });
+  };
+
+  const navigationOnlyState = (message: string, loading = false) => (
+    <div className="h-full p-8">
+      <Button variant="ghost" onClick={() => setLocation("/content")} className="mb-8">
+        <ChevronLeft className="mr-2 h-4 w-4" /> Back to content
+      </Button>
+      <div className="mx-auto max-w-lg rounded-lg border bg-card p-8 text-center">
+        {loading && <Loader2 className="mx-auto mb-3 h-6 w-6 animate-spin text-muted-foreground" />}
+        <p className="text-sm text-muted-foreground">{message}</p>
+        {!!editionMatrix?.items.length && (
+          <div className="mt-6 space-y-2 border-t pt-4 text-left">
+            <p className="text-xs font-semibold uppercase tracking-wider">Accessible editions</p>
+            {editionMatrix.items.map((edition) => (
+              <div key={`${edition.market}-${edition.locale}`} className="flex items-center justify-between rounded border px-3 py-2 text-xs">
+                <span>{edition.market.toUpperCase()} · {edition.locale}</span>
+                <Badge variant={edition.exact ? "secondary" : "outline"}>
+                  {edition.exact ? `Rev ${edition.revisionNumber}` : "No exact edition"}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  if (!id) {
+    return navigationOnlyState("This document URL is invalid.");
+  }
+  if (isSessionLoading || (session && isEditionMatrixLoading)) {
+    return navigationOnlyState("Loading your accessible document editions…", true);
+  }
+  if (isSessionError || isEditionMatrixError) {
+    return navigationOnlyState("We could not load the editions you can access. Please return to content and try again.");
+  }
+  if (selectedEdition && !selectedEdition.exact) {
     return (
-      <div className="h-full flex items-center justify-center p-8">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      <div className="h-full p-8">
+        <Button variant="ghost" onClick={() => setLocation("/content")} className="mb-8">
+          <ChevronLeft className="mr-2 h-4 w-4" /> Back to content
+        </Button>
+        <div className="mx-auto max-w-2xl space-y-5 rounded-lg border bg-card p-8">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Inherited edition</p>
+            <h1 className="mt-2 text-xl font-semibold">{selectedMarket.toUpperCase()} · {selectedLocale}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This market and locale has no exact editorial revision. No fallback draft content is loaded into the editor.
+            </p>
+          </div>
+          <div className="rounded border bg-muted/20 p-4 text-sm">
+            <p className="font-medium">Public effective source</p>
+            <p className="mt-1 text-muted-foreground">
+              {selectedEdition.effectiveMarket && selectedEdition.effectiveLocale
+                ? `${selectedEdition.effectiveMarket.toUpperCase()} · ${selectedEdition.effectiveLocale} · Revision ${selectedEdition.effectiveRevisionNumber ?? "unknown"}`
+                : "No published effective source is available."}
+            </p>
+            {selectedEdition.fallbackReason && <p className="mt-1 text-xs text-muted-foreground">Fallback: {selectedEdition.fallbackReason}</p>}
+          </div>
+          <Button
+            type="button"
+            onClick={createOverride}
+            disabled={!canEditSelectedMarket || createEditionOverride.isPending || !selectedEdition.effectiveRevisionId}
+            data-testid="button-create-edition-override"
+          >
+            {createEditionOverride.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Create editable override
+          </Button>
+          <div className="border-t pt-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider">Accessible editions</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {editionMatrix?.items.map((edition) => (
+                <Button key={`${edition.market}-${edition.locale}`} type="button" variant="outline" onClick={() => selectEdition(edition.market, edition.locale)}>
+                  {edition.market.toUpperCase()} · {edition.locale} · {edition.exact ? `Rev ${edition.revisionNumber}` : "Inherited"}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
+  }
+  if (selectedMarket && isDocumentLoading) {
+    return navigationOnlyState(`Loading ${selectedMarket.toUpperCase()} · ${selectedLocale}…`, true);
+  }
+  if (isDocumentError) {
+    return navigationOnlyState(`This edition could not be loaded. ${(documentError as any)?.error ?? (documentError as Error)?.message ?? ""}`);
+  }
+  if (!doc) {
+    return navigationOnlyState("No accessible document edition was found.");
   }
 
   const getStatusColor = (s: DocumentStatus) => {
@@ -196,20 +385,27 @@ export default function DocumentDetail() {
   };
 
   const handleAction = (action: "submit" | "publish" | "archive" | "restore") => {
+    const targetParams = { market: selectedMarket, locale: selectedLocale };
     const opts = {
       onSuccess: (updated: any) => {
-        queryClient.setQueryData(getGetDocumentQueryKey(id!), updated);
+        queryClient.setQueryData(getGetDocumentQueryKey(id!, targetParams), updated);
         queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
+        queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
         queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("documents") || String(query.queryKey[0]).includes("published") || String(query.queryKey[0]).includes("preview") });
-        toast({ title: action === "publish" ? "Selected UAE edition revision published" : action === "submit" ? "UAE edition submitted for review" : action === "restore" ? "Document restored as a draft" : "Document archived" });
+        toast({
+          title: action === "publish" ? "Selected market and locale revision published" : action === "submit" ? "Latest edition revisions submitted for review" : action === "restore" ? "Document restored as a draft" : "Document archived",
+          description: action === "restore"
+            ? "This edition is not public. Its restored draft must pass review before it can be published again."
+            : undefined,
+        });
         if (action === "publish") setPublishOpen(false);
       },
       onError: (err: any) => toast({ title: "Action failed", description: err.error, variant: "destructive" })
     };
 
-    if (action === "submit") submitDoc.mutate({ documentId: id!, data: {} }, opts);
-    if (action === "archive") archiveDoc.mutate({ documentId: id!, data: {} }, opts);
-    if (action === "restore") restoreDoc.mutate({ documentId: id!, data: {} }, opts);
+    if (action === "submit" && selectedEdition?.revisionId) submitDoc.mutate({ documentId: id!, data: { revisionId: selectedEdition.revisionId } }, opts);
+    if (action === "archive") archiveDoc.mutate({ documentId: id!, data: { market: selectedMarket, locale: selectedLocale } }, opts);
+    if (action === "restore") restoreDoc.mutate({ documentId: id!, data: { market: selectedMarket, locale: selectedLocale } }, opts);
     if (action === "publish" && publishRevisionId) {
       publishDoc.mutate({ documentId: id!, data: { revisionId: publishRevisionId } }, opts);
     }
@@ -218,9 +414,10 @@ export default function DocumentDetail() {
   const handleRollback = (revisionId: string) => {
     rollbackDoc.mutate({ documentId: id!, data: { revisionId } }, {
       onSuccess: (updated) => {
-        queryClient.setQueryData(getGetDocumentQueryKey(id!), updated);
+        queryClient.setQueryData(getGetDocumentQueryKey(id!, documentParams), updated);
         toast({ title: "Rollback successful" });
-        initialized.current = false; // Force form re-init from new data
+        queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
+        queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
       },
       onError: (err: any) => toast({ title: "Rollback failed", description: err.error, variant: "destructive" })
     });
@@ -253,7 +450,7 @@ export default function DocumentDetail() {
       },
     };
     if (requiresArchive) {
-      archiveDoc.mutate({ documentId: id!, data: {} }, options);
+      archiveDoc.mutate({ documentId: id!, data: { market: selectedMarket, locale: selectedLocale } }, options);
     } else {
       deleteDoc.mutate({ documentId: id! }, options);
     }
@@ -271,9 +468,6 @@ export default function DocumentDetail() {
     }
   };
 
-  // Find the latest revision ID for the publish dialog default
-  const sortedRevisions = [...(revisionsData?.items ?? [])].sort((a, b) => b.number - a.number || String(b.createdAt).localeCompare(String(a.createdAt)));
-  const latestRevId = sortedRevisions[0]?.id;
   const openPreview = async () => {
     const result = await createPreview();
     if (!result.data?.previewUrl) {
@@ -318,22 +512,22 @@ export default function DocumentDetail() {
 
           <Button 
             onClick={handleSave} 
-            disabled={updateDoc.isPending || !hasUnsaved || !contentValidation.success}
+            disabled={updateDoc.isPending || !contentValidation.success || !authoringActions.canSave}
             size="sm" 
             variant="default" 
             className="font-mono uppercase tracking-wider text-xs"
           >
             {updateDoc.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin"/> : <Save className="w-3.5 h-3.5 mr-2" />}
-            Save Draft
+            {selectedEdition?.workflowState === "approved" ? "Start New Draft" : "Save Draft"}
           </Button>
 
-          {doc.status === "draft" && (
-            <Button variant="outline" size="sm" onClick={() => handleAction("submit")} disabled={submitDoc.isPending || hasUnsaved || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs">
+          {authoringActions.canSubmit && (
+             <Button variant="outline" size="sm" onClick={() => handleAction("submit")} disabled={submitDoc.isPending || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs">
               <Send className="w-3.5 h-3.5 mr-2" /> Submit Review
             </Button>
           )}
-           {canPublish && ["approved", "in-review", "draft"].includes(doc.status) && (
-            <Button size="sm" onClick={() => { setPublishRevisionId(latestRevId || null); setPublishOpen(true); }} disabled={hasUnsaved || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+           {authoringActions.canPublish && (
+              <Button size="sm" onClick={() => { setPublishRevisionId(selectedEdition?.revisionId ?? null); setPublishOpen(true); }} disabled={!contentValidation.success} className="font-mono uppercase tracking-wider text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
               <Globe className="w-3.5 h-3.5 mr-2" /> Publish...
             </Button>
           )}
@@ -348,11 +542,11 @@ export default function DocumentDetail() {
               <Trash2 className="mr-2 h-4 w-4" /> Remove office
             </Button>
           )}
-          {isAdministrator && doc.status === "archived" ? (
+          {canPublish && doc.status === "archived" ? (
             <Button variant="outline" size="sm" onClick={() => handleAction("restore")} disabled={restoreDoc.isPending} className="font-mono uppercase tracking-wider text-xs">
               <RotateCcw className="mr-2 h-4 w-4" /> Restore as draft
             </Button>
-          ) : isAdministrator && doc.kind !== "office" ? (
+          ) : canPublish && doc.kind !== "office" ? (
                <Button variant="ghost" size="sm" onClick={() => handleAction("archive")} className="text-muted-foreground hover:text-destructive" title="Archive Document">
                  <Archive className="w-4 h-4" />
                </Button>
@@ -365,20 +559,31 @@ export default function DocumentDetail() {
         {/* Left Column: Editor */}
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar border-r border-border">
           <div className="max-w-3xl mx-auto space-y-8">
+            <section className="rounded-lg border bg-card p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">{doc.kind.replace("-", " ")} authoring guide</p>
+              <p className="mt-1 text-sm text-muted-foreground">{CONTENT_GUIDANCE[doc.kind as CmsDocumentKind]}</p>
+              <p className="mt-3 text-xs font-medium">Selected edition: <strong>{selectedMarketConfig?.displayName ?? selectedMarket} · {selectedLocale}</strong> ({selectedEdition?.exact ? "exact override" : "inherited effective content"})</p>
+              {authoringActions.immutable && <p className="mt-2 text-xs text-amber-600">This edition is in review and cannot be edited until it is approved or rejected.</p>}
+              {doc.status === "draft" && doc.publishedRevisionId && (
+                <p className="mt-2 text-xs text-amber-600">This draft is not publicly visible. Submit it for review and publish it to return this edition to the website.</p>
+              )}
+            </section>
             <div>
-              <label className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Display Title</label>
+              <label className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Display Title <span className="text-destructive">(required)</span></label>
               <Input 
                 value={title}
                 onChange={(e) => { setTitle(e.target.value); }}
+                 disabled={authoringActions.immutable || !canEditSelectedMarket}
                 className="text-3xl font-bold tracking-tight h-auto py-3 px-4 bg-background border-border/50 focus-visible:ring-1 focus-visible:ring-primary shadow-sm"
               />
             </div>
             
             <div>
-              <label className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Summary / Deck</label>
+              <label className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Summary / Deck <span>(optional)</span></label>
               <Textarea 
                 value={summary}
                 onChange={(e) => { setSummary(e.target.value); }}
+                 disabled={authoringActions.immutable || !canEditSelectedMarket}
                 className="text-lg leading-relaxed min-h-[100px] resize-y bg-background border-border/50 focus-visible:ring-1 focus-visible:ring-primary shadow-sm"
                 placeholder="Brief summary appearing in cards and lists..."
               />
@@ -387,7 +592,7 @@ export default function DocumentDetail() {
             <ContentEditor
               kind={doc.kind as CmsDocumentKind}
               value={content}
-              onChange={setContent}
+              onChange={authoringActions.immutable || !canEditSelectedMarket ? () => {} : setContent}
               errors={contentValidation.success ? [] : contentValidation.errors}
             />
             <details className="rounded-md border bg-muted/20 p-4">
@@ -404,6 +609,7 @@ export default function DocumentDetail() {
               <TabsTrigger value="metadata" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Metadata</TabsTrigger>
               <TabsTrigger value="seo" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">SEO</TabsTrigger>
               <TabsTrigger value="revisions" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Revisions</TabsTrigger>
+              <TabsTrigger value="editions" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Editions</TabsTrigger>
             </TabsList>
             
             <TabsContent value="metadata" className="flex-1 overflow-y-auto p-4 space-y-6 mt-0">
@@ -445,6 +651,61 @@ export default function DocumentDetail() {
                   )}
                 </div>
               </div>
+              <div className="space-y-3 border-t pt-4">
+                <div>
+                  <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Review comments</label>
+                  <p className="mt-1 text-xs text-muted-foreground">Comments attach to the selected {selectedMarket.toUpperCase()} revision.</p>
+                </div>
+                <div className="max-h-32 space-y-2 overflow-y-auto">
+                  {(reviewComments ?? []).map((comment) => <p key={comment.id} className="rounded border bg-muted/20 p-2 text-xs">{comment.body}</p>)}
+                </div>
+                <Textarea value={reviewComment} onChange={(event) => setReviewComment(event.target.value)} placeholder="Leave reviewer guidance…" rows={3} data-testid="textarea-review-comment" />
+                <div className="flex gap-2">
+                  <Button type="button" size="sm" variant="outline" disabled={!reviewComment.trim() || addReviewComment.isPending || !selectedEdition?.revisionId} onClick={() => addReviewComment.mutate({ documentId: id!, data: { revisionId: selectedEdition!.revisionId!, body: reviewComment.trim() } }, { onSuccess: () => { setReviewComment(""); queryClient.invalidateQueries({ queryKey: getListDocumentReviewCommentsQueryKey(id!, reviewCommentsParams) }); } })} data-testid="button-add-review-comment">Add comment</Button>
+                  {selectedEdition?.workflowState === "in-review" && canPublish && <Button type="button" size="sm" variant="destructive" disabled={!reviewComment.trim() || rejectRevision.isPending || !selectedEdition.revisionId} onClick={() => {
+                    const targetParams = { market: selectedMarket, locale: selectedLocale };
+                    rejectRevision.mutate({ documentId: id!, data: { revisionId: selectedEdition.revisionId!, body: reviewComment.trim() } }, { onSuccess: () => {
+                      setReviewComment("");
+                      queryClient.invalidateQueries({ queryKey: getGetDocumentQueryKey(id!, targetParams) });
+                      queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
+                      queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
+                    } });
+                  }} data-testid="button-reject-revision">Reject revision</Button>}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="editions" className="flex-1 overflow-y-auto p-4 space-y-4 mt-0">
+              <div>
+                <h3 className="text-sm font-semibold">Market + locale matrix</h3>
+                <p className="mt-1 text-xs text-muted-foreground">Select the exact edition to edit. Publishing a selected revision changes only that market and locale.</p>
+              </div>
+               {(editionMatrix?.items ?? []).map((edition) => {
+                 const market = marketData?.items.find((item) => item.code === edition.market);
+                 const active = selectedMarket === edition.market && selectedLocale === edition.locale;
+                return (
+                   <button type="button" key={`${edition.market}-${edition.locale}`} onClick={() => selectEdition(edition.market, edition.locale)} className={`w-full rounded-md border p-3 text-left ${active ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`} data-testid={`button-edition-${edition.market}-${edition.locale}`}>
+                    <div className="flex items-center justify-between gap-2">
+                       <span className="text-sm font-medium">{market?.displayName ?? edition.market} · {edition.locale}</span>
+                       <Badge variant={edition.exact ? "secondary" : "outline"}>{edition.exact ? `Rev ${edition.revisionNumber}` : "Inherited"}</Badge>
+                    </div>
+                     <p className="mt-1 text-xs text-muted-foreground">{edition.workflowState ?? "no workflow"} · {edition.publicationState ?? "unpublished"}</p>
+                     <p className="mt-1 text-[10px] text-muted-foreground">{edition.exact ? "Own override" : `Effective from ${edition.effectiveMarket ?? "none"} / ${edition.effectiveLocale ?? "none"}${edition.fallbackReason ? ` · ${edition.fallbackReason}` : ""}`}</p>
+                  </button>
+                );
+              })}
+               {selectedEdition && !selectedEdition.exact && <Button type="button" className="w-full" onClick={createOverride} disabled={!canEditSelectedMarket || createEditionOverride.isPending} data-testid="button-create-edition-override">Create editable override from effective content</Button>}
+              <div className="border-t pt-4">
+                <h3 className="text-sm font-semibold">Readiness checklist</h3>
+                <div className="mt-3 space-y-3">
+                  {readiness.map((item) => (
+                    <div key={item.label} className="flex gap-2" data-testid={`status-readiness-${item.label.toLowerCase().replaceAll(" ", "-")}`}>
+                      {item.ready ? <Check className="mt-0.5 h-4 w-4 text-emerald-600" /> : <Circle className="mt-0.5 h-4 w-4 text-amber-500" />}
+                      <div><p className="text-xs font-medium">{item.label}</p><p className="text-[10px] text-muted-foreground">{item.detail}</p></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </TabsContent>
             
             <TabsContent value="seo" className="flex-1 overflow-y-auto p-4 space-y-4 mt-0">
@@ -453,6 +714,7 @@ export default function DocumentDetail() {
                 <Input 
                   value={seo.title} 
                   onChange={(e) => handleSeoChange("title", e.target.value)}
+                  disabled={authoringActions.immutable || !canEditSelectedMarket}
                   placeholder="Defaults to display title"
                   className="font-mono text-xs"
                 />
@@ -463,6 +725,7 @@ export default function DocumentDetail() {
                 <Textarea 
                   value={seo.description} 
                   onChange={(e) => handleSeoChange("description", e.target.value)}
+                  disabled={authoringActions.immutable || !canEditSelectedMarket}
                   placeholder="Meta description for search engines..."
                   className="font-mono text-xs resize-none min-h-[80px]"
                 />
@@ -473,6 +736,7 @@ export default function DocumentDetail() {
                 <Input 
                   value={seo.canonicalUrl || ""} 
                   onChange={(e) => handleSeoChange("canonicalUrl", e.target.value)}
+                  disabled={authoringActions.immutable || !canEditSelectedMarket}
                   placeholder="https://..."
                   className="font-mono text-xs"
                 />
@@ -482,6 +746,7 @@ export default function DocumentDetail() {
                 <Switch 
                   checked={seo.noIndex}
                   onCheckedChange={(c) => handleSeoChange("noIndex", c)}
+                  disabled={authoringActions.immutable || !canEditSelectedMarket}
                   id="noIndex"
                 />
                 <Label htmlFor="noIndex" className="font-mono text-xs uppercase tracking-wider text-muted-foreground">No Index (Hide from Search)</Label>
@@ -501,7 +766,7 @@ export default function DocumentDetail() {
                    <GitCompare className="w-3 h-3 mr-1" /> Compare
                  </Button>
                </div>
-                {sortedRevisions.map(rev => (
+                {editionRevisions.map(rev => (
                  <div key={rev.id} className="p-4 border-b border-border/50 hover:bg-muted/30 transition-colors group flex gap-3">
                     <Checkbox 
                       checked={selectedRevs.includes(rev.id)}
@@ -525,7 +790,7 @@ export default function DocumentDetail() {
                     </div>
                  </div>
                ))}
-               {!revisionsData?.items.length && (
+                {!editionRevisions.length && (
                  <div className="p-4 text-center text-xs font-mono text-muted-foreground">No revisions saved yet.</div>
                )}
             </TabsContent>
@@ -538,7 +803,7 @@ export default function DocumentDetail() {
           <DialogHeader>
             <DialogTitle>Publish Content</DialogTitle>
             <DialogDescription className="font-mono text-xs mt-2">
-               Select the exact revision to publish for its UAE/English edition. Other market editions are unchanged.
+               Select the exact revision to publish. Its market and locale are shown; every other edition remains unchanged.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
@@ -550,9 +815,9 @@ export default function DocumentDetail() {
                   onChange={(e) => setPublishRevisionId(e.target.value)}
                >
                  <option value="" disabled>Select a revision...</option>
-                  {sortedRevisions.map(rev => (
+                   {editionRevisions.map(rev => (
                    <option key={rev.id} value={rev.id}>
-                     Revision {rev.number} ({format(new Date(rev.createdAt), "MMM d, HH:mm")})
+                      {rev.market.toUpperCase()} · {rev.locale} · Revision {rev.number} ({format(new Date(rev.createdAt), "MMM d, HH:mm")})
                    </option>
                  ))}
                </select>

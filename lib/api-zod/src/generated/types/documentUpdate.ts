@@ -28,8 +28,10 @@ export interface DocumentUpdate {
   content?: DocumentUpdateContent;
   seo?: SeoMetadataInput;
   mediaIds?: string[];
-  /** @minItems 1 */
-  markets?: string[];
+  /** @pattern ^[a-z][a-z0-9-]{1,15}$ */
+  market: string;
+  /** @pattern ^[a-z]{2}(?:-[A-Z]{2})?$ */
+  locale: string;
   /**
      * Optimistic concurrency version.
      * @minimum 1

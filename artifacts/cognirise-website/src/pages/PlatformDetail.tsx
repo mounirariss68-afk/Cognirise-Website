@@ -1,7 +1,7 @@
 import { useRoute } from "wouter";
 import NotFound from "@/pages/not-found";
 import { BrandButton } from "@/components/ui/brand-button";
-import { contentRecord, useCmsEntry } from "@/lib/cms";
+import { contentRecord, resolveCmsMedia, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 
 export default function PlatformDetail() {
@@ -9,18 +9,20 @@ export default function PlatformDetail() {
   const slug = params?.slug ?? "";
   const query = useCmsEntry("platform", slug);
   const record = query.data ? contentRecord(query.data, "platform") : undefined;
+  const hero = record && query.data
+    ? resolveCmsMedia(query.data.media, record.heroMedia, record.heroMediaId)
+    : undefined;
   useDynamicMetadata(query.data && metadataFromSeo(query.data.seo, {
     title: `${query.data.title} | Cognirise`,
     description: record?.summary ?? query.data.summary ?? "A Cognirise governed enterprise platform.",
-    imageUrl: query.data.media?.[0]?.url,
+    imageUrl: hero?.url,
   }));
   if (!match || !slug || (!query.isPending && (!record || record.template !== "standard"))) return <NotFound />;
   if (!record || !query.data) return null;
-  const hero = query.data.media?.find((media) => media.id === record.heroMediaId)?.url;
   return (
     <main className="overflow-hidden">
       <section className="relative bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12 md:py-32">
-        {hero && <img src={hero} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25" />}
+        {hero && <img src={hero.url} alt={record.heroMedia?.altText || hero.altText || ""} className="absolute inset-0 h-full w-full object-cover opacity-25" />}
         <div className="relative mx-auto max-w-[1200px]">
           <p className="text-xs font-bold uppercase tracking-[.2em] text-white/60">{record.category}</p>
           <h1 className="mt-7 max-w-[900px] text-5xl font-semibold leading-[.94] md:text-7xl">{query.data.title}</h1>

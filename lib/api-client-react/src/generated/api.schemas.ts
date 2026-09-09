@@ -5,6 +5,18 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+export type PublicConfigurationMarketsItem = {
+  code: string;
+  displayName: string;
+  defaultLocale: string;
+  locales: string[];
+  isCanonical: boolean;
+};
+
+export interface PublicConfiguration {
+  markets: PublicConfigurationMarketsItem[];
+}
+
 export type ApiErrorDetails = { [key: string]: unknown };
 
 export interface ApiError {
@@ -15,18 +27,57 @@ export interface ApiError {
 
 export interface NavigationSetting {
   id: string;
+  label: string;
+  /** @nullable */
+  parentId: string | null;
+  /** @minimum 0 */
+  order: number;
+  destination: string;
+  visible: boolean;
+}
+
+export interface UpdateNavigationSetting {
+  id: string;
+  label: string;
+  /**
+     * Omit to inherit the registry parent; use null to explicitly place the item at the top level.
+     * @nullable
+     */
+  parentId?: string | null;
+  /** @minimum 0 */
+  order: number;
+  destination: string;
+  visible: boolean;
+}
+
+export interface PageAvailability {
+  path: string;
   enabled: boolean;
 }
 
 export interface NavigationSettings {
   items: NavigationSetting[];
+  pages: PageAvailability[];
+  requestedMarket: string;
+  requestedLocale: string;
+  market: string;
+  locale: string;
+  usedFallback: boolean;
+  isConfigured?: boolean;
   /** @nullable */
   updatedAt: string | null;
 }
 
 export interface UpdateNavigationSettings {
-  /** @minItems 1 */
-  items: NavigationSetting[];
+  items: UpdateNavigationSetting[];
+  pages: PageAvailability[];
+  market: string;
+  locale: string;
+}
+
+export interface NavigationEditionSelector {
+  market: string;
+  locale: string;
 }
 
 export interface HealthStatus {
@@ -164,6 +215,11 @@ export interface User {
   email: string;
   role: UserRole;
   status: UserStatus;
+  /**
+     * @items.minLength 2
+     * @items.maxLength 24
+     */
+  marketCodes: string[];
   mfaEnabled: boolean;
   mustRotate: boolean;
   /** @nullable */
@@ -430,6 +486,7 @@ export const DocumentKind = {
   framework: 'framework',
   office: 'office',
   'site-configuration': 'site-configuration',
+  'landing-page': 'landing-page',
 } as const;
 
 export type DocumentStatus = typeof DocumentStatus[keyof typeof DocumentStatus];
@@ -443,6 +500,34 @@ export const DocumentStatus = {
   published: 'published',
   archived: 'archived',
 } as const;
+
+export type CmsImmutableMediaReferenceRole = typeof CmsImmutableMediaReferenceRole[keyof typeof CmsImmutableMediaReferenceRole];
+
+
+export const CmsImmutableMediaReferenceRole = {
+  identity: 'identity',
+  logo: 'logo',
+  hero: 'hero',
+  supporting: 'supporting',
+  background: 'background',
+  icon: 'icon',
+  'og-image': 'og-image',
+  document: 'document',
+} as const;
+
+/**
+ * Immutable reference to the exact governed media version selected by an editor.
+ */
+export interface CmsImmutableMediaReference {
+  mediaId: string;
+  mediaVersionId: string;
+  role: CmsImmutableMediaReferenceRole;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  altText?: string;
+}
 
 export type CmsPersonContentSchemaVersion = typeof CmsPersonContentSchemaVersion[keyof typeof CmsPersonContentSchemaVersion];
 
@@ -504,6 +589,7 @@ export interface CmsPersonContent {
   focusAreas?: CmsPersonContentFocusAreasItem[];
   profileLinks?: CmsLink[];
   identityMediaId?: string;
+  identityMedia?: CmsImmutableMediaReference;
   approvedFallback?: CmsPersonContentApprovedFallback;
   visibility?: CmsVisibility;
   order?: number;
@@ -552,6 +638,7 @@ export interface CmsPartnerContent {
   /** @pattern ^https?://.+ */
   website?: string;
   logoMediaId?: string;
+  logoMedia?: CmsImmutableMediaReference;
   relationshipStatus?: CmsPartnerContentRelationshipStatus;
   visibility?: CmsVisibility;
   order?: number;
@@ -621,6 +708,7 @@ export interface CmsPlatformContent {
   summary?: string;
   template?: CmsPlatformContentTemplate;
   heroMediaId?: string;
+  heroMedia?: CmsImmutableMediaReference;
   sections?: CmsPlatformContentSectionsItem[];
   capabilities?: string[];
   differentiators?: string[];
@@ -663,6 +751,8 @@ export interface CmsPublicationContent {
   platformIds?: string[];
   heroMediaId?: string;
   pdfMediaId?: string;
+  heroMedia?: CmsImmutableMediaReference;
+  pdfMedia?: CmsImmutableMediaReference;
   visibility?: CmsVisibility;
   order?: number;
   sources?: CmsSource[];
@@ -816,6 +906,7 @@ export interface CmsCaseStudyContent {
   outcomes?: string[];
   evidence?: CmsEvidence[];
   heroMediaId?: string;
+  heroMedia?: CmsImmutableMediaReference;
   visibility?: CmsVisibility;
   order?: number;
   sources?: CmsSource[];
@@ -968,6 +1059,7 @@ export interface CmsFrameworkContent {
   workedExample: CmsFrameworkWorkedExample;
   sectorExamples?: CmsFrameworkExample[];
   heroMediaId?: string;
+  heroMedia?: CmsImmutableMediaReference;
   cta?: CmsLink;
   visibility?: CmsVisibility;
   order?: number;
@@ -1036,10 +1128,50 @@ export type CmsSiteConfigurationContent = {
   contactEmail: string;
 };
 
+export type CmsLandingPageContentSchemaVersion = typeof CmsLandingPageContentSchemaVersion[keyof typeof CmsLandingPageContentSchemaVersion];
+
+
+export const CmsLandingPageContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export type CmsLandingPageContentTemplate = typeof CmsLandingPageContentTemplate[keyof typeof CmsLandingPageContentTemplate];
+
+
+export const CmsLandingPageContentTemplate = {
+  landing: 'landing',
+  collection: 'collection',
+  campaign: 'campaign',
+  legal: 'legal',
+} as const;
+
+export type CmsLandingPageContentSectionsItem = { [key: string]: unknown };
+
+export type CmsLandingPageContentCta = { [key: string]: unknown };
+
+export type CmsLandingPageContentSeo = { [key: string]: unknown };
+
+export type CmsLandingPageContentLegal = { [key: string]: unknown };
+
+/**
+ * Governed reusable landing-page composition.
+ */
+export interface CmsLandingPageContent {
+  schemaVersion: CmsLandingPageContentSchemaVersion;
+  pagePath: string;
+  template: CmsLandingPageContentTemplate;
+  narrative: string;
+  sections: CmsLandingPageContentSectionsItem[];
+  cta?: CmsLandingPageContentCta;
+  seo?: CmsLandingPageContentSeo;
+  legal?: CmsLandingPageContentLegal;
+  visualReferences?: CmsImmutableMediaReference[];
+}
+
 /**
  * Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
  */
-export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent | CmsOfficeContent | CmsSiteConfigurationContent;
+export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent | CmsOfficeContent | CmsSiteConfigurationContent | CmsLandingPageContent;
 
 export interface SeoMetadata {
   title: string;
@@ -1068,6 +1200,12 @@ export interface Document {
   revisionNumber: number;
   /** True only when permanent deletion is allowed; previously published offices must be archived. */
   canPermanentlyDelete: boolean;
+  /** True when this editorial discovery entry is the effective approved published fallback rather than an exact edition. */
+  inherited: boolean;
+  /** @nullable */
+  effectiveMarket: string | null;
+  /** @nullable */
+  effectiveLocale: string | null;
   /** @nullable */
   currentRevisionId?: string | null;
   /** @nullable */
@@ -1150,8 +1288,10 @@ export interface DocumentUpdate {
   content?: DocumentUpdateContent;
   seo?: SeoMetadataInput;
   mediaIds?: string[];
-  /** @minItems 1 */
-  markets?: string[];
+  /** @pattern ^[a-z][a-z0-9-]{1,15}$ */
+  market: string;
+  /** @pattern ^[a-z]{2}(?:-[A-Z]{2})?$ */
+  locale: string;
   /**
      * Optimistic concurrency version.
      * @minimum 1
@@ -1225,6 +1365,7 @@ export interface DocumentRevision {
 }
 
 export interface ReviewSubmissionInput {
+  revisionId: string;
   /** @maxLength 1000 */
   note?: string;
   reviewerIds?: string[];
@@ -1243,20 +1384,104 @@ export interface RollbackInput {
 }
 
 export interface ArchiveInput {
+  market: string;
+  locale: string;
   /** @maxLength 1000 */
   reason?: string;
 }
+
+export interface EditionOverrideInput {
+  market: string;
+  locale: string;
+  sourceRevisionId?: string;
+}
+
+export type DocumentPreviewNavigationItemsItem = { [key: string]: unknown };
+
+export type DocumentPreviewNavigationPagesItem = { [key: string]: unknown };
+
+/**
+ * Immutable navigation and page-availability snapshot captured when the preview capability was issued.
+ */
+export type DocumentPreviewNavigation = {
+  market: string;
+  locale: string;
+  items: DocumentPreviewNavigationItemsItem[];
+  pages: DocumentPreviewNavigationPagesItem[];
+  [key: string]: unknown;
+ };
 
 export interface DocumentPreview {
   document: DocumentSnapshot;
   previewUrl: string;
   expiresAt: string;
+  requestedMarket: string;
+  requestedLocale: string;
   market: string;
   locale: string;
+  revisionId: string;
   /** @minimum 1 */
   revisionNumber: number;
   usedFallback: boolean;
+  /** @nullable */
+  fallbackReason: string | null;
+  navigationPolicyDigest: string;
+  /** Immutable navigation and page-availability snapshot captured when the preview capability was issued. */
+  navigation: DocumentPreviewNavigation;
   warnings: string[];
+}
+
+export interface DocumentEdition {
+  market: string;
+  locale: string;
+  exact: boolean;
+  /** @nullable */
+  effectiveMarket: string | null;
+  /** @nullable */
+  effectiveLocale: string | null;
+  usedFallback: boolean;
+  /** @nullable */
+  fallbackReason: string | null;
+  /** @nullable */
+  publicationState: string | null;
+  /** @nullable */
+  workflowState: string | null;
+  /** @nullable */
+  revisionId: string | null;
+  /** @nullable */
+  revisionNumber: number | null;
+  /** @nullable */
+  effectivePublicationState: string | null;
+  /** @nullable */
+  effectiveWorkflowState: string | null;
+  /** @nullable */
+  effectiveRevisionId: string | null;
+  /** @nullable */
+  effectiveRevisionNumber: number | null;
+  ready: boolean;
+  readinessErrors: string[];
+}
+
+export interface DocumentEditionMatrix {
+  documentId: string;
+  items: DocumentEdition[];
+}
+
+export interface ReviewCommentInput {
+  revisionId: string;
+  /**
+     * @minLength 1
+     * @maxLength 2000
+     */
+  body: string;
+}
+
+export interface ReviewComment {
+  id: string;
+  revisionId: string;
+  body: string;
+  authorId: string;
+  createdAt: string;
 }
 
 export interface PageMetadata {
@@ -1785,13 +2010,24 @@ export interface UserInvitationInput {
      */
   email: string;
   role: UserRole;
+  /**
+     * @items.minLength 2
+     * @items.maxLength 24
+     */
+  marketCodes?: string[];
 }
+
+export type UserInvitationDelivery = typeof UserInvitationDelivery[keyof typeof UserInvitationDelivery];
+
+
+export const UserInvitationDelivery = {
+  email: 'email',
+} as const;
 
 export interface UserInvitation {
   id: string;
   user: User;
-  /** One-time credential to copy securely to the invited user. */
-  temporaryPassword: string;
+  delivery: UserInvitationDelivery;
   expiresAt: string;
   createdAt: string;
 }
@@ -1804,16 +2040,25 @@ export interface UserUpdate {
   name?: string;
   role?: UserRole;
   status?: UserStatus;
+  /**
+     * @items.minLength 2
+     * @items.maxLength 24
+     */
+  marketCodes?: string[];
 }
 
-export interface UserCredentialUpdate {
-  userId: string;
+export interface AccessTokenConsumption {
+  /**
+     * @minLength 32
+     * @maxLength 256
+     */
+  token: string;
   /**
      * @minLength 12
      * @maxLength 128
      * @pattern ^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).+$
      */
-  temporaryPassword: string;
+  newPassword: string;
 }
 
 export interface PasswordChangeInput {
@@ -1829,14 +2074,21 @@ export interface PasswordChangeInput {
   newPassword: string;
 }
 
-export interface PasswordResetInput {
-  sendEmail?: boolean;
-}
+/**
+ * Requests secure email delivery to the user's registered address.
+ */
+export interface PasswordResetInput { [key: string]: unknown }
+
+export type PasswordResetDelivery = typeof PasswordResetDelivery[keyof typeof PasswordResetDelivery];
+
+
+export const PasswordResetDelivery = {
+  email: 'email',
+} as const;
 
 export interface PasswordReset {
   id: string;
-  /** One-time credential to copy securely to the user. */
-  temporaryPassword: string;
+  delivery: PasswordResetDelivery;
   expiresAt: string;
 }
 
@@ -1924,8 +2176,10 @@ export type PublishedContentPage = PageMetadata & {
   locale: string;
   requestedMarket: string;
   usedFallback: boolean;
-  /** True once this content kind has an approved publication history, including archived records. */
+  /** True once this content kind has an immediate publication history, including archived records. */
   isConfigured: boolean;
+  /** Landing page paths with an immediate publication in their history. Draft-only pages are excluded. */
+  configuredPagePaths: string[];
 };
 
 export type SitemapEntryChangeFrequency = typeof SitemapEntryChangeFrequency[keyof typeof SitemapEntryChangeFrequency];
@@ -2057,6 +2311,16 @@ export type PageSizeParameter = number;
 
 export type SearchParameter = string;
 
+export type GetPublicNavigationSettingsParams = {
+market?: string;
+locale?: string;
+};
+
+export type GetNavigationSettingsParams = {
+market?: string;
+locale?: string;
+};
+
 export type GetDashboardKpisParams = {
 period?: DashboardPeriod;
 from?: string;
@@ -2080,6 +2344,22 @@ search?: SearchParameter;
 kind?: DocumentKind;
 status?: DocumentStatus;
 market?: string;
+locale?: string;
+};
+
+export type GetDocumentParams = {
+market: string;
+locale: string;
+};
+
+export type ListDocumentReviewCommentsParams = {
+revisionId?: string;
+};
+
+export type PreviewDocumentParams = {
+market: string;
+locale: string;
+revisionId?: string;
 };
 
 export type ListMarketEditionsParams = {
