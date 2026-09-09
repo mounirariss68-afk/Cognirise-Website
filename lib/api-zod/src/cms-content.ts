@@ -261,6 +261,34 @@ const heroMediaReferenceSchema = z.object({
   mediaVersionId: z.string().uuid(),
   mimeType: z.enum(["video/mp4", "video/webm"]),
 }).strict();
+
+export const siteConfigurationContentSchema = z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
+  page: z.enum(["homepage", "industries"]),
+  hero: z.object({
+    posterMediaId: z.string().uuid(),
+    posterMediaVersionId: z.string().uuid(),
+    sources: z.array(heroMediaReferenceSchema).length(2),
+  }).strict(),
+}).strict().superRefine((value, context) => {
+  const mimeTypes = value.hero.sources.map((source) => source.mimeType);
+  if (new Set(mimeTypes).size !== 2) {
+    context.addIssue({
+      code: "custom",
+      path: ["hero", "sources"],
+      message: "Hero sources require exactly one MP4 and one WebM.",
+    });
+  }
+  const assetIds = [value.hero.posterMediaId, ...value.hero.sources.map((source) => source.mediaId)];
+  if (new Set(assetIds).size !== 3) {
+    context.addIssue({
+      code: "custom",
+      path: ["hero"],
+      message: "Poster, MP4, and WebM must be three distinct media assets.",
+    });
+  }
+});
+
 export const cmsContentSchemas = {
   person: personContentSchema,
   partner: partnerContentSchema,
@@ -439,30 +467,3 @@ export function cmsPublicRoute(kind: CmsDocumentKind, slug: string, content: Cms
     ? `/work/${slug}`
     : null;
 }
-
-export const siteConfigurationContentSchema = z.object({
-  schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
-  page: z.enum(["homepage", "industries"]),
-  hero: z.object({
-    posterMediaId: z.string().uuid(),
-    posterMediaVersionId: z.string().uuid(),
-    sources: z.array(heroMediaReferenceSchema).length(2),
-  }).strict(),
-}).strict().superRefine((value, context) => {
-  const mimeTypes = value.hero.sources.map((source) => source.mimeType);
-  if (new Set(mimeTypes).size !== 2) {
-    context.addIssue({
-      code: "custom",
-      path: ["hero", "sources"],
-      message: "Hero sources require exactly one MP4 and one WebM.",
-    });
-  }
-  const assetIds = [value.hero.posterMediaId, ...value.hero.sources.map((source) => source.mediaId)];
-  if (new Set(assetIds).size !== 3) {
-    context.addIssue({
-      code: "custom",
-      path: ["hero"],
-      message: "Poster, MP4, and WebM must be three distinct media assets.",
-    });
-  }
-});
