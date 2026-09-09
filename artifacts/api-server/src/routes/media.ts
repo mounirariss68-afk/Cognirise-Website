@@ -210,6 +210,7 @@ router.get("/media/:mediaId/file", asyncRoute(async (req, res) => {
     return;
   }
   try {
+    res.set("Cache-Control", "no-store, private");
     const size = Number(result.rows[0].byte_size);
     const range = parseByteRange(req.headers.range, size);
     res.set("Accept-Ranges", "bytes");

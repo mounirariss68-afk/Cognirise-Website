@@ -341,6 +341,10 @@ test("public media stays on the revision pin when a newer asset version appears"
   assert.equal(firstContent.media[0].versionId, revisions.first.versionId);
   const firstMedia = await fetch(`${origin}${firstContent.media[0].url}`);
   assert.equal(firstMedia.headers.get("content-type"), "image/png");
+  assert.equal(
+    firstMedia.headers.get("cache-control"),
+    "public, max-age=31536000, immutable",
+  );
   assert.equal(await firstMedia.text(), "approved-version-one");
   const partial = await fetch(`${origin}${firstContent.media[0].url}`, {
     headers: { range: "bytes=9-15" },
@@ -349,6 +353,10 @@ test("public media stays on the revision pin when a newer asset version appears"
   assert.equal(partial.headers.get("accept-ranges"), "bytes");
   assert.equal(partial.headers.get("content-range"), "bytes 9-15/20");
   assert.equal(partial.headers.get("content-type"), "image/png");
+  assert.equal(
+    partial.headers.get("cache-control"),
+    "public, max-age=31536000, immutable",
+  );
   assert.equal(await partial.text(), "version");
   const unsatisfiable = await fetch(`${origin}${firstContent.media[0].url}`, {
     headers: { range: "bytes=20-" },
@@ -366,6 +374,7 @@ test("public media stays on the revision pin when a newer asset version appears"
   assert.equal(protectedPartial.status, 206);
   assert.equal(protectedPartial.headers.get("content-range"), "bytes 17-19/20");
   assert.equal(protectedPartial.headers.get("content-type"), "image/png");
+  assert.equal(protectedPartial.headers.get("cache-control"), "no-store, private");
   assert.equal(await protectedPartial.text(), "one");
 
   const metadataPatch = await fetch(`${origin}/api/media/${assetId}`, {

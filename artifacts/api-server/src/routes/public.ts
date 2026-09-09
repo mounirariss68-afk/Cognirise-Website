@@ -14,6 +14,7 @@ import { SlidingWindowThrottle } from "../lib/security";
 import { downloadMediaObject, parseByteRange } from "../lib/object-storage";
 
 const router: IRouter = Router();
+const PUBLIC_IMMUTABLE_MEDIA_CACHE_CONTROL = "public, max-age=31536000, immutable";
 export const publicMediaDelivery = {
   download: downloadMediaObject,
 };
@@ -401,6 +402,7 @@ router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
   if (!asset.rowCount) { res.status(404).json({ error: "Public media not found." }); return; }
   const size = Number(asset.rows[0].byte_size);
   const range = parseByteRange(req.headers.range, size);
+  res.set("Cache-Control", PUBLIC_IMMUTABLE_MEDIA_CACHE_CONTROL);
   res.set("Accept-Ranges", "bytes");
   if (range === "invalid") {
     res.status(416).set("Content-Range", `bytes */${size}`).end();

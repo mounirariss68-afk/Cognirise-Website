@@ -1294,6 +1294,12 @@ paths:
       responses:
         "200":
           description: Published media bytes
+          headers:
+            Cache-Control:
+              description: Long-lived public caching for this immutable published media version.
+              schema:
+                type: string
+                example: public, max-age=31536000, immutable
           content:
             image/jpeg: {}
             image/png: {}
@@ -1305,6 +1311,11 @@ paths:
         "206":
           description: Requested byte range
           headers:
+            Cache-Control:
+              description: Long-lived public caching for this immutable published media version.
+              schema:
+                type: string
+                example: public, max-age=31536000, immutable
             Accept-Ranges: { schema: { type: string, enum: [bytes] } }
             Content-Range: { schema: { type: string } }
           content:
