@@ -67,6 +67,7 @@ import IDAOMethodology from "@/pages/IDAOMethodology";
 import MethodologiesPortfolio from "@/pages/MethodologiesPortfolio";
 import AIValueToScale from "@/pages/AIValueToScale";
 import HumanAgentOperatingModel from "@/pages/HumanAgentOperatingModel";
+import AgenticOperationsReadiness from "@/pages/AgenticOperationsReadiness";
 
 export function Router() {
   const [location] = useLocation();
@@ -93,6 +94,7 @@ export function Router() {
         {/* Methodologies */}
         <Route path="/methodologies" component={MethodologiesPortfolio} />
         <Route path="/methodologies/ai-value-to-scale" component={AIValueToScale} />
+        <Route path="/methodologies/agentic-operations-readiness" component={AgenticOperationsReadiness} />
         <Route path="/methodologies/idao" component={IDAOMethodology} />
         <Route path="/methodologies/agent-authority-model" component={AgentAuthorityModel} />
         <Route path="/methodologies/human-agent-operating-model" component={HumanAgentOperatingModel} />

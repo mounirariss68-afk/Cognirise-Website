@@ -28,6 +28,10 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: "AI Value-to-Scale Maturity Model | Cognirise",
     description: "Assess seven evidence-backed conditions for repeatedly moving valuable AI from opportunity into sustained operation.",
   },
+  "/methodologies/agentic-operations-readiness": {
+    title: "Agentic Operations Readiness Framework | Cognirise",
+    description: "Decide whether one workflow should proceed to agent delivery, needs preparation, or must stop—and identify the operating conditions to resolve.",
+  },
   "/what-we-do/agentic-enterprise-transformation": {
     title: "Agentic Transformation Capability | Consulting & Engineering with AI",
     description: "A supporting capability within Consulting & Engineering with AI for redesigning priority work around governed intelligent execution.",
@@ -159,6 +163,7 @@ const compiledNavigation: NavigationItem[] = [
     items: [
       { id: "methodologies.overview", label: "Methodology Portfolio", href: "/methodologies" },
       { id: "methodologies.value-to-scale", label: "AI Value-to-Scale", href: "/methodologies/ai-value-to-scale" },
+      { id: "methodologies.agentic-readiness", label: "Agentic Operations Readiness", href: "/methodologies/agentic-operations-readiness" },
       { id: "methodologies.idao", label: "IDAO", href: "/methodologies/idao" },
       { id: "methodologies.agent-authority", label: "Agent Authority Model", href: "/methodologies/agent-authority-model" },
     ]
