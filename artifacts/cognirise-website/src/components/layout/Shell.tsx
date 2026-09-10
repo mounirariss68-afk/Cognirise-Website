@@ -32,6 +32,10 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: "Agentic Operations Readiness Framework | Cognirise",
     description: "Decide whether one workflow should proceed to agent delivery, needs preparation, or must stop—and identify the operating conditions to resolve.",
   },
+  "/methodologies/ai-use-case-prioritization": {
+    title: "AI Use-Case Prioritization | Cognirise",
+    description: "A transparent working instrument for comparing AI opportunities across value, feasibility, friction and control burden.",
+  },
   "/what-we-do/agentic-enterprise-transformation": {
     title: "Agentic Transformation Capability | Consulting & Engineering with AI",
     description: "A supporting capability within Consulting & Engineering with AI for redesigning priority work around governed intelligent execution.",
@@ -164,6 +168,7 @@ const compiledNavigation: NavigationItem[] = [
       { id: "methodologies.overview", label: "Methodology Portfolio", href: "/methodologies" },
       { id: "methodologies.value-to-scale", label: "AI Value-to-Scale", href: "/methodologies/ai-value-to-scale" },
       { id: "methodologies.agentic-readiness", label: "Agentic Operations Readiness", href: "/methodologies/agentic-operations-readiness" },
+      { id: "methodologies.use-case-prioritization", label: "Use-Case Prioritization", href: "/methodologies/ai-use-case-prioritization" },
       { id: "methodologies.idao", label: "IDAO", href: "/methodologies/idao" },
       { id: "methodologies.agent-authority", label: "Agent Authority Model", href: "/methodologies/agent-authority-model" },
     ]

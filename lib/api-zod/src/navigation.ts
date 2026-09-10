@@ -5,6 +5,7 @@ export const NAVIGATION_ITEM_REGISTRY = [
   { id: "methodologies", label: "How we do it", destination: "/methodologies" },
   { id: "methodologies.overview", label: "Methodology Portfolio", parentId: "methodologies", destination: "/methodologies" },
   { id: "methodologies.value-to-scale", label: "AI Value-to-Scale", parentId: "methodologies", destination: "/methodologies/ai-value-to-scale" },
+  { id: "methodologies.use-case-prioritization", label: "Use-Case Prioritization", parentId: "methodologies", destination: "/methodologies/ai-use-case-prioritization" },
   { id: "methodologies.idao", label: "IDAO", parentId: "methodologies", destination: "/methodologies/idao" },
   { id: "methodologies.agent-authority", label: "Agent Authority Model", parentId: "methodologies", destination: "/methodologies/agent-authority-model" },
   { id: "platforms", label: "Platforms", destination: "/platforms" },

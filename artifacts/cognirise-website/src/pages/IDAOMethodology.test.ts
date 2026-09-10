@@ -16,7 +16,7 @@ test("routes IDAO and redirects retired service overviews to the homepage practi
   assert.doesNotMatch(app, /ServicesOverview/);
 });
 
-test("navigation makes What we do direct and exposes both methodologies in order", () => {
+test("navigation makes What we do direct and exposes the methodology portfolio in order", () => {
   assert.match(shell, /id: "what-we-do",[\s\S]*?href: "\/",\s*\}/);
   assert.match(shell, /label: "How we do it"[\s\S]*?label: "IDAO"[\s\S]*?label: "Agent Authority Model"/);
   assert.match(shell, /aria-expanded/);
@@ -30,7 +30,7 @@ test("navigation makes What we do direct and exposes both methodologies in order
   );
   assert.deepEqual(
     NAVIGATION_ITEM_REGISTRY.filter((item) => item.id === "methodologies" || ("parentId" in item && item.parentId === "methodologies")).map((item) => item.id),
-    ["methodologies", "methodologies.idao", "methodologies.agent-authority"],
+    ["methodologies", "methodologies.overview", "methodologies.value-to-scale", "methodologies.use-case-prioritization", "methodologies.idao", "methodologies.agent-authority"],
   );
 });
 

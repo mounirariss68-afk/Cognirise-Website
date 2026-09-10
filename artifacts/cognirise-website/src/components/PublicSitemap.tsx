@@ -8,6 +8,7 @@ export const STATIC_SITEMAP_PATHS = [
   "/methodologies",
   "/methodologies/ai-value-to-scale",
   "/methodologies/agentic-operations-readiness",
+  "/methodologies/ai-use-case-prioritization",
   "/methodologies/idao",
   "/methodologies/agent-authority-model",
   ...ALLIANCE_PLATFORM_LIST.map(({ slug }) => `/platforms/${slug}`),

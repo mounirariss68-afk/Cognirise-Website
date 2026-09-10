@@ -3,9 +3,9 @@ import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { mergeSitemapItems, STATIC_SITEMAP_PATHS } from "./PublicSitemap";
 
-test("sitemap integration includes both methodologies once across static and CMS sources", () => {
+test("sitemap integration includes the public methodologies once across static and CMS sources", () => {
   const origin = "https://cognirise.ai";
-  const routes = ["/methodologies/idao", "/methodologies/agent-authority-model"];
+  const routes = ["/methodologies/ai-use-case-prioritization", "/methodologies/idao", "/methodologies/agent-authority-model"];
   routes.forEach((route) => assert.ok(STATIC_SITEMAP_PATHS.includes(route)));
   const merged = mergeSitemapItems([
     { url: `${origin}/` },
@@ -24,5 +24,6 @@ test("the canonical methodology route is present in the static XML sitemap", asy
   const xml = await readFile(new URL("../../public/sitemap.xml", import.meta.url), "utf8");
   assert.match(xml, /https:\/\/cognirise\.ai\/methodologies\/agent-authority-model/);
   assert.match(xml, /https:\/\/cognirise\.ai\/methodologies\/idao/);
+  assert.match(xml, /https:\/\/cognirise\.ai\/methodologies\/ai-use-case-prioritization/);
   assert.doesNotMatch(xml, /https:\/\/cognirise\.ai\/what-we-do<\/loc>/);
 });
