@@ -11,7 +11,7 @@
 - [CMS merge reconciliation](cms-merge-reconciliation.md) — Development data created by isolated task work must cross the merge boundary through safe, idempotent reconciliation.
 - [Person market availability](person-market-availability.md) — Stage and publish availability separately; requested-market suppression must run before content fallback.
 - [Modular panorama continuity](modular-panorama-continuity.md) — Derive adjoining Pulse modules from one connected master and never animate them out of alignment.
-- [Website browser validation routing](website-browser-validation-routing.md) — Use the root dev-domain target so SPA assets and API requests reach their separate managed workflows.
+- [Website browser validation routing](website-browser-validation-routing.md) — Shell-run Chromium uses the managed local proxy with both website and API workflows running.
 - [App Storage one-off scripts](app-storage-one-off-scripts.md) — Shell-run CMS jobs lack Google ADC; use Replit sidecar auth and keep object reads outside database transactions.
 - [Governed preview capabilities](governed-preview-capabilities.md) — Pin previews by revision ID, serve draft media only through the capability, and force metadata independently of draft SEO.
 - [Composite image animation](composite-image-animation.md) — Isolate clean artwork from designed page screenshots before image-to-video generation so baked typography never enters footage.

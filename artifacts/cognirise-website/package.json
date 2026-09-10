@@ -15,7 +15,8 @@
     "test:case-studies-browser": "node scripts/case-study-rail.browser-test.mjs",
     "test:industry-images-browser": "node scripts/industry-images.browser-test.mjs",
     "test:navigation-browser": "node scripts/navigation-idao.browser-test.mjs",
-    "test:readiness-browser": "node scripts/readiness-decision.browser-test.mjs"
+    "test:readiness-browser": "node scripts/readiness-decision.browser-test.mjs",
+    "test:methodology-browser": "node scripts/methodology-relationships.browser-test.mjs"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",

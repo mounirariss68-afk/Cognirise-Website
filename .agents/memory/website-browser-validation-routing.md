@@ -3,8 +3,8 @@ name: Website browser validation routing
 description: How to target the Cognirise website in browser-level validation without bypassing Replit's split workflow routing.
 ---
 
-Run browser-level website checks against the root development-domain URL, with the application route appended directly. Do not include the artifact path prefix, and do not target the website workflow port.
+Run shell-managed Chromium checks against the managed local proxy at `http://127.0.0.1:80`, with the application route appended directly. Start both the website and API workflows first. Do not include the artifact path prefix, target the website workflow port, or default shell-run Chromium to the external development domain.
 
-**Why:** The Cognirise development preview intentionally splits root Vite assets and `/api` requests across separate managed workflows. An artifact-prefixed browser URL leaves the prefix in the SPA pathname, while a direct website port bypasses the API workflow; either target can produce a false route or CMS failure even when the managed preview is healthy.
+**Why:** The Cognirise preview splits Vite assets and `/api` requests across separate managed workflows. The local port-80 proxy preserves that routing. Direct workflow ports bypass part of the app, while the external development domain can present a Replit preview-sharing interstitial to shell-run headless Chromium.
 
-**How to apply:** Set browser-test base URLs to the root Replit development domain and then append routes such as `/what-we-do` or `/#home-industries`. Keep shell-only route probes separate from browser validation because the shell's local proxy context is not equivalent to the artifact preview.
+**How to apply:** Keep browser-script defaults on the local port-80 proxy and allow an explicit base-URL override. If a route renders the generic 404, verify both workflows and the `/api/public/navigation` response before treating it as an application regression. Managed app-preview tooling can continue resolving the artifact route itself.
