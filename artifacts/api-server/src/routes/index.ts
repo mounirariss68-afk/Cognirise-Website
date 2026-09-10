@@ -9,6 +9,7 @@ import publicRouter from "./public";
 import analyticsRouter from "./analytics";
 import mediaRouter from "./media";
 import navigationRouter from "./navigation";
+import readinessAssessmentsRouter from "./readiness-assessments";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(publicRouter);
 router.use(analyticsRouter);
 router.use(mediaRouter);
 router.use(navigationRouter);
+router.use(readinessAssessmentsRouter);
 
 export default router;

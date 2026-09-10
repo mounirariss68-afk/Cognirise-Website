@@ -9,6 +9,94 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Save a completed readiness decision
+ */
+export const CreateReadinessAssessmentBody = zod.object({
+  "answers": zod.object({
+  "stability": zod.enum(['ready', 'prepare', 'stop']),
+  "access": zod.enum(['ready', 'prepare', 'stop']),
+  "observability": zod.enum(['ready', 'prepare', 'stop']),
+  "fallback": zod.enum(['ready', 'prepare', 'stop']),
+  "exceptions": zod.enum(['ready', 'prepare', 'stop']),
+  "economics": zod.enum(['ready', 'prepare', 'stop'])
+})
+})
+
+export const createReadinessAssessmentResponseOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const CreateReadinessAssessmentResponse = zod.object({
+  "id": zod.string().regex(createReadinessAssessmentResponseOneIdRegExp),
+  "answers": zod.object({
+  "stability": zod.enum(['ready', 'prepare', 'stop']),
+  "access": zod.enum(['ready', 'prepare', 'stop']),
+  "observability": zod.enum(['ready', 'prepare', 'stop']),
+  "fallback": zod.enum(['ready', 'prepare', 'stop']),
+  "exceptions": zod.enum(['ready', 'prepare', 'stop']),
+  "economics": zod.enum(['ready', 'prepare', 'stop'])
+}),
+  "decision": zod.enum(['proceed', 'prepare', 'stop']),
+  "unresolvedConditionIds": zod.array(zod.enum(['stability', 'access', 'observability', 'fallback', 'exceptions', 'economics'])),
+  "createdAt": zod.coerce.date(),
+  "expiresAt": zod.coerce.date()
+}).and(zod.object({
+  "deleteToken": zod.string()
+}))
+
+
+/**
+ * @summary Reopen a saved readiness decision
+ */
+export const getReadinessAssessmentPathIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const GetReadinessAssessmentParams = zod.object({
+  "id": zod.coerce.string().regex(getReadinessAssessmentPathIdRegExp)
+})
+
+export const getReadinessAssessmentResponseIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const GetReadinessAssessmentResponse = zod.object({
+  "id": zod.string().regex(getReadinessAssessmentResponseIdRegExp),
+  "answers": zod.object({
+  "stability": zod.enum(['ready', 'prepare', 'stop']),
+  "access": zod.enum(['ready', 'prepare', 'stop']),
+  "observability": zod.enum(['ready', 'prepare', 'stop']),
+  "fallback": zod.enum(['ready', 'prepare', 'stop']),
+  "exceptions": zod.enum(['ready', 'prepare', 'stop']),
+  "economics": zod.enum(['ready', 'prepare', 'stop'])
+}),
+  "decision": zod.enum(['proceed', 'prepare', 'stop']),
+  "unresolvedConditionIds": zod.array(zod.enum(['stability', 'access', 'observability', 'fallback', 'exceptions', 'economics'])),
+  "createdAt": zod.coerce.date(),
+  "expiresAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a saved readiness decision
+ */
+export const deleteReadinessAssessmentPathIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const DeleteReadinessAssessmentParams = zod.object({
+  "id": zod.coerce.string().regex(deleteReadinessAssessmentPathIdRegExp)
+})
+
+export const deleteReadinessAssessmentHeaderXDeleteTokenMin = 32;
+export const deleteReadinessAssessmentHeaderXDeleteTokenMax = 200;
+
+
+
+export const DeleteReadinessAssessmentHeader = zod.object({
+  "X-Delete-Token": zod.string().min(deleteReadinessAssessmentHeaderXDeleteTokenMin).max(deleteReadinessAssessmentHeaderXDeleteTokenMax)
+})
+
+export const DeleteReadinessAssessmentResponse = zod.void()
+
+
+/**
  * @summary Get enabled public markets and locales
  */
 export const GetPublicConfigurationResponse = zod.object({

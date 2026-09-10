@@ -162,6 +162,13 @@
       "when": 1788959300007,
       "tag": "0022_cms_legacy_root_archive_normalization",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1788998400000,
+      "tag": "0023_readiness_assessments",
+      "breakpoints": true
     }
   ]
 }

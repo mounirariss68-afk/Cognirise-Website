@@ -22,6 +22,70 @@ tags:
   - { name: analytics, description: First-party analytics and consent }
   - { name: navigation, description: Governed public navigation visibility }
 paths:
+  /public/readiness-assessments:
+    post:
+      operationId: createReadinessAssessment
+      tags: [public]
+      summary: Save a completed readiness decision
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReadinessAssessmentInput"
+      responses:
+        "201":
+          description: Saved readiness decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadinessAssessmentReceipt"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /public/readiness-assessments/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+    get:
+      operationId: getReadinessAssessment
+      tags: [public]
+      summary: Reopen a saved readiness decision
+      responses:
+        "200":
+          description: Saved readiness decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadinessAssessment"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteReadinessAssessment
+      tags: [public]
+      summary: Delete a saved readiness decision
+      parameters:
+        - in: header
+          name: X-Delete-Token
+          required: true
+          schema: { type: string, minLength: 32, maxLength: 200 }
+      responses:
+        "204":
+          description: Readiness decision deleted
+        "403":
+          description: Deletion permission is missing or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [error]
+                properties:
+                  error: { type: string }
+        "404":
+          $ref: "#/components/responses/NotFound"
   /public/configuration:
     get:
       operationId: getPublicConfiguration
@@ -3415,6 +3479,56 @@ components:
       properties:
         locale: { type: string }
         url: { type: string }
+
+    ReadinessAnswer:
+      type: string
+      enum: [ready, prepare, stop]
+    ReadinessDecision:
+      type: string
+      enum: [proceed, prepare, stop]
+    ReadinessAnswers:
+      type: object
+      additionalProperties: false
+      required: [stability, access, observability, fallback, exceptions, economics]
+      properties:
+        stability: { $ref: "#/components/schemas/ReadinessAnswer" }
+        access: { $ref: "#/components/schemas/ReadinessAnswer" }
+        observability: { $ref: "#/components/schemas/ReadinessAnswer" }
+        fallback: { $ref: "#/components/schemas/ReadinessAnswer" }
+        exceptions: { $ref: "#/components/schemas/ReadinessAnswer" }
+        economics: { $ref: "#/components/schemas/ReadinessAnswer" }
+    ReadinessAssessmentInput:
+      type: object
+      additionalProperties: false
+      required: [answers]
+      properties:
+        answers:
+          $ref: "#/components/schemas/ReadinessAnswers"
+    ReadinessAssessment:
+      type: object
+      required: [id, answers, decision, unresolvedConditionIds, createdAt, expiresAt]
+      properties:
+        id:
+          type: string
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+        answers:
+          $ref: "#/components/schemas/ReadinessAnswers"
+        decision:
+          $ref: "#/components/schemas/ReadinessDecision"
+        unresolvedConditionIds:
+          type: array
+          items:
+            type: string
+            enum: [stability, access, observability, fallback, exceptions, economics]
+        createdAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+    ReadinessAssessmentReceipt:
+      allOf:
+        - $ref: "#/components/schemas/ReadinessAssessment"
+        - type: object
+          required: [deleteToken]
+          properties:
+            deleteToken: { type: string }
 
     AnalyticsEventInput:
       type: object

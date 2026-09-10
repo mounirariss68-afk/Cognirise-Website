@@ -2217,6 +2217,63 @@ export interface Sitemap {
   generatedAt: string;
 }
 
+export type ReadinessAnswer = typeof ReadinessAnswer[keyof typeof ReadinessAnswer];
+
+
+export const ReadinessAnswer = {
+  ready: 'ready',
+  prepare: 'prepare',
+  stop: 'stop',
+} as const;
+
+export type ReadinessDecision = typeof ReadinessDecision[keyof typeof ReadinessDecision];
+
+
+export const ReadinessDecision = {
+  proceed: 'proceed',
+  prepare: 'prepare',
+  stop: 'stop',
+} as const;
+
+export interface ReadinessAnswers {
+  stability: ReadinessAnswer;
+  access: ReadinessAnswer;
+  observability: ReadinessAnswer;
+  fallback: ReadinessAnswer;
+  exceptions: ReadinessAnswer;
+  economics: ReadinessAnswer;
+}
+
+export interface ReadinessAssessmentInput {
+  answers: ReadinessAnswers;
+}
+
+export type ReadinessAssessmentUnresolvedConditionIdsItem = typeof ReadinessAssessmentUnresolvedConditionIdsItem[keyof typeof ReadinessAssessmentUnresolvedConditionIdsItem];
+
+
+export const ReadinessAssessmentUnresolvedConditionIdsItem = {
+  stability: 'stability',
+  access: 'access',
+  observability: 'observability',
+  fallback: 'fallback',
+  exceptions: 'exceptions',
+  economics: 'economics',
+} as const;
+
+export interface ReadinessAssessment {
+  /** @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$ */
+  id: string;
+  answers: ReadinessAnswers;
+  decision: ReadinessDecision;
+  unresolvedConditionIds: ReadinessAssessmentUnresolvedConditionIdsItem[];
+  createdAt: string;
+  expiresAt: string;
+}
+
+export type ReadinessAssessmentReceipt = ReadinessAssessment & {
+  deleteToken: string;
+};
+
 export type AnalyticsEventInputName = typeof AnalyticsEventInputName[keyof typeof AnalyticsEventInputName];
 
 
@@ -2310,6 +2367,10 @@ export type PageParameter = number;
 export type PageSizeParameter = number;
 
 export type SearchParameter = string;
+
+export type DeleteReadinessAssessment403 = {
+  error: string;
+};
 
 export type GetPublicNavigationSettingsParams = {
 market?: string;

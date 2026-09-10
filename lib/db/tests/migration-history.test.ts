@@ -25,6 +25,7 @@ const expectedMigrations = [
   { idx: 20, when: 1788959300005, tag: "0020_cms_navigation_published_policy" },
   { idx: 21, when: 1788959300006, tag: "0021_cms_preview_navigation_snapshot" },
   { idx: 22, when: 1788959300007, tag: "0022_cms_legacy_root_archive_normalization" },
+  { idx: 23, when: 1788998400000, tag: "0023_readiness_assessments" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {

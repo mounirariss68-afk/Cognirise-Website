@@ -1,11 +1,16 @@
-import { useMemo, useState } from "react";
 import { ArrowRight, ArrowDown, Check, Printer, RotateCcw } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useDynamicMetadata } from "@/lib/metadata";
 import { MethodologyRelationship } from "@/components/MethodologyRelationship";
 import { PulseImage } from "@/components/ui/pulse-image";
+import { useEffect, useMemo, useState } from "react";
+import {
+import { ArrowRight, Check, Copy, Printer, RotateCcw, Save, Trash2 } from "lucide-react";
+import {
 
-type Answer = "ready" | "prepare" | "stop";
+type Answer = ReadinessAnswers[keyof ReadinessAnswers];
+
+type SavedState = Pick<ReadinessAssessment, "id" | "createdAt" | "expiresAt">;
 type ConditionRecord = { evidence: string; owner: string; reassessmentDate: string };
 
 const EMPTY_CONDITION_RECORD: ConditionRecord = { evidence: "", owner: "", reassessmentDate: "" };
@@ -95,10 +100,37 @@ function Kicker({ children, inverse = false }: { children: React.ReactNode; inve
 }
 
 export default function AgenticOperationsReadiness() {
-  const [answers, setAnswers] = useState<Partial<Record<(typeof CONDITIONS)[number]["id"], Answer>>>({});
+  const [answers, setAnswers] = useState<Partial<ReadinessAnswers>>({});
   const [workflowScope, setWorkflowScope] = useState("");
   const [governanceReview, setGovernanceReview] = useState("");
   const [conditionRecords, setConditionRecords] = useState<Partial<Record<(typeof CONDITIONS)[number]["id"], ConditionRecord>>>({});
+  const [requestedSavedId] = useState(() => getSavedReadinessId(window.location.search));
+  const [saved, setSaved] = useState<SavedState | null>(null);
+  const [isLoadingSaved, setIsLoadingSaved] = useState(Boolean(requestedSavedId));
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const id = requestedSavedId;
+    if (!id) return;
+    const controller = new AbortController();
+    getReadinessAssessment(id, { signal: controller.signal })
+      .then((record) => {
+        setAnswers(record.answers);
+        setSaved(record);
+        setLoadError(null);
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        setLoadError(error instanceof Error ? error.message : "The saved decision could not be reopened.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoadingSaved(false);
+      });
+    return () => controller.abort();
+  }, [requestedSavedId]);
 
   useDynamicMetadata({
     title: "Agentic Operations Readiness Framework | Cognirise",
@@ -116,17 +148,32 @@ export default function AgenticOperationsReadiness() {
   const unresolved = CONDITIONS.filter((condition) => answers[condition.id] !== "ready");
   const completed = Object.keys(answers).length;
   const assessmentComplete = completed === CONDITIONS.length;
+  const completeAnswers = isCompleteReadinessAnswers(answers) ? answers : null;
+  const assessmentLocked = isLoadingSaved || isSaving || isDeleting;
   const updateConditionRecord = (id: (typeof CONDITIONS)[number]["id"], field: keyof ConditionRecord, value: string) => {
     setConditionRecords((current) => ({
       ...current,
       [id]: { ...(current[id] ?? EMPTY_CONDITION_RECORD), [field]: value },
     }));
   };
+  const updateAnswer = (id: (typeof CONDITIONS)[number]["id"], answer: Answer) => {
+    setAnswers((current) => ({ ...current, [id]: answer }));
+    if (saved) {
+      setSaved(null);
+      replaceReadinessUrl(null);
+    }
+    setStatusMessage(null);
+    setLoadError(null);
+  };
   const resetAssessment = () => {
     setAnswers({});
     setWorkflowScope("");
     setGovernanceReview("");
     setConditionRecords({});
+    setSaved(null);
+    replaceReadinessUrl(null);
+    setStatusMessage(null);
+    setLoadError(null);
   };
   const printReadinessRecord = () => {
     const printClass = "readiness-record-printing";
@@ -134,6 +181,53 @@ export default function AgenticOperationsReadiness() {
     document.body.classList.add(printClass);
     window.addEventListener("afterprint", cleanup, { once: true });
     window.requestAnimationFrame(() => window.print());
+  };
+  const saveAssessment = async () => {
+    if (!completeAnswers || isSaving) return;
+    setIsSaving(true);
+    setStatusMessage(null);
+    try {
+      const record = await createReadinessAssessment({ answers: completeAnswers });
+      storeReadinessDeleteToken(record.id, record.deleteToken);
+      setSaved(record);
+      replaceReadinessUrl(record.id);
+      setStatusMessage("Decision saved. Copy the link to share this fixed record.");
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : "The decision could not be saved.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  const copyShareLink = async () => {
+    if (!saved) return;
+    try {
+      await navigator.clipboard.writeText(readinessShareUrl(saved.id));
+      setStatusMessage("Share link copied.");
+    } catch {
+      setStatusMessage("Copy the link from your browser address bar.");
+    }
+  };
+  const deleteSavedAssessment = async () => {
+    if (!saved || isDeleting) return;
+    const deleteToken = getReadinessDeleteToken(saved.id);
+    if (!deleteToken) {
+      setStatusMessage("Only the browser that saved this decision can delete it before expiry.");
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      await deleteReadinessAssessment(saved.id, {
+        headers: { "X-Delete-Token": deleteToken },
+      });
+      forgetReadinessDeleteToken(saved.id);
+      setSaved(null);
+      replaceReadinessUrl(null);
+      setStatusMessage("Saved record deleted. Your selected answers remain on this page.");
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : "The saved record could not be deleted.");
+    } finally {
+      setIsDeleting(false);
+    }
   };
   const resultCopy = result === "proceed"
     ? {
@@ -269,6 +363,35 @@ export default function AgenticOperationsReadiness() {
           />
         </div>
 
+        {(isLoadingSaved || loadError || saved) && (
+          <div className="mt-8 border border-[#cbd3e1] bg-[#f3f5f8] p-5" role="status">
+            {isLoadingSaved && <p className="text-sm font-semibold">Reopening the saved decision…</p>}
+            {loadError && (
+              <>
+                <p className="text-sm font-semibold text-[#b43b2b]">This saved decision is unavailable or has expired.</p>
+                <p className="mt-1 text-xs leading-[1.55] text-[#647491]">You can still complete and save a new assessment below.</p>
+              </>
+            )}
+            {saved && (
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold">Saved decision reopened</p>
+                  <p className="mt-1 text-xs leading-[1.55] text-[#647491]">
+                    This fixed record expires {new Date(saved.expiresAt).toLocaleDateString(undefined, {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}. It contains only the six selected answers and their derived outcome.
+                  </p>
+                </div>
+                <button type="button" onClick={copyShareLink} className="inline-flex items-center gap-2 border border-[#102957] px-4 py-2 text-xs font-bold hover:bg-[#102957] hover:text-white">
+                  <Copy size={14} /> Copy share link
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         <ol className="mt-14 space-y-5">
           {CONDITIONS.map((condition, index) => (
             <li key={condition.id} className="border border-[#cbd3e1] bg-white p-5 md:p-7">
@@ -287,9 +410,10 @@ export default function AgenticOperationsReadiness() {
                         type="button"
                         role="radio"
                         aria-checked={selected}
+                         disabled={assessmentLocked}
                          data-readiness-answer={`${condition.id}:${answer}`}
-                        onClick={() => setAnswers((current) => ({ ...current, [condition.id]: answer }))}
-                        className={`grid min-h-14 grid-cols-[82px_1fr] items-start gap-3 border p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--brand-coral))] ${
+                         onClick={() => updateAnswer(condition.id, answer)}
+                         className={`grid min-h-14 grid-cols-[82px_1fr] items-start gap-3 border p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--brand-coral))] disabled:cursor-wait disabled:opacity-70 ${
                           selected ? "border-[#102957] bg-[#102957] text-white" : "border-[#d7dde7] hover:border-[#102957]"
                         }`}
                       >
@@ -316,11 +440,44 @@ export default function AgenticOperationsReadiness() {
               <p className="font-semibold leading-[1.5]">{resultCopy.line}</p>
               <p className="mt-2 text-sm leading-[1.55] text-[#b9c7db]">{resultCopy.detail}</p>
               {completed > 0 && (
-                <button data-testid="button-reset-assessment" type="button" onClick={resetAssessment} className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-white/75 underline underline-offset-4 hover:text-white">
+                <button data-testid="button-reset-assessment" type="button" disabled={assessmentLocked} onClick={resetAssessment} className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-white/75 underline underline-offset-4 hover:text-white disabled:cursor-wait disabled:opacity-50">
                   <RotateCcw size={13} /> Reset assessment
                 </button>
               )}
             </div>
+          </div>
+          <div className="mt-6 border-t border-white/15 pt-5">
+            <div className="flex flex-wrap items-center gap-3">
+              {!saved && (
+                <button
+                  type="button"
+                  data-readiness-save
+                  disabled={!completeAnswers || isSaving}
+                  onClick={saveAssessment}
+                  className="inline-flex items-center gap-2 bg-white px-4 py-2.5 text-xs font-bold text-[#102957] disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  <Save size={14} /> {isSaving ? "Saving…" : "Save this decision"}
+                </button>
+              )}
+              {saved && (
+                <>
+                  <button type="button" onClick={copyShareLink} className="inline-flex items-center gap-2 bg-white px-4 py-2.5 text-xs font-bold text-[#102957]">
+                    <Copy size={14} /> Copy share link
+                  </button>
+                  {getReadinessDeleteToken(saved.id) && (
+                    <button data-testid="button-delete-readiness-record" type="button" disabled={isDeleting} onClick={deleteSavedAssessment} className="inline-flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-white/75 underline underline-offset-4 hover:text-white disabled:opacity-50">
+                      <Trash2 size={14} /> {isDeleting ? "Deleting…" : "Delete saved record"}
+                    </button>
+                  )}
+                </>
+              )}
+              <p className="text-xs leading-[1.5] text-[#b9c7db]">
+                {completeAnswers
+                  ? "Saves fixed choices only—workflow scope, evidence notes, owners and dates stay in this browser. Records expire after 90 days."
+                  : "Answer all six conditions to save a shareable decision."}
+              </p>
+            </div>
+            {statusMessage && <p className="mt-3 text-xs font-semibold text-white" role="status">{statusMessage}</p>}
           </div>
         </div>
       </section>
@@ -375,7 +532,7 @@ export default function AgenticOperationsReadiness() {
               <button data-testid="button-print-readiness-record" type="button" onClick={printReadinessRecord} className="inline-flex items-center gap-2 bg-[#102957] px-5 py-3 text-sm font-bold text-white hover:bg-[hsl(var(--brand-pink))]">
                 <Printer size={16} /> Print or save record
               </button>
-              <p className="max-w-xl text-xs leading-[1.55] text-[#647491]">Your browser’s print dialog can print the record or save it as a PDF. Nothing is uploaded or stored by Cognirise.</p>
+              <p className="max-w-xl text-xs leading-[1.55] text-[#647491]">Your browser’s print dialog can print the full record or save it as a PDF. Workflow scope, evidence notes, owners and dates remain local even when the fixed-choice decision is shared.</p>
             </div>
           </div>
         )}
@@ -403,7 +560,7 @@ export default function AgenticOperationsReadiness() {
           })}
           <div className="print-governance"><h2>Governance review</h2><p>{governanceReview || "No overall governance review note recorded."}</p></div>
           <p className="print-links">Next methods: IDAO — {window.location.origin}/methodologies/idao &nbsp;·&nbsp; Agent Authority — {window.location.origin}/methodologies/agent-authority-model</p>
-          <p className="print-privacy">Generated locally from this browser session. Assessment answers were not submitted to Cognirise or analytics.</p>
+          <p className="print-privacy">Generated locally from this browser session. Free-text scope, evidence and ownership details were not submitted to Cognirise or analytics.</p>
         </section>
       )}
 

@@ -35,6 +35,7 @@ import type {
   ConsentRecord,
   CsrfToken,
   DashboardKpis,
+  DeleteReadinessAssessment403,
   Document,
   DocumentEditionMatrix,
   DocumentInput,
@@ -97,6 +98,9 @@ import type {
   PublicationInput,
   PublishedContent,
   PublishedContentPage,
+  ReadinessAssessment,
+  ReadinessAssessmentInput,
+  ReadinessAssessmentReceipt,
   RecoveryInput,
   ReviewComment,
   ReviewCommentInput,
@@ -147,6 +151,225 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getCreateReadinessAssessmentUrl = () => {
+
+
+
+
+  return `/api/public/readiness-assessments`
+}
+
+/**
+ * @summary Save a completed readiness decision
+ */
+export const createReadinessAssessment = async (readinessAssessmentInput: ReadinessAssessmentInput, options?: Parameters<typeof customFetch>[1]): Promise<ReadinessAssessmentReceipt> => {
+
+  return customFetch<ReadinessAssessmentReceipt>(getCreateReadinessAssessmentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(readinessAssessmentInput)
+  }
+);}
+
+
+
+
+
+export const getCreateReadinessAssessmentMutationOptions = <TError = ErrorType<BadRequestResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReadinessAssessment>>, TError,{data: BodyType<ReadinessAssessmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createReadinessAssessment>>, TError,{data: BodyType<ReadinessAssessmentInput>}, TContext> => {
+
+const mutationKey = ['createReadinessAssessment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createReadinessAssessment>>, {data: BodyType<ReadinessAssessmentInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createReadinessAssessment(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateReadinessAssessmentMutationResult = NonNullable<Awaited<ReturnType<typeof createReadinessAssessment>>>
+    export type CreateReadinessAssessmentMutationBody = BodyType<ReadinessAssessmentInput>
+    export type CreateReadinessAssessmentMutationError = ErrorType<BadRequestResponse>
+
+    /**
+ * @summary Save a completed readiness decision
+ */
+export const useCreateReadinessAssessment = <TError = ErrorType<BadRequestResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReadinessAssessment>>, TError,{data: BodyType<ReadinessAssessmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createReadinessAssessment>>,
+        TError,
+        {data: BodyType<ReadinessAssessmentInput>},
+        TContext
+      > => {
+      return useMutation(getCreateReadinessAssessmentMutationOptions(options));
+    }
+
+export const getGetReadinessAssessmentUrl = (id: string,) => {
+
+
+
+
+  return `/api/public/readiness-assessments/${id}`
+}
+
+/**
+ * @summary Reopen a saved readiness decision
+ */
+export const getReadinessAssessment = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<ReadinessAssessment> => {
+
+  return customFetch<ReadinessAssessment>(getGetReadinessAssessmentUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetReadinessAssessmentQueryKey = (id: string,) => {
+    return [
+    `/api/public/readiness-assessments/${id}`
+    ] as const;
+    }
+
+
+export const getGetReadinessAssessmentQueryOptions = <TData = Awaited<ReturnType<typeof getReadinessAssessment>>, TError = ErrorType<NotFoundResponse>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReadinessAssessment>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetReadinessAssessmentQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getReadinessAssessment>>> = ({ signal }) => getReadinessAssessment(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getReadinessAssessment>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetReadinessAssessmentQueryResult = NonNullable<Awaited<ReturnType<typeof getReadinessAssessment>>>
+export type GetReadinessAssessmentQueryError = ErrorType<NotFoundResponse>
+
+
+/**
+ * @summary Reopen a saved readiness decision
+ */
+
+export function useGetReadinessAssessment<TData = Awaited<ReturnType<typeof getReadinessAssessment>>, TError = ErrorType<NotFoundResponse>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReadinessAssessment>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetReadinessAssessmentQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getDeleteReadinessAssessmentUrl = (id: string,) => {
+
+
+
+
+  return `/api/public/readiness-assessments/${id}`
+}
+
+/**
+ * @summary Delete a saved readiness decision
+ */
+export const deleteReadinessAssessment = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteReadinessAssessmentUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteReadinessAssessmentMutationOptions = <TError = ErrorType<DeleteReadinessAssessment403 | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteReadinessAssessment>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteReadinessAssessment>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteReadinessAssessment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteReadinessAssessment>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteReadinessAssessment(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteReadinessAssessmentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteReadinessAssessment>>>
+
+    export type DeleteReadinessAssessmentMutationError = ErrorType<DeleteReadinessAssessment403 | NotFoundResponse>
+
+    /**
+ * @summary Delete a saved readiness decision
+ */
+export const useDeleteReadinessAssessment = <TError = ErrorType<DeleteReadinessAssessment403 | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteReadinessAssessment>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteReadinessAssessment>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteReadinessAssessmentMutationOptions(options));
+    }
 
 export const getGetPublicConfigurationUrl = () => {
 
