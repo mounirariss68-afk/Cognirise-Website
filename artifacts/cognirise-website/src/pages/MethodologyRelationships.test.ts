@@ -21,41 +21,37 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.match(relBlock, /Start here when/i);
     assert.match(relBlock, /Decision/);
     assert.match(relBlock, /Output/);
-    assert.match(relBlock, /How it connects to IDAO/);
-    assert.match(relBlock, /How it connects to Agent Authority/);
+    assert.match(relBlock, /Connection to IDAO/);
+    assert.match(relBlock, /Connection to Agent Authority/);
     assert.match(relBlock, /Reassess when/);
     assert.match(relBlock, /Does not decide/);
   });
 
   it("verifies IDAO entry points, loopback, and K/D/A in route map", () => {
     assert.match(routeMap, /Innovate, Demonstrate, Activate/);
-    assert.match(routeMap, /update to Operate/);
     assert.match(routeMap, /loopback/i);
     assert.match(routeMap, /Knowledge/);
     assert.match(routeMap, /Decision/);
     assert.match(routeMap, /Action/);
-    assert.match(routeMap, /start from any situation/i);
-    assert.match(routeMap, /optional/i);
-    assert.match(routeMap, /not another framework/i);
-    assert.match(routeMap, /Self-assessment · an instrument within this method/);
-    assert.match(routeMap, /No initiative is required to start at Innovate/i);
     for (const situation of ["Organization-wide constraint", "Multiple opportunities", "One use case or workflow", "Human–agent work design", "Specific handover authority", "Evidence from live operation"]) {
       assert.match(routeMap, new RegExp(situation));
     }
   });
 
-  it("verifies one AI Value-to-Scale occurrence in portfolio and nested assessment", () => {
-    const vtsMatches = portfolio.match(/AI Value-to-Scale Maturity Model/g) || [];
-    assert.strictEqual(vtsMatches.length, 1);
-    assert.match(portfolio, /Self-Administered AI Maturity Assessment/);
-    assert.match(portfolio, /nested/i);
+  it("verifies the new method overview image and routing approach in portfolio", () => {
+    assert.match(portfolio, /method-overview\.jpg/);
+    assert.match(portfolio, /route-navigator/);
+    assert.doesNotMatch(portfolio, /AI Value-to-Scale Maturity Model/);
+    assert.doesNotMatch(portfolio, /Complete static route/i);
+    assert.doesNotMatch(portfolio, /Download the VTS assessment worksheet/i);
+    assert.match(routeMap, /Start with your situation/i);
   });
 
   it("verifies imagery refs exist in the pages", () => {
-    assert.match(vts, /method-value-to-scale\.jpg/);
-    assert.match(ucp, /method-use-case-prioritization-clean\.jpg/);
-    assert.match(aor, /method-operations-readiness-clean\.jpg/);
-    assert.match(haom, /method-human-agent-operating-model-clean\.jpg/);
+    assert.match(vts, /method-vts\.jpg/);
+    assert.match(ucp, /method-ucp-v2\.jpg/);
+    assert.match(aor, /method-aor-v2\.jpg/);
+    assert.match(haom, /method-haom-v2\.jpg/);
   });
 
   it("uses the shared relationship block on every supporting methodology", () => {

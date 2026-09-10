@@ -4,12 +4,12 @@ import test from "node:test";
 
 const page = readFileSync(new URL("./AgenticOperationsReadiness.tsx", import.meta.url), "utf8");
 const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
-const portfolio = readFileSync(new URL("./MethodologiesPortfolio.tsx", import.meta.url), "utf8");
+const routeMap = readFileSync(new URL("../components/MethodologyRouteMap.tsx", import.meta.url), "utf8");
 
 test("publishes the workflow readiness method and portfolio route", () => {
-  assert.match(app, /path="\/methodologies\/agentic-operations-readiness" component=\{AgenticOperationsReadiness\}/);
-  assert.match(portfolio, /title: "Agentic Operations Readiness Framework"[\s\S]*?release: "Available now"/);
-  assert.match(portfolio, /href: "\/methodologies\/agentic-operations-readiness"/);
+  assert.match(app, /path="\/methodologies\/agentic-operations-readiness"/);
+  assert.match(routeMap, /method: "Agentic Operations Readiness"/);
+  assert.match(routeMap, /href: "\/methodologies\/agentic-operations-readiness"/);
 });
 
 test("tests all six workflow operating conditions", () => {
@@ -36,5 +36,16 @@ test("dates sources and separates them from Cognirise proprietary logic", () => 
   assert.match(page, /not presented as requirements of the sources below/);
   for (const source of ["NIST AI Risk Management Framework", "NIST AI 600-1", "EU AI Act"]) {
     assert.match(page, new RegExp(source));
+  }
+});
+
+test("keeps validated local working state in saved-record-specific session namespaces", () => {
+  assert.match(page, /useMethodSessionState<Partial<ReadinessAnswers>>/);
+  assert.match(page, /requestedSavedId \?[\s\S]*?isReadinessAnswersSessionState/);
+  assert.match(page, /setAnswers\(record\.answers\)/);
+  assert.match(page, /setSessionNamespace\(record\.id\)/);
+  assert.match(page, /forgetReadinessSession\(saved\.id\)/);
+  for (const field of ["answers", "workflow-scope", "governance-review", "condition-records"]) {
+    assert.match(page, new RegExp(`"${field}"`));
   }
 });

@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
-import { getRecommendation, type UseCase } from "./AIUseCasePrioritization";
+import { getRecommendation, isUseCaseSessionState, type UseCase } from "./AIUseCasePrioritization";
+import { parseMethodSessionState } from "../lib/use-method-session-state";
 
 function opportunity(scores: UseCase["scores"]): UseCase {
   return {
@@ -35,6 +36,15 @@ test("high control burden and low feasibility produce an explained stop decision
   assert.equal(result.stage, "Stop");
   assert.match(result.reason, /control burden/i);
   assert.match(result.reason, /feasibility/i);
+});
+
+test("restores only valid session opportunities and preserves an intentionally empty portfolio", () => {
+  assert.deepEqual(parseMethodSessionState("[]", [opportunity(base)], isUseCaseSessionState), []);
+  assert.deepEqual(
+    parseMethodSessionState(JSON.stringify([opportunity(base)]), [], isUseCaseSessionState),
+    [opportunity(base)],
+  );
+  assert.deepEqual(parseMethodSessionState('[{"id":"bad"}]', [opportunity(base)], isUseCaseSessionState), [opportunity(base)]);
 });
 
 test("the page states its limits and connects decisions to IDAO and Value Scan", () => {

@@ -38,3 +38,12 @@ test("low scores return improvement actions rather than sustain checks", () => {
   const result = calculateMaturity(answers);
   assert.match(result.priorities[0].action, /establish its baseline/);
 });
+
+test("calculates stage from average rather than being capped by weakest link (unsupported min-score rule)", () => {
+  const answers = Object.fromEntries(MATURITY_DIMENSIONS.map((dimension) => [dimension.id, dimension.id === "value" ? 1 : 5]));
+  const result = calculateMaturity(answers);
+  // Average is (1 + 30) / 7 ≈ 4.42, rounding to 4 (Operating)
+  // If a min-score rule were active, it would cap at 1 (Exploring).
+  assert.equal(result.stage.name, "Operating");
+  assert.equal(result.stage.score, 4);
+});

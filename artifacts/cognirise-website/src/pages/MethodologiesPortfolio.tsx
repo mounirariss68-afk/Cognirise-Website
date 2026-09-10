@@ -1,78 +1,104 @@
-import { ArrowRight, Download } from "lucide-react";
-import { BrandButton } from "@/components/ui/brand-button";
+import { useEffect } from "react";
+import { useLocation } from "wouter";
+import { PulseImage } from "@/components/ui/pulse-image";
 import { assetUrl } from "@/lib/assets";
 import { MethodologyRouteMap } from "@/components/MethodologyRouteMap";
 
-type PortfolioItem = {
-  release: string;
-  title: string;
-  user: string;
-  decision: string;
-  output: string;
-  relation: string;
-  href?: string;
-  nested?: { title: string; desc: string };
-};
-
-const portfolio: PortfolioItem[] = [
-  {
-    release: "Available now",
-    title: "AI Value-to-Scale Maturity Model",
-    user: "Enterprise and government leaders",
-    decision: "What prevents repeatable movement from opportunity to sustained value?",
-    output: "Seven-dimension maturity profile, evidence gaps and prioritized actions",
-    relation: "IDAO: identifies constraints, priorities and potential initiatives; evidence determines entry at Innovate or a later stage. Agent Authority: tests governance capability, but sets no handover limit itself.",
-    href: "/methodologies/ai-value-to-scale",
-    nested: { title: "Self-Administered AI Maturity Assessment", desc: "An application of Value-to-Scale with the same IDAO and Agent Authority relationships." }
-  },
-  { release: "Available now", title: "Agentic Operations Readiness Framework", user: "Process owners, operations, technology and risk", decision: "Is this workflow ready for agents, and what must change first?", output: "Proceed, Prepare or Stop decision with a register of unresolved operating conditions", relation: "IDAO: missing conditions become work at the appropriate stage and the test repeats when scope changes. Agent Authority: separately sets independence for each consequential handover.", href: "/methodologies/agentic-operations-readiness" },
-  { release: "Available now", title: "AI Use-Case Portfolio Prioritization Method", user: "Transformation and investment leaders", decision: "Which opportunities should advance, sequence or stop?", output: "Transparent scorecard and an Innovate, Demonstrate, Activate or stop recommendation", relation: "IDAO: recommends stop, investigate, demonstrate or activate. Agent Authority: exposure and oversight affect control burden, priority, scope and entry point.", href: "/methodologies/ai-use-case-prioritization" },
-  { release: "Available now", title: "Human–Agent Operating Model Playbook", user: "Business, workforce and operating-model leaders", decision: "How must roles, rights and handovers change when AI enters real work?", output: "Role and handover design, decision-rights map, capability plan, incentive changes and adoption measures", relation: "IDAO: shapes work across all four stages. Agent Authority: translates consequential handovers into explicit rights without replacing the approved calculation.", href: "/methodologies/human-agent-operating-model" },
-];
-
 export default function MethodologiesPortfolio() {
+  const [location] = useLocation();
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        let restored = false;
+        try {
+          const storedScroll = sessionStorage.getItem("cognirise-methodology-scroll");
+          if (storedScroll) {
+            const scrollY = parseInt(storedScroll, 10);
+            if (!isNaN(scrollY)) {
+              window.scrollTo({ top: scrollY, behavior: "instant" });
+              sessionStorage.removeItem("cognirise-methodology-scroll");
+              restored = true;
+            }
+          }
+        } catch (e) {}
+        
+        // Fallback if no exact scroll position was stored but we have the hash
+        if (!restored && window.location.hash === "#route-navigator") {
+          const el = document.getElementById("route-navigator");
+          if (el) {
+            el.scrollIntoView({ behavior: "instant", block: "start" });
+          }
+        }
+      });
+    });
+  }, [location]);
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const el = document.getElementById("route-navigator");
+    if (el) {
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      el.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+      window.history.pushState(null, "", "#route-navigator");
+    }
+  };
+
   return (
     <main className="bg-[#fdfcfb] text-[#102957]">
-      <header className="px-6 pb-20 pt-12 md:px-[4.8vw] lg:pb-28">
-        <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[hsl(var(--brand-pink))]">Cognirise methodologies</p>
-        <div className="mt-7 grid gap-10 lg:grid-cols-[1.1fr_.9fr] lg:items-end">
-          <h1 className="font-display text-[clamp(52px,8vw,118px)] font-semibold leading-[.88] tracking-[-.09em]">A portfolio for AI that has to operate.</h1>
-          <div className="border-t border-[#102957] pt-6">
-            <p className="text-lg leading-[1.6] text-[#405777]">
-              Every supporting method connects to our two approved anchors: <strong>IDAO</strong> is our core adaptive delivery framework, and the <strong>Agent Authority Model</strong> governs consequential handovers across it.
-            </p>
-            <BrandButton href="/methodologies/agentic-operations-readiness" className="mt-7">Assess a workflow</BrandButton>
+      <header className="px-6 pb-20 pt-12 md:px-[4.8vw] lg:pb-28 border-b border-[#cbd3e1]">
+        <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[hsl(var(--brand-pink))]" data-testid="portfolio-kicker">
+          How we do it
+        </p>
+        <div className="mt-7 grid gap-12 lg:gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+          <div className="flex flex-col gap-8">
+            <h1 className="font-display text-[clamp(45px,7vw,100px)] font-semibold leading-[.88] tracking-[-.08em]" data-testid="portfolio-title">
+              From AI ambition to working outcomes.
+            </h1>
+            <div className="border-t border-[#102957] pt-8 max-w-[620px]">
+              <p className="text-[19px] leading-[1.58] text-[#405777]" data-testid="portfolio-description">
+                Choose the decision you need to make. Find a practical method to assess the evidence, define the next action and move forward responsibly.
+              </p>
+              
+              <a 
+                href="#route-navigator" 
+                onClick={handleNavClick}
+                data-testid="hero-primary-cta"
+                className="mt-10 relative overflow-hidden inline-flex items-center gap-3 bg-[#102957] text-white px-7 py-4 hover:bg-[#1a3a75] text-[15px] font-bold transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--brand-pink))]"
+              >
+                <div className="absolute top-0 left-0 bottom-0 w-1 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
+                <span className="pl-1">Find your situation</span>
+              </a>
+            </div>
           </div>
+          
+          <figure className="relative h-[430px] w-full overflow-hidden bg-[#071936] [clip-path:polygon(0_8%,12%_0,92%_0,100%_9%,100%_86%,90%_100%,12%_96%,0_100%)] md:h-[520px] md:[clip-path:polygon(11%_0,100%_0,100%_82%,94%_82%,94%_92%,83%_100%,0_100%,0_14%)] lg:h-[620px] lg:[clip-path:polygon(13%_0,100%_0,100%_80%,95%_80%,95%_92%,82%_100%,0_100%,0_15%)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-8 motion-safe:duration-700 motion-safe:ease-out" data-testid="hero-figure">
+            <PulseImage
+              src={assetUrl("/images/cognirise/method-overview.jpg")}
+              alt="Architectural intersection representing connected methods"
+              className="h-full w-full object-cover opacity-90"
+              eager
+            />
+          </figure>
         </div>
       </header>
-      <section className="border-y border-[#cbd3e1] bg-[#fdfcfb] px-6 py-20 md:px-[4.8vw]" aria-labelledby="roadmap-title">
-        <h2 id="roadmap-title" className="font-display text-[clamp(40px,5vw,72px)] font-semibold tracking-[-.08em]">Methodology Route Map</h2>
-        <p className="mt-4 max-w-2xl text-sm leading-[1.65] text-[#536887]">Connect every method to our two core anchors: IDAO for adaptive delivery, and the Agent Authority Model for safe handovers. Select your situation to see the logical route.</p>
-        <div className="mt-12">
-          <MethodologyRouteMap />
-        </div>
 
-        <div className="mt-20 border-t border-[#cbd3e1] pt-16" aria-labelledby="portfolio-list-title">
-          <h2 id="portfolio-list-title" className="font-display text-[clamp(32px,4vw,56px)] font-semibold tracking-[-.06em]">The Methods</h2>
-          <ol className="mt-10 border-l border-t border-[#cbd3e1] grid lg:grid-cols-2">
-          {portfolio.map((item) => <li key={item.title} className="flex flex-col gap-5 border-b border-r border-[#cbd3e1] bg-white p-6 lg:p-8">
-            <div><span className="block text-[9px] uppercase tracking-wider text-[#647491]">{item.release}</span></div>
-            <div>
-              <h3 className="font-display text-2xl font-semibold tracking-[-.05em]">{item.title}</h3>
-              <p className="mt-3 text-xs leading-[1.5] text-[#647491]"><strong>User:</strong> {item.user}</p>
-              {item.nested && (
-                <div className="mt-5 p-4 border border-[#cbd3e1] bg-[#f1f3f7] rounded-sm">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-[#647491] block mb-1">Nested Instrument</span>
-                  <h4 className="font-semibold text-sm text-[#102957]">{item.nested.title}</h4>
-                  <p className="text-[11px] text-[#536887] mt-1">{item.nested.desc}</p>
-                </div>
-              )}
-              {item.href && <a href={item.href} className="mt-6 inline-flex items-center gap-2 text-sm font-bold underline underline-offset-4 text-[hsl(var(--brand-pink))] hover:text-[#102957]">Open methodology <ArrowRight size={14} /></a>}
-            </div>
-            <dl className="grid gap-4 text-sm leading-[1.55] text-[#405777] mt-auto pt-6 border-t border-[#cbd3e1]"><div><dt className="text-[10px] font-bold uppercase tracking-wider text-[#647491]">Decision</dt><dd className="mt-1">{item.decision}</dd></div><div><dt className="text-[10px] font-bold uppercase tracking-wider text-[#647491]">Output</dt><dd className="mt-1">{item.output}</dd></div><div><dt className="text-[10px] font-bold uppercase tracking-wider text-[#647491]">Connection</dt><dd className="mt-1">{item.relation}</dd></div></dl>
-          </li>)}
-        </ol>
-        <a href={assetUrl("/downloads/cognirise-ai-value-to-scale-assessment.pdf")} download className="mt-8 inline-flex items-center gap-2 text-sm font-bold underline underline-offset-4 text-[#102957] hover:text-[hsl(var(--brand-pink))]"><Download size={16} /> Download the VTS assessment worksheet</a>
+      <section 
+        id="route-navigator"
+        className="bg-white px-6 py-24 md:px-[4.8vw] min-h-[80vh]" 
+        aria-labelledby="roadmap-title"
+      >
+        <div className="max-w-3xl mb-16">
+          <h2 id="roadmap-title" className="font-display text-[clamp(40px,5vw,72px)] font-semibold tracking-[-.08em] text-[#102957]">
+            Start with your situation
+          </h2>
+          <p className="mt-6 text-[19px] leading-[1.58] text-[#536887]">
+            Select the decision in front of you. See which method can help, what it produces, and when IDAO delivery or an Agent Authority decision becomes relevant.
+          </p>
+        </div>
+        
+        <div data-testid="route-navigator-container">
+          <MethodologyRouteMap />
         </div>
       </section>
     </main>

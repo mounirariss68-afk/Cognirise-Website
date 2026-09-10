@@ -2,7 +2,7 @@ import { ArrowDown, ArrowRight, Check, Copy, Printer, RotateCcw, Save, Trash2 } 
 import { BrandButton } from "@/components/ui/brand-button";
 import { useDynamicMetadata } from "@/lib/metadata";
 import { MethodologyRelationship } from "@/components/MethodologyRelationship";
-import { PulseImage } from "@/components/ui/pulse-image";
+import { MethodPageHero } from "@/components/MethodPageHero";
 import { useEffect, useMemo, useState } from "react";
 import {
   createReadinessAssessment,
@@ -20,6 +20,7 @@ import {
   replaceReadinessUrl,
   storeReadinessDeleteToken,
 } from "@/lib/readiness-assessment";
+import { useMethodSessionState } from "@/lib/use-method-session-state";
 
 type Answer = ReadinessAnswers[keyof ReadinessAnswers];
 
@@ -85,6 +86,43 @@ const CONDITIONS = [
   },
 ] as const;
 
+const READINESS_SESSION_PREFIX = "cognirise:method:agentic-operations-readiness";
+const readinessSessionKey = (namespace: string, field: string) =>
+  `${READINESS_SESSION_PREFIX}:${namespace}:${field}`;
+const READINESS_SESSION_FIELDS = ["answers", "workflow-scope", "governance-review", "condition-records"] as const;
+
+const forgetReadinessSession = (namespace: string) => {
+  try {
+    READINESS_SESSION_FIELDS.forEach((field) => sessionStorage.removeItem(readinessSessionKey(namespace, field)));
+  } catch {
+    // Session storage may be disabled; the in-memory assessment still resets.
+  }
+};
+
+export const isReadinessAnswersSessionState = (value: unknown): value is Partial<ReadinessAnswers> => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const validIds = new Set<string>(CONDITIONS.map(({ id }) => id));
+  return Object.entries(value).every(([id, answer]) =>
+    validIds.has(id) && (answer === "ready" || answer === "prepare" || answer === "stop")
+  );
+};
+
+export const isConditionRecordsSessionState = (
+  value: unknown,
+): value is Partial<Record<(typeof CONDITIONS)[number]["id"], ConditionRecord>> => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const validIds = new Set<string>(CONDITIONS.map(({ id }) => id));
+  return Object.entries(value).every(([id, record]) => {
+    if (!validIds.has(id) || !record || typeof record !== "object" || Array.isArray(record)) return false;
+    const candidate = record as Record<string, unknown>;
+    return typeof candidate.evidence === "string"
+      && typeof candidate.owner === "string"
+      && typeof candidate.reassessmentDate === "string";
+  });
+};
+
+const isSessionString = (value: unknown): value is string => typeof value === "string";
+
 const SOURCES = [
   {
     label: "NIST AI Risk Management Framework 1.0 (January 2023)",
@@ -113,12 +151,29 @@ function Kicker({ children, inverse = false }: { children: React.ReactNode; inve
 }
 
 export default function AgenticOperationsReadiness() {
-  const [answers, setAnswers] = useState<Partial<ReadinessAnswers>>({});
-  const [workflowScope, setWorkflowScope] = useState("");
-  const [governanceReview, setGovernanceReview] = useState("");
-  const [conditionRecords, setConditionRecords] = useState<Partial<Record<(typeof CONDITIONS)[number]["id"], ConditionRecord>>>({});
   const [requestedSavedId] = useState(() => getSavedReadinessId(window.location.search));
   const [saved, setSaved] = useState<SavedState | null>(null);
+  const [sessionNamespace, setSessionNamespace] = useState(requestedSavedId ?? "draft");
+  const [answers, setAnswers] = useMethodSessionState<Partial<ReadinessAnswers>>(
+    readinessSessionKey(sessionNamespace, "answers"),
+    {},
+    { validate: requestedSavedId ? ((value: unknown): value is Partial<ReadinessAnswers> => false) : isReadinessAnswersSessionState },
+  );
+  const [workflowScope, setWorkflowScope] = useMethodSessionState(
+    readinessSessionKey(sessionNamespace, "workflow-scope"),
+    "",
+    { validate: isSessionString },
+  );
+  const [governanceReview, setGovernanceReview] = useMethodSessionState(
+    readinessSessionKey(sessionNamespace, "governance-review"),
+    "",
+    { validate: isSessionString },
+  );
+  const [conditionRecords, setConditionRecords] = useMethodSessionState<Partial<Record<(typeof CONDITIONS)[number]["id"], ConditionRecord>>>(
+    readinessSessionKey(sessionNamespace, "condition-records"),
+    {},
+    { validate: isConditionRecordsSessionState },
+  );
   const [isLoadingSaved, setIsLoadingSaved] = useState(Boolean(requestedSavedId));
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -173,6 +228,7 @@ export default function AgenticOperationsReadiness() {
     setAnswers((current) => ({ ...current, [id]: answer }));
     if (saved) {
       setSaved(null);
+      setSessionNamespace("draft");
       replaceReadinessUrl(null);
     }
     setStatusMessage(null);
@@ -184,6 +240,7 @@ export default function AgenticOperationsReadiness() {
     setGovernanceReview("");
     setConditionRecords({});
     setSaved(null);
+    setSessionNamespace("draft");
     replaceReadinessUrl(null);
     setStatusMessage(null);
     setLoadError(null);
@@ -203,6 +260,7 @@ export default function AgenticOperationsReadiness() {
       const record = await createReadinessAssessment({ answers: completeAnswers });
       storeReadinessDeleteToken(record.id, record.deleteToken);
       setSaved(record);
+      setSessionNamespace(record.id);
       replaceReadinessUrl(record.id);
       setStatusMessage("Decision saved. Copy the link to share this fixed record.");
     } catch (error) {
@@ -233,7 +291,9 @@ export default function AgenticOperationsReadiness() {
         headers: { "X-Delete-Token": deleteToken },
       });
       forgetReadinessDeleteToken(saved.id);
+      forgetReadinessSession(saved.id);
       setSaved(null);
+      setSessionNamespace("draft");
       replaceReadinessUrl(null);
       setStatusMessage("Saved record deleted. Your selected answers remain on this page.");
     } catch (error) {
@@ -267,33 +327,15 @@ export default function AgenticOperationsReadiness() {
 
   return (
     <article className="readiness-page overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
-      <header className="px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24">
-        <Kicker>Methodologies & frameworks / 02</Kicker>
-        <div className="mt-8 grid gap-12 lg:grid-cols-[1.05fr_.95fr] lg:items-end">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[hsl(var(--brand-pink))]">Workflow decision method</p>
-            <h1 className="mt-5 max-w-[940px] font-display text-[clamp(52px,7.4vw,112px)] font-semibold leading-[.88] tracking-[-.09em]">
-              Ready for agents?
-            </h1>
-          </div>
-          <div className="border-t border-[#102957] pt-6">
-            <p className="text-[19px] leading-[1.58] text-[#405777]">
-              Test one workflow—not an organisation, platform or agent—against the conditions it needs to operate. Leave with a clear Proceed, Prepare or Stop decision and the specific work still unresolved.
-            </p>
-            <a href="#assessment" className="mt-8 inline-flex items-center gap-3 border-b border-[#102957] pb-2 text-sm font-bold hover:text-[hsl(var(--brand-pink))]">
-              Assess one workflow <ArrowRight size={16} />
-            </a>
-          </div>
-        </div>
-      </header>
-      <section className="px-6 pb-16 md:px-[4.8vw]">
-        <PulseImage
-          src="/images/cognirise/method-operations-readiness-clean.jpg"
-          alt="Cinematic raster composition showing a bounded operational workflow"
-          className="w-full h-[55vh] object-cover rounded-sm shadow-md"
-          fallbackColor="#102957"
-        />
-      </section>
+      <MethodPageHero
+        breadcrumb="Methodologies / 02"
+        title="Ready for agents?"
+        description="Test one workflow—not an organisation, platform or agent—against the conditions it needs to operate. Leave with a clear Proceed, Prepare or Stop decision and the specific work still unresolved."
+        imageSrc="/images/cognirise/method-aor-v2.jpg"
+        imageAlt="Cinematic raster composition showing a bounded operational workflow"
+        imageCaptionSubtitle="Workflow Decision"
+        imageCaptionTitle="Evidence before authority."
+      />
 
       <MethodologyRelationship
         startHereWhen={<>You have a specific, bounded workflow and need to confirm it has the necessary stability, observability, and economic conditions before agent delivery begins.</>}
@@ -305,76 +347,86 @@ export default function AgenticOperationsReadiness() {
         doesNotDecide={<>Which workflow is most valuable (use AI Use-Case Prioritization) or the specific rights of a human supervisor (use Human-Agent Operating Model).</>}
       />
 
-      <section className="border-y border-[#cbd3e1] bg-[#f1f3f7] px-6 py-20 md:px-[4.8vw] lg:py-24">
-        <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-[8vw]">
-          <div>
-            <Kicker>The boundary</Kicker>
-            <h2 className="mt-5 font-display text-[clamp(40px,5vw,72px)] font-semibold leading-[.97] tracking-[-.08em]">Readiness before authority.</h2>
-          </div>
-          <div className="border-t border-[#102957] pt-6">
-            <p className="text-[18px] leading-[1.6] text-[#30486d]">
-              This framework decides whether the workflow has viable operating conditions. It does not decide how independently an agent may act.
-            </p>
-            <div className="mt-10 rounded-sm border border-[#cbd3e1] bg-white p-6 shadow-sm">
-              <strong className="block text-[10px] uppercase tracking-wider text-[#647491]">6 Conditions feed into:</strong>
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
-                <div className="border-t-4 border-[#16805f] bg-[#16805f]/10 p-4">
-                  <strong className="text-xs text-[#16805f]">Proceed</strong>
-                  <p className="mt-2 text-[11px] text-[#405777]">Enter or update the responsible IDAO stage with the evidence recorded.</p>
-                </div>
-                <div className="border-t-4 border-[#b5367d] bg-[#b5367d]/10 p-4">
-                  <strong className="text-xs text-[#b5367d]">Prepare</strong>
-                  <p className="mt-2 text-[11px] text-[#405777]">Turn missing conditions into work at the appropriate IDAO stage, then repeat the test.</p>
-                </div>
-                <div className="border-t-4 border-[#d34f38] bg-[#d34f38]/10 p-4">
-                  <strong className="text-xs text-[#d34f38]">Stop</strong>
-                  <p className="mt-2 text-[11px] text-[#405777]">Do not enter IDAO delivery for this scope; redefine it, resolve the blocker or stop.</p>
-                </div>
+      <section className="border-y border-[#cbd3e1] bg-[#f3f5f8] px-6 py-20 md:px-[4.8vw] lg:py-28 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-[40vw] h-[40vw] bg-[radial-gradient(circle_at_top_left,rgba(154,99,218,0.1),transparent_70%)] pointer-events-none" />
+        
+        <div className="max-w-[1200px] mx-auto relative z-10">
+          <div className="grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-20">
+            <div>
+              <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#102957] mb-5">
+                <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
+                The Boundary
               </div>
-              <ArrowDown className="mx-auto my-4 text-[#cbd3e1]" aria-hidden="true" />
-              <div className="rounded-sm border border-[hsl(var(--brand-coral))] bg-[#fff0f2] p-4 text-center">
-                <strong className="block text-[10px] uppercase tracking-wider text-[#102957]">Separate Agent Authority decision</strong>
-                <p className="mt-1 text-[11px] text-[#536887]">For any selected consequential handover, set how independently it may act.</p>
-              </div>
+              <h2 className="font-display text-[clamp(42px,5vw,72px)] font-semibold leading-[.97] tracking-[-.05em]">Readiness before authority.</h2>
             </div>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <a href="/methodologies/idao" className="border border-[#cbd3e1] bg-white p-5 hover:border-[#102957]">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#647491]">If it can proceed</span>
-                <strong className="mt-2 block font-display text-xl tracking-[-.05em]">Deliver through IDAO →</strong>
-              </a>
-              <a href="/methodologies/agent-authority-model" className="border border-[#cbd3e1] bg-white p-5 hover:border-[#102957]">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#647491]">Before live handover</span>
-                <strong className="mt-2 block font-display text-xl tracking-[-.05em]">Set Agent Authority →</strong>
-              </a>
+            <div className="border-l border-[#cbd3e1] pl-8 lg:pl-12">
+              <p className="text-[19px] leading-[1.6] text-[#405777]">
+                This framework decides whether the workflow has viable operating conditions. It does not decide how independently an agent may act.
+              </p>
+              
+              <div className="mt-12 bg-white border border-[#cbd3e1] shadow-sm relative">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
+                <div className="p-8 lg:p-10">
+                  <strong className="block text-[11px] uppercase tracking-[0.15em] text-[#102957] mb-8">6 Conditions feed into:</strong>
+                  <div className="grid gap-6 md:grid-cols-3">
+                    <div className="border-t-4 border-[#16805f] bg-[#16805f]/5 p-5">
+                      <strong className="text-[13px] font-bold uppercase tracking-wider text-[#16805f]">Proceed</strong>
+                      <p className="mt-3 text-[13px] leading-relaxed text-[#405777]">Enter or update the responsible IDAO stage with the evidence recorded.</p>
+                    </div>
+                    <div className="border-t-4 border-[#b5367d] bg-[#b5367d]/5 p-5">
+                      <strong className="text-[13px] font-bold uppercase tracking-wider text-[#b5367d]">Prepare</strong>
+                      <p className="mt-3 text-[13px] leading-relaxed text-[#405777]">Turn missing conditions into work at the appropriate IDAO stage, then repeat the test.</p>
+                    </div>
+                    <div className="border-t-4 border-[#d34f38] bg-[#d34f38]/5 p-5">
+                      <strong className="text-[13px] font-bold uppercase tracking-wider text-[#d34f38]">Stop</strong>
+                      <p className="mt-3 text-[13px] leading-relaxed text-[#405777]">Do not enter IDAO delivery for this scope; redefine it, resolve the blocker or stop.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-center my-8">
+                    <ArrowDown className="text-[#a0afc0]" size={24} aria-hidden="true" />
+                  </div>
+                  
+                  <div className="border border-[hsl(var(--brand-coral))] bg-[hsl(var(--brand-coral))]/5 p-6 text-center">
+                    <strong className="block text-[12px] uppercase tracking-[0.15em] text-[#102957]">Separate Agent Authority decision</strong>
+                    <p className="mt-2 text-[14px] text-[#536887]">For any selected consequential handover, set how independently it may act.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="assessment" className="scroll-mt-20 px-6 py-20 md:px-[4.8vw] lg:py-28" aria-labelledby="assessment-title">
-        <div className="grid gap-8 lg:grid-cols-[.72fr_1.28fr] lg:items-end">
-          <div>
-            <Kicker>Six operating conditions</Kicker>
-            <h2 id="assessment-title" className="mt-5 font-display text-[clamp(42px,5.5vw,78px)] font-semibold leading-[.96] tracking-[-.08em]">Evidence, not optimism.</h2>
+      <section id="assessment" className="scroll-mt-20 px-6 py-20 md:px-[4.8vw] lg:py-28 bg-[#fdfcfb]" aria-labelledby="assessment-title">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="grid gap-12 lg:grid-cols-[.7fr_1.3fr] lg:items-end">
+            <div>
+              <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#102957] mb-5">
+                <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
+                Six operating conditions
+              </div>
+              <h2 id="assessment-title" className="font-display text-[clamp(42px,5.5vw,78px)] font-semibold leading-[.96] tracking-[-.05em]">Evidence, not optimism.</h2>
+            </div>
+            <p className="lg:border-l border-[#cbd3e1] lg:pl-10 text-[18px] leading-[1.65] text-[#405777]">
+              Choose the statement that best matches current evidence. “Ready” must be demonstrable. One Stop condition stops the current scope; any Prepare condition names work to complete.
+            </p>
           </div>
-          <p className="max-w-[700px] border-t border-[#102957] pt-6 text-[16px] leading-[1.65] text-[#405777]">
-            Choose the statement that best matches current evidence. “Ready” must be demonstrable. One Stop condition stops the current scope; any Prepare condition names work to complete.
-          </p>
-        </div>
 
-        <div className="mt-12 border border-[#cbd3e1] bg-[#f3f5f8] p-5 md:p-7">
-          <label htmlFor="workflow-scope" className="text-[10px] font-bold uppercase tracking-[.12em] text-[#102957]">Workflow scope</label>
-          <p className="mt-2 max-w-3xl text-xs leading-[1.55] text-[#647491]">Name the bounded workflow, trigger, start and end point, business area and material exclusions. This stays in this browser session and is only included when you print.</p>
-          <textarea
-            id="workflow-scope"
-            data-testid="input-workflow-scope"
-            value={workflowScope}
-            onChange={(event) => setWorkflowScope(event.target.value)}
-            rows={3}
-            placeholder="Example: Customer refund requests from approved intake through payment instruction; excludes suspected fraud and refunds above the delegated limit."
-            className="mt-4 w-full resize-y border border-[#b9c4d5] bg-white p-3 text-sm leading-[1.55] text-[#102957] outline-none focus:border-[#102957]"
-          />
-        </div>
+          <div className="mt-16 border border-[#cbd3e1] bg-white shadow-[0_2px_10px_rgba(16,41,87,0.02)] p-8 lg:p-10 relative">
+            <div className="absolute top-0 left-0 w-1 h-full bg-[#102957]" />
+            <label htmlFor="workflow-scope" className="text-[12px] font-bold uppercase tracking-[0.15em] text-[#102957]">Workflow scope</label>
+            <p className="mt-3 max-w-3xl text-[14px] leading-relaxed text-[#536887]">Name the bounded workflow, trigger, start and end point, business area and material exclusions. This stays in this browser session and is only included when you print.</p>
+            <textarea
+              id="workflow-scope"
+              data-testid="input-workflow-scope"
+              value={workflowScope}
+              onChange={(event) => setWorkflowScope(event.target.value)}
+              rows={3}
+              placeholder="Example: Customer refund requests from approved intake through payment instruction; excludes suspected fraud and refunds above the delegated limit."
+              className="mt-6 w-full resize-y border border-[#cbd3e1] bg-[#fdfcfb] p-4 text-[15px] leading-relaxed text-[#102957] outline-none focus:border-[hsl(var(--brand-pink))] focus:bg-white transition-all shadow-inner"
+            />
+          </div>
 
         {(isLoadingSaved || loadError || saved) && (
           <div className="mt-8 border border-[#cbd3e1] bg-[#f3f5f8] p-5" role="status">
@@ -405,43 +457,44 @@ export default function AgenticOperationsReadiness() {
           </div>
         )}
 
-        <ol className="mt-14 space-y-5">
-          {CONDITIONS.map((condition, index) => (
-            <li key={condition.id} className="border border-[#cbd3e1] bg-white p-5 md:p-7">
-              <div className="grid gap-6 lg:grid-cols-[.72fr_1.28fr]">
-                <div>
-                  <span className="text-[10px] font-bold tracking-[.12em] text-[hsl(var(--brand-pink))]">0{index + 1}</span>
-                  <h3 className="mt-3 font-display text-[30px] font-semibold tracking-[-.06em]">{condition.title}</h3>
-                  <p className="mt-3 text-sm font-semibold leading-[1.55] text-[#405777]">{condition.question}</p>
+          <ol className="mt-16 space-y-8">
+            {CONDITIONS.map((condition, index) => (
+              <li key={condition.id} className="border border-[#cbd3e1] bg-white shadow-[0_2px_10px_rgba(16,41,87,0.02)] hover:shadow-md transition-shadow">
+                <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
+                  <div className="p-8 lg:p-10 lg:border-r border-[#cbd3e1]">
+                    <span className="text-[12px] font-bold tracking-[0.15em] text-[hsl(var(--brand-pink))] block mb-4">0{index + 1}</span>
+                    <h3 className="font-display text-[32px] font-semibold tracking-[-.04em] mb-4 text-[#102957]">{condition.title}</h3>
+                    <p className="text-[16px] leading-relaxed text-[#536887]">{condition.question}</p>
+                  </div>
+                  <div role="radiogroup" aria-label={condition.title} className="p-6 lg:p-8 grid gap-3 bg-[#fdfcfb]">
+                    {(["ready", "prepare", "stop"] as const).map((answer) => {
+                      const selected = answers[condition.id] === answer;
+                      return (
+                        <button
+                          key={answer}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                           disabled={assessmentLocked}
+                           data-readiness-answer={`${condition.id}:${answer}`}
+                           onClick={() => updateAnswer(condition.id, answer)}
+                           className={`group grid grid-cols-[100px_1fr] items-start gap-4 border p-4 text-left transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--brand-coral))] disabled:cursor-wait disabled:opacity-70 ${
+                            selected ? "border-[#102957] bg-[#102957] text-white shadow-md" : "border-[#cbd3e1] bg-white hover:border-[hsl(var(--brand-pink))]"
+                          }`}
+                        >
+                          <strong className={`text-[11px] uppercase tracking-[0.15em] mt-0.5 ${selected ? "text-white" : answer === "ready" ? "text-[#16805f]" : answer === "stop" ? "text-[#d34f38]" : "text-[#b5367d]"}`}>
+                            {answer}
+                          </strong>
+                          <span className={`text-[14px] leading-relaxed ${selected ? "text-white/90" : "text-[#405777] group-hover:text-[#102957]"}`}>{condition[answer]}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div role="radiogroup" aria-label={condition.title} className="grid gap-2">
-                  {(["ready", "prepare", "stop"] as const).map((answer) => {
-                    const selected = answers[condition.id] === answer;
-                    return (
-                      <button
-                        key={answer}
-                        type="button"
-                        role="radio"
-                        aria-checked={selected}
-                         disabled={assessmentLocked}
-                         data-readiness-answer={`${condition.id}:${answer}`}
-                         onClick={() => updateAnswer(condition.id, answer)}
-                         className={`grid min-h-14 grid-cols-[82px_1fr] items-start gap-3 border p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--brand-coral))] disabled:cursor-wait disabled:opacity-70 ${
-                          selected ? "border-[#102957] bg-[#102957] text-white" : "border-[#d7dde7] hover:border-[#102957]"
-                        }`}
-                      >
-                        <strong className={`text-[10px] uppercase tracking-wider ${selected ? "text-white" : answer === "ready" ? "text-[#16805f]" : answer === "stop" ? "text-[#d34f38]" : "text-[#b5367d]"}`}>
-                          {answer}
-                        </strong>
-                        <span className={`text-xs leading-[1.5] ${selected ? "text-white/80" : "text-[#536887]"}`}>{condition[answer]}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </li>
-          ))}
-        </ol>
+              </li>
+            ))}
+          </ol>
+        </div>
 
         <div data-readiness-decision className="sticky bottom-4 z-20 mt-8 border border-white/20 bg-[#071936] p-6 text-white shadow-[0_18px_60px_rgba(7,25,54,.25)] md:p-8" aria-live="polite">
           <div className="grid gap-6 lg:grid-cols-[.6fr_1.4fr] lg:items-center">
