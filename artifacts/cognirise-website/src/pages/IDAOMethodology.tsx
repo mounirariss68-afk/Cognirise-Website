@@ -382,6 +382,7 @@ export default function IDAOMethodology() {
           <div className="self-end border-t border-[#102957] pt-6 text-[16px] leading-[1.65] text-[#405777]">
             <p>Handover is prepared from the start. Named owners receive the operating knowledge, traceability, evaluation evidence, known limitations and governance routines needed to run the capability with confidence.</p>
             <p className="mt-5">We rehearse support and intervention before acceptance. The outcome is not dependency on a delivery team; it is a client-owned capability with clear authority, observable performance and a route to responsible improvement.</p>
+            <a href="/methodologies/human-agent-operating-model" className="mt-7 inline-flex items-center gap-2 border-b border-[#102957] pb-2 text-sm font-bold hover:text-[hsl(var(--brand-pink))]">Design roles, rights and adoption <ArrowRight size={15} /></a>
           </div>
         </div>
       </section>

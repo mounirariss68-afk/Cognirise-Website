@@ -490,6 +490,9 @@ export function AgentAuthorityLayout({
               These are not permanent agent classes. A single agent may answer a question, fix a case outcome,
               and change a system record—three handovers that can require three different authorities.
             </p>
+            <a href="/methodologies/human-agent-operating-model" className="mt-6 inline-flex items-center gap-2 border-b border-[#102957] pb-2 text-sm font-bold hover:text-[hsl(var(--brand-pink))]">
+              Place handovers into the operating model <ArrowRight size={15} />
+            </a>
           </div>
         </div>
         <ol className="mt-14 grid border-l border-t border-[#cbd3e1] lg:grid-cols-3">
