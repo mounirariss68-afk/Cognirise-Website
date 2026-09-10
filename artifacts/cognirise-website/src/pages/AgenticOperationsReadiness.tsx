@@ -1,9 +1,12 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, Check, RotateCcw } from "lucide-react";
+import { ArrowRight, Check, Printer, RotateCcw } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useDynamicMetadata } from "@/lib/metadata";
 
 type Answer = "ready" | "prepare" | "stop";
+type ConditionRecord = { evidence: string; owner: string; reassessmentDate: string };
+
+const EMPTY_CONDITION_RECORD: ConditionRecord = { evidence: "", owner: "", reassessmentDate: "" };
 
 const CONDITIONS = [
   {
@@ -91,6 +94,9 @@ function Kicker({ children, inverse = false }: { children: React.ReactNode; inve
 
 export default function AgenticOperationsReadiness() {
   const [answers, setAnswers] = useState<Partial<Record<(typeof CONDITIONS)[number]["id"], Answer>>>({});
+  const [workflowScope, setWorkflowScope] = useState("");
+  const [governanceReview, setGovernanceReview] = useState("");
+  const [conditionRecords, setConditionRecords] = useState<Partial<Record<(typeof CONDITIONS)[number]["id"], ConditionRecord>>>({});
 
   useDynamicMetadata({
     title: "Agentic Operations Readiness Framework | Cognirise",
@@ -107,6 +113,26 @@ export default function AgenticOperationsReadiness() {
 
   const unresolved = CONDITIONS.filter((condition) => answers[condition.id] !== "ready");
   const completed = Object.keys(answers).length;
+  const assessmentComplete = completed === CONDITIONS.length;
+  const updateConditionRecord = (id: (typeof CONDITIONS)[number]["id"], field: keyof ConditionRecord, value: string) => {
+    setConditionRecords((current) => ({
+      ...current,
+      [id]: { ...(current[id] ?? EMPTY_CONDITION_RECORD), [field]: value },
+    }));
+  };
+  const resetAssessment = () => {
+    setAnswers({});
+    setWorkflowScope("");
+    setGovernanceReview("");
+    setConditionRecords({});
+  };
+  const printReadinessRecord = () => {
+    const printClass = "readiness-record-printing";
+    const cleanup = () => document.body.classList.remove(printClass);
+    document.body.classList.add(printClass);
+    window.addEventListener("afterprint", cleanup, { once: true });
+    window.requestAnimationFrame(() => window.print());
+  };
   const resultCopy = result === "proceed"
     ? {
         label: "Proceed",
@@ -131,7 +157,7 @@ export default function AgenticOperationsReadiness() {
         };
 
   return (
-    <article className="overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
+    <article className="readiness-page overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       <header className="px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24">
         <Kicker>Methodologies & frameworks / 02</Kicker>
         <div className="mt-8 grid gap-12 lg:grid-cols-[1.05fr_.95fr] lg:items-end">
@@ -187,6 +213,20 @@ export default function AgenticOperationsReadiness() {
           </p>
         </div>
 
+        <div className="mt-12 border border-[#cbd3e1] bg-[#f3f5f8] p-5 md:p-7">
+          <label htmlFor="workflow-scope" className="text-[10px] font-bold uppercase tracking-[.12em] text-[#102957]">Workflow scope</label>
+          <p className="mt-2 max-w-3xl text-xs leading-[1.55] text-[#647491]">Name the bounded workflow, trigger, start and end point, business area and material exclusions. This stays in this browser session and is only included when you print.</p>
+          <textarea
+            id="workflow-scope"
+            data-testid="input-workflow-scope"
+            value={workflowScope}
+            onChange={(event) => setWorkflowScope(event.target.value)}
+            rows={3}
+            placeholder="Example: Customer refund requests from approved intake through payment instruction; excludes suspected fraud and refunds above the delegated limit."
+            className="mt-4 w-full resize-y border border-[#b9c4d5] bg-white p-3 text-sm leading-[1.55] text-[#102957] outline-none focus:border-[#102957]"
+          />
+        </div>
+
         <ol className="mt-14 space-y-5">
           {CONDITIONS.map((condition, index) => (
             <li key={condition.id} className="border border-[#cbd3e1] bg-white p-5 md:p-7">
@@ -234,7 +274,7 @@ export default function AgenticOperationsReadiness() {
               <p className="font-semibold leading-[1.5]">{resultCopy.line}</p>
               <p className="mt-2 text-sm leading-[1.55] text-[#b9c7db]">{resultCopy.detail}</p>
               {completed > 0 && (
-                <button type="button" onClick={() => setAnswers({})} className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-white/75 underline underline-offset-4 hover:text-white">
+                <button data-testid="button-reset-assessment" type="button" onClick={resetAssessment} className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-white/75 underline underline-offset-4 hover:text-white">
                   <RotateCcw size={13} /> Reset assessment
                 </button>
               )}
@@ -251,12 +291,32 @@ export default function AgenticOperationsReadiness() {
             <p className="mt-6 text-sm leading-[1.65] text-[#536887]">The output is an operating-condition register. It records the gap, evidence required, accountable owner and reassessment date.</p>
           </div>
           <div className="border-t border-[#9eabc0]">
-            {unresolved.map((condition) => (
-              <div key={condition.id} data-readiness-unresolved={condition.id} className="grid gap-2 border-b border-[#b9c4d5] py-5 sm:grid-cols-[160px_1fr]">
+            {unresolved.map((condition) => {
+              const record = conditionRecords[condition.id] ?? EMPTY_CONDITION_RECORD;
+              return (
+              <div key={condition.id} data-readiness-unresolved={condition.id} className="grid gap-4 border-b border-[#b9c4d5] py-6 sm:grid-cols-[160px_1fr]">
                 <strong className="text-sm">{condition.title}</strong>
-                <p className="text-sm leading-[1.6] text-[#405777]">{condition.resolve}</p>
+                <div>
+                  <p className="text-sm leading-[1.6] text-[#405777]">{condition.resolve}</p>
+                  {assessmentComplete && (
+                    <div className="mt-5 grid gap-3 md:grid-cols-2">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#536887] md:col-span-2">
+                        Evidence and governance note
+                        <textarea data-testid={`input-evidence-${condition.id}`} value={record.evidence} onChange={(event) => updateConditionRecord(condition.id, "evidence", event.target.value)} rows={2} className="mt-2 block w-full resize-y border border-[#b9c4d5] bg-white p-3 text-sm font-normal normal-case tracking-normal text-[#102957] outline-none focus:border-[#102957]" placeholder="Evidence held, evidence still required, and the governance review needed" />
+                      </label>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#536887]">
+                        Accountable owner
+                        <input data-testid={`input-owner-${condition.id}`} value={record.owner} onChange={(event) => updateConditionRecord(condition.id, "owner", event.target.value)} className="mt-2 block w-full border border-[#b9c4d5] bg-white p-3 text-sm font-normal normal-case tracking-normal text-[#102957] outline-none focus:border-[#102957]" placeholder="Name or role" />
+                      </label>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#536887]">
+                        Reassessment date
+                        <input data-testid={`input-reassessment-${condition.id}`} type="date" value={record.reassessmentDate} onChange={(event) => updateConditionRecord(condition.id, "reassessmentDate", event.target.value)} className="mt-2 block w-full border border-[#b9c4d5] bg-white p-3 text-sm font-normal normal-case tracking-normal text-[#102957] outline-none focus:border-[#102957]" />
+                      </label>
+                    </div>
+                  )}
+                </div>
               </div>
-            ))}
+            )})}
             {unresolved.length === 0 && (
               <div className="flex items-start gap-3 border-b border-[#b9c4d5] py-6">
                 <Check className="mt-0.5 text-[#16805f]" size={18} />
@@ -265,7 +325,45 @@ export default function AgenticOperationsReadiness() {
             )}
           </div>
         </div>
+        {assessmentComplete && (
+          <div className="mt-10 border-t border-[#9eabc0] pt-7">
+            <label htmlFor="governance-review" className="text-[10px] font-bold uppercase tracking-[.12em] text-[#102957]">Overall governance review</label>
+            <textarea id="governance-review" data-testid="input-governance-review" value={governanceReview} onChange={(event) => setGovernanceReview(event.target.value)} rows={3} className="mt-3 block w-full resize-y border border-[#b9c4d5] bg-white p-3 text-sm text-[#102957] outline-none focus:border-[#102957]" placeholder="Decision forum, reviewers, evidence location, approval constraints or next review point" />
+            <div className="mt-5 flex flex-wrap items-center gap-4">
+              <button data-testid="button-print-readiness-record" type="button" onClick={printReadinessRecord} className="inline-flex items-center gap-2 bg-[#102957] px-5 py-3 text-sm font-bold text-white hover:bg-[hsl(var(--brand-pink))]">
+                <Printer size={16} /> Print or save record
+              </button>
+              <p className="max-w-xl text-xs leading-[1.55] text-[#647491]">Your browser’s print dialog can print the record or save it as a PDF. Nothing is uploaded or stored by Cognirise.</p>
+            </div>
+          </div>
+        )}
       </section>
+
+      {assessmentComplete && (
+        <section className="readiness-print-record hidden" aria-label="Readiness assessment record">
+          <p className="print-kicker">Cognirise · Agentic Operations Readiness Framework</p>
+          <div className="print-heading">
+            <div><h1>Workflow readiness record</h1><p>{workflowScope || "Workflow scope not recorded"}</p></div>
+            <div className="print-decision"><span>Decision</span><strong>{resultCopy.label}</strong></div>
+          </div>
+          <p className="print-summary">{resultCopy.line} {resultCopy.detail}</p>
+          <h2>Six operating conditions</h2>
+          {CONDITIONS.map((condition, index) => {
+            const answer = answers[condition.id] as Answer;
+            const record = conditionRecords[condition.id] ?? EMPTY_CONDITION_RECORD;
+            return (
+              <div className="print-condition" key={condition.id}>
+                <div><span>0{index + 1}</span><strong>{condition.title}</strong></div>
+                <div><b>{answer === "ready" ? "Ready" : answer === "prepare" ? "Prepare" : "Stop"}</b><p>{condition[answer]}</p></div>
+                {answer !== "ready" && <div className="print-resolution"><p><b>Unresolved condition:</b> {condition.resolve}</p><p><b>Evidence / governance note:</b> {record.evidence || "Not recorded"}</p><p><b>Accountable owner:</b> {record.owner || "Not assigned"} &nbsp; <b>Reassess:</b> {record.reassessmentDate || "Not scheduled"}</p></div>}
+              </div>
+            );
+          })}
+          <div className="print-governance"><h2>Governance review</h2><p>{governanceReview || "No overall governance review note recorded."}</p></div>
+          <p className="print-links">Next methods: IDAO — {window.location.origin}/methodologies/idao &nbsp;·&nbsp; Agent Authority — {window.location.origin}/methodologies/agent-authority-model</p>
+          <p className="print-privacy">Generated locally from this browser session. Assessment answers were not submitted to Cognirise or analytics.</p>
+        </section>
+      )}
 
       <section className="px-6 py-20 md:px-[4.8vw] lg:py-24" aria-labelledby="basis-title">
         <div className="grid gap-10 lg:grid-cols-[.72fr_1.28fr] lg:gap-[8vw]">

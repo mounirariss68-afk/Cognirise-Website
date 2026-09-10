@@ -1,6 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body.readiness-record-printing header,
+  body.readiness-record-printing footer,
+  body.readiness-record-printing .readiness-page > :not(.readiness-print-record) { display: none !important; }
+  body.readiness-record-printing .readiness-print-record {
+    display: block !important;
+    width: 100%;
+    color: #102957;
+    font-family: Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.4;
+  }
+  .print-kicker { margin: 0 0 12mm; border-bottom: 2px solid #102957; padding-bottom: 3mm; font-size: 8pt; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .print-heading { display: grid; grid-template-columns: 1fr 34mm; gap: 10mm; align-items: start; }
+  .print-heading h1 { margin: 0; font-size: 25pt; line-height: 1; letter-spacing: -.04em; }
+  .print-heading p { margin: 4mm 0 0; color: #405777; }
+  .print-decision { border-left: 3px solid #db509e; padding-left: 4mm; }
+  .print-decision span { display: block; font-size: 7pt; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .print-decision strong { display: block; margin-top: 2mm; font-size: 20pt; }
+  .print-summary { margin: 7mm 0; border: 1px solid #cbd3e1; padding: 4mm; }
+  .readiness-print-record h2 { margin: 7mm 0 3mm; font-size: 13pt; }
+  .print-condition { break-inside: avoid; display: grid; grid-template-columns: 42mm 1fr; gap: 3mm 6mm; border-top: 1px solid #9eabc0; padding: 3mm 0; }
+  .print-condition > div:first-child { display: flex; gap: 3mm; }
+  .print-condition span { color: #db509e; font-size: 8pt; font-weight: 700; }
+  .print-condition p { margin: 1mm 0 0; color: #405777; }
+  .print-resolution { grid-column: 2; border-left: 2px solid #db509e; padding-left: 3mm; }
+  .print-governance { break-inside: avoid; border-top: 2px solid #102957; margin-top: 5mm; }
+  .print-links { border-top: 1px solid #9eabc0; margin-top: 7mm; padding-top: 3mm; font-size: 8pt; }
+  .print-privacy { color: #647491; font-size: 7.5pt; }
+}
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
