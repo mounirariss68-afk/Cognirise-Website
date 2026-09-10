@@ -52,6 +52,7 @@ export default function Home() {
   const convergenceVisual = landingMedia(governedLanding, "home-convergence-visual", { src: assetUrl("/images/cognirise/pulse-convergence.jpg"), alt: "Depiction of convergence" });
   const frameworkIdaoCta = landingCta(governedLanding, "home-framework-idao-cta", { label: "Explore IDAO", href: "/methodologies/idao" });
   const frameworkAuthorityCta = landingCta(governedLanding, "home-framework-authority-cta", { label: "Agent Authority Model", href: "/methodologies/agent-authority-model" });
+  const frameworkPortfolioCta = landingCta(governedLanding, "home-framework-portfolio-cta", { label: "View methodology portfolio", href: "/methodologies" });
   const convergenceCta = landingCta(governedLanding, "home-convergence-cta", { label: "Meet the team", href: "/about" });
   const startCta = landingCta(governedLanding, "home-start-cta", { label: "Book a consultation", href: "/contact" });
   const visualUrl = (mediaId: string, mediaVersionId: string) =>
@@ -268,6 +269,7 @@ export default function Home() {
               {featuredFramework?.teaser ?? landingText(governedLanding, "home-framework-teaser", "A deterministic way to set how much authority each agent handover may exercise on its own.")}
             </p>
             <div className="flex flex-wrap gap-4">
+              <BrandButton href={frameworkPortfolioCta.href} variant="inverse">{frameworkPortfolioCta.label}</BrandButton>
               <BrandButton href={frameworkIdaoCta.href} variant="inverse">{frameworkIdaoCta.label}</BrandButton>
               <BrandButton href={frameworkAuthorityCta.href} variant="inverse">{frameworkAuthorityCta.label}</BrandButton>
             </div>

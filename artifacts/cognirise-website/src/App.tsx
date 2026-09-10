@@ -64,6 +64,8 @@ import CmsPreview from "@/pages/CmsPreview";
 
 import AgentAuthorityModel from "@/pages/AgentAuthorityModel";
 import IDAOMethodology from "@/pages/IDAOMethodology";
+import MethodologiesPortfolio from "@/pages/MethodologiesPortfolio";
+import AIValueToScale from "@/pages/AIValueToScale";
 
 export function Router() {
   const [location] = useLocation();
@@ -88,6 +90,8 @@ export function Router() {
         <Route path="/" component={Home} />
         
         {/* Methodologies */}
+        <Route path="/methodologies" component={MethodologiesPortfolio} />
+        <Route path="/methodologies/ai-value-to-scale" component={AIValueToScale} />
         <Route path="/methodologies/idao" component={IDAOMethodology} />
         <Route path="/methodologies/agent-authority-model" component={AgentAuthorityModel} />
 

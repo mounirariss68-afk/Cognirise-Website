@@ -253,3 +253,17 @@ mtime_ms = 1788949243726
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/82456dc7-7c6c-48d3-ba03-217f0e316fb3/fa1f0eef-98e0-4be6-8a1b-fd143e4a4f43"
 storage_version_token = "1788949258724285"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "VIG0MUqfTGTruTemqR-PM"
+uri = "file://artifacts/cognirise-website/public/downloads/cognirise-ai-value-to-scale-assessment.pdf"
+type = "pdf"
+title = "AI Value-to-Scale Assessment"
+description = "Accessible, ungated three-page worksheet matching the Cognirise web assessment."
+logical_id = "40dac1be-0f4d-4799-9183-ec7f29e58438"
+content_hash = "sha256:cc05d42aef4c2df592ce6231a0eba12d0f49d9e3a603a1b42d01df7b340b7e24"
+size = 59494
+mtime_ms = 1788991115718
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/40dac1be-0f4d-4799-9183-ec7f29e58438/6168f3f8-a54f-4077-b116-261050c907f4"
+storage_version_token = "1788991289523866"
+content_type = "application/pdf"

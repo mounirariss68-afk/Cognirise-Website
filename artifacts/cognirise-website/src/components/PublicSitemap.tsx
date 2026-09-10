@@ -5,6 +5,8 @@ import { ALLIANCE_PLATFORM_LIST } from "@/lib/alliancePlatforms";
 import { useLocation } from "wouter";
 
 export const STATIC_SITEMAP_PATHS = [
+  "/methodologies",
+  "/methodologies/ai-value-to-scale",
   "/methodologies/idao",
   "/methodologies/agent-authority-model",
   ...ALLIANCE_PLATFORM_LIST.map(({ slug }) => `/platforms/${slug}`),

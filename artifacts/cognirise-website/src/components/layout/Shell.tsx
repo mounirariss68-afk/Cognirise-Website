@@ -20,6 +20,14 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: "IDAO Methodology | Cognirise",
     description: "Innovate, Demonstrate, Activate and Operate: Cognirise's methodology for moving consequential work from opportunity to sustained operation.",
   },
+  "/methodologies": {
+    title: "AI Methodologies & Frameworks | Cognirise",
+    description: "Explore Cognirise methods for moving valuable AI into sustained operation, from organisational maturity to workflow authority.",
+  },
+  "/methodologies/ai-value-to-scale": {
+    title: "AI Value-to-Scale Maturity Model | Cognirise",
+    description: "Assess seven evidence-backed conditions for repeatedly moving valuable AI from opportunity into sustained operation.",
+  },
   "/what-we-do/agentic-enterprise-transformation": {
     title: "Agentic Transformation Capability | Consulting & Engineering with AI",
     description: "A supporting capability within Consulting & Engineering with AI for redesigning priority work around governed intelligent execution.",
@@ -147,8 +155,10 @@ const compiledNavigation: NavigationItem[] = [
   {
     id: "methodologies",
     label: "How we do it",
-    href: "/methodologies/idao",
+    href: "/methodologies",
     items: [
+      { id: "methodologies.overview", label: "Methodology Portfolio", href: "/methodologies" },
+      { id: "methodologies.value-to-scale", label: "AI Value-to-Scale", href: "/methodologies/ai-value-to-scale" },
       { id: "methodologies.idao", label: "IDAO", href: "/methodologies/idao" },
       { id: "methodologies.agent-authority", label: "Agent Authority Model", href: "/methodologies/agent-authority-model" },
     ]
@@ -412,7 +422,7 @@ export function Shell({
   const isCurrentSection = (itemHref: string) => {
     const pathname = itemHref.split("#")[0];
     if (pathname === "/") return currentPath === "/";
-    if (pathname === "/methodologies/idao") return currentPath.startsWith("/methodologies/");
+    if (pathname === "/methodologies") return currentPath.startsWith("/methodologies");
     return currentPath.startsWith(pathname);
   };
 
