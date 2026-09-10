@@ -29,3 +29,4 @@
 - [Protected methodology anchors](protected-methodology-anchors.md) — Treat IDAO and Agent Authority as read-only canon; supporting methods connect to them without changing them.
 - [OpenAPI UUID generation](openapi-uuid-generation.md) — Avoid format: uuid while this workspace uses Zod 3; Orval 8 emits the Zod 4-only zod.uuid() helper.
 - [Saved assessment async consistency](saved-assessment-async-consistency.md) — Lock edits during save/reopen or revision-check responses so stable links always match displayed answers.
+- [Text resize verification](text-resize-verification.md) — Disable transitions fully before resampling fonts; reduced-motion rules can otherwise compound simulated text enlargement.

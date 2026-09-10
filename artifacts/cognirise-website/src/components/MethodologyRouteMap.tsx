@@ -191,9 +191,9 @@ export function MethodologyRouteMap() {
         </article>
       ))}
     </section>
-    <div className="methodology-route-screen bg-[#fdfcfb] flex flex-col md:flex-row shadow-lg border border-[#cbd3e1]">
+    <div data-testid="methodology-route-map" className="methodology-route-screen bg-[#fdfcfb] flex flex-col xl:flex-row shadow-lg border border-[#cbd3e1] [overflow-wrap:anywhere] [&_button]:scroll-mt-32 [&_a]:scroll-mt-32">
       {/* Left Side: Situations Radio Group */}
-      <div className="md:w-[320px] lg:w-[400px] shrink-0 border-b md:border-b-0 md:border-r border-[#cbd3e1] bg-[#f9fafb]">
+      <div className="xl:w-[400px] min-w-0 shrink-0 border-b xl:border-b-0 xl:border-r border-[#cbd3e1] bg-[#f9fafb]">
         <div className="p-6 lg:p-8 border-b border-[#cbd3e1]">
           <h3 className="font-display text-xl font-semibold text-[#102957]">Start with your situation</h3>
         </div>
@@ -226,7 +226,7 @@ export function MethodologyRouteMap() {
                 <div className={`shrink-0 mt-0.5 flex h-6 w-6 items-center justify-center rounded-sm ${isActive ? 'bg-[hsl(var(--brand-pink))] text-white' : 'bg-black/5 text-[#647491] group-hover:bg-[#102957] group-hover:text-white'}`}>
                   <Icon size={14} />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <span className={`block font-semibold text-[15px] leading-tight ${isActive ? "text-white" : "text-[#102957]"}`}>
                     {sit.label}
                   </span>
@@ -247,7 +247,7 @@ export function MethodologyRouteMap() {
         aria-live="polite"
         data-testid="route-output-panel"
         ref={outputRef}
-        className="flex-1 scroll-mt-24 p-6 sm:p-8 md:p-10 lg:p-16 bg-white flex flex-col relative overflow-hidden min-h-[600px]"
+        className="min-w-0 flex-1 scroll-mt-24 p-6 sm:p-8 md:p-10 lg:p-16 bg-white flex flex-col relative min-h-[600px]"
       >
         <div key={activeSituation} className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-500 motion-safe:fill-mode-both">
           {/* Output Header */}
@@ -264,7 +264,7 @@ export function MethodologyRouteMap() {
           </div>
 
           {/* Grid of details */}
-          <div className="grid lg:grid-cols-2 gap-10 mb-14">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-10 mb-14">
             <div data-testid="route-detail-decision">
               <h5 className="text-[11px] font-bold uppercase tracking-wider text-[#102957] mb-3 flex items-center gap-2">
                 <CornerDownRight size={14} className="text-[hsl(var(--brand-pink))]" />
@@ -318,16 +318,16 @@ export function MethodologyRouteMap() {
                 data-testid={`action-${action.type}`}
                 className={
                   action.type === 'primary'
-                    ? "relative overflow-hidden inline-flex items-center gap-3 bg-[#102957] text-white px-7 py-4 hover:bg-[#1a3a75] text-[15px] font-bold transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--brand-pink))]"
-                    : "inline-flex items-center gap-2 text-[15px] font-bold text-[#405777] hover:text-[#102957] underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#102957]"
+                    ? "relative max-w-full min-w-0 inline-flex items-center gap-3 bg-[#102957] text-white px-7 py-4 hover:bg-[#1a3a75] text-[15px] font-bold transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--brand-pink))]"
+                    : "max-w-full min-w-0 inline-flex items-center gap-2 text-[15px] font-bold text-[#405777] hover:text-[#102957] underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#102957]"
                 }
               >
                 {action.type === 'primary' && (
                   <div className="absolute top-0 left-0 bottom-0 w-1 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
                 )}
-                <span className={action.type === 'primary' ? "pl-1" : ""}>{action.label}</span>
+                <span className={action.type === 'primary' ? "min-w-0 pl-1" : "min-w-0"}>{action.label}</span>
                 {action.type === 'primary' && (
-                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                  <ArrowRight size={16} className="shrink-0 transition-transform group-hover:translate-x-1" />
                 )}
               </Link>
             ))}

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { rm } from "node:fs/promises";
+import { resizeText, assertNoClipping, assertFocusedVisible } from "./methodology-text-layout.mjs";
 import { assertMethodologyPrint, routeExpectations } from "./methodology-print-check.mjs";
 
 const browserPath = process.env.CHROMIUM_PATH || "/repl/tools/bin/chromium";
@@ -100,7 +101,7 @@ async function navigate(pathname, readyExpression) {
   throw new Error(`Route did not become ready: ${pathname}\n${JSON.stringify(diagnostics, null, 2)}`);
 }
 
-async function pressKey(key, code, keyCode) {
+async function pressKey(key, code, keyCode, modifiers = 0) {
   for (const type of ["keyDown", "keyUp"]) {
     await send("Input.dispatchKeyEvent", {
       type,
@@ -108,30 +109,53 @@ async function pressKey(key, code, keyCode) {
       code,
       windowsVirtualKeyCode: keyCode,
       nativeVirtualKeyCode: keyCode,
+      modifiers,
     });
   }
   await delay(50);
 }
 
-async function assertRelationshipLayout(pathname, width) {
+const routeMap = '[data-testid="methodology-route-map"]';
+const relationship = '[aria-label="Methodology boundaries and connections"]';
+const destinations = ["/methodologies/idao", "/methodologies/agent-authority-model"];
+
+async function tabInto(selector) {
+  await evaluate(`(() => {
+    const entry = document.createElement("button");
+    entry.id = "methodology-test-entry";
+    document.querySelector(${JSON.stringify(selector)}).before(entry);
+    entry.focus();
+  })()`);
+  await pressKey("Tab", "Tab", 9);
+  await evaluate(`document.getElementById("methodology-test-entry").remove()`);
+}
+
+async function assertRelationshipLayout(pathname, width, scale) {
   await setViewport(width);
-  await navigate(pathname, `Boolean(document.querySelector('[aria-label="Methodology boundaries and connections"]'))`);
-  await evaluate(`document.querySelector('[aria-label="Methodology boundaries and connections"] details').open = true`);
+  await navigate(pathname, `Boolean(document.querySelector(${JSON.stringify(relationship)}))`);
+  const context = pathname + " at " + width + "px / " + scale * 100 + "% text";
+  await resizeText(evaluate, relationship, scale);
+  await tabInto(relationship + " details");
+  await assertFocusedVisible(evaluate, relationship + " summary", context + " disclosure keyboard entry");
+  await pressKey(" ", "Space", 32);
+  assert.equal(await evaluate(`document.querySelector(${JSON.stringify(relationship + " details")}).open`), true, context + " keyboard opens connections");
+  await assertNoClipping(evaluate, relationship, context);
   const layout = await evaluate(`(() => {
-    const section = document.querySelector('[aria-label="Methodology boundaries and connections"]');
-    const grid = section.querySelector('details > div');
+    const section = document.querySelector(${JSON.stringify(relationship)});
+    const grid = section.querySelector('[data-testid="relationship-grid"]');
     const columns = [...grid.children];
     const panels = [...columns[1].children];
     const sectionRect = section.getBoundingClientRect();
     const gridRect = grid.getBoundingClientRect();
     const panelRects = panels.map((panel) => panel.getBoundingClientRect());
+    const overlaps = (a, b) => a.left < b.right - 0.5 && a.right > b.left + 0.5 && a.top < b.bottom - 0.5 && a.bottom > b.top + 0.5;
     return {
       sectionScrollWidth: section.scrollWidth,
       sectionClientWidth: section.clientWidth,
       gridRight: gridRect.right,
       sectionRight: sectionRect.right,
-      columnsOverlap: columns[0].getBoundingClientRect().right > columns[1].getBoundingClientRect().left + 0.5,
-      panelsOverlap: panelRects[0].bottom > panelRects[1].top + 0.5,
+      columnsOverlap: overlaps(columns[0].getBoundingClientRect(), columns[1].getBoundingClientRect()),
+      panelsOverlap: overlaps(panelRects[0], panelRects[1]),
       panelsClipped: panelRects.some((rect) => rect.left < sectionRect.left || rect.right > sectionRect.right),
     };
   })()`);
@@ -140,45 +164,63 @@ async function assertRelationshipLayout(pathname, width) {
   assert.equal(layout.panelsOverlap, false, `${pathname} relationship panels should not overlap at ${width}px`);
   assert.equal(layout.panelsClipped, false, `${pathname} relationship panels should not clip at ${width}px`);
   assert.ok(layout.gridRight <= layout.sectionRight + 1, `${pathname} relationship grid should remain inside its section at ${width}px`);
+  for (const destination of destinations) {
+    await pressKey("Tab", "Tab", 9);
+    await assertFocusedVisible(evaluate, relationship + ' a[href="' + destination + '"]', context + " " + destination);
+  }
 }
 
-try {
-  await send("Page.enable");
-  await send("Runtime.enable");
-
-  await setViewport(1440);
-  await navigate("/methodologies", `document.querySelectorAll('[role="radiogroup"][aria-label="Starting situation"] [role="radio"]').length === 6`);
-
-  const firstRadio = '[role="radiogroup"][aria-label="Starting situation"] [data-route-index="0"]';
-  await evaluate(`(() => {
-    const group = document.querySelector('[role="radiogroup"][aria-label="Starting situation"]');
-    const entry = document.createElement("button");
-    entry.type = "button";
-    entry.id = "route-map-test-entry";
-    group.before(entry);
-    entry.focus();
-  })()`);
-  await pressKey("Tab", "Tab", 9);
-  const firstFocusState = await evaluate(`({
-    activeIndex: document.activeElement?.getAttribute("data-route-index"),
-    checked: document.querySelector(${JSON.stringify(firstRadio)}).getAttribute("aria-checked"),
-  })`);
-  assert.deepEqual(firstFocusState, { activeIndex: "0", checked: "true" });
-  await evaluate(`document.getElementById("route-map-test-entry").remove(); true`);
-  assert.match(await evaluate(`document.getElementById("selected-route-output").innerText`), /AI Value-to-Scale/);
-
-  await evaluate(`document.querySelector('[data-route-index="2"]').click(); true`);
+async function assertRouteMap(width, scale) {
+  await setViewport(width);
+  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 6`);
+  const context = "Route map at " + width + "px / " + scale * 100 + "% text";
+  // Restore a known selection, then enter through the real roving-tabindex group.
+  await evaluate(`document.querySelector('[data-route-index="0"]').click()`);
   await delay(50);
-  assert.equal(await evaluate(`document.querySelector('[data-route-index="2"]').getAttribute("aria-checked")`), "true");
-  assert.match(await evaluate(`document.getElementById("selected-route-output").innerText`), /Agentic Operations Readiness/);
-
-  await evaluate(`document.querySelector('[data-route-index="2"]').focus(); true`);
+  await resizeText(evaluate, routeMap, scale);
+  await tabInto('[data-testid="situation-radiogroup"]');
+  const methods = [
+    "AI Value-to-Scale", "AI Use-Case Prioritization", "Agentic Operations Readiness",
+    "Human–Agent Operating Model", "Agent Authority Model", "IDAO Loopback",
+  ];
+  for (let index = 0; index < methods.length; index += 1) {
+    if (index) await pressKey("ArrowDown", "ArrowDown", 40);
+    // React replaces the selected panel. Re-snapshot unscaled styles, never
+    // compound the scale or accidentally test newly mounted text at 100%.
+    if (index) await resizeText(evaluate, routeMap, scale);
+    const radio = '[data-route-index="' + index + '"]';
+    await assertFocusedVisible(evaluate, radio, context + " keyboard route " + index);
+    assert.equal(await evaluate(`document.querySelector(${JSON.stringify(radio)}).getAttribute("aria-checked")`), "true");
+    assert.equal(await evaluate(`document.querySelector('[data-testid="route-detail-method"]').textContent`), methods[index]);
+    await assertNoClipping(evaluate, routeMap, context + " selection " + index);
+    const overlapping = await evaluate(`(() => {
+      const panels = [...document.querySelector(${JSON.stringify(routeMap)}).children].map(el => el.getBoundingClientRect());
+      return panels[0].right > panels[1].left + 1 && panels[0].bottom > panels[1].top + 1;
+    })()`);
+    assert.equal(overlapping, false, context + " selector and output must not overlap");
+    // Tab out of the radio group to both governing links and every route action.
+    const links = await evaluate(`[...document.querySelectorAll('#selected-route-output a')].map((el, index) => {
+      el.dataset.browserLinkIndex = index;
+      return el.getAttribute("href");
+    })`);
+    for (const destination of destinations) assert.ok(links.includes(destination), context + " retains " + destination);
+    for (const [linkIndex, href] of links.entries()) {
+      await pressKey("Tab", "Tab", 9);
+      await assertFocusedVisible(evaluate, '[data-browser-link-index="' + linkIndex + '"]', context + " destination " + href);
+    }
+    // Reverse-tab back to the selected radio, ready to choose the next route.
+    for (const _ of links) await pressKey("Tab", "Tab", 9, 8);
+    await assertFocusedVisible(evaluate, radio, context + " reverse keyboard entry");
+  }
   await pressKey("ArrowDown", "ArrowDown", 40);
-  assert.equal(await evaluate(`document.activeElement?.getAttribute("data-route-index")`), "3");
-  assert.equal(await evaluate(`document.activeElement?.getAttribute("aria-checked")`), "true");
+  assert.equal(await evaluate(`document.activeElement?.getAttribute("data-route-index")`), "0", context + " arrow navigation wraps");
   await pressKey("ArrowLeft", "ArrowLeft", 37);
-  assert.equal(await evaluate(`document.activeElement?.getAttribute("data-route-index")`), "2");
+  assert.equal(await evaluate(`document.activeElement?.getAttribute("data-route-index")`), "5", context + " reverse arrow navigation wraps");
+}
 
+async function assertPrintRoutes() {
+  await setViewport(1440);
+  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 6`);
   const screenRoutes = [];
   for (const width of [1440, 390]) {
     await setViewport(width, width === 390 ? 844 : 1000, width === 390);
@@ -197,16 +239,35 @@ try {
       })()`);
       assert.equal(route.method, expected.method, `${width}px route ${index} method`);
       assert.deepEqual(route.destinations, expected.destinations, `${width}px route ${index} destinations`);
-      assert.deepEqual(route.anchors, ["/methodologies/idao", "/methodologies/agent-authority-model"]);
+      assert.deepEqual(route.anchors, destinations);
       if (width === 1440) screenRoutes.push(route);
     }
   }
-
   // Both viewport origins must print every route, not just the selected/restored one.
   for (const width of [1440, 390]) {
     await setViewport(width, 1000, width === 390);
     await assertMethodologyPrint({ send, evaluate, screenRoutes, width, outputDir: profilePath });
   }
+}
+
+try {
+  await send("Page.enable");
+  await send("Runtime.enable");
+  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  // Reduced-motion CSS still sets a nonzero transition duration on every element
+  // (default property: all). Disable it fully so resampling sees baseline fonts,
+  // not the starting frame of a font-size transition from the previous scale.
+  await send("Page.addScriptToEvaluateOnNewDocument", { source: `
+    document.addEventListener("DOMContentLoaded", () => {
+      const style = document.createElement("style");
+      style.textContent = "html, body, * { scroll-behavior: auto !important; overflow-anchor: none !important; transition: none !important; }";
+      document.head.append(style);
+    });
+  ` });
+
+  // Print at native typography before any text-only overrides are introduced.
+  await assertPrintRoutes();
+  await send("Emulation.setEmulatedMedia", { media: "screen", features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
 
   const relationshipPaths = [
     "/methodologies/ai-value-to-scale",
@@ -214,9 +275,15 @@ try {
     "/methodologies/agentic-operations-readiness",
     "/methodologies/human-agent-operating-model",
   ];
-  for (const width of [1440, 900]) {
-    for (const path of relationshipPaths) {
-      await assertRelationshipLayout(path, width);
+  const scales = process.env.PULSE_TEXT_SCALES?.split(",").map(Number) || [1, 2];
+  const widths = process.env.PULSE_TEXT_WIDTHS?.split(",").map(Number) || [1440, 900, 768, 390];
+  for (const scale of scales) {
+    for (const width of widths) {
+      await assertRouteMap(width, scale);
+      for (const path of relationshipPaths) {
+        await assertRelationshipLayout(path, width, scale);
+      }
+      console.log(`Passed methodology layout at ${width}px / ${scale * 100}% text`);
     }
   }
 
@@ -224,13 +291,13 @@ try {
   await navigate("/methodologies/agentic-operations-readiness", `document.body.textContent.includes("6 Conditions feed into:")`);
   const readinessBoundary = await evaluate(`(() => {
     const stop = [...document.querySelectorAll("strong")].find((node) => node.textContent?.trim() === "Stop" && node.closest("section")?.textContent.includes("6 Conditions feed into:"))?.parentElement;
-    const idao = [...document.querySelectorAll('strong')].find((node) => node.textContent?.trim() === "Separate Agent Authority decision")?.parentElement;
+    const authority = [...document.querySelectorAll("strong")].find((node) => node.textContent?.trim() === "Separate Agent Authority decision")?.parentElement;
     const stopRect = stop.getBoundingClientRect();
-    const idaoRect = idao.getBoundingClientRect();
+    const authorityRect = authority.getBoundingClientRect();
     return {
       stopText: stop.innerText,
-      separate: stopRect.bottom <= idaoRect.top || idaoRect.bottom <= stopRect.top || stopRect.right <= idaoRect.left || idaoRect.right <= stopRect.left,
-      gap: idaoRect.top - stopRect.bottom,
+      separate: stopRect.bottom <= authorityRect.top || authorityRect.bottom <= stopRect.top || stopRect.right <= authorityRect.left || authorityRect.right <= stopRect.left,
+      gap: authorityRect.top - stopRect.bottom,
     };
   })()`);
   assert.match(readinessBoundary.stopText, /Do not enter IDAO delivery/);
