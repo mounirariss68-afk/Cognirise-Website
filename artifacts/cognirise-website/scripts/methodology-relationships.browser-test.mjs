@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { rm } from "node:fs/promises";
+import { assertMethodologyPrint, routeExpectations } from "./methodology-print-check.mjs";
 
 const browserPath = process.env.CHROMIUM_PATH || "/repl/tools/bin/chromium";
 const baseUrl = process.env.PULSE_BROWSER_BASE_URL || "http://127.0.0.1:80";
@@ -115,9 +116,10 @@ async function pressKey(key, code, keyCode) {
 async function assertRelationshipLayout(pathname, width) {
   await setViewport(width);
   await navigate(pathname, `Boolean(document.querySelector('[aria-label="Methodology boundaries and connections"]'))`);
+  await evaluate(`document.querySelector('[aria-label="Methodology boundaries and connections"] details').open = true`);
   const layout = await evaluate(`(() => {
     const section = document.querySelector('[aria-label="Methodology boundaries and connections"]');
-    const grid = section.querySelector('h2 + div');
+    const grid = section.querySelector('details > div');
     const columns = [...grid.children];
     const panels = [...columns[1].children];
     const sectionRect = section.getBoundingClientRect();
@@ -163,12 +165,12 @@ try {
   })`);
   assert.deepEqual(firstFocusState, { activeIndex: "0", checked: "true" });
   await evaluate(`document.getElementById("route-map-test-entry").remove(); true`);
-  assert.match(await evaluate(`document.getElementById("selected-methodology-route").innerText`), /AI Value-to-Scale/);
+  assert.match(await evaluate(`document.getElementById("selected-route-output").innerText`), /AI Value-to-Scale/);
 
   await evaluate(`document.querySelector('[data-route-index="2"]').click(); true`);
   await delay(50);
   assert.equal(await evaluate(`document.querySelector('[data-route-index="2"]').getAttribute("aria-checked")`), "true");
-  assert.match(await evaluate(`document.getElementById("selected-methodology-route").innerText`), /Agentic Operations Readiness/);
+  assert.match(await evaluate(`document.getElementById("selected-route-output").innerText`), /Agentic Operations Readiness/);
 
   await evaluate(`document.querySelector('[data-route-index="2"]').focus(); true`);
   await pressKey("ArrowDown", "ArrowDown", 40);
@@ -177,35 +179,34 @@ try {
   await pressKey("ArrowLeft", "ArrowLeft", 37);
   assert.equal(await evaluate(`document.activeElement?.getAttribute("data-route-index")`), "2");
 
-  await evaluate(`[...document.querySelectorAll("button")].find((button) => button.textContent?.trim() === "Show all routes").click(); true`);
-  await delay(50);
-  assert.equal(await evaluate(`document.querySelector('[role="radiogroup"][aria-label="Starting situation"] [aria-checked="true"]')`), null);
-  assert.equal(await evaluate(`document.getElementById("selected-methodology-route").innerText.includes("Every situation goes directly")`), true);
-
-  await setViewport(390, 844, true);
-  await navigate("/methodologies", `document.querySelectorAll('.md\\\\:hidden a').length > 0`);
-  const mobileDestinations = await evaluate(`(() => {
-    const visibleLinks = [...document.querySelectorAll('.md\\\\:hidden a')].filter((link) => link.getBoundingClientRect().height > 0);
-    return visibleLinks.map((link) => ({
-      text: link.innerText.replace(/\\s+/g, " ").trim(),
-      path: new URL(link.href).pathname,
-    }));
-  })()`);
-  const routePaths = [
-    "/methodologies/ai-value-to-scale",
-    "/methodologies/ai-use-case-prioritization",
-    "/methodologies/agentic-operations-readiness",
-    "/methodologies/human-agent-operating-model",
-    "/methodologies/agent-authority-model",
-    "/methodologies/idao",
-  ];
-  for (const path of routePaths) {
-    assert.ok(mobileDestinations.some((link) => link.path === path), `Mobile route should retain ${path}`);
+  const screenRoutes = [];
+  for (const width of [1440, 390]) {
+    await setViewport(width, width === 390 ? 844 : 1000, width === 390);
+    for (const [index, expected] of routeExpectations.entries()) {
+      await evaluate(`document.querySelector('[data-route-index="${index}"]').click(); true`);
+      await delay(50);
+      const route = await evaluate(`(() => {
+        const panel = document.getElementById("selected-route-output");
+        return {
+          method: panel.querySelector('[data-testid="route-detail-method"]').textContent.trim(),
+          copy: ['route-detail-decision', 'route-detail-output', 'route-anchor-idao', 'route-anchor-authority']
+            .map(id => panel.querySelector('[data-testid="' + id + '"] p').textContent.trim()),
+          destinations: [...panel.querySelectorAll('[data-testid="route-actions"] a')].map(link => link.getAttribute('href')),
+          anchors: [...panel.querySelectorAll('[data-testid^="route-anchor-"] a')].map(link => link.getAttribute('href')),
+        };
+      })()`);
+      assert.equal(route.method, expected.method, `${width}px route ${index} method`);
+      assert.deepEqual(route.destinations, expected.destinations, `${width}px route ${index} destinations`);
+      assert.deepEqual(route.anchors, ["/methodologies/idao", "/methodologies/agent-authority-model"]);
+      if (width === 1440) screenRoutes.push(route);
+    }
   }
-  const idaoAnchor = mobileDestinations.find((link) => link.text.includes("IDAO Delivery Framework"));
-  const authorityAnchor = mobileDestinations.find((link) => link.text.includes("Agent Authority Model") && !link.text.includes("Situation:"));
-  assert.equal(idaoAnchor?.path, "/methodologies/idao");
-  assert.equal(authorityAnchor?.path, "/methodologies/agent-authority-model");
+
+  // Both viewport origins must print every route, not just the selected/restored one.
+  for (const width of [1440, 390]) {
+    await setViewport(width, 1000, width === 390);
+    await assertMethodologyPrint({ send, evaluate, screenRoutes, width, outputDir: profilePath });
+  }
 
   const relationshipPaths = [
     "/methodologies/ai-value-to-scale",
@@ -223,7 +224,7 @@ try {
   await navigate("/methodologies/agentic-operations-readiness", `document.body.textContent.includes("6 Conditions feed into:")`);
   const readinessBoundary = await evaluate(`(() => {
     const stop = [...document.querySelectorAll("strong")].find((node) => node.textContent?.trim() === "Stop" && node.closest("section")?.textContent.includes("6 Conditions feed into:"))?.parentElement;
-    const idao = [...document.querySelectorAll('a[href="/methodologies/idao"]')].find((link) => link.innerText.includes("Deliver through IDAO"));
+    const idao = [...document.querySelectorAll('strong')].find((node) => node.textContent?.trim() === "Separate Agent Authority decision")?.parentElement;
     const stopRect = stop.getBoundingClientRect();
     const idaoRect = idao.getBoundingClientRect();
     return {
@@ -233,8 +234,8 @@ try {
     };
   })()`);
   assert.match(readinessBoundary.stopText, /Do not enter IDAO delivery/);
-  assert.equal(readinessBoundary.separate, true, "Stop must remain visibly separate from the IDAO entry link");
-  assert.ok(readinessBoundary.gap > 8, "Stop and the IDAO entry link should retain visible spacing");
+  assert.equal(readinessBoundary.separate, true, "Stop must remain visibly separate from the Agent Authority decision");
+  assert.ok(readinessBoundary.gap > 8, "Stop and the Agent Authority decision should retain visible spacing");
 
   console.log("Methodology route and relationship browser regression passed");
 } finally {

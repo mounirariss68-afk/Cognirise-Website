@@ -2,6 +2,7 @@ import { useState, useEffect, type KeyboardEvent, useRef } from "react";
 import { ArrowRight, Info, Workflow, Scale, Target, ShieldCheck, CheckCircle2, CornerDownRight } from "lucide-react";
 import { Link } from "wouter";
 import { trackProjectEvent } from "@/lib/analytics";
+import "./MethodologyRouteMap.print.css";
 
 type RouteSituation = "org-wide" | "multiple-opps" | "one-workflow" | "work-design" | "authority" | "live-evidence";
 
@@ -166,7 +167,31 @@ export function MethodologyRouteMap() {
   const activeRoute = ROUTE_DATA.find(r => r.id === activeSituation) || ROUTE_DATA[0];
 
   return (
-    <div className="bg-[#fdfcfb] flex flex-col md:flex-row shadow-lg border border-[#cbd3e1]">
+    <>
+    <section className="methodology-route-print" aria-label="Complete methodology route map">
+      <h2>Cognirise methodology route map</h2>
+      <div className="methodology-print-anchors" aria-label="Governing framework anchors">
+        <h3>Governing frameworks</h3>
+        <p><Link href="/methodologies/idao">IDAO Delivery Framework</Link></p>
+        <p><Link href="/methodologies/agent-authority-model">Agent Authority Model</Link></p>
+      </div>
+      {ROUTE_DATA.map((route) => (
+        <article key={route.id} data-print-route={route.id}>
+          <p><strong>Situation:</strong> {route.label}</p>
+          <h3>{route.method}</h3>
+          <p><strong>Decision needed:</strong> {route.decision}</p>
+          <p><strong>Required output:</strong> {route.output}</p>
+          <p><strong>Connection to IDAO:</strong> {route.idao}</p>
+          <p><strong>Connection to Agent Authority:</strong> {route.authority}</p>
+          <div>
+            {route.actions.map((action) => (
+              <p key={action.href}><Link href={action.href}>{action.label}</Link></p>
+            ))}
+          </div>
+        </article>
+      ))}
+    </section>
+    <div className="methodology-route-screen bg-[#fdfcfb] flex flex-col md:flex-row shadow-lg border border-[#cbd3e1]">
       {/* Left Side: Situations Radio Group */}
       <div className="md:w-[320px] lg:w-[400px] shrink-0 border-b md:border-b-0 md:border-r border-[#cbd3e1] bg-[#f9fafb]">
         <div className="p-6 lg:p-8 border-b border-[#cbd3e1]">
@@ -310,5 +335,6 @@ export function MethodologyRouteMap() {
         </div>
       </div>
     </div>
+    </>
   );
 }

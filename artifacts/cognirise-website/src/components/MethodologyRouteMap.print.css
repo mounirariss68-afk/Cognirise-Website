@@ -1,0 +1,67 @@
+.methodology-route-print {
+  display: none;
+}
+
+@media print {
+  /* Scope print overrides to the portfolio; canonical framework pages are unchanged. */
+  body:has(.methodology-route-print) header,
+  body:has(.methodology-route-print) footer,
+  .methodology-route-screen,
+  #route-navigator > :not([data-testid="route-navigator-container"]) {
+    display: none !important;
+  }
+
+  #route-navigator {
+    padding: 0;
+    min-height: 0;
+  }
+
+  .methodology-route-print {
+    display: block;
+    color: #102957;
+    background: white;
+    font: 10pt/1.35 Arial, sans-serif;
+  }
+
+  .methodology-route-print h2 {
+    font-size: 19pt;
+    font-weight: 700;
+    margin-bottom: 4mm;
+    break-after: avoid;
+  }
+
+  .methodology-route-print h3 {
+    font-size: 12pt;
+    font-weight: 700;
+    margin: 2mm 0;
+  }
+
+  .methodology-route-print article,
+  .methodology-print-anchors {
+    display: block;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    overflow: visible;
+    border: 1px solid #9eabc0;
+    padding: 4mm;
+    margin-bottom: 4mm;
+  }
+
+  .methodology-route-print p {
+    margin: 1.5mm 0;
+    orphans: 3;
+    widows: 3;
+  }
+
+  .methodology-route-print a {
+    color: inherit;
+    text-decoration: underline;
+    overflow-wrap: anywhere;
+  }
+
+  /* Retain a readable destination on paper as well as a clickable PDF link. */
+  .methodology-route-print a::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+  }
+}
