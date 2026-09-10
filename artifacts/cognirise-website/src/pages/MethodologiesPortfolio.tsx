@@ -72,7 +72,7 @@ export default function MethodologiesPortfolio() {
             </div>
           </div>
           
-          <figure className="relative h-[430px] w-full overflow-hidden bg-[#071936] [clip-path:polygon(0_8%,12%_0,92%_0,100%_9%,100%_86%,90%_100%,12%_96%,0_100%)] md:h-[520px] md:[clip-path:polygon(11%_0,100%_0,100%_82%,94%_82%,94%_92%,83%_100%,0_100%,0_14%)] lg:h-[620px] lg:[clip-path:polygon(13%_0,100%_0,100%_80%,95%_80%,95%_92%,82%_100%,0_100%,0_15%)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-8 motion-safe:duration-700 motion-safe:ease-out" data-testid="hero-figure">
+          <figure data-methodology-hero-frame className="clip-diagonal relative h-[430px] w-full overflow-hidden bg-[#071936] md:h-[520px] lg:h-[620px] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-8 motion-safe:duration-700 motion-safe:ease-out" data-testid="hero-figure">
             <PulseImage
               src={assetUrl("/images/cognirise/method-overview.jpg")}
               alt="Architectural intersection representing connected methods"

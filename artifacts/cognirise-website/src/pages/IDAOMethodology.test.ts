@@ -61,11 +61,10 @@ test("IDAO keeps approved imagery, order and milestone commitments", () => {
   assert.match(page, /governed MVP within[\s\S]*2–4 weeks/i);
 });
 
-test("IDAO hero keeps its intentional responsive polygon and accessible reveal", () => {
+test("IDAO hero keeps the shared five-point silhouette and accessible reveal", () => {
   assert.match(page, /data-idao-hero-frame/);
-  assert.match(page, /\[clip-path:polygon\([^)]*\)\]/);
-  assert.match(page, /md:\[clip-path:polygon\([^)]*\)\]/);
-  assert.match(page, /lg:\[clip-path:polygon\([^)]*\)\]/);
+  assert.match(page, /className="clip-diagonal relative h-\[430px\][^"]*md:h-\[520px\] lg:h-\[620px\]"/);
+  assert.doesNotMatch(page, /\[clip-path:polygon/);
   assert.match(page, /initial=\{reducedMotion \? false : \{ opacity: 0, x: 28 \}\}/);
   assert.match(page, /transition=\{\{ duration: reducedMotion \? 0 : 1/);
   assert.doesNotMatch(page, /animate=\{\{[^}]*clipPath: "inset\(0\)"/);

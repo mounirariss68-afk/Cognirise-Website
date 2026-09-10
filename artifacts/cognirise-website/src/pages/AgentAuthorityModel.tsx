@@ -452,13 +452,12 @@ export function AgentAuthorityLayout({
               Assess one handover <ArrowRight size={16} />
             </a>
           </motion.div>
-          <motion.figure
+          <motion.div
             initial={reducedMotion ? false : { opacity: 0, clipPath: "inset(0 100% 0 0)" }}
             animate={{ opacity: 1, clipPath: "inset(0 0 0 0)" }}
             transition={{ duration: reducedMotion ? 0 : 1, ease: [0.16, 1, 0.3, 1] }}
-            className="relative h-[430px] overflow-hidden bg-[#071936] lg:h-[650px]"
-            style={{ clipPath: "polygon(10% 0, 100% 0, 100% 91%, 0 100%, 0 12%)" }}
           >
+            <figure data-methodology-hero-frame className="clip-diagonal relative h-[430px] overflow-hidden bg-[#071936] lg:h-[650px]">
             <PulseImage
               src={heroMedia?.url ?? assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")}
               alt={framework?.heroMedia?.altText || heroMedia?.altText || "A luminous gateway marking the boundary between proposed and permitted agent authority."}
@@ -466,13 +465,14 @@ export function AgentAuthorityLayout({
               eager
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/80 via-transparent to-transparent" />
-            <figcaption className="absolute bottom-8 left-8 right-8 max-w-[480px] text-white">
+            <figcaption className="absolute bottom-[11%] left-8 right-8 max-w-[480px] text-white">
               <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/65">The governing rule</span>
               <strong className="mt-2 block font-display text-[clamp(26px,3vw,43px)] leading-[1.04] tracking-[-0.06em]">
                 Exposure sets the ceiling. Evidence earns the climb.
               </strong>
             </figcaption>
-          </motion.figure>
+            </figure>
+          </motion.div>
         </div>
       </header>
 

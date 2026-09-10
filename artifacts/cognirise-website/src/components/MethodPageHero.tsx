@@ -69,7 +69,8 @@ export function MethodPageHero({
           initial={reducedMotion ? false : { opacity: 0, x: 28 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: reducedMotion ? 0 : 1, ease: [0.2, 0.7, 0.2, 1] }}
-          className="relative h-[430px] overflow-hidden bg-[#071936] [clip-path:polygon(0_8%,12%_0,92%_0,100%_9%,100%_86%,90%_100%,12%_96%,0_100%)] md:h-[520px] md:[clip-path:polygon(11%_0,100%_0,100%_82%,94%_82%,94%_92%,83%_100%,0_100%,0_14%)] lg:h-[620px] lg:[clip-path:polygon(13%_0,100%_0,100%_80%,95%_80%,95%_92%,82%_100%,0_100%,0_15%)]"
+          data-methodology-hero-frame
+          className="clip-diagonal relative h-[430px] overflow-hidden bg-[#071936] md:h-[520px] lg:h-[620px]"
         >
           <PulseImage
             src={assetUrl(imageSrc)}
@@ -80,7 +81,7 @@ export function MethodPageHero({
           {(imageCaptionSubtitle || imageCaptionTitle) && (
             <>
               <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/90 via-[#071936]/10 to-transparent" />
-              <figcaption className="absolute bottom-[11%] left-6 right-7 text-white md:bottom-10 md:left-10 md:right-[12%] lg:left-12">
+              <figcaption className="absolute bottom-[11%] left-6 right-7 text-white md:left-10 md:right-[12%] lg:left-12">
                 {imageCaptionSubtitle && <span className="text-[10px] font-bold uppercase tracking-[0.13em] text-white/70">{imageCaptionSubtitle}</span>}
                 {imageCaptionTitle && <strong className="mt-2 block max-w-[540px] font-display text-[clamp(24px,3vw,40px)] leading-[1.04] tracking-[-0.06em]">{imageCaptionTitle}</strong>}
               </figcaption>
