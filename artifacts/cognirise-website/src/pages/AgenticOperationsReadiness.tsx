@@ -1,12 +1,25 @@
-import { ArrowRight, ArrowDown, Check, Printer, RotateCcw } from "lucide-react";
+import { ArrowDown, ArrowRight, Check, Copy, Printer, RotateCcw, Save, Trash2 } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useDynamicMetadata } from "@/lib/metadata";
 import { MethodologyRelationship } from "@/components/MethodologyRelationship";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { useEffect, useMemo, useState } from "react";
 import {
-import { ArrowRight, Check, Copy, Printer, RotateCcw, Save, Trash2 } from "lucide-react";
+  createReadinessAssessment,
+  deleteReadinessAssessment,
+  getReadinessAssessment,
+  type ReadinessAnswers,
+  type ReadinessAssessment,
+} from "@workspace/api-client-react";
 import {
+  forgetReadinessDeleteToken,
+  getReadinessDeleteToken,
+  getSavedReadinessId,
+  isCompleteReadinessAnswers,
+  readinessShareUrl,
+  replaceReadinessUrl,
+  storeReadinessDeleteToken,
+} from "@/lib/readiness-assessment";
 
 type Answer = ReadinessAnswers[keyof ReadinessAnswers];
 
