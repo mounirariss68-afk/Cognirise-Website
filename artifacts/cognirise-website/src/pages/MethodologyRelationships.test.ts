@@ -10,6 +10,8 @@ const __dirname = dirname(__filename);
 describe("Methodology Relationships and Boundaries", () => {
   const root = resolve(__dirname, "../..");
   const routeMap = readFileSync(resolve(root, "src/components/MethodologyRouteMap.tsx"), "utf8");
+
+  const analytics = readFileSync(resolve(root, "src/lib/analytics.ts"), "utf8");
   const portfolio = readFileSync(resolve(root, "src/pages/MethodologiesPortfolio.tsx"), "utf8");
   const relBlock = readFileSync(resolve(root, "src/components/MethodologyRelationship.tsx"), "utf8");
   const vts = readFileSync(resolve(root, "src/pages/AIValueToScale.tsx"), "utf8");
@@ -45,6 +47,28 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.doesNotMatch(portfolio, /Complete static route/i);
     assert.doesNotMatch(portfolio, /Download the VTS assessment worksheet/i);
     assert.match(routeMap, /Start with your situation/i);
+  });
+
+  it("tracks methodology route choices and fixed destinations without free-form content", () => {
+    assert.match(analytics, /window\.umami\?\.track\(name, data\)/);
+    assert.match(routeMap, /trackProjectEvent\("methodology_route_selected", \{[\s\S]*situation,[\s\S]*location:/);
+    assert.match(routeMap, /trackProjectEvent\("methodology_destination_opened", \{[\s\S]*situation: activeSituation,[\s\S]*destination,[\s\S]*location/);
+    for (const location of [
+      "desktop_route_selector",
+      "mobile_route_selector",
+      "desktop_selected_route",
+      "mobile_selected_route",
+    ]) {
+      assert.match(routeMap, new RegExp(location));
+    }
+    assert.match(routeMap, /trackProjectEvent\("methodology_anchor_opened", \{ destination, location \}\)/);
+    assert.match(routeMap, /"desktop_route_map"/);
+    assert.match(routeMap, /"mobile_route_map"/);
+    assert.match(routeMap, /onClick=\{\(\) => openDestination\(action\.href\)\}/);
+    assert.match(routeMap, /onClick=\{\(\) => openAnchor\("\/methodologies\/idao"\)\}/);
+    assert.match(routeMap, /onClick=\{\(\) => openAnchor\("\/methodologies\/agent-authority-model"\)\}/);
+    assert.match(routeMap, /if \(lastSelectedSituation\.current === situation\) return/);
+    assert.doesNotMatch(routeMap, /trackProjectEvent\([^)]*(label|decision|output|idao|authority)/);
   });
 
   it("verifies imagery refs exist in the pages", () => {

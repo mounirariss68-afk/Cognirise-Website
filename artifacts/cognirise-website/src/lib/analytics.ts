@@ -4,11 +4,31 @@ import type { AnalyticsEventInputName } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import { useMarketStore, type Market } from "@/store/market";
 
+type ProjectAnalyticsData = Record<string, string | number | boolean>;
+
+declare global {
+  interface Window {
+    umami?: {
+      track(name: string, data?: ProjectAnalyticsData): void;
+    };
+  }
+}
+
 const CONSENT_KEY = "cognirise-analytics-consent";
 const CONSENT_VERSION = "1";
 const VISITOR_KEY = "cognirise-visitor-id";
 const SESSION_KEY = "cognirise-session-id";
 const listeners = new Set<() => void>();
+
+export function trackProjectEvent(name: string, data?: ProjectAnalyticsData): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.umami?.track(name, data);
+  } catch {
+    // Project analytics must never interrupt the visitor journey.
+  }
+}
 
 function id(storage: Storage, key: string) {
   let value = storage.getItem(key);

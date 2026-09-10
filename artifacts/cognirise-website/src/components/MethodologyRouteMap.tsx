@@ -1,6 +1,7 @@
 import { useState, useEffect, type KeyboardEvent, useRef } from "react";
 import { ArrowRight, Info, Workflow, Scale, Target, ShieldCheck, CheckCircle2, CornerDownRight } from "lucide-react";
 import { Link } from "wouter";
+import { trackProjectEvent } from "@/lib/analytics";
 
 type RouteSituation = "org-wide" | "multiple-opps" | "one-workflow" | "work-design" | "authority" | "live-evidence";
 
@@ -83,6 +84,8 @@ const ROUTE_DATA = [
   }
 ] as const;
 
+type MethodologyDestination = (typeof ROUTE_DATA)[number]["actions"][number]["href"];
+
 export function MethodologyRouteMap() {
   const [activeSituation, setActiveSituation] = useState<RouteSituation>(() => {
     try {
@@ -95,6 +98,33 @@ export function MethodologyRouteMap() {
   });
 
   const outputRef = useRef<HTMLDivElement>(null);
+  // Defaults and restored state are not buyer interactions.
+  const lastSelectedSituation = useRef<RouteSituation | null>(null);
+
+  const selectSituation = (situation: RouteSituation) => {
+    setActiveSituation(situation);
+    if (lastSelectedSituation.current === situation) return;
+    lastSelectedSituation.current = situation;
+    trackProjectEvent("methodology_route_selected", {
+      situation,
+      location: window.innerWidth < 768 ? "mobile_route_selector" : "desktop_route_selector",
+    });
+  };
+
+  const openDestination = (destination: MethodologyDestination) => {
+    handleLinkClick();
+    trackProjectEvent("methodology_destination_opened", {
+      situation: activeSituation,
+      destination,
+      location: window.innerWidth < 768 ? "mobile_selected_route" : "desktop_selected_route",
+    });
+  };
+
+  const openAnchor = (destination: "/methodologies/idao" | "/methodologies/agent-authority-model") => {
+    handleLinkClick();
+    const location = window.innerWidth < 768 ? "mobile_route_map" : "desktop_route_map";
+    trackProjectEvent("methodology_anchor_opened", { destination, location });
+  };
 
   useEffect(() => {
     try {
@@ -120,13 +150,13 @@ export function MethodologyRouteMap() {
     if (nextButton) {
       nextButton.focus();
       const nextId = ROUTE_DATA[nextIndex].id as RouteSituation;
-      setActiveSituation(nextId);
+      selectSituation(nextId);
       
     }
   };
 
   const handleRadioClick = (id: RouteSituation) => {
-    setActiveSituation(id);
+    selectSituation(id);
     if (window.innerWidth < 768 && outputRef.current) {
        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
        outputRef.current.scrollIntoView({ behavior: reducedMotion ? "instant" : "smooth", block: "start" });
@@ -239,14 +269,14 @@ export function MethodologyRouteMap() {
               <div data-testid="route-anchor-idao">
                 <h6 className="text-[13px] font-bold text-[#102957] mb-1 flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-[hsl(var(--brand-violet))] rounded-full" />
-                  IDAO Delivery Framework
+                  <Link href="/methodologies/idao" onClick={() => openAnchor("/methodologies/idao")} className="underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]">IDAO Delivery Framework</Link>
                 </h6>
                 <p className="text-[15px] text-[#536887] leading-relaxed pl-3.5 border-l border-[#cbd3e1]/50">{activeRoute.idao}</p>
               </div>
               <div data-testid="route-anchor-authority">
                 <h6 className="text-[13px] font-bold text-[#102957] mb-1 flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-[hsl(var(--brand-coral))] rounded-full" />
-                  Agent Authority Model
+                  <Link href="/methodologies/agent-authority-model" onClick={() => openAnchor("/methodologies/agent-authority-model")} className="underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]">Agent Authority Model</Link>
                 </h6>
                 <p className="text-[15px] text-[#536887] leading-relaxed pl-3.5 border-l border-[#cbd3e1]/50">{activeRoute.authority}</p>
               </div>
@@ -259,7 +289,7 @@ export function MethodologyRouteMap() {
               <Link 
                 key={idx}
                 href={action.href}
-                onClick={handleLinkClick}
+                onClick={() => openDestination(action.href)}
                 data-testid={`action-${action.type}`}
                 className={
                   action.type === 'primary'
