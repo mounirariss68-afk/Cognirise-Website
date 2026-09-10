@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, Check, Printer, RotateCcw } from "lucide-react";
+import { ArrowRight, ArrowDown, Check, Printer, RotateCcw } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useDynamicMetadata } from "@/lib/metadata";
+import { MethodologyRelationship } from "@/components/MethodologyRelationship";
+import { PulseImage } from "@/components/ui/pulse-image";
 
 type Answer = "ready" | "prepare" | "stop";
 type ConditionRecord = { evidence: string; owner: string; reassessmentDate: string };
@@ -177,6 +179,24 @@ export default function AgenticOperationsReadiness() {
           </div>
         </div>
       </header>
+      <section className="px-6 pb-16 md:px-[4.8vw]">
+        <PulseImage
+          src="/images/cognirise/method-operations-readiness-clean.jpg"
+          alt="Cinematic raster composition showing a bounded operational workflow"
+          className="w-full h-[55vh] object-cover rounded-sm shadow-md"
+          fallbackColor="#102957"
+        />
+      </section>
+
+      <MethodologyRelationship
+        startHereWhen={<>You have a specific, bounded workflow and need to confirm it has the necessary stability, observability, and economic conditions before agent delivery begins.</>}
+        decision={<>Is this workflow ready for agents, and what must change first?</>}
+        output={<>A Proceed, Prepare or Stop decision accompanied by a register of unresolved operating conditions, their owners, and evidence gaps.</>}
+        connectsToIdao={<>Produces Proceed, Prepare or Stop for one bounded workflow. Missing conditions become work within the appropriate IDAO stage, and the readiness test repeats when scope changes.</>}
+        connectsToAuthority={<>Establishes whether the workflow can operate at all. Agent Authority separately determines how independently each consequential handover inside the workflow may act.</>}
+        reassessWhen={<>The workflow scope changes, the underlying tool access permissions change, or unresolved conditions pass their reassessment date.</>}
+        doesNotDecide={<>Which workflow is most valuable (use AI Use-Case Prioritization) or the specific rights of a human supervisor (use Human-Agent Operating Model).</>}
+      />
 
       <section className="border-y border-[#cbd3e1] bg-[#f1f3f7] px-6 py-20 md:px-[4.8vw] lg:py-24">
         <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-[8vw]">
@@ -188,14 +208,36 @@ export default function AgenticOperationsReadiness() {
             <p className="text-[18px] leading-[1.6] text-[#30486d]">
               This framework decides whether the workflow has viable operating conditions. It does not decide how independently an agent may act.
             </p>
-            <div className="mt-7 grid gap-4 sm:grid-cols-2">
+            <div className="mt-10 rounded-sm border border-[#cbd3e1] bg-white p-6 shadow-sm">
+              <strong className="block text-[10px] uppercase tracking-wider text-[#647491]">6 Conditions feed into:</strong>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <div className="border-t-4 border-[#16805f] bg-[#16805f]/10 p-4">
+                  <strong className="text-xs text-[#16805f]">Proceed</strong>
+                  <p className="mt-2 text-[11px] text-[#405777]">Enter or update the responsible IDAO stage with the evidence recorded.</p>
+                </div>
+                <div className="border-t-4 border-[#b5367d] bg-[#b5367d]/10 p-4">
+                  <strong className="text-xs text-[#b5367d]">Prepare</strong>
+                  <p className="mt-2 text-[11px] text-[#405777]">Turn missing conditions into work at the appropriate IDAO stage, then repeat the test.</p>
+                </div>
+                <div className="border-t-4 border-[#d34f38] bg-[#d34f38]/10 p-4">
+                  <strong className="text-xs text-[#d34f38]">Stop</strong>
+                  <p className="mt-2 text-[11px] text-[#405777]">Do not enter IDAO delivery for this scope; redefine it, resolve the blocker or stop.</p>
+                </div>
+              </div>
+              <ArrowDown className="mx-auto my-4 text-[#cbd3e1]" aria-hidden="true" />
+              <div className="rounded-sm border border-[hsl(var(--brand-coral))] bg-[#fff0f2] p-4 text-center">
+                <strong className="block text-[10px] uppercase tracking-wider text-[#102957]">Separate Agent Authority decision</strong>
+                <p className="mt-1 text-[11px] text-[#536887]">For any selected consequential handover, set how independently it may act.</p>
+              </div>
+            </div>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
               <a href="/methodologies/idao" className="border border-[#cbd3e1] bg-white p-5 hover:border-[#102957]">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#647491]">If it can proceed</span>
-                <strong className="mt-2 block font-display text-2xl tracking-[-.05em]">Deliver through IDAO →</strong>
+                <strong className="mt-2 block font-display text-xl tracking-[-.05em]">Deliver through IDAO →</strong>
               </a>
               <a href="/methodologies/agent-authority-model" className="border border-[#cbd3e1] bg-white p-5 hover:border-[#102957]">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#647491]">Before live handover</span>
-                <strong className="mt-2 block font-display text-2xl tracking-[-.05em]">Set Agent Authority →</strong>
+                <strong className="mt-2 block font-display text-xl tracking-[-.05em]">Set Agent Authority →</strong>
               </a>
             </div>
           </div>

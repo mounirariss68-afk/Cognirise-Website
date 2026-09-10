@@ -1,6 +1,8 @@
-import { ArrowRight, Check, GitBranch, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight, ArrowDown, Check, GitBranch, ShieldCheck, Users } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useDynamicMetadata } from "@/lib/metadata";
+import { MethodologyRelationship } from "@/components/MethodologyRelationship";
+import { PulseImage } from "@/components/ui/pulse-image";
 
 const DESIGN_STEPS = [
   {
@@ -99,6 +101,24 @@ export default function HumanAgentOperatingModel() {
           </div>
         </div>
       </header>
+      <section className="px-6 pb-16 md:px-[4.8vw]">
+        <PulseImage
+          src="/images/cognirise/method-human-agent-operating-model-clean.jpg"
+          alt="Cinematic raster composition showing live work and human-agent handovers"
+          className="w-full h-[55vh] object-cover rounded-sm shadow-md"
+          fallbackColor="#102957"
+        />
+      </section>
+
+      <MethodologyRelationship
+        startHereWhen={<>An AI capability is entering live work, requiring changes to roles, rights, handovers, incentives, and operational measures.</>}
+        decision={<>How must roles, rights and handovers change when AI enters real work?</>}
+        output={<>A role and handover design, decision-rights map, capability plan, incentive changes, and adoption measures.</>}
+        connectsToIdao={<>Shapes roles, handovers, capabilities, incentives and measures throughout Innovate, Demonstrate, Activate and Operate. Live evidence can return weak assumptions to the responsible stage.</>}
+        connectsToAuthority={<>Converts identified handovers into explicit propose, approve, act, intervene and demotion rights. Uses the Agent Authority Model calculation to bound the autonomy of those rights.</>}
+        reassessWhen={<>Agents gain new capabilities, exception volume overwhelms human supervisors, or business incentives drift away from the workflow's purpose.</>}
+        doesNotDecide={<>If the underlying workflow is stable enough to automate (use Agentic Operations Readiness).</>}
+      />
 
       <section className="border-y border-[#cbd3e1] bg-[#f1f3f7] px-6 py-20 md:px-[4.8vw] lg:py-24" aria-labelledby="not-rollout">
         <div className="grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-[8vw]">
@@ -141,6 +161,19 @@ export default function HumanAgentOperatingModel() {
       </section>
 
       <section className="bg-[#071936] px-6 py-20 text-white md:px-[4.8vw] lg:py-28" aria-labelledby="rights-title">
+        <div className="mb-16 border border-white/20 bg-white/5 rounded-sm p-8 max-w-5xl">
+          <h3 className="text-xs font-bold uppercase tracking-[.12em] text-[#ff9fcf] mb-6 text-center">Handover Choreography across IDAO</h3>
+          <div className="grid md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 items-center">
+            <div className="text-center p-4 border border-white/20 bg-[#0b2247]"><span className="text-[10px] block mb-1 text-white/50 uppercase tracking-wider">Innovate</span><p className="text-xs text-[#b9c7db]">Identify roles and constraints.</p></div>
+            <ArrowRight className="text-white/30 hidden md:block mx-auto" /><ArrowDown className="text-white/30 md:hidden mx-auto" />
+            <div className="text-center p-4 border border-white/20 bg-[#0b2247]"><span className="text-[10px] block mb-1 text-white/50 uppercase tracking-wider">Demonstrate</span><p className="text-xs text-[#b9c7db]">Test handover logic safely.</p></div>
+            <ArrowRight className="text-white/30 hidden md:block mx-auto" /><ArrowDown className="text-white/30 md:hidden mx-auto" />
+            <div className="text-center p-4 border border-[hsl(var(--brand-coral))] bg-[hsl(var(--brand-coral))]/10"><span className="text-[10px] block mb-1 text-[hsl(var(--brand-coral))] uppercase tracking-wider font-bold">Activate</span><p className="text-xs text-white">Install explicit rights pointing to Agent Authority.</p></div>
+            <ArrowRight className="text-white/30 hidden md:block mx-auto" /><ArrowDown className="text-white/30 md:hidden mx-auto" />
+            <div className="text-center p-4 border border-white/20 bg-[#0b2247]"><span className="text-[10px] block mb-1 text-white/50 uppercase tracking-wider">Operate</span><p className="text-xs text-[#b9c7db]">Measure and loop back.</p></div>
+          </div>
+        </div>
+
         <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-[7vw]">
           <div>
             <Kicker inverse>Decision-rights map</Kicker>
@@ -154,9 +187,9 @@ export default function HumanAgentOperatingModel() {
             </table>
           </div>
         </div>
-        <div className="mt-12 grid gap-6 border border-white/20 bg-[#0b2247] p-6 md:grid-cols-[auto_1fr_auto] md:items-center md:p-8">
-          <ShieldCheck className="text-[#ff9fcf]" size={34} />
-          <div><h3 className="font-display text-2xl font-semibold tracking-[-.04em]">Consequential handovers need an authority ceiling.</h3><p className="mt-2 text-sm leading-[1.6] text-[#b9c7db]">For every decision or action that can materially affect a person, record, system or service, use the Agent Authority Model to set permitted autonomy, intervention and automatic demotion.</p></div>
+        <div className="mt-12 grid gap-6 border border-[hsl(var(--brand-coral))] bg-[#0b2247] p-6 md:grid-cols-[auto_1fr_auto] md:items-center md:p-8">
+          <ShieldCheck className="text-[hsl(var(--brand-coral))]" size={34} />
+          <div><h3 className="font-display text-2xl font-semibold tracking-[-.04em]">Consequential handovers need an authority ceiling.</h3><p className="mt-2 text-sm leading-[1.6] text-[#b9c7db]">For every explicit propose, approve, act, intervene, and demotion right that can materially affect a person, record, system or service, point to the Agent Authority Model calculation to set permitted autonomy.</p></div>
           <BrandButton href="/methodologies/agent-authority-model" variant="inverse">Set the authority</BrandButton>
         </div>
       </section>

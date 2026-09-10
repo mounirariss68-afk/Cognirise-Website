@@ -1,7 +1,9 @@
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, ArrowRight } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { ValueToScaleAssessment } from "@/components/ValueToScaleAssessment";
 import { MATURITY_DIMENSIONS, MATURITY_STAGES } from "@/lib/value-to-scale";
+import { MethodologyRelationship } from "@/components/MethodologyRelationship";
+import { PulseImage } from "@/components/ui/pulse-image";
 
 const sources = [
   { label: "NIST AI Risk Management Framework 1.0 (2023)", url: "https://www.nist.gov/itl/ai-risk-management-framework" },
@@ -23,9 +25,58 @@ export default function AIValueToScale() {
         </div>
       </header>
 
+      <section className="px-6 pb-20 md:px-[4.8vw] lg:pb-28">
+        <PulseImage
+          src="/images/cognirise/method-value-to-scale.jpg"
+          alt="Cinematic raster composition showing an organizational system at scale"
+          className="w-full h-[60vh] object-cover rounded-sm shadow-md"
+          fallbackColor="#102957"
+        />
+      </section>
+
+      <MethodologyRelationship
+        startHereWhen={<>An organization-wide or portfolio-level constraint prevents repeatable movement from opportunity to sustained value.</>}
+        decision={<>What prevents repeatable movement from opportunity to sustained value?</>}
+        output={<>A seven-dimension maturity profile, a register of evidence gaps, and prioritized actions.</>}
+        connectsToIdao={<>Identifies systemic constraints, priorities and potential initiatives. Evidence determines whether selected work enters Innovate or a later IDAO stage; the method does not force every initiative to start at Innovate.</>}
+        connectsToAuthority={<>Tests whether authority governance is an organizational capability. The Agent Authority Model separately sets actual autonomy limits for specific handovers in selected initiatives.</>}
+        reassessWhen={<>After a completed IDAO cycle reveals new organizational evidence, or when market, platform, or regulatory constraints change materially.</>}
+        doesNotDecide={<>Which specific use cases to fund next (use AI Use-Case Prioritization) or the readiness of a single workflow (use Agentic Operations Readiness).</>}
+      />
+
       <section id="model" className="border-y border-[#cbd3e1] bg-[#102957] px-6 py-20 text-white md:px-[4.8vw] lg:py-28">
         <h2 className="max-w-4xl font-display text-[clamp(42px,5.5vw,80px)] font-semibold leading-[.95] tracking-[-.08em]">Five stages. Seven conditions. Evidence before confidence.</h2>
-        <div className="mt-12 grid border-l border-t border-white/20 md:grid-cols-5">{MATURITY_STAGES.map((stage) => <div key={stage.score} className="border-b border-r border-white/20 p-5"><span className="text-xs text-[#ff9fcf]">0{stage.score}</span><h3 className="mt-6 font-display text-2xl font-semibold">{stage.name}</h3><p className="mt-3 text-xs leading-[1.55] text-[#c5d0e1]">{stage.test}</p></div>)}</div>
+        <div className="mt-12 mb-16 bg-white/5 border border-white/20 p-6 rounded-sm max-w-5xl">
+          <div className="grid md:grid-cols-[1fr_auto_1fr] gap-8 items-center">
+            <div className="space-y-4">
+               <h3 className="font-bold text-xs text-white uppercase tracking-wider">Seven Conditions</h3>
+                 <p className="text-xs text-white/70">{MATURITY_DIMENSIONS.map((dimension) => dimension.name).join(" · ")}</p>
+               <div className="p-3 bg-[hsl(var(--brand-pink))]/20 border-l-2 border-[hsl(var(--brand-pink))]">
+                  <p className="text-[11px] font-medium text-white">Weak-condition evidence can move work to an earlier IDAO entry or loopback. Stronger evidence can support a later entry; authority limits remain separate.</p>
+               </div>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+               <ArrowRight className="text-white/30 hidden md:block" />
+               <ArrowDown className="text-white/30 md:hidden" />
+            </div>
+            <div className="space-y-4">
+               <div className="p-4 border border-white/20 rounded-sm">
+                 <h3 className="font-bold text-xs text-white mb-2 uppercase tracking-wider">IDAO Entry Points</h3>
+                 <ul className="text-xs text-white/70 space-y-1">
+                    <li><strong>Innovate:</strong> investigate unresolved assumptions</li>
+                    <li><strong>Demonstrate:</strong> prove the selected work in context</li>
+                    <li><strong>Activate or Operate update:</strong> use sufficiently strong evidence responsibly</li>
+                 </ul>
+               </div>
+               <div className="p-4 border border-[hsl(var(--brand-coral))] bg-[hsl(var(--brand-coral))]/10 rounded-sm">
+                 <h3 className="font-bold text-xs text-white mb-1 uppercase tracking-wider">Agent Authority is Separate</h3>
+                 <p className="text-xs text-white/70">VTS tests if governance is an organizational capability. The Agent Authority Model sets actual limits for specific handovers.</p>
+               </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid border-l border-t border-white/20 md:grid-cols-5">{MATURITY_STAGES.map((stage) => <div key={stage.score} className="border-b border-r border-white/20 p-5"><span className="text-xs text-[#ff9fcf]">0{stage.score}</span><h3 className="mt-6 font-display text-2xl font-semibold">{stage.name}</h3><p className="mt-3 text-xs leading-[1.55] text-[#c5d0e1]">{stage.test}</p></div>)}</div>
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{MATURITY_DIMENSIONS.map((dimension) => <div key={dimension.id} className="border-t border-white/30 pt-4"><h3 className="font-display text-xl font-semibold">{dimension.name}</h3><p className="mt-2 text-xs leading-[1.55] text-[#c5d0e1]">{dimension.question}</p></div>)}</div>
       </section>
 

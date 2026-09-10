@@ -3,6 +3,8 @@ import { Link } from "wouter";
 import { motion, useReducedMotion } from "framer-motion";
 import { Plus, ArrowRight, Info, Trash2 } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
+import { MethodologyRelationship } from "@/components/MethodologyRelationship";
+import { PulseImage } from "@/components/ui/pulse-image";
 
 export type UseCase = {
   id: string;
@@ -194,8 +196,11 @@ function UseCaseCard({ uc, index, updateUseCase, removeUseCase }: { uc: UseCase;
          <span className="text-[13px] text-[#405777]">{rec.reason}</span>
       </div>
        <div className="border-t border-[#cbd3e1] bg-white px-6 py-3 md:px-8" data-testid={`text-score-explanation-${uc.id}`}>
-         <span className="text-[10px] font-bold uppercase tracking-wider text-[#647491]">Calculation</span>
-         <p className="mt-1 text-[11px] leading-relaxed text-[#536887]">{getScoreExplanation(uc)} = {rec.score}/30. The stage rule above uses the individual criteria, not the total alone.</p>
+         <span className="text-[10px] font-bold uppercase tracking-wider text-[#647491] block mb-1">Calculation & Control Burden</span>
+         <p className="text-[11px] leading-relaxed text-[#536887] mb-2">{getScoreExplanation(uc)} = {rec.score}/30. The stage rule above uses the individual criteria, not the total alone.</p>
+         <p className="text-[11px] leading-relaxed text-[#102957] font-medium border-l-2 border-[#cbd3e1] pl-3 py-1 bg-[#f3f5f8]">
+           <strong>Note on Control Burden:</strong> Reflects exposure and required oversight. It can change priority, scope, or IDAO entry point. <Link href="/methodologies/agent-authority-model" className="underline font-bold text-[hsl(var(--brand-coral))] hover:text-[#102957]">Use Agent Authority</Link> separately when a consequential handover exists.
+         </p>
        </div>
     </motion.div>
   );
@@ -311,6 +316,24 @@ export default function AIUseCasePrioritization() {
            </p>
          </div>
       </header>
+      <section className="px-6 py-12 md:px-[4.8vw]">
+        <PulseImage
+          src="/images/cognirise/method-use-case-prioritization-clean.jpg"
+          alt="Cinematic raster composition showing portfolio choice and strategic investment"
+          className="w-full h-[55vh] object-cover rounded-sm shadow-md"
+          fallbackColor="#102957"
+        />
+      </section>
+
+      <MethodologyRelationship
+        startHereWhen={<>You have multiple opportunities or a defined use case, and need to decide which should advance, how they sequence, and where they enter delivery.</>}
+        decision={<>Which opportunities should advance, sequence or stop?</>}
+        output={<>A transparent comparative scorecard and a clear recommendation to enter Innovate, Demonstrate, Activate, or to Stop.</>}
+        connectsToIdao={<>Recommends whether an opportunity should stop, be investigated in <strong>Innovate</strong>, proved through <strong>Demonstrate</strong>, or moved into <strong>Activate</strong>.</>}
+        connectsToAuthority={<>Examines exposure and required oversight (Control Burden dimension) to inform sequence and IDAO entry. Agent Authority will later govern the specific handovers inside the delivered workflow.</>}
+        reassessWhen={<>Business value changes, new platform capabilities alter feasibility, or a previously stopped opportunity resolves its blocking dependency.</>}
+        doesNotDecide={<>The systemic readiness of the organization (use AI Value-to-Scale) or the operational conditions of a detailed workflow (use Agentic Operations Readiness).</>}
+      />
 
       <section className="px-6 py-16 md:px-[4.8vw] bg-[#f1f3f7]">
          <div className="mb-10 max-w-2xl">
