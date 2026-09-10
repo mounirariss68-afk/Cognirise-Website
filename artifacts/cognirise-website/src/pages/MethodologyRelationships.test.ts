@@ -73,7 +73,7 @@ describe("Methodology Relationships and Boundaries", () => {
 
   it("verifies imagery refs exist in the pages", () => {
     assert.match(vts, /method-vts\.jpg/);
-    assert.match(ucp, /method-ucp-v2\.jpg/);
+    assert.match(ucp, /method-ucp-governed-ai-v3\.jpg/);
     assert.match(aor, /method-aor-v2\.jpg/);
     assert.match(haom, /method-haom-v2\.jpg/);
   });

@@ -338,8 +338,8 @@ export default function AIUseCasePrioritization() {
             This framework aligns decisions to your specific operational context, intentionally avoiding generic statistical benchmarks. The output connects directly to the IDAO delivery methodology.
           </p>
         }
-        imageSrc="/images/cognirise/method-ucp-v2.jpg"
-        imageAlt="Cinematic composition showing portfolio choice and strategic investment."
+        imageSrc="/images/cognirise/method-ucp-governed-ai-v3.jpg"
+        imageAlt="Architectural gateways and transparent panels crossed by a flowing stream of violet, pink, and coral light."
         imageCaptionSubtitle="Portfolio Strategy"
         imageCaptionTitle="Directing energy where it earns value."
       />
