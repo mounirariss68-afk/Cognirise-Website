@@ -25,3 +25,4 @@
 - [Pulse artwork text hygiene](pulse-artwork-text-hygiene.md) — Blueprint-like raster scenes need semantic surface replacement, not simple text erasure, plus final visual inspection.
 - [Media stream listener cleanup](media-stream-listener-cleanup.md) — Node pipeline handles aborts but can retain listeners; clean only listeners added during delivery.
 - [Governed landing parity](governed-landing-parity.md) — Generate required CMS slots from approved templates; configured delivery must fail closed rather than restore compiled content.
+- [Sticky panel browser assertions](sticky-panel-browser-assertions.md) — Activate a sticky element’s scroll range before asserting viewport visibility.

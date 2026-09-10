@@ -205,6 +205,7 @@ export default function AgenticOperationsReadiness() {
                         type="button"
                         role="radio"
                         aria-checked={selected}
+                         data-readiness-answer={`${condition.id}:${answer}`}
                         onClick={() => setAnswers((current) => ({ ...current, [condition.id]: answer }))}
                         className={`grid min-h-14 grid-cols-[82px_1fr] items-start gap-3 border p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--brand-coral))] ${
                           selected ? "border-[#102957] bg-[#102957] text-white" : "border-[#d7dde7] hover:border-[#102957]"
@@ -223,7 +224,7 @@ export default function AgenticOperationsReadiness() {
           ))}
         </ol>
 
-        <div className="sticky bottom-4 z-20 mt-8 border border-white/20 bg-[#071936] p-6 text-white shadow-[0_18px_60px_rgba(7,25,54,.25)] md:p-8" aria-live="polite">
+        <div data-readiness-decision className="sticky bottom-4 z-20 mt-8 border border-white/20 bg-[#071936] p-6 text-white shadow-[0_18px_60px_rgba(7,25,54,.25)] md:p-8" aria-live="polite">
           <div className="grid gap-6 lg:grid-cols-[.6fr_1.4fr] lg:items-center">
             <div>
               <p className="text-[9px] font-bold uppercase tracking-[.14em] text-white/55">Current decision · {completed}/6 answered</p>
@@ -251,7 +252,7 @@ export default function AgenticOperationsReadiness() {
           </div>
           <div className="border-t border-[#9eabc0]">
             {unresolved.map((condition) => (
-              <div key={condition.id} className="grid gap-2 border-b border-[#b9c4d5] py-5 sm:grid-cols-[160px_1fr]">
+              <div key={condition.id} data-readiness-unresolved={condition.id} className="grid gap-2 border-b border-[#b9c4d5] py-5 sm:grid-cols-[160px_1fr]">
                 <strong className="text-sm">{condition.title}</strong>
                 <p className="text-sm leading-[1.6] text-[#405777]">{condition.resolve}</p>
               </div>
