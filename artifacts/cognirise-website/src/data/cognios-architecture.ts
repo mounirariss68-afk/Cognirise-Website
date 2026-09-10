@@ -1,5 +1,14 @@
 export type ArchitectureComponent = { id: string; name: string; responsibility: string; details: string[]; engine?: string };
 export type ArchitectureLayer = { id: string; number: string; name: string; responsibility: string; principle: string; controls: string[]; engine?: string; components: ArchitectureComponent[] };
+export type PlatformRelationship = {
+  id: string;
+  name: string;
+  href: string;
+  ownership: "cognirise" | "partner";
+  role: "core" | "specialist" | "partner";
+  layerIds: ArchitectureLayer["id"][];
+  contribution: string;
+};
 
 const component = (id: string, name: string, responsibility: string, details: string[], engine?: string): ArchitectureComponent => ({ id, name, responsibility, details, engine });
 
@@ -71,5 +80,83 @@ export const architectureRequirements = [
   { id: "residency-context", name: "Residency & deployment context", description: "A cross-cutting context for examining how information classification and the operating environment inform architecture decisions across the six layers." },
   { id: "human-authority", name: "Human authority", description: "A cross-cutting context for locating human decision points, approvals and controls within the relevant responsibility layers." }
 ];
+
+export const platformRelationships: PlatformRelationship[] = [
+  {
+    id: "cognios",
+    name: "CogniOS",
+    href: "/platforms/cognios",
+    ownership: "cognirise",
+    role: "core",
+    layerIds: ["experience", "intelligence", "process", "knowledge", "integration", "foundation"],
+    contribution: "The Cognirise operating-system boundary spanning all six responsibility layers.",
+  },
+  {
+    id: "cognidocs",
+    name: "CogniDocs",
+    href: "/platforms/cognidocs",
+    ownership: "cognirise",
+    role: "specialist",
+    layerIds: ["knowledge", "intelligence", "foundation"],
+    contribution: "Governs knowledge intake, retrieval context and the document foundations beneath intelligent work.",
+  },
+  {
+    id: "cogniagents",
+    name: "CogniAgents",
+    href: "/platforms/cogniagents",
+    ownership: "cognirise",
+    role: "specialist",
+    layerIds: ["intelligence", "process", "integration"],
+    contribution: "Coordinates bounded agent work, tool use and hand-offs into governed processes and systems.",
+  },
+  {
+    id: "cognitalk",
+    name: "CogniTalk",
+    href: "/platforms/cognitalk",
+    ownership: "cognirise",
+    role: "specialist",
+    layerIds: ["experience", "intelligence", "knowledge"],
+    contribution: "Provides conversational touchpoints grounded in enterprise intelligence and governed knowledge.",
+  },
+  {
+    id: "cogniware",
+    name: "CogniWare",
+    href: "/platforms/cogniware",
+    ownership: "cognirise",
+    role: "specialist",
+    layerIds: ["process", "integration", "foundation"],
+    contribution: "Connects approved intelligent actions to enterprise services, contracts and runtime foundations.",
+  },
+  {
+    id: "lupitor",
+    name: "Lupitor",
+    href: "/platforms/lupitor",
+    ownership: "partner",
+    role: "partner",
+    layerIds: ["experience", "intelligence", "knowledge", "integration"],
+    contribution: "Contributes verified multilingual, multichannel agent capability connected to knowledge and enterprise systems.",
+  },
+  {
+    id: "datatoolpack",
+    name: "Datatoolpack AutoData",
+    href: "/platforms/datatoolpack",
+    ownership: "partner",
+    role: "partner",
+    layerIds: ["intelligence", "knowledge", "integration", "foundation"],
+    contribution: "Contributes profiling, preparation and traceable AI-ready data outputs at the data and integration boundary.",
+  },
+  {
+    id: "bunjee-ai",
+    name: "bunjee.ai",
+    href: "/platforms/bunjee-ai",
+    ownership: "partner",
+    role: "partner",
+    layerIds: ["experience", "intelligence", "knowledge"],
+    contribution: "Contributes captured and structured organizational expertise to people-facing intelligent workflows.",
+  },
+];
+
+export const platformsForLayer = (layerId: string) =>
+  platformRelationships.filter((platform) => platform.layerIds.includes(layerId));
 
 export const findLayer = (id?: string | null) => architectureLayers.find((layer) => layer.id === id) ?? architectureLayers[0];

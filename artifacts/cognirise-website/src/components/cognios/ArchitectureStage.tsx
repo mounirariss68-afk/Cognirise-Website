@@ -7,13 +7,15 @@ import {
   architectureLayers,
   architectureRequirements,
   architectureSpines,
+  platformRelationships,
+  platformsForLayer,
   type ArchitectureComponent,
   type ArchitectureLayer,
 } from "@/data/cognios-architecture";
 import { SpatialDisclosure, SpatialDisclosureItem, SpatialDisclosureTrigger, SpatialDisclosurePanel, useSpatialDisclosure } from "@/components/ui/spatial-disclosure";
 import "./ArchitectureStage.css";
 
-type Lens = "capability" | "security";
+type Lens = "capability" | "security" | "platform";
 type ContextSelection = { type: "spine" | "requirement"; id: string } | null;
 
 const engineFor = (name?: string) =>
@@ -27,10 +29,12 @@ export function ArchitectureStage() {
   const viewParam = params.get("view");
   const validLayer = architectureLayers.find((layer) => layer.id === params.get("layer"));
   const validComponent = validLayer?.components.find((component) => component.id === params.get("component"));
+  const validPlatform = platformRelationships.find((platform) => platform.id === params.get("platform"));
   const layerId = validLayer?.id ?? null;
   const componentId = validComponent?.id ?? null;
   const activeLevel = componentId ? 2 : layerId ? 1 : 0;
-  const [lens, setLens] = useState<Lens>(viewParam === "security" ? "security" : "capability");
+  const initialLens: Lens = viewParam === "security" ? "security" : viewParam === "platform" ? "platform" : "capability";
+  const [lens, setLens] = useState<Lens>(initialLens);
   const [contextSelection, setContextSelection] = useState<ContextSelection>(null);
   const reducedMotion = useReducedMotion();
   const stageRef = useRef<HTMLDivElement>(null);
@@ -54,15 +58,30 @@ export function ArchitectureStage() {
     if (nextLens === "security") {
       next.set("view", "security");
       next.delete("component");
+      next.delete("platform");
+    } else if (nextLens === "platform") {
+      next.set("view", "platform");
+      next.delete("component");
     } else {
       next.delete("view");
+      next.delete("platform");
     }
     const query = next.toString();
     setLocation(`${location.split("?")[0]}${query ? `?${query}` : ""}#architecture`);
   };
 
+  const selectPlatform = (platformId: string) => {
+    const next = new URLSearchParams(window.location.search);
+    next.set("view", "platform");
+    next.delete("component");
+    if (validPlatform?.id === platformId) next.delete("platform");
+    else next.set("platform", platformId);
+    const query = next.toString();
+    setLocation(`${window.location.pathname}?${query}#architecture`);
+  };
+
   useEffect(() => {
-    setLens(viewParam === "security" ? "security" : "capability");
+    setLens(viewParam === "security" ? "security" : viewParam === "platform" ? "platform" : "capability");
   }, [viewParam]);
 
   useEffect(() => {
@@ -88,6 +107,11 @@ export function ArchitectureStage() {
       if (contextSelection) setContextSelection(null);
       else if (currentComponent) setArchitectureState(currentLayer, null);
       else if (currentLayer) setArchitectureState(null, null);
+      else if (current.get("platform")) {
+        current.delete("platform");
+        const query = current.toString();
+        setLocation(`${window.location.pathname}${query ? `?${query}` : ""}#architecture`);
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -125,7 +149,7 @@ export function ArchitectureStage() {
           <p>One operating system. Six responsibility layers. Two continuous control spines.</p>
         </div>
         <div className="coas-lens-switch" aria-label="Architecture view">
-          {(["capability", "security"] as Lens[]).map((item) => (
+          {(["capability", "security", "platform"] as Lens[]).map((item) => (
             <button
               key={item}
               type="button"
@@ -139,6 +163,48 @@ export function ArchitectureStage() {
           ))}
         </div>
       </header>
+
+      {lens === "platform" && (
+        <div className="coas-platform-map" data-testid="platform-map">
+          <div className="coas-platform-copy">
+            <span className="coas-label">Platform contributions</span>
+            <p>Choose a platform to highlight every layer it supports, or choose a layer to see every contributing platform. A relationship shows contribution, not exclusive placement or ownership.</p>
+          </div>
+          <div className="coas-platform-groups">
+            {(["cognirise", "partner"] as const).map((ownership) => (
+              <fieldset key={ownership} className={`coas-platform-group is-${ownership}`}>
+                <legend>{ownership === "cognirise" ? "Cognirise platforms" : "Partner platforms"}</legend>
+                <div>
+                  {platformRelationships.filter((platform) => platform.ownership === ownership).map((platform) => (
+                    <button
+                      key={platform.id}
+                      type="button"
+                      className={`coas-platform-btn ${validPlatform?.id === platform.id ? "is-active" : ""}`}
+                      aria-pressed={validPlatform?.id === platform.id}
+                      data-testid={`platform-btn-${platform.id}`}
+                      onClick={() => selectPlatform(platform.id)}
+                      onKeyDown={(event) => {
+                        if (event.key !== "Enter" && event.key !== " ") return;
+                        event.preventDefault();
+                        selectPlatform(platform.id);
+                      }}
+                    >
+                      <span>{platform.name}</span>
+                      <small>{platform.role === "core" ? "CogniOS core" : ownership === "partner" ? "Partner contribution" : "Specialist platform"}</small>
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            ))}
+          </div>
+          {validPlatform && (
+            <div className={`coas-platform-summary is-${validPlatform.ownership}`} aria-live="polite">
+              <div><strong>{validPlatform.name}</strong><p>{validPlatform.contribution}</p></div>
+              <a href={validPlatform.href}>View platform <ArrowRight size={14} /></a>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="coas-engine-legend" aria-label="Engine relationship legend">
         <span className="coas-legend-label">Engine association</span>
@@ -177,7 +243,7 @@ export function ArchitectureStage() {
                   <SpatialDisclosureItem
                     key={layer.id}
                     id={layer.id}
-                    className={({ isActive, isSelected }) => `coas-layer ${isActive ? "is-active" : ""} ${layerId && !isActive ? "is-quiet" : ""}`}
+                    className={({ isActive }) => `coas-layer ${isActive ? "is-active" : ""} ${layerId && !isActive ? "is-quiet" : ""} ${lens === "platform" && validPlatform?.layerIds.includes(layer.id) ? "is-platform-match" : ""}`}
                   >
                     {({ isActive }) => (
                       <>
@@ -198,7 +264,7 @@ export function ArchitectureStage() {
                           <div className="coas-layer-meta">
                             <EngineMark engine={layer.engine} />
                             <span className="coas-layer-count">
-                              {lens === "capability" ? `${layer.components.length} components` : `${layer.controls.length} controls`}
+                              {lens === "capability" ? `${layer.components.length} components` : lens === "security" ? `${layer.controls.length} controls` : `${platformsForLayer(layer.id).length} platforms`}
                             </span>
                           </div>
                           <span className="coas-layer-action" aria-hidden="true">
@@ -224,8 +290,10 @@ export function ArchitectureStage() {
                                     selected={componentId}
                                     onSelect={(id) => setArchitectureState(layer.id, componentId === id ? null : id)}
                                   />
-                                ) : (
+                                ) : lens === "security" ? (
                                   <SecurityStudy layer={layer} />
+                                ) : (
+                                  <PlatformStudy layer={layer} />
                                 )}
                               </SpatialDisclosurePanel>
                             </motion.div>
@@ -278,8 +346,29 @@ export function ArchitectureStage() {
         <span><i className="coas-notation-spine" /> Continuous band = cross-cutting spine</span>
         <span><i className="coas-notation-layer" /> Enclosure = component membership</span>
         <span><i className="coas-notation-engine" /> Signal square = documented engine association</span>
+        <span><i className="coas-notation-partner" /> Dashed edge = partner contribution, not Cognirise ownership</span>
       </footer>
     </section>
+  );
+}
+
+function PlatformStudy({ layer }: { layer: ArchitectureLayer }) {
+  return (
+    <div className="coas-platform-study" data-testid={`platforms-for-layer-${layer.id}`}>
+      <div>
+        <span className="coas-label">Contributing platforms</span>
+        <h3>{layer.name}</h3>
+        <p>These platforms contribute capability at this layer. They are not exclusive to it, and partner products remain independently owned.</p>
+      </div>
+      <div className="coas-layer-platforms">
+        {platformsForLayer(layer.id).map((platform) => (
+          <a key={platform.id} href={platform.href} className={`is-${platform.ownership}`}>
+            <span><strong>{platform.name}</strong><small>{platform.ownership === "partner" ? "Partner platform" : platform.role === "core" ? "CogniOS core" : "Cognirise specialist"}</small></span>
+            <ArrowRight size={15} />
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }
 

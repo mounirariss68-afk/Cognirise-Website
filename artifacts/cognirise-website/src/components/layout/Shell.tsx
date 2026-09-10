@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { Fragment, useState, useEffect, useRef } from "react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { configurePublicMarkets, getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
@@ -146,7 +146,24 @@ const pageMeta: Record<string, { title: string; description: string }> = {
   },
 };
 
-type NavigationItem = { id: string; label: string; href: string; items?: NavigationItem[] };
+type NavigationItem = { id: string; label: string; href: string; group?: "own" | "partner"; items?: NavigationItem[] };
+const ownPlatformPaths = new Set(["/platforms/cognios", "/platforms/cognidocs", "/platforms/cogniagents", "/platforms/cognitalk", "/platforms/cogniware"]);
+const partnerPlatformPaths = new Set(["/platforms/lupitor", "/platforms/datatoolpack", "/platforms/bunjee-ai"]);
+
+export const groupPlatformNavigation = (items: NavigationItem[]): NavigationItem[] =>
+  items.map((item) => item.id !== "platforms" && routePath(item.href) !== "/platforms"
+    ? item
+    : {
+        ...item,
+        items: item.items
+          ?.filter((child) => routePath(child.href) !== "/platforms/cognios/architecture" && !child.href.includes("#architecture"))
+          .map((child) => {
+            const path = routePath(child.href);
+            if (ownPlatformPaths.has(path)) return { ...child, group: "own" as const };
+            if (partnerPlatformPaths.has(path)) return { ...child, group: "partner" as const };
+            return child;
+          }),
+      });
 export type PreviewNavigationSnapshot = {
   market?: string;
   locale?: string;
@@ -179,15 +196,14 @@ const compiledNavigation: NavigationItem[] = [
     href: "/platforms",
     items: [
       { id: "platforms.overview", label: "Platform Overview", href: "/platforms" },
-      { id: "platforms.cognios", label: "CogniOS", href: "/platforms/cognios" },
-      { id: "platforms.architecture", label: "Architecture", href: "/platforms/cognios#architecture" },
-      { id: "platforms.cognidocs", label: "CogniDocs", href: "/platforms/cognidocs" },
-      { id: "platforms.cogniagents", label: "CogniAgents", href: "/platforms/cogniagents" },
-      { id: "platforms.cognitalk", label: "CogniTalk", href: "/platforms/cognitalk" },
-      { id: "platforms.cogniware", label: "CogniWare", href: "/platforms/cogniware" },
-      { id: "platforms.lupitor", label: "Lupitor", href: "/platforms/lupitor" },
-      { id: "platforms.datatoolpack", label: "Datatoolpack", href: "/platforms/datatoolpack" },
-      { id: "platforms.bunjee-ai", label: "bunjee.ai", href: "/platforms/bunjee-ai" },
+      { id: "platforms.cognios", label: "CogniOS", href: "/platforms/cognios", group: "own" },
+      { id: "platforms.cognidocs", label: "CogniDocs", href: "/platforms/cognidocs", group: "own" },
+      { id: "platforms.cogniagents", label: "CogniAgents", href: "/platforms/cogniagents", group: "own" },
+      { id: "platforms.cognitalk", label: "CogniTalk", href: "/platforms/cognitalk", group: "own" },
+      { id: "platforms.cogniware", label: "CogniWare", href: "/platforms/cogniware", group: "own" },
+      { id: "platforms.lupitor", label: "Lupitor", href: "/platforms/lupitor", group: "partner" },
+      { id: "platforms.datatoolpack", label: "Datatoolpack AutoData", href: "/platforms/datatoolpack", group: "partner" },
+      { id: "platforms.bunjee-ai", label: "bunjee.ai", href: "/platforms/bunjee-ai", group: "partner" },
     ]
   },
   {
@@ -309,7 +325,7 @@ export function Shell({
         return build(childrenByParent.get("") ?? roots);
       })()
     : null;
-  const visibleNavigation = snapshotNavigation ?? (navigationSettings.data?.isConfigured
+  const rawVisibleNavigation: NavigationItem[] = snapshotNavigation ?? (navigationSettings.data?.isConfigured
     ? navigationSettings.data.items
       .filter((item) => item.visible && !item.parentId)
       .map((item) => {
@@ -330,6 +346,7 @@ export function Shell({
         return left - right;
       })
     : navigationSettings.data?.isConfigured === false ? compiledNavigation : []);
+  const visibleNavigation = groupPlatformNavigation(rawVisibleNavigation);
   const [scrolled, setScrolled] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousPathRef = useRef(window.location.pathname);
@@ -502,8 +519,14 @@ export function Shell({
                         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
                         
                         <ul className="flex flex-col gap-3 relative z-10">
-                          {item.items.map((subItem) => (
-                            <li key={subItem.href}>
+                          {item.items.map((subItem, index) => (
+                            <Fragment key={subItem.id}>
+                              {subItem.group && item.items?.[index - 1]?.group !== subItem.group && (
+                                <li className={`pt-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground ${subItem.group === "partner" ? "mt-2 border-t border-border pt-4" : ""}`} aria-label={subItem.group === "own" ? "Cognirise-owned platforms" : "Partner platforms"}>
+                                  {subItem.group === "own" ? "Own platforms" : "Partner platforms"}
+                                </li>
+                              )}
+                            <li>
                               <Link 
                                 href={subItem.href}
                                 aria-current={isCurrentDestination(subItem.href) ? "page" : undefined}
@@ -523,6 +546,7 @@ export function Shell({
                                 {subItem.label}
                               </Link>
                             </li>
+                            </Fragment>
                           ))}
                         </ul>
                       </div>
@@ -598,8 +622,14 @@ export function Shell({
                 
                 {item.items && mobileExpanded === item.label && (
                   <ul id={`mobile-menu-${item.id}`} className="flex flex-col gap-3 pb-6 pl-4 border-l border-border/50 ml-2">
-                    {item.items.map((subItem) => (
-                      <li key={subItem.href}>
+                    {item.items.map((subItem, index) => (
+                      <Fragment key={subItem.id}>
+                        {subItem.group && item.items?.[index - 1]?.group !== subItem.group && (
+                          <li className={`pt-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground ${subItem.group === "partner" ? "mt-2 border-t border-border pt-4" : ""}`} aria-label={subItem.group === "own" ? "Cognirise-owned platforms" : "Partner platforms"}>
+                            {subItem.group === "own" ? "Own platforms" : "Partner platforms"}
+                          </li>
+                        )}
+                      <li>
                         <Link 
                           href={subItem.href}
                           aria-current={isCurrentDestination(subItem.href) ? "page" : undefined}
@@ -610,6 +640,7 @@ export function Shell({
                           {subItem.label}
                         </Link>
                       </li>
+                      </Fragment>
                     ))}
                   </ul>
                 )}
