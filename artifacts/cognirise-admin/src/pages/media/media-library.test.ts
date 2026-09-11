@@ -109,8 +109,13 @@ test("authorized governance owners can inspect, approve, or reject awaiting-revi
   assert.match(source, /useReviewMedia/);
   assert.match(source, /Review media asset/);
   assert.match(source, /Inspect the preview and governed metadata/);
-  assert.match(source, /data: \{ decision: reviewDecision \}/);
-  assert.match(source, /Confirm \{reviewDecision === "approve" \? "approval" : "rejection"\}/);
+  assert.match(source, /data: \{\s+decision,\s+sourceRightsApproved,\s+accessibilityApproved,/);
+  assert.match(source, /Confirm approval/);
+  assert.doesNotMatch(source, /reviewDecision|setReviewDecision|>Back</);
+  assert.match(source, /submitReview\("reject"\)/);
+  assert.match(source, /submitReview\("approve"\)/);
+  assert.match(source, /reviewSubmitting\.current = true/);
+  assert.match(source, /disabled=\{reviewPending \|\| !sourceRightsApproved \|\| !accessibilityApproved\}/);
   assert.match(source, /Awaiting a publisher review/);
   assert.match(source, /Asset approved/);
   assert.match(source, /Asset rejected/);

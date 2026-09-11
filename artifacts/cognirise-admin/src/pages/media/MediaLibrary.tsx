@@ -534,7 +534,9 @@ export default function MediaLibrary() {
   const [motionFlags, setMotionFlags] = useState({ autoplay: false, loop: false, decorative: false, hasAudio: false });
   const [editingAsset, setEditingAsset] = useState<ExtendedMediaAsset | null>(null);
   const [reviewAsset, setReviewAsset] = useState<ExtendedMediaAsset | null>(null);
-  const [reviewDecision, setReviewDecision] = useState<"approve" | "reject" | null>(null);
+  const reviewSubmitting = useRef(false);
+  const [reviewPending, setReviewPending] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
   const [sourceRightsApproved, setSourceRightsApproved] = useState(false);
   const [accessibilityApproved, setAccessibilityApproved] = useState(false);
   const [downloadingAssetId, setDownloadingAssetId] = useState<string | null>(null);
@@ -675,13 +677,17 @@ export default function MediaLibrary() {
     }
   };
 
-  const submitReview = async () => {
-    if (!reviewAsset || !reviewDecision) return;
+  const submitReview = async (decision: "approve" | "reject") => {
+    if (!reviewAsset || !canReview || reviewSubmitting.current) return;
+    if (decision === "approve" && (!sourceRightsApproved || !accessibilityApproved)) return;
+    reviewSubmitting.current = true;
+    setReviewPending(true);
+    setReviewError(null);
     try {
       const updated = await reviewMedia.mutateAsync({
         mediaId: reviewAsset.id,
          data: {
-           decision: reviewDecision,
+           decision,
            sourceRightsApproved,
            accessibilityApproved,
          },
@@ -694,19 +700,23 @@ export default function MediaLibrary() {
       );
       await queryClient.invalidateQueries({ queryKey: getListMediaQueryKey() });
       toast({
-        title: reviewDecision === "approve" ? "Asset approved" : "Asset rejected",
-        description: reviewDecision === "approve"
+        title: decision === "approve" ? "Asset approved" : "Asset rejected",
+        description: decision === "approve"
           ? `${reviewAsset.filename} is now Available.`
           : `${reviewAsset.filename} has been removed from the review queue.`,
       });
-      setReviewDecision(null);
       setReviewAsset(null);
     } catch (error: unknown) {
       const detail = typeof error === "object" && error && "data" in error
         && typeof error.data === "object" && error.data && "error" in error.data
         ? String(error.data.error)
         : "The review decision could not be saved.";
-      toast({ title: "Review failed", description: detail, variant: "destructive" });
+      const message = `${detail} Retry the decision, or refresh the library before reopening Review.`;
+      setReviewError(message);
+      toast({ title: "Review failed", description: message, variant: "destructive" });
+    } finally {
+      reviewSubmitting.current = false;
+      setReviewPending(false);
     }
   };
 
@@ -719,7 +729,8 @@ export default function MediaLibrary() {
             variant="outline"
             size="sm"
             onClick={() => {
-              setReviewDecision(null);
+              if (reviewSubmitting.current) return;
+              setReviewError(null);
               setSourceRightsApproved(false);
               setAccessibilityApproved(false);
               setReviewAsset(asset);
@@ -1132,8 +1143,8 @@ export default function MediaLibrary() {
       <Dialog
         open={Boolean(reviewAsset)}
         onOpenChange={(open) => {
-          if (!open && !reviewMedia.isPending) {
-            setReviewDecision(null);
+          if (!open && !reviewSubmitting.current) {
+            setReviewError(null);
             setSourceRightsApproved(false);
             setAccessibilityApproved(false);
             setReviewAsset(null);
@@ -1164,62 +1175,40 @@ export default function MediaLibrary() {
                 <div className="sm:col-span-2"><p className="text-[10px] font-mono uppercase text-muted-foreground">Usage</p><p>{reviewAsset.caption || reviewAsset.campaignMetadata?.approvedUse || "Not provided"}</p></div>
                 <div className="sm:col-span-2"><p className="text-[10px] font-mono uppercase text-muted-foreground">Credit / rights</p><p>{reviewAsset.credit || "Not recorded"}</p></div>
               </div>
-              {reviewDecision && (
-                <div role="alert" className={`rounded-md border p-4 text-sm ${reviewDecision === "reject" ? "border-destructive/40 bg-destructive/5" : "border-emerald-500/40 bg-emerald-500/5"}`}>
+                <div className="rounded-md border border-emerald-500/40 bg-emerald-500/5 p-4 text-sm">
                   <p className="font-medium">
-                    {reviewDecision === "approve" ? "Approve this asset?" : "Reject this asset?"}
+                    Approve this asset?
                   </p>
                   <p className="mt-1 text-muted-foreground">
-                    {reviewDecision === "approve"
-                      ? "It will move to Available and can be assigned to governed content."
-                      : "It will leave the review queue and remain unavailable for content assignment."}
+                    It will move to Available and can be assigned to governed content.
                   </p>
                 </div>
-              )}
-              {reviewDecision === "approve" && (
                 <div className="space-y-3 rounded-md border border-amber-500/40 bg-amber-500/5 p-4">
                   <p className="text-sm font-medium">Confirm source review gates</p>
                   <p className="text-xs text-muted-foreground">
                     Approval creates a new immutable metadata version; the original source version and binary remain unchanged.
                   </p>
                   <label className="flex items-start gap-2 text-sm">
-                    <Checkbox checked={sourceRightsApproved} onCheckedChange={(checked) => setSourceRightsApproved(checked === true)} />
+                    <Checkbox disabled={reviewPending} checked={sourceRightsApproved} onCheckedChange={(checked) => setSourceRightsApproved(checked === true)} />
                     <span>I confirm documented source rights and permission are approved.</span>
                   </label>
                   <label className="flex items-start gap-2 text-sm">
-                    <Checkbox checked={accessibilityApproved} onCheckedChange={(checked) => setAccessibilityApproved(checked === true)} />
+                    <Checkbox disabled={reviewPending} checked={accessibilityApproved} onCheckedChange={(checked) => setAccessibilityApproved(checked === true)} />
                     <span>I confirm the source accessibility review is complete and approved.</span>
                   </label>
                 </div>
-              )}
+              <p className="text-xs text-muted-foreground">Reject removes this asset from the review queue and keeps it unavailable for content assignment.</p>
+              {reviewError && <p role="alert" className="text-sm text-destructive">{reviewError}</p>}
             </div>
           )}
           <DialogFooter className="flex-col gap-2 sm:flex-row">
-            {reviewDecision ? (
-              <>
-                <Button variant="ghost" onClick={() => setReviewDecision(null)} disabled={reviewMedia.isPending}>Back</Button>
-                <Button
-                  variant={reviewDecision === "reject" ? "destructive" : "default"}
-                  onClick={submitReview}
-                   disabled={reviewMedia.isPending || (
-                     reviewDecision === "approve"
-                     && (!sourceRightsApproved || !accessibilityApproved)
-                   )}
-                >
-                  {reviewMedia.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Confirm {reviewDecision === "approve" ? "approval" : "rejection"}
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" onClick={() => setReviewDecision("reject")}>
-                  <X className="h-4 w-4" /> Reject
-                </Button>
-                <Button onClick={() => setReviewDecision("approve")}>
-                  <Check className="h-4 w-4" /> Approve
-                </Button>
-              </>
-            )}
+            <Button variant="outline" onClick={() => submitReview("reject")} disabled={reviewPending}>
+              <X className="h-4 w-4" /> Reject
+            </Button>
+            <Button onClick={() => submitReview("approve")} disabled={reviewPending || !sourceRightsApproved || !accessibilityApproved}>
+              {reviewPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              Confirm approval
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
