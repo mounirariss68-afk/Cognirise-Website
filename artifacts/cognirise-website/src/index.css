@@ -360,6 +360,7 @@
 }
 
 .pulse-action-icon {
+  --pulse-action-travel: 460ms cubic-bezier(.16, 1, .3, 1);
   position: absolute;
   left: 0;
   top: 50%;
@@ -375,7 +376,7 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .24);
   backdrop-filter: blur(10px);
   transform: translateY(-50%);
-  transition: left 460ms cubic-bezier(.16, 1, .3, 1);
+  transition: left var(--pulse-action-travel);
 }
 
 .pulse-action-icon::after {
@@ -389,6 +390,10 @@
   border-radius: 999px;
   background: hsl(var(--brand-coral));
   box-shadow: 0 0 0 1px hsl(var(--brand-coral) / .22);
+  /* The resting dot's center is 11.5px right/down from the circle center. */
+  transform-origin: calc(50% - 11.5px) calc(50% - 11.5px);
+  rotate: 0deg;
+  transition: rotate var(--pulse-action-travel);
 }
 
 .pulse-action-inverse .pulse-action-icon,
@@ -424,6 +429,10 @@
   left: calc(100% - 36px);
 }
 
+.pulse-action:focus-visible .pulse-action-icon::after {
+  rotate: -360deg;
+}
+
 .pulse-action:focus-visible .pulse-action-label {
   transform: translateX(-4px);
 }
@@ -453,6 +462,10 @@
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .pulse-action:hover .pulse-action-icon {
     left: calc(100% - 36px);
+  }
+
+  .pulse-action:hover .pulse-action-icon::after {
+    rotate: -360deg;
   }
 
   .pulse-action:hover .pulse-action-label {
@@ -491,6 +504,10 @@
   }
   .pulse-action .pulse-action-label {
     transform: translateX(-4px);
+  }
+  .pulse-action .pulse-action-icon::after {
+    rotate: 0deg !important;
+    transition: none !important;
   }
   .pulse-action,
   .pulse-action *,
