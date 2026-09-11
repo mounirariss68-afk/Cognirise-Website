@@ -15,6 +15,20 @@ test("Work overview redirects before policy gates and full records retain their 
   assert.doesNotMatch(app, /WorkProof/);
 });
 
+test("legacy industry selected-work routes preserve their query and move to the overview rail", () => {
+  const redirect = 'return <AnchoredRedirect to="/industries" anchor="selected-work" />';
+  assert.match(app, /const legacyIndustryPaths = new Set/);
+  assert.match(app, /"\/industries\/financial-services"/);
+  assert.match(app, /"\/industries\/banking"/);
+  assert.match(app, /"\/pov-banking"/);
+  assert.match(app, /window\.location\.hash === "#selected-work"/);
+  assert.ok(app.includes(redirect));
+  assert.ok(app.indexOf(redirect) < app.indexOf("const unavailable"));
+  assert.ok(app.indexOf(redirect) < app.indexOf("if (policy.isPending)"));
+  assert.match(app, /search \? `\$\{to\}\?\$\{search\}` : to/);
+  assert.doesNotMatch(app, /LegacyIndustrySelectedWorkRedirect|LegacyIndustryAliasRedirect/);
+});
+
 test("all compiled collection landings pass explicitly through the governed boundary", () => {
   for (const [path, component] of [
     ["/about", "AboutPeople"], ["/partners", "Partners"], ["/platforms", "PlatformsOverview"],

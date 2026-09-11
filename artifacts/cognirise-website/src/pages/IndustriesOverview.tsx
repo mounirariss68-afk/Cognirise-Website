@@ -5,6 +5,8 @@ import { assetUrl } from "@/lib/assets";
 import { IndustryPicker } from "@/components/IndustryPicker";
 import { useEffect, useRef, useState } from "react";
 import { contentRecord, useCmsCollection, usePublishedHeroFilm } from "@/lib/cms";
+import { CaseStudyRail, type PublicCaseStudy } from "@/components/work/case-study-ui";
+import { approvedPublishedCases } from "@/components/work/case-study-model";
 
 function IndustriesHeroFilm() {
   const [videoReady, setVideoReady] = useState(false);
@@ -87,8 +89,12 @@ function IndustriesHeroFilm() {
 
 export default function IndustriesOverview() {
   const { market } = useMarketStore();
-  
   const marketLocation = getMarketLocationLabel(market);
+  const caseStudies = useCmsCollection<PublicCaseStudy>("case-study", [], (item) => {
+    const record = contentRecord(item, "case-study") as PublicCaseStudy;
+    return record;
+  });
+  const approvedCases = approvedPublishedCases(caseStudies.data);
 
   return (
     <div className="io">
@@ -145,6 +151,22 @@ export default function IndustriesOverview() {
         heading="Different pressure. One accountable route."
         introduction="Explore where the work is consequential—and where the right combination of people, systems and agents can shift it."
       />
+
+      {caseStudies.delivery === "loading" ? (
+        <section className="case-study-rail" id="selected-work" tabIndex={-1} aria-labelledby="case-studies-title" aria-busy="true">
+          <div className="case-study-rail__heading"><span className="case-study-rail__kicker">Cross-sector delivery</span><h2 id="case-studies-title">Case studies</h2><p role="status">Loading approved case studies…</p></div>
+        </section>
+      ) : caseStudies.issue ? (
+        <section className="case-study-rail" id="selected-work" tabIndex={-1} aria-labelledby="case-studies-title">
+          <div className="case-study-rail__heading"><span className="case-study-rail__kicker">Cross-sector delivery</span><h2 id="case-studies-title">Case studies</h2><p role="alert">Approved case studies are temporarily unavailable. Please try again later.</p></div>
+        </section>
+      ) : approvedCases.length ? (
+        <CaseStudyRail cases={approvedCases} />
+      ) : (
+        <section className="case-study-rail" id="selected-work" tabIndex={-1} aria-labelledby="case-studies-title">
+          <div className="case-study-rail__heading"><span className="case-study-rail__kicker">Cross-sector delivery</span><h2 id="case-studies-title">Case studies</h2><p role="status">No approved case studies are currently published for this market.</p></div>
+        </section>
+      )}
 
       <section className="io-capability">
         <div className="io-capability-head">

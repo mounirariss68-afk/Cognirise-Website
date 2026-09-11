@@ -5,34 +5,10 @@ import { BrandButton } from "@/components/ui/brand-button";
 import { assetUrl } from "@/lib/assets";
 import { useMarketStore } from "@/store/market";
 import type { IndustryContent } from "@/content/industries";
-import { contentRecord, useCmsCollection, useCmsEntry } from "@/lib/cms";
-import { IndustryEvidenceRail, type PublicCaseStudy } from "@/components/work/case-study-ui";
-
-function useSelectedWorkHashTarget(caseCount: number) {
-  React.useEffect(() => {
-    if (typeof window === "undefined" || window.location.hash !== "#selected-work") return;
-
-    const frame = window.requestAnimationFrame(() => {
-      const target = document.getElementById("selected-work");
-      if (!target || window.location.hash !== "#selected-work") return;
-
-      target.focus({ preventScroll: true });
-      target.scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-        block: "start",
-      });
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [caseCount]);
-}
+import { contentRecord, useCmsEntry } from "@/lib/cms";
 
 export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
   const cms = useCmsEntry("industry", industry.slug);
-  const caseStudies = useCmsCollection<PublicCaseStudy>("case-study", [], (item) => {
-    const record = contentRecord(item, "case-study") as PublicCaseStudy;
-    return record.disclosure === "restricted" ? null : record;
-  });
   const published = cms.data ? contentRecord(cms.data, "industry") : null;
   const view = published ? { ...industry, ...published, slug: industry.slug } : industry;
   if (cms.isAuthoritative && cms.delivery === "loading") {
@@ -49,12 +25,11 @@ export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
       </main>
     );
   }
-  return <IndustryEditorialView view={view} cases={caseStudies.data} />;
+  return <IndustryEditorialView view={view} />;
 }
 
-export function IndustryEditorialView({ view, cases = [] }: { view: IndustryContent; cases?: PublicCaseStudy[] }) {
+export function IndustryEditorialView({ view }: { view: IndustryContent }) {
   const { market } = useMarketStore();
-  useSelectedWorkHashTarget(cases.length);
   const thesisParts = view.thesis.split(" — ");
   const opportunityValue = view.opportunity as unknown as string | { title: string; body: string };
   const opportunity = typeof opportunityValue === "string"
@@ -116,7 +91,6 @@ export function IndustryEditorialView({ view, cases = [] }: { view: IndustryCont
         <div className="ind-evidence-head"><div><div className="ind-kicker">Representative use cases</div><h2 id="evidence-title">Where capability can meet real work.</h2></div><p>These representative patterns are not Cognirise client case studies. Evidence strength and decision boundaries stay visible.</p></div>
         <table className="ind-table"><thead><tr><th scope="col">Use case</th><th scope="col">Evidence</th><th scope="col">Required boundary</th></tr></thead><tbody>{view.uses.map((u) => <tr key={u.use}><th scope="row" data-label="Use case">{u.use}</th><td data-label="Evidence">{u.evidence}</td><td data-label="Required boundary">{u.boundary}</td></tr>)}</tbody></table>
       </section>
-      <IndustryEvidenceRail cases={cases} industrySlug={view.slug} />
       <section className="ind-support" aria-label="Supporting evidence and operating guardrails">
         <div><div className="ind-kicker">Documented reversal</div><h2>{view.reversal.title}</h2><p>{view.reversal.body}</p></div>
         <div><div className="ind-kicker">Myth / verdict</div><strong>{view.myth.claim}</strong><p>{view.myth.verdict}</p></div>

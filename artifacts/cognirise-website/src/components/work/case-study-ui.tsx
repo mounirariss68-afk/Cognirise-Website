@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import type { CmsRecord } from "@/lib/cms";
 import { trackEvent } from "@/lib/analytics";
 import { useMarketStore, type Market } from "@/store/market";
@@ -17,7 +17,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { caseSectors, directlyRelatedCases, normalizeCaseFilterValue } from "./case-study-model";
+import { approvedPublishedCases, caseSectors, normalizeCaseFilterValue } from "./case-study-model";
 
 type RichBlock = {
   type: string;
@@ -61,6 +61,7 @@ type LooseCase = CmsRecord & {
   approvedForIndustry?: boolean;
   variant?: string;
   disclosure?: string;
+  visibility?: string;
   mandate?: string;
   context?: string;
   constraints?: string[];
@@ -102,23 +103,57 @@ function fixtures(item: LooseCase): Fixture[] {
   return [];
 }
 
+function DeferredCaseRendition({
+  item,
+  rendition,
+  compact,
+}: {
+  item: LooseCase;
+  rendition: NonNullable<LooseCase["media"]>[number];
+  compact: boolean;
+}) {
+  const frame = useRef<HTMLElement | null>(null);
+  const [shouldLoad, setShouldLoad] = useState(() => typeof window === "undefined");
+  useEffect(() => {
+    const node = frame.current;
+    if (shouldLoad || !node) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setShouldLoad(true);
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      setShouldLoad(true);
+      observer.disconnect();
+    }, { rootMargin: "300px 0px", threshold: 0.5 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [shouldLoad]);
+  return (
+    <figure
+      ref={frame}
+      className={`case-rendition ${compact ? "is-compact" : ""}`}
+      data-case-media={rendition.url}
+    >
+      <img
+        src={shouldLoad ? rendition.url : undefined}
+        style={shouldLoad ? undefined : { visibility: "hidden" }}
+        alt={item.visual?.altText || rendition.altText || "Illustrative interface reconstruction"}
+        loading="lazy"
+        draggable={false}
+      />
+      <figcaption>{rendition.caption || item.visual?.caption || "Illustrative reconstruction using anonymized fixture data."}</figcaption>
+      {item.visual?.textEquivalent && <span className="sr-only">{item.visual.textEquivalent}</span>}
+    </figure>
+  );
+}
+
 function PulseInterface({ item, compact = false }: { item: LooseCase; compact?: boolean }) {
   const rows = fixtures(item);
   const template = item.visual?.template || item.visualTemplate || "operations-console";
   const rendition = item.media?.[0];
   if (rendition) {
-    return (
-      <figure className={`case-rendition ${compact ? "is-compact" : ""}`}>
-        <img
-          src={rendition.url}
-          alt={item.visual?.altText || rendition.altText || "Illustrative interface reconstruction"}
-          loading={compact ? "lazy" : "eager"}
-          draggable={false}
-        />
-        <figcaption>{rendition.caption || item.visual?.caption || "Illustrative reconstruction using anonymized fixture data."}</figcaption>
-        {item.visual?.textEquivalent && <span className="sr-only">{item.visual.textEquivalent}</span>}
-      </figure>
-    );
+    return <DeferredCaseRendition item={item} rendition={rendition} compact={compact} />;
   }
   return (
     <div className={`case-interface case-interface--${template.replace(/[^a-z0-9-]/gi, "-")} ${compact ? "is-compact" : ""}`} aria-label={item.visual?.altText || `${template} interface reconstruction`}>
@@ -147,30 +182,22 @@ function publicExplanation(item: LooseCase) {
 }
 
 function WorkCard({ item, onOpen, editorial = false }: { item: LooseCase; onOpen?: (trigger: HTMLButtonElement) => void; editorial?: boolean }) {
-  const [expanded, setExpanded] = useState(false);
-  const detailsId = `case-details-${item.slug}`;
-
   if (editorial) {
     return (
-      <article className={`work-card work-card--editorial ${expanded ? "is-expanded" : ""}`} data-testid={`card-case-${item.slug}`}>
+      <article className="work-card work-card--editorial" data-testid={`card-case-${item.slug}`}>
         <header className="work-card__intro">
           <div className="work-card__meta"><span>{item.organizationDescriptor || item.descriptor || item.summary}</span></div>
           <h3>{item.title}</h3>
           <p data-testid={`case-explanation-${item.slug}`}>{publicExplanation(item)}</p>
-          <button className="work-card__toggle" type="button" aria-controls={detailsId} aria-expanded={expanded} onClick={() => setExpanded(!expanded)} data-testid={`button-toggle-case-${item.slug}`}>
-            {expanded ? "Collapse" : "Expand"} <ArrowRight size={12} className={`transition-transform duration-200 ${expanded ? "-rotate-90" : "rotate-90"}`} />
-          </button>
         </header>
-        {expanded && (
-          <div className="work-card__details" id={detailsId}>
-            <section><small>01 / Objective</small><h4>The mandate</h4><p>{item.objective || item.mandate}</p></section>
-            <section><small>02 / Work</small><h4>What changed</h4><p>{item.work?.find((block) => block.text)?.text || item.context}</p></section>
-            <section><small>03 / Controls</small><h4>How it stayed bounded</h4><ul>{item.controls?.map((ctrl, i) => <li key={i}>{ctrl}</li>)}</ul></section>
-            <section><small>04 / Impact</small><h4>What can be said</h4><p>{value(item, "impact")}</p></section>
-          </div>
-        )}
+        <div className="work-card__details">
+          <section><small>01 / Objective</small><h4>The mandate</h4><p>{item.objective || item.mandate}</p></section>
+          <section><small>02 / Work</small><h4>What changed</h4><p>{item.work?.find((block) => block.text)?.text || item.context}</p></section>
+          <section><small>03 / Controls</small><h4>How it stayed bounded</h4><ul>{item.controls?.map((ctrl, i) => <li key={i}>{ctrl}</li>)}</ul></section>
+          <section><small>04 / Impact</small><h4>What can be said</h4><p>{value(item, "impact")}</p></section>
+        </div>
         <div className="work-card__visual">
-          <PulseInterface item={item} compact={!expanded} />
+          <PulseInterface item={item} />
         </div>
       </article>
     );
@@ -267,13 +294,44 @@ export function WorkLibrary({ cases }: { cases: LooseCase[] }) {
   );
 }
 
-export function IndustryEvidenceRail({ cases, industrySlug }: { cases: LooseCase[]; industrySlug: string }) {
-  const { market } = useMarketStore();
-  const related = directlyRelatedCases(cases, industrySlug);
+function useSelectedWorkHashTarget(caseCount: number) {
+  useEffect(() => {
+    if (typeof window === "undefined" || window.location.hash !== "#selected-work" || !caseCount) return;
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById("selected-work");
+      if (!target || window.location.hash !== "#selected-work") return;
+      target.focus({ preventScroll: true });
+      target.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [caseCount]);
+}
+
+function useReducedMotionPreference() {
+  const [reducedMotion, setReducedMotion] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  return reducedMotion;
+}
+
+export function CaseStudyRail({ cases }: { cases: LooseCase[] }) {
+  const eligible = approvedPublishedCases(cases);
   const carouselRoot = useRef<HTMLDivElement | null>(null);
   const previousControl = useRef<HTMLButtonElement | null>(null);
   const nextControl = useRef<HTMLButtonElement | null>(null);
   const horizontalWheelLocked = useRef(false);
+  const reducedMotion = useReducedMotionPreference();
+  useSelectedWorkHashTarget(eligible.length);
   useEffect(() => {
     const root = carouselRoot.current;
     if (!root) return;
@@ -300,17 +358,17 @@ export function IndustryEvidenceRail({ cases, industrySlug }: { cases: LooseCase
     };
     root.addEventListener("wheel", handleHorizontalWheel, { passive: false });
     return () => root.removeEventListener("wheel", handleHorizontalWheel);
-  }, [related.length]);
-  if (!related.length) return null;
+  }, [eligible.length]);
+  if (!eligible.length) return null;
   return (
-    <section className="industry-case-rail" id="selected-work" tabIndex={-1} aria-labelledby="industry-cases-title">
-       <div className="industry-case-rail__heading"><span className="ind-kicker">Directly related work</span><h2 id="industry-cases-title">Case studies</h2><p>Solutions developed around real operating work, with the information flow and decision controls made visible.</p></div>
-       <Carousel ref={carouselRoot} opts={{ align: "start", loop: false, containScroll: "trimSnaps", watchDrag: true }} aria-label="Related case studies">
-         <div className="industry-case-rail__controls">
+    <section className="case-study-rail" id="selected-work" tabIndex={-1} aria-labelledby="case-studies-title">
+       <div className="case-study-rail__heading"><span className="case-study-rail__kicker">Cross-sector delivery</span><h2 id="case-studies-title">Case studies</h2><p>Solutions developed around real operating work, with the information flow and decision controls made visible.</p></div>
+       <Carousel ref={carouselRoot} opts={{ align: "start", loop: false, containScroll: "trimSnaps", watchDrag: true, duration: reducedMotion ? 0 : 25 }} aria-label="Case studies">
+          <div className="case-study-rail__controls">
            <CarouselPrevious ref={previousControl} aria-label="Previous slide" className="static translate-y-0" />
            <CarouselNext ref={nextControl} aria-label="Next slide" className="static translate-y-0" />
          </div>
-         <CarouselContent>{related.map((item, index) => <CarouselItem className="industry-case-rail__slide" aria-label={`${index + 1} of ${related.length}`} key={item.slug}><WorkCard item={item} editorial /></CarouselItem>)}</CarouselContent>
+          <CarouselContent>{eligible.map((item, index) => <CarouselItem className="case-study-rail__slide" aria-label={`${index + 1} of ${eligible.length}`} key={item.slug}><WorkCard item={item} editorial /></CarouselItem>)}</CarouselContent>
       </Carousel>
     </section>
   );

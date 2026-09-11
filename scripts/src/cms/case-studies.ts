@@ -1,5 +1,6 @@
 import { validateCmsSnapshot } from "@workspace/api-zod";
 import type { InventoryRecord } from "./common.js";
+import { PUBLIC_MARKET_BASELINE } from "./market-baseline.js";
 
 const SOURCE_DECK = "attached_assets/Cognirise-Case-Studies-Azure-Deployments_-_Read-Only_1788946106330.pptx";
 const SOURCE_DATE = "2026-09-06";
@@ -21,28 +22,39 @@ type Seed = {
   related: Array<"financial-services" | "telecoms" | "travel-hospitality" | "energy-resources" | "public-sector" | "education">;
 };
 
-export const CASE_VISUAL_LABELS: readonly (readonly string[])[] = [
-  ["Batch recipe lookup", "Line 04 / changeover", "Verified 18 / 22"],
-  ["Demand pulse", "Cold-chain exceptions", "Forecast horizon / 14d"],
-  ["Visit debrief", "Territory queue", "Manager review"],
-  ["Curated audio", "Stock at hand", "Room profile"],
-  ["Issuer filings", "Price watchlist", "Source confidence"],
-  ["Document intake", "Schedule B checks", "Awaiting sign-off"],
-  ["Delegation ledger", "Policy boundary", "Evidence hash"],
-  ["Fee schedule", "Approval trail", "Effective 01 / 07"],
-  ["Supplier factors", "Plant energy", "Declaration draft"],
-  ["Offer rules", "Eligibility path", "Human checkpoint"],
-  ["Product library", "General question", "Source citation"],
-  ["Knowledge spaces", "Agent library", "Tenant controls"],
-  ["Tender review", "Workstream map", "Decision gate"],
-  ["Call transcript", "Gate 02 / suitability", "Escalation queue"],
-  ["Incident bridge", "Backup estate", "Approval required"],
-  ["Asset register", "Reuse match", "Evidence packet"],
-  ["Encrypted vault", "Client-side key", "Benchmark run"],
-  ["Acoustic profile", "Listening zone", "Suggested bundle"],
-  ["Exposure watch", "Concentration band", "Analyst review"],
-  ["Line telemetry", "Fault signature", "Work order gate"],
-  ["Provision bridge", "Exposure driver", "Threshold alert"],
+export type CaseCinematicVisual = {
+  filename: string;
+  creativeBrief: string;
+  caption: string;
+  altText: string;
+  textEquivalent: string;
+};
+
+// Each commissioned image is an original, text-free editorial scene. These
+// briefs are the source of truth for CMS accessibility and rights review; they
+// do not imply the image is a reconstruction of a client interface.
+export const CASE_CINEMATIC_VISUALS: readonly CaseCinematicVisual[] = [
+  { filename: "01-industrial-knowledge.jpg", creativeBrief: "Process expertise moving from a controlled knowledge stack to a factory line.", caption: "Controlled industrial knowledge in motion.", altText: "Two process engineers review a luminous knowledge stack beside an industrial production line.", textEquivalent: "A process engineer reviews a controlled knowledge collection while a colleague confirms its release to an operating production line." },
+  { filename: "02-pharmacy-signals.jpg", creativeBrief: "Cold-chain and inventory signals converging on accountable pharmacy operations.", caption: "Connected pharmacy operations signals.", altText: "A pharmacy operations specialist checks a glowing control station between medicine storage and a conveyor.", textEquivalent: "Medicine storage, inventory trays and an operations conveyor connect through one illuminated exception point checked by a specialist." },
+  { filename: "03-field-coaching.jpg", creativeBrief: "Visit evidence becoming a manager-reviewed coaching conversation.", caption: "A traceable route from field evidence to coaching.", altText: "Two field-team colleagues review physical materials at a table crossed by a violet light path.", textEquivalent: "A field representative and manager turn physical visit materials into a visible feedback route at a shared review table." },
+  { filename: "04-specialist-retail.jpg", creativeBrief: "A specialist product journey joining tactile discovery, stock and fulfilment.", caption: "Specialist retail, from product discovery to handoff.", altText: "A shopkeeper checks a product in a specialist retail space as a courier collects a parcel.", textEquivalent: "A specialist shopkeeper verifies a product while a courier receives a prepared parcel, connecting discovery and fulfilment." },
+  { filename: "05-market-search.jpg", creativeBrief: "An analyst tracing a market question back to a physical source dossier.", caption: "Market research with source traceability.", altText: "An analyst holds a source dossier in a research room with a flowing violet evidence path.", textEquivalent: "An analyst examines a sourced dossier as an illuminated path connects the research archive to the review desk." },
+  { filename: "06-tax-preparation.jpg", creativeBrief: "A practitioner reviewing an orderly, exception-aware preparation queue.", caption: "Tax preparation held for practitioner sign-off.", altText: "A practitioner reviews a document folder beside ordered illuminated validation trays.", textEquivalent: "A practitioner reviews a final folder after materials have passed through a series of controlled preparation trays." },
+  { filename: "07-agent-delegation.jpg", creativeBrief: "Bounded agent authority travelling through visible policy gates to a human operator.", caption: "Delegation remains bounded and inspectable.", altText: "An operator holds a mandate token beside a row of transparent policy gates linked by violet light.", textEquivalent: "A single delegation path passes through successive physical policy gates before reaching the operator holding the mandate." },
+  { filename: "08-fee-schedule.jpg", creativeBrief: "One safeguarded fee source with a visible owner-controlled change mechanism.", caption: "A maintained source for governed fee information.", altText: "A steward turns a physical approval wheel beside a large blank illuminated archival panel.", textEquivalent: "A steward uses a physical control beside a protected archival panel, conveying that one maintained source is owner-governed." },
+  { filename: "09-embedded-emissions.jpg", creativeBrief: "Materials, energy and suppliers joined into a reviewable product lineage.", caption: "Embedded-emissions lineage from inputs to review.", altText: "A sustainability reviewer observes materials, factory equipment and illuminated paths through a tall review gate.", textEquivalent: "Material, energy and supplier forms converge through a review gate where a sustainability specialist checks their lineage." },
+  { filename: "10-vehicle-offers.jpg", creativeBrief: "Rules-based vehicle offers with a physical exception gate and underwriter oversight.", caption: "Vehicle offers routed through accountable controls.", altText: "An underwriter moves geometric blocks through a glowing gate beside an unbranded vehicle model.", textEquivalent: "An underwriter guides abstract product-rule blocks through a coral-lit exception gate before they reach a vehicle offer model." },
+  { filename: "11-general-investment.jpg", creativeBrief: "General information stays in the product library while advice goes to people.", caption: "A clear human boundary around investment guidance.", altText: "An adviser and visitor meet beside a curated product library in a calm information salon.", textEquivalent: "A visitor receives a human handoff in a product-information library, separating general information from personal advice." },
+  { filename: "12-governed-ai-workspace.jpg", creativeBrief: "Private knowledge spaces and controlled agent pathways behind tenant boundaries.", caption: "A governed workspace for organizational knowledge.", altText: "An administrator reviews illuminated knowledge rooms and identity arches in a shared workspace.", textEquivalent: "Private knowledge rooms connect through visible identity arches while an administrator oversees permissions from a central table." },
+  { filename: "13-public-services.jpg", creativeBrief: "Public-service workstreams progressing across a civic model to a human decision gate.", caption: "Public-service workflows pause for accountable decisions.", altText: "A raised hand pauses illuminated routes across a detailed civic infrastructure model.", textEquivalent: "Illuminated workstreams travel across bridges and civic infrastructure until an official pauses them at a decision point." },
+  { filename: "14-call-risk-gates.jpg", creativeBrief: "Call signals passing through successive suitability and conduct gates to a reviewer.", caption: "Call review through visible risk gates.", altText: "A headset-wearing reviewer presses a coral control beside four translucent gates crossed by sound-wave light.", textEquivalent: "A call signal crosses four physical gates in sequence before a reviewer deliberately activates the final escalation control." },
+  { filename: "15-data-centre-incidents.jpg", creativeBrief: "An incident signal moving through topology to a controlled recovery action.", caption: "Data-centre response with approval in the loop.", altText: "An incident engineer stands at a control station in a blue data-centre corridor under a coral alert path.", textEquivalent: "A coral incident path travels through the data-centre structure to an engineer who authorizes a controlled intervention." },
+  { filename: "16-hotel-asset-reuse.jpg", creativeBrief: "Retired hospitality assets travelling to accountable reuse routes.", caption: "Hospitality assets prepared for a second life.", altText: "A property manager hands over a token beside a chair, linens and a hospitality service cart.", textEquivalent: "A chair and linen cart sit in a service yard while a property manager verifies the handoff that begins a reuse route." },
+  { filename: "17-browser-encrypted-storage.jpg", creativeBrief: "A client-held key outside a protected storage vault.", caption: "Client-side control around encrypted storage.", altText: "A person holds a small glowing key outside a tall translucent vault in an architectural security chamber.", textEquivalent: "The key remains in the user's hand outside a sealed vault, conveying storage whose contents cannot be opened by the service." },
+  { filename: "18-room-aware-audio.jpg", creativeBrief: "A listening room and physical room model used to explain a bounded recommendation.", caption: "Room-aware audio, made tangible.", altText: "An adviser and shopper compare a miniature listening-room model beside speakers and flowing sound waves.", textEquivalent: "A shopper and adviser use a physical model of the room while sound waves show how the recommendation responds to space." },
+  { filename: "19-portfolio-warning.jpg", creativeBrief: "Early-warning exposure signals isolated for an analyst's human review.", caption: "Portfolio warning signals before the decision.", altText: "An analyst places a glowing coral block into a review tray among large abstract exposure forms.", textEquivalent: "An analyst removes a coral early-warning block from grouped exposure forms and places it in a dedicated review tray." },
+  { filename: "20-production-faults.jpg", creativeBrief: "Machine telemetry linked to maintenance knowledge and an approved work order.", caption: "Production-fault response with operator approval.", altText: "A factory operator holds an approval token beside a beverage line and a violet machine-signal pulse.", textEquivalent: "A machine signal crosses a beverage line to an operator who holds the approval needed to issue maintenance work." },
+  { filename: "21-provision-movements.jpg", creativeBrief: "Exposure drivers moving across a bridge until a threshold routes an exception to review.", caption: "Provision movements surfaced before close.", altText: "A finance reviewer moves glowing violet blocks across a navy bridge toward a coral exception tray.", textEquivalent: "A finance reviewer follows abstract exposure blocks over a bridge while a coral threshold isolates one exception for review." },
 ] as const;
 
 // Public wording is deliberately source-owned here rather than extracted at runtime.
@@ -88,10 +100,33 @@ export const CASE_STUDY_TAXONOMY_COUNTS = {
   "Security & AI Infrastructure": 2,
 } as const;
 
+export function caseStudyMarketInventory(records = caseStudyRecords()) {
+  const enabledFallbackMarkets = PUBLIC_MARKET_BASELINE
+    .filter((market) => market.enabled && market.fallbackMarketCode === "uae")
+    .map((market) => market.code);
+  return records.map((record) => ({
+    externalId: record.externalId,
+    slug: record.fields.slug,
+    title: record.name,
+    directPublishedMarket: "uae",
+    fallbackDelivery: enabledFallbackMarkets.map((requestedMarket) => ({
+      requestedMarket,
+      effectiveMarket: "uae",
+      effectiveLocale: "en",
+      usedFallback: true,
+      restriction: "No local case-study edition exists; public delivery is the configured UAE/en fallback.",
+    })),
+    unavailableRequests: "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+    approvedMediaPath: (record.fields.mediaPaths as string[])[0],
+  }));
+}
+
 export function caseStudyRecords(): InventoryRecord[] {
   return seeds.map((seed, index) => {
     const slide = index + 1;
     const slug = slugify(seed.title);
+    const visual = CASE_CINEMATIC_VISUALS[index];
+    if (!visual) throw new Error(`Missing cinematic visual brief for case-study slide ${slide}.`);
     const sourceFile = SOURCE_DECK;
     const source = { label: `Approved source presentation, slide ${slide}`, accessedAt: SOURCE_DATE };
     const summary = `${seed.mandate} ${seed.approach}`;
@@ -110,15 +145,15 @@ export function caseStudyRecords(): InventoryRecord[] {
       relatedIndustries: seed.related,
        visual: {
         kind: "illustrative-interface-reconstruction" as const,
-        caption: `${CASE_VISUAL_LABELS[index].join(" → ")}.`,
-        altText: `Cognirise Pulse workflow for ${seed.title.toLowerCase()}, showing inputs, processing, a control checkpoint and the resulting capability.`,
-        textEquivalent: `${seed.approach} The visual follows ${CASE_VISUAL_LABELS[index].join(", ")} through a human or policy checkpoint to the resulting capability.`,
+         caption: visual.caption,
+         altText: visual.altText,
+         textEquivalent: visual.textEquivalent,
         template: seed.template,
-         fixtureLabels: [...CASE_VISUAL_LABELS[index]],
+          fixtureLabels: [visual.creativeBrief, "Human review", "Controlled outcome"],
       },
       mandate: seed.mandate,
       context: "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
-      constraints: ["Do not infer organization identity from this summary.", "Interface labels and values are anonymized fixtures."],
+      constraints: ["Do not infer organization identity from this summary.", "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."],
       work: [{ type: "paragraph" as const, text: seed.approach }],
       controls: ["Human review remains required for consequential actions.", "Public reconstruction contains no source-system data."],
       outcomes: [seed.impact],
@@ -144,7 +179,7 @@ export function caseStudyRecords(): InventoryRecord[] {
          slug,
          summary,
          content,
-         mediaPaths: [`/images/cognirise/cases/${String(slide).padStart(2, "0")}-${slug}.png`],
+          mediaPaths: [`/images/cognirise/cases/cinematic/${visual.filename}`],
        },
       review: {
          status: "approved",

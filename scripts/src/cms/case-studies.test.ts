@@ -3,7 +3,12 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { validateCmsSnapshot } from "@workspace/api-zod";
-import { CASE_STUDY_TAXONOMY_COUNTS, caseStudyRecords } from "./case-studies.js";
+import {
+  CASE_CINEMATIC_VISUALS,
+  CASE_STUDY_TAXONOMY_COUNTS,
+  caseStudyMarketInventory,
+  caseStudyRecords,
+} from "./case-studies.js";
 import { websiteRoot } from "./common.js";
 import { migrationOperations } from "./migration.js";
 
@@ -19,6 +24,23 @@ test("the source-owned case-study baseline has exactly 21 governed records", () 
     ])),
     CASE_STUDY_TAXONOMY_COUNTS,
   );
+});
+
+test("the market inventory reports configured UAE fallback delivery per case", () => {
+  const report = caseStudyMarketInventory();
+  assert.equal(report.length, 21);
+  assert.ok(report.every((entry) =>
+    entry.directPublishedMarket === "uae"
+    && entry.fallbackDelivery.length === 3
+    && entry.fallbackDelivery.every((delivery) =>
+      ["europe", "ksa", "turkiye"].includes(delivery.requestedMarket)
+      && delivery.effectiveMarket === "uae"
+      && delivery.effectiveLocale === "en"
+      && delivery.usedFallback
+    )
+    && entry.unavailableRequests.includes("disabled or unconfigured")
+    && entry.approvedMediaPath.startsWith("/images/cognirise/cases/cinematic/")
+  ));
 });
 
 test("every baseline summary satisfies the public contract and carries slide-only provenance", () => {
@@ -50,26 +72,39 @@ test("every baseline summary satisfies the public contract and carries slide-onl
   }
 });
 
-test("case studies carry distinct approved-safe visual fixtures and deterministic perceptual signatures", async () => {
+function jpegDimensions(bytes: Buffer) {
+  let offset = 2;
+  while (offset + 9 < bytes.length) {
+    if (bytes[offset] !== 0xff) { offset++; continue; }
+    const marker = bytes[offset + 1];
+    const length = bytes.readUInt16BE(offset + 2);
+    if (marker >= 0xc0 && marker <= 0xc3) {
+      return { width: bytes.readUInt16BE(offset + 7), height: bytes.readUInt16BE(offset + 5) };
+    }
+    offset += 2 + length;
+  }
+  throw new Error("JPEG dimensions could not be read.");
+}
+
+test("case studies carry distinct approved cinematic artwork and creative briefs", async () => {
   const records = caseStudyRecords();
   const mediaPaths = records.map((record) => (record.fields.mediaPaths as string[])[0]);
   assert.equal(new Set(mediaPaths).size, 21);
-  const labels = records.flatMap((record) => {
+  assert.equal(CASE_CINEMATIC_VISUALS.length, 21);
+  for (const record of records) {
     const visual = (record.fields.content as Record<string, any>).visual;
-    assert.match(visual.caption, /→/);
     assert.ok(visual.altText.length > 20);
     assert.equal(visual.fixtureLabels.length, 3);
-    return visual.fixtureLabels;
-  });
-  assert.equal(new Set(labels).size, 63);
+    assert.match((record.fields.mediaPaths as string[])[0], /\/cases\/cinematic\/.+\.jpg$/);
+  }
   assert.doesNotMatch(JSON.stringify(records), /\b(?:Türkiye|Turkey|UAE|Netherlands|Nepal|Istanbul)\b/i);
   
   const sizes = new Set();
   for (const mediaPath of mediaPaths) {
     const bytes = await readFile(path.join(websiteRoot, "public", mediaPath));
-    assert.equal(bytes.toString("ascii", 1, 4), "PNG");
-    assert.equal(bytes.readUInt32BE(16), 1600);
-    assert.equal(bytes.readUInt32BE(20), 1000);
+    assert.equal(bytes[0], 0xff);
+    assert.equal(bytes[1], 0xd8);
+    assert.deepEqual(jpegDimensions(bytes), { width: 1600, height: 1000 });
     sizes.add(bytes.length);
   }
   assert.ok(sizes.size > 15, "Expected distinct layout file sizes to vary significantly as a perceptual signature");

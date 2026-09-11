@@ -24,6 +24,28 @@ function AnchoredRedirect({ to, anchor }: { to: string; anchor: string }) {
   const search = useSearch();
   return <Redirect to={`${to}${search ? `?${search}` : ""}#${anchor}`} />;
 }
+
+const legacyIndustryPaths = new Set([
+  "/industries/financial-services",
+  "/industries/travel-hospitality",
+  "/industries/energy-resources",
+  "/industries/telecoms",
+  "/industries/public-sector",
+  "/industries/education",
+  "/industries/banking",
+  "/industries/government",
+  "/industries/travel",
+  "/industries/energy",
+  "/industries/manufacturing",
+  "/pov-banking",
+  "/pov-government",
+  "/pov-telecoms",
+  "/pov-travel",
+  "/pov-energy",
+  "/pov-manufacturing",
+  "/pov-public-sector",
+  "/sectors",
+]);
 // Pages
 import Home from "@/pages/Home";
 import AgenticTransformation from "@/pages/AgenticTransformation";
@@ -84,6 +106,11 @@ export function Router() {
   // Retirement takes precedence over stale availability or a failed policy fetch.
   // Only the overview is retired; shareable full records keep their routes.
   if (path === "/work" || path === "/work/") return <CanonicalRedirect to="/industries" />;
+  if (
+    legacyIndustryPaths.has(path)
+    && typeof window !== "undefined"
+    && window.location.hash === "#selected-work"
+  ) return <AnchoredRedirect to="/industries" anchor="selected-work" />;
   const unavailable = policy.data?.isConfigured === true
     && policy.data.pages.some((page) => page.path === path && !page.enabled);
   if (policy.isPending) return <Shell><div aria-busy="true" className="min-h-[60vh]" /></Shell>;
@@ -140,7 +167,7 @@ export function Router() {
         <Route path="/industries/education" component={IndustryEducation} />
         
         {/* Legacy aliases */}
-        <Route path="/sectors"><Redirect to="/industries" /></Route>
+        <Route path="/sectors"><CanonicalRedirect to="/industries" /></Route>
 
         {/* Legacy aliases */}
         <Route path="/who"><Redirect to="/about" /></Route>
@@ -153,7 +180,7 @@ export function Router() {
         
         <Route path="/pov-banking"><CanonicalRedirect to="/industries/financial-services" /></Route>
         <Route path="/pov-government"><CanonicalRedirect to="/industries/public-sector" /></Route>
-        <Route path="/pov-telecoms"><Redirect to="/industries/telecoms" /></Route>
+        <Route path="/pov-telecoms"><CanonicalRedirect to="/industries/telecoms" /></Route>
         <Route path="/pov-travel"><CanonicalRedirect to="/industries/travel-hospitality" /></Route>
         <Route path="/pov-energy"><CanonicalRedirect to="/industries/energy-resources" /></Route>
         <Route path="/industries/manufacturing"><CanonicalRedirect to="/industries/public-sector" /></Route>

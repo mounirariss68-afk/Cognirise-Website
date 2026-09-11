@@ -4,8 +4,16 @@ import { readFileSync } from "node:fs";
 
 const source = readFileSync(new URL("./IndustriesOverview.tsx", import.meta.url), "utf8");
 
-test("composes the overview around the shared picker and one capability story", () => {
+test("composes the overview around the picker, one approved case-study rail, and one capability story", () => {
   assert.match(source, /<IndustryPicker[\s\S]*id="industries"/);
+  assert.match(source, /useCmsCollection<PublicCaseStudy>\("case-study"/);
+  assert.match(source, /approvedPublishedCases\(caseStudies\.data\)/);
+  assert.match(source, /<CaseStudyRail cases=\{approvedCases\} \/>/);
+  assert.ok(source.indexOf("<IndustryPicker") < source.indexOf("<CaseStudyRail"));
+  assert.ok(source.indexOf("<CaseStudyRail") < source.indexOf('<section className="io-capability">'));
+  assert.match(source, /Loading approved case studies/);
+  assert.match(source, /Approved case studies are temporarily unavailable/);
+  assert.match(source, /No approved case studies are currently published/);
   assert.match(source, /Agentic platforms/);
   assert.match(source, /Sovereign & regulated AI/);
   assert.match(source, /AI-native consulting & engineering/);

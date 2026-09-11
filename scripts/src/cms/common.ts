@@ -3,6 +3,7 @@ import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { pulseIndustryMediaByFilename } from "./industry-media.js";
+import { CASE_CINEMATIC_VISUALS } from "./case-studies.js";
 
 export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 export const websiteRoot = path.join(repositoryRoot, "artifacts/cognirise-website");
@@ -62,11 +63,15 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
   // Editorial raster artwork belongs in the CMS. Editable masters, archives,
   // brand marks, and the CogniOS UI annotation remain source/code-owned.
   const files = (await walk(directory)).filter((file) =>
-    /\.(png|jpe?g)$/i.test(file) && path.basename(file) !== "blueprint-annotated.png"
+    /\.(png|jpe?g)$/i.test(file)
+    && path.basename(file) !== "blueprint-annotated.png"
+    // The prior deterministic SVG-derived fixtures remain in the repository as
+    // history, but the commissioned cinematic JPEGs are the CMS media source.
+    && !/[\\/]cognirise[\\/]cases[\\/][^\\/]+\.png$/i.test(file)
   );
+  const caseVisualByFilename = new Map(CASE_CINEMATIC_VISUALS.map((visual) => [visual.filename, visual]));
   const sourceFiles = (await walk(path.join(websiteRoot, "src"))).filter((file) => /\.(ts|tsx)$/.test(file));
   const usages = new Map<string, string[]>();
-  const legacyAltText: Record<string, string> = {};
   for (const sourceFile of sourceFiles) {
     const contents = await readFile(sourceFile, "utf8");
     for (const match of contents.matchAll(/\/images\/[A-Za-z0-9_./-]+/g)) {
@@ -84,8 +89,7 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
     const extension = path.extname(file).toLowerCase();
     const dimensions = imageDimensions(bytes, extension);
     const approvedIndustryMedia = pulseIndustryMediaByFilename.get(path.basename(file));
-    const approvedCaseMedia = name.startsWith("artifacts/cognirise-website/public/images/cognirise/cases/")
-      && (approvedIndustryMedia?.altText ?? legacyAltText[path.basename(file)] ?? path.basename(file, extension)).trim().length > 0;
+    const approvedCaseMedia = caseVisualByFilename.get(path.basename(file));
     const dedicatedValueToScaleHero = publicPath === "/images/cognirise/method-vts-v2.jpg";
     return {
       externalId: stableId("asset", file, name),
@@ -116,19 +120,19 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
         campaignMetadata: null,
         accessibility: {
           altText: approvedIndustryMedia?.altText
-            ?? legacyAltText[path.basename(file)]
+            ?? approvedCaseMedia?.altText
             ?? path.basename(file, extension).replaceAll("-", " "),
           decorative: false,
         },
         rights: approvedIndustryMedia
           ? { status: "approved-use", owner: "Cognirise", source: "Approved Cognirise Pulse industry family" }
           : name.startsWith("artifacts/cognirise-website/public/images/cognirise/cases/")
-            ? { status: "approved-use", owner: "Cognirise", source: "Deterministic Cognirise Pulse fixture reconstruction" }
+            ? { status: "approved-use", owner: "Cognirise", source: "Original commissioned Cognirise Pulse cinematic artwork" }
           : { status: "needs-review", owner: "Rights holder pending editorial review", source: publicPath },
       },
        review: approvedIndustryMedia || approvedCaseMedia
          ? { status: "approved", reasons: [approvedCaseMedia
-           ? "Source review approved: deterministic anonymized fixture, rights, and accessibility gates passed."
+            ? "Source review approved: original commissioned cinematic artwork, rights, and accessibility gates passed."
            : "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."] }
          : review(["Confirm rights holder, source, license, and descriptive alt text before media import."]),
       digest: checksum,

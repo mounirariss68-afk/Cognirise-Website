@@ -1,0 +1,1033 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-09-11T12:56:59.422Z",
+  "marketEndpointConfiguration": [
+    {
+      "code": "europe",
+      "default_locale": "en",
+      "fallback_market_code": "uae",
+      "fallback_locale": "en",
+      "is_canonical": false
+    },
+    {
+      "code": "ksa",
+      "default_locale": "en",
+      "fallback_market_code": "uae",
+      "fallback_locale": "en",
+      "is_canonical": false
+    },
+    {
+      "code": "turkiye",
+      "default_locale": "en",
+      "fallback_market_code": "uae",
+      "fallback_locale": "en",
+      "is_canonical": false
+    },
+    {
+      "code": "uae",
+      "default_locale": "en",
+      "fallback_market_code": null,
+      "fallback_locale": null,
+      "is_canonical": true
+    }
+  ],
+  "caseCount": 21,
+  "exactImmutablePinsVerified": 21,
+  "durableReadbacksVerified": 21,
+  "cases": [
+    {
+      "slug": "accelerating-governed-vehicle-offers",
+      "revisionId": "c676d900-3a74-47f5-8fdd-6cca73e05cf1",
+      "revisionNumber": 4,
+      "assetId": "81fb65f3-9ec1-41e5-975a-8d8e3bad06fe",
+      "mediaVersionId": "727f7778-9820-472a-a892-e0c59f934232",
+      "filename": "10-vehicle-offers.jpg",
+      "sha256": "4d4d96a489dd117430fff010f2c9cc1a4f1f3e410c6fc98a762211609ad08c10",
+      "byteSize": 222259,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-10",
+        "slug": "accelerating-governed-vehicle-offers",
+        "title": "Accelerating governed vehicle offers",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/10-vehicle-offers.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "answering-general-investment-questions",
+      "revisionId": "b4e7cf4c-6902-45d8-b5d9-d8d13622df23",
+      "revisionNumber": 3,
+      "assetId": "61d3e459-aed4-40d3-b7f8-61138160cb80",
+      "mediaVersionId": "1048fca9-6fe8-4b55-ad14-4caab795babe",
+      "filename": "11-general-investment.jpg",
+      "sha256": "7d9d5251cdc850423f11e41bc17ad2d2b8b48495346f7e858495004a978c8be2",
+      "byteSize": 255160,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-11",
+        "slug": "answering-general-investment-questions",
+        "title": "Answering general investment questions",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/11-general-investment.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "automating-recurring-tax-preparation",
+      "revisionId": "2ca50868-43b8-4316-94fe-297d6d28ac67",
+      "revisionNumber": 4,
+      "assetId": "08f27cfe-be43-44fe-9c6c-cb08bb47751e",
+      "mediaVersionId": "b4af917f-7a93-40ed-99f9-bbc0210b5a62",
+      "filename": "06-tax-preparation.jpg",
+      "sha256": "9c1ea4445c615ba03ad0bb862cbfe8964a4c352849506a679d97fa0085e2d9a4",
+      "byteSize": 247458,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-06",
+        "slug": "automating-recurring-tax-preparation",
+        "title": "Automating recurring tax preparation",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/06-tax-preparation.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "checking-calls-through-risk-gates",
+      "revisionId": "a275af3b-447b-4263-aa00-2da838bce466",
+      "revisionNumber": 4,
+      "assetId": "12fb325e-b62b-4687-8165-097571a5487a",
+      "mediaVersionId": "793331b2-5e8e-4218-8cf1-66c71324bfe7",
+      "filename": "14-call-risk-gates.jpg",
+      "sha256": "2ee2a41378cbfe3c302412f6a675d5c0031ec1e4354e60eea33f2b7d177c38e2",
+      "byteSize": 240805,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-14",
+        "slug": "checking-calls-through-risk-gates",
+        "title": "Checking calls through risk gates",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/14-call-risk-gates.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "coaching-a-distributed-field-team",
+      "revisionId": "20d6a972-48f7-4996-be2e-5aad743902d0",
+      "revisionNumber": 3,
+      "assetId": "f7f92ee8-32f2-4b67-b2e8-579fc0199648",
+      "mediaVersionId": "feb5aedc-0b49-48b0-bd3a-4198fb940f68",
+      "filename": "03-field-coaching.jpg",
+      "sha256": "704e5a1ec29061c09f3b848b3c33b26543f44b7a5361acd8c7c8e15a1b0393ea",
+      "byteSize": 165167,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-03",
+        "slug": "coaching-a-distributed-field-team",
+        "title": "Coaching a distributed field team",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/03-field-coaching.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "connecting-pharmacy-operations-signals",
+      "revisionId": "3e93cc97-2414-415c-88fe-84410827fea3",
+      "revisionNumber": 3,
+      "assetId": "74966487-fc28-4899-b118-7a6d7036d1eb",
+      "mediaVersionId": "4cb57284-c8d5-45d7-87e5-5a7d08de9b8c",
+      "filename": "02-pharmacy-signals.jpg",
+      "sha256": "e17d02ba685fb8f6fc93db8fe817dfe236c1d5a8f145b6cbdcc6a81732f5fdb8",
+      "byteSize": 282570,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-02",
+        "slug": "connecting-pharmacy-operations-signals",
+        "title": "Connecting pharmacy operations signals",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/02-pharmacy-signals.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "creating-a-governed-ai-workspace",
+      "revisionId": "879da501-07bb-4d50-bcb5-16a98706d34d",
+      "revisionNumber": 4,
+      "assetId": "3cbfa281-c17e-4513-a604-e83215b27224",
+      "mediaVersionId": "3cded961-f97f-4e2f-ab1b-84d412307e89",
+      "filename": "12-governed-ai-workspace.jpg",
+      "sha256": "220c51206189de0ced8d0ec3bd4f1423ac699370d6d9044bf973345ada6ef9ee",
+      "byteSize": 268306,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-12",
+        "slug": "creating-a-governed-ai-workspace",
+        "title": "Creating a governed AI workspace",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/12-governed-ai-workspace.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "creating-accountable-agent-delegation",
+      "revisionId": "57f9bfbd-50d1-454d-967c-2f10c8b64196",
+      "revisionNumber": 4,
+      "assetId": "7927f5e2-6bc8-4d56-804a-ae5ef29b54c0",
+      "mediaVersionId": "8935b340-b0dc-40ea-bf8b-de2027f30a25",
+      "filename": "07-agent-delegation.jpg",
+      "sha256": "35dc81a08ab6c569e8360e78014f80e0dd07da0be6a14fee67a64d5ffd8313cf",
+      "byteSize": 248868,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-07",
+        "slug": "creating-accountable-agent-delegation",
+        "title": "Creating accountable agent delegation",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/07-agent-delegation.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "diagnosing-production-line-faults",
+      "revisionId": "9c242f1a-9baf-4129-ae4d-e33fd96e2264",
+      "revisionNumber": 4,
+      "assetId": "2080aaf4-e726-4a1c-a6c1-60ffb1cd4175",
+      "mediaVersionId": "21ad8633-cfea-41c2-b970-c0e5c7166988",
+      "filename": "20-production-faults.jpg",
+      "sha256": "c84ccea40018da43f71fe24accb669ebf15cf32102a46e9baf3694c951418baa",
+      "byteSize": 346174,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-20",
+        "slug": "diagnosing-production-line-faults",
+        "title": "Diagnosing production-line faults",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/20-production-faults.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "finding-a-second-life-for-hotel-assets",
+      "revisionId": "a5c3e591-a307-430a-9aea-b995ed570710",
+      "revisionNumber": 3,
+      "assetId": "2a984062-1798-4ece-8774-742044bce930",
+      "mediaVersionId": "ba541ab6-db69-4825-9d50-2ff55c5ea4cf",
+      "filename": "16-hotel-asset-reuse.jpg",
+      "sha256": "06b145c7abfaa4cf03161dee3e4c9c900acea3607c7aa36fa1d73626fb665f26",
+      "byteSize": 281133,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-16",
+        "slug": "finding-a-second-life-for-hotel-assets",
+        "title": "Finding a second life for hotel assets",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/16-hotel-asset-reuse.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "governing-a-single-fee-schedule",
+      "revisionId": "410ab569-290e-48c2-8bf7-8e080df68f1d",
+      "revisionNumber": 4,
+      "assetId": "304f83df-93b8-4863-b6ba-fbc596a611c5",
+      "mediaVersionId": "e7a3df3c-c464-47b7-8873-81a4b66a875a",
+      "filename": "08-fee-schedule.jpg",
+      "sha256": "a4723d76ee48249a40c6b429715f3f064ecbce3485d0f7a867c74b93e3ebd193",
+      "byteSize": 181506,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-08",
+        "slug": "governing-a-single-fee-schedule",
+        "title": "Governing a single fee schedule",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/08-fee-schedule.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "making-industrial-knowledge-self-service",
+      "revisionId": "05053ef7-a071-474f-a70e-efdfd531a754",
+      "revisionNumber": 4,
+      "assetId": "5faa8ab8-b210-498c-8339-d2784a757c4e",
+      "mediaVersionId": "1a8036f3-7c5a-4eb3-abf9-96992ecc9b69",
+      "filename": "01-industrial-knowledge.jpg",
+      "sha256": "b961284318d5c2b737465d195b0ed366e4ec229daa7346a0624362c67f1fc36f",
+      "byteSize": 290630,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-01",
+        "slug": "making-industrial-knowledge-self-service",
+        "title": "Making industrial knowledge self-service",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/01-industrial-knowledge.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "making-market-information-searchable",
+      "revisionId": "736add92-4ff5-4553-89d7-c3dcad18a767",
+      "revisionNumber": 4,
+      "assetId": "6ec581cd-5b5d-4c89-b273-de437fe55215",
+      "mediaVersionId": "48629a50-7b06-4623-8e1c-c41b8b9c074d",
+      "filename": "05-market-search.jpg",
+      "sha256": "a1006aaf6994ec59ceb5c5205f88f55675aa2f116b6cc9309e7bbf361578594d",
+      "byteSize": 244671,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-05",
+        "slug": "making-market-information-searchable",
+        "title": "Making market information searchable",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/05-market-search.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "monitoring-portfolio-early-warning-signals",
+      "revisionId": "2a8db455-bb36-4084-8f3a-60fc24e0ef4b",
+      "revisionNumber": 4,
+      "assetId": "8bc9a21c-8a31-4557-bcb8-dfa4c32e8935",
+      "mediaVersionId": "5d16ce53-22bb-489f-a49a-f45ab1b17760",
+      "filename": "19-portfolio-warning.jpg",
+      "sha256": "4450ac0a15a8f730508464f3fa8dc539c92f860fb2de775635c413db575a823d",
+      "byteSize": 171122,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-19",
+        "slug": "monitoring-portfolio-early-warning-signals",
+        "title": "Monitoring portfolio early-warning signals",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/19-portfolio-warning.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "orchestrating-data-centre-incidents",
+      "revisionId": "c579cd28-87d9-4ce0-b527-5df617ea91be",
+      "revisionNumber": 4,
+      "assetId": "a8860821-3528-42ff-99c8-d3de177fa27e",
+      "mediaVersionId": "87907d2e-ccad-4ab4-b5c1-71f242592c8e",
+      "filename": "15-data-centre-incidents.jpg",
+      "sha256": "ab7e4b75d54416fc41018aa5474058336b4a08f85b6d333ff17c147c27a9d371",
+      "byteSize": 317337,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-15",
+        "slug": "orchestrating-data-centre-incidents",
+        "title": "Orchestrating data-centre incidents",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/15-data-centre-incidents.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "preparing-embedded-emissions-data",
+      "revisionId": "e6dfa4b5-87e0-49c9-aa9e-90e100711ab3",
+      "revisionNumber": 3,
+      "assetId": "2f44e333-cc65-40e6-8239-eff44a115453",
+      "mediaVersionId": "0c89760c-b94c-41cf-854f-77c33906114c",
+      "filename": "09-embedded-emissions.jpg",
+      "sha256": "50509537c8eb3440ffc0d9cc3c3aaab871403284ec66af8f9a73191f33443420",
+      "byteSize": 264937,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-09",
+        "slug": "preparing-embedded-emissions-data",
+        "title": "Preparing embedded-emissions data",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/09-embedded-emissions.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "prototyping-agentic-public-services",
+      "revisionId": "ca4966c8-db58-48b8-952a-a30da79a6dff",
+      "revisionNumber": 3,
+      "assetId": "bfafdb26-b556-42b3-9c2a-85ad9226213c",
+      "mediaVersionId": "1aedd71a-6c31-4a1c-90de-e74f52a48484",
+      "filename": "13-public-services.jpg",
+      "sha256": "b16cd546120146aabcdfd4cfdab6bf8b1113704936b450e6165dd55c40df665a",
+      "byteSize": 275336,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-13",
+        "slug": "prototyping-agentic-public-services",
+        "title": "Prototyping agentic public services",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/13-public-services.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "proving-browser-side-encrypted-storage",
+      "revisionId": "e935ef13-fc5e-4d32-b9a3-681afb3b3e71",
+      "revisionNumber": 4,
+      "assetId": "aa564f81-7563-4ea8-8775-693ee8d6f64b",
+      "mediaVersionId": "75d8de00-4f70-4865-a995-d54752ceda78",
+      "filename": "17-browser-encrypted-storage.jpg",
+      "sha256": "97217baedd24276e1b8432869740d636efa8b47be7bab7c44bb330c8db2d3f0d",
+      "byteSize": 204593,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-17",
+        "slug": "proving-browser-side-encrypted-storage",
+        "title": "Proving browser-side encrypted storage",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/17-browser-encrypted-storage.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "recommending-room-aware-audio-systems",
+      "revisionId": "4897b0b0-f931-4cff-9fe0-4980bfca01f1",
+      "revisionNumber": 4,
+      "assetId": "3948ae62-4b4f-4c4f-883c-717444a4f728",
+      "mediaVersionId": "5011da97-e509-49fe-90df-1afd8a3e4a41",
+      "filename": "18-room-aware-audio.jpg",
+      "sha256": "868473375c66ecde717ca71d1eeaff584c84b4a5792779bc352c23fda0d1cf0e",
+      "byteSize": 245945,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-18",
+        "slug": "recommending-room-aware-audio-systems",
+        "title": "Recommending room-aware audio systems",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/18-room-aware-audio.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "taking-a-specialist-retailer-online",
+      "revisionId": "8cef7a55-035e-4be9-b5c3-fd7519d2ae51",
+      "revisionNumber": 4,
+      "assetId": "81e83d7b-890a-4e9c-b07b-1b1c17ae8537",
+      "mediaVersionId": "199e0551-3b24-4af9-be4c-b1b35d340482",
+      "filename": "04-specialist-retail.jpg",
+      "sha256": "887683263a4418769592cfc8113776ac4c3a6714c1886951f36cd4e62d0b83c6",
+      "byteSize": 224337,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-04",
+        "slug": "taking-a-specialist-retailer-online",
+        "title": "Taking a specialist retailer online",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/04-specialist-retail.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    },
+    {
+      "slug": "tracing-provision-movements-earlier",
+      "revisionId": "57f06ba6-d64f-4628-b5d4-371b156109c9",
+      "revisionNumber": 4,
+      "assetId": "39e7a1ed-aadb-40fb-96e2-bc1c4f60cea0",
+      "mediaVersionId": "90596e0f-5be9-4436-a7fd-ca61dd36c4bf",
+      "filename": "21-provision-movements.jpg",
+      "sha256": "b132a8d4365d6173364ed6c1416dc3a610ca6d02ef9310d4f82c02369dbd6eea",
+      "byteSize": 214542,
+      "dimensions": "1600x1000",
+      "marketDelivery": {
+        "externalId": "case-study:slide-21",
+        "slug": "tracing-provision-movements-earlier",
+        "title": "Tracing provision movements earlier",
+        "directPublishedMarket": "uae",
+        "fallbackDelivery": [
+          {
+            "requestedMarket": "ksa",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "turkiye",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          },
+          {
+            "requestedMarket": "europe",
+            "effectiveMarket": "uae",
+            "effectiveLocale": "en",
+            "usedFallback": true,
+            "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+          }
+        ],
+        "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+        "approvedMediaPath": "/images/cognirise/cases/cinematic/21-provision-movements.jpg"
+      },
+      "exactPinVerified": true,
+      "durableReadbackVerified": true
+    }
+  ],
+  "publicListEndpointFallbackVerification": [
+    {
+      "requestedMarket": "uae",
+      "requestedLocale": "en",
+      "endpoint": "GET /api/public/content?kind=case-study",
+      "candidateOrder": [
+        "uae|en"
+      ],
+      "effectivePublishedEditions": [
+        {
+          "market": "uae",
+          "locale": "en"
+        }
+      ],
+      "usedFallback": false,
+      "caseStudyRowsAvailable": 21
+    },
+    {
+      "requestedMarket": "ksa",
+      "requestedLocale": "en",
+      "endpoint": "GET /api/public/content?kind=case-study",
+      "candidateOrder": [
+        "ksa|en",
+        "uae|en"
+      ],
+      "effectivePublishedEditions": [
+        {
+          "market": "uae",
+          "locale": "en"
+        }
+      ],
+      "usedFallback": true,
+      "caseStudyRowsAvailable": 21
+    },
+    {
+      "requestedMarket": "turkiye",
+      "requestedLocale": "en",
+      "endpoint": "GET /api/public/content?kind=case-study",
+      "candidateOrder": [
+        "turkiye|en",
+        "uae|en"
+      ],
+      "effectivePublishedEditions": [
+        {
+          "market": "uae",
+          "locale": "en"
+        }
+      ],
+      "usedFallback": true,
+      "caseStudyRowsAvailable": 21
+    },
+    {
+      "requestedMarket": "europe",
+      "requestedLocale": "en",
+      "endpoint": "GET /api/public/content?kind=case-study",
+      "candidateOrder": [
+        "europe|en",
+        "uae|en"
+      ],
+      "effectivePublishedEditions": [
+        {
+          "market": "uae",
+          "locale": "en"
+        }
+      ],
+      "usedFallback": true,
+      "caseStudyRowsAvailable": 21
+    }
+  ],
+  "marketPolicyConclusion": "UAE/en is the direct published edition. KSA/en, Türkiye/en, and Europe/en requests are intentionally served by the configured UAE/en fallback; only disabled or unconfigured market/locale requests are unavailable."
+}

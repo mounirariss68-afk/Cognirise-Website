@@ -6,7 +6,6 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { setMaxListeners } from "node:events";
 import { PassThrough, type Readable } from "node:stream";
 
 const allowedTypes = new Set([
@@ -330,26 +329,43 @@ export function openMediaReadStream(source: Readable): Readable {
   const cancelWhenReady = () => {
     if (ready && cancelled && !source.destroyed) source.destroy();
   };
-  source.once("response", () => {
+  // `Readable.pipe` forwards a source error to its destination when the
+  // destination has no error listener. Delivery pipelines remove their
+  // temporary listeners after an aborted response, but GCS can emit its
+  // abort error later. Keep this one bounded adapter-owned listener for the
+  // lifetime of the per-request pass-through so that late errors cannot
+  // become an unhandled exception after delivery cleanup.
+  output.once("error", () => {});
+  const onResponse = () => {
     // GCS emits response immediately BEFORE attaching its internal pipeline.
     queueMicrotask(() => {
       ready = true;
       cancelWhenReady();
     });
-  });
-  source.once("data", () => {
+  };
+  const onData = () => {
     // Also support ordinary readables without the GCS response event.
     ready = true;
     if (cancelled) {
       source.pause();
       queueMicrotask(cancelWhenReady);
     }
-  });
+  };
   const onSourceError = (error: Error) => {
     if (!output.destroyed) output.destroy(error);
   };
+  const releaseSourceListeners = () => {
+    source.removeListener("response", onResponse);
+    source.removeListener("data", onData);
+    source.removeListener("error", onSourceError);
+    source.removeListener("end", releaseSourceListeners);
+    source.removeListener("close", releaseSourceListeners);
+  };
+  source.once("response", onResponse);
+  source.once("data", onData);
   source.once("error", onSourceError);
-  source.once("end", () => source.removeListener("error", onSourceError));
+  source.once("end", releaseSourceListeners);
+  source.once("close", releaseSourceListeners);
   output.once("close", () => {
     if (source.destroyed || source.readableEnded) return;
     cancelled = true;

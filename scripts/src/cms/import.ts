@@ -47,7 +47,9 @@ import {
   caseRefreshDigest,
   caseRefreshAssetBinaryUpdate,
   assessCaseMediaPin,
-  copyPublishedCasePayload,
+  hasExactCasePublicationPin,
+  hasExpectedCaseVisual,
+  mergePublishedCaseVisualPayload,
   historicalCasePinReceiptIsValid,
   planCasePublicationRefreshEntry,
   planCaseVisualRefresh,
@@ -293,6 +295,7 @@ async function applyDatabase(
             console.warn(`Reusing matching media binary for ${operation.externalId} while preserving its earlier inventory receipt digest.`);
           }
         }
+        let assetCreated = false;
         if (!asset) {
           [asset] = await tx.insert(cmsMediaAssetsTable).values({
             ...(lineageAssetId ? { id: lineageAssetId } : {}),
@@ -303,7 +306,7 @@ async function applyDatabase(
             byteSize: operation.byteSize,
             checksum: operation.checksum,
             ...mediaMetadataUpdate(operation),
-            status: "pending-review",
+            status: approvedCaseRefresh ? "active" : "pending-review",
             uploadedByUserId: serviceAccount.id,
           }).returning();
           if (!asset) throw new Error(`Could not create media ${operation.externalId}.`);
@@ -323,10 +326,15 @@ async function applyDatabase(
                campaignMetadata: operation.campaignMetadata,
                altText: operation.altText,
                credit: operation.credit,
-              accessibilityStatus: "needs-review",
-              rightsStatus: "needs-review",
+              accessibilityStatus: approvedCaseRefresh ? "approved" : "needs-review",
+              rightsStatus: approvedCaseRefresh ? "approved-use" : "needs-review",
+              ...(approvedCaseRefresh ? {
+                sourceReview: "approved",
+                governedRefreshKey: refreshKey,
+              } : {}),
             },
           });
+          assetCreated = true;
           mediaCreated++;
         } else {
           const [latestVersion] = await tx.select().from(cmsMediaVersionsTable)
@@ -458,6 +466,28 @@ async function applyDatabase(
             metadata: { status: "pending-review", sourcePath: operation.publicPath },
           });
         }
+        if (approvedCaseRefresh && refreshKey && assetCreated) {
+          await tx.insert(cmsOperationReceiptsTable).values({
+            idempotencyKey: refreshKey,
+            operation: "cms.inventory.case-media-version-refreshed",
+            subjectId: String(asset.id),
+            requestDigest: operation.requestDigest,
+            resultDigest: resultDigest({ mediaId: asset.id, checksum: operation.checksum }),
+          });
+          await tx.insert(cmsAuditEventsTable).values({
+            actorUserId: serviceAccount.id,
+            actorLabel: "cms-inventory-migration",
+            action: "cms.inventory.case-media-version-refreshed",
+            targetType: "media",
+            targetId: String(asset.id),
+            requestId: refreshKey,
+            metadata: {
+              sourcePath: operation.publicPath,
+              priorMediaVersionId: null,
+              checksum: operation.checksum,
+            },
+          });
+        }
       }
 
       for (const operation of operations.filter((item) =>
@@ -512,10 +542,15 @@ async function applyDatabase(
           || publishedRevision.workflowState !== "approved"
           || !readiness?.success
           || !Array.isArray(publishedPayload?.mediaIds)
-          || publishedPayload.mediaIds.length !== 1
-          || publishedPayload.mediaIds[0] !== mediaId) {
+          || publishedPayload.mediaIds.length !== 1) {
           throw new Error(`${operation.externalId}: published case snapshot is not repairable.`);
         }
+        // A newly commissioned asset deliberately has a new asset identity.
+        // Its immutable version is created above, then the publication-refresh
+        // pass below appends a revision and switches the published pin. Do not
+        // try to repair the old revision as if it already referenced the new
+        // asset; that would either fail or overwrite its immutable history.
+        if (publishedPayload.mediaIds[0] !== mediaId) continue;
         const references = await tx.select({
           assetId: cmsMediaReferencesTable.assetId,
           mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
@@ -669,7 +704,7 @@ async function applyDatabase(
           documentKind: document?.kind ?? null,
         });
         if (entryPlan.action === "fail") throw new Error(`${operation.externalId}: ${entryPlan.reason}.`);
-        if (entryPlan.action === "fresh-install" || entryPlan.action === "replay") continue;
+        if (entryPlan.action === "fresh-install") continue;
         const [edition] = await tx.select().from(cmsMarketEditionsTable).where(and(
           eq(cmsMarketEditionsTable.documentId, document.id),
           eq(cmsMarketEditionsTable.market, "uae"),
@@ -712,14 +747,71 @@ async function applyDatabase(
               eq(cmsMediaVersionsTable.assetId, mediaId!),
             ))
           : [];
-        const [targetVersion] = mediaId ? await tx.select().from(cmsMediaVersionsTable)
+        const targetMediaId = mediaByPath.get(operation.mediaPaths[0]);
+        if (!targetMediaId) throw new Error(`${operation.externalId}: replacement cinematic media is unavailable.`);
+        const [targetVersion] = await tx.select().from(cmsMediaVersionsTable)
           .where(and(
-            eq(cmsMediaVersionsTable.assetId, mediaId),
+            eq(cmsMediaVersionsTable.assetId, targetMediaId),
             eq(cmsMediaVersionsTable.checksum, mediaOperation.checksum),
           ))
           .orderBy(desc(cmsMediaVersionsTable.versionNumber))
-          .limit(1) : [];
+          .limit(1);
+        const [targetAsset] = await tx.select({
+          status: cmsMediaAssetsTable.status,
+        }).from(cmsMediaAssetsTable).where(eq(cmsMediaAssetsTable.id, targetMediaId));
         const targetMetadata = targetVersion?.metadata as Record<string, unknown> | null;
+        if (entryPlan.action === "replay") {
+          const references = await tx.select({
+            assetId: cmsMediaReferencesTable.assetId,
+            mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
+          }).from(cmsMediaReferencesTable).where(and(
+            eq(cmsMediaReferencesTable.documentId, document.id),
+            eq(cmsMediaReferencesTable.fieldPath, `revision:${publishedRevision?.id}`),
+          ));
+          const [pinnedVersion] = references.length === 1 && references[0].mediaVersionId
+            ? await tx.select({
+              id: cmsMediaVersionsTable.id,
+              assetId: cmsMediaVersionsTable.assetId,
+              checksum: cmsMediaVersionsTable.checksum,
+              storageKey: cmsMediaVersionsTable.storageKey,
+            }).from(cmsMediaVersionsTable)
+              .where(eq(cmsMediaVersionsTable.id, references[0].mediaVersionId))
+            : [];
+          const replayGovernanceValid = Boolean(
+            publishedRevision?.workflowState === "approved"
+            && validation?.success
+            && evidenceApproved
+            && targetAsset?.status === "active"
+            && mediaOperation.sourceReviewApproved === true
+            && targetMetadata?.rightsStatus === "approved-use"
+            && targetMetadata?.accessibilityStatus === "approved"
+            && targetVersion
+            && hasExpectedCaseVisual(
+              publishedPayload as Record<string, unknown>,
+              replacementValidation.data as Record<string, unknown>,
+            )
+            && hasExactCasePublicationPin({
+              expectedAssetId: targetMediaId,
+              expectedMediaVersionId: String(targetVersion?.id),
+              expectedChecksum: mediaOperation.checksum,
+              mediaIds: publishedPayload?.mediaIds,
+              references: references.map((reference) => ({
+                assetId: String(reference.assetId),
+                mediaVersionId: reference.mediaVersionId ? String(reference.mediaVersionId) : null,
+              })),
+              pinnedVersion: pinnedVersion ? {
+                id: String(pinnedVersion.id),
+                assetId: String(pinnedVersion.assetId),
+                checksum: pinnedVersion.checksum,
+                storageKey: pinnedVersion.storageKey,
+              } : null,
+            })
+          );
+          if (!replayGovernanceValid) {
+            throw new Error(`${operation.externalId}: receipted case visual replay does not match its exact approved publication pin.`);
+          }
+          continue;
+        }
         const plan = planCaseVisualRefresh({
           receiptExists: false,
           currentVersionNumber: currentVersion?.versionNumber ?? 0,
@@ -733,32 +825,84 @@ async function applyDatabase(
           sourceReviewApproved: mediaOperation.sourceReviewApproved === true,
           rightsApproved: targetMetadata?.rightsStatus === "approved-use",
           accessibilityApproved: targetMetadata?.accessibilityStatus === "approved",
-          publicationValid: Boolean(validation?.success && mediaId && targetVersion),
+          publicationValid: Boolean(
+            validation?.success && mediaId && targetVersion && targetMediaId && targetAsset?.status === "active"
+          ),
           evidenceApproved,
         });
         if (plan.action === "fail") throw new Error(`${operation.externalId}: ${plan.reason}.`);
-        if (plan.action === "replay") continue;
+        if (plan.action === "replay") {
+          const references = await tx.select({
+            assetId: cmsMediaReferencesTable.assetId,
+            mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
+          }).from(cmsMediaReferencesTable).where(and(
+            eq(cmsMediaReferencesTable.documentId, document.id),
+            eq(cmsMediaReferencesTable.fieldPath, `revision:${publishedRevision?.id}`),
+          ));
+          const [pinnedVersion] = references.length === 1 && references[0].mediaVersionId
+            ? await tx.select({
+              id: cmsMediaVersionsTable.id,
+              assetId: cmsMediaVersionsTable.assetId,
+              checksum: cmsMediaVersionsTable.checksum,
+              storageKey: cmsMediaVersionsTable.storageKey,
+            }).from(cmsMediaVersionsTable)
+              .where(eq(cmsMediaVersionsTable.id, references[0].mediaVersionId))
+            : [];
+          if (
+            !hasExpectedCaseVisual(
+              publishedPayload as Record<string, unknown>,
+              replacementValidation.data as Record<string, unknown>,
+            )
+            || !hasExactCasePublicationPin({
+              expectedAssetId: targetMediaId,
+              expectedMediaVersionId: String(targetVersion?.id),
+              expectedChecksum: mediaOperation.checksum,
+              mediaIds: publishedPayload?.mediaIds,
+              references: references.map((reference) => ({
+                assetId: String(reference.assetId),
+                mediaVersionId: reference.mediaVersionId ? String(reference.mediaVersionId) : null,
+              })),
+              pinnedVersion: pinnedVersion ? {
+                id: String(pinnedVersion.id),
+                assetId: String(pinnedVersion.assetId),
+                checksum: pinnedVersion.checksum,
+                storageKey: pinnedVersion.storageKey,
+              } : null,
+            })
+          ) {
+            throw new Error(`${operation.externalId}: unchanged binary replay does not match its exact approved visual and immutable pin.`);
+          }
+          continue;
+        }
         const [latestRevision] = await tx.select({ revisionNumber: cmsRevisionsTable.revisionNumber })
           .from(cmsRevisionsTable)
           .where(eq(cmsRevisionsTable.editionId, edition.id))
           .orderBy(desc(cmsRevisionsTable.revisionNumber))
           .limit(1);
-        const copiedPayload = copyPublishedCasePayload(replacementValidation.data);
+        const copiedPayload = mergePublishedCaseVisualPayload(
+          publishedPayload as Record<string, unknown>,
+          replacementValidation.data as Record<string, unknown>,
+          targetMediaId,
+        );
+        const mergedValidation = validateCmsSnapshot("case-study", copiedPayload, "publish");
+        if (!mergedValidation.success) {
+          throw new Error(`${operation.externalId}: merged visual refresh payload failed publication validation.`);
+        }
         const [newRevision] = await tx.insert(cmsRevisionsTable).values({
           editionId: edition.id,
           revisionNumber: (latestRevision?.revisionNumber ?? 0) + 1,
           payloadVersion: publishedRevision!.payloadVersion,
-          payload: copiedPayload,
-          contentDigest: resultDigest(copiedPayload),
+          payload: mergedValidation.data,
+          contentDigest: resultDigest(mergedValidation.data),
           workflowState: "approved",
           createdByUserId: serviceAccount.id,
           approvedByUserId: serviceAccount.id,
           approvedAt: new Date(),
           reason: "Approved case-study narrative and governed visual refresh; prior revisions preserved.",
         }).returning({ id: cmsRevisionsTable.id });
-        if (!newRevision || !targetVersion || !mediaId) throw new Error(`${operation.externalId}: refresh revision could not be created.`);
+        if (!newRevision || !targetVersion || !targetMediaId) throw new Error(`${operation.externalId}: refresh revision could not be created.`);
         await tx.insert(cmsMediaReferencesTable).values({
-          assetId: mediaId,
+          assetId: targetMediaId,
           mediaVersionId: targetVersion.id,
           documentId: document.id,
           fieldPath: `revision:${newRevision.id}`,
@@ -829,11 +973,18 @@ async function applyDatabase(
         }
         if (receipt) {
           if (!canRecoverPreservedEducation && receipt.requestDigest !== operation.requestDigest) {
-            console.error(`Preserving previously imported document for ${operation.externalId}; the inventory digest changed.`);
-            replayed++;
-            continue;
+            if (operation.kind === "case-study"
+              && operation.idempotencyKey.startsWith("cms-case-study-baseline-v2:")) {
+              // The v2 baseline digest covers editor-owned narrative fields.
+              // Reconcile its immutable visual pin below instead of treating a
+              // legitimate editor revision as a receipt conflict.
+            } else {
+              console.error(`Preserving previously imported document for ${operation.externalId}; the inventory digest changed.`);
+              replayed++;
+              continue;
+            }
           }
-          if (!canRecoverPreservedEducation) {
+          if (!canRecoverPreservedEducation && receipt.requestDigest === operation.requestDigest) {
             replayed++;
             continue;
           }
@@ -858,27 +1009,95 @@ async function applyDatabase(
             }
             const [publishedRevision] = await tx.select({
               id: cmsRevisionsTable.id,
-              contentDigest: cmsRevisionsTable.contentDigest,
+              payload: cmsRevisionsTable.payload,
+              workflowState: cmsRevisionsTable.workflowState,
             }).from(cmsRevisionsTable).where(eq(cmsRevisionsTable.id, edition.publishedRevisionId));
-            if (!publishedRevision || publishedRevision.contentDigest !== resultDigest(readiness.data)) {
-              throw new Error(`${operation.externalId}: governed narrative replacement was not published with its visual.`);
+            const publishedValidation = publishedRevision
+              ? validateCmsSnapshot("case-study", publishedRevision.payload, "publish")
+              : null;
+            const targetMediaId = operation.mediaPaths.length === 1
+              ? mediaByPath.get(operation.mediaPaths[0])
+              : undefined;
+            const expectedMediaOperation = operation.mediaPaths.length === 1
+              ? mediaOperations.find((item) =>
+                item.publicPath === operation.mediaPaths[0] && item.cmsOwnership === "cms-candidate"
+              )
+              : undefined;
+            const [targetVersion] = targetMediaId ? await tx.select({
+              id: cmsMediaVersionsTable.id,
+              assetId: cmsMediaVersionsTable.assetId,
+              checksum: cmsMediaVersionsTable.checksum,
+              storageKey: cmsMediaVersionsTable.storageKey,
+            }).from(cmsMediaVersionsTable).where(and(
+              eq(cmsMediaVersionsTable.assetId, targetMediaId),
+              eq(cmsMediaVersionsTable.checksum, expectedMediaOperation?.checksum ?? ""),
+            )).orderBy(desc(cmsMediaVersionsTable.versionNumber)).limit(1) : [];
+            const references = publishedRevision ? await tx.select({
+              assetId: cmsMediaReferencesTable.assetId,
+              mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
+            }).from(cmsMediaReferencesTable).where(and(
+              eq(cmsMediaReferencesTable.documentId, conflict.id),
+              eq(cmsMediaReferencesTable.fieldPath, `revision:${publishedRevision.id}`),
+            )) : [];
+            const [pinnedVersion] = references.length === 1 && references[0].mediaVersionId
+              ? await tx.select({
+                id: cmsMediaVersionsTable.id,
+                assetId: cmsMediaVersionsTable.assetId,
+                checksum: cmsMediaVersionsTable.checksum,
+                storageKey: cmsMediaVersionsTable.storageKey,
+              }).from(cmsMediaVersionsTable)
+                .where(eq(cmsMediaVersionsTable.id, references[0].mediaVersionId))
+              : [];
+            if (
+              !publishedRevision
+              || publishedRevision.workflowState !== "approved"
+              || !publishedValidation?.success
+              || !targetMediaId
+              || !expectedMediaOperation
+              || !targetVersion
+              || !hasExpectedCaseVisual(
+                publishedValidation.data as Record<string, unknown>,
+                readiness.data as Record<string, unknown>,
+              )
+              || !hasExactCasePublicationPin({
+                expectedAssetId: targetMediaId,
+                expectedMediaVersionId: String(targetVersion.id),
+                expectedChecksum: expectedMediaOperation.checksum,
+                mediaIds: publishedValidation.data.mediaIds,
+                references: references.map((reference) => ({
+                  assetId: String(reference.assetId),
+                  mediaVersionId: reference.mediaVersionId ? String(reference.mediaVersionId) : null,
+                })),
+                pinnedVersion: pinnedVersion ? {
+                  id: String(pinnedVersion.id),
+                  assetId: String(pinnedVersion.assetId),
+                  checksum: pinnedVersion.checksum,
+                  storageKey: pinnedVersion.storageKey,
+                } : null,
+              })
+            ) {
+              throw new Error(`${operation.externalId}: governed visual replacement conflicts with the published narrative or immutable pin.`);
             }
-            await tx.insert(cmsOperationReceiptsTable).values({
-              idempotencyKey: operation.idempotencyKey,
-              operation: "cms.inventory.case-study-summary-published",
-              subjectId: String(conflict.id),
-              requestDigest: operation.requestDigest,
-              resultDigest: resultDigest({ documentId: conflict.id, governedReplacement: true }),
-            });
-            await tx.insert(cmsAuditEventsTable).values({
-              actorUserId: serviceAccount.id,
-              actorLabel: "cms-inventory-migration",
-              action: "cms.inventory.case-study-summary-published",
-              targetType: "case-study",
-              targetId: String(conflict.id),
-              requestId: operation.idempotencyKey,
-              metadata: { sourceExternalId: operation.externalId, governedReplacement: true },
-            });
+            if (!receipt) {
+              await tx.insert(cmsOperationReceiptsTable).values({
+                idempotencyKey: operation.idempotencyKey,
+                operation: "cms.inventory.case-study-summary-published",
+                subjectId: String(conflict.id),
+                requestDigest: operation.requestDigest,
+                resultDigest: resultDigest({ documentId: conflict.id, governedReplacement: true }),
+              });
+              await tx.insert(cmsAuditEventsTable).values({
+                actorUserId: serviceAccount.id,
+                actorLabel: "cms-inventory-migration",
+                action: "cms.inventory.case-study-summary-published",
+                targetType: "case-study",
+                targetId: String(conflict.id),
+                requestId: operation.idempotencyKey,
+                metadata: { sourceExternalId: operation.externalId, governedReplacement: true },
+              });
+            } else if (receipt.operation !== "cms.inventory.case-study-summary-published") {
+              throw new Error(`${operation.externalId}: governed baseline receipt has an incompatible operation.`);
+            }
             replayed++;
             continue;
           }

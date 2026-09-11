@@ -1,30 +1,13 @@
 import React from "react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { ArrowRight, ChevronDown, ExternalLink } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import type { IndustryContent } from "@/content/industries";
-import { IndustryEvidenceRail, type PublicCaseStudy } from "@/components/work/case-study-ui";
 import { resolveCmsMedia, type CmsRecord } from "@/lib/cms";
 import type { BankingPov, CmsMediaReferenceContract, IndustryContent as CmsIndustryContent } from "@workspace/api-zod";
 
 type BankingView = IndustryContent & Partial<Pick<CmsRecord<CmsIndustryContent>, "media" | "heroMedia" | "heroMediaId">>;
 type StartingPoint = BankingPov["startingPoints"][number];
-
-function useSelectedWorkHashTarget(caseCount: number) {
-  React.useEffect(() => {
-    if (typeof window === "undefined" || window.location.hash !== "#selected-work") return;
-    const frame = window.requestAnimationFrame(() => {
-      const target = document.getElementById("selected-work");
-      if (!target || window.location.hash !== "#selected-work") return;
-      target.focus({ preventScroll: true });
-      target.scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-        block: "start",
-      });
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [caseCount]);
-}
 
 function useFineHover() {
   const [canHover, setCanHover] = React.useState(false);
@@ -38,8 +21,9 @@ function useFineHover() {
   return canHover;
 }
 
-export function BankingEditorial({ view, cases = [] }: { view: BankingView; cases?: PublicCaseStudy[] }) {
-  useSelectedWorkHashTarget(cases.length);
+export function BankingEditorial({ view }: { view: BankingView }) {
+  const search = useSearch();
+  const consolidatedCaseStudiesHref = `/industries${search ? `?${search}` : ""}#selected-work`;
   const pov = view.bankingPov;
   if (!pov) return null;
 
@@ -106,7 +90,7 @@ export function BankingEditorial({ view, cases = [] }: { view: BankingView; case
           <p>{pov.hero.body}</p>
           <nav className="b-hero-anchors" aria-label="Banking page sections">
             <a href="#starting-points">{pov.hero.startingPointsAnchorLabel} <ChevronDown size={14} /></a>
-            <a href="#selected-work">{pov.hero.selectedWorkAnchorLabel} <ChevronDown size={14} /></a>
+            <Link href={consolidatedCaseStudiesHref}>{pov.hero.selectedWorkAnchorLabel} <ChevronDown size={14} /></Link>
           </nav>
         </div>
         <figure className="b-hero-image">
@@ -137,8 +121,6 @@ export function BankingEditorial({ view, cases = [] }: { view: BankingView; case
       <section className="b-voice" aria-labelledby="banking-voice-title">
         <div className="b-voice-grid"><div className="b-voice-intro"><div className="b-kicker">Deep dive</div><h2 id="banking-voice-title" className="b-section-title">Seven voice journeys.</h2><p>{pov.voiceBanking.cogniriseContribution}</p><aside className="b-partner-note"><strong>{pov.voiceBanking.platform.name}</strong><p>{pov.voiceBanking.platform.contribution}</p><small>{pov.voiceBanking.platform.qualification}</small><a href={pov.voiceBanking.platform.href} target="_blank" rel="noreferrer">Visit platform <ExternalLink size={12} /></a></aside></div><div className="b-voice-list">{pov.voiceBanking.journeys.map((journey) => <article className="b-voice-item" key={journey.id}><div><h4>{journey.title}</h4><p>{journey.scope}</p></div><div className="b-voice-meta"><p><strong>Acting boundary:</strong> {journey.controlBoundary}</p><p><strong>Measures:</strong> {journey.measures.join(", ")}</p></div></article>)}</div></div>
       </section>
-
-      <div id="selected-work" tabIndex={-1}><IndustryEvidenceRail cases={cases} industrySlug={view.slug} /></div>
 
       <section className="b-readiness" aria-labelledby="banking-readiness-title">
         <div className="b-readiness-copy"><div className="b-kicker">{pov.productionReadiness.eyebrow}</div><h2 id="banking-readiness-title" className="b-section-title">{pov.productionReadiness.heading}</h2><p>{pov.productionReadiness.body}</p><ul className="b-readiness-practices">{pov.productionReadiness.practices.map((practice) => <li key={practice}>{practice}</li>)}</ul><div className="b-delivery"><h3>Delivery path with proof.</h3><div className="b-delivery-grid">{pov.deliveryPath.stages.map((stage) => <article className="b-delivery-stage" key={stage.stage}><strong>{stage.stage}</strong><p><b>Owner:</b> {stage.owner}</p><p>{stage.outcome}</p></article>)}</div><ul className="b-readiness-practices">{pov.deliveryPath.practices.map((practice) => <li key={practice}>{practice}</li>)}</ul></div></div>

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-11T10:19:17.801Z",
-  "manifestDigest": "382007f5c41aa430f6db2a2541bf2979e36ba0f4e5ea8e43ec5c56d1d03973ec",
-  "dryRun": true,
-  "mode": "payload-only",
-  "note": "No storage or database call was made. Use --apply-db --target=development to import governed drafts.",
+  "generatedAt": "2026-09-11T12:59:23.436Z",
+  "manifestDigest": "0a8c63c81ed24b289e6a5768c642cfec9b5cd816c8765f563acd53a7c725961c",
+  "dryRun": false,
+  "mode": "development-db-apply",
+  "note": "Applied the governed UAE/English inventory. Eligible case-study summaries publish only after evidence, source review, rights, accessibility, durable-storage, and immutable-version gates pass; all other content retains its governed state.",
   "operations": [
     {
       "externalId": "person:8a0e78e95b87db8e0acd",
@@ -1132,21 +1132,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Batch recipe lookup → Line 04 / changeover → Verified 18 / 22.",
-            "altText": "Cognirise Pulse workflow for making industrial knowledge self-service, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A bilingual assistant searches the approved technical corpus, returns a sourced answer and routes uncertain questions to a process expert. The visual follows Batch recipe lookup, Line 04 / changeover, Verified 18 / 22 through a human or policy checkpoint to the resulting capability.",
+            "caption": "Controlled industrial knowledge in motion.",
+            "altText": "Two process engineers review a luminous knowledge stack beside an industrial production line.",
+            "textEquivalent": "A process engineer reviews a controlled knowledge collection while a colleague confirms its release to an operating production line.",
             "template": "knowledge-assistant",
             "fixtureLabels": [
-              "Batch recipe lookup",
-              "Line 04 / changeover",
-              "Verified 18 / 22"
+              "Process expertise moving from a controlled knowledge stack to a factory line.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Reduce dependence on a small group of process experts for routine technical questions.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -1196,10 +1196,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/01-making-industrial-knowledge-self-service.png"
+        "/images/cognirise/cases/cinematic/01-industrial-knowledge.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-01",
-      "requestDigest": "b0397cd32d73f98d8b43bda88c47d63a7d5b7dd7b6da903b24c366b7de8fb076"
+      "requestDigest": "c3f2be03234e5e8c3f330f1b253eef3239d407354e2ff117ac8d36b4683c5dcf"
     },
     {
       "externalId": "case-study:slide-02",
@@ -1225,21 +1225,21 @@
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Demand pulse → Cold-chain exceptions → Forecast horizon / 14d.",
-            "altText": "Cognirise Pulse workflow for connecting pharmacy operations signals, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A shared analytics flow joins service language, anomaly, demand and inventory signals, then sends exceptions to an accountable reviewer. The visual follows Demand pulse, Cold-chain exceptions, Forecast horizon / 14d through a human or policy checkpoint to the resulting capability.",
+            "caption": "Connected pharmacy operations signals.",
+            "altText": "A pharmacy operations specialist checks a glowing control station between medicine storage and a conveyor.",
+            "textEquivalent": "Medicine storage, inventory trays and an operations conveyor connect through one illuminated exception point checked by a specialist.",
             "template": "analytics-dashboard",
             "fixtureLabels": [
-              "Demand pulse",
-              "Cold-chain exceptions",
-              "Forecast horizon / 14d"
+              "Cold-chain and inventory signals converging on accountable pharmacy operations.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Connect service, sales and inventory signals that were reviewed in separate workflows.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -1289,10 +1289,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/02-connecting-pharmacy-operations-signals.png"
+        "/images/cognirise/cases/cinematic/02-pharmacy-signals.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-02",
-      "requestDigest": "56739f1cfe989ace8d99bfafb2e7aaa4780f97f7462c72528f742c7f6c3da793"
+      "requestDigest": "8eb241716e2b5806936ea34de69e84cf9027ac0fa6c9bdad5635266b5b855e95"
     },
     {
       "externalId": "case-study:slide-03",
@@ -1318,21 +1318,21 @@
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Visit debrief → Territory queue → Manager review.",
-            "altText": "Cognirise Pulse workflow for coaching a distributed field team, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A field-coaching platform captures visit notes, structures feedback and presents manager review queues before guidance is released. The visual follows Visit debrief, Territory queue, Manager review through a human or policy checkpoint to the resulting capability.",
+            "caption": "A traceable route from field evidence to coaching.",
+            "altText": "Two field-team colleagues review physical materials at a table crossed by a violet light path.",
+            "textEquivalent": "A field representative and manager turn physical visit materials into a visible feedback route at a shared review table.",
             "template": "workflow-console",
             "fixtureLabels": [
-              "Visit debrief",
-              "Territory queue",
-              "Manager review"
+              "Visit evidence becoming a manager-reviewed coaching conversation.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Create a consistent feedback loop for a distributed field organization.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -1382,10 +1382,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/03-coaching-a-distributed-field-team.png"
+        "/images/cognirise/cases/cinematic/03-field-coaching.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-03",
-      "requestDigest": "7aee9298f2232d8f677cb7da5c5f1bbc0e1dd1a12e81fc141d123a08e976a6a6"
+      "requestDigest": "c18b4a15fab740eff0a8f166d7fc074f72be02e759deaf9f42cd620743447297"
     },
     {
       "externalId": "case-study:slide-04",
@@ -1411,21 +1411,21 @@
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Curated audio → Stock at hand → Room profile.",
-            "altText": "Cognirise Pulse workflow for taking a specialist retailer online, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "The storefront connects catalogue and stock data with reviews, ordering and recommendations bounded to available products. The visual follows Curated audio, Stock at hand, Room profile through a human or policy checkpoint to the resulting capability.",
+            "caption": "Specialist retail, from product discovery to handoff.",
+            "altText": "A shopkeeper checks a product in a specialist retail space as a courier collects a parcel.",
+            "textEquivalent": "A specialist shopkeeper verifies a product while a courier receives a prepared parcel, connecting discovery and fulfilment.",
             "template": "commerce-experience",
             "fixtureLabels": [
-              "Curated audio",
-              "Stock at hand",
-              "Room profile"
+              "A specialist product journey joining tactile discovery, stock and fulfilment.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Create a digital storefront capable of extending demand beyond a physical location.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -1475,10 +1475,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/04-taking-a-specialist-retailer-online.png"
+        "/images/cognirise/cases/cinematic/04-specialist-retail.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-04",
-      "requestDigest": "ce41e6419822b276c9f3c518c1bab493b28b24d9219bdfb34be69dda956acca6"
+      "requestDigest": "8296887261fd121537d26cfc4837010f0e5ecd368bf3e50dd368f1c627f3b448"
     },
     {
       "externalId": "case-study:slide-05",
@@ -1506,21 +1506,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Issuer filings → Price watchlist → Source confidence.",
-            "altText": "Cognirise Pulse workflow for making market information searchable, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A collection service gathers listings, prices and issuer disclosures, indexes their source and lets analysts search with citations. The visual follows Issuer filings, Price watchlist, Source confidence through a human or policy checkpoint to the resulting capability.",
+            "caption": "Market research with source traceability.",
+            "altText": "An analyst holds a source dossier in a research room with a flowing violet evidence path.",
+            "textEquivalent": "An analyst examines a sourced dossier as an illuminated path connects the research archive to the review desk.",
             "template": "knowledge-assistant",
             "fixtureLabels": [
-              "Issuer filings",
-              "Price watchlist",
-              "Source confidence"
+              "An analyst tracing a market question back to a physical source dossier.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Replace fragmented manual market-data collection with a searchable corpus.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -1570,10 +1570,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/05-making-market-information-searchable.png"
+        "/images/cognirise/cases/cinematic/05-market-search.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-05",
-      "requestDigest": "1fd1aaf97b643a78907ac16f95d99d62984a8a32f2ec922e45dcec48382f774d"
+      "requestDigest": "5c1e0a445b515943f1d2fd6a06d09d454ccc368fa84dda38ee0eb9db5ef77109"
     },
     {
       "externalId": "case-study:slide-06",
@@ -1601,21 +1601,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Document intake → Schedule B checks → Awaiting sign-off.",
-            "altText": "Cognirise Pulse workflow for automating recurring tax preparation, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A workflow receives client documents, checks required fields and calculations, and holds the return for practitioner sign-off. The visual follows Document intake, Schedule B checks, Awaiting sign-off through a human or policy checkpoint to the resulting capability.",
+            "caption": "Tax preparation held for practitioner sign-off.",
+            "altText": "A practitioner reviews a document folder beside ordered illuminated validation trays.",
+            "textEquivalent": "A practitioner reviews a final folder after materials have passed through a series of controlled preparation trays.",
             "template": "workflow-console",
             "fixtureLabels": [
-              "Document intake",
-              "Schedule B checks",
-              "Awaiting sign-off"
+              "A practitioner reviewing an orderly, exception-aware preparation queue.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Reduce repetitive preparation and document-chasing work in recurring tax workflows.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -1665,10 +1665,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/06-automating-recurring-tax-preparation.png"
+        "/images/cognirise/cases/cinematic/06-tax-preparation.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-06",
-      "requestDigest": "b99d163a70a9b5046625ac132b130969ca624979913039dc9064e6834f5df242"
+      "requestDigest": "ef961ec5073f6628a7b07f6f74255ed6f01ff2ec6c1ac969ee0d33aa66f4a2b4"
     },
     {
       "externalId": "case-study:slide-07",
@@ -1694,21 +1694,21 @@
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Delegation ledger → Policy boundary → Evidence hash.",
-            "altText": "Cognirise Pulse workflow for creating accountable agent delegation, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A trust fabric issues bounded mandates, enforces policy and records signed evidence for every delegated action. The visual follows Delegation ledger, Policy boundary, Evidence hash through a human or policy checkpoint to the resulting capability.",
+            "caption": "Delegation remains bounded and inspectable.",
+            "altText": "An operator holds a mandate token beside a row of transparent policy gates linked by violet light.",
+            "textEquivalent": "A single delegation path passes through successive physical policy gates before reaching the operator holding the mandate.",
             "template": "governance-console",
             "fixtureLabels": [
-              "Delegation ledger",
-              "Policy boundary",
-              "Evidence hash"
+              "Bounded agent authority travelling through visible policy gates to a human operator.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Make delegated agent authority, budgets and evidence inspectable.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -1758,10 +1758,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/07-creating-accountable-agent-delegation.png"
+        "/images/cognirise/cases/cinematic/07-agent-delegation.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-07",
-      "requestDigest": "1840dd05a4917aac8e03b5997a5a1a54adc2fbbbe1d38944fd5168b5eef2889a"
+      "requestDigest": "3df32082975a53b6baee2465b8398e25c47cafca6ad8a73e5b6b09cb28bcef3d"
     },
     {
       "externalId": "case-study:slide-08",
@@ -1789,21 +1789,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Fee schedule → Approval trail → Effective 01 / 07.",
-            "altText": "Cognirise Pulse workflow for governing a single fee schedule, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "An authenticated application publishes the effective fee schedule, records changes and restricts updates to approved owners. The visual follows Fee schedule, Approval trail, Effective 01 / 07 through a human or policy checkpoint to the resulting capability.",
+            "caption": "A maintained source for governed fee information.",
+            "altText": "A steward turns a physical approval wheel beside a large blank illuminated archival panel.",
+            "textEquivalent": "A steward uses a physical control beside a protected archival panel, conveying that one maintained source is owner-governed.",
             "template": "workflow-console",
             "fixtureLabels": [
-              "Fee schedule",
-              "Approval trail",
-              "Effective 01 / 07"
+              "One safeguarded fee source with a visible owner-controlled change mechanism.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Replace emailed fee-schedule copies with one maintained source.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -1853,10 +1853,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/08-governing-a-single-fee-schedule.png"
+        "/images/cognirise/cases/cinematic/08-fee-schedule.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-08",
-      "requestDigest": "724e41297480d68c437ae85980dc8209f19be17dc231847c9bdcaa9864fa5569"
+      "requestDigest": "6738234908d95a95a11ca2f196cd3765c06b197e401ef3f36e06e874e5407ee4"
     },
     {
       "externalId": "case-study:slide-09",
@@ -1884,21 +1884,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Supplier factors → Plant energy → Declaration draft.",
-            "altText": "Cognirise Pulse workflow for preparing embedded-emissions data, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A data pipeline validates supplier, production and energy inputs, calculates product-level emissions and routes declarations for review. The visual follows Supplier factors, Plant energy, Declaration draft through a human or policy checkpoint to the resulting capability.",
+            "caption": "Embedded-emissions lineage from inputs to review.",
+            "altText": "A sustainability reviewer observes materials, factory equipment and illuminated paths through a tall review gate.",
+            "textEquivalent": "Material, energy and supplier forms converge through a review gate where a sustainability specialist checks their lineage.",
             "template": "analytics-dashboard",
             "fixtureLabels": [
-              "Supplier factors",
-              "Plant energy",
-              "Declaration draft"
+              "Materials, energy and suppliers joined into a reviewable product lineage.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Connect production, supplier and energy information for embedded-emissions reporting.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -1948,10 +1948,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/09-preparing-embedded-emissions-data.png"
+        "/images/cognirise/cases/cinematic/09-embedded-emissions.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-09",
-      "requestDigest": "146e169f602ddee2d2a43700753282af925abcdfcab784e2e3f7bc2ca406e1eb"
+      "requestDigest": "b028e088ff99829c191c1d3dc6996239620f4e8334f0eb8ff55219da2a69e736"
     },
     {
       "externalId": "case-study:slide-10",
@@ -1979,21 +1979,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Offer rules → Eligibility path → Human checkpoint.",
-            "altText": "Cognirise Pulse workflow for accelerating governed vehicle offers, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "An orchestrated workflow combines product rules, retrieved evidence and decision logic, with exceptions held for human approval. The visual follows Offer rules, Eligibility path, Human checkpoint through a human or policy checkpoint to the resulting capability.",
+            "caption": "Vehicle offers routed through accountable controls.",
+            "altText": "An underwriter moves geometric blocks through a glowing gate beside an unbranded vehicle model.",
+            "textEquivalent": "An underwriter guides abstract product-rule blocks through a coral-lit exception gate before they reach a vehicle offer model.",
             "template": "workflow-console",
             "fixtureLabels": [
-              "Offer rules",
-              "Eligibility path",
-              "Human checkpoint"
+              "Rules-based vehicle offers with a physical exception gate and underwriter oversight.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Shorten offer preparation while retaining rules-based traceability.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -2043,10 +2043,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/10-accelerating-governed-vehicle-offers.png"
+        "/images/cognirise/cases/cinematic/10-vehicle-offers.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-10",
-      "requestDigest": "17528898b6ad4970933175f95f55eebcb98fb890abeaa0a5a7e2799713e0f54e"
+      "requestDigest": "a5befca8a606e95c044f826f61ad57c47020d070084ef1625a493d8dace901c0"
     },
     {
       "externalId": "case-study:slide-11",
@@ -2074,21 +2074,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Product library → General question → Source citation.",
-            "altText": "Cognirise Pulse workflow for answering general investment questions, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A bilingual assistant answers from governed product documents, cites its sources and redirects advice requests to qualified people. The visual follows Product library, General question, Source citation through a human or policy checkpoint to the resulting capability.",
+            "caption": "A clear human boundary around investment guidance.",
+            "altText": "An adviser and visitor meet beside a curated product library in a calm information salon.",
+            "textEquivalent": "A visitor receives a human handoff in a product-information library, separating general information from personal advice.",
             "template": "knowledge-assistant",
             "fixtureLabels": [
-              "Product library",
-              "General question",
-              "Source citation"
+              "General information stays in the product library while advice goes to people.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Provide consistent answers to general product questions while reserving advice for people.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -2138,10 +2138,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/11-answering-general-investment-questions.png"
+        "/images/cognirise/cases/cinematic/11-general-investment.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-11",
-      "requestDigest": "ef29fb1a4ac745cc36a2aef7d2d5a3858905638806045cdcfce83d193199b576"
+      "requestDigest": "90052b021651fbc4a5e5164893de2889ac3fd088f38c39e50f9c5eca93b5b7d6"
     },
     {
       "externalId": "case-study:slide-12",
@@ -2167,21 +2167,21 @@
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Knowledge spaces → Agent library → Tenant controls.",
-            "altText": "Cognirise Pulse workflow for creating a governed ai workspace, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A multilingual workspace combines chat, controlled knowledge collections and task agents behind tenant identity and access policy. The visual follows Knowledge spaces, Agent library, Tenant controls through a human or policy checkpoint to the resulting capability.",
+            "caption": "A governed workspace for organizational knowledge.",
+            "altText": "An administrator reviews illuminated knowledge rooms and identity arches in a shared workspace.",
+            "textEquivalent": "Private knowledge rooms connect through visible identity arches while an administrator oversees permissions from a central table.",
             "template": "knowledge-assistant",
             "fixtureLabels": [
-              "Knowledge spaces",
-              "Agent library",
-              "Tenant controls"
+              "Private knowledge spaces and controlled agent pathways behind tenant boundaries.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Give staff a tenant-controlled alternative to public AI tools for document work.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -2231,10 +2231,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/12-creating-a-governed-ai-workspace.png"
+        "/images/cognirise/cases/cinematic/12-governed-ai-workspace.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-12",
-      "requestDigest": "5888d2292d94bd103a9331184cd165b92b4d6ba7ff452d397a30d74c568637a6"
+      "requestDigest": "100e3b99c7b1997c960a36fe0917eb005cabe2cfbe0d77792526e149460126f5"
     },
     {
       "externalId": "case-study:slide-13",
@@ -2262,21 +2262,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Tender review → Workstream map → Decision gate.",
-            "altText": "Cognirise Pulse workflow for prototyping agentic public services, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A coordinated agent flow analyzes tender material, maps workstreams and pauses at defined human decision gates. The visual follows Tender review, Workstream map, Decision gate through a human or policy checkpoint to the resulting capability.",
+            "caption": "Public-service workflows pause for accountable decisions.",
+            "altText": "A raised hand pauses illuminated routes across a detailed civic infrastructure model.",
+            "textEquivalent": "Illuminated workstreams travel across bridges and civic infrastructure until an official pauses them at a decision point.",
             "template": "operations-console",
             "fixtureLabels": [
-              "Tender review",
-              "Workstream map",
-              "Decision gate"
+              "Public-service workstreams progressing across a civic model to a human decision gate.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Demonstrate how multiple governed agents could support infrastructure workflows.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -2326,10 +2326,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/13-prototyping-agentic-public-services.png"
+        "/images/cognirise/cases/cinematic/13-public-services.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-13",
-      "requestDigest": "5b331e528f991581ecb5654de99882f3bd605883b25c661bc3a7c3b4bcdefd95"
+      "requestDigest": "13068883a60f8b548219103e3c179b0656645d6ba4a1816fe9d26dfa525b3253"
     },
     {
       "externalId": "case-study:slide-14",
@@ -2357,21 +2357,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Call transcript → Gate 02 / suitability → Escalation queue.",
-            "altText": "Cognirise Pulse workflow for checking calls through risk gates, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A compliance flow transcribes calls, applies four suitability and conduct gates, and sends flagged passages to reviewers. The visual follows Call transcript, Gate 02 / suitability, Escalation queue through a human or policy checkpoint to the resulting capability.",
+            "caption": "Call review through visible risk gates.",
+            "altText": "A headset-wearing reviewer presses a coral control beside four translucent gates crossed by sound-wave light.",
+            "textEquivalent": "A call signal crosses four physical gates in sequence before a reviewer deliberately activates the final escalation control.",
             "template": "governance-console",
             "fixtureLabels": [
-              "Call transcript",
-              "Gate 02 / suitability",
-              "Escalation queue"
+              "Call signals passing through successive suitability and conduct gates to a reviewer.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Extend call review beyond small manual samples while preserving an audit queue.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -2421,10 +2421,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/14-checking-calls-through-risk-gates.png"
+        "/images/cognirise/cases/cinematic/14-call-risk-gates.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-14",
-      "requestDigest": "c04ffbdd0f035bf97e2ab77d65031260cbd0e29d5bfeda7444a632863b48bad0"
+      "requestDigest": "cba74adc5e1765684c49a2508e064a9886e907771f0536af0379f3dd7703c6f5"
     },
     {
       "externalId": "case-study:slide-15",
@@ -2452,21 +2452,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Incident bridge → Backup estate → Approval required.",
-            "altText": "Cognirise Pulse workflow for orchestrating data-centre incidents, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "An operations flow connects alerts to topology and runbooks, proposes recovery steps and pauses disruptive actions for approval. The visual follows Incident bridge, Backup estate, Approval required through a human or policy checkpoint to the resulting capability.",
+            "caption": "Data-centre response with approval in the loop.",
+            "altText": "An incident engineer stands at a control station in a blue data-centre corridor under a coral alert path.",
+            "textEquivalent": "A coral incident path travels through the data-centre structure to an engineer who authorizes a controlled intervention.",
             "template": "operations-console",
             "fixtureLabels": [
-              "Incident bridge",
-              "Backup estate",
-              "Approval required"
+              "An incident signal moving through topology to a controlled recovery action.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Make infrastructure incident diagnosis, approvals and evidence consistent.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -2516,10 +2516,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/15-orchestrating-data-centre-incidents.png"
+        "/images/cognirise/cases/cinematic/15-data-centre-incidents.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-15",
-      "requestDigest": "9777c671bc68481b77f15608b70b1e8615babac6bdaf05edabd98e5f36eec230"
+      "requestDigest": "8f2223fe4396ae258ce85302294598957f41c1ed6336aa0e82eafbbc5b45e22a"
     },
     {
       "externalId": "case-study:slide-16",
@@ -2547,21 +2547,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Asset register → Reuse match → Evidence packet.",
-            "altText": "Cognirise Pulse workflow for finding a second life for hotel assets, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A circularity portal registers retired assets, matches eligible reuse routes and preserves evidence for each handoff. The visual follows Asset register, Reuse match, Evidence packet through a human or policy checkpoint to the resulting capability.",
+            "caption": "Hospitality assets prepared for a second life.",
+            "altText": "A property manager hands over a token beside a chair, linens and a hospitality service cart.",
+            "textEquivalent": "A chair and linen cart sit in a service yard while a property manager verifies the handoff that begins a reuse route.",
             "template": "analytics-dashboard",
             "fixtureLabels": [
-              "Asset register",
-              "Reuse match",
-              "Evidence packet"
+              "Retired hospitality assets travelling to accountable reuse routes.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Track retired hospitality assets and routes to reuse, donation or recycling.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -2611,10 +2611,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/16-finding-a-second-life-for-hotel-assets.png"
+        "/images/cognirise/cases/cinematic/16-hotel-asset-reuse.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-16",
-      "requestDigest": "f8b0cab9f61a588d3982e9d68e89ce9b19ccc96d668836614bb306bb005fbb24"
+      "requestDigest": "e84bcff61fa2d97f0c17d4dcf114a39110628b2841f9ccc229d1b6797ce85dae"
     },
     {
       "externalId": "case-study:slide-17",
@@ -2640,21 +2640,21 @@
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Encrypted vault → Client-side key → Benchmark run.",
-            "altText": "Cognirise Pulse workflow for proving browser-side encrypted storage, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A browser-encrypted vault keeps encryption keys client-side, applies identity controls and records distributed storage checks. The visual follows Encrypted vault, Client-side key, Benchmark run through a human or policy checkpoint to the resulting capability.",
+            "caption": "Client-side control around encrypted storage.",
+            "altText": "A person holds a small glowing key outside a tall translucent vault in an architectural security chamber.",
+            "textEquivalent": "The key remains in the user's hand outside a sealed vault, conveying storage whose contents cannot be opened by the service.",
             "template": "governance-console",
             "fixtureLabels": [
-              "Encrypted vault",
-              "Client-side key",
-              "Benchmark run"
+              "A client-held key outside a protected storage vault.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Keep sensitive file contents unreadable to the service operator.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -2704,10 +2704,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/17-proving-browser-side-encrypted-storage.png"
+        "/images/cognirise/cases/cinematic/17-browser-encrypted-storage.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-17",
-      "requestDigest": "be9dd134676e7ab477dd7ed87325680860a38a65c1ee0e7027cf6d1089383733"
+      "requestDigest": "731207272c227b251fc3638ce7eaea7d4083d37a4ff9025d3d8aa8f4bd55a471"
     },
     {
       "externalId": "case-study:slide-18",
@@ -2733,21 +2733,21 @@
           "relatedIndustries": [],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Acoustic profile → Listening zone → Suggested bundle.",
-            "altText": "Cognirise Pulse workflow for recommending room-aware audio systems, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A multilingual adviser reads room characteristics and preferences, checks current catalogue constraints and presents primary and alternative systems. The visual follows Acoustic profile, Listening zone, Suggested bundle through a human or policy checkpoint to the resulting capability.",
+            "caption": "Room-aware audio, made tangible.",
+            "altText": "An adviser and shopper compare a miniature listening-room model beside speakers and flowing sound waves.",
+            "textEquivalent": "A shopper and adviser use a physical model of the room while sound waves show how the recommendation responds to space.",
             "template": "commerce-experience",
             "fixtureLabels": [
-              "Acoustic profile",
-              "Listening zone",
-              "Suggested bundle"
+              "A listening room and physical room model used to explain a bounded recommendation.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Translate a room image and stated preferences into a bounded product recommendation.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -2797,10 +2797,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/18-recommending-room-aware-audio-systems.png"
+        "/images/cognirise/cases/cinematic/18-room-aware-audio.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-18",
-      "requestDigest": "b6a99c8f6e047adf46e3c2670f130e20a955c029f02e473eed2c6c34da404764"
+      "requestDigest": "685ab892cec27060c31ee07a5959f17f1825518efc835a38d4dcc708d2b46703"
     },
     {
       "externalId": "case-study:slide-19",
@@ -2828,21 +2828,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Exposure watch → Concentration band → Analyst review.",
-            "altText": "Cognirise Pulse workflow for monitoring portfolio early-warning signals, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A monitoring workspace combines portfolio exposures, disclosure changes and concentration bands, then queues material signals for analyst review. The visual follows Exposure watch, Concentration band, Analyst review through a human or policy checkpoint to the resulting capability.",
+            "caption": "Portfolio warning signals before the decision.",
+            "altText": "An analyst places a glowing coral block into a review tray among large abstract exposure forms.",
+            "textEquivalent": "An analyst removes a coral early-warning block from grouped exposure forms and places it in a dedicated review tray.",
             "template": "analytics-dashboard",
             "fixtureLabels": [
-              "Exposure watch",
-              "Concentration band",
-              "Analyst review"
+              "Early-warning exposure signals isolated for an analyst's human review.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Bring disclosures, concentration and early-warning signals into a human-gated review flow.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -2892,10 +2892,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/19-monitoring-portfolio-early-warning-signals.png"
+        "/images/cognirise/cases/cinematic/19-portfolio-warning.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-19",
-      "requestDigest": "14af1c22d8c72d06345ec311a6cb3e1a8b9764d3ab7ac82c5c1f644415ab43c4"
+      "requestDigest": "b0aff77de8cefc0227ad2cabf55768e6367d1ca01dea2a72021201498feebd61"
     },
     {
       "externalId": "case-study:slide-20",
@@ -2923,21 +2923,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Line telemetry → Fault signature → Work order gate.",
-            "altText": "Cognirise Pulse workflow for diagnosing production-line faults, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "A maintenance flow compares line telemetry with known fault signatures, retrieves the relevant procedure and requires approval before issuing work. The visual follows Line telemetry, Fault signature, Work order gate through a human or policy checkpoint to the resulting capability.",
+            "caption": "Production-fault response with operator approval.",
+            "altText": "A factory operator holds an approval token beside a beverage line and a violet machine-signal pulse.",
+            "textEquivalent": "A machine signal crosses a beverage line to an operator who holds the approval needed to issue maintenance work.",
             "template": "operations-console",
             "fixtureLabels": [
-              "Line telemetry",
-              "Fault signature",
-              "Work order gate"
+              "Machine telemetry linked to maintenance knowledge and an approved work order.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Connect telemetry and maintenance knowledge for governed fault response.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -2987,10 +2987,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/20-diagnosing-production-line-faults.png"
+        "/images/cognirise/cases/cinematic/20-production-faults.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-20",
-      "requestDigest": "155ed9397010709a559a5f516149a20bd43ec70f3bb754a8580bc54d91797df9"
+      "requestDigest": "35cc876939f8f43766e3693906d1d48f1242d790f9572edd6b2c35c023fa25c5"
     },
     {
       "externalId": "case-study:slide-21",
@@ -3018,21 +3018,21 @@
           ],
           "visual": {
             "kind": "illustrative-interface-reconstruction",
-            "caption": "Provision bridge → Exposure driver → Threshold alert.",
-            "altText": "Cognirise Pulse workflow for tracing provision movements earlier, showing inputs, processing, a control checkpoint and the resulting capability.",
-            "textEquivalent": "An authenticated monitoring view connects portfolio movements to exposure drivers and raises threshold alerts for finance review. The visual follows Provision bridge, Exposure driver, Threshold alert through a human or policy checkpoint to the resulting capability.",
+            "caption": "Provision movements surfaced before close.",
+            "altText": "A finance reviewer moves glowing violet blocks across a navy bridge toward a coral exception tray.",
+            "textEquivalent": "A finance reviewer follows abstract exposure blocks over a bridge while a coral threshold isolates one exception for review.",
             "template": "analytics-dashboard",
             "fixtureLabels": [
-              "Provision bridge",
-              "Exposure driver",
-              "Threshold alert"
+              "Exposure drivers moving across a bridge until a threshold routes an exception to review.",
+              "Human review",
+              "Controlled outcome"
             ]
           },
           "mandate": "Make provision movements and their exposure-level drivers visible before period end.",
           "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
           "constraints": [
             "Do not infer organization identity from this summary.",
-            "Interface labels and values are anonymized fixtures."
+            "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."
           ],
           "work": [
             {
@@ -3082,10 +3082,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/cases/21-tracing-provision-movements-earlier.png"
+        "/images/cognirise/cases/cinematic/21-provision-movements.jpg"
       ],
       "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-21",
-      "requestDigest": "ce7ff1cea84c98adc8fb65b0a15c0ceed4606ef2fc96c7d86c961f65bedf4def"
+      "requestDigest": "0ca02736b77aea086c5ebb27b209828cda9268821b4ed6aba06d6281aba46c7d"
     },
     {
       "externalId": "industry:b60f973e571d3059824d",
@@ -4920,14 +4920,14 @@
       "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:c0ed4904df64037b6051",
-      "idempotencyKey": "cms-media-binary-v1:asset:c0ed4904df64037b6051:df3faecb49f9d159b40aea1b9df48677a859e6a8df37c3d125ab244cbe51ccd0",
-      "filename": "01-making-industrial-knowledge-self-service.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/01-making-industrial-knowledge-self-service.png",
-      "publicPath": "/images/cognirise/cases/01-making-industrial-knowledge-self-service.png",
-      "checksum": "df3faecb49f9d159b40aea1b9df48677a859e6a8df37c3d125ab244cbe51ccd0",
-      "mimeType": "image/png",
-      "byteSize": 95174,
+      "externalId": "asset:3b30ec62a149240b9ccf",
+      "idempotencyKey": "cms-media-binary-v1:asset:3b30ec62a149240b9ccf:b961284318d5c2b737465d195b0ed366e4ec229daa7346a0624362c67f1fc36f",
+      "filename": "01-industrial-knowledge.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/01-industrial-knowledge.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/01-industrial-knowledge.jpg",
+      "checksum": "b961284318d5c2b737465d195b0ed366e4ec229daa7346a0624362c67f1fc36f",
+      "mimeType": "image/jpeg",
+      "byteSize": 290630,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -4935,38 +4935,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for making industrial knowledge self-service, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "Two process engineers review a luminous knowledge stack beside an industrial production line.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "a3ca2e112ed9e85ecdc6b044f681a2701f5344f034611ec380802885bf73603b",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:c0ed4904df64037b6051",
-          "idempotencyKey": "cms-media-inventory-v3:asset:c0ed4904df64037b6051",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:c0ed4904df64037b6051:df3faecb49f9d159b40aea1b9df48677a859e6a8df37c3d125ab244cbe51ccd0",
-          "requestDigest": "b8aeccf02d5d9b94048235e9b5cc3ffc27a499c211d3ce77d98ccfa555c9d067",
-          "acceptedRequestDigests": [
-            "b8aeccf02d5d9b94048235e9b5cc3ffc27a499c211d3ce77d98ccfa555c9d067"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "b8aeccf02d5d9b94048235e9b5cc3ffc27a499c211d3ce77d98ccfa555c9d067",
-        "529b2fe29a1483d6fb6f4bbb9db3b7b516095e642b2970bcf3bcfd4fd365e57b",
-        "83f2780d332ae52230b67c1e9c9b07872f53dc32690ad9b93d64fb21b7d10273"
-      ]
+      "requestDigest": "7f81de9a70fb064c36613dff4d647324463ce723fe2e69876695c881b34cc059",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:4d0809fd1e70d0ee5b73",
-      "idempotencyKey": "cms-media-binary-v1:asset:4d0809fd1e70d0ee5b73:22215d4005cbf0701590414bf59e373ee814a866c5bfcd96b8c36c4c06182809",
-      "filename": "02-connecting-pharmacy-operations-signals.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/02-connecting-pharmacy-operations-signals.png",
-      "publicPath": "/images/cognirise/cases/02-connecting-pharmacy-operations-signals.png",
-      "checksum": "22215d4005cbf0701590414bf59e373ee814a866c5bfcd96b8c36c4c06182809",
-      "mimeType": "image/png",
-      "byteSize": 81399,
+      "externalId": "asset:4ce4b5941810b6c235f1",
+      "idempotencyKey": "cms-media-binary-v1:asset:4ce4b5941810b6c235f1:e17d02ba685fb8f6fc93db8fe817dfe236c1d5a8f145b6cbdcc6a81732f5fdb8",
+      "filename": "02-pharmacy-signals.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/02-pharmacy-signals.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/02-pharmacy-signals.jpg",
+      "checksum": "e17d02ba685fb8f6fc93db8fe817dfe236c1d5a8f145b6cbdcc6a81732f5fdb8",
+      "mimeType": "image/jpeg",
+      "byteSize": 282570,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -4974,38 +4960,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for connecting pharmacy operations signals, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "A pharmacy operations specialist checks a glowing control station between medicine storage and a conveyor.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "1360df4bb1d61f82f061634c775ca0d175b2e25a6782a523590ef69c5a6bb76c",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:4d0809fd1e70d0ee5b73",
-          "idempotencyKey": "cms-media-inventory-v3:asset:4d0809fd1e70d0ee5b73",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:4d0809fd1e70d0ee5b73:22215d4005cbf0701590414bf59e373ee814a866c5bfcd96b8c36c4c06182809",
-          "requestDigest": "0039e2a06deb697f144d14e2ba4e01f41e0795bf40022dd3cef6845eab4076b1",
-          "acceptedRequestDigests": [
-            "0039e2a06deb697f144d14e2ba4e01f41e0795bf40022dd3cef6845eab4076b1"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "0039e2a06deb697f144d14e2ba4e01f41e0795bf40022dd3cef6845eab4076b1",
-        "78be17b0756ab5647f9973960155ad523e735ad94fdaf14e4dfe0dab95656aa2",
-        "bcdddd0203bc9e7dcd8a0444788c782729ecf2da5bf7ce5fc74c246e534e8adc"
-      ]
+      "requestDigest": "90ab8c8f19b475300c33344c1ef76600596002def06d361723c75ff2ca0dc3a4",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:7060ef9f22405008331f",
-      "idempotencyKey": "cms-media-binary-v1:asset:7060ef9f22405008331f:6ace31c8e97c2f2005908d85fdb18f74a645f59c05333ee6c1a73e43716289ff",
-      "filename": "03-coaching-a-distributed-field-team.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/03-coaching-a-distributed-field-team.png",
-      "publicPath": "/images/cognirise/cases/03-coaching-a-distributed-field-team.png",
-      "checksum": "6ace31c8e97c2f2005908d85fdb18f74a645f59c05333ee6c1a73e43716289ff",
-      "mimeType": "image/png",
-      "byteSize": 104383,
+      "externalId": "asset:ce46a5b80419e4b09c7a",
+      "idempotencyKey": "cms-media-binary-v1:asset:ce46a5b80419e4b09c7a:704e5a1ec29061c09f3b848b3c33b26543f44b7a5361acd8c7c8e15a1b0393ea",
+      "filename": "03-field-coaching.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/03-field-coaching.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/03-field-coaching.jpg",
+      "checksum": "704e5a1ec29061c09f3b848b3c33b26543f44b7a5361acd8c7c8e15a1b0393ea",
+      "mimeType": "image/jpeg",
+      "byteSize": 165167,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5013,38 +4985,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for coaching a distributed field team, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "Two field-team colleagues review physical materials at a table crossed by a violet light path.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "e776d96602c183167c7efd2ddbcadb37a8bcd3c1db14a7d7f8ad71f59ed7eb9f",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:7060ef9f22405008331f",
-          "idempotencyKey": "cms-media-inventory-v3:asset:7060ef9f22405008331f",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:7060ef9f22405008331f:6ace31c8e97c2f2005908d85fdb18f74a645f59c05333ee6c1a73e43716289ff",
-          "requestDigest": "f1d5834c0efd203c6a04e33d2941b2e49d2a4b8e783a7f37b7eacb11917971a9",
-          "acceptedRequestDigests": [
-            "f1d5834c0efd203c6a04e33d2941b2e49d2a4b8e783a7f37b7eacb11917971a9"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "f1d5834c0efd203c6a04e33d2941b2e49d2a4b8e783a7f37b7eacb11917971a9",
-        "d679482d0378b009ad18ca59de3ea2b3b0c92426e7d2addde758e6f9e0943eb3",
-        "a54c950bd540d916a10e3e89652566d912243d765f260ae1041aa02524053a78"
-      ]
+      "requestDigest": "19e303f1cff15ec0eeb19f2a43b4ea8da215ce7be57008acf4bbceeffa659b92",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:bf5cf1e28b1da1245934",
-      "idempotencyKey": "cms-media-binary-v1:asset:bf5cf1e28b1da1245934:0f2fe082244ebda7a225713fae7e10ad8f3e50f53ba2ae4f036c3dc5dbee989f",
-      "filename": "04-taking-a-specialist-retailer-online.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/04-taking-a-specialist-retailer-online.png",
-      "publicPath": "/images/cognirise/cases/04-taking-a-specialist-retailer-online.png",
-      "checksum": "0f2fe082244ebda7a225713fae7e10ad8f3e50f53ba2ae4f036c3dc5dbee989f",
-      "mimeType": "image/png",
-      "byteSize": 62138,
+      "externalId": "asset:69955581917d639a71c6",
+      "idempotencyKey": "cms-media-binary-v1:asset:69955581917d639a71c6:887683263a4418769592cfc8113776ac4c3a6714c1886951f36cd4e62d0b83c6",
+      "filename": "04-specialist-retail.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/04-specialist-retail.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/04-specialist-retail.jpg",
+      "checksum": "887683263a4418769592cfc8113776ac4c3a6714c1886951f36cd4e62d0b83c6",
+      "mimeType": "image/jpeg",
+      "byteSize": 224337,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5052,38 +5010,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for taking a specialist retailer online, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "A shopkeeper checks a product in a specialist retail space as a courier collects a parcel.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "0ef841fcba9189a9b5d067fb0fae62ff66c8a8a479650a590df16e28eb94c64e",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:bf5cf1e28b1da1245934",
-          "idempotencyKey": "cms-media-inventory-v3:asset:bf5cf1e28b1da1245934",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:bf5cf1e28b1da1245934:0f2fe082244ebda7a225713fae7e10ad8f3e50f53ba2ae4f036c3dc5dbee989f",
-          "requestDigest": "e06e874c990864f2a31382f837e3a0fdce3fd2f2fa5b2e4baccac037ff1b414c",
-          "acceptedRequestDigests": [
-            "e06e874c990864f2a31382f837e3a0fdce3fd2f2fa5b2e4baccac037ff1b414c"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "e06e874c990864f2a31382f837e3a0fdce3fd2f2fa5b2e4baccac037ff1b414c",
-        "205b1cebbe848d782ebf6d53a5f73d51eeefb2858bc18fedad498d552edb2ebc",
-        "5dd1f76cb5079a497dd2d08b2354be18e27f0f5d2936ebf174d56cf2821fd054"
-      ]
+      "requestDigest": "349e8115ade9f2f429053632ea715151911dfa98e5e96426ea973667b6e27951",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:87621d169e3231794b8f",
-      "idempotencyKey": "cms-media-binary-v1:asset:87621d169e3231794b8f:d622199bf9a853b61d3255e7ff5638549b75a19b4a8e06d53e1ca874ca4f8728",
-      "filename": "05-making-market-information-searchable.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/05-making-market-information-searchable.png",
-      "publicPath": "/images/cognirise/cases/05-making-market-information-searchable.png",
-      "checksum": "d622199bf9a853b61d3255e7ff5638549b75a19b4a8e06d53e1ca874ca4f8728",
-      "mimeType": "image/png",
-      "byteSize": 63855,
+      "externalId": "asset:0b0754ae0e3e50cccd57",
+      "idempotencyKey": "cms-media-binary-v1:asset:0b0754ae0e3e50cccd57:a1006aaf6994ec59ceb5c5205f88f55675aa2f116b6cc9309e7bbf361578594d",
+      "filename": "05-market-search.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/05-market-search.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/05-market-search.jpg",
+      "checksum": "a1006aaf6994ec59ceb5c5205f88f55675aa2f116b6cc9309e7bbf361578594d",
+      "mimeType": "image/jpeg",
+      "byteSize": 244671,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5091,38 +5035,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for making market information searchable, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "An analyst holds a source dossier in a research room with a flowing violet evidence path.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "f936285f2db9ae7f769910f0bed5fe0f4c367691f38255879454d71a0f442282",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:87621d169e3231794b8f",
-          "idempotencyKey": "cms-media-inventory-v3:asset:87621d169e3231794b8f",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:87621d169e3231794b8f:d622199bf9a853b61d3255e7ff5638549b75a19b4a8e06d53e1ca874ca4f8728",
-          "requestDigest": "1d82f34b95f018a29fb595248604c557ade098ae3733b982575637653edd6ca5",
-          "acceptedRequestDigests": [
-            "1d82f34b95f018a29fb595248604c557ade098ae3733b982575637653edd6ca5"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "1d82f34b95f018a29fb595248604c557ade098ae3733b982575637653edd6ca5",
-        "6ac690748b9b48bee7ced41e8841edc4eab555d71a849f4985bc507678ac5954",
-        "1711add5ba9c66509bbbe6ab96bb688c98719b38c82240e74e4b47249b6109b7"
-      ]
+      "requestDigest": "bec3291c21c84728ae9a88a0f89981608ba698d6c8b2eda685074db34873a191",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:051f8ecaf788666610ef",
-      "idempotencyKey": "cms-media-binary-v1:asset:051f8ecaf788666610ef:d599158118c07ba7f802083320f4bf0c2e1530ad7b59c5afea9260afe64f4b44",
-      "filename": "06-automating-recurring-tax-preparation.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/06-automating-recurring-tax-preparation.png",
-      "publicPath": "/images/cognirise/cases/06-automating-recurring-tax-preparation.png",
-      "checksum": "d599158118c07ba7f802083320f4bf0c2e1530ad7b59c5afea9260afe64f4b44",
-      "mimeType": "image/png",
-      "byteSize": 127759,
+      "externalId": "asset:958cd8eb5095c60d4b5d",
+      "idempotencyKey": "cms-media-binary-v1:asset:958cd8eb5095c60d4b5d:9c1ea4445c615ba03ad0bb862cbfe8964a4c352849506a679d97fa0085e2d9a4",
+      "filename": "06-tax-preparation.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/06-tax-preparation.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/06-tax-preparation.jpg",
+      "checksum": "9c1ea4445c615ba03ad0bb862cbfe8964a4c352849506a679d97fa0085e2d9a4",
+      "mimeType": "image/jpeg",
+      "byteSize": 247458,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5130,38 +5060,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for automating recurring tax preparation, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "A practitioner reviews a document folder beside ordered illuminated validation trays.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "2e9db99db2ca1417bbe544a7762ba709a2ea5ebab8c7b332a264ab3c25eed294",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:051f8ecaf788666610ef",
-          "idempotencyKey": "cms-media-inventory-v3:asset:051f8ecaf788666610ef",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:051f8ecaf788666610ef:d599158118c07ba7f802083320f4bf0c2e1530ad7b59c5afea9260afe64f4b44",
-          "requestDigest": "9269b19763bfea866bfac234be49e8a05e4b370ac27a0a5b6e3097c861a5f48a",
-          "acceptedRequestDigests": [
-            "9269b19763bfea866bfac234be49e8a05e4b370ac27a0a5b6e3097c861a5f48a"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "9269b19763bfea866bfac234be49e8a05e4b370ac27a0a5b6e3097c861a5f48a",
-        "802ccf0cbc7ef65a1da1de01259875f5987cfc51790d7c6fb5f0314f5e3e7697",
-        "fa5c1c9a4e42f838858a7bb3b761231676442e275a8172c549e5f651c5b50fe1"
-      ]
+      "requestDigest": "b8311ba6cf956561e6d004db501650dc4f8fcac8b4a73543e3dd3257b7cca68b",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:9df9051c08b1ac4e755a",
-      "idempotencyKey": "cms-media-binary-v1:asset:9df9051c08b1ac4e755a:2df44d6df16188f2852c86ea63ea67881408f4d89b0a38798b38fe45d28a3b0e",
-      "filename": "07-creating-accountable-agent-delegation.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/07-creating-accountable-agent-delegation.png",
-      "publicPath": "/images/cognirise/cases/07-creating-accountable-agent-delegation.png",
-      "checksum": "2df44d6df16188f2852c86ea63ea67881408f4d89b0a38798b38fe45d28a3b0e",
-      "mimeType": "image/png",
-      "byteSize": 86779,
+      "externalId": "asset:ddb188f0463d96e4d9f2",
+      "idempotencyKey": "cms-media-binary-v1:asset:ddb188f0463d96e4d9f2:35dc81a08ab6c569e8360e78014f80e0dd07da0be6a14fee67a64d5ffd8313cf",
+      "filename": "07-agent-delegation.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/07-agent-delegation.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/07-agent-delegation.jpg",
+      "checksum": "35dc81a08ab6c569e8360e78014f80e0dd07da0be6a14fee67a64d5ffd8313cf",
+      "mimeType": "image/jpeg",
+      "byteSize": 248868,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5169,38 +5085,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for creating accountable agent delegation, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "An operator holds a mandate token beside a row of transparent policy gates linked by violet light.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "25cabab1a489601d9a12eacbd53dbcbdde1c07370c1a9692b1fb36e17f84f55b",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:9df9051c08b1ac4e755a",
-          "idempotencyKey": "cms-media-inventory-v3:asset:9df9051c08b1ac4e755a",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:9df9051c08b1ac4e755a:2df44d6df16188f2852c86ea63ea67881408f4d89b0a38798b38fe45d28a3b0e",
-          "requestDigest": "ef746f0277463b2509487c4e864a96c225e1e304b0f8b7d6699a6c3b8edcbff8",
-          "acceptedRequestDigests": [
-            "ef746f0277463b2509487c4e864a96c225e1e304b0f8b7d6699a6c3b8edcbff8"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "ef746f0277463b2509487c4e864a96c225e1e304b0f8b7d6699a6c3b8edcbff8",
-        "d9f3d19e938cc50d782a673d0c9005aafa592234d0d9d091ce91e153e155eba2",
-        "a31846662328139981712c116bbb3512580c84de4e191a7db042d2a127dff7ed"
-      ]
+      "requestDigest": "b4877e8b16c9a7994c1d69bbbb02cf7051c067ba90d02dc43675c511fbb66c5b",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:1552d989c32158cec678",
-      "idempotencyKey": "cms-media-binary-v1:asset:1552d989c32158cec678:2b242a4ee761b65e514f15345bc3e4ae962ad487c13facdba7562d65b980556d",
-      "filename": "08-governing-a-single-fee-schedule.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/08-governing-a-single-fee-schedule.png",
-      "publicPath": "/images/cognirise/cases/08-governing-a-single-fee-schedule.png",
-      "checksum": "2b242a4ee761b65e514f15345bc3e4ae962ad487c13facdba7562d65b980556d",
-      "mimeType": "image/png",
-      "byteSize": 67584,
+      "externalId": "asset:4129ccbf77dda3cc3fc4",
+      "idempotencyKey": "cms-media-binary-v1:asset:4129ccbf77dda3cc3fc4:a4723d76ee48249a40c6b429715f3f064ecbce3485d0f7a867c74b93e3ebd193",
+      "filename": "08-fee-schedule.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/08-fee-schedule.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/08-fee-schedule.jpg",
+      "checksum": "a4723d76ee48249a40c6b429715f3f064ecbce3485d0f7a867c74b93e3ebd193",
+      "mimeType": "image/jpeg",
+      "byteSize": 181506,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5208,38 +5110,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for governing a single fee schedule, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "A steward turns a physical approval wheel beside a large blank illuminated archival panel.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "d7ffdcdda69a15cd2dbcf5fe50a6a44934e6c259caf8b123b5e342a5b80d1f34",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:1552d989c32158cec678",
-          "idempotencyKey": "cms-media-inventory-v3:asset:1552d989c32158cec678",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1552d989c32158cec678:2b242a4ee761b65e514f15345bc3e4ae962ad487c13facdba7562d65b980556d",
-          "requestDigest": "fc76ab48e5d54782a4575bd2b1c1eff1138754cd00c86de022006de2bc592b30",
-          "acceptedRequestDigests": [
-            "fc76ab48e5d54782a4575bd2b1c1eff1138754cd00c86de022006de2bc592b30"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "fc76ab48e5d54782a4575bd2b1c1eff1138754cd00c86de022006de2bc592b30",
-        "5e06c5bf2fac63cbad5dc840216f972e74b189b3d3c08d6e5e4ffee7a498b684",
-        "cf3acfe193bff3d836538ffc1efda958f03db3604748564791731502ec93496e"
-      ]
+      "requestDigest": "bd6c93651022dd5f0ae4a13c71f3da5f127bf00f4c4550e38d9d2d62b278aacd",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:02a506550e53b6f87a6b",
-      "idempotencyKey": "cms-media-binary-v1:asset:02a506550e53b6f87a6b:44ec716506ecbe632fddff1cfc7d30ae31f6a7eba0023eca44fc36b616abadb6",
-      "filename": "09-preparing-embedded-emissions-data.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/09-preparing-embedded-emissions-data.png",
-      "publicPath": "/images/cognirise/cases/09-preparing-embedded-emissions-data.png",
-      "checksum": "44ec716506ecbe632fddff1cfc7d30ae31f6a7eba0023eca44fc36b616abadb6",
-      "mimeType": "image/png",
-      "byteSize": 77654,
+      "externalId": "asset:f59fbb3e14233aa30857",
+      "idempotencyKey": "cms-media-binary-v1:asset:f59fbb3e14233aa30857:50509537c8eb3440ffc0d9cc3c3aaab871403284ec66af8f9a73191f33443420",
+      "filename": "09-embedded-emissions.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/09-embedded-emissions.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/09-embedded-emissions.jpg",
+      "checksum": "50509537c8eb3440ffc0d9cc3c3aaab871403284ec66af8f9a73191f33443420",
+      "mimeType": "image/jpeg",
+      "byteSize": 264937,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5247,38 +5135,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for preparing embedded-emissions data, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "A sustainability reviewer observes materials, factory equipment and illuminated paths through a tall review gate.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "19630ba754421d49ce608593592dc87f334cae6c017d49bab25b2bd0a1d35e46",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:02a506550e53b6f87a6b",
-          "idempotencyKey": "cms-media-inventory-v3:asset:02a506550e53b6f87a6b",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:02a506550e53b6f87a6b:44ec716506ecbe632fddff1cfc7d30ae31f6a7eba0023eca44fc36b616abadb6",
-          "requestDigest": "cf72c3113b60cc0d7ce4b3f225fa563c32970fb417dfb323182a4f4d43b65e70",
-          "acceptedRequestDigests": [
-            "cf72c3113b60cc0d7ce4b3f225fa563c32970fb417dfb323182a4f4d43b65e70"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "cf72c3113b60cc0d7ce4b3f225fa563c32970fb417dfb323182a4f4d43b65e70",
-        "b318d05a12dd8669c90eb9e01fbccc8eecdb9a3f6bae55ac01eec7d103b6c59e",
-        "91a71a303e0cca8a2e029a2f3abc3af4e55dd44d9f920d55113e7c46833a0717"
-      ]
+      "requestDigest": "6036628552d4ebe009c7c47a7d0eee378fa52bc40f2ebe653264fb17aec81b99",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:731241e4073be8c56ef0",
-      "idempotencyKey": "cms-media-binary-v1:asset:731241e4073be8c56ef0:2a44eda7a5d9c389b7859a05b9f59caa2e641458a50b6ac6a62948598d4c12ee",
-      "filename": "10-accelerating-governed-vehicle-offers.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/10-accelerating-governed-vehicle-offers.png",
-      "publicPath": "/images/cognirise/cases/10-accelerating-governed-vehicle-offers.png",
-      "checksum": "2a44eda7a5d9c389b7859a05b9f59caa2e641458a50b6ac6a62948598d4c12ee",
-      "mimeType": "image/png",
-      "byteSize": 67910,
+      "externalId": "asset:a075f2ee938e52b9904c",
+      "idempotencyKey": "cms-media-binary-v1:asset:a075f2ee938e52b9904c:4d4d96a489dd117430fff010f2c9cc1a4f1f3e410c6fc98a762211609ad08c10",
+      "filename": "10-vehicle-offers.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/10-vehicle-offers.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/10-vehicle-offers.jpg",
+      "checksum": "4d4d96a489dd117430fff010f2c9cc1a4f1f3e410c6fc98a762211609ad08c10",
+      "mimeType": "image/jpeg",
+      "byteSize": 222259,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5286,38 +5160,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for accelerating governed vehicle offers, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "An underwriter moves geometric blocks through a glowing gate beside an unbranded vehicle model.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "203b378ec704b96692294d33c1897b1f70419550a2f0fbae28864680dca147fb",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:731241e4073be8c56ef0",
-          "idempotencyKey": "cms-media-inventory-v3:asset:731241e4073be8c56ef0",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:731241e4073be8c56ef0:2a44eda7a5d9c389b7859a05b9f59caa2e641458a50b6ac6a62948598d4c12ee",
-          "requestDigest": "fe0a033fbdad717a1d34311b652edabc40455f8f754af1ba821b82c2935bef27",
-          "acceptedRequestDigests": [
-            "fe0a033fbdad717a1d34311b652edabc40455f8f754af1ba821b82c2935bef27"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "fe0a033fbdad717a1d34311b652edabc40455f8f754af1ba821b82c2935bef27",
-        "a2f079b852a6b18d052c5b476c62a1f4b9d80baf8f31de62fcb2f6411c50ac1d",
-        "3edd30f254d3769c7a1284108e1180c9b8a51240babece7fd19516c82168b279"
-      ]
+      "requestDigest": "6141ba3b17cab7204fa1298bb8d951a6a8d72a5afd5d0c4ba57656323ec54158",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:d4a44fe04ba9897c2ad2",
-      "idempotencyKey": "cms-media-binary-v1:asset:d4a44fe04ba9897c2ad2:81ece7b6ecce7595a770510091c25735e67ab2efe5129c4632d475fb794a7ee4",
-      "filename": "11-answering-general-investment-questions.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/11-answering-general-investment-questions.png",
-      "publicPath": "/images/cognirise/cases/11-answering-general-investment-questions.png",
-      "checksum": "81ece7b6ecce7595a770510091c25735e67ab2efe5129c4632d475fb794a7ee4",
-      "mimeType": "image/png",
-      "byteSize": 82806,
+      "externalId": "asset:228b6ba95371431fc3b3",
+      "idempotencyKey": "cms-media-binary-v1:asset:228b6ba95371431fc3b3:7d9d5251cdc850423f11e41bc17ad2d2b8b48495346f7e858495004a978c8be2",
+      "filename": "11-general-investment.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/11-general-investment.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/11-general-investment.jpg",
+      "checksum": "7d9d5251cdc850423f11e41bc17ad2d2b8b48495346f7e858495004a978c8be2",
+      "mimeType": "image/jpeg",
+      "byteSize": 255160,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5325,38 +5185,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for answering general investment questions, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "An adviser and visitor meet beside a curated product library in a calm information salon.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "7807e5fec6acc84deb790eaa13e5e942517dc56f851819fb4b968a958712769a",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:d4a44fe04ba9897c2ad2",
-          "idempotencyKey": "cms-media-inventory-v3:asset:d4a44fe04ba9897c2ad2",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:d4a44fe04ba9897c2ad2:81ece7b6ecce7595a770510091c25735e67ab2efe5129c4632d475fb794a7ee4",
-          "requestDigest": "66dc2b974633b5e40ac909ddf79cd4b572589d4b929ea71d548cc651bd6a975c",
-          "acceptedRequestDigests": [
-            "66dc2b974633b5e40ac909ddf79cd4b572589d4b929ea71d548cc651bd6a975c"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "66dc2b974633b5e40ac909ddf79cd4b572589d4b929ea71d548cc651bd6a975c",
-        "2bbd72a5d288b7b8e1ad710032d2fd2ef26235086df8fe6bd4d5820450a14564",
-        "978a4b754cd96c3dde9c0d6b0acb560e2cb51c844462ede2aed5a656e581df45"
-      ]
+      "requestDigest": "b3aca4e472b8cb24ca5e2d791e95f8a48e9b7a308a1227cdfc7995ccfeadf688",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:560ed836866e86920e96",
-      "idempotencyKey": "cms-media-binary-v1:asset:560ed836866e86920e96:7bfe3e0c6fad3e00a57cf80d86524f0ee9c0fae78b3ec023282f720edd21e34e",
-      "filename": "12-creating-a-governed-ai-workspace.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/12-creating-a-governed-ai-workspace.png",
-      "publicPath": "/images/cognirise/cases/12-creating-a-governed-ai-workspace.png",
-      "checksum": "7bfe3e0c6fad3e00a57cf80d86524f0ee9c0fae78b3ec023282f720edd21e34e",
-      "mimeType": "image/png",
-      "byteSize": 79232,
+      "externalId": "asset:37f4fe7066f00f747d90",
+      "idempotencyKey": "cms-media-binary-v1:asset:37f4fe7066f00f747d90:220c51206189de0ced8d0ec3bd4f1423ac699370d6d9044bf973345ada6ef9ee",
+      "filename": "12-governed-ai-workspace.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/12-governed-ai-workspace.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/12-governed-ai-workspace.jpg",
+      "checksum": "220c51206189de0ced8d0ec3bd4f1423ac699370d6d9044bf973345ada6ef9ee",
+      "mimeType": "image/jpeg",
+      "byteSize": 268306,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5364,38 +5210,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for creating a governed ai workspace, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "An administrator reviews illuminated knowledge rooms and identity arches in a shared workspace.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "2a389a142722a30436fc98f213fe86cc50af3cd74f520766d1e27d64e01d5e33",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:560ed836866e86920e96",
-          "idempotencyKey": "cms-media-inventory-v3:asset:560ed836866e86920e96",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:560ed836866e86920e96:7bfe3e0c6fad3e00a57cf80d86524f0ee9c0fae78b3ec023282f720edd21e34e",
-          "requestDigest": "5bca763e3e1d140f703942fe8ff24ceb1d4abb52f5ebdb9fb889aea067f2ac3a",
-          "acceptedRequestDigests": [
-            "5bca763e3e1d140f703942fe8ff24ceb1d4abb52f5ebdb9fb889aea067f2ac3a"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "5bca763e3e1d140f703942fe8ff24ceb1d4abb52f5ebdb9fb889aea067f2ac3a",
-        "faa6bf998a58faece404399f53654d3f7a80f13d481a1329cadfd8320618db16",
-        "1313cb42ed954ef46a77dc15a23dfe1a729d3f3a4b58683b7ff85ae186268add"
-      ]
+      "requestDigest": "cc92ceec45f81ae2e414c50e7f5790296fcfc65d15fdd25c8614b2fbc62c98d5",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:4b617df04f81594e8b65",
-      "idempotencyKey": "cms-media-binary-v1:asset:4b617df04f81594e8b65:7447d83325e4f1e090a876af59f068d96e435f924e41095e77bab191f17c67e2",
-      "filename": "13-prototyping-agentic-public-services.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/13-prototyping-agentic-public-services.png",
-      "publicPath": "/images/cognirise/cases/13-prototyping-agentic-public-services.png",
-      "checksum": "7447d83325e4f1e090a876af59f068d96e435f924e41095e77bab191f17c67e2",
-      "mimeType": "image/png",
-      "byteSize": 64274,
+      "externalId": "asset:7efcfb2995fb991e1393",
+      "idempotencyKey": "cms-media-binary-v1:asset:7efcfb2995fb991e1393:b16cd546120146aabcdfd4cfdab6bf8b1113704936b450e6165dd55c40df665a",
+      "filename": "13-public-services.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/13-public-services.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/13-public-services.jpg",
+      "checksum": "b16cd546120146aabcdfd4cfdab6bf8b1113704936b450e6165dd55c40df665a",
+      "mimeType": "image/jpeg",
+      "byteSize": 275336,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5403,38 +5235,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for prototyping agentic public services, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "A raised hand pauses illuminated routes across a detailed civic infrastructure model.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "b48a639f914cad1e2742ee032fbf91b5d683fc4099f13374f617fa7d0919d89c",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:4b617df04f81594e8b65",
-          "idempotencyKey": "cms-media-inventory-v3:asset:4b617df04f81594e8b65",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:4b617df04f81594e8b65:7447d83325e4f1e090a876af59f068d96e435f924e41095e77bab191f17c67e2",
-          "requestDigest": "63b542d53503e708a890dff4cb6ef43ce06fab879ff2459fdf6762ed8cd8f60e",
-          "acceptedRequestDigests": [
-            "63b542d53503e708a890dff4cb6ef43ce06fab879ff2459fdf6762ed8cd8f60e"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "63b542d53503e708a890dff4cb6ef43ce06fab879ff2459fdf6762ed8cd8f60e",
-        "b0281968296e38a6ac2508de75676faa2efb43a4bc168207ec5b5d79c119eb32",
-        "aa96ef751c72af79668b517a2f5c115053b46914fd00fceb3313539c0330025a"
-      ]
+      "requestDigest": "ca2141f5b43b2049227d4db9e63ec05715ca89a2f17c46c9511b73c2f9fd2ab3",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:4357890e2475c5479554",
-      "idempotencyKey": "cms-media-binary-v1:asset:4357890e2475c5479554:a2c8ba18b49eceb65c2d2141a0f329ea3b3233ba1a39b1726d7ec3ca65734dfe",
-      "filename": "14-checking-calls-through-risk-gates.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/14-checking-calls-through-risk-gates.png",
-      "publicPath": "/images/cognirise/cases/14-checking-calls-through-risk-gates.png",
-      "checksum": "a2c8ba18b49eceb65c2d2141a0f329ea3b3233ba1a39b1726d7ec3ca65734dfe",
-      "mimeType": "image/png",
-      "byteSize": 99364,
+      "externalId": "asset:b9d12de29212669b3489",
+      "idempotencyKey": "cms-media-binary-v1:asset:b9d12de29212669b3489:2ee2a41378cbfe3c302412f6a675d5c0031ec1e4354e60eea33f2b7d177c38e2",
+      "filename": "14-call-risk-gates.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/14-call-risk-gates.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/14-call-risk-gates.jpg",
+      "checksum": "2ee2a41378cbfe3c302412f6a675d5c0031ec1e4354e60eea33f2b7d177c38e2",
+      "mimeType": "image/jpeg",
+      "byteSize": 240805,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5442,38 +5260,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for checking calls through risk gates, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "A headset-wearing reviewer presses a coral control beside four translucent gates crossed by sound-wave light.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "681b0a1f541b7b2a856629eca22909121d7df29105a71a7edae374982fa089b0",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:4357890e2475c5479554",
-          "idempotencyKey": "cms-media-inventory-v3:asset:4357890e2475c5479554",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:4357890e2475c5479554:a2c8ba18b49eceb65c2d2141a0f329ea3b3233ba1a39b1726d7ec3ca65734dfe",
-          "requestDigest": "2561ad62f1e352f7808e8333ea493e06379d8d25c9a1a9ddb81aa8bacfc15dad",
-          "acceptedRequestDigests": [
-            "2561ad62f1e352f7808e8333ea493e06379d8d25c9a1a9ddb81aa8bacfc15dad"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "2561ad62f1e352f7808e8333ea493e06379d8d25c9a1a9ddb81aa8bacfc15dad",
-        "b67adff7b49a46a5f6b7a201ca8f0d2c9a7d9ba37239cd26cec11252548c137d",
-        "74b04ea6129649a4a84b056531e61b1b130e98edaca6c6fe505d02aecc17ede5"
-      ]
+      "requestDigest": "4c9fdab3db85bcb7bf659fd605acd66293c5be3121483a6df4d714cdb919068e",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:61aa9fb27b83f941773c",
-      "idempotencyKey": "cms-media-binary-v1:asset:61aa9fb27b83f941773c:a32b9fbb2ddfd02b1a1e953ea362622bfa1b9bc5650af9777577786353df95ad",
-      "filename": "15-orchestrating-data-centre-incidents.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/15-orchestrating-data-centre-incidents.png",
-      "publicPath": "/images/cognirise/cases/15-orchestrating-data-centre-incidents.png",
-      "checksum": "a32b9fbb2ddfd02b1a1e953ea362622bfa1b9bc5650af9777577786353df95ad",
-      "mimeType": "image/png",
-      "byteSize": 103026,
+      "externalId": "asset:464e4e03d821799b7a31",
+      "idempotencyKey": "cms-media-binary-v1:asset:464e4e03d821799b7a31:ab7e4b75d54416fc41018aa5474058336b4a08f85b6d333ff17c147c27a9d371",
+      "filename": "15-data-centre-incidents.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/15-data-centre-incidents.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/15-data-centre-incidents.jpg",
+      "checksum": "ab7e4b75d54416fc41018aa5474058336b4a08f85b6d333ff17c147c27a9d371",
+      "mimeType": "image/jpeg",
+      "byteSize": 317337,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5481,38 +5285,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for orchestrating data-centre incidents, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "An incident engineer stands at a control station in a blue data-centre corridor under a coral alert path.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "ea597fc17df6c39318a505628f80b64652b2c68238b4d16b3a751a1f31cdc074",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:61aa9fb27b83f941773c",
-          "idempotencyKey": "cms-media-inventory-v3:asset:61aa9fb27b83f941773c",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:61aa9fb27b83f941773c:a32b9fbb2ddfd02b1a1e953ea362622bfa1b9bc5650af9777577786353df95ad",
-          "requestDigest": "436e7aeb78bb26ff8f3229a1be5f6ec9e6663cfcf8d7ae578082b5eac05a55c7",
-          "acceptedRequestDigests": [
-            "436e7aeb78bb26ff8f3229a1be5f6ec9e6663cfcf8d7ae578082b5eac05a55c7"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "436e7aeb78bb26ff8f3229a1be5f6ec9e6663cfcf8d7ae578082b5eac05a55c7",
-        "07bfeb229ceba433f859408e870a02edb412109a3a3e4b2deb8cb3d80d80046d",
-        "0f77873d5f9394b74ae6437dcc769df85d2e920b11fdfdd7300bf38e6eae277c"
-      ]
+      "requestDigest": "22510f3069d0e0705ceeac28979c5040472da22bb9a97d09f9733969bd434d0a",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:89a9b277c7b432618099",
-      "idempotencyKey": "cms-media-binary-v1:asset:89a9b277c7b432618099:f5ceecc5fb289447606004a2fde288e0e0d33d37ba779dc44d7d7632b6ab22af",
-      "filename": "16-finding-a-second-life-for-hotel-assets.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/16-finding-a-second-life-for-hotel-assets.png",
-      "publicPath": "/images/cognirise/cases/16-finding-a-second-life-for-hotel-assets.png",
-      "checksum": "f5ceecc5fb289447606004a2fde288e0e0d33d37ba779dc44d7d7632b6ab22af",
-      "mimeType": "image/png",
-      "byteSize": 77834,
+      "externalId": "asset:a23e3c8070ea8e4f9da9",
+      "idempotencyKey": "cms-media-binary-v1:asset:a23e3c8070ea8e4f9da9:06b145c7abfaa4cf03161dee3e4c9c900acea3607c7aa36fa1d73626fb665f26",
+      "filename": "16-hotel-asset-reuse.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/16-hotel-asset-reuse.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/16-hotel-asset-reuse.jpg",
+      "checksum": "06b145c7abfaa4cf03161dee3e4c9c900acea3607c7aa36fa1d73626fb665f26",
+      "mimeType": "image/jpeg",
+      "byteSize": 281133,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5520,38 +5310,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for finding a second life for hotel assets, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "A property manager hands over a token beside a chair, linens and a hospitality service cart.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "e2710b8b500fdc466bb73ef61285c7cfadbf1ed8979755bdd524531a1ab740fa",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:89a9b277c7b432618099",
-          "idempotencyKey": "cms-media-inventory-v3:asset:89a9b277c7b432618099",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:89a9b277c7b432618099:f5ceecc5fb289447606004a2fde288e0e0d33d37ba779dc44d7d7632b6ab22af",
-          "requestDigest": "1aa6624f930c6b2298c296694b29aeeceebf14a413c2e20b6c03d6f284356649",
-          "acceptedRequestDigests": [
-            "1aa6624f930c6b2298c296694b29aeeceebf14a413c2e20b6c03d6f284356649"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "1aa6624f930c6b2298c296694b29aeeceebf14a413c2e20b6c03d6f284356649",
-        "e820565a42550aa859c7b5ab06d4b01631b85b9afdb99b4f9d661c5af2781801",
-        "0b4d8810444d53d2be04a2e104249211009f9d3fcbec4a8e296ff13b98125b23"
-      ]
+      "requestDigest": "a597942783a9dd1d3973278f8e4383e214a6d70ec5d293f389e5f1424848a4ba",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:1795ba514767650319a0",
-      "idempotencyKey": "cms-media-binary-v1:asset:1795ba514767650319a0:4e4747dee6729b56f9ed5e1a7f3642ccb5c554719484b0961026e504446c816e",
-      "filename": "17-proving-browser-side-encrypted-storage.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/17-proving-browser-side-encrypted-storage.png",
-      "publicPath": "/images/cognirise/cases/17-proving-browser-side-encrypted-storage.png",
-      "checksum": "4e4747dee6729b56f9ed5e1a7f3642ccb5c554719484b0961026e504446c816e",
-      "mimeType": "image/png",
-      "byteSize": 70502,
+      "externalId": "asset:44547e41d042fcc930dc",
+      "idempotencyKey": "cms-media-binary-v1:asset:44547e41d042fcc930dc:97217baedd24276e1b8432869740d636efa8b47be7bab7c44bb330c8db2d3f0d",
+      "filename": "17-browser-encrypted-storage.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/17-browser-encrypted-storage.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/17-browser-encrypted-storage.jpg",
+      "checksum": "97217baedd24276e1b8432869740d636efa8b47be7bab7c44bb330c8db2d3f0d",
+      "mimeType": "image/jpeg",
+      "byteSize": 204593,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5559,38 +5335,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for proving browser-side encrypted storage, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "A person holds a small glowing key outside a tall translucent vault in an architectural security chamber.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "a0240c7bedfbd6d326d10bddd25d10fc091c2e2c905da1f906c2e4727c2584ca",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:1795ba514767650319a0",
-          "idempotencyKey": "cms-media-inventory-v3:asset:1795ba514767650319a0",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1795ba514767650319a0:4e4747dee6729b56f9ed5e1a7f3642ccb5c554719484b0961026e504446c816e",
-          "requestDigest": "49a55cfa3e40ac3c1d64eaa1f1506354cee46d798cc1fca6869cfe2b6d1c6847",
-          "acceptedRequestDigests": [
-            "49a55cfa3e40ac3c1d64eaa1f1506354cee46d798cc1fca6869cfe2b6d1c6847"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "49a55cfa3e40ac3c1d64eaa1f1506354cee46d798cc1fca6869cfe2b6d1c6847",
-        "578729f2906521896b8a8cbaf375685dfb863d73b94bcc3b18a1c96050bc2483",
-        "894acc9e69086456ec3968bac76b0f3d997ac3377670fa6fa0a43478698f8b49"
-      ]
+      "requestDigest": "dfed854ddcece9bb60a3d3a76e1b6372df2c22f44e39c92f2c29730235ec0dee",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:a603ab33c5902333b82a",
-      "idempotencyKey": "cms-media-binary-v1:asset:a603ab33c5902333b82a:9923b42a8d5ec91142ff01f2106ffc35c166daf9e2b6c9fb073a99cbee66f5ee",
-      "filename": "18-recommending-room-aware-audio-systems.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/18-recommending-room-aware-audio-systems.png",
-      "publicPath": "/images/cognirise/cases/18-recommending-room-aware-audio-systems.png",
-      "checksum": "9923b42a8d5ec91142ff01f2106ffc35c166daf9e2b6c9fb073a99cbee66f5ee",
-      "mimeType": "image/png",
-      "byteSize": 71182,
+      "externalId": "asset:4f62747025a38dc36328",
+      "idempotencyKey": "cms-media-binary-v1:asset:4f62747025a38dc36328:868473375c66ecde717ca71d1eeaff584c84b4a5792779bc352c23fda0d1cf0e",
+      "filename": "18-room-aware-audio.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/18-room-aware-audio.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/18-room-aware-audio.jpg",
+      "checksum": "868473375c66ecde717ca71d1eeaff584c84b4a5792779bc352c23fda0d1cf0e",
+      "mimeType": "image/jpeg",
+      "byteSize": 245945,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5598,38 +5360,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for recommending room-aware audio systems, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "An adviser and shopper compare a miniature listening-room model beside speakers and flowing sound waves.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "5ba91da295048c5e7a8d36efb1362eefd3f1e6374aa3d2a485d2e10a3f701271",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:a603ab33c5902333b82a",
-          "idempotencyKey": "cms-media-inventory-v3:asset:a603ab33c5902333b82a",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:a603ab33c5902333b82a:9923b42a8d5ec91142ff01f2106ffc35c166daf9e2b6c9fb073a99cbee66f5ee",
-          "requestDigest": "d726c4117f20817a0ce8bc393c3914fa2d92732aa767f06c084fbfea668eea4b",
-          "acceptedRequestDigests": [
-            "d726c4117f20817a0ce8bc393c3914fa2d92732aa767f06c084fbfea668eea4b"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "d726c4117f20817a0ce8bc393c3914fa2d92732aa767f06c084fbfea668eea4b",
-        "5ee5bd0f29382e05daa625293237411edc1bb9f9c2f63e293e206849b93ca68c",
-        "0266c3b3a07dacbbabdadceb2ba7d5da65533f8af689acf273a8547b7b7553d4"
-      ]
+      "requestDigest": "20d1466dd1f11464278c34a2570f7c2e9e5e6481b059aa1db565cf52d8211d48",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:e238a63ac6fae72cf50d",
-      "idempotencyKey": "cms-media-binary-v1:asset:e238a63ac6fae72cf50d:320c7aa38d080f334fff64c78c8fb14e6412017e629d0df129e9710ef36ebe4c",
-      "filename": "19-monitoring-portfolio-early-warning-signals.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/19-monitoring-portfolio-early-warning-signals.png",
-      "publicPath": "/images/cognirise/cases/19-monitoring-portfolio-early-warning-signals.png",
-      "checksum": "320c7aa38d080f334fff64c78c8fb14e6412017e629d0df129e9710ef36ebe4c",
-      "mimeType": "image/png",
-      "byteSize": 90531,
+      "externalId": "asset:332aa16952d25c5e1b9b",
+      "idempotencyKey": "cms-media-binary-v1:asset:332aa16952d25c5e1b9b:4450ac0a15a8f730508464f3fa8dc539c92f860fb2de775635c413db575a823d",
+      "filename": "19-portfolio-warning.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/19-portfolio-warning.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/19-portfolio-warning.jpg",
+      "checksum": "4450ac0a15a8f730508464f3fa8dc539c92f860fb2de775635c413db575a823d",
+      "mimeType": "image/jpeg",
+      "byteSize": 171122,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5637,38 +5385,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for monitoring portfolio early-warning signals, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "An analyst places a glowing coral block into a review tray among large abstract exposure forms.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "ae5f38af4bcc5f18dd34896da8374f5b20e5b6c45365d94823e84ac91d31899b",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:e238a63ac6fae72cf50d",
-          "idempotencyKey": "cms-media-inventory-v3:asset:e238a63ac6fae72cf50d",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:e238a63ac6fae72cf50d:320c7aa38d080f334fff64c78c8fb14e6412017e629d0df129e9710ef36ebe4c",
-          "requestDigest": "d4b7dacaa2973c601dc70f6f8a575679f4ee3add49cfc03e0b460808af26f20a",
-          "acceptedRequestDigests": [
-            "d4b7dacaa2973c601dc70f6f8a575679f4ee3add49cfc03e0b460808af26f20a"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "d4b7dacaa2973c601dc70f6f8a575679f4ee3add49cfc03e0b460808af26f20a",
-        "e95371a8074eed54f5b38ae9918eb7494864bf59584d3227cb2f608042fd8d26",
-        "ac6b49f5814a09dfd04c4314990d01ff753b91de8fa9dc0403a9acca76441d06"
-      ]
+      "requestDigest": "9f14f24f26447375f8cd32e2201b03fc1b2581fa8807283096066cc0ecf49069",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:fc4aa6c552381c401bbc",
-      "idempotencyKey": "cms-media-binary-v1:asset:fc4aa6c552381c401bbc:ec465e2fb55274c25333004ec6e703b3b0717b37b9bf6acff74f770718f65d31",
-      "filename": "20-diagnosing-production-line-faults.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/20-diagnosing-production-line-faults.png",
-      "publicPath": "/images/cognirise/cases/20-diagnosing-production-line-faults.png",
-      "checksum": "ec465e2fb55274c25333004ec6e703b3b0717b37b9bf6acff74f770718f65d31",
-      "mimeType": "image/png",
-      "byteSize": 82461,
+      "externalId": "asset:95e9fb5fc413f33e254e",
+      "idempotencyKey": "cms-media-binary-v1:asset:95e9fb5fc413f33e254e:c84ccea40018da43f71fe24accb669ebf15cf32102a46e9baf3694c951418baa",
+      "filename": "20-production-faults.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/20-production-faults.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/20-production-faults.jpg",
+      "checksum": "c84ccea40018da43f71fe24accb669ebf15cf32102a46e9baf3694c951418baa",
+      "mimeType": "image/jpeg",
+      "byteSize": 346174,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5676,38 +5410,24 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for diagnosing production-line faults, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "A factory operator holds an approval token beside a beverage line and a violet machine-signal pulse.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "b0840a8ef72d7985c18ad3a5b6d5f33fab30487ee8758fa903cc62ff4bd16fa9",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:fc4aa6c552381c401bbc",
-          "idempotencyKey": "cms-media-inventory-v3:asset:fc4aa6c552381c401bbc",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:fc4aa6c552381c401bbc:ec465e2fb55274c25333004ec6e703b3b0717b37b9bf6acff74f770718f65d31",
-          "requestDigest": "7840459d0a04008fa1a5becbd580fc0333f3b079add913a5b58018e8b570fe71",
-          "acceptedRequestDigests": [
-            "7840459d0a04008fa1a5becbd580fc0333f3b079add913a5b58018e8b570fe71"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "7840459d0a04008fa1a5becbd580fc0333f3b079add913a5b58018e8b570fe71",
-        "ada812ef374894fb215d0426202eaec1119fea29cc5ba87e8cadecac9cb6e257",
-        "46e62c4a34d6fe2294f5eab856c94c6039e3790c950335c94485894aa262c64e"
-      ]
+      "requestDigest": "e36c20614826ff9949c6eaf3d89b2a7852fa24215a24ff598d5a41de24a1e63c",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
-      "externalId": "asset:8d8d830513bbef43e89a",
-      "idempotencyKey": "cms-media-binary-v1:asset:8d8d830513bbef43e89a:fe791c345f02f15295424067e48bbe056651f9af143d3c4ef2fd70ace2f5adb6",
-      "filename": "21-tracing-provision-movements-earlier.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/21-tracing-provision-movements-earlier.png",
-      "publicPath": "/images/cognirise/cases/21-tracing-provision-movements-earlier.png",
-      "checksum": "fe791c345f02f15295424067e48bbe056651f9af143d3c4ef2fd70ace2f5adb6",
-      "mimeType": "image/png",
-      "byteSize": 70993,
+      "externalId": "asset:21ad8ae49106c709ddd7",
+      "idempotencyKey": "cms-media-binary-v1:asset:21ad8ae49106c709ddd7:b132a8d4365d6173364ed6c1416dc3a610ca6d02ef9310d4f82c02369dbd6eea",
+      "filename": "21-provision-movements.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/21-provision-movements.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/21-provision-movements.jpg",
+      "checksum": "b132a8d4365d6173364ed6c1416dc3a610ca6d02ef9310d4f82c02369dbd6eea",
+      "mimeType": "image/jpeg",
+      "byteSize": 214542,
       "width": 1600,
       "height": 1000,
       "cmsOwnership": "cms-candidate",
@@ -5715,28 +5435,14 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Cognirise Pulse workflow for tracing provision movements earlier, showing inputs, processing, a control checkpoint and the resulting capability.",
+      "altText": "A finance reviewer moves glowing violet blocks across a navy bridge toward a coral exception tray.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "732ddfb2dcdc89ac0a2d0e64e537350074ec4e82364a50affdcae47b8a903e46",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:8d8d830513bbef43e89a",
-          "idempotencyKey": "cms-media-inventory-v3:asset:8d8d830513bbef43e89a",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:8d8d830513bbef43e89a:fe791c345f02f15295424067e48bbe056651f9af143d3c4ef2fd70ace2f5adb6",
-          "requestDigest": "470b572b559546fc5e7d60d672b594e306b825e9fab674ac99a7b73fef5efaa4",
-          "acceptedRequestDigests": [
-            "470b572b559546fc5e7d60d672b594e306b825e9fab674ac99a7b73fef5efaa4"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "470b572b559546fc5e7d60d672b594e306b825e9fab674ac99a7b73fef5efaa4",
-        "081067dc61198f0409cafe915810e4e1b784af7665c6d6850b1b9ec9481f9dc4",
-        "52db2dd7442b021388271ddb00ee6f7e7feded56d841bdd3ea82179eaab054df"
-      ]
+      "requestDigest": "c2e4705ad8833fc8298a2b49d0c686a064c64141879448b6e4638a9c9b43b8e1",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
       "externalId": "asset:f6a19919d1de6e4dd655",
@@ -5808,8 +5514,7 @@
       "cmsOwnership": "cms-candidate",
       "usages": [
         "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
-        "artifacts/cognirise-website/src/pages/DataAIFoundations.tsx",
-        "artifacts/cognirise-website/src/pages/WorkProof.tsx"
+        "artifacts/cognirise-website/src/pages/DataAIFoundations.tsx"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
@@ -5845,6 +5550,7 @@
         "6f2f990ac15a7b8175e98a727d09c94bc2cf65abd6a0f361690b5c81b47d078e",
         "02fc1d2a5261b118e1018f9935ae26a4efc07f1ce412a13581e51cdc52b26a07",
         "c503347772761de66288d8ea345093aa3518f278b3556f257211834b3f200b58",
+        "4a34ad105ac11e3ec36fcde1c1ae31f5d037c594b2ed6fdac61d376d54edea70",
         "ca8c68bce860d24152ad0cd28faecdec5eec3971db00f862da96e84fe490e43f"
       ]
     },
@@ -6890,6 +6596,33 @@
       "acceptedPriorRequestDigests": []
     },
     {
+      "externalId": "asset:2dc40757783120012a55",
+      "idempotencyKey": "cms-media-binary-v1:asset:2dc40757783120012a55:ad0ddce310568b7161ee26c1cab7ef5348db2e8252413eecb12a0860853733d5",
+      "filename": "method-vts-v2.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/method-vts-v2.jpg",
+      "publicPath": "/images/cognirise/method-vts-v2.jpg",
+      "checksum": "ad0ddce310568b7161ee26c1cab7ef5348db2e8252413eecb12a0860853733d5",
+      "mimeType": "image/jpeg",
+      "byteSize": 1160096,
+      "width": 3072,
+      "height": 3072,
+      "cmsOwnership": "code-owned",
+      "usages": [
+        "artifacts/cognirise-website/src/pages/AIValueToScale.tsx"
+      ],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "method vts v2",
+      "credit": "Rights holder pending editorial review",
+      "rightsStatus": "needs-review",
+      "accessibilityStatus": "approved",
+      "sourceReviewApproved": false,
+      "requestDigest": "afeae186c62a83296db2c49589237d709888b053af3baf78e449b71060599270",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
+    },
+    {
       "externalId": "asset:018e16432cd270f65862",
       "idempotencyKey": "cms-media-binary-v1:asset:018e16432cd270f65862:2fb6f8369e97439558da982b49b475b07df337493051a76b7244132206c85e65",
       "filename": "method-vts.jpg",
@@ -6901,9 +6634,7 @@
       "width": 1024,
       "height": 1024,
       "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/pages/AIValueToScale.tsx"
-      ],
+      "usages": [],
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
@@ -6930,8 +6661,7 @@
       "cmsOwnership": "cms-candidate",
       "usages": [
         "artifacts/cognirise-website/src/pages/AgenticTransformation.tsx",
-        "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx",
-        "artifacts/cognirise-website/src/pages/WorkProof.tsx"
+        "artifacts/cognirise-website/src/pages/CogniOSPlatform.tsx"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
@@ -6971,6 +6701,7 @@
         "92fb47068ed29b37f2e425b8f783ea63fc4633e01f2b5098a2d0d15b64ad4bd7",
         "7d29e3619d3b159fd05d797a219593f3783268aad8ad5702edb62beda2178695",
         "f353dcf119df05b6e04026fc6b01d8528f1592af16fbea5f3dcbe22fbae3fe2e",
+        "cb772da890c3457e202a99ddb5883ff8e96b2ce56dfb8187984a103ac07db2a6",
         "caeffd6d14f9312bedb7827e7b8afa6680aa106712fbab78ea44412f9e94f18a"
       ]
     },
@@ -7465,8 +7196,7 @@
       "height": 1024,
       "cmsOwnership": "cms-candidate",
       "usages": [
-        "artifacts/cognirise-website/src/pages/ValueScan.tsx",
-        "artifacts/cognirise-website/src/pages/WorkProof.tsx"
+        "artifacts/cognirise-website/src/pages/ValueScan.tsx"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
@@ -7490,6 +7220,7 @@
       ],
       "acceptedPriorRequestDigests": [
         "d643be98d760066867242ad6e883c99b2f3d474a73db57b32ee4bd84fc538327",
+        "88ef1d7835e93e165399cde72b0f3e1d0191bf87297392b004c0a7bd69b18383",
         "8236dd6e4061ace93091ac77ca30e4e80650fdd67cfc664b3a1cd4f2f4c2034b"
       ]
     },
@@ -7916,5 +7647,26 @@
         "a861c514d1885fddd698a2ccf6fa66769072c3cd3f26ff75cbd61a165292786b"
       ]
     }
-  ]
+  ],
+  "database": {
+    "before": {
+      "documents": 55,
+      "editions": 55,
+      "revisions": 145,
+      "media": 125,
+      "receipts": 483,
+      "audits": 565
+    },
+    "created": 0,
+    "replayed": 49,
+    "mediaCreated": 0,
+    "mediaRepaired": 0,
+    "mediaReplayed": 87,
+    "availabilityCreated": 0,
+    "availabilityReplayed": 8,
+    "availabilityConflicts": [],
+    "governanceCreated": 0,
+    "governanceReplayed": 5,
+    "governanceConflicts": []
+  }
 }

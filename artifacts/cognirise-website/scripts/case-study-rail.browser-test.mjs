@@ -4,6 +4,7 @@ import { rm } from "node:fs/promises";
 
 const browserPath = process.env.CHROMIUM_PATH || "/repl/tools/bin/chromium";
 const baseUrl = process.env.PULSE_BROWSER_BASE_URL || "http://127.0.0.1:80";
+const runScope = process.env.PULSE_CASE_STUDY_BROWSER_SCOPE || "full";
 const debuggingPort = 9337;
 const profilePath = `/tmp/cognirise-case-rail-browser-test-${process.pid}`;
 const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -11,6 +12,11 @@ const navigationPolicy = {
   mode: "configured-legacy",
   pendingRequestIds: new Set(),
 };
+const imageNetworkRequests = new Set();
+
+if (!["full", "remainder"].includes(runScope)) {
+  throw new Error(`Unsupported PULSE_CASE_STUDY_BROWSER_SCOPE: ${runScope}. Use "full" or "remainder".`);
+}
 
 await rm(profilePath, { recursive: true, force: true });
 const browser = spawn(browserPath, [
@@ -45,6 +51,10 @@ let commandId = 0;
 
 socket.onmessage = ({ data }) => {
   const message = JSON.parse(data);
+  if (message.method === "Network.requestWillBeSent" && message.params.type === "Image") {
+    imageNetworkRequests.add(message.params.request.url);
+    return;
+  }
   if (message.method === "Fetch.requestPaused") {
     const request = message.params;
     if (request.request.url.includes("/api/public/navigation")) {
@@ -167,18 +177,18 @@ async function releasePendingNavigationRequests() {
   }));
 }
 
-async function waitForLocation(pathname, timeout = 7000) {
+async function navigate(url, pathname = new URL(url).pathname, timeout = 7000) {
+  const before = await evaluate(`({ href: location.href, timeOrigin: performance.timeOrigin })`);
+  if (new URL(url).href === before.href && new URL(before.href).pathname === pathname) return;
+  await send("Page.navigate", { url });
   const attempts = Math.ceil(timeout / 100);
   for (let attempt = 0; attempt < attempts; attempt += 1) {
-    if (await evaluate(`location.pathname === ${JSON.stringify(pathname)}`)) return;
+    const current = await evaluate(`({ href: location.href, pathname: location.pathname, timeOrigin: performance.timeOrigin })`);
+    const navigationStarted = current.href !== before.href || current.timeOrigin !== before.timeOrigin;
+    if (navigationStarted && current.pathname === pathname) return;
     await delay(100);
   }
   throw new Error(`Expected browser location to become ${pathname}; got ${await evaluate("location.href")}`);
-}
-
-async function navigate(url, pathname = new URL(url).pathname) {
-  await send("Page.navigate", { url });
-  await waitForLocation(pathname);
 }
 
 async function assertRetiredWorkRedirects() {
@@ -198,6 +208,28 @@ async function assertRetiredWorkRedirects() {
         search: `?${query}`,
         hash: "",
       }, `[${mode}] retired Work route did not preserve its query while dropping the old overview anchor`);
+    }
+  }
+  await releasePendingNavigationRequests();
+}
+
+async function assertLegacyIndustrySelectedWorkRedirects() {
+  for (const mode of ["legacy-disabled", "failed", "pending"]) {
+    navigationPolicy.mode = mode;
+    await releasePendingNavigationRequests();
+    for (const source of ["/industries/financial-services", "/industries/banking"]) {
+      const query = "market=uae&legacy-selected-work=task-300";
+      await navigate(`${baseUrl}${source}?${query}#selected-work`, "/industries");
+      const destination = await evaluate(`({
+        pathname: location.pathname,
+        search: location.search,
+        hash: location.hash,
+      })`);
+      assert.deepEqual(destination, {
+        pathname: "/industries",
+        search: `?${query}`,
+        hash: "#selected-work",
+      }, `[${mode}] ${source} did not bypass navigation policy to preserve its selected-work location`);
     }
   }
   await releasePendingNavigationRequests();
@@ -249,7 +281,7 @@ async function assertNavigationOmitsWork(mode, viewport) {
 }
 
 const stateExpression = `(() => {
-  const slides = [...document.querySelectorAll(".industry-case-rail__slide")];
+  const slides = [...document.querySelectorAll(".case-study-rail__slide")];
   const previous = document.querySelector('button[aria-label="Previous slide"]');
   const next = document.querySelector('button[aria-label="Next slide"]');
   return {
@@ -263,7 +295,7 @@ const stateExpression = `(() => {
 
 async function dispatchWheel({ deltaX = 0, deltaY = 0, shiftKey = false }) {
   return evaluate(`(() => {
-    const target = document.querySelector(".case-rendition img");
+    const target = document.querySelector(".case-study-rail .case-rendition img, .case-study-rail [aria-roledescription='carousel']");
     const event = new WheelEvent("wheel", {
       bubbles: true,
       cancelable: true,
@@ -272,12 +304,21 @@ async function dispatchWheel({ deltaX = 0, deltaY = 0, shiftKey = false }) {
       shiftKey: ${shiftKey},
     });
     target.dispatchEvent(event);
-    return event.defaultPrevented;
   })()`);
 }
 
+async function receivedImageRequests(urls, timeout = 2500) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    if (urls.every((url) => imageNetworkRequests.has(url))) return true;
+    await delay(50);
+  }
+  return urls.every((url) => imageNetworkRequests.has(url));
+}
+
 async function clickUntilDisabled(label) {
-  for (let attempt = 0; attempt < 12; attempt += 1) {
+  const limit = await evaluate(`document.querySelectorAll(".case-study-rail__slide").length + 2`);
+  for (let attempt = 0; attempt < limit; attempt += 1) {
     const clicked = await evaluate(`(() => {
       const button = document.querySelector('button[aria-label="${label}"]');
       if (!button || button.disabled) return false;
@@ -293,6 +334,7 @@ async function clickUntilDisabled(label) {
 try {
   await send("Page.enable");
   await send("Runtime.enable");
+  await send("Network.enable");
   await send("Fetch.enable", {
     patterns: [{
       urlPattern: "*api/public/navigation*",
@@ -305,10 +347,40 @@ try {
     deviceScaleFactor: 1,
     mobile: false,
   });
-  await assertRetiredWorkRedirects();
-  for (const mode of ["configured-legacy", "fallback"]) {
-    await assertNavigationOmitsWork(mode, { label: "desktop", width: 1440, height: 1000, mobile: false });
-    await assertNavigationOmitsWork(mode, { label: "mobile", width: 390, height: 844, mobile: true });
+  if (runScope === "full") {
+    await assertRetiredWorkRedirects();
+    await assertLegacyIndustrySelectedWorkRedirects();
+    for (const mode of ["configured-legacy", "fallback"]) {
+      await assertNavigationOmitsWork(mode, { label: "desktop", width: 1440, height: 1000, mobile: false });
+      await assertNavigationOmitsWork(mode, { label: "mobile", width: 390, height: 844, mobile: true });
+    }
+
+    navigationPolicy.mode = "configured-legacy";
+    await releasePendingNavigationRequests();
+    await send("Emulation.setDeviceMetricsOverride", {
+      width: 1366,
+      height: 768,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    for (const source of [
+      "/industries/financial-services",
+      "/industries/telecoms",
+      "/industries/banking",
+    ]) {
+      const query = "market=uae&legacy-selected-work=task-300";
+      await navigate(`${baseUrl}${source}?${query}#selected-work`, "/industries");
+      const destination = await evaluate(`({
+        pathname: location.pathname,
+        search: location.search,
+        hash: location.hash,
+      })`);
+      assert.deepEqual(destination, {
+        pathname: "/industries",
+        search: `?${query}`,
+        hash: "#selected-work",
+      }, `${source} did not preserve its query and selected-work anchor`);
+    }
   }
 
   navigationPolicy.mode = "configured-legacy";
@@ -319,25 +391,53 @@ try {
     deviceScaleFactor: 1,
     mobile: false,
   });
+  imageNetworkRequests.clear();
+  await send("Network.setCacheDisabled", { cacheDisabled: true });
   await send("Page.navigate", {
-    url: `${baseUrl}/industries/financial-services?market=uae#selected-work`,
+    url: `${baseUrl}/industries?market=uae#selected-work`,
   });
   for (let attempt = 0; attempt < 100; attempt += 1) {
-    if (await evaluate(`document.querySelectorAll(".industry-case-rail__slide").length > 1`)) break;
+    if (await evaluate(`document.querySelectorAll(".case-study-rail__slide").length > 1`)) break;
     await delay(100);
   }
-  await evaluate(`document.documentElement.style.scrollBehavior = "auto"; document.querySelector(".industry-case-rail").scrollIntoView({ block: "center" })`);
+  const railReady = await evaluate(`document.querySelectorAll(".case-study-rail__slide").length > 1`);
+  assert.equal(railReady, true, "The consolidated case-study rail did not load approved records");
+  const [deliveredCaseSlugs, railCaseSlugs] = await Promise.all([
+    evaluate(`fetch("/api/public/content?kind=case-study&market=uae&locale=en&pageSize=100")
+      .then((response) => response.ok ? response.json() : null)
+      .then((payload) => {
+        const seen = new Set();
+        return (payload?.items || []).flatMap((candidate) => {
+          const content = candidate?.content || {};
+          const slug = typeof candidate?.slug === "string" ? candidate.slug.trim() : "";
+          const eligible = slug
+            && content.disclosure !== "restricted"
+            && content.visibility !== "hidden"
+            && content.approvedForIndustry !== false
+            && content.publicEvidenceStatus === "approved"
+            && !seen.has(slug);
+          if (eligible) seen.add(slug);
+          return eligible ? [slug] : [];
+        }).sort();
+      })`),
+    evaluate(`([...document.querySelectorAll(".case-study-rail .work-card--editorial")]
+      .map((card) => card.getAttribute("data-testid")?.replace(/^card-case-/, ""))
+      .filter(Boolean)
+      .sort())`),
+  ]);
+  assert.deepEqual(railCaseSlugs, deliveredCaseSlugs, "The consolidated rail did not render every eligible published case exactly once");
+  console.log(`Validated ${railCaseSlugs.length} eligible published case studies in the consolidated rail.`);
+  await evaluate(`document.documentElement.style.scrollBehavior = "auto"; document.querySelector(".case-study-rail").scrollIntoView({ block: "center" })`);
   await delay(600);
 
   const start = await evaluate(stateExpression);
   assert.equal(start.previousDisabled, true);
   assert.equal(start.nextDisabled, false);
 
-  const collapsedCard = await evaluate(`(() => {
+  const expandedCard = await evaluate(`(() => {
     const card = document.querySelector(".work-card--editorial");
     const figure = card.querySelector(".case-rendition");
     const image = figure.querySelector("img");
-    const toggle = card.querySelector('button[data-testid^="button-toggle-case-"]');
     const cardRect = card.getBoundingClientRect();
     const figureRect = figure.getBoundingClientRect();
     const imageRect = image.getBoundingClientRect();
@@ -345,100 +445,77 @@ try {
       cardHeight: cardRect.height,
       viewportHeight: innerHeight,
       imageContained: imageRect.left >= figureRect.left - 1 && imageRect.right <= figureRect.right + 1,
-      expanded: toggle.getAttribute("aria-expanded"),
-      controls: toggle.getAttribute("aria-controls"),
-      detailsPresent: Boolean(card.querySelector(".work-card__details")),
+      details: card.querySelector(".work-card__details")?.querySelectorAll(":scope > section").length,
+      toggleCount: card.querySelectorAll('[data-testid^="button-toggle-case-"]').length,
+      eagerImages: [...document.querySelectorAll(".case-study-rail img")].filter((node) => node.loading === "eager").length,
       dialogPresent: Boolean(document.querySelector('[role="dialog"]')),
-      repetitiveFooterPresent: Boolean(card.querySelector(".work-card__footer")),
-      railHeight: document.querySelector(".industry-case-rail").getBoundingClientRect().height,
-      cardHeights: [...document.querySelectorAll(".work-card--editorial")].slice(0, 3).map((item) => item.getBoundingClientRect().height),
-      fullyVisibleCards: [...document.querySelectorAll(".industry-case-rail__slide")].filter((slide) => {
-        const rect = slide.getBoundingClientRect();
-        return rect.left >= -1 && rect.right <= innerWidth + 1;
-      }).length,
+      slugs: [...document.querySelectorAll(".work-card--editorial")].map((node) => node.getAttribute("data-testid")),
     };
   })()`);
-  assert.ok(collapsedCard.cardHeight < collapsedCard.viewportHeight * 0.72);
-  assert.ok(collapsedCard.railHeight <= collapsedCard.viewportHeight);
-  assert.equal(collapsedCard.fullyVisibleCards, 3);
-  assert.equal(collapsedCard.imageContained, true);
-  assert.equal(collapsedCard.expanded, "false");
-  assert.ok(collapsedCard.controls?.startsWith("case-details-"));
-  assert.equal(collapsedCard.detailsPresent, false);
-  assert.equal(collapsedCard.dialogPresent, false);
-  assert.equal(collapsedCard.repetitiveFooterPresent, false);
-  const industryAffordances = await evaluate(`(() => {
-    const cards = [...document.querySelectorAll(".work-card--editorial")];
-    return {
-      cardCount: cards.length,
-      fullRecordLinks: cards.flatMap((card) => [...card.querySelectorAll('a[href^="/work/"]')]).length,
-      openRecordControls: cards.flatMap((card) => [...card.querySelectorAll('[data-testid^="button-open-case-"]')]).length,
-      inlineToggles: cards.flatMap((card) => [...card.querySelectorAll('[data-testid^="button-toggle-case-"]')]).length,
-    };
-  })()`);
-  if (industryAffordances.fullRecordLinks === 0 && industryAffordances.openRecordControls === 0) {
-    console.warn("Pre-existing industry behavior: case cards expose inline expansion only; no full-record link or drawer affordance is present.");
-  }
-
-  await evaluate(`document.querySelector(".work-card--editorial button[data-testid^='button-toggle-case-']").click()`);
-  await delay(100);
-  const expandedCard = await evaluate(`(() => {
-    const card = document.querySelector(".work-card--editorial");
-    const toggle = card.querySelector('button[data-testid^="button-toggle-case-"]');
-    const details = card.querySelector(".work-card__details");
-    const figureRect = card.querySelector(".case-rendition").getBoundingClientRect();
-    const imageRect = card.querySelector(".case-rendition img").getBoundingClientRect();
-    return {
-      expanded: toggle.getAttribute("aria-expanded"),
-      detailsId: details?.id,
-      detailSections: details?.querySelectorAll(":scope > section").length,
-      detailsBeforeVisual: Boolean(details && details.compareDocumentPosition(card.querySelector(".work-card__visual")) & Node.DOCUMENT_POSITION_FOLLOWING),
-      cardHeights: [...document.querySelectorAll(".work-card--editorial")].slice(0, 3).map((item) => item.getBoundingClientRect().height),
-      imageContained: imageRect.left >= figureRect.left - 1 && imageRect.right <= figureRect.right + 1,
-      dialogPresent: Boolean(document.querySelector('[role="dialog"]')),
-    };
-  })()`);
-  assert.equal(expandedCard.expanded, "true");
-  assert.equal(expandedCard.detailsId, collapsedCard.controls);
-  assert.equal(expandedCard.detailSections, 4);
-  assert.equal(expandedCard.detailsBeforeVisual, true);
-  assert.ok(expandedCard.cardHeights[0] > collapsedCard.cardHeights[0]);
-  assert.ok(Math.abs(expandedCard.cardHeights[1] - collapsedCard.cardHeights[1]) < 1);
-  assert.ok(Math.abs(expandedCard.cardHeights[2] - collapsedCard.cardHeights[2]) < 1);
+  assert.ok(expandedCard.cardHeight > expandedCard.viewportHeight * 0.72);
   assert.equal(expandedCard.imageContained, true);
+  assert.equal(expandedCard.details, 4);
+  assert.equal(expandedCard.toggleCount, 0);
+  assert.equal(expandedCard.eagerImages, 0);
   assert.equal(expandedCard.dialogPresent, false);
-  await evaluate(`document.querySelector(".work-card--editorial button[data-testid^='button-toggle-case-']").click()`);
-  await delay(100);
-  const collapsedAgain = await evaluate(`(() => {
-    const card = document.querySelector(".work-card--editorial");
-    const toggle = card.querySelector('button[data-testid^="button-toggle-case-"]');
+  assert.equal(new Set(expandedCard.slugs).size, expandedCard.slugs.length);
+  const initialMedia = await evaluate(`(() => [...document.querySelectorAll(".case-study-rail [data-case-media]")].map((frame) => {
+    const image = frame.querySelector("img");
     return {
-      expanded: toggle.getAttribute("aria-expanded"),
-      detailsPresent: Boolean(card.querySelector(".work-card__details")),
-      dialogPresent: Boolean(document.querySelector('[role="dialog"]')),
+      url: new URL(frame.getAttribute("data-case-media"), location.href).href,
+      requested: Boolean(image?.getAttribute("src")),
     };
-  })()`);
-  assert.deepEqual(collapsedAgain, {
-    expanded: "false",
-    detailsPresent: false,
-    dialogPresent: false,
-  });
+  }))()`);
+  const initiallyRequestedMedia = initialMedia.filter((media) => media.requested).map((media) => media.url);
+  assert.ok(initialMedia.length > 1, "The rail needs more than one media-backed case to verify lazy delivery");
+  assert.ok(initiallyRequestedMedia.length > 0, "No visible case-study image entered the lazy delivery queue");
+  assert.ok(initiallyRequestedMedia.length < initialMedia.length, "Every rail image entered the lazy delivery queue before its slide became visible");
+  assert.equal(await receivedImageRequests(initiallyRequestedMedia), true, "Visible case-study images did not create image network requests");
+  assert.equal(
+    initialMedia.filter((media) => !media.requested).some((media) => !imageNetworkRequests.has(media.url)),
+    true,
+    "Off-screen case-study media made image network requests before becoming visible",
+  );
 
-  assert.equal(await dispatchWheel({ deltaX: -120 }), true);
+  await dispatchWheel({ deltaX: -120 });
   await delay(400);
-  assert.equal((await evaluate(stateExpression)).first, start.first);
+  const startAfterWheel = await evaluate(stateExpression);
+  assert.equal(startAfterWheel.previousDisabled, true);
+  assert.ok(Math.abs(startAfterWheel.first - start.first) < 2);
 
-  assert.equal(await dispatchWheel({ deltaX: 120 }), true);
+  await dispatchWheel({ deltaX: 120 });
   await delay(700);
   const second = await evaluate(stateExpression);
   assert.ok(second.first < start.first - 100);
   assert.equal(second.previousDisabled, false);
+  const mediaAfterAdvance = await evaluate(`(() => [...document.querySelectorAll(".case-study-rail [data-case-media]")].map((frame) => {
+    const image = frame.querySelector("img");
+    return {
+      url: new URL(frame.getAttribute("data-case-media"), location.href).href,
+      requested: Boolean(image?.getAttribute("src")),
+    };
+  }))()`);
+  const newlyVisibleMedia = mediaAfterAdvance
+    .filter((media) => media.requested && !initiallyRequestedMedia.includes(media.url))
+    .map((media) => media.url);
+  assert.ok(newlyVisibleMedia.length > 0, "Advancing the rail did not enqueue newly visible case-study media");
+  assert.equal(await receivedImageRequests(newlyVisibleMedia), true, "Newly visible case-study media did not create image network requests");
 
   await dispatchWheel({ deltaX: -120 });
   await delay(700);
   const returned = await evaluate(stateExpression);
   assert.equal(returned.previousDisabled, true);
 
+  await evaluate(`(() => {
+    const carousel = document.querySelector('.case-study-rail [aria-roledescription="carousel"]');
+    carousel.focus();
+    carousel.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+  })()`);
+  await delay(700);
+  assert.ok((await evaluate(stateExpression)).first < start.first - 100);
+
+  await clickUntilDisabled("Previous slide");
+  await delay(700);
   await dispatchWheel({ deltaY: 120, shiftKey: true });
   await delay(700);
   assert.ok((await evaluate(stateExpression)).first < start.first - 100);
@@ -456,8 +533,60 @@ try {
   await clickUntilDisabled("Previous slide");
   await delay(700);
   const reset = await evaluate(stateExpression);
+  const dragOrigin = await evaluate(`(() => {
+    const rect = document.querySelector(".case-study-rail .case-rendition, .case-study-rail .case-interface").getBoundingClientRect();
+    return { x: rect.left + Math.min(rect.width * .72, rect.width - 30), y: rect.top + Math.min(rect.height * .45, 180) };
+  })()`);
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: dragOrigin.x, y: dragOrigin.y });
+  await send("Input.dispatchMouseEvent", { type: "mousePressed", x: dragOrigin.x, y: dragOrigin.y, button: "left", clickCount: 1 });
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: dragOrigin.x - 180, y: dragOrigin.y, button: "left", buttons: 1 });
+  await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: dragOrigin.x - 180, y: dragOrigin.y, button: "left", clickCount: 1 });
+  await delay(700);
+  assert.ok((await evaluate(stateExpression)).first < reset.first - 100, "Drag did not advance the case-study rail");
+
+  await clickUntilDisabled("Previous slide");
+  await delay(700);
+  const mobileViewport = { width: 390, height: 844, deviceScaleFactor: 1, mobile: true };
+  await send("Emulation.setDeviceMetricsOverride", mobileViewport);
+  await navigate(`${baseUrl}/industries?market=uae#selected-work`, "/industries");
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    if (await evaluate(`document.querySelectorAll(".case-study-rail__slide").length > 0`)) break;
+    await delay(100);
+  }
+  const mobileRail = await evaluate(`(() => {
+    const rail = document.querySelector(".case-study-rail");
+    const first = document.querySelector(".case-study-rail__slide");
+    return {
+      controls: rail?.querySelectorAll('button[aria-label$="slide"]').length,
+      details: first?.querySelectorAll(".work-card__details > section").length,
+      touchAction: getComputedStyle(rail?.querySelector('[aria-roledescription="carousel"]')).touchAction,
+    };
+  })()`);
+  assert.equal(mobileRail.controls, 2);
+  assert.equal(mobileRail.details, 4);
+  assert.match(mobileRail.touchAction, /pan-y/);
+  const mobileStart = await evaluate(stateExpression);
+  assert.equal(mobileStart.previousDisabled, true);
+  await clickUntilDisabled("Next slide");
+  await delay(700);
+  const mobileEnd = await evaluate(stateExpression);
+  assert.equal(mobileEnd.nextDisabled, true);
+  assert.ok(mobileEnd.first < mobileStart.first - 100, "Mobile controls did not traverse the rail");
+  await clickUntilDisabled("Previous slide");
+  await delay(700);
+  const mobileReset = await evaluate(stateExpression);
+  assert.equal(mobileReset.previousDisabled, true);
+  assert.ok(Math.abs(mobileReset.first - mobileStart.first) < 2, "Mobile controls did not return to the first case");
+
+  await send("Emulation.setDeviceMetricsOverride", {
+    width: 1366,
+    height: 768,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  const verticalStart = await evaluate(stateExpression);
   const imageCenter = await evaluate(`(() => {
-    const rect = document.querySelector(".case-rendition img").getBoundingClientRect();
+    const rect = document.querySelector(".case-study-rail .case-rendition img, .case-study-rail .case-interface").getBoundingClientRect();
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
   })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: imageCenter.x, y: imageCenter.y });
@@ -470,7 +599,7 @@ try {
   });
   await delay(500);
   const vertical = await evaluate(stateExpression);
-  assert.ok(vertical.scrollY > reset.scrollY);
+  assert.ok(vertical.scrollY > verticalStart.scrollY);
   assert.ok(Math.abs(vertical.first - reset.first) < 2);
 
   const eligibleFullRecord = await evaluate(`fetch("/api/public/content?kind=case-study&market=uae&locale=en&pageSize=100")
@@ -513,7 +642,7 @@ try {
     console.warn("No eligible published full case-study record was delivered; direct /work/:slug preservation check was skipped.");
   }
 
-  console.log("Case-study inline expansion, image containment, carousel endpoints and native vertical scrolling passed.");
+  console.log("Consolidated case-study details, redirects, lazy media, carousel controls, keyboard, drag, mobile and native vertical scrolling passed.");
 } finally {
   socket.close();
   browser.kill("SIGTERM");

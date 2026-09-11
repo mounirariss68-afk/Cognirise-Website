@@ -7,6 +7,7 @@ export type RelatedCase = {
   publicEvidenceStatus?: string;
   approvedForIndustry?: boolean;
   disclosure?: string;
+  visibility?: string;
 };
 
 export function caseSectors(item: RelatedCase) {
@@ -17,11 +18,25 @@ export function normalizeCaseFilterValue(value: string) {
   return value === "All" ? "all" : value;
 }
 
-export function directlyRelatedCases<T extends RelatedCase>(cases: T[], industrySlug: string): T[] {
-  if (industrySlug === "energy-resources" || industrySlug === "education") return [];
-  return cases.filter((item) =>
-    item.approvedForIndustry !== false &&
-    item.publicEvidenceStatus === "approved" &&
-    (item.relatedIndustries || item.industrySlugs || []).includes(industrySlug) &&
-    item.disclosure !== "restricted");
+/**
+ * The public endpoint already limits this collection to published records for
+ * the selected market. Keep the remaining publication gates together here so
+ * the overview cannot accidentally expose a restricted, hidden, or
+ * unapproved record when the CMS payload changes.
+ */
+export function approvedPublishedCases<T extends RelatedCase>(cases: T[]): T[] {
+  const seen = new Set<string>();
+  return cases.filter((item) => {
+    const slug = item.slug?.trim();
+    if (
+      !slug
+      || seen.has(slug)
+      || item.disclosure === "restricted"
+      || item.visibility === "hidden"
+      || item.approvedForIndustry === false
+      || item.publicEvidenceStatus !== "approved"
+    ) return false;
+    seen.add(slug);
+    return true;
+  });
 }

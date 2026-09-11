@@ -3,6 +3,9 @@ import test from "node:test";
 import {
   assessCaseMediaPin,
   copyPublishedCasePayload,
+  hasExactCasePublicationPin,
+  hasExpectedCaseVisual,
+  mergePublishedCaseVisualPayload,
   historicalCasePinReceiptIsValid,
   planCasePublicationRefreshEntry,
   planPublishedPinRepair,
@@ -85,6 +88,77 @@ test("a refresh copies the published payload rather than mutating it", () => {
   assert.notEqual(copied.content, published.content);
   copied.content.title = "Changed copy";
   assert.equal(published.content.title, "Editor's title");
+});
+
+test("a refresh preserves newer editorial fields while replacing only visual governance", () => {
+  const published = {
+    summary: "Editor-approved newer summary",
+    content: {
+      mandate: "Editor-approved mandate",
+      outcomes: ["Editor-approved outcome"],
+      visual: { caption: "Prior artwork", altText: "Prior visual" },
+    },
+    mediaIds: ["old-asset"],
+  };
+  const replacement = {
+    summary: "Baseline summary that must not overwrite edits",
+    content: {
+      mandate: "Baseline mandate that must not overwrite edits",
+      visual: { caption: "New artwork", altText: "New visual" },
+    },
+    mediaIds: ["new-asset"],
+  };
+  const merged = mergePublishedCaseVisualPayload(published, replacement, "new-asset");
+
+  assert.equal(merged.summary, "Editor-approved newer summary");
+  assert.equal((merged.content as any).mandate, "Editor-approved mandate");
+  assert.deepEqual((merged.content as any).outcomes, ["Editor-approved outcome"]);
+  assert.deepEqual((merged.content as any).visual, replacement.content.visual);
+  assert.deepEqual(merged.mediaIds, ["new-asset"]);
+  assert.deepEqual(published.mediaIds, ["old-asset"]);
+  assert.deepEqual(published.content.visual, { caption: "Prior artwork", altText: "Prior visual" });
+});
+
+test("receipted and unchanged-binary fresh-install replays require the exact approved visual and media pin", () => {
+  const replacement = {
+    content: { visual: { caption: "Approved cinematic scene", altText: "Approved visual" } },
+    mediaIds: ["new-asset"],
+  };
+  const editedPublished = {
+    content: {
+      title: "Editor-updated title",
+      visual: { caption: "Approved cinematic scene", altText: "Approved visual" },
+    },
+    mediaIds: ["new-asset"],
+  };
+  assert.equal(hasExpectedCaseVisual(editedPublished, replacement), true);
+  assert.equal(hasExpectedCaseVisual({
+    ...editedPublished,
+    content: { ...editedPublished.content, visual: { caption: "Unapproved swap" } },
+  }, replacement), false);
+
+  const exact = {
+    expectedAssetId: "new-asset",
+    expectedMediaVersionId: "new-version",
+    expectedChecksum: "new-checksum",
+    mediaIds: ["new-asset"],
+    references: [{ assetId: "new-asset", mediaVersionId: "new-version" }],
+    pinnedVersion: {
+      id: "new-version",
+      assetId: "new-asset",
+      checksum: "new-checksum",
+      storageKey: "cms-media/inventory-new-checksum",
+    },
+  };
+  assert.equal(hasExactCasePublicationPin(exact), true);
+  assert.equal(hasExactCasePublicationPin({
+    ...exact,
+    references: [{ assetId: "new-asset", mediaVersionId: "other-version" }],
+  }), false);
+  assert.equal(hasExactCasePublicationPin({
+    ...exact,
+    pinnedVersion: { ...exact.pinnedVersion, checksum: "other-checksum" },
+  }), false);
 });
 
 test("failed publication, evidence, or media gates never append", () => {

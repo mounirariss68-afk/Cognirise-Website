@@ -1,8 +1,7 @@
 import { IndustryEditorial } from "@/components/industries/IndustryEditorial";
 import { BankingEditorial } from "@/components/industries/BankingEditorial";
 import { INDUSTRIES, type IndustryContent } from "@/content/industries";
-import { contentRecord, useCmsEntry, useCmsCollection, type CmsRecord } from "@/lib/cms";
-import { type PublicCaseStudy } from "@/components/work/case-study-ui";
+import { contentRecord, useCmsEntry, type CmsRecord } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import type { IndustryContent as CmsIndustryContent } from "@workspace/api-zod";
 
@@ -12,11 +11,6 @@ export default function IndustryBanking() {
   const published = cms.data ? contentRecord(cms.data, "industry") : null;
 
   const view = published ? { ...baseIndustry, ...published, slug: baseIndustry.slug } as IndustryContent & Partial<CmsRecord<CmsIndustryContent>> : baseIndustry;
-
-  const caseStudies = useCmsCollection<PublicCaseStudy>("case-study", [], (item) => {
-    const record = contentRecord(item, "case-study") as PublicCaseStudy;
-    return record.disclosure === "restricted" ? null : record;
-  });
 
   const pov = view.bankingPov;
   useDynamicMetadata(
@@ -49,7 +43,7 @@ export default function IndustryBanking() {
   }
 
   if (pov) {
-    return <BankingEditorial view={view} cases={caseStudies.data} />;
+    return <BankingEditorial view={view} />;
   }
 
   return <IndustryEditorial industry={view} />;

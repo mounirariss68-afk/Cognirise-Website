@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { PassThrough, Readable, pipeline as streamPipeline } from "node:stream";
-import { once } from "node:events";
+import { getEventListeners, once } from "node:events";
 import test from "node:test";
 import express from "express";
 import cookieParser from "cookie-parser";
@@ -297,6 +297,34 @@ test("early consumer abort lets GCS attach then cancels upstream without drainin
   assert.equal(networkBody.destroyed, true);
   assert.equal(sdkUserStream.readableLength, 0);
   assert.ok(sdkUserStream.readableLength <= sdkUserStream.readableHighWaterMark);
+});
+
+test("late upstream abort errors stay handled after a media consumer closes", async () => {
+  const sdkUserStream = new PassThrough();
+  const storageErrorListener = () => {};
+  sdkUserStream.on("error", storageErrorListener);
+  const consumer = openMediaReadStream(sdkUserStream);
+  const adapterErrorListeners = getEventListeners(consumer, "error");
+  assert.ok(adapterErrorListeners.length >= 1);
+
+  consumer.destroy();
+  await once(consumer, "close");
+  const retainedConsumerErrorListeners = getEventListeners(consumer, "error");
+  assert.equal(retainedConsumerErrorListeners.length, 1);
+  sdkUserStream.emit("response", {});
+  await Promise.resolve();
+  assert.equal(sdkUserStream.destroyed, true);
+
+  const upstreamClosed = once(sdkUserStream, "close");
+  sdkUserStream.destroy(Object.assign(new Error("aborted"), { code: "ECONNRESET" }));
+  await upstreamClosed;
+
+  assert.deepEqual(getEventListeners(sdkUserStream, "error"), [storageErrorListener]);
+  assert.equal(getEventListeners(sdkUserStream, "response").length, 0);
+  assert.equal(getEventListeners(sdkUserStream, "data").length, 0);
+  assert.equal(getEventListeners(sdkUserStream, "end").length, 0);
+  assert.equal(getEventListeners(sdkUserStream, "close").length, 0);
+  assert.deepEqual(getEventListeners(consumer, "error"), retainedConsumerErrorListeners);
 });
 
 test("motion collection requires video metadata and rejects video elsewhere", () => {

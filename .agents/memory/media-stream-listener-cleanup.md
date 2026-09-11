@@ -14,3 +14,9 @@ Do not expose a Google Storage SDK user stream directly to an aborting HTTP pipe
 **Why:** With Google Storage 8 and Node 24, a page reload could destroy the SDK user stream before its response callback ran. The callback then threw `ERR_STREAM_UNABLE_TO_PIPE` outside the route's awaited pipeline and crashed the API.
 
 **How to apply:** GCS emits its response event before attaching the internal pipeline: defer cancellation to a microtask after that callback. First-data readiness is a fallback for ordinary readables. Never drain the entire remaining file after abort; public videos would amplify cheap cancelled requests into large storage reads. Include “consumer aborts, then upstream response arrives” and bounded upstream cancellation in regression coverage.
+
+Keep a bounded adapter-owned error listener on the pass-through after response-pipeline cleanup.
+
+**Why:** Upstream cancellation can report a delayed connection-reset error after the HTTP consumer has finished cleaning up. Without an adapter listener, that late error becomes an unhandled event and crashes the API.
+
+**How to apply:** Distinguish adapter-lifetime listeners from response-lifetime listeners; clean only the latter when delivery ends and exercise delayed upstream errors after consumer abort.

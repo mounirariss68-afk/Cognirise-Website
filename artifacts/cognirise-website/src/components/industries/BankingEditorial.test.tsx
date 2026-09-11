@@ -58,3 +58,9 @@ test("Banking editorial resolves only pinned supporting artwork with fixed dimen
   assert.match(html, /width="1200"/);
   assert.match(html, /height="1200"/);
 });
+
+test("Banking editorial sends its selected-work link to the consolidated overview", () => {
+  const html = render();
+  assert.match(html, /href="\/industries#selected-work"/);
+  assert.doesNotMatch(html, /industry-case-rail|case-study-rail/);
+});
