@@ -1,0 +1,30 @@
+{
+  "environment": "task development only",
+  "scope": "Aggregated browser checks; initial managed browser pass plus only the blocked storage and refresh continuation in installed Chromium through CDP.",
+  "keyboardBrowseFocus": true,
+  "multiFileBrowseAndDrop": true,
+  "mixedUnsupportedBatchDoesNotBlockValidFiles": true,
+  "directoryDropRejected": true,
+  "metadataAndCollectionIsolationAcrossTabChanges": true,
+  "realUploadsAndMetadataIsolation": true,
+  "partialPutFailureAndRetry": true,
+  "completedItemsNotRetransferred": true,
+  "finalizeOnlyRefreshRecovery": true,
+  "exactByteDraftReselection": true,
+  "viewerUploadControlsHidden": true,
+  "viewerUploadApiReturns403": true,
+  "unauthenticatedMediaApiReturns401": true,
+  "realCompletedFixtureUploadsAcrossChecks": 3,
+  "temporaryUsersSessionsAndMediaCleaned": true,
+  "screenshots": [
+    "screenshots/media-library-task-295.jpg",
+    "screenshots/media-library-task-295-mobile.jpg"
+  ],
+  "notes": [
+    "The managed testing browser could not restart its context; the remaining checks used the installed Chromium, not a second full pass.",
+    "Real storage checks exposed and verified fixes for sidecar URL signing and a GCS preview abort-before-response crash.",
+    "The narrow viewport screenshot exposed filename squeezing; queue cards now stack their actions beneath the filename on narrow screens.",
+    "Screenshots show temporary test fixtures and the expected wrong-file-reselection error toast; those fixtures were removed afterward.",
+    "No media was approved or published; production and post-merge main-CMS state were not verified."
+  ]
+}

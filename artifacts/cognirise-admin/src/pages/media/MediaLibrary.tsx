@@ -56,10 +56,11 @@ import {
   CMS_HERO_DOCUMENT_SLUGS,
   type CmsHeroFilmSlot,
 } from "@workspace/api-zod";
+import { BatchUploadZone } from "./BatchUploadZone";
 
-type MediaCollection = "website" | "linkedin" | "motion";
-type LinkedInAssetKind = "post" | "header";
-type CampaignMetadata = {
+export type MediaCollection = "website" | "linkedin" | "motion";
+export type LinkedInAssetKind = "post" | "header";
+export type CampaignMetadata = {
   campaign?: string;
   edition?: string;
   title?: string;
@@ -67,9 +68,9 @@ type CampaignMetadata = {
   pulseSource?: string;
   approvedUse?: string;
 };
-type CampaignField = keyof CampaignMetadata;
-type MotionVariant = "landscape" | "portrait" | "square" | "mobile" | "desktop";
-type MotionMetadata = {
+export type CampaignField = keyof CampaignMetadata;
+export type MotionVariant = "landscape" | "portrait" | "square" | "mobile" | "desktop";
+export type MotionMetadata = {
   groupId: string;
   variant: MotionVariant;
   posterMediaId?: string;
@@ -84,8 +85,8 @@ type MotionMetadata = {
     audioDescription?: string;
   };
 };
-type MotionTextField = "groupId" | "posterMediaId" | "reducedMotionMediaId" | "captionsMediaId" | "transcript" | "audioDescription";
-type ExtendedMediaAsset = {
+export type MotionTextField = "groupId" | "posterMediaId" | "reducedMotionMediaId" | "captionsMediaId" | "transcript" | "audioDescription";
+export type ExtendedMediaAsset = {
   id: string;
   versionId: string;
   filename: string;
@@ -345,12 +346,12 @@ function HeroAssignments() {
   );
 }
 
-const PAGE_SIZE = 40;
-const STANDARD_UPLOAD_LIMIT = 50 * 1024 * 1024;
-const VIDEO_UPLOAD_LIMIT = 250 * 1024 * 1024;
-const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/avif,application/pdf";
-const VIDEO_ACCEPT = "video/mp4,video/webm";
-const EMPTY_CAMPAIGN: Record<CampaignField, string> = {
+export const PAGE_SIZE = 40;
+export const STANDARD_UPLOAD_LIMIT = 50 * 1024 * 1024;
+export const VIDEO_UPLOAD_LIMIT = 250 * 1024 * 1024;
+export const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/avif,application/pdf";
+export const VIDEO_ACCEPT = "video/mp4,video/webm";
+export const EMPTY_CAMPAIGN: Record<CampaignField, string> = {
   campaign: "",
   edition: "",
   title: "",
@@ -358,7 +359,7 @@ const EMPTY_CAMPAIGN: Record<CampaignField, string> = {
   pulseSource: "",
   approvedUse: "",
 };
-const CAMPAIGN_FIELDS: Array<{ key: CampaignField; label: string; maxLength: number; placeholder: string; multiline?: boolean }> = [
+export const CAMPAIGN_FIELDS: Array<{ key: CampaignField; label: string; maxLength: number; placeholder: string; multiline?: boolean }> = [
   { key: "campaign", label: "Campaign", maxLength: 120, placeholder: "e.g. Human + Agent Advantage" },
   { key: "edition", label: "Edition", maxLength: 80, placeholder: "e.g. UAE launch" },
   { key: "title", label: "Title", maxLength: 160, placeholder: "Public-facing asset title" },
@@ -366,7 +367,7 @@ const CAMPAIGN_FIELDS: Array<{ key: CampaignField; label: string; maxLength: num
   { key: "pulseSource", label: "Pulse source", maxLength: 160, placeholder: "Source issue, article, or research" },
   { key: "approvedUse", label: "Approved use", maxLength: 300, placeholder: "Where and how this asset may be used", multiline: true },
 ];
-const EMPTY_MOTION: Record<MotionTextField, string> = {
+export const EMPTY_MOTION: Record<MotionTextField, string> = {
   groupId: "",
   posterMediaId: "",
   reducedMotionMediaId: "",
@@ -374,7 +375,7 @@ const EMPTY_MOTION: Record<MotionTextField, string> = {
   transcript: "",
   audioDescription: "",
 };
-const MOTION_FIELDS: Array<{ key: MotionTextField; label: string; maxLength: number; placeholder: string; multiline?: boolean }> = [
+export const MOTION_FIELDS: Array<{ key: MotionTextField; label: string; maxLength: number; placeholder: string; multiline?: boolean }> = [
   { key: "groupId", label: "Asset group", maxLength: 120, placeholder: "e.g. homepage-hero" },
   { key: "posterMediaId", label: "Poster media ID", maxLength: 120, placeholder: "Media library ID for the poster image" },
   { key: "reducedMotionMediaId", label: "Reduced-motion fallback ID", maxLength: 120, placeholder: "Media library ID for the static fallback" },
@@ -383,22 +384,22 @@ const MOTION_FIELDS: Array<{ key: MotionTextField; label: string; maxLength: num
   { key: "audioDescription", label: "Audio description", maxLength: 2000, placeholder: "Describe essential visual information", multiline: true },
 ];
 
-function assetCampaign(asset: ExtendedMediaAsset) {
+export function assetCampaign(asset: ExtendedMediaAsset) {
   return asset.campaignMetadata ?? {};
 }
 
-function cleanCampaignMetadata(values: Record<CampaignField, string>): CampaignMetadata | undefined {
+export function cleanCampaignMetadata(values: Record<CampaignField, string>): CampaignMetadata | undefined {
   const entries = CAMPAIGN_FIELDS
     .map(({ key }) => [key, values[key].trim()] as const)
     .filter(([, value]) => value.length > 0);
   return entries.length ? Object.fromEntries(entries) : undefined;
 }
 
-function buildMotionMetadata(
+export function buildMotionMetadata(
   values: Record<MotionTextField, string>,
   variant: MotionVariant,
   flags: { autoplay: boolean; loop: boolean; decorative: boolean; hasAudio: boolean },
-): MotionMetadata {
+) {
   const optional = (key: MotionTextField) => values[key].trim() || undefined;
   return {
     groupId: values.groupId.trim(),
@@ -522,12 +523,6 @@ export default function MediaLibrary() {
   const [linkedinKind, setLinkedinKind] = useState<LinkedInAssetKind | "all">("all");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [brokenPreviews, setBrokenPreviews] = useState<Record<string, true>>({});
-  const [uploadCollection, setUploadCollection] = useState<MediaCollection>("website");
-  const [uploadLinkedinKind, setUploadLinkedinKind] = useState<LinkedInAssetKind>("post");
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [motionSetupOpen, setMotionSetupOpen] = useState(false);
-  const [finalizeAsset, setFinalizeAsset] = useState<ExtendedMediaAsset | null>(null);
   const [title, setTitle] = useState("");
   const [usage, setUsage] = useState("");
   const [altText, setAltText] = useState("");
@@ -540,11 +535,9 @@ export default function MediaLibrary() {
   const [reviewAsset, setReviewAsset] = useState<ExtendedMediaAsset | null>(null);
   const [reviewDecision, setReviewDecision] = useState<"approve" | "reject" | null>(null);
   const [downloadingAssetId, setDownloadingAssetId] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const requestUpload = useRequestMediaUpload();
-  const finalizeUpload = useFinalizeMediaUpload();
   const updateMedia = useUpdateMedia();
   const reviewMedia = useReviewMedia();
   const { data: session } = useGetSession();
@@ -574,108 +567,8 @@ export default function MediaLibrary() {
   const selectCollection = (nextCollection: string) => {
     const next = nextCollection as MediaCollection;
     setCollection(next);
-    setUploadCollection(next);
     setPage(1);
     setBrokenPreviews({});
-  };
-
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const selectedCollection = uploadCollection;
-    const isVideoUpload = selectedCollection === "motion";
-    if (isVideoUpload && !["video/mp4", "video/webm"].includes(file.type)) {
-      toast({ title: "Unsupported video", description: "Videos & animations accepts MP4 and WebM files only.", variant: "destructive" });
-      return;
-    }
-    if (isVideoUpload && !motionFields.groupId.trim()) {
-      toast({ title: "Asset group required", description: "Configure a group and variant before uploading motion media.", variant: "destructive" });
-      return;
-    }
-    if (!isVideoUpload && !IMAGE_ACCEPT.split(",").includes(file.type)) {
-      toast({ title: "Unsupported file", description: "Website and LinkedIn uploads accept JPEG, PNG, WebP, AVIF, and PDF files.", variant: "destructive" });
-      return;
-    }
-    const uploadLimit = isVideoUpload ? VIDEO_UPLOAD_LIMIT : STANDARD_UPLOAD_LIMIT;
-    if (file.size > uploadLimit) {
-      toast({
-        title: "File too large",
-        description: isVideoUpload ? "Maximum video file size is 250MB." : "Maximum file size is 50MB.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUploading(true);
-    setUploadProgress(10);
-    try {
-      const requestData = {
-        filename: file.name,
-        mimeType: file.type,
-        size: file.size,
-        collection: selectedCollection,
-        linkedinAssetKind: selectedCollection === "linkedin" ? uploadLinkedinKind : undefined,
-        motionMetadata: selectedCollection === "motion"
-          ? buildMotionMetadata(motionFields, motionVariant, motionFlags)
-          : undefined,
-      };
-      const response = await requestUpload.mutateAsync({ data: requestData });
-      setUploadProgress(40);
-
-      const putResponse = await fetch(response.uploadUrl, {
-        method: response.method,
-        headers: response.headers,
-        body: file,
-      });
-      if (!putResponse.ok) throw new Error("Failed to upload to storage");
-
-      setUploadProgress(80);
-      setFinalizeAsset({ ...(response.media as ExtendedMediaAsset), collection: selectedCollection });
-      setTitle((current) => current.trim() || file.name.replace(/\.[^.]+$/, ""));
-      setAltText("");
-      setCredit("");
-      setCampaignFields(EMPTY_CAMPAIGN);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "An error occurred during upload";
-      toast({ title: "Upload failed", description: message, variant: "destructive" });
-    } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  const handleFinalize = async () => {
-    if (!finalizeAsset) return;
-    try {
-      const finalizeData = {
-        objectPath: finalizeAsset.objectPath,
-        altText: altText || undefined,
-        caption: usage || undefined,
-        credit: credit || undefined,
-        campaignMetadata: finalizeAsset.collection === "linkedin" ? cleanCampaignMetadata(campaignFields) : undefined,
-        motionMetadata: finalizeAsset.collection === "motion"
-          ? buildMotionMetadata(motionFields, motionVariant, motionFlags)
-          : undefined,
-      };
-      await finalizeUpload.mutateAsync({
-        mediaId: finalizeAsset.id,
-        data: finalizeData,
-      });
-      if (finalizeAsset.collection === "motion" && title.trim()) {
-        const extension = finalizeAsset.filename.match(/\.[^.]+$/)?.[0] ?? "";
-        await updateMedia.mutateAsync({
-          mediaId: finalizeAsset.id,
-          data: { filename: `${title.trim()}${extension}` },
-        });
-      }
-      toast({ title: "Asset finalized successfully" });
-      setFinalizeAsset(null);
-      await queryClient.invalidateQueries({ queryKey: getListMediaQueryKey() });
-    } catch (error: unknown) {
-      const detail = typeof error === "object" && error && "error" in error ? String(error.error) : "An error occurred";
-      toast({ title: "Finalization failed", description: detail, variant: "destructive" });
-    }
   };
 
   const openEditor = (asset: ExtendedMediaAsset) => {
@@ -953,50 +846,10 @@ export default function MediaLibrary() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Media Library</h1>
           <p className="mt-1 text-sm font-mono text-muted-foreground">Managed website, LinkedIn, and motion assets</p>
         </div>
-        <div className="flex flex-wrap items-end gap-2">
-          <div className="space-y-1">
-            <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">New upload collection</Label>
-            <Select value={uploadCollection} onValueChange={(value) => setUploadCollection(value as MediaCollection)}>
-              <SelectTrigger className="w-36 bg-background" aria-label="New upload collection">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="website">Website</SelectItem>
-                <SelectItem value="linkedin">LinkedIn</SelectItem>
-                 <SelectItem value="motion">Videos &amp; animations</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {uploadCollection === "linkedin" && (
-            <div className="space-y-1">
-              <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">LinkedIn asset kind</Label>
-              <Select value={uploadLinkedinKind} onValueChange={(value) => setUploadLinkedinKind(value as LinkedInAssetKind)}>
-                <SelectTrigger className="w-32 bg-background" aria-label="LinkedIn asset kind">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="post">Post image</SelectItem>
-                  <SelectItem value="header">Profile header</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            onChange={handleFileSelect}
-            accept={uploadCollection === "motion" ? VIDEO_ACCEPT : IMAGE_ACCEPT}
-          />
-          <Button
-            className="gap-2 text-xs font-mono uppercase tracking-wider"
-            onClick={() => uploadCollection === "motion" ? setMotionSetupOpen(true) : fileInputRef.current?.click()}
-            disabled={isUploading}
-          >
-            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
-            {isUploading ? `Uploading ${uploadProgress}%` : "Upload asset"}
-          </Button>
-        </div>
+      </div>
+
+      <div className="mb-8">
+        <BatchUploadZone />
       </div>
 
       <Tabs value={collection} onValueChange={selectCollection} className="mb-3">
@@ -1233,77 +1086,6 @@ export default function MediaLibrary() {
         )}
       </div>
 
-      <Dialog open={motionSetupOpen} onOpenChange={setMotionSetupOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Configure motion upload</DialogTitle>
-            <DialogDescription>
-              Set the required group, variant, and accessibility decisions before selecting an MP4 or WebM file.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">{motionForm}</div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setMotionSetupOpen(false)}>Cancel</Button>
-            <Button
-              disabled={!motionFields.groupId.trim()}
-              onClick={() => {
-                setMotionSetupOpen(false);
-                fileInputRef.current?.click();
-              }}
-            >
-              Choose MP4 or WebM
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={Boolean(finalizeAsset)} onOpenChange={(open) => !open && setFinalizeAsset(null)}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Asset metadata</DialogTitle>
-            <DialogDescription className="mt-1 text-xs font-mono">
-               Add governed accessibility, rights, and usage context before publishing the asset.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="rounded-md border border-border bg-muted/30 p-3 text-xs font-mono">
-              Collection: {finalizeAsset?.collection === "linkedin"
-                ? `LinkedIn • ${uploadLinkedinKind === "header" ? "Profile header" : "Post image"}`
-                : finalizeAsset?.collection === "motion" ? "Videos & animations" : "Website"}
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Alt text</Label>
-              <Textarea value={altText} onChange={(event) => setAltText(event.target.value)} placeholder="Describe the image for screen readers" className="resize-none" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Credit / rights</Label>
-              <Input value={credit} onChange={(event) => setCredit(event.target.value)} placeholder="e.g. Internal, Getty Images" />
-            </div>
-            {finalizeAsset?.collection === "linkedin" && (
-              <div className="border-t border-border pt-4">
-                <p className="mb-4 text-xs font-mono uppercase tracking-wider text-primary">LinkedIn campaign details</p>
-                {campaignForm}
-              </div>
-            )}
-            {finalizeAsset?.collection === "motion" && (
-              <div className="border-t border-border pt-4">
-                <p className="mb-2 text-xs font-mono uppercase tracking-wider text-primary">Video &amp; animation details</p>
-                <p className="mb-4 text-xs text-muted-foreground">
-                  Record a poster and static fallback media ID so motion has a governed loading and reduced-motion alternative.
-                </p>
-                {motionForm}
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setFinalizeAsset(null)}>Skip for now</Button>
-            <Button onClick={handleFinalize} disabled={finalizeUpload.isPending}>
-              {finalizeUpload.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save metadata
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={Boolean(editingAsset)} onOpenChange={(open) => !open && setEditingAsset(null)}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">

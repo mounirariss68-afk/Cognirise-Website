@@ -12,6 +12,7 @@ const adminRoot = new URL("../../../", import.meta.url);
 
 test("media library separates website, LinkedIn, and video collections in list and upload contracts", async () => {
   const source = await readFile(new URL("src/pages/media/MediaLibrary.tsx", adminRoot), "utf8");
+  const batchZoneSource = await readFile(new URL("src/pages/media/BatchUploadZone.tsx", adminRoot), "utf8");
 
   assert.match(source, /type MediaCollection = "website" \| "linkedin" \| "motion"/);
   assert.match(source, /collection,/);
@@ -23,23 +24,26 @@ test("media library separates website, LinkedIn, and video collections in list a
   assert.match(source, /collectionCounts\.website/);
   assert.match(source, /collectionCounts\.linkedin/);
   assert.match(source, /collectionCounts\.motion/);
-  assert.match(source, /<SelectItem value="motion">Videos &amp; animations<\/SelectItem>/);
-  assert.match(source, /<SelectItem value="post">Post image<\/SelectItem>/);
-  assert.match(source, /<SelectItem value="header">Profile header<\/SelectItem>/);
+  assert.match(batchZoneSource, /<SelectItem value="motion">Videos &amp; animations<\/SelectItem>/);
+  assert.match(batchZoneSource, /<SelectItem value="post">Post image<\/SelectItem>/);
+  assert.match(batchZoneSource, /<SelectItem value="header">Profile header<\/SelectItem>/);
 });
 
 test("video uploads accept only MP4 and WebM with an explicit 250MB limit", async () => {
   const source = await readFile(new URL("src/pages/media/MediaLibrary.tsx", adminRoot), "utf8");
+  const batchZoneSource = await readFile(new URL("src/pages/media/BatchUploadZone.tsx", adminRoot), "utf8");
 
   assert.match(source, /const VIDEO_UPLOAD_LIMIT = 250 \* 1024 \* 1024/);
   assert.match(source, /const VIDEO_ACCEPT = "video\/mp4,video\/webm"/);
-  assert.match(source, /\["video\/mp4", "video\/webm"\]\.includes\(file\.type\)/);
-  assert.match(source, /Maximum video file size is 250MB/);
-  assert.match(source, /accept=\{uploadCollection === "motion" \? VIDEO_ACCEPT : IMAGE_ACCEPT\}/);
+  assert.match(batchZoneSource, /MP4, WebM up to 250 MiB/);
+  assert.match(batchZoneSource, /accept=\{collection === "motion" \? VIDEO_ACCEPT : IMAGE_ACCEPT\}/);
+  assert.match(batchZoneSource, /multiple/);
 });
 
 test("video assets have a playable, accessible preview and governed metadata", async () => {
   const source = await readFile(new URL("src/pages/media/MediaLibrary.tsx", adminRoot), "utf8");
+  const batchZoneSource = await readFile(new URL("src/pages/media/BatchUploadZone.tsx", adminRoot), "utf8");
+  const queueSource = await readFile(new URL("src/pages/media/upload-queue-engine.ts", adminRoot), "utf8");
 
   assert.match(source, /<video/);
   assert.match(source, /controls/);
@@ -48,12 +52,14 @@ test("video assets have a playable, accessible preview and governed metadata", a
   for (const field of ["groupId", "variant", "posterMediaId", "reducedMotionMediaId", "captionsMediaId", "transcript", "audioDescription"]) {
     assert.match(source, new RegExp(`${field}:`));
   }
-  assert.match(source, /motionMetadata: finalizeAsset\.collection === "motion"/);
-  assert.match(source, /caption: usage \|\| undefined/);
-  assert.match(source, /credit: credit \|\| undefined/);
-  assert.match(source, /Configure motion upload/);
+  assert.match(queueSource, /item\.collection === "motion"/);
+  assert.match(queueSource, /caption: item\.usage \|\| undefined/);
+  assert.match(queueSource, /credit: item\.credit \|\| undefined/);
+  const fieldsSource = await readFile(new URL("src/pages/media/QueuedMetadataFields.tsx", adminRoot), "utf8");
+  assert.match(fieldsSource, /Motion metadata/);
+  assert.match(fieldsSource, /MOTION_FIELDS\.map/);
   assert.match(source, /Edit video metadata/);
-  assert.match(source, /buildMotionMetadata\(motionFields, motionVariant, motionFlags\)/);
+  assert.match(queueSource, /buildMotionMetadata\(item\.motionFields/);
 });
 
 test("LinkedIn media exposes campaign, dimensions, accessibility, rights and status metadata", async () => {
@@ -71,9 +77,10 @@ test("LinkedIn media exposes campaign, dimensions, accessibility, rights and sta
 
 test("LinkedIn-only campaign metadata is captured during finalization and remains editable", async () => {
   const source = await readFile(new URL("src/pages/media/MediaLibrary.tsx", adminRoot), "utf8");
+  const queueSource = await readFile(new URL("src/pages/media/upload-queue-engine.ts", adminRoot), "utf8");
 
-  assert.match(source, /finalizeAsset\?\.collection === "linkedin"/);
-  assert.match(source, /campaignMetadata: finalizeAsset\.collection === "linkedin"/);
+  assert.match(queueSource, /item\.collection === "linkedin"/);
+  assert.match(queueSource, /campaignMetadata: item\.collection === "linkedin"/);
   assert.match(source, /useUpdateMedia/);
   assert.match(source, /Edit LinkedIn campaign metadata/);
   assert.match(source, /maxLength=\{field\.maxLength\}/);

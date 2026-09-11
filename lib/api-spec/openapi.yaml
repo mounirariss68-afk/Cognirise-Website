@@ -1103,6 +1103,16 @@ paths:
       security:
         - cookieAuth: []
           csrfToken: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Retry key scoped to the authenticated user. An identical retry returns the same pending asset with a fresh signed URL; reuse with different input or after completion is rejected.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+            pattern: '^[\x21-\x7E]+$'
       requestBody:
         required: true
         content:
@@ -1116,6 +1126,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MediaUpload"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /media/{mediaId}:
     parameters:
       - $ref: "#/components/parameters/MediaId"
@@ -1241,6 +1253,31 @@ paths:
           description: Requested byte range is not satisfiable
           headers:
             Content-Range: { schema: { type: string } }
+  /media/{mediaId}/renew-upload:
+    post:
+      operationId: renewMediaUpload
+      tags: [media]
+      summary: Issue a fresh signed URL for an existing pending upload
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - $ref: "#/components/parameters/MediaId"
+      responses:
+        "200":
+          description: Upload target renewed without creating a new asset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaUpload"
+        "403":
+          description: Upload renewal is not permitted for this user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /media/{mediaId}/review:
     post:
       operationId: reviewMedia

@@ -7394,6 +7394,16 @@ export const ListMediaResponse = zod.object({
 /**
  * @summary Request a direct upload target
  */
+export const requestMediaUploadHeaderIdempotencyKeyMax = 200;
+
+
+export const requestMediaUploadHeaderIdempotencyKeyRegExp = new RegExp('^[\\x21-\\x7E]+$');
+
+
+export const RequestMediaUploadHeader = zod.object({
+  "Idempotency-Key": zod.string().min(1).max(requestMediaUploadHeaderIdempotencyKeyMax).regex(requestMediaUploadHeaderIdempotencyKeyRegExp).optional().describe('Retry key scoped to the authenticated user. An identical retry returns the same pending asset with a fresh signed URL; reuse with different input or after completion is rejected.')
+})
+
 export const requestMediaUploadBodyFilenameMax = 255;
 
 export const requestMediaUploadBodyMimeTypeMax = 120;
@@ -7939,6 +7949,127 @@ export const DownloadMediaParams = zod.object({
 })
 
 export const DownloadMediaResponse = zod.unknown()
+
+
+/**
+ * @summary Issue a fresh signed URL for an existing pending upload
+ */
+export const RenewMediaUploadParams = zod.object({
+  "mediaId": zod.coerce.string()
+})
+
+export const renewMediaUploadResponseMediaSizeMin = 0;
+export const renewMediaUploadResponseMediaSizeMultipleOf = 1;
+
+export const renewMediaUploadResponseMediaWidthMultipleOf = 1;
+
+export const renewMediaUploadResponseMediaHeightMultipleOf = 1;
+
+export const renewMediaUploadResponseMediaDurationMin = 0;
+
+export const renewMediaUploadResponseMediaCampaignMetadataOneCampaignMax = 120;
+
+
+export const renewMediaUploadResponseMediaCampaignMetadataOneCampaignRegExp = new RegExp('\\S');
+export const renewMediaUploadResponseMediaCampaignMetadataOneEditionMax = 80;
+
+
+export const renewMediaUploadResponseMediaCampaignMetadataOneEditionRegExp = new RegExp('\\S');
+export const renewMediaUploadResponseMediaCampaignMetadataOneTitleMax = 160;
+
+
+export const renewMediaUploadResponseMediaCampaignMetadataOneTitleRegExp = new RegExp('\\S');
+export const renewMediaUploadResponseMediaCampaignMetadataOnePurposeMax = 300;
+
+
+export const renewMediaUploadResponseMediaCampaignMetadataOnePurposeRegExp = new RegExp('\\S');
+export const renewMediaUploadResponseMediaCampaignMetadataOnePulseSourceMax = 160;
+
+
+export const renewMediaUploadResponseMediaCampaignMetadataOnePulseSourceRegExp = new RegExp('\\S');
+export const renewMediaUploadResponseMediaCampaignMetadataOneApprovedUseMax = 300;
+
+
+export const renewMediaUploadResponseMediaCampaignMetadataOneApprovedUseRegExp = new RegExp('\\S');
+export const renewMediaUploadResponseMediaMotionMetadataOneGroupIdMax = 120;
+
+
+export const renewMediaUploadResponseMediaMotionMetadataOneGroupIdRegExp = new RegExp('\\S');
+
+
+export const renewMediaUploadResponseMediaMotionMetadataOneAutoplayDefault = false;
+export const renewMediaUploadResponseMediaMotionMetadataOneLoopDefault = false;
+export const renewMediaUploadResponseMediaMotionMetadataOneAccessibilityTranscriptMax = 10000;
+
+
+export const renewMediaUploadResponseMediaMotionMetadataOneAccessibilityTranscriptRegExp = new RegExp('\\S');
+export const renewMediaUploadResponseMediaMotionMetadataOneAccessibilityAudioDescriptionMax = 2000;
+
+
+export const renewMediaUploadResponseMediaMotionMetadataOneAccessibilityAudioDescriptionRegExp = new RegExp('\\S');
+export const renewMediaUploadResponseMediaFocalPointOneXMin = 0;
+export const renewMediaUploadResponseMediaFocalPointOneXMax = 1;
+
+export const renewMediaUploadResponseMediaFocalPointOneYMin = 0;
+export const renewMediaUploadResponseMediaFocalPointOneYMax = 1;
+
+
+
+export const RenewMediaUploadResponse = zod.object({
+  "media": zod.object({
+  "id": zod.string(),
+  "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
+  "filename": zod.string(),
+  "objectPath": zod.string(),
+  "publicUrl": zod.string().nullish(),
+  "mimeType": zod.string(),
+  "size": zod.number().min(renewMediaUploadResponseMediaSizeMin).multipleOf(renewMediaUploadResponseMediaSizeMultipleOf),
+  "width": zod.number().min(1).multipleOf(renewMediaUploadResponseMediaWidthMultipleOf).nullish(),
+  "height": zod.number().min(1).multipleOf(renewMediaUploadResponseMediaHeightMultipleOf).nullish(),
+  "duration": zod.number().min(renewMediaUploadResponseMediaDurationMin).nullish(),
+  "checksum": zod.string().nullish(),
+  "altText": zod.string().nullish(),
+  "caption": zod.string().nullish(),
+  "credit": zod.string().nullish(),
+  "collection": zod.enum(['website', 'linkedin', 'motion']),
+  "linkedinAssetKind": zod.union([zod.enum(['post', 'header']),zod.null()]).optional(),
+  "campaignMetadata": zod.union([zod.object({
+  "campaign": zod.string().min(1).max(renewMediaUploadResponseMediaCampaignMetadataOneCampaignMax).regex(renewMediaUploadResponseMediaCampaignMetadataOneCampaignRegExp).optional(),
+  "edition": zod.string().min(1).max(renewMediaUploadResponseMediaCampaignMetadataOneEditionMax).regex(renewMediaUploadResponseMediaCampaignMetadataOneEditionRegExp).optional(),
+  "title": zod.string().min(1).max(renewMediaUploadResponseMediaCampaignMetadataOneTitleMax).regex(renewMediaUploadResponseMediaCampaignMetadataOneTitleRegExp).optional(),
+  "purpose": zod.string().min(1).max(renewMediaUploadResponseMediaCampaignMetadataOnePurposeMax).regex(renewMediaUploadResponseMediaCampaignMetadataOnePurposeRegExp).optional(),
+  "pulseSource": zod.string().min(1).max(renewMediaUploadResponseMediaCampaignMetadataOnePulseSourceMax).regex(renewMediaUploadResponseMediaCampaignMetadataOnePulseSourceRegExp).optional(),
+  "approvedUse": zod.string().min(1).max(renewMediaUploadResponseMediaCampaignMetadataOneApprovedUseMax).regex(renewMediaUploadResponseMediaCampaignMetadataOneApprovedUseRegExp).optional()
+}),zod.null()]).optional(),
+  "motionMetadata": zod.union([zod.object({
+  "groupId": zod.string().min(1).max(renewMediaUploadResponseMediaMotionMetadataOneGroupIdMax).regex(renewMediaUploadResponseMediaMotionMetadataOneGroupIdRegExp),
+  "variant": zod.enum(['landscape', 'portrait', 'square', 'mobile', 'desktop']),
+  "posterMediaId": zod.string().min(1).optional(),
+  "reducedMotionMediaId": zod.string().min(1).optional(),
+  "autoplay": zod.boolean().default(renewMediaUploadResponseMediaMotionMetadataOneAutoplayDefault),
+  "loop": zod.boolean().default(renewMediaUploadResponseMediaMotionMetadataOneLoopDefault),
+  "accessibility": zod.object({
+  "decorative": zod.boolean(),
+  "hasAudio": zod.boolean(),
+  "captionsMediaId": zod.string().min(1).optional(),
+  "transcript": zod.string().min(1).max(renewMediaUploadResponseMediaMotionMetadataOneAccessibilityTranscriptMax).regex(renewMediaUploadResponseMediaMotionMetadataOneAccessibilityTranscriptRegExp).optional(),
+  "audioDescription": zod.string().min(1).max(renewMediaUploadResponseMediaMotionMetadataOneAccessibilityAudioDescriptionMax).regex(renewMediaUploadResponseMediaMotionMetadataOneAccessibilityAudioDescriptionRegExp).optional()
+})
+}),zod.null()]).optional(),
+  "focalPoint": zod.union([zod.object({
+  "x": zod.number().min(renewMediaUploadResponseMediaFocalPointOneXMin).max(renewMediaUploadResponseMediaFocalPointOneXMax),
+  "y": zod.number().min(renewMediaUploadResponseMediaFocalPointOneYMin).max(renewMediaUploadResponseMediaFocalPointOneYMax)
+}),zod.null()]).optional(),
+  "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
+  "createdBy": zod.string().optional(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),
+  "uploadUrl": zod.string(),
+  "method": zod.enum(['PUT']),
+  "headers": zod.record(zod.string(), zod.string()),
+  "expiresAt": zod.coerce.date()
+})
 
 
 /**

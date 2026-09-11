@@ -7,6 +7,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { setMaxListeners } from "node:events";
+import { PassThrough, type Readable } from "node:stream";
 
 const allowedTypes = new Set([
   "image/jpeg",
@@ -39,13 +40,51 @@ const storage = new Storage({
 });
 const execFileAsync = promisify(execFile);
 
+export class MediaObjectValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "MediaObjectValidationError";
+  }
+}
+
 function configuration() {
   const bucketName = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
   const prefix = process.env.PRIVATE_OBJECT_DIR?.replace(/^\/+|\/+$/g, "");
   if (!bucketName || !prefix) {
     throw new Error("Object Storage is not configured.");
   }
-  return { bucket: storage.bucket(bucketName), prefix };
+  return { bucket: storage.bucket(bucketName), bucketName, prefix };
+}
+
+export async function signMediaObjectUploadUrl(
+  bucketName: string,
+  objectPath: string,
+  expiresAt: Date,
+): Promise<string> {
+  const response = await fetch(
+    `${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bucket_name: bucketName,
+        object_name: objectPath,
+        method: "PUT",
+        expires_at: expiresAt.toISOString(),
+      }),
+      signal: AbortSignal.timeout(30_000),
+    },
+  );
+  if (!response.ok) {
+    // Deliberately omit the response body: signing failures must never put a
+    // signed URL, credentials, or provider detail into application logs.
+    throw new Error(`Object storage signing service returned HTTP ${response.status}.`);
+  }
+  const payload = await response.json() as { signed_url?: unknown };
+  if (typeof payload.signed_url !== "string" || !payload.signed_url.startsWith("https://")) {
+    throw new Error("Object storage signing service returned an invalid response.");
+  }
+  return payload.signed_url;
 }
 
 export function assertMediaType(mimeType: string, size: number): void {
@@ -204,18 +243,34 @@ export async function createMediaUpload(
   mimeType: string,
   checksum?: string,
 ): Promise<{ objectPath: string; uploadUrl: string; expiresAt: Date }> {
-  const { bucket, prefix } = configuration();
+  const { prefix } = configuration();
   // This is deliberately a disposable namespace. No version or delivery route
   // may ever retain this key because its signed URL remains valid for its TTL.
   const objectPath = `${prefix}/cms-media/staging/${id}`;
+  return renewMediaUpload(objectPath, mimeType, checksum);
+}
+
+/** Re-sign the exact disposable staging key already bound to a pending row. */
+export async function renewMediaUpload(
+  objectPath: string,
+  mimeType: string,
+  checksum?: string,
+): Promise<{ objectPath: string; uploadUrl: string; expiresAt: Date }> {
+  const { bucketName, prefix } = configuration();
+  const identity = objectPath.slice(`${prefix}/cms-media/staging/`.length);
+  if (
+    !objectPath.startsWith(`${prefix}/cms-media/staging/`) ||
+    !identity ||
+    identity.includes("/") ||
+    objectPath.includes("..")
+  ) {
+    throw new MediaObjectValidationError("Invalid staging object path.");
+  }
   const expiresAt = new Date(Date.now() + 10 * 60_000);
-  const [uploadUrl] = await bucket.file(objectPath).getSignedUrl({
-    version: "v4",
-    action: "write",
-    expires: expiresAt,
-    contentType: mimeType,
-    extensionHeaders: checksum ? { "x-goog-meta-checksum": checksum } : undefined,
-  });
+  // The sidecar signs the object and method. Do not add unsigned x-goog-meta-*
+  // headers to the client contract: GCS rejects them for these URLs. Integrity
+  // is enforced by hashing the downloaded bytes during promotion.
+  const uploadUrl = await signMediaObjectUploadUrl(bucketName, objectPath, expiresAt);
   return { objectPath, uploadUrl, expiresAt };
 }
 
@@ -227,7 +282,7 @@ export async function verifyMediaObject(
 ) {
   const { bucket, prefix } = configuration();
   if (!objectPath.startsWith(`${prefix}/cms-media/`) || objectPath.includes("..")) {
-    throw new Error("Invalid object path.");
+    throw new MediaObjectValidationError("Invalid object path.");
   }
   const [metadata] = await bucket.file(objectPath).getMetadata();
   const size = Number(metadata.size);
@@ -237,10 +292,9 @@ export async function verifyMediaObject(
     !allowedTypes.has(contentType ?? "") ||
     contentType !== expectedType ||
     size !== expectedSize ||
-    size > (contentType?.startsWith("video/") ? MAX_VIDEO_BYTES : MAX_MEDIA_BYTES) ||
-    (expectedChecksum && checksum !== expectedChecksum)
+    size > (contentType?.startsWith("video/") ? MAX_VIDEO_BYTES : MAX_MEDIA_BYTES)
   ) {
-    throw new Error("Uploaded object metadata does not match the upload request.");
+    throw new MediaObjectValidationError("Uploaded object metadata does not match the upload request.");
   }
   return {
     size,
@@ -257,7 +311,57 @@ export async function downloadMediaObject(objectPath: string, range?: { start: n
   }
   const file = bucket.file(objectPath);
   await file.getMetadata();
-  return file.createReadStream(range);
+  return openMediaReadStream(file.createReadStream(range));
+}
+
+/**
+ * Isolate the GCS SDK's deferred response stream from an HTTP consumer.
+ *
+ * GCS returns its user stream before its response callback pipes the network
+ * body into it. Destroying that user stream during this window makes the SDK's
+ * later pipeline call throw synchronously. A separate pass-through lets an
+ * aborted HTTP response close immediately while the SDK finishes setup. Cancel
+ * upstream immediately after that safe point, rather than draining a whole file.
+ */
+export function openMediaReadStream(source: Readable): Readable {
+  const output = new PassThrough();
+  let ready = false;
+  let cancelled = false;
+  const cancelWhenReady = () => {
+    if (ready && cancelled && !source.destroyed) source.destroy();
+  };
+  source.once("response", () => {
+    // GCS emits response immediately BEFORE attaching its internal pipeline.
+    queueMicrotask(() => {
+      ready = true;
+      cancelWhenReady();
+    });
+  });
+  source.once("data", () => {
+    // Also support ordinary readables without the GCS response event.
+    ready = true;
+    if (cancelled) {
+      source.pause();
+      queueMicrotask(cancelWhenReady);
+    }
+  });
+  const onSourceError = (error: Error) => {
+    if (!output.destroyed) output.destroy(error);
+  };
+  source.once("error", onSourceError);
+  source.once("end", () => source.removeListener("error", onSourceError));
+  output.once("close", () => {
+    if (source.destroyed || source.readableEnded) return;
+    cancelled = true;
+    source.unpipe(output);
+    if (ready) cancelWhenReady();
+    else {
+      // Permit only the first readiness signal; its callback cancels upstream.
+      source.resume();
+    }
+  });
+  source.pipe(output);
+  return output;
 }
 
 export async function inspectMediaObject(objectPath: string, expectedType: string) {
@@ -317,15 +421,28 @@ async function inspectVerifiedBytes(
     return { width: null, height: null, duration: null, rendition: null };
   }
   if (expectedType === "video/mp4" || expectedType === "video/webm") {
-    return { ...await probeVideoBytes(bytes, expectedType), rendition: null };
+    try {
+      return { ...await probeVideoBytes(bytes, expectedType), rendition: null };
+    } catch (error) {
+      if (error instanceof MediaObjectValidationError) throw error;
+      throw new MediaObjectValidationError("Uploaded video could not be validated.");
+    }
   }
-  const dimensions = await sharp(bytes, { failOn: "error" }).metadata();
-  if (!dimensions.width || !dimensions.height) throw new Error("Image dimensions could not be read.");
-  const renditionBytes = await sharp(bytes)
-    .rotate()
-    .resize({ width: 1600, withoutEnlargement: true })
-    .webp({ quality: 82 })
-    .toBuffer();
+  let dimensions: Awaited<ReturnType<ReturnType<typeof sharp>["metadata"]>>;
+  let renditionBytes: Buffer;
+  try {
+    dimensions = await sharp(bytes, { failOn: "error" }).metadata();
+    if (!dimensions.width || !dimensions.height) {
+      throw new Error("Image dimensions could not be read.");
+    }
+    renditionBytes = await sharp(bytes)
+      .rotate()
+      .resize({ width: 1600, withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+  } catch {
+    throw new MediaObjectValidationError("Uploaded image could not be validated.");
+  }
   const renditionChecksum = createHash("sha256").update(renditionBytes).digest("hex");
   const renditionPath = `${finalObjectPath.slice(0, finalObjectPath.lastIndexOf("/"))}/${renditionChecksum}-web-1600.webp`;
   await saveImmutableObject(renditionPath, renditionBytes, "image/webp");
@@ -356,13 +473,16 @@ export async function promoteMediaObject(
     !stagingPath.startsWith(`${prefix}/cms-media/staging/`) ||
     stagingPath.includes("..")
   ) {
-    throw new Error("Invalid staging object path.");
+    throw new MediaObjectValidationError("Invalid staging object path.");
   }
   const uploadIdentity = stagingPath.slice(`${prefix}/cms-media/staging/`.length);
   if (!uploadIdentity || uploadIdentity.includes("/")) {
-    throw new Error("Invalid staging object path.");
+    throw new MediaObjectValidationError("Invalid staging object path.");
   }
-  await verifyMediaObject(stagingPath, expectedType, expectedSize, expectedChecksum);
+  // Metadata is useful for type/size screening, but a client-controlled custom
+  // metadata checksum is never proof of content identity. The SHA-256 is
+  // computed from the downloaded bytes and compared below.
+  await verifyMediaObject(stagingPath, expectedType, expectedSize);
   const [bytes] = await bucket.file(stagingPath).download();
   const maximum = expectedType.startsWith("video/") ? MAX_VIDEO_BYTES : MAX_MEDIA_BYTES;
   if (
@@ -371,9 +491,12 @@ export async function promoteMediaObject(
     bytes.length > maximum ||
     detectMediaSignature(bytes) !== expectedType
   ) {
-    throw new Error("Uploaded object bytes do not match the upload request.");
+    throw new MediaObjectValidationError("Uploaded object bytes do not match the upload request.");
   }
   const checksum = createHash("sha256").update(bytes).digest("hex");
+  if (expectedChecksum && checksum !== expectedChecksum) {
+    throw new MediaObjectValidationError("Uploaded object checksum does not match the upload request.");
+  }
   const storageKey = `${prefix}/cms-media/objects/${uploadIdentity}/sha256/${checksum}`;
   const inspected = await inspectVerifiedBytes(bytes, expectedType, storageKey);
   await saveImmutableObject(storageKey, bytes, expectedType);

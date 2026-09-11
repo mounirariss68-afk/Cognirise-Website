@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { Readable } from "node:stream";
+import { PassThrough, Readable, pipeline as streamPipeline } from "node:stream";
+import { once } from "node:events";
 import test from "node:test";
 import express from "express";
 import cookieParser from "cookie-parser";
@@ -19,6 +20,7 @@ import {
   isValidMediaClassification,
   media,
   mediaStorage,
+  deterministicMediaId,
   protectedMediaDownloadSql,
   protectedMediaFileSql,
   protectedMediaDelivery,
@@ -35,6 +37,8 @@ import {
   detectMediaSignature,
   parseByteRange,
   probeVideoBytes,
+  signMediaObjectUploadUrl,
+  openMediaReadStream,
 } from "../src/lib/object-storage.ts";
 
 test("media contract accepts governed collection filters and classification", () => {
@@ -70,6 +74,57 @@ test("media contract accepts governed collection filters and classification", ()
   });
   assert.equal(finalize.success, true);
   assert.equal(finalize.success && finalize.data.linkedinAssetKind, "header");
+});
+
+test("upload idempotency identities are deterministic and user scoped", () => {
+  const first = deterministicMediaId("00000000-0000-4000-8000-000000000001", "batch:item-1");
+  assert.equal(
+    first,
+    deterministicMediaId("00000000-0000-4000-8000-000000000001", "batch:item-1"),
+  );
+  assert.notEqual(
+    first,
+    deterministicMediaId("00000000-0000-4000-8000-000000000002", "batch:item-1"),
+  );
+  assert.notEqual(
+    first,
+    deterministicMediaId("00000000-0000-4000-8000-000000000001", "batch:item-2"),
+  );
+  assert.match(first, /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+});
+
+test("media upload signing uses the sidecar contract without leaking responses", async (t) => {
+  let capturedUrl = "";
+  let capturedInit: RequestInit | undefined;
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request, init?: RequestInit) => {
+    capturedUrl = String(input);
+    capturedInit = init;
+    return new Response(JSON.stringify({ signed_url: "https://storage.example/signed" }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  });
+  const expiresAt = new Date("2026-10-01T00:10:00.000Z");
+  assert.equal(
+    await signMediaObjectUploadUrl("bucket-id", "private/cms-media/staging/asset-id", expiresAt),
+    "https://storage.example/signed",
+  );
+  assert.equal(capturedUrl, "http://127.0.0.1:1106/object-storage/signed-object-url");
+  assert.equal(capturedInit?.method, "POST");
+  assert.deepEqual(JSON.parse(String(capturedInit?.body)), {
+    bucket_name: "bucket-id",
+    object_name: "private/cms-media/staging/asset-id",
+    method: "PUT",
+    expires_at: expiresAt.toISOString(),
+  });
+
+  t.mock.restoreAll();
+  t.mock.method(globalThis, "fetch", async () =>
+    new Response("signed_url=https://secret.example/do-not-log", { status: 503 }));
+  await assert.rejects(
+    signMediaObjectUploadUrl("bucket-id", "private/cms-media/staging/asset-id", expiresAt),
+    (error: Error) => error.message === "Object storage signing service returned HTTP 503.",
+  );
 });
 
 test("media classification requires a kind only for LinkedIn", () => {
@@ -206,6 +261,28 @@ test("single HTTP byte ranges support open, bounded and suffix forms", () => {
   assert.equal(parseByteRange("bytes=0-1,4-5", 100), "invalid");
 });
 
+test("early consumer abort lets GCS attach then cancels upstream without draining the object", async () => {
+  const sdkUserStream = new PassThrough({ highWaterMark: 1024 });
+  const consumer = openMediaReadStream(sdkUserStream);
+  consumer.destroy();
+  await once(consumer, "close");
+  assert.equal(sdkUserStream.destroyed, false);
+
+  const networkBody = new PassThrough();
+  sdkUserStream.emit("response", {});
+  const completed = new Promise<Error | null | undefined>((resolve) => {
+    assert.doesNotThrow(() => {
+      streamPipeline(networkBody, sdkUserStream, resolve);
+    });
+  });
+  await Promise.resolve();
+  assert.equal(sdkUserStream.destroyed, true);
+  await completed;
+  assert.equal(networkBody.destroyed, true);
+  assert.equal(sdkUserStream.readableLength, 0);
+  assert.ok(sdkUserStream.readableLength <= sdkUserStream.readableHighWaterMark);
+});
+
 test("motion collection requires video metadata and rejects video elsewhere", () => {
   const motionMetadata = {
     groupId: "homepage-hero",
@@ -242,6 +319,191 @@ test("caption edits append metadata-only versions without moving pinned referenc
   assert.match(appendMediaMetadataVersionSql, /\$2::jsonb/);
   assert.doesNotMatch(appendMediaMetadataVersionSql, /UPDATE cms_media_versions/);
   assert.doesNotMatch(appendMediaMetadataVersionSql, /cms_media_references/);
+});
+
+test("upload requests and renewals preserve identity, ownership and retry safety", {
+  concurrency: false,
+}, async (t) => {
+  const now = new Date("2026-10-01T00:00:00Z");
+  const assets = new Map<string, Record<string, any>>();
+  const signed = new Map<string, number>();
+  let failNextSigning = false;
+
+  t.mock.method(mediaStorage, "createUpload", async (id: string) => {
+    if (failNextSigning) {
+      failNextSigning = false;
+      throw new Error("signer unavailable");
+    }
+    const count = (signed.get(id) ?? 0) + 1;
+    signed.set(id, count);
+    return {
+      objectPath: `private/cms-media/staging/${id}`,
+      uploadUrl: `https://upload.example/${id}/${count}`,
+      expiresAt: new Date(now.getTime() + count * 60_000),
+    };
+  });
+  t.mock.method(mediaStorage, "renewUpload", async (path: string) => {
+    const count = (signed.get(path) ?? 0) + 1;
+    signed.set(path, count);
+    return {
+      objectPath: path,
+      uploadUrl: `https://upload.example/renew/${count}`,
+      expiresAt: new Date(now.getTime() + count * 60_000),
+    };
+  });
+  t.mock.method(pool, "query", async (sql: unknown, values?: unknown[]) => {
+    const statement = String(sql);
+    if (statement.includes("FROM cms_sessions s")) {
+      const tokenHash = String(values?.[0]);
+      const identities = [
+        ["owner-token", "owner-user", "editor"],
+        ["other-token", "other-user", "editor"],
+        ["admin-token", "admin-user", "administrator"],
+        ["viewer-token", "viewer-user", "viewer"],
+      ];
+      const identity = identities.find(([token]) => security.hashToken(token) === tokenHash);
+      if (!identity) return { rowCount: 0, rows: [] };
+      return {
+        rowCount: 1,
+        rows: [{
+          id: `${identity[1]}-session`,
+          token_digest: tokenHash,
+          mfa_satisfied_at: now,
+          expires_at: new Date(now.getTime() + 60_000),
+          created_at: now,
+          user_id: identity[1],
+          name: identity[1],
+          email: `${identity[1]}@example.com`,
+          role: identity[2],
+          status: "active",
+          last_login_at: null,
+          user_created_at: now,
+          user_updated_at: now,
+          must_rotate: false,
+          mfa_enabled: true,
+        }],
+      };
+    }
+    if (statement.includes("INSERT INTO cms_media_assets")) {
+      const id = String(values?.[0]);
+      if (assets.has(id)) return { rowCount: 0, rows: [] };
+      const row = {
+        id,
+        storage_key: values?.[1],
+        filename: values?.[2],
+        original_filename: values?.[2],
+        media_type: values?.[3],
+        byte_size: values?.[4],
+        checksum: values?.[5],
+        status: "pending",
+        uploaded_by_user_id: values?.[6],
+        collection: values?.[7],
+        linkedin_asset_kind: values?.[8],
+        campaign_metadata: values?.[9],
+        motion_metadata: values?.[10],
+        created_at: now,
+        updated_at: now,
+      };
+      assets.set(id, row);
+      return { rowCount: 1, rows: [row] };
+    }
+    if (statement.includes("UPDATE cms_media_assets SET storage_key=$2")) {
+      const row = assets.get(String(values?.[0]));
+      if (row?.status === "pending") row.storage_key = values?.[1];
+      return { rowCount: row ? 1 : 0, rows: [] };
+    }
+    if (statement.includes("SELECT * FROM cms_media_assets WHERE id=$1")) {
+      const row = assets.get(String(values?.[0]));
+      return { rowCount: row ? 1 : 0, rows: row ? [row] : [] };
+    }
+    return { rowCount: 1, rows: [] };
+  });
+
+  const app = express();
+  app.use(express.json());
+  app.use(cookieParser());
+  app.use((req, _res, next) => {
+    req.log = { error() {}, warn() {} } as typeof req.log;
+    next();
+  });
+  app.use("/api", mediaRouter);
+  const server = app.listen(0, "127.0.0.1");
+  await new Promise<void>((resolve) => server.once("listening", resolve));
+  t.after(() => new Promise<void>((resolve, reject) =>
+    server.close((error) => error ? reject(error) : resolve())
+  ));
+  const address = server.address();
+  assert.ok(address && typeof address !== "string");
+  const origin = `http://127.0.0.1:${address.port}`;
+  const headers = (token: string, key?: string) => {
+    const csrf = auth.csrfForSession(security.hashToken(token));
+    return {
+      "content-type": "application/json",
+      origin,
+      "x-csrf-token": csrf,
+      cookie: `${auth.SESSION_COOKIE}=${token}; ${auth.CSRF_COOKIE}=${csrf}`,
+      ...(key ? { "idempotency-key": key } : {}),
+    };
+  };
+  const body = { filename: "batch.png", mimeType: "image/png", size: 128 };
+  const request = (token: string, key: string, input = body) => fetch(`${origin}/api/media/upload-requests`, {
+    method: "POST",
+    headers: headers(token, key),
+    body: JSON.stringify(input),
+  });
+  const legacyRequest = () => fetch(`${origin}/api/media/upload-requests`, {
+    method: "POST",
+    headers: headers("owner-token"),
+    body: JSON.stringify(body),
+  });
+
+  const legacyFirst = await legacyRequest();
+  const legacyRetry = await legacyRequest();
+  assert.equal(legacyFirst.status, 201);
+  assert.equal(legacyRetry.status, 201);
+  assert.notEqual(
+    (await legacyFirst.json() as { media: { id: string } }).media.id,
+    (await legacyRetry.json() as { media: { id: string } }).media.id,
+  );
+
+  const [first, racedRetry] = await Promise.all([
+    request("owner-token", "batch-1"),
+    request("owner-token", "batch-1"),
+  ]);
+  assert.deepEqual([first.status, racedRetry.status].sort(), [200, 201]);
+  const firstBody = await first.json() as {
+    media: { id: string };
+    uploadUrl: string;
+    headers: Record<string, string>;
+  };
+  const retryBody = await racedRetry.json() as { media: { id: string }; uploadUrl: string };
+  assert.equal(firstBody.media.id, retryBody.media.id);
+  assert.notEqual(firstBody.uploadUrl, retryBody.uploadUrl);
+  assert.deepEqual(firstBody.headers, { "Content-Type": "image/png" });
+  assert.equal(assets.size, 3);
+
+  assert.equal((await request("owner-token", "batch-1", { ...body, filename: "changed.png" })).status, 409);
+  assert.equal((await request("other-token", "batch-1")).status, 201);
+  assert.equal(assets.size, 4);
+
+  const mediaId = firstBody.media.id;
+  const renew = (token: string) => fetch(`${origin}/api/media/${mediaId}/renew-upload`, {
+    method: "POST",
+    headers: headers(token),
+  });
+  assert.equal((await renew("viewer-token")).status, 403);
+  assert.equal((await renew("other-token")).status, 403);
+  assert.equal((await renew("owner-token")).status, 200);
+  assert.equal((await renew("admin-token")).status, 200);
+  assets.get(mediaId)!.status = "pending-review";
+  assert.equal((await renew("owner-token")).status, 409);
+  assert.equal((await request("owner-token", "batch-1")).status, 409);
+
+  failNextSigning = true;
+  assert.equal((await request("owner-token", "transient-signing")).status, 503);
+  const recovered = await request("owner-token", "transient-signing");
+  assert.equal(recovered.status, 200);
+  assert.equal(assets.size, 5);
 });
 
 test("publisher-only review decisions enforce valid transitions and write audit events", {
@@ -448,10 +710,20 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
     [secondAssetId, makeAsset(secondAssetId, secondStagingKey)],
   ]);
   const persistedFinalKeys = new Set<string>();
+  const latestMetadata = new Map<string, Record<string, unknown>>();
+  let promotionCount = 0;
+  let finalizedAudits = 0;
+  let failPromotion = false;
+  let failVersionInsert = false;
   let deliveredKey: string | undefined;
   let deliveryFailure: "missing" | "stream" | null = null;
 
   t.mock.method(mediaStorage, "promote", async (path: string) => {
+    promotionCount++;
+    if (failPromotion) {
+      failPromotion = false;
+      throw new Error("object storage temporarily unavailable");
+    }
     const verified = Buffer.from(objects.get(path)!);
     const promotedKey = path === stagingKey ? finalKey : secondFinalKey;
     objects.set(promotedKey, verified);
@@ -481,6 +753,7 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
   t.mock.method(pool, "query", async (sql: unknown, values?: unknown[]) => {
     const statement = String(sql);
     if (statement.includes("FROM cms_sessions s")) {
+      const isOtherEditor = values?.[0] === security.hashToken("other-editor-token");
       return {
         rowCount: 1,
         rows: [{
@@ -489,10 +762,10 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
           mfa_satisfied_at: now,
           expires_at: new Date(now.getTime() + 60_000),
           created_at: now,
-          user_id: "user-id",
-          name: "Administrator",
-          email: "admin@example.com",
-          role: "administrator",
+          user_id: isOtherEditor ? "other-user-id" : "user-id",
+          name: isOtherEditor ? "Other editor" : "Administrator",
+          email: isOtherEditor ? "other@example.com" : "admin@example.com",
+          role: isOtherEditor ? "editor" : "administrator",
           status: "active",
           last_login_at: null,
           user_created_at: now,
@@ -502,9 +775,12 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
         }],
       };
     }
-    if (statement.includes("SELECT * FROM cms_media_assets")) {
+    if (statement.includes("latest_metadata")) {
       const asset = assets.get(String(values![0]));
-      return { rowCount: asset ? 1 : 0, rows: asset ? [asset] : [] };
+      return {
+        rowCount: asset ? 1 : 0,
+        rows: asset ? [{ ...asset, latest_metadata: latestMetadata.get(String(values![0])) }] : [],
+      };
     }
     if (statement.includes("UPDATE cms_media_assets SET storage_key")) {
       const asset = assets.get(String(values![0]))!;
@@ -513,8 +789,13 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
     }
     if (statement.includes("INSERT INTO cms_media_versions")) {
       persistedFinalKeys.add(String(values![1]));
+      latestMetadata.set(String(values![0]), values![6] as Record<string, unknown>);
       assert.ok(values![1] === finalKey || values![1] === secondFinalKey);
       assert.ok(values![1] !== stagingKey && values![1] !== secondStagingKey);
+      return { rowCount: 1, rows: [] };
+    }
+    if (statement.includes("'media.finalized'")) {
+      finalizedAudits++;
       return { rowCount: 1, rows: [] };
     }
     if (statement === protectedMediaFileSql || statement === protectedMediaDownloadSql) {
@@ -535,10 +816,46 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
     }
     return { rowCount: 1, rows: [] };
   });
+  t.mock.method(pool, "connect", async () => {
+    let assetSnapshot = new Map<string, Record<string, any>>();
+    let keySnapshot = new Set<string>();
+    let metadataSnapshot = new Map<string, Record<string, unknown>>();
+    let auditSnapshot = 0;
+    return {
+      query: async (sql: unknown, values?: unknown[]) => {
+        const statement = String(sql);
+        if (statement === "BEGIN") {
+          assetSnapshot = new Map([...assets].map(([id, row]) => [id, { ...row }]));
+          keySnapshot = new Set(persistedFinalKeys);
+          metadataSnapshot = new Map(latestMetadata);
+          auditSnapshot = finalizedAudits;
+        }
+        if (statement.includes("INSERT INTO cms_media_versions") && failVersionInsert) {
+          failVersionInsert = false;
+          throw new Error("database temporarily unavailable");
+        }
+        if (statement === "ROLLBACK") {
+          assets.clear();
+          for (const [id, row] of assetSnapshot) assets.set(id, row);
+          persistedFinalKeys.clear();
+          for (const key of keySnapshot) persistedFinalKeys.add(key);
+          latestMetadata.clear();
+          for (const [id, metadata] of metadataSnapshot) latestMetadata.set(id, metadata);
+          finalizedAudits = auditSnapshot;
+        }
+        return pool.query(sql as never, values);
+      },
+      release() {},
+    } as never;
+  });
 
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
+  app.use((req, _res, next) => {
+    req.log = { error() {}, warn() {} } as typeof req.log;
+    next();
+  });
   app.use("/api", mediaRouter);
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
@@ -555,12 +872,48 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
     "x-csrf-token": csrf,
     cookie: `${auth.SESSION_COOKIE}=session-token; ${auth.CSRF_COOKIE}=${csrf}`,
   };
+  const otherCsrf = auth.csrfForSession(security.hashToken("other-editor-token"));
+  const forbiddenFinalize = await fetch(`${origin}/api/media/${assetId}/finalize`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      origin,
+      "x-csrf-token": otherCsrf,
+      cookie: `${auth.SESSION_COOKIE}=other-editor-token; ${auth.CSRF_COOKIE}=${otherCsrf}`,
+    },
+    body: JSON.stringify({ objectPath: stagingKey }),
+  });
+  assert.equal(forbiddenFinalize.status, 403);
+  assert.equal(promotionCount, 0);
+  failPromotion = true;
+  const transientPromotion = await fetch(`${origin}/api/media/${assetId}/finalize`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ objectPath: stagingKey }),
+  });
+  assert.equal(transientPromotion.status, 503);
+  assert.equal(assets.get(assetId)!.status, "pending");
+  assert.equal(persistedFinalKeys.size, 0);
+  assert.equal(finalizedAudits, 0);
+
+  failVersionInsert = true;
+  const transientDatabase = await fetch(`${origin}/api/media/${assetId}/finalize`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ objectPath: stagingKey }),
+  });
+  assert.equal(transientDatabase.status, 503);
+  assert.equal(assets.get(assetId)!.status, "pending");
+  assert.equal(persistedFinalKeys.size, 0);
+  assert.equal(finalizedAudits, 0);
+
   const finalized = await fetch(`${origin}/api/media/${assetId}/finalize`, {
     method: "POST",
     headers,
     body: JSON.stringify({ objectPath: stagingKey }),
   });
   assert.equal(finalized.status, 200);
+  assert.equal(finalizedAudits, 1);
   assert.equal((await finalized.json() as { status: string }).status, "review");
   const secondFinalized = await fetch(`${origin}/api/media/${secondAssetId}/finalize`, {
     method: "POST",
@@ -572,6 +925,20 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
   assert.equal(assets.get(secondAssetId)!.storage_key, secondFinalKey);
   assert.notEqual(finalKey, secondFinalKey);
   assert.deepEqual(persistedFinalKeys, new Set([finalKey, secondFinalKey]));
+  const repeatedFinalize = await fetch(`${origin}/api/media/${assetId}/finalize`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ objectPath: stagingKey }),
+  });
+  assert.equal(repeatedFinalize.status, 200);
+  assert.equal(promotionCount, 4);
+  const changedFinalize = await fetch(`${origin}/api/media/${assetId}/finalize`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ objectPath: stagingKey, caption: "changed after completion" }),
+  });
+  assert.equal(changedFinalize.status, 409);
+  assert.equal(promotionCount, 4);
 
   // Simulate reuse of the still-valid signed PUT after finalization.
   objects.set(stagingKey, Buffer.from("attacker overwrite"));

@@ -4088,7 +4088,7 @@ export const requestMediaUpload = async (mediaUploadInput: MediaUploadInput, opt
 
 
 
-export const getRequestMediaUploadMutationOptions = <TError = ErrorType<unknown>,
+export const getRequestMediaUploadMutationOptions = <TError = ErrorType<ConflictResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestMediaUpload>>, TError,{data: BodyType<MediaUploadInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof requestMediaUpload>>, TError,{data: BodyType<MediaUploadInput>}, TContext> => {
 
@@ -4117,12 +4117,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type RequestMediaUploadMutationResult = NonNullable<Awaited<ReturnType<typeof requestMediaUpload>>>
     export type RequestMediaUploadMutationBody = BodyType<MediaUploadInput>
-    export type RequestMediaUploadMutationError = ErrorType<unknown>
+    export type RequestMediaUploadMutationError = ErrorType<ConflictResponse>
 
     /**
  * @summary Request a direct upload target
  */
-export const useRequestMediaUpload = <TError = ErrorType<unknown>,
+export const useRequestMediaUpload = <TError = ErrorType<ConflictResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestMediaUpload>>, TError,{data: BodyType<MediaUploadInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof requestMediaUpload>>,
@@ -4506,6 +4506,77 @@ export function useDownloadMedia<TData = Awaited<ReturnType<typeof downloadMedia
 
 
 
+
+export const getRenewMediaUploadUrl = (mediaId: string,) => {
+
+
+
+
+  return `/api/media/${mediaId}/renew-upload`
+}
+
+/**
+ * @summary Issue a fresh signed URL for an existing pending upload
+ */
+export const renewMediaUpload = async (mediaId: string, options?: Parameters<typeof customFetch>[1]): Promise<MediaUpload> => {
+
+  return customFetch<MediaUpload>(getRenewMediaUploadUrl(mediaId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRenewMediaUploadMutationOptions = <TError = ErrorType<ApiError | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof renewMediaUpload>>, TError,{mediaId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof renewMediaUpload>>, TError,{mediaId: string}, TContext> => {
+
+const mutationKey = ['renewMediaUpload'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof renewMediaUpload>>, {mediaId: string}> = (props) => {
+          const {mediaId} = props ?? {};
+
+          return  renewMediaUpload(mediaId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RenewMediaUploadMutationResult = NonNullable<Awaited<ReturnType<typeof renewMediaUpload>>>
+
+    export type RenewMediaUploadMutationError = ErrorType<ApiError | ConflictResponse>
+
+    /**
+ * @summary Issue a fresh signed URL for an existing pending upload
+ */
+export const useRenewMediaUpload = <TError = ErrorType<ApiError | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof renewMediaUpload>>, TError,{mediaId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof renewMediaUpload>>,
+        TError,
+        {mediaId: string},
+        TContext
+      > => {
+      return useMutation(getRenewMediaUploadMutationOptions(options));
+    }
 
 export const getReviewMediaUrl = (mediaId: string,) => {
 

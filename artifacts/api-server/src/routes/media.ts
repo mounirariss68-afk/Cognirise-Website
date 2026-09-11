@@ -1,5 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { pipeline } from "node:stream/promises";
+import { createHash } from "node:crypto";
 import { pool } from "@workspace/db";
 import {
   ListMediaQueryParams,
@@ -25,6 +26,8 @@ import {
   downloadMediaObject,
   parseByteRange,
   promoteMediaObject,
+  MediaObjectValidationError,
+  renewMediaUpload,
 } from "../lib/object-storage";
 
 const router: IRouter = Router();
@@ -34,9 +37,62 @@ export const protectedMediaDelivery = {
 };
 export const mediaStorage = {
   createUpload: createMediaUpload,
+  renewUpload: renewMediaUpload,
   promote: promoteMediaObject,
   deleteStaging: deleteMediaStagingObject,
 };
+
+const IDEMPOTENCY_KEY_PATTERN = /^[\x21-\x7e]{1,200}$/;
+
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.entries(value as Record<string, unknown>)
+      .filter(([, item]) => item !== undefined)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, item]) => `${JSON.stringify(key)}:${canonicalJson(item)}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+export function deterministicMediaId(userId: string, idempotencyKey: string): string {
+  const bytes = createHash("sha256")
+    .update("cognirise:media-upload:v1\0")
+    .update(userId)
+    .update("\0")
+    .update(idempotencyKey)
+    .digest()
+    .subarray(0, 16);
+  bytes[6] = (bytes[6] & 0x0f) | 0x50;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = bytes.toString("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+function uploadRequestMatches(row: Record<string, any>, input: Record<string, any>): boolean {
+  return row.filename === input.filename &&
+    row.original_filename === input.filename &&
+    row.media_type === input.mimeType &&
+    Number(row.byte_size) === input.size &&
+    row.checksum === (input.checksum ?? "pending") &&
+    row.collection === (input.collection ?? "website") &&
+    (row.linkedin_asset_kind ?? null) === (input.linkedinAssetKind ?? null) &&
+    canonicalJson(row.campaign_metadata ?? null) === canonicalJson(input.campaignMetadata ?? null) &&
+    canonicalJson(row.motion_metadata ?? null) === canonicalJson(input.motionMetadata ?? null);
+}
+
+function uploadResponse(row: Record<string, any>, upload: Awaited<ReturnType<typeof createMediaUpload>>) {
+  return {
+    media: media(row),
+    uploadUrl: upload.uploadUrl,
+    method: "PUT",
+    headers: {
+      "Content-Type": row.media_type,
+    },
+    expiresAt: upload.expiresAt,
+  };
+}
 
 type MediaClassification = {
   collection?: "website" | "linkedin" | "motion";
@@ -191,25 +247,84 @@ router.post("/media/upload-requests", requireCsrf, requireEditor, asyncRoute(asy
     return;
   }
   const auth = res.locals.auth as AuthContext;
-  const id = crypto.randomUUID();
+  const idempotencyKey = req.header("idempotency-key");
+  if (idempotencyKey !== undefined && !IDEMPOTENCY_KEY_PATTERN.test(idempotencyKey)) {
+    res.status(400).json({ error: "Idempotency-Key must contain 1 to 200 visible ASCII characters." });
+    return;
+  }
+  const id = idempotencyKey
+    ? deterministicMediaId(auth.user.id, idempotencyKey)
+    : crypto.randomUUID();
   try {
-    const upload = await mediaStorage.createUpload(id, input.mimeType, input.checksum);
     const result = await pool.query(
       `INSERT INTO cms_media_assets(
-         storage_key,filename,original_filename,media_type,byte_size,checksum,status,uploaded_by_user_id,
+          id,storage_key,filename,original_filename,media_type,byte_size,checksum,status,uploaded_by_user_id,
          collection,linkedin_asset_kind,campaign_metadata,motion_metadata)
-       VALUES ($1,$2,$2,$3,$4,$5,'pending',$6,$7,$8,$9,$10) RETURNING *`,
+        VALUES ($1,$2,$3,$3,$4,$5,$6,'pending',$7,$8,$9,$10,$11)
+        ON CONFLICT (id) DO NOTHING RETURNING *`,
       [
-        upload.objectPath, input.filename, input.mimeType, input.size,
+        id, `pending:${id}`, input.filename, input.mimeType, input.size,
         input.checksum ?? "pending", auth.user.id, input.collection ?? "website",
         input.linkedinAssetKind ?? null, input.campaignMetadata ?? null,
         input.motionMetadata ?? null,
       ],
     );
-    await audit(auth, "media.upload_requested", "media", id);
-    res.status(201).json({ media: media(result.rows[0]), uploadUrl: upload.uploadUrl, method: "PUT", headers: { "Content-Type": input.mimeType, ...(input.checksum ? { "x-goog-meta-checksum": input.checksum } : {}) }, expiresAt: upload.expiresAt });
+    let row = result.rows[0] as Record<string, any> | undefined;
+    const created = Boolean(row);
+    if (!row) {
+      const existing = await pool.query("SELECT * FROM cms_media_assets WHERE id=$1", [id]);
+      row = existing.rows[0];
+    }
+    if (!row || (idempotencyKey && !uploadRequestMatches(row, input))) {
+      res.status(409).json({ error: "Idempotency-Key is already associated with a different upload request." });
+      return;
+    }
+    if (row.status !== "pending") {
+      res.status(409).json({ error: "This upload request is already complete and cannot be restarted." });
+      return;
+    }
+    const upload = await mediaStorage.createUpload(id, input.mimeType, input.checksum);
+    if (created || row.storage_key === `pending:${id}`) {
+      await pool.query("UPDATE cms_media_assets SET storage_key=$2 WHERE id=$1 AND status='pending'", [id, upload.objectPath]);
+      row.storage_key = upload.objectPath;
+      await audit(auth, "media.upload_requested", "media", id);
+    } else if (row.storage_key !== upload.objectPath) {
+      res.status(409).json({ error: "This upload request has an invalid staging path." });
+      return;
+    }
+    res.status(created ? 201 : 200).json(uploadResponse(row, upload));
   } catch (error) {
     req.log.error({ err: error }, "Media upload request failed");
+    res.status(503).json({ error: "Media storage is temporarily unavailable." });
+  }
+}));
+
+router.post("/media/:mediaId/renew-upload", requireCsrf, requireEditor, asyncRoute(async (req, res) => {
+  const auth = res.locals.auth as AuthContext;
+  const result = await pool.query("SELECT * FROM cms_media_assets WHERE id=$1", [req.params.mediaId]);
+  if (!result.rowCount) {
+    res.status(404).json({ error: "Media asset not found." });
+    return;
+  }
+  const row = result.rows[0];
+  if (row.uploaded_by_user_id !== auth.user.id && auth.user.role !== "administrator") {
+    res.status(403).json({ error: "Only the original uploader or an administrator can renew this upload." });
+    return;
+  }
+  if (row.status !== "pending") {
+    res.status(409).json({ error: "Only a pending upload can be renewed." });
+    return;
+  }
+  try {
+    const upload = await mediaStorage.renewUpload(
+      row.storage_key,
+      row.media_type,
+      row.checksum === "pending" ? undefined : row.checksum,
+    );
+    await audit(auth, "media.upload_renewed", "media", String(row.id));
+    res.json(uploadResponse(row, upload));
+  } catch (error) {
+    req.log.error({ err: error }, "Media upload renewal failed");
     res.status(503).json({ error: "Media storage is temporarily unavailable." });
   }
 }));
@@ -472,40 +587,92 @@ router.post("/media/:mediaId/finalize", requireCsrf, requireEditor, asyncRoute(a
     return;
   }
   const input = parsed.data as typeof parsed.data & MediaClassification;
-  const current = await pool.query("SELECT * FROM cms_media_assets WHERE id=$1 AND status='pending'", [req.params.mediaId]);
-  if (!current.rowCount || current.rows[0].storage_key !== parsed.data.objectPath) {
-    res.status(409).json({ error: "This upload cannot be finalized." });
-    return;
-  }
-  const classification: MediaClassification = {
-    collection: input.collection ?? current.rows[0].collection ?? "website",
-    linkedinAssetKind: Object.hasOwn(input, "linkedinAssetKind") ? input.linkedinAssetKind : current.rows[0].linkedin_asset_kind,
-    motionMetadata: Object.hasOwn(input, "motionMetadata") ? input.motionMetadata : current.rows[0].motion_metadata,
-  };
-  if (!isValidMediaClassification(classification, current.rows[0].media_type)) {
-    res.status(400).json({ error: "Video must use the motion collection and include governed motion metadata." });
-    return;
-  }
+  const auth = res.locals.auth as AuthContext;
+  const receipt = createHash("sha256")
+    .update(canonicalJson(input))
+    .digest("hex");
+  const client = await pool.connect();
+  let response: ReturnType<typeof media> | undefined;
+  let cleanupPath: string | undefined;
   try {
+    await client.query("BEGIN");
+    const current = await client.query(
+      `SELECT a.*,v.metadata latest_metadata
+         FROM cms_media_assets a
+         LEFT JOIN LATERAL (
+           SELECT metadata FROM cms_media_versions
+            WHERE asset_id=a.id ORDER BY version_number DESC LIMIT 1
+         ) v ON true
+        WHERE a.id=$1 FOR UPDATE OF a`,
+      [req.params.mediaId],
+    );
+    if (!current.rowCount) {
+      await client.query("ROLLBACK");
+      res.status(404).json({ error: "Media asset not found." });
+      return;
+    }
+    const row = current.rows[0];
+    if (row.uploaded_by_user_id !== auth.user.id && auth.user.role !== "administrator") {
+      await client.query("ROLLBACK");
+      res.status(403).json({ error: "Only the original uploader or an administrator can finalize this upload." });
+      return;
+    }
+    if (row.status !== "pending") {
+      if (
+        row.latest_metadata?.uploadFinalizationReceipt === receipt &&
+        row.latest_metadata?.uploadObjectPath === input.objectPath
+      ) {
+        const finalized = await client.query(`${selectMedia} WHERE a.id=$1`, [req.params.mediaId]);
+        await client.query("COMMIT");
+        res.json(media(finalized.rows[0] ?? row));
+        return;
+      }
+      await client.query("ROLLBACK");
+      res.status(409).json({ error: "This asset is already finalized and cannot be changed by retrying." });
+      return;
+    }
+    if (row.storage_key !== input.objectPath) {
+      await client.query("ROLLBACK");
+      res.status(409).json({ error: "This upload cannot be finalized." });
+      return;
+    }
+    const classification: MediaClassification = {
+      collection: input.collection ?? row.collection ?? "website",
+      linkedinAssetKind: Object.hasOwn(input, "linkedinAssetKind") ? input.linkedinAssetKind : row.linkedin_asset_kind,
+      motionMetadata: Object.hasOwn(input, "motionMetadata") ? input.motionMetadata : row.motion_metadata,
+    };
+    if (!isValidMediaClassification(classification, row.media_type)) {
+      await client.query("ROLLBACK");
+      res.status(400).json({ error: "Video must use the motion collection and include governed motion metadata." });
+      return;
+    }
+    if (input.checksum && row.checksum !== "pending" && input.checksum !== row.checksum) {
+      await client.query("ROLLBACK");
+      res.status(409).json({ error: "Finalization checksum does not match the upload request." });
+      return;
+    }
     const promoted = await mediaStorage.promote(
-      parsed.data.objectPath,
-      current.rows[0].media_type,
-      current.rows[0].byte_size,
-      current.rows[0].checksum === "pending" ? undefined : current.rows[0].checksum,
+      input.objectPath,
+      row.media_type,
+      row.byte_size,
+      input.checksum ?? (row.checksum === "pending" ? undefined : row.checksum),
     );
     const metadata = {
-      caption: parsed.data.caption ?? null,
+      caption: input.caption ?? null,
       altText: input.altText ?? null,
       credit: input.credit ?? null,
       motionMetadata: classification.motionMetadata ?? null,
       duration: promoted.duration ?? null,
+      uploadFinalizationReceipt: receipt,
+      uploadObjectPath: input.objectPath,
     };
-    const result = await pool.query(
+    const result = await client.query(
       `UPDATE cms_media_assets SET storage_key=$2,checksum=$3,alt_text=$4,credit=$5,
        collection=$6,linkedin_asset_kind=$7,
        campaign_metadata=COALESCE($8,campaign_metadata),
         motion_metadata=$9,
-        status='pending-review',updated_at=now() WHERE id=$1 RETURNING *`,
+         status='pending-review',updated_at=now()
+       WHERE id=$1 AND status='pending' RETURNING *`,
       [
         req.params.mediaId,
         promoted.storageKey,
@@ -518,13 +685,14 @@ router.post("/media/:mediaId/finalize", requireCsrf, requireEditor, asyncRoute(a
         classification.motionMetadata ?? null,
       ],
     );
-    await pool.query(
+    if (!result.rowCount) throw new Error("Concurrent media finalization transition failed.");
+    await client.query(
       `INSERT INTO cms_media_versions(asset_id,version_number,storage_key,checksum,byte_size,width,height,metadata)
         VALUES ($1,1,$2,$3,$4,$5,$6,$7)`,
       [req.params.mediaId, promoted.storageKey, promoted.checksum, promoted.size, promoted.width, promoted.height, metadata],
     );
     if (promoted.rendition) {
-      await pool.query(
+      await client.query(
         `INSERT INTO cms_media_versions(asset_id,version_number,storage_key,checksum,byte_size,width,height,metadata)
          VALUES ($1,2,$2,$3,$4,$5,$6,$7)`,
         [req.params.mediaId, promoted.rendition.storageKey, promoted.rendition.checksum,
@@ -532,16 +700,32 @@ router.post("/media/:mediaId/finalize", requireCsrf, requireEditor, asyncRoute(a
           { ...metadata, rendition: "webp-1600" }],
       );
     }
-    await mediaStorage.deleteStaging(parsed.data.objectPath).catch((error) => {
-      req.log.warn({ err: error }, "Finalized media staging cleanup failed");
-    });
-    await audit(res.locals.auth as AuthContext, "media.finalized", "media", String(req.params.mediaId));
-    const finalized = await pool.query(`${selectMedia} WHERE a.id=$1`, [req.params.mediaId]);
-    res.json(media(finalized.rows[0] ?? result.rows[0]));
+    await client.query(
+      `INSERT INTO cms_audit_events
+        (actor_user_id,actor_label,action,target_type,target_id,metadata)
+       VALUES ($1,$2,'media.finalized','media',$3,$4)`,
+      [auth.user.id, auth.user.email, String(req.params.mediaId), { receipt }],
+    );
+    const finalized = await client.query(`${selectMedia} WHERE a.id=$1`, [req.params.mediaId]);
+    response = media(finalized.rows[0] ?? result.rows[0]);
+    cleanupPath = input.objectPath;
+    await client.query("COMMIT");
   } catch (error) {
-    await pool.query("UPDATE cms_media_assets SET status='failed',updated_at=now() WHERE id=$1", [req.params.mediaId]);
-    res.status(409).json({ error: "Uploaded object verification failed." });
+    await client.query("ROLLBACK");
+    if (error instanceof MediaObjectValidationError) {
+      res.status(409).json({ error: "Uploaded object verification failed." });
+    } else {
+      req.log.error({ err: error }, "Media finalization temporarily failed");
+      res.status(503).json({ error: "Media finalization is temporarily unavailable; retry safely." });
+    }
+    return;
+  } finally {
+    client.release();
   }
+  await mediaStorage.deleteStaging(cleanupPath!).catch((error) => {
+    req.log.warn({ err: error }, "Finalized media staging cleanup failed");
+  });
+  res.json(response);
 }));
 
 export default router;
