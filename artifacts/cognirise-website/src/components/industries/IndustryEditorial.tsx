@@ -67,7 +67,7 @@ export function IndustryEditorialView({ view: baseView, marketOverride }: { view
       </IndustrySection>
 
       <IndustrySection id="pressures" className="ind-pressure" aria-labelledby="pressure-title">
-        <div><div className="ind-kicker">Operating pressures</div><h2 id="pressure-title">Where the operating model resists the demo.</h2></div>
+        <div><div className="ind-kicker">Operating pressures</div><h2 id="pressure-title">Where impressive AI demos meet the realities of running a business.</h2></div>
         <div className="ind-pressure-list">{view.pressures.map((pressure, index) => <article key={pressure.title}><span>0{index + 1}</span><div><h3>{pressure.title}</h3><p>{pressure.body}</p></div></article>)}</div>
         {pov?.convictions && <div className="ind-nested-module ind-convictions" aria-label="Strategic convictions"><div className="ind-kicker">Strategic convictions</div><h3>Lead with educational purpose.</h3><div className="ind-pressure-list">{pov.convictions.map((conviction, index) => <article key={conviction.title}><span>0{index + 1}</span><div><h4>{conviction.title}</h4><p>{conviction.body}</p></div></article>)}</div></div>}
       </IndustrySection>

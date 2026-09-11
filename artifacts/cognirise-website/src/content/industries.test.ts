@@ -35,8 +35,8 @@ test("does not publish internal research-production language", () => {
   assert.doesNotMatch(published, /editor note|placeholder|tbd|claude/);
 });
 
-test("keeps the approved financial-services hero punctuation in fallback and CMS content", () => {
-  const approvedHeadline = "The model estate — not the chatbot — is where trust is won.";
+test("keeps the approved financial-services thesis in fallback and CMS content", () => {
+  const approvedHeadline = "Trust in AI comes from how it is governed and operated—not how well its chatbot performs.";
   const financialServices = INDUSTRIES.find((industry) => industry.slug === "financial-services");
   assert.equal(financialServices?.thesis, approvedHeadline);
 
@@ -58,8 +58,7 @@ test("keeps the approved financial-services hero punctuation in fallback and CMS
   const heroMarkup = html.match(/<h1 id="industry-title">(.+?)<\/h1>/)?.[1];
   assert.ok(heroMarkup);
   assert.equal(heroMarkup.replace(/<[^>]+>/g, ""), approvedHeadline);
-  assert.equal((heroMarkup.match(/class="ind-thesis-dash"/g) ?? []).length, 2);
-  assert.match(html, /\.ind-thesis-dash\{[^}]*margin-inline:\.06em/);
+  assert.equal((heroMarkup.match(/class="ind-thesis-dash"/g) ?? []).length, 0);
 });
 
 test("keeps evidence classifications and source labels visible", () => {
@@ -266,5 +265,6 @@ test("the shared industry renderer has the governed nine-section outline in a fi
     ));
     const sections = [...html.matchAll(/data-industry-section="([^"]+)"/g)].map((match) => match[1]);
     assert.deepEqual(sections, INDUSTRY_SECTION_IDS, `${industry.slug} must use the shared section outline`);
+    assert.ok(html.includes('<h2 id="pressure-title">Where impressive AI demos meet the realities of running a business.</h2>'));
   }
 });

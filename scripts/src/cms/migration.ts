@@ -98,6 +98,76 @@ export const EDUCATION_SUCCESSOR_SEO = {
   description: "Build shared AI capability across schools, universities and education authorities: better learning, stronger educators and researchers, and responsible service redesign.",
 } as const;
 
+export const FINANCIAL_SERVICES_GOVERNED_THESIS =
+  "Trust in AI comes from how it is governed and operated—not how well its chatbot performs.";
+
+const FINANCIAL_SERVICES_HISTORICAL_THESIS_RECEIPTS = new Set([
+  "The model estate—not the chatbot—is where trust is won.",
+  "The model estate — not the chatbot — is where trust is won.",
+]);
+
+export function isFinancialServicesThesisSuccessorOperation(
+  operation: Pick<MigrationOperation, "idempotencyKey" | "kind" | "slug">,
+) {
+  return operation.kind === "industry"
+    && operation.slug === "financial-services"
+    && operation.idempotencyKey.startsWith("cms-industry-financial-services-thesis-v13:");
+}
+
+export function financialServicesThesisSuccessorPlan(input: {
+  slug: string;
+  market: string;
+  locale: string;
+  publicationState: string | null | undefined;
+  publishedRevisionId: string | null | undefined;
+  latestRevision: { id: string; workflowState: string } | undefined;
+  publishedPayload: unknown;
+  canonicalPayload: unknown;
+  publishedReferences: ReadonlyArray<{ assetId: string; mediaVersionId: string | null }>;
+}): {
+  payload: Record<string, unknown>;
+  references: Array<{ assetId: string; mediaVersionId: string | null }>;
+} | null {
+  if (
+    input.slug !== "financial-services"
+    || input.market !== "uae"
+    || input.locale !== "en"
+    || input.publicationState !== "published"
+    || !input.publishedRevisionId
+    || input.latestRevision?.id !== input.publishedRevisionId
+    || input.latestRevision.workflowState !== "approved"
+    || !input.publishedPayload
+    || typeof input.publishedPayload !== "object"
+    || Array.isArray(input.publishedPayload)
+    || !input.canonicalPayload
+    || typeof input.canonicalPayload !== "object"
+    || Array.isArray(input.canonicalPayload)
+  ) return null;
+
+  const published = structuredClone(input.publishedPayload) as {
+    content?: Record<string, unknown>;
+  };
+  const canonical = input.canonicalPayload as {
+    content?: Record<string, unknown>;
+  };
+  const previousThesis = published.content?.thesis;
+  if (
+    typeof previousThesis !== "string"
+    || !FINANCIAL_SERVICES_HISTORICAL_THESIS_RECEIPTS.has(previousThesis)
+    || canonical.content?.thesis !== FINANCIAL_SERVICES_GOVERNED_THESIS
+  ) return null;
+
+  if (!published.content) return null;
+  published.content.thesis = FINANCIAL_SERVICES_GOVERNED_THESIS;
+  return {
+    payload: published as Record<string, unknown>,
+    references: input.publishedReferences.map(({ assetId, mediaVersionId }) => ({
+      assetId,
+      mediaVersionId,
+    })),
+  };
+}
+
 export function educationSuccessorRecoveryKey(externalId: string, version = "v11") {
   return `cms-industry-education-successor-${version}-recovery:${externalId}`;
 }
@@ -358,7 +428,7 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
     // reconciliation can preserve every earlier immutable baseline and receipt.
     idempotencyKey: record.type === "industry"
       ? record.fields.slug === "financial-services"
-        ? `cms-industry-contract-v12:${record.externalId}`
+        ? `cms-industry-financial-services-thesis-v13:${record.externalId}`
         : record.fields.slug === "education"
               ? `cms-industry-education-successor-v12:${record.externalId}`
         : `cms-industry-contract-v8:${record.externalId}`

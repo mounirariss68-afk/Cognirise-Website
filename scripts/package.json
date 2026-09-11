@@ -16,6 +16,7 @@
     "cms:import-banking-media": "tsx ./src/cms/banking-media-import.ts",
     "cms:reconcile-banking-successor": "tsx ./src/cms/banking-successor.ts",
     "cms:setup-banking-successor": "tsx ./src/cms/banking-successor.ts",
+    "cms:reconcile-financial-services-thesis": "tsx ./src/cms/financial-services-thesis-successor.ts",
     "cms:setup-banking-postmerge": "pnpm cms:import-banking-media -- --apply-db --target=development --write && pnpm cms:reconcile-banking-successor -- --apply-db --target=development --write",
     "cms:verify-banking-publication": "tsx ./src/cms/banking-publication-verify.ts",
     "cms:publish-industry-images": "tsx ./src/cms/industry-cutover.ts",

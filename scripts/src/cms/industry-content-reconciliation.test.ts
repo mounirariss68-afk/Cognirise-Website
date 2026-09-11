@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   financialServicesPunctuationReconciliationPlan,
+  financialServicesThesisSuccessorPlan,
+  FINANCIAL_SERVICES_GOVERNED_THESIS,
+  isFinancialServicesThesisSuccessorOperation,
   educationSuccessorAction,
   EDUCATION_SUCCESSOR_SEO,
   canonicalResultDigest,
@@ -177,6 +180,87 @@ test("copies current punctuation-only media references without substituting a pr
   assert.deepEqual(plan.references, [{ assetId: "current-media", mediaVersionId: null }]);
   assert.equal(plan.payload.content.heroMediaId, "current-media");
   assert.deepEqual(plan.payload.mediaIds, ["current-media"]);
+});
+
+test("Financial Services successor changes only the governed thesis and preserves immutable references", () => {
+  const published = {
+    slug: "financial-services",
+    title: "Financial Services",
+    summary: "Unchanged summary.",
+    content: {
+      thesis: "The model estate — not the chatbot — is where trust is won.",
+      dek: "Unchanged dek.",
+      heroMediaId: "current-media",
+      marketOverride: { uae: "Unchanged market copy." },
+    },
+    mediaIds: ["current-media"],
+  };
+  const plan = financialServicesThesisSuccessorPlan({
+    slug: "financial-services",
+    market: "uae",
+    locale: "en",
+    publicationState: "published",
+    publishedRevisionId: "revision-5",
+    latestRevision: { id: "revision-5", workflowState: "approved" },
+    publishedPayload: published,
+    canonicalPayload: {
+      content: { thesis: FINANCIAL_SERVICES_GOVERNED_THESIS },
+    },
+    publishedReferences: [{ assetId: "current-media", mediaVersionId: "immutable-v1" }],
+  });
+  assert.ok(plan);
+  const successorContent = plan.payload.content as Record<string, unknown>;
+  assert.equal(successorContent.thesis, FINANCIAL_SERVICES_GOVERNED_THESIS);
+  assert.equal(successorContent.dek, published.content.dek);
+  assert.deepEqual(successorContent.marketOverride, published.content.marketOverride);
+  assert.deepEqual(plan.references, [{ assetId: "current-media", mediaVersionId: "immutable-v1" }]);
+  assert.equal(published.content.thesis, "The model estate — not the chatbot — is where trust is won.");
+  assert.deepEqual(
+    financialServicesThesisSuccessorPlan({
+      slug: "financial-services",
+      market: "uae",
+      locale: "en",
+      publicationState: "published",
+      publishedRevisionId: "revision-5",
+      latestRevision: { id: "revision-5", workflowState: "approved" },
+      publishedPayload: published,
+      canonicalPayload: { content: { thesis: FINANCIAL_SERVICES_GOVERNED_THESIS } },
+      publishedReferences: [{ assetId: "current-media", mediaVersionId: "immutable-v1" }],
+    }),
+    plan,
+  );
+  assert.equal(isFinancialServicesThesisSuccessorOperation({
+    kind: "industry",
+    slug: "financial-services",
+    idempotencyKey: "cms-industry-financial-services-thesis-v13:industry:test",
+  }), true);
+});
+
+test("Financial Services successor refuses newer drafts, market overrides, and non-exact canonical copy", () => {
+  const input = {
+    slug: "financial-services",
+    market: "uae",
+    locale: "en",
+    publicationState: "published",
+    publishedRevisionId: "revision-5",
+    latestRevision: { id: "revision-6", workflowState: "draft" },
+    publishedPayload: {
+      content: { thesis: "The model estate — not the chatbot — is where trust is won." },
+    },
+    canonicalPayload: { content: { thesis: FINANCIAL_SERVICES_GOVERNED_THESIS } },
+    publishedReferences: [],
+  };
+  assert.equal(financialServicesThesisSuccessorPlan(input), null);
+  assert.equal(financialServicesThesisSuccessorPlan({
+    ...input,
+    latestRevision: { id: "revision-5", workflowState: "approved" },
+    market: "ksa",
+  }), null);
+  assert.equal(financialServicesThesisSuccessorPlan({
+    ...input,
+    latestRevision: { id: "revision-5", workflowState: "approved" },
+    canonicalPayload: { content: { thesis: "A nearby but unapproved sentence." } },
+  }), null);
 });
 
 test("Education successor accepts only an exact known authority and governed v2 shape", () => {

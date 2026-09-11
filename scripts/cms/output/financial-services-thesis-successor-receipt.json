@@ -1,0 +1,8 @@
+{
+  "task": 316,
+  "mode": "apply",
+  "disposition": "preserved-conflict",
+  "error": "Financial Services has a newer draft/review revision (latest=d069afc1-f54b-4560-93bf-4db2abbac255, published=a9becd21-1772-4be7-afec-54b519ff13b5, state=draft); preserving editorial authority.",
+  "action": "No Financial Services draft, publication pointer, unrelated payload field, media pin, historical receipt, or market override was overwritten.",
+  "recommendedEditorialResolution": "Have the editorial owner incorporate the approved thesis into the existing Financial Services draft without discarding its other edits, then review and publish it through the normal CMS controls. Rejecting a draft alone does not make this automatic successor eligible; it requires latest revision to equal the approved published revision."
+}

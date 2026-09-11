@@ -18,6 +18,7 @@ import {
   educationSuccessorAction,
   educationSuccessorRecoveryKey,
   educationSuccessorVersion,
+  isFinancialServicesThesisSuccessorOperation,
   financialServicesPunctuationReconciliationPlan,
   isEducationSuccessorOperation,
   personAvailabilityOperations,
@@ -995,6 +996,17 @@ async function applyDatabase(
         }
         const [conflict] = await tx.select({ id: cmsDocumentsTable.id }).from(cmsDocumentsTable)
           .where(eq(cmsDocumentsTable.canonicalSlug, operation.slug));
+        // Task 316 owns an existing Financial Services document in a
+        // separate, edition-locked transaction. Allow an empty database to
+        // receive its first governed draft, but never merge the full
+        // canonical payload over an existing publication or newer draft.
+        if (conflict && isFinancialServicesThesisSuccessorOperation(operation)) {
+          console.warn(
+            `${operation.externalId}: Financial Services thesis successor is owned by the edition-locked reconciliation; no generic import was attempted.`,
+          );
+          replayed++;
+          continue;
+        }
         const resolvedPayload = resolveMigrationMedia(operation, mediaByPath);
         if (conflict) {
           if (operation.kind === "case-study" && operation.idempotencyKey.startsWith("cms-case-study-baseline-v2:")) {

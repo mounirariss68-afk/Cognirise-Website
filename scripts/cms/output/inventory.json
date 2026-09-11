@@ -3643,7 +3643,7 @@
           "legacyPath": "/industries/banking",
           "name": "Financial Services",
           "shortName": "Finance",
-          "thesis": "The model estate — not the chatbot — is where trust is won.",
+          "thesis": "Trust in AI comes from how it is governed and operated—not how well its chatbot performs.",
           "accent": "trust is won.",
           "dek": "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
           "opportunity": "Turn fragmented controls and exception-heavy operations into faster, traceable decisions that improve customer outcomes without weakening model-risk discipline.",
@@ -8104,7 +8104,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "ec243da510e3d59eb3439e7881acd53d922c6a20fda6d1efa0b9318ede4f832c",
+  "manifestDigest": "3c012b7a28b8ef767024778fc7b18297d157cc0f9e74411c651bae169442cf2e",
   "generatedAt": "2026-09-11T17:33:33.435Z",
   "dryRun": false
 }

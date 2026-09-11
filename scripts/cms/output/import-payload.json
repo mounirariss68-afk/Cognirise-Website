@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-09-11T17:33:44.189Z",
-  "manifestDigest": "ec243da510e3d59eb3439e7881acd53d922c6a20fda6d1efa0b9318ede4f832c",
+  "manifestDigest": "3c012b7a28b8ef767024778fc7b18297d157cc0f9e74411c651bae169442cf2e",
   "dryRun": true,
   "mode": "payload-only",
   "note": "No storage or database call was made. Use --apply-db --target=development to import governed drafts.",
@@ -3101,7 +3101,7 @@
           "legacyPath": "/industries/banking",
           "name": "Financial Services",
           "shortName": "Finance",
-          "thesis": "The model estate — not the chatbot — is where trust is won.",
+          "thesis": "Trust in AI comes from how it is governed and operated—not how well its chatbot performs.",
           "accent": "trust is won.",
           "dek": "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
           "opportunity": "Turn fragmented controls and exception-heavy operations into faster, traceable decisions that improve customer outcomes without weakening model-risk discipline.",
@@ -3207,8 +3207,8 @@
       "mediaPaths": [
         "/images/cognirise/industries/pulse-industry-financial-services.png"
       ],
-      "idempotencyKey": "cms-industry-contract-v12:industry:b60f973e571d3059824d",
-      "requestDigest": "cf0807ed65eb3d803a42694e52cfdd2b746c54e61776512ca9f1955a59aca9d7"
+      "idempotencyKey": "cms-industry-financial-services-thesis-v13:industry:b60f973e571d3059824d",
+      "requestDigest": "ac189b842ae5d6003ece9352dc81a5250b20d7a50d14ee1f8da15734230fe73e"
     },
     {
       "externalId": "industry:37a17e1c80062ece7c5c",

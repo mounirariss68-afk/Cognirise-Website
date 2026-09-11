@@ -9,6 +9,10 @@ pnpm --filter @workspace/db prepare-schema-push
 # reconciliation runs. Keep this boundary non-destructive so immutable media
 # review metadata survives a merge.
 pnpm --filter @workspace/db push
+# Task 316 owns the exact Financial Services thesis successor. Run it before
+# generic inventory reconciliation so its edition lock can preserve a newer
+# editorial draft instead of allowing a full canonical payload merge.
+pnpm --filter @workspace/scripts cms:reconcile-financial-services-thesis -- --apply-db --target=development --write --report-conflict
 pnpm --filter @workspace/scripts cms:reconcile
 pnpm --filter @workspace/scripts cms:reconcile-site-hero-media -- --apply-db --target=development
 # Schema push applies columns and tables only; this development-only command

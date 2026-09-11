@@ -12,6 +12,7 @@ import {
   educationSuccessorRecoveryKey,
   educationSuccessorVersion,
   isEducationSuccessorOperation,
+  isFinancialServicesThesisSuccessorOperation,
   isKnownEducationSuccessorAuthorityDigest,
   historicalMediaReceipts,
   mediaMigrationOperations,
@@ -486,6 +487,7 @@ async function main() {
   const mediaOperations = mediaMigrationOperations(inventory.records);
   for (const operation of migrationOperations(inventory.records)) {
     const educationSuccessor = isEducationSuccessorOperation(operation);
+    const financialServicesThesisSuccessor = isFinancialServicesThesisSuccessorOperation(operation);
     const normalizedOperationPayload = JSON.parse(JSON.stringify(operation.payload)) as {
       mediaIds?: unknown[];
       content?: Record<string, unknown>;
@@ -494,6 +496,10 @@ async function main() {
     expected.set(operation.idempotencyKey, {
       requestDigest: operation.requestDigest,
       subjectType: "document",
+      // Task 316 has an edition-locked owner. A newer editorial draft is
+      // reported and left retryable rather than terminally preserved by the
+      // generic inventory importer.
+      optional: financialServicesThesisSuccessor,
       // Versioned industry baselines receive a new receipt. If an earlier
       // edition has subsequent revisions, import records a preservation
       // receipt rather than replacing that editorial history.
