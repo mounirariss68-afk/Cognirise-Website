@@ -12,6 +12,9 @@ import {
   type FrameworkContent,
   type OfficeContent,
   type LandingPageContent,
+  INDUSTRY_SECTION_IDS,
+  isIndustrySectionId,
+  type IndustrySectionId,
   validateCmsContent,
 } from "@workspace/api-zod";
 import { useMarketStore } from "@/store/market";
@@ -53,6 +56,27 @@ type ImmutableCmsMediaReference = {
   altText?: string;
 };
 
+/** The fixed industry-outline identifiers accepted by a protected preview. */
+export { INDUSTRY_SECTION_IDS as INDUSTRY_PREVIEW_SECTION_IDS };
+export type IndustryPreviewSectionId = IndustrySectionId;
+export type IndustryPreviewFocusMessage = {
+  type: "industry-preview-focus";
+  section: IndustryPreviewSectionId;
+  state?: "expanded" | "collapsed";
+};
+
+export function isIndustryPreviewFocusMessage(value: unknown): value is IndustryPreviewFocusMessage {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const message = value as Record<string, unknown>;
+  if (
+    message.type !== "industry-preview-focus"
+    || typeof message.section !== "string"
+    || !isIndustrySectionId(message.section)
+    || !["expanded", "collapsed", undefined].includes(message.state as "expanded" | "collapsed" | undefined)
+  ) return false;
+  return Object.keys(message).every((key) => key === "type" || key === "section" || key === "state");
+}
+
 /**
  * Resolve governed media by its exact immutable version. Legacy asset IDs are
  * consulted only for documents which have not yet been migrated to a
@@ -69,6 +93,80 @@ export function resolveCmsMedia(
     );
   }
   return legacyMediaId ? media?.find((item) => item.id === legacyMediaId) : undefined;
+}
+
+/** Protected previews must never turn a mutable asset ID into draft media.
+ * Unlike resolveCmsMedia, this deliberately has no legacy-ID fallback. */
+export function resolvePinnedCmsMedia(
+  media: PublishedContent["media"],
+  reference?: ImmutableCmsMediaReference,
+): DeliveredCmsMedia | undefined {
+  if (!reference?.mediaId || !reference.mediaVersionId) return undefined;
+  return media?.find((item) =>
+    item.id === reference.mediaId && item.versionId === reference.mediaVersionId
+  );
+}
+
+export type PreviewIndustryMediaResolution = {
+  content: IndustryContent;
+  missingReferences: string[];
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function pinnedReferenceKey(value: Record<string, unknown>): string | null {
+  return typeof value.mediaId === "string" && typeof value.mediaVersionId === "string"
+    ? `${value.mediaId}@${value.mediaVersionId}`
+    : null;
+}
+
+/** Hydrate a saved industry snapshot only with URLs issued for this preview
+ * session.  In particular, Education's supporting imagery cannot retain a
+ * public/static URL when its immutable draft-media reference is unavailable. */
+export function resolvePreviewIndustryMedia(
+  industry: IndustryContent,
+  media: PublishedContent["media"],
+): PreviewIndustryMediaResolution {
+  // CMS content is JSON. Cloning avoids mutating the immutable saved response
+  // before it is rendered or checked by another preview concern.
+  const content = JSON.parse(JSON.stringify(industry)) as IndustryContent;
+  const missingReferences = new Set<string>();
+
+  const inspect = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      value.forEach(inspect);
+      return;
+    }
+    if (!isRecord(value)) return;
+    const key = pinnedReferenceKey(value);
+    if (key && !resolvePinnedCmsMedia(media, value as ImmutableCmsMediaReference)) {
+      missingReferences.add(key);
+    }
+    Object.values(value).forEach(inspect);
+  };
+  inspect(content);
+
+  const hero = resolvePinnedCmsMedia(media, content.heroMedia);
+  if (content.heroMedia && hero) {
+    content.image = hero.url;
+    content.imageAlt = content.heroMedia.altText || hero.altText || content.imageAlt;
+  }
+
+  const educationPov = content.educationPov;
+  if (educationPov?.version === 2 && educationPov.imagery) {
+    for (const slot of ["educatorPractice", "researchCoordination"] as const) {
+      const scene = educationPov.imagery[slot];
+      const resolved = resolvePinnedCmsMedia(media, scene.media);
+      if (scene.media && resolved) {
+        scene.src = resolved.url;
+        scene.altText = scene.media.altText || resolved.altText || scene.altText;
+      }
+    }
+  }
+
+  return { content, missingReferences: [...missingReferences] };
 }
 
 /** The compiled route inventory is deliberately explicit.  Reconciliation

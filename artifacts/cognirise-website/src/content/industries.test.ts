@@ -7,7 +7,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Router } from "wouter";
 import { projectIndustrySnapshotForMarket, validateCmsContent } from "@workspace/api-zod";
 import { IndustryEditorialView } from "@/components/industries/IndustryEditorial";
-import { INDUSTRIES } from "./industries";
+import { INDUSTRIES, INDUSTRY_SECTION_IDS } from "./industries";
 
 test("publishes exactly six complete, distinct industry records", () => {
   assert.equal(INDUSTRIES.length, 6);
@@ -254,5 +254,17 @@ test("every projected Education edition validates and preserves its five convict
     if (market !== "uae") assert.doesNotMatch(publicJson, /\bUAE\b|United Arab Emirates|moe\.gov\.ae|ai\.gov\.ae/i);
     if (market !== "ksa") assert.doesNotMatch(publicJson, /Saudi|sdaia\.gov\.sa/i);
     assert.deepEqual(projectIndustrySnapshotForMarket(payload, market), payload);
+  }
+});
+
+test("the shared industry renderer has the governed nine-section outline in a fixed order", () => {
+  for (const industry of INDUSTRIES) {
+    const html = renderToStaticMarkup(createElement(
+      Router,
+      { ssrPath: `/industries/${industry.slug}` },
+      createElement(IndustryEditorialView, { view: industry }),
+    ));
+    const sections = [...html.matchAll(/data-industry-section="([^"]+)"/g)].map((match) => match[1]);
+    assert.deepEqual(sections, INDUSTRY_SECTION_IDS, `${industry.slug} must use the shared section outline`);
   }
 });

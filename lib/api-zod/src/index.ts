@@ -16,3 +16,4 @@ export * from "./navigation";
 export * from "./agent-authority";
 export * from "./industry-market-projection";
 export * from "./education-saudi-evidence";
+export * from "./industry-sections";

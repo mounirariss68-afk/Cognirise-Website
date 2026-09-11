@@ -35,6 +35,23 @@ test("protected Education preview projects the complete snapshot for requested a
   assert.match(previewRoute, /X-Robots-Tag": "noindex, nofollow, noarchive"/);
 });
 
+test("preview sessions distinguish expiry and revocation without weakening capability checks", async () => {
+  const route = await readFile(resolve(process.cwd(), "src/routes/documents.ts"), "utf8");
+  const previewRoute = route.slice(
+    route.indexOf('"/preview/:token"'),
+    route.indexOf('"/preview/:token/media/:mediaId/:versionId"'),
+  );
+
+  assert.match(previewRoute, /authenticate,\s*requireMfa/);
+  assert.match(previewRoute, /p\.expires_at,p\.revoked_at/);
+  assert.match(previewRoute, /WHERE p\.token_digest=\$1/);
+  assert.match(previewRoute, /canAccessMarket[\s\S]*row\.revoked_at/);
+  assert.match(previewRoute, /status\(410\)\.json\(\{ error: "Preview session has been revoked\.", reason: "revoked" \}\)/);
+  assert.match(previewRoute, /status\(410\)\.json\(\{ error: "Preview session has expired\.", reason: "expired" \}\)/);
+  assert.match(previewRoute, /Cache-Control": "no-store, private"/);
+  assert.match(previewRoute, /X-Robots-Tag": "noindex, nofollow, noarchive"/);
+});
+
 test("pending media is available through both protected preview stages, never through a public bypass", async () => {
   const route = await readFile(resolve(process.cwd(), "src/routes/documents.ts"), "utf8");
   const metadataRoute = route.slice(route.indexOf('"/preview/:token"'), route.indexOf('"/preview/:token/media/:mediaId/:versionId"'));
@@ -44,8 +61,9 @@ test("pending media is available through both protected preview stages, never th
     assert.match(stage, /a\.status IN \('active','ready','pending-review'\)/);
     assert.match(stage, /canAccessEditionTarget/);
     assert.match(stage, /requested_locale/);
-    assert.match(stage, /p\.revoked_at IS NULL/);
     assert.match(stage, /no-store, private/);
   }
+  assert.match(metadataRoute, /row\.revoked_at/);
+  assert.match(binaryRoute, /p\.revoked_at IS NULL/);
   assert.match(binaryRoute, /previewMediaIds\(asset\.rows\[0\]\.payload\)\.includes/);
 });

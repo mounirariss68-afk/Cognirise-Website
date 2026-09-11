@@ -2710,57 +2710,83 @@ router.post(
     }
     const id = String(req.params.documentId);
     const auth = res.locals.auth as AuthContext;
-    const old = await pool.query(
-      `SELECT r.payload,r.edition_id,d.kind,d.canonical_slug,e.market,e.locale FROM cms_revisions r
-       JOIN cms_market_editions e ON e.id=r.edition_id
-       JOIN cms_documents d ON d.id=e.document_id
-       WHERE r.id=$1 AND e.document_id=$2`,
-      [parsed.data.revisionId, id],
-    );
-    if (!old.rowCount) {
-      res.status(409).json({ error: "The selected revision does not exist." });
-      return;
-    }
-    if (!isCmsConfigurationIdentityValid(
-      old.rows[0].kind,
-      old.rows[0].canonical_slug,
-      old.rows[0].payload,
-    )) {
-      res.status(409).json({ error: "Site configuration does not match its canonical singleton identity." });
-      return;
-    }
-    const revision = await pool.query(
-      `INSERT INTO cms_revisions
-       (edition_id,revision_number,payload,content_digest,workflow_state,
-        created_by_user_id,reason)
-       SELECT $1,max(revision_number)+1,$2,$3,'draft',$4,$5
-        FROM cms_revisions WHERE edition_id=$1 RETURNING id`,
-      [old.rows[0].edition_id, old.rows[0].payload, digest(old.rows[0].payload), auth.user.id, parsed.data.note],
-    );
-    await pool.query(
-      `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
-       SELECT ref.asset_id,COALESCE(ref.media_version_id,latest.id),ref.document_id,$3
-         FROM cms_media_references ref
-         LEFT JOIN LATERAL (
-           SELECT id FROM cms_media_versions
-            WHERE asset_id=ref.asset_id ORDER BY version_number DESC LIMIT 1
-         ) latest ON ref.media_version_id IS NULL
-        WHERE ref.document_id=$1 AND ref.field_path=$2
-       ON CONFLICT DO NOTHING`,
-      [
+    const client = await pool.connect();
+    let old: any;
+    try {
+      await client.query("BEGIN");
+      old = await client.query(
+        `SELECT r.payload,r.edition_id,d.kind,d.canonical_slug,e.market,e.locale,e.content_mode
+           FROM cms_revisions r
+           JOIN cms_market_editions e ON e.id=r.edition_id
+           JOIN cms_documents d ON d.id=e.document_id
+          WHERE r.id=$1 AND e.document_id=$2
+          FOR UPDATE OF e`,
+        [parsed.data.revisionId, id],
+      );
+      if (!old.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "The selected revision does not exist." });
+        return;
+      }
+      if (!isCmsConfigurationIdentityValid(
+        old.rows[0].kind,
+        old.rows[0].canonical_slug,
+        old.rows[0].payload,
+      )) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "Site configuration does not match its canonical singleton identity." });
+        return;
+      }
+      const revision = await client.query(
+        `INSERT INTO cms_revisions
+         (edition_id,revision_number,payload,content_digest,workflow_state,
+          created_by_user_id,reason)
+         SELECT $1,max(revision_number)+1,$2,$3,'draft',$4,$5
+         FROM cms_revisions WHERE edition_id=$1 RETURNING id`,
+        [old.rows[0].edition_id, old.rows[0].payload, digest(old.rows[0].payload), auth.user.id, parsed.data.note],
+      );
+      await client.query(
+        `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
+         SELECT ref.asset_id,COALESCE(ref.media_version_id,latest.id),ref.document_id,$3
+           FROM cms_media_references ref
+           LEFT JOIN LATERAL (
+             SELECT id FROM cms_media_versions
+              WHERE asset_id=ref.asset_id ORDER BY version_number DESC LIMIT 1
+           ) latest ON ref.media_version_id IS NULL
+          WHERE ref.document_id=$1 AND ref.field_path=$2
+         ON CONFLICT DO NOTHING`,
+        [
+          id,
+          `revision:${parsed.data.revisionId}`,
+          `revision:${String(revision.rows[0].id)}`,
+        ],
+      );
+      await syncMediaReferences(
+        client,
         id,
-        `revision:${parsed.data.revisionId}`,
-        `revision:${String(revision.rows[0].id)}`,
-      ],
-    );
-    await syncMediaReferences(
-      pool,
-      id,
-      String(revision.rows[0].id),
-      old.rows[0].payload,
-    );
+        String(revision.rows[0].id),
+        old.rows[0].payload,
+      );
+      if (old.rows[0].content_mode === "shared") {
+        await ensureAvailabilityState(client, id);
+        await client.query(
+          `UPDATE cms_document_availability_states
+              SET draft_version=draft_version+1,shared_source_revision_id=$2,reviewed_version=NULL,
+                  reviewed_source_revision_id=NULL,reviewed_selections='[]'::jsonb,
+                  updated_by_user_id=$3,updated_at=now()
+            WHERE document_id=$1 AND shared_source_edition_id=$4`,
+          [id, revision.rows[0].id, auth.user.id, old.rows[0].edition_id],
+        );
+      }
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
     await audit(auth, "document.rolled_back", "document", id);
-    res.json(await getDocument(id, auth, old.rows[0].market, old.rows[0].locale));
+    res.json(await getDocument(id, auth, old!.rows[0].market, old!.rows[0].locale));
   }),
 );
 
@@ -2853,7 +2879,7 @@ router.post(
         );
       }
       const selected = await client.query(
-        `SELECT e.id,e.published_revision_id,d.kind,
+        `SELECT e.id,e.published_revision_id,e.content_mode,d.kind,
                 latest.id revision_id,latest.revision_number,latest.workflow_state,latest.payload
            FROM cms_market_editions e
            JOIN cms_documents d ON d.id=e.document_id
@@ -2911,6 +2937,17 @@ router.post(
           successor.rows[0].payload,
           String(sourceRevisionId),
         );
+        if (edition.content_mode === "shared") {
+          await ensureAvailabilityState(client, id);
+          await client.query(
+            `UPDATE cms_document_availability_states
+                SET draft_version=draft_version+1,shared_source_revision_id=$2,reviewed_version=NULL,
+                    reviewed_source_revision_id=NULL,reviewed_selections='[]'::jsonb,
+                    updated_by_user_id=$3,updated_at=now()
+              WHERE document_id=$1 AND shared_source_edition_id=$4`,
+            [id, successorRevisionId, (res.locals.auth as AuthContext).user.id, edition.id],
+          );
+        }
       }
       await client.query(
         `UPDATE cms_market_editions
@@ -3052,16 +3089,16 @@ router.get(
       `SELECT d.id document_id,d.kind,e.market,e.locale,COALESCE(e.editorial_market,e.market) editorial_market,
               r.id revision_id,r.payload,r.revision_number,
               p.requested_market,p.requested_locale,p.fallback_reason,
-              p.navigation_policy_digest,p.navigation_snapshot
+              p.navigation_policy_digest,p.navigation_snapshot,p.expires_at,p.revoked_at
          FROM cms_preview_sessions p
          JOIN cms_market_editions e ON e.id=p.edition_id
          JOIN cms_documents d ON d.id=e.document_id
          JOIN cms_revisions r ON r.id=p.revision_id AND r.edition_id=e.id
-        WHERE p.token_digest=$1 AND p.expires_at>now() AND p.revoked_at IS NULL`,
+         WHERE p.token_digest=$1`,
       [hashToken(String(req.params.token))],
     );
     if (!preview.rowCount) {
-      res.status(404).json({ error: "Preview not found or expired." });
+      res.status(404).json({ error: "Preview not found." });
       return;
     }
     res.set({
@@ -3077,6 +3114,14 @@ router.get(
       String(row.requested_locale ?? row.locale),
     )) {
       res.status(403).json({ error: "You are not assigned to this preview market." });
+      return;
+    }
+    if (row.revoked_at) {
+      res.status(410).json({ error: "Preview session has been revoked.", reason: "revoked" });
+      return;
+    }
+    if (new Date(row.expires_at).getTime() <= Date.now()) {
+      res.status(410).json({ error: "Preview session has expired.", reason: "expired" });
       return;
     }
     const pending = await pool.query(

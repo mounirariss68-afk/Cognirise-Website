@@ -459,7 +459,7 @@ export function Shell({
       <header
         className="fixed top-0 z-50 flex h-[72px] w-full items-center border-b border-border bg-white/95 backdrop-blur transition-colors duration-300 md:h-[82px]"
       >
-        <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-6 md:px-12">
+        <div className="mx-auto flex w-full max-w-[1440px] min-w-0 items-center justify-between px-6 md:px-12">
           <Link href="/" className="relative z-50 flex h-full shrink-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2">
             <img
               src={assetUrl("images/cognirise/logo-blue.svg")}
@@ -468,12 +468,12 @@ export function Shell({
             />
           </Link>
 
-          <nav className="hidden h-full items-center xl:flex">
-            <ul className="flex items-center gap-2">
+          <nav className="hidden min-w-0 h-full items-center 2xl:flex">
+            <ul className="flex items-center gap-1 2xl:gap-2">
               {visibleNavigation.map((item) => (
                 <li
                   key={item.id}
-                  className="relative h-full flex items-center px-4"
+                  className="relative h-full flex items-center px-2 2xl:px-4"
                   onMouseEnter={() => item.items ? handleMouseEnter(item.label) : handleMouseLeave()}
                   onMouseLeave={handleMouseLeave}
                   onFocus={() => item.items && handleMouseEnter(item.label)}
@@ -554,7 +554,7 @@ export function Shell({
             </ul>
           </nav>
 
-          <div className="hidden items-center gap-6 xl:flex relative z-50">
+          <div className="relative z-50 hidden shrink-0 items-center gap-4 2xl:gap-6 2xl:flex">
             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
               {marketOptions.map((option, index) => (
                 <div key={option.code} className="flex items-center gap-2">
@@ -570,11 +570,11 @@ export function Shell({
                 </div>
               ))}
             </div>
-            <BrandButton href="/value-scan">Bring us one process</BrandButton>
+            <BrandButton href="/value-scan" className="shrink-0">Bring us one process</BrandButton>
           </div>
 
           <button
-            className="xl:hidden p-2 -mr-2 relative z-50 rounded-sm text-[hsl(var(--brand-deep))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]"
+            className="2xl:hidden p-2 -mr-2 relative z-50 rounded-sm text-[hsl(var(--brand-deep))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]"
             onClick={() => setIsOpen(!isOpen)}
             aria-label={isOpen ? "Close menu" : "Open menu"}
             aria-expanded={isOpen}
@@ -588,7 +588,7 @@ export function Shell({
       <div className="h-[72px] md:h-[82px] shrink-0" />
 
       {isOpen && (
-        <div className="fixed inset-0 top-[72px] md:top-[82px] z-40 bg-white px-6 py-8 overflow-y-auto xl:hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 top-[72px] md:top-[82px] z-40 bg-white px-6 py-8 overflow-y-auto 2xl:hidden animate-in fade-in duration-200">
           <nav className="flex flex-col gap-2 pb-12">
             {visibleNavigation.map((item) => (
               <div key={item.id} className="flex flex-col border-b border-border last:border-0">

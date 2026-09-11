@@ -56,6 +56,7 @@ let currentSession: any = { user: { role: "administrator", marketCodes: ["uae"] 
 let currentAvailability: any;
 let currentPersonAvailability: any = { items: [] };
 let pendingSave: { input: any; options: any } | undefined;
+let pendingRestore: { input: any; options: any } | undefined;
 let mutationPending = false;
 let onSharedAvailabilityMutation: ((input: any, options: any) => void) | undefined;
 let onPersonAvailabilityMutation: ((input: any, options: any) => void) | undefined;
@@ -69,6 +70,12 @@ const mutation = {
   },
 };
 const inertMutation = { isPending: false, mutate() {} };
+const restoreMutation = {
+  isPending: false,
+  mutate(input: any, options: any) {
+    pendingRestore = { input, options };
+  },
+};
 const sharedAvailabilityMutation = {
   get isPending() { return false; },
   mutate(input: any, options: any) {
@@ -176,7 +183,7 @@ mock.module("@workspace/api-client-react", {
     useSubmitDocument: () => inertMutation,
     usePublishDocument: () => inertMutation,
     useArchiveDocument: () => inertMutation,
-    useRestoreDocument: () => inertMutation,
+    useRestoreDocument: () => restoreMutation,
     useDeleteDocument: () => inertMutation,
     useRollbackDocument: () => inertMutation,
     useCreateDocumentEditionOverride: () => inertMutation,
@@ -214,6 +221,7 @@ async function renderDetail(initialDocument: any = documentBase) {
   });
   return {
     container,
+    client,
     unmount: async () => {
       await React.act(async () => root.unmount());
       client.clear();
@@ -759,6 +767,67 @@ test("customization publish confirmation never promises destination release", as
     currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
     currentEditions = [edition];
     currentMarkets = [{ code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentAvailability = undefined;
+  }
+});
+
+test("restoring a shared source retains its successor matrix row and invalidates the source availability snapshot", async () => {
+  currentAvailability = {
+    documentId: "document-1",
+    draftVersion: 2,
+    reviewedVersion: null,
+    publishedVersion: 1,
+    sharedSource: {
+      editionId: "uae-edition",
+      revisionId: "revision-1",
+      publishedRevisionId: "revision-1",
+      market: "uae",
+      locale: "en-US",
+    },
+    affectedEditions: [],
+    items: [{
+      marketEditionId: "uae-edition",
+      market: "uae",
+      locale: "en-US",
+      displayName: "UAE",
+      stagedDecision: "show",
+      reviewedDecision: null,
+      publishedDecision: "show",
+      publishedEffectiveAvailable: true,
+      pending: false,
+      customized: false,
+    }],
+  };
+  const view = await renderDetail({ ...documentBase, status: "archived" });
+  try {
+    view.client.setQueryData(["availability"], currentAvailability);
+    view.client.setQueryData(["editions"], { items: [edition] });
+    await React.act(async () => button(view.container, "Restore as draft").click());
+    assert.equal(pendingRestore?.input.documentId, "document-1");
+
+    await React.act(async () => {
+      pendingRestore!.options.onSuccess({
+        ...documentBase,
+        status: "draft",
+        revisionNumber: 2,
+        currentRevisionId: "restored-revision-2",
+      });
+    });
+
+    assert.deepEqual(view.client.getQueryData<any>(["editions"]).items[0], {
+      ...edition,
+      revisionId: "restored-revision-2",
+      revisionNumber: 2,
+    }, "the active source continues at its returned successor revision");
+    assert.equal(view.client.getQueryState(["availability"])?.isInvalidated, true);
+    assert.equal(
+      view.client.getQueryData<any>(["availability"]).items[0].stagedDecision,
+      "show",
+      "destination availability remains visible until the authoritative source-pointer refresh completes",
+    );
+  } finally {
+    await view.unmount();
+    pendingRestore = undefined;
     currentAvailability = undefined;
   }
 });

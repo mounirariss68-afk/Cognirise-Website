@@ -45,6 +45,25 @@ test("capabilities can be added and removed without changing remaining values or
   ]);
 });
 
+test("capability updates retain unknown historical fields and media pins", () => {
+  const original = [{
+    title: "One",
+    body: "Body one",
+    legacyLabel: "Retained during migration",
+    image: { mediaId: "media-1", mediaVersionId: "version-1", role: "supporting" },
+  }];
+
+  const changed = changeIndustryCapability(original, 0, "title", "Updated");
+
+  assert.deepEqual(changed, [{
+    title: "Updated",
+    body: "Body one",
+    legacyLabel: "Retained during migration",
+    image: { mediaId: "media-1", mediaVersionId: "version-1", role: "supporting" },
+  }]);
+  assert.deepEqual(original[0].image, { mediaId: "media-1", mediaVersionId: "version-1", role: "supporting" });
+});
+
 test("industry editor uses controlled repeatable capability fields instead of pair parsing", async () => {
   const source = await readFile(new URL("src/pages/documents/ContentEditor.tsx", adminRoot), "utf8");
   const industryEditor = source.slice(source.indexOf('{kind === "industry"'), source.indexOf('{kind === "framework"'));

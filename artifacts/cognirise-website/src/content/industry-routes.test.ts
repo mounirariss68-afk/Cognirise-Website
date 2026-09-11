@@ -41,10 +41,14 @@ test("keeps replaced industry routes intentional and query-preserving", () => {
   assert.match(app, /path="\/pov-government"[\s\S]*CanonicalRedirect to="\/industries\/public-sector"/);
 });
 
-test("preserves metadata, accessible comparisons and reduced motion", () => {
+test("preserves metadata, accessible application evidence and reduced motion", () => {
   for (const slug of canonical) assert.match(shell, new RegExp(`\"/industries/${slug}\":[\\s\\S]*title:`));
   assert.match(page, /<table className="ind-table">/);
-  assert.match(page, /aria-labelledby="evidence-title"/);
+  // The shared template renamed the evidence slot to applications; it still
+  // exposes labelled table headers and keeps evidence status visible.
+  assert.match(page, /aria-labelledby="applications-title"/);
+  assert.match(page, /<th scope="col">Evidence status<\/th>/);
+  assert.match(page, /<th scope="col">Required human-control boundary<\/th>/);
   assert.match(page, /@media\(prefers-reduced-motion:reduce\)/);
   for (const variant of ["network", "journey", "field", "factory"]) {
     assert.match(page, new RegExp(`\\.industry--${variant}`));

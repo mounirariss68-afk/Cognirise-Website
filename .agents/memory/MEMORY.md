@@ -34,3 +34,4 @@
 - [CMS save concurrency](cms-save-concurrency.md) — Acquire edition locks before reading latest revisions; preserve local evidence when save confirmation fails.
 - [Media schema reconciliation](media-schema-reconciliation.md) — Library repair is not authorization to republish content or manufacture reviewer clearance.
 - [Shared content destinations](shared-content-destinations.md) — Separate saved and published source authority; preserve ambiguous regional history through explicit source selection.
+- [Visual inspector verification](visual-inspector-verification.md) — Test rendered field placement, not only section maps; locked review must retain preview controls.

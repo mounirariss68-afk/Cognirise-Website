@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo, type ReactNode } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback, type ReactNode } from "react";
 import { useRoute, useLocation } from "wouter";
 import { 
   useGetDocument, 
@@ -49,7 +49,11 @@ import { collectContentMediaIds, CONTENT_GUIDANCE, documentReadiness, editionAut
 import { buildDraftSave, describeSaveFailure, isDraftSaveResponse, serverValidationIssues, type DraftSeo, type DraftSaveIssue } from "./draft-save";
 import { describeActionError } from "./action-error";
 import { MarketAvailabilityChecklist, type AvailabilityDestination, type AvailabilitySelectionDraft } from "./MarketAvailabilityChecklist";
+import { IndustryVisualWorkspace } from "./IndustryVisualWorkspace";
 
+// hint: Logic changed on both sides. Requires understanding intent of each change.
+import { applyLocalSuccessorToEditionMatrix, previewPinForEditionRevision } from "./preview-revision-lifecycle";
+// hint: Logic changed on both sides. Requires understanding intent of each change.
 export default function DocumentDetail() {
   const [, params] = useRoute("/content/:id");
   const id = params?.id;
@@ -125,6 +129,15 @@ export default function DocumentDetail() {
   });
   const addReviewComment = useAddDocumentReviewComment();
   const rejectRevision = useRejectDocumentRevision();
+  // Preview issuance always targets the already-saved exact revision. The
+  // visual workspace never receives local draft state.
+  const requestIndustryPreview = useCallback(async () => {
+    const result = await createPreview();
+    if (result.isError || !result.data?.previewUrl) {
+      throw result.error ?? new Error("The protected preview capability could not be issued.");
+    }
+    return result.data;
+  }, [createPreview]);
   
   const hydratedEditionKey = useRef("");
   const hydratedRevision = useRef<number | undefined>(undefined);
@@ -350,8 +363,12 @@ export default function DocumentDetail() {
     !selectedIsSharedSource || canManageSharedDestinations
   );
   useEffect(() => {
-    setPreviewRevisionId(selectedEdition?.revisionId ?? undefined);
-  }, [selectedEdition?.revisionId, selectedEdition?.revisionNumber]);
+    // A matrix refresh caused by another editor must not silently exchange a
+    // capability the reviewer already has open. A local save/action explicitly
+    // advances this pin in its success handler.
+    setPreviewRevisionId((pinned) =>
+      previewPinForEditionRevision(pinned, selectedEdition?.revisionId, false));
+  }, [previewRevisionId, selectedEdition?.revisionId, selectedEdition?.revisionNumber]);
   const readiness = useMemo(
     () => doc ? documentReadiness(doc.kind as CmsDocumentKind, title, content, mediaIds) : [],
     [content, doc, mediaIds, title],
@@ -426,7 +443,12 @@ export default function DocumentDetail() {
         preserveAfterFailedSave.current = false;
         setSaveBlocked(false);
         setBlockedRecovery(null);
-        if (updated.currentRevisionId) setPreviewRevisionId(updated.currentRevisionId);
+        if (updated.currentRevisionId) {
+          setPreviewRevisionId((pinned) =>
+            previewPinForEditionRevision(pinned, updated.currentRevisionId, true));
+          queryClient.setQueryData(getListDocumentEditionsQueryKey(id!), (matrix: any) =>
+            applyLocalSuccessorToEditionMatrix(matrix, targetParams, updated));
+        }
         lastSaved.current = { ...submitted, seo: submitted.seo ?? {} };
         setSeoOriginallyPresent(Boolean(submitted.seo));
         hasUnsavedRef.current = false;
@@ -733,6 +755,18 @@ export default function DocumentDetail() {
     const opts = {
       onSuccess: (updated: any) => {
         queryClient.setQueryData(getGetDocumentQueryKey(id!, targetParams), updated);
+        if (action === "restore" && updated.currentRevisionId) {
+          setPreviewRevisionId((pinned) =>
+            previewPinForEditionRevision(pinned, updated.currentRevisionId, true));
+          queryClient.setQueryData(getListDocumentEditionsQueryKey(id!), (matrix: any) =>
+            applyLocalSuccessorToEditionMatrix(matrix, targetParams, updated));
+        }
+        // Restore can promote a replacement shared-source revision. The
+        // availability response owns that pointer and its destination state;
+        // never retain its pre-restore cache beside the local matrix successor.
+        if (action === "restore" && selectedIsSharedSource) {
+          queryClient.invalidateQueries({ queryKey: getGetDocumentAvailabilityQueryKey(id!) });
+        }
         queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
         queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
         queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("documents") || String(query.queryKey[0]).includes("published") || String(query.queryKey[0]).includes("preview") });
@@ -849,6 +883,18 @@ export default function DocumentDetail() {
     rollbackDoc.mutate({ documentId: id!, data: { revisionId } }, {
       onSuccess: (updated) => {
         queryClient.setQueryData(getGetDocumentQueryKey(id!, documentParams), updated);
+        if (updated.currentRevisionId) {
+          setPreviewRevisionId((pinned) =>
+            previewPinForEditionRevision(pinned, updated.currentRevisionId, true));
+          queryClient.setQueryData(getListDocumentEditionsQueryKey(id!), (matrix: any) =>
+            applyLocalSuccessorToEditionMatrix(matrix, documentParams, updated));
+        }
+        // Rollback may replace the availability source pointer even though its
+        // destination decisions are unchanged. Refetch that authoritative
+        // state while retaining the successor selected in the edition matrix.
+        if (selectedIsSharedSource) {
+          queryClient.invalidateQueries({ queryKey: getGetDocumentAvailabilityQueryKey(id!) });
+        }
         toast({ title: "Rollback successful" });
         queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
         queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
@@ -988,10 +1034,10 @@ export default function DocumentDetail() {
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden flex">
+      <div className={`flex-1 ${doc.kind === "industry" ? "overflow-y-auto flex flex-col" : "overflow-hidden flex"}`}>
         {/* Left Column: Editor */}
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar border-r border-border">
-          <div className="max-w-3xl mx-auto space-y-8">
+        <div className={`flex-1 ${doc.kind === "industry" ? "w-full p-4 lg:p-8" : "overflow-y-auto p-8 custom-scrollbar border-r border-border"}`}>
+          <div className={`${doc.kind === "industry" ? "w-full max-w-none" : "max-w-3xl mx-auto"} space-y-8`}>
             {actionError && (
               <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/5 p-4" data-testid="action-error-summary">
                 <p className="text-sm font-semibold text-destructive">{actionError.message}</p>
@@ -1080,23 +1126,37 @@ export default function DocumentDetail() {
               {fieldIssue("summary") && <p id="document-summary-error" className="mt-1 text-xs text-destructive">{fieldIssue("summary")}</p>}
             </div>
 
-            <fieldset disabled={editorLocked} className="contents">
-              <ContentEditor
+            {doc.kind === "industry" ? (
+              <IndustryVisualWorkspace
+                content={content}
+                onChange={editorLocked ? () => {} : handleContentChange}
+                errors={contentValidation.success ? [] : contentValidation.errors}
+                disabled={editorLocked}
+                revisionId={previewRevisionId}
+                currentRevisionId={selectedEdition?.revisionId ?? undefined}
+                revisionNumber={selectedEdition?.revisionNumber ?? doc.revisionNumber}
+                market={selectedMarket}
+                locale={selectedLocale}
+                hasUnsaved={hasUnsaved}
+                requestPreview={requestIndustryPreview}
+              />
+            ) : (
+              <fieldset disabled={editorLocked} className="contents"><ContentEditor
                 kind={doc.kind as CmsDocumentKind}
                 value={content}
                 onChange={editorLocked ? () => {} : handleContentChange}
                 errors={contentValidation.success ? [] : contentValidation.errors}
-              />
-            </fieldset>
-            <details className="rounded-md border bg-muted/20 p-4">
+              /></fieldset>
+            )}
+            {doc.kind !== "industry" && <details className="rounded-md border bg-muted/20 p-4">
               <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider">Advanced structured view (read only)</summary>
               <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap text-xs">{JSON.stringify(content, null, 2)}</pre>
-            </details>
+            </details>}
           </div>
         </div>
 
         {/* Right Column: Metadata & Sidepanes */}
-        <div className="w-[320px] bg-card flex flex-col h-full border-l border-border">
+        <div className={doc.kind === "industry" ? "w-full shrink-0 border-t bg-card" : "w-[320px] bg-card flex flex-col h-full border-l border-border"}>
           <Tabs value={activeSideTab} onValueChange={setActiveSideTab} className="flex flex-col h-full">
             <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent p-0 h-12">
               <TabsTrigger value="metadata" disabled={updateDoc.isPending} className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Metadata</TabsTrigger>

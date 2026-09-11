@@ -1,0 +1,92 @@
+/**
+ * The fixed top-level industry composition. This is intentionally a rendering
+ * contract rather than a CMS schema field: revisions keep their existing
+ * structured content and never persist ordering or section IDs.
+ */
+export const INDUSTRY_SECTION_IDS = [
+  "hero",
+  "opportunity",
+  "pressures",
+  "capabilities",
+  "applications",
+  "perspective",
+  "market",
+  "sources",
+  "cta",
+] as const;
+
+export type IndustrySectionId = (typeof INDUSTRY_SECTION_IDS)[number];
+export const INDUSTRY_PREVIEW_STATUSES = ["ready", "unavailable", "expired", "revoked"] as const;
+export type IndustryPreviewStatus = (typeof INDUSTRY_PREVIEW_STATUSES)[number];
+
+export const INDUSTRY_SECTION_OUTLINE = [
+  { id: "hero", label: "Hero and industry proposition" },
+  { id: "opportunity", label: "Opportunity and strategic shift" },
+  { id: "pressures", label: "Operating pressures" },
+  { id: "capabilities", label: "Value domains and capabilities" },
+  { id: "applications", label: "Representative applications" },
+  { id: "perspective", label: "Perspective and adoption guidance" },
+  { id: "market", label: "Market context" },
+  { id: "sources", label: "Sources and further evidence" },
+  { id: "cta", label: "Value Scan and contact" },
+] as const satisfies ReadonlyArray<{ id: IndustrySectionId; label: string }>;
+
+/**
+ * Structured-content paths owned by each fixed visual section. The map is
+ * shared with authoring validation only; it is not persisted into revisions.
+ */
+export const INDUSTRY_SECTION_CONTENT_PATHS: Readonly<Record<IndustrySectionId, readonly string[]>> = {
+  hero: [
+    "legacyPath", "name", "shortName", "thesis", "accent", "dek", "image", "imageAlt", "heroMedia", "heroMediaId", "variant",
+    "bankingPov.descriptor", "bankingPov.hero",
+    "educationPov.introduction",
+  ],
+  opportunity: [
+    "opportunity", "educationPov.strategicShift", "bankingPov.valueOutcomes",
+  ],
+  pressures: [
+    "pressures", "educationPov.convictions", "bankingPov.adoptionLevels",
+  ],
+  capabilities: [
+    "capabilities", "educationPov.valueDomains", "educationPov.targetState", "educationPov.imagery",
+    "bankingPov.valueDomains", "bankingPov.startingPoints",
+  ],
+  applications: [
+    "uses", "educationPov.applications", "educationPov.signals", "bankingPov.voiceBanking",
+  ],
+  perspective: [
+    "reversal", "myth", "educationPov.patternQuote", "educationPov.globalDirection", "educationPov.roadmap",
+    "bankingPov.productionReadiness", "bankingPov.deliveryPath",
+  ],
+  market: [
+    "gcc", "educationPov.leadershipTest", "bankingPov.market",
+  ],
+  sources: [
+    "sources", "bankingPov.evidenceSignals", "bankingPov.partners", "bankingPov.caseMembershipSnapshot",
+  ],
+  cta: ["selectedWork", "service", "bankingPov.cta"],
+};
+
+export function belongsToIndustrySection(path: string, section: IndustrySectionId) {
+  return INDUSTRY_SECTION_CONTENT_PATHS[section].some((prefix) =>
+    path === prefix
+    || path.startsWith(`${prefix}.`)
+    || path.startsWith(`content.${prefix}`)
+    || path.includes(`.${prefix}.`),
+  );
+}
+
+export function isIndustrySectionId(value: unknown): value is IndustrySectionId {
+  return typeof value === "string" && (INDUSTRY_SECTION_IDS as readonly string[]).includes(value);
+}
+
+export function isIndustryPreviewStatusMessage(value: unknown): value is {
+  type: "industry-preview-status";
+  status: IndustryPreviewStatus;
+} {
+  if (!value || typeof value !== "object") return false;
+  const message = value as Record<string, unknown>;
+  return message.type === "industry-preview-status"
+    && typeof message.status === "string"
+    && (INDUSTRY_PREVIEW_STATUSES as readonly string[]).includes(message.status);
+}

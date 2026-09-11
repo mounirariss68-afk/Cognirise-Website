@@ -1,5 +1,12 @@
 export type EvidenceKind = "Official source" | "Independent study" | "Company-reported" | "Vendor claim";
 export type IndustryMarket = "uae" | "ksa" | "turkiye" | "europe";
+// Compatibility re-export for page modules. The shared contract is the
+// authority used by the public renderer and the admin inspector.
+export {
+  INDUSTRY_SECTION_IDS,
+  INDUSTRY_SECTION_OUTLINE,
+  type IndustrySectionId,
+} from "@workspace/api-zod";
 
 export type IndustryContent = {
   schemaVersion: 1;

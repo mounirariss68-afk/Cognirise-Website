@@ -11,9 +11,10 @@ export function industryCapabilities(value: unknown): IndustryCapability[] {
       ? item as Record<string, unknown>
       : {};
     return {
+      ...capability,
       title: typeof capability.title === "string" ? capability.title : "",
       body: typeof capability.body === "string" ? capability.body : "",
-    };
+    } as IndustryCapability;
   });
 }
 

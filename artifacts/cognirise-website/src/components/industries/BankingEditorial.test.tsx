@@ -64,3 +64,17 @@ test("Banking editorial sends its selected-work link to the consolidated overvie
   assert.match(html, /href="\/industries#selected-work"/);
   assert.doesNotMatch(html, /industry-case-rail|case-study-rail/);
 });
+
+test("Banking retains its approved detail inside the governed nine-section order", () => {
+  const html = render();
+  const sections = [...html.matchAll(/data-industry-section="([^"]+)"/g)].map((match) => match[1]);
+  assert.deepEqual(sections, [
+    "hero", "opportunity", "pressures", "capabilities", "applications",
+    "perspective", "market", "sources", "cta",
+  ]);
+  assert.match(html, /Financial Stability Board/);
+  assert.match(html, /Consultation report, not binding regulation/);
+  assert.match(html, /Required human-control boundary/);
+  assert.match(html, /b-starter-tiles/);
+  assert.match(html, /data-spatial-disclosure/);
+});
