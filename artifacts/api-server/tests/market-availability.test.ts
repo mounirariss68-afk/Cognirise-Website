@@ -17,6 +17,7 @@ test("person availability stages editor changes and publishes them with governan
   let marketCodes = ["ksa"];
   let auditCount = 0;
   let publicSelectionChecked = false;
+  let publishedDecision: "inherit" | "off" = "inherit";
   const now = new Date();
 
   t.mock.method(pool, "query", async (sql: unknown) => {
@@ -57,6 +58,7 @@ test("person availability stages editor changes and publishes them with governan
       return { rowCount: 1, rows: [] };
     }
     if (statement.includes("SET published_decision=a.draft_decision")) {
+      publishedDecision = "off";
       return {
         rowCount: 1,
         rows: [{ market: "ksa", published_decision: "off", published_at: now }],
@@ -94,7 +96,15 @@ test("person availability stages editor changes and publishes them with governan
         statement.includes("requested.code=$3") &&
         statement.includes("a.published_decision='off'") &&
         !statement.includes("a.draft_decision='off'");
-      return { rowCount: 0, rows: [] };
+      const rows = publishedDecision === "off"
+        ? []
+        : [{
+            ...publicPersonRow("staged-person", "staged-person", "ksa"),
+            requested_market: "ksa",
+            requested_locale: "en",
+            total_count: 1,
+          }];
+      return { rowCount: rows.length, rows };
     }
     return { rowCount: 0, rows: [] };
   });
@@ -156,6 +166,14 @@ test("person availability stages editor changes and publishes them with governan
   assert.equal(stagedResponse.previewEffectiveAvailable, false);
   assert.equal(auditCount, 1);
 
+  const beforeRelease = await fetch(`${origin}/api/public/content?market=ksa&locale=en&kind=person`);
+  assert.equal(beforeRelease.status, 200);
+  assert.deepEqual(
+    (await beforeRelease.json() as { items: Array<{ slug: string }> }).items.map((item) => item.slug),
+    ["staged-person"],
+    "a staged hidden decision must not change public delivery",
+  );
+
   const editorPublish = await fetch(`${origin}/api/documents/person-id/market-availability/market-id/publish`, {
     method: "POST",
     headers,
@@ -175,3 +193,261 @@ test("person availability stages editor changes and publishes them with governan
   assert.deepEqual((await listed.json() as { items: unknown[] }).items, []);
   assert.equal(publicSelectionChecked, true);
 });
+
+test("public person collection keeps visible records and excludes mixed hidden records", {
+  concurrency: false,
+}, async (t) => {
+  const fixture: PublicPersonFixture = {
+    markets: [{
+      code: "uae",
+      default_locale: "en",
+      fallback_market_code: null,
+      fallback_locale: null,
+      is_canonical: true,
+    }],
+    rows: [
+      publicPersonRow("visible-person", "visible-person", "uae"),
+      publicPersonRow("hidden-person", "hidden-person", "uae"),
+    ],
+    decisions: {
+      "visible-person:uae": "show",
+      "hidden-person:uae": "off",
+    },
+  };
+  const origin = await startPublicFixture(t, fixture);
+
+  const collection = await fetch(`${origin}/api/public/content?market=uae&locale=en&kind=person`);
+  assert.equal(collection.status, 200);
+  const payload = await collection.json() as {
+    items: Array<{ id: string; slug: string; market: string; requestedMarket: string; usedFallback: boolean }>;
+    total: number;
+  };
+  assert.deepEqual(payload.items.map((item) => item.slug), ["visible-person"]);
+  assert.equal(payload.items[0]?.market, "uae");
+  assert.equal(payload.items[0]?.requestedMarket, "uae");
+  assert.equal(payload.items[0]?.usedFallback, false);
+  assert.equal(payload.total, 1);
+
+  const hiddenDetail = await fetch(`${origin}/api/public/content/uae/en/person/hidden-person`);
+  assert.equal(hiddenDetail.status, 404, "hidden people must not resolve through the public detail API");
+});
+
+test("public person collection returns no records when every requested-market record is hidden", {
+  concurrency: false,
+}, async (t) => {
+  const fixture: PublicPersonFixture = {
+    markets: [{
+      code: "uae",
+      default_locale: "en",
+      fallback_market_code: null,
+      fallback_locale: null,
+      is_canonical: true,
+    }],
+    rows: [
+      publicPersonRow("hidden-founder", "hidden-founder", "uae"),
+      publicPersonRow("hidden-advisor", "hidden-advisor", "uae"),
+    ],
+    decisions: {
+      "hidden-founder:uae": "off",
+      "hidden-advisor:uae": "off",
+    },
+  };
+  const origin = await startPublicFixture(t, fixture);
+
+  const collection = await fetch(`${origin}/api/public/content?market=uae&locale=en&kind=person`);
+  assert.equal(collection.status, 200);
+  const payload = await collection.json() as { items: unknown[]; total: number };
+  assert.deepEqual(payload.items, []);
+  assert.equal(payload.total, 0);
+  assert.equal(
+    (await fetch(`${origin}/api/public/content/uae/en/person/hidden-founder`)).status,
+    404,
+  );
+});
+
+test("requested-market person availability falls back to a published UAE edition when not explicitly hidden", {
+  concurrency: false,
+}, async (t) => {
+  const fixture: PublicPersonFixture = {
+    markets: [
+      {
+        code: "ksa",
+        default_locale: "en",
+        fallback_market_code: "uae",
+        fallback_locale: "en",
+        is_canonical: false,
+      },
+      {
+        code: "uae",
+        default_locale: "en",
+        fallback_market_code: null,
+        fallback_locale: null,
+        is_canonical: true,
+      },
+    ],
+    rows: [publicPersonRow("uae-fallback-person", "uae-fallback-person", "uae", "ksa")],
+    decisions: { "uae-fallback-person:ksa": "inherit" },
+  };
+  const origin = await startPublicFixture(t, fixture);
+
+  const response = await fetch(`${origin}/api/public/content?market=ksa&locale=en&kind=person`);
+  assert.equal(response.status, 200);
+  const payload = await response.json() as {
+    items: Array<{
+      slug: string;
+      market: string;
+      locale: string;
+      requestedMarket: string;
+      requestedLocale: string;
+      usedFallback: boolean;
+    }>;
+    market: string;
+    requestedMarket: string;
+    usedFallback: boolean;
+  };
+  assert.deepEqual(payload.items.map((item) => item.slug), ["uae-fallback-person"]);
+  assert.equal(payload.items[0]?.market, "uae");
+  assert.equal(payload.items[0]?.locale, "en");
+  assert.equal(payload.items[0]?.requestedMarket, "ksa");
+  assert.equal(payload.items[0]?.requestedLocale, "en");
+  assert.equal(payload.items[0]?.usedFallback, true);
+  assert.equal(payload.market, "uae");
+  assert.equal(payload.requestedMarket, "ksa");
+  assert.equal(payload.usedFallback, true);
+});
+
+type PersonDecision = "inherit" | "show" | "off";
+
+type PublicPersonFixture = {
+  markets: Array<Record<string, unknown>>;
+  rows: Array<Record<string, any>>;
+  decisions: Record<string, PersonDecision>;
+};
+
+function publicPersonRow(
+  id: string,
+  slug: string,
+  market: string,
+  requestedMarket = market,
+): Record<string, any> {
+  const now = new Date("2026-09-11T00:00:00.000Z");
+  return {
+    id,
+    kind: "person",
+    market,
+    locale: "en",
+    published_at: now,
+    updated_at: now,
+    localized_slug: slug,
+    revision_id: `${id}-revision`,
+    revision_number: 1,
+    requested_market: requestedMarket,
+    requested_locale: "en",
+    payload: {
+      slug,
+      title: `${slug} title`,
+      summary: `${slug} summary`,
+      content: {
+        schemaVersion: 1,
+        role: "leader",
+        title: `${slug} title`,
+        biography: `${slug} biography`,
+        contribution: `${slug} contribution`,
+        focusAreas: [],
+        profileLinks: [],
+        approvedFallback: "initials",
+        visibility: "public",
+        order: 0,
+        sources: [{
+          label: "Fixture source",
+          url: "https://example.com/fixture-source",
+          accessedAt: "2026-09-11",
+        }],
+        verificationDate: "2026-09-11",
+        reviewDate: "2027-09-11",
+        relatedIds: [],
+      },
+      mediaIds: [],
+      markets: [market],
+    },
+  };
+}
+
+async function startPublicFixture(t: any, fixture: PublicPersonFixture): Promise<string> {
+  const priorDatabaseUrl = process.env.DATABASE_URL;
+  const priorSessionSecret = process.env.SESSION_SECRET;
+  process.env.DATABASE_URL = "postgres://test.invalid/cognirise";
+  process.env.SESSION_SECRET = "market-public-test-session-secret-long-enough";
+
+  const [{ default: app }, { pool }] = await Promise.all([
+    import("../src/app.ts"),
+    import("@workspace/db"),
+  ]);
+
+  t.mock.method(pool, "query", async (sql: unknown, values?: unknown[]) => {
+    const statement = String(sql);
+    if (statement.includes("FROM market_editions WHERE enabled=true")) {
+      return { rowCount: fixture.markets.length, rows: fixture.markets };
+    }
+    if (statement.includes("WITH selected AS")) {
+      assert.match(statement, /d\.kind<>'person' OR NOT EXISTS/);
+      assert.match(statement, /requested\.code=\$3/);
+      assert.match(statement, /a\.published_decision='off'/);
+      assert.doesNotMatch(statement, /a\.draft_decision='off'/);
+      const requestedMarket = String(values?.[2]);
+      const rows = fixture.rows
+        .filter((row) => fixture.decisions[`${row.id}:${requestedMarket}`] !== "off")
+        .map((row) => ({
+          ...row,
+          requested_market: requestedMarket,
+          requested_locale: String(values?.[3]),
+          total_count: fixture.rows.filter(
+            (candidate) => fixture.decisions[`${candidate.id}:${requestedMarket}`] !== "off",
+          ).length,
+        }));
+      return { rowCount: rows.length, rows };
+    }
+    if (statement.includes("SELECT d.id,d.kind,e.market")) {
+      const requestedMarket = String(values?.[2]);
+      const slug = String(values?.[1]);
+      const row = fixture.rows.find((candidate) =>
+        candidate.localized_slug === slug &&
+        fixture.decisions[`${candidate.id}:${requestedMarket}`] !== "off"
+      );
+      if (!row) return { rowCount: 0, rows: [] };
+      return {
+        rowCount: 1,
+        rows: [{
+          ...row,
+          requested_market: requestedMarket,
+          requested_locale: String(values?.[4]),
+        }],
+      };
+    }
+    if (statement.includes("SELECT a.*,v.id version_id")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("WITH publication_history")) {
+      return {
+        rowCount: 1,
+        rows: [{ is_configured: true, configured_page_paths: [] }],
+      };
+    }
+    return { rowCount: 0, rows: [] };
+  });
+
+  const server = app.listen(0, "127.0.0.1");
+  await new Promise<void>((resolve) => server.once("listening", resolve));
+  t.after(async () => {
+    await new Promise<void>((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve())),
+    );
+    if (priorDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+    else process.env.DATABASE_URL = priorDatabaseUrl;
+    if (priorSessionSecret === undefined) delete process.env.SESSION_SECRET;
+    else process.env.SESSION_SECRET = priorSessionSecret;
+  });
+  const address = server.address();
+  assert.ok(address && typeof address !== "string");
+  return `http://127.0.0.1:${address.port}`;
+}

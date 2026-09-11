@@ -1,9 +1,16 @@
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
+import type { PersonContent } from "@workspace/api-zod";
 import { assetUrl } from "@/lib/assets";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
-import { landingCta, landingMedia, landingText } from "@/lib/cms";
-import { contentRecord, useCmsCollection } from "@/lib/cms";
+import {
+  contentRecord,
+  landingCta,
+  landingMedia,
+  landingText,
+  type CmsDeliveryState,
+  useCmsCollection,
+} from "@/lib/cms";
 
 type TeamProfile = {
   initials: string;
@@ -12,87 +19,10 @@ type TeamProfile = {
   title: string;
   background: string;
   contribution: string;
-  enabled: boolean;
 };
 
-export const peopleFallback: TeamProfile[] = [
-  {
-    initials: "MA",
-    name: "Mounir Ariss",
-    group: "leadership",
-    title: "CEO & Co-founder",
-    background: "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage, with senior accountability kept close to delivery.",
-    contribution: "Strategic judgment, practical transformation leadership and a focus on turning consequential AI decisions into operating results.",
-    enabled: true,
-  },
-  {
-    initials: "BE",
-    name: "Bulent Egrilmez",
-    group: "leadership",
-    title: "CTO & Co-founder",
-    background: "A technology leader focused on production-grade AI, LLM and RAG systems, multi-agent architecture, product delivery and enterprise transformation.",
-    contribution: "The engineering discipline to move AI from a promising prototype into secure, scalable systems that perform in production.",
-    enabled: true,
-  },
-  {
-    initials: "OBY",
-    name: "Omer Barbaros Yis",
-    group: "leadership",
-    title: "Co-founder",
-    background: "An experienced business and technology leader helping organisations connect strategic ambition, operating priorities and executable transformation.",
-    contribution: "An operator’s perspective on shaping partnerships and practical routes from enterprise priorities to sustained value.",
-    enabled: true,
-  },
-  {
-    initials: "HN",
-    name: "Hisham Nofal, PhD.",
-    group: "leadership",
-    title: "Education Sector lead",
-    background: "More than two decades across education consulting, sector leadership and academia, with deep experience of GCC and MENA education systems and former leadership of KPMG Saudi Arabia’s education sector.",
-    contribution: "Sector depth that connects education policy and institutional ambition with workable, responsible transformation.",
-    enabled: true,
-  },
-  {
-    initials: "GG",
-    name: "Gökhan Güney",
-    group: "leadership",
-    title: "Co-founder",
-    background: "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf, building the engineering muscle that turns strategy into systems that run.",
-    contribution: "Delivery leadership, local operating knowledge and the discipline required to carry complex change into production.",
-    enabled: false,
-  },
-  {
-    initials: "AL",
-    name: "Alexis Lecanuet",
-    group: "advisor",
-    title: "Former Regional CEO, Accenture Middle East",
-    background: "A senior regional leader with extensive experience in strategy execution, client portfolio leadership and large-scale digital transformation across Europe and MENA.",
-    contribution: "An inside view of how transformation firms win and scale in the region, sharpening Cognirise’s senior-led, platform-powered model.",
-    enabled: true,
-  },
-  {
-    initials: "RA",
-    name: "Rami Aslan",
-    group: "advisor",
-    title: "Former CEO, Türk Telekom · Investor & Board Member",
-    background: "More than 25 years across North America, Europe, the Middle East and Africa, spanning telecom operations, corporate finance, investment and board leadership.",
-    contribution: "The operator’s seat on transformation at national scale, alongside investor discipline and deep telecom expertise.",
-    enabled: true,
-  },
-  {
-    initials: "FM",
-    name: "Fadi Mattar",
-    group: "advisor",
-    title: "Public & Government Affairs Director — IMEA & Türkiye, and Country Director Kuwait & Levant, Dow",
-    background: "A senior corporate-affairs and country leader whose career bridges energy and petrochemicals, financial services, government relations and business leadership in the Gulf.",
-    contribution: "A grounded understanding of how large industrial organisations and governments make decisions, strengthening our market and stakeholder perspective.",
-    enabled: true,
-  },
-];
-
-const profileOrder = peopleFallback.map(({ name }) => name);
-
-function ProfileList({ profiles, label }: { profiles: TeamProfile[]; label: string }) {
+function ProfileList({ profiles, label, delivery }: { profiles: TeamProfile[]; label: string; delivery: CmsDeliveryState }) {
+  if (delivery !== "cms" && delivery !== "intentional-empty") return null;
   if (!profiles.length) {
     return <p className="border-y border-border py-12 text-muted-foreground">No {label.toLowerCase()} profiles are currently published.</p>;
   }
@@ -125,6 +55,16 @@ function ProfileList({ profiles, label }: { profiles: TeamProfile[]; label: stri
   );
 }
 
+function PeopleDeliveryStatus({ delivery }: { delivery: CmsDeliveryState }) {
+  if (delivery === "loading") {
+    return <p className="border-y border-border py-12 text-muted-foreground" aria-busy="true" role="status" data-testid="status-about-people-loading">Loading team profiles…</p>;
+  }
+  if (delivery !== "cms" && delivery !== "intentional-empty") {
+    return <p className="border-y border-border py-12 text-muted-foreground" role="alert" data-testid="status-about-people-unavailable">Team profiles are temporarily unavailable.</p>;
+  }
+  return null;
+}
+
 export default function AboutPeople() {
   const governedLanding = useGovernedLanding();
   const heroEyebrow = landingText(governedLanding, "about-hero-eyebrow", "Our Team");
@@ -138,27 +78,21 @@ export default function AboutPeople() {
   const advisoryBody = landingText(governedLanding, "about-advisory-body", "Senior leaders who pressure-test our model and keep it grounded in what enterprises actually need.");
   const closingHeading = landingText(governedLanding, "about-closing-heading", "Bring one process. Meet the people.");
   const closingCta = landingCta(governedLanding, "about-closing-cta", { label: "Book a value scan", href: "/value-scan" });
-  const peopleQuery = useCmsCollection("person", peopleFallback, (item) => {
+  const peopleQuery = useCmsCollection("person", [], (item) => {
     const content = contentRecord(item, "person");
+    const personContent = item.content as PersonContent;
     if (content.role !== "founder" && content.role !== "leader" && content.role !== "advisor") return null;
     const name = item.title;
     return {
       initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 3),
       name,
       group: content.role === "advisor" ? "advisor" as const : "leadership" as const,
-      title: content.title,
+      title: personContent.title,
       background: content.biography || "",
       contribution: content.contribution || content.focusAreas.map((focus) => focus.detail).join(" "),
-      enabled: true,
     };
   });
-  const visiblePeople = peopleQuery.data
-    .filter((profile) => profile.enabled)
-    .sort((a, b) => {
-      const aIndex = profileOrder.indexOf(a.name);
-      const bIndex = profileOrder.indexOf(b.name);
-      return (aIndex < 0 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex < 0 ? Number.MAX_SAFE_INTEGER : bIndex);
-    });
+  const visiblePeople = peopleQuery.delivery === "cms" ? peopleQuery.data : [];
   const leadership = visiblePeople.filter((profile) => profile.group === "leadership");
   const advisors = visiblePeople.filter((profile) => profile.group === "advisor");
 
@@ -184,7 +118,8 @@ export default function AboutPeople() {
           <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">{leadershipEyebrow}</p>
           <h2 id="leadership-team" className="text-4xl font-semibold md:text-6xl">{leadershipTitle}</h2>
         </div>
-        <ProfileList profiles={leadership} label="Leadership Team" />
+        <PeopleDeliveryStatus delivery={peopleQuery.delivery} />
+        <ProfileList profiles={leadership} label="Leadership Team" delivery={peopleQuery.delivery} />
       </section>
 
       <section id="board-of-advisors" className="scroll-mt-24 bg-secondary px-6 py-24 md:px-12 md:py-32" aria-labelledby="board-of-advisors-heading">
@@ -196,7 +131,7 @@ export default function AboutPeople() {
               <p className="mt-5 max-w-[650px] leading-7 text-muted-foreground">{advisoryBody}</p>
             </div>
           </div>
-          <ProfileList profiles={advisors} label="Board of Advisors" />
+          <ProfileList profiles={advisors} label="Board of Advisors" delivery={peopleQuery.delivery} />
         </div>
       </section>
 

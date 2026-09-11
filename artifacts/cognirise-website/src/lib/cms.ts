@@ -15,6 +15,7 @@ import {
   validateCmsContent,
 } from "@workspace/api-zod";
 import { useMarketStore } from "@/store/market";
+import { getListPublishedContentQueryKey } from "@workspace/api-client-react";
 
 export type CmsContentByKind = {
   person: PersonContent;
@@ -154,7 +155,7 @@ export function usePublishedHeroFilm(
 }
 
 const CUTOVER: Record<WebsiteCmsDocumentKind, boolean> = {
-  person: env.VITE_CMS_CUTOVER_PEOPLE === "true",
+  person: true,
   partner: env.VITE_CMS_CUTOVER_PARTNERS === "true",
   platform: env.VITE_CMS_CUTOVER_PLATFORMS === "true",
   publication: env.VITE_CMS_CUTOVER_PUBLICATIONS === "true",
@@ -169,7 +170,7 @@ export function cmsCollectionIsCutOver(
   kind: WebsiteCmsDocumentKind,
   isConfigured = true,
 ): boolean {
-  return CUTOVER[kind] && isConfigured;
+  return kind === "person" || (CUTOVER[kind] && isConfigured);
 }
 
 export function cmsCollectionDelivery(
@@ -200,6 +201,18 @@ export function governedLandingDelivery(
   if (state === "loading" || state === "api-error" || state === "contract-error") return state;
   if (hasPage) return "cms";
   return configuredPagePaths.includes(pagePath) ? "intentional-empty" : "compiled-fallback";
+}
+
+export function cmsCollectionData<T>(
+  kind: WebsiteCmsDocumentKind,
+  delivery: CmsDeliveryState,
+  mapped: T[],
+  fallback: T[],
+  isAuthoritative: boolean,
+): T[] {
+  // People never accept a compiled roster, even from a legacy caller.
+  if (kind === "person") return delivery === "cms" ? mapped : [];
+  return !isAuthoritative && delivery !== "cms" ? fallback : mapped;
 }
 
 export function contentRecord<K extends WebsiteCmsDocumentKind>(item: PublishedContent, kind: K): CmsRecord<CmsContentByKind[K]> {
@@ -284,18 +297,33 @@ export function useCmsCollection<T>(
   mapper: (item: PublishedContent, index: number) => T | null,
 ) {
   const { market, locale } = useMarketStore();
-  const query = useListPublishedContent({ kind: kind as DocumentKind, market, locale, pageSize: 100 });
+  const params = { kind: kind as DocumentKind, market, locale, pageSize: 100 };
+  const query = useListPublishedContent(params, {
+    query: kind === "person" ? {
+      queryKey: getListPublishedContentQueryKey(params),
+      staleTime: 0,
+      refetchOnMount: "always",
+      refetchOnWindowFocus: true,
+      placeholderData: undefined,
+    } : undefined,
+  });
   const response = query.data as (typeof query.data & {
     isConfigured?: boolean;
     configuredPagePaths?: string[];
   }) | undefined;
-  const validations = response?.items.map((item) => validateCmsContent(kind as CmsDocumentKind, item.content, "publish"));
+  const invalidEnvelope = kind === "person" && response !== undefined &&
+    (!Array.isArray(response?.items) || response.items.some((item) =>
+      !item || item.kind !== "person" || typeof item.title !== "string" ||
+      typeof item.id !== "string" || !item.content));
+  const items = invalidEnvelope ? [] : response?.items;
+  const validations = items?.map((item) => validateCmsContent(kind as CmsDocumentKind, item.content, "publish"));
   const contractErrors = validations?.flatMap((result) => result.success ? [] : result.errors) ?? [];
-  const validItems = response?.items.filter((_item, index) => validations?.[index]?.success) ?? [];
+  if (invalidEnvelope) contractErrors.push("Invalid person collection response.");
+  const validItems = items?.filter((_item, index) => validations?.[index]?.success) ?? [];
   const mapped = validItems.map(mapper).filter((item): item is T => item !== null);
   const cutover = cmsCollectionIsCutOver(kind, response?.isConfigured);
   const delivery = cmsCollectionDelivery(kind, {
-    isPending: query.isPending,
+    isPending: query.isPending || (kind === "person" && query.isFetching && !query.isError),
     isError: query.isError,
     hasContractErrors: Boolean(contractErrors.length),
     hasItems: Boolean(mapped.length),
@@ -311,7 +339,7 @@ export function useCmsCollection<T>(
 
   return {
     ...query,
-    data: useFallback ? fallback : mapped,
+    data: cmsCollectionData(kind, delivery, mapped, fallback, cutover),
     delivery,
     issue,
     isFallback: useFallback,

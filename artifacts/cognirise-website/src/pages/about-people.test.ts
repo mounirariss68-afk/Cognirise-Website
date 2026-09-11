@@ -4,35 +4,26 @@ import test from "node:test";
 
 const websiteRoot = new URL("../../", import.meta.url);
 
-test("publishes the requested leadership roster before the advisory board", async () => {
+test("uses the CMS people collection in API order without a compiled roster", async () => {
   const source = await readFile(new URL("src/pages/AboutPeople.tsx", websiteRoot), "utf8");
-  const roster = [
-    ["Mounir Ariss", "CEO & Co-founder"],
-    ["Bulent Egrilmez", "CTO & Co-founder"],
-    ["Omer Barbaros Yis", "Co-founder"],
-    ["Hisham Nofal, PhD.", "Education Sector lead"],
-  ] as const;
-
-  let previous = -1;
-  for (const [name, title] of roster) {
-    const position = source.indexOf(`name: "${name}"`);
-    assert.ok(position > previous, `${name} must appear in the requested order`);
-    assert.match(source.slice(position, position + 180), new RegExp(`title: "${title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`));
-    previous = position;
-  }
-
-  const boardPosition = source.indexOf('id="board-of-advisors"');
-  assert.ok(boardPosition > source.indexOf('id="leadership-team"'));
-  assert.match(source, /name: "Alexis Lecanuet"[\s\S]{0,180}title: "Former Regional CEO, Accenture Middle East"/);
-  assert.match(source, /name: "Rami Aslan"/);
-  assert.match(source, /name: "Fadi Mattar"/);
+  assert.match(source, /useCmsCollection\("person", \[\],/);
+  assert.doesNotMatch(source, /\bpeopleFallback\b|\bprofileOrder\b/);
+  assert.match(source, /const visiblePeople = peopleQuery\.delivery === "cms" \? peopleQuery\.data : \[\]/);
+  assert.doesNotMatch(source, /\.sort\(/);
+  assert.match(source, /const leadership = visiblePeople\.filter/);
+  assert.match(source, /const advisors = visiblePeople\.filter/);
+  assert.match(source, /String\(profiles\.length\)/);
 });
 
-test("retains Gökhan as a disabled fallback and uses one source-free profile pattern", async () => {
+test("uses the CMS person title and makes non-CMS delivery explicit", async () => {
   const source = await readFile(new URL("src/pages/AboutPeople.tsx", websiteRoot), "utf8");
-  const gokhan = source.slice(source.indexOf('name: "Gökhan Güney"'), source.indexOf('name: "Alexis Lecanuet"'));
-
-  assert.match(gokhan, /enabled: false/);
+  assert.match(source, /const personContent = item\.content as PersonContent/);
+  assert.match(source, /name,\s*group:[\s\S]*title: personContent\.title/);
+  assert.match(source, /function PeopleDeliveryStatus/);
+  assert.match(source, /delivery === "loading"/);
+  assert.match(source, /delivery !== "cms"/);
+  assert.match(source, /function ProfileList[\s\S]*if \(delivery !== "cms" && delivery !== "intentional-empty"\) return null/);
+  assert.match(source, /No \{label.toLowerCase\(\)\} profiles are currently published/);
   assert.match(source, /function ProfileList/);
   assert.match(source, /<ProfileList profiles=\{leadership\}/);
   assert.match(source, /<ProfileList profiles=\{advisors\}/);

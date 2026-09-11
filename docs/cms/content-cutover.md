@@ -4,14 +4,16 @@ Contract version 1 lives in the neutral API contract package and is enforced by 
 
 | Experience | CMS-owned | Code-owned | Public route | Sort / empty behavior |
 | --- | --- | --- | --- | --- |
-| People / advisors | Entity identity, role, title, biography, contribution, focus, links, approved identity asset/fallback, visibility, order, sources/review | About/advisor art direction and surrounding marketing copy | `/about`, `/advisors` | `content.order`; compiled collection fallback until the people cutover switch passes |
+| People / advisors | Entity identity, role, title, biography, contribution, focus, links, approved identity asset/fallback, visibility, order, sources/review | About/advisor art direction and surrounding marketing copy | `/about` | CMS exclusively in all environments; `content.order`, then API title tie-break; explicit loading, empty, and unavailable states |
 | Partners | Alliance content, evidence, coverage, links/logo, relationship/visibility/order, sources/review | Page framing and alliance-group presentation | `/partners` | `content.order`; intentional empty review queue when authoritative |
 | Platforms | Entity summary, standard sections, capabilities, differentiators, CTA, relations, SEO/media/order | CogniOS specialist architecture and named legacy specialist interactions | `/platforms`, `/platforms/:slug` | Specialist static routes win; new standard records use the generic route |
 | Publications | Article/POV variant, teaser/body, author/dates, topics/relations, hero/PDF, SEO/social/order | Insights landing composition | `/insights`, `/insights/:slug` | Articles render structured blocks; POVs require an approved PDF |
 | Case studies | Summary/full variant, disclosure, narrative, controls/outcomes, approved evidence, quote/media/CTA | Work landing narrative | `/work`, `/work/:slug` | Only public, full, non-restricted records receive detail routes |
 | Industries | Thesis/dek, value-led opportunity, two or more build capabilities, selected-work description, operating pressures, reversal, myth, GCC context, use-case boundaries, sources/review, media/order | Editorial page composition and shared picker behavior | `/industries`, `/industries/:slug` | Canonical slugs and `content.order` are retained; evidence, governance, and market fallback rules are unchanged |
 
-The `VITE_CMS_CUTOVER_*` switches are independent and default off. While a switch is off, an API/contract/empty state may use the compiled collection. Once on, empty stays intentionally empty and API or contract failure is observable instead of reverting to compiled content. Industry CMS revisions and the compiled fallback implement the same required contract; a partial industry payload is a contract failure, not permission to mix CMS and compiled fields.
+The legacy `VITE_CMS_CUTOVER_PEOPLE` switch is ignored, including when absent or false. There is no compiled people roster. Requested-market published suppression applies before approved CMS edition fallback; staged availability does not affect public delivery. People revalidate on mount, market changes, and window focus; pending revalidation does not render cached profiles. Deploy the updated website build once to remove the legacy path; subsequent CMS visibility publications require no code release.
+
+Other `VITE_CMS_CUTOVER_*` switches are independent and default off. While a switch is off, an API/contract/empty state may use the compiled collection. Once on, empty stays intentionally empty and API or contract failure is observable instead of reverting to compiled content. Industry CMS revisions and the compiled fallback implement the same required contract; a partial industry payload is a contract failure, not permission to mix CMS and compiled fields.
 
 ## Industry contract baseline
 
@@ -31,4 +33,4 @@ The manifest reconciles 22 governed website assets. `blueprint-annotated.png` is
 
 ## Initial cutover status
 
-All 18 imported UAE/English records are drafts. No edition is approved or published, no fallback switch is removed, and static files remain available for rollback. `scripts/cms/output/cutover-report.json` is the machine-readable release record.
+The initial import contained 18 UAE/English drafts. This is historical import information, not current publication status. People delivery is now CMS-only regardless of import or configuration state. `scripts/cms/output/cutover-report.json` records the initial import.

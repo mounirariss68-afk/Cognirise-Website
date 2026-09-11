@@ -1,7 +1,23 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { COMPILED_LANDING_ROUTES, cmsCollectionDelivery, cmsCollectionIsCutOver, cmsEntryRenderPolicy, landingNarrative, landingSections, landingVisualReferences, type CmsDeliveryState } from "./cms";
+import { COMPILED_LANDING_ROUTES, cmsCollectionData, cmsCollectionDelivery, cmsCollectionIsCutOver, cmsEntryRenderPolicy, landingNarrative, landingSections, landingVisualReferences, type CmsDeliveryState } from "./cms";
 import type { LandingPageContent } from "@workspace/api-zod";
+
+test("people never select compiled profiles, even with legacy cutover disabled or no publication history", () => {
+  for (const configured of [undefined, false, true]) {
+    assert.equal(cmsCollectionIsCutOver("person", configured), true);
+    assert.equal(cmsCollectionDelivery("person", {
+      isPending: false, isError: false, hasContractErrors: false, hasItems: false,
+      isConfigured: configured,
+    }), "intentional-empty");
+  }
+  for (const authoritative of [false, true]) {
+    for (const state of ["loading", "api-error", "contract-error", "intentional-empty", "compiled-fallback"] as CmsDeliveryState[]) {
+      assert.deepEqual(cmsCollectionData("person", state, ["stale profile"], ["hidden compiled profile"], authoritative), []);
+    }
+    assert.deepEqual(cmsCollectionData("person", "cms", ["visible leader", "visible advisor"], ["hidden compiled profile"], authoritative), ["visible leader", "visible advisor"]);
+  }
+});
 
 test("compiled framework content is limited to explicit pre-cutover fallback", () => {
   assert.equal(cmsEntryRenderPolicy(false, "compiled-fallback"), "compiled-fallback");
