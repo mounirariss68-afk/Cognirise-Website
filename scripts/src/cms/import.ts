@@ -864,7 +864,7 @@ async function applyDatabase(
             operation.idempotencyKey.startsWith("cms-industry-contract-v8:")
             || (
               operation.slug === "education"
-              && operation.idempotencyKey.startsWith("cms-industry-education-successor-v10:")
+              && operation.idempotencyKey.startsWith("cms-industry-education-successor-v11:")
             )
             || (
               operation.slug === "financial-services"
@@ -1112,7 +1112,7 @@ async function applyDatabase(
             edition.publicationState,
           );
           const isEducationSuccessor = operation.slug === "education"
-            && operation.idempotencyKey.startsWith("cms-industry-education-successor-v10:");
+            && operation.idempotencyKey.startsWith("cms-industry-education-successor-v11:");
           if (isEducationSuccessor) {
             baselineAction = educationSuccessorAction({
               baselineAction,
@@ -1145,12 +1145,20 @@ async function applyDatabase(
             baselineAction = "append-and-publish";
           }
           if (baselineAction === "append-and-publish" || baselineAction === "repair-v3-media") {
-            const publicationPin = isPunctuationOnly
+            // Education v11 is a controlled handoff, not a one-media
+            // publication. Preserve the approved v2 edition, append the
+            // successor as a draft, then let the Education-only cutover add
+            // all three approved immutable pins in one publish transaction.
+            const educationSuccessorDraft = isEducationSuccessor
+              && baselineAction === "append-and-publish";
+            const publicationPin = educationSuccessorDraft
+              ? null
+              : isPunctuationOnly
               ? null
               : baselineAction === "repair-v3-media" || (!approvedPin && priorApprovedPin)
                 ? priorApprovedPin
                 : approvedPin;
-            if (!publicationPin && !isPunctuationOnly) {
+            if (!publicationPin && !isPunctuationOnly && !educationSuccessorDraft) {
               throw new Error(`${operation.slug} has no approved immutable hero-media pin; preserving publication.`);
             }
             const nextRevisionNumber = Math.max(...revisions.map((revision) => revision.revisionNumber)) + 1;
@@ -1164,11 +1172,15 @@ async function applyDatabase(
               content: Record<string, unknown>;
               mediaIds: string[];
             };
-            if (!isPunctuationOnly) {
+            if (!isPunctuationOnly && !educationSuccessorDraft) {
               publicationPayload.mediaIds = [String(publicationPin!.assetId)];
               publicationPayload.content.heroMediaId = String(publicationPin!.assetId);
             }
-            const readiness = validateCmsSnapshot("industry", publicationPayload, "publish");
+            const readiness = validateCmsSnapshot(
+              "industry",
+              publicationPayload,
+              educationSuccessorDraft ? "draft" : "publish",
+            );
             if (!readiness.success) {
               throw new Error(`${operation.slug} is not publication-ready: ${readiness.errors.join("; ")}`);
             }
@@ -1183,10 +1195,42 @@ async function applyDatabase(
               reason: baselineAction === "repair-v3-media"
                 ? "Approved v4 repair of the known v3 industry hero-media pin defect; prior revisions preserved."
                 : isEducationSuccessor
-                  ? "Approved Education POV successor v10; prior revisions and immutable media preserved."
+                  ? "Approved Education POV successor v11 with governed supporting imagery; prior revisions and immutable media preserved."
                 : "Approved financial-services punctuation baseline v12; prior revisions and media state preserved.",
             }).returning({ id: cmsRevisionsTable.id });
             if (!revision) throw new Error(`Could not append the ${operation.slug} contract baseline.`);
+            if (educationSuccessorDraft) {
+              await tx.insert(cmsOperationReceiptsTable).values({
+                idempotencyKey: operation.idempotencyKey,
+                operation: "cms.inventory.education-successor-pending-cutover",
+                subjectId: String(conflict.id),
+                requestDigest: operation.requestDigest,
+                resultDigest: resultDigest({
+                  documentId: conflict.id,
+                  editionId: edition.id,
+                  revisionId: revision.id,
+                }),
+              });
+              await tx.insert(cmsAuditEventsTable).values({
+                actorUserId: serviceAccount.id,
+                actorLabel: "cms-inventory-migration",
+                action: "cms.inventory.education-successor-pending-cutover",
+                targetType: "industry",
+                targetId: String(conflict.id),
+                requestId: operation.idempotencyKey,
+                metadata: {
+                  market: "uae",
+                  locale: "en",
+                  revisionId: String(revision.id),
+                  previousRevisionId: String(revisions[0].id),
+                  workflowState: "draft",
+                  publicationState: edition.publicationState,
+                  reason: "Education v11 successor is awaiting the governed three-image immutable-media cutover",
+                },
+              });
+              created++;
+              continue;
+            }
             if (isPunctuationOnly && punctuationPlan!.references.length) {
               await tx.insert(cmsMediaReferencesTable).values(
                 punctuationPlan!.references.map((reference) => ({

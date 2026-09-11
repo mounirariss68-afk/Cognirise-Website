@@ -8,10 +8,7 @@ import {
   type InventoryRecord,
   repositoryRoot,
 } from "./common.js";
-import {
-  industryPublicationPinAction,
-  pulseIndustryMedia,
-} from "./industry-media.js";
+import { industryPublicationPinAction, pulseIndustryMedia } from "./industry-media.js";
 import {
   mediaMigrationOperations,
   migrationOperations,
@@ -25,8 +22,10 @@ const args = process.argv.slice(2);
 const shouldApply = args.includes("--apply-db");
 const shouldVerify = args.includes("--verify-db");
 const target = args.find((argument) => argument.startsWith("--target="))?.slice(9);
+const requestedSlug = args.find((argument) => argument.startsWith("--slug="))?.slice(7);
 const APPROVED_AT = "2026-09-08";
 const CUTOVER_PREFIX = "cms-industry-pulse-cutover-v2";
+const EDUCATION_V2_CUTOVER_PREFIX = "cms-industry-education-imagery-v3";
 const LEGACY_CUTOVER_PREFIX = "cms-industry-pulse-cutover-v1";
 const MEDIA_APPROVAL_PREFIX = "cms-industry-pulse-media-approval-v2";
 const REFERENCE_REPAIR_PREFIX = "cms-industry-pulse-reference-repair-v1";
@@ -65,6 +64,9 @@ function assertDevelopmentTarget() {
 }
 
 async function loadPlan() {
+  if (requestedSlug && requestedSlug !== "education") {
+    throw new Error("This scoped cutover supports Education only.");
+  }
   const inventory = JSON.parse(
     await readFile(`${repositoryRoot}/scripts/cms/output/inventory.json`, "utf8"),
   ) as Inventory;
@@ -79,7 +81,7 @@ async function loadPlan() {
       .filter((operation) => operation.kind === "industry")
       .map((operation) => [operation.slug, operation]),
   );
-  const plan = pulseIndustryMedia.map((definition) => {
+  const fullPlan = pulseIndustryMedia.map((definition) => {
     const operation = operationsByPath.get(definition.publicPath);
     if (!operation) throw new Error(`The governed inventory is missing ${definition.publicPath}.`);
     if (
@@ -92,18 +94,22 @@ async function loadPlan() {
     ) {
       throw new Error(`${definition.publicPath} does not match the approved media contract.`);
     }
-    const contentOperation = definition.slug
+    const contentOperation = definition.slug && definition.role !== "supporting"
       ? contentOperationsBySlug.get(definition.slug)
       : undefined;
-    if (definition.slug && !contentOperation) {
+    if (definition.slug && definition.role !== "supporting" && !contentOperation) {
       throw new Error(`The governed inventory is missing the ${definition.slug} content baseline.`);
     }
     const content = contentOperation?.payload.content as Record<string, unknown> | undefined;
     if (
       contentOperation
       && (
-        contentOperation.mediaPaths.length !== 1
-        || contentOperation.mediaPaths[0] !== definition.publicPath
+        contentOperation.mediaPaths[0] !== definition.publicPath
+        || (definition.slug !== "education" && contentOperation.mediaPaths.length !== 1)
+        || (definition.slug === "education" && (
+          contentOperation.mediaPaths.length !== 3
+          || supportingMediaPaths(contentOperation.mediaPaths).length !== 2
+        ))
         || content?.image !== definition.publicPath
         || content?.imageAlt !== definition.altText
       )
@@ -112,11 +118,30 @@ async function loadPlan() {
     }
     return { definition, operation, contentOperation };
   });
-  const associated = plan.filter((item) => item.definition.slug);
-  if (plan.length !== 9 || associated.length !== 6) {
-    throw new Error("The Pulse industry family must contain exactly nine assets and six website associations.");
+  const plan = requestedSlug
+    ? fullPlan.filter((item) => item.definition.slug === requestedSlug)
+    : fullPlan;
+  const associated = plan.filter((item) => item.definition.slug && item.definition.role !== "supporting");
+  const supporting = plan.filter((item) => item.definition.role === "supporting");
+  const expectedAssociated = requestedSlug ? 1 : 6;
+  const expectedSupporting = 2;
+  const expectedUnassociated = requestedSlug ? 0 : 3;
+  if (
+    associated.length !== expectedAssociated
+    || supporting.length !== expectedSupporting
+    || plan.length !== expectedAssociated + expectedSupporting + expectedUnassociated
+  ) {
+    throw new Error(requestedSlug
+      ? "The Education cutover must contain exactly one hero and two supporting scenes."
+      : "The Pulse industry family must contain eleven assets, six hero associations, and two Education supporting scenes.");
   }
   return plan;
+}
+
+function supportingMediaPaths(paths: string[]) {
+  return paths.filter((path) => pulseIndustryMedia.some((media) =>
+    media.role === "supporting" && media.publicPath === path
+  ));
 }
 
 async function uploadApprovedMedia(
@@ -286,10 +311,15 @@ async function applyCutover(
     let replayed = 0;
     let repaired = 0;
 
-    for (const item of plan.filter((candidate) => candidate.definition.slug)) {
+    for (const item of plan.filter((candidate) =>
+      candidate.definition.slug && candidate.definition.role !== "supporting"
+    )) {
       const slug = item.definition.slug!;
       const media = approvedMedia.get(item.definition.publicPath)!;
-      const idempotencyKey = `${CUTOVER_PREFIX}:${slug}`;
+      const supporting = plan
+        .filter((candidate) => candidate.definition.slug === slug && candidate.definition.role === "supporting")
+        .map((candidate) => approvedMedia.get(candidate.definition.publicPath)!);
+      const idempotencyKey = `${slug === "education" ? EDUCATION_V2_CUTOVER_PREFIX : CUTOVER_PREFIX}:${slug}`;
       const editionResult = await client.query(
         `SELECT d.id::text document_id,e.id::text edition_id,e.locale,e.publication_state,
                 e.published_revision_id::text
@@ -360,11 +390,14 @@ async function applyCutover(
           payload: { mediaIds?: unknown; content?: Record<string, unknown> };
           workflow_state: string;
         };
+        const expectedMedia = [media, ...supporting];
         const currentReferences = await client.query(
-          `SELECT media_version_id::text
+          `SELECT asset_id::text,media_version_id::text
              FROM cms_media_references
-            WHERE document_id=$1 AND field_path=$2 AND asset_id=$3`,
-          [edition.document_id, `revision:${current.id}`, media.assetId],
+             WHERE document_id=$1 AND field_path=$2
+               AND asset_id::text=ANY($3::text[])
+             ORDER BY array_position($3::text[],asset_id::text)`,
+          [edition.document_id, `revision:${current.id}`, expectedMedia.map((item) => item.assetId)],
         );
         const pinAction = industryPublicationPinAction({
           workflowState: current.workflow_state,
@@ -372,6 +405,10 @@ async function applyCutover(
           heroMediaId: current.payload?.content?.heroMediaId,
           expectedAssetId: media.assetId,
           expectedVersionId: media.versionId,
+          expectedSupportingMedia: supporting.map((item) => ({
+            assetId: item.assetId,
+            versionId: item.versionId,
+          })),
           referenceVersionIds: currentReferences.rows.map((reference) =>
             typeof reference.media_version_id === "string"
               ? reference.media_version_id
@@ -459,13 +496,62 @@ async function applyCutover(
         continue;
       }
       let sourceRevision;
-      if (legacyReceipt.rowCount) {
+      if (legacyReceipt.rowCount && slug !== "education") {
         sourceRevision = await client.query(
           `SELECT id::text,revision_number,payload,workflow_state
              FROM cms_revisions
             WHERE id=$1 AND edition_id=$2`,
           [legacyReceipt.rows[0].subject_id, edition.edition_id],
         );
+      } else if (slug === "education") {
+        // A v11 successor is intentionally imported as a governed draft. It
+        // must become the cutover source so the final immutable three-image
+        // publication retains its approved narrative rather than rebuilding
+        // from the obsolete v2 publication.
+        sourceRevision = await client.query(
+          `SELECT id::text,revision_number,payload,workflow_state
+             FROM cms_revisions
+            WHERE edition_id=$1
+            ORDER BY revision_number DESC
+            LIMIT 1`,
+          [edition.edition_id],
+        );
+        const candidate = sourceRevision.rows[0] as {
+          payload?: Record<string, unknown>;
+          workflow_state?: string;
+        } | undefined;
+        const normalizedCandidate = candidate?.payload
+          ? structuredClone(candidate.payload) as {
+              mediaIds?: unknown[];
+              content?: Record<string, unknown>;
+            }
+          : undefined;
+        if (normalizedCandidate) {
+          normalizedCandidate.mediaIds = [];
+          delete normalizedCandidate.content?.heroMediaId;
+          delete normalizedCandidate.content?.heroMedia;
+          delete normalizedCandidate.content?.supportingMedia;
+          const imagery = normalizedCandidate.content?.educationPov;
+          const scenes = imagery && typeof imagery === "object" && !Array.isArray(imagery)
+            ? (imagery as Record<string, unknown>).imagery
+            : undefined;
+          if (scenes && typeof scenes === "object" && !Array.isArray(scenes)) {
+            for (const slot of ["educatorPractice", "researchCoordination"]) {
+              const scene = (scenes as Record<string, unknown>)[slot];
+              if (scene && typeof scene === "object" && !Array.isArray(scene)) {
+                delete (scene as Record<string, unknown>).media;
+              }
+            }
+          }
+        }
+        if (
+          sourceRevision.rowCount !== 1
+          || candidate?.workflow_state !== "draft"
+          || !normalizedCandidate
+          || resultDigest(normalizedCandidate) !== resultDigest(item.contentOperation!.payload)
+        ) {
+          throw new Error("education has no exact governed v11 draft available for the three-image cutover.");
+        }
       } else if (edition.published_revision_id) {
         sourceRevision = await client.query(
           `SELECT id::text,revision_number,payload,workflow_state
@@ -517,11 +603,42 @@ async function applyCutover(
         [edition.edition_id],
       );
       const payload = structuredClone(source.payload);
-      payload.mediaIds = [media.assetId];
+      payload.mediaIds = [media.assetId, ...supporting.map((item) => item.assetId)];
       payload.content = {
         ...((payload.content && typeof payload.content === "object") ? payload.content : {}),
         heroMediaId: media.assetId,
+        heroMedia: {
+          mediaId: media.assetId,
+          mediaVersionId: media.versionId,
+          role: "hero",
+          altText: item.definition.altText,
+        },
       };
+      if (slug === "education") {
+        const content = payload.content as {
+          educationPov?: { version?: unknown; imagery?: Record<string, Record<string, unknown>> };
+        };
+        if (content.educationPov?.version === 2) {
+          const imagery = content.educationPov.imagery ?? (content.educationPov.imagery = {});
+          for (const item of supporting) {
+            const slot = item.definition.imagerySlot;
+            if (!slot) {
+              throw new Error(`Education supporting media ${item.definition.publicPath} has no imagery slot.`);
+            }
+            imagery[slot] = {
+              ...imagery[slot],
+              src: item.definition.publicPath,
+              altText: item.definition.altText,
+              media: {
+                mediaId: item.assetId,
+                mediaVersionId: item.versionId,
+                role: "supporting",
+                altText: item.definition.altText,
+              },
+            };
+          }
+        }
+      }
       const validation = validateCmsSnapshot("industry" as CmsDocumentKind, payload, "publish");
       if (!validation.success) {
         throw new Error(`${slug}: ${validation.errors.join("; ")}`);
@@ -542,11 +659,11 @@ async function applyCutover(
         ],
       );
       const revisionId = String(revisionResult.rows[0].id);
-      await client.query(
+      for (const pinnedMedia of [media, ...supporting]) await client.query(
         `INSERT INTO cms_media_references
           (asset_id,media_version_id,document_id,field_path)
          VALUES ($1,$2,$3,$4)`,
-        [media.assetId, media.versionId, edition.document_id, `revision:${revisionId}`],
+        [pinnedMedia.assetId, pinnedMedia.versionId, edition.document_id, `revision:${revisionId}`],
       );
       await client.query(
         `UPDATE cms_market_editions
@@ -600,7 +717,7 @@ async function applyCutover(
     }
     await verifyCutover(plan, client);
     await client.query("COMMIT");
-    console.log(`Pulse industry cutover applied: media=9 published=${published} repaired=${repaired} replayed=${replayed} unassociated=3.`);
+    console.log(`${requestedSlug === "education" ? "Education imagery" : "Pulse industry"} cutover applied: media=${plan.length} published=${published} repaired=${repaired} replayed=${replayed} unassociated=${plan.filter((item) => !item.definition.slug).length}.`);
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -618,6 +735,7 @@ async function verifyCutover(
   const client = providedClient ?? ownedClient!;
   try {
     let associated = 0;
+    let supporting = 0;
     let unassociated = 0;
     for (const item of plan) {
       const media = await client.query(
@@ -652,6 +770,25 @@ async function verifyCutover(
         || metadata?.rightsStatus !== "approved-use"
       ) {
         throw new Error(`Approved media governance parity failed for ${item.definition.publicPath}.`);
+      }
+
+      if (item.definition.role === "supporting") {
+        const references = await client.query(
+          `SELECT count(*)::int count
+             FROM cms_documents d
+             JOIN cms_market_editions e ON e.document_id=d.id AND e.market='uae'
+             JOIN cms_media_references ref ON ref.document_id=d.id
+               AND ref.field_path='revision:' || e.published_revision_id::text
+               AND ref.asset_id=$1
+            WHERE d.kind='industry' AND d.canonical_slug='education'
+              AND e.publication_state='published'`,
+          [row.asset_id],
+        );
+        if (Number(references.rows[0].count) !== 1) {
+          throw new Error(`${item.definition.publicPath} must be pinned to the published Education revision.`);
+        }
+        supporting++;
+        continue;
       }
 
       if (!item.definition.slug) {
@@ -715,33 +852,38 @@ async function verifyCutover(
       }
       associated++;
     }
-    const publishedIndustries = await client.query(
-      `SELECT count(*)::int count
-         FROM cms_market_editions e
-         JOIN cms_documents d ON d.id=e.document_id
-        WHERE d.kind='industry' AND e.publication_state='published'`,
-    );
-    const additionalPages = await client.query(
-      `SELECT count(*)::int count
-         FROM cms_documents
-        WHERE kind='industry' AND canonical_slug IN ('defense','retail-cpg')`,
-    );
-    const additionalPublications = await client.query(
-      `SELECT count(*)::int count
-         FROM cms_market_editions e
-         JOIN cms_documents d ON d.id=e.document_id
-        WHERE d.kind='industry'
-          AND d.canonical_slug IN ('manufacturing','defense','retail-cpg')
-          AND e.publication_state='published'`,
-    );
-    if (
-      Number(publishedIndustries.rows[0].count) !== 6
-      || Number(additionalPages.rows[0].count) !== 0
-      || Number(additionalPublications.rows[0].count) !== 0
-    ) {
-      throw new Error("Only the six existing public industries may be published by this cutover.");
+    if (!requestedSlug) {
+      const publishedIndustries = await client.query(
+        `SELECT count(*)::int count
+           FROM cms_market_editions e
+           JOIN cms_documents d ON d.id=e.document_id
+          WHERE d.kind='industry' AND e.publication_state='published'`,
+      );
+      const additionalPages = await client.query(
+        `SELECT count(*)::int count
+           FROM cms_documents
+          WHERE kind='industry' AND canonical_slug IN ('defense','retail-cpg')`,
+      );
+      const additionalPublications = await client.query(
+        `SELECT count(*)::int count
+           FROM cms_market_editions e
+           JOIN cms_documents d ON d.id=e.document_id
+          WHERE d.kind='industry'
+            AND d.canonical_slug IN ('manufacturing','defense','retail-cpg')
+            AND e.publication_state='published'`,
+      );
+      if (
+        Number(publishedIndustries.rows[0].count) !== 6
+        || Number(additionalPages.rows[0].count) !== 0
+        || Number(additionalPublications.rows[0].count) !== 0
+      ) {
+        throw new Error("Only the six existing public industries may be published by this cutover.");
+      }
     }
-    console.log(`Verified Pulse industry cutover: approvedMedia=9 publishedIndustries=${associated} unassociatedMedia=${unassociated}.`);
+    if (supporting !== 2) throw new Error("Education supporting imagery is incomplete.");
+    const expectedAssociated = requestedSlug ? 1 : 6;
+    if (associated !== expectedAssociated) throw new Error("Scoped industry publication count is incomplete.");
+    console.log(`Verified ${requestedSlug === "education" ? "Education imagery" : "Pulse industry"} cutover: approvedMedia=${plan.length} publishedIndustries=${associated} supportingMedia=${supporting} unassociatedMedia=${unassociated}.`);
   } finally {
     ownedClient?.release();
   }

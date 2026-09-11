@@ -314,6 +314,11 @@ const educationRoadmapSchema = z.array(z.object({
   body: z.string().trim().min(1).max(1_000),
 }).strict()).length(3);
 
+const educationImagerySceneSchema = z.object({
+  src: safeAssetPath,
+  altText: z.string().trim().min(1).max(500),
+  media: cmsMediaReferenceSchema.extend({ role: z.literal("supporting") }).strict().optional(),
+}).strict();
 const legacyEducationPovSchema = z.object({
   version: z.undefined().optional(),
   introduction: z.string().trim().max(4_000).optional(),
@@ -338,6 +343,10 @@ const legacyEducationPovSchema = z.object({
 
 const educationPovV2Schema = z.object({
   version: z.literal(2),
+  imagery: z.object({
+    educatorPractice: educationImagerySceneSchema,
+    researchCoordination: educationImagerySceneSchema,
+  }).strict().optional(),
   introduction: z.string().trim().min(1).max(4_000),
   strategicShift: z.string().trim().min(1).max(4_000),
   patternQuote: z.string().trim().min(1).max(2_000),
@@ -406,6 +415,7 @@ export const industryContentSchema = z.object({
   educationPov: educationPovSchema.optional(),
   heroMedia: optionalMediaReference,
   heroMediaId: legacyMediaId,
+  supportingMedia: z.array(cmsMediaReferenceSchema).max(8).optional(),
   verificationDate: date,
   reviewDate: date,
   visibility: z.enum(["public", "hidden", "restricted"]).default("public"),
@@ -888,7 +898,10 @@ export function validateCmsSnapshotForDelivery(
       };
     }
   }
-  return validateCmsSnapshotStructure(kind, input, mode);
+  const source = validateCmsSnapshotStructure(kind, input, mode);
+  if (!source.success || mode !== "publish" || kind !== "industry") return source;
+  const errors = educationImmutableMediaErrors(source.data as z.infer<typeof cmsSnapshotSchema>);
+  return errors.length ? { success: false as const, errors } : source;
 }
 
 const EDUCATION_DELIVERY_MARKETS = ["uae", "ksa", "turkiye", "europe"] as const;
@@ -918,6 +931,38 @@ function educationDerivativeErrors(snapshot: z.infer<typeof cmsSnapshotSchema>):
   });
 }
 
+function educationImmutableMediaErrors(snapshot: {
+  slug: string;
+  mediaIds: string[];
+  content?: unknown;
+}) {
+  const content = snapshot.content as IndustryContent;
+  const pov = content.educationPov;
+  if (
+    snapshot.slug !== "education"
+    || pov?.version !== 2
+  ) return [];
+  const expected = [
+    content.heroMedia,
+    pov.imagery?.educatorPractice.media,
+    pov.imagery?.researchCoordination.media,
+  ];
+  if (snapshot.mediaIds.length !== 3 || new Set(snapshot.mediaIds).size !== 3) {
+    return ["Education v2 publication requires exactly three ordered immutable media IDs."];
+  }
+  if (expected.some((reference) => !reference)) {
+    return ["Education v2 publication requires hero and both supporting immutable media references."];
+  }
+  if (
+    expected[0]!.role !== "hero"
+    || expected[1]!.role !== "supporting"
+    || expected[2]!.role !== "supporting"
+    || expected.some((reference, index) => reference!.mediaId !== snapshot.mediaIds[index])
+  ) {
+    return ["Education v2 immutable media references must match ordered hero, educator-practice, and research-coordination media IDs."];
+  }
+  return [];
+}
 export function validateCmsSnapshot(
   kind: CmsDocumentKind,
   input: unknown,
@@ -925,7 +970,10 @@ export function validateCmsSnapshot(
 ) {
   const source = validateCmsSnapshotStructure(kind, input, mode);
   if (!source.success || mode !== "publish" || kind !== "industry") return source;
-  const errors = educationDerivativeErrors(source.data);
+  const errors = [
+    ...educationImmutableMediaErrors(source.data as z.infer<typeof cmsSnapshotSchema>),
+    ...educationDerivativeErrors(source.data),
+  ];
   return errors.length
     ? { success: false as const, errors }
     : source;
@@ -987,6 +1035,28 @@ export function collectCmsMediaReferences(
   ] as const;
   for (const [referenceField, legacyField, role] of locations) {
     add(record[referenceField] ?? record[legacyField], `content.${referenceField}`, role);
+  }
+  if (Array.isArray(record.supportingMedia)) {
+    for (const [index, reference] of record.supportingMedia.entries()) {
+      add(reference, `content.supportingMedia.${index}`, "supporting");
+    }
+  }
+  const educationPov = record.educationPov;
+  const educationImagery = educationPov && typeof educationPov === "object" && !Array.isArray(educationPov)
+    ? (educationPov as Record<string, unknown>).imagery
+    : undefined;
+  if (
+    kind === "industry"
+    && educationImagery
+    && typeof educationImagery === "object"
+    && !Array.isArray(educationImagery)
+  ) {
+    for (const slot of ["educatorPractice", "researchCoordination"]) {
+      const scene = (educationImagery as Record<string, unknown>)[slot];
+      if (scene && typeof scene === "object" && !Array.isArray(scene)) {
+        add((scene as Record<string, unknown>).media, `content.educationPov.imagery.${slot}.media`, "supporting");
+      }
+    }
   }
   if (record.social && typeof record.social === "object" && !Array.isArray(record.social)) {
     const social = record.social as Record<string, unknown>;

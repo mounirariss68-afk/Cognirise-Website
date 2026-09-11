@@ -323,7 +323,7 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
       ? record.fields.slug === "financial-services"
         ? `cms-industry-contract-v12:${record.externalId}`
         : record.fields.slug === "education"
-          ? `cms-industry-education-successor-v10:${record.externalId}`
+          ? `cms-industry-education-successor-v11:${record.externalId}`
         : `cms-industry-contract-v8:${record.externalId}`
       : record.type === "case-study"
         ? `cms-case-study-baseline-v2:${record.externalId}`

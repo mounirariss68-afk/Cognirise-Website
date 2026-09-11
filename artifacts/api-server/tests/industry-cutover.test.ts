@@ -129,7 +129,7 @@ test("the governed inventory produces six publishable industry cutover records i
       operation.slug === "financial-services"
         ? "cms-industry-contract-v12:"
         : operation.slug === "education"
-          ? "cms-industry-education-successor-v10:"
+          ? "cms-industry-education-successor-v11:"
         : "cms-industry-contract-v8:",
     )
   ));
@@ -143,13 +143,16 @@ test("the governed inventory produces six publishable industry cutover records i
   for (const operation of industries) {
     const approvedMedia = pulseIndustryMedia.find((item) => item.slug === operation.slug);
     assert.ok(approvedMedia);
-    assert.deepEqual(operation.mediaPaths, [approvedMedia.publicPath]);
+    const supportingPaths = pulseIndustryMedia
+      .filter((item) => item.slug === operation.slug && item.role === "supporting")
+      .map((item) => item.publicPath);
+    assert.deepEqual(operation.mediaPaths, [approvedMedia.publicPath, ...supportingPaths]);
     assert.equal((operation.payload.content as { image?: string }).image, approvedMedia.publicPath);
     assert.equal((operation.payload.content as { imageAlt?: string }).imageAlt, approvedMedia.altText);
     const resolved = resolveMigrationMedia(operation, candidateByPath);
-    const validation = validateCmsSnapshot("industry", resolved, "publish");
+    const validation = validateCmsSnapshot("industry", resolved, "draft");
     assert.equal(validation.success, true, validation.success ? undefined : validation.errors.join("; "));
-    assert.equal(resolved.mediaIds.length, 1);
+    assert.equal(resolved.mediaIds.length, 1 + supportingPaths.length);
     assert.equal((resolved.content as { heroMediaId?: string }).heroMediaId, resolved.mediaIds[0]);
     assert.ok((resolved.content as { opportunity?: string }).opportunity);
     assert.ok((resolved.content as { capabilities?: unknown[] }).capabilities!.length >= 2);
@@ -158,15 +161,16 @@ test("the governed inventory produces six publishable industry cutover records i
   }
 });
 
-test("the Pulse industry family governs nine native-wide assets but associates only the six existing industries", () => {
+test("the Pulse industry family governs Education supporting scenes without creating another industry", () => {
   const inventory = loadInventory();
   const media = mediaMigrationOperations(inventory.records);
   const mediaByPath = new Map(media.map((operation) => [operation.publicPath, operation]));
-  const associated = pulseIndustryMedia.filter((item) => item.slug);
+  const associated = pulseIndustryMedia.filter((item) => item.slug && item.role !== "supporting");
   const unassociated = pulseIndustryMedia.filter((item) => !item.slug);
 
-  assert.equal(pulseIndustryMedia.length, 9);
+  assert.equal(pulseIndustryMedia.length, 11);
   assert.equal(associated.length, 6);
+  assert.equal(pulseIndustryMedia.filter((item) => item.role === "supporting").length, 2);
   assert.deepEqual(
     unassociated.map((item) => item.sector),
     ["Manufacturing", "Defense", "Retail & CPG"],
@@ -190,9 +194,29 @@ test("the Pulse industry family governs nine native-wide assets but associates o
   );
   assert.deepEqual(
     [...industryPaths].sort(),
-    associated.map((item) => item.publicPath).sort(),
+    [
+      ...associated.map((item) => item.publicPath),
+      ...pulseIndustryMedia.filter((item) => item.role === "supporting").map((item) => item.publicPath),
+    ].sort(),
   );
   assert.ok(unassociated.every((item) => !industryPaths.has(item.publicPath)));
+});
+
+test("Education reconciliation invokes the Education-only imagery cutover", () => {
+  const reconcileSource = readFileSync(
+    path.resolve(process.cwd(), "../../scripts/src/cms/reconcile.ts"),
+    "utf8",
+  );
+  const cutoverSource = readFileSync(
+    path.resolve(process.cwd(), "../../scripts/src/cms/industry-cutover.ts"),
+    "utf8",
+  );
+  assert.match(reconcileSource, /"cms:publish-education-imagery"/);
+  assert.match(cutoverSource, /requestedSlug && requestedSlug !== "education"/);
+  assert.match(cutoverSource, /fullPlan\.filter\(\(item\) => item\.definition\.slug === requestedSlug\)/);
+  assert.match(cutoverSource, /if \(!requestedSlug\) \{/);
+  assert.match(cutoverSource, /const expectedUnassociated = requestedSlug \? 0 : 3/);
+  assert.match(cutoverSource, /plan\.length !== expectedAssociated \+ expectedSupporting \+ expectedUnassociated/);
 });
 
 test("compiled industry fallbacks use the approved Pulse PNG family", () => {
@@ -235,4 +259,17 @@ test("only an absent exact reference can be restored on an approved Pulse public
     heroMediaId: "another-asset",
     referenceVersionIds: [],
   }), "blocked");
+  const supporting = [{ assetId: "educator-practice", versionId: "educator-practice-v1" }];
+  assert.equal(industryPublicationPinAction({
+    ...base,
+    mediaIds: ["approved-asset", "educator-practice"],
+    expectedSupportingMedia: supporting,
+    referenceVersionIds: ["approved-version", "educator-practice-v1"],
+  }), "complete");
+  assert.equal(industryPublicationPinAction({
+    ...base,
+    mediaIds: ["approved-asset", "educator-practice"],
+    expectedSupportingMedia: supporting,
+    referenceVersionIds: ["approved-version"],
+  }), "blocked", "a partial supporting-media pin cannot be repaired as a hero-only reference");
 });

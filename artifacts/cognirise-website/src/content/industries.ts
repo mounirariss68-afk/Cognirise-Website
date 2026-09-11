@@ -25,6 +25,18 @@ export type IndustryContent = {
   sources: { label: string; publisher: string; kind: EvidenceKind; url: string; accessedAt?: string; market?: IndustryMarket }[];
   educationPov?: {
     version?: 2;
+    imagery?: {
+      educatorPractice: {
+        src: string;
+        altText: string;
+        media?: { mediaId: string; mediaVersionId: string; role: "identity" | "logo" | "hero" | "supporting" | "background" | "icon" | "og-image" | "document"; altText?: string };
+      };
+      researchCoordination: {
+        src: string;
+        altText: string;
+        media?: { mediaId: string; mediaVersionId: string; role: "identity" | "logo" | "hero" | "supporting" | "background" | "icon" | "og-image" | "document"; altText?: string };
+      };
+    };
     introduction?: string;
     strategicShift?: string;
     patternQuote?: string;
@@ -220,7 +232,7 @@ export const INDUSTRIES: IndustryContent[] = [
       { title: "Evidence and scale", body: "Measure learning, research speed, workload, service quality, equity, cost, safety and trust; scale only where evidence warrants it." },
     ],
     selectedWork: { description: "Cognirise brings consulting, engineering, data, platform and change capabilities together to redesign a complete school, university or authority journey and establish the shared layer that lets evidence-backed practices scale." },
-    image: "/images/cognirise/industries/pulse-industry-education-learning.png", imageAlt: "Students learning individually and in groups across a stepped campus connected by luminous knowledge paths.", variant: "network",
+    image: "/images/cognirise/industries/pulse-industry-education-hero-v2.png", imageAlt: "A school learner, university learner, educator and researcher collaborate around a learning table in a light-filled campus studio.", variant: "network",
     pressures: [
       { title: "The operating system is shared capability", body: "Trusted data, secure platforms, integration, policy, evaluation, workforce capability and human oversight—not one software product—coordinate responsible use." },
       { title: "School autonomy must stay tightly bounded", body: "K–12 access and interfaces must be age-appropriate, safeguarded and controlled by accountable educators." },
@@ -255,6 +267,16 @@ export const INDUSTRIES: IndustryContent[] = [
     ],
     educationPov: {
       version: 2,
+      imagery: {
+        educatorPractice: {
+          src: "/images/cognirise/industries/pulse-industry-education-practice-v2.png",
+          altText: "Four distinct educators collaboratively reviewing lesson materials around a table in a bright professional-learning studio.",
+        },
+        researchCoordination: {
+          src: "/images/cognirise/industries/pulse-industry-education-research-v2.png",
+          altText: "Three distinct university colleagues coordinate a reviewable research plan around a transparent table.",
+        },
+      },
       introduction: "AI is already changing how learners learn, educators teach, researchers discover and institutions operate. Schools, universities, school networks and education authorities now need to shape that change around learning, human development and public trust. An institution-wide AI operating system is not a single product: it is the shared layer of trusted data, secure platforms, integration, policy, evaluation, capability and human oversight through which AI-enabled work is coordinated. In K–12, access and autonomy must be age-appropriate, safeguarded and educator-controlled. In higher education, specialised agents can act only within approved, reviewable workflows.",
       strategicShift: "Move the unit of innovation from the individual chatbot or copilot to the complete learner, educator, researcher, family or employee journey—and measure educational, research, service, equity and trust outcomes rather than usage.",
       patternQuote: "The repeatable pattern is purposeful specialisation plus governance: approved content, defined users, age-appropriate design, educator or expert oversight, protected data, equitable access and outcomes that can be evaluated.",

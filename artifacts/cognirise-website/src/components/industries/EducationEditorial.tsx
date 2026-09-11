@@ -1,11 +1,12 @@
-import React from "react";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import React, { useState } from "react";
+import { ArrowRight, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "wouter";
 import { BrandButton } from "@/components/ui/brand-button";
 import { assetUrl } from "@/lib/assets";
 import { useMarketStore, type Market } from "@/store/market";
 import type { IndustryContent } from "@/content/industries";
 import { projectIndustrySnapshotForMarket } from "@workspace/api-zod";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SAUDI_EDUCATION_SOURCES: IndustryContent["sources"] = [
   { label: "National Strategy for Data and AI", publisher: "Saudi Data & AI Authority", kind: "Official source", url: "https://sdaia.gov.sa/en/SDAIA/SdaiaStrategies/Pages/NationalStrategyForDataAndAI.aspx" },
@@ -57,18 +58,367 @@ export function resolveEducationMarketContent(view: IndustryContent, market: Mar
   };
 }
 
+const SECTIONS = [
+  { id: "convictions", label: "Convictions" },
+  { id: "domains", label: "Domains" },
+  { id: "applications", label: "Applications" },
+  { id: "capabilities", label: "Capabilities" },
+  { id: "roadmap", label: "Roadmap" },
+  { id: "evidence", label: "Evidence" },
+];
+
+/**
+ * Content revisions do not always change review metadata.  Keep the renderer
+ * keyed to the projected payload itself so a CMS revision cannot retain a
+ * selection that belongs to the previous edition.
+ */
+export function stableEducationContentSignature(content: unknown): string {
+  const sortValue = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(sortValue);
+    if (value && typeof value === "object") {
+      return Object.fromEntries(
+        Object.entries(value as Record<string, unknown>)
+          .sort(([left], [right]) => left.localeCompare(right))
+          .map(([key, nestedValue]) => [key, sortValue(nestedValue)]),
+      );
+    }
+    return value;
+  };
+
+  return JSON.stringify(sortValue(content));
+}
+
+function safeSelectionIndex(selection: number, itemCount: number): number {
+  return Number.isInteger(selection) && selection >= 0 && selection < itemCount ? selection : 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sub-components for focused rendering                                       */
+/* -------------------------------------------------------------------------- */
+
+function TextSafeHero({ view, regional, isV2 }: { view: IndustryContent; regional: any; isV2: boolean }) {
+  return (
+    <section className="relative flex flex-col lg:block bg-[#fdfbf7]" aria-labelledby="education-title">
+      {/* Mobile Image (stacked, reflows naturally) */}
+      <div className="w-full h-[45vh] sm:h-[55vh] lg:hidden">
+        <img 
+          src={assetUrl(view.image)} 
+          alt={view.imageAlt} 
+          className="w-full h-full object-cover object-right" 
+        />
+      </div>
+      
+      {/* Desktop Background Image (spans right side) */}
+      <div className="hidden lg:block absolute inset-0 w-full h-full z-0">
+        <img 
+          src={assetUrl(view.image)} 
+          alt={view.imageAlt} 
+          className="w-full h-full object-cover object-right" 
+        />
+      </div>
+
+      {/* Text Safe Region */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-16 lg:py-32 flex items-center min-h-[50vh] lg:min-h-[85vh]">
+        <div className="min-w-0 bg-[#fdfbf7]/95 backdrop-blur-md p-8 md:p-12 lg:p-16 max-w-3xl shadow-xl border border-[#cbd3e1]/50 rounded-lg lg:rounded-xl">
+          <div data-testid="education-audience-label" className="flex items-center gap-3 text-xs uppercase tracking-[0.15em] font-bold mb-8 text-[#ff775d]">
+             <span className="w-10 h-[2px] shrink-0 bg-gradient-to-r from-[#7659df] via-[#a92d73] to-[#ff775d]" />
+             <span className="min-w-0 break-words">{regional.label} / {isV2 ? "Schools, Universities & Authorities" : "Higher education"}</span>
+          </div>
+          <h1 id="education-title" className="break-words font-display text-[#102957] text-4xl md:text-5xl lg:text-[4.5rem] leading-[1.05] tracking-tight mb-8">
+            {view.thesis}
+          </h1>
+          <p className="break-words text-[#405677] text-xl md:text-[22px] leading-[1.6] font-light max-w-2xl">
+            {view.dek}
+          </p>
+          <p data-testid="education-hero-caption" className="mt-6 break-words border-t border-[#cbd3e1] pt-4 text-sm leading-relaxed text-[#506583]">
+            Illustration: {view.imageAlt}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StrategicShift({ pov, view, isV2 }: { pov: any; view: IndustryContent; isV2: boolean }) {
+  if (isV2) {
+    return (
+      <section className="py-24 md:py-32 px-6 bg-[#fdfbf7]">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+           <div>
+             <div className="flex items-center gap-3 text-xs uppercase tracking-[0.15em] font-bold mb-8 text-[#a92d73]">
+               <span className="w-8 h-[2px] bg-gradient-to-r from-[#7659df] to-[#a92d73]" />
+               The strategic shift
+             </div>
+             <p className="text-xl md:text-[22px] text-[#405677] leading-[1.8] font-light">
+               {pov.introduction}
+             </p>
+           </div>
+           <div className="border-l-4 border-[#ff775d] pl-8 md:pl-12 py-4">
+             <p className="font-display text-3xl md:text-4xl lg:text-[40px] text-[#102957] leading-[1.3] tracking-tight">
+               “{pov.strategicShift}”
+             </p>
+           </div>
+        </div>
+      </section>
+    );
+  }
+  return (
+    <section className="py-24 px-6 bg-[#071936] text-white">
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <div className="flex items-center gap-3 text-xs uppercase tracking-[0.15em] font-bold mb-6 text-[#ff775d]">
+            <span className="w-8 h-[2px] bg-[#ff775d]" />
+            The strategic shift
+          </div>
+          <h2 className="font-display text-4xl md:text-6xl leading-tight">From isolated copilots to coordinated institutional action.</h2>
+        </div>
+        <p className="text-xl text-[#d7dfed] leading-relaxed">{view.opportunity}</p>
+      </div>
+    </section>
+  );
+}
+
+function CapabilityLayerMap({ capabilities, safeCapability, onSelect, leadershipTest, isV2 }: { capabilities: any[]; safeCapability: number; onSelect: (i: number) => void; leadershipTest?: string; isV2: boolean }) {
+  // We represent the 7 capabilities as a shared-layer map instead of an accordion
+  // 0: Mission, 1: Learning, 2: Educator, 3: Governance, 4: Agent platform, 5: People, 6: Evidence
+  
+  const MapNode = ({ index, label, active, onClick, className = "" }: { index: number; label: string; active: boolean; onClick: () => void; className?: string }) => (
+      <button
+        type="button"
+        data-testid={`education-capability-${index + 1}`}
+        data-content-title={label}
+        aria-pressed={active}
+      onClick={onClick}
+      className={`w-full text-left px-5 py-4 border-2 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff775d] ${
+        active 
+        ? "bg-[#102957] border-[#102957] text-white shadow-lg scale-[1.02]" 
+        : "bg-white border-[#cbd3e1] text-[#102957] hover:border-[#7659df] hover:shadow-md"
+      } ${className}`}
+    >
+      <div className={`text-[10px] font-bold tracking-widest mb-1 ${active ? "text-[#ff775d]" : "text-[#7659df]"}`}>0{index + 1}</div>
+      <div className="font-display text-lg leading-tight">{label}</div>
+    </button>
+  );
+
+  return (
+    <section id="capabilities" className="py-24 md:py-32 px-6 bg-[#fdfbf7] scroll-mt-[156px] md:scroll-mt-[166px]">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center gap-3 text-xs uppercase tracking-[0.15em] font-bold mb-6 text-[#7659df]">
+          <span className="w-8 h-[2px] bg-[#7659df]" />
+          The target state
+        </div>
+        <h2 className="font-display text-4xl md:text-6xl leading-[1.1] tracking-tight text-[#102957] mb-8 max-w-4xl">
+          {isV2 ? "One shared layer. Seven capabilities." : "One shared layer. Six capabilities."}
+        </h2>
+        <p className="text-xl text-[#506583] leading-relaxed font-light mb-16 max-w-3xl">
+          A federated institutional layer supports specialised teaching, research, student-service and administrative agents without locking strategy to one product or provider.
+        </p>
+        
+        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          {/* Layer Map (Interactive) */}
+          <div className="lg:col-span-6 flex flex-col gap-6">
+            
+            {/* Top Layer: Specialised Applications & Agency */}
+            <div className="bg-[#eef0f5] p-6 rounded-xl border border-[#cbd3e1]/50">
+              <div className="text-xs uppercase font-bold tracking-widest text-[#506583] mb-4 text-center">Specialised Applications & Agency</div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {capabilities[1] && <MapNode index={1} label={capabilities[1].title} active={safeCapability === 1} onClick={() => onSelect(1)} />}
+                {capabilities[2] && <MapNode index={2} label={capabilities[2].title} active={safeCapability === 2} onClick={() => onSelect(2)} />}
+              </div>
+            </div>
+
+            {/* Middle Layer: Federated Platform & Governance */}
+            <div className="bg-[#eef0f5] p-6 rounded-xl border border-[#cbd3e1]/50">
+              <div className="text-xs uppercase font-bold tracking-widest text-[#506583] mb-4 text-center">Federated Platform Layer</div>
+              <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                {capabilities[3] && <MapNode index={3} label={capabilities[3].title} active={safeCapability === 3} onClick={() => onSelect(3)} />}
+                {capabilities[5] && <MapNode index={5} label={capabilities[5].title} active={safeCapability === 5} onClick={() => onSelect(5)} />}
+              </div>
+              {capabilities[4] && <MapNode index={4} label={capabilities[4].title} active={safeCapability === 4} onClick={() => onSelect(4)} />}
+            </div>
+
+            {/* Base Layer: Mission & Evidence */}
+            <div className="bg-[#eef0f5] p-6 rounded-xl border border-[#cbd3e1]/50">
+              <div className="text-xs uppercase font-bold tracking-widest text-[#506583] mb-4 text-center">Strategic Foundation</div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {capabilities[0] && <MapNode index={0} label={capabilities[0].title} active={safeCapability === 0} onClick={() => onSelect(0)} />}
+                {capabilities[6] && <MapNode index={6} label={capabilities[6].title} active={safeCapability === 6} onClick={() => onSelect(6)} />}
+              </div>
+            </div>
+
+          </div>
+          
+          {/* Reading Pane (Normal Flow / Sticky) */}
+          <div className="lg:col-span-6 lg:sticky lg:top-32">
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={safeCapability}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                data-testid="education-capabilities-detail"
+                data-selected-title={capabilities[safeCapability]?.title}
+                className="bg-white p-8 md:p-12 border border-[#cbd3e1] rounded-2xl shadow-xl border-t-4 border-t-[#a92d73]"
+              >
+                <div className="text-[12px] font-bold tracking-widest uppercase mb-4 text-[#a92d73]">
+                  Capability 0{safeCapability + 1}
+                </div>
+                <h3 className="font-display text-3xl md:text-4xl text-[#102957] mb-6 leading-tight">
+                  {capabilities[safeCapability]?.title}
+                </h3>
+                <p className="text-[17px] text-[#405677] leading-[1.7]">
+                  {capabilities[safeCapability]?.body}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+
+            {isV2 && leadershipTest && (
+              <aside className="mt-8 bg-[#eef0f5] p-8 border-l-4 border-[#ff775d] rounded-r-xl">
+                <div className="text-[10px] uppercase font-bold tracking-widest text-[#ff775d] mb-3">Leadership test</div>
+                <p className="font-display text-xl text-[#102957] leading-snug">{leadershipTest}</p>
+              </aside>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RoadmapTimeline({ roadmap, safeHorizon, onSelect, leadershipTest, isV2 }: { roadmap: any[]; safeHorizon: number; onSelect: (i: number) => void; leadershipTest?: string; isV2: boolean }) {
+  if (!roadmap || roadmap.length === 0) return null;
+
+  return (
+    <section id="roadmap" className="py-24 md:py-32 px-6 bg-[#eef0f5] scroll-mt-[156px] md:scroll-mt-[166px]">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-16 md:mb-20">
+          <div className="flex justify-center items-center gap-3 text-xs uppercase tracking-[0.15em] font-bold mb-6 text-[#ff775d]">
+            <span className="w-8 h-[2px] bg-[#ff775d]" />
+            A practical sequence
+          </div>
+          <h2 className="font-display text-4xl md:text-6xl leading-[1.1] tracking-tight text-[#102957]">
+            Establish. Build. Scale.
+          </h2>
+        </div>
+
+        {/* Timeline Interactive (Normal Flow details to avoid absolute positioning fragility) */}
+        <div className="flex flex-col gap-8 md:gap-12">
+          {/* The Timeline Bar */}
+          <div className="relative">
+            <div className="hidden md:block absolute top-1/2 left-0 w-full h-[2px] bg-[#cbd3e1] -translate-y-1/2 z-0" />
+            <div className="grid md:grid-cols-3 gap-6 relative z-10">
+              {roadmap.map((step, index) => {
+                const isSelected = safeHorizon === index;
+                return (
+                  <button
+                    key={step.horizon}
+                    type="button"
+                    data-testid={`education-roadmap-${index + 1}`}
+                    data-content-title={step.title}
+                    aria-pressed={isSelected}
+                    onClick={() => onSelect(index)}
+                    className={`flex flex-col items-start md:items-center text-left md:text-center p-6 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff775d] bg-white rounded-xl border-2 ${
+                      isSelected 
+                      ? "border-[#a92d73] shadow-lg md:-translate-y-2" 
+                      : "border-transparent shadow-sm hover:border-[#7659df] opacity-80 hover:opacity-100"
+                    }`}
+                  >
+                    <div className={`font-display text-sm md:text-base font-bold tracking-widest uppercase mb-3 ${
+                      isSelected ? "text-[#a92d73]" : "text-[#7659df]"
+                    }`}>
+                      {step.horizon}
+                    </div>
+                    <h3 className="font-display text-2xl text-[#102957] leading-tight mb-0">
+                      {step.title}
+                    </h3>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Details Pane (Normal Flow) */}
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={safeHorizon}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              data-testid="education-timeline-panel"
+              data-selected-title={roadmap[safeHorizon].title}
+              className="bg-white p-8 md:p-12 border-t-4 border-[#a92d73] shadow-xl rounded-xl w-full"
+            >
+              <h4 className="font-display text-2xl md:text-3xl text-[#102957] mb-6">{roadmap[safeHorizon].title} detail</h4>
+              <p className="text-[17px] md:text-lg text-[#506583] leading-[1.7] max-w-4xl">
+                {roadmap[safeHorizon].body}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {!isV2 && leadershipTest && (
+          <aside className="mt-16 bg-white p-8 border-l-4 border-[#ff775d] max-w-3xl mx-auto text-center md:text-left rounded-r-xl shadow-sm">
+            <div className="text-[10px] uppercase font-bold tracking-widest text-[#ff775d] mb-3">Leadership test</div>
+            <p className="font-display text-2xl text-[#102957] leading-snug">{leadershipTest}</p>
+          </aside>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Main Education Page View                                                   */
+/* -------------------------------------------------------------------------- */
+
 export function EducationEditorialView({ view: rawView, marketOverride }: { view: IndustryContent; marketOverride?: Market }) {
   const { market: selectedMarket } = useMarketStore();
   const market = marketOverride ?? selectedMarket;
-
   const view = projectIndustrySnapshotForMarket({ content: rawView }, market).content as IndustryContent;
-  const pov = view.educationPov as NonNullable<IndustryContent["educationPov"]> & { version?: 2; introduction?: string; strategicShift?: string; patternQuote?: string; globalDirection?: string; applications?: { title: string; items: { title: string; body: string; sourceUrls: string[]; market?: string; }[]; }[]; };
+  const pov = view.educationPov as NonNullable<IndustryContent["educationPov"]> & { 
+    version?: 2; 
+    introduction?: string; 
+    strategicShift?: string; 
+    patternQuote?: string; 
+    globalDirection?: string; 
+    applications?: { title: string; items: { title: string; body: string; sourceUrls: string[]; market?: string; }[]; }[];
+  };
+  
   if (!pov) return null;
+
+  return (
+    <EducationEditorialContent
+      key={`${market}:${stableEducationContentSignature(view)}`}
+      view={view}
+      market={market}
+      pov={pov}
+    />
+  );
+}
+
+function EducationEditorialContent({
+  view,
+  market,
+  pov,
+}: {
+  view: IndustryContent;
+  market: Market;
+  pov: NonNullable<IndustryContent["educationPov"]> & {
+    version?: 2;
+    introduction?: string;
+    strategicShift?: string;
+    patternQuote?: string;
+    globalDirection?: string;
+    applications?: { title: string; items: { title: string; body: string; sourceUrls: string[]; market?: string; }[]; }[];
+  };
+}) {
 
   const isV2 = pov.version === 2;
   const regional = resolveEducationMarketContent(view, market);
 
-  // For v2, the projection has already filtered the arrays. For v1, we apply legacy overrides.
+  // Apply legacy overrides for V1, otherwise use V2 content directly
   const convictions = isV2
     ? pov.convictions
     : pov.convictions.map((item, index) =>
@@ -86,358 +436,432 @@ export function EducationEditorialView({ view: rawView, marketOverride }: { view
       );
 
   const signals = pov.signals;
+  const applications = isV2 && pov.applications ? pov.applications : [];
+  const sources = isV2 ? view.sources : regional.sources;
 
-  const applications = isV2 && pov.applications
-    ? pov.applications
-    : [];
+  // The keyed parent remounts this state synchronously for every projected
+  // content revision and market edition.
+  const [selectedDomain, setSelectedDomain] = useState(0);
+  const [selectedAppGroup, setSelectedAppGroup] = useState(0);
+  const [selectedCapability, setSelectedCapability] = useState(0);
+  const [selectedHorizon, setSelectedHorizon] = useState(0);
+  const [expandedEvidence, setExpandedEvidence] = useState<Record<number, boolean>>({});
 
-  const sources = isV2
-    ? view.sources
-    : regional.sources;
+  // Guard every reading pane in the same render as its selection. This avoids
+  // stale/out-of-range reads while a projected CMS payload is being replaced.
+  const safeDomain = safeSelectionIndex(selectedDomain, valueDomains.length);
+  const safeAppGroup = safeSelectionIndex(selectedAppGroup, applications.length);
+  const safeCapability = safeSelectionIndex(selectedCapability, pov.targetState.length);
+  const safeHorizon = safeSelectionIndex(selectedHorizon, pov.roadmap?.length ?? 0);
+  const sections = isV2 && applications.length > 0
+    ? SECTIONS
+    : SECTIONS.filter((section) => section.id !== "applications");
+
+  const toggleEvidence = (index: number) => {
+    setExpandedEvidence(prev => ({ ...prev, [index]: !prev[index] }));
+  };
 
   return (
-    <main className="edu">
-      <style>{`
-        .edu{--ink:#102957;--deep:#071936;--paper:#fdfbf7;--soft:#eef0f5;--line:#cbd3e1;--violet:#7659df;--pink:#a92d73;--coral:#ff775d;background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;overflow:hidden}
-        .edu *{box-sizing:border-box}.edu figure{margin:0}.edu h1,.edu h2,.edu h3{font-family:Comfortaa,sans-serif}.edu a{color:inherit}.edu :focus-visible{outline:3px solid var(--coral);outline-offset:4px}.edu-kicker{font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:10px}.edu-kicker:before{content:"";width:25px;height:2px;background:linear-gradient(90deg,var(--violet),var(--pink),var(--coral))}
-        .edu-hero{padding:34px 4.8vw 54px;display:grid;grid-template-columns:.86fr 1.14fr;gap:5vw;align-items:end;min-height:690px}.edu-hero h1{font-size:clamp(49px,6vw,92px);line-height:.95;letter-spacing:-.075em;margin:32px 0 28px}.edu-hero p{max-width:590px;color:#405677;font-size:18px;line-height:1.65}.edu-image{height:610px;position:relative;overflow:hidden;clip-path:polygon(0 7%,92% 0,100% 100%,8% 94%);background:var(--deep)}.edu-image img{width:100%;height:100%;object-fit:cover}.edu-image:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(7,25,54,.48),transparent 55%)}.edu-image span{position:absolute;z-index:1;left:32px;bottom:30px;color:white;text-transform:uppercase;font-size:10px;letter-spacing:.13em}
-        .edu-opportunity{margin:0 4.8vw;padding:88px 6vw;background:var(--deep);color:white;display:grid;grid-template-columns:.72fr 1.28fr;gap:8vw}.edu-opportunity h2,.edu-section h2,.edu-signals h2,.edu-roadmap h2{font-size:clamp(40px,5vw,70px);line-height:.98;letter-spacing:-.07em;margin:22px 0}.edu-opportunity p{font-size:clamp(20px,2vw,28px);line-height:1.55;color:#d7dfed;margin:0}
-        .edu-section{padding:115px 4.8vw}.edu-head{display:grid;grid-template-columns:.72fr 1.28fr;gap:8vw}.edu-lead{color:#405677;font-size:19px;line-height:1.65;align-self:end}.edu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:52px}.edu-card{background:var(--paper);padding:35px 29px;min-height:235px}.edu-card span{color:var(--pink);font-size:10px;letter-spacing:.12em}.edu-card h3{font-size:24px;line-height:1.15;letter-spacing:-.04em;margin:22px 0 13px}.edu-card p,.edu-card li{color:#506583;line-height:1.6}.edu-card ul{padding-left:18px}.edu-convictions .edu-grid{grid-template-columns:repeat(5,1fr)}.edu-convictions .edu-card{padding:30px 22px}.edu-domains{background:var(--soft)}.edu-domains .edu-card{min-height:410px}
-        .edu-signals{padding:110px 4.8vw}.edu-signal-list{margin-top:45px;border-top:1px solid var(--ink)}.edu-signal{display:grid;grid-template-columns:.55fr 1fr 1.25fr 56px;gap:25px;padding:22px 10px;border-bottom:1px solid var(--line);align-items:start}.edu-signal h3{font-size:18px;margin:0}.edu-signal p{margin:0;color:#506583;line-height:1.5}.edu-signal-links{display:flex;gap:8px;justify-content:flex-end}.edu-signal-links a{padding:7px}
-        .edu-target{background:var(--deep);color:white}.edu-target .edu-lead,.edu-target .edu-card p{color:#d7dfed}.edu-target .edu-grid{border-color:#ffffff30;background:#ffffff30}.edu-target .edu-card{background:#102957}
-        .edu-region{margin:0 4.8vw;padding:80px 6vw;background:linear-gradient(115deg,#7659df,#db509e);color:white;display:grid;grid-template-columns:.75fr 1.25fr;gap:8vw}.edu-region h2{font-size:clamp(35px,4.5vw,62px);letter-spacing:-.065em;line-height:1;margin:20px 0}.edu-region p{font-size:20px;line-height:1.6;align-self:end}
-        .edu-roadmap{padding:115px 4.8vw}.edu-roadmap-grid{display:grid;grid-template-columns:repeat(3,1fr);margin-top:48px}.edu-step{padding:36px;border-top:2px solid var(--coral);border-right:1px solid var(--line)}.edu-step:last-child{border-right:0}.edu-step strong{color:var(--pink);font-size:12px;letter-spacing:.1em;text-transform:uppercase}.edu-step h3{font-size:27px;margin:20px 0 12px}.edu-step p{color:#506583;line-height:1.6}.edu-test{margin-top:70px;border:1px solid var(--ink);padding:45px;display:grid;grid-template-columns:.45fr 1.55fr;gap:6vw}.edu-test p{font:600 clamp(22px,2.4vw,34px)/1.35 Comfortaa;margin:0}
-        .edu-sources{padding:100px 4.8vw;background:var(--soft)}.edu-source-list{margin-top:35px;display:grid;grid-template-columns:1fr 1fr;gap:0 35px}.edu-source{display:grid;grid-template-columns:1fr 24px;gap:15px;padding:17px 5px;border-bottom:1px solid var(--line);text-decoration:none}.edu-source span{grid-column:1;color:#4e607c;font-size:12px}.edu-source svg{grid-column:2;grid-row:1}
-        .edu-cta{background:var(--deep);color:white;padding:95px 4.8vw;display:grid;grid-template-columns:1.3fr .7fr;gap:45px;align-items:end}.edu-cta h2{font-size:clamp(43px,6vw,84px);line-height:.95;letter-spacing:-.075em;margin:20px 0}.edu-cta p{color:#d7dfed;line-height:1.65;max-width:720px}.edu-cta aside{border-left:2px solid var(--coral);padding-left:25px}.edu-cta aside a{display:block;margin-bottom:24px;font-weight:700}
-
-        .edu-intro-quote { margin: 0 4.8vw; padding: 88px 6vw; background: var(--deep); color: white; display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: center; }
-        .edu-intro-quote .edu-intro p { font-size: clamp(20px, 2vw, 28px); line-height: 1.55; color: #d7dfed; margin: 0; }
-        .edu-intro-quote .edu-quote { border-left: 2px solid var(--coral); padding-left: 30px; }
-        .edu-intro-quote .edu-quote p { font-size: clamp(22px, 2.5vw, 30px); line-height: 1.4; color: white; font-family: Comfortaa, sans-serif; margin: 0; }
-
-        .edu-apps { padding: 100px 4.8vw; background: var(--soft); }
-        .edu-app-group { margin-top: 50px; }
-        .edu-app-group h3 { font-size: 26px; margin-bottom: 25px; color: var(--ink); font-family: Comfortaa, sans-serif; }
-        .edu-app-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
-        .edu-app-card h4 { font-size: 19px; margin-bottom: 12px; margin-top: 0; color: var(--ink); }
-        .edu-app-links { display: flex; gap: 8px; margin-top: 15px; }
-        .edu-app-links a { padding: 7px; color: var(--violet); display: inline-flex; align-items: center; justify-content: center; }
-
-        .edu-pattern { padding: 100px 4.8vw; text-align: center; background: var(--deep); color: white; }
-        .edu-pattern h2 { font-size: clamp(32px, 4vw, 50px); max-width: 900px; margin: 0 auto; line-height: 1.3; letter-spacing: -0.04em; }
-
-        .edu-signals-table { width: 100%; border-collapse: collapse; margin-top: 45px; text-align: left; }
-        .edu-signals-table th { padding: 15px 15px 15px 0; border-bottom: 2px solid var(--ink); font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--pink); }
-        .edu-signals-table td { padding: 25px 15px 25px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
-        .edu-signals-table td strong { display: block; font-size: 18px; margin-bottom: 8px; font-weight: 600; color: var(--ink); }
-        .edu-signals-table .edu-signal-links { justify-content: flex-start; margin-top: 8px; }
-        .edu-signals-table td p { margin: 0; color: #506583; line-height: 1.5; }
-
-        .edu-target-container { display: grid; grid-template-columns: 1fr 380px; gap: 5vw; margin-top: 52px; align-items: start; }
-        .edu-target-container .edu-grid { margin-top: 0; }
-        .edu-target-container .edu-test { margin-top: 0; background: rgba(255,255,255,0.05); padding: 45px; display: block; }
-        .edu-target-container .edu-test p { font: 600 clamp(22px,2.4vw,34px)/1.35 Comfortaa; margin: 20px 0 0; }
-
-        .edu-global { padding: 80px 4.8vw; background: linear-gradient(115deg, #7659df, #db509e); color: white; }
-        .edu-global p { font-size: clamp(22px, 2.5vw, 32px); line-height: 1.5; max-width: 1100px; margin: 0; font-family: Comfortaa, sans-serif; }
-
-        @media(max-width:950px){
-           .edu-intro-quote { grid-template-columns: 1fr; gap: 40px; }
-           .edu-target-container { grid-template-columns: 1fr; }
-           .edu-convictions .edu-grid { grid-template-columns: repeat(2,1fr); }
-           .edu-app-grid { grid-template-columns: repeat(2,1fr); }
-        }
-        @media(max-width:760px){
-           .edu-hero{display:flex;flex-direction:column;align-items:stretch;min-height:0;padding:34px 21px 36px}
-           .edu-hero h1{font-size:50px}
-           .edu-image{height:430px}
-           .edu-opportunity,.edu-head,.edu-region,.edu-test,.edu-cta{display:block;margin:0}
-           .edu-opportunity,.edu-section,.edu-signals,.edu-roadmap,.edu-sources,.edu-cta{padding:78px 21px}
-           .edu-grid,.edu-convictions .edu-grid,.edu-roadmap-grid,.edu-source-list,.edu-app-grid{grid-template-columns:1fr}
-           .edu-card,.edu-domains .edu-card{min-height:0}
-           .edu-signal{grid-template-columns:1fr}
-           .edu-signal-links{justify-content:flex-start}
-           .edu-region{padding:75px 21px}
-           .edu-step{border-right:0}
-           .edu-test{margin-top:50px;padding:30px}
-           .edu-test p{margin-top:25px}
-           .edu-cta aside{margin-top:42px}
-           .edu-intro-quote { padding: 78px 21px; }
-           .edu-apps, .edu-pattern, .edu-global { padding: 78px 21px; }
-
-           .edu-signals-table, .edu-signals-table tbody, .edu-signals-table tr, .edu-signals-table td, .edu-signals-table th { display: block; }
-           .edu-signals-table th { display: none; }
-           .edu-signals-table tr { margin-bottom: 25px; border-bottom: 1px solid var(--ink); padding-bottom: 20px; }
-           .edu-signals-table td { border: none; padding: 10px 0; }
-           .edu-signals-table td::before { content: attr(data-label); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--pink); display: block; margin-bottom: 6px; font-weight: 700; }
-        }
-        @media(prefers-reduced-motion:reduce){.edu *{scroll-behavior:auto!important}}
-      `}</style>
-
-      <section className="edu-hero" aria-labelledby="education-title">
-        <div>
-          <div className="edu-kicker">{regional.label} / {isV2 ? "Schools, Universities & Education Authorities" : "Higher education"}</div>
-          <h1 id="education-title">{view.thesis}</h1>
-          <p>{view.dek}</p>
-        </div>
-        <figure className="edu-image">
-          <img src={assetUrl(view.image)} alt={view.imageAlt} />
-          <span>Institution-wide perspective</span>
-        </figure>
-      </section>
-
-      {isV2 ? (
-        <section className="edu-intro-quote" aria-labelledby="education-opportunity">
-          <div className="edu-intro">
-            <h2 id="education-opportunity" className="sr-only">The strategic shift</h2>
-            <p>{pov.introduction}</p>
-          </div>
-          <aside className="edu-quote">
-            <p>“{pov.strategicShift}”</p>
-          </aside>
-        </section>
-      ) : (
-        <section className="edu-opportunity" aria-labelledby="education-opportunity">
-          <div>
-            <div className="edu-kicker">The strategic shift</div>
-            <h2 id="education-opportunity">From isolated copilots to coordinated institutional action.</h2>
-          </div>
-          <p>{view.opportunity}</p>
-        </section>
-      )}
-
-      <section className="edu-section edu-convictions" aria-labelledby="education-convictions">
-        <div className="edu-head">
-          <div>
-            <div className="edu-kicker">Five convictions</div>
-            <h2 id="education-convictions">{isV2 ? "Lead with educational purpose." : "Lead as a university."}</h2>
-          </div>
-          <p className="edu-lead">Academic mission and human purpose set the direction. Technology, operating design and assurance make that direction executable.</p>
-        </div>
-        <div className="edu-grid">
-          {convictions.map((item, index) => (
-            <article className="edu-card" key={item.title}>
-              <span>0{index + 1}</span>
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
-            </article>
+    <main className="bg-[#fdfbf7] text-[#102957] font-sans selection:bg-[#7659df]/20 edu">
+      
+      {/* Shell is 72px on small screens and 82px from md upward. */}
+      <nav aria-label="Education sections" className="sticky top-[72px] md:top-[82px] z-40 bg-[#fdfbf7]/95 backdrop-blur-md border-b border-[#cbd3e1] px-6 py-4 flex gap-6 overflow-x-auto shadow-sm">
+        <div className="max-w-7xl mx-auto flex items-center gap-6 w-full min-w-max">
+          <span className="font-display font-bold text-[#102957] mr-4 whitespace-nowrap shrink-0">Cognirise Education</span>
+          {sections.map(s => (
+            <a key={s.id} href={`#${s.id}`} className="text-sm font-semibold text-[#506583] hover:text-[#ff775d] transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff775d] rounded">
+              {s.label}
+            </a>
           ))}
         </div>
-      </section>
+      </nav>
 
-      <section className="edu-section edu-domains" aria-labelledby="education-domains">
-        <div className="edu-head">
-          <div>
-            <div className="edu-kicker">Where value becomes tangible</div>
-            <h2 id="education-domains">Redesign complete institutional journeys.</h2>
+      <TextSafeHero view={view} regional={regional} isV2={isV2} />
+      
+      <StrategicShift pov={pov} view={view} isV2={isV2} />
+
+      {/* Convictions */}
+      <section id="convictions" className="py-24 md:py-32 px-6 bg-[#eef0f5] scroll-mt-[156px] md:scroll-mt-[166px]">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-20">
+            <div className="lg:col-span-5">
+              <div className="sticky top-32">
+                <div className="flex items-center gap-3 text-xs uppercase tracking-[0.15em] font-bold mb-6 text-[#7659df]">
+                  <span className="w-8 h-[2px] bg-[#7659df]" />
+                  Five convictions
+                </div>
+                <h2 className="font-display text-4xl md:text-6xl leading-[1.1] tracking-tight text-[#102957] mb-8">
+                  {isV2 ? "Lead with educational purpose." : "Lead as a university."}
+                </h2>
+                <p className="text-xl text-[#506583] leading-relaxed font-light">
+                  Academic mission and human purpose set the direction. Technology, operating design and assurance make that direction executable.
+                </p>
+              </div>
+            </div>
+            <div className="lg:col-span-7 flex flex-col gap-12 md:gap-16">
+              {convictions.map((item, index) => (
+                <article key={item.title} className="flex gap-6 md:gap-8 group">
+                  <div className="text-3xl md:text-4xl font-display text-[#cbd3e1] group-hover:text-[#a92d73] transition-colors shrink-0">
+                    0{index + 1}
+                  </div>
+                  <div>
+                    <h3 className="font-display text-2xl md:text-[28px] leading-tight text-[#102957] mb-4">
+                      {item.title}
+                    </h3>
+                    <p className="text-[17px] text-[#506583] leading-[1.7]">
+                      {item.body}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
-          <p className="edu-lead">The strongest opportunities connect specialist assistance with trusted context, core systems and accountable people.</p>
-        </div>
-        <div className="edu-grid">
-          {valueDomains.map((item, index) => (
-            <article className="edu-card" key={item.title}>
-              <span>0{index + 1}</span>
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
-              <ul>
-                {item.examples.map((example) => (
-                  <li key={example}>{example}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
         </div>
       </section>
 
+      {/* Domain Explorer */}
+      <section id="domains" className="py-24 md:py-32 px-6 bg-[#fdfbf7] scroll-mt-[156px] md:scroll-mt-[166px]">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-16 md:mb-24">
+            <div className="flex justify-center items-center gap-3 text-xs uppercase tracking-[0.15em] font-bold mb-6 text-[#a92d73]">
+              <span className="w-8 h-[2px] bg-[#a92d73]" />
+              Where value becomes tangible
+            </div>
+            <h2 className="font-display text-4xl md:text-6xl leading-[1.1] tracking-tight text-[#102957] mb-6">
+              Redesign complete institutional journeys.
+            </h2>
+            <p className="text-xl text-[#506583] font-light">
+              The strongest opportunities connect specialist assistance with trusted context, core systems and accountable people.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+            <div className="lg:col-span-4 flex flex-col gap-2">
+              {valueDomains.map((domain, index) => (
+                <button
+                  key={domain.title}
+                  type="button"
+                  data-testid={`education-domain-${index + 1}`}
+                  data-content-title={domain.title}
+                  aria-pressed={safeDomain === index}
+                  onClick={() => setSelectedDomain(index)}
+                  className={`text-left px-6 py-5 border-l-4 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff775d] ${
+                    safeDomain === index 
+                    ? "border-[#ff775d] bg-[#071936] text-white shadow-lg scale-[1.02]" 
+                    : "border-transparent hover:bg-[#eef0f5] text-[#102957]"
+                  }`}
+                >
+                  <span className={`text-[10px] font-bold tracking-widest block mb-1 ${safeDomain === index ? 'text-[#ff775d]' : 'text-[#7659df]'}`}>
+                    0{index + 1}
+                  </span>
+                  <h3 className="font-display text-xl md:text-2xl">{domain.title}</h3>
+                </button>
+              ))}
+            </div>
+            
+            <div className="lg:col-span-8 bg-[#eef0f5] p-8 md:p-12 min-h-[500px] flex flex-col rounded-xl border border-[#cbd3e1]/50">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={safeDomain}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.2 }}
+                  data-testid="education-journey-panel"
+                  data-selected-title={valueDomains[safeDomain].title}
+                  className="flex flex-col h-full"
+                >
+                  <div className="grid lg:grid-cols-[minmax(0,1.2fr)_minmax(15rem,.8fr)] gap-8 mb-8">
+                    <div>
+                      <h3 className="font-display text-3xl md:text-4xl text-[#102957] mb-6">
+                        {valueDomains[safeDomain].title}
+                      </h3>
+                      <p className="text-xl text-[#405677] leading-[1.7] font-light max-w-2xl">
+                        {valueDomains[safeDomain].body}
+                      </p>
+                    </div>
+                    <figure className="self-start">
+                      <img
+                        src={assetUrl(pov.imagery?.educatorPractice?.src || view.image)}
+                        alt={pov.imagery?.educatorPractice?.altText || view.imageAlt}
+                        className="aspect-[4/3] w-full rounded-lg object-cover shadow-md"
+                      />
+                      <figcaption className="mt-3 text-xs leading-relaxed text-[#506583]">
+                        {pov.imagery?.educatorPractice?.altText || view.imageAlt}
+                      </figcaption>
+                    </figure>
+                  </div>
+                  
+                  <div className="mt-auto">
+                    <h4 className="text-xs uppercase font-bold tracking-[0.15em] text-[#a92d73] mb-4">Examples in practice</h4>
+                    <ul className="grid md:grid-cols-2 gap-4">
+                      {valueDomains[safeDomain].examples.map((ex, i) => (
+                        <li key={i} className="flex gap-3 text-[#102957] text-[15px] leading-relaxed">
+                          <ArrowRight size={16} className="shrink-0 mt-1 text-[#ff775d]" />
+                          <span>{ex}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Applications */}
       {isV2 && applications.length > 0 && (
-        <section className="edu-apps" aria-labelledby="education-apps">
-          <div className="edu-kicker">Tangible Applications</div>
-          <h2 id="education-apps" style={{ fontSize: 'clamp(40px,5vw,70px)', letterSpacing: '-0.07em', margin: '22px 0', fontFamily: 'Comfortaa, sans-serif', color: 'var(--ink)' }}>Specialist assistance in practice.</h2>
-          {applications.map(group => (
-            <div className="edu-app-group" key={group.title}>
-              <h3>{group.title}</h3>
-              <div className="edu-app-grid">
-                {group.items.map(item => (
-                  <article className="edu-app-card edu-card" key={item.title}>
-                    <h4>{item.title}</h4>
-                    <p>{item.body}</p>
-                    <div className="edu-app-links">
+        <section id="applications" className="py-24 md:py-32 px-6 bg-[#071936] text-white scroll-mt-[156px] md:scroll-mt-[166px]">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-16">
+              <div className="flex items-center gap-3 text-xs uppercase tracking-[0.15em] font-bold mb-6 text-[#ff775d]">
+                <span className="w-8 h-[2px] bg-gradient-to-r from-[#a92d73] to-[#ff775d]" />
+                Tangible Applications
+              </div>
+              <h2 className="font-display text-4xl md:text-6xl leading-[1.1] tracking-tight mb-8">
+                Specialist assistance in practice.
+              </h2>
+              
+              <div className="flex flex-wrap gap-4 mt-12">
+                {applications.map((group, index) => (
+                  <button
+                    key={group.title}
+                    type="button"
+                    data-testid={`education-application-group-${index + 1}`}
+                    data-content-title={group.title}
+                    aria-pressed={safeAppGroup === index}
+                    onClick={() => setSelectedAppGroup(index)}
+                    className={`px-6 py-3 font-display text-lg md:text-xl rounded-full border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff775d] ${
+                      safeAppGroup === index
+                      ? "bg-[#ff775d] border-[#ff775d] text-white shadow-[0_0_20px_rgba(255,119,93,0.3)]"
+                      : "border-[#ffffff30] text-[#d7dfed] hover:border-[#ffffff60] hover:bg-[#ffffff10]"
+                    }`}
+                  >
+                    {group.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={safeAppGroup}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+                data-testid="education-applications-detail"
+                data-selected-title={applications[safeAppGroup].title}
+                className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+              >
+                {applications[safeAppGroup].items.map((item) => (
+                  <article key={item.title} className="bg-[#102957] p-8 border border-[#ffffff15] flex flex-col hover:border-[#a92d73]/50 transition-colors rounded-xl">
+                    <h4 className="font-display text-2xl text-white mb-4 leading-snug">{item.title}</h4>
+                    <p className="text-[#d7dfed] text-base leading-[1.6] mb-8 font-light">{item.body}</p>
+                    <div className="mt-auto flex gap-3 pt-6 border-t border-[#ffffff15]">
                       {item.sourceUrls.map((url, i) => (
-                        <a href={url} target="_blank" rel="noreferrer" aria-label={`${item.title} source ${i + 1}`} key={url}>
-                          <ExternalLink size={15} aria-hidden="true" />
+                        <a 
+                          href={url} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="flex items-center justify-center w-10 h-10 rounded-full bg-[#071936] text-[#ff775d] hover:bg-[#ff775d] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff775d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#102957]"
+                          aria-label={`${item.title} source ${i + 1}`} 
+                          key={url}
+                        >
+                          <ExternalLink size={16} aria-hidden="true" />
                         </a>
                       ))}
                     </div>
                   </article>
                 ))}
-              </div>
-            </div>
-          ))}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </section>
       )}
 
+      {/* Pattern Quote */}
       {isV2 && pov.patternQuote && (
-        <section className="edu-pattern">
-          <h2>“{pov.patternQuote}”</h2>
+        <section className="py-24 px-6 bg-[#7659df] text-white relative">
+          <div className="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none">
+             <img src={assetUrl(pov.imagery?.researchCoordination?.src || view.image)} alt="" className="w-full h-full object-cover" />
+          </div>
+          <div className="max-w-5xl mx-auto text-center relative z-10">
+            <h2 className="font-display text-3xl md:text-5xl leading-[1.3] tracking-tight">“{pov.patternQuote}”</h2>
+          </div>
         </section>
       )}
 
-      <section className="edu-signals" aria-labelledby="education-signals">
-        <div className="edu-kicker">Institutional signals</div>
-        <h2 id="education-signals">What leading institutions make visible.</h2>
-        <p>These external examples are not Cognirise client work. Preliminary and institution-reported evidence is identified in the description.</p>
+      <CapabilityLayerMap 
+        capabilities={pov.targetState} 
+        safeCapability={safeCapability} 
+        onSelect={setSelectedCapability} 
+        leadershipTest={pov.leadershipTest}
+        isV2={isV2}
+      />
 
-        {isV2 ? (
-          <table className="edu-signals-table">
-            <thead>
-              <tr>
-                <th>Source</th>
-                <th>Strategic signal</th>
-                <th>Implication</th>
-              </tr>
-            </thead>
-            <tbody>
-              {signals.map((item) => (
-                <tr key={item.institution}>
-                  <td data-label="Source">
-                    <strong>{item.institution}</strong>
-                    <div className="edu-signal-links">
-                      {item.sourceUrls.map((url, i) => (
-                        <a href={url} target="_blank" rel="noreferrer" aria-label={`${item.institution} source ${i + 1}`} key={url}>
-                          <ExternalLink size={16} aria-hidden="true" />
-                        </a>
-                      ))}
+      {/* Global Direction */}
+      {isV2 && pov.globalDirection && (
+        <section className="py-20 px-6 bg-[#102957] text-white text-center">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-[10px] uppercase font-bold tracking-widest text-[#cbd3e1] mb-6">Global Direction</div>
+            <p className="font-display text-2xl md:text-4xl leading-tight font-light">{pov.globalDirection}</p>
+          </div>
+        </section>
+      )}
+
+      {/* Regional (for V1 only) */}
+      {!isV2 && (
+        <section className="py-24 px-6 bg-gradient-to-br from-[#7659df] to-[#db509e] text-white">
+          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <div className="flex items-center gap-3 text-xs uppercase tracking-[0.15em] font-bold mb-6 text-[#fdfbf7]">
+                <span className="w-8 h-[2px] bg-white" />
+                {regional.label}
+              </div>
+              <h2 className="font-display text-4xl md:text-6xl leading-tight">Turn national ambition into institutional capability.</h2>
+            </div>
+            <p className="text-xl md:text-2xl leading-relaxed">{regional.regionalBody}</p>
+          </div>
+        </section>
+      )}
+
+      <RoadmapTimeline 
+        roadmap={pov.roadmap} 
+        safeHorizon={safeHorizon} 
+        onSelect={setSelectedHorizon} 
+        leadershipTest={pov.leadershipTest}
+        isV2={isV2} 
+      />
+
+      {/* Evidence */}
+      <section id="evidence" className="py-24 md:py-32 px-6 bg-[#fdfbf7] scroll-mt-[156px] md:scroll-mt-[166px] border-t border-[#cbd3e1]">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-16">
+            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.15em] font-bold mb-6 text-[#7659df]">
+              <span className="w-8 h-[2px] bg-[#7659df]" />
+              Institutional signals
+            </div>
+            <h2 className="font-display text-4xl md:text-5xl leading-[1.1] tracking-tight text-[#102957] mb-6">
+              What leading institutions make visible.
+            </h2>
+            <p className="text-lg text-[#506583] font-light italic max-w-3xl">
+              These external examples are not Cognirise client work. Preliminary and institution-reported evidence is identified in the description.
+            </p>
+          </div>
+
+          <div className="border-t-2 border-[#102957]">
+            {signals.map((item, index) => {
+              const isExpanded = expandedEvidence[index];
+              return (
+                <div key={item.institution} className="border-b border-[#cbd3e1]">
+                  <button 
+                    type="button"
+                    data-testid={`education-evidence-${index + 1}`}
+                    aria-expanded={isExpanded}
+                    onClick={() => toggleEvidence(index)}
+                    className="w-full py-6 md:py-8 flex flex-col md:flex-row md:items-start gap-4 md:gap-8 text-left hover:bg-[#eef0f5]/50 transition-colors px-4 -mx-4 md:mx-0 md:px-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff775d]"
+                  >
+                    <div className="md:w-1/3 shrink-0">
+                      <h3 className="font-display text-xl md:text-2xl text-[#102957] font-bold">{item.institution}</h3>
                     </div>
-                  </td>
-                  <td data-label="Strategic signal"><p>{item.signal}</p></td>
-                  <td data-label="Implication"><p>{item.implication}</p></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="edu-signal-list">
-            {signals.map((item) => (
-              <article className="edu-signal" key={item.institution}>
-                <h3>{item.institution}</h3>
-                <p>{item.signal}</p>
-                <p>{item.implication}</p>
-                <div className="edu-signal-links">
-                  {item.sourceUrls.map((url, index) => (
-                    <a href={url} target="_blank" rel="noreferrer" aria-label={`${item.institution} source ${index + 1}`} key={url}>
-                      <ExternalLink size={16} aria-hidden="true" />
-                    </a>
-                  ))}
+                    <div className="md:w-2/3 flex items-start justify-between gap-6 w-full">
+                      <p className="text-lg text-[#405677] leading-relaxed m-0 flex-1">{item.signal}</p>
+                      <div className="shrink-0 mt-1">
+                        {isExpanded ? <ChevronUp size={24} className="text-[#a92d73]" /> : <ChevronDown size={24} className="text-[#7659df]" />}
+                      </div>
+                    </div>
+                  </button>
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pb-8 pt-2 md:pl-[calc(33.333%+2rem)] px-4 -mx-4 md:mx-0 md:px-0">
+                          <div className="bg-[#eef0f5] p-6 rounded-lg border-l-4 border-[#ff775d]">
+                            <h4 className="text-xs uppercase font-bold tracking-[0.1em] text-[#102957] mb-2">Implication</h4>
+                            <p className="text-[#506583] text-[15px] leading-relaxed mb-6">{item.implication}</p>
+                            
+                            <h4 className="text-xs uppercase font-bold tracking-[0.1em] text-[#102957] mb-3">Sources</h4>
+                            <div className="flex flex-wrap gap-3">
+                              {item.sourceUrls.map((url, i) => (
+                                <a 
+                                  href={url} 
+                                  target="_blank" 
+                                  rel="noreferrer" 
+                                  className="inline-flex items-center gap-2 text-sm bg-white text-[#7659df] px-4 py-2 rounded-full border border-[#cbd3e1] hover:border-[#7659df] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff775d]"
+                                  key={url}
+                                >
+                                  <span>View Source {item.sourceUrls.length > 1 ? i + 1 : ''}</span>
+                                  <ExternalLink size={14} aria-hidden="true" />
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </article>
-            ))}
+              );
+            })}
           </div>
-        )}
-      </section>
 
-      <section className="edu-section edu-target" aria-labelledby="education-target">
-        <div className="edu-head">
-          <div>
-            <div className="edu-kicker">The target state</div>
-            <h2 id="education-target">{isV2 ? "One shared layer. Seven reinforcing capabilities." : "One shared layer. Six reinforcing capabilities."}</h2>
-          </div>
-          <p className="edu-lead">A federated institutional layer supports specialised teaching, research, student-service and administrative agents without locking strategy to one product or provider.</p>
-        </div>
-
-        {isV2 ? (
-          <div className="edu-target-container">
-            <div className="edu-grid">
-              {pov.targetState.map((item, index) => (
-                <article className="edu-card" key={item.title}>
-                  <span>0{index + 1}</span>
-                  <h3>{item.title}</h3>
-                  <p>{item.body}</p>
-                </article>
+          <div className="mt-20">
+            <h3 className="font-display text-2xl text-[#102957] mb-8">Read the sources behind this view.</h3>
+            <div className="grid md:grid-cols-2 gap-x-8 gap-y-4">
+              {sources.map((source) => (
+                <a 
+                  className="group flex items-start gap-4 p-4 border border-[#cbd3e1] rounded-lg hover:border-[#7659df] hover:bg-white transition-all bg-[#eef0f5]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff775d]" 
+                  href={source.url} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  key={source.url}
+                >
+                  <div className="shrink-0 mt-1 text-[#a92d73] group-hover:text-[#ff775d] transition-colors">
+                    <ExternalLink size={18} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <strong className="block text-[#102957] font-semibold text-[15px] mb-1 group-hover:text-[#7659df] transition-colors">{source.label}</strong>
+                    <span className="block text-[#506583] text-[13px]">{source.publisher} &middot; {source.kind}</span>
+                  </div>
+                </a>
               ))}
             </div>
-            <aside className="edu-test">
-              <div className="edu-kicker">Leadership test</div>
-              <p>{pov.leadershipTest}</p>
-            </aside>
           </div>
-        ) : (
-          <div className="edu-grid">
-            {pov.targetState.map((item, index) => (
-              <article className="edu-card" key={item.title}>
-                <span>0{index + 1}</span>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {isV2 && pov.globalDirection && (
-        <section className="edu-global" aria-labelledby="education-global">
-          <div className="edu-kicker" style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '15px' }}>Global Direction</div>
-          <p id="education-global">{pov.globalDirection}</p>
-        </section>
-      )}
-
-      {!isV2 && (
-        <section className="edu-region" aria-labelledby="education-region">
-          <div>
-            <div className="edu-kicker">{regional.label}</div>
-            <h2 id="education-region">Turn national ambition into institutional capability.</h2>
-          </div>
-          <p>{regional.regionalBody}</p>
-        </section>
-      )}
-
-      {pov.roadmap && pov.roadmap.length > 0 && (
-        <section className="edu-roadmap" aria-labelledby="education-roadmap">
-          <div className="edu-kicker">A practical sequence</div>
-          <h2 id="education-roadmap">Establish. Build. Scale.</h2>
-          <div className="edu-roadmap-grid">
-            {pov.roadmap.map((step) => (
-              <article className="edu-step" key={step.horizon}>
-                <strong>{step.horizon}</strong>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </article>
-            ))}
-          </div>
-          {!isV2 && (
-            <aside className="edu-test">
-              <div className="edu-kicker">Leadership test</div>
-              <p>{pov.leadershipTest}</p>
-            </aside>
-          )}
-        </section>
-      )}
-
-      <section className="edu-sources" aria-labelledby="education-sources">
-        <div className="edu-kicker">Evidence and source trail</div>
-        <h2 id="education-sources">Read the sources behind this view.</h2>
-        <div className="edu-source-list">
-          {sources.map((source) => (
-            <a className="edu-source" href={source.url} target="_blank" rel="noreferrer" key={source.url}>
-              <strong>{source.label}</strong>
-              <span>{source.publisher} · {source.kind}</span>
-              <ExternalLink size={15} aria-hidden="true" />
-            </a>
-          ))}
         </div>
       </section>
 
-      <section className="edu-cta" aria-labelledby="education-cta">
-        <div>
-          <div className="edu-kicker">A practical first move</div>
-          <h2 id="education-cta">{view.service.firstMove}</h2>
-          <p>For schools, universities, school networks and education authorities: bring educational, research, service, technology and transformation owners around one journey. Start with a measurable redesign and a route from evidence-backed practice to institution-wide capability.</p>
+      {/* CTA */}
+      <section className="py-24 md:py-32 px-6 bg-[#071936] text-white">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-16 items-end">
+          <div className="lg:col-span-8">
+            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.15em] font-bold mb-6 text-[#ff775d]">
+              <span className="w-8 h-[2px] bg-[#ff775d]" />
+              A practical first move
+            </div>
+            <h2 className="font-display text-5xl md:text-7xl leading-[1.05] tracking-tight mb-8">
+              {view.service.firstMove}
+            </h2>
+            <p className="text-xl text-[#d7dfed] leading-[1.7] max-w-2xl font-light">
+              For schools, universities, school networks and education authorities: bring educational, research, service, technology and transformation owners around one journey. Start with a measurable redesign and a route from evidence-backed practice to institution-wide capability.
+            </p>
+          </div>
+          <div className="lg:col-span-4 flex flex-col items-start lg:items-end gap-8">
+            <div className="w-full max-w-sm p-8 bg-[#102957] border-l-4 border-[#ff775d] rounded-r-lg">
+              <Link href={view.service.href} className="flex items-center gap-3 text-[#ff775d] hover:text-white transition-colors font-bold text-lg mb-8 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded">
+                Connect capabilities <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <BrandButton href="/value-scan" className="w-full justify-center py-4 text-lg">
+                Start a Value Scan
+              </BrandButton>
+            </div>
+          </div>
         </div>
-        <aside>
-          <Link href={view.service.href}>
-            Connect consulting, engineering, data, platform and change <ArrowRight size={14} />
-          </Link>
-          <BrandButton href="/value-scan">Start a Value Scan</BrandButton>
-        </aside>
       </section>
     </main>
   );

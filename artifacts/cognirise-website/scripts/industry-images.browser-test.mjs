@@ -14,7 +14,7 @@ const routes = [
   { slug: "travel-hospitality", path: "/industries/travel-hospitality", selector: ".ind-image img", expected: 1 },
   { slug: "energy-resources", path: "/industries/energy-resources", selector: ".ind-image img", expected: 1 },
   { slug: "public-sector", path: "/industries/public-sector", selector: ".ind-image img", expected: 1 },
-  { slug: "education", path: "/industries/education", selector: ".edu-image img", expected: 1 },
+  { slug: "education", path: "/industries/education", selector: '[aria-labelledby="education-title"] img', expected: 2, visibleExpected: 1 },
 ];
 const viewports = [
   { label: "desktop", width: 1440, height: 1000, mobile: false },
@@ -105,7 +105,10 @@ async function inspectRoute(route, viewport) {
   }
 
   const images = await evaluate(`(async () => {
-    const elements = [...document.querySelectorAll(${selector})];
+    const elements = [...document.querySelectorAll(${selector})].filter((image) => {
+      const rect = image.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
     await Promise.all(elements.map(async (image) => {
       if (!image.complete) {
         await new Promise((resolve) => {
@@ -148,7 +151,7 @@ async function inspectRoute(route, viewport) {
     });
   })()`);
 
-  assert.equal(images.length, route.expected, `[${viewport.label}] ${route.slug}: expected ${route.expected} images`);
+  assert.equal(images.length, route.visibleExpected ?? route.expected, `[${viewport.label}] ${route.slug}: expected visible images`);
   for (const image of images) {
     const context = `[${viewport.label}] ${route.slug} (${image.src})`;
     const url = new URL(image.src);

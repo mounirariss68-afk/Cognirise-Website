@@ -216,6 +216,30 @@ export function contentRecord<K extends WebsiteCmsDocumentKind>(item: PublishedC
       content.imageAlt = content.heroMedia?.altText || hero.altText || content.imageAlt;
     }
   }
+  if (kind === "industry") {
+    const pov = (content as Record<string, unknown>).educationPov;
+    const imagery = pov && typeof pov === "object" && !Array.isArray(pov)
+      ? (pov as Record<string, unknown>).imagery
+      : undefined;
+    if (imagery && typeof imagery === "object" && !Array.isArray(imagery)) {
+      for (const slot of ["educatorPractice", "researchCoordination"]) {
+        const scene = (imagery as Record<string, unknown>)[slot];
+        if (!scene || typeof scene !== "object" || Array.isArray(scene)) continue;
+        const mutableScene = scene as {
+          src?: string;
+          altText?: string;
+          media?: ImmutableCmsMediaReference;
+        };
+        const resolved = mutableScene.media
+          ? resolveCmsMedia(item.media, mutableScene.media)
+          : undefined;
+        if (resolved) {
+          mutableScene.src = resolved.url;
+          mutableScene.altText = mutableScene.media?.altText || resolved.altText || mutableScene.altText;
+        }
+      }
+    }
+  }
   return {
     ...content,
     id: item.id,

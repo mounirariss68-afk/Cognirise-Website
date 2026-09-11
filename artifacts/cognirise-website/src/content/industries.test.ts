@@ -112,6 +112,16 @@ test("publishes the education POV across schools, higher education and instituti
   assert.ok(education?.educationPov);
   assert.equal(education.educationPov.convictions.length, 5);
   assert.equal(education.educationPov.version, 2);
+  assert.deepEqual(
+    Object.keys(education.educationPov.imagery ?? {}).sort(),
+    ["educatorPractice", "researchCoordination"],
+  );
+  assert.ok(
+    Object.values(education.educationPov.imagery ?? {}).every((scene) =>
+      scene.src.startsWith("/images/cognirise/industries/pulse-industry-education-")
+        && scene.altText.length > 20
+    ),
+  );
   assert.equal(education.educationPov.valueDomains.length, 5);
   assert.equal(education.educationPov.targetState.length, 7);
   assert.deepEqual(education.educationPov.roadmap.map((step) => step.horizon), ["0–90 days", "3–9 months", "9–18 months"]);
@@ -135,9 +145,7 @@ test("publishes the education POV across schools, higher education and instituti
   assert.match(html, /Research and Discovery/i);
   assert.match(html, /Educator Capability and Professional Practice/i);
   assert.match(html, /Identify and redesign one measurable education journey/i);
-  assert.match(html, /<table[\s>]/);
-  assert.match(html, /Strategic signal/i);
-  assert.match(html, /Implication/i);
+  assert.match(html, /Institutional signals/i);
   assert.match(html, /not Cognirise client/i);
   assert.match(html, /href="\/value-scan"/);
   assert.doesNotMatch(html, /Operating pressures|governed capability|required boundary|supporting evidence and operating guardrails|route to a governed build/i);

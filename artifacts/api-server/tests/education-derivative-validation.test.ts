@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  collectCmsMediaReferences,
   projectIndustrySnapshotForMarket,
   validateCmsSnapshot,
   validateCmsSnapshotForDelivery,
@@ -15,7 +16,11 @@ function educationSnapshot(markets = ["uae"]) {
     slug: "education",
     title: "Education",
     summary: "Education perspective",
-    mediaIds: [],
+    mediaIds: [
+      "00000000-0000-4000-8000-000000000001",
+      "00000000-0000-4000-8000-000000000002",
+      "00000000-0000-4000-8000-000000000003",
+    ],
     markets,
     content: {
       schemaVersion: 1,
@@ -43,8 +48,34 @@ function educationSnapshot(markets = ["uae"]) {
         kind: "Official source",
         url: globalUrl,
       }],
+      heroMedia: {
+        mediaId: "00000000-0000-4000-8000-000000000001",
+        mediaVersionId: "00000000-0000-4000-8000-000000000101",
+        role: "hero",
+        altText: "A university campus",
+      },
       educationPov: {
         version: 2,
+        imagery: {
+          educatorPractice: {
+            src: "/images/education-practice.jpg",
+            altText: "Educators planning together.",
+            media: {
+              mediaId: "00000000-0000-4000-8000-000000000002",
+              mediaVersionId: "00000000-0000-4000-8000-000000000102",
+              role: "supporting",
+            },
+          },
+          researchCoordination: {
+            src: "/images/education-research.jpg",
+            altText: "Researchers coordinating together.",
+            media: {
+              mediaId: "00000000-0000-4000-8000-000000000003",
+              mediaVersionId: "00000000-0000-4000-8000-000000000103",
+              role: "supporting",
+            },
+          },
+        },
         introduction: "Introduction.",
         strategicShift: "Strategic shift.",
         patternQuote: "Pattern quote.",
@@ -164,4 +195,64 @@ test("legacy Education publication remains readable without derivative enforceme
   legacy.content.educationPov.signals[0].signal = "UAE-specific historical signal.";
   const projected = projectIndustrySnapshotForMarket(legacy, "europe", "uae");
   assert.equal(validateCmsSnapshotForDelivery("industry", projected, "publish").success, true);
+});
+
+test("Education supporting scenes retain their approved paths and immutable references across market delivery", () => {
+  const snapshot = educationSnapshot();
+  const pov = snapshot.content.educationPov as typeof snapshot.content.educationPov & {
+    imagery?: {
+      educatorPractice: { src: string; altText: string; media: { mediaId: string; mediaVersionId: string; role: "supporting" } };
+      researchCoordination: { src: string; altText: string; media: { mediaId: string; mediaVersionId: string; role: "supporting" } };
+    };
+  };
+  const educatorMediaId = "00000000-0000-4000-8000-000000000011";
+  const educatorVersionId = "00000000-0000-4000-8000-000000000012";
+  const researchMediaId = "00000000-0000-4000-8000-000000000013";
+  const researchVersionId = "00000000-0000-4000-8000-000000000014";
+  snapshot.mediaIds = [snapshot.mediaIds[0], educatorMediaId, researchMediaId];
+  pov.imagery = {
+    educatorPractice: {
+      src: "/images/cognirise/industries/pulse-industry-education-practice-v2.png",
+      altText: "Educators planning together.",
+      media: { mediaId: educatorMediaId, mediaVersionId: educatorVersionId, role: "supporting" },
+    },
+    researchCoordination: {
+      src: "/images/cognirise/industries/pulse-industry-education-research-v2.png",
+      altText: "Researchers coordinating together.",
+      media: { mediaId: researchMediaId, mediaVersionId: researchVersionId, role: "supporting" },
+    },
+  };
+  const references = collectCmsMediaReferences("industry", snapshot.content, []);
+  assert.deepEqual(
+    references.filter((reference) => reference.role === "supporting").map((reference) => ({
+      mediaId: reference.mediaId,
+      mediaVersionId: reference.mediaVersionId,
+    })),
+    [
+      { mediaId: educatorMediaId, mediaVersionId: educatorVersionId },
+      { mediaId: researchMediaId, mediaVersionId: researchVersionId },
+    ],
+  );
+  const delivered = projectIndustrySnapshotForMarket(snapshot, "ksa", "uae");
+  assert.deepEqual(
+    (delivered.content.educationPov as typeof pov).imagery,
+    pov.imagery,
+  );
+  assert.equal(validateCmsSnapshotForDelivery("industry", delivered, "publish").success, true);
+});
+
+test("Education v2 refuses mutable or incomplete supporting-scene references at publication", () => {
+  const pathOnly = educationSnapshot();
+  delete pathOnly.content.educationPov.imagery.educatorPractice.media;
+  const errors = publicationErrors(pathOnly);
+  assert.ok(errors.some((error) => error.includes("hero and both supporting immutable media references")));
+
+  const wrongRole = educationSnapshot();
+  wrongRole.content.educationPov.imagery.researchCoordination.media.role = "hero";
+  const roleErrors = publicationErrors(wrongRole);
+  assert.ok(roleErrors.length > 0);
+
+  const misordered = educationSnapshot();
+  [misordered.mediaIds[1], misordered.mediaIds[2]] = [misordered.mediaIds[2], misordered.mediaIds[1]];
+  assert.ok(publicationErrors(misordered).some((error) => error.includes("ordered hero")));
 });

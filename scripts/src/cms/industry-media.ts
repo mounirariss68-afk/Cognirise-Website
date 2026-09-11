@@ -1,6 +1,8 @@
 export interface PulseIndustryMediaDefinition {
   sector: string;
   slug: string | null;
+  role?: "hero" | "supporting";
+  imagerySlot?: "educatorPractice" | "researchCoordination";
   filename: string;
   publicPath: string;
   altText: string;
@@ -51,10 +53,31 @@ export const pulseIndustryMedia: PulseIndustryMediaDefinition[] = [
   {
     sector: "Education",
     slug: "education",
-    filename: "pulse-industry-education-learning.png",
-    publicPath: "/images/cognirise/industries/pulse-industry-education-learning.png",
-    altText: "Students learning individually and in groups across a stepped campus connected by luminous knowledge paths.",
+    role: "hero",
+    filename: "pulse-industry-education-hero-v2.png",
+    publicPath: "/images/cognirise/industries/pulse-industry-education-hero-v2.png",
+    altText: "A school learner, university learner, educator and researcher collaborate around a learning table in a light-filled campus studio.",
     usage: "CMS industry hero: Education",
+  },
+  {
+    sector: "Education",
+    slug: "education",
+    role: "supporting",
+    imagerySlot: "educatorPractice",
+    filename: "pulse-industry-education-practice-v2.png",
+    publicPath: "/images/cognirise/industries/pulse-industry-education-practice-v2.png",
+    altText: "Four distinct educators collaboratively reviewing lesson materials around a table in a bright professional-learning studio.",
+    usage: "CMS industry supporting media: Education educator practice",
+  },
+  {
+    sector: "Education",
+    slug: "education",
+    role: "supporting",
+    imagerySlot: "researchCoordination",
+    filename: "pulse-industry-education-research-v2.png",
+    publicPath: "/images/cognirise/industries/pulse-industry-education-research-v2.png",
+    altText: "Three distinct university colleagues coordinate a reviewable research plan around a transparent table.",
+    usage: "CMS industry supporting media: Education research coordination",
   },
   {
     sector: "Manufacturing",
@@ -87,7 +110,11 @@ export const pulseIndustryMediaByFilename = new Map(
 );
 
 export const pulseIndustryMediaBySlug = new Map(
-  pulseIndustryMedia.flatMap((item) => item.slug ? [[item.slug, item] as const] : []),
+  pulseIndustryMedia.flatMap((item) => item.slug && item.role !== "supporting" ? [[item.slug, item] as const] : []),
+);
+
+export const educationSupportingMedia = pulseIndustryMedia.filter((item) =>
+  item.slug === "education" && item.role === "supporting",
 );
 
 export function industryPublicationPinAction(input: {
@@ -97,17 +124,23 @@ export function industryPublicationPinAction(input: {
   expectedAssetId: string;
   expectedVersionId: string;
   referenceVersionIds: Array<string | null>;
+  expectedSupportingMedia?: Array<{ assetId: string; versionId: string }>;
 }): "complete" | "insert-reference" | "blocked" {
+  const expectedMedia = [
+    { assetId: input.expectedAssetId, versionId: input.expectedVersionId },
+    ...(input.expectedSupportingMedia ?? []),
+  ];
+  if (!Array.isArray(input.mediaIds)) return "blocked";
+  const mediaIds = input.mediaIds;
   if (
     input.workflowState !== "approved"
-    || !Array.isArray(input.mediaIds)
-    || input.mediaIds.length !== 1
-    || input.mediaIds[0] !== input.expectedAssetId
+    || mediaIds.length !== expectedMedia.length
+    || expectedMedia.some((media, index) => mediaIds[index] !== media.assetId)
     || input.heroMediaId !== input.expectedAssetId
   ) return "blocked";
   if (input.referenceVersionIds.length === 0) return "insert-reference";
-  return input.referenceVersionIds.length === 1
-    && input.referenceVersionIds[0] === input.expectedVersionId
+  return input.referenceVersionIds.length === expectedMedia.length
+    && expectedMedia.every((media, index) => input.referenceVersionIds[index] === media.versionId)
     ? "complete"
     : "blocked";
 }

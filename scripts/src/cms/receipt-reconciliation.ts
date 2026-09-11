@@ -11,13 +11,15 @@ export interface ExpectedReceipt {
   publishCase?: boolean;
   publishEducationSuccessor?: boolean;
   expectedNormalizedPayloadDigest?: string;
+  educationMedia?: MediaMigrationOperation[];
 }
 
 export type EducationReconciliationStatus =
   | "published"
   | "reused"
   | "preserved-editorial"
-  | "new-draft";
+  | "new-draft"
+  | "pending-cutover";
 
 export function educationReconciliationOutcome(input: {
   receiptOperation: string | undefined;
@@ -31,6 +33,15 @@ export function educationReconciliationOutcome(input: {
       return input.publishedComplete && input.exactPayload
         ? { valid: true, status: "published", message: "approved successor is published" }
         : { valid: false, message: "published successor pointer, payload, or immutable pin is incomplete" };
+    case "cms.inventory.education-successor-pending-cutover":
+      if (input.publishedComplete) {
+        return input.exactPayload
+          ? { valid: true, status: "published", message: "successor completed the approved immutable-media cutover" }
+          : { valid: false, message: "cutover publication does not match governed authority" };
+      }
+      return input.exactPayload && input.freshDraftComplete
+        ? { valid: true, status: "pending-cutover", message: "successor draft is awaiting the approved immutable-media cutover" }
+        : { valid: false, message: "successor draft awaiting cutover is missing or does not match governed authority" };
     case "cms.inventory.industry-contract-baseline-reused":
       return input.publishedComplete && input.exactPayload
         ? { valid: true, status: "reused", message: "approved successor publication was reused" }
