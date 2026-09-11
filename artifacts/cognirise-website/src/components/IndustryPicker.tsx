@@ -17,6 +17,7 @@ type IndustryPickerProps = {
   heading?: string;
   introduction?: string;
   className?: string;
+  compact?: boolean;
 };
 
 const pickerStyles = `
@@ -54,6 +55,27 @@ const pickerStyles = `
   .home-industry-link{display:inline-flex;align-items:center;gap:8px;border-bottom:1px solid rgba(16,41,87,.58);padding-bottom:4px;font-size:11px;font-weight:700;color:var(--hi-ink);transition:color .2s,border-color .2s}
   .home-industry-link:hover{color:var(--hi-coral);border-color:var(--hi-coral)}
   .home-industry-status{border-block:1px solid var(--hi-line);margin-top:36px;padding:34px 0;color:#536887;font-size:14px;line-height:1.55}
+  .home-industry-disclosure--compact{padding-top:32px;padding-bottom:64px}
+  .home-industry-disclosure--compact > .border-t{padding-top:16px;gap:18px}
+  .home-industry-disclosure--compact h2{font-size:clamp(34px,3.6vw,52px);margin-top:8px}
+  .home-industry-disclosure--compact .home-industry-grid{margin-top:24px}
+  .home-industry-disclosure--compact .home-industry-row{height:196px}
+  .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active){height:294px}
+  .home-industry-disclosure--compact .home-industry-trigger{padding:16px 18px 14px;gap:7px}
+  .home-industry-disclosure--compact .home-industry-title{font-size:clamp(18px,1.7vw,24px)}
+  .home-industry-disclosure--compact .home-industry-orientation{font-size:12px;line-height:1.48}
+  .home-industry-disclosure--compact .home-industry-panel-content{padding:0 18px 16px}
+  .home-industry-disclosure--compact .home-industry-detail{font-size:12px;line-height:1.52;margin-bottom:9px}
+  .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active) .home-industry-item.active{grid-template-rows:130px minmax(0,1fr)}
+  @media(min-width:768px) and (max-width:1100px){
+    .home-industry-disclosure--compact{padding-top:28px;padding-bottom:52px}
+    .home-industry-disclosure--compact > .border-t{padding-top:14px;gap:16px}
+    .home-industry-disclosure--compact .home-industry-row{height:206px}
+    .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active){height:294px}
+    .home-industry-disclosure--compact .home-industry-trigger{padding:15px 16px 13px}
+    .home-industry-disclosure--compact .home-industry-panel-content{padding:0 16px 14px}
+    .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active) .home-industry-item.active{grid-template-rows:130px minmax(0,1fr)}
+  }
   @media(min-width:768px) and (max-width:1100px){
     .home-industry-row{height:390px}
     .home-industry-row:has(.home-industry-item.active) .home-industry-item{flex-grow:.85}
@@ -72,6 +94,18 @@ const pickerStyles = `
     .home-industry-trigger{padding:22px 21px 20px}
     .home-industry-panel-content{padding:0 21px 24px}
     .home-industry-title{font-size:28px}
+    .home-industry-disclosure--compact{padding-top:3rem;padding-bottom:82px}
+    .home-industry-disclosure--compact > .border-t{padding-top:1.5rem;gap:2rem}
+    .home-industry-disclosure--compact h2{font-size:42px;margin-top:.75rem}
+    .home-industry-disclosure--compact .home-industry-grid{margin-top:2.25rem}
+    .home-industry-disclosure--compact .home-industry-row,
+    .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active){height:auto}
+    .home-industry-disclosure--compact .home-industry-trigger{padding:22px 21px 20px;gap:10px}
+    .home-industry-disclosure--compact .home-industry-title{font-size:28px}
+    .home-industry-disclosure--compact .home-industry-orientation{font-size:12px;line-height:1.48}
+    .home-industry-disclosure--compact .home-industry-panel-content{padding:0 21px 24px}
+    .home-industry-disclosure--compact .home-industry-detail{font-size:12px;line-height:1.52;margin-bottom:13px}
+    .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active) .home-industry-item.active{grid-template-rows:minmax(240px,1fr) auto}
   }
   @media(prefers-reduced-motion:reduce){.home-industry-item,.home-industry-panel,.home-industry-visual img,.home-industry-visual:before,.home-industry-link{transition:none!important}}
 `;
@@ -82,6 +116,7 @@ export function IndustryPicker({
   heading = "Built for complexity.",
   introduction = "We partner with organisations whose scale, regulatory burden and operating environments demand absolute precision.",
   className = "",
+  compact = false,
 }: IndustryPickerProps) {
   const industryQuery = useCmsCollection("industry", INDUSTRIES, (item) => ({
     ...contentRecord(item, "industry"),
@@ -107,7 +142,7 @@ export function IndustryPicker({
   const empty = industryQuery.isAuthoritative && industryQuery.delivery === "intentional-empty";
 
   return (
-    <section id={id} className={`home-industry-disclosure px-6 md:px-[4.8vw] pb-[82px] lg:pb-[130px] pt-12 ${className}`}>
+    <section id={id} className={`home-industry-disclosure ${compact ? "home-industry-disclosure--compact" : ""} px-6 md:px-[4.8vw] pb-[82px] lg:pb-[130px] pt-12 ${className}`}>
       <style>{pickerStyles}</style>
       <div className="border-t border-[#102957] pt-6 flex flex-col lg:flex-row justify-between gap-8 items-start lg:items-end">
         <div>

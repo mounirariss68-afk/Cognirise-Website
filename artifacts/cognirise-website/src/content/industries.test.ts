@@ -112,7 +112,7 @@ test("publishes the education POV across schools, higher education and instituti
   assert.equal(education.educationPov.convictions.length, 5);
   assert.equal(education.educationPov.version, 2);
   assert.equal(education.educationPov.imagery, undefined);
-  assert.match(education.image, /pulse-industry-education-campus-v3\.png$/);
+  assert.match(education.image, /pulse-industry-education-campus-v4\.png$/);
   assert.equal(education.educationPov.valueDomains.length, 5);
   assert.equal(education.educationPov.targetState.length, 7);
   assert.deepEqual(education.educationPov.roadmap.map((step) => step.horizon), ["0–90 days", "3–9 months", "9–18 months"]);

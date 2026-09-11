@@ -161,7 +161,7 @@ test("the governed inventory produces six publishable industry cutover records i
   }
 });
 
-test("the Pulse industry family governs one Education hero without creating another industry", () => {
+test("the Pulse industry family governs reviewed heroes without creating another industry", () => {
   const inventory = loadInventory();
   const media = mediaMigrationOperations(inventory.records);
   const mediaByPath = new Map(media.map((operation) => [operation.publicPath, operation]));
@@ -202,7 +202,7 @@ test("the Pulse industry family governs one Education hero without creating anot
   assert.ok(unassociated.every((item) => !industryPaths.has(item.publicPath)));
 });
 
-test("Education reconciliation invokes the Education-only hero cutover", () => {
+test("reconciliation invokes the scoped Education and Public Sector hero cutovers", () => {
   const reconcileSource = readFileSync(
     path.resolve(process.cwd(), "../../scripts/src/cms/reconcile.ts"),
     "utf8",
@@ -212,7 +212,8 @@ test("Education reconciliation invokes the Education-only hero cutover", () => {
     "utf8",
   );
   assert.match(reconcileSource, /"cms:publish-education-hero"/);
-  assert.match(cutoverSource, /requestedSlug && requestedSlug !== "education"/);
+  assert.match(reconcileSource, /"cms:publish-public-sector-hero"/);
+  assert.match(cutoverSource, /requestedSlug !== "education" && requestedSlug !== "public-sector"/);
   assert.match(cutoverSource, /fullPlan\.filter\(\(item\) => item\.definition\.slug === requestedSlug\)/);
   assert.match(cutoverSource, /if \(!requestedSlug\) \{/);
   assert.match(cutoverSource, /const expectedUnassociated = requestedSlug \? 0 : 3/);

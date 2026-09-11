@@ -150,6 +150,7 @@ export default function IndustriesOverview() {
         kicker="Industry points of view"
         heading="Different pressure. One accountable route."
         introduction="Explore where the work is consequential—and where the right combination of people, systems and agents can shift it."
+        compact
       />
 
       {caseStudies.delivery === "loading" ? (

@@ -138,12 +138,22 @@
   margin-bottom: 3px;
 }
 .case-study-rail .work-card--editorial {
-  align-self: flex-start;
+  align-self: stretch;
   height: auto;
+  width: 100%;
 }
 
 .case-study-rail .work-card--editorial {
   overflow-wrap: anywhere;
+}
+.case-study-rail__slide {
+  display: flex;
+  align-items: stretch;
+}
+.case-study-rail .work-card__visual {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
 }
 .case-study-rail .work-card__intro {
   min-height: 0;
@@ -193,6 +203,11 @@
   .case-study-rail {
     padding-top: 38px;
     padding-bottom: 38px;
+  }
+  .case-study-rail .case-rendition figcaption {
+    min-height: 45px;
+    display: flex;
+    align-items: center;
   }
   .work-card__intro {
     min-height: 215px;

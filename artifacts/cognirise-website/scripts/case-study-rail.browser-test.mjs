@@ -14,8 +14,8 @@ const navigationPolicy = {
 };
 const imageNetworkRequests = new Set();
 
-if (!["full", "remainder"].includes(runScope)) {
-  throw new Error(`Unsupported PULSE_CASE_STUDY_BROWSER_SCOPE: ${runScope}. Use "full" or "remainder".`);
+if (!["full", "remainder", "layout"].includes(runScope)) {
+  throw new Error(`Unsupported PULSE_CASE_STUDY_BROWSER_SCOPE: ${runScope}. Use "full", "remainder", or "layout".`);
 }
 
 await rm(profilePath, { recursive: true, force: true });
@@ -427,28 +427,52 @@ try {
   ]);
   assert.deepEqual(railCaseSlugs, deliveredCaseSlugs, "The consolidated rail did not render every eligible published case exactly once");
   console.log(`Validated ${railCaseSlugs.length} eligible published case studies in the consolidated rail.`);
-  for (const [width, height, expected] of [
+  const layoutViewports = [
     [1366, 768, 3], [1440, 900, 3], [1920, 1080, 3],
     [1024, 768, 2], [820, 1180, 1], [390, 844, 1],
-  ]) {
+  ];
+  const requestedLayoutWidths = new Set(
+    (process.env.PULSE_CASE_STUDY_LAYOUT_WIDTHS || "")
+      .split(",")
+      .map((value) => Number(value.trim()))
+      .filter((value) => Number.isFinite(value)),
+  );
+  for (const [width, height, expected] of layoutViewports.filter(([candidate]) =>
+    !requestedLayoutWidths.size || requestedLayoutWidths.has(candidate)
+  )) {
     await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false });
     await delay(500);
     await clickUntilDisabled("Previous slide");
     const layout = await evaluate(`(() => {
       const cards = [...document.querySelectorAll(".case-study-rail .work-card--editorial")];
       const bounds = cards.map(card => card.getBoundingClientRect());
+      const images = cards.map(card => card.querySelector(".case-rendition img")?.getBoundingClientRect());
+      const firstCardHeight = bounds[0]?.height ?? 0;
+      const firstImage = images[0];
       return {
         visible: bounds.filter(rect => rect.left >= -1 && rect.right <= innerWidth + 1).length,
         width: bounds[0].width,
         overflow: document.documentElement.scrollWidth > innerWidth,
+        equalHeights: bounds.every(rect => Math.abs(rect.height - firstCardHeight) < 1),
+        imagesAligned: images.length === cards.length && images.every(rect =>
+          rect
+          && firstImage
+          && Math.abs(rect.top - firstImage.top) < 1
+          && Math.abs(rect.bottom - firstImage.bottom) < 1
+        ),
+        cardBounds: bounds.map(rect => ({ top: rect.top, bottom: rect.bottom, height: rect.height })),
+        imageBounds: images.map(rect => rect && ({ top: rect.top, bottom: rect.bottom, height: rect.height })),
         complete: cards.every(card => card.querySelectorAll(".work-card__details section").length === 4),
         readable: cards.every(card => parseFloat(getComputedStyle(card.querySelector(".work-card__details p")).fontSize) >= 13),
         contained: cards.every(card => getComputedStyle(card.querySelector("img")).objectFit === "contain"),
         captionInFlow: cards.every(card => getComputedStyle(card.querySelector("figcaption")).position === "static")
       };
     })()`);
+    if (requestedLayoutWidths.size) console.log(`Case geometry ${width}px: ${JSON.stringify({ cardBounds: layout.cardBounds, imageBounds: layout.imageBounds })}`);
     assert.equal(layout.visible, expected, `Expected ${expected} full cards at ${width}px`);
     assert.equal(layout.overflow, false, `Page overflow at ${width}px`);
+    assert.equal(layout.equalHeights, true, `Case cards must share one height at ${width}px`);
+    assert.equal(layout.imagesAligned, true, `Case images must share top and bottom edges at ${width}px`);
     assert.equal(layout.complete && layout.readable && layout.contained && layout.captionInFlow, true);
     if (width === 1366 || width === 1440) assert.ok(layout.width >= 395 && layout.width <= 430);
     console.log(`Case layout ${width}×${height}: ${layout.visible} full cards, ${layout.width.toFixed(1)}px images.`);

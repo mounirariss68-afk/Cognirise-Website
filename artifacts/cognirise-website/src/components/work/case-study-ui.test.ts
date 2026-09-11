@@ -78,7 +78,10 @@ test("CSS ensures images are fully contained and scale properly", async () => {
   assert.match(css, /\.case-study-rail \.case-rendition figcaption\s*\{\s*position: static;/);
   assert.match(css, /\.case-study-rail \.work-card__details ul\s*\{\s*font-size: 13px;/);
   assert.match(css, /\.work-card--editorial \.case-rendition figcaption\s*\{[\s\S]*?background:\s*#071936;/);
-  assert.match(css, /\.case-study-rail \.work-card--editorial\s*\{[\s\S]*?align-self:\s*flex-start;[\s\S]*?height:\s*auto;/);
+  assert.match(css, /\.case-study-rail__slide\s*\{[\s\S]*?display:\s*flex;[\s\S]*?align-items:\s*stretch;/);
+  assert.match(css, /\.case-study-rail \.work-card--editorial\s*\{[\s\S]*?align-self:\s*stretch;[\s\S]*?height:\s*auto;[\s\S]*?width:\s*100%;/);
+  assert.match(css, /\.case-study-rail \.work-card__visual\s*\{[\s\S]*?margin-top:\s*auto;/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.case-study-rail \.case-rendition figcaption\s*\{[\s\S]*?min-height:\s*45px;[\s\S]*?display:\s*flex;/);
 });
 
 test("carousel keeps drag enabled and synchronizes both end controls after reinitialization", async () => {

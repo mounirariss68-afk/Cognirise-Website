@@ -32,15 +32,22 @@ import {
 import { mediaVersionIsExactCurrent } from "./media-metadata.js";
 import { runReconciliationLifecycle } from "./reconcile-order.js";
 
-function normalizeEducationMediaPayload(payload: {
-  mediaIds?: unknown[];
-  content?: Record<string, unknown>;
-}) {
+function normalizeEducationMediaPayload(
+  payload: {
+    mediaIds?: unknown[];
+    content?: Record<string, unknown>;
+  },
+  replacement?: { image?: unknown; imageAlt?: unknown },
+) {
   payload.mediaIds = [];
   if (!payload.content) return;
   delete payload.content.heroMediaId;
   delete payload.content.heroMedia;
   delete payload.content.supportingMedia;
+  if (replacement) {
+    if (typeof replacement.image === "string") payload.content.image = replacement.image;
+    if (typeof replacement.imageAlt === "string") payload.content.imageAlt = replacement.imageAlt;
+  }
   const pov = payload.content.educationPov;
   const imagery = pov && typeof pov === "object" && !Array.isArray(pov)
     ? (pov as Record<string, unknown>).imagery
@@ -89,14 +96,18 @@ function run(command: string, args: string[]) {
 }
 
 async function reconcilePublishedIndustryMedia() {
-  await run("pnpm", [
-    "--filter",
-    "@workspace/scripts",
-    "cms:publish-education-hero",
-    "--",
-    "--apply-db",
-    "--target=development",
-  ]);
+  for (const slug of ["education", "public-sector"]) {
+    await run("pnpm", [
+      "--filter",
+      "@workspace/scripts",
+      slug === "education"
+        ? "cms:publish-education-hero"
+        : "cms:publish-public-sector-hero",
+      "--",
+      "--apply-db",
+      "--target=development",
+    ]);
+  }
 }
 
 async function inspectReconciliationState(
@@ -104,6 +115,7 @@ async function inspectReconciliationState(
   database: DatabaseBindings,
 ) {
   const {
+    cmsAuditEventsTable,
     cmsDocumentsTable,
     cmsMarketEditionsTable,
     cmsRevisionsTable,
@@ -165,6 +177,24 @@ async function inspectReconciliationState(
           .orderBy(desc(cmsRevisionsTable.revisionNumber))
           .limit(1)
       : [];
+    const [receiptAudit] = expectation.publishEducationSuccessor
+      ? await db.select({
+          metadata: cmsAuditEventsTable.metadata,
+        }).from(cmsAuditEventsTable)
+          .where(eq(cmsAuditEventsTable.requestId, receipt.idempotencyKey))
+          .limit(1)
+      : [];
+    const successorRevisionId = (receiptAudit?.metadata as Record<string, unknown> | null)?.revisionId;
+    const [successorRevision] = typeof successorRevisionId === "string" && edition?.id
+      ? await db.select({
+          id: cmsRevisionsTable.id,
+          payload: cmsRevisionsTable.payload,
+          workflowState: cmsRevisionsTable.workflowState,
+        }).from(cmsRevisionsTable).where(and(
+          eq(cmsRevisionsTable.id, successorRevisionId),
+          eq(cmsRevisionsTable.editionId, edition.id),
+        ))
+      : [];
     const payload = publishedRevision?.payload as {
       seo?: Record<string, unknown>;
       content?: {
@@ -181,12 +211,15 @@ async function inspectReconciliationState(
       ? payload.mediaIds.filter((item): item is string => typeof item === "string")
       : [];
     const expectedEducationMedia = expectation.educationMedia ?? [];
-    const references = edition?.publishedRevisionId && mediaIds.length === expectedEducationMedia.length
+    const references = edition?.publishedRevisionId && mediaIds.length > 0
       ? await db.select({
           assetId: cmsMediaReferencesTable.assetId,
           mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
+           assetStatus: cmsMediaAssetsTable.status,
           assetChecksum: cmsMediaAssetsTable.checksum,
+           storageKey: cmsMediaVersionsTable.storageKey,
           versionChecksum: cmsMediaVersionsTable.checksum,
+           versionMetadata: cmsMediaVersionsTable.metadata,
         }).from(cmsMediaReferencesTable)
           .innerJoin(cmsMediaAssetsTable, eq(cmsMediaAssetsTable.id, cmsMediaReferencesTable.assetId))
           .innerJoin(cmsMediaVersionsTable, eq(cmsMediaVersionsTable.id, cmsMediaReferencesTable.mediaVersionId))
@@ -202,6 +235,27 @@ async function inspectReconciliationState(
       ...(imagery?.educatorPractice?.media ? [imagery.educatorPractice.media] : []),
       ...(imagery?.researchCoordination?.media ? [imagery.researchCoordination.media] : []),
     ];
+    const publishedPinsHaveStrictMetadata = Boolean(
+      mediaIds.length > 0
+      && references.length === mediaIds.length
+      && new Set(references.map((reference) => reference.assetId)).size === mediaIds.length
+      && selectedReferences.length === mediaIds.length
+      && selectedReferences.every((selected, index) => {
+        const pinned = selected && typeof selected.mediaId === "string"
+          ? referenceByAssetId.get(selected.mediaId)
+          : undefined;
+        const metadata = pinned?.versionMetadata as Record<string, unknown> | null | undefined;
+        return selected?.mediaId === mediaIds[index]
+          && selected?.mediaVersionId === pinned?.mediaVersionId
+          && selected?.role === (index === 0 ? "hero" : "supporting")
+          && (pinned?.assetStatus === "active" || pinned?.assetStatus === "ready")
+          && pinned?.assetChecksum === pinned?.versionChecksum
+          && typeof pinned?.storageKey === "string"
+          && !pinned.storageKey.startsWith("deferred/")
+          && metadata?.accessibilityStatus === "approved"
+          && metadata?.rightsStatus === "approved-use";
+      }),
+    );
     const hasExactPins = expectedEducationMedia.length === mediaIds.length
       && mediaIds.length === expectedEducationMedia.length
       && selectedReferences.length === expectedEducationMedia.length
@@ -225,17 +279,30 @@ async function inspectReconciliationState(
       && payload.content.heroMediaId === mediaIds[0]
       && hasExactPins,
     );
-    const authoritativePayload = receipt.operation === "cms.inventory.import"
-      || receipt.operation === "cms.inventory.education-successor-pending-cutover"
-      ? latestRevision?.payload
-      : publishedRevision?.payload;
+    const publishedAuthority = Boolean(
+      edition?.publicationState === "published"
+      && edition.publishedRevisionId
+      && publishedRevision?.workflowState === "approved"
+      && publishedPinsHaveStrictMetadata
+      && validateCmsSnapshot("industry", publishedRevision.payload, "publish").success,
+    );
+    const authoritativePayload = receipt.operation === "cms.inventory.education-successor-pending-cutover"
+      ? (publishedComplete ? publishedRevision?.payload : successorRevision?.payload)
+      : receipt.operation === "cms.inventory.import"
+        ? latestRevision?.payload
+        : publishedRevision?.payload;
     const normalizedPayload = authoritativePayload
       ? JSON.parse(JSON.stringify(authoritativePayload)) as {
           mediaIds?: unknown[];
           content?: Record<string, unknown>;
         }
       : undefined;
-    if (normalizedPayload) normalizeEducationMediaPayload(normalizedPayload);
+    if (normalizedPayload) {
+      normalizeEducationMediaPayload(normalizedPayload, {
+        image: expectation.expectedImage,
+        imageAlt: expectation.expectedImageAlt,
+      });
+    }
     const requiresEducationSuccessorRecovery = Boolean(
       receipt.operation === "cms.inventory.industry-contract-editorial-preserved"
       && edition?.publishedRevisionId
@@ -254,9 +321,10 @@ async function inspectReconciliationState(
       receiptOperation: receipt.operation,
       publishedComplete,
       exactPayload,
+      publishedAuthority,
       freshDraftComplete: Boolean(
         receipt.operation === "cms.inventory.education-successor-pending-cutover"
-          ? latestRevision?.workflowState === "draft"
+          ? successorRevision?.workflowState === "draft"
           : edition?.publicationState === "draft"
             && !edition.publishedRevisionId
             && latestRevision?.workflowState === "draft"
@@ -432,10 +500,16 @@ async function main() {
       tolerateDigestDrift: toleratesDocumentReceiptDigestDrift(
         operation,
         governedLegacyExternalIds,
-      ) && !educationSuccessor,
+      ),
       publishEducationSuccessor: educationSuccessor,
       expectedNormalizedPayloadDigest: educationSuccessor
         ? canonicalResultDigest(normalizedOperationPayload)
+        : undefined,
+      expectedImage: educationSuccessor
+        ? (normalizedOperationPayload.content as Record<string, unknown> | undefined)?.image
+        : undefined,
+      expectedImageAlt: educationSuccessor
+        ? (normalizedOperationPayload.content as Record<string, unknown> | undefined)?.imageAlt
         : undefined,
       educationMedia: educationSuccessor
         ? operation.mediaPaths.map((publicPath) => {
@@ -460,6 +534,8 @@ async function main() {
         optional: true,
         publishEducationSuccessor: true,
         expectedNormalizedPayloadDigest: canonicalResultDigest(normalizedOperationPayload),
+          expectedImage: (normalizedOperationPayload.content as Record<string, unknown> | undefined)?.image,
+          expectedImageAlt: (normalizedOperationPayload.content as Record<string, unknown> | undefined)?.imageAlt,
         educationMedia: operation.mediaPaths.map((publicPath) => {
           const media = mediaOperations.find((candidate) => candidate.publicPath === publicPath);
           if (!media) throw new Error(`Education successor media is missing ${publicPath}.`);

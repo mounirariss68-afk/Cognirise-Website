@@ -204,7 +204,7 @@ export const INDUSTRIES: IndustryContent[] = [
       { title: "Public-service engineering", body: "Redesign journeys from policy intent to resolved case and measure outcomes across channels." },
     ],
     selectedWork: { description: "Selected work should state the public-value objective, affected service, governance controls and accessible outcome evidence." },
-    image: "/images/cognirise/industries/pulse-industry-public-sector-services.png", imageAlt: "Citizens receiving documents and support at an accessible civic service centre linked by luminous service routes.", variant: "ledger",
+    image: "/images/cognirise/industries/pulse-industry-public-sector-civic-review-v1.png", imageAlt: "A light-filled civic atrium where a public service review is connected by purposeful violet and coral routes.", variant: "ledger",
     pressures: [
       { title: "Legitimacy before velocity", body: "Decisions that affect people need named authority, traceable evidence, clear explanations and a practical route to human review." },
       { title: "Accessibility is part of the system", body: "A digital service succeeds only when people across languages, abilities and levels of digital confidence can complete the journey." },
@@ -240,7 +240,7 @@ export const INDUSTRIES: IndustryContent[] = [
       { title: "Evidence and scale", body: "Measure learning, research speed, workload, service quality, equity, cost, safety and trust; scale only where evidence warrants it." },
     ],
     selectedWork: { description: "Cognirise brings consulting, engineering, data, platform and change capabilities together to redesign a complete school, university or authority journey and establish the shared layer that lets evidence-backed practices scale." },
-    image: "/images/cognirise/industries/pulse-industry-education-campus-v3.png", imageAlt: "A sunlit education campus atrium connects library shelves, tiered learning spaces and glazed science rooms along restrained violet and coral light paths.", variant: "network",
+    image: "/images/cognirise/industries/pulse-industry-education-campus-v4.png", imageAlt: "A sunlit education campus atrium connects library shelves, learning stairs and glazed science rooms through purposeful violet Pulse routes.", variant: "network",
     pressures: [
       { title: "The operating system is shared capability", body: "Trusted data, secure platforms, integration, policy, evaluation, workforce capability and human oversight—not one software product—coordinate responsible use." },
       { title: "School autonomy must stay tightly bounded", body: "K–12 access and interfaces must be age-appropriate, safeguarded and controlled by accountable educators." },

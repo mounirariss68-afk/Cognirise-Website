@@ -11,6 +11,8 @@ export interface ExpectedReceipt {
   publishCase?: boolean;
   publishEducationSuccessor?: boolean;
   expectedNormalizedPayloadDigest?: string;
+  expectedImage?: unknown;
+  expectedImageAlt?: unknown;
   educationMedia?: MediaMigrationOperation[];
 }
 
@@ -25,13 +27,17 @@ export function educationReconciliationOutcome(input: {
   receiptOperation: string | undefined;
   publishedComplete: boolean;
   exactPayload: boolean;
+  publishedAuthority?: boolean;
   freshDraftComplete: boolean;
   hasLiveRevision: boolean;
 }): { valid: boolean; status?: EducationReconciliationStatus; message: string } {
   switch (input.receiptOperation) {
     case "cms.inventory.education-successor-published":
-      return input.publishedComplete && input.exactPayload
-        ? { valid: true, status: "published", message: "approved successor is published" }
+      if (input.publishedComplete && input.exactPayload) {
+        return { valid: true, status: "published", message: "approved successor is published" };
+      }
+      return input.publishedAuthority && input.exactPayload
+        ? { valid: true, status: "pending-cutover", message: "approved successor authority is preserved while its reviewed hero awaits immutable-media cutover" }
         : { valid: false, message: "published successor pointer, payload, or immutable pin is incomplete" };
     case "cms.inventory.education-successor-pending-cutover":
       if (input.publishedComplete) {
@@ -43,8 +49,11 @@ export function educationReconciliationOutcome(input: {
         ? { valid: true, status: "pending-cutover", message: "successor draft is awaiting the approved immutable-media cutover" }
         : { valid: false, message: "successor draft awaiting cutover is missing or does not match governed authority" };
     case "cms.inventory.industry-contract-baseline-reused":
-      return input.publishedComplete && input.exactPayload
-        ? { valid: true, status: "reused", message: "approved successor publication was reused" }
+      if (input.publishedComplete && input.exactPayload) {
+        return { valid: true, status: "reused", message: "approved successor publication was reused" };
+      }
+      return input.publishedAuthority && input.exactPayload
+        ? { valid: true, status: "pending-cutover", message: "approved baseline authority is preserved while its reviewed hero awaits immutable-media cutover" }
         : { valid: false, message: "reused successor no longer matches its approved publication" };
     case "cms.inventory.industry-contract-editorial-preserved":
       return input.hasLiveRevision

@@ -26,3 +26,9 @@ Apply public eligibility before selecting the winning content source, consistent
 **Why:** Ranking a private regional revision before filtering it can hide a valid shared page or deny that page's media. Conversely, document-wide media permission can expose assets belonging only to an excluded customization.
 
 **How to apply:** Navigation, content, sitemaps, and media must agree on the eligible winning revision. Keep represented historical URLs known separately from currently deliverable URLs, so superseded links can be suppressed without suppressing valid fallback content.
+
+Treat a successful publication readback as insufficient evidence of live shared delivery.
+
+**Why:** A targeted media cutover can update the edition publication while leaving the shared destination's approved source behind; the strict public gate then correctly hides the page despite a published database revision.
+
+**How to apply:** Targeted cutovers must release the reviewed shared source and its existing authorized destination snapshot together, including replay. Verify the public collection and actual media response, not only revision status.

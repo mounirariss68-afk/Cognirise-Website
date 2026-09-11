@@ -9,6 +9,7 @@ test("composes the overview around the picker, one approved case-study rail, and
   assert.match(source, /useCmsCollection<PublicCaseStudy>\("case-study"/);
   assert.match(source, /approvedPublishedCases\(caseStudies\.data\)/);
   assert.match(source, /<CaseStudyRail cases=\{approvedCases\} \/>/);
+  assert.match(source, /<IndustryPicker[\s\S]*compact\s*\/>/);
   assert.ok(source.indexOf("<IndustryPicker") < source.indexOf("<CaseStudyRail"));
   assert.ok(source.indexOf("<CaseStudyRail") < source.indexOf('<section className="io-capability">'));
   assert.match(source, /Loading approved case studies/);

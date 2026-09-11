@@ -4144,8 +4144,8 @@
           "selectedWork": {
             "description": "Selected work should state the public-value objective, affected service, governance controls and accessible outcome evidence."
           },
-          "image": "/images/cognirise/industries/pulse-industry-public-sector-services.png",
-          "imageAlt": "Citizens receiving documents and support at an accessible civic service centre linked by luminous service routes.",
+          "image": "/images/cognirise/industries/pulse-industry-public-sector-civic-review-v1.png",
+          "imageAlt": "A light-filled civic atrium where a public service review is connected by purposeful violet and coral routes.",
           "variant": "ledger",
           "pressures": [
             {
@@ -4219,7 +4219,7 @@
           "relatedIds": []
         },
         "mediaPaths": [
-          "/images/cognirise/industries/pulse-industry-public-sector-services.png"
+          "/images/cognirise/industries/pulse-industry-public-sector-civic-review-v1.png"
         ]
       },
       "review": {
@@ -4280,8 +4280,8 @@
           "selectedWork": {
             "description": "Cognirise brings consulting, engineering, data, platform and change capabilities together to redesign a complete school, university or authority journey and establish the shared layer that lets evidence-backed practices scale."
           },
-          "image": "/images/cognirise/industries/pulse-industry-education-campus-v3.png",
-          "imageAlt": "A sunlit education campus atrium connects library shelves, tiered learning spaces and glazed science rooms along restrained violet and coral light paths.",
+          "image": "/images/cognirise/industries/pulse-industry-education-campus-v4.png",
+          "imageAlt": "A sunlit education campus atrium connects library shelves, learning stairs and glazed science rooms through purposeful violet Pulse routes.",
           "variant": "network",
           "pressures": [
             {
@@ -4694,7 +4694,7 @@
           "relatedIds": []
         },
         "mediaPaths": [
-          "/images/cognirise/industries/pulse-industry-education-campus-v3.png"
+          "/images/cognirise/industries/pulse-industry-education-campus-v4.png"
         ]
       },
       "review": {
@@ -6235,16 +6235,16 @@
       "digest": "ab57adbe16350bd3b16ec1865a3bf7dc410dd55f196fe338da61969c9e56a969"
     },
     {
-      "externalId": "asset:2b97a4644d4df2519e73",
+      "externalId": "asset:54a14f79308ea4d8a11c",
       "type": "asset",
-      "name": "pulse-industry-education-campus-v3.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-campus-v3.png",
+      "name": "pulse-industry-education-campus-v4.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-campus-v4.png",
       "fields": {
-        "publicPath": "/images/cognirise/industries/pulse-industry-education-campus-v3.png",
-        "bytes": 1909265,
+        "publicPath": "/images/cognirise/industries/pulse-industry-education-campus-v4.png",
+        "bytes": 1872116,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "4715b760ca0f30d5e69968f2e8a6225ba9acdd61fbfd6ac3eae41726b7937a0a",
+        "checksum": "46087ebf4530fc1a2cee82571273a4316723b332fb818afff33b39112b404dac",
         "width": 1024,
         "height": 1024,
         "usages": [
@@ -6255,7 +6255,7 @@
         "linkedinAssetKind": null,
         "campaignMetadata": null,
         "accessibility": {
-          "altText": "A sunlit education campus atrium connects library shelves, tiered learning spaces and glazed science rooms along restrained violet and coral light paths.",
+          "altText": "A sunlit education campus atrium connects library shelves, learning stairs and glazed science rooms through purposeful violet Pulse routes.",
           "decorative": false
         },
         "rights": {
@@ -6270,7 +6270,7 @@
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
       },
-      "digest": "4715b760ca0f30d5e69968f2e8a6225ba9acdd61fbfd6ac3eae41726b7937a0a"
+      "digest": "46087ebf4530fc1a2cee82571273a4316723b332fb818afff33b39112b404dac"
     },
     {
       "externalId": "asset:bbbaa7ea7a2547b64df3",
@@ -6531,16 +6531,16 @@
       "digest": "727af375484e4c4c7c24188c140f68a1a6fd20cfd99c7a5016f96ecb30a2cef4"
     },
     {
-      "externalId": "asset:1f2bc243d3d62cb6da04",
+      "externalId": "asset:4eddec2864867be55c3f",
       "type": "asset",
-      "name": "pulse-industry-public-sector-services.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-public-sector-services.png",
+      "name": "pulse-industry-public-sector-civic-review-v1.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-public-sector-civic-review-v1.png",
       "fields": {
-        "publicPath": "/images/cognirise/industries/pulse-industry-public-sector-services.png",
-        "bytes": 2446012,
+        "publicPath": "/images/cognirise/industries/pulse-industry-public-sector-civic-review-v1.png",
+        "bytes": 1461131,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "942dfbcb83fc0264f06f4ba60e7511670973fe75b14ada8d3b144a155918ec4b",
+        "checksum": "39ea08d936bcb804867695096a863b9d341c61c509f2c519eb7a17274604c2cc",
         "width": 1536,
         "height": 1024,
         "usages": [
@@ -6551,7 +6551,7 @@
         "linkedinAssetKind": null,
         "campaignMetadata": null,
         "accessibility": {
-          "altText": "Citizens receiving documents and support at an accessible civic service centre linked by luminous service routes.",
+          "altText": "A light-filled civic atrium where a public service review is connected by purposeful violet and coral routes.",
           "decorative": false
         },
         "rights": {
@@ -6566,7 +6566,7 @@
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
       },
-      "digest": "942dfbcb83fc0264f06f4ba60e7511670973fe75b14ada8d3b144a155918ec4b"
+      "digest": "39ea08d936bcb804867695096a863b9d341c61c509f2c519eb7a17274604c2cc"
     },
     {
       "externalId": "asset:ce6e9786500aa02af86d",
@@ -8104,7 +8104,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "d9e3fed6f0c24ff5e5a731e0216a2f1cc78445669930d89b1fb93ff1a71b05e2",
-  "generatedAt": "2026-09-11T15:27:48.930Z",
+  "manifestDigest": "ec243da510e3d59eb3439e7881acd53d922c6a20fda6d1efa0b9318ede4f832c",
+  "generatedAt": "2026-09-11T17:33:33.435Z",
   "dryRun": false
 }

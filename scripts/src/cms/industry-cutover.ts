@@ -28,7 +28,8 @@ const target = args.find((argument) => argument.startsWith("--target="))?.slice(
 const requestedSlug = args.find((argument) => argument.startsWith("--slug="))?.slice(7);
 const APPROVED_AT = "2026-09-08";
 const CUTOVER_PREFIX = "cms-industry-pulse-cutover-v2";
-const EDUCATION_HERO_CUTOVER_PREFIX = "cms-industry-education-hero-v4";
+const EDUCATION_HERO_CUTOVER_PREFIX = "cms-industry-education-hero-v5";
+const PUBLIC_SECTOR_HERO_CUTOVER_PREFIX = "cms-industry-public-sector-civic-review-v1";
 const EDUCATION_PRIOR_CUTOVER_PREFIX = "cms-industry-education-imagery-v3";
 const LEGACY_CUTOVER_PREFIX = "cms-industry-pulse-cutover-v1";
 const MEDIA_APPROVAL_PREFIX = "cms-industry-pulse-media-approval-v2";
@@ -67,9 +68,84 @@ function assertDevelopmentTarget() {
   }
 }
 
+function normalizeEducationCutoverPayload(
+  payload: Record<string, unknown>,
+  replacement: { image: string; imageAlt: string },
+) {
+  const normalized = structuredClone(payload) as {
+    mediaIds?: unknown[];
+    content?: Record<string, unknown>;
+  };
+  normalized.mediaIds = [];
+  delete normalized.content?.heroMediaId;
+  delete normalized.content?.heroMedia;
+  delete normalized.content?.supportingMedia;
+  if (normalized.content) {
+    normalized.content.image = replacement.image;
+    normalized.content.imageAlt = replacement.imageAlt;
+  }
+  const pov = normalized.content?.educationPov;
+  const imagery = pov && typeof pov === "object" && !Array.isArray(pov)
+    ? (pov as Record<string, unknown>).imagery
+    : undefined;
+  if (imagery && typeof imagery === "object" && !Array.isArray(imagery)) {
+    for (const slot of ["educatorPractice", "researchCoordination"]) {
+      const scene = (imagery as Record<string, unknown>)[slot];
+      if (scene && typeof scene === "object" && !Array.isArray(scene)) {
+        delete (scene as Record<string, unknown>).media;
+      }
+    }
+  }
+  return normalized;
+}
+
+export interface EducationCutoverSourceRevision {
+  id: string;
+  revisionNumber: number;
+  workflowState: string;
+  normalizedDigest: string;
+}
+
+export function chooseEducationCutoverSource(input: {
+  expectedDigest: string;
+  publishedRevision?: EducationCutoverSourceRevision;
+  latestRevision?: EducationCutoverSourceRevision;
+  pendingRevision?: EducationCutoverSourceRevision;
+  pendingAuthorized: boolean;
+}): "published" | "pending" {
+  const { publishedRevision, latestRevision, pendingRevision } = input;
+  const pendingIsLatest = Boolean(
+    input.pendingAuthorized
+    && pendingRevision
+    && latestRevision?.id === pendingRevision.id,
+  );
+  if (
+    publishedRevision
+    && latestRevision
+    && latestRevision.id !== publishedRevision.id
+    && !pendingIsLatest
+  ) {
+    throw new Error("education has a newer unpublished editorial revision; refusing to replace its governed media.");
+  }
+  if (
+    publishedRevision
+    && publishedRevision.workflowState === "approved"
+    && publishedRevision.normalizedDigest === input.expectedDigest
+  ) {
+    return "published";
+  }
+  if (
+    pendingIsLatest
+    && pendingRevision!.normalizedDigest === input.expectedDigest
+  ) {
+    return "pending";
+  }
+  throw new Error("education has no exact governed successor source available for the reviewed-hero cutover.");
+}
+
 async function loadPlan() {
-  if (requestedSlug && requestedSlug !== "education") {
-    throw new Error("This scoped cutover supports Education only.");
+  if (requestedSlug && requestedSlug !== "education" && requestedSlug !== "public-sector") {
+    throw new Error("This scoped cutover supports Education and Public Sector only.");
   }
   const inventory = JSON.parse(
     await readFile(`${repositoryRoot}/scripts/cms/output/inventory.json`, "utf8"),
@@ -133,7 +209,7 @@ async function loadPlan() {
     || plan.length !== expectedAssociated + expectedSupporting + expectedUnassociated
   ) {
     throw new Error(requestedSlug
-      ? "The Education cutover must contain exactly one reviewed hero."
+      ? "The scoped industry cutover must contain exactly one reviewed hero."
       : "The Pulse industry family must contain nine assets and six hero associations.");
   }
   return plan;
@@ -316,10 +392,15 @@ async function applyCutover(
       const supporting = plan
         .filter((candidate) => candidate.definition.slug === slug && candidate.definition.role === "supporting")
         .map((candidate) => approvedMedia.get(candidate.definition.publicPath)!);
-       const idempotencyKey = `${slug === "education" ? EDUCATION_HERO_CUTOVER_PREFIX : CUTOVER_PREFIX}:${slug}`;
+       const cutoverPrefix = slug === "education"
+         ? EDUCATION_HERO_CUTOVER_PREFIX
+         : slug === "public-sector"
+           ? PUBLIC_SECTOR_HERO_CUTOVER_PREFIX
+           : CUTOVER_PREFIX;
+       const idempotencyKey = `${cutoverPrefix}:${slug}`;
       const editionResult = await client.query(
-        `SELECT d.id::text document_id,e.id::text edition_id,e.locale,e.publication_state,
-                e.published_revision_id::text
+        `SELECT d.id::text document_id,e.id::text edition_id,e.locale,e.content_mode,
+                e.publication_state,e.published_revision_id::text
            FROM cms_documents d
            JOIN cms_market_editions e ON e.document_id=d.id AND e.market='uae'
           WHERE d.kind='industry' AND d.canonical_slug=$1`,
@@ -332,6 +413,7 @@ async function applyCutover(
         document_id: string;
         edition_id: string;
         published_revision_id: string | null;
+        content_mode: string;
       };
       const legacyReceipt = await client.query(
         "SELECT subject_id FROM cms_operation_receipts WHERE idempotency_key=$1",
@@ -505,10 +587,18 @@ async function applyCutover(
         } else {
           replayed++;
         }
+        await syncPublishedSourcePointer(client, edition, current.id, admin.id);
         continue;
       }
-      let sourceRevision;
-      if (legacyReceipt.rowCount && slug !== "education") {
+      let sourceRevision: { rowCount: number | null; rows: any[] } = { rowCount: 0, rows: [] };
+      if (slug !== "education" && edition.published_revision_id) {
+        sourceRevision = await client.query(
+          `SELECT id::text,revision_number,payload,workflow_state
+             FROM cms_revisions
+            WHERE id=$1 AND edition_id=$2 AND workflow_state='approved'`,
+          [edition.published_revision_id, edition.edition_id],
+        );
+      } else if (legacyReceipt.rowCount && slug !== "education") {
         sourceRevision = await client.query(
           `SELECT id::text,revision_number,payload,workflow_state
              FROM cms_revisions
@@ -516,11 +606,53 @@ async function applyCutover(
           [legacyReceipt.rows[0].subject_id, edition.edition_id],
         );
       } else if (slug === "education") {
-         // A v12 successor is intentionally imported as a governed draft. It
-         // must become the cutover source so the final immutable hero
-         // publication retains its approved narrative rather than rebuilding
-         // from the obsolete published edition.
-        sourceRevision = await client.query(
+        // A receipt-backed draft is not authority by itself. Prefer the
+        // current approved publication when it is canonically equivalent
+        // after the authorized hero normalization. A successor draft may be
+        // used only when it is both receipt-backed and the latest revision;
+        // any unknown later editorial revision is a visible conflict.
+        const pendingReceipt = await client.query(
+          `SELECT idempotency_key,operation,metadata
+             FROM cms_operation_receipts r
+             LEFT JOIN cms_audit_events a ON a.request_id=r.idempotency_key
+            WHERE r.idempotency_key=ANY($1::text[])
+              AND r.operation=ANY($4::text[])
+              AND ($3::text IS NULL OR r.request_digest=$3::text)
+              AND r.subject_id=$2`,
+          [
+            [
+              item.contentOperation!.idempotencyKey,
+              educationSuccessorRecoveryKey(
+                item.contentOperation!.externalId,
+                educationSuccessorVersion(item.contentOperation!.idempotencyKey) ?? "v11",
+              ),
+            ],
+            edition.document_id,
+            null,
+            [...educationDraftReceiptOperations],
+          ],
+        );
+        const pendingMetadata = pendingReceipt.rows[0]?.metadata as Record<string, unknown> | null;
+        const pendingRevisionId = typeof pendingMetadata?.revisionId === "string"
+          ? pendingMetadata.revisionId
+          : null;
+        const pendingRevision = pendingRevisionId
+          ? await client.query(
+            `SELECT id::text,revision_number,payload,workflow_state
+               FROM cms_revisions
+              WHERE id=$1 AND edition_id=$2`,
+            [pendingRevisionId, edition.edition_id],
+          )
+          : null;
+        const publishedRevision = edition.published_revision_id
+          ? await client.query(
+            `SELECT id::text,revision_number,payload,workflow_state
+               FROM cms_revisions
+              WHERE id=$1 AND edition_id=$2 AND workflow_state='approved'`,
+            [edition.published_revision_id, edition.edition_id],
+          )
+          : null;
+        const latestRevision = await client.query(
           `SELECT id::text,revision_number,payload,workflow_state
              FROM cms_revisions
             WHERE edition_id=$1
@@ -528,67 +660,89 @@ async function applyCutover(
             LIMIT 1`,
           [edition.edition_id],
         );
+        const expectedPayloadDigest = canonicalResultDigest(item.contentOperation!.payload);
+        const normalized = (revision: { payload?: Record<string, unknown> } | undefined) =>
+          revision?.payload
+            ? normalizeEducationCutoverPayload(revision.payload, {
+                image: item.definition.publicPath,
+                imageAlt: item.definition.altText,
+              })
+            : undefined;
+        const normalizedPublished = normalized(publishedRevision?.rows[0]);
+        const normalizedPending = normalized(pendingRevision?.rows[0]);
+        const publishedMatches = Boolean(
+          normalizedPublished
+          && canonicalResultDigest(normalizedPublished) === expectedPayloadDigest,
+        );
+        const pendingMatches = Boolean(
+          normalizedPending
+          && canonicalResultDigest(normalizedPending) === expectedPayloadDigest,
+        );
+        const pendingIsAuthorized = Boolean(
+          pendingRevisionId
+          && pendingReceipt.rowCount === 1
+          && educationDraftReceiptAllowed(
+            pendingReceipt.rows[0]?.operation,
+            Number(pendingRevision?.rows[0]?.revision_number),
+            edition.published_revision_id ?? null,
+          ),
+        );
+        const sourceChoice = chooseEducationCutoverSource({
+          expectedDigest: expectedPayloadDigest,
+          publishedRevision: publishedRevision?.rowCount === 1
+            ? {
+                id: publishedRevision.rows[0].id,
+                revisionNumber: Number(publishedRevision.rows[0].revision_number),
+                workflowState: publishedRevision.rows[0].workflow_state,
+                normalizedDigest: publishedMatches
+                  ? expectedPayloadDigest
+                  : canonicalResultDigest(normalizedPublished),
+              }
+            : undefined,
+          latestRevision: latestRevision.rowCount === 1
+            ? {
+                id: latestRevision.rows[0].id,
+                revisionNumber: Number(latestRevision.rows[0].revision_number),
+                workflowState: latestRevision.rows[0].workflow_state,
+                normalizedDigest: latestRevision.rows[0].payload
+                  ? canonicalResultDigest(normalizeEducationCutoverPayload(latestRevision.rows[0].payload, {
+                      image: item.definition.publicPath,
+                      imageAlt: item.definition.altText,
+                    }))
+                  : "",
+              }
+            : undefined,
+          pendingRevision: pendingRevision?.rowCount === 1
+            ? {
+                id: pendingRevision.rows[0].id,
+                revisionNumber: Number(pendingRevision.rows[0].revision_number),
+                workflowState: pendingRevision.rows[0].workflow_state,
+                normalizedDigest: pendingMatches
+                  ? expectedPayloadDigest
+                  : canonicalResultDigest(normalizedPending),
+              }
+            : undefined,
+          pendingAuthorized: pendingIsAuthorized,
+        });
+        sourceRevision = (sourceChoice === "published" ? publishedRevision : pendingRevision)!;
         const candidate = sourceRevision.rows[0] as {
+          id?: string;
           payload?: Record<string, unknown>;
           workflow_state?: string;
         } | undefined;
         const normalizedCandidate = candidate?.payload
-          ? structuredClone(candidate.payload) as {
-              mediaIds?: unknown[];
-              content?: Record<string, unknown>;
-            }
+          ? normalizeEducationCutoverPayload(candidate.payload, {
+              image: item.definition.publicPath,
+              imageAlt: item.definition.altText,
+            })
           : undefined;
-        if (normalizedCandidate) {
-          normalizedCandidate.mediaIds = [];
-          delete normalizedCandidate.content?.heroMediaId;
-          delete normalizedCandidate.content?.heroMedia;
-          delete normalizedCandidate.content?.supportingMedia;
-          const imagery = normalizedCandidate.content?.educationPov;
-          const scenes = imagery && typeof imagery === "object" && !Array.isArray(imagery)
-            ? (imagery as Record<string, unknown>).imagery
-            : undefined;
-          if (scenes && typeof scenes === "object" && !Array.isArray(scenes)) {
-            for (const slot of ["educatorPractice", "researchCoordination"]) {
-              const scene = (scenes as Record<string, unknown>)[slot];
-              if (scene && typeof scene === "object" && !Array.isArray(scene)) {
-                delete (scene as Record<string, unknown>).media;
-              }
-            }
-          }
-        }
-        const pendingReceipt = await client.query(
-          `SELECT idempotency_key,operation
-             FROM cms_operation_receipts
-            WHERE idempotency_key=ANY($1::text[])
-              AND operation=ANY($4::text[])
-              AND subject_id=$2
-              AND request_digest=$3`,
-          [
-            [
-               item.contentOperation!.idempotencyKey,
-               educationSuccessorRecoveryKey(
-                 item.contentOperation!.externalId,
-                 educationSuccessorVersion(item.contentOperation!.idempotencyKey) ?? "v11",
-               ),
-            ],
-            edition.document_id,
-            item.contentOperation!.requestDigest,
-            [...educationDraftReceiptOperations],
-          ],
-        );
         if (
           sourceRevision.rowCount !== 1
-          || candidate?.workflow_state !== "draft"
           || !normalizedCandidate
-          || pendingReceipt.rowCount !== 1
-          || !educationDraftReceiptAllowed(
-            pendingReceipt.rows[0]?.operation,
-            Number(sourceRevision.rows[0]?.revision_number),
-            edition.published_revision_id ?? null,
-          )
-          || canonicalResultDigest(normalizedCandidate) !== canonicalResultDigest(item.contentOperation!.payload)
+          || (candidate?.workflow_state !== "approved" && sourceChoice !== "pending")
+          || canonicalResultDigest(normalizedCandidate) !== expectedPayloadDigest
         ) {
-           throw new Error("education has no exact governed v12 draft available for the reviewed-hero cutover.");
+          throw new Error("education has no exact governed successor source available for the reviewed-hero cutover.");
         }
       } else if (edition.published_revision_id) {
         sourceRevision = await client.query(
@@ -644,6 +798,8 @@ async function applyCutover(
       payload.mediaIds = [media.assetId, ...supporting.map((item) => item.assetId)];
       payload.content = {
         ...((payload.content && typeof payload.content === "object") ? payload.content : {}),
+        image: item.definition.publicPath,
+        imageAlt: item.definition.altText,
         heroMediaId: media.assetId,
         heroMedia: {
           mediaId: media.assetId,
@@ -685,6 +841,7 @@ async function applyCutover(
           WHERE id=$1`,
         [edition.edition_id, revisionId],
       );
+      await syncPublishedSourcePointer(client, edition, revisionId, admin.id);
       await client.query(
         "UPDATE cms_documents SET updated_at=now() WHERE id=$1",
         [edition.document_id],
@@ -730,12 +887,53 @@ async function applyCutover(
     }
     await verifyCutover(plan, client);
     await client.query("COMMIT");
-     console.log(`${requestedSlug === "education" ? "Education hero" : "Pulse industry"} cutover applied: media=${plan.length} published=${published} repaired=${repaired} replayed=${replayed} unassociated=${plan.filter((item) => !item.definition.slug).length}.`);
+     console.log(`${requestedSlug ? `${requestedSlug} hero` : "Pulse industry"} cutover applied: media=${plan.length} published=${published} repaired=${repaired} replayed=${replayed} unassociated=${plan.filter((item) => !item.definition.slug).length}.`);
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
   } finally {
     client.release();
+  }
+}
+
+async function syncPublishedSourcePointer(
+  client: SqlClient,
+  edition: {
+    document_id: string;
+    edition_id: string;
+    content_mode: string;
+  },
+  revisionId: string,
+  adminId: string,
+) {
+  if (edition.content_mode !== "shared") return;
+  const state = await client.query(
+    `SELECT shared_source_edition_id::text,published_source_revision_id::text
+       FROM cms_document_availability_states
+      WHERE document_id=$1`,
+    [edition.document_id],
+  );
+  if (
+    state.rowCount !== 1
+    || state.rows[0].shared_source_edition_id !== edition.edition_id
+  ) {
+    throw new Error(`Published delivery source pointer is missing or stale for ${edition.document_id}.`);
+  }
+  if (state.rows[0].published_source_revision_id === revisionId) return;
+  const result = await client.query(
+    `UPDATE cms_document_availability_states
+        SET published_version=COALESCE(published_version,0)+1,
+            published_source_revision_id=$2,
+            published_by_user_id=$3,
+            published_at=now(),
+            updated_at=now()
+      WHERE document_id=$1
+        AND shared_source_edition_id=$4
+        AND published_source_revision_id IS DISTINCT FROM $2`,
+    [edition.document_id, revisionId, adminId, edition.edition_id],
+  );
+  if (result.rowCount !== 1) {
+    throw new Error(`Published delivery source pointer is missing or stale for ${edition.document_id}.`);
   }
 }
 
@@ -817,10 +1015,14 @@ async function verifyCutover(
       }
 
       const publication = await client.query(
-        `SELECT d.id::text document_id,e.publication_state,e.published_revision_id::text,
+        `SELECT d.id::text document_id,e.id::text edition_id,e.content_mode,
+                e.publication_state,e.published_revision_id::text,
+                delivery.shared_source_edition_id::text,
+                delivery.published_source_revision_id::text,
                 r.workflow_state,r.payload,ref.asset_id::text,ref.media_version_id::text
            FROM cms_documents d
            JOIN cms_market_editions e ON e.document_id=d.id AND e.market='uae'
+           LEFT JOIN cms_document_availability_states delivery ON delivery.document_id=d.id
            JOIN cms_revisions r ON r.id=e.published_revision_id
            JOIN cms_media_references ref ON ref.document_id=d.id
              AND ref.field_path='revision:' || r.id::text
@@ -840,10 +1042,19 @@ async function verifyCutover(
       if (
         published.publication_state !== "published"
         || published.workflow_state !== "approved"
+        || (
+          published.content_mode === "shared"
+          && (
+            published.shared_source_edition_id !== published.edition_id
+            || published.published_source_revision_id !== published.published_revision_id
+          )
+        )
         || published.media_version_id !== row.version_id
         || !validation.success
         || validation.data.mediaIds[0] !== row.asset_id
         || (validation.data.content as Record<string, unknown>).heroMediaId !== row.asset_id
+       || (validation.data.content as Record<string, unknown>).image !== item.definition.publicPath
+       || (validation.data.content as Record<string, unknown>).imageAlt !== item.definition.altText
       ) {
         throw new Error(`Published industry parity failed for ${item.definition.slug}.`);
       }
@@ -896,7 +1107,7 @@ async function verifyCutover(
     if (supporting !== 0) throw new Error("Rejected Education supporting imagery must not be published.");
     const expectedAssociated = requestedSlug ? 1 : 6;
     if (associated !== expectedAssociated) throw new Error("Scoped industry publication count is incomplete.");
-    console.log(`Verified ${requestedSlug === "education" ? "Education hero" : "Pulse industry"} cutover: approvedMedia=${plan.length} publishedIndustries=${associated} supportingMedia=${supporting} unassociatedMedia=${unassociated}.`);
+      console.log(`Verified ${requestedSlug ? `${requestedSlug} hero` : "Pulse industry"} cutover: approvedMedia=${plan.length} publishedIndustries=${associated} supportingMedia=${supporting} unassociatedMedia=${unassociated}.`);
   } finally {
     ownedClient?.release();
   }

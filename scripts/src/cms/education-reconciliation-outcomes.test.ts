@@ -4,6 +4,7 @@ import { isKnownEducationSuccessorAuthorityDigest } from "./migration.js";
 import { educationReconciliationOutcome } from "./receipt-reconciliation.js";
 import { runReconciliationLifecycle } from "./reconcile-order.js";
 import { educationDraftReceiptAllowed, educationDraftReceiptOperations, industryPublicationPinAction } from "./industry-media.js";
+import { chooseEducationCutoverSource } from "./industry-cutover.js";
 import { readFileSync } from "node:fs";
 
 test("Education reconciliation preserves newer editorial authority without requiring the governed payload", () => {
@@ -28,6 +29,37 @@ test("Education reconciliation accepts an already-complete governed publication"
     freshDraftComplete: false,
     hasLiveRevision: true,
   }).status, "reused");
+});
+
+test("prior published successor and baseline receipts preserve canonical authority during hero replacement", () => {
+  for (const receiptOperation of [
+    "cms.inventory.education-successor-published",
+    "cms.inventory.industry-contract-baseline-reused",
+  ]) {
+    const pendingReplacement = educationReconciliationOutcome({
+      receiptOperation,
+      publishedComplete: false,
+      exactPayload: true,
+      publishedAuthority: true,
+      freshDraftComplete: false,
+      hasLiveRevision: true,
+    });
+    assert.deepEqual(pendingReplacement, {
+      valid: true,
+      status: "pending-cutover",
+      message: receiptOperation.endsWith("published")
+        ? "approved successor authority is preserved while its reviewed hero awaits immutable-media cutover"
+        : "approved baseline authority is preserved while its reviewed hero awaits immutable-media cutover",
+    });
+    assert.equal(educationReconciliationOutcome({
+      receiptOperation,
+      publishedComplete: false,
+      exactPayload: true,
+      publishedAuthority: false,
+      freshDraftComplete: false,
+      hasLiveRevision: true,
+    }).valid, false, "old pins without strict published authority remain blocked");
+  }
 });
 
 test("fresh Education import is complete only as an exact review draft", () => {
@@ -135,6 +167,39 @@ test("generic import authority never authorizes newer drafts or an existing publ
   assert.equal(educationDraftReceiptAllowed("cms.inventory.import", 1, "published"), false);
   assert.equal(educationDraftReceiptAllowed("cms.inventory.industry-contract-editorial-preserved", 1, null), false);
   assert.equal(educationDraftReceiptAllowed("cms.inventory.education-successor-pending-cutover", 10, "previous-approved"), true);
+});
+
+test("Education cutover prefers an equivalent publication and blocks unknown newer edits", () => {
+  const revision = (id: string, revisionNumber: number, workflowState: string, normalizedDigest: string) => ({
+    id, revisionNumber, workflowState, normalizedDigest,
+  });
+  assert.equal(chooseEducationCutoverSource({
+    expectedDigest: "governed",
+    publishedRevision: revision("published", 11, "approved", "governed"),
+    latestRevision: revision("pending", 12, "draft", "governed"),
+    pendingRevision: revision("pending", 12, "draft", "governed"),
+    pendingAuthorized: true,
+  }), "published", "canonical equivalence preserves the approved publication");
+  assert.throws(() => chooseEducationCutoverSource({
+    expectedDigest: "governed",
+    publishedRevision: revision("published", 11, "approved", "governed"),
+    latestRevision: revision("unknown", 12, "draft", "editorial-drift"),
+    pendingAuthorized: false,
+  }), /newer unpublished editorial revision/);
+  assert.equal(chooseEducationCutoverSource({
+    expectedDigest: "successor",
+    publishedRevision: revision("published", 11, "approved", "old-hero"),
+    latestRevision: revision("pending", 12, "draft", "successor"),
+    pendingRevision: revision("pending", 12, "draft", "successor"),
+    pendingAuthorized: true,
+  }), "pending", "only a receipt-backed latest successor draft may replace a non-equivalent publication");
+  assert.throws(() => chooseEducationCutoverSource({
+    expectedDigest: "successor",
+    publishedRevision: revision("published", 11, "approved", "old-hero"),
+    latestRevision: revision("pending", 12, "draft", "successor"),
+    pendingRevision: revision("pending", 12, "draft", "successor"),
+    pendingAuthorized: false,
+  }), /newer unpublished editorial revision/);
 });
 
 test("a preserved receipt can recover only from a known approved Education authority", () => {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-11T15:27:51.146Z",
-  "manifestDigest": "d9e3fed6f0c24ff5e5a731e0216a2f1cc78445669930d89b1fb93ff1a71b05e2",
+  "generatedAt": "2026-09-11T17:33:44.189Z",
+  "manifestDigest": "ec243da510e3d59eb3439e7881acd53d922c6a20fda6d1efa0b9318ede4f832c",
   "dryRun": true,
   "mode": "payload-only",
   "note": "No storage or database call was made. Use --apply-db --target=development to import governed drafts.",
@@ -3614,8 +3614,8 @@
           "selectedWork": {
             "description": "Selected work should state the public-value objective, affected service, governance controls and accessible outcome evidence."
           },
-          "image": "/images/cognirise/industries/pulse-industry-public-sector-services.png",
-          "imageAlt": "Citizens receiving documents and support at an accessible civic service centre linked by luminous service routes.",
+          "image": "/images/cognirise/industries/pulse-industry-public-sector-civic-review-v1.png",
+          "imageAlt": "A light-filled civic atrium where a public service review is connected by purposeful violet and coral routes.",
           "variant": "ledger",
           "pressures": [
             {
@@ -3697,10 +3697,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/industries/pulse-industry-public-sector-services.png"
+        "/images/cognirise/industries/pulse-industry-public-sector-civic-review-v1.png"
       ],
       "idempotencyKey": "cms-industry-contract-v8:industry:e201f6f730b8afa45524",
-      "requestDigest": "6a887aab7e308a3251e4909923cb2fc0418a40a598a766e0fdf7427d2b2713f7"
+      "requestDigest": "4dbfee571c8172cbd39ccaca4d8364fff53b4877c900846dd365a5a9d05e0e83"
     },
     {
       "externalId": "industry:8c90ace640ac504ab64a",
@@ -3753,8 +3753,8 @@
           "selectedWork": {
             "description": "Cognirise brings consulting, engineering, data, platform and change capabilities together to redesign a complete school, university or authority journey and establish the shared layer that lets evidence-backed practices scale."
           },
-          "image": "/images/cognirise/industries/pulse-industry-education-campus-v3.png",
-          "imageAlt": "A sunlit education campus atrium connects library shelves, tiered learning spaces and glazed science rooms along restrained violet and coral light paths.",
+          "image": "/images/cognirise/industries/pulse-industry-education-campus-v4.png",
+          "imageAlt": "A sunlit education campus atrium connects library shelves, learning stairs and glazed science rooms through purposeful violet Pulse routes.",
           "variant": "network",
           "pressures": [
             {
@@ -4177,10 +4177,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/industries/pulse-industry-education-campus-v3.png"
+        "/images/cognirise/industries/pulse-industry-education-campus-v4.png"
       ],
       "idempotencyKey": "cms-industry-education-successor-v12:industry:8c90ace640ac504ab64a",
-      "requestDigest": "774310ac4f6f7de6f12c874db6bc98efb476719aedffcd0364cc1587e18d5138"
+      "requestDigest": "a6d0f44bb76e41677c77c75373859d56df6712552b5f1aeb4b660c3394eed969"
     },
     {
       "externalId": "framework:agent-authority-model-v1",
@@ -5677,14 +5677,14 @@
       ]
     },
     {
-      "externalId": "asset:2b97a4644d4df2519e73",
-      "idempotencyKey": "cms-media-binary-v1:asset:2b97a4644d4df2519e73:4715b760ca0f30d5e69968f2e8a6225ba9acdd61fbfd6ac3eae41726b7937a0a",
-      "filename": "pulse-industry-education-campus-v3.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-campus-v3.png",
-      "publicPath": "/images/cognirise/industries/pulse-industry-education-campus-v3.png",
-      "checksum": "4715b760ca0f30d5e69968f2e8a6225ba9acdd61fbfd6ac3eae41726b7937a0a",
+      "externalId": "asset:54a14f79308ea4d8a11c",
+      "idempotencyKey": "cms-media-binary-v1:asset:54a14f79308ea4d8a11c:46087ebf4530fc1a2cee82571273a4316723b332fb818afff33b39112b404dac",
+      "filename": "pulse-industry-education-campus-v4.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-campus-v4.png",
+      "publicPath": "/images/cognirise/industries/pulse-industry-education-campus-v4.png",
+      "checksum": "46087ebf4530fc1a2cee82571273a4316723b332fb818afff33b39112b404dac",
       "mimeType": "image/png",
-      "byteSize": 1909265,
+      "byteSize": 1872116,
       "width": 1024,
       "height": 1024,
       "cmsOwnership": "cms-candidate",
@@ -5694,12 +5694,12 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "A sunlit education campus atrium connects library shelves, tiered learning spaces and glazed science rooms along restrained violet and coral light paths.",
+      "altText": "A sunlit education campus atrium connects library shelves, learning stairs and glazed science rooms through purposeful violet Pulse routes.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "9d95424e539419c2ca968934e729135f22ad5e123b58cea6bca401393797cf20",
+      "requestDigest": "eddac64bb143c6165df4dbea9585219caae7155a029a0793460443ef5cd05f2a",
       "historicalReceipts": [],
       "acceptedPriorRequestDigests": []
     },
@@ -5980,14 +5980,14 @@
       ]
     },
     {
-      "externalId": "asset:1f2bc243d3d62cb6da04",
-      "idempotencyKey": "cms-media-binary-v1:asset:1f2bc243d3d62cb6da04:942dfbcb83fc0264f06f4ba60e7511670973fe75b14ada8d3b144a155918ec4b",
-      "filename": "pulse-industry-public-sector-services.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-public-sector-services.png",
-      "publicPath": "/images/cognirise/industries/pulse-industry-public-sector-services.png",
-      "checksum": "942dfbcb83fc0264f06f4ba60e7511670973fe75b14ada8d3b144a155918ec4b",
+      "externalId": "asset:4eddec2864867be55c3f",
+      "idempotencyKey": "cms-media-binary-v1:asset:4eddec2864867be55c3f:39ea08d936bcb804867695096a863b9d341c61c509f2c519eb7a17274604c2cc",
+      "filename": "pulse-industry-public-sector-civic-review-v1.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-public-sector-civic-review-v1.png",
+      "publicPath": "/images/cognirise/industries/pulse-industry-public-sector-civic-review-v1.png",
+      "checksum": "39ea08d936bcb804867695096a863b9d341c61c509f2c519eb7a17274604c2cc",
       "mimeType": "image/png",
-      "byteSize": 2446012,
+      "byteSize": 1461131,
       "width": 1536,
       "height": 1024,
       "cmsOwnership": "cms-candidate",
@@ -5997,27 +5997,14 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "Citizens receiving documents and support at an accessible civic service centre linked by luminous service routes.",
+      "altText": "A light-filled civic atrium where a public service review is connected by purposeful violet and coral routes.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "e5c6ee5029f6a1d9357de181d89bedc486fca513c250f2930297ff15b4d94b92",
-      "historicalReceipts": [
-        {
-          "externalId": "asset:1f2bc243d3d62cb6da04",
-          "idempotencyKey": "cms-media-inventory-v3:asset:1f2bc243d3d62cb6da04",
-          "replacementIdempotencyKey": "cms-media-binary-v1:asset:1f2bc243d3d62cb6da04:942dfbcb83fc0264f06f4ba60e7511670973fe75b14ada8d3b144a155918ec4b",
-          "requestDigest": "dbdcf634521fd5acc1ae37a646ac3c4dfc0b8abdcebefa197d65e049034c98f8",
-          "acceptedRequestDigests": [
-            "dbdcf634521fd5acc1ae37a646ac3c4dfc0b8abdcebefa197d65e049034c98f8"
-          ]
-        }
-      ],
-      "acceptedPriorRequestDigests": [
-        "dbdcf634521fd5acc1ae37a646ac3c4dfc0b8abdcebefa197d65e049034c98f8",
-        "1593c76f0a411d7dda094500cf71a0a14fa31eeb55328771bca63db7c1985eeb"
-      ]
+      "requestDigest": "95978a04b3f395e1e4c31a15517cbeefbc6f109b106d164967737270e6ac56c3",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
     },
     {
       "externalId": "asset:ce6e9786500aa02af86d",

@@ -18,6 +18,17 @@ test("previews disclosures without making their triggers navigation links", () =
   assert.match(source, /<Link href=\{industry\.href\} className="home-industry-link"/);
 });
 
+test("supports a compact overview-only layout without changing the shared homepage default", () => {
+  assert.match(source, /compact\?: boolean/);
+  assert.match(source, /compact = false/);
+  assert.match(source, /home-industry-disclosure--compact/);
+  assert.match(source, /home-industry-disclosure--compact[\s\S]*home-industry-row\{height:196px\}/);
+  assert.match(source, /home-industry-disclosure--compact \.home-industry-row:has\(\.home-industry-item\.active\) \.home-industry-item\.active\{grid-template-rows:130px minmax\(0,1fr\)\}/);
+  assert.match(source, /home-industry-disclosure--compact \.home-industry-orientation\{font-size:12px/);
+  assert.match(source, /home-industry-disclosure--compact \.home-industry-detail\{font-size:12px/);
+  assert.match(source, /@media\(max-width:767px\)[\s\S]*home-industry-disclosure--compact \.home-industry-row:has\(\.home-industry-item\.active\)\{height:auto\}/);
+});
+
 test("preserves responsive visuals and reduced-motion behavior", () => {
   assert.match(source, /@media\(max-width:767px\)/);
   assert.match(source, /@media\(prefers-reduced-motion:reduce\)/);

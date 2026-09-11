@@ -20,6 +20,7 @@
     "cms:verify-banking-publication": "tsx ./src/cms/banking-publication-verify.ts",
     "cms:publish-industry-images": "tsx ./src/cms/industry-cutover.ts",
     "cms:publish-education-hero": "tsx ./src/cms/industry-cutover.ts --slug=education",
+    "cms:publish-public-sector-hero": "tsx ./src/cms/industry-cutover.ts --slug=public-sector",
     "cms:reconcile-site-heroes": "tsx ./src/cms/hero-reconciliation.ts",
     "cms:reconcile-site-hero-media": "tsx ./src/cms/hero-reconciliation.ts --media-only",
     "cms:reconcile-methodologies-hero": "tsx ./src/cms/methodologies-reconciliation.ts",
