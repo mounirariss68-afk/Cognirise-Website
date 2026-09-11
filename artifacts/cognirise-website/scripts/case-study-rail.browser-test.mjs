@@ -331,6 +331,117 @@ async function clickUntilDisabled(label) {
   throw new Error(`${label} did not reach a disabled endpoint`);
 }
 
+async function railAlignment(label) {
+  const alignment = await evaluate(`(() => {
+    const cards = [...document.querySelectorAll(".case-study-rail .work-card--editorial")];
+    const rects = (selector) => cards.map((card) => card.querySelector(selector)?.getBoundingClientRect());
+    const intros = rects(".work-card__intro");
+    const details = rects(".work-card__details");
+    const media = rects(".case-rendition img, .case-interface");
+    const spread = (rectangles, edge) => {
+      const values = rectangles.filter(Boolean).map((rect) => rect[edge]);
+      if (!values.length) return Infinity;
+      return Math.max(...values) - Math.min(...values);
+    };
+    const detailsToMediaGaps = cards.map((card) => {
+      const detailsRect = card.querySelector(".work-card__details")?.getBoundingClientRect();
+      const mediaRect = card.querySelector(".case-rendition img, .case-interface")?.getBoundingClientRect();
+      return detailsRect && mediaRect ? mediaRect.top - detailsRect.bottom : Infinity;
+    });
+    return {
+      cards: cards.length,
+      intros: intros.filter(Boolean).length,
+      details: details.filter(Boolean).length,
+      media: media.filter(Boolean).length,
+      introBottomSpread: spread(intros, "bottom"),
+      detailsBottomSpread: spread(details, "bottom"),
+      maxDetailsToMediaGap: detailsToMediaGaps.length ? Math.max(...detailsToMediaGaps.map((gap) => Math.abs(gap))) : Infinity,
+      detailsToMediaGaps,
+    };
+  })()`);
+  assert.ok(alignment.cards > 1, `[${label}] rail did not expose enough cards for alignment checks`);
+  assert.equal(alignment.intros, alignment.cards, `[${label}] every card needs an intro row`);
+  assert.equal(alignment.details, alignment.cards, `[${label}] every card needs a details row`);
+  assert.equal(alignment.media, alignment.cards, `[${label}] every card needs a visual row`);
+  assert.ok(alignment.introBottomSpread < 1, `[${label}] intro bottoms drift across cards: ${alignment.introBottomSpread}px`);
+  assert.ok(alignment.detailsBottomSpread < 1, `[${label}] details bottoms drift across cards: ${alignment.detailsBottomSpread}px`);
+  assert.ok(alignment.maxDetailsToMediaGap < 0.5, `[${label}] details-to-image gap is not zero: ${JSON.stringify(alignment.detailsToMediaGaps)}`);
+  return alignment;
+}
+
+async function dispatchWheelBurst({ deltaX = 0, deltaY = 0, shiftKey = false, count = 1, interval = 0 }) {
+  if (!interval && count > 1) {
+    await evaluate(`(() => {
+      const target = document.querySelector(".case-study-rail .case-rendition img, .case-study-rail [aria-roledescription='carousel']");
+      for (let index = 0; index < ${count}; index += 1) {
+        target.dispatchEvent(new WheelEvent("wheel", {
+          bubbles: true,
+          cancelable: true,
+          deltaX: ${deltaX},
+          deltaY: ${deltaY},
+          shiftKey: ${shiftKey},
+        }));
+      }
+    })()`);
+    return;
+  }
+  for (let index = 0; index < count; index += 1) {
+    await dispatchWheel({ deltaX, deltaY, shiftKey });
+    if (interval) await delay(interval);
+  }
+}
+
+async function waitForRailSettle(timeout = 1800) {
+  const deadline = Date.now() + timeout;
+  let previous = await evaluate(stateExpression);
+  let stableSamples = 0;
+  while (Date.now() < deadline) {
+    await delay(80);
+    const current = await evaluate(stateExpression);
+    if (Math.abs(current.first - previous.first) < 0.5) {
+      stableSamples += 1;
+      if (stableSamples >= 3) return current;
+    } else {
+      stableSamples = 0;
+    }
+    previous = current;
+  }
+  throw new Error("Case-study rail did not settle before the next gesture");
+}
+
+async function saveRailScreenshot(width, height) {
+  const imageFound = await evaluate(`(() => {
+    const image = document.querySelector(".case-study-rail .case-rendition img");
+    if (!image) return false;
+    image.scrollIntoView({ block: "center", behavior: "instant" });
+    return true;
+  })()`);
+  if (!imageFound) throw new Error(`Case-study rail screenshot ${width}x${height} has no image target`);
+  await delay(350);
+  for (let attempt = 0; attempt < 60; attempt += 1) {
+    const mediaReady = await evaluate(`(() => {
+      const viewport = document.querySelector('.case-study-rail [aria-roledescription="carousel"] > .overflow-hidden').getBoundingClientRect();
+      const images = [...document.querySelectorAll(".case-study-rail .case-rendition img")].filter((image) => {
+        const rect = image.getBoundingClientRect();
+        return rect.bottom > 0 && rect.top < innerHeight
+          && rect.right > viewport.left + 1 && rect.left < viewport.right - 1;
+      });
+      return {
+        count: images.length,
+        ready: images.length > 0 && images.every((image) => image.complete && image.naturalWidth > 0),
+      };
+    })()`);
+    if (mediaReady.ready) break;
+    if (attempt === 59) throw new Error(`Case-study rail screenshot ${width}x${height} has no loaded visible image`);
+    await delay(100);
+  }
+  await waitForRailSettle();
+  const screenshot = await send("Page.captureScreenshot", { format: "png" });
+  const path = `/tmp/case-study-rail-${width}x${height}.png`;
+  await writeFile(path, Buffer.from(screenshot.data, "base64"));
+  console.log(`Saved case-study rail screenshot ${path}`);
+}
+
 try {
   await send("Page.enable");
   await send("Runtime.enable");
@@ -435,7 +546,7 @@ try {
     (process.env.PULSE_CASE_STUDY_LAYOUT_WIDTHS || "")
       .split(",")
       .map((value) => Number(value.trim()))
-      .filter((value) => Number.isFinite(value)),
+      .filter((value) => Number.isFinite(value) && value > 0),
   );
   for (const [width, height, expected] of layoutViewports.filter(([candidate]) =>
     !requestedLayoutWidths.size || requestedLayoutWidths.has(candidate)
@@ -475,10 +586,39 @@ try {
     assert.equal(layout.imagesAligned, true, `Case images must share top and bottom edges at ${width}px`);
     assert.equal(layout.complete && layout.readable && layout.contained && layout.captionInFlow, true);
     if (width === 1366 || width === 1440) assert.ok(layout.width >= 395 && layout.width <= 430);
+    await railAlignment(`${width}x${height} first position`);
+    if (width === 1366 || width === 1440) await saveRailScreenshot(width, height);
     console.log(`Case layout ${width}×${height}: ${layout.visible} full cards, ${layout.width.toFixed(1)}px images.`);
   }
   await send("Emulation.setDeviceMetricsOverride", { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
   await delay(500);
+  await clickUntilDisabled("Previous slide");
+  await railAlignment("1366x768 before long-text mutation");
+  await evaluate(`(() => {
+    const target = document.querySelector(".case-study-rail .work-card--editorial .work-card__intro > p");
+    if (!target) throw new Error("The first rail card has no intro paragraph to mutate");
+    window.__caseRailOriginalIntroText = target.textContent;
+    target.textContent = \`${"Long-form operating context that must remain readable while every rail card keeps its shared text-row baseline. ".repeat(24)}\`;
+  })()`);
+  await delay(150);
+  await railAlignment("1366x768 long-text mutation");
+  await evaluate(`(() => {
+    const target = document.querySelector(".case-study-rail .work-card--editorial .work-card__intro > p");
+    if (!target || typeof window.__caseRailOriginalIntroText !== "string") {
+      throw new Error("The long-text rail mutation could not be restored");
+    }
+    target.textContent = window.__caseRailOriginalIntroText;
+    delete window.__caseRailOriginalIntroText;
+  })()`);
+  await delay(150);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+  await delay(500);
+  await clickUntilDisabled("Previous slide");
+  await railAlignment("1440x900 after long-text restore and resize");
+  await saveRailScreenshot(1440, 900);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
+  await delay(500);
+  await saveRailScreenshot(1366, 768);
   await evaluate(`document.documentElement.style.scrollBehavior = "auto"; document.querySelector(".case-study-rail").scrollIntoView({ block: "center" })`);
   await delay(600);
 
@@ -540,6 +680,7 @@ try {
   const second = await evaluate(stateExpression);
   assert.ok(second.first < start.first - 100);
   assert.equal(second.previousDisabled, false);
+  await railAlignment("1366x768 later second position");
   const mediaAfterAdvance = await evaluate(`(() => [...document.querySelectorAll(".case-study-rail [data-case-media]")].map((frame) => {
     const image = frame.querySelector("img");
     return {
@@ -557,6 +698,75 @@ try {
   await delay(700);
   const returned = await evaluate(stateExpression);
   assert.equal(returned.previousDisabled, true);
+  await railAlignment("1366x768 after reverse to first");
+
+  await waitForRailSettle();
+  const tinyGestureStart = await evaluate(stateExpression);
+  await dispatchWheelBurst({ deltaX: 2, count: 3, interval: 10 });
+  await delay(120);
+  const tinyGesturePartial = await evaluate(stateExpression);
+  assert.ok(Math.abs(tinyGesturePartial.first - tinyGestureStart.first) < 2, "A sub-threshold trackpad gesture advanced the rail");
+  await dispatchWheelBurst({ deltaX: 2, count: 20, interval: 10 });
+  await delay(700);
+  const tinyGestureAdvance = await evaluate(stateExpression);
+  assert.ok(tinyGestureAdvance.first < tinyGestureStart.first - 100, "Small horizontal deltas did not accumulate into one rail gesture");
+  const afterMomentum = await evaluate(stateExpression);
+  assert.ok(Math.abs(afterMomentum.first - tinyGestureAdvance.first) < 2, "Trackpad momentum triggered more than one rail advance");
+  await dispatchWheelBurst({ deltaX: -2, count: 6, interval: 10 });
+  await delay(700);
+  await waitForRailSettle();
+  const tinyGestureReverse = await evaluate(stateExpression);
+  assert.equal(tinyGestureReverse.previousDisabled, true);
+  assert.ok(Math.abs(tinyGestureReverse.first - tinyGestureStart.first) < 2, "Accumulated reverse deltas did not return to the first case");
+  await railAlignment("1366x768 after small-delta accumulation and reverse");
+
+  const railClickPoint = await evaluate(`(() => {
+    const rect = document.querySelector('.case-study-rail [aria-roledescription="carousel"]').getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + Math.min(rect.height / 2, 220) };
+  })()`);
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: railClickPoint.x, y: railClickPoint.y });
+  await send("Input.dispatchMouseEvent", { type: "mousePressed", x: railClickPoint.x, y: railClickPoint.y, button: "left", clickCount: 1 });
+  await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: railClickPoint.x, y: railClickPoint.y, button: "left", clickCount: 1 });
+  const clickedRailFocus = await evaluate(`(() => {
+    const active = document.activeElement;
+    return {
+      activeCarousel: active?.matches('.case-study-rail [aria-roledescription="carousel"]') === true,
+      activeRail: active?.matches(".case-study-rail") === true,
+    };
+  })()`);
+  assert.equal(clickedRailFocus.activeCarousel, true, "Clicking the rail did not focus its keyboard carousel region");
+  assert.equal(clickedRailFocus.activeRail, false);
+  await evaluate(`(() => {
+    const section = document.querySelector(".case-study-rail");
+    const carousel = section.querySelector('[aria-roledescription="carousel"]');
+    const sentinel = document.createElement("button");
+    sentinel.type = "button";
+    sentinel.textContent = "keyboard focus sentinel";
+    sentinel.dataset.caseRailFocusSentinel = "true";
+    sentinel.style.cssText = "position:absolute;left:-10000px;top:-10000px";
+    section.insertBefore(sentinel, carousel);
+    sentinel.focus();
+  })()`);
+  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+  const railTabFocus = await evaluate(`(() => {
+    const carousel = document.querySelector('.case-study-rail [aria-roledescription="carousel"]');
+    const style = getComputedStyle(carousel);
+    const focused = document.activeElement === carousel;
+    document.querySelector(".case-study-rail [data-case-rail-focus-sentinel]")?.remove();
+    return {
+      focused,
+      focusVisible: carousel.matches(":focus-visible"),
+      focusTreatment: style.outlineStyle !== "none" || style.boxShadow !== "none",
+    };
+  })()`);
+  assert.equal(railTabFocus.focused, true, "Tab skipped the keyboard-focusable carousel region");
+  assert.equal(railTabFocus.focusVisible, true, "Tab focus did not expose the carousel region as focus-visible");
+  assert.equal(railTabFocus.focusTreatment, true, "Carousel focus has no visible outline or ring");
+  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "ArrowRight", code: "ArrowRight", windowsVirtualKeyCode: 39 });
+  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "ArrowRight", code: "ArrowRight", windowsVirtualKeyCode: 39 });
+  await delay(700);
+  assert.ok((await evaluate(stateExpression)).first < tinyGestureStart.first - 100, "Focused rail did not respond to an arrow key");
 
   await evaluate(`(() => {
     const carousel = document.querySelector('.case-study-rail [aria-roledescription="carousel"]');
@@ -576,15 +786,23 @@ try {
   await delay(700);
   const end = await evaluate(stateExpression);
   assert.equal(end.nextDisabled, true);
+  await railAlignment("1366x768 at next endpoint");
   await dispatchWheel({ deltaX: 120 });
   await delay(500);
   const endAfterWheel = await evaluate(stateExpression);
   assert.equal(endAfterWheel.nextDisabled, true);
   assert.ok(Math.abs(endAfterWheel.first - end.first) < 2);
+  await dispatchWheelBurst({ deltaX: 2, count: 20 });
+  await delay(700);
+  const endAfterTinyMomentum = await evaluate(stateExpression);
+  assert.equal(endAfterTinyMomentum.nextDisabled, true);
+  assert.ok(Math.abs(endAfterTinyMomentum.first - end.first) < 2, "Accumulated momentum moved beyond the next endpoint");
+  await railAlignment("1366x768 after repeated endpoint gestures");
 
   await clickUntilDisabled("Previous slide");
   await delay(700);
   const reset = await evaluate(stateExpression);
+  await railAlignment("1366x768 after button reset");
   // Expanded text can put the image below the viewport; drag an actual visible image.
   await evaluate(`document.querySelector(".case-study-rail .case-rendition, .case-study-rail .case-interface").scrollIntoView({ block: "center", behavior: "instant" })`);
   await delay(300);
@@ -607,6 +825,89 @@ try {
   await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: dragOrigin.x - 180, y: dragOrigin.y, button: "left", clickCount: 1 });
   await delay(700);
   assert.ok((await evaluate(stateExpression)).first < reset.first - 100, "Drag did not advance the case-study rail");
+  await railAlignment("1366x768 after pointer drag");
+
+  await clickUntilDisabled("Previous slide");
+  await delay(700);
+  await evaluate(`document.querySelector('button[aria-label="Next slide"]').click()`);
+  await delay(700);
+  const tabOrigin = await evaluate(`(() => {
+    const previous = document.querySelector('button[aria-label="Previous slide"]');
+    previous.focus();
+    return {
+      activePrevious: document.activeElement === previous,
+      previousDisabled: previous.disabled,
+    };
+  })()`);
+  assert.equal(tabOrigin.activePrevious, true);
+  assert.equal(tabOrigin.previousDisabled, false);
+  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+  const tabFocus = await evaluate(`(() => {
+    const next = document.querySelector('button[aria-label="Next slide"]');
+    const style = getComputedStyle(next);
+    return {
+      activeNext: document.activeElement === next,
+      focusVisible: next.matches(":focus-visible"),
+      focusTreatment: style.outlineStyle !== "none" || style.boxShadow !== "none",
+    };
+  })()`);
+  assert.equal(tabFocus.activeNext, true, "Tab did not move focus through the rail controls");
+  assert.equal(tabFocus.focusVisible, true, "Keyboard focus is not exposed with :focus-visible");
+  assert.equal(tabFocus.focusTreatment, true, "Keyboard focus has no visible outline or ring");
+
+  await waitForRailSettle();
+  const editableBefore = await evaluate(stateExpression);
+  const editableKey = await evaluate(`(() => {
+    const carousel = document.querySelector('.case-study-rail [aria-roledescription="carousel"]');
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = "editable key preservation";
+    input.style.cssText = "position:absolute;left:0;top:0;width:1px;height:1px";
+    carousel.append(input);
+    input.focus();
+    const event = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true });
+    const dispatchResult = input.dispatchEvent(event);
+    const result = {
+      activeInput: document.activeElement === input,
+      defaultPrevented: event.defaultPrevented,
+      dispatchResult,
+      value: input.value,
+    };
+    input.remove();
+    return result;
+  })()`);
+  await delay(700);
+  assert.equal(editableKey.activeInput, true);
+  assert.equal(editableKey.defaultPrevented, false, "Carousel intercepted an arrow key from an editable control");
+  assert.equal(editableKey.dispatchResult, true);
+  assert.equal(editableKey.value, "editable key preservation");
+  const editableAfter = await evaluate(stateExpression);
+  assert.ok(Math.abs(editableAfter.first - editableBefore.first) < 2, "Editable arrow-key input moved the carousel");
+
+  const outsideKey = await evaluate(`(() => {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = "outside carousel";
+    input.style.cssText = "position:absolute;left:-100px;top:-100px";
+    document.body.append(input);
+    input.focus();
+    const event = new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true });
+    const dispatchResult = input.dispatchEvent(event);
+    const result = {
+      activeInput: document.activeElement === input,
+      defaultPrevented: event.defaultPrevented,
+      dispatchResult,
+    };
+    input.remove();
+    return result;
+  })()`);
+  await delay(700);
+  assert.equal(outsideKey.activeInput, true);
+  assert.equal(outsideKey.defaultPrevented, false);
+  assert.equal(outsideKey.dispatchResult, true);
+  const outsideAfter = await evaluate(stateExpression);
+  assert.ok(Math.abs(outsideAfter.first - editableBefore.first) < 2, "A non-carousel arrow key moved the rail");
 
   await clickUntilDisabled("Previous slide");
   await delay(700);
@@ -636,11 +937,13 @@ try {
   const mobileEnd = await evaluate(stateExpression);
   assert.equal(mobileEnd.nextDisabled, true);
   assert.ok(mobileEnd.first < mobileStart.first - 100, "Mobile controls did not traverse the rail");
+  await railAlignment("390x844 at next endpoint");
   await clickUntilDisabled("Previous slide");
   await delay(700);
   const mobileReset = await evaluate(stateExpression);
   assert.equal(mobileReset.previousDisabled, true);
   assert.ok(Math.abs(mobileReset.first - mobileStart.first) < 2, "Mobile controls did not return to the first case");
+  await railAlignment("390x844 after button reset");
 
   await send("Emulation.setDeviceMetricsOverride", {
     width: 1366,
@@ -668,6 +971,35 @@ try {
   const vertical = await evaluate(stateExpression);
   assert.ok(vertical.scrollY > verticalStart.scrollY);
   assert.ok(Math.abs(vertical.first - reset.first) < 2);
+  await railAlignment("1366x768 after native vertical scroll");
+
+  await send("Emulation.setEmulatedMedia", {
+    features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+  });
+  await delay(250);
+  const reducedMotion = await evaluate(`(() => {
+    const carousel = document.querySelector('.case-study-rail [aria-roledescription="carousel"]');
+    return {
+      matches: matchMedia("(prefers-reduced-motion: reduce)").matches,
+      transitionDuration: getComputedStyle(carousel).transitionDuration,
+      animationDuration: getComputedStyle(carousel).animationDuration,
+    };
+  })()`);
+  assert.equal(reducedMotion.matches, true, "Reduced-motion media emulation was not applied");
+  const reducedMotionStart = await evaluate(stateExpression);
+  await evaluate(`document.querySelector('button[aria-label="Next slide"]').click()`);
+  await delay(700);
+  const reducedMotionNext = await evaluate(stateExpression);
+  assert.ok(reducedMotionNext.first < reducedMotionStart.first - 100, "Next button stopped working under reduced motion");
+  await evaluate(`document.querySelector('button[aria-label="Previous slide"]').click()`);
+  await delay(700);
+  const reducedMotionReset = await evaluate(stateExpression);
+  assert.ok(Math.abs(reducedMotionReset.first - reducedMotionStart.first) < 2, "Previous button stopped working under reduced motion");
+  await railAlignment("1366x768 reduced-motion button round trip");
+  await send("Emulation.setEmulatedMedia", {
+    features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
+  });
+  await delay(150);
 
   const eligibleFullRecord = await evaluate(`fetch("/api/public/content?kind=case-study&market=uae&locale=en&pageSize=100")
     .then((response) => response.ok ? response.json() : null)

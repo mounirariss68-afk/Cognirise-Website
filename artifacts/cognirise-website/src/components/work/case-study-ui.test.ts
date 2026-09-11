@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { approvedPublishedCases, caseSectors, normalizeCaseFilterValue, type RelatedCase } from "./case-study-model";
-import { horizontalCarouselAction } from "./case-study-ui";
+import { horizontalCarouselAction, horizontalCarouselDelta } from "./case-study-ui";
 import { readFile } from "node:fs/promises";
 
 const base = {
@@ -78,9 +78,17 @@ test("CSS ensures images are fully contained and scale properly", async () => {
   assert.match(css, /\.case-study-rail \.case-rendition figcaption\s*\{\s*position: static;/);
   assert.match(css, /\.case-study-rail \.work-card__details ul\s*\{\s*font-size: 13px;/);
   assert.match(css, /\.work-card--editorial \.case-rendition figcaption\s*\{[\s\S]*?background:\s*#071936;/);
-  assert.match(css, /\.case-study-rail__slide\s*\{[\s\S]*?display:\s*flex;[\s\S]*?align-items:\s*stretch;/);
+  assert.match(css, /\.case-study-rail__slide\s*\{[\s\S]*?display:\s*grid;[\s\S]*?grid-template-rows:\s*subgrid;[\s\S]*?grid-row:\s*span 3;[\s\S]*?align-items:\s*stretch;/);
   assert.match(css, /\.case-study-rail \.work-card--editorial\s*\{[\s\S]*?align-self:\s*stretch;[\s\S]*?height:\s*auto;[\s\S]*?width:\s*100%;/);
-  assert.match(css, /\.case-study-rail \.work-card__visual\s*\{[\s\S]*?margin-top:\s*auto;/);
+  assert.match(css, /\.case-study-rail \.work-card__visual\s*\{[\s\S]*?margin-top:\s*0;/);
+  // Guard every matching block, not just the first intended declaration:
+  // a later legacy rule can silently break the nested subgrid cascade.
+  for (const [, declarations] of css.matchAll(/\.case-study-rail__slide\s*\{([^}]*)\}/g)) {
+    assert.doesNotMatch(declarations, /display:\s*(?!grid\b)[\w-]+/);
+  }
+  for (const [, declarations] of css.matchAll(/\.case-study-rail \.work-card__visual\s*\{([^}]*)\}/g)) {
+    assert.doesNotMatch(declarations, /margin-top:\s*auto/);
+  }
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.case-study-rail \.case-rendition figcaption\s*\{[\s\S]*?min-height:\s*45px;[\s\S]*?display:\s*flex;/);
 });
 
@@ -94,13 +102,20 @@ test("carousel keeps drag enabled and synchronizes both end controls after reini
   assert.doesNotMatch(rail, /fallbackSelector/);
   assert.match(rail, /ref=\{previousControl\} aria-label="Previous slide"/);
   assert.match(rail, /ref=\{nextControl\} aria-label="Next slide"/);
-  assert.match(rail, /event\.shiftKey && Math\.abs\(event\.deltaY\) >= 8/);
+  assert.match(rail, /input\.shiftKey && input\.deltaY/);
   assert.match(rail, /draggable=\{false\}/);
   assert.match(rail, /duration: reducedMotion \? 0 : 25/);
   assert.match(rail, /loading="lazy"/);
   assert.match(rail, /new IntersectionObserver/);
   assert.match(rail, /data-case-media=\{rendition\.url\}/);
   assert.match(rail, /src=\{shouldLoad \? rendition\.url : undefined\}/);
+  assert.match(rail, /tabIndex=\{0\}/);
+  assert.match(rail, /focus\(\{ preventScroll: true \}\)/);
+  assert.match(rail, /horizontalWheelDelta/);
+  assert.match(rail, /HORIZONTAL_WHEEL_IDLE_RESET_MS/);
+  assert.match(carousel, /onKeyDown=\{handleKeyDown\}/);
+  assert.doesNotMatch(carousel, /onKeyDownCapture/);
+  assert.match(carousel, /isEditableTarget/);
   assert.match(carousel, /off\('reInit', onSelect\)/);
 });
 
@@ -130,4 +145,26 @@ test("horizontal wheel navigation stops at both ends instead of reversing", () =
     canScrollPrevious: true,
     canScrollNext: false,
   }), "previous");
+});
+
+test("horizontal wheel intent accumulates, protects momentum, and preserves modifiers", () => {
+  const gesture = { deltaY: 0, shiftKey: false };
+  assert.equal(horizontalCarouselDelta({ ...gesture, deltaX: 3 }), 3);
+  assert.equal(horizontalCarouselAction({
+    ...gesture,
+    deltaX: 3,
+    canScrollPrevious: true,
+    canScrollNext: true,
+  }), null);
+  assert.equal(horizontalCarouselAction({
+    ...gesture,
+    deltaX: 9,
+    canScrollPrevious: true,
+    canScrollNext: true,
+  }), "next");
+  assert.equal(horizontalCarouselDelta({ deltaX: 0, deltaY: 4, shiftKey: true }), 4);
+  assert.equal(horizontalCarouselDelta({ deltaX: 0, deltaY: 120, shiftKey: false }), 0);
+  assert.equal(horizontalCarouselDelta({ deltaX: 120, deltaY: 0, shiftKey: false, ctrlKey: true }), 0);
+  assert.equal(horizontalCarouselDelta({ deltaX: -120, deltaY: 0, shiftKey: false, metaKey: true }), 0);
+  assert.equal(horizontalCarouselDelta({ deltaX: 120, deltaY: 0, shiftKey: false, altKey: true }), 0);
 });

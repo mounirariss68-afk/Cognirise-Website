@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { Link } from "wouter";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import type { CmsRecord } from "@/lib/cms";
@@ -75,21 +76,48 @@ type LooseCase = CmsRecord & {
 
 export type PublicCaseStudy = LooseCase;
 
-export function horizontalCarouselAction(input: {
+type HorizontalCarouselInput = {
   deltaX: number;
   deltaY: number;
   shiftKey: boolean;
+  altKey?: boolean;
+  ctrlKey?: boolean;
+  metaKey?: boolean;
+};
+
+const HORIZONTAL_WHEEL_THRESHOLD = 8;
+const HORIZONTAL_WHEEL_IDLE_RESET_MS = 320;
+
+export function horizontalCarouselDelta(input: HorizontalCarouselInput): number {
+  if (input.altKey || input.ctrlKey || input.metaKey) return 0;
+  if (Math.abs(input.deltaX) > Math.abs(input.deltaY) && input.deltaX) return input.deltaX;
+  if (input.shiftKey && input.deltaY) return input.deltaY;
+  return 0;
+}
+
+export function horizontalCarouselAction(input: HorizontalCarouselInput & {
   canScrollPrevious: boolean;
   canScrollNext: boolean;
 }): "previous" | "next" | null {
-  const horizontalDelta = Math.abs(input.deltaX) >= 8 && Math.abs(input.deltaX) > Math.abs(input.deltaY)
-    ? input.deltaX
-    : input.shiftKey && Math.abs(input.deltaY) >= 8
-      ? input.deltaY
-      : 0;
+  const horizontalDelta = horizontalCarouselDelta(input);
+  if (Math.abs(horizontalDelta) < HORIZONTAL_WHEEL_THRESHOLD) return null;
   if (!horizontalDelta) return null;
   if (horizontalDelta > 0) return input.canScrollNext ? "next" : null;
   return input.canScrollPrevious ? "previous" : null;
+}
+
+function isEditableControl(target: EventTarget | null) {
+  if (typeof Element === "undefined" || !(target instanceof Element)) return false;
+  const control = target.closest("input, textarea, select, [contenteditable]");
+  return Boolean(control && (
+    ["INPUT", "TEXTAREA", "SELECT"].includes(control.tagName)
+    || control.getAttribute("contenteditable") !== "false"
+  ));
+}
+
+function isRailInteractiveTarget(target: EventTarget | null) {
+  if (typeof Element === "undefined" || !(target instanceof Element)) return false;
+  return Boolean(target.closest("a, button, input, textarea, select, [contenteditable], [role='button']"));
 }
 
 const value = (item: LooseCase, key: "stage" | "impact") =>
@@ -330,40 +358,70 @@ export function CaseStudyRail({ cases }: { cases: LooseCase[] }) {
   const previousControl = useRef<HTMLButtonElement | null>(null);
   const nextControl = useRef<HTMLButtonElement | null>(null);
   const horizontalWheelLocked = useRef(false);
+  const horizontalWheelDelta = useRef(0);
+  const horizontalWheelIdleTimer = useRef<number | null>(null);
   const reducedMotion = useReducedMotionPreference();
   useSelectedWorkHashTarget(eligible.length);
   useEffect(() => {
     const root = carouselRoot.current;
     if (!root) return;
+    const resetHorizontalWheel = () => {
+      horizontalWheelLocked.current = false;
+      horizontalWheelDelta.current = 0;
+      horizontalWheelIdleTimer.current = null;
+    };
     const handleHorizontalWheel = (event: WheelEvent) => {
+      if (isEditableControl(event.target)) return;
+      const delta = horizontalCarouselDelta(event);
+      if (!delta) return;
       const previous = previousControl.current;
       const next = nextControl.current;
+      if (horizontalWheelIdleTimer.current !== null) {
+        window.clearTimeout(horizontalWheelIdleTimer.current);
+      }
+      horizontalWheelIdleTimer.current = window.setTimeout(resetHorizontalWheel, HORIZONTAL_WHEEL_IDLE_RESET_MS);
+      if (horizontalWheelLocked.current) {
+        event.preventDefault();
+        return;
+      }
+      if (horizontalWheelDelta.current && Math.sign(horizontalWheelDelta.current) !== Math.sign(delta)) {
+        horizontalWheelDelta.current = 0;
+      }
+      horizontalWheelDelta.current += delta;
       const action = horizontalCarouselAction({
-        deltaX: event.deltaX,
-        deltaY: event.deltaY,
-        shiftKey: event.shiftKey,
+        deltaX: horizontalWheelDelta.current,
+        deltaY: 0,
+        shiftKey: false,
         canScrollPrevious: Boolean(previous && !previous.disabled),
         canScrollNext: Boolean(next && !next.disabled),
       });
-      const isHorizontalIntent = Math.abs(event.deltaX) >= 8 && Math.abs(event.deltaX) > Math.abs(event.deltaY)
-        || event.shiftKey && Math.abs(event.deltaY) >= 8;
-      if (!isHorizontalIntent) return;
       event.preventDefault();
-      if (!action || horizontalWheelLocked.current) return;
+      if (!action) return;
       const control = action === "next" ? next : previous;
       if (!control) return;
       horizontalWheelLocked.current = true;
+      horizontalWheelDelta.current = 0;
       control.click();
-      window.setTimeout(() => { horizontalWheelLocked.current = false; }, 320);
     };
     root.addEventListener("wheel", handleHorizontalWheel, { passive: false });
-    return () => root.removeEventListener("wheel", handleHorizontalWheel);
+    return () => {
+      root.removeEventListener("wheel", handleHorizontalWheel);
+      if (horizontalWheelIdleTimer.current !== null) {
+        window.clearTimeout(horizontalWheelIdleTimer.current);
+        horizontalWheelIdleTimer.current = null;
+      }
+      resetHorizontalWheel();
+    };
   }, [eligible.length]);
   if (!eligible.length) return null;
+  const focusRailWithoutScrolling = (event: ReactMouseEvent<HTMLElement>) => {
+    if (isRailInteractiveTarget(event.target)) return;
+    carouselRoot.current?.focus({ preventScroll: true });
+  };
   return (
-    <section className="case-study-rail" id="selected-work" tabIndex={-1} aria-labelledby="case-studies-title">
+    <section className="case-study-rail" id="selected-work" tabIndex={-1} aria-labelledby="case-studies-title" onClick={focusRailWithoutScrolling}>
        <div className="case-study-rail__heading"><span className="case-study-rail__kicker">Cross-sector delivery</span><h2 id="case-studies-title">Case studies</h2><p>Solutions developed around real operating work, with the information flow and decision controls made visible.</p></div>
-       <Carousel ref={carouselRoot} opts={{ align: "start", loop: false, containScroll: "trimSnaps", watchDrag: true, duration: reducedMotion ? 0 : 25 }} aria-label="Case studies">
+       <Carousel ref={carouselRoot} tabIndex={0} opts={{ align: "start", loop: false, containScroll: "trimSnaps", watchDrag: true, duration: reducedMotion ? 0 : 25 }} aria-label="Case studies">
           <div className="case-study-rail__controls">
            <CarouselPrevious ref={previousControl} aria-label="Previous slide" className="static translate-y-0" />
            <CarouselNext ref={nextControl} aria-label="Next slide" className="static translate-y-0" />

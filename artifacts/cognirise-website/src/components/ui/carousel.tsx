@@ -39,6 +39,17 @@ function useCarousel() {
   return context;
 }
 
+function isEditableTarget(target: EventTarget | null) {
+  if (typeof Element === 'undefined' || !(target instanceof Element)) {
+    return false;
+  }
+  const control = target.closest('input, textarea, select, [contenteditable]');
+  return Boolean(control && (
+    ['INPUT', 'TEXTAREA', 'SELECT'].includes(control.tagName)
+    || control.getAttribute('contenteditable') !== 'false'
+  ));
+}
+
 const Carousel = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & CarouselProps
@@ -51,6 +62,7 @@ const Carousel = React.forwardRef<
       plugins,
       className,
       children,
+      onKeyDown: onKeyDownProp,
       ...props
     },
     ref,
@@ -84,6 +96,17 @@ const Carousel = React.forwardRef<
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
+        onKeyDownProp?.(event);
+        if (
+          event.defaultPrevented
+          || event.altKey
+          || event.ctrlKey
+          || event.metaKey
+          || event.shiftKey
+          || isEditableTarget(event.target)
+        ) {
+          return;
+        }
         if (event.key === 'ArrowLeft') {
           event.preventDefault();
           scrollPrev();
@@ -92,7 +115,7 @@ const Carousel = React.forwardRef<
           scrollNext();
         }
       },
-      [scrollPrev, scrollNext],
+      [onKeyDownProp, scrollPrev, scrollNext],
     );
 
     React.useEffect(() => {
@@ -134,11 +157,11 @@ const Carousel = React.forwardRef<
       >
         <div
           ref={ref}
-          onKeyDownCapture={handleKeyDown}
           className={cn('relative', className)}
           role="region"
           aria-roledescription="carousel"
           {...props}
+          onKeyDown={handleKeyDown}
         >
           {children}
         </div>

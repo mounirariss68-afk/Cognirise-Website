@@ -145,15 +145,30 @@
 
 .case-study-rail .work-card--editorial {
   overflow-wrap: anywhere;
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 3;
 }
 .case-study-rail__slide {
-  display: flex;
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 3;
   align-items: stretch;
+}
+.case-study-rail [aria-roledescription="carousel"] > .overflow-hidden > div {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 94%;
+  grid-template-rows: auto auto auto;
+}
+.case-study-rail [aria-roledescription="carousel"]:focus-visible {
+  outline: 3px solid #7659df;
+  outline-offset: 5px;
 }
 .case-study-rail .work-card__visual {
   display: flex;
   flex-direction: column;
-  margin-top: auto;
+  margin-top: 0;
 }
 .case-study-rail .work-card__intro {
   min-height: 0;
@@ -170,13 +185,19 @@
 }
 .case-study-rail .case-rendition {
   aspect-ratio: auto;
+  border-top: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 .case-study-rail .case-rendition img {
   aspect-ratio: 16 / 10;
+  flex: none;
 }
 .case-study-rail .case-rendition figcaption {
   position: static;
   font-size: 10px;
+  flex: 1;
 }
 
 @media (min-width: 1200px) {
@@ -185,17 +206,26 @@
   .case-study-rail__slide {
     flex-basis: calc(100% / 3);
   }
+  .case-study-rail [aria-roledescription="carousel"] > .overflow-hidden > div {
+    grid-auto-columns: calc(100% / 3);
+  }
 }
 
 @media (min-width: 960px) and (max-width: 1199px) {
   .case-study-rail__slide {
     flex-basis: 50%;
   }
+  .case-study-rail [aria-roledescription="carousel"] > .overflow-hidden > div {
+    grid-auto-columns: 50%;
+  }
 }
 
 @media (max-width: 959px) and (min-width: 761px) {
   .case-study-rail__slide {
     flex-basis: min(82vw, 760px);
+  }
+  .case-study-rail [aria-roledescription="carousel"] > .overflow-hidden > div {
+    grid-auto-columns: min(82vw, 760px);
   }
 }
 
