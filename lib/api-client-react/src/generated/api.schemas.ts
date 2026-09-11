@@ -1869,8 +1869,15 @@ export const MediaReviewDecisionDecision = {
   reject: 'reject',
 } as const;
 
+/**
+ * Approvals require both sourceRightsApproved and accessibilityApproved; rejections do not require either confirmation.
+ */
 export interface MediaReviewDecision {
   decision: MediaReviewDecisionDecision;
+  /** Publisher confirms the immutable source rights/access permission is documented and approved. */
+  sourceRightsApproved?: boolean;
+  /** Publisher confirms the immutable source accessibility review is complete and approved. */
+  accessibilityApproved?: boolean;
 }
 
 export interface MediaUpdate {

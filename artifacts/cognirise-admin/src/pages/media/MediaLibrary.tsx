@@ -43,6 +43,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import {
   buildHeroDraftContent,
@@ -534,6 +535,8 @@ export default function MediaLibrary() {
   const [editingAsset, setEditingAsset] = useState<ExtendedMediaAsset | null>(null);
   const [reviewAsset, setReviewAsset] = useState<ExtendedMediaAsset | null>(null);
   const [reviewDecision, setReviewDecision] = useState<"approve" | "reject" | null>(null);
+  const [sourceRightsApproved, setSourceRightsApproved] = useState(false);
+  const [accessibilityApproved, setAccessibilityApproved] = useState(false);
   const [downloadingAssetId, setDownloadingAssetId] = useState<string | null>(null);
 
   const { toast } = useToast();
@@ -677,7 +680,11 @@ export default function MediaLibrary() {
     try {
       const updated = await reviewMedia.mutateAsync({
         mediaId: reviewAsset.id,
-        data: { decision: reviewDecision },
+         data: {
+           decision: reviewDecision,
+           sourceRightsApproved,
+           accessibilityApproved,
+         },
       });
       queryClient.setQueriesData(
         { queryKey: getListMediaQueryKey() },
@@ -713,6 +720,8 @@ export default function MediaLibrary() {
             size="sm"
             onClick={() => {
               setReviewDecision(null);
+              setSourceRightsApproved(false);
+              setAccessibilityApproved(false);
               setReviewAsset(asset);
             }}
           >
@@ -1125,6 +1134,8 @@ export default function MediaLibrary() {
         onOpenChange={(open) => {
           if (!open && !reviewMedia.isPending) {
             setReviewDecision(null);
+            setSourceRightsApproved(false);
+            setAccessibilityApproved(false);
             setReviewAsset(null);
           }
         }}
@@ -1165,6 +1176,22 @@ export default function MediaLibrary() {
                   </p>
                 </div>
               )}
+              {reviewDecision === "approve" && (
+                <div className="space-y-3 rounded-md border border-amber-500/40 bg-amber-500/5 p-4">
+                  <p className="text-sm font-medium">Confirm source review gates</p>
+                  <p className="text-xs text-muted-foreground">
+                    Approval creates a new immutable metadata version; the original source version and binary remain unchanged.
+                  </p>
+                  <label className="flex items-start gap-2 text-sm">
+                    <Checkbox checked={sourceRightsApproved} onCheckedChange={(checked) => setSourceRightsApproved(checked === true)} />
+                    <span>I confirm documented source rights and permission are approved.</span>
+                  </label>
+                  <label className="flex items-start gap-2 text-sm">
+                    <Checkbox checked={accessibilityApproved} onCheckedChange={(checked) => setAccessibilityApproved(checked === true)} />
+                    <span>I confirm the source accessibility review is complete and approved.</span>
+                  </label>
+                </div>
+              )}
             </div>
           )}
           <DialogFooter className="flex-col gap-2 sm:flex-row">
@@ -1174,7 +1201,10 @@ export default function MediaLibrary() {
                 <Button
                   variant={reviewDecision === "reject" ? "destructive" : "default"}
                   onClick={submitReview}
-                  disabled={reviewMedia.isPending}
+                   disabled={reviewMedia.isPending || (
+                     reviewDecision === "approve"
+                     && (!sourceRightsApproved || !accessibilityApproved)
+                   )}
                 >
                   {reviewMedia.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                   Confirm {reviewDecision === "approve" ? "approval" : "rejection"}

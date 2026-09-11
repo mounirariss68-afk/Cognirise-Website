@@ -32,8 +32,9 @@ export default function AIValueToScale() {
             </div>
           </div>
         }
-        imageSrc="/images/cognirise/method-vts.jpg"
-        imageAlt="Cinematic view of an organizational system at scale."
+        imageSrc="/images/cognirise/method-vts-v2.jpg"
+        imageAlt="Violet, pink and orange light streams connect architectural portals and converge at a circular portal on the right."
+        imagePosition="right center"
         imageCaptionSubtitle="Systemic Readiness"
         imageCaptionTitle="Connecting opportunity to sustained value."
       />

@@ -169,8 +169,24 @@ test("active and ready media are usable while pending and failed stay explicit",
   assert.equal(isPreviewableMediaStatus("pending"), false);
   assert.equal(apiMediaStatus("pending-review"), "review");
   assert.equal(apiMediaStatus("rejected"), "rejected");
+  // The route separately requires both confirmations. This parser currently
+  // preserves optionality despite the OpenAPI required array.
   assert.equal(ReviewMediaBody.safeParse({ decision: "approve" }).success, true);
-  assert.equal(ReviewMediaBody.safeParse({ decision: "reject" }).success, true);
+  assert.equal(ReviewMediaBody.safeParse({
+    decision: "approve",
+    sourceRightsApproved: true,
+    accessibilityApproved: true,
+  }).success, true);
+  assert.equal(ReviewMediaBody.safeParse({
+    decision: "approve",
+    sourceRightsApproved: false,
+    accessibilityApproved: true,
+  }).success, true);
+  assert.equal(ReviewMediaBody.safeParse({
+    decision: "reject",
+    sourceRightsApproved: false,
+    accessibilityApproved: false,
+  }).success, true);
   assert.equal(ReviewMediaBody.safeParse({ decision: "publish" }).success, false);
 
   const base = {
@@ -520,6 +536,7 @@ test("publisher-only review decisions enforce valid transitions and write audit 
   ]);
   const audits: Array<{ action: string; assetId: string; metadata: unknown }> = [];
 
+  const metadataVersions: Record<string, unknown>[] = [];
   t.mock.method(pool, "query", async (sql: unknown, values?: unknown[]) => {
     const statement = String(sql);
     if (statement.includes("FROM cms_sessions s")) {
@@ -569,6 +586,13 @@ test("publisher-only review decisions enforce valid transitions and write audit 
           if (transactionStatuses.get(id) !== "pending-review") return { rowCount: 0, rows: [] };
           transactionStatuses.set(id, String(values?.[1]));
           return { rowCount: 1, rows: [{ id }] };
+        }
+        if (statement.includes("SELECT metadata FROM cms_media_versions")) {
+          return { rowCount: 1, rows: [{ metadata: { rightsStatus: "needs-review", accessibilityStatus: "needs-review" } }] };
+        }
+        if (statement.includes("INSERT INTO cms_media_versions")) {
+          metadataVersions.push(values?.[1] as Record<string, unknown>);
+          return { rowCount: 1, rows: [{ id: "approved-version" }] };
         }
         if (statement.includes("SELECT a.*,v.id version_id")) {
           const id = String(values?.[0]);
@@ -627,7 +651,14 @@ test("publisher-only review decisions enforce valid transitions and write audit 
   const address = server.address();
   assert.ok(address && typeof address !== "string");
   const origin = `http://127.0.0.1:${address.port}`;
-  const review = async (token: string, id: string, decision: "approve" | "reject") => {
+  const review = async (
+    token: string,
+    id: string,
+    decision: "approve" | "reject",
+    confirmations = decision === "approve"
+      ? { sourceRightsApproved: true, accessibilityApproved: true }
+      : { sourceRightsApproved: false, accessibilityApproved: false },
+  ) => {
     const csrf = auth.csrfForSession(security.hashToken(token));
     return fetch(`${origin}/api/media/${id}/review`, {
       method: "POST",
@@ -637,7 +668,7 @@ test("publisher-only review decisions enforce valid transitions and write audit 
         "x-csrf-token": csrf,
         cookie: `${auth.SESSION_COOKIE}=${token}; ${auth.CSRF_COOKIE}=${csrf}`,
       },
-      body: JSON.stringify({ decision }),
+      body: JSON.stringify({ decision, ...confirmations }),
     });
   };
 
@@ -649,7 +680,23 @@ test("publisher-only review decisions enforce valid transitions and write audit 
   assert.equal(approved.status, 200);
   assert.equal((await approved.json() as { status: string }).status, "ready");
   assert.equal(statuses.get(assetId), "active");
+  assert.deepEqual(metadataVersions, [{
+    rightsStatus: "approved-use",
+    accessibilityStatus: "approved",
+    sourceReview: {
+      sourceRightsApproved: true,
+      accessibilityApproved: true,
+      reviewedBy: "publisher-user",
+    },
+  }]);
 
+  const missingConfirmations = await review(
+    "publisher-token",
+    "00000000-0000-4000-8000-000000000204",
+    "approve",
+    {} as { sourceRightsApproved: boolean; accessibilityApproved: boolean },
+  );
+  assert.equal(missingConfirmations.status, 400);
   const repeated = await review("publisher-token", assetId, "reject");
   assert.equal(repeated.status, 409);
   assert.equal(statuses.get(assetId), "active");
@@ -666,6 +713,8 @@ test("publisher-only review decisions enforce valid transitions and write audit 
   assert.deepEqual(audits[0].metadata, {
     previousStatus: "pending-review",
     nextStatus: "active",
+    sourceRightsApproved: true,
+    accessibilityApproved: true,
   });
   const failedAudit = await review("publisher-token", auditFailureAssetId, "approve");
   assert.equal(failedAudit.status, 500);

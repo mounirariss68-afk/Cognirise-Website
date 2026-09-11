@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
@@ -19,6 +20,8 @@ const consumers = [
   ["Human-Agent Operating Model", readSource("../pages/HumanAgentOperatingModel.tsx")],
 ] as const;
 
+  const checksum = (path: string) => createHash("sha256")
+    .update(readFileSync(new URL(path, import.meta.url))).digest("hex");
 const standaloneFrames = [
   ["methodology portfolio", portfolio],
   ["IDAO", idao],

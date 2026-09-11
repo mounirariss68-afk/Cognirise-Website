@@ -18,7 +18,6 @@ describe("Methodology Relationships and Boundaries", () => {
   const ucp = readFileSync(resolve(root, "src/pages/AIUseCasePrioritization.tsx"), "utf8");
   const aor = readFileSync(resolve(root, "src/pages/AgenticOperationsReadiness.tsx"), "utf8");
   const haom = readFileSync(resolve(root, "src/pages/HumanAgentOperatingModel.tsx"), "utf8");
-
   it("has exactly seven headings in MethodologyRelationship", () => {
     assert.match(relBlock, /Start here when/i);
     assert.match(relBlock, /Decision/);
@@ -74,7 +73,7 @@ describe("Methodology Relationships and Boundaries", () => {
   });
 
   it("verifies imagery refs exist in the pages", () => {
-    assert.match(vts, /method-vts\.jpg/);
+    assert.match(vts, /method-vts-v2\.jpg/);
     assert.match(ucp, /method-ucp-governed-ai-v3\.jpg/);
     assert.match(aor, /method-aor-v2\.jpg/);
     assert.match(haom, /method-haom-v2\.jpg/);

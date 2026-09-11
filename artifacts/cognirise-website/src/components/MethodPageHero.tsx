@@ -12,6 +12,7 @@ interface MethodPageHeroProps {
   supportingText?: React.ReactNode;
   imageSrc: string;
   imageAlt: string;
+  imagePosition?: string;
   imageCaptionSubtitle?: string;
   imageCaptionTitle?: string;
 }
@@ -23,6 +24,7 @@ export function MethodPageHero({
   supportingText,
   imageSrc,
   imageAlt,
+  imagePosition,
   imageCaptionSubtitle,
   imageCaptionTitle,
 }: MethodPageHeroProps) {
@@ -76,6 +78,7 @@ export function MethodPageHero({
             src={assetUrl(imageSrc)}
             alt={imageAlt}
             className="h-full w-full object-cover"
+            style={imagePosition ? { objectPosition: imagePosition } : undefined}
             eager
           />
           {(imageCaptionSubtitle || imageCaptionTitle) && (

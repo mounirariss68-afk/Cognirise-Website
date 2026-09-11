@@ -77,6 +77,28 @@ Any other missing pin, provenance gap, payload change, reason/state/sequence
 difference, or pointer mismatch records a preservation receipt without
 publishing or overwriting.
 
+The AI Value-to-Scale route artwork has a separate, development-only media
+reconciliation. It uploads the exact supplied JPEG to checksum-addressed private
+storage, downloads it again to verify the SHA-256 checksum, and creates one
+dedicated website asset and immutable version:
+
+```sh
+pnpm --filter @workspace/scripts cms:reconcile-value-to-scale-hero -- --apply-db --target=development
+pnpm --filter @workspace/scripts cms:reconcile-value-to-scale-hero -- --verify-db --target=development
+```
+
+The asset remains `pending-review`, with rights and accessibility both
+`needs-review`; the supplied-use request is source evidence, not approval. The
+command never creates a page association or changes a revision/publication pin.
+The generic inventory explicitly excludes this path because the targeted
+receipt is its single owner. The command reports page candidates separately
+from actual media references and fails on an unexpected reference to the legacy
+`method-vts.jpg`. Replay validates the receipted original immutable version and
+durable bytes without reverting later editor metadata or replacement versions.
+The immutable source version retains `needs-review` rights/accessibility
+metadata; changing only the asset workflow status through `/media/:id/review`
+does not clear those source-metadata gates.
+
 Once the transaction verifies successfully, enable the existing
 `VITE_CMS_CUTOVER_INDUSTRIES=true` environment gate for the target environment
 and restart the website workflow. This makes the published CMS records

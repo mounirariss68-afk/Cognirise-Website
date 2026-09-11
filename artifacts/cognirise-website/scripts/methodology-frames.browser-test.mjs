@@ -82,16 +82,23 @@ try {
         const path = `/methodologies${suffix}`;
         const label = `${suffix.slice(1) || "portfolio"}-${width}-${motion}`;
         if (!caseFilter.test(label)) continue;
-        await send("Page.navigate", { url: `${baseUrl}${path}` });
         let ready = false;
-        for (let i = 0; i < 150; i++) {
-          ready = await evaluate(`location.pathname === ${JSON.stringify(path)}
-            && document.readyState === "complete"
-            && !!document.querySelector('[data-methodology-hero-frame] img')`);
-          if (ready) break;
-          await delay(100);
+        for (let attempt = 0; attempt < 2 && !ready; attempt++) {
+          await send("Page.navigate", { url: `${baseUrl}${path}` });
+          for (let i = 0; i < 150; i++) {
+            ready = await evaluate(`(() => {
+              const image = document.querySelector('[data-methodology-hero-frame] img');
+              return location.pathname === ${JSON.stringify(path)}
+                && document.readyState === "complete"
+                && !!image
+                && image.complete
+                && image.naturalWidth > 0;
+            })()`);
+            if (ready) break;
+            await delay(100);
+          }
         }
-        assert.ok(ready, `${label}: hero must load`);
+        assert.ok(ready, `${label}: hero must load and decode after one retry`);
         await evaluate(`(async () => {
           await document.fonts.ready;
           const frame = document.querySelector('[data-methodology-hero-frame]');
@@ -118,6 +125,9 @@ try {
             opacity: getComputedStyle(frame).opacity,
             left: rect.left, right: rect.right, width: rect.width, height: rect.height,
             loaded: image.complete && image.naturalWidth > 0,
+             source: image.getAttribute('src'),
+             objectFit: getComputedStyle(image).objectFit,
+             objectPosition: getComputedStyle(image).objectPosition,
             alt: image.alt,
             caption: cr ? {
               left: (cr.left - rect.left) / rect.width,
@@ -134,6 +144,11 @@ try {
         assert.equal(geometry.inlineClip, "", `${label}: no inline override of shared silhouette`);
         assert.equal(Number(geometry.opacity), 1, `${label}: visible frame`);
         assert.ok(geometry.loaded && geometry.alt, `${label}: original accessible image loaded`);
+         if (suffix === "/ai-value-to-scale") {
+           assert.ok(geometry.source.endsWith("/images/cognirise/method-vts-v2.jpg"), `${label}: supplied version loaded`);
+           assert.equal(geometry.objectFit, "cover", `${label}: image is not stretched`);
+           assert.equal(geometry.objectPosition, "100% 50%", `${label}: right portal remains in crop`);
+         }
         assert.ok(geometry.left >= -1 && geometry.right <= width + 1, `${label}: frame fits viewport`);
         const authority = suffix === "/agent-authority-model";
         const height = width >= 1024 ? (authority ? 650 : 620) : (width >= 768 && !authority ? 520 : 430);

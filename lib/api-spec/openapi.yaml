@@ -3161,10 +3161,17 @@ components:
       type: object
       additionalProperties: false
       required: [decision]
+      description: Approvals require both sourceRightsApproved and accessibilityApproved; rejections do not require either confirmation.
       properties:
         decision:
           type: string
           enum: [approve, reject]
+        sourceRightsApproved:
+          type: boolean
+          description: Publisher confirms the immutable source rights/access permission is documented and approved.
+        accessibilityApproved:
+          type: boolean
+          description: Publisher confirms the immutable source accessibility review is complete and approved.
     MediaUpdate:
       type: object
       additionalProperties: false

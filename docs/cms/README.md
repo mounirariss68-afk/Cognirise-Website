@@ -39,6 +39,13 @@ pnpm --filter @workspace/scripts cms:reconcile
 
 Post-merge setup runs `cms:reconcile` after applying the schema and with App Storage configured. Every run verifies database checksum/size/version state and checks each object’s GCS size plus stored checksum or provider MD5 against the repository source. Missing catalog rows are created; deferred, absent-version, or incomplete rows receive a new verified immutable version and their mutable asset pointer is repaired. A valid immutable version is reused, never overwritten. The terminal summary reports missing, invalid, conflicts, created, repaired, and reused counts. Binary conflicts, stale receipt subjects, or an unavailable/invalid object fail setup for operator review; metadata-only legacy receipt drift is reported and preserved rather than overwriting immutable media.
 
+Post-merge setup also runs the targeted `cms:reconcile-value-to-scale-hero`
+command. It is receipt-governed and development-only, verifies the exact
+repository JPEG by durable storage readback, and creates the dedicated website
+media asset without associating it to a CMS page or changing any published pin.
+Rights and accessibility remain in the normal `needs-review` gates until an
+authorized publisher reviews the asset.
+
 Generated payload writing is restricted to `scripts/cms/output/`. Database mutation is restricted to the explicit `cms:import -- --apply-db` path and requires `DATABASE_URL`. Review every `needs-review` item before approval or publication. Never treat this inventory as approval for claims, image rights, sources, or market visibility.
 
 See [governance](governance.md), [content cutover](content-cutover.md), [operations](operations.md), [security](security.md), [backup and restore](backup-restore.md), and [retention and privacy](retention-privacy.md).

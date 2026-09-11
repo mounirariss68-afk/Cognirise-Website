@@ -86,6 +86,7 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
     const approvedIndustryMedia = pulseIndustryMediaByFilename.get(path.basename(file));
     const approvedCaseMedia = name.startsWith("artifacts/cognirise-website/public/images/cognirise/cases/")
       && (approvedIndustryMedia?.altText ?? legacyAltText[path.basename(file)] ?? path.basename(file, extension)).trim().length > 0;
+    const dedicatedValueToScaleHero = publicPath === "/images/cognirise/method-vts-v2.jpg";
     return {
       externalId: stableId("asset", file, name),
       type: "asset" as const,
@@ -102,7 +103,14 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
         usages: approvedIndustryMedia
           ? [approvedIndustryMedia.usage]
           : usages.get(publicPath) ?? [],
-        cmsOwnership: "cms-candidate",
+        // This supplied hero has its own receipt-governed reconciliation. Mark
+        // it non-candidate here so a freshly generated generic inventory cannot
+        // create a second checksum-addressed asset before the targeted job.
+        cmsOwnership: dedicatedValueToScaleHero ? "code-owned" : "cms-candidate",
+        ...(dedicatedValueToScaleHero ? {
+          cmsOwnershipReason:
+            "Excluded from generic inventory import; owned by cms:reconcile-value-to-scale-hero.",
+        } : {}),
         collection: "website",
         linkedinAssetKind: null,
         campaignMetadata: null,

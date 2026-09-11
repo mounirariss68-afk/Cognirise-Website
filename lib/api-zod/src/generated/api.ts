@@ -8122,8 +8122,10 @@ export const ReviewMediaParams = zod.object({
 })
 
 export const ReviewMediaBody = zod.object({
-  "decision": zod.enum(['approve', 'reject'])
-})
+  "decision": zod.enum(['approve', 'reject']),
+  "sourceRightsApproved": zod.boolean().optional().describe('Publisher confirms the immutable source rights\/access permission is documented and approved.'),
+  "accessibilityApproved": zod.boolean().optional().describe('Publisher confirms the immutable source accessibility review is complete and approved.')
+}).describe('Approvals require both sourceRightsApproved and accessibilityApproved; rejections do not require either confirmation.')
 
 export const reviewMediaResponseSizeMin = 0;
 export const reviewMediaResponseSizeMultipleOf = 1;

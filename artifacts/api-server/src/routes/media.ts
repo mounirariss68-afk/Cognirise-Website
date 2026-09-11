@@ -401,6 +401,21 @@ router.post(
     }
     const auth = res.locals.auth as AuthContext;
     const mediaId = String(req.params.mediaId);
+    // Orval's Zod generator currently does not honor multi-property OpenAPI
+    // `required` arrays for request bodies. Enforce the documented review
+    // contract at the server boundary until generated support catches up.
+    const reviewInput = parsed.data as typeof parsed.data & {
+      sourceRightsApproved?: boolean;
+      accessibilityApproved?: boolean;
+    };
+    const { sourceRightsApproved, accessibilityApproved } = reviewInput;
+    if (
+      parsed.data.decision === "approve"
+      && (!sourceRightsApproved || !accessibilityApproved)
+    ) {
+      res.status(400).json({ error: "Publisher approval requires documented source rights and accessibility approval." });
+      return;
+    }
     const nextStatus = parsed.data.decision === "approve" ? "active" : "rejected";
     const action = `media.${parsed.data.decision === "approve" ? "approved" : "rejected"}`;
     const client = await pool.connect();
@@ -418,6 +433,32 @@ router.post(
         res.status(409).json({ error: "Only an awaiting-review asset can be reviewed." });
         return;
       }
+      if (parsed.data.decision === "approve") {
+        const latest = await client.query(
+          `SELECT metadata FROM cms_media_versions
+             WHERE asset_id=$1 ORDER BY version_number DESC LIMIT 1`,
+          [mediaId],
+        );
+        if (!latest.rowCount) throw new Error("Media has no source version to snapshot.");
+        const priorMetadata = latest.rows[0].metadata && typeof latest.rows[0].metadata === "object"
+          ? latest.rows[0].metadata as Record<string, unknown>
+          : {};
+        const clearanceMetadata = {
+          ...priorMetadata,
+          rightsStatus: "approved-use",
+          accessibilityStatus: "approved",
+          sourceReview: {
+            sourceRightsApproved,
+            accessibilityApproved,
+            reviewedBy: String(auth.user.id),
+          },
+        };
+        const appended = await client.query(
+          appendMediaMetadataVersionSql,
+          [mediaId, clearanceMetadata],
+        );
+        if (!appended.rowCount) throw new Error("Media has no source version to snapshot.");
+      }
       await client.query(
         `INSERT INTO cms_audit_events
           (actor_user_id,actor_label,action,target_type,target_id,metadata)
@@ -427,7 +468,13 @@ router.post(
           auth.user.email,
           action,
           mediaId,
-          { previousStatus: "pending-review", nextStatus },
+          {
+            previousStatus: "pending-review",
+            nextStatus,
+            ...(parsed.data.decision === "approve"
+              ? { sourceRightsApproved, accessibilityApproved }
+              : {}),
+          },
         ],
       );
       const reviewed = await client.query(`${selectMedia} WHERE a.id=$1`, [mediaId]);
