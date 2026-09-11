@@ -31,3 +31,4 @@
 - [Saved assessment async consistency](saved-assessment-async-consistency.md) — Lock edits during save/reopen or revision-check responses so stable links always match displayed answers.
 - [Text resize verification](text-resize-verification.md) — Disable transitions fully before resampling fonts; reduced-motion rules can otherwise compound simulated text enlargement.
 - [Upload retry boundaries](upload-retry-boundaries.md) — Preflight metadata before locking retries; session changes and staging-to-immutable promotion need explicit recovery boundaries.
+- [CMS save concurrency](cms-save-concurrency.md) — Acquire edition locks before reading latest revisions; preserve local evidence when save confirmation fails.

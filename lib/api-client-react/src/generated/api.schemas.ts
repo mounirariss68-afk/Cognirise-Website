@@ -1175,13 +1175,12 @@ export interface CmsLandingPageContent {
 export type CmsStructuredContent = CmsPersonContent | CmsPartnerContent | CmsPlatformContent | CmsPublicationContent | CmsCaseStudyContent | CmsFrameworkContent | CmsOfficeContent | CmsSiteConfigurationContent | CmsLandingPageContent;
 
 export interface SeoMetadata {
-  title: string;
-  description: string;
-  /** @nullable */
-  canonicalUrl?: string | null;
+  /** @maxLength 70 */
+  title?: string;
+  /** @maxLength 180 */
+  description?: string;
+  canonicalUrl?: string;
   noIndex?: boolean;
-  /** @nullable */
-  imageId?: string | null;
 }
 
 export interface Document {
@@ -1227,19 +1226,16 @@ export interface Document {
 export type DocumentInputContent = { [key: string]: unknown };
 
 export interface SeoMetadataInput {
+  /** @maxLength 70 */
+  title?: string;
+  /** @maxLength 180 */
+  description?: string;
   /**
-     * @minLength 1
-     * @maxLength 70
+     * Blank clears the optional canonical URL; nonblank values must use HTTP(S).
+     * @pattern ^(?:$|[hH][tT][tT][pP][sS]?://.+)
      */
-  title: string;
-  /**
-     * @minLength 1
-     * @maxLength 170
-     */
-  description: string;
   canonicalUrl?: string;
   noIndex?: boolean;
-  imageId?: string;
 }
 
 export interface DocumentInput {
@@ -1251,11 +1247,14 @@ export interface DocumentInput {
   slug: string;
   /**
      * @minLength 1
-     * @maxLength 200
+     * @maxLength 240
      */
   title: string;
-  /** @maxLength 500 */
-  summary?: string;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  summary?: string | null;
   /** Raw structured content preserved for document-kind validation by the shared CMS contract. */
   content: DocumentInputContent;
   seo?: SeoMetadataInput;
@@ -1277,17 +1276,18 @@ export interface DocumentUpdate {
   slug?: string;
   /**
      * @minLength 1
-     * @maxLength 200
+     * @maxLength 240
      */
   title?: string;
   /**
-     * @maxLength 500
+     * @maxLength 2000
      * @nullable
      */
   summary?: string | null;
   /** Raw structured content preserved for document-kind validation by the shared CMS contract. */
   content?: DocumentUpdateContent;
-  seo?: SeoMetadataInput;
+  /** Null explicitly clears SEO metadata from the successor draft. */
+  seo?: SeoMetadataInput | null;
   mediaIds?: string[];
   /** @pattern ^[a-z][a-z0-9-]{1,15}$ */
   market: string;
@@ -2541,4 +2541,3 @@ export type GetPublicSitemapParams = {
 market?: string;
 locale?: string;
 };
-

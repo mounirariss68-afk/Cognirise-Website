@@ -543,13 +543,23 @@ const pageSectionIdentity = {
   order: z.number().int().min(0).max(10_000).default(0),
 };
 
+const blankOrHttpUrl = z.preprocess(
+  (value) => typeof value === "string" && value.trim() === "" ? undefined : value,
+  safeExternalUrl.optional(),
+);
 export const cmsSeoSchema = z.object({
   title: z.string().trim().max(70).optional(),
   description: z.string().trim().max(180).optional(),
-  canonicalUrl: safeExternalUrl.optional(),
+  canonicalUrl: blankOrHttpUrl,
   noIndex: z.boolean().default(false),
 }).strict();
 
+export const cmsDraftMetadataSchema = z.object({
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(160),
+  title: z.string().trim().min(1).max(CMS_DRAFT_METADATA_LIMITS.title),
+  summary: z.string().trim().max(CMS_DRAFT_METADATA_LIMITS.summary).nullable().optional(),
+  seo: cmsSeoSchema.optional(),
+}).strict();
 export const cmsPageSectionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("narrative"), ...pageSectionIdentity, heading: z.string().trim().max(240).optional(), body: z.array(cmsRichBlockSchema).min(1).max(50) }).strict(),
   z.object({ type: z.literal("cta"), ...pageSectionIdentity, label: z.string().trim().min(1).max(120), href: safeLink, style: z.enum(["primary", "secondary", "text"]).default("primary") }).strict(),
@@ -764,12 +774,8 @@ export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: 
     ? { success: false as const, errors }
     : { success: true as const, data: parsed.data as CmsContent };
 }
-export const cmsSnapshotSchema = z.object({
-  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(160),
-  title: z.string().trim().min(1).max(240),
-  summary: z.string().trim().max(2_000).nullable().optional(),
+export const cmsSnapshotSchema = cmsDraftMetadataSchema.extend({
   content: z.unknown(),
-  seo: cmsSeoSchema.optional(),
   mediaIds: idList,
   markets: z.array(z.string().regex(/^[a-z][a-z0-9-]{1,15}$/)).min(1).max(20),
 }).strict();
@@ -998,3 +1004,22 @@ export function collectCmsMediaReferences(
 }
 
 export type CmsMediaReferenceContract = z.infer<typeof cmsMediaReferenceSchema>;
+
+export const CMS_DRAFT_METADATA_LIMITS = {
+  title: 240,
+  summary: 2_000,
+  seoTitle: 70,
+  seoDescription: 180,
+} as const;
+
+export function validateCmsDraftMetadata(input: unknown) {
+  const parsed = cmsDraftMetadataSchema.safeParse(input);
+  return parsed.success
+    ? { success: true as const, data: parsed.data }
+    : {
+        success: false as const,
+        errors: parsed.error.issues.map(
+          (issue) => `${issue.path.join(".") || "document"}: ${issue.message}`,
+        ),
+      };
+}

@@ -2630,8 +2630,8 @@ components:
         kind:
           $ref: "#/components/schemas/DocumentKind"
         slug: { type: string, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', maxLength: 160 }
-        title: { type: string, minLength: 1, maxLength: 200 }
-        summary: { type: string, maxLength: 500 }
+        title: { type: string, minLength: 1, maxLength: 240 }
+        summary: { type: ["string", "null"], maxLength: 2000 }
         content:
           type: object
           additionalProperties: true
@@ -2652,14 +2652,17 @@ components:
       required: [market, locale, revisionNumber]
       properties:
         slug: { type: string, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', maxLength: 160 }
-        title: { type: string, minLength: 1, maxLength: 200 }
-        summary: { type: ["string", "null"], maxLength: 500 }
+        title: { type: string, minLength: 1, maxLength: 240 }
+        summary: { type: ["string", "null"], maxLength: 2000 }
         content:
           type: object
           additionalProperties: true
           description: Raw structured content preserved for document-kind validation by the shared CMS contract.
         seo:
-          $ref: "#/components/schemas/SeoMetadataInput"
+          anyOf:
+            - $ref: "#/components/schemas/SeoMetadataInput"
+            - type: "null"
+          description: Null explicitly clears SEO metadata from the successor draft.
         mediaIds:
           type: array
           items: { type: string }
@@ -2720,23 +2723,23 @@ components:
           $ref: "#/components/schemas/MarketAvailabilityDecision"
     SeoMetadata:
       type: object
-      required: [title, description]
+      additionalProperties: false
       properties:
-        title: { type: string }
-        description: { type: string }
-        canonicalUrl: { type: ["string", "null"] }
+        title: { type: string, maxLength: 70 }
+        description: { type: string, maxLength: 180 }
+        canonicalUrl: { type: string }
         noIndex: { type: boolean }
-        imageId: { type: ["string", "null"] }
     SeoMetadataInput:
       type: object
       additionalProperties: false
-      required: [title, description]
       properties:
-        title: { type: string, minLength: 1, maxLength: 70 }
-        description: { type: string, minLength: 1, maxLength: 170 }
-        canonicalUrl: { type: string }
+        title: { type: string, maxLength: 70 }
+        description: { type: string, maxLength: 180 }
+        canonicalUrl:
+          type: string
+          pattern: '^(?:$|[hH][tT][tT][pP][sS]?://.+)'
+          description: Blank clears the optional canonical URL; nonblank values must use HTTP(S).
         noIndex: { type: boolean, default: false }
-        imageId: { type: string }
     DocumentRevision:
       type: object
       required: [id, documentId, number, market, locale, snapshot, createdBy, createdAt]

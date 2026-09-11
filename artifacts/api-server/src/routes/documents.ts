@@ -15,6 +15,7 @@ import {
   RollbackDocumentBody,
   SubmitDocumentBody,
   UpdateDocumentBody,
+  cmsSeoSchema,
   isCmsConfigurationIdentityValid,
   validateCmsSnapshot,
   validateCmsSnapshotForDelivery,
@@ -533,6 +534,14 @@ router.post(
   requireCsrf,
   requireEditor,
   asyncRoute(async (req, res) => {
+    if (req.body?.seo !== undefined && !cmsSeoSchema.safeParse(req.body.seo).success) {
+      const seo = cmsSeoSchema.safeParse(req.body.seo);
+      res.status(400).json({
+        error: "Invalid document SEO metadata.",
+        details: seo.success ? [] : seo.error.issues.map((issue) => ({ ...issue, path: ["seo", ...issue.path] })),
+      });
+      return;
+    }
     const parsed = CreateDocumentBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: "Invalid document.", details: parsed.error.issues });
@@ -925,6 +934,18 @@ router.patch(
   requireCsrf,
   requireEditor,
   asyncRoute(async (req, res) => {
+    if (
+      req.body?.seo !== undefined
+      && req.body.seo !== null
+      && !cmsSeoSchema.safeParse(req.body.seo).success
+    ) {
+      const seo = cmsSeoSchema.safeParse(req.body.seo);
+      res.status(400).json({
+        error: "Invalid document SEO metadata.",
+        details: seo.success ? [] : seo.error.issues.map((issue) => ({ ...issue, path: ["seo", ...issue.path] })),
+      });
+      return;
+    }
     const parsed = UpdateDocumentBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: "Invalid document update.", details: parsed.error.issues });
@@ -941,6 +962,21 @@ router.patch(
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
+      const lockedEdition = await client.query(
+        `SELECT id FROM cms_market_editions
+          WHERE document_id=$1 AND market=$2 AND locale=$3
+          ORDER BY created_at,id LIMIT 1
+          FOR UPDATE`,
+        [id, requestedMarket, requestedLocale],
+      );
+      if (!lockedEdition.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: `The ${requestedMarket}/${requestedLocale} edition does not exist.` });
+        return;
+      }
+      // This must be a separate statement after acquiring the edition lock.
+      // Under READ COMMITTED it receives a fresh snapshot, so a waiter sees the
+      // revision committed by the request which held the lock before it.
       const edition = await client.query(
         `SELECT e.id,e.published_revision_id,d.kind,r.id revision_id,r.payload,
                 r.revision_number,r.workflow_state
@@ -949,8 +985,7 @@ router.patch(
          LEFT JOIN LATERAL (SELECT id,payload,revision_number,workflow_state FROM cms_revisions
            WHERE edition_id=e.id ORDER BY revision_number DESC,created_at DESC,id DESC LIMIT 1) r ON true
          WHERE e.document_id=$1 AND e.market=$2 AND e.locale=$3
-         ORDER BY e.created_at,e.id LIMIT 1
-         FOR UPDATE OF e`,
+          ORDER BY e.created_at,e.id LIMIT 1`,
         [id, requestedMarket, requestedLocale],
       );
       if (!edition.rowCount) {
@@ -990,6 +1025,7 @@ router.patch(
       delete next.market;
       delete next.locale;
       delete next.revisionNumber;
+      if (parsed.data.seo === null) delete next.seo;
       if (!isCmsConfigurationIdentityValid(current.kind, next.slug, next.content)) {
         await client.query("ROLLBACK");
         res.status(409).json({ error: "Contact email configuration must use its canonical singleton slug." });
@@ -1032,8 +1068,19 @@ router.patch(
     } finally {
       client.release();
     }
-    await audit(auth, "document.updated", "document", id);
-    res.json(await getDocument(id, auth, requestedMarket, requestedLocale));
+    try {
+      await audit(auth, "document.updated", "document", id);
+      const saved = await getDocument(id, auth, requestedMarket, requestedLocale);
+      if (!saved) throw new Error("Committed document could not be reloaded.");
+      res.json(saved);
+    } catch (error) {
+      req.log.error({ err: error, documentId: id }, "Document saved but response hydration failed");
+      res.status(500).json({
+        code: "DOCUMENT_SAVE_COMMITTED",
+        committed: true,
+        error: "The document was saved, but its confirmation could not be loaded. Reload this edition before saving again.",
+      });
+    }
   }),
 );
 

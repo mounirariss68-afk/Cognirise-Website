@@ -16,17 +16,18 @@ export interface DocumentUpdate {
   slug?: string;
   /**
      * @minLength 1
-     * @maxLength 200
+     * @maxLength 240
      */
   title?: string;
   /**
-     * @maxLength 500
+     * @maxLength 2000
      * @nullable
      */
   summary?: string | null;
   /** Raw structured content preserved for document-kind validation by the shared CMS contract. */
   content?: DocumentUpdateContent;
-  seo?: SeoMetadataInput;
+  /** Null explicitly clears SEO metadata from the successor draft. */
+  seo?: SeoMetadataInput | null;
   mediaIds?: string[];
   /** @pattern ^[a-z][a-z0-9-]{1,15}$ */
   market: string;

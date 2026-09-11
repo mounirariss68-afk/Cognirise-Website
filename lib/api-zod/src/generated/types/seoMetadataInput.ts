@@ -7,17 +7,14 @@
  */
 
 export interface SeoMetadataInput {
+  /** @maxLength 70 */
+  title?: string;
+  /** @maxLength 180 */
+  description?: string;
   /**
-     * @minLength 1
-     * @maxLength 70
+     * Blank clears the optional canonical URL; nonblank values must use HTTP(S).
+     * @pattern ^(?:$|[hH][tT][tT][pP][sS]?://.+)
      */
-  title: string;
-  /**
-     * @minLength 1
-     * @maxLength 170
-     */
-  description: string;
   canonicalUrl?: string;
   noIndex?: boolean;
-  imageId?: string;
 }

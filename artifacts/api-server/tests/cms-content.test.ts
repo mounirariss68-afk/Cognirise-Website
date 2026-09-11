@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   CreateDocumentBody,
+  CMS_DRAFT_METADATA_LIMITS,
+  cmsDocumentKinds,
+  cmsDraftMetadataSchema,
   cmsMediaReferenceSchema,
   collectCmsMediaReferences,
   CreateDocumentEditionOverrideBody,
@@ -38,6 +41,75 @@ const heroIds = {
   webm: "00000000-0000-4000-8000-000000000003",
   webmVersion: "00000000-0000-4000-8000-000000000013",
 };
+
+test("draft request and snapshot metadata rules stay aligned for every document kind", () => {
+  const metadataCases = [
+    undefined,
+    {},
+    { title: "" },
+    { description: "" },
+    { title: "Search title", description: "Search description" },
+    { canonicalUrl: "" },
+    { canonicalUrl: "https://www.cognirise.ai/path" },
+    { canonicalUrl: "HTTPS://www.cognirise.ai/path" },
+    { canonicalUrl: "http://example.com/path", noIndex: true },
+  ];
+
+  for (const kind of cmsDocumentKinds) {
+    for (const seo of metadataCases) {
+      const input = {
+        kind,
+        slug: `metadata-${kind}`,
+        title: "T".repeat(CMS_DRAFT_METADATA_LIMITS.title),
+        summary: "S".repeat(CMS_DRAFT_METADATA_LIMITS.summary),
+        content: initialCmsContent(kind),
+        ...(seo === undefined ? {} : { seo }),
+        markets: ["uae"],
+      };
+      const request = CreateDocumentBody.safeParse(input);
+      assert.equal(request.success, true, `${kind} request rejected ${JSON.stringify(seo)}`);
+      const snapshot = validateCmsSnapshot(kind, {
+        slug: input.slug,
+        title: input.title,
+        summary: input.summary,
+        content: input.content,
+        ...(seo === undefined ? {} : { seo }),
+        mediaIds: [],
+        markets: input.markets,
+      }, "draft");
+      assert.equal(
+        snapshot.success,
+        true,
+        `${kind} snapshot rejected ${JSON.stringify(seo)}: ${
+          snapshot.success ? "" : snapshot.errors.join("; ")
+        }`,
+      );
+    }
+  }
+
+  assert.equal(CreateDocumentBody.safeParse({
+    kind: "person",
+    slug: "too-long-metadata",
+    title: "T".repeat(CMS_DRAFT_METADATA_LIMITS.title + 1),
+    content: initialCmsContent("person"),
+    markets: ["uae"],
+  }).success, false);
+  assert.equal(cmsDraftMetadataSchema.safeParse({
+    slug: "too-long-seo",
+    title: "Metadata",
+    seo: { description: "D".repeat(CMS_DRAFT_METADATA_LIMITS.seoDescription + 1) },
+  }).success, false);
+  assert.equal(cmsDraftMetadataSchema.safeParse({
+    slug: "unsafe-canonical",
+    title: "Metadata",
+    seo: { canonicalUrl: "javascript:alert(1)" },
+  }).success, false);
+  assert.equal(cmsDraftMetadataSchema.safeParse({
+    slug: "legacy-seo",
+    title: "Metadata",
+    seo: { imageId: heroIds.poster },
+  }).success, false, "unknown legacy SEO properties must be rejected, not stripped");
+});
 
 test("immutable media references require and collect exact versions from every landing location", () => {
   const mediaId = "00000000-0000-4000-8000-000000000021";

@@ -152,12 +152,10 @@ export function ContentEditor({ kind, value, onChange, errors }: {
           <Field
             label="Public website contact email"
             type="email"
+            required
+            error={fieldErrors.contactEmail}
             value={value.contactEmail}
-            onChange={(next) => onChange({
-              schemaVersion: 1,
-              configuration: "contact-email",
-              contactEmail: next,
-            })}
+            onChange={(next) => set("contactEmail", next)}
             placeholder="hello@cognirise.ai"
           />
           <p className="text-sm text-muted-foreground">
@@ -393,7 +391,7 @@ export function ContentEditor({ kind, value, onChange, errors }: {
         <p className="text-sm text-muted-foreground">Add approved visuals within a media section so their purpose and accessibility text travel with the exact revision.</p>
       </>}
 
-      {common}
+      {kind !== "site-configuration" && common}
     </div>
   );
 }

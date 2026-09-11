@@ -10,6 +10,7 @@ import { CMS_CONTACT_EMAIL_DOCUMENT_SLUG } from "@workspace/api-zod";
 import { Loader2, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { describeSaveFailure } from "./documents/draft-save";
 
 const params = {
   kind: "site-configuration" as const,
@@ -49,9 +50,9 @@ export default function ContactSettings() {
       },
     }, {
       onSuccess: (document) => setLocation(`/content/${document.id}`),
-      onError: (error: any) => toast({
+      onError: (error) => toast({
         title: "Contact setting could not be created",
-        description: error.error || error.message,
+        description: describeSaveFailure(error).description,
         variant: "destructive",
       }),
     });

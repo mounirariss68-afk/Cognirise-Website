@@ -18,11 +18,14 @@ export interface DocumentInput {
   slug: string;
   /**
      * @minLength 1
-     * @maxLength 200
+     * @maxLength 240
      */
   title: string;
-  /** @maxLength 500 */
-  summary?: string;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  summary?: string | null;
   /** Raw structured content preserved for document-kind validation by the shared CMS contract. */
   content: DocumentInputContent;
   seo?: SeoMetadataInput;

@@ -7,11 +7,10 @@
  */
 
 export interface SeoMetadata {
-  title: string;
-  description: string;
-  /** @nullable */
-  canonicalUrl?: string | null;
+  /** @maxLength 70 */
+  title?: string;
+  /** @maxLength 180 */
+  description?: string;
+  canonicalUrl?: string;
   noIndex?: boolean;
-  /** @nullable */
-  imageId?: string | null;
 }

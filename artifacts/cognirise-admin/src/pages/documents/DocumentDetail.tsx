@@ -16,7 +16,6 @@ import {
   getPreviewDocumentQueryKey,
   getListDocumentRevisionsQueryKey,
   DocumentStatus,
-  SeoMetadataInput
 } from "@workspace/api-client-react";
 import { getListMarketEditionsQueryKey, useListMarketEditions, getListDocumentEditionsQueryKey, useListDocumentEditions, useCreateDocumentEditionOverride, getListDocumentReviewCommentsQueryKey, useListDocumentReviewComments, useAddDocumentReviewComment, useRejectDocumentRevision } from "@workspace/api-client-react";
 import { type CmsDocumentKind, validateCmsContent } from "@workspace/api-zod";
@@ -47,6 +46,7 @@ import {
 import { officeLifecycleAction } from "./office-lifecycle";
 import { Check, Circle } from "lucide-react";
 import { collectContentMediaIds, CONTENT_GUIDANCE, documentReadiness, editionAuthoringActions, selectInitialExactEdition } from "./authoring";
+import { buildDraftSave, describeSaveFailure, isDraftSaveResponse, serverValidationIssues, type DraftSeo, type DraftSaveIssue } from "./draft-save";
 
 export default function DocumentDetail() {
   const [, params] = useRoute("/content/:id");
@@ -93,12 +93,18 @@ export default function DocumentDetail() {
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [content, setContent] = useState<Record<string, any>>({});
-  const [seo, setSeo] = useState<SeoMetadataInput>({ title: "", description: "", canonicalUrl: "", noIndex: false });
+  const [seo, setSeo] = useState<DraftSeo>({});
+  const [seoOriginallyPresent, setSeoOriginallyPresent] = useState(false);
+  const [activeSideTab, setActiveSideTab] = useState("metadata");
+  const [saveIssues, setSaveIssues] = useState<DraftSaveIssue[]>([]);
+  const [conflictOpen, setConflictOpen] = useState(false);
+  const [saveRecovery, setSaveRecovery] = useState<"uncertain" | "committed" | null>(null);
+  const [saveBlocked, setSaveBlocked] = useState(false);
+  const [blockedRecovery, setBlockedRecovery] = useState<"conflict" | "uncertain" | "committed" | null>(null);
   const canEditSelectedMarket = isAdministrator
     || session?.user?.role === "publisher"
     || Boolean(session?.user?.marketCodes?.includes(selectedMarket));
   const [previewRevisionId, setPreviewRevisionId] = useState<string | undefined>();
-  const [selectedRevisionNumber, setSelectedRevisionNumber] = useState<number | undefined>();
   const [reviewComment, setReviewComment] = useState("");
   const previewParams = { market: selectedMarket, locale: selectedLocale, revisionId: previewRevisionId };
   const { refetch: createPreview } = usePreviewDocument(id!, previewParams, {
@@ -112,9 +118,24 @@ export default function DocumentDetail() {
   const rejectRevision = useRejectDocumentRevision();
   
   const hydratedEditionKey = useRef("");
-  const lastSaved = useRef({ title: "", summary: "", content: {} as Record<string, any>, seo: {} as any });
+  const hydratedRevision = useRef<number | undefined>(undefined);
+  const currentEditorKey = useRef("");
+  const lastSaved = useRef({ title: "", summary: "", content: {} as Record<string, any>, seo: {} as DraftSeo });
+  const hasUnsavedRef = useRef(false);
+  const preserveAfterFailedSave = useRef(false);
+  const mountedRef = useRef(true);
+  const saveSequence = useRef(0);
 
   const [hasUnsaved, setHasUnsaved] = useState(false);
+  currentEditorKey.current = `${id}:${selectedMarket}:${selectedLocale}`;
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      saveSequence.current += 1;
+    };
+  }, []);
   
   // Dialog states
   const [publishOpen, setPublishOpen] = useState(false);
@@ -136,48 +157,72 @@ export default function DocumentDetail() {
   }, [editionMatrix, selectedMarket, session]);
 
   useEffect(() => {
-    if (doc && selectedMarket && selectedLocale) {
-      const responseKey = `${selectedMarket}:${selectedLocale}`;
+    if (doc && id && selectedMarket && selectedLocale && !updateDoc.isPending) {
+      const responseKey = `${id}:${selectedMarket}:${selectedLocale}`;
+      if (hydratedEditionKey.current === responseKey && (hasUnsavedRef.current || preserveAfterFailedSave.current)) return;
       setTitle(doc.title);
       setSummary(doc.summary || "");
       const nextContent = (doc.content || {}) as Record<string, any>;
       setContent(nextContent);
-      const formattedSeo = doc.seo ? {
-        title: doc.seo.title || "",
-        description: doc.seo.description || "",
-        canonicalUrl: doc.seo.canonicalUrl || "",
-        noIndex: doc.seo.noIndex || false
-      } : { title: "", description: "", canonicalUrl: "", noIndex: false };
+      const formattedSeo: DraftSeo = doc.seo ? { ...doc.seo } : {};
       
       setSeo(formattedSeo);
+      setSeoOriginallyPresent(Boolean(doc.seo));
       lastSaved.current = { title: doc.title, summary: doc.summary || "", content: nextContent, seo: formattedSeo };
       hydratedEditionKey.current = responseKey;
+      hydratedRevision.current = doc.revisionNumber;
+      hasUnsavedRef.current = false;
+      preserveAfterFailedSave.current = false;
+      setSaveBlocked(false);
+      setBlockedRecovery(null);
       setHasUnsaved(false);
+      setSaveIssues([]);
     }
-  }, [doc, selectedLocale, selectedMarket]);
+  }, [doc, id, selectedLocale, selectedMarket, updateDoc.isPending]);
 
   // Check for unsaved changes against lastSaved ref
   useEffect(() => {
-    if (hydratedEditionKey.current !== `${selectedMarket}:${selectedLocale}`) return;
+    if (hydratedEditionKey.current !== `${id}:${selectedMarket}:${selectedLocale}`) return;
     const isDirty = title !== lastSaved.current.title || 
                     summary !== lastSaved.current.summary || 
                     JSON.stringify(content) !== JSON.stringify(lastSaved.current.content) ||
                     JSON.stringify(seo) !== JSON.stringify(lastSaved.current.seo);
     setHasUnsaved(isDirty);
-  }, [title, summary, content, seo, selectedLocale, selectedMarket]);
+    hasUnsavedRef.current = isDirty;
+  }, [title, summary, content, seo, id, selectedLocale, selectedMarket]);
 
   // Before unload protection
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsaved) {
+      if (hasUnsavedRef.current || preserveAfterFailedSave.current || saveBlocked) {
         e.preventDefault();
         e.returnValue = "";
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [hasUnsaved]);
+  }, [hasUnsaved, saveBlocked]);
 
+  useEffect(() => {
+    const protectInternalNavigation = (event: MouseEvent) => {
+      const target = event.target;
+      const anchor = target instanceof Element ? target.closest("a[href]") : null;
+      if (!anchor || anchor.getAttribute("target") === "_blank") return;
+      if (updateDoc.isPending) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      if ((hasUnsavedRef.current || preserveAfterFailedSave.current) && !window.confirm("Discard unsaved changes and leave this editor?")) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    document.addEventListener("click", protectInternalNavigation, true);
+    return () => document.removeEventListener("click", protectInternalNavigation, true);
+  }, [updateDoc.isPending]);
+
+  const mediaIds = useMemo(() => collectContentMediaIds(content), [content]);
   const contentValidation = useMemo(
     () => doc ? validateCmsContent(doc.kind as CmsDocumentKind, content, "draft") : { success: false as const, errors: [] },
     [content, doc],
@@ -191,9 +236,7 @@ export default function DocumentDetail() {
   const selectedMarketConfig = marketData?.items.find((market) => market.code === selectedMarket);
   useEffect(() => {
     setPreviewRevisionId(selectedEdition?.revisionId ?? undefined);
-    setSelectedRevisionNumber(selectedEdition?.revisionNumber ?? undefined);
   }, [selectedEdition?.revisionId, selectedEdition?.revisionNumber]);
-  const mediaIds = useMemo(() => collectContentMediaIds(content), [content]);
   const readiness = useMemo(
     () => doc ? documentReadiness(doc.kind as CmsDocumentKind, title, content, mediaIds) : [],
     [content, doc, mediaIds, title],
@@ -205,33 +248,69 @@ export default function DocumentDetail() {
     canPublish && !editionIsArchived,
     hasUnsaved,
   );
+  const fieldIssue = (path: string) => saveIssues.find((issue) => issue.path === path)?.message;
+  const editorHydrated = hydratedEditionKey.current === currentEditorKey.current && hydratedRevision.current !== undefined;
+  const editorLocked = !editorHydrated || updateDoc.isPending || authoringActions.immutable || !canEditSelectedMarket;
 
   const handleSave = () => {
-    if (!doc) return;
+    if (!doc || updateDoc.isPending || !editorHydrated || saveBlocked) return;
+    const editorKey = `${id}:${selectedMarket}:${selectedLocale}`;
     const targetParams = { market: selectedMarket, locale: selectedLocale };
-    
-    if (!contentValidation.success) {
-      toast({ title: "Structured content is incomplete", description: contentValidation.errors[0], variant: "destructive" });
+    const prepared = buildDraftSave(doc.kind as CmsDocumentKind, {
+      slug: doc.slug, title, summary, content, mediaIds, markets: doc.markets,
+    }, seo, seoOriginallyPresent);
+    if (!prepared.success) {
+      setSaveIssues(prepared.issues);
+      if (prepared.issues.some((issue) => issue.path === "seo" || issue.path.startsWith("seo."))) setActiveSideTab("seo");
+      toast({ title: "Draft has validation errors", description: prepared.issues[0]?.message, variant: "destructive" });
       return;
     }
-
+    setSaveIssues([]);
+    const operation = ++saveSequence.current;
+    preserveAfterFailedSave.current = true;
+    const submittedRevision = hydratedRevision.current;
+    const submitted = { title, summary, content: prepared.snapshot.content as Record<string, any>, seo: prepared.seo };
     updateDoc.mutate({
       documentId: id!,
       data: {
-        title,
-        summary: summary || null,
-        content: contentValidation.data,
-        mediaIds,
+        title: prepared.snapshot.title,
+        summary: prepared.snapshot.summary ?? null,
+        content: prepared.snapshot.content,
+        mediaIds: prepared.snapshot.mediaIds,
         market: selectedMarket,
         locale: selectedLocale,
-        seo,
-        revisionNumber: selectedRevisionNumber ?? selectedEdition?.revisionNumber ?? editionRevisions[0]?.number ?? doc.revisionNumber
+        seo: prepared.seo as any,
+        revisionNumber: submittedRevision ?? doc.revisionNumber
       }
     }, {
       onSuccess: (updated) => {
-        setSelectedRevisionNumber(updated.revisionNumber);
+        if (!mountedRef.current || operation !== saveSequence.current || editorKey !== currentEditorKey.current || hydratedRevision.current !== submittedRevision) return;
+        if (!isDraftSaveResponse(updated, {
+          documentId: id!,
+          kind: doc.kind as CmsDocumentKind,
+          slug: doc.slug,
+          market: targetParams.market,
+          locale: targetParams.locale,
+          previousRevision: submittedRevision!,
+          snapshot: prepared.snapshot,
+        })) {
+          const failure = describeSaveFailure({ name: "ResponseParseError", status: 200 });
+          setSaveRecovery("uncertain");
+          setSaveBlocked(true);
+          setBlockedRecovery("uncertain");
+          toast({ title: failure.title, description: failure.description, variant: "destructive" });
+          queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
+          queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
+          return;
+        }
+        hydratedRevision.current = updated.revisionNumber;
+        preserveAfterFailedSave.current = false;
+        setSaveBlocked(false);
+        setBlockedRecovery(null);
         if (updated.currentRevisionId) setPreviewRevisionId(updated.currentRevisionId);
-        lastSaved.current = { title, summary, content: contentValidation.data as Record<string, any>, seo };
+        lastSaved.current = { ...submitted, seo: submitted.seo ?? {} };
+        setSeoOriginallyPresent(Boolean(submitted.seo));
+        hasUnsavedRef.current = false;
         setHasUnsaved(false);
         queryClient.setQueryData(getGetDocumentQueryKey(id!, targetParams), updated);
         queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
@@ -240,29 +319,53 @@ export default function DocumentDetail() {
         toast({ title: `${selectedMarket.toUpperCase()} edition saved successfully` });
       },
       onError: (err) => {
-        toast({ title: "Save failed", description: (err as any).error, variant: "destructive" });
+        if (!mountedRef.current || operation !== saveSequence.current || editorKey !== currentEditorKey.current) return;
+        const failure = describeSaveFailure(err);
+        const serverIssues = serverValidationIssues(err);
+        if (serverIssues.length) {
+          setSaveIssues(serverIssues);
+          if (serverIssues.some((issue) => issue.path === "seo" || issue.path.startsWith("seo."))) setActiveSideTab("seo");
+        }
+        if (failure.action === "review-conflict") { setConflictOpen(true); setBlockedRecovery("conflict"); }
+        if (failure.action === "verify") { setSaveRecovery("uncertain"); setBlockedRecovery("uncertain"); }
+        if (failure.action === "reload-committed") { setSaveRecovery("committed"); setBlockedRecovery("committed"); }
+        if (["review-conflict", "verify", "reload-committed"].includes(failure.action)) setSaveBlocked(true);
+        toast({ title: failure.title, description: failure.description, variant: "destructive" });
       }
     });
   };
 
-  const handleSeoChange = (field: keyof SeoMetadataInput, value: any) => {
+  const handleSeoChange = (field: keyof DraftSeo, value: any) => {
+    hasUnsavedRef.current = true;
     setSeo(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleContentChange = (next: Record<string, any>) => {
+    hasUnsavedRef.current = true;
+    setContent(next);
+  };
+
   const selectEdition = (market: string, locale: string) => {
-    if (hasUnsaved && !window.confirm("Discard unsaved changes and switch editions?")) return;
+    if (updateDoc.isPending) return;
+    if (market === selectedMarket && locale === selectedLocale) return;
+    if ((hasUnsavedRef.current || saveBlocked || preserveAfterFailedSave.current) && !window.confirm("Discard local changes and switch editions?")) return;
     const target = editionMatrix?.items.find((item) => item.market === market && item.locale === locale);
     if (!target) return;
     hydratedEditionKey.current = "";
+    hydratedRevision.current = undefined;
+    preserveAfterFailedSave.current = false;
+    setSaveBlocked(false);
+    setBlockedRecovery(null);
+    saveSequence.current += 1;
+    hasUnsavedRef.current = false;
     setHasUnsaved(false);
     setSelectedMarket(market);
     setSelectedLocale(locale);
     setPreviewRevisionId(target.exact ? target.revisionId ?? undefined : undefined);
-    setSelectedRevisionNumber(target.exact ? target.revisionNumber ?? undefined : undefined);
   };
 
   const createOverride = () => {
-    if (!selectedEdition || selectedEdition.exact) return;
+    if (!selectedEdition || selectedEdition.exact || updateDoc.isPending) return;
     const targetMarket = selectedEdition.market;
     const targetLocale = selectedEdition.locale;
     createEditionOverride.mutate({ documentId: id!, data: {
@@ -275,7 +378,6 @@ export default function DocumentDetail() {
         setSelectedMarket(targetMarket);
         setSelectedLocale(targetLocale);
         setPreviewRevisionId(revision.id);
-        setSelectedRevisionNumber(revision.number);
         queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
         queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
         toast({ title: `${targetMarket.toUpperCase()} · ${targetLocale} override created` });
@@ -284,9 +386,29 @@ export default function DocumentDetail() {
     });
   };
 
+  const leaveEditor = (destination: string) => {
+    if (updateDoc.isPending) return;
+    if ((hasUnsavedRef.current || saveBlocked || preserveAfterFailedSave.current) && !window.confirm("Discard local changes and leave this editor?")) return;
+    setLocation(destination);
+  };
+
+  const discardAndReloadLatest = () => {
+    setConflictOpen(false);
+    setSaveRecovery(null);
+    saveSequence.current += 1;
+    hydratedEditionKey.current = "";
+    hydratedRevision.current = undefined;
+    hasUnsavedRef.current = false;
+    preserveAfterFailedSave.current = false;
+    setSaveBlocked(false);
+    setBlockedRecovery(null);
+    setHasUnsaved(false);
+    queryClient.resetQueries({ queryKey: getGetDocumentQueryKey(id!, documentParams), exact: true });
+  };
+
   const navigationOnlyState = (message: string, loading = false) => (
     <div className="h-full p-8">
-      <Button variant="ghost" onClick={() => setLocation("/content")} className="mb-8">
+      <Button variant="ghost" onClick={() => leaveEditor("/content")} disabled={updateDoc.isPending} className="mb-8">
         <ChevronLeft className="mr-2 h-4 w-4" /> Back to content
       </Button>
       <div className="mx-auto max-w-lg rounded-lg border bg-card p-8 text-center">
@@ -321,7 +443,7 @@ export default function DocumentDetail() {
   if (selectedEdition && !selectedEdition.exact) {
     return (
       <div className="h-full p-8">
-        <Button variant="ghost" onClick={() => setLocation("/content")} className="mb-8">
+        <Button variant="ghost" onClick={() => leaveEditor("/content")} disabled={updateDoc.isPending} className="mb-8">
           <ChevronLeft className="mr-2 h-4 w-4" /> Back to content
         </Button>
         <div className="mx-auto max-w-2xl space-y-5 rounded-lg border bg-card p-8">
@@ -354,7 +476,7 @@ export default function DocumentDetail() {
             <p className="mb-3 text-xs font-semibold uppercase tracking-wider">Accessible editions</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {editionMatrix?.items.map((edition) => (
-                <Button key={`${edition.market}-${edition.locale}`} type="button" variant="outline" onClick={() => selectEdition(edition.market, edition.locale)}>
+                  <Button key={`${edition.market}-${edition.locale}`} type="button" variant="outline" disabled={updateDoc.isPending} onClick={() => selectEdition(edition.market, edition.locale)}>
                   {edition.market.toUpperCase()} · {edition.locale} · {edition.exact ? `Rev ${edition.revisionNumber}` : "Inherited"}
                 </Button>
               ))}
@@ -385,6 +507,7 @@ export default function DocumentDetail() {
   };
 
   const handleAction = (action: "submit" | "publish" | "archive" | "restore") => {
+    if (updateDoc.isPending) return;
     const targetParams = { market: selectedMarket, locale: selectedLocale };
     const opts = {
       onSuccess: (updated: any) => {
@@ -412,6 +535,7 @@ export default function DocumentDetail() {
   };
 
   const handleRollback = (revisionId: string) => {
+    if (updateDoc.isPending) return;
     rollbackDoc.mutate({ documentId: id!, data: { revisionId } }, {
       onSuccess: (updated) => {
         queryClient.setQueryData(getGetDocumentQueryKey(id!, documentParams), updated);
@@ -424,7 +548,7 @@ export default function DocumentDetail() {
   };
 
   const handleRemoveOffice = () => {
-    if (!doc || doc.kind !== "office") return;
+    if (!doc || doc.kind !== "office" || updateDoc.isPending) return;
     const requiresArchive = officeLifecycleAction(doc) === "archive";
     const options = {
       onSuccess: () => {
@@ -487,7 +611,7 @@ export default function DocumentDetail() {
       {/* Top Bar */}
       <header className="flex-none h-16 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-4">
-           <Button variant="ghost" size="icon" onClick={() => setLocation(doc.kind === "case-study" ? "/case-studies" : doc.kind === "industry" ? "/industries" : doc.kind === "framework" ? "/frameworks" : doc.kind === "site-configuration" ? "/contact-settings" : `/${doc.kind}s`)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+           <Button variant="ghost" size="icon" disabled={updateDoc.isPending} onClick={() => leaveEditor(doc.kind === "case-study" ? "/case-studies" : doc.kind === "industry" ? "/industries" : doc.kind === "framework" ? "/frameworks" : doc.kind === "site-configuration" ? "/contact-settings" : `/${doc.kind}s`)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <div className="h-4 w-px bg-border"></div>
@@ -511,7 +635,7 @@ export default function DocumentDetail() {
 
           <Button 
             onClick={handleSave} 
-            disabled={updateDoc.isPending || !contentValidation.success || !authoringActions.canSave}
+            disabled={!editorHydrated || updateDoc.isPending || saveBlocked || !authoringActions.canSave}
             size="sm" 
             variant="default" 
             className="font-mono uppercase tracking-wider text-xs"
@@ -521,12 +645,12 @@ export default function DocumentDetail() {
           </Button>
 
           {authoringActions.canSubmit && (
-             <Button variant="outline" size="sm" onClick={() => handleAction("submit")} disabled={submitDoc.isPending || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs">
+             <Button variant="outline" size="sm" onClick={() => handleAction("submit")} disabled={updateDoc.isPending || submitDoc.isPending || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs">
               <Send className="w-3.5 h-3.5 mr-2" /> Submit Review
             </Button>
           )}
            {authoringActions.canPublish && (
-              <Button size="sm" onClick={() => { setPublishRevisionId(selectedEdition?.revisionId ?? null); setPublishOpen(true); }} disabled={!contentValidation.success} className="font-mono uppercase tracking-wider text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button size="sm" onClick={() => { setPublishRevisionId(selectedEdition?.revisionId ?? null); setPublishOpen(true); }} disabled={updateDoc.isPending || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
               <Globe className="w-3.5 h-3.5 mr-2" /> Publish...
             </Button>
           )}
@@ -535,18 +659,18 @@ export default function DocumentDetail() {
               variant="outline"
               size="sm"
               onClick={() => setRemoveOfficeOpen(true)}
-              disabled={archiveDoc.isPending || deleteDoc.isPending}
+               disabled={updateDoc.isPending || archiveDoc.isPending || deleteDoc.isPending}
               className="font-mono uppercase tracking-wider text-xs text-destructive hover:text-destructive"
             >
               <Trash2 className="mr-2 h-4 w-4" /> Remove office
             </Button>
           )}
           {canPublish && doc.status === "archived" ? (
-            <Button variant="outline" size="sm" onClick={() => handleAction("restore")} disabled={restoreDoc.isPending} className="font-mono uppercase tracking-wider text-xs">
+            <Button variant="outline" size="sm" onClick={() => handleAction("restore")} disabled={updateDoc.isPending || restoreDoc.isPending} className="font-mono uppercase tracking-wider text-xs">
               <RotateCcw className="mr-2 h-4 w-4" /> Restore as draft
             </Button>
           ) : canPublish && doc.kind !== "office" ? (
-               <Button variant="ghost" size="sm" onClick={() => handleAction("archive")} className="text-muted-foreground hover:text-destructive" title="Archive Document">
+               <Button variant="ghost" size="sm" disabled={updateDoc.isPending} onClick={() => handleAction("archive")} className="text-muted-foreground hover:text-destructive" title="Archive Document">
                  <Archive className="w-4 h-4" />
                </Button>
           ) : null}
@@ -558,6 +682,20 @@ export default function DocumentDetail() {
         {/* Left Column: Editor */}
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar border-r border-border">
           <div className="max-w-3xl mx-auto space-y-8">
+            {!!saveIssues.length && (
+              <div role="alert" aria-labelledby="draft-error-title" className="rounded-md border border-destructive/40 bg-destructive/5 p-4" data-testid="draft-error-summary">
+                <p id="draft-error-title" className="text-sm font-semibold text-destructive">Fix these issues before saving</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-xs">
+                  {saveIssues.map((issue, index) => (
+                    <li key={`${issue.path}-${index}`}>
+                      {issue.path.startsWith("seo") ? (
+                        <button type="button" className="underline" onClick={() => setActiveSideTab("seo")}>SEO: {issue.message}</button>
+                      ) : <><strong>{issue.path}</strong>: {issue.message}</>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <section className="rounded-lg border bg-card p-4">
               <p className="text-xs font-semibold uppercase tracking-wider text-primary">{doc.kind.replace("-", " ")} authoring guide</p>
               <p className="mt-1 text-sm text-muted-foreground">{CONTENT_GUIDANCE[doc.kind as CmsDocumentKind]}</p>
@@ -566,34 +704,57 @@ export default function DocumentDetail() {
               {doc.status === "draft" && doc.publishedRevisionId && (
                 <p className="mt-2 text-xs text-amber-600">This draft is not publicly visible. Submit it for review and publish it to return this edition to the website.</p>
               )}
+              {saveBlocked && (
+                <div className="mt-2 flex items-center justify-between gap-3 rounded border border-destructive/30 p-2">
+                  <p className="text-xs text-destructive">Saving is paused until you deliberately reload the latest revision. Your local inputs remain available to review or copy.</p>
+                  <Button type="button" size="sm" variant="outline" onClick={() => {
+                    if (blockedRecovery === "conflict") setConflictOpen(true);
+                    else setSaveRecovery(blockedRecovery === "committed" ? "committed" : "uncertain");
+                  }}>Review recovery options</Button>
+                </div>
+              )}
             </section>
             <div>
-              <label className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Display Title <span className="text-destructive">(required)</span></label>
+              <label htmlFor="document-title" className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Display Title <span className="text-destructive">(required)</span></label>
               <Input 
+                id="document-title"
                 value={title}
-                onChange={(e) => { setTitle(e.target.value); }}
-                 disabled={authoringActions.immutable || !canEditSelectedMarket}
+                onChange={(e) => { hasUnsavedRef.current = true; setTitle(e.target.value); }}
+                disabled={editorLocked}
+                maxLength={240}
+                aria-invalid={Boolean(fieldIssue("title"))}
+                aria-describedby={fieldIssue("title") ? "document-title-error" : "document-title-help"}
                 className="text-3xl font-bold tracking-tight h-auto py-3 px-4 bg-background border-border/50 focus-visible:ring-1 focus-visible:ring-primary shadow-sm"
               />
+              <p id="document-title-help" className="mt-1 text-xs text-muted-foreground">{title.length}/240 characters</p>
+              {fieldIssue("title") && <p id="document-title-error" className="mt-1 text-xs text-destructive">{fieldIssue("title")}</p>}
             </div>
             
             <div>
-              <label className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Summary / Deck <span>(optional)</span></label>
+              <label htmlFor="document-summary" className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Summary / Deck <span>(optional)</span></label>
               <Textarea 
+                id="document-summary"
                 value={summary}
-                onChange={(e) => { setSummary(e.target.value); }}
-                 disabled={authoringActions.immutable || !canEditSelectedMarket}
+                onChange={(e) => { hasUnsavedRef.current = true; setSummary(e.target.value); }}
+                disabled={editorLocked}
+                maxLength={2000}
+                aria-invalid={Boolean(fieldIssue("summary"))}
+                aria-describedby={fieldIssue("summary") ? "document-summary-error" : "document-summary-help"}
                 className="text-lg leading-relaxed min-h-[100px] resize-y bg-background border-border/50 focus-visible:ring-1 focus-visible:ring-primary shadow-sm"
                 placeholder="Brief summary appearing in cards and lists..."
               />
+              <p id="document-summary-help" className="mt-1 text-xs text-muted-foreground">{summary.length}/2000 characters</p>
+              {fieldIssue("summary") && <p id="document-summary-error" className="mt-1 text-xs text-destructive">{fieldIssue("summary")}</p>}
             </div>
 
-            <ContentEditor
-              kind={doc.kind as CmsDocumentKind}
-              value={content}
-              onChange={authoringActions.immutable || !canEditSelectedMarket ? () => {} : setContent}
-              errors={contentValidation.success ? [] : contentValidation.errors}
-            />
+            <fieldset disabled={editorLocked} className="contents">
+              <ContentEditor
+                kind={doc.kind as CmsDocumentKind}
+                value={content}
+                onChange={editorLocked ? () => {} : handleContentChange}
+                errors={contentValidation.success ? [] : contentValidation.errors}
+              />
+            </fieldset>
             <details className="rounded-md border bg-muted/20 p-4">
               <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider">Advanced structured view (read only)</summary>
               <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap text-xs">{JSON.stringify(content, null, 2)}</pre>
@@ -603,12 +764,12 @@ export default function DocumentDetail() {
 
         {/* Right Column: Metadata & Sidepanes */}
         <div className="w-[320px] bg-card flex flex-col h-full border-l border-border">
-          <Tabs defaultValue="metadata" className="flex flex-col h-full">
+          <Tabs value={activeSideTab} onValueChange={setActiveSideTab} className="flex flex-col h-full">
             <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent p-0 h-12">
-              <TabsTrigger value="metadata" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Metadata</TabsTrigger>
-              <TabsTrigger value="seo" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">SEO</TabsTrigger>
-              <TabsTrigger value="revisions" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Revisions</TabsTrigger>
-              <TabsTrigger value="editions" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Editions</TabsTrigger>
+              <TabsTrigger value="metadata" disabled={updateDoc.isPending} className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Metadata</TabsTrigger>
+              <TabsTrigger value="seo" disabled={updateDoc.isPending} className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">SEO{saveIssues.some((issue) => issue.path.startsWith("seo")) ? " !" : ""}</TabsTrigger>
+              <TabsTrigger value="revisions" disabled={updateDoc.isPending} className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Revisions</TabsTrigger>
+              <TabsTrigger value="editions" disabled={updateDoc.isPending} className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Editions</TabsTrigger>
             </TabsList>
             
             <TabsContent value="metadata" className="flex-1 overflow-y-auto p-4 space-y-6 mt-0">
@@ -683,7 +844,7 @@ export default function DocumentDetail() {
                  const market = marketData?.items.find((item) => item.code === edition.market);
                  const active = selectedMarket === edition.market && selectedLocale === edition.locale;
                 return (
-                   <button type="button" key={`${edition.market}-${edition.locale}`} onClick={() => selectEdition(edition.market, edition.locale)} className={`w-full rounded-md border p-3 text-left ${active ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`} data-testid={`button-edition-${edition.market}-${edition.locale}`}>
+                   <button type="button" key={`${edition.market}-${edition.locale}`} disabled={updateDoc.isPending} onClick={() => selectEdition(edition.market, edition.locale)} className={`w-full rounded-md border p-3 text-left disabled:cursor-not-allowed disabled:opacity-50 ${active ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`} data-testid={`button-edition-${edition.market}-${edition.locale}`}>
                     <div className="flex items-center justify-between gap-2">
                        <span className="text-sm font-medium">{market?.displayName ?? edition.market} · {edition.locale}</span>
                        <Badge variant={edition.exact ? "secondary" : "outline"}>{edition.exact ? `Rev ${edition.revisionNumber}` : "Inherited"}</Badge>
@@ -693,7 +854,7 @@ export default function DocumentDetail() {
                   </button>
                 );
               })}
-               {selectedEdition && !selectedEdition.exact && <Button type="button" className="w-full" onClick={createOverride} disabled={!canEditSelectedMarket || createEditionOverride.isPending} data-testid="button-create-edition-override">Create editable override from effective content</Button>}
+               {selectedEdition && !selectedEdition.exact && <Button type="button" className="w-full" onClick={createOverride} disabled={updateDoc.isPending || !canEditSelectedMarket || createEditionOverride.isPending} data-testid="button-create-edition-override">Create editable override from effective content</Button>}
               <div className="border-t pt-4">
                 <h3 className="text-sm font-semibold">Readiness checklist</h3>
                 <div className="mt-3 space-y-3">
@@ -711,41 +872,58 @@ export default function DocumentDetail() {
               <div className="space-y-2">
                 <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">SEO Title</Label>
                 <Input 
-                  value={seo.title} 
+                  id="seo-title"
+                  value={typeof seo.title === "string" ? seo.title : ""}
                   onChange={(e) => handleSeoChange("title", e.target.value)}
-                  disabled={authoringActions.immutable || !canEditSelectedMarket}
+                  disabled={editorLocked}
+                  maxLength={70}
+                  aria-invalid={Boolean(fieldIssue("seo.title") || fieldIssue("seo"))}
+                  aria-describedby={fieldIssue("seo.title") ? "seo-title-error" : "seo-title-help"}
                   placeholder="Defaults to display title"
                   className="font-mono text-xs"
                 />
+                <p id="seo-title-help" className="text-[10px] text-muted-foreground">{typeof seo.title === "string" ? seo.title.length : 0}/70 characters. Leave all SEO fields blank to omit SEO.</p>
+                {fieldIssue("seo.title") && <p id="seo-title-error" className="text-xs text-destructive">{fieldIssue("seo.title")}</p>}
               </div>
               
               <div className="space-y-2">
                 <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">SEO Description</Label>
                 <Textarea 
-                  value={seo.description} 
+                  id="seo-description"
+                  value={typeof seo.description === "string" ? seo.description : ""}
                   onChange={(e) => handleSeoChange("description", e.target.value)}
-                  disabled={authoringActions.immutable || !canEditSelectedMarket}
+                  disabled={editorLocked}
+                  maxLength={180}
+                  aria-invalid={Boolean(fieldIssue("seo.description"))}
+                  aria-describedby={fieldIssue("seo.description") ? "seo-description-error" : "seo-description-help"}
                   placeholder="Meta description for search engines..."
                   className="font-mono text-xs resize-none min-h-[80px]"
                 />
+                <p id="seo-description-help" className="text-[10px] text-muted-foreground">{typeof seo.description === "string" ? seo.description.length : 0}/180 characters</p>
+                {fieldIssue("seo.description") && <p id="seo-description-error" className="text-xs text-destructive">{fieldIssue("seo.description")}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Canonical URL</Label>
                 <Input 
-                  value={seo.canonicalUrl || ""} 
+                  id="seo-canonical-url"
+                  value={typeof seo.canonicalUrl === "string" ? seo.canonicalUrl : ""}
                   onChange={(e) => handleSeoChange("canonicalUrl", e.target.value)}
-                  disabled={authoringActions.immutable || !canEditSelectedMarket}
+                  disabled={editorLocked}
+                  aria-invalid={Boolean(fieldIssue("seo.canonicalUrl"))}
+                  aria-describedby={fieldIssue("seo.canonicalUrl") ? "seo-canonical-error" : undefined}
                   placeholder="https://..."
                   className="font-mono text-xs"
                 />
+                {fieldIssue("seo.canonicalUrl") && <p id="seo-canonical-error" className="text-xs text-destructive">{fieldIssue("seo.canonicalUrl")}</p>}
+                {fieldIssue("seo") && <p className="text-xs text-destructive">{fieldIssue("seo")}</p>}
               </div>
 
               <div className="flex items-center space-x-2 pt-2">
                 <Switch 
-                  checked={seo.noIndex}
+                  checked={Boolean(seo.noIndex)}
                   onCheckedChange={(c) => handleSeoChange("noIndex", c)}
-                  disabled={authoringActions.immutable || !canEditSelectedMarket}
+                  disabled={editorLocked}
                   id="noIndex"
                 />
                 <Label htmlFor="noIndex" className="font-mono text-xs uppercase tracking-wider text-muted-foreground">No Index (Hide from Search)</Label>
@@ -796,6 +974,40 @@ export default function DocumentDetail() {
           </Tabs>
         </div>
       </div>
+
+      <AlertDialog open={conflictOpen} onOpenChange={setConflictOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Review the revision conflict</AlertDialogTitle>
+            <AlertDialogDescription>
+              Another editor saved a newer revision. Your local inputs are still here. Copy or review them before choosing to discard them and reload.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep reviewing local changes</AlertDialogCancel>
+            <AlertDialogAction onClick={discardAndReloadLatest}>Discard and reload latest</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={saveRecovery !== null} onOpenChange={(open) => { if (!open) setSaveRecovery(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {saveRecovery === "committed" ? "The server reports a committed revision" : "Verify the latest revision before saving again"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {saveRecovery === "committed"
+                ? "A revision was committed, but its confirmation did not complete normally. Your local inputs remain visible as evidence. Reload the latest server revision before making another save."
+                : "The request outcome could not be confirmed. Your local inputs remain unchanged. Review or copy them, then deliberately reload the latest server revision; do not retry against the old revision token."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep reviewing local changes</AlertDialogCancel>
+            <AlertDialogAction onClick={discardAndReloadLatest}>Discard and reload latest</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={publishOpen} onOpenChange={setPublishOpen}>
         <DialogContent>

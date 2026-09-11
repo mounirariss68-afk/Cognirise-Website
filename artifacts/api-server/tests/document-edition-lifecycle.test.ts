@@ -35,6 +35,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
   const draftDocumentId = "00000000-0000-4000-8000-000000000101";
   const approvedDocumentId = "00000000-0000-4000-8000-000000000102";
   const inheritedDocumentId = "00000000-0000-4000-8000-000000000103";
+  const contactDocumentId = "00000000-0000-4000-8000-000000000104";
   const mediaAssetId = "00000000-0000-4000-8000-000000000501";
   const mediaVersionA = "00000000-0000-4000-8000-000000000502";
   const mediaVersionB = "00000000-0000-4000-8000-000000000503";
@@ -66,6 +67,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
   });
   const documents = new Map([
     [draftDocumentId, {
+      kind: "publication",
       slug: "ksa-first-publication",
       title: "KSA first publication",
       editions: [
@@ -111,6 +113,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
       ] satisfies Edition[],
     }],
     [approvedDocumentId, {
+      kind: "publication",
       slug: "ksa-approved",
       title: "KSA approved",
       editions: [
@@ -143,6 +146,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
       ] satisfies Edition[],
     }],
     [inheritedDocumentId, {
+      kind: "publication",
       slug: "uae-published-fallback",
       title: "UAE root title must not select drafts",
       editions: [{
@@ -170,6 +174,35 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
         ],
       }] satisfies Edition[],
     }],
+    [contactDocumentId, {
+      kind: "site-configuration",
+      slug: "site-contact-email",
+      title: "Public contact email",
+      editions: [{
+        id: "00000000-0000-4000-8000-000000000208",
+        market: "ksa",
+        locale: "en",
+        publicationState: "published",
+        publishedRevisionId: "00000000-0000-4000-8000-000000000308",
+        revisions: [{
+          id: "00000000-0000-4000-8000-000000000308",
+          number: 1,
+          workflow: "approved",
+          payload: {
+            slug: "site-contact-email",
+            title: "Public contact email",
+            summary: null,
+            content: {
+              schemaVersion: 1,
+              configuration: "contact-email",
+              contactEmail: "approved@cognirise.ai",
+            },
+            mediaIds: [],
+            markets: ["ksa"],
+          },
+        }],
+      }] satisfies Edition[],
+    }],
   ]);
   const queriedStatements: string[] = [];
   const observedCandidateChains: string[][] = [];
@@ -178,6 +211,8 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
     [`${inheritedDocumentId}:00000000-0000-4000-8000-000000000305:${mediaAssetId}`, mediaVersionA],
   ]);
   const previewSessions: Array<unknown[]> = [];
+  let failNextAudit = false;
+  let insertedRevisionSequence = 400;
 
   const findEdition = (documentId: string, market: unknown, locale: unknown) =>
     documents.get(documentId)?.editions.find(
@@ -189,7 +224,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
     const revision = latest(edition);
     return {
       id: documentId,
-      kind: "publication",
+      kind: document.kind,
       canonical_slug: document.slug,
       title: document.title,
       owner_id: "user-id",
@@ -237,8 +272,9 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
       };
     }
     if (statement === "SELECT kind FROM cms_documents WHERE id=$1") {
-      return documents.has(String(values[0]))
-        ? { rowCount: 1, rows: [{ kind: "publication" }] }
+      const document = documents.get(String(values[0]));
+      return document
+        ? { rowCount: 1, rows: [{ kind: document.kind }] }
         : { rowCount: 0, rows: [] };
     }
     if (statement.includes("FROM market_editions WHERE enabled=true")) {
@@ -276,6 +312,28 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
           published_at: now,
         }],
       };
+    }
+    if (statement.includes("d.canonical_slug=$1")) {
+      const document = documents.get(contactDocumentId)!;
+      const edition = document.editions[0];
+      const revision = edition.revisions.find(
+        (candidate) => candidate.id === edition.publishedRevisionId,
+      );
+      return revision
+        ? {
+            rowCount: 1,
+            rows: [{
+              id: contactDocumentId,
+              market: edition.market,
+              locale: edition.locale,
+              published_at: now,
+              updated_at: now,
+              revision_id: revision.id,
+              revision_number: revision.number,
+              payload: revision.payload,
+            }],
+          }
+        : { rowCount: 0, rows: [] };
     }
     if (statement.includes("WITH selected AS")) {
       const edition = findEdition(approvedDocumentId, "ksa", "en");
@@ -538,20 +596,47 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
       return { rowCount: 1, rows: [] };
     }
     if (statement.includes("INSERT INTO cms_audit_events")) {
+      if (failNextAudit) {
+        failNextAudit = false;
+        throw new Error("simulated post-commit audit response failure");
+      }
       return { rowCount: 1, rows: [] };
     }
     return { rowCount: 0, rows: [] };
   };
 
   t.mock.method(pool, "query", query as never);
-  t.mock.method(pool, "connect", async () => ({
+  const editionLockTails = new Map<string, Promise<void>>();
+  t.mock.method(pool, "connect", async () => {
+    let releaseEditionLock: (() => void) | undefined;
+    return ({
     async query(sql: unknown, values: unknown[] = []) {
       const statement = String(sql);
-      if (statement === "BEGIN" || statement === "COMMIT" || statement === "ROLLBACK") {
+      if (statement === "BEGIN") {
         return { rowCount: 0, rows: [] };
+      }
+      if (statement === "COMMIT" || statement === "ROLLBACK") {
+        releaseEditionLock?.();
+        releaseEditionLock = undefined;
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT id FROM cms_market_editions") && statement.includes("FOR UPDATE")) {
+        const lockKey = `${values[0]}:${values[1]}:${values[2]}`;
+        const predecessor = editionLockTails.get(lockKey) ?? Promise.resolve();
+        let unlock!: () => void;
+        editionLockTails.set(lockKey, new Promise<void>((resolve) => {
+          unlock = resolve;
+        }));
+        await predecessor;
+        releaseEditionLock = unlock;
+        const edition = findEdition(String(values[0]), values[1], values[2]);
+        return edition
+          ? { rowCount: 1, rows: [{ id: edition.id }] }
+          : { rowCount: 0, rows: [] };
       }
       if (statement.includes("SELECT e.id,e.published_revision_id,d.kind")) {
         const edition = findEdition(String(values[0]), values[1], values[2]);
+        const document = documents.get(String(values[0]));
         if (!edition) return { rowCount: 0, rows: [] };
         const revision = latest(edition);
         return {
@@ -559,7 +644,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
           rows: [{
             id: edition.id,
             published_revision_id: edition.publishedRevisionId,
-            kind: "publication",
+            kind: document?.kind ?? "publication",
             revision_id: revision.id,
             payload: revision.payload,
             revision_number: revision.number,
@@ -631,7 +716,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
           .find((candidate) => candidate.id === values[0])!;
         const number = edition.revisions.length ? latest(edition).number + 1 : 1;
         const revision = {
-          id: `00000000-0000-4000-8000-${String(400 + number).padStart(12, "0")}`,
+          id: `00000000-0000-4000-8000-${String(++insertedRevisionSequence).padStart(12, "0")}`,
           number,
           workflow: "draft" as const,
           payload: values[1] as Record<string, unknown>,
@@ -680,7 +765,8 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
       return query(sql, values);
     },
     release() {},
-  }) as never);
+    }) as never;
+  });
 
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
@@ -809,13 +895,71 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
   assert.equal(cannotRepublishApproved.status, 409);
 
   role = "editor";
+  const concurrentSave = (title: string) => fetch(`${origin}/api/documents/${draftDocumentId}`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify({
+      market: "ksa",
+      locale: "en",
+      revisionNumber: 2,
+      title,
+    }),
+  });
+  const concurrentResponses = await Promise.all([
+    concurrentSave("Concurrent writer A"),
+    concurrentSave("Concurrent writer B"),
+  ]);
+  assert.deepEqual(
+    concurrentResponses.map((response) => response.status).sort(),
+    [200, 409],
+    "the edition lock must make a waiting writer observe the winner's committed revision",
+  );
+  assert.equal(
+    latest(findEdition(draftDocumentId, "ksa", "en")!).number,
+    3,
+    "concurrent requests with one revision token create exactly one successor",
+  );
+
   const approvedEdition = findEdition(approvedDocumentId, "ksa", "en")!;
   const approvedPointer = approvedEdition.publishedRevisionId;
   const approvedRevision = approvedEdition.revisions[0];
+  const rejectedLegacySeo = await fetch(`${origin}/api/documents/${approvedDocumentId}`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify({
+      market: "ksa",
+      locale: "en",
+      revisionNumber: 1,
+      seo: { imageId: mediaAssetId },
+    }),
+  });
+  assert.equal(rejectedLegacySeo.status, 400);
+  const legacySeoError = await rejectedLegacySeo.json() as { error: string; details: { path: string[] }[] };
+  assert.match(legacySeoError.error, /SEO metadata/i);
+  assert.deepEqual(legacySeoError.details[0].path, ["seo"]);
+  assert.equal(latest(approvedEdition).number, 1, "unknown SEO must be rejected rather than stripped");
+  const invalidCanonical = await fetch(`${origin}/api/documents/${approvedDocumentId}`, {
+    method: "PATCH", headers,
+    body: JSON.stringify({
+      market: "ksa", locale: "en", revisionNumber: 1,
+      seo: { canonicalUrl: "ftp://example.com" },
+    }),
+  });
+  assert.equal(invalidCanonical.status, 400);
+  const canonicalError = await invalidCanonical.json() as { details: { path: string[] }[] };
+  assert.deepEqual(canonicalError.details[0].path, ["seo", "canonicalUrl"]);
+  assert.equal(latest(approvedEdition).number, 1);
+
   const successor = await fetch(`${origin}/api/documents/${approvedDocumentId}`, {
     method: "PATCH",
     headers,
-    body: JSON.stringify({ market: "ksa", locale: "en", revisionNumber: 1, title: "KSA successor one" }),
+    body: JSON.stringify({
+      market: "ksa",
+      locale: "en",
+      revisionNumber: 1,
+      title: "KSA successor one",
+      seo: { title: "Partial search title" },
+    }),
   });
   assert.equal(successor.status, 200);
   const successorBody = await successor.json() as {
@@ -830,7 +974,13 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
   const secondSave = await fetch(`${origin}/api/documents/${approvedDocumentId}`, {
     method: "PATCH",
     headers,
-    body: JSON.stringify({ market: "ksa", locale: "en", revisionNumber: 2, title: "KSA successor two" }),
+    body: JSON.stringify({
+      market: "ksa",
+      locale: "en",
+      revisionNumber: 2,
+      title: "KSA successor two",
+      seo: { title: "", description: "", canonicalUrl: "" },
+    }),
   });
   assert.equal(secondSave.status, 200);
   const secondBody = await secondSave.json() as {
@@ -839,6 +989,31 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
   assert.equal(secondBody.revisionNumber, 3);
   assert.notEqual(secondBody.currentRevisionId, successorBody.currentRevisionId);
   assert.equal(secondBody.title, "KSA successor two");
+  const savedSeo = (latest(approvedEdition).payload as {
+    seo?: { title?: string; description?: string; canonicalUrl?: string; noIndex?: boolean };
+  }).seo;
+  assert.equal(savedSeo?.title, "");
+  assert.equal(savedSeo?.description, "");
+  assert.equal(savedSeo?.canonicalUrl, undefined, "blank canonical URL is normalized away");
+  assert.equal(savedSeo?.noIndex, false);
+
+  const staleSave = await fetch(`${origin}/api/documents/${approvedDocumentId}`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify({
+      market: "ksa",
+      locale: "en",
+      revisionNumber: 2,
+      title: "STALE OVERWRITE",
+    }),
+  });
+  assert.equal(staleSave.status, 409);
+  assert.match(
+    (await staleSave.json() as { error: string }).error,
+    /changed by another user/i,
+  );
+  assert.equal(latest(approvedEdition).number, 3);
+  assert.equal(latest(approvedEdition).payload.title, "KSA successor two");
 
   const listed = await fetch(`${origin}/api/documents?market=ksa&locale=en`, { headers });
   assert.equal(listed.status, 200);
@@ -902,6 +1077,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
       locale: "en",
       revisionNumber: 3,
       title: "KSA reviewed successor",
+      seo: null,
     }),
   });
   const revisedSuccessorBody = await revisedSuccessor.json() as {
@@ -911,6 +1087,11 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
   };
   assert.equal(revisedSuccessor.status, 200, JSON.stringify(revisedSuccessorBody));
   assert.equal(revisedSuccessorBody.revisionNumber, 4);
+  assert.equal(
+    "seo" in latest(approvedEdition).payload,
+    false,
+    "null explicitly clears SEO instead of storing an invalid null snapshot",
+  );
   const resubmittedSuccessor = await fetch(`${origin}/api/documents/${approvedDocumentId}/submit`, {
     method: "POST",
     headers,
@@ -1016,5 +1197,106 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
     mediaReferences.get(`${inheritedDocumentId}:${overrideBody.id}:${mediaAssetId}`),
     mediaVersionA,
     "submission and publication must retain the inherited source pin",
+  );
+
+  role = "editor";
+  const openedContact = await fetch(
+    `${origin}/api/documents/${contactDocumentId}?market=ksa&locale=en`,
+    { headers },
+  );
+  const openedContactBody = await openedContact.json() as {
+    content?: { contactEmail?: string };
+    seo?: unknown;
+    revisionNumber?: number;
+    publishedRevisionId?: string;
+  };
+  assert.equal(openedContact.status, 200);
+  assert.equal(openedContactBody.content?.contactEmail, "approved@cognirise.ai");
+  assert.equal(openedContactBody.seo, undefined, "initializer-shaped contact content has no SEO");
+
+  const saveContact = async (revisionNumber: number, contactEmail: string) => {
+    const response = await fetch(`${origin}/api/documents/${contactDocumentId}`, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({
+        market: "ksa",
+        locale: "en",
+        revisionNumber,
+        content: {
+          schemaVersion: 1,
+          configuration: "contact-email",
+          contactEmail,
+        },
+      }),
+    });
+    const body = await response.json() as {
+      content?: { contactEmail?: string };
+      revisionNumber?: number;
+      publishedRevisionId?: string;
+      error?: string;
+    };
+    assert.equal(response.status, 200, JSON.stringify(body));
+    return body;
+  };
+  const firstContactSave = await saveContact(1, "first-draft@cognirise.ai");
+  assert.equal(firstContactSave.revisionNumber, 2);
+  assert.equal(firstContactSave.content?.contactEmail, "first-draft@cognirise.ai");
+  assert.equal(firstContactSave.publishedRevisionId, openedContactBody.publishedRevisionId);
+
+  const reloadedContact = await fetch(
+    `${origin}/api/documents/${contactDocumentId}?market=ksa&locale=en`,
+    { headers },
+  );
+  assert.equal(reloadedContact.status, 200);
+  assert.equal(
+    (await reloadedContact.json() as { content: { contactEmail: string } }).content.contactEmail,
+    "first-draft@cognirise.ai",
+  );
+  const secondContactSave = await saveContact(2, "second-draft@cognirise.ai");
+  assert.equal(secondContactSave.revisionNumber, 3);
+  assert.equal(secondContactSave.content?.contactEmail, "second-draft@cognirise.ai");
+
+  const publicContact = await fetch(
+    `${origin}/api/public/contact-configuration?market=ksa&locale=en`,
+  );
+  const publicContactBody = await publicContact.json() as {
+    contactEmail?: string;
+    revision?: number;
+  };
+  assert.equal(publicContact.status, 200);
+  assert.equal(publicContactBody.contactEmail, "approved@cognirise.ai");
+  assert.equal(publicContactBody.revision, 1);
+  assert.equal(
+    findEdition(contactDocumentId, "ksa", "en")!.publishedRevisionId,
+    openedContactBody.publishedRevisionId,
+    "successive contact draft saves must retain the approved predecessor",
+  );
+
+  failNextAudit = true;
+  const uncertainConfirmation = await fetch(`${origin}/api/documents/${approvedDocumentId}`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify({
+      market: "ksa",
+      locale: "en",
+      revisionNumber: 4,
+      title: "Committed despite response failure",
+    }),
+  });
+  const uncertainBody = await uncertainConfirmation.json() as {
+    code?: string;
+    committed?: boolean;
+    error?: string;
+  };
+  assert.equal(uncertainConfirmation.status, 500);
+  assert.equal(uncertainBody.code, "DOCUMENT_SAVE_COMMITTED");
+  assert.equal(uncertainBody.committed, true);
+  assert.match(uncertainBody.error ?? "", /saved.*reload/i);
+  assert.equal(latest(approvedEdition).number, 5);
+  assert.equal(latest(approvedEdition).payload.title, "Committed despite response failure");
+  assert.equal(
+    approvedEdition.publishedRevisionId,
+    revisedSuccessorBody.currentRevisionId,
+    "a committed successor save must not change the published pointer",
   );
 });

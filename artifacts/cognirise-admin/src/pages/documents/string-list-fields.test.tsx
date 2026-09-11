@@ -210,3 +210,44 @@ test("case-study ContentEditor retains an added row through its controlled paren
     await editor.unmount();
   }
 });
+
+test("configuration controls exclude governance while contact edits preserve legacy data for explicit review", async () => {
+  for (const initial of [
+    { schemaVersion: 1, configuration: "contact-email", contactEmail: "hello@example.com" },
+    { schemaVersion: 1, page: "homepage", hero: { sources: [] } },
+  ]) {
+    const editor = await renderEditor("site-configuration", initial);
+    try {
+      assert.doesNotMatch(editor.container.textContent ?? "", /Governance and ordering|Verification date|Next review date|Related record IDs/);
+      assert.equal(editor.container.querySelectorAll('input[type="date"]').length, 0);
+    } finally {
+      await editor.unmount();
+    }
+  }
+  const legacy = { schemaVersion: 1, configuration: "contact-email", contactEmail: "hello@example.com", reviewDate: "2026-09-10" };
+  const editor = await renderEditor("site-configuration", legacy);
+  try {
+    const field = editor.container.querySelector<HTMLInputElement>('input[type="email"]')!;
+    const setValue = Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value")!.set!;
+    await React.act(async () => {
+      setValue.call(field, "editor@example.com");
+      field.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+    });
+    assert.equal(editor.content().contactEmail, "editor@example.com");
+    assert.equal(editor.content().reviewDate, legacy.reviewDate, "editing must not silently delete legacy properties");
+    assert.equal(validateCmsContent("site-configuration", editor.content(), "draft").success, false);
+  } finally {
+    await editor.unmount();
+  }
+});
+
+test("ordinary governed content keeps date-only controls and valid dates", async () => {
+  const editor = await renderEditor("office", { schemaVersion: 1, city: "Dubai", address: "Business Centre", verificationDate: "2026-09-10", reviewDate: "2027-09-10" });
+  try {
+    assert.match(editor.container.textContent ?? "", /Governance and ordering/);
+    assert.deepEqual([...editor.container.querySelectorAll<HTMLInputElement>('input[type="date"]')].map((field) => field.value), ["2026-09-10", "2027-09-10"]);
+    assert.equal(validateCmsContent("office", editor.content(), "draft").success, true);
+  } finally {
+    await editor.unmount();
+  }
+});

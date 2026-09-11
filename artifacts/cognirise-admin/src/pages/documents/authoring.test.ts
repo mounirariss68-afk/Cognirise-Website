@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { editionAuthoringActions, selectInitialExactEdition } from "./edition-authoring.ts";
 import type { DocumentEdition } from "@workspace/api-client-react";
+import { buildDraftSave, describeSaveFailure, isDraftSaveResponse, normalizeDraftSeo, serverValidationIssues } from "./draft-save.ts";
 
 const adminRoot = new URL("../../../", import.meta.url);
 
@@ -100,7 +101,8 @@ test("an approved latest exact revision can start a successor draft", () => {
 
 test("detail rehydrates form state whenever the exact edition response changes", async () => {
   const detail = await readFile(new URL("src/pages/documents/DocumentDetail.tsx", adminRoot), "utf8");
-  assert.match(detail, /const responseKey = `\$\{selectedMarket\}:\$\{selectedLocale\}`/);
+  assert.match(detail, /const responseKey = `\$\{id\}:\$\{selectedMarket\}:\$\{selectedLocale\}`/);
+  assert.match(detail, /hasUnsavedRef\.current \|\| preserveAfterFailedSave\.current/);
   assert.doesNotMatch(detail, /if \(doc && !initialized\.current\)/);
 });
 
@@ -122,4 +124,111 @@ test("publish options and response cache stay scoped to the selected exact editi
   assert.doesNotMatch(detail, /\{sortedRevisions\.map\(rev => \(\s*<option/);
   assert.match(detail, /const targetParams = \{ market: selectedMarket, locale: selectedLocale \};/);
   assert.match(detail, /setQueryData\(getGetDocumentQueryKey\(id!, targetParams\), updated\)/);
+  assert.match(detail, /if \(market === selectedMarket && locale === selectedLocale\) return/);
+});
+
+const validSource = {
+  slug: "contact-email",
+  title: "Contact email",
+  summary: "",
+  content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "hello@example.com" },
+  mediaIds: [],
+  markets: ["uae"],
+};
+
+test("blank optional SEO stays absent and clearing existing SEO sends null", () => {
+  assert.equal(normalizeDraftSeo({ title: " ", description: "", canonicalUrl: "", noIndex: false }, false), undefined);
+  assert.equal(normalizeDraftSeo({ title: "", description: "", canonicalUrl: "", noIndex: false }, true), null);
+  const result = buildDraftSave("site-configuration", validSource, {}, false);
+  assert.equal(result.success, true);
+  if (result.success) assert.equal(Object.hasOwn(result.snapshot, "seo"), false);
+});
+
+test("draft save uses the shared snapshot validator for metadata and preserves unknown SEO", () => {
+  const partial = buildDraftSave("site-configuration", validSource, { title: "Only a title" }, false);
+  assert.equal(partial.success, true);
+  const badUrl = buildDraftSave("site-configuration", validSource, {
+    title: "Search title",
+    description: "Search description",
+    canonicalUrl: "javascript:alert(1)",
+  }, false);
+  assert.equal(badUrl.success, false);
+  if (!badUrl.success) assert.equal(badUrl.issues[0]?.path, "seo.canonicalUrl");
+  const legacy = buildDraftSave("site-configuration", validSource, { imageId: "legacy" }, true);
+  assert.equal(legacy.success, false);
+  if (!legacy.success) assert.equal(legacy.issues[0]?.path, "seo");
+});
+
+test("save failures distinguish validation, authorization, conflict, and uncertain responses", () => {
+  assert.equal(describeSaveFailure({ status: 422, data: { details: [{ path: ["seo", "title"], message: "Too long" }] } }).action, "review-fields");
+  assert.equal(describeSaveFailure({ status: 401 }).action, "sign-in");
+  assert.equal(describeSaveFailure({ status: 403 }).title, "You cannot save this edition");
+  assert.equal(describeSaveFailure({ status: 409 }).action, "review-conflict");
+  assert.equal(describeSaveFailure({ name: "ResponseParseError", status: 200 }).action, "verify");
+  assert.equal(describeSaveFailure({ status: 500, data: { code: "DOCUMENT_SAVE_COMMITTED", committed: true } }).action, "reload-committed");
+  assert.deepEqual(
+    serverValidationIssues({ data: { details: [{ path: ["seo", "canonicalUrl"], message: "Use an HTTP(S) URL" }] } }),
+    [{ path: "seo.canonicalUrl", message: "Use an HTTP(S) URL" }],
+  );
+  assert.deepEqual(describeSaveFailure(new TypeError("token=secret")), {
+    title: "Network interrupted the save",
+    description: "Your changes remain here. Verify the latest revision before attempting another save.",
+    action: "verify",
+  });
+  const expectedSave = {
+    documentId: "document-1",
+    kind: "site-configuration" as const,
+    slug: "contact-email",
+    market: "uae",
+    locale: "en-US",
+    previousRevision: 1,
+    snapshot: {
+      title: "Contact email",
+      summary: null,
+      content: validSource.content,
+      seo: undefined,
+      mediaIds: [],
+    },
+  };
+  assert.equal(isDraftSaveResponse(null, expectedSave), false);
+  assert.equal(isDraftSaveResponse({ revisionNumber: 2 }, expectedSave), false);
+  assert.equal(isDraftSaveResponse({
+    id: "document-1",
+    kind: "site-configuration",
+    slug: "contact-email",
+    title: "Contact email",
+    content: validSource.content,
+    markets: ["uae"],
+    revisionNumber: 2,
+    currentRevisionId: "revision-2",
+  }, expectedSave), true);
+  assert.equal(isDraftSaveResponse({
+    id: "document-1",
+    kind: "site-configuration",
+    slug: "contact-email",
+    title: "Contact email",
+    content: validSource.content,
+    markets: ["uae"],
+    revisionNumber: 2,
+    market: "ksa",
+  }, expectedSave), false);
+  for (const nearValid of [
+    { kind: "office" },
+    { slug: "different-slug" },
+    { content: { ...validSource.content, contactEmail: "other@example.com" } },
+  ]) {
+    assert.equal(isDraftSaveResponse({
+      id: "document-1",
+      kind: "site-configuration",
+      slug: "contact-email",
+      title: "Contact email",
+      summary: null,
+      content: validSource.content,
+      markets: ["uae"],
+      mediaIds: [],
+      revisionNumber: 2,
+      currentRevisionId: "revision-2",
+      ...nearValid,
+    }, expectedSave), false);
+  }
 });
