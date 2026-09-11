@@ -41,7 +41,9 @@ describe("Methodology Relationships and Boundaries", () => {
   });
 
   it("verifies the new method overview image and routing approach in portfolio", () => {
-    assert.match(portfolio, /method-overview\.jpg/);
+    assert.match(portfolio, /landingMedia\(governedLanding, "methodologies-hero-media"/);
+    assert.match(portfolio, /src=\{heroMedia\.src\}/);
+    assert.match(portfolio, /alt=\{heroMedia\.alt\}/);
     assert.match(portfolio, /route-navigator/);
     assert.doesNotMatch(portfolio, /AI Value-to-Scale Maturity Model/);
     assert.doesNotMatch(portfolio, /Complete static route/i);

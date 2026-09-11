@@ -26,10 +26,11 @@ const expectedCounts = {
   "/platforms": 17,
   "/insights": 41,
   "/work": 56,
+  "/methodologies": 3,
 };
 
 test("generated landing inventory is current and has every unique governed slot", () => {
-  execFileSync(process.execPath, ["scripts/generate-landing-parity.mjs", "--check"], {
+  execFileSync(process.execPath, ["scripts/generate-landing-parity.mjs", "--page=/methodologies", "--check"], {
     cwd: workspace,
     stdio: "pipe",
   });
@@ -45,7 +46,7 @@ test("generated landing inventory is current and has every unique governed slot"
 });
 
 test("all generated landing envelopes pass the real draft validator", () => {
-  assert.equal(seeds.length, 6);
+  assert.equal(seeds.length, 7);
   for (const seed of seeds) {
     const result = validateCmsSnapshot("landing-page", seed.snapshot, "draft");
     assert.equal(result.success, true, result.success ? undefined : `${seed.path}: ${result.errors.join("; ")}`);
@@ -77,7 +78,7 @@ test("every generated publication slot is required with its generated type", () 
       assert.ok(result.errors.some((error) => error.includes(`missing required slot "${migration.id}" (media)`)), seed.path);
     }
 
-    const narrative = seed.snapshot.content.sections.find((section) => section.type === "narrative" && section.id !== "hero");
+    const narrative = seed.snapshot.content.sections.find((section) => section.type === "narrative");
     assert.ok(narrative, `${seed.path} needs a generated narrative fixture`);
     const withoutNarrative = structuredClone(seed.snapshot);
     withoutNarrative.content.sections = withoutNarrative.content.sections.filter((section) => section.id !== narrative.id);

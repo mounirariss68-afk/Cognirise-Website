@@ -2304,7 +2304,7 @@ components:
       properties:
         schemaVersion: { type: number, enum: [1] }
         pagePath: { type: string }
-        template: { type: string, enum: [landing, collection, campaign, legal] }
+        template: { type: string, enum: [landing, collection, campaign, legal, methodologies] }
         narrative: { type: string }
         sections: { type: array, items: { type: object, additionalProperties: true } }
         cta: { type: object, additionalProperties: true }

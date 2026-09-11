@@ -3,9 +3,21 @@ import { useLocation } from "wouter";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { assetUrl } from "@/lib/assets";
 import { MethodologyRouteMap } from "@/components/MethodologyRouteMap";
+import { useGovernedLanding } from "@/components/GovernedLandingRoute";
+import { landingCta, landingMedia, landingNarrative } from "@/lib/cms";
 
 export default function MethodologiesPortfolio() {
   const [location] = useLocation();
+  const governedLanding = useGovernedLanding();
+  const governedHero = governedLanding ? landingNarrative(governedLanding, "hero") : null;
+  const primaryAction = landingCta(governedLanding, "primary-action", {
+    label: "Find your situation",
+    href: "/methodologies#route-navigator",
+  });
+  const heroMedia = landingMedia(governedLanding, "methodologies-hero-media", {
+    src: assetUrl("/images/cognirise/method-overview.jpg"),
+    alt: "Architectural intersection representing connected methods",
+  });
 
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -35,6 +47,7 @@ export default function MethodologiesPortfolio() {
   }, [location]);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (primaryAction.href !== "/methodologies#route-navigator") return;
     e.preventDefault();
     const el = document.getElementById("route-navigator");
     if (el) {
@@ -53,29 +66,30 @@ export default function MethodologiesPortfolio() {
         <div className="mt-7 grid gap-12 lg:gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <div className="flex flex-col gap-8">
             <h1 className="font-display text-[clamp(45px,7vw,100px)] font-semibold leading-[.88] tracking-[-.08em]" data-testid="portfolio-title">
-              From AI ambition to working outcomes.
+              {governedHero?.heading ?? "From AI ambition to working outcomes."}
             </h1>
             <div className="border-t border-[#102957] pt-8 max-w-[620px]">
               <p className="text-[19px] leading-[1.58] text-[#405777]" data-testid="portfolio-description">
-                Choose the decision you need to make. Find a practical method to assess the evidence, define the next action and move forward responsibly.
+                {governedHero?.text ?? "Choose the decision you need to make. Find a practical method to assess the evidence, define the next action and move forward responsibly."}
               </p>
               
               <a 
-                href="#route-navigator" 
+                href={primaryAction.href}
                 onClick={handleNavClick}
                 data-testid="hero-primary-cta"
                 className="mt-10 relative overflow-hidden inline-flex items-center gap-3 bg-[#102957] text-white px-7 py-4 hover:bg-[#1a3a75] text-[15px] font-bold transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--brand-pink))]"
               >
                 <div className="absolute top-0 left-0 bottom-0 w-1 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-                <span className="pl-1">Find your situation</span>
+                <span className="pl-1">{primaryAction.label}</span>
               </a>
             </div>
           </div>
           
           <figure data-methodology-hero-frame className="clip-diagonal relative h-[430px] w-full overflow-hidden bg-[#071936] md:h-[520px] lg:h-[620px] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-8 motion-safe:duration-700 motion-safe:ease-out" data-testid="hero-figure">
             <PulseImage
-              src={assetUrl("/images/cognirise/method-overview.jpg")}
-              alt="Architectural intersection representing connected methods"
+              key={heroMedia.src}
+              src={heroMedia.src}
+              alt={heroMedia.alt}
               className="h-full w-full object-cover opacity-90"
               eager
             />

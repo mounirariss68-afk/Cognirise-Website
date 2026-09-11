@@ -80,6 +80,7 @@ export const COMPILED_LANDING_ROUTES = [
   { sourceKey: "compiled:/platforms", path: "/platforms", template: "landing" },
   { sourceKey: "compiled:/insights", path: "/insights", template: "landing" },
   { sourceKey: "compiled:/work", path: "/work", template: "landing" },
+  { sourceKey: "compiled:/methodologies", path: "/methodologies", template: "methodologies" },
 ] as const;
 
 export const COMPILED_CONTACT_EMAIL = "hello@cognirise.ai";

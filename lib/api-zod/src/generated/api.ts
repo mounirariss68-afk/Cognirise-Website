@@ -1346,7 +1346,7 @@ export const ListDocumentsResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -1790,7 +1790,7 @@ export const CreateDocumentResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -2210,7 +2210,7 @@ export const GetDocumentResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -2662,7 +2662,7 @@ export const UpdateDocumentResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -3107,7 +3107,7 @@ export const ListDocumentRevisionsResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -3561,7 +3561,7 @@ export const CreateDocumentEditionOverrideResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -4035,7 +4035,7 @@ export const GetDocumentRevisionResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -4451,7 +4451,7 @@ export const SubmitDocumentResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -4921,7 +4921,7 @@ export const RejectDocumentRevisionResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -5345,7 +5345,7 @@ export const PublishDocumentResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -5769,7 +5769,7 @@ export const RollbackDocumentResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -6194,7 +6194,7 @@ export const ArchiveDocumentResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -6619,7 +6619,7 @@ export const RestoreDocumentResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),
@@ -7037,7 +7037,7 @@ export const PreviewDocumentResponse = zod.object({
 })]),zod.object({
   "schemaVersion": zod.literal(1),
   "pagePath": zod.string(),
-  "template": zod.enum(['landing', 'collection', 'campaign', 'legal']),
+  "template": zod.enum(['landing', 'collection', 'campaign', 'legal', 'methodologies']),
   "narrative": zod.string(),
   "sections": zod.array(zod.record(zod.string(), zod.unknown())),
   "cta": zod.record(zod.string(), zod.unknown()).optional(),

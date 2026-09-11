@@ -2431,5 +2431,79 @@
         "relatedIds": []
       }
     }
+  },
+  {
+    "slug": "methodologies",
+    "path": "/methodologies",
+    "title": "Methodologies",
+    "sourceKey": "compiled:/methodologies",
+    "snapshot": {
+      "slug": "methodologies",
+      "title": "Methodologies",
+      "summary": "Choose the decision you need to make. Find a practical method to assess the evidence, define the next action and move forward responsibly.",
+      "markets": [
+        "uae"
+      ],
+      "mediaIds": [],
+      "content": {
+        "schemaVersion": 1,
+        "pagePath": "/methodologies",
+        "template": "methodologies",
+        "narrative": "From AI ambition to working outcomes.",
+        "sections": [
+          {
+            "type": "narrative",
+            "id": "hero",
+            "heading": "From AI ambition to working outcomes.",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Choose the decision you need to make. Find a practical method to assess the evidence, define the next action and move forward responsibly."
+              }
+            ],
+            "order": 0
+          },
+          {
+            "type": "migration-media",
+            "id": "methodologies-hero-media",
+            "sourcePath": "/images/cognirise/method-overview.jpg",
+            "altText": "Architectural intersection representing connected methods",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 1
+          },
+          {
+            "type": "cta",
+            "id": "primary-action",
+            "label": "Find your situation",
+            "href": "/methodologies#route-navigator",
+            "style": "primary",
+            "order": 2
+          }
+        ],
+        "cta": {
+          "label": "Find your situation",
+          "href": "/methodologies#route-navigator",
+          "style": "primary"
+        },
+        "seo": {
+          "title": "AI Methodologies & Frameworks | Cognirise",
+          "description": "Explore Cognirise methods for moving valuable AI into sustained operation, from organisational maturity to workflow authority."
+        },
+        "legal": {},
+        "visualReferences": [],
+        "visibility": "public",
+        "order": 0,
+        "sources": [
+          {
+            "label": "Compiled Methodologies page",
+            "url": "https://www.cognirise.com/methodologies"
+          }
+        ],
+        "verificationDate": "2026-09-09",
+        "reviewDate": "2027-03-09",
+        "relatedIds": []
+      }
+    }
   }
 ]

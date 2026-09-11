@@ -358,7 +358,7 @@ export function ContentEditor({ kind, value, onChange, errors }: {
 
       {kind === "landing-page" && <>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Choice label="Governed template" required error={fieldErrors.template} value={value.template ?? ""} options={["landing", "collection", "campaign", "legal"]} onChange={(next) => set("template", next)} />
+          <Choice label="Governed template" required error={fieldErrors.template} value={value.template ?? ""} options={["landing", "collection", "campaign", "legal", "methodologies"]} onChange={(next) => set("template", next)} />
           <Field label="Public page path" required error={fieldErrors.pagePath} value={value.pagePath} onChange={(next) => set("pagePath", next)} placeholder="/about" />
         </div>
         <Area label="Opening narrative" required error={fieldErrors.narrative} value={value.narrative ?? ""} onChange={(next) => set("narrative", next)} rows={5} />

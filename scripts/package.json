@@ -14,6 +14,7 @@
     "cms:import-task-295-media": "tsx ./src/cms/task-295-media-import.ts",
     "cms:publish-industry-images": "tsx ./src/cms/industry-cutover.ts",
     "cms:reconcile-site-heroes": "tsx ./src/cms/hero-reconciliation.ts",
+    "cms:reconcile-methodologies-hero": "tsx ./src/cms/methodologies-reconciliation.ts",
     "cms:reconcile-offices": "tsx ./src/cms/office-reconciliation.ts",
     "cms:backup": "tsx ./src/cms/backup.ts",
     "cms:verify-backup": "tsx ./src/cms/verify-backup.ts",

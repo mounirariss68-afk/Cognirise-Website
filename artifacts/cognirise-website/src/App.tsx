@@ -93,7 +93,7 @@ export function Router() {
         <Route path="/" component={Home} />
         
         {/* Methodologies */}
-        <Route path="/methodologies" component={MethodologiesPortfolio} />
+        <Route path="/methodologies"><GovernedLandingRoute pagePath="/methodologies" compiled={MethodologiesPortfolio} /></Route>
         <Route path="/methodologies/ai-use-case-prioritization" component={AIUseCasePrioritization} />
         <Route path="/methodologies/ai-value-to-scale" component={AIValueToScale} />
         <Route path="/methodologies/agentic-operations-readiness" component={AgenticOperationsReadiness} />

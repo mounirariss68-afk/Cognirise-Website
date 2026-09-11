@@ -17,9 +17,11 @@ test("compiled framework content is limited to explicit pre-cutover fallback", (
 test("compiled landing inventory has a governed source key for every known route", () => {
   assert.deepEqual(COMPILED_LANDING_ROUTES.map((route) => route.sourceKey), [
     "compiled:/", "compiled:/about", "compiled:/partners", "compiled:/platforms",
-    "compiled:/insights", "compiled:/work",
+    "compiled:/insights", "compiled:/work", "compiled:/methodologies",
   ]);
-  assert.ok(COMPILED_LANDING_ROUTES.every((route) => route.template === "landing"));
+  assert.deepEqual(COMPILED_LANDING_ROUTES.map((route) => route.template), [
+    "landing", "landing", "landing", "landing", "landing", "landing", "methodologies",
+  ]);
 });
 
 test("office fallback ends after CMS publication history exists", () => {

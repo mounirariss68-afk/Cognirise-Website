@@ -4,7 +4,7 @@ import type { LandingPageContent } from "@workspace/api-zod";
 import { contentRecord, governedLandingDelivery, LandingSlotDeliveryError, useCmsCollection } from "@/lib/cms";
 
 export type GovernedLandingRouteProps = {
-  pagePath: "/about" | "/partners" | "/platforms" | "/insights" | "/work";
+  pagePath: "/about" | "/partners" | "/platforms" | "/insights" | "/work" | "/methodologies";
   compiled: ComponentType;
 };
 const GovernedLandingContext = createContext<CmsRecord<LandingPageContent> | null>(null);

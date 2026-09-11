@@ -479,7 +479,7 @@ export const cmsPageSectionSchema = z.discriminatedUnion("type", [
 const cmsLandingPageContentBaseSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
   pagePath: safeInternalPath,
-  template: z.enum(["landing", "collection", "campaign", "legal"]),
+  template: z.enum(["landing", "collection", "campaign", "legal", "methodologies"]),
   narrative: z.string().trim().min(1).max(2_000),
   // Compiled landing routes may expose many individually governed microcopy
   // slots (the Work proof ledger currently exceeds fifty).

@@ -14,4 +14,5 @@ export const CmsLandingPageContentTemplate = {
   collection: 'collection',
   campaign: 'campaign',
   legal: 'legal',
+  methodologies: 'methodologies',
 } as const;

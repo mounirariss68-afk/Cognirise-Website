@@ -33,7 +33,6 @@ const methodologySources = [
 
 test("all seven methodology routes resolve to the audited hero implementations", () => {
   const routes = [
-    ["/methodologies", "MethodologiesPortfolio"],
     ["/methodologies/ai-use-case-prioritization", "AIUseCasePrioritization"],
     ["/methodologies/ai-value-to-scale", "AIValueToScale"],
     ["/methodologies/agentic-operations-readiness", "AgenticOperationsReadiness"],
@@ -41,6 +40,7 @@ test("all seven methodology routes resolve to the audited hero implementations",
     ["/methodologies/agent-authority-model", "AgentAuthorityModel"],
     ["/methodologies/human-agent-operating-model", "HumanAgentOperatingModel"],
   ] as const;
+  assert.match(app, /<Route path="\/methodologies"><GovernedLandingRoute pagePath="\/methodologies" compiled=\{MethodologiesPortfolio\} \/><\/Route>/);
 
   for (const [path, component] of routes) {
     assert.match(

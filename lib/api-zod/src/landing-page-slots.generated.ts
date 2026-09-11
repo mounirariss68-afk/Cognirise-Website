@@ -215,6 +215,11 @@ export const landingPageSlotContract = {
     "work-proof-starting-point-value": "narrative",
     "work-proof-surface-label": "narrative",
     "work-proof-surface-value": "narrative"
+  },
+  "/methodologies": {
+    "hero": "narrative",
+    "methodologies-hero-media": "migration-media",
+    "primary-action": "cta"
   }
 } as const;
 

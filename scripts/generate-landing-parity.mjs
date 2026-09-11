@@ -9,14 +9,19 @@ const inventoryPath = path.join(root, "lib/db/landing-page-inventory.json");
 const migrationPath = path.join(root, "lib/db/migrations/0019_cms_landing_page_contract.sql");
 const contractPath = path.join(root, "lib/api-zod/src/landing-page-slots.generated.ts");
 const check = process.argv.includes("--check");
+const selectedPage = process.argv.find((argument) => argument.startsWith("--page="))?.slice("--page=".length);
 
 const pages = [
-  ["homepage", "/", "Homepage", "Home.tsx"],
-  ["about", "/about", "About", "AboutPeople.tsx"],
-  ["partners", "/partners", "Partners", "Partners.tsx"],
-  ["platforms", "/platforms", "Platforms", "PlatformsOverview.tsx"],
-  ["insights", "/insights", "Insights", "InsightsEditorial.tsx"],
-  ["work", "/work", "Work", "WorkProof.tsx"],
+  ["homepage", "/", "Homepage", "Home.tsx", "landing"],
+  ["about", "/about", "About", "AboutPeople.tsx", "landing"],
+  ["partners", "/partners", "Partners", "Partners.tsx", "landing"],
+  ["platforms", "/platforms", "Platforms", "PlatformsOverview.tsx", "landing"],
+  ["insights", "/insights", "Insights", "InsightsEditorial.tsx", "landing"],
+  ["work", "/work", "Work", "WorkProof.tsx", "landing"],
+  ["methodologies", "/methodologies", "Methodologies", "MethodologiesPortfolio.tsx", "methodologies", {
+    heroHeadingTestId: "portfolio-title",
+    heroBodyTestId: "portfolio-description",
+  }],
 ];
 const marketSource = fs.readFileSync(path.join(root, "artifacts/cognirise-website/src/store/market.ts"), "utf8");
 const uaeLocation = marketSource.match(/\{\s*id:\s*"uae"[^}]*locationLabel:\s*"([^"]+)"/)?.[1];
@@ -86,11 +91,34 @@ function jsxText(node) {
     else if (ts.isJsxFragment(child)) child.children.forEach(visit);
     else if (ts.isJsxExpression(child) && child.expression) {
       if (ts.isStringLiteral(child.expression)) text += child.expression.text;
+      else if (ts.isBinaryExpression(child.expression) && child.expression.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken) {
+        text += String(evaluate(child.expression.right, {}));
+      }
       else fail("Unsupported dynamic JSX hero fallback", child.expression);
     }
   }
   visit(node);
   return text.replace(/\s+/g, " ").trim();
+}
+
+function jsxElementByTestId(source, testId) {
+  const matches = [];
+  function visit(node) {
+    if (ts.isJsxElement(node)) {
+      const attribute = node.openingElement.attributes.properties.find((property) =>
+        ts.isJsxAttribute(property)
+          && property.name.text === "data-testid"
+          && property.initializer
+          && ts.isStringLiteral(property.initializer)
+          && property.initializer.text === testId
+      );
+      if (attribute) matches.push(node);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  if (matches.length !== 1) fail(`Expected exactly one JSX element with data-testid="${testId}"`, source);
+  return matches[0];
 }
 
 function staticArrays(source, env) {
@@ -139,7 +167,7 @@ function dynamicEnvironments(call, arrays, baseEnv) {
   return [baseEnv];
 }
 
-function extractPage([slug, pagePath, title, filename]) {
+function extractPage([slug, pagePath, title, filename, template, jsxFallbacks = {}]) {
   const filenameAbsolute = path.join(root, "artifacts/cognirise-website/src/pages", filename);
   const source = ts.createSourceFile(filenameAbsolute, fs.readFileSync(filenameAbsolute, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const baseEnv = { market: "uae", marketLocation: uaeLocation };
@@ -212,6 +240,12 @@ function extractPage([slug, pagePath, title, filename]) {
   }
   visit(source);
 
+  if (jsxFallbacks.heroHeadingTestId) {
+    heroHeading = jsxText(jsxElementByTestId(source, jsxFallbacks.heroHeadingTestId));
+  }
+  if (jsxFallbacks.heroBodyTestId) {
+    heroBody = jsxText(jsxElementByTestId(source, jsxFallbacks.heroBodyTestId));
+  }
   if (slug === "homepage") {
     const html = fs.readFileSync(path.join(root, "artifacts/cognirise-website/index.html"), "utf8");
     seoTitle = html.match(/<title>([^<]+)<\/title>/)?.[1];
@@ -244,7 +278,7 @@ function extractPage([slug, pagePath, title, filename]) {
   const content = {
     schemaVersion: 1,
     pagePath,
-    template: "landing",
+    template,
     narrative: heroHeading,
     sections,
     ...(primaryCta ? { cta: { label: primaryCta.label, href: primaryCta.href, style: primaryCta.style } } : {}),
@@ -264,7 +298,22 @@ function extractPage([slug, pagePath, title, filename]) {
   };
 }
 
-const inventory = pages.map(extractPage);
+const selectedDefinitions = selectedPage
+  ? pages.filter(([, pagePath]) => pagePath === selectedPage)
+  : pages;
+if (selectedPage && selectedDefinitions.length !== 1) {
+  throw new Error(`Unknown targeted landing page "${selectedPage}"`);
+}
+const generatedInventory = selectedDefinitions.map(extractPage);
+let inventory = generatedInventory;
+if (selectedPage) {
+  const [generatedPage] = generatedInventory;
+  const existingInventory = JSON.parse(fs.readFileSync(inventoryPath, "utf8"));
+  const existingIndex = existingInventory.findIndex((route) => route.path === selectedPage);
+  if (existingIndex === -1) existingInventory.push(generatedPage);
+  else existingInventory[existingIndex] = generatedPage;
+  inventory = existingInventory;
+}
 const json = `${JSON.stringify(inventory, null, 2)}\n`;
 const contract = `// Generated by scripts/generate-landing-parity.mjs. Do not edit by hand.
 export const landingPageSlotContract = ${JSON.stringify(Object.fromEntries(
