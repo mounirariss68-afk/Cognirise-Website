@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { rm } from "node:fs/promises";
+import { rm, writeFile } from "node:fs/promises";
 
 const browserPath = process.env.CHROMIUM_PATH || "/repl/tools/bin/chromium";
 const baseUrl = process.env.PULSE_BROWSER_BASE_URL || "http://127.0.0.1:80";
@@ -427,6 +427,34 @@ try {
   ]);
   assert.deepEqual(railCaseSlugs, deliveredCaseSlugs, "The consolidated rail did not render every eligible published case exactly once");
   console.log(`Validated ${railCaseSlugs.length} eligible published case studies in the consolidated rail.`);
+  for (const [width, height, expected] of [
+    [1366, 768, 3], [1440, 900, 3], [1920, 1080, 3],
+    [1024, 768, 2], [820, 1180, 1], [390, 844, 1],
+  ]) {
+    await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false });
+    await delay(500);
+    await clickUntilDisabled("Previous slide");
+    const layout = await evaluate(`(() => {
+      const cards = [...document.querySelectorAll(".case-study-rail .work-card--editorial")];
+      const bounds = cards.map(card => card.getBoundingClientRect());
+      return {
+        visible: bounds.filter(rect => rect.left >= -1 && rect.right <= innerWidth + 1).length,
+        width: bounds[0].width,
+        overflow: document.documentElement.scrollWidth > innerWidth,
+        complete: cards.every(card => card.querySelectorAll(".work-card__details section").length === 4),
+        readable: cards.every(card => parseFloat(getComputedStyle(card.querySelector(".work-card__details p")).fontSize) >= 13),
+        contained: cards.every(card => getComputedStyle(card.querySelector("img")).objectFit === "contain"),
+        captionInFlow: cards.every(card => getComputedStyle(card.querySelector("figcaption")).position === "static")
+      };
+    })()`);
+    assert.equal(layout.visible, expected, `Expected ${expected} full cards at ${width}px`);
+    assert.equal(layout.overflow, false, `Page overflow at ${width}px`);
+    assert.equal(layout.complete && layout.readable && layout.contained && layout.captionInFlow, true);
+    if (width === 1366 || width === 1440) assert.ok(layout.width >= 395 && layout.width <= 430);
+    console.log(`Case layout ${width}×${height}: ${layout.visible} full cards, ${layout.width.toFixed(1)}px images.`);
+  }
+  await send("Emulation.setDeviceMetricsOverride", { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
+  await delay(500);
   await evaluate(`document.documentElement.style.scrollBehavior = "auto"; document.querySelector(".case-study-rail").scrollIntoView({ block: "center" })`);
   await delay(600);
 
@@ -533,6 +561,18 @@ try {
   await clickUntilDisabled("Previous slide");
   await delay(700);
   const reset = await evaluate(stateExpression);
+  // Expanded text can put the image below the viewport; drag an actual visible image.
+  await evaluate(`document.querySelector(".case-study-rail .case-rendition, .case-study-rail .case-interface").scrollIntoView({ block: "center", behavior: "instant" })`);
+  await delay(300);
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    if (await evaluate(`[...document.querySelectorAll(".case-study-rail img")].slice(0,3).every(img => img.complete && img.naturalWidth > 0)`)) break;
+    if (attempt === 99) throw new Error("The first three case-study images did not load");
+    await delay(100);
+  }
+  if (process.env.PULSE_CASE_STUDY_SCREENSHOT) {
+    const screenshot = await send("Page.captureScreenshot", { format: "jpeg", quality: 90 });
+    await writeFile(process.env.PULSE_CASE_STUDY_SCREENSHOT, Buffer.from(screenshot.data, "base64"));
+  }
   const dragOrigin = await evaluate(`(() => {
     const rect = document.querySelector(".case-study-rail .case-rendition, .case-study-rail .case-interface").getBoundingClientRect();
     return { x: rect.left + Math.min(rect.width * .72, rect.width - 30), y: rect.top + Math.min(rect.height * .45, 180) };
@@ -584,6 +624,9 @@ try {
     deviceScaleFactor: 1,
     mobile: false,
   });
+  await delay(500);
+  await evaluate(`document.querySelector(".case-study-rail .case-rendition img, .case-study-rail .case-interface").scrollIntoView({ block: "center", behavior: "instant" })`);
+  await delay(300);
   const verticalStart = await evaluate(stateExpression);
   const imageCenter = await evaluate(`(() => {
     const rect = document.querySelector(".case-study-rail .case-rendition img, .case-study-rail .case-interface").getBoundingClientRect();

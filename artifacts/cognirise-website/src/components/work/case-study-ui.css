@@ -68,7 +68,7 @@
   border-bottom: 1px solid #bfc9d8;
 }
 
-/* Expanded cards remain deliberately wide enough for their complete record. */
+/* Expanded records wrap naturally; laptop rails show three complete cards. */
 .case-study-rail {
   padding-top: clamp(30px, 4vh, 48px);
   padding-bottom: clamp(30px, 4vh, 48px);
@@ -142,9 +142,44 @@
   height: auto;
 }
 
-@media (min-width: 960px) {
+.case-study-rail .work-card--editorial {
+  overflow-wrap: anywhere;
+}
+.case-study-rail .work-card__intro {
+  min-height: 0;
+}
+.case-study-rail .work-card__intro > p,
+.case-study-rail .work-card__details p,
+.case-study-rail .work-card__details ul {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.case-study-rail .work-card__details small,
+.case-study-rail .work-card__meta {
+  font-size: 9px;
+}
+.case-study-rail .case-rendition {
+  aspect-ratio: auto;
+}
+.case-study-rail .case-rendition img {
+  aspect-ratio: 16 / 10;
+}
+.case-study-rail .case-rendition figcaption {
+  position: static;
+  font-size: 10px;
+}
+
+@media (min-width: 1200px) {
+  /* CarouselContent's -16px margin and each slide's 16px padding supply
+     the gutters: a third of that track fits exactly three full cards. */
   .case-study-rail__slide {
-    flex-basis: min(76vw, 980px);
+    flex-basis: calc(100% / 3);
+  }
+}
+
+@media (min-width: 960px) and (max-width: 1199px) {
+  .case-study-rail__slide {
+    flex-basis: 50%;
   }
 }
 

@@ -73,7 +73,10 @@ test("CSS ensures images are fully contained and scale properly", async () => {
   assert.match(css, /\.case-rendition\{[^}]*overflow:hidden/);
   assert.match(css, /\.case-rendition\.is-compact img\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*100%;[^}]*height:\s*auto;/);
   assert.match(css, /\.case-rendition:not\(\.is-compact\) img\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*100%;[^}]*height:\s*auto;/);
-  assert.match(css, /@media \(min-width: 960px\)[\s\S]*?\.case-study-rail__slide\s*\{[\s\S]*?flex-basis:\s*min\(76vw, 980px\);/);
+  assert.match(css, /@media \(min-width: 1200px\)[\s\S]*?\.case-study-rail__slide\s*\{[\s\S]*?flex-basis:\s*calc\(100% \/ 3\);/);
+  assert.match(css, /@media \(min-width: 960px\) and \(max-width: 1199px\)[\s\S]*?flex-basis:\s*50%;/);
+  assert.match(css, /\.case-study-rail \.case-rendition figcaption\s*\{\s*position: static;/);
+  assert.match(css, /\.case-study-rail \.work-card__details ul\s*\{\s*font-size: 13px;/);
   assert.match(css, /\.work-card--editorial \.case-rendition figcaption\s*\{[\s\S]*?background:\s*#071936;/);
   assert.match(css, /\.case-study-rail \.work-card--editorial\s*\{[\s\S]*?align-self:\s*flex-start;[\s\S]*?height:\s*auto;/);
 });

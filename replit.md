@@ -43,3 +43,4 @@ _Populate as you build — sharp edges, "always run X before Y" rules._
 ## Pointers
 
 - See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- **Required for case-study image work:** Read [`docs/case-study-image-design-guide.md`](docs/case-study-image-design-guide.md) before creating, selecting, editing, or exporting case-study artwork. Follow its versioned visual rules, provenance requirements, and generation-receipt checklist.
