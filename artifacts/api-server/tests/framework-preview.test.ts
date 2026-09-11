@@ -25,7 +25,8 @@ test("protected Education preview projects the complete snapshot for requested a
 
   assert.match(route, /projectIndustrySnapshotForMarket/);
   assert.match(previewRoute, /const requestedMarket = String\(row\.requested_market \?\? row\.market\)/);
-  assert.match(previewRoute, /const editionMarket = String\(row\.market\)/);
+  assert.match(previewRoute, /COALESCE\(e\.editorial_market,e\.market\) editorial_market/);
+  assert.match(previewRoute, /const editionMarket = String\(row\.editorial_market \?\? row\.market\)/);
   assert.match(previewRoute, /projectPreviewDocument\([\s\S]*row\.payload,[\s\S]*requestedMarket,[\s\S]*editionMarket/);
   assert.match(previewRoute, /document: projectedDocument/);
   assert.match(previewRoute, /validateCmsSnapshotForDelivery\([\s\S]*projectedDocument,[\s\S]*"draft"/);
@@ -41,7 +42,8 @@ test("pending media is available through both protected preview stages, never th
   for (const stage of [metadataRoute, binaryRoute]) {
     assert.match(stage, /authenticate,\s*requireMfa/);
     assert.match(stage, /a\.status IN \('active','ready','pending-review'\)/);
-    assert.match(stage, /canAccessMarket/);
+    assert.match(stage, /canAccessEditionTarget/);
+    assert.match(stage, /requested_locale/);
     assert.match(stage, /p\.revoked_at IS NULL/);
     assert.match(stage, /no-store, private/);
   }

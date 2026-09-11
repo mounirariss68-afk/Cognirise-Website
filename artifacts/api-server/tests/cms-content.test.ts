@@ -613,10 +613,10 @@ test("navigation settings enforce the authoritative market-aware menu contract",
 
 test("market availability accepts only the governed three-state decision", () => {
   for (const decision of ["inherit", "show", "off"]) {
-    assert.equal(UpdateDocumentMarketAvailabilityBody.safeParse({ decision }).success, true);
+    assert.equal(UpdateDocumentMarketAvailabilityBody.safeParse({ decision, version: 0 }).success, true);
   }
   assert.equal(
-    UpdateDocumentMarketAvailabilityBody.safeParse({ decision: "hidden" }).success,
+    UpdateDocumentMarketAvailabilityBody.safeParse({ decision: "hidden", version: 0 }).success,
     false,
   );
 });
@@ -627,6 +627,14 @@ test("edition overrides require an exact target market and locale", () => {
     locale: "ar-SA",
   }).success, true);
   assert.equal(CreateDocumentEditionOverrideBody.safeParse({ market: "ksa" }).success, false);
+});
+
+test("internal shared-source address is a valid editable edition target", () => {
+  assert.equal(UpdateDocumentBody.safeParse({
+    market: "shared-source",
+    locale: "und",
+    revisionNumber: 1,
+  }).success, true);
 });
 
 test("industry publication requires the broadened value and delivery contract", () => {

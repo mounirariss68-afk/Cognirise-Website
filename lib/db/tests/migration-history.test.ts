@@ -26,6 +26,8 @@ const expectedMigrations = [
   { idx: 21, when: 1788959300006, tag: "0021_cms_preview_navigation_snapshot" },
   { idx: 22, when: 1788959300007, tag: "0022_cms_legacy_root_archive_normalization" },
   { idx: 23, when: 1788998400000, tag: "0023_readiness_assessments" },
+  { idx: 24, when: 1788998400001, tag: "0024_cms_document_availability" },
+  { idx: 25, when: 1788998400002, tag: "0025_cms_editorial_market" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {
@@ -74,6 +76,24 @@ test("upgrades a migration-0007 database and resolves staged availability only a
   const legacyArchivedDocumentId = randomUUID();
   const legacyArchivedUaeEditionId = randomUUID();
   const legacyArchivedKsaEditionId = randomUUID();
+  const gulfMarketId = randomUUID();
+  const middleMarketId = randomUUID();
+  const regionalMarketId = randomUUID();
+  const canonicalMarketId = randomUUID();
+  const isolatedMarketId = randomUUID();
+  const chainedDocumentId = randomUUID();
+  const chainedEditionId = randomUUID();
+  const chainedRevisionId = randomUUID();
+  const canonicalDocumentId = randomUUID();
+  const canonicalEditionId = randomUUID();
+  const canonicalRevisionId = randomUUID();
+  const excludedPersonDocumentId = randomUUID();
+  const excludedPersonEditionId = randomUUID();
+  const excludedPersonRevisionId = randomUUID();
+  const publishedWithDraftDocumentId = randomUUID();
+  const draftEditionId = randomUUID();
+  const draftPublishedRevisionId = randomUUID();
+  const newerDraftRevisionId = randomUUID();
   await migrationPool.query(`
     CREATE TABLE "cms_documents" (
       "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -92,7 +112,8 @@ test("upgrades a migration-0007 database and resolves staged availability only a
       "fallback_mode" text NOT NULL DEFAULT 'none',
       "parity_complete" boolean NOT NULL DEFAULT false,
       "published_revision_id" uuid,
-      "published_at" timestamp with time zone
+       "published_at" timestamp with time zone,
+       "updated_at" timestamp with time zone NOT NULL DEFAULT now()
     );
     CREATE TABLE "cms_revisions" (
       "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -124,6 +145,15 @@ test("upgrades a migration-0007 database and resolves staged availability only a
       "role" text NOT NULL DEFAULT 'editor',
       "status" text NOT NULL DEFAULT 'active',
       "email_verified_at" timestamp with time zone
+    );
+    CREATE TABLE "cms_audit_events" (
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      "actor_label" text NOT NULL DEFAULT 'fixture',
+      "action" text NOT NULL,
+      "target_type" text NOT NULL,
+      "target_id" text NOT NULL,
+      "metadata" jsonb,
+      "occurred_at" timestamp with time zone NOT NULL DEFAULT now()
     );
     CREATE TABLE "cms_media_assets" (
       "id" uuid PRIMARY KEY,
@@ -224,12 +254,335 @@ test("upgrades a migration-0007 database and resolves staged availability only a
       publishedRevisionId,
     ],
   );
+  // This is intentionally a pre-0024 database fixture. It exercises the
+  // actual PostgreSQL migration with a requested default/fallback locale,
+  // a fallback chain longer than one hop, and an independent canonical
+  // market. The approved pointer must win over a newer draft revision.
+  await migrationPool.query(
+    `INSERT INTO "market_editions"
+       ("id","code","default_locale","fallback_market_code","fallback_locale","is_canonical")
+     VALUES
+       ($1,'gulf','ar','middle','fr',false),
+       ($2,'middle','de','regional','es',false),
+       ($3,'regional','it',NULL,NULL,false),
+       ($4,'canonical','en',NULL,NULL,true),
+       ($5,'isolated','en',NULL,NULL,false)`,
+    [gulfMarketId, middleMarketId, regionalMarketId, canonicalMarketId, isolatedMarketId],
+  );
+  await migrationPool.query(
+    `INSERT INTO "cms_documents" ("id","kind","canonical_slug")
+     VALUES
+       ($1,'publication','chained-publication'),
+       ($2,'publication','canonical-publication'),
+       ($3,'person','excluded-person'),
+       ($4,'publication','published-over-newer-draft')`,
+    [chainedDocumentId, canonicalDocumentId, excludedPersonDocumentId, publishedWithDraftDocumentId],
+  );
+  await migrationPool.query(
+    `INSERT INTO "cms_market_editions"
+       ("id","document_id","market","locale","localized_slug","publication_state",
+        "published_revision_id","published_at")
+     VALUES
+       ($1,$2,'regional','es','chained-publication','published',$3,now()-interval '1 day'),
+       ($4,$5,'canonical','en','canonical-publication','published',$6,now()-interval '1 day'),
+       ($7,$8,'canonical','en','excluded-person','published',$9,now()-interval '1 day'),
+       ($10,$11,'gulf','ar','published-over-newer-draft','published',$12,now()-interval '1 day')`,
+    [
+      chainedEditionId, chainedDocumentId, chainedRevisionId,
+      canonicalEditionId, canonicalDocumentId, canonicalRevisionId,
+      excludedPersonEditionId, excludedPersonDocumentId, excludedPersonRevisionId,
+      draftEditionId, publishedWithDraftDocumentId, draftPublishedRevisionId,
+    ],
+  );
+  await migrationPool.query(
+    `INSERT INTO "cms_revisions"
+       ("id","edition_id","revision_number","workflow_state","payload","created_at")
+     VALUES
+       ($1,$2,1,'approved','{"mediaIds":[],"content":{}}'::jsonb,now()-interval '2 days'),
+       ($3,$4,1,'approved','{"mediaIds":[],"content":{}}'::jsonb,now()-interval '2 days'),
+       ($5,$6,1,'approved','{"mediaIds":[],"content":{}}'::jsonb,now()-interval '2 days'),
+       ($7,$8,1,'approved','{"mediaIds":[],"content":{}}'::jsonb,now()-interval '2 days'),
+       ($9,$8,2,'draft','{"mediaIds":[],"content":{}}'::jsonb,now()-interval '1 hour')`,
+    [
+      chainedRevisionId, chainedEditionId,
+      canonicalRevisionId, canonicalEditionId,
+      excludedPersonRevisionId, excludedPersonEditionId,
+      draftPublishedRevisionId, draftEditionId,
+      newerDraftRevisionId,
+    ],
+  );
+  // 0008/0009 are intentionally still pending. Supplying their eventual
+  // shape lets the real historical chain carry this pre-existing person
+  // exclusion into 0024 without skipping any migration.
+  await migrationPool.query(`
+    CREATE TABLE "cms_person_market_availability" (
+      "document_id" uuid NOT NULL REFERENCES "cms_documents"("id") ON DELETE CASCADE,
+      "market_edition_id" uuid NOT NULL REFERENCES "market_editions"("id") ON DELETE CASCADE,
+      "decision" text NOT NULL DEFAULT 'inherit',
+      "published_decision" text NOT NULL DEFAULT 'inherit',
+      "draft_decision" text,
+      "updated_by_user_id" uuid,
+      "published_by_user_id" uuid,
+      "published_at" timestamp with time zone,
+      "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+      "updated_at" timestamp with time zone NOT NULL DEFAULT now(),
+      PRIMARY KEY ("document_id","market_edition_id")
+    );
+  `);
+  await migrationPool.query(
+    `INSERT INTO "cms_person_market_availability"
+       ("document_id","market_edition_id","decision","published_decision")
+     VALUES ($1,$2,'off','off')`,
+    [excludedPersonDocumentId, gulfMarketId],
+  );
 
   await migrate(drizzle(migrationPool), {
     migrationsFolder,
     migrationsSchema: schema,
     migrationsTable: "__drizzle_migrations",
   });
+  const migrationReceipt = await migrationPool.query<{
+    document_id: string;
+    locale: string;
+    legacy_selected_edition_id: string | null;
+    legacy_selected_revision_id: string | null;
+    published_selected_edition_id: string | null;
+    published_selected_revision_id: string | null;
+    legacy_resolvable: boolean;
+    published_resolvable: boolean;
+    selection_preserved: boolean;
+  }>(
+    `SELECT "document_id","locale","legacy_selected_edition_id","legacy_selected_revision_id",
+            "published_selected_edition_id","published_selected_revision_id",
+            "legacy_resolvable","published_resolvable","selection_preserved"
+       FROM "cms_document_availability_migration_reports"
+      WHERE "market_edition_id"=$1
+        AND "document_id" IN ($2,$3,$4,$5)
+      ORDER BY "document_id","locale"`,
+    [
+      gulfMarketId,
+      chainedDocumentId,
+      canonicalDocumentId,
+      excludedPersonDocumentId,
+      publishedWithDraftDocumentId,
+    ],
+  );
+  const chainedReceipt = migrationReceipt.rows.find((row) =>
+    row.document_id === chainedDocumentId && row.locale === "ar"
+  );
+  assert.deepEqual(chainedReceipt, {
+    document_id: chainedDocumentId,
+    locale: "ar",
+    legacy_selected_edition_id: chainedEditionId,
+    legacy_selected_revision_id: chainedRevisionId,
+    published_selected_edition_id: chainedEditionId,
+    published_selected_revision_id: chainedRevisionId,
+    legacy_resolvable: true,
+    published_resolvable: true,
+    selection_preserved: true,
+  });
+  const canonicalReceipt = migrationReceipt.rows.find((row) =>
+    row.document_id === canonicalDocumentId && row.locale === "fr"
+  );
+  assert.equal(canonicalReceipt?.legacy_selected_revision_id, canonicalRevisionId);
+  assert.equal(canonicalReceipt?.published_selected_revision_id, canonicalRevisionId);
+  const excludedReceipt = migrationReceipt.rows.find((row) =>
+    row.document_id === excludedPersonDocumentId && row.locale === "ar"
+  );
+  assert.deepEqual(excludedReceipt && {
+    legacy: excludedReceipt.legacy_selected_revision_id,
+    published: excludedReceipt.published_selected_revision_id,
+    legacyResolvable: excludedReceipt.legacy_resolvable,
+    publishedResolvable: excludedReceipt.published_resolvable,
+    preserved: excludedReceipt.selection_preserved,
+  }, {
+    legacy: null,
+    published: null,
+    legacyResolvable: false,
+    publishedResolvable: false,
+    preserved: true,
+  });
+  const pinnedDraftReceipt = migrationReceipt.rows.find((row) =>
+    row.document_id === publishedWithDraftDocumentId && row.locale === "ar"
+  );
+  assert.equal(pinnedDraftReceipt?.legacy_selected_revision_id, draftPublishedRevisionId);
+  assert.equal(pinnedDraftReceipt?.published_selected_revision_id, draftPublishedRevisionId);
+  assert.notEqual(pinnedDraftReceipt?.published_selected_revision_id, newerDraftRevisionId);
+  const excludedAvailability = await migrationPool.query<{ published_decision: string }>(
+    `SELECT "published_decision" FROM "cms_document_market_availability"
+      WHERE "document_id"=$1 AND "market_edition_id"=$2 AND "locale"='ar'`,
+    [excludedPersonDocumentId, gulfMarketId],
+  );
+  assert.equal(excludedAvailability.rows[0]?.published_decision, "off");
+  const globallyIneligibleAvailability = await migrationPool.query<{ published_decision: string }>(
+    `SELECT "published_decision" FROM "cms_document_market_availability"
+      WHERE "document_id"=$1 AND "market_edition_id"=$2 AND "locale"='en'`,
+    [chainedDocumentId, isolatedMarketId],
+  );
+  assert.equal(
+    globallyIneligibleAvailability.rows[0]?.published_decision,
+    "off",
+    "singleton shared promotion must not expose a legacy-unreachable destination",
+  );
+  // A replay preserves the receipt and does not replace a later editorial
+  // selection with a freshly computed migration baseline.
+  await migrationPool.query(
+    `UPDATE "cms_document_market_availability"
+        SET "published_decision"='show',"updated_at"=now()
+      WHERE "document_id"=$1 AND "market_edition_id"=$2 AND "locale"='ar'`,
+    [chainedDocumentId, gulfMarketId],
+  );
+  const receiptBeforeReplay = await migrationPool.query(
+    `SELECT * FROM "cms_document_availability_migration_reports"
+      WHERE "document_id"=$1 AND "market_edition_id"=$2 AND "locale"='ar'`,
+    [chainedDocumentId, gulfMarketId],
+  );
+  await assert.rejects(
+    migrationPool.query(
+      `UPDATE "cms_document_availability_migration_reports"
+          SET "selection_preserved"=false
+        WHERE "document_id"=$1 AND "market_edition_id"=$2 AND "locale"='ar'`,
+      [chainedDocumentId, gulfMarketId],
+    ),
+    /migration receipts are immutable/,
+  );
+  await migrationPool.query(await readFile(
+    new URL("../migrations/0024_cms_document_availability.sql", import.meta.url),
+    "utf8",
+  ));
+  const receiptAfterReplay = await migrationPool.query(
+    `SELECT * FROM "cms_document_availability_migration_reports"
+      WHERE "document_id"=$1 AND "market_edition_id"=$2 AND "locale"='ar'`,
+    [chainedDocumentId, gulfMarketId],
+  );
+  assert.deepEqual(receiptAfterReplay.rows, receiptBeforeReplay.rows);
+  const editorialSelectionAfterReplay = await migrationPool.query<{ published_decision: string }>(
+    `SELECT "published_decision" FROM "cms_document_market_availability"
+      WHERE "document_id"=$1 AND "market_edition_id"=$2 AND "locale"='ar'`,
+    [chainedDocumentId, gulfMarketId],
+  );
+  assert.equal(editorialSelectionAfterReplay.rows[0]?.published_decision, "show");
+
+  // The development post-merge reconciler replays this SQL after a schema
+  // push. A later one-edition custom document must not be reclassified as a
+  // historical shared source or receive historical availability on replay.
+  const laterCustomDocumentId = randomUUID();
+  const laterCustomEditionId = randomUUID();
+  await migrationPool.query(
+    `INSERT INTO "cms_documents" ("id", "canonical_slug") VALUES ($1, 'later-custom-document')`,
+    [laterCustomDocumentId],
+  );
+  await migrationPool.query(
+    `INSERT INTO "cms_market_editions" ("id", "document_id", "content_mode")
+     VALUES ($1, $2, 'custom')`,
+    [laterCustomEditionId, laterCustomDocumentId],
+  );
+  await migrationPool.query(
+    `INSERT INTO "cms_document_availability_states" ("document_id") VALUES ($1)`,
+    [laterCustomDocumentId],
+  );
+  const selectedSourceBeforeReplay = await migrationPool.query<{
+    shared_source_edition_id: string | null;
+    shared_source_revision_id: string | null;
+    published_source_revision_id: string | null;
+  }>(
+    `SELECT "shared_source_edition_id","shared_source_revision_id","published_source_revision_id"
+       FROM "cms_document_availability_states" WHERE "document_id"=$1`,
+    [publishedDocumentId],
+  );
+  await migrationPool.query(await readFile(
+    new URL("../migrations/0024_cms_document_availability.sql", import.meta.url),
+    "utf8",
+  ));
+  const laterCustomMode = await migrationPool.query<{ content_mode: string }>(
+    `SELECT "content_mode" FROM "cms_market_editions" WHERE "id"=$1`,
+    [laterCustomEditionId],
+  );
+  assert.equal(laterCustomMode.rows[0]?.content_mode, "custom");
+  const laterCustomAvailability = await migrationPool.query(
+    `SELECT 1 FROM "cms_document_market_availability" WHERE "document_id"=$1`,
+    [laterCustomDocumentId],
+  );
+  assert.equal(
+    laterCustomAvailability.rowCount,
+    0,
+    "a replay must not turn documents authored after the migration into historical availability rows",
+  );
+  const selectedSourceAfterReplay = await migrationPool.query<{
+    shared_source_edition_id: string | null;
+    shared_source_revision_id: string | null;
+    published_source_revision_id: string | null;
+  }>(
+    `SELECT "shared_source_edition_id","shared_source_revision_id","published_source_revision_id"
+       FROM "cms_document_availability_states" WHERE "document_id"=$1`,
+    [publishedDocumentId],
+  );
+  assert.ok(selectedSourceBeforeReplay.rows[0]?.shared_source_edition_id);
+  assert.deepEqual(selectedSourceAfterReplay.rows, selectedSourceBeforeReplay.rows);
+
+  // A real shared source may already have been moved to its internal delivery
+  // address before the editorial-origin migration runs. The moved source uses
+  // its relocation audit, while a real regional clone must retain its own
+  // address as editorial origin rather than inherit the source's UAE origin.
+  const relocatedDocumentId = randomUUID();
+  const relocatedSourceEditionId = randomUUID();
+  const relocatedSourceRevisionId = randomUUID();
+  const internalCloneEditionId = randomUUID();
+  const internalCloneRevisionId = randomUUID();
+  await migrationPool.query(
+    `INSERT INTO "cms_documents" ("id","canonical_slug") VALUES ($1,'relocated-editorial-origin')`,
+    [relocatedDocumentId],
+  );
+  await migrationPool.query(
+    `INSERT INTO "cms_market_editions"
+       ("id","document_id","market","locale","content_mode","publication_state")
+     VALUES ($1,$2,'shared-source','und','shared','published'),
+            ($3,$2,'ksa','en','custom','published')`,
+    [relocatedSourceEditionId, relocatedDocumentId, internalCloneEditionId],
+  );
+  await migrationPool.query(
+    `INSERT INTO "cms_revisions"
+       ("id","edition_id","revision_number","payload","content_digest","workflow_state","source_revision_id")
+     VALUES ($1,$2,1,'{}'::jsonb,'relocated-source','approved',NULL),
+            ($3,$4,1,'{}'::jsonb,'internal-clone','approved',$1)`,
+    [
+      relocatedSourceRevisionId,
+      relocatedSourceEditionId,
+      internalCloneRevisionId,
+      internalCloneEditionId,
+    ],
+  );
+  await migrationPool.query(
+    `UPDATE "cms_market_editions" SET "published_revision_id"=CASE
+       WHEN "id"=$1 THEN $2::uuid WHEN "id"=$3 THEN $4::uuid END
+      WHERE "id" IN ($1,$3)`,
+    [
+      relocatedSourceEditionId,
+      relocatedSourceRevisionId,
+      internalCloneEditionId,
+      internalCloneRevisionId,
+    ],
+  );
+  await migrationPool.query(
+    `INSERT INTO "cms_audit_events" ("actor_label","action","target_type","target_id","metadata")
+     VALUES ('migration fixture','document.shared_source_relocated','document',$1,
+             jsonb_build_object('sourceEditionId',$2::text,'from',jsonb_build_object('market','uae')))`,
+    [relocatedDocumentId, relocatedSourceEditionId],
+  );
+  await migrationPool.query(await readFile(
+    new URL("../migrations/0025_cms_editorial_market.sql", import.meta.url),
+    "utf8",
+  ));
+  const recoveredOrigins = await migrationPool.query<{ id: string; editorial_market: string | null }>(
+    `SELECT "id","editorial_market" FROM "cms_market_editions"
+      WHERE "id" IN ($1,$2) ORDER BY "market"`,
+    [relocatedSourceEditionId, internalCloneEditionId],
+  );
+  assert.deepEqual(
+    recoveredOrigins.rows.map((row) => row.editorial_market),
+    ["ksa", "uae"],
+    "a real clone keeps its own origin while the moved source uses its audit receipt",
+  );
 
   const mediaIdentityConstraint = await migrationPool.query<{ contype: string }>(
     `SELECT contype

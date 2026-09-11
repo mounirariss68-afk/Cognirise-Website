@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { projectIndustrySnapshotForMarket } from "@workspace/api-zod";
+import { industryDeliveryErrors } from "../src/routes/documents";
 
 const v2Snapshot = {
   slug: "education",
@@ -187,4 +188,32 @@ test("projection rejects unmarked foreign regional copy anywhere in the payload"
     () => projectIndustrySnapshotForMarket(unsafe, "uae", "uae"),
     /foreign regional content/,
   );
+});
+
+test("shared Banking publication reports incompatible selected destinations before public delivery", () => {
+  // This is intentionally a raw persisted-model fixture: projection rejects
+  // the cross-market Banking source before schema delivery validation, which
+  // is the contract the publication transaction must enforce.
+  const ksaBankingSource = {
+    slug: "financial-services",
+    markets: ["ksa"],
+    content: { bankingPov: { market: "ksa" } },
+  };
+  const errors = industryDeliveryErrors(ksaBankingSource, "ksa", [{
+    market: "uae",
+    locale: "en",
+  }]);
+  assert.deepEqual(
+    errors.map(({ market, locale }) => ({ market, locale })),
+    [{ market: "uae", locale: "en" }],
+  );
+  assert.match(errors[0]?.error ?? "", /cannot fall back from ksa to uae/i);
+
+  // A published exact custom UAE edition wins source selection and therefore
+  // does not consume the new shared KSA source.
+  assert.deepEqual(industryDeliveryErrors(ksaBankingSource, "ksa", [{
+    market: "uae",
+    locale: "en",
+    hasPublishedCustom: true,
+  }]), []);
 });

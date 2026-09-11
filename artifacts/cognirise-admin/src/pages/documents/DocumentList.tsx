@@ -458,7 +458,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                       <p className="text-xs text-destructive">No enabled market is available. Ask an administrator to enable one.</p>
                     ) : primaryMarket ? (
                       <p className="text-xs text-muted-foreground">
-                        The primary edition starts in {primaryMarket.defaultLocale}; other editions can inherit through configured fallbacks.
+                        Shared content starts in {primaryMarket.defaultLocale}. Choose additional destinations from the editor when needed.
                       </p>
                     ) : null}
                     <FormMessage />

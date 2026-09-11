@@ -1,7 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-test("person availability stages editor changes and publishes them with governance", { concurrency: false }, async (t) => {
+let marketAvailabilityTestTail = Promise.resolve();
+
+async function serialMarketAvailabilityTest<T>(run: () => Promise<T>): Promise<T> {
+  const previous = marketAvailabilityTestTail;
+  let release!: () => void;
+  marketAvailabilityTestTail = new Promise<void>((resolve) => { release = resolve; });
+  await previous;
+  try {
+    return await run();
+  } finally {
+    release();
+  }
+}
+
+test("person availability mutations use the versioned destination workflow", { concurrency: false }, async (t) => serialMarketAvailabilityTest(async () => {
   const priorDatabaseUrl = process.env.DATABASE_URL;
   const priorSessionSecret = process.env.SESSION_SECRET;
   process.env.DATABASE_URL = "postgres://test.invalid/cognirise";
@@ -16,8 +30,8 @@ test("person availability stages editor changes and publishes them with governan
   let role: "viewer" | "editor" | "administrator" = "viewer";
   let marketCodes = ["ksa"];
   let auditCount = 0;
-  let publicSelectionChecked = false;
   let publishedDecision: "inherit" | "off" = "inherit";
+  let publicSelectionChecked = false;
   const now = new Date();
 
   t.mock.method(pool, "query", async (sql: unknown) => {
@@ -50,7 +64,13 @@ test("person availability stages editor changes and publishes them with governan
     if (statement.includes("SELECT d.kind,m.code market")) {
       return { rowCount: 1, rows: [{ kind: "person", market: "ksa" }] };
     }
-    if (statement.includes("INSERT INTO cms_person_market_availability")) {
+    if (statement.includes("SELECT draft_version FROM cms_document_availability_states")) {
+      return { rowCount: 1, rows: [{ draft_version: 0 }] };
+    }
+    if (statement.includes("INSERT INTO cms_document_availability_states")) {
+      return { rowCount: 1, rows: [] };
+    }
+    if (statement.includes("INSERT INTO cms_document_market_availability")) {
       return { rowCount: 1, rows: [] };
     }
     if (statement.includes("INSERT INTO cms_audit_events")) {
@@ -64,7 +84,7 @@ test("person availability stages editor changes and publishes them with governan
         rows: [{ market: "ksa", published_decision: "off", published_at: now }],
       };
     }
-    if (statement.includes("JOIN cms_person_market_availability a") && statement.includes("WHERE m.id=$2")) {
+    if (statement.includes("JOIN cms_document_market_availability a") && statement.includes("WHERE m.id=$2")) {
       return {
         rowCount: 1,
         rows: [{
@@ -92,10 +112,10 @@ test("person availability stages editor changes and publishes them with governan
       };
     }
     if (statement.includes("WITH selected AS")) {
-      publicSelectionChecked = statement.includes("cms_person_market_availability") &&
+      publicSelectionChecked = statement.includes("cms_document_market_availability") &&
         statement.includes("requested.code=$3") &&
-        statement.includes("a.published_decision='off'") &&
-        !statement.includes("a.draft_decision='off'");
+        statement.includes("availability.published_decision IS DISTINCT FROM 'off'") &&
+        !statement.includes("availability.draft_decision");
       const rows = publishedDecision === "off"
         ? []
         : [{
@@ -108,6 +128,10 @@ test("person availability stages editor changes and publishes them with governan
     }
     return { rowCount: 0, rows: [] };
   });
+  t.mock.method(pool, "connect", async () => ({
+    query: (sql: unknown, values?: unknown[]) => pool.query(sql, values),
+    release: () => undefined,
+  }) as never);
 
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
@@ -153,7 +177,7 @@ test("person availability stages editor changes and publishes them with governan
   const updated = await fetch(`${origin}/api/documents/person-id/market-availability/market-id`, {
     method: "PUT",
     headers,
-    body: JSON.stringify({ decision: "off" }),
+    body: JSON.stringify({ decision: "off", version: 0 }),
   });
   assert.equal(updated.status, 200);
   const stagedResponse = await updated.json() as {
@@ -185,32 +209,45 @@ test("person availability stages editor changes and publishes them with governan
     method: "POST",
     headers,
   });
-  assert.equal(release.status, 204);
-  assert.equal(auditCount, 2);
+  assert.equal(release.status, 400, "the legacy endpoint cannot publish without a reviewed version");
+  assert.equal(auditCount, 1);
 
   const listed = await fetch(`${origin}/api/public/content?market=ksa&locale=en&kind=person`);
   assert.equal(listed.status, 200);
-  assert.deepEqual((await listed.json() as { items: unknown[] }).items, []);
+  assert.deepEqual(
+    (await listed.json() as { items: Array<{ slug: string }> }).items.map((item) => item.slug),
+    ["staged-person"],
+    "the rejected legacy release cannot alter the still-published person visibility",
+  );
   assert.equal(publicSelectionChecked, true);
-});
+}));
 
 test("public person collection keeps visible records and excludes mixed hidden records", {
   concurrency: false,
-}, async (t) => {
+}, async (t) => serialMarketAvailabilityTest(async () => {
   const fixture: PublicPersonFixture = {
-    markets: [{
-      code: "uae",
-      default_locale: "en",
-      fallback_market_code: null,
-      fallback_locale: null,
-      is_canonical: true,
-    }],
+    markets: [
+      {
+        code: "ksa",
+        default_locale: "en",
+        fallback_market_code: "uae",
+        fallback_locale: "en",
+        is_canonical: false,
+      },
+      {
+        code: "uae",
+        default_locale: "en",
+        fallback_market_code: null,
+        fallback_locale: null,
+        is_canonical: true,
+      },
+    ],
     rows: [
       publicPersonRow("visible-person", "visible-person", "uae"),
       publicPersonRow("hidden-person", "hidden-person", "uae"),
     ],
     decisions: {
-      "visible-person:uae": "show",
+      "visible-person:uae": "inherit",
       "hidden-person:uae": "off",
     },
   };
@@ -219,8 +256,17 @@ test("public person collection keeps visible records and excludes mixed hidden r
   const collection = await fetch(`${origin}/api/public/content?market=uae&locale=en&kind=person`);
   assert.equal(collection.status, 200);
   const payload = await collection.json() as {
-    items: Array<{ id: string; slug: string; market: string; requestedMarket: string; usedFallback: boolean }>;
-    total: number;
+    items: Array<{
+      slug: string;
+      market: string;
+      locale: string;
+      requestedMarket: string;
+      requestedLocale: string;
+      usedFallback: boolean;
+    }>;
+    market: string;
+    requestedMarket: string;
+    usedFallback: boolean;
   };
   assert.deepEqual(payload.items.map((item) => item.slug), ["visible-person"]);
   assert.equal(payload.items[0]?.market, "uae");
@@ -230,44 +276,59 @@ test("public person collection keeps visible records and excludes mixed hidden r
 
   const hiddenDetail = await fetch(`${origin}/api/public/content/uae/en/person/hidden-person`);
   assert.equal(hiddenDetail.status, 404, "hidden people must not resolve through the public detail API");
-});
+}));
 
 test("public person collection returns no records when every requested-market record is hidden", {
   concurrency: false,
-}, async (t) => {
+}, async (t) => serialMarketAvailabilityTest(async () => {
   const fixture: PublicPersonFixture = {
-    markets: [{
-      code: "uae",
-      default_locale: "en",
-      fallback_market_code: null,
-      fallback_locale: null,
-      is_canonical: true,
-    }],
-    rows: [
-      publicPersonRow("hidden-founder", "hidden-founder", "uae"),
-      publicPersonRow("hidden-advisor", "hidden-advisor", "uae"),
+    markets: [
+      {
+        code: "ksa",
+        default_locale: "en",
+        fallback_market_code: "uae",
+        fallback_locale: "en",
+        is_canonical: false,
+      },
+      {
+        code: "uae",
+        default_locale: "en",
+        fallback_market_code: null,
+        fallback_locale: null,
+        is_canonical: true,
+      },
     ],
-    decisions: {
-      "hidden-founder:uae": "off",
-      "hidden-advisor:uae": "off",
-    },
+    rows: [publicPersonRow("hidden-founder", "hidden-founder", "uae")],
+    decisions: { "hidden-founder:uae": "off" },
   };
   const origin = await startPublicFixture(t, fixture);
 
   const collection = await fetch(`${origin}/api/public/content?market=uae&locale=en&kind=person`);
   assert.equal(collection.status, 200);
-  const payload = await collection.json() as { items: unknown[]; total: number };
+  const payload = await collection.json() as {
+    items: Array<{
+      slug: string;
+      market: string;
+      locale: string;
+      requestedMarket: string;
+      requestedLocale: string;
+      usedFallback: boolean;
+    }>;
+    market: string;
+    requestedMarket: string;
+    usedFallback: boolean;
+  };
   assert.deepEqual(payload.items, []);
   assert.equal(payload.total, 0);
   assert.equal(
     (await fetch(`${origin}/api/public/content/uae/en/person/hidden-founder`)).status,
     404,
   );
-});
+}));
 
 test("requested-market person availability falls back to a published UAE edition when not explicitly hidden", {
   concurrency: false,
-}, async (t) => {
+}, async (t) => serialMarketAvailabilityTest(async () => {
   const fixture: PublicPersonFixture = {
     markets: [
       {
@@ -314,7 +375,7 @@ test("requested-market person availability falls back to a published UAE edition
   assert.equal(payload.market, "uae");
   assert.equal(payload.requestedMarket, "ksa");
   assert.equal(payload.usedFallback, true);
-});
+}));
 
 type PersonDecision = "inherit" | "show" | "off";
 
@@ -390,13 +451,17 @@ async function startPublicFixture(t: any, fixture: PublicPersonFixture): Promise
       return { rowCount: fixture.markets.length, rows: fixture.markets };
     }
     if (statement.includes("WITH selected AS")) {
-      assert.match(statement, /d\.kind<>'person' OR NOT EXISTS/);
       assert.match(statement, /requested\.code=\$3/);
-      assert.match(statement, /a\.published_decision='off'/);
-      assert.doesNotMatch(statement, /a\.draft_decision='off'/);
+      assert.match(statement, /cms_document_market_availability availability/);
+      assert.match(statement, /availability\.published_decision IS DISTINCT FROM 'off'/);
+      assert.doesNotMatch(statement, /availability\.draft_decision/);
       const requestedMarket = String(values?.[2]);
+      const requestedSlug = statement.includes("source_rank=1") ? String(values?.[1]) : null;
       const rows = fixture.rows
-        .filter((row) => fixture.decisions[`${row.id}:${requestedMarket}`] !== "off")
+        .filter((row) =>
+          fixture.decisions[`${row.id}:${requestedMarket}`] !== "off"
+          && (requestedSlug === null || row.localized_slug === requestedSlug)
+        )
         .map((row) => ({
           ...row,
           requested_market: requestedMarket,

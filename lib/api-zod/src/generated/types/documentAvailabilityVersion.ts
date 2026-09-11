@@ -5,10 +5,8 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
-import type { MarketAvailabilityDecision } from './marketAvailabilityDecision';
 
-export interface MarketAvailabilityUpdate {
-  decision: MarketAvailabilityDecision;
+export interface DocumentAvailabilityVersion {
   /** @minimum 0 */
   version: number;
 }

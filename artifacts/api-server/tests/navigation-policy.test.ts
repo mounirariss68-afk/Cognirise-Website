@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import test from "node:test";
 import {
   NAVIGATION_ITEM_IDS,
@@ -6,7 +7,7 @@ import {
   UpdateNavigationSettingsSchema,
   parsePersistedNavigationPolicy,
 } from "@workspace/api-zod";
-import { isPublishedPageAvailable, publishedNavigationPolicy } from "../src/lib/navigation-policy";
+import { isPublishedPageAvailable, navigationCandidates, publishedNavigationPolicy } from "../src/lib/navigation-policy";
 import { pool } from "@workspace/db";
 
 test("the active navigation registry retires Work without accepting new writes", () => {
@@ -24,6 +25,25 @@ test("the active navigation registry retires Work without accepting new writes",
       visible: true,
     }],
   }).success, false);
+});
+
+test("a locale supported only by a fallback market is not a valid requested destination", async (t) => {
+  t.mock.method(pool, "query", async () => ({
+    rowCount: 2,
+    rows: [
+      {
+        code: "ksa", default_locale: "ar", fallback_market_code: "uae",
+        fallback_locale: null, is_canonical: false,
+      },
+      {
+        code: "uae", default_locale: "en", fallback_market_code: null,
+        fallback_locale: null, is_canonical: true,
+      },
+    ],
+  }));
+  assert.equal(await navigationCandidates("ksa", "en"), null);
+  assert.equal(await publishedNavigationPolicy("ksa", "en"), null);
+  assert.equal(await isPublishedPageAvailable("/platforms", "ksa", "en"), false);
 });
 
 test("persisted policies drop only retired Work records and keep approved settings", () => {
@@ -230,6 +250,224 @@ test("published policy compatibility removes legacy Work without losing approved
   ]);
   assert.equal(await isPublishedPageAvailable("/work", "uae", "en"), true);
   assert.equal(await isPublishedPageAvailable("/work/customer-story", "uae", "en"), true);
+});
+
+test("published navigation hides a destination whose published CMS document is unavailable", async (t) => {
+  const platform = {
+    slug: "unavailable-platform",
+    title: "Unavailable platform",
+    content: {
+      schemaVersion: 1,
+      category: "Specialist",
+      summary: "A governed platform summary.",
+      heroMediaId: "00000000-0000-4000-8000-000000000001",
+      template: "standard",
+      sections: [],
+      capabilities: [],
+      differentiators: [],
+      visibility: "public",
+      order: 0,
+      sources: [{ label: "Approved source", url: "https://example.com/source", accessedAt: "2026-09-06" }],
+      verificationDate: "2026-09-06",
+      reviewDate: "2027-03-06",
+      relatedIds: [],
+    },
+    mediaIds: ["00000000-0000-4000-8000-000000000001"],
+    markets: ["uae"],
+  };
+  t.mock.method(pool, "query", async (sql: unknown) => {
+    const statement = String(sql);
+    if (statement.includes("FROM market_editions WHERE enabled=true")) {
+      return {
+        rowCount: 1,
+        rows: [{
+          code: "uae", default_locale: "en", fallback_market_code: null,
+          fallback_locale: null, is_canonical: true,
+        }],
+      };
+    }
+    if (statement.includes("cms_navigation_published_policies")) {
+      return {
+        rowCount: 1,
+        rows: [{
+          items: [{
+            id: "platforms", label: "Unavailable platform", parentId: null,
+            order: 0, destination: "/platforms/unavailable-platform", visible: true,
+          }],
+          pages: [{ path: "/platforms/unavailable-platform", enabled: true }],
+          published_at: new Date(),
+        }],
+      };
+    }
+    if (statement.includes("FROM cms_documents d")) {
+      assert.match(statement, /cms_document_availability_states delivery/);
+      assert.match(statement, /e\.content_mode='shared'/);
+      assert.match(statement, /r\.id=e\.published_revision_id/);
+      assert.doesNotMatch(statement, /e\.published_revision_id=delivery\.shared_source_revision_id/);
+      assert.match(statement, /e\.published_revision_id=delivery\.published_source_revision_id/);
+      assert.match(statement, /cms_document_market_availability/);
+      return { rowCount: 1, rows: [{ kind: "platform", payload: platform, available: false }] };
+    }
+    return { rowCount: 0, rows: [] };
+  });
+
+  const policy = await publishedNavigationPolicy("uae", "en");
+  assert.equal(policy?.items[0]?.visible, false);
+  assert.equal(await isPublishedPageAvailable("/platforms/unavailable-platform", "uae", "en"), false);
+});
+
+test("navigation hides a superseded shared slug while retaining the exact custom route", async (t) => {
+  const platform = (slug: string) => ({
+    slug,
+    title: slug,
+    content: {
+      schemaVersion: 1,
+      category: "Specialist",
+      summary: "A governed platform summary.",
+      heroMediaId: "00000000-0000-4000-8000-000000000001",
+      template: "standard",
+      sections: [],
+      capabilities: [],
+      differentiators: [],
+      visibility: "public",
+      order: 0,
+      sources: [{ label: "Approved source", url: "https://example.com/source", accessedAt: "2026-09-06" }],
+      verificationDate: "2026-09-06",
+      reviewDate: "2027-03-06",
+      relatedIds: [],
+    },
+    mediaIds: ["00000000-0000-4000-8000-000000000001"],
+    markets: ["ksa"],
+  });
+  t.mock.method(pool, "query", async (sql: unknown) => {
+    const statement = String(sql);
+    if (statement.includes("FROM market_editions WHERE enabled=true")) {
+      return {
+        rowCount: 1,
+        rows: [{
+          code: "ksa", default_locale: "en", fallback_market_code: null,
+          fallback_locale: null, is_canonical: true,
+        }],
+      };
+    }
+    if (statement.includes("cms_navigation_published_policies")) {
+      return {
+        rowCount: 1,
+        rows: [{
+          items: [
+            { id: "platforms", label: "Shared", parentId: null, order: 0, destination: "/platforms/shared-platform", visible: true },
+            { id: "methodologies", label: "Custom", parentId: null, order: 1, destination: "/platforms/regional-platform", visible: true },
+          ],
+          pages: [
+            { path: "/platforms/shared-platform", enabled: true },
+            { path: "/platforms/regional-platform", enabled: true },
+          ],
+          published_at: new Date(),
+        }],
+      };
+    }
+    if (statement.includes("FROM cms_documents d")) {
+      assert.match(statement, /FROM selected_sources/);
+      // The shared source remains a represented route, but exact KSA custom
+      // wins public delivery. Its old slug is therefore known-and-unavailable.
+      return {
+        rowCount: 2,
+        rows: [
+          { kind: "platform", payload: platform("shared-platform"), available: true, source_rank: "2", public_eligible: true },
+          { kind: "platform", payload: platform("regional-platform"), available: true, source_rank: "1", public_eligible: true },
+        ],
+      };
+    }
+    return { rowCount: 0, rows: [] };
+  });
+
+  const policy = await publishedNavigationPolicy("ksa", "en");
+  assert.deepEqual(policy?.items.map((item) => [item.destination, item.visible]), [
+    ["/platforms/shared-platform", false],
+    ["/platforms/regional-platform", true],
+  ]);
+  assert.equal(await isPublishedPageAvailable("/platforms/shared-platform", "ksa", "en"), false);
+  assert.equal(await isPublishedPageAvailable("/platforms/regional-platform", "ksa", "en"), true);
+});
+
+test("real navigation selection promotes a public shared source over a private exact custom source", {
+  skip: !process.env.DATABASE_URL && "DATABASE_URL is not available",
+  concurrency: false,
+}, async (t) => {
+  const client = await pool.connect();
+  const schema = `navigation_public_source_${randomUUID().replaceAll("-", "")}`;
+  try {
+    await client.query(`CREATE SCHEMA "${schema}"; SET search_path TO "${schema}";`);
+    await client.query(`
+      CREATE TABLE market_editions (
+        id text PRIMARY KEY, code text NOT NULL UNIQUE, default_locale text NOT NULL,
+        fallback_market_code text, fallback_locale text, is_canonical boolean NOT NULL DEFAULT false,
+        enabled boolean NOT NULL DEFAULT true
+      );
+      CREATE TABLE cms_documents (
+        id text PRIMARY KEY, kind text NOT NULL, status text NOT NULL DEFAULT 'active'
+      );
+      CREATE TABLE cms_market_editions (
+        id text PRIMARY KEY, document_id text NOT NULL, market text NOT NULL, locale text NOT NULL,
+        content_mode text NOT NULL, publication_state text NOT NULL, published_at timestamptz,
+        published_revision_id text, editorial_market text, updated_at timestamptz NOT NULL DEFAULT now()
+      );
+      CREATE TABLE cms_revisions (
+        id text PRIMARY KEY, edition_id text NOT NULL, workflow_state text NOT NULL, payload jsonb NOT NULL
+      );
+      CREATE TABLE cms_document_availability_states (
+        document_id text PRIMARY KEY, published_version integer NOT NULL,
+        shared_source_edition_id text, published_source_revision_id text
+      );
+      CREATE TABLE cms_document_market_availability (
+        document_id text NOT NULL, market_edition_id text NOT NULL, locale text NOT NULL,
+        published_decision text, PRIMARY KEY (document_id, market_edition_id, locale)
+      );
+      CREATE TABLE cms_navigation_published_policies (
+        market text NOT NULL, locale text NOT NULL, items jsonb NOT NULL, pages jsonb NOT NULL,
+        published_at timestamptz NOT NULL
+      );
+      INSERT INTO market_editions (id,code,default_locale,is_canonical)
+      VALUES ('destination-ksa','ksa','en',true);
+      INSERT INTO cms_documents (id,kind) VALUES ('document','platform');
+      INSERT INTO cms_market_editions
+        (id,document_id,market,locale,content_mode,publication_state,published_at,published_revision_id)
+      VALUES
+        ('shared','document','shared-source','und','shared','published',now(),'shared-revision'),
+        ('custom','document','ksa','en','custom','published',now(),'custom-revision');
+      INSERT INTO cms_revisions (id,edition_id,workflow_state,payload) VALUES
+        ('shared-revision','shared','approved',
+         '{"slug":"shared-platform","title":"Shared","content":{"schemaVersion":1,"category":"Specialist","summary":"Shared summary","heroMediaId":"00000000-0000-4000-8000-000000000001","template":"standard","sections":[],"capabilities":[],"differentiators":[],"visibility":"public","order":0,"sources":[{"label":"Approved source","url":"https://example.com/source","accessedAt":"2026-09-06"}],"verificationDate":"2026-09-06","reviewDate":"2027-03-06","relatedIds":[]},"mediaIds":["00000000-0000-4000-8000-000000000001"],"markets":["ksa"]}'::jsonb),
+        ('custom-revision','custom','approved',
+         '{"slug":"private-platform","title":"Private","visibility":"restricted","content":{"schemaVersion":1,"category":"Specialist","summary":"Private summary","heroMediaId":"00000000-0000-4000-8000-000000000001","template":"standard","sections":[],"capabilities":[],"differentiators":[],"visibility":"public","order":0,"sources":[{"label":"Approved source","url":"https://example.com/source","accessedAt":"2026-09-06"}],"verificationDate":"2026-09-06","reviewDate":"2027-03-06","relatedIds":[]},"mediaIds":["00000000-0000-4000-8000-000000000001"],"markets":["ksa"]}'::jsonb);
+      INSERT INTO cms_document_availability_states
+        (document_id,published_version,shared_source_edition_id,published_source_revision_id)
+      VALUES ('document',1,'shared','shared-revision');
+      INSERT INTO cms_document_market_availability
+        (document_id,market_edition_id,locale,published_decision)
+      VALUES ('document','destination-ksa','en','show');
+      INSERT INTO cms_navigation_published_policies (market,locale,items,pages,published_at)
+      VALUES (
+        'ksa','en',
+        '[{"id":"platforms","label":"Shared","parentId":null,"order":0,"destination":"/platforms/shared-platform","visible":true},{"id":"methodologies","label":"Private","parentId":null,"order":1,"destination":"/platforms/private-platform","visible":true}]'::jsonb,
+        '[{"path":"/platforms/shared-platform","enabled":true},{"path":"/platforms/private-platform","enabled":true}]'::jsonb,
+        now()
+      );
+    `);
+    t.mock.method(pool, "query", async (sql: string, values?: unknown[]) =>
+      await client.query(sql, values),
+    );
+    const policy = await publishedNavigationPolicy("ksa", "en");
+    assert.deepEqual(policy?.items.map((item) => [item.destination, item.visible]), [
+      ["/platforms/shared-platform", true],
+      ["/platforms/private-platform", false],
+    ]);
+    assert.equal(await isPublishedPageAvailable("/platforms/shared-platform", "ksa", "en"), true);
+    assert.equal(await isPublishedPageAvailable("/platforms/private-platform", "ksa", "en"), false);
+  } finally {
+    await client.query(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`);
+    client.release();
+  }
 });
 
 test("an unsupported published grandchild is surfaced instead of silently flattened", async (t) => {

@@ -1291,13 +1291,15 @@ export interface DocumentUpdate {
   mediaIds?: string[];
   /** @pattern ^[a-z][a-z0-9-]{1,15}$ */
   market: string;
-  /** @pattern ^[a-z]{2}(?:-[A-Z]{2})?$ */
+  /** @pattern ^(?:und|[a-z]{2}(?:-[A-Z]{2})?)$ */
   locale: string;
   /**
      * Optimistic concurrency version.
      * @minimum 1
      */
   revisionNumber: number;
+  /** Optional exact latest revision identity. When supplied, the server rejects a save if this edition's latest revision is not this revision, preventing a relocated shared-source address from writing to a replacement customization. */
+  expectedRevisionId?: string;
 }
 
 export type MarketAvailabilityDecision = typeof MarketAvailabilityDecision[keyof typeof MarketAvailabilityDecision];
@@ -1336,6 +1338,84 @@ export interface DocumentMarketAvailability {
 
 export interface MarketAvailabilityUpdate {
   decision: MarketAvailabilityDecision;
+  /** @minimum 0 */
+  version: number;
+}
+
+export interface DocumentAvailabilityDestination {
+  marketEditionId: string;
+  market: string;
+  locale: string;
+  displayName: string;
+  stagedDecision: MarketAvailabilityDecision;
+  reviewedDecision: MarketAvailabilityDecision | null;
+  publishedDecision: MarketAvailabilityDecision;
+  publishedEffectiveAvailable: boolean;
+  pending: boolean;
+  customized: boolean;
+}
+
+export type DocumentAvailabilitySharedSource = {
+  market: string;
+  locale: string;
+  editionId: string;
+  /** @nullable */
+  revisionId: string | null;
+  /** @nullable */
+  publishedRevisionId: string | null;
+  /** @nullable */
+  sourceRevisionId: string | null;
+} | null;
+
+export interface DocumentAvailability {
+  documentId: string;
+  /** @minimum 0 */
+  draftVersion: number;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  reviewedVersion: number | null;
+  /** @minimum 0 */
+  publishedVersion: number;
+  sharedSource: DocumentAvailabilitySharedSource;
+  canEditShared: boolean;
+  items: DocumentAvailabilityDestination[];
+  /** Market/locale destination labels affected by the returned reviewed or published snapshot. */
+  affectedEditions: string[];
+}
+
+export type DocumentAvailabilityDestinationInputDecision = typeof DocumentAvailabilityDestinationInputDecision[keyof typeof DocumentAvailabilityDestinationInputDecision];
+
+
+export const DocumentAvailabilityDestinationInputDecision = {
+  inherit: 'inherit',
+  show: 'show',
+  off: 'off',
+} as const;
+
+export interface DocumentAvailabilityDestinationInput {
+  marketEditionId: string;
+  /** @pattern ^[a-z]{2}(?:-[A-Z]{2})?$ */
+  locale: string;
+  decision: DocumentAvailabilityDestinationInputDecision;
+}
+
+export interface DocumentAvailabilityUpdate {
+  /** @minimum 0 */
+  version: number;
+  destinations: DocumentAvailabilityDestinationInput[];
+}
+
+export interface DocumentAvailabilityVersion {
+  /** @minimum 0 */
+  version: number;
+}
+
+export interface DocumentAvailabilitySourceSelection {
+  /** @minimum 0 */
+  version: number;
+  sourceRevisionId: string;
 }
 
 export interface DocumentSnapshot {
@@ -2359,6 +2439,11 @@ export type BadRequestResponse = ApiError;
  * Authentication required or failed
  */
 export type UnauthorizedResponse = ApiError;
+
+/**
+ * Authenticated user lacks permission
+ */
+export type ForbiddenResponse = ApiError;
 
 /**
  * Resource not found

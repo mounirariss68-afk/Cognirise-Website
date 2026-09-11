@@ -7,20 +7,23 @@ import { buildDraftSave, describeSaveFailure, isDraftSaveResponse, normalizeDraf
 
 const adminRoot = new URL("../../../", import.meta.url);
 
-test("guided editor exposes readiness and exact edition controls", async () => {
+test("guided editor uses a shared-content destination checklist", async () => {
   const detail = await readFile(new URL("src/pages/documents/DocumentDetail.tsx", adminRoot), "utf8");
   assert.match(detail, /documentReadiness/);
-  assert.match(detail, /Market \+ locale matrix/);
+  assert.match(detail, /Show this content in/);
+  assert.match(detail, /MarketAvailabilityChecklist/);
+  assert.match(detail, /Customize for this edition/);
+  assert.match(detail, /Return to shared content/);
   assert.match(detail, /market: selectedMarket/);
   assert.match(detail, /locale: selectedLocale/);
   assert.match(detail, /revisionId: previewRevisionId/);
   assert.match(detail, /useListDocumentEditions/);
-  assert.match(detail, /useCreateDocumentEditionOverride/);
+  assert.match(detail, /useCreateDocumentCustomization/);
   assert.match(detail, /revision\.market === selectedMarket && revision\.locale === selectedLocale/);
   assert.match(detail, /useGetDocument\(id!, documentParams/);
   assert.match(detail, /window\.open\(result\.data\.previewUrl/);
   assert.doesNotMatch(detail, /\/cognirise-website/);
-  assert.doesNotMatch(detail, /UAE\/English edition/);
+  assert.doesNotMatch(detail, /Market \+ locale matrix/);
 });
 
 test("content editor chooses governed media instead of accepting copied IDs", async () => {
@@ -106,16 +109,20 @@ test("detail rehydrates form state whenever the exact edition response changes",
   assert.doesNotMatch(detail, /if \(doc && !initialized\.current\)/);
 });
 
-test("an inherited edition remains selectable for explicit override creation", async () => {
-  const inherited = { ...edition("ksa", "approved", ""), exact: false, effectiveRevisionId: "public-source" };
-  const selected = selectInitialExactEdition([inherited], "editor", ["ksa"]);
-  assert.equal(selected, inherited);
-
+test("customizations and initial selection use the explicit saved shared source", async () => {
   const detail = await readFile(new URL("src/pages/documents/DocumentDetail.tsx", adminRoot), "utf8");
-  assert.match(detail, /enabled: Boolean\(id && selectedEdition\?\.exact && selectedEdition\.revisionId\)/);
-  assert.match(detail, /sourceRevisionId: selectedEdition\.effectiveRevisionId/);
-  assert.match(detail, /No fallback draft content is loaded into the editor/);
-  assert.doesNotMatch(detail, /if \(!target\?\.exact \|\| !target\.revisionId\) return/);
+  assert.match(detail, /const sharedSource = availabilityForReview\?\.sharedSource/);
+  assert.match(detail, /sourceRevisionId,/);
+  assert.match(detail, /useSelectDocumentAvailabilitySource/);
+  assert.match(detail, /Create a shared source from an exact historical revision/);
+  assert.match(detail, /const canEditSelectedEdition = selectedIsSharedSource/);
+  assert.match(detail, /canEditSelectedEdition && !editionIsArchived/);
+  assert.match(detail, /getDocumentAvailability\(id!\)/);
+  assert.match(detail, /A source save advances availability's version/);
+  assert.match(detail, /if \(!sharedSource\)/);
+  assert.match(detail, /if \(canManageSharedDestinations\)/);
+  assert.match(detail, /Save shared content before creating a customization/);
+  assert.doesNotMatch(detail, /Create editable override/);
 });
 
 test("publish options and response cache stay scoped to the selected exact edition", async () => {
@@ -125,6 +132,8 @@ test("publish options and response cache stay scoped to the selected exact editi
   assert.match(detail, /const targetParams = \{ market: selectedMarket, locale: selectedLocale \};/);
   assert.match(detail, /setQueryData\(getGetDocumentQueryKey\(id!, targetParams\), updated\)/);
   assert.match(detail, /if \(market === selectedMarket && locale === selectedLocale\) return/);
+  assert.match(detail, /Destination impact/);
+  assert.match(detail, /pendingDestinationChanges/);
 });
 
 const validSource = {

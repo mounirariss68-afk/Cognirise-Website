@@ -702,6 +702,127 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/availability:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    get:
+      operationId: getDocumentAvailability
+      tags: [documents]
+      summary: Get the staged, reviewed, and published shared-content destinations
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Versioned document availability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentAvailability"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      operationId: updateDocumentAvailability
+      tags: [documents]
+      summary: Save all shared-content destinations as a new staged version
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentAvailabilityUpdate"
+      responses:
+        "200":
+          description: Staged destination selection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentAvailability"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/availability/review:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    post:
+      operationId: reviewDocumentAvailability
+      tags: [documents]
+      summary: Freeze a staged destination version for publication review
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentAvailabilityVersion"
+      responses:
+        "200":
+          description: Reviewed destination selection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentAvailability"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/availability/source:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    post:
+      operationId: selectDocumentAvailabilitySource
+      tags: [documents]
+      summary: Create an explicit shared source from an exact historical revision
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentAvailabilitySourceSelection"
+      responses:
+        "201":
+          description: Shared source selected without changing existing editions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentAvailability"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/availability/publish:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    post:
+      operationId: publishDocumentAvailability
+      tags: [documents]
+      summary: Publish the exact reviewed shared-content destination version
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentAvailabilityVersion"
+      responses:
+        "200":
+          description: Published destination selection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentAvailability"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /documents/{documentId}/market-availability/{marketEditionId}:
     parameters:
       - $ref: "#/components/parameters/DocumentId"
@@ -743,6 +864,12 @@ paths:
       security:
         - cookieAuth: []
           csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentAvailabilityVersion"
       responses:
         "204":
           description: Staged decision published
@@ -1854,6 +1981,12 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ApiError"
+    Forbidden:
+      description: Authenticated user lacks permission
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
     NotFound:
       description: Resource not found
       content:
@@ -2667,12 +2800,15 @@ components:
           type: array
           items: { type: string }
         market: { type: string, pattern: '^[a-z][a-z0-9-]{1,15}$' }
-        locale: { type: string, pattern: '^[a-z]{2}(?:-[A-Z]{2})?$' }
+        locale: { type: string, pattern: '^(?:und|[a-z]{2}(?:-[A-Z]{2})?)$' }
         revisionNumber:
           type: number
           multipleOf: 1
           minimum: 1
           description: Optimistic concurrency version.
+        expectedRevisionId:
+          type: string
+          description: Optional exact latest revision identity. When supplied, the server rejects a save if this edition's latest revision is not this revision, preventing a relocated shared-source address from writing to a replacement customization.
     MarketAvailabilityDecision:
       type: string
       enum: [inherit, show, off]
@@ -2717,10 +2853,96 @@ components:
     MarketAvailabilityUpdate:
       type: object
       additionalProperties: false
-      required: [decision]
+      required: [decision, version]
       properties:
         decision:
           $ref: "#/components/schemas/MarketAvailabilityDecision"
+        version: { type: number, multipleOf: 1, minimum: 0 }
+    DocumentAvailabilityDestination:
+      type: object
+      additionalProperties: false
+      required: [marketEditionId, market, locale, displayName, stagedDecision, reviewedDecision, publishedDecision, publishedEffectiveAvailable, pending, customized]
+      properties:
+        marketEditionId: { type: string }
+        market: { type: string }
+        locale: { type: string }
+        displayName: { type: string }
+        stagedDecision:
+          $ref: "#/components/schemas/MarketAvailabilityDecision"
+        reviewedDecision:
+          anyOf:
+            - $ref: "#/components/schemas/MarketAvailabilityDecision"
+            - type: "null"
+        publishedDecision:
+          $ref: "#/components/schemas/MarketAvailabilityDecision"
+        publishedEffectiveAvailable: { type: boolean }
+        pending: { type: boolean }
+        customized: { type: boolean }
+    DocumentAvailability:
+      type: object
+      additionalProperties: false
+      required: [documentId, draftVersion, reviewedVersion, publishedVersion, sharedSource, canEditShared, items, affectedEditions]
+      properties:
+        documentId: { type: string }
+        draftVersion: { type: number, multipleOf: 1, minimum: 0 }
+        reviewedVersion: { type: ["number", "null"], multipleOf: 1, minimum: 0 }
+        publishedVersion: { type: number, multipleOf: 1, minimum: 0 }
+        sharedSource:
+          anyOf:
+            - type: object
+              additionalProperties: false
+              required: [market, locale, editionId, revisionId, publishedRevisionId, sourceRevisionId]
+              properties:
+                market: { type: string }
+                locale: { type: string }
+                editionId: { type: string }
+                revisionId: { type: ["string", "null"] }
+                publishedRevisionId: { type: ["string", "null"] }
+                sourceRevisionId: { type: ["string", "null"] }
+            - type: "null"
+        canEditShared: { type: boolean }
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentAvailabilityDestination"
+        affectedEditions:
+          type: array
+          items: { type: string }
+          description: Market/locale destination labels affected by the returned reviewed or published snapshot.
+    DocumentAvailabilityDestinationInput:
+      type: object
+      additionalProperties: false
+      required: [marketEditionId, locale, decision]
+      properties:
+        marketEditionId: { type: string }
+        locale: { type: string, pattern: '^[a-z]{2}(?:-[A-Z]{2})?$' }
+        decision:
+          type: string
+          enum: [inherit, show, off]
+    DocumentAvailabilityUpdate:
+      type: object
+      additionalProperties: false
+      required: [version, destinations]
+      properties:
+        version: { type: number, multipleOf: 1, minimum: 0 }
+        destinations:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/DocumentAvailabilityDestinationInput"
+    DocumentAvailabilityVersion:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version: { type: number, multipleOf: 1, minimum: 0 }
+    DocumentAvailabilitySourceSelection:
+      type: object
+      additionalProperties: false
+      required: [version, sourceRevisionId]
+      properties:
+        version: { type: number, multipleOf: 1, minimum: 0 }
+        sourceRevisionId: { type: string }
     SeoMetadata:
       type: object
       additionalProperties: false

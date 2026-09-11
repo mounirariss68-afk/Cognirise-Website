@@ -206,6 +206,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
   ]);
   const queriedStatements: string[] = [];
   const observedCandidateChains: string[][] = [];
+  let explicitSourceSelected = false;
   const frozenPreviewSnapshots: Array<Record<string, unknown>> = [];
   const mediaReferences = new Map<string, string>([
     [`${inheritedDocumentId}:00000000-0000-4000-8000-000000000305:${mediaAssetId}`, mediaVersionA],
@@ -634,7 +635,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
           ? { rowCount: 1, rows: [{ id: edition.id }] }
           : { rowCount: 0, rows: [] };
       }
-      if (statement.includes("SELECT e.id,e.published_revision_id,d.kind")) {
+      if (statement.includes("SELECT e.id,e.published_revision_id,e.content_mode,d.kind")) {
         const edition = findEdition(String(values[0]), values[1], values[2]);
         const document = documents.get(String(values[0]));
         if (!edition) return { rowCount: 0, rows: [] };
@@ -644,6 +645,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
           rows: [{
             id: edition.id,
             published_revision_id: edition.publishedRevisionId,
+            content_mode: "custom",
             kind: document?.kind ?? "publication",
             revision_id: revision.id,
             payload: revision.payload,
@@ -654,6 +656,28 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
       }
       if (statement.includes("WITH config AS") && statement.includes("effective published revision")) {
         return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("JOIN cms_document_availability_states state")
+        && statement.includes("shared_source_edition_id")) {
+        explicitSourceSelected = true;
+        const documentId = String(values[0]);
+        const source = findEdition(documentId, "uae", "en");
+        const sourceRevision = source?.revisions.find(
+          (revision) => revision.id === "00000000-0000-4000-8000-000000000305",
+        );
+        if (!source || !sourceRevision || (values[1] && values[1] !== sourceRevision.id)) {
+          return { rowCount: 0, rows: [] };
+        }
+        return {
+          rowCount: 1,
+          rows: [{
+            kind: "publication",
+            id: sourceRevision.id,
+            payload: sourceRevision.payload,
+            market: "uae",
+            locale: "en",
+          }],
+        };
       }
       if (statement.includes("WITH candidates AS") && statement.includes("JOIN candidates c")) {
         const candidateMarkets = values[1] as string[];
@@ -997,6 +1021,25 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
   assert.equal(savedSeo?.canonicalUrl, undefined, "blank canonical URL is normalized away");
   assert.equal(savedSeo?.noIndex, false);
 
+  const staleIdentitySave = await fetch(`${origin}/api/documents/${approvedDocumentId}`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify({
+      market: "ksa",
+      locale: "en",
+      revisionNumber: 3,
+      expectedRevisionId: approvedPointer,
+      title: "STALE RELOCATED ADDRESS OVERWRITE",
+    }),
+  });
+  assert.equal(staleIdentitySave.status, 409);
+  assert.match(
+    (await staleIdentitySave.json() as { error: string }).error,
+    /reopen.*saving/i,
+  );
+  assert.equal(latest(approvedEdition).number, 3);
+  assert.equal(latest(approvedEdition).payload.title, "KSA successor two");
+
   const staleSave = await fetch(`${origin}/api/documents/${approvedDocumentId}`, {
     method: "PATCH",
     headers,
@@ -1152,7 +1195,10 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
     error?: string;
   };
   assert.equal(override.status, 201, JSON.stringify(overrideBody));
-  assert.deepEqual(observedCandidateChains.at(-1), ["ksa", "europe", "uae"]);
+  assert.ok(
+    explicitSourceSelected,
+    "customization must use the explicit saved shared source, not navigation fallback candidates",
+  );
   assert.equal(overrideBody.snapshot?.title, "Approved UAE fallback");
   assert.equal(overrideBody.snapshot?.slug, "uae-published-fallback");
   assert.doesNotMatch(JSON.stringify(overrideBody.snapshot), /FALLBACK DRAFT SECRET|uae-unpublished-newer/);

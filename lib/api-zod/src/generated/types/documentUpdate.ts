@@ -31,11 +31,13 @@ export interface DocumentUpdate {
   mediaIds?: string[];
   /** @pattern ^[a-z][a-z0-9-]{1,15}$ */
   market: string;
-  /** @pattern ^[a-z]{2}(?:-[A-Z]{2})?$ */
+  /** @pattern ^(?:und|[a-z]{2}(?:-[A-Z]{2})?)$ */
   locale: string;
   /**
      * Optimistic concurrency version.
      * @minimum 1
      */
   revisionNumber: number;
+  /** Optional exact latest revision identity. When supplied, the server rejects a save if this edition's latest revision is not this revision, preventing a relocated shared-source address from writing to a replacement customization. */
+  expectedRevisionId?: string;
 }

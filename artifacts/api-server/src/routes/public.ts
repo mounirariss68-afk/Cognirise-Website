@@ -24,22 +24,190 @@ import { downloadMediaObject, parseByteRange } from "../lib/object-storage";
 import { isPublicContentVisible } from "../lib/policy";
 import { PUBLIC_KIND_CONFIGURATION_SQL } from "../lib/document-lifecycle-sql";
 import { navigationCandidates, isPublishedPageAvailable } from "../lib/navigation-policy";
+import {
+  documentPublishedAvailabilityClause,
+  industryDestinationEligibilityClause,
+  publicPayloadEligibilityClause,
+} from "../lib/availability";
 
 const router: IRouter = Router();
 const PUBLIC_IMMUTABLE_MEDIA_CACHE_CONTROL = "public, max-age=31536000, immutable";
 export const publicMediaDelivery = {
   download: downloadMediaObject,
 };
-const PUBLIC_PAYLOAD_SQL = `(r.payload->>'visibility' IS NULL OR r.payload->>'visibility'='public')
-  AND (r.payload->'content'->>'visibility' IS NULL OR r.payload->'content'->>'visibility'='public')
-  AND (r.payload->>'confidential' IS NULL OR r.payload->>'confidential' NOT IN ('true','restricted'))
-  AND (r.payload->'content'->>'confidential' IS NULL OR r.payload->'content'->>'confidential' NOT IN ('true','restricted'))
-  AND (r.payload->'content'->>'disclosure' IS NULL OR r.payload->'content'->>'disclosure'<>'restricted')
-  AND (d.kind<>'case-study' OR r.payload->'content'->>'publicEvidenceStatus'='approved')
-  AND NOT (
-    d.kind='landing-page'
-    AND COALESCE(r.payload->'content'->>'pagePath',r.payload->>'pagePath') IN ('/work','/work/')
+const PUBLIC_PAYLOAD_SQL = publicPayloadEligibilityClause();
+
+/**
+ * Custom editions remain independently deliverable through the request's
+ * normal candidate chain. A shared edition is deliberately different: its
+ * state-selected source edition is the delivery source for every eligible
+ * destination, even where the market itself has no fallback chain. The
+ * separately frozen published source pointer, rather than state’s editable
+ * draft source pointer, must match the edition's approved published revision.
+ */
+function deliverySourceClause(candidateClause: string, edition = "e", state = "delivery") {
+  return `(
+    (${edition}.content_mode='custom' AND ${candidateClause})
+    OR (
+      ${edition}.content_mode='shared'
+      AND ${edition}.id=${state}.shared_source_edition_id
+      AND ${edition}.published_revision_id=${state}.published_source_revision_id
+    )
   )`;
+}
+
+/**
+ * Public media has no destination request, so authorize a reference only when
+ * its exact published edition/revision would win public source selection for
+ * at least one enabled destination. This is deliberately stronger than a
+ * document-wide availability check: an off KSA custom revision cannot publish
+ * its media merely because that document's shared UAE source remains on.
+ *
+ * The candidate CTE mirrors navigationCandidates/marketLocaleCandidates:
+ * requested locale, requested default locale, configured fallback chain, then
+ * canonical default locale. The winning-source ordering is the public content
+ * query's exact-custom, shared, other-custom ordering.
+ */
+export function referencedRevisionHasEligibleDestinationClause(
+  documentIdSql: string,
+  editionIdSql: string,
+  revisionIdSql: string,
+) {
+  return `EXISTS (
+    SELECT 1
+      FROM market_editions destination
+      CROSS JOIN LATERAL (
+        SELECT DISTINCT locale
+          FROM unnest(
+            ARRAY[destination.default_locale,destination.fallback_locale]
+          ) AS supported_locale(locale)
+         WHERE locale IS NOT NULL
+      ) destination_locale
+     WHERE destination.enabled=true AND destination_locale.locale IS NOT NULL
+       AND ${documentPublishedAvailabilityClause(
+         documentIdSql,
+         "destination.code",
+         "destination_locale.locale",
+       )}
+       AND EXISTS (
+         WITH RECURSIVE fallback_chain AS (
+           SELECT destination.code,destination.fallback_market_code,
+                  destination.fallback_locale,0 AS depth,ARRAY[destination.code]::text[] AS visited
+           UNION ALL
+           SELECT fallback.code,fallback.fallback_market_code,
+                  fallback.fallback_locale,current.depth+1,current.visited || fallback.code
+             FROM fallback_chain current
+             JOIN market_editions fallback
+               ON fallback.code=current.fallback_market_code
+              AND fallback.enabled=true
+            WHERE current.depth<CASE
+                    WHEN destination_locale.locale<>destination.default_locale THEN 14
+                    ELSE 15
+                  END
+              AND NOT fallback.code=ANY(current.visited)
+         ),
+         candidate_keys AS (
+           SELECT destination.code AS market,destination_locale.locale AS locale,0 AS candidate_rank
+           UNION ALL
+           SELECT destination.code,destination.default_locale,1
+            WHERE destination_locale.locale<>destination.default_locale
+           UNION ALL
+           SELECT fallback.code,COALESCE(current.fallback_locale,fallback.default_locale),current.depth+2
+             FROM fallback_chain current
+             JOIN market_editions fallback
+               ON fallback.code=current.fallback_market_code
+              AND fallback.enabled=true
+           UNION ALL
+           SELECT canonical.code,canonical.default_locale,99
+             FROM market_editions canonical
+            WHERE canonical.enabled=true AND canonical.is_canonical=true
+         ),
+         candidates AS (
+           SELECT market,locale,min(candidate_rank) AS candidate_rank
+             FROM candidate_keys
+            GROUP BY market,locale
+         ),
+         selected_source AS (
+           SELECT source_edition.id AS edition_id,source_revision.id AS revision_id
+             FROM cms_market_editions source_edition
+             LEFT JOIN cms_document_availability_states source_delivery
+               ON source_delivery.document_id=source_edition.document_id
+             JOIN cms_revisions source_revision
+               ON source_revision.id=source_edition.published_revision_id
+              AND source_revision.edition_id=source_edition.id
+              AND source_revision.workflow_state='approved'
+             LEFT JOIN candidates
+               ON candidates.market=source_edition.market
+              AND candidates.locale=source_edition.locale
+            WHERE source_edition.document_id=${documentIdSql}
+              AND source_edition.publication_state='published'
+              AND source_edition.published_at<=now()
+              AND ${publicPayloadEligibilityClause("d", "source_revision")}
+              AND ${industryDestinationEligibilityClause(
+                "d",
+                "source_edition",
+                "source_revision",
+                "destination.code",
+              )}
+              AND (
+                (source_edition.content_mode='custom' AND candidates.market IS NOT NULL)
+                OR (
+                  source_edition.content_mode='shared'
+                  AND source_edition.id=source_delivery.shared_source_edition_id
+                  AND source_edition.published_revision_id=source_delivery.published_source_revision_id
+                )
+              )
+            ORDER BY CASE
+              WHEN source_edition.content_mode='custom'
+               AND source_edition.market=destination.code
+               AND source_edition.locale=destination_locale.locale THEN 0
+              WHEN source_edition.content_mode='shared' THEN 1
+              ELSE 2
+            END,
+            candidates.candidate_rank,source_edition.updated_at DESC,source_edition.id
+            LIMIT 1
+         )
+         SELECT 1 FROM selected_source
+          WHERE selected_source.edition_id=${editionIdSql}
+            AND selected_source.revision_id=${revisionIdSql}
+       )
+  )`;
+}
+
+/**
+ * A shared sitemap row is hidden only by an exact custom revision that could
+ * itself be publicly selected. Merely publishing an edition pointer is not
+ * enough: a private, restricted, retired, or unapproved custom revision must
+ * not make the publicly eligible shared route disappear.
+ */
+export function publishedCustomSourceExistsClause(
+  documentAlias: string,
+  documentIdSql: string,
+  marketSql: string,
+  localeSql: string,
+) {
+  return `EXISTS (
+    SELECT 1
+      FROM cms_market_editions custom
+      JOIN cms_revisions custom_revision
+        ON custom_revision.id=custom.published_revision_id
+       AND custom_revision.edition_id=custom.id
+       AND custom_revision.workflow_state='approved'
+     WHERE custom.document_id=${documentIdSql}
+       AND custom.content_mode='custom'
+       AND custom.market=${marketSql}
+       AND custom.locale=${localeSql}
+       AND custom.publication_state='published'
+       AND custom.published_at<=now()
+       AND ${publicPayloadEligibilityClause(documentAlias, "custom_revision")}
+        AND ${industryDestinationEligibilityClause(
+          documentAlias,
+          "custom",
+          "custom_revision",
+          marketSql,
+        )}
+  )`;
+}
 const publicLimiter = new SlidingWindowThrottle(240, 60_000);
 router.use(
   "/public",
@@ -218,13 +386,21 @@ async function published(row: Record<string, any>, snapshot = publicSnapshot(row
         AND a.id::text=ANY($3::text[]) AND a.status IN ('active','ready')`,
     [String(row.id), `revision:${String(row.revision_id)}`, mediaIds],
   );
-  const projectedSnapshot = row.kind === "industry"
-    ? projectIndustrySnapshotForMarket(
-        snapshot,
-        String(row.requested_market),
-        String(row.market),
-      )
-    : snapshot;
+  let projectedSnapshot: typeof snapshot;
+  try {
+    projectedSnapshot = row.kind === "industry"
+      ? projectIndustrySnapshotForMarket(
+           snapshot,
+           String(row.requested_market),
+           String(row.editorial_market ?? row.market),
+         )
+      : snapshot;
+  } catch {
+    // A historically published shared source can be structurally valid yet
+    // incompatible with this delivery market. Treat it as ineligible rather
+    // than turning a public miss into a 500/502 contract failure.
+    return null;
+  }
   const projectedValidation = validateCmsSnapshotForDelivery(
     row.kind as CmsDocumentKind,
     projectedSnapshot,
@@ -283,24 +459,28 @@ router.get(
     }
     const result = await pool.query(
       `WITH selected AS (
-         SELECT d.id,d.kind,e.market,e.locale,e.published_at,e.updated_at,e.localized_slug,
+         SELECT d.id,d.kind,e.market,e.locale,COALESCE(e.editorial_market,e.market) editorial_market,
+                e.published_at,e.updated_at,e.localized_slug,
                 r.id revision_id,r.revision_number,r.payload,
                 row_number() OVER (
                   PARTITION BY d.id
-                  ORDER BY array_position($2::text[],e.market||'|'||e.locale),e.updated_at DESC,e.id
+                   ORDER BY CASE
+                     WHEN e.content_mode='custom' AND e.market=$3 AND e.locale=$4 THEN 0
+                     WHEN e.content_mode='shared' THEN 1
+                     ELSE 2
+                   END,
+                   array_position($2::text[],e.market||'|'||e.locale),e.updated_at DESC,e.id
                 ) AS market_rank
            FROM cms_documents d
            JOIN cms_market_editions e ON e.document_id=d.id
+            LEFT JOIN cms_document_availability_states delivery ON delivery.document_id=d.id
            JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
              AND r.workflow_state='approved'
           WHERE d.status<>'archived' AND e.publication_state='published'
             AND e.published_at<=now() AND ($1::text IS NULL OR d.kind=$1)
-            AND (e.market||'|'||e.locale)=ANY($2::text[])
-            AND (d.kind<>'person' OR NOT EXISTS (
-              SELECT 1 FROM cms_person_market_availability a
-              JOIN market_editions requested ON requested.id=a.market_edition_id
-              WHERE a.document_id=d.id AND requested.code=$3 AND a.published_decision='off'
-            ))
+             AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($2::text[])")}
+            AND ${documentPublishedAvailabilityClause("d.id", "$3", "$4")}
+             AND ${industryDestinationEligibilityClause("d", "e", "r", "$3")}
             AND ${PUBLIC_PAYLOAD_SQL}
        )
        SELECT *,count(*) OVER() total_count,$3::text requested_market,$4::text requested_locale
@@ -330,9 +510,9 @@ router.get(
         if (route && !await isPageAvailable(route, market, locale)) return null;
         return { row, snapshot };
       }))).filter((entry): entry is { row: Record<string, any>; snapshot: NonNullable<ReturnType<typeof publicSnapshot>> } => Boolean(entry));
-      const items = await Promise.all(
+      const items = (await Promise.all(
         eligibleRows.map(({ row, snapshot }) => published(row, snapshot)),
-      );
+      )).filter((item): item is NonNullable<typeof item> => item !== null);
       res.json({
         ...pageOf(
           items,
@@ -382,16 +562,23 @@ router.get("/public/hero-films/:slot", asyncRoute(async (req, res) => {
             r.id revision_id,r.revision_number,r.payload
        FROM cms_documents d
        JOIN cms_market_editions e ON e.document_id=d.id
+        LEFT JOIN cms_document_availability_states delivery ON delivery.document_id=d.id
        JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
          AND r.workflow_state='approved'
       WHERE d.kind='site-configuration'
         AND d.canonical_slug=$1
-        AND (e.market||'|'||e.locale)=ANY($2::text[])
+        AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($2::text[])")}
         AND e.publication_state='published' AND e.published_at<=now()
+         AND ${documentPublishedAvailabilityClause("d.id", "$3", "$4")}
         AND ${PUBLIC_PAYLOAD_SQL}
-      ORDER BY array_position($2::text[],e.market||'|'||e.locale),e.updated_at DESC,e.id
+       ORDER BY CASE
+         WHEN e.content_mode='custom' AND e.market=$3 AND e.locale=$4 THEN 0
+         WHEN e.content_mode='shared' THEN 1
+         ELSE 2
+       END,
+       array_position($2::text[],e.market||'|'||e.locale),e.updated_at DESC,e.id
       LIMIT 1`,
-    [documentSlug, candidates],
+    [documentSlug, candidates, market, locale],
   );
   if (!result.rowCount) {
     res.status(404).json({ error: "Public hero film not found." });
@@ -447,15 +634,23 @@ router.get("/public/contact-configuration", asyncRoute(async (req, res) => {
             r.id revision_id,r.revision_number,r.payload
        FROM cms_documents d
        JOIN cms_market_editions e ON e.document_id=d.id
+        LEFT JOIN cms_document_availability_states delivery ON delivery.document_id=d.id
        JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
          AND r.workflow_state='approved'
       WHERE d.kind='site-configuration' AND d.status<>'archived'
         AND d.canonical_slug=$1
-        AND (e.market||'|'||e.locale)=ANY($2::text[])
+        AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($2::text[])")}
         AND e.publication_state='published' AND e.published_at<=now()
-      ORDER BY array_position($2::text[],e.market||'|'||e.locale),e.updated_at DESC,e.id
+         AND ${documentPublishedAvailabilityClause("d.id", "$3", "$4")}
+         AND ${PUBLIC_PAYLOAD_SQL}
+       ORDER BY CASE
+         WHEN e.content_mode='custom' AND e.market=$3 AND e.locale=$4 THEN 0
+         WHEN e.content_mode='shared' THEN 1
+         ELSE 2
+       END,
+       array_position($2::text[],e.market||'|'||e.locale),e.updated_at DESC,e.id
       LIMIT 1`,
-    [CMS_CONTACT_EMAIL_DOCUMENT_SLUG, candidates],
+    [CMS_CONTACT_EMAIL_DOCUMENT_SLUG, candidates, market, locale],
   );
   if (!result.rowCount) {
     res.status(404).json({ error: "Public contact configuration not found." });
@@ -491,24 +686,36 @@ router.get(
       return;
     }
     const result = await pool.query(
-      `SELECT d.id,d.kind,e.market,e.locale,e.published_at,e.updated_at,e.localized_slug,
-              r.id revision_id,r.revision_number,r.payload,
-              $3::text requested_market,$5::text requested_locale
-         FROM cms_documents d
-         JOIN cms_market_editions e ON e.document_id=d.id
-         JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
-           AND r.workflow_state='approved'
-        WHERE d.status<>'archived' AND e.publication_state='published'
-          AND e.published_at<=now() AND d.kind=$1
-          AND COALESCE(r.payload->>'slug',e.localized_slug)=$2
-          AND (e.market||'|'||e.locale)=ANY($4::text[])
-          AND (d.kind<>'person' OR NOT EXISTS (
-            SELECT 1 FROM cms_person_market_availability a
-            JOIN market_editions requested ON requested.id=a.market_edition_id
-            WHERE a.document_id=d.id AND requested.code=$3 AND a.published_decision='off'
-          ))
-          AND ${PUBLIC_PAYLOAD_SQL}
-        ORDER BY array_position($4::text[],e.market||'|'||e.locale),e.updated_at DESC,e.id
+      `WITH selected AS (
+         SELECT d.id,d.kind,e.market,e.locale,COALESCE(e.editorial_market,e.market) editorial_market,
+                e.published_at,e.updated_at,e.localized_slug,
+                r.id revision_id,r.revision_number,r.payload,
+                $3::text requested_market,$5::text requested_locale,
+                row_number() OVER (
+                  PARTITION BY d.id
+                  ORDER BY CASE
+                    WHEN e.content_mode='custom' AND e.market=$3 AND e.locale=$5 THEN 0
+                    WHEN e.content_mode='shared' THEN 1
+                    ELSE 2
+                  END,
+                  array_position($4::text[],e.market||'|'||e.locale),e.updated_at DESC,e.id
+                ) AS source_rank
+           FROM cms_documents d
+           JOIN cms_market_editions e ON e.document_id=d.id
+            LEFT JOIN cms_document_availability_states delivery ON delivery.document_id=d.id
+           JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
+             AND r.workflow_state='approved'
+          WHERE d.status<>'archived' AND e.publication_state='published'
+            AND e.published_at<=now() AND d.kind=$1
+            AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($4::text[])")}
+            AND ${documentPublishedAvailabilityClause("d.id", "$3", "$5")}
+             AND ${industryDestinationEligibilityClause("d", "e", "r", "$3")}
+            AND ${PUBLIC_PAYLOAD_SQL}
+       )
+       SELECT id,kind,market,locale,editorial_market,published_at,updated_at,localized_slug,
+              revision_id,revision_number,payload,requested_market,requested_locale
+         FROM selected
+        WHERE source_rank=1 AND COALESCE(payload->>'slug',localized_slug)=$2
         LIMIT 1`,
       [kind, slug, market, candidates, locale],
     );
@@ -531,7 +738,12 @@ router.get(
         res.status(404).json({ error: "Published content not found." });
         return;
       }
-      res.json(await published(result.rows[0], snapshot));
+      const delivered = await published(result.rows[0], snapshot);
+      if (!delivered) {
+        res.status(404).json({ error: "Published content not found." });
+        return;
+      }
+      res.json(delivered);
     } catch (error) {
       if (error instanceof PublicContractError) {
         req.log.error({ err: error, kind, slug, market }, "Invalid published CMS content");
@@ -559,6 +771,7 @@ router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
        WHERE a.id=$1 AND a.status IN ('active','ready') AND d.status<>'archived'
         AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE(r.payload->'mediaIds','[]'::jsonb)) media_id
           WHERE media_id=a.id::text)
+          AND ${referencedRevisionHasEligibleDestinationClause("d.id", "e.id", "r.id")}
         AND ${PUBLIC_PAYLOAD_SQL}`,
     [req.params.mediaId, req.params.versionId],
   );
@@ -605,14 +818,51 @@ router.get(
       return;
     }
     const result = await pool.query(
-      `SELECT d.kind,e.market,e.locale,e.updated_at,r.payload
-         FROM cms_documents d JOIN cms_market_editions e ON e.document_id=d.id
-         JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
-           AND r.workflow_state='approved'
-        WHERE d.status<>'archived' AND e.publication_state='published'
-            AND e.published_at<=now() AND ($1::text IS NULL OR e.market=$1)
+      `WITH selected AS (
+         SELECT d.kind,e.market,e.locale,e.updated_at,r.payload
+           FROM cms_documents d
+           JOIN cms_market_editions e ON e.document_id=d.id
+           JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
+             AND r.workflow_state='approved'
+          WHERE d.status<>'archived' AND e.content_mode='custom'
+            AND e.publication_state='published' AND e.published_at<=now()
+            AND ($1::text IS NULL OR e.market=$1)
+            AND ${documentPublishedAvailabilityClause("d.id", "e.market", "e.locale")}
+             AND ${industryDestinationEligibilityClause("d", "e", "r", "e.market")}
             AND COALESCE((r.payload->'seo'->>'noIndex')::boolean,false)=false
-            AND ${PUBLIC_PAYLOAD_SQL}`,
+            AND ${PUBLIC_PAYLOAD_SQL}
+         UNION ALL
+         SELECT d.kind,destination.code market,destination_locale.locale,e.updated_at,r.payload
+           FROM cms_documents d
+           JOIN cms_document_availability_states delivery ON delivery.document_id=d.id
+           JOIN cms_market_editions e ON e.id=delivery.shared_source_edition_id
+             AND e.document_id=d.id AND e.content_mode='shared'
+             AND e.publication_state='published' AND e.published_at<=now()
+             AND e.published_revision_id=delivery.published_source_revision_id
+           JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
+             AND r.workflow_state='approved'
+           JOIN market_editions destination ON destination.enabled=true
+           CROSS JOIN LATERAL (
+             SELECT DISTINCT locale
+               FROM unnest(
+                 ARRAY[destination.default_locale,destination.fallback_locale]
+               ) AS supported_locale(locale)
+              WHERE locale IS NOT NULL
+           ) destination_locale
+          WHERE ($1::text IS NULL OR destination.code=$1)
+            AND destination_locale.locale IS NOT NULL
+             AND NOT ${publishedCustomSourceExistsClause(
+               "d",
+               "d.id",
+               "destination.code",
+               "destination_locale.locale",
+             )}
+            AND ${documentPublishedAvailabilityClause("d.id", "destination.code", "destination_locale.locale")}
+             AND ${industryDestinationEligibilityClause("d", "e", "r", "destination.code")}
+            AND COALESCE((r.payload->'seo'->>'noIndex')::boolean,false)=false
+            AND ${PUBLIC_PAYLOAD_SQL}
+       )
+       SELECT * FROM selected`,
       [parsed.data.market ?? null],
     );
     const candidates = result.rows.flatMap((row) => {

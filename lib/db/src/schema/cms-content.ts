@@ -89,6 +89,22 @@ export const cmsMarketEditionsTable = pgTable(
       (): AnyPgColumn => cmsRevisionsTable.id,
       { onDelete: "set null" },
     ),
+    /**
+     * Shared editions are the one editable source used by availability
+     * destinations. Exact regional editions stay custom and never receive a
+     * shared publication implicitly.
+     */
+    contentMode: text("content_mode").notNull().default("custom"),
+    /**
+     * Stable editorial origin for a shared edition whose market/locale are
+     * relocated to an internal delivery address. `market` remains the address
+     * used for delivery and routing.
+     */
+    editorialMarket: text("editorial_market"),
+    customizedFromRevisionId: uuid("customized_from_revision_id").references(
+      (): AnyPgColumn => cmsRevisionsTable.id,
+      { onDelete: "set null" },
+    ),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -108,16 +124,17 @@ export const cmsMarketEditionsTable = pgTable(
       table.publishAt,
     ),
     index("cms_market_editions_published_revision_idx").on(table.publishedRevisionId),
+    index("cms_market_editions_content_mode_idx").on(table.documentId, table.contentMode),
   ],
 );
 
 /**
- * An explicit delivery decision for a person in a configured market.
+ * An explicit delivery decision for a document in a configured market.
  * Absence of a row and `inherit` have the same delivery semantics, while
  * retaining `inherit` allows an editor's deliberate reset to be audited.
  */
-export const cmsPersonMarketAvailabilityTable = pgTable(
-  "cms_person_market_availability",
+export const cmsDocumentMarketAvailabilityTable = pgTable(
+  "cms_document_market_availability",
   {
     documentId: uuid("document_id")
       .notNull()
@@ -125,9 +142,8 @@ export const cmsPersonMarketAvailabilityTable = pgTable(
     marketEditionId: uuid("market_edition_id")
       .notNull()
       .references(() => marketEditionsTable.id, { onDelete: "cascade" }),
-    /** Legacy pre-staging decision retained for an append-safe migration. */
-    decision: text("decision").notNull().default("inherit"),
-    publishedDecision: text("published_decision").notNull().default("inherit"),
+    locale: text("locale").notNull(),
+    publishedDecision: text("published_decision").notNull().default("off"),
     draftDecision: text("draft_decision"),
     updatedByUserId: uuid("updated_by_user_id").references(() => cmsUsersTable.id, {
       onDelete: "set null",
@@ -140,21 +156,135 @@ export const cmsPersonMarketAvailabilityTable = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
-    primaryKey({ columns: [table.documentId, table.marketEditionId] }),
+    primaryKey({ columns: [table.documentId, table.marketEditionId, table.locale] }),
     check(
-      "cms_person_market_availability_decision_check",
-      sql`${table.decision} IN ('inherit', 'show', 'off')`,
-    ),
-    check(
-      "cms_person_market_availability_published_decision_check",
+      "cms_document_market_availability_published_decision_check",
       sql`${table.publishedDecision} IN ('inherit', 'show', 'off')`,
     ),
     check(
-      "cms_person_market_availability_draft_decision_check",
+      "cms_document_market_availability_draft_decision_check",
       sql`${table.draftDecision} IS NULL OR ${table.draftDecision} IN ('inherit', 'show', 'off')`,
     ),
-    index("cms_person_market_availability_market_idx").on(table.marketEditionId),
+    index("cms_document_market_availability_market_idx").on(table.marketEditionId),
   ],
+);
+
+/** One optimistic-lock boundary for all of a shared document's destinations. */
+export const cmsDocumentAvailabilityStatesTable = pgTable(
+  "cms_document_availability_states",
+  {
+    documentId: uuid("document_id")
+      .primaryKey()
+      .references(() => cmsDocumentsTable.id, { onDelete: "cascade" }),
+    draftVersion: integer("draft_version").notNull().default(0),
+    reviewedVersion: integer("reviewed_version"),
+    publishedVersion: integer("published_version").notNull().default(0),
+    sharedSourceEditionId: uuid("shared_source_edition_id").references(
+      () => cmsMarketEditionsTable.id,
+      { onDelete: "set null" },
+    ),
+    sharedSourceRevisionId: uuid("shared_source_revision_id").references(
+      () => cmsRevisionsTable.id,
+      { onDelete: "set null" },
+    ),
+    publishedSourceRevisionId: uuid("published_source_revision_id").references(
+      () => cmsRevisionsTable.id,
+      { onDelete: "set null" },
+    ),
+    reviewedSourceRevisionId: uuid("reviewed_source_revision_id").references(
+      () => cmsRevisionsTable.id,
+      { onDelete: "set null" },
+    ),
+    reviewedSelections: jsonb("reviewed_selections")
+      .$type<Array<{ marketEditionId: string; locale: string; decision: "inherit" | "show" | "off" }>>()
+      .notNull()
+      .default([]),
+    updatedByUserId: uuid("updated_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    reviewedByUserId: uuid("reviewed_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    publishedByUserId: uuid("published_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+  },
+);
+
+/** Idempotently reconciled migration evidence for delivery parity audits. */
+export const cmsDocumentAvailabilityMigrationReportsTable = pgTable(
+  "cms_document_availability_migration_reports",
+  {
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => cmsDocumentsTable.id, { onDelete: "cascade" }),
+    marketEditionId: uuid("market_edition_id")
+      .notNull()
+      .references(() => marketEditionsTable.id, { onDelete: "cascade" }),
+    locale: text("locale").notNull(),
+    legacyDecision: text("legacy_decision"),
+    legacyPublishedDecision: text("legacy_published_decision"),
+    legacyDraftDecision: text("legacy_draft_decision"),
+    publishedDecision: text("published_decision").notNull(),
+    draftDecision: text("draft_decision"),
+    visibilityPreserved: boolean("visibility_preserved").notNull(),
+    legacyResolvable: boolean("legacy_resolvable").notNull(),
+    publishedResolvable: boolean("published_resolvable").notNull(),
+    resolvabilityPreserved: boolean("resolvability_preserved").notNull(),
+    legacySelectedEditionId: uuid("legacy_selected_edition_id"),
+    legacySelectedRevisionId: uuid("legacy_selected_revision_id"),
+    publishedSelectedEditionId: uuid("published_selected_edition_id"),
+    publishedSelectedRevisionId: uuid("published_selected_revision_id"),
+    selectionPreserved: boolean("selection_preserved").notNull().default(true),
+    reconciledAt: timestamp("reconciled_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.documentId, table.marketEditionId, table.locale] })],
+);
+
+export const cmsDocumentAvailabilityMigrationControlTable = pgTable(
+  "cms_document_availability_migration_control",
+  {
+    migrationKey: text("migration_key").primaryKey(),
+    completedAt: timestamp("completed_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+);
+
+/** Reconciliation evidence for internal shared-source editorial origins. */
+export const cmsEditorialMarketMigrationReportsTable = pgTable(
+  "cms_editorial_market_migration_reports",
+  {
+    marketEditionId: uuid("market_edition_id")
+      .primaryKey()
+      .references(() => cmsMarketEditionsTable.id, { onDelete: "cascade" }),
+    candidateCount: integer("candidate_count").notNull(),
+    resolvedMarket: text("resolved_market"),
+    ambiguous: boolean("ambiguous").notNull(),
+    reconciledAt: timestamp("reconciled_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+);
+
+/** @deprecated Read-only legacy compatibility model; use cmsDocumentMarketAvailabilityTable. */
+export const cmsPersonMarketAvailabilityTable = pgTable(
+  "cms_person_market_availability",
+  {
+    documentId: uuid("document_id").notNull(),
+    marketEditionId: uuid("market_edition_id").notNull(),
+    decision: text("decision").notNull(),
+    publishedDecision: text("published_decision").notNull().default("inherit"),
+    draftDecision: text("draft_decision"),
+    updatedByUserId: uuid("updated_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    publishedByUserId: uuid("published_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.documentId, table.marketEditionId] })],
 );
 
 export const cmsRevisionsTable = pgTable(
@@ -177,6 +307,10 @@ export const cmsRevisionsTable = pgTable(
       { onDelete: "set null" },
     ),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
+    sourceRevisionId: uuid("source_revision_id").references(
+      (): AnyPgColumn => cmsRevisionsTable.id,
+      { onDelete: "set null" },
+    ),
     reason: text("reason").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -418,6 +552,10 @@ export type CmsDocument = typeof cmsDocumentsTable.$inferSelect;
 export type CmsMarketEdition = typeof cmsMarketEditionsTable.$inferSelect;
 export type CmsPersonMarketAvailability =
   typeof cmsPersonMarketAvailabilityTable.$inferSelect;
+export type CmsDocumentMarketAvailability =
+  typeof cmsDocumentMarketAvailabilityTable.$inferSelect;
+export type CmsDocumentAvailabilityState =
+  typeof cmsDocumentAvailabilityStatesTable.$inferSelect;
 export type CmsRevision = typeof cmsRevisionsTable.$inferSelect;
 export type CmsReviewComment = typeof cmsReviewCommentsTable.$inferSelect;
 export type CmsTaxonomy = typeof cmsTaxonomiesTable.$inferSelect;

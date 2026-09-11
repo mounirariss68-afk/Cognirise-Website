@@ -169,6 +169,20 @@
       "when": 1788998400000,
       "tag": "0023_readiness_assessments",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1788998400001,
+      "tag": "0024_cms_document_availability",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1788998400002,
+      "tag": "0025_cms_editorial_market",
+      "breakpoints": true
     }
   ]
 }

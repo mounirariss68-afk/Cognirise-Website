@@ -37,6 +37,10 @@ import type {
   DashboardKpis,
   DeleteReadinessAssessment403,
   Document,
+  DocumentAvailability,
+  DocumentAvailabilitySourceSelection,
+  DocumentAvailabilityUpdate,
+  DocumentAvailabilityVersion,
   DocumentEditionMatrix,
   DocumentInput,
   DocumentKind,
@@ -49,6 +53,7 @@ import type {
   EditionOverrideInput,
   EnquiryInput,
   EnquiryReceipt,
+  ForbiddenResponse,
   GetDashboardKpisParams,
   GetDocumentParams,
   GetNavigationSettingsParams,
@@ -2692,6 +2697,371 @@ export function useGetDocumentMarketAvailability<TData = Awaited<ReturnType<type
 
 
 
+export const getGetDocumentAvailabilityUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/availability`
+}
+
+/**
+ * @summary Get the staged, reviewed, and published shared-content destinations
+ */
+export const getDocumentAvailability = async (documentId: string, options?: Parameters<typeof customFetch>[1]): Promise<DocumentAvailability> => {
+
+  return customFetch<DocumentAvailability>(getGetDocumentAvailabilityUrl(documentId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDocumentAvailabilityQueryKey = (documentId: string,) => {
+    return [
+    `/api/documents/${documentId}/availability`
+    ] as const;
+    }
+
+
+export const getGetDocumentAvailabilityQueryOptions = <TData = Awaited<ReturnType<typeof getDocumentAvailability>>, TError = ErrorType<NotFoundResponse>>(documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDocumentAvailability>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDocumentAvailabilityQueryKey(documentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDocumentAvailability>>> = ({ signal }) => getDocumentAvailability(documentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: documentId !== null && documentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDocumentAvailability>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetDocumentAvailabilityQueryResult = NonNullable<Awaited<ReturnType<typeof getDocumentAvailability>>>
+export type GetDocumentAvailabilityQueryError = ErrorType<NotFoundResponse>
+
+
+/**
+ * @summary Get the staged, reviewed, and published shared-content destinations
+ */
+
+export function useGetDocumentAvailability<TData = Awaited<ReturnType<typeof getDocumentAvailability>>, TError = ErrorType<NotFoundResponse>>(
+ documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDocumentAvailability>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetDocumentAvailabilityQueryOptions(documentId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateDocumentAvailabilityUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/availability`
+}
+
+/**
+ * @summary Save all shared-content destinations as a new staged version
+ */
+export const updateDocumentAvailability = async (documentId: string,
+    documentAvailabilityUpdate: DocumentAvailabilityUpdate, options?: Parameters<typeof customFetch>[1]): Promise<DocumentAvailability> => {
+
+  return customFetch<DocumentAvailability>(getUpdateDocumentAvailabilityUrl(documentId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(documentAvailabilityUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateDocumentAvailabilityMutationOptions = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDocumentAvailability>>, TError,{documentId: string;data: BodyType<DocumentAvailabilityUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateDocumentAvailability>>, TError,{documentId: string;data: BodyType<DocumentAvailabilityUpdate>}, TContext> => {
+
+const mutationKey = ['updateDocumentAvailability'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateDocumentAvailability>>, {documentId: string;data: BodyType<DocumentAvailabilityUpdate>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  updateDocumentAvailability(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateDocumentAvailabilityMutationResult = NonNullable<Awaited<ReturnType<typeof updateDocumentAvailability>>>
+    export type UpdateDocumentAvailabilityMutationBody = BodyType<DocumentAvailabilityUpdate>
+    export type UpdateDocumentAvailabilityMutationError = ErrorType<ConflictResponse>
+
+    /**
+ * @summary Save all shared-content destinations as a new staged version
+ */
+export const useUpdateDocumentAvailability = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDocumentAvailability>>, TError,{documentId: string;data: BodyType<DocumentAvailabilityUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateDocumentAvailability>>,
+        TError,
+        {documentId: string;data: BodyType<DocumentAvailabilityUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateDocumentAvailabilityMutationOptions(options));
+    }
+
+export const getReviewDocumentAvailabilityUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/availability/review`
+}
+
+/**
+ * @summary Freeze a staged destination version for publication review
+ */
+export const reviewDocumentAvailability = async (documentId: string,
+    documentAvailabilityVersion: DocumentAvailabilityVersion, options?: Parameters<typeof customFetch>[1]): Promise<DocumentAvailability> => {
+
+  return customFetch<DocumentAvailability>(getReviewDocumentAvailabilityUrl(documentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(documentAvailabilityVersion)
+  }
+);}
+
+
+
+
+
+export const getReviewDocumentAvailabilityMutationOptions = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewDocumentAvailability>>, TError,{documentId: string;data: BodyType<DocumentAvailabilityVersion>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reviewDocumentAvailability>>, TError,{documentId: string;data: BodyType<DocumentAvailabilityVersion>}, TContext> => {
+
+const mutationKey = ['reviewDocumentAvailability'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reviewDocumentAvailability>>, {documentId: string;data: BodyType<DocumentAvailabilityVersion>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  reviewDocumentAvailability(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReviewDocumentAvailabilityMutationResult = NonNullable<Awaited<ReturnType<typeof reviewDocumentAvailability>>>
+    export type ReviewDocumentAvailabilityMutationBody = BodyType<DocumentAvailabilityVersion>
+    export type ReviewDocumentAvailabilityMutationError = ErrorType<ConflictResponse>
+
+    /**
+ * @summary Freeze a staged destination version for publication review
+ */
+export const useReviewDocumentAvailability = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewDocumentAvailability>>, TError,{documentId: string;data: BodyType<DocumentAvailabilityVersion>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reviewDocumentAvailability>>,
+        TError,
+        {documentId: string;data: BodyType<DocumentAvailabilityVersion>},
+        TContext
+      > => {
+      return useMutation(getReviewDocumentAvailabilityMutationOptions(options));
+    }
+
+export const getSelectDocumentAvailabilitySourceUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/availability/source`
+}
+
+/**
+ * @summary Create an explicit shared source from an exact historical revision
+ */
+export const selectDocumentAvailabilitySource = async (documentId: string,
+    documentAvailabilitySourceSelection: DocumentAvailabilitySourceSelection, options?: Parameters<typeof customFetch>[1]): Promise<DocumentAvailability> => {
+
+  return customFetch<DocumentAvailability>(getSelectDocumentAvailabilitySourceUrl(documentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(documentAvailabilitySourceSelection)
+  }
+);}
+
+
+
+
+
+export const getSelectDocumentAvailabilitySourceMutationOptions = <TError = ErrorType<BadRequestResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof selectDocumentAvailabilitySource>>, TError,{documentId: string;data: BodyType<DocumentAvailabilitySourceSelection>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof selectDocumentAvailabilitySource>>, TError,{documentId: string;data: BodyType<DocumentAvailabilitySourceSelection>}, TContext> => {
+
+const mutationKey = ['selectDocumentAvailabilitySource'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof selectDocumentAvailabilitySource>>, {documentId: string;data: BodyType<DocumentAvailabilitySourceSelection>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  selectDocumentAvailabilitySource(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SelectDocumentAvailabilitySourceMutationResult = NonNullable<Awaited<ReturnType<typeof selectDocumentAvailabilitySource>>>
+    export type SelectDocumentAvailabilitySourceMutationBody = BodyType<DocumentAvailabilitySourceSelection>
+    export type SelectDocumentAvailabilitySourceMutationError = ErrorType<BadRequestResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>
+
+    /**
+ * @summary Create an explicit shared source from an exact historical revision
+ */
+export const useSelectDocumentAvailabilitySource = <TError = ErrorType<BadRequestResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof selectDocumentAvailabilitySource>>, TError,{documentId: string;data: BodyType<DocumentAvailabilitySourceSelection>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof selectDocumentAvailabilitySource>>,
+        TError,
+        {documentId: string;data: BodyType<DocumentAvailabilitySourceSelection>},
+        TContext
+      > => {
+      return useMutation(getSelectDocumentAvailabilitySourceMutationOptions(options));
+    }
+
+export const getPublishDocumentAvailabilityUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/availability/publish`
+}
+
+/**
+ * @summary Publish the exact reviewed shared-content destination version
+ */
+export const publishDocumentAvailability = async (documentId: string,
+    documentAvailabilityVersion: DocumentAvailabilityVersion, options?: Parameters<typeof customFetch>[1]): Promise<DocumentAvailability> => {
+
+  return customFetch<DocumentAvailability>(getPublishDocumentAvailabilityUrl(documentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(documentAvailabilityVersion)
+  }
+);}
+
+
+
+
+
+export const getPublishDocumentAvailabilityMutationOptions = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishDocumentAvailability>>, TError,{documentId: string;data: BodyType<DocumentAvailabilityVersion>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publishDocumentAvailability>>, TError,{documentId: string;data: BodyType<DocumentAvailabilityVersion>}, TContext> => {
+
+const mutationKey = ['publishDocumentAvailability'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishDocumentAvailability>>, {documentId: string;data: BodyType<DocumentAvailabilityVersion>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  publishDocumentAvailability(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublishDocumentAvailabilityMutationResult = NonNullable<Awaited<ReturnType<typeof publishDocumentAvailability>>>
+    export type PublishDocumentAvailabilityMutationBody = BodyType<DocumentAvailabilityVersion>
+    export type PublishDocumentAvailabilityMutationError = ErrorType<ConflictResponse>
+
+    /**
+ * @summary Publish the exact reviewed shared-content destination version
+ */
+export const usePublishDocumentAvailability = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishDocumentAvailability>>, TError,{documentId: string;data: BodyType<DocumentAvailabilityVersion>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publishDocumentAvailability>>,
+        TError,
+        {documentId: string;data: BodyType<DocumentAvailabilityVersion>},
+        TContext
+      > => {
+      return useMutation(getPublishDocumentAvailabilityMutationOptions(options));
+    }
+
 export const getUpdateDocumentMarketAvailabilityUrl = (documentId: string,
     marketEditionId: string,) => {
 
@@ -2779,14 +3149,15 @@ export const getPublishDocumentMarketAvailabilityUrl = (documentId: string,
  * @summary Publish a staged person market availability decision
  */
 export const publishDocumentMarketAvailability = async (documentId: string,
-    marketEditionId: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+    marketEditionId: string,
+    documentAvailabilityVersion: DocumentAvailabilityVersion, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
 
   return customFetch<void>(getPublishDocumentMarketAvailabilityUrl(documentId,marketEditionId),
   {
     ...options,
-    method: 'POST'
-
-
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(documentAvailabilityVersion)
   }
 );}
 
@@ -2795,8 +3166,8 @@ export const publishDocumentMarketAvailability = async (documentId: string,
 
 
 export const getPublishDocumentMarketAvailabilityMutationOptions = <TError = ErrorType<ConflictResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string;data: BodyType<DocumentAvailabilityVersion>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string;data: BodyType<DocumentAvailabilityVersion>}, TContext> => {
 
 const mutationKey = ['publishDocumentMarketAvailability'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -2808,10 +3179,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, {documentId: string;marketEditionId: string}> = (props) => {
-          const {documentId,marketEditionId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, {documentId: string;marketEditionId: string;data: BodyType<DocumentAvailabilityVersion>}> = (props) => {
+          const {documentId,marketEditionId,data} = props ?? {};
 
-          return  publishDocumentMarketAvailability(documentId,marketEditionId,requestOptions)
+          return  publishDocumentMarketAvailability(documentId,marketEditionId,data,requestOptions)
         }
 
 
@@ -2822,18 +3193,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PublishDocumentMarketAvailabilityMutationResult = NonNullable<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>>
-
+    export type PublishDocumentMarketAvailabilityMutationBody = BodyType<DocumentAvailabilityVersion>
     export type PublishDocumentMarketAvailabilityMutationError = ErrorType<ConflictResponse>
 
     /**
  * @summary Publish a staged person market availability decision
  */
 export const usePublishDocumentMarketAvailability = <TError = ErrorType<ConflictResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishDocumentMarketAvailability>>, TError,{documentId: string;marketEditionId: string;data: BodyType<DocumentAvailabilityVersion>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof publishDocumentMarketAvailability>>,
         TError,
-        {documentId: string;marketEditionId: string},
+        {documentId: string;marketEditionId: string;data: BodyType<DocumentAvailabilityVersion>},
         TContext
       > => {
       return useMutation(getPublishDocumentMarketAvailabilityMutationOptions(options));

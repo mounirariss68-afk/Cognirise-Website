@@ -32,4 +32,5 @@
 - [Text resize verification](text-resize-verification.md) — Disable transitions fully before resampling fonts; reduced-motion rules can otherwise compound simulated text enlargement.
 - [Upload retry boundaries](upload-retry-boundaries.md) — Preflight metadata before locking retries; session changes and staging-to-immutable promotion need explicit recovery boundaries.
 - [CMS save concurrency](cms-save-concurrency.md) — Acquire edition locks before reading latest revisions; preserve local evidence when save confirmation fails.
-- [Media schema reconciliation](media-schema-reconciliation.md) — Current columns do not prove collection CHECK constraints are current; library repair must not republish pages.
+- [Media schema reconciliation](media-schema-reconciliation.md) — Library repair is not authorization to republish content or manufacture reviewer clearance.
+- [Shared content destinations](shared-content-destinations.md) — Separate saved and published source authority; preserve ambiguous regional history through explicit source selection.

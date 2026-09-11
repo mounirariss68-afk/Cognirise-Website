@@ -28,6 +28,9 @@ test("public hero selection remains bound to the approved published revision", a
   const source = await readFile(resolve(process.cwd(), "src/routes/public.ts"), "utf8");
   assert.match(source, /r\.id=e\.published_revision_id/);
   assert.match(source, /r\.workflow_state='approved'/);
+  assert.doesNotMatch(source, /e\.published_revision_id=delivery\.shared_source_revision_id/);
+  assert.match(source, /e\.published_revision_id=delivery\.published_source_revision_id/);
+  assert.match(source, /documentPublishedAvailabilityClause\("d\.id", "\$3", "\$4"\)/);
   assert.match(source, /validateCmsSnapshot\("site-configuration", row\.payload, "publish"\)/);
   assert.match(source, /ref\.field_path=\$2/);
 });
@@ -38,7 +41,7 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
   const priorDatabaseUrl = process.env.DATABASE_URL;
   const priorSessionSecret = process.env.SESSION_SECRET;
   process.env.DATABASE_URL = "postgres://test.invalid/cognirise";
-  process.env.SESSION_SECRET = "public-hero-test-session-secret-long-enough";
+  process.env.SESSION_SECRET = "hero-publication-test-session-secret-long-enough";
 
   const [{ pool }, { default: app }, auth, security] = await Promise.all([
     import("@workspace/db"),
@@ -52,7 +55,7 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
   } as const;
   const requestedSlugs: string[] = [];
   const publishedSlugs = new Set<string>();
-  const now = new Date("2026-09-09T00:00:00Z");
+  const now = new Date("2026-09-07T00:00:00Z");
 
   t.mock.method(pool, "query", async (sql: unknown, values?: unknown[]) => {
     const statement = String(sql);

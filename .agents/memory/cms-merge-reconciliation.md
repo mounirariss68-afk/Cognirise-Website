@@ -33,8 +33,8 @@ If an earlier reconciliation incorrectly classified a known approved predecessor
 
 **How to apply:** Require exact normalized predecessor identity and matching provenance before recovery. Keep unknown editorial changes protected, and verify the recovered draft through the normal immutable-media approval and publication path.
 
-Treat a conflict-free rebase as unverified until the semantic diff and focused tests confirm each changed handler and test fixture still has its original boundary.
+Absence of textual merge conflicts does not establish semantic correctness.
 
-**Why:** An automated rebase can splice a valid code block into several unrelated handlers without leaving conflict markers. Typechecking then catches only the scope errors, while tests may also be syntactically valid yet exercise broken fixtures.
+**Why:** Automated merging has moved valid code between unrelated scopes without leaving conflict markers. Some resulting tests remained syntactically valid while checking the wrong behavior.
 
-**How to apply:** After rebasing governed CMS work, compare the affected files to the incoming base and the intended pre-rebase change. Restore unrelated source and test blocks before validating the focused route and reconciliation behavior.
+**How to apply:** Validate changed behavioral boundaries after merging; syntax and type checks alone cannot establish that source selection and publication protections survived.

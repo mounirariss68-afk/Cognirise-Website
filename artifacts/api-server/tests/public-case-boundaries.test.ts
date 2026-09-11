@@ -103,6 +103,10 @@ test("public case collection, detail, sitemap, and media enforce disclosure boun
       assert.match(statement, /r\.workflow_state='approved'/);
       assert.match(statement, /disclosure.*restricted/);
       assert.match(statement, /pagePath.*work/);
+      if (statement.includes("source_rank=1")) {
+        const found = rows.find((candidate) => candidate.localized_slug === values?.[1]);
+        return found ? { rowCount: 1, rows: [found] } : { rowCount: 0, rows: [] };
+      }
       return { rowCount: rows.length, rows: rows.map((candidate) => ({ ...candidate, total_count: rows.length })) };
     }
     if (statement.includes("SELECT d.id,d.kind,e.market")) {

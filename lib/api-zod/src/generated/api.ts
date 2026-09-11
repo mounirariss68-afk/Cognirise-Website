@@ -2279,7 +2279,7 @@ export const updateDocumentBodySeoOneDescriptionMax = 180;
 export const updateDocumentBodySeoOneCanonicalUrlRegExp = new RegExp('^(?:$|[hH][tT][tT][pP][sS]?://.+)');
 export const updateDocumentBodySeoOneNoIndexDefault = false;
 export const updateDocumentBodyMarketRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
-export const updateDocumentBodyLocaleRegExp = new RegExp('^[a-z]{2}(?:-[A-Z]{2})?$');
+export const updateDocumentBodyLocaleRegExp = new RegExp('^(?:und|[a-z]{2}(?:-[A-Z]{2})?)$');
 export const updateDocumentBodyRevisionNumberMultipleOf = 1;
 
 
@@ -2298,7 +2298,8 @@ export const UpdateDocumentBody = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "market": zod.string().regex(updateDocumentBodyMarketRegExp),
   "locale": zod.string().regex(updateDocumentBodyLocaleRegExp),
-  "revisionNumber": zod.number().min(1).multipleOf(updateDocumentBodyRevisionNumberMultipleOf).describe('Optimistic concurrency version.')
+  "revisionNumber": zod.number().min(1).multipleOf(updateDocumentBodyRevisionNumberMultipleOf).describe('Optimistic concurrency version.'),
+  "expectedRevisionId": zod.string().optional().describe('Optional exact latest revision identity. When supplied, the server rejects a save if this edition\'s latest revision is not this revision, preventing a relocated shared-source address from writing to a replacement customization.')
 })
 
 export const updateDocumentResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
@@ -3634,6 +3635,289 @@ export const GetDocumentMarketAvailabilityResponse = zod.object({
 
 
 /**
+ * @summary Get the staged, reviewed, and published shared-content destinations
+ */
+export const GetDocumentAvailabilityParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const getDocumentAvailabilityResponseDraftVersionMin = 0;
+export const getDocumentAvailabilityResponseDraftVersionMultipleOf = 1;
+
+export const getDocumentAvailabilityResponseReviewedVersionMin = 0;
+export const getDocumentAvailabilityResponseReviewedVersionMultipleOf = 1;
+
+export const getDocumentAvailabilityResponsePublishedVersionMin = 0;
+export const getDocumentAvailabilityResponsePublishedVersionMultipleOf = 1;
+
+
+
+export const GetDocumentAvailabilityResponse = zod.object({
+  "documentId": zod.string(),
+  "draftVersion": zod.number().min(getDocumentAvailabilityResponseDraftVersionMin).multipleOf(getDocumentAvailabilityResponseDraftVersionMultipleOf),
+  "reviewedVersion": zod.number().min(getDocumentAvailabilityResponseReviewedVersionMin).multipleOf(getDocumentAvailabilityResponseReviewedVersionMultipleOf).nullable(),
+  "publishedVersion": zod.number().min(getDocumentAvailabilityResponsePublishedVersionMin).multipleOf(getDocumentAvailabilityResponsePublishedVersionMultipleOf),
+  "sharedSource": zod.union([zod.object({
+  "market": zod.string(),
+  "locale": zod.string(),
+  "editionId": zod.string(),
+  "revisionId": zod.string().nullable(),
+  "publishedRevisionId": zod.string().nullable(),
+  "sourceRevisionId": zod.string().nullable()
+}),zod.null()]),
+  "canEditShared": zod.boolean(),
+  "items": zod.array(zod.object({
+  "marketEditionId": zod.string(),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "displayName": zod.string(),
+  "stagedDecision": zod.enum(['inherit', 'show', 'off']),
+  "reviewedDecision": zod.union([zod.enum(['inherit', 'show', 'off']),zod.null()]),
+  "publishedDecision": zod.enum(['inherit', 'show', 'off']),
+  "publishedEffectiveAvailable": zod.boolean(),
+  "pending": zod.boolean(),
+  "customized": zod.boolean()
+})),
+  "affectedEditions": zod.array(zod.string()).describe('Market\/locale destination labels affected by the returned reviewed or published snapshot.')
+})
+
+
+/**
+ * @summary Save all shared-content destinations as a new staged version
+ */
+export const UpdateDocumentAvailabilityParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const updateDocumentAvailabilityBodyVersionMin = 0;
+export const updateDocumentAvailabilityBodyVersionMultipleOf = 1;
+
+export const updateDocumentAvailabilityBodyDestinationsItemLocaleRegExp = new RegExp('^[a-z]{2}(?:-[A-Z]{2})?$');
+
+
+export const UpdateDocumentAvailabilityBody = zod.object({
+  "version": zod.number().min(updateDocumentAvailabilityBodyVersionMin).multipleOf(updateDocumentAvailabilityBodyVersionMultipleOf),
+  "destinations": zod.array(zod.object({
+  "marketEditionId": zod.string(),
+  "locale": zod.string().regex(updateDocumentAvailabilityBodyDestinationsItemLocaleRegExp),
+  "decision": zod.enum(['inherit', 'show', 'off'])
+}))
+})
+
+export const updateDocumentAvailabilityResponseDraftVersionMin = 0;
+export const updateDocumentAvailabilityResponseDraftVersionMultipleOf = 1;
+
+export const updateDocumentAvailabilityResponseReviewedVersionMin = 0;
+export const updateDocumentAvailabilityResponseReviewedVersionMultipleOf = 1;
+
+export const updateDocumentAvailabilityResponsePublishedVersionMin = 0;
+export const updateDocumentAvailabilityResponsePublishedVersionMultipleOf = 1;
+
+
+
+export const UpdateDocumentAvailabilityResponse = zod.object({
+  "documentId": zod.string(),
+  "draftVersion": zod.number().min(updateDocumentAvailabilityResponseDraftVersionMin).multipleOf(updateDocumentAvailabilityResponseDraftVersionMultipleOf),
+  "reviewedVersion": zod.number().min(updateDocumentAvailabilityResponseReviewedVersionMin).multipleOf(updateDocumentAvailabilityResponseReviewedVersionMultipleOf).nullable(),
+  "publishedVersion": zod.number().min(updateDocumentAvailabilityResponsePublishedVersionMin).multipleOf(updateDocumentAvailabilityResponsePublishedVersionMultipleOf),
+  "sharedSource": zod.union([zod.object({
+  "market": zod.string(),
+  "locale": zod.string(),
+  "editionId": zod.string(),
+  "revisionId": zod.string().nullable(),
+  "publishedRevisionId": zod.string().nullable(),
+  "sourceRevisionId": zod.string().nullable()
+}),zod.null()]),
+  "canEditShared": zod.boolean(),
+  "items": zod.array(zod.object({
+  "marketEditionId": zod.string(),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "displayName": zod.string(),
+  "stagedDecision": zod.enum(['inherit', 'show', 'off']),
+  "reviewedDecision": zod.union([zod.enum(['inherit', 'show', 'off']),zod.null()]),
+  "publishedDecision": zod.enum(['inherit', 'show', 'off']),
+  "publishedEffectiveAvailable": zod.boolean(),
+  "pending": zod.boolean(),
+  "customized": zod.boolean()
+})),
+  "affectedEditions": zod.array(zod.string()).describe('Market\/locale destination labels affected by the returned reviewed or published snapshot.')
+})
+
+
+/**
+ * @summary Freeze a staged destination version for publication review
+ */
+export const ReviewDocumentAvailabilityParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const reviewDocumentAvailabilityBodyVersionMin = 0;
+export const reviewDocumentAvailabilityBodyVersionMultipleOf = 1;
+
+
+
+export const ReviewDocumentAvailabilityBody = zod.object({
+  "version": zod.number().min(reviewDocumentAvailabilityBodyVersionMin).multipleOf(reviewDocumentAvailabilityBodyVersionMultipleOf)
+})
+
+export const reviewDocumentAvailabilityResponseDraftVersionMin = 0;
+export const reviewDocumentAvailabilityResponseDraftVersionMultipleOf = 1;
+
+export const reviewDocumentAvailabilityResponseReviewedVersionMin = 0;
+export const reviewDocumentAvailabilityResponseReviewedVersionMultipleOf = 1;
+
+export const reviewDocumentAvailabilityResponsePublishedVersionMin = 0;
+export const reviewDocumentAvailabilityResponsePublishedVersionMultipleOf = 1;
+
+
+
+export const ReviewDocumentAvailabilityResponse = zod.object({
+  "documentId": zod.string(),
+  "draftVersion": zod.number().min(reviewDocumentAvailabilityResponseDraftVersionMin).multipleOf(reviewDocumentAvailabilityResponseDraftVersionMultipleOf),
+  "reviewedVersion": zod.number().min(reviewDocumentAvailabilityResponseReviewedVersionMin).multipleOf(reviewDocumentAvailabilityResponseReviewedVersionMultipleOf).nullable(),
+  "publishedVersion": zod.number().min(reviewDocumentAvailabilityResponsePublishedVersionMin).multipleOf(reviewDocumentAvailabilityResponsePublishedVersionMultipleOf),
+  "sharedSource": zod.union([zod.object({
+  "market": zod.string(),
+  "locale": zod.string(),
+  "editionId": zod.string(),
+  "revisionId": zod.string().nullable(),
+  "publishedRevisionId": zod.string().nullable(),
+  "sourceRevisionId": zod.string().nullable()
+}),zod.null()]),
+  "canEditShared": zod.boolean(),
+  "items": zod.array(zod.object({
+  "marketEditionId": zod.string(),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "displayName": zod.string(),
+  "stagedDecision": zod.enum(['inherit', 'show', 'off']),
+  "reviewedDecision": zod.union([zod.enum(['inherit', 'show', 'off']),zod.null()]),
+  "publishedDecision": zod.enum(['inherit', 'show', 'off']),
+  "publishedEffectiveAvailable": zod.boolean(),
+  "pending": zod.boolean(),
+  "customized": zod.boolean()
+})),
+  "affectedEditions": zod.array(zod.string()).describe('Market\/locale destination labels affected by the returned reviewed or published snapshot.')
+})
+
+
+/**
+ * @summary Create an explicit shared source from an exact historical revision
+ */
+export const SelectDocumentAvailabilitySourceParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const selectDocumentAvailabilitySourceBodyVersionMin = 0;
+export const selectDocumentAvailabilitySourceBodyVersionMultipleOf = 1;
+
+
+
+export const SelectDocumentAvailabilitySourceBody = zod.object({
+  "version": zod.number().min(selectDocumentAvailabilitySourceBodyVersionMin).multipleOf(selectDocumentAvailabilitySourceBodyVersionMultipleOf),
+  "sourceRevisionId": zod.string()
+})
+
+export const selectDocumentAvailabilitySourceResponseDraftVersionMin = 0;
+export const selectDocumentAvailabilitySourceResponseDraftVersionMultipleOf = 1;
+
+export const selectDocumentAvailabilitySourceResponseReviewedVersionMin = 0;
+export const selectDocumentAvailabilitySourceResponseReviewedVersionMultipleOf = 1;
+
+export const selectDocumentAvailabilitySourceResponsePublishedVersionMin = 0;
+export const selectDocumentAvailabilitySourceResponsePublishedVersionMultipleOf = 1;
+
+
+
+export const SelectDocumentAvailabilitySourceResponse = zod.object({
+  "documentId": zod.string(),
+  "draftVersion": zod.number().min(selectDocumentAvailabilitySourceResponseDraftVersionMin).multipleOf(selectDocumentAvailabilitySourceResponseDraftVersionMultipleOf),
+  "reviewedVersion": zod.number().min(selectDocumentAvailabilitySourceResponseReviewedVersionMin).multipleOf(selectDocumentAvailabilitySourceResponseReviewedVersionMultipleOf).nullable(),
+  "publishedVersion": zod.number().min(selectDocumentAvailabilitySourceResponsePublishedVersionMin).multipleOf(selectDocumentAvailabilitySourceResponsePublishedVersionMultipleOf),
+  "sharedSource": zod.union([zod.object({
+  "market": zod.string(),
+  "locale": zod.string(),
+  "editionId": zod.string(),
+  "revisionId": zod.string().nullable(),
+  "publishedRevisionId": zod.string().nullable(),
+  "sourceRevisionId": zod.string().nullable()
+}),zod.null()]),
+  "canEditShared": zod.boolean(),
+  "items": zod.array(zod.object({
+  "marketEditionId": zod.string(),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "displayName": zod.string(),
+  "stagedDecision": zod.enum(['inherit', 'show', 'off']),
+  "reviewedDecision": zod.union([zod.enum(['inherit', 'show', 'off']),zod.null()]),
+  "publishedDecision": zod.enum(['inherit', 'show', 'off']),
+  "publishedEffectiveAvailable": zod.boolean(),
+  "pending": zod.boolean(),
+  "customized": zod.boolean()
+})),
+  "affectedEditions": zod.array(zod.string()).describe('Market\/locale destination labels affected by the returned reviewed or published snapshot.')
+})
+
+
+/**
+ * @summary Publish the exact reviewed shared-content destination version
+ */
+export const PublishDocumentAvailabilityParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const publishDocumentAvailabilityBodyVersionMin = 0;
+export const publishDocumentAvailabilityBodyVersionMultipleOf = 1;
+
+
+
+export const PublishDocumentAvailabilityBody = zod.object({
+  "version": zod.number().min(publishDocumentAvailabilityBodyVersionMin).multipleOf(publishDocumentAvailabilityBodyVersionMultipleOf)
+})
+
+export const publishDocumentAvailabilityResponseDraftVersionMin = 0;
+export const publishDocumentAvailabilityResponseDraftVersionMultipleOf = 1;
+
+export const publishDocumentAvailabilityResponseReviewedVersionMin = 0;
+export const publishDocumentAvailabilityResponseReviewedVersionMultipleOf = 1;
+
+export const publishDocumentAvailabilityResponsePublishedVersionMin = 0;
+export const publishDocumentAvailabilityResponsePublishedVersionMultipleOf = 1;
+
+
+
+export const PublishDocumentAvailabilityResponse = zod.object({
+  "documentId": zod.string(),
+  "draftVersion": zod.number().min(publishDocumentAvailabilityResponseDraftVersionMin).multipleOf(publishDocumentAvailabilityResponseDraftVersionMultipleOf),
+  "reviewedVersion": zod.number().min(publishDocumentAvailabilityResponseReviewedVersionMin).multipleOf(publishDocumentAvailabilityResponseReviewedVersionMultipleOf).nullable(),
+  "publishedVersion": zod.number().min(publishDocumentAvailabilityResponsePublishedVersionMin).multipleOf(publishDocumentAvailabilityResponsePublishedVersionMultipleOf),
+  "sharedSource": zod.union([zod.object({
+  "market": zod.string(),
+  "locale": zod.string(),
+  "editionId": zod.string(),
+  "revisionId": zod.string().nullable(),
+  "publishedRevisionId": zod.string().nullable(),
+  "sourceRevisionId": zod.string().nullable()
+}),zod.null()]),
+  "canEditShared": zod.boolean(),
+  "items": zod.array(zod.object({
+  "marketEditionId": zod.string(),
+  "market": zod.string(),
+  "locale": zod.string(),
+  "displayName": zod.string(),
+  "stagedDecision": zod.enum(['inherit', 'show', 'off']),
+  "reviewedDecision": zod.union([zod.enum(['inherit', 'show', 'off']),zod.null()]),
+  "publishedDecision": zod.enum(['inherit', 'show', 'off']),
+  "publishedEffectiveAvailable": zod.boolean(),
+  "pending": zod.boolean(),
+  "customized": zod.boolean()
+})),
+  "affectedEditions": zod.array(zod.string()).describe('Market\/locale destination labels affected by the returned reviewed or published snapshot.')
+})
+
+
+/**
  * @summary Set a person's governed availability for a market edition
  */
 export const UpdateDocumentMarketAvailabilityParams = zod.object({
@@ -3641,8 +3925,14 @@ export const UpdateDocumentMarketAvailabilityParams = zod.object({
   "marketEditionId": zod.coerce.string()
 })
 
+export const updateDocumentMarketAvailabilityBodyVersionMin = 0;
+export const updateDocumentMarketAvailabilityBodyVersionMultipleOf = 1;
+
+
+
 export const UpdateDocumentMarketAvailabilityBody = zod.object({
-  "decision": zod.enum(['inherit', 'show', 'off'])
+  "decision": zod.enum(['inherit', 'show', 'off']),
+  "version": zod.number().min(updateDocumentMarketAvailabilityBodyVersionMin).multipleOf(updateDocumentMarketAvailabilityBodyVersionMultipleOf)
 })
 
 export const UpdateDocumentMarketAvailabilityResponse = zod.object({
@@ -3666,6 +3956,15 @@ export const UpdateDocumentMarketAvailabilityResponse = zod.object({
 export const PublishDocumentMarketAvailabilityParams = zod.object({
   "documentId": zod.coerce.string(),
   "marketEditionId": zod.coerce.string()
+})
+
+export const publishDocumentMarketAvailabilityBodyVersionMin = 0;
+export const publishDocumentMarketAvailabilityBodyVersionMultipleOf = 1;
+
+
+
+export const PublishDocumentMarketAvailabilityBody = zod.object({
+  "version": zod.number().min(publishDocumentMarketAvailabilityBodyVersionMin).multipleOf(publishDocumentMarketAvailabilityBodyVersionMultipleOf)
 })
 
 export const PublishDocumentMarketAvailabilityResponse = zod.void()

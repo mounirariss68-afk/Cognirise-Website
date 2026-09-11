@@ -10,6 +10,7 @@
     "cms:inventory": "tsx ./src/cms/inventory.ts",
     "cms:import": "tsx ./src/cms/import.ts",
     "cms:reconcile": "tsx ./src/cms/reconcile.ts",
+    "cms:reconcile-document-availability": "tsx ./src/cms/document-availability-reconciliation.ts",
     "cms:verify": "tsx ./src/cms/verify.ts",
     "cms:import-task-295-media": "tsx ./src/cms/task-295-media-import.ts",
     "cms:import-banking-media": "tsx ./src/cms/banking-media-import.ts",
