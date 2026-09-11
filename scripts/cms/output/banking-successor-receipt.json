@@ -2,16 +2,53 @@
   "task": 289,
   "mode": "apply",
   "baselineDigest": "648edadb39862742be05b9be5ec2687528e78a8f3b0570565e7092fe85aa300c",
-  "receiptKey": "cms-banking-pov-v1-successor:7e168f5d-9a00-407d-a63d-ae5f65faef89:a9becd21-1772-4be7-afec-54b519ff13b5:4395de16b6c27a8aefa8c3cdd7380be01b9b6e873e4f0e299d453ed538abf37c:3bdcc3e34c4ece84281dac1b7a497b3cf4746737f6ec250506402c1189ef900d",
+  "receiptKey": "cms-banking-pov-v1-successor:7e168f5d-9a00-407d-a63d-ae5f65faef89:a9becd21-1772-4be7-afec-54b519ff13b5:4395de16b6c27a8aefa8c3cdd7380be01b9b6e873e4f0e299d453ed538abf37c:f940b3abf09c481289c157e748264cf135a00340d420f6a1f74ec5f48108a4a2",
   "documentId": "b05b2617-0584-4bf3-966d-8f78f3896027",
   "editionId": "7e168f5d-9a00-407d-a63d-ae5f65faef89",
   "publishedRevisionId": "a9becd21-1772-4be7-afec-54b519ff13b5",
-  "candidateDigest": "3bdcc3e34c4ece84281dac1b7a497b3cf4746737f6ec250506402c1189ef900d",
+  "candidateDigest": "f940b3abf09c481289c157e748264cf135a00340d420f6a1f74ec5f48108a4a2",
   "preservedCaseCount": 8,
   "action": "append-draft-for-editorial-review-only",
   "publication": "No publication occurs here. CMS review, approved immutable media, and the established publisher procedure remain mandatory.",
   "securePreview": "An authorized editor may create a scoped UAE/en preview using GET /api/documents/b05b2617-0584-4bf3-966d-8f78f3896027/preview?market=uae&locale=en&revisionId={draftRevisionId}; preview tokens are deliberately never written to this receipt.",
-  "disposition": "replayed",
-  "draftRevisionId": "bf8ccd16-1de1-43ec-8303-9d166ae23d62",
-  "securePreviewRequest": "/api/documents/b05b2617-0584-4bf3-966d-8f78f3896027/preview?market=uae&locale=en&revisionId=bf8ccd16-1de1-43ec-8303-9d166ae23d62"
+  "disposition": "created-draft",
+  "draftRevisionId": "d069afc1-f54b-4560-93bf-4db2abbac255",
+  "immutablePins": [
+    {
+      "mediaId": "f2144c4f-aa53-4f92-9432-b826e786596c",
+      "mediaVersionId": "c1520472-40dc-4c38-a622-7842cc183c08",
+      "fieldPath": "content.bankingPov.startingPoints.0.image",
+      "role": "supporting",
+      "altText": "A modern banking gateway with flowing illuminated paths, representing governed core operations."
+    },
+    {
+      "mediaId": "20d3be48-6a7f-48eb-93b7-16da1840e2ce",
+      "mediaVersionId": "9c847621-3173-4ffd-b194-585e7b5bd518",
+      "fieldPath": "content.bankingPov.startingPoints.1.image",
+      "role": "supporting",
+      "altText": "Abstract illuminated forms in dialogue, representing human and AI collaboration in a contact centre."
+    },
+    {
+      "mediaId": "8350af7e-f983-4d76-98d2-ca937c86e13b",
+      "mediaVersionId": "7d382089-eb44-4844-adb9-9106e178ea4b",
+      "fieldPath": "content.bankingPov.startingPoints.2.image",
+      "role": "supporting",
+      "altText": "Directed illuminated pathways through a digital structure, representing governed software delivery."
+    },
+    {
+      "mediaId": "de938b11-0d16-42ae-bca1-15a26d35b1fd",
+      "mediaVersionId": "10650e07-6b2e-468c-916d-c45a29fede07",
+      "fieldPath": "content.bankingPov.startingPoints.3.image",
+      "role": "supporting",
+      "altText": "A luminous knowledge field with connected signals, representing governed marketing intelligence."
+    },
+    {
+      "mediaId": "df2d410a-819b-4022-b87e-7695a36e0f75",
+      "mediaVersionId": "4343f02f-a5b8-4c11-bfc2-399c2dae1a12",
+      "fieldPath": "content.bankingPov.productionReadiness.image",
+      "role": "supporting",
+      "altText": "Violet and coral light flows pass through transparent gates beside a metallic vault-like structure."
+    }
+  ],
+  "securePreviewRequest": "/api/documents/b05b2617-0584-4bf3-966d-8f78f3896027/preview?market=uae&locale=en&revisionId=d069afc1-f54b-4560-93bf-4db2abbac255"
 }
