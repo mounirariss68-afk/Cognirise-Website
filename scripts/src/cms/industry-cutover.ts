@@ -12,6 +12,8 @@ import { industryPublicationPinAction, pulseIndustryMedia } from "./industry-med
 import {
   mediaMigrationOperations,
   migrationOperations,
+  canonicalResultDigest,
+  educationSuccessorRecoveryKey,
   resultDigest,
   type MediaMigrationOperation,
   type MigrationOperation,
@@ -544,11 +546,28 @@ async function applyCutover(
             }
           }
         }
+        const pendingReceipt = await client.query(
+          `SELECT idempotency_key
+             FROM cms_operation_receipts
+            WHERE idempotency_key=ANY($1::text[])
+              AND operation='cms.inventory.education-successor-pending-cutover'
+              AND subject_id=$2
+              AND request_digest=$3`,
+          [
+            [
+              item.contentOperation!.idempotencyKey,
+              educationSuccessorRecoveryKey(item.contentOperation!.externalId),
+            ],
+            edition.document_id,
+            item.contentOperation!.requestDigest,
+          ],
+        );
         if (
           sourceRevision.rowCount !== 1
           || candidate?.workflow_state !== "draft"
           || !normalizedCandidate
-          || resultDigest(normalizedCandidate) !== resultDigest(item.contentOperation!.payload)
+          || pendingReceipt.rowCount !== 1
+          || canonicalResultDigest(normalizedCandidate) !== canonicalResultDigest(item.contentOperation!.payload)
         ) {
           throw new Error("education has no exact governed v11 draft available for the three-image cutover.");
         }

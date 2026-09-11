@@ -27,6 +27,12 @@ Publisher review approval must append a metadata-only media version while retain
 
 **How to apply:** Keep approval behind the existing publisher, MFA, and CSRF protections; record the confirmations and reviewer identity in the new version metadata; keep the storage key, checksum, dimensions, and byte size unchanged; then transition the asset status inside the same transaction.
 
+If an earlier reconciliation incorrectly classified a known approved predecessor as editorial drift, preserve that original receipt and append a separately identified recovery operation.
+
+**Why:** Rewriting the preservation receipt would erase its audit meaning; ignoring it would leave later approved cutovers permanently unable to obtain their governed source draft.
+
+**How to apply:** Require exact normalized predecessor identity and matching provenance before recovery. Keep unknown editorial changes protected, and verify the recovered draft through the normal immutable-media approval and publication path.
+
 Treat a conflict-free rebase as unverified until the semantic diff and focused tests confirm each changed handler and test fixture still has its original boundary.
 
 **Why:** An automated rebase can splice a valid code block into several unrelated handlers without leaving conflict markers. Typechecking then catches only the scope errors, while tests may also be syntactically valid yet exercise broken fixtures.

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { isKnownEducationSuccessorAuthorityDigest } from "./migration.js";
 import { educationReconciliationOutcome } from "./receipt-reconciliation.js";
 import { runReconciliationLifecycle } from "./reconcile-order.js";
 
@@ -63,6 +64,16 @@ test("published Education reconciliation outcome is idempotent", () => {
     educationReconciliationOutcome(input),
     educationReconciliationOutcome(input),
   );
+});
+
+test("a preserved receipt can recover only from a known approved Education authority", () => {
+  assert.equal(
+    isKnownEducationSuccessorAuthorityDigest(
+      "cc208e07c47b59d8e27e80bd55a8f3515a88b79c1b7f91459bf6e251e0a050e5",
+    ),
+    true,
+  );
+  assert.equal(isKnownEducationSuccessorAuthorityDigest("editorial-drift"), false);
 });
 
 test("an old approved Education v2 imports a successor draft, cuts over all three pins, then replays", async () => {

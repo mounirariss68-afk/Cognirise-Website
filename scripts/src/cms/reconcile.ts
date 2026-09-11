@@ -9,6 +9,8 @@ import {
 import {
   canonicalResultDigest,
   EDUCATION_SUCCESSOR_SEO,
+  educationSuccessorRecoveryKey,
+  isKnownEducationSuccessorAuthorityDigest,
   historicalMediaReceipts,
   mediaMigrationOperations,
   migrationOperations,
@@ -152,6 +154,7 @@ async function inspectReconciliationState(
       : [];
     const [latestRevision] = edition?.id
       ? await db.select({
+          id: cmsRevisionsTable.id,
           payload: cmsRevisionsTable.payload,
           workflowState: cmsRevisionsTable.workflowState,
         }).from(cmsRevisionsTable)
@@ -230,6 +233,15 @@ async function inspectReconciliationState(
         }
       : undefined;
     if (normalizedPayload) normalizeEducationMediaPayload(normalizedPayload);
+    const requiresEducationSuccessorRecovery = Boolean(
+      receipt.operation === "cms.inventory.industry-contract-editorial-preserved"
+      && edition?.publishedRevisionId
+      && latestRevision?.id === edition.publishedRevisionId
+      && latestRevision.workflowState === "approved"
+      && isKnownEducationSuccessorAuthorityDigest(
+        normalizedPayload ? canonicalResultDigest(normalizedPayload) : undefined,
+      ),
+    );
     const exactPayload = Boolean(
       normalizedPayload
       && expectation.expectedNormalizedPayloadDigest
@@ -251,7 +263,8 @@ async function inspectReconciliationState(
     if (!outcome.valid) {
       invalid.push(`${receipt.idempotencyKey}: ${outcome.message}`);
     } else {
-      educationCutoverPending ||= outcome.status === "pending-cutover";
+      educationCutoverPending ||= outcome.status === "pending-cutover"
+        || requiresEducationSuccessorRecovery;
       educationOutcomes.push({
         idempotencyKey: receipt.idempotencyKey,
         status: outcome.status!,
@@ -431,6 +444,20 @@ async function main() {
         && (operation.payload.content as Record<string, unknown>).disclosure === "anonymized"
         && (operation.payload.content as Record<string, unknown>).publicEvidenceStatus === "approved"),
     });
+    if (educationSuccessor) {
+      expected.set(educationSuccessorRecoveryKey(operation.externalId), {
+        requestDigest: operation.requestDigest,
+        subjectType: "document",
+        optional: true,
+        publishEducationSuccessor: true,
+        expectedNormalizedPayloadDigest: canonicalResultDigest(normalizedOperationPayload),
+        educationMedia: operation.mediaPaths.map((publicPath) => {
+          const media = mediaOperations.find((candidate) => candidate.publicPath === publicPath);
+          if (!media) throw new Error(`Education successor media is missing ${publicPath}.`);
+          return media;
+        }),
+      });
+    }
   }
   for (const operation of mediaOperations
     .filter((item) => item.cmsOwnership === "cms-candidate")) {

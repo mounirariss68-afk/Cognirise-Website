@@ -4,6 +4,8 @@ import {
   financialServicesPunctuationReconciliationPlan,
   educationSuccessorAction,
   EDUCATION_SUCCESSOR_SEO,
+  canonicalResultDigest,
+  educationSuccessorRecoveryKey,
   industryBaselineAction,
   isApprovedFinancialServicesPunctuationReconciliation,
 } from "./migration.js";
@@ -177,7 +179,7 @@ test("copies current punctuation-only media references without substituting a pr
   assert.deepEqual(plan.payload.mediaIds, ["current-media"]);
 });
 
-test("Education successor accepts only the exact known v8 authority and governed v2 shape", () => {
+test("Education successor accepts only an exact known authority and governed v2 shape", () => {
   const canonicalPayload = {
     seo: { ...EDUCATION_SUCCESSOR_SEO, noIndex: false },
     content: {
@@ -211,4 +213,50 @@ test("Education successor accepts only the exact known v8 authority and governed
     latestNormalizedPayloadDigest: "already-v2",
     canonicalPayload,
   }), "reuse-complete");
+});
+
+test("Education redesign replays from the exact approved v10 successor authority", () => {
+  const canonicalPayload = {
+    seo: { ...EDUCATION_SUCCESSOR_SEO, noIndex: false },
+    content: {
+      educationPov: {
+        version: 2,
+        valueDomains: Array.from({ length: 5 }, () => ({})),
+        targetState: Array.from({ length: 7 }, () => ({})),
+      },
+    },
+  };
+  assert.equal(educationSuccessorAction({
+    baselineAction: "append-and-publish",
+    latestNormalizedPayloadDigest: "cc208e07c47b59d8e27e80bd55a8f3515a88b79c1b7f91459bf6e251e0a050e5",
+    canonicalPayload,
+  }), "append-and-publish");
+  assert.equal(educationSuccessorAction({
+    baselineAction: "append-and-publish",
+    latestNormalizedPayloadDigest: "unrecognized-approved-looking-payload",
+    canonicalPayload,
+  }), "preserve-editorial");
+});
+
+test("Education recovery receipt remains separately identifiable from the preserved v11 receipt", () => {
+  assert.equal(
+    educationSuccessorRecoveryKey("industry:education"),
+    "cms-industry-education-successor-v11-recovery:industry:education",
+  );
+});
+
+test("Education cutover authority comparison is stable across JSONB key ordering", () => {
+  const left = {
+    seo: { description: "description", title: "title", noIndex: false },
+    content: { educationPov: { version: 2, valueDomains: [], targetState: [] } },
+    mediaIds: [],
+  };
+  assert.equal(
+    canonicalResultDigest(left),
+    canonicalResultDigest({
+      mediaIds: [],
+      content: { educationPov: { targetState: [], valueDomains: [], version: 2 } },
+      seo: { noIndex: false, title: "title", description: "description" },
+    }),
+  );
 });

@@ -16,6 +16,7 @@ import {
   matchesGovernedCutoverSource,
   industryBaselineAction,
   educationSuccessorAction,
+  educationSuccessorRecoveryKey,
   financialServicesPunctuationReconciliationPlan,
   personAvailabilityOperations,
   personGovernanceOperations,
@@ -787,14 +788,41 @@ async function applyDatabase(
       for (const operation of operations) {
         const [receipt] = await tx.select().from(cmsOperationReceiptsTable)
           .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.idempotencyKey));
+        const educationRecoveryKey = operation.kind === "industry"
+          && operation.slug === "education"
+          && operation.idempotencyKey.startsWith("cms-industry-education-successor-v11:")
+          ? educationSuccessorRecoveryKey(operation.externalId)
+          : undefined;
+        const [educationRecoveryReceipt] = educationRecoveryKey
+          ? await tx.select().from(cmsOperationReceiptsTable)
+            .where(eq(cmsOperationReceiptsTable.idempotencyKey, educationRecoveryKey))
+          : [];
+        const canRecoverPreservedEducation = Boolean(
+          educationRecoveryKey
+          && receipt?.operation === "cms.inventory.industry-contract-editorial-preserved"
+          && receipt.requestDigest === operation.requestDigest,
+        );
+        if (educationRecoveryReceipt) {
+          if (
+            !canRecoverPreservedEducation
+            || educationRecoveryReceipt.operation !== "cms.inventory.education-successor-pending-cutover"
+            || educationRecoveryReceipt.requestDigest !== operation.requestDigest
+          ) {
+            throw new Error(`${operation.externalId}: Education successor recovery receipt conflicts with the current operation.`);
+          }
+          replayed++;
+          continue;
+        }
         if (receipt) {
-          if (receipt.requestDigest !== operation.requestDigest) {
+          if (!canRecoverPreservedEducation && receipt.requestDigest !== operation.requestDigest) {
             console.error(`Preserving previously imported document for ${operation.externalId}; the inventory digest changed.`);
             replayed++;
             continue;
           }
-          replayed++;
-          continue;
+          if (!canRecoverPreservedEducation) {
+            replayed++;
+            continue;
+          }
         }
         const [conflict] = await tx.select({ id: cmsDocumentsTable.id }).from(cmsDocumentsTable)
           .where(eq(cmsDocumentsTable.canonicalSlug, operation.slug));
@@ -1068,9 +1096,18 @@ async function applyDatabase(
               const receipt = allReceipts.find((item) => {
                 const candidateAudit = auditByRequest.get(item.idempotencyKey);
                 const candidateMetadata = candidateAudit?.metadata as Record<string, unknown> | null;
+                const isVersionedIndustryOperation =
+                  item.idempotencyKey.startsWith("cms-industry-contract-v")
+                  || item.idempotencyKey.startsWith("cms-industry-education-successor-v");
+                const isIndustryContractAudit =
+                  candidateAudit?.action?.startsWith("cms.inventory.industry-contract")
+                  || (
+                    item.idempotencyKey.startsWith("cms-industry-education-successor-v")
+                    && candidateAudit?.action === "cms.inventory.education-successor-published"
+                  );
                 return item.subjectId === String(conflict.id)
-                  && item.idempotencyKey.startsWith("cms-industry-contract-v")
-                  && item.operation.startsWith("cms.inventory.industry-contract")
+                  && isVersionedIndustryOperation
+                  && isIndustryContractAudit
                   && candidateMetadata?.revisionId === revisionId;
               });
               const audit = receipt ? auditByRequest.get(receipt.idempotencyKey) : undefined;
@@ -1078,7 +1115,13 @@ async function applyDatabase(
               provenanceValid = receipt
                 ? Boolean(
                     receipt.subjectId === String(conflict.id)
-                    && audit?.action?.startsWith("cms.inventory.industry-contract")
+                    && (
+                      audit?.action?.startsWith("cms.inventory.industry-contract")
+                      || (
+                        receipt.idempotencyKey.startsWith("cms-industry-education-successor-v")
+                        && audit?.action === "cms.inventory.education-successor-published"
+                      )
+                    )
                     && audit.targetType === "industry"
                     && audit.targetId === String(conflict.id)
                     && metadata?.revisionId === revisionId
@@ -1200,8 +1243,11 @@ async function applyDatabase(
             }).returning({ id: cmsRevisionsTable.id });
             if (!revision) throw new Error(`Could not append the ${operation.slug} contract baseline.`);
             if (educationSuccessorDraft) {
+              const pendingReceiptKey = canRecoverPreservedEducation
+                ? educationRecoveryKey!
+                : operation.idempotencyKey;
               await tx.insert(cmsOperationReceiptsTable).values({
-                idempotencyKey: operation.idempotencyKey,
+                idempotencyKey: pendingReceiptKey,
                 operation: "cms.inventory.education-successor-pending-cutover",
                 subjectId: String(conflict.id),
                 requestDigest: operation.requestDigest,
@@ -1217,7 +1263,7 @@ async function applyDatabase(
                 action: "cms.inventory.education-successor-pending-cutover",
                 targetType: "industry",
                 targetId: String(conflict.id),
-                requestId: operation.idempotencyKey,
+                requestId: pendingReceiptKey,
                 metadata: {
                   market: "uae",
                   locale: "en",
@@ -1226,6 +1272,9 @@ async function applyDatabase(
                   workflowState: "draft",
                   publicationState: edition.publicationState,
                   reason: "Education v11 successor is awaiting the governed three-image immutable-media cutover",
+                  ...(canRecoverPreservedEducation
+                    ? { recoveredFromReceiptKey: operation.idempotencyKey }
+                    : {}),
                 },
               });
               created++;
@@ -1344,6 +1393,11 @@ async function applyDatabase(
                 mediaVersionId: String(approvedPin!.mediaVersionId),
               },
             });
+          } else if (receipt?.operation === "cms.inventory.industry-contract-editorial-preserved") {
+            // The existing preservation receipt is immutable. If the current
+            // authority is not one of the explicitly approved handoff states,
+            // keep it preserved rather than attempting a second receipt.
+            replayed++;
           } else {
             // A later revision is editorial authority. Record the versioned
             // baseline as intentionally preserved; never replace or publish it.

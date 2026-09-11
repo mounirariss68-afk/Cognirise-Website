@@ -74,10 +74,27 @@ export interface PersonGovernanceOperation {
 
 const EDUCATION_V8_AUTHORITY_DIGEST =
   "99e765da04fa7ef70050ed29c4b3242b2ce3861e0ce8bd7fa62bfc02de3e43ca";
+// The Education redesign was merged after v10 had already been approved in
+// development. Keep that exact, previously reviewed payload as an explicit
+// handoff authority rather than treating it as arbitrary editorial drift.
+const EDUCATION_V10_AUTHORITY_DIGEST =
+  "cc208e07c47b59d8e27e80bd55a8f3515a88b79c1b7f91459bf6e251e0a050e5";
+const EDUCATION_KNOWN_AUTHORITY_DIGESTS = new Set([
+  EDUCATION_V8_AUTHORITY_DIGEST,
+  EDUCATION_V10_AUTHORITY_DIGEST,
+]);
 export const EDUCATION_SUCCESSOR_SEO = {
   title: "Education AI | K–12 & Higher Education | Cognirise",
   description: "Build shared AI capability across schools, universities and education authorities: better learning, stronger educators and researchers, and responsible service redesign.",
 } as const;
+
+export function educationSuccessorRecoveryKey(externalId: string) {
+  return `cms-industry-education-successor-v11-recovery:${externalId}`;
+}
+
+export function isKnownEducationSuccessorAuthorityDigest(digest: string | undefined) {
+  return EDUCATION_KNOWN_AUTHORITY_DIGESTS.has(digest ?? "");
+}
 
 export function educationSuccessorAction(input: {
   baselineAction: ReturnType<typeof industryBaselineAction>;
@@ -97,7 +114,7 @@ export function educationSuccessorAction(input: {
   if (!isExactSuccessor) return "preserve-editorial";
   if (input.baselineAction === "reuse-complete") return "reuse-complete";
   return input.baselineAction === "append-and-publish"
-      && input.latestNormalizedPayloadDigest === EDUCATION_V8_AUTHORITY_DIGEST
+      && isKnownEducationSuccessorAuthorityDigest(input.latestNormalizedPayloadDigest)
     ? "append-and-publish"
     : "preserve-editorial";
 }
