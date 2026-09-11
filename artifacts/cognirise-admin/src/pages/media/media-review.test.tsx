@@ -86,6 +86,7 @@ const sourceAsset: Asset = {
 let assets: Asset[] = [];
 let reviewCalls: ReviewInput[] = [];
 let reviewBehavior: (input: ReviewInput) => Promise<Asset>;
+let role = "publisher";
 
 function getListMediaQueryKey(params?: unknown) {
   return ["/api/media", ...(params === undefined ? [] : [params])];
@@ -119,6 +120,7 @@ function performReview(input: ReviewInput) {
 
 function resetState() {
   assets = [{ ...sourceAsset }];
+  role = "publisher";
   reviewCalls = [];
   reviewBehavior = async (input) => performReview(input);
 }
@@ -152,7 +154,7 @@ if (typeof moduleMock !== "function") {
       getListMediaQueryKey,
       getGetDocumentRevisionQueryKey: (...parts: unknown[]) => ["document-revision", ...parts],
       getGetMediaQueryKey: (id: string) => ["media", id],
-      useGetSession: () => ({ data: { user: { role: "publisher" } }, isLoading: false, isError: false }),
+      useGetSession: () => ({ data: { user: { role } }, isLoading: false, isError: false }),
       useListMedia: (params?: Record<string, unknown>, options?: { query?: MockQueryOptions }) => {
         const queryOptions = options?.query ?? {};
         const queryKey = queryOptions.queryKey ?? getListMediaQueryKey(params);
@@ -251,6 +253,77 @@ if (typeof moduleMock !== "function") {
   async function closeReview() {
     await React.act(async () => button(document.body, "Close").click());
   }
+
+  test("card actions stay ordered on a compact non-wrapping row without changing table sizing", async () => {
+    resetState();
+    const view = await renderLibrary();
+    try {
+      const review = reviewButton(view.container);
+      const download = button(view.container, "Download");
+      assert.equal(review.nextElementSibling, download);
+      assert.ok(review.parentElement?.classList.contains("flex-nowrap"));
+      assert.ok(review.parentElement?.classList.contains("items-center"));
+      for (const action of [review, download]) {
+        for (const token of ["h-8", "px-2", "gap-1.5", "shrink-0", "whitespace-nowrap"]) {
+          assert.ok(action.classList.contains(token), `card action needs ${token}`);
+        }
+        assert.ok(action.querySelector("svg"));
+      }
+      await React.act(async () => button(view.container, "List view").click());
+      for (const action of [reviewButton(view.container), button(view.container, "Download")]) {
+        assert.ok(action.parentElement?.classList.contains("flex-col"));
+        assert.ok(action.classList.contains("px-3"));
+        assert.ok(action.classList.contains("gap-2"));
+      }
+    } finally {
+      await view.unmount();
+    }
+  });
+
+  test("card downloads retain pending state and start the protected file download", async () => {
+    resetState();
+    let release!: (response: Response) => void;
+    const fetchMock = mock.method(globalThis, "fetch", () => new Promise<Response>((resolve) => { release = resolve; }));
+    const anchorClick = mock.method(dom.window.HTMLAnchorElement.prototype, "click", function (this: HTMLAnchorElement) {
+      assert.equal(this.getAttribute("href"), `/api/media/${sourceAsset.id}/download`);
+      assert.equal(this.download, sourceAsset.filename);
+    });
+    const view = await renderLibrary();
+    try {
+      const download = button(view.container, "Download");
+      await React.act(async () => download.click());
+      assert.equal(download.disabled, true);
+      assert.ok(download.querySelector("svg.animate-spin"));
+      assert.equal(download.textContent, "Download");
+      assert.equal(reviewButton(view.container).nextElementSibling, download);
+      await React.act(async () => download.click());
+      assert.equal(fetchMock.mock.callCount(), 1);
+      await React.act(async () => {
+        release(new Response(null, { status: 206 }));
+        await tick();
+      });
+      assert.equal(anchorClick.mock.callCount(), 1);
+      assert.equal(download.disabled, false);
+    } finally {
+      await view.unmount();
+      fetchMock.mock.restore();
+      anchorClick.mock.restore();
+    }
+  });
+
+  test("unavailable card downloads remain disabled and editors cannot review", async () => {
+    resetState();
+    role = "editor";
+    assets = [{ ...sourceAsset, publicUrl: "" }];
+    const view = await renderLibrary();
+    try {
+      assert.equal(button(view.container, "Download").disabled, true);
+      assert.equal([...view.container.querySelectorAll("button")].some((item) => item.textContent === "Review"), false);
+      assert.match(view.container.textContent ?? "", /Awaiting a publisher review/);
+    } finally {
+      await view.unmount();
+    }
+  });
 
   test("grid and list views open the review gates immediately", async () => {
     resetState();

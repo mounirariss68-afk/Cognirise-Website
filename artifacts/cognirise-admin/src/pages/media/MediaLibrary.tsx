@@ -723,11 +723,12 @@ export default function MediaLibrary() {
   const assetActions = (asset: ExtendedMediaAsset, compact = false) => {
     const downloadable = Boolean(asset.publicUrl) && ["review", "ready", "active"].includes(asset.status);
     return (
-      <div className={`flex ${compact ? "flex-col items-end" : "flex-wrap"} gap-2`}>
+      <div className={`flex ${compact ? "flex-col items-end" : "flex-nowrap items-center"} gap-2`}>
         {asset.status === "review" && canReview && (
           <Button
             variant="outline"
             size="sm"
+            className={compact ? undefined : "shrink-0 gap-1.5 px-2"}
             onClick={() => {
               if (reviewSubmitting.current) return;
               setReviewError(null);
@@ -743,6 +744,7 @@ export default function MediaLibrary() {
         <Button
           variant="outline"
           size="sm"
+          className={compact ? undefined : "shrink-0 gap-1.5 px-2"}
           disabled={!downloadable || downloadingAssetId === asset.id}
           onClick={() => handleDownload(asset)}
           aria-label={`Download ${asset.filename}`}
