@@ -2,8 +2,13 @@ import { Router, type IRouter } from "express";
 import { pool } from "@workspace/db";
 import {
   NAVIGATION_ITEM_REGISTRY,
+  NAVIGATION_ITEM_IDS,
   NavigationPolicySnapshotSchema,
   NavigationSettingsSchema,
+  isRetiredNavigationPagePath,
+  isActiveNavigationItemId,
+  parsePersistedNavigationPolicy,
+  RETIRED_NAVIGATION_PAGE_PATHS,
   UpdateNavigationSettingsSchema,
 } from "@workspace/api-zod";
 import {
@@ -142,7 +147,11 @@ async function settings(requestedMarket: string, requestedLocale: string, allowF
   const stored = new Map(rows.map((row) => [String(row.item_id), row]));
   const legacy = await pool.query(`SELECT id,COALESCE(visible,enabled) AS visible FROM cms_navigation_items`);
   const legacyVisibility = new Map(legacy.rows.map((row) => [String(row.id), Boolean(row.visible)]));
-  const pageMap = new Map(pages.map((row) => [String(row.path), Boolean(row.enabled)]));
+  const pageMap = new Map(
+    pages
+      .filter((row) => !isRetiredNavigationPagePath(String(row.path)))
+      .map((row) => [String(row.path), Boolean(row.enabled)]),
+  );
   const timestamps = [...rows, ...pages].map((row) => new Date(row.updated_at));
   return NavigationSettingsSchema.parse({
     items: NAVIGATION_ITEM_REGISTRY.map((item, order) => {
@@ -159,6 +168,7 @@ async function settings(requestedMarket: string, requestedLocale: string, allowF
       };
     }).sort((a, b) => a.order - b.order),
     pages: [...new Set([...defaultPages, ...pageMap.keys()])]
+      .filter((path) => !isRetiredNavigationPagePath(path))
       .map((path) => ({ path, enabled: pageMap.get(path) ?? true })),
     requestedMarket,
     requestedLocale,
@@ -266,8 +276,15 @@ router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, requir
           WHERE market=$1 AND locale=$2 ORDER BY path FOR UPDATE`,
         [market, locale],
       );
-    const releaseItems = items.rows.filter((item) => item.workflow_state === "in-review");
-    const releasePages = pages.rows.filter((page) => page.workflow_state === "in-review");
+    // Retired rows may remain in the editions table for audit/history. They
+    // are not part of a new publication and must not make a Work-only review
+    // appear publishable.
+    const releaseItems = items.rows.filter((item) =>
+      item.workflow_state === "in-review" && isActiveNavigationItemId(String(item.item_id))
+    );
+    const releasePages = pages.rows.filter((page) =>
+      page.workflow_state === "in-review" && !isRetiredNavigationPagePath(String(page.path))
+    );
     if (!releaseItems.length && !releasePages.length) {
       await client.query("ROLLBACK");
       res.status(409).json({ error: "Navigation must be submitted for review before publication." });
@@ -281,7 +298,7 @@ router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, requir
       [market, locale],
     );
     if (exactPublished.rowCount) {
-      baseline = NavigationPolicySnapshotSchema.parse(exactPublished.rows[0]);
+      baseline = parsePersistedNavigationPolicy(exactPublished.rows[0]);
     } else {
       const candidates = await navigationCandidates(market, locale);
       for (const candidate of candidates?.slice(1) ?? []) {
@@ -291,7 +308,7 @@ router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, requir
           [candidate.market, candidate.locale],
         );
         if (!fallbackPublished.rowCount) continue;
-        baseline = NavigationPolicySnapshotSchema.parse(fallbackPublished.rows[0]);
+        baseline = parsePersistedNavigationPolicy(fallbackPublished.rows[0]);
         break;
       }
     }
@@ -331,13 +348,15 @@ router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, requir
     );
     await client.query(
       `UPDATE cms_navigation_editions SET workflow_state='approved',updated_at=now()
-       WHERE market=$1 AND locale=$2 AND workflow_state='in-review'`,
-      [market, locale],
+       WHERE market=$1 AND locale=$2 AND workflow_state='in-review'
+         AND item_id = ANY($3::text[])`,
+      [market, locale, NAVIGATION_ITEM_IDS],
     );
     await client.query(
       `UPDATE cms_page_availability SET workflow_state='approved',updated_at=now()
-       WHERE market=$1 AND locale=$2 AND workflow_state='in-review'`,
-      [market, locale],
+       WHERE market=$1 AND locale=$2 AND workflow_state='in-review'
+         AND path <> ALL($3::text[])`,
+      [market, locale, RETIRED_NAVIGATION_PAGE_PATHS],
     );
     await client.query("COMMIT");
   } catch (error) {

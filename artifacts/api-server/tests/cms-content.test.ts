@@ -19,6 +19,7 @@ import {
   UpdateDocumentMarketAvailabilityBody,
   UpdateDocumentBody,
   UpdateNavigationSettingsSchema,
+  isCmsRetiredLandingPagePath,
   validateCmsContent,
   validateCmsSnapshot,
 } from "@workspace/api-zod";
@@ -213,7 +214,6 @@ test("all seeded landing revision envelopes open as editable drafts and remain b
     ["partners", "/partners", "Partners", "A partner model for governed delivery."],
     ["platforms", "/platforms", "Platforms", "Platforms that turn intelligence into operating leverage."],
     ["insights", "/insights", "Insights", "Evidence for the decisions that move the work."],
-    ["work", "/work", "Work", "Proof that complex work can move with control."],
   ] as const) {
     const snapshot = {
       slug, title, summary: narrative, markets: ["uae"], mediaIds: [],
@@ -231,6 +231,53 @@ test("all seeded landing revision envelopes open as editable drafts and remain b
     assert.equal(editable.success, true, editable.success ? undefined : editable.errors.join("; "));
     assert.equal(validateCmsSnapshot("landing-page", snapshot, "publish").success, false);
     if (editable.success) assert.equal(editable.data.content.pagePath, pagePath);
+  }
+});
+
+test("the retired /work overview is not a public landing route while case-study routes remain eligible", () => {
+  assert.equal(isCmsRetiredLandingPagePath("/work"), true);
+  assert.equal(cmsPublicRoute("landing-page", "work", {
+    ...governance,
+    pagePath: "/work",
+    template: "landing",
+    narrative: "Retired overview",
+    sections: [{
+      type: "cta",
+      id: "primary-action",
+      order: 0,
+      label: "Start",
+      href: "/contact",
+      style: "primary",
+    }],
+    seo: {},
+    legal: {},
+    visualReferences: [],
+  } as never), null);
+  assert.equal(cmsPublicRoute("case-study", "proof", {
+    ...governance,
+    variant: "full",
+    disclosure: "anonymized",
+  } as never), "/work/proof");
+  const retirement = validateCmsContent("landing-page", {
+    ...governance,
+    pagePath: "/work",
+    template: "landing",
+    narrative: "Retired overview",
+    sections: [{
+      type: "cta",
+      id: "primary-action",
+      order: 0,
+      label: "Start",
+      href: "/contact",
+      style: "primary",
+    }],
+    seo: {},
+    legal: {},
+    visualReferences: [],
+  }, "publish");
+  assert.equal(retirement.success, false);
+  if (!retirement.success) {
+    assert.ok(retirement.errors.some((error) => /retired/i.test(error)));
   }
 });
 

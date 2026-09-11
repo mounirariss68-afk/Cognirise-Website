@@ -1,8 +1,72 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { UpdateNavigationSettingsSchema } from "@workspace/api-zod";
+import {
+  NAVIGATION_ITEM_IDS,
+  NavigationPolicySnapshotSchema,
+  UpdateNavigationSettingsSchema,
+  parsePersistedNavigationPolicy,
+} from "@workspace/api-zod";
 import { isPublishedPageAvailable, publishedNavigationPolicy } from "../src/lib/navigation-policy";
 import { pool } from "@workspace/db";
+
+test("the active navigation registry retires Work without accepting new writes", () => {
+  assert.equal(NAVIGATION_ITEM_IDS.includes("work"), false);
+  assert.equal(UpdateNavigationSettingsSchema.safeParse({
+    market: "uae",
+    locale: "en",
+    pages: [],
+    items: [{
+      id: "work",
+      label: "Work",
+      parentId: null,
+      order: 0,
+      destination: "/work",
+      visible: true,
+    }],
+  }).success, false);
+});
+
+test("persisted policies drop only retired Work records and keep approved settings", () => {
+  const persisted = {
+    items: [
+      {
+        id: "platforms",
+        label: "Approved platforms",
+        parentId: null,
+        order: 0,
+        destination: "/platforms",
+        visible: false,
+      },
+      {
+        id: "work",
+        label: "Legacy Work",
+        parentId: null,
+        order: 1,
+        destination: "/work",
+        visible: true,
+      },
+    ],
+    pages: [
+      { path: "/platforms", enabled: false },
+      { path: "/work", enabled: false },
+      { path: "/work/customer-story", enabled: true },
+    ],
+  };
+  assert.equal(NavigationPolicySnapshotSchema.safeParse(persisted).success, false);
+  const parsed = parsePersistedNavigationPolicy(persisted);
+  assert.deepEqual(parsed.items, [{
+    id: "platforms",
+    label: "Approved platforms",
+    parentId: null,
+    order: 0,
+    destination: "/platforms",
+    visible: false,
+  }]);
+  assert.deepEqual(parsed.pages, [
+    { path: "/platforms", enabled: false },
+    { path: "/work/customer-story", enabled: true },
+  ]);
+});
 
 const base = {
   market: "ksa",
@@ -129,6 +193,43 @@ test("fallback market and locale policies suppress the same page everywhere", as
   assert.equal(policy?.locale, "en");
   assert.equal(policy?.usedFallback, true);
   assert.equal(await isPublishedPageAvailable("/platforms", "ksa", "ar"), false);
+});
+
+test("published policy compatibility removes legacy Work without losing approved decisions", async (t) => {
+  t.mock.method(pool, "query", async (sql: unknown) => {
+    if (String(sql).includes("FROM market_editions")) {
+      return {
+        rowCount: 1,
+        rows: [{
+          code: "uae", default_locale: "en", fallback_market_code: null,
+          fallback_locale: null, is_canonical: true,
+        }],
+      };
+    }
+    return {
+      rowCount: 1,
+      rows: [{
+        items: [
+          { id: "platforms", label: "Approved platforms", parentId: null, order: 0, destination: "/platforms", visible: false },
+          { id: "work", label: "Legacy Work", parentId: null, order: 1, destination: "/work", visible: true },
+        ],
+        pages: [
+          { path: "/platforms", enabled: false },
+          { path: "/work", enabled: false },
+          { path: "/work/customer-story", enabled: true },
+        ],
+        published_at: new Date(),
+      }],
+    };
+  });
+  const policy = await publishedNavigationPolicy("uae", "en");
+  assert.deepEqual(policy?.items.map((item) => item.id), ["platforms"]);
+  assert.deepEqual(policy?.pages, [
+    { path: "/platforms", enabled: false },
+    { path: "/work/customer-story", enabled: true },
+  ]);
+  assert.equal(await isPublishedPageAvailable("/work", "uae", "en"), true);
+  assert.equal(await isPublishedPageAvailable("/work/customer-story", "uae", "en"), true);
 });
 
 test("an unsupported published grandchild is surfaced instead of silently flattened", async (t) => {

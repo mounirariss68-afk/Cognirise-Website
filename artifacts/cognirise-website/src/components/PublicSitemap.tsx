@@ -15,7 +15,7 @@ export const STATIC_SITEMAP_PATHS = [
 ];
 
 export function mergeSitemapItems(items: Array<{ url: string }>, origin: string, unavailablePaths = new Set<string>()) {
-  const redirectPaths = new Set(["/services", "/what-we-do"]);
+   const redirectPaths = new Set(["/services", "/what-we-do", "/work", "/work/"]);
   const routableItems = items.filter((entry) => {
     const path = new URL(entry.url, origin).pathname;
     return path !== "/advisors" && !redirectPaths.has(path) && !unavailablePaths.has(path);

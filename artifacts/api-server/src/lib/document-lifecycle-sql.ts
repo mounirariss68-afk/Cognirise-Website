@@ -47,7 +47,10 @@ export const DELETE_DOCUMENT_SQL = `
 
 export const PUBLIC_KIND_CONFIGURATION_SQL = `
   WITH publication_history AS (
-    SELECT published_revision.payload->'content'->>'pagePath' page_path
+    SELECT COALESCE(
+             published_revision.payload->'content'->>'pagePath',
+             published_revision.payload->>'pagePath'
+           ) page_path
       FROM cms_audit_events publication_event
       JOIN cms_documents d
         ON d.id::text=publication_event.target_id
@@ -57,6 +60,17 @@ export const PUBLIC_KIND_CONFIGURATION_SQL = `
        AND publication_event.target_type='document'
        AND publication_event.action='document.published'
        AND COALESCE(publication_event.metadata->>'scheduled','false')='false'
+       AND (
+         d.kind<>'landing-page'
+         OR
+         COALESCE(
+           published_revision.payload->'content'->>'pagePath',
+           published_revision.payload->>'pagePath'
+         ) IS NULL OR COALESCE(
+           published_revision.payload->'content'->>'pagePath',
+           published_revision.payload->>'pagePath'
+         ) <> ALL (ARRAY['/work','/work/']::text[])
+       )
   )
   SELECT EXISTS (SELECT 1 FROM publication_history) AS is_configured,
     COALESCE(

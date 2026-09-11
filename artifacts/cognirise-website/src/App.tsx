@@ -51,7 +51,6 @@ import IndustryEnergy from "@/pages/IndustryEnergy";
 import IndustryPublicSector from "@/pages/IndustryPublicSector";
 import IndustryEducation from "@/pages/IndustryEducation";
 
-import WorkProof from "@/pages/WorkProof";
 import CaseStudyDetail from "@/pages/CaseStudyDetail";
 import InsightsEditorial from "@/pages/InsightsEditorial";
 import InsightArticle from "@/pages/InsightArticle";
@@ -82,6 +81,9 @@ export function Router() {
   // immutable navigation snapshot and supplies it to Shell; do not consult
   // the live public policy or page availability for this route.
   if (isPreview) return <CmsPreview />;
+  // Retirement takes precedence over stale availability or a failed policy fetch.
+  // Only the overview is retired; shareable full records keep their routes.
+  if (path === "/work" || path === "/work/") return <CanonicalRedirect to="/industries" />;
   const unavailable = policy.data?.isConfigured === true
     && policy.data.pages.some((page) => page.path === path && !page.enabled);
   if (policy.isPending) return <Shell><div aria-busy="true" className="min-h-[60vh]" /></Shell>;
@@ -160,7 +162,6 @@ export function Router() {
 
 
         {/* Work & Insights */}
-        <Route path="/work"><GovernedLandingRoute pagePath="/work" compiled={WorkProof} /></Route>
         <Route path="/work/:slug" component={CaseStudyDetail} />
         <Route path="/insights"><GovernedLandingRoute pagePath="/insights" compiled={InsightsEditorial} /></Route>
         <Route path="/insights/:slug" component={InsightArticle} />

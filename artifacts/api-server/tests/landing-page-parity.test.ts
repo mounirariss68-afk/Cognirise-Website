@@ -25,7 +25,6 @@ const expectedCounts = {
   "/partners": 16,
   "/platforms": 17,
   "/insights": 41,
-  "/work": 56,
   "/methodologies": 3,
 };
 
@@ -46,7 +45,7 @@ test("generated landing inventory is current and has every unique governed slot"
 });
 
 test("all generated landing envelopes pass the real draft validator", () => {
-  assert.equal(seeds.length, 7);
+  assert.equal(seeds.length, 6);
   for (const seed of seeds) {
     const result = validateCmsSnapshot("landing-page", seed.snapshot, "draft");
     assert.equal(result.success, true, result.success ? undefined : `${seed.path}: ${result.errors.join("; ")}`);

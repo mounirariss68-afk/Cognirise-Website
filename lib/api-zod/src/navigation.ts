@@ -24,7 +24,6 @@ export const NAVIGATION_ITEM_REGISTRY = [
   { id: "industries.travel", label: "Travel & Hospitality", parentId: "industries", destination: "/industries/travel-hospitality" },
   { id: "industries.energy", label: "Energy & Resources", parentId: "industries", destination: "/industries/energy-resources" },
   { id: "industries.manufacturing", label: "Manufacturing & Conglomerates", parentId: "industries", destination: "/industries/manufacturing" },
-  { id: "work", label: "Work", destination: "/work" },
   { id: "insights", label: "Insights", destination: "/insights" },
   { id: "about", label: "About", destination: "/about" },
   { id: "about.leadership", label: "Our Team", parentId: "about", destination: "/about" },
@@ -35,6 +34,24 @@ export const NAVIGATION_ITEM_REGISTRY = [
 
 export const NAVIGATION_ITEM_IDS = NAVIGATION_ITEM_REGISTRY.map((item) => item.id);
 const navigationId = z.enum(NAVIGATION_ITEM_IDS as [string, ...string[]]);
+
+// These identifiers are no longer part of the active menu, but can still be
+// present in a policy published before the corresponding route was retired.
+// Keep this list separate from NAVIGATION_ITEM_REGISTRY so new writes cannot
+// resurrect a retired item while old published snapshots remain readable.
+export const RETIRED_NAVIGATION_ITEM_IDS = ["work"] as const;
+export const RETIRED_NAVIGATION_PAGE_PATHS = ["/work", "/work/"] as const;
+
+const retiredNavigationItemIds = new Set<string>(RETIRED_NAVIGATION_ITEM_IDS);
+const retiredNavigationPagePaths = new Set<string>(RETIRED_NAVIGATION_PAGE_PATHS);
+
+export function isActiveNavigationItemId(id: string): id is (typeof NAVIGATION_ITEM_IDS)[number] {
+  return (NAVIGATION_ITEM_IDS as readonly string[]).includes(id);
+}
+
+export function isRetiredNavigationPagePath(path: string) {
+  return retiredNavigationPagePaths.has(path);
+}
 
 export const NavigationSettingSchema = z.object({
   id: navigationId,
@@ -125,6 +142,55 @@ export const NavigationPolicySnapshotSchema = z.object({
 }).strict().superRefine((value, context) => {
   validateNavigationHierarchy(value.items, context);
 });
+
+/**
+ * Policies are immutable snapshots, so removing an item from the active
+ * registry does not remove it from already-published JSON. Read those
+ * snapshots through this narrow compatibility boundary instead of weakening
+ * NavigationPolicySnapshotSchema (which validates all new writes).
+ *
+ * Retired overview pages are removed for the same reason: an old disabled
+ * `/work` decision must not make the replacement redirect look unavailable.
+ * Case-study detail paths below `/work/:slug` are deliberately preserved.
+ */
+export function normalizePersistedNavigationPolicy(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+
+  const record = value as Record<string, unknown>;
+  const items = Array.isArray(record.items)
+    ? record.items
+      .filter((item) => {
+        if (!item || typeof item !== "object" || Array.isArray(item)) return true;
+        const id = (item as Record<string, unknown>).id;
+        return typeof id !== "string" || !retiredNavigationItemIds.has(id);
+      })
+      .map((item) => {
+        if (!item || typeof item !== "object" || Array.isArray(item)) return item;
+        const normalized = { ...(item as Record<string, unknown>) };
+        if (typeof normalized.parentId === "string" && retiredNavigationItemIds.has(normalized.parentId)) {
+          normalized.parentId = null;
+        }
+        return normalized;
+      })
+    : record.items;
+  const pages = Array.isArray(record.pages)
+    ? record.pages.filter((page) => {
+      if (!page || typeof page !== "object" || Array.isArray(page)) return true;
+      const path = (page as Record<string, unknown>).path;
+      return typeof path !== "string" || !retiredNavigationPagePaths.has(path);
+    })
+    : record.pages;
+
+  return { ...record, items, pages };
+}
+
+export function parsePersistedNavigationPolicy(value: unknown) {
+  return NavigationPolicySnapshotSchema.parse(normalizePersistedNavigationPolicy(value));
+}
+
+export function safeParsePersistedNavigationPolicy(value: unknown) {
+  return NavigationPolicySnapshotSchema.safeParse(normalizePersistedNavigationPolicy(value));
+}
 
 export const UpdateNavigationSettingsSchema = z.object({
   items: z.array(UpdateNavigationSettingSchema).max(NAVIGATION_ITEM_IDS.length),

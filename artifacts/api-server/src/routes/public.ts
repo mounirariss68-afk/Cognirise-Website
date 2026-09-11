@@ -7,6 +7,7 @@ import {
   CMS_HERO_FILM_SLOTS,
   contactEmailConfigurationContentSchema,
   cmsPublicRoute,
+  isCmsRetiredLandingPagePath,
   type CmsHeroFilmSlot,
   type CmsContent,
   type CmsDocumentKind,
@@ -34,7 +35,11 @@ const PUBLIC_PAYLOAD_SQL = `(r.payload->>'visibility' IS NULL OR r.payload->>'vi
   AND (r.payload->>'confidential' IS NULL OR r.payload->>'confidential' NOT IN ('true','restricted'))
   AND (r.payload->'content'->>'confidential' IS NULL OR r.payload->'content'->>'confidential' NOT IN ('true','restricted'))
   AND (r.payload->'content'->>'disclosure' IS NULL OR r.payload->'content'->>'disclosure'<>'restricted')
-  AND (d.kind<>'case-study' OR r.payload->'content'->>'publicEvidenceStatus'='approved')`;
+  AND (d.kind<>'case-study' OR r.payload->'content'->>'publicEvidenceStatus'='approved')
+  AND NOT (
+    d.kind='landing-page'
+    AND COALESCE(r.payload->'content'->>'pagePath',r.payload->>'pagePath') IN ('/work','/work/')
+  )`;
 const publicLimiter = new SlidingWindowThrottle(240, 60_000);
 router.use(
   "/public",
@@ -44,6 +49,18 @@ router.use(
 class PublicContractError extends Error {}
 
 function publicSnapshot(row: Record<string, any>) {
+  if (
+    row.kind === "landing-page"
+    && row.payload
+    && typeof row.payload === "object"
+    && !Array.isArray(row.payload)
+  ) {
+    const content = row.payload.content;
+    const pagePath = content && typeof content === "object" && !Array.isArray(content)
+      ? content.pagePath ?? row.payload.pagePath
+      : row.payload.pagePath;
+    if (typeof pagePath === "string" && isCmsRetiredLandingPagePath(pagePath)) return null;
+  }
   if (!isPublicContentVisible(String(row.kind), row.payload)) return null;
   const validation = validateCmsSnapshot(row.kind as CmsDocumentKind, row.payload, "publish");
   if (!validation.success) return null;

@@ -69,6 +69,7 @@ test("public landing configuration reports publication history per page path", {
     }
     if (statement.includes("WITH selected AS")) return { rowCount: 0, rows: [] };
     if (statement.includes("configured_page_paths")) {
+      assert.match(statement, /pagePath[\s\S]*work/);
       return {
         rowCount: 1,
         rows: [{

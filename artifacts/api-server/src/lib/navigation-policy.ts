@@ -1,5 +1,5 @@
 import { pool } from "@workspace/db";
-import { NavigationPolicySnapshotSchema } from "@workspace/api-zod";
+import { safeParsePersistedNavigationPolicy } from "@workspace/api-zod";
 
 export type PolicyCandidate = { market: string; locale: string };
 
@@ -47,22 +47,22 @@ export async function publishedNavigationPolicy(market: string, locale: string) 
       [candidate.market, candidate.locale],
     );
     if (!result.rowCount || !result.rows[0]) continue;
-    const parsed = NavigationPolicySnapshotSchema.safeParse({
+    const parsed = safeParsePersistedNavigationPolicy({
       items: result.rows[0].items,
       pages: result.rows[0].pages,
     });
-    if (!parsed.success) {
-      throw new Error(`Published navigation policy is invalid: ${parsed.error.issues[0]?.message ?? "invalid hierarchy"}`);
+    if (parsed.success) {
+      return {
+        ...parsed.data,
+        market: candidate.market,
+        locale: candidate.locale,
+        requestedMarket: market,
+        requestedLocale: locale,
+        usedFallback: candidate.market !== market || candidate.locale !== locale,
+        publishedAt: result.rows[0].published_at,
+      };
     }
-    return {
-      ...parsed.data,
-      market: candidate.market,
-      locale: candidate.locale,
-      requestedMarket: market,
-      requestedLocale: locale,
-      usedFallback: candidate.market !== market || candidate.locale !== locale,
-      publishedAt: result.rows[0].published_at,
-    };
+    throw new Error(`Published navigation policy is invalid: ${parsed.error.issues[0]?.message ?? "invalid hierarchy"}`);
   }
   return null;
 }

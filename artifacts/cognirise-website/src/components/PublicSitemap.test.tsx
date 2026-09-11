@@ -26,4 +26,15 @@ test("the canonical methodology route is present in the static XML sitemap", asy
   assert.match(xml, /https:\/\/cognirise\.ai\/methodologies\/idao/);
   assert.match(xml, /https:\/\/cognirise\.ai\/methodologies\/ai-use-case-prioritization/);
   assert.doesNotMatch(xml, /https:\/\/cognirise\.ai\/what-we-do<\/loc>/);
+  assert.doesNotMatch(xml, /https:\/\/cognirise\.ai\/work\/?<\/loc>/);
+});
+
+test("retired Work overview is excluded without removing published full record URLs", () => {
+  const origin = "https://cognirise.ai";
+  const items = ["/work", "/work/", "/work?source=legacy#proof", "/work/full-record"]
+    .map((path) => ({ url: `${origin}${path}` }));
+  const merged = mergeSitemapItems(items, origin);
+  assert.deepEqual(merged.filter((item) => new URL(item.url).pathname.startsWith("/work")), [
+    { url: `${origin}/work/full-record` },
+  ]);
 });

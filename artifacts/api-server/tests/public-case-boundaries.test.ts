@@ -51,6 +51,38 @@ test("public case collection, detail, sitemap, and media enforce disclosure boun
     row("hidden-case", { ...governed, variant: "full", visibility: "hidden" }),
     row("review-case", { ...governed, variant: "full", publicEvidenceStatus: "needs-review" }),
     row("invalid-case", { ...governed, variant: "full", mandate: "" }),
+    {
+      id: "legacy-work-overview",
+      kind: "landing-page",
+      market: "uae",
+      locale: "en",
+      published_at: now,
+      updated_at: now,
+      localized_slug: "work",
+      revision_id: "legacy-work-revision",
+      revision_number: 1,
+      payload: {
+        slug: "work",
+        title: "Work",
+        summary: "Retired compiled overview",
+        markets: ["uae"],
+        mediaIds: [],
+        content: {
+          schemaVersion: 1,
+          pagePath: "/work",
+          template: "landing",
+          narrative: "Retired compiled overview",
+          sections: [{ type: "narrative", id: "legacy-slot", order: 0 }],
+          visibility: "public",
+          order: 0,
+          sources: [],
+          verificationDate: "2026-09-06",
+          reviewDate: "2027-03-06",
+          relatedIds: [],
+        },
+      },
+      requested_market: "uae",
+    },
   ];
 
   t.mock.method(pool, "query", async (sql: unknown, values?: unknown[]) => {
@@ -70,6 +102,7 @@ test("public case collection, detail, sitemap, and media enforce disclosure boun
     if (statement.includes("WITH selected AS")) {
       assert.match(statement, /r\.workflow_state='approved'/);
       assert.match(statement, /disclosure.*restricted/);
+      assert.match(statement, /pagePath.*work/);
       return { rowCount: rows.length, rows: rows.map((candidate) => ({ ...candidate, total_count: rows.length })) };
     }
     if (statement.includes("SELECT d.id,d.kind,e.market")) {
@@ -114,6 +147,7 @@ test("public case collection, detail, sitemap, and media enforce disclosure boun
   assert.equal((await fetch(`${origin}/api/public/content/uae/en/case-study/summary-case`)).status, 404);
   assert.equal((await fetch(`${origin}/api/public/content/uae/en/case-study/full-case`)).status, 200);
   assert.equal((await fetch(`${origin}/api/public/content/uae/en/case-study/restricted-case`)).status, 404);
+  assert.equal((await fetch(`${origin}/api/public/content/uae/en/landing-page/work`)).status, 404);
 
   const sitemap = await (await fetch(`${origin}/api/public/sitemap?market=uae`)).json() as {
     items: Array<{ url: string }>;

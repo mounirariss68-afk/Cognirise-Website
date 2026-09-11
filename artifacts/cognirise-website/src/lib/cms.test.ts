@@ -178,7 +178,7 @@ test("contact delivery keys requests by the selected runtime locale", () => {
 test("landing cutover is isolated to each page publication history", () => {
   const aboutOnly = ["/about"];
   assert.equal(governedLandingDelivery("cms", aboutOnly, "/about", true), "cms");
-  for (const path of ["/", "/partners", "/platforms", "/insights", "/work"]) {
+  for (const path of ["/", "/partners", "/platforms", "/insights"]) {
     assert.equal(governedLandingDelivery("cms", aboutOnly, path, false), "compiled-fallback");
   }
 

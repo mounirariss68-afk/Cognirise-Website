@@ -169,8 +169,14 @@ test("explicit null promotion survives save, reload, review, and publish", { con
         publishedPages = JSON.parse(String(values[3]));
       }
       if (statement.includes("SET workflow_state='approved'")) {
-        for (const row of rows.values()) if (row.workflow_state === "in-review") row.workflow_state = "approved";
-        for (const row of pageRows.values()) if (row.workflow_state === "in-review") row.workflow_state = "approved";
+        for (const row of rows.values()) {
+          if (row.workflow_state === "in-review" && row.item_id !== "work") row.workflow_state = "approved";
+        }
+        for (const row of pageRows.values()) {
+          if (row.workflow_state === "in-review" && row.path !== "/work" && row.path !== "/work/") {
+            row.workflow_state = "approved";
+          }
+        }
       }
       return { rowCount: 0, rows: [] };
     },
@@ -279,13 +285,27 @@ test("explicit null promotion survives save, reload, review, and publish", { con
   assert.equal(pageOnlyPublish.status, 200);
   assert.equal(publishedPages?.find((page) => page.path === "/faq")?.enabled, false);
 
+  // A snapshot from before the retirement may still contain Work. Publishing
+  // an unrelated approved change must reconcile that legacy record without
+  // reverting the already-published settings.
+  publishedItems = [
+    ...(publishedItems ?? []),
+    {
+      id: "work", label: "Legacy Work", parentId: null, order: 30,
+      destination: "/work", visible: true,
+    },
+  ];
+  publishedPages = [
+    ...(publishedPages ?? []),
+    { path: "/work", enabled: false },
+  ];
   const secondSave = await fetch(`${origin}/api/navigation`, {
     method: "PUT", headers,
     body: JSON.stringify({
       market: "uae", locale: "en", pages: [],
       items: [{
-        id: "work", label: "Reviewed work", parentId: null, order: 30,
-        destination: "/work", visible: true,
+        id: "about", label: "Reviewed about", parentId: null, order: 30,
+        destination: "/about", visible: true,
       }],
     }),
   });
@@ -294,9 +314,13 @@ test("explicit null promotion survives save, reload, review, and publish", { con
     method: "POST", headers, body: JSON.stringify({ market: "uae", locale: "en" }),
   });
   assert.equal(secondReview.status, 200);
-  rows.set("about", {
-    item_id: "about", label: "Unreviewed about", parent_id: null, sort_order: 31,
-    destination: "/about", visible: false, workflow_state: "draft", updated_at: now,
+  rows.set("insights", {
+    item_id: "insights", label: "Unreviewed insights", parent_id: null, sort_order: 31,
+    destination: "/insights", visible: false, workflow_state: "draft", updated_at: now,
+  });
+  rows.set("work", {
+    item_id: "work", label: "Legacy reviewed Work", parent_id: null, sort_order: 32,
+    destination: "/work", visible: true, workflow_state: "in-review", updated_at: now,
   });
   const secondPublish = await fetch(`${origin}/api/navigation/publish`, {
     method: "POST", headers, body: JSON.stringify({ market: "uae", locale: "en" }),
@@ -316,6 +340,8 @@ test("explicit null promotion survives save, reload, review, and publish", { con
   );
   assert.equal(secondBody.pages.find((page) => page.path === "/platforms/cognios")?.enabled, false);
   assert.equal(secondBody.pages.find((page) => page.path === "/faq")?.enabled, false);
-  assert.equal(secondBody.items.find((item) => item.id === "work")?.label, "Reviewed work");
-  assert.equal(secondBody.items.find((item) => item.id === "about")?.label, "About");
+  assert.equal(secondBody.pages.some((page) => page.path === "/work"), false);
+  assert.equal(secondBody.items.some((item) => item.id === "work"), false);
+  assert.equal(secondBody.items.find((item) => item.id === "about")?.label, "Reviewed about");
+  assert.equal(secondBody.items.find((item) => item.id === "insights")?.label, "Insights");
 });

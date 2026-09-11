@@ -112,10 +112,6 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: "Education AI | K–12 & Higher Education | Cognirise",
     description: "Build shared AI capability across schools, universities and education authorities: better learning, stronger educators and researchers, and responsible service redesign.",
   },
-  "/work": {
-    title: "How Cognirise Delivers AI Transformation",
-    description: "See how Cognirise frames, builds and governs consequential AI transformation work without hiding behind theatre.",
-  },
   "/insights": {
     title: "AI Transformation Insights | Cognirise",
     description: "Field notes for leaders building AI-native organisations across strategy, architecture, governance and operations.",
@@ -151,11 +147,11 @@ const ownPlatformPaths = new Set(["/platforms/cognios", "/platforms/cognidocs", 
 const partnerPlatformPaths = new Set(["/platforms/lupitor", "/platforms/datatoolpack", "/platforms/bunjee-ai"]);
 
 export const groupPlatformNavigation = (items: NavigationItem[]): NavigationItem[] =>
-  items.map((item) => item.id !== "platforms" && routePath(item.href) !== "/platforms"
-    ? item
+  items.filter((item) => item.id !== "work" && !/^\/work\/?$/.test(routePath(item.href))).map((item) => item.id !== "platforms" && routePath(item.href) !== "/platforms"
+    ? { ...item, items: item.items ? groupPlatformNavigation(item.items) : undefined }
     : {
         ...item,
-        items: item.items
+        items: (item.items ? groupPlatformNavigation(item.items) : undefined)
           ?.filter((child) => routePath(child.href) !== "/platforms/cognios/architecture" && !child.href.includes("#architecture"))
           .map((child) => {
             const path = routePath(child.href);
@@ -220,7 +216,6 @@ const compiledNavigation: NavigationItem[] = [
       { id: "industries.education", label: "Education", href: "/industries/education" },
     ]
   },
-  { id: "work", label: "Work", href: "/work" },
   { id: "insights", label: "Insights", href: "/insights" },
   {
     id: "about",
@@ -707,7 +702,6 @@ export function Shell({
                 <li><Link href="/industries" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Industries</Link></li>
                 <li><Link href="/methodologies/idao" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">IDAO methodology</Link></li>
                 <li><Link href="/methodologies/agent-authority-model" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Agent Authority Model</Link></li>
-                <li><Link href="/work" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Work</Link></li>
               </ul>
             </div>
 

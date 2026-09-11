@@ -5,10 +5,20 @@ import { readFileSync } from "node:fs";
 const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 const boundary = readFileSync(new URL("../components/GovernedLandingRoute.tsx", import.meta.url), "utf8");
 
+test("Work overview redirects before policy gates and full records retain their route", () => {
+  const redirect = 'if (path === "/work" || path === "/work/") return <CanonicalRedirect to="/industries" />';
+  assert.ok(app.includes(redirect));
+  assert.ok(app.indexOf(redirect) < app.indexOf("const unavailable"));
+  assert.ok(app.indexOf(redirect) < app.indexOf("if (policy.isPending)"));
+  assert.match(app, /search \? `\$\{to\}\?\$\{search\}` : to/);
+  assert.match(app, /<Route path="\/work\/:slug" component=\{CaseStudyDetail\}/);
+  assert.doesNotMatch(app, /WorkProof/);
+});
+
 test("all compiled collection landings pass explicitly through the governed boundary", () => {
   for (const [path, component] of [
     ["/about", "AboutPeople"], ["/partners", "Partners"], ["/platforms", "PlatformsOverview"],
-    ["/insights", "InsightsEditorial"], ["/work", "WorkProof"],
+    ["/insights", "InsightsEditorial"],
   ]) {
     assert.match(app, new RegExp(`<GovernedLandingRoute pagePath="${path}" compiled=\\{${component}\\}`));
     assert.doesNotMatch(app, new RegExp(`<Route path="${path}" component=\\{${component}\\}`));
@@ -30,7 +40,7 @@ test("configured CMS wins and only explicitly unconfigured delivery renders comp
 });
 
 test("each approved compiled template consumes the governed landing context in place", () => {
-  for (const component of ["AboutPeople", "Partners", "PlatformsOverview", "InsightsEditorial", "WorkProof"]) {
+  for (const component of ["AboutPeople", "Partners", "PlatformsOverview", "InsightsEditorial"]) {
     const source = readFileSync(new URL(`./${component}.tsx`, import.meta.url), "utf8");
     assert.match(source, /useGovernedLanding\(\)/);
     assert.match(source, /landingNarrative\(governedLanding, "hero"\)|landingText\(governedLanding, "[^"]+-hero-heading"/);

@@ -21,6 +21,14 @@ export const cmsDocumentKinds = ["person", "partner", "platform", "publication",
 export type CmsDocumentKind = (typeof cmsDocumentKinds)[number];
 export type CmsValidationMode = "draft" | "publish";
 
+/**
+ * The compiled /work overview was retired in favour of individually governed
+ * case-study routes. Keep this explicit rather than relying on the generated
+ * slot contract alone: old published revisions can outlive the source
+ * inventory, and must remain readable in the CMS without becoming public
+ * landing delivery.
+ */
+export const CMS_RETIRED_LANDING_PAGE_PATHS = ["/work", "/work/"] as const;
 export function initialCmsContent(kind: CmsDocumentKind): CmsContent {
   if (kind === "framework") {
     return {
@@ -712,6 +720,9 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   }
   if (kind === "landing-page") {
     const landing = value as LandingPageContent;
+    if (isCmsRetiredLandingPagePath(landing.pagePath)) {
+      errors.push(`Landing page "${landing.pagePath}" is retired and cannot be published.`);
+    }
     if (!landing.sections.length) errors.push("At least one governed page section is required.");
     if (new Set(landing.sections.map((section) => section.id)).size !== landing.sections.length) {
       errors.push("Landing page section ids must be unique.");
@@ -928,7 +939,10 @@ export function cmsPublicRoute(kind: CmsDocumentKind, slug: string, content: Cms
   if (kind === "publication") return `/insights/${slug}`;
   if (kind === "industry") return `/industries/${slug}`;
   if (kind === "framework") return `/methodologies/${slug}`;
-  if (kind === "landing-page") return (content as LandingPageContent).pagePath;
+  if (kind === "landing-page") {
+    const path = (content as LandingPageContent).pagePath;
+    return isCmsRetiredLandingPagePath(path) ? null : path;
+  }
   const caseStudy = content as CaseStudyContent;
   return caseStudy.variant === "full" && caseStudy.disclosure !== "restricted"
     ? `/work/${slug}`
@@ -1022,4 +1036,10 @@ export function validateCmsDraftMetadata(input: unknown) {
           (issue) => `${issue.path.join(".") || "document"}: ${issue.message}`,
         ),
       };
+}
+
+export type CmsRetiredLandingPagePath = (typeof CMS_RETIRED_LANDING_PAGE_PATHS)[number];
+
+export function isCmsRetiredLandingPagePath(path: string): path is CmsRetiredLandingPagePath {
+  return (CMS_RETIRED_LANDING_PAGE_PATHS as readonly string[]).includes(path);
 }

@@ -24,3 +24,11 @@ Build partial navigation or availability releases by overlaying reviewed changes
 **Why:** Reconstructing a release from a partial review can silently erase unrelated live restrictions, labels, hierarchy, or visibility decisions.
 
 **How to apply:** Lock the live snapshot, overlay only the current reviewed changes, validate the complete resulting policy, and publish it atomically. Unreviewed drafts must never enter the replacement snapshot.
+
+## Retiring a landing without deleting its history
+
+Prefer explicit delivery-time retirement over mutating historical publication state when a route is removed but editorial history and shared assets must remain.
+
+**Why:** A retired overview can share a URL prefix and media with still-public detail records. Archiving by slug alone can affect unrelated content, while changing old migrations does not reconcile existing installations.
+
+**How to apply:** Match the exact retired landing path in the selected immutable payload across public collection, detail, sitemap, configuration, and media eligibility. Keep detail routes and shared-media eligibility independent; normalize legacy navigation on read without publishing draft settings.
