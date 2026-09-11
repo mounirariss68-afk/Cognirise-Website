@@ -128,6 +128,8 @@ test("the governed inventory produces six publishable industry cutover records i
     operation.idempotencyKey.startsWith(
       operation.slug === "financial-services"
         ? "cms-industry-contract-v12:"
+        : operation.slug === "education"
+          ? "cms-industry-education-successor-v10:"
         : "cms-industry-contract-v8:",
     )
   ));

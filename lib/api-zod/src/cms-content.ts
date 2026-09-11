@@ -14,6 +14,7 @@ import {
   type GovernedLandingPagePath,
   type GovernedLandingSlotType,
 } from "./landing-page-slots.generated";
+import { projectIndustrySnapshotForMarket } from "./industry-market-projection";
 
 export const CMS_CONTRACT_VERSION = 1 as const;
 export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study", "industry", "framework", "office", "site-configuration", "landing-page"] as const;
@@ -259,34 +260,97 @@ const industrySourceSchema = z.object({
   kind: z.enum(["Official source", "Independent study", "Company-reported", "Vendor claim"]),
   url: safeExternalUrl,
   accessedAt: optionalDate,
+  market: z.enum(["uae", "ksa", "turkiye", "europe"]).optional(),
 }).strict();
 
-const titledBodySchema = z.object({
+const titledBodyShape = {
   title: z.string().trim().min(1).max(160),
   body: z.string().trim().min(1).max(1_000),
+};
+
+const titledBodySchema = z.object(titledBodyShape).strict();
+const educationTitledBodySchema = z.object({
+  ...titledBodyShape,
+  market: z.enum(["uae", "ksa", "turkiye", "europe"]).optional(),
 }).strict();
 
-const educationPovSchema = z.object({
-  convictions: z.array(titledBodySchema).length(5),
+const educationMarketSchema = z.enum(["uae", "ksa", "turkiye", "europe"]);
+const educationSignalShape = {
+  institution: z.string().trim().min(1).max(120),
+  signal: z.string().trim().min(1).max(500),
+  implication: z.string().trim().min(1).max(500),
+  sourceUrls: z.array(safeExternalUrl).min(1).max(4),
+};
+const educationApplicationItemShape = {
+  title: z.string().trim().min(1).max(160),
+  body: z.string().trim().min(1).max(2_000),
+  market: educationMarketSchema.optional(),
+};
+const legacyEducationApplicationsSchema = z.array(z.object({
+  title: z.string().trim().min(1).max(160),
+  items: z.array(z.object({
+    ...educationApplicationItemShape,
+    sourceUrls: z.array(safeExternalUrl),
+  }).strict()),
+}).strict());
+const educationApplicationsV2Schema = z.array(z.object({
+  title: z.string().trim().min(1).max(160),
+  items: z.array(z.object({
+    ...educationApplicationItemShape,
+    sourceUrls: z.array(safeExternalUrl).min(1).max(4),
+  }).strict()).min(1).max(12),
+}).strict()).min(1).max(6);
+const educationRoadmapSchema = z.array(z.object({
+  horizon: z.string().trim().min(1).max(80),
+  title: z.string().trim().min(1).max(160),
+  body: z.string().trim().min(1).max(1_000),
+}).strict()).length(3);
+
+const legacyEducationPovSchema = z.object({
+  version: z.undefined().optional(),
+  introduction: z.string().trim().max(4_000).optional(),
+  strategicShift: z.string().trim().max(4_000).optional(),
+  patternQuote: z.string().trim().max(2_000).optional(),
+  globalDirection: z.string().trim().max(4_000).optional(),
+  convictions: z.array(educationTitledBodySchema).length(5),
   valueDomains: z.array(z.object({
     title: z.string().trim().min(1).max(160),
     body: z.string().trim().min(1).max(2_000),
     examples: z.array(z.string().trim().min(1).max(500)).min(1).max(6),
   }).strict()).length(3),
+  applications: legacyEducationApplicationsSchema.optional(),
   signals: z.array(z.object({
-    institution: z.string().trim().min(1).max(120),
-    signal: z.string().trim().min(1).max(500),
-    implication: z.string().trim().min(1).max(500),
-    sourceUrls: z.array(safeExternalUrl).min(1).max(4),
+    ...educationSignalShape,
+    market: educationMarketSchema.optional(),
   }).strict()).min(6).max(10),
   targetState: z.array(titledBodySchema).length(6),
-  roadmap: z.array(z.object({
-    horizon: z.string().trim().min(1).max(80),
-    title: z.string().trim().min(1).max(160),
-    body: z.string().trim().min(1).max(1_000),
-  }).strict()).length(3),
+  roadmap: educationRoadmapSchema,
   leadershipTest: z.string().trim().min(1).max(1_000),
 }).strict();
+
+const educationPovV2Schema = z.object({
+  version: z.literal(2),
+  introduction: z.string().trim().min(1).max(4_000),
+  strategicShift: z.string().trim().min(1).max(4_000),
+  patternQuote: z.string().trim().min(1).max(2_000),
+  globalDirection: z.string().trim().min(1).max(4_000),
+  convictions: z.array(educationTitledBodySchema).length(5),
+  valueDomains: z.array(z.object({
+    title: z.string().trim().min(1).max(160),
+    body: z.string().trim().min(1).max(2_000),
+    examples: z.array(z.string().trim().min(1).max(500)).max(6),
+  }).strict()).length(5),
+  applications: educationApplicationsV2Schema,
+  signals: z.array(z.object({
+    ...educationSignalShape,
+    market: educationMarketSchema.optional(),
+  }).strict()).min(1).max(10),
+  targetState: z.array(titledBodySchema).length(7),
+  roadmap: educationRoadmapSchema,
+  leadershipTest: z.string().trim().min(1).max(1_000),
+}).strict();
+
+const educationPovSchema = z.union([legacyEducationPovSchema, educationPovV2Schema]);
 
 export const industryContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
@@ -339,7 +403,32 @@ export const industryContentSchema = z.object({
   visibility: z.enum(["public", "hidden", "restricted"]).default("public"),
   order: z.number().int().min(0).max(10_000).default(0),
   relatedIds: idList,
-}).strict();
+}).strict().superRefine((value, context) => {
+  if (value.educationPov?.version !== 2) return;
+  const sourceTrail = new Set(value.sources.map((source) => source.url));
+  const associations = [
+    ...value.educationPov.signals.flatMap((signal, index) =>
+      signal.sourceUrls.map((url, sourceIndex) => ({
+        url,
+        path: ["educationPov", "signals", index, "sourceUrls", sourceIndex],
+      }))),
+    ...(value.educationPov.applications ?? []).flatMap((group, groupIndex) =>
+      group.items.flatMap((item, itemIndex) =>
+        item.sourceUrls.map((url, sourceIndex) => ({
+          url,
+          path: ["educationPov", "applications", groupIndex, "items", itemIndex, "sourceUrls", sourceIndex],
+        })))),
+  ];
+  for (const association of associations) {
+    if (!sourceTrail.has(association.url)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: association.path,
+        message: "Source URL must match a URL in the industry source trail.",
+      });
+    }
+  }
+});
 
 const frameworkExampleSchema = z.object({
   sector: z.string().trim().min(1).max(160),
@@ -692,7 +781,7 @@ export type CmsCollectedMediaReference = {
   role?: CmsMediaReferenceContract["role"];
   altText?: string;
 };
-export function validateCmsSnapshot(
+function validateCmsSnapshotStructure(
   kind: CmsDocumentKind,
   input: unknown,
   mode: CmsValidationMode = "draft",
@@ -730,6 +819,92 @@ export function validateCmsSnapshot(
     success: true as const,
     data: { ...snapshot.data, content: content.data, mediaIds: [...mediaIds] },
   };
+}
+
+/**
+ * Validates one already-projected delivery derivative without attempting to
+ * derive further markets. Public and preview delivery use this boundary after
+ * applying their requested market projection.
+ */
+export function validateCmsSnapshotForDelivery(
+  kind: CmsDocumentKind,
+  input: unknown,
+  mode: CmsValidationMode = "publish",
+) {
+  if (kind === "industry" && mode === "publish") {
+    const snapshot = cmsSnapshotSchema.safeParse(input);
+    const snapshotData = snapshot.success ? snapshot.data : null;
+    const content = snapshotData
+      && snapshotData.content
+      && typeof snapshotData.content === "object"
+      && !Array.isArray(snapshotData.content)
+      ? snapshotData.content as Record<string, unknown>
+      : null;
+    const pov = content?.educationPov;
+    if (
+      content
+      && snapshotData
+      && (snapshotData.slug === "education" || content.name === "Education")
+      && pov
+      && typeof pov === "object"
+      && !Array.isArray(pov)
+      && (pov as Record<string, unknown>).version !== 2
+    ) {
+      // A legacy source revision was fully validated before publication. Its
+      // leak-safe derivative can have historical cardinalities reduced by
+      // filtering; keep that already-published content readable.
+      const references = collectCmsMediaReferences(kind, content, snapshotData.mediaIds);
+      return {
+        success: true as const,
+        data: {
+          ...snapshotData,
+          content: content as IndustryContent,
+          mediaIds: [...new Set(references.map((reference) => reference.mediaId))],
+        },
+      };
+    }
+  }
+  return validateCmsSnapshotStructure(kind, input, mode);
+}
+
+const EDUCATION_DELIVERY_MARKETS = ["uae", "ksa", "turkiye", "europe"] as const;
+
+function educationDerivativeErrors(snapshot: z.infer<typeof cmsSnapshotSchema>): string[] {
+  const content = snapshot.content as IndustryContent;
+  if (content.educationPov?.version !== 2) return [];
+  // The UAE edition is canonical and can serve every governed fallback market.
+  // Exact non-UAE editions serve only the markets explicitly declared by their
+  // snapshot.
+  const markets = snapshot.markets.includes("uae")
+    ? [...EDUCATION_DELIVERY_MARKETS]
+    : EDUCATION_DELIVERY_MARKETS.filter((market) => snapshot.markets.includes(market));
+  const editionMarket = snapshot.markets.includes("uae") ? "uae" : snapshot.markets[0];
+  return markets.flatMap((market) => {
+    try {
+      const derivative = projectIndustrySnapshotForMarket(snapshot, market, editionMarket);
+      const validation = validateCmsSnapshotForDelivery("industry", derivative, "publish");
+      return validation.success
+        ? []
+        : validation.errors.map((error) => `Education ${market} delivery: ${error}`);
+    } catch (error) {
+      return [
+        `Education ${market} delivery: ${error instanceof Error ? error.message : "market projection failed."}`,
+      ];
+    }
+  });
+}
+
+export function validateCmsSnapshot(
+  kind: CmsDocumentKind,
+  input: unknown,
+  mode: CmsValidationMode = "draft",
+) {
+  const source = validateCmsSnapshotStructure(kind, input, mode);
+  if (!source.success || mode !== "publish" || kind !== "industry") return source;
+  const errors = educationDerivativeErrors(source.data);
+  return errors.length
+    ? { success: false as const, errors }
+    : source;
 }
 
 export function cmsPublicRoute(kind: CmsDocumentKind, slug: string, content: CmsContent): string | null {

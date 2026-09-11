@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
 import { useRoute } from "wouter";
-import { type CmsDocumentKind, type FrameworkContent, type OfficeContent, validateCmsSnapshot } from "@workspace/api-zod";
+import { type CmsDocumentKind, type FrameworkContent, type IndustryContent, type OfficeContent, validateCmsSnapshot } from "@workspace/api-zod";
 import NotFound from "@/pages/not-found";
 import { applyMetadata } from "@/lib/metadata";
 import { AgentAuthorityLayout } from "@/pages/AgentAuthorityModel";
-import type { CmsRecord } from "@/lib/cms";
+import { resolveCmsMedia, type CmsRecord } from "@/lib/cms";
 import { normalizeFrameworkPreviewContent } from "@/lib/framework-preview";
 import { OfficeContactCard } from "@/components/OfficeContactCard";
+import { EducationEditorialView } from "@/components/industries/EducationEditorial";
 import { Shell, type PreviewNavigationSnapshot } from "@/components/layout/Shell";
+import type { Market } from "@/store/market";
 
 type Preview = {
   kind: CmsDocumentKind;
   document: Record<string, any>;
   market: string;
   locale: string;
+  requestedMarket: string;
+  requestedLocale: string;
   revisionId: string;
   revisionNumber: number;
   usedFallback: boolean;
@@ -22,6 +26,26 @@ type Preview = {
   validationWarnings: string[];
   navigation: PreviewNavigationSnapshot;
 };
+
+function educationPreviewContent(snapshot: Record<string, any> | null): IndustryContent | null {
+  const content = snapshot?.content;
+  const pov = content?.educationPov;
+  if (
+    !content
+    || typeof content !== "object"
+    || !pov
+    || typeof pov !== "object"
+    || !Array.isArray(pov.convictions)
+    || !Array.isArray(pov.valueDomains)
+    || !Array.isArray(pov.signals)
+    || !Array.isArray(pov.targetState)
+    || !Array.isArray(pov.roadmap)
+    || !Array.isArray(content.sources)
+    || !content.service
+    || typeof content.service !== "object"
+  ) return null;
+  return content as IndustryContent;
+}
 
 function Content({ value }: { value: Record<string, any> }) {
   const rows = Object.entries(value).filter(([key]) => !["schemaVersion", "sources", "relatedIds", "order", "visibility"].includes(key));
@@ -82,6 +106,25 @@ export default function CmsPreview() {
         updatedAt: "",
       } as CmsRecord<FrameworkContent>
     : null;
+  // Market projection can legitimately remove every market-specific application
+  // from a group, so preview rendering uses a conservative structural guard
+  // rather than requiring the projected derivative to satisfy publish counts.
+  const educationContent = preview.kind === "industry"
+    ? educationPreviewContent(rawSnapshot)
+    : null;
+  const educationHero = educationContent
+    ? resolveCmsMedia(preview.media, educationContent.heroMedia, educationContent.heroMediaId)
+    : undefined;
+  const education = educationContent && educationHero
+    ? {
+        ...educationContent,
+        image: educationHero.url,
+        imageAlt: educationContent.heroMedia?.altText ?? educationHero.altText ?? educationContent.imageAlt,
+      }
+    : educationContent;
+  const educationMarket = ["uae", "ksa", "turkiye", "europe"].includes(preview.requestedMarket)
+    ? preview.requestedMarket as Market
+    : undefined;
 
   if (preview.kind === "framework" && framework) {
     return (
@@ -118,6 +161,24 @@ export default function CmsPreview() {
           </div>
         </section>
       </main>
+    );
+  }
+
+  if (education && educationMarket) {
+    return (
+      <Shell navigationOverride={preview.navigation}>
+        <header className="sticky top-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-3 text-amber-950 sm:px-6 sm:py-4">
+          <div className="mx-auto flex max-w-[1100px] flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
+            <strong>Protected draft preview — not published</strong>
+            <span className="font-mono text-[10px] uppercase sm:text-xs">{preview.requestedMarket} / {preview.requestedLocale} · revision {preview.revisionNumber}{preview.usedFallback ? " · fallback" : ""}</span>
+          </div>
+        </header>
+        {warningPanel}
+        <EducationEditorialView
+          view={education as Parameters<typeof EducationEditorialView>[0]["view"]}
+          marketOverride={educationMarket}
+        />
+      </Shell>
     );
   }
 

@@ -10,12 +10,14 @@ import {
   CreateDocumentEditionOverrideBody,
   ListDocumentsQueryParams,
   PublishDocumentBody,
+  projectIndustrySnapshotForMarket,
   RejectDocumentRevisionBody,
   RollbackDocumentBody,
   SubmitDocumentBody,
   UpdateDocumentBody,
   isCmsConfigurationIdentityValid,
   validateCmsSnapshot,
+  validateCmsSnapshotForDelivery,
 } from "@workspace/api-zod";
 import {
   authenticate,
@@ -66,6 +68,17 @@ export function previewMediaIds(payload: unknown): string[] {
     Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds.filter((value): value is string => typeof value === "string") : [],
   ).map((reference) => reference.mediaId);
   return [...new Set(candidates.filter((value): value is string => typeof value === "string" && UUID.test(value)))].slice(0, 50);
+}
+
+export function projectPreviewDocument(
+  kind: CmsDocumentKind,
+  payload: unknown,
+  requestedMarket: string,
+  editionMarket: string,
+) {
+  return kind === "industry"
+    ? projectIndustrySnapshotForMarket(payload, requestedMarket, editionMarket)
+    : payload;
 }
 
 function mapDocument(row: Record<string, any>) {
@@ -1909,8 +1922,20 @@ router.get(
       res.status(403).json({ error: "You are not assigned to this preview market." });
       return;
     }
-    const validation = validateSnapshot(row.kind, row.payload, "draft");
-    const mediaIds = validation.success ? validation.data.mediaIds : previewMediaIds(row.payload);
+    const requestedMarket = String(row.requested_market ?? row.market);
+    const editionMarket = String(row.market);
+    const projectedDocument = projectPreviewDocument(
+      row.kind as CmsDocumentKind,
+      row.payload,
+      requestedMarket,
+      editionMarket,
+    );
+    const validation = validateCmsSnapshotForDelivery(
+      row.kind as CmsDocumentKind,
+      projectedDocument,
+      "draft",
+    );
+    const mediaIds = validation.success ? validation.data.mediaIds : previewMediaIds(projectedDocument);
     const availableMedia = mediaIds.length ? await pool.query(
       `SELECT a.id,v.id version_id,v.width,v.height,v.metadata,
           a.media_type,a.alt_text,a.credit
@@ -1930,7 +1955,7 @@ router.get(
     const availableIds = new Set(availableMedia.rows.map((asset) => String(asset.id)));
     res.json({
       kind: row.kind,
-      document: row.payload,
+      document: projectedDocument,
       market: row.market,
       locale: row.locale,
       requestedMarket: row.requested_market ?? row.market,

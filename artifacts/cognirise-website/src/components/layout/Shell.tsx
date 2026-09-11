@@ -109,8 +109,8 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     description: "An evidence-led view of governed public-sector AI, accessible services, accountability and sovereign delivery.",
   },
   "/industries/education": {
-    title: "Education AI | Evidence-Led Industry View | Cognirise",
-    description: "An evidence-led view of AI in education, centred on learning evidence, learner protections and educator judgment.",
+    title: "Education AI | K–12 & Higher Education | Cognirise",
+    description: "Build shared AI capability across schools, universities and education authorities: better learning, stronger educators and researchers, and responsible service redesign.",
   },
   "/work": {
     title: "How Cognirise Delivers AI Transformation",

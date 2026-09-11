@@ -7,6 +7,8 @@ import {
   repositoryRoot,
 } from "./common.js";
 import {
+  canonicalResultDigest,
+  EDUCATION_SUCCESSOR_SEO,
   historicalMediaReceipts,
   mediaMigrationOperations,
   migrationOperations,
@@ -17,6 +19,7 @@ import { validateCmsSnapshot } from "@workspace/api-zod";
 import { mapWithConcurrency } from "./media-reconciliation.js";
 import { objectStorageClient } from "./object-storage.js";
 import {
+  educationReconciliationOutcome,
   inspectReceiptCoverage,
   requiresPublishedCaseSnapshot,
   toleratesDocumentReceiptDigestDrift,
@@ -88,9 +91,16 @@ async function inspectReconciliationState(
     requestDigest: cmsOperationReceiptsTable.requestDigest,
     subjectId: cmsOperationReceiptsTable.subjectId,
     operation: cmsOperationReceiptsTable.operation,
+    resultDigest: cmsOperationReceiptsTable.resultDigest,
   }).from(cmsOperationReceiptsTable);
   const coverage = inspectReceiptCoverage(expected, receipts);
   const { conflicts, missingCount, relevantReceipts } = coverage;
+  const invalid = [...coverage.invalid];
+  const educationOutcomes: Array<{
+    idempotencyKey: string;
+    status: string;
+    message: string;
+  }> = [];
 
   const documentIds: string[] = [];
   const mediaIds: string[] = [];
@@ -98,6 +108,99 @@ async function inspectReconciliationState(
     const operation = expected.get(receipt.idempotencyKey)!;
     if (operation.subjectType === "document") documentIds.push(receipt.subjectId);
     else mediaIds.push(receipt.subjectId);
+  }
+
+  for (const receipt of relevantReceipts) {
+    const expectation = expected.get(receipt.idempotencyKey);
+    if (!expectation?.publishEducationSuccessor) continue;
+    const [edition] = await db.select({
+      id: cmsMarketEditionsTable.id,
+      publicationState: cmsMarketEditionsTable.publicationState,
+      publishedRevisionId: cmsMarketEditionsTable.publishedRevisionId,
+    }).from(cmsMarketEditionsTable).where(and(
+      eq(cmsMarketEditionsTable.documentId, receipt.subjectId),
+      eq(cmsMarketEditionsTable.market, "uae"),
+    ));
+    const [publishedRevision] = edition?.publishedRevisionId
+      ? await db.select({
+          payload: cmsRevisionsTable.payload,
+          workflowState: cmsRevisionsTable.workflowState,
+        }).from(cmsRevisionsTable).where(eq(cmsRevisionsTable.id, edition.publishedRevisionId))
+      : [];
+    const [latestRevision] = edition?.id
+      ? await db.select({
+          payload: cmsRevisionsTable.payload,
+          workflowState: cmsRevisionsTable.workflowState,
+        }).from(cmsRevisionsTable)
+          .where(eq(cmsRevisionsTable.editionId, edition.id))
+          .orderBy(desc(cmsRevisionsTable.revisionNumber))
+          .limit(1)
+      : [];
+    const payload = publishedRevision?.payload as {
+      seo?: Record<string, unknown>;
+      content?: { educationPov?: { version?: unknown }; heroMediaId?: unknown };
+      mediaIds?: unknown[];
+    } | undefined;
+    const mediaIds = Array.isArray(payload?.mediaIds)
+      ? payload.mediaIds.filter((item): item is string => typeof item === "string")
+      : [];
+    const [reference] = edition?.publishedRevisionId && mediaIds.length === 1
+      ? await db.select({
+          mediaVersionId: cmsMediaReferencesTable.mediaVersionId,
+        }).from(cmsMediaReferencesTable).where(and(
+          eq(cmsMediaReferencesTable.documentId, receipt.subjectId),
+          eq(cmsMediaReferencesTable.fieldPath, `revision:${edition.publishedRevisionId}`),
+          eq(cmsMediaReferencesTable.assetId, mediaIds[0]),
+        ))
+      : [];
+    const publishedComplete = Boolean(
+      edition?.publicationState === "published"
+      && edition.publishedRevisionId
+      && publishedRevision?.workflowState === "approved"
+      && payload?.content?.educationPov?.version === 2
+      && payload.seo?.title === EDUCATION_SUCCESSOR_SEO.title
+      && payload.seo?.description === EDUCATION_SUCCESSOR_SEO.description
+      && payload.content.heroMediaId === mediaIds[0]
+      && reference?.mediaVersionId,
+    );
+    const authoritativePayload = receipt.operation === "cms.inventory.import"
+      ? latestRevision?.payload
+      : publishedRevision?.payload;
+    const normalizedPayload = authoritativePayload
+      ? JSON.parse(JSON.stringify(authoritativePayload)) as {
+          mediaIds?: unknown[];
+          content?: Record<string, unknown>;
+        }
+      : undefined;
+    if (normalizedPayload) {
+      normalizedPayload.mediaIds = [];
+      if (normalizedPayload.content) delete normalizedPayload.content.heroMediaId;
+    }
+    const exactPayload = Boolean(
+      normalizedPayload
+      && expectation.expectedNormalizedPayloadDigest
+      && canonicalResultDigest(normalizedPayload) === expectation.expectedNormalizedPayloadDigest,
+    );
+    const outcome = educationReconciliationOutcome({
+      receiptOperation: receipt.operation,
+      publishedComplete,
+      exactPayload,
+      freshDraftComplete: Boolean(
+        edition?.publicationState === "draft"
+        && !edition.publishedRevisionId
+        && latestRevision?.workflowState === "draft"
+      ),
+      hasLiveRevision: Boolean(latestRevision),
+    });
+    if (!outcome.valid) {
+      invalid.push(`${receipt.idempotencyKey}: ${outcome.message}`);
+    } else {
+      educationOutcomes.push({
+        idempotencyKey: receipt.idempotencyKey,
+        status: outcome.status!,
+        message: outcome.message,
+      });
+    }
   }
 
   const uniqueDocumentIds = [...new Set(documentIds)];
@@ -119,7 +222,6 @@ async function inspectReconciliationState(
         .orderBy(desc(cmsMediaVersionsTable.versionNumber))
       : [],
   ]);
-  const invalid = [...coverage.invalid];
   if (documents.length !== uniqueDocumentIds.length) {
     invalid.push(`receipt subjects: found ${documents.length}/${uniqueDocumentIds.length} documents`);
   }
@@ -209,6 +311,7 @@ async function inspectReconciliationState(
     missingCount,
     conflicts,
     invalid,
+    educationOutcomes,
   };
 }
 
@@ -230,6 +333,15 @@ async function main() {
     personGovernanceOperations(inventory.records).map((operation) => operation.externalId),
   );
   for (const operation of migrationOperations(inventory.records)) {
+    const educationSuccessor = operation.idempotencyKey.startsWith(
+      "cms-industry-education-successor-v10:",
+    );
+    const normalizedOperationPayload = JSON.parse(JSON.stringify(operation.payload)) as {
+      mediaIds?: unknown[];
+      content?: Record<string, unknown>;
+    };
+    normalizedOperationPayload.mediaIds = [];
+    if (normalizedOperationPayload.content) delete normalizedOperationPayload.content.heroMediaId;
     expected.set(operation.idempotencyKey, {
       requestDigest: operation.requestDigest,
       subjectType: "document",
@@ -239,7 +351,11 @@ async function main() {
       tolerateDigestDrift: toleratesDocumentReceiptDigestDrift(
         operation,
         governedLegacyExternalIds,
-      ),
+      ) && !educationSuccessor,
+      publishEducationSuccessor: educationSuccessor,
+      expectedNormalizedPayloadDigest: educationSuccessor
+        ? canonicalResultDigest(normalizedOperationPayload)
+        : undefined,
       publishCase: Boolean(operation.kind === "case-study"
         && operation.mediaPaths.length === 1
         && operation.payload.content
@@ -281,6 +397,9 @@ async function main() {
   const database = await loadDatabase();
   try {
     const before = await inspectReconciliationState(expected, database);
+    for (const outcome of before.educationOutcomes) {
+      console.log(`Education reconciliation ${outcome.status}: ${outcome.message} (${outcome.idempotencyKey}).`);
+    }
     const initialImport = before.existingCount === 0;
     if (before.state !== "complete") {
       console.log(
@@ -304,6 +423,9 @@ async function main() {
       },
       inspectAfterImport: () => inspectReconciliationState(expected, database),
       validateAfterImport: (next) => {
+        for (const outcome of next.educationOutcomes) {
+          console.log(`Education reconciliation ${outcome.status}: ${outcome.message} (${outcome.idempotencyKey}).`);
+        }
         if (next.conflicts.length) {
           const details = next.conflicts
             .map((conflict) => `${conflict.idempotencyKey} (stored ${conflict.actualDigest}, inventory ${conflict.expectedDigest})`)
@@ -334,6 +456,15 @@ async function main() {
         `CMS media reconciliation completed: missing=0 invalid=0 conflicts=${before.conflicts.length} created=0 repaired=0 reused=${before.existingCount}.`,
       );
       return;
+    }
+    const final = await inspectReconciliationState(expected, database);
+    if (final.state !== "complete") {
+      throw new Error(
+        `CMS post-publication reconciliation became incomplete: missing=${final.missingCount} invalid=${final.invalid.length} conflicts=${final.conflicts.length}. ${final.invalid.join("; ")}`,
+      );
+    }
+    for (const outcome of final.educationOutcomes) {
+      console.log(`Education reconciliation ${outcome.status}: ${outcome.message} (${outcome.idempotencyKey}).`);
     }
     console.log(
       `CMS media reconciliation completed: missing=0 invalid=0 conflicts=${after.conflicts.length} created=${after.existingCount - before.existingCount} repaired=${before.invalid.length} reused=${before.existingCount - before.invalid.length}.`,

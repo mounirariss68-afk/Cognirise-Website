@@ -72,6 +72,36 @@ export interface PersonGovernanceOperation {
   requestDigest: string;
 }
 
+const EDUCATION_V8_AUTHORITY_DIGEST =
+  "99e765da04fa7ef70050ed29c4b3242b2ce3861e0ce8bd7fa62bfc02de3e43ca";
+export const EDUCATION_SUCCESSOR_SEO = {
+  title: "Education AI | K–12 & Higher Education | Cognirise",
+  description: "Build shared AI capability across schools, universities and education authorities: better learning, stronger educators and researchers, and responsible service redesign.",
+} as const;
+
+export function educationSuccessorAction(input: {
+  baselineAction: ReturnType<typeof industryBaselineAction>;
+  latestNormalizedPayloadDigest: string | undefined;
+  canonicalPayload: unknown;
+}): "append-and-publish" | "reuse-complete" | "preserve-editorial" {
+  const canonical = input.canonicalPayload as {
+    seo?: Record<string, unknown>;
+    content?: { educationPov?: Record<string, unknown> };
+  } | null;
+  const pov = canonical?.content?.educationPov;
+  const isExactSuccessor = pov?.version === 2
+    && Array.isArray(pov.valueDomains) && pov.valueDomains.length === 5
+    && Array.isArray(pov.targetState) && pov.targetState.length === 7
+    && canonical?.seo?.title === EDUCATION_SUCCESSOR_SEO.title
+    && canonical?.seo?.description === EDUCATION_SUCCESSOR_SEO.description;
+  if (!isExactSuccessor) return "preserve-editorial";
+  if (input.baselineAction === "reuse-complete") return "reuse-complete";
+  return input.baselineAction === "append-and-publish"
+      && input.latestNormalizedPayloadDigest === EDUCATION_V8_AUTHORITY_DIGEST
+    ? "append-and-publish"
+    : "preserve-editorial";
+}
+
 export function industryBaselineAction(
   revisions: ReadonlyArray<{
     id: string;
@@ -275,7 +305,9 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
     title: record.name,
     summary: typeof record.fields.summary === "string" ? record.fields.summary : null,
     content: record.fields.content,
-    seo: { noIndex: false },
+    seo: record.type === "industry" && record.fields.slug === "education"
+      ? { ...EDUCATION_SUCCESSOR_SEO, noIndex: false }
+      : { noIndex: false },
     mediaIds: [],
     markets: ["uae"],
   };
@@ -290,6 +322,8 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
     idempotencyKey: record.type === "industry"
       ? record.fields.slug === "financial-services"
         ? `cms-industry-contract-v12:${record.externalId}`
+        : record.fields.slug === "education"
+          ? `cms-industry-education-successor-v10:${record.externalId}`
         : `cms-industry-contract-v8:${record.externalId}`
       : record.type === "case-study"
         ? `cms-case-study-baseline-v2:${record.externalId}`

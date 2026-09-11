@@ -5,7 +5,7 @@ import { test } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Router } from "wouter";
-import { validateCmsContent } from "@workspace/api-zod";
+import { projectIndustrySnapshotForMarket, validateCmsContent } from "@workspace/api-zod";
 import { IndustryEditorialView } from "@/components/industries/IndustryEditorial";
 import { EducationEditorialView } from "@/components/industries/EducationEditorial";
 import { INDUSTRIES } from "./industries";
@@ -107,20 +107,21 @@ test("renders all six migrated CMS industry payloads without compiled fallback",
   }
 });
 
-test("publishes the specialist higher education POV with balanced themes and supplied evidence", () => {
+test("publishes the education POV across schools, higher education and institutional transformation", () => {
   const education = INDUSTRIES.find((industry) => industry.slug === "education");
   assert.ok(education?.educationPov);
   assert.equal(education.educationPov.convictions.length, 5);
-  assert.equal(education.educationPov.valueDomains.length, 3);
-  assert.equal(education.educationPov.targetState.length, 6);
+  assert.equal(education.educationPov.version, 2);
+  assert.equal(education.educationPov.valueDomains.length, 5);
+  assert.equal(education.educationPov.targetState.length, 7);
   assert.deepEqual(education.educationPov.roadmap.map((step) => step.horizon), ["0–90 days", "3–9 months", "9–18 months"]);
 
   const copy = JSON.stringify(education).toLowerCase();
-  for (const theme of ["teaching", "assessment", "research", "student success", "operations", "agent platform", "people and change", "evidence and scale", "uae"]) {
+  for (const theme of ["k–12", "teaching", "assessment", "research", "educator", "operations", "agent platform", "people and change", "evidence and scale", "uae"]) {
     assert.ok(copy.includes(theme), `missing Education theme: ${theme}`);
   }
   assert.doesNotMatch(copy, /saudi/i);
-  for (const institution of ["harvard", "yale", "caltech", "mit", "stanford", "university of california"]) {
+  for (const institution of ["harvard", "yale", "caltech", "singapore", "aila"]) {
     assert.ok(copy.includes(institution), `missing institutional signal: ${institution}`);
   }
 
@@ -129,12 +130,40 @@ test("publishes the specialist higher education POV with balanced themes and sup
     { ssrPath: "/industries/education" },
     createElement(EducationEditorialView, { view: education }),
   ));
-  assert.match(html, /From isolated copilots to coordinated institutional action/i);
-  assert.match(html, /Teaching and assessment/i);
-  assert.match(html, /Research and discovery/i);
-  assert.match(html, /Student success and operations/i);
-  assert.match(html, /Identify and redesign one measurable institutional journey/i);
+  assert.match(html, /Build the institution-wide AI operating system/);
+  assert.match(html, /Learning, Teaching and Assessment/i);
+  assert.match(html, /Research and Discovery/i);
+  assert.match(html, /Educator Capability and Professional Practice/i);
+  assert.match(html, /Identify and redesign one measurable education journey/i);
+  assert.match(html, /<table[\s>]/);
+  assert.match(html, /Strategic signal/i);
+  assert.match(html, /Implication/i);
+  assert.match(html, /not Cognirise client/i);
+  assert.match(html, /href="\/value-scan"/);
   assert.doesNotMatch(html, /Operating pressures|governed capability|required boundary|supporting evidence and operating guardrails|route to a governed build/i);
+});
+
+test("keeps application and signal claims associated with the published source trail", () => {
+  const education = INDUSTRIES.find((industry) => industry.slug === "education")!;
+  const sources = new Set(education.sources.map((source) => source.url));
+  const pov = education.educationPov!;
+  assert.equal(pov.applications?.length, 3);
+  for (const item of [...pov.signals, ...(pov.applications ?? []).flatMap((group) => group.items)]) {
+    assert.ok(item.sourceUrls.length > 0);
+    for (const url of item.sourceUrls) assert.ok(sources.has(url), `unmapped source: ${url}`);
+  }
+  assert.ok(pov.introduction && pov.strategicShift && pov.patternQuote && pov.globalDirection);
+  assert.doesNotMatch(JSON.stringify(education), /194-student|twice the learning|weeks to (?:about )?an hour/);
+  const harvard = education.sources.find((source) => source.publisher === "Harvard Gazette");
+  if (harvard) assert.notEqual(harvard.kind, "Independent study");
+});
+
+test("Education metadata reflects the broader audience without changing the route", () => {
+  const shell = readFileSync(path.resolve(process.cwd(), "src/components/layout/Shell.tsx"), "utf8");
+  const metadata = shell.match(/"\/industries\/education": \{([\s\S]*?)\n  \}/)?.[1];
+  assert.ok(metadata);
+  assert.match(metadata, /K–12 & Higher Education/);
+  assert.match(metadata, /schools, universities and education authorities/);
 });
 
 test("keeps UAE and Saudi Education editions strictly separated", () => {
@@ -164,5 +193,32 @@ test("keeps UAE and Saudi Education editions strictly separated", () => {
       createElement(EducationEditorialView, { view: education, marketOverride: market }),
     ));
     assert.doesNotMatch(neutralHtml, /\bUAE\b|United Arab Emirates|Saudi/i);
+  }
+});
+
+test("every projected Education edition validates and preserves its five convictions and source associations", () => {
+  const { slug: _slug, ...content } = INDUSTRIES.find((industry) => industry.slug === "education")!;
+  for (const market of ["uae", "ksa", "turkiye", "europe"]) {
+    const payload = projectIndustrySnapshotForMarket({
+      content,
+      title: "Education",
+      summary: content.dek,
+      seo: { description: content.dek },
+    }, market);
+    const validation = validateCmsContent("industry", payload.content, "publish");
+    assert.equal(validation.success, true, `${market}: ${validation.success ? "" : validation.errors.join("; ")}`);
+    assert.equal(payload.content.educationPov!.convictions.length, 5);
+    const sourceUrls = new Set(payload.content.sources.map((source) => source.url));
+    const claims = [
+      ...payload.content.educationPov!.signals,
+      ...payload.content.educationPov!.applications!.flatMap((group) => group.items),
+    ];
+    for (const item of claims) {
+      for (const url of item.sourceUrls) assert.ok(sourceUrls.has(url), `${market}: missing source ${url}`);
+    }
+    const publicJson = JSON.stringify(payload);
+    if (market !== "uae") assert.doesNotMatch(publicJson, /\bUAE\b|United Arab Emirates|moe\.gov\.ae|ai\.gov\.ae/i);
+    if (market !== "ksa") assert.doesNotMatch(publicJson, /Saudi|sdaia\.gov\.sa/i);
+    assert.deepEqual(projectIndustrySnapshotForMarket(payload, market), payload);
   }
 });

@@ -9,6 +9,53 @@ export interface ExpectedReceipt {
   sameSubjectAs?: string;
   media?: MediaMigrationOperation;
   publishCase?: boolean;
+  publishEducationSuccessor?: boolean;
+  expectedNormalizedPayloadDigest?: string;
+}
+
+export type EducationReconciliationStatus =
+  | "published"
+  | "reused"
+  | "preserved-editorial"
+  | "new-draft";
+
+export function educationReconciliationOutcome(input: {
+  receiptOperation: string | undefined;
+  publishedComplete: boolean;
+  exactPayload: boolean;
+  freshDraftComplete: boolean;
+  hasLiveRevision: boolean;
+}): { valid: boolean; status?: EducationReconciliationStatus; message: string } {
+  switch (input.receiptOperation) {
+    case "cms.inventory.education-successor-published":
+      return input.publishedComplete && input.exactPayload
+        ? { valid: true, status: "published", message: "approved successor is published" }
+        : { valid: false, message: "published successor pointer, payload, or immutable pin is incomplete" };
+    case "cms.inventory.industry-contract-baseline-reused":
+      return input.publishedComplete && input.exactPayload
+        ? { valid: true, status: "reused", message: "approved successor publication was reused" }
+        : { valid: false, message: "reused successor no longer matches its approved publication" };
+    case "cms.inventory.industry-contract-editorial-preserved":
+      return input.hasLiveRevision
+        ? { valid: true, status: "preserved-editorial", message: "newer editorial authority was preserved" }
+        : { valid: false, message: "preserved editorial authority is missing" };
+    case "cms.inventory.import":
+      if (!input.exactPayload) {
+        return { valid: false, message: "fresh Education draft does not match governed authority" };
+      }
+      if (input.publishedComplete) {
+        return {
+          valid: true,
+          status: "published",
+          message: "fresh governed draft completed the approved immutable-media cutover",
+        };
+      }
+      return input.freshDraftComplete
+        ? { valid: true, status: "new-draft", message: "fresh Education successor remains a review draft" }
+        : { valid: false, message: "fresh Education draft is missing or was implicitly approved without a complete cutover" };
+    default:
+      return { valid: false, message: `unsupported Education receipt outcome ${input.receiptOperation ?? "(missing)"}` };
+  }
 }
 
 export interface ReceiptSummaryInput {

@@ -12,6 +12,7 @@ import {
 } from "./capability-fields";
 import { MediaField, type MediaSelection } from "./MediaField";
 import { contentErrorMap } from "./authoring";
+import { updateEducationPov } from "./education-fields";
 import { newLandingNarrativeSection, updateLandingSection } from "./landing-section-fields";
 import {
   addStringListItem,
@@ -50,24 +51,24 @@ function Requirement({ required }: { required?: boolean }) {
 function Field({ label, value, onChange, placeholder, type = "text", required, error }: {
   label: string; value: unknown; onChange: (value: string) => void; placeholder?: string; type?: string; required?: boolean; error?: string;
 }) {
-  return <div className="space-y-2"><Label>{label} <Requirement required={required} /></Label><Input aria-invalid={Boolean(error)} type={type} value={typeof value === "string" || typeof value === "number" ? value : ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
+  return <div className="space-y-2"><Label>{label} <Requirement required={required} /></Label><Input aria-label={label} aria-invalid={Boolean(error)} type={type} value={typeof value === "string" || typeof value === "number" ? value : ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
 }
 function Area({ label, value, onChange, placeholder, rows = 4, required, error }: {
   label: string; value: string; onChange: (value: string) => void; placeholder?: string; rows?: number; required?: boolean; error?: string;
 }) {
-  return <div className="space-y-2"><Label>{label} <Requirement required={required} /></Label><Textarea aria-invalid={Boolean(error)} rows={rows} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
+  return <div className="space-y-2"><Label>{label} <Requirement required={required} /></Label><Textarea aria-label={label} aria-invalid={Boolean(error)} rows={rows} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
 }
 function Choice({ label, value, options, onChange, required, error }: {
   label: string; value: string; options: string[]; onChange: (value: string) => void; required?: boolean; error?: string;
 }) {
-  return <div className="space-y-2"><Label>{label} <Requirement required={required} /></Label><Select value={value || undefined} onValueChange={onChange}><SelectTrigger aria-invalid={Boolean(error)}><SelectValue placeholder={`Select ${label.toLowerCase()}`} /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem value={option} key={option}>{option.replaceAll("-", " ")}</SelectItem>)}</SelectContent></Select>{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
+  return <div className="space-y-2"><Label>{label} <Requirement required={required} /></Label><Select value={value || undefined} onValueChange={onChange}><SelectTrigger aria-label={label} aria-invalid={Boolean(error)}><SelectValue placeholder={`Select ${label.toLowerCase()}`} /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem value={option} key={option}>{option.replaceAll("-", " ")}</SelectItem>)}</SelectContent></Select>{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
 }
 
-function StringList({ label, value, onChange, required = false }: {
-  label: string; value: unknown; onChange: (value: string[]) => void; required?: boolean;
+function StringList({ label, value, onChange, required = false, maximum }: {
+  label: string; value: unknown; onChange: (value: string[]) => void; required?: boolean; maximum?: number;
 }) {
   const items = stringListItems(value);
-  return <section className="space-y-3"><div className="flex items-center justify-between"><Label>{label} <Requirement required={required} /></Label><Button type="button" size="sm" variant="outline" onClick={() => onChange(addStringListItem(items))}>Add item</Button></div>{items.map((item, index) => <div key={index} className="flex gap-2"><Input value={item} onChange={(event) => onChange(changeStringListItem(items, index, event.target.value))} aria-label={`${label} ${index + 1}`} /><Button type="button" variant="ghost" onClick={() => onChange(removeStringListItem(items, index))}>Remove</Button></div>)}{items.length === 0 && <p className="text-xs text-muted-foreground">No items added.</p>}</section>;
+  return <section className="space-y-3"><div className="flex items-center justify-between"><Label>{label} <Requirement required={required} /></Label><Button type="button" size="sm" variant="outline" disabled={maximum !== undefined && items.length >= maximum} onClick={() => onChange(addStringListItem(items))}>Add item</Button></div>{items.map((item, index) => <div key={index} className="flex gap-2"><Input value={item} onChange={(event) => onChange(changeStringListItem(items, index, event.target.value))} aria-label={`${label} ${index + 1}`} /><Button type="button" variant="ghost" onClick={() => onChange(removeStringListItem(items, index))}>Remove</Button></div>)}{items.length === 0 && <p className="text-xs text-muted-foreground">No items added.</p>}</section>;
 }
 export function ContentEditor({ kind, value, onChange, errors }: {
   kind: CmsDocumentKind;
@@ -86,6 +87,7 @@ export function ContentEditor({ kind, value, onChange, errors }: {
     roadmap: [],
     leadershipTest: "",
   };
+  const educationV2 = educationPov.version === 2;
   const common = (
     <section className="space-y-4 border-t pt-6">
       <h3 className="font-semibold">Governance and ordering</h3>
@@ -316,14 +318,32 @@ export function ContentEditor({ kind, value, onChange, errors }: {
         <Area label="GCC context" value={value.gcc ?? ""} onChange={(next) => set("gcc", next)} />
         <RecordList label="Relevant service and first move" value={value.service ? [value.service] : []} minimum={1} columns={[{ key: "label", label: "Service label" }, { key: "href", label: "Internal path" }, { key: "firstMove", label: "First move" }]} onChange={(next) => set("service", next[0] ?? {})} />
         <RecordList label="Use-case evidence" value={value.uses} minimum={1} columns={[{ key: "use", label: "Use case" }, { key: "evidence", label: "Evidence class" }, { key: "boundary", label: "Required boundary" }]} onChange={(next) => set("uses", next)} />
-        <RecordList label="Industry source trail" value={value.sources} minimum={1} columns={[{ key: "label", label: "Label" }, { key: "publisher", label: "Publisher" }, { key: "kind", label: "Evidence kind" }, { key: "url", label: "URL" }, { key: "accessedAt", label: "Accessed date", type: "date" }]} onChange={(next) => set("sources", next)} />
+        <RecordList label="Industry source trail" value={value.sources} minimum={1} columns={[{ key: "label", label: "Label" }, { key: "publisher", label: "Publisher" }, { key: "kind", label: "Evidence kind" }, { key: "url", label: "URL" }, { key: "accessedAt", label: "Accessed date", type: "date" }, { key: "market", label: "Market", type: "market" }]} onChange={(next) => set("sources", next)} />
         {(value.educationPov || value.legacyPath === "/industries/education") && <section className="space-y-4 rounded-md border p-4">
           <h3 className="font-semibold">Higher education POV structure</h3>
           <p className="text-sm text-muted-foreground">Use the governed controls below. This specialist structure is used only by the Education page.</p>
-          <PairList label="Five convictions" value={educationPov.convictions} left="title" right="body" onChange={(next) => set("educationPov", { ...educationPov, convictions: next })} />
-          <EducationDomains value={educationPov.valueDomains} onChange={(valueDomains) => set("educationPov", { ...educationPov, valueDomains })} />
-          <EducationSignals value={educationPov.signals} onChange={(signals) => set("educationPov", { ...educationPov, signals })} />
-          <PairList label="Six target-state capabilities" value={educationPov.targetState} left="title" right="body" onChange={(next) => set("educationPov", { ...educationPov, targetState: next })} />
+          {!educationV2 && <Button type="button" variant="outline" onClick={() => set("educationPov", {
+            ...educationPov,
+            version: 2,
+            introduction: "",
+            strategicShift: "",
+            patternQuote: "",
+            globalDirection: "",
+            valueDomains: [...educationPov.valueDomains, ...Array.from({ length: Math.max(0, 5 - educationPov.valueDomains.length) }, () => ({ title: "", body: "", examples: [] }))],
+            targetState: [...educationPov.targetState, ...Array.from({ length: Math.max(0, 7 - educationPov.targetState.length) }, () => ({ title: "", body: "" }))],
+          })}>Upgrade to Education POV v2</Button>}
+          {educationV2 && <>
+            <p className="text-sm font-medium">Education POV contract version 2</p>
+            <Area label="Introduction" required value={educationPov.introduction ?? ""} onChange={(introduction) => set("educationPov", updateEducationPov(educationPov, { introduction }))} />
+            <Area label="Strategic shift" required value={educationPov.strategicShift ?? ""} onChange={(strategicShift) => set("educationPov", updateEducationPov(educationPov, { strategicShift }))} />
+            <Area label="Pattern quote" required value={educationPov.patternQuote ?? ""} onChange={(patternQuote) => set("educationPov", updateEducationPov(educationPov, { patternQuote }))} />
+            <Area label="Global direction" required value={educationPov.globalDirection ?? ""} onChange={(globalDirection) => set("educationPov", updateEducationPov(educationPov, { globalDirection }))} />
+          </>}
+          <RecordList label="Five convictions" value={educationPov.convictions} minimum={5} columns={[{ key: "title", label: "Title" }, { key: "body", label: "Description" }, ...(educationV2 ? [{ key: "market", label: "Market", type: "market" as const }] : [])]} onChange={(next) => set("educationPov", { ...educationPov, convictions: next })} />
+          <EducationDomains version={educationV2 ? 2 : undefined} value={educationPov.valueDomains} onChange={(valueDomains) => set("educationPov", { ...educationPov, valueDomains })} />
+          {educationV2 && <EducationApplications value={educationPov.applications} onChange={(applications) => set("educationPov", { ...educationPov, applications })} />}
+          <EducationSignals version={educationV2 ? 2 : undefined} value={educationPov.signals} onChange={(signals) => set("educationPov", { ...educationPov, signals })} />
+          <PairList label={educationV2 ? "Seven target-state capabilities" : "Six target-state capabilities"} value={educationPov.targetState} left="title" right="body" onChange={(next) => set("educationPov", { ...educationPov, targetState: next })} />
           <RecordList label="Roadmap" value={educationPov.roadmap} minimum={3} columns={[{ key: "horizon", label: "Horizon" }, { key: "title", label: "Title" }, { key: "body", label: "Description" }]} onChange={(next) => set("educationPov", { ...educationPov, roadmap: next })} />
           <Area label="Leadership test" value={educationPov.leadershipTest} onChange={(next) => set("educationPov", { ...educationPov, leadershipTest: next })} />
         </section>}
@@ -378,9 +398,40 @@ export function ContentEditor({ kind, value, onChange, errors }: {
   );
 }
 
-function EducationSignals({ value, onChange }: { value: unknown; onChange: (value: any[]) => void }) {
+const educationMarkets = ["all-markets", "uae", "ksa", "turkiye", "europe"];
+
+function EducationSignals({ value, onChange, version }: { value: unknown; onChange: (value: any[]) => void; version?: 2 }) {
   const items = Array.isArray(value) ? value : [];
-  return <section className="space-y-3"><div className="flex justify-between"><Label>Institutional signals <Requirement required /></Label><Button type="button" size="sm" variant="outline" disabled={items.length >= 10} onClick={() => onChange([...items, { institution: "", signal: "", implication: "", sourceUrls: [] }])}>Add signal</Button></div>{items.map((item, index) => <fieldset key={index} className="space-y-3 rounded-md border p-3"><legend>Signal {index + 1}</legend><Field label="Institution" required value={item.institution} onChange={(institution) => onChange(items.map((current, i) => i === index ? { ...current, institution } : current))} /><Area label="Signal" required value={item.signal ?? ""} onChange={(signal) => onChange(items.map((current, i) => i === index ? { ...current, signal } : current))} /><Area label="Implication" required value={item.implication ?? ""} onChange={(implication) => onChange(items.map((current, i) => i === index ? { ...current, implication } : current))} /><StringList label="Source URLs" required value={item.sourceUrls} onChange={(sourceUrls) => onChange(items.map((current, i) => i === index ? { ...current, sourceUrls } : current))} /><Button type="button" variant="ghost" onClick={() => onChange(items.filter((_, i) => i !== index))}>Remove signal</Button></fieldset>)}</section>;
+  const update = (index: number, patch: Record<string, unknown>) => onChange(items.map((current, i) => i === index ? { ...current, ...patch } : current));
+  return <section className="space-y-3"><div className="flex justify-between"><Label>Institutional signals <Requirement required /></Label><Button type="button" size="sm" variant="outline" disabled={items.length >= 10} onClick={() => onChange([...items, { institution: "", signal: "", implication: "", sourceUrls: [] }])}>Add signal</Button></div>{items.map((item, index) => <fieldset key={index} className="space-y-3 rounded-md border p-3"><legend>Signal {index + 1}</legend><Field label={`Signal ${index + 1} institution`} required value={item.institution} onChange={(institution) => update(index, { institution })} /><Area label={`Signal ${index + 1} statement`} required value={item.signal ?? ""} onChange={(signal) => update(index, { signal })} /><Area label={`Signal ${index + 1} implication`} required value={item.implication ?? ""} onChange={(implication) => update(index, { implication })} />{version === 2 && <Choice label={`Signal ${index + 1} market`} value={item.market ?? "all-markets"} options={educationMarkets} onChange={(market) => update(index, { market: market === "all-markets" ? undefined : market })} />}<StringList label={`Signal ${index + 1} source URLs`} required value={item.sourceUrls} onChange={(sourceUrls) => update(index, { sourceUrls })} /><Button type="button" variant="ghost" aria-label={`Remove signal ${index + 1}`} onClick={() => onChange(items.filter((_, i) => i !== index))}>Remove signal</Button></fieldset>)}</section>;
+}
+
+function EducationApplications({ value, onChange }: { value: unknown; onChange: (value: any[]) => void }) {
+  const groups = Array.isArray(value) ? value : [];
+  const replaceGroup = (index: number, next: Record<string, unknown>) =>
+    onChange(groups.map((group, current) => current === index ? { ...group, ...next } : group));
+  return <section className="space-y-3">
+    <div className="flex justify-between"><Label>Application groups <Requirement required /></Label><Button type="button" size="sm" variant="outline" disabled={groups.length >= 6} onClick={() => onChange([...groups, { title: "", items: [] }])}>Add application group</Button></div>
+    {groups.map((group, groupIndex) => {
+      const items = Array.isArray(group.items) ? group.items : [];
+      const updateItem = (itemIndex: number, patch: Record<string, unknown>) =>
+        replaceGroup(groupIndex, { items: items.map((item: Record<string, unknown>, current: number) => current === itemIndex ? { ...item, ...patch } : item) });
+      return <fieldset key={groupIndex} className="space-y-3 rounded-md border p-3">
+        <legend>Application group {groupIndex + 1}</legend>
+        <Field label={`Application group ${groupIndex + 1} title`} required value={group.title} onChange={(title) => replaceGroup(groupIndex, { title })} />
+        <Button type="button" size="sm" variant="outline" disabled={items.length >= 12} onClick={() => replaceGroup(groupIndex, { items: [...items, { title: "", body: "", sourceUrls: [] }] })}>Add application</Button>
+        {items.map((item: Record<string, any>, itemIndex: number) => <fieldset key={itemIndex} className="space-y-3 rounded-md border p-3">
+          <legend>Application {itemIndex + 1}</legend>
+          <Field label={`Application ${groupIndex + 1}.${itemIndex + 1} title`} required value={item.title} onChange={(title) => updateItem(itemIndex, { title })} />
+          <Area label={`Application ${groupIndex + 1}.${itemIndex + 1} description`} required value={item.body ?? ""} onChange={(body) => updateItem(itemIndex, { body })} />
+          <Choice label={`Application ${groupIndex + 1}.${itemIndex + 1} market`} value={item.market ?? "all-markets"} options={educationMarkets} onChange={(market) => updateItem(itemIndex, { market: market === "all-markets" ? undefined : market })} />
+          <StringList label={`Application ${groupIndex + 1}.${itemIndex + 1} source URLs`} required maximum={4} value={item.sourceUrls} onChange={(sourceUrls) => updateItem(itemIndex, { sourceUrls })} />
+          <Button type="button" variant="ghost" aria-label={`Remove application ${itemIndex + 1} from group ${groupIndex + 1}`} onClick={() => replaceGroup(groupIndex, { items: items.filter((_: unknown, current: number) => current !== itemIndex) })}>Remove application</Button>
+        </fieldset>)}
+        <Button type="button" variant="ghost" aria-label={`Remove application group ${groupIndex + 1}`} onClick={() => onChange(groups.filter((_: unknown, current: number) => current !== groupIndex))}>Remove application group</Button>
+      </fieldset>;
+    })}
+  </section>;
 }
 
 function LandingSections({ value, onChange }: {
@@ -436,7 +487,7 @@ function LandingSections({ value, onChange }: {
   </section>;
 }
 
-type RecordColumn = { key: string; label: string; type?: "text" | "date" | "checkbox" };
+type RecordColumn = { key: string; label: string; type?: "text" | "date" | "checkbox" | "market" };
 
 function RecordList({ label, value, columns, onChange, minimum = 0 }: {
   label: string; value: unknown; columns: RecordColumn[]; onChange: (value: Array<Record<string, any>>) => void; minimum?: number;
@@ -455,7 +506,9 @@ function RecordList({ label, value, columns, onChange, minimum = 0 }: {
         <Label className="text-xs">{column.label}</Label>
         {column.type === "checkbox"
           ? <input type="checkbox" className="ml-2" checked={Boolean(get(item, column.key))} onChange={(event) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, event.target.checked) : current))} />
-          : <Input type={column.type ?? "text"} value={get(item, column.key) ?? ""} onChange={(event) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, event.target.value) : current))} />}
+          : column.type === "market"
+            ? <Choice label={`${label} ${index + 1} ${column.label}`} value={get(item, column.key) ?? "all-markets"} options={educationMarkets} onChange={(next) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, next === "all-markets" ? undefined : next) : current))} />
+            : <Input aria-label={`${label} ${index + 1} ${column.label}`} type={column.type ?? "text"} value={get(item, column.key) ?? ""} onChange={(event) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, event.target.value) : current))} />}
       </div>)}
       <Button type="button" variant="ghost" className="sm:col-span-2" disabled={items.length <= minimum} onClick={() => onChange(items.filter((_, currentIndex) => currentIndex !== index))}>Remove row</Button>
     </fieldset>)}
@@ -470,7 +523,8 @@ function PairList({ label, value, left, right, onChange }: {
   return <section className="space-y-3"><div className="flex items-center justify-between"><Label>{label} <Requirement /></Label><Button type="button" size="sm" variant="outline" onClick={() => onChange([...items, { [left]: "", [right]: "" }])}>Add row</Button></div>{items.map((item, index) => <fieldset key={index} className="grid gap-3 rounded-md border p-3 sm:grid-cols-2"><legend className="px-1 text-xs font-medium">{label} {index + 1}</legend><div><Label className="text-xs">{left.replaceAll(/([A-Z])/g, " $1")}</Label><Input value={item[left] ?? ""} onChange={(event) => update(index, left, event.target.value)} /></div><div><Label className="text-xs">{right.replaceAll(/([A-Z])/g, " $1")}</Label><Input value={item[right] ?? ""} onChange={(event) => update(index, right, event.target.value)} /></div><Button type="button" variant="ghost" className="sm:col-span-2" onClick={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}>Remove row</Button></fieldset>)}</section>;
 }
 
-function EducationDomains({ value, onChange }: { value: unknown; onChange: (value: any[]) => void }) {
+function EducationDomains({ value, onChange, version }: { value: unknown; onChange: (value: any[]) => void; version?: 2 }) {
   const items = Array.isArray(value) ? value : [];
-  return <section className="space-y-3"><div className="flex justify-between"><Label>Three value domains <Requirement required /></Label><Button type="button" size="sm" variant="outline" disabled={items.length >= 3} onClick={() => onChange([...items, { title: "", body: "", examples: [] }])}>Add domain</Button></div>{items.map((item, index) => <fieldset key={index} className="space-y-3 rounded-md border p-3"><legend>Domain {index + 1}</legend><Field label="Title" required value={item.title} onChange={(title) => onChange(items.map((current, i) => i === index ? { ...current, title } : current))} /><Area label="Description" required value={item.body ?? ""} onChange={(body) => onChange(items.map((current, i) => i === index ? { ...current, body } : current))} /><StringList label="Examples" required value={item.examples} onChange={(examples) => onChange(items.map((current, i) => i === index ? { ...current, examples } : current))} /><Button type="button" variant="ghost" onClick={() => onChange(items.filter((_, i) => i !== index))}>Remove domain</Button></fieldset>)}</section>;
+  const maximum = version === 2 ? 5 : 3;
+  return <section className="space-y-3"><div className="flex justify-between"><Label>{version === 2 ? "Five value domains" : "Three value domains"} <Requirement required /></Label><Button type="button" size="sm" variant="outline" disabled={items.length >= maximum} onClick={() => onChange([...items, { title: "", body: "", examples: [] }])}>Add domain</Button></div>{items.map((item, index) => <fieldset key={index} className="space-y-3 rounded-md border p-3"><legend>Domain {index + 1}</legend><Field label={`Domain ${index + 1} title`} required value={item.title} onChange={(title) => onChange(items.map((current, i) => i === index ? { ...current, title } : current))} /><Area label={`Domain ${index + 1} description`} required value={item.body ?? ""} onChange={(body) => onChange(items.map((current, i) => i === index ? { ...current, body } : current))} /><StringList label={`Domain ${index + 1} examples`} required={version !== 2} value={item.examples} onChange={(examples) => onChange(items.map((current, i) => i === index ? { ...current, examples } : current))} /><Button type="button" variant="ghost" aria-label={`Remove domain ${index + 1}`} onClick={() => onChange(items.filter((_, i) => i !== index))}>Remove domain</Button></fieldset>)}</section>;
 }

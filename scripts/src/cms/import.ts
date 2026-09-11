@@ -15,6 +15,7 @@ import {
   canonicalResultDigest,
   matchesGovernedCutoverSource,
   industryBaselineAction,
+  educationSuccessorAction,
   financialServicesPunctuationReconciliationPlan,
   personAvailabilityOperations,
   personGovernanceOperations,
@@ -862,6 +863,10 @@ async function applyDatabase(
           const isIndustryContractOperation = operation.kind === "industry" && (
             operation.idempotencyKey.startsWith("cms-industry-contract-v8:")
             || (
+              operation.slug === "education"
+              && operation.idempotencyKey.startsWith("cms-industry-education-successor-v10:")
+            )
+            || (
               operation.slug === "financial-services"
               && operation.idempotencyKey.startsWith("cms-industry-contract-v12:")
             )
@@ -1106,6 +1111,17 @@ async function applyDatabase(
             edition.publishedRevisionId ? String(edition.publishedRevisionId) : null,
             edition.publicationState,
           );
+          const isEducationSuccessor = operation.slug === "education"
+            && operation.idempotencyKey.startsWith("cms-industry-education-successor-v10:");
+          if (isEducationSuccessor) {
+            baselineAction = educationSuccessorAction({
+              baselineAction,
+              latestNormalizedPayloadDigest: revisions[0]
+                ? normalizedPayloadDigest(revisions[0].payload, false)
+                : undefined,
+              canonicalPayload: resolvedPayload,
+            });
+          }
           const punctuationPlan = baselineAction === "preserve-editorial"
             ? financialServicesPunctuationReconciliationPlan({
                 slug: operation.slug,
@@ -1166,6 +1182,8 @@ async function applyDatabase(
               createdByUserId: serviceAccount.id,
               reason: baselineAction === "repair-v3-media"
                 ? "Approved v4 repair of the known v3 industry hero-media pin defect; prior revisions preserved."
+                : isEducationSuccessor
+                  ? "Approved Education POV successor v10; prior revisions and immutable media preserved."
                 : "Approved financial-services punctuation baseline v12; prior revisions and media state preserved.",
             }).returning({ id: cmsRevisionsTable.id });
             if (!revision) throw new Error(`Could not append the ${operation.slug} contract baseline.`);
@@ -1208,6 +1226,8 @@ async function applyDatabase(
               idempotencyKey: operation.idempotencyKey,
               operation: baselineAction === "repair-v3-media"
                 ? "cms.inventory.industry-contract-v3-media-repaired"
+                : isEducationSuccessor
+                  ? "cms.inventory.education-successor-published"
                 : "cms.inventory.industry-contract-baseline-published",
               subjectId: String(conflict.id),
               requestDigest: operation.requestDigest,
@@ -1224,6 +1244,8 @@ async function applyDatabase(
               actorLabel: "cms-inventory-migration",
               action: baselineAction === "repair-v3-media"
                 ? "cms.inventory.industry-contract-v3-media-repaired"
+                : isEducationSuccessor
+                  ? "cms.inventory.education-successor-published"
                 : "cms.inventory.industry-contract-baseline-published",
               targetType: "industry",
               targetId: String(conflict.id),
@@ -1237,6 +1259,8 @@ async function applyDatabase(
                 publicationState: "published",
                 reason: baselineAction === "repair-v3-media"
                   ? "Known v3 unpinned square-JPG reference replaced in a new immutable revision using the prior approved Pulse pin"
+                  : isEducationSuccessor
+                    ? "Approved Education v2 successor with strict market markers and prior immutable Pulse pin preserved"
                   : "Approved financial-services punctuation baseline v12 with prior media state preserved",
                 repairedRevisionId: baselineAction === "repair-v3-media"
                   ? String(publishedRevision!.id)

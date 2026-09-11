@@ -13,6 +13,8 @@ import {
   GetPublicSitemapQueryParams,
   ListPublishedContentQueryParams,
   validateCmsSnapshot,
+  validateCmsSnapshotForDelivery,
+  projectIndustrySnapshotForMarket,
 } from "@workspace/api-zod";
 import { asyncRoute, throttle } from "../lib/http";
 import { pageOf } from "../lib/cms";
@@ -199,14 +201,31 @@ async function published(row: Record<string, any>, snapshot = publicSnapshot(row
         AND a.id::text=ANY($3::text[]) AND a.status IN ('active','ready')`,
     [String(row.id), `revision:${String(row.revision_id)}`, mediaIds],
   );
+  const projectedSnapshot = row.kind === "industry"
+    ? projectIndustrySnapshotForMarket(
+        snapshot,
+        String(row.requested_market),
+        String(row.market),
+      )
+    : snapshot;
+  const projectedValidation = validateCmsSnapshotForDelivery(
+    row.kind as CmsDocumentKind,
+    projectedSnapshot,
+    "publish",
+  );
+  if (!projectedValidation.success) {
+    throw new PublicContractError(
+      `Published revision ${row.revision_number} is invalid after market projection.`,
+    );
+  }
   return {
     id: String(row.id),
     kind: row.kind,
-    slug: snapshot.slug ?? row.localized_slug,
-    title: snapshot.title,
-    summary: snapshot.summary,
-    content: snapshot.content,
-    seo: snapshot.seo ?? (snapshot.content as Record<string, unknown>).seo,
+    slug: projectedValidation.data.slug ?? row.localized_slug,
+    title: projectedValidation.data.title,
+    summary: projectedValidation.data.summary,
+    content: projectedValidation.data.content,
+    seo: projectedValidation.data.seo ?? (projectedValidation.data.content as Record<string, unknown>).seo,
     media: assets.rows.map((asset) => ({
        id: String(asset.id), versionId: String(asset.version_id),
        url: publicMediaUrl(String(asset.id), String(asset.version_id)), mimeType: asset.media_type,

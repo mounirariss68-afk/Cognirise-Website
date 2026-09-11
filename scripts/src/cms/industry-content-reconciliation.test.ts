@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   financialServicesPunctuationReconciliationPlan,
+  educationSuccessorAction,
+  EDUCATION_SUCCESSOR_SEO,
   industryBaselineAction,
   isApprovedFinancialServicesPunctuationReconciliation,
 } from "./migration.js";
@@ -173,4 +175,40 @@ test("copies current punctuation-only media references without substituting a pr
   assert.deepEqual(plan.references, [{ assetId: "current-media", mediaVersionId: null }]);
   assert.equal(plan.payload.content.heroMediaId, "current-media");
   assert.deepEqual(plan.payload.mediaIds, ["current-media"]);
+});
+
+test("Education successor accepts only the exact known v8 authority and governed v2 shape", () => {
+  const canonicalPayload = {
+    seo: { ...EDUCATION_SUCCESSOR_SEO, noIndex: false },
+    content: {
+      educationPov: {
+        version: 2,
+        valueDomains: Array.from({ length: 5 }, () => ({})),
+        targetState: Array.from({ length: 7 }, () => ({})),
+      },
+    },
+  };
+  assert.equal(educationSuccessorAction({
+    baselineAction: "append-and-publish",
+    latestNormalizedPayloadDigest: "99e765da04fa7ef70050ed29c4b3242b2ce3861e0ce8bd7fa62bfc02de3e43ca",
+    canonicalPayload,
+  }), "append-and-publish");
+  assert.equal(educationSuccessorAction({
+    baselineAction: "append-and-publish",
+    latestNormalizedPayloadDigest: "newer-editorial-authority",
+    canonicalPayload,
+  }), "preserve-editorial");
+  assert.equal(educationSuccessorAction({
+    baselineAction: "append-and-publish",
+    latestNormalizedPayloadDigest: "99e765da04fa7ef70050ed29c4b3242b2ce3861e0ce8bd7fa62bfc02de3e43ca",
+    canonicalPayload: {
+      ...canonicalPayload,
+      seo: { ...canonicalPayload.seo, title: "Stale Education metadata" },
+    },
+  }), "preserve-editorial");
+  assert.equal(educationSuccessorAction({
+    baselineAction: "reuse-complete",
+    latestNormalizedPayloadDigest: "already-v2",
+    canonicalPayload,
+  }), "reuse-complete");
 });

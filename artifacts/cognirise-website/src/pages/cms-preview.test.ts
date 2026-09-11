@@ -51,3 +51,21 @@ test("office previews reuse the public contact card and keep phone optional", as
   assert.match(card, /\{phone \? \(/);
   assert.match(card, /href=\{`tel:\$\{phone\}`\}/);
 });
+
+test("Education previews use the editorial hierarchy with the requested market", async () => {
+  const preview = await readFile(pageUrl, "utf8");
+
+  assert.match(preview, /preview\.kind === "industry"/);
+  assert.match(preview, /educationPreviewContent\(rawSnapshot\)/);
+  assert.match(preview, /Array\.isArray\(pov\.convictions\)/);
+  assert.match(preview, /<EducationEditorialView/);
+  assert.match(preview, /marketOverride=\{educationMarket\}/);
+  assert.match(preview, /preview\.requestedMarket/);
+  assert.match(preview, /resolveCmsMedia\(preview\.media, educationContent\.heroMedia, educationContent\.heroMediaId\)/);
+  assert.match(preview, /image: educationHero\.url/);
+  assert.match(preview, /noIndex: true/);
+  assert.doesNotMatch(
+    preview.slice(preview.indexOf("if (education && educationMarket)"), preview.indexOf("return (", preview.indexOf("if (education && educationMarket)")) + 20),
+    /<Content/,
+  );
+});

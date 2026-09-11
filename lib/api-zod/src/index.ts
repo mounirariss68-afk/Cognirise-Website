@@ -14,3 +14,5 @@ export { GetDocumentQueryParams } from "./generated/api";
 export * from "./cms-content";
 export * from "./navigation";
 export * from "./agent-authority";
+export * from "./industry-market-projection";
+export * from "./education-saudi-evidence";

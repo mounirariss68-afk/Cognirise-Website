@@ -18,3 +18,18 @@ test("protected preview returns only revision-pinned media with private response
   assert.match(previewRoute, /"\/preview\/:token\/media\/:mediaId\/:versionId"/);
   assert.match(previewRoute, /p\.revoked_at IS NULL/);
 });
+
+test("protected Education preview projects the complete snapshot for requested and edition markets", async () => {
+  const route = await readFile(resolve(process.cwd(), "src/routes/documents.ts"), "utf8");
+  const previewRoute = route.slice(route.indexOf('"/preview/:token"'));
+
+  assert.match(route, /projectIndustrySnapshotForMarket/);
+  assert.match(previewRoute, /const requestedMarket = String\(row\.requested_market \?\? row\.market\)/);
+  assert.match(previewRoute, /const editionMarket = String\(row\.market\)/);
+  assert.match(previewRoute, /projectPreviewDocument\([\s\S]*row\.payload,[\s\S]*requestedMarket,[\s\S]*editionMarket/);
+  assert.match(previewRoute, /document: projectedDocument/);
+  assert.match(previewRoute, /validateCmsSnapshotForDelivery\([\s\S]*projectedDocument,[\s\S]*"draft"/);
+  assert.match(previewRoute, /url: `\/api\/preview\/\$\{encodeURIComponent/);
+  assert.match(previewRoute, /caption: asset\.metadata\?\.caption \?\? null/);
+  assert.match(previewRoute, /X-Robots-Tag": "noindex, nofollow, noarchive"/);
+});
