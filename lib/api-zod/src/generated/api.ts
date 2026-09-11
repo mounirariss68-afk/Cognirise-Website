@@ -88,6 +88,7 @@ export const deleteReadinessAssessmentHeaderXDeleteTokenMin = 32;
 export const deleteReadinessAssessmentHeaderXDeleteTokenMax = 200;
 
 
+
 export const DeleteReadinessAssessmentHeader = zod.object({
   "X-Delete-Token": zod.string().min(deleteReadinessAssessmentHeaderXDeleteTokenMin).max(deleteReadinessAssessmentHeaderXDeleteTokenMax)
 })
@@ -132,6 +133,7 @@ export const getPublicNavigationSettingsResponseItemsItemOrderMin = 0;
 export const getPublicNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
 
 
+
 export const GetPublicNavigationSettingsResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
@@ -170,6 +172,7 @@ export const getNavigationSettingsResponseItemsItemOrderMin = 0;
 export const getNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
 
 
+
 export const GetNavigationSettingsResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
@@ -200,6 +203,7 @@ export const updateNavigationSettingsBodyItemsItemOrderMin = 0;
 export const updateNavigationSettingsBodyItemsItemOrderMultipleOf = 1;
 
 
+
 export const UpdateNavigationSettingsBody = zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
@@ -219,6 +223,7 @@ export const UpdateNavigationSettingsBody = zod.object({
 
 export const updateNavigationSettingsResponseItemsItemOrderMin = 0;
 export const updateNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
+
 
 
 export const UpdateNavigationSettingsResponse = zod.object({
@@ -256,6 +261,7 @@ export const reviewNavigationSettingsResponseItemsItemOrderMin = 0;
 export const reviewNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
 
 
+
 export const ReviewNavigationSettingsResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.string(),
@@ -289,6 +295,7 @@ export const PublishNavigationSettingsBody = zod.object({
 
 export const publishNavigationSettingsResponseItemsItemOrderMin = 0;
 export const publishNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
+
 
 
 export const PublishNavigationSettingsResponse = zod.object({
@@ -339,6 +346,7 @@ export const submitEnquiryBodySourcePageMax = 200;
 export const submitEnquiryBodyWebsiteMax = 0;
 
 
+
 export const SubmitEnquiryBody = zod.object({
   "name": zod.string().min(submitEnquiryBodyNameMin).max(submitEnquiryBodyNameMax),
   "email": zod.string().max(submitEnquiryBodyEmailMax).regex(submitEnquiryBodyEmailRegExp),
@@ -371,6 +379,7 @@ export const subscribeNewsletterBodySourcePageMax = 200;
 export const subscribeNewsletterBodyWebsiteMax = 0;
 
 
+
 export const SubscribeNewsletterBody = zod.object({
   "email": zod.string().max(subscribeNewsletterBodyEmailMax).regex(subscribeNewsletterBodyEmailRegExp),
   "market": zod.enum(['uae', 'ksa', 'turkiye', 'europe']),
@@ -392,6 +401,7 @@ export const SubscribeNewsletterResponse = zod.object({
 export const getAuthBootstrapResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const getAuthBootstrapResponseSessionOneUserMarketCodesItemMin = 2;
 export const getAuthBootstrapResponseSessionOneUserMarketCodesItemMax = 24;
+
 
 
 export const GetAuthBootstrapResponse = zod.object({
@@ -447,6 +457,7 @@ export const bootstrapAuthResponseSessionOneUserMarketCodesItemMin = 2;
 export const bootstrapAuthResponseSessionOneUserMarketCodesItemMax = 24;
 
 
+
 export const BootstrapAuthResponse = zod.object({
   "authenticated": zod.boolean(),
   "session": zod.union([zod.object({
@@ -487,6 +498,7 @@ export const loginBodyEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
 export const loginBodyPasswordMax = 128;
 
 
+
 export const LoginBody = zod.object({
   "email": zod.string().max(loginBodyEmailMax).regex(loginBodyEmailRegExp),
   "password": zod.string().min(1).max(loginBodyPasswordMax)
@@ -495,6 +507,7 @@ export const LoginBody = zod.object({
 export const loginResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const loginResponseSessionOneUserMarketCodesItemMin = 2;
 export const loginResponseSessionOneUserMarketCodesItemMax = 24;
+
 
 
 export const LoginResponse = zod.object({
@@ -541,6 +554,7 @@ export const VerifyMfaBody = zod.object({
 export const verifyMfaResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const verifyMfaResponseSessionOneUserMarketCodesItemMin = 2;
 export const verifyMfaResponseSessionOneUserMarketCodesItemMax = 24;
+
 
 
 export const VerifyMfaResponse = zod.object({
@@ -603,6 +617,7 @@ export const confirmMfaResponseOneSessionOneUserMarketCodesItemMax = 24;
 export const confirmMfaResponseTwoRecoveryCodesItemRegExp = new RegExp('^[A-Z0-9]{4,}(?:-[A-Z0-9]{4,})*$');
 
 
+
 export const ConfirmMfaResponse = zod.object({
   "authenticated": zod.boolean(),
   "session": zod.union([zod.object({
@@ -646,6 +661,7 @@ export const recoverAuthBodyRecoveryCodeMin = 8;
 export const recoverAuthBodyRecoveryCodeMax = 64;
 
 
+
 export const RecoverAuthBody = zod.object({
   "email": zod.string().max(recoverAuthBodyEmailMax).regex(recoverAuthBodyEmailRegExp),
   "recoveryCode": zod.string().min(recoverAuthBodyRecoveryCodeMin).max(recoverAuthBodyRecoveryCodeMax)
@@ -654,6 +670,7 @@ export const RecoverAuthBody = zod.object({
 export const recoverAuthResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const recoverAuthResponseSessionOneUserMarketCodesItemMin = 2;
 export const recoverAuthResponseSessionOneUserMarketCodesItemMax = 24;
+
 
 
 export const RecoverAuthResponse = zod.object({
@@ -716,6 +733,7 @@ export const changePasswordBodyNewPasswordMin = 12;
 export const changePasswordBodyNewPasswordMax = 128;
 
 
+
 export const ChangePasswordBody = zod.object({
   "currentPassword": zod.string().min(1).max(changePasswordBodyCurrentPasswordMax),
   "newPassword": zod.string().min(changePasswordBodyNewPasswordMin).max(changePasswordBodyNewPasswordMax)
@@ -736,6 +754,7 @@ export const LogoutResponse = zod.void()
 export const getSessionResponseUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const getSessionResponseUserMarketCodesItemMin = 2;
 export const getSessionResponseUserMarketCodesItemMax = 24;
+
 
 
 export const GetSessionResponse = zod.object({
@@ -859,6 +878,7 @@ export const getDashboardKpisResponsePublishFailuresMin = 0;
 export const getDashboardKpisResponsePublishFailuresMultipleOf = 1;
 
 
+
 export const GetDashboardKpisResponse = zod.object({
   "documents": zod.object({
   "draft": zod.number().min(getDashboardKpisResponseDocumentsDraftMin).multipleOf(getDashboardKpisResponseDocumentsDraftMultipleOf),
@@ -927,6 +947,7 @@ export const listDocumentsQueryPageSizeMax = 100;
 export const listDocumentsQueryPageSizeMultipleOf = 1;
 
 export const listDocumentsQuerySearchMax = 200;
+
 
 
 export const ListDocumentsQueryParams = zod.object({
@@ -1007,7 +1028,11 @@ export const listDocumentsResponseTwoItemsItemContentEightTwoContactEmailRegExp 
 export const listDocumentsResponseTwoItemsItemContentNineVisualReferencesItemAltTextMax = 500;
 
 export const listDocumentsResponseTwoItemsItemSeoTitleMax = 70;
+
+export const listDocumentsResponseTwoItemsItemSeoDescriptionMax = 180;
+
 export const listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf = 1;
+
 
 
 export const ListDocumentsResponse = zod.object({
@@ -1456,7 +1481,11 @@ export const createDocumentResponseContentEightTwoContactEmailRegExp = new RegEx
 export const createDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
 
 export const createDocumentResponseSeoTitleMax = 70;
+
+export const createDocumentResponseSeoDescriptionMax = 180;
+
 export const createDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const CreateDocumentResponse = zod.object({
@@ -1875,7 +1904,11 @@ export const getDocumentResponseContentEightTwoContactEmailRegExp = new RegExp('
 export const getDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
 
 export const getDocumentResponseSeoTitleMax = 70;
+
+export const getDocumentResponseSeoDescriptionMax = 180;
+
 export const getDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const GetDocumentResponse = zod.object({
@@ -2240,11 +2273,15 @@ export const updateDocumentBodyTitleMax = 240;
 export const updateDocumentBodySummaryMax = 2000;
 
 export const updateDocumentBodySeoOneTitleMax = 70;
-export const listDocumentsResponseTwoItemsItemSeoTitleMax = 70;
+
+export const updateDocumentBodySeoOneDescriptionMax = 180;
+
+export const updateDocumentBodySeoOneCanonicalUrlRegExp = new RegExp('^(?:$|[hH][tT][tT][pP][sS]?://.+)');
 export const updateDocumentBodySeoOneNoIndexDefault = false;
 export const updateDocumentBodyMarketRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 export const updateDocumentBodyLocaleRegExp = new RegExp('^[a-z]{2}(?:-[A-Z]{2})?$');
 export const updateDocumentBodyRevisionNumberMultipleOf = 1;
+
 
 
 export const UpdateDocumentBody = zod.object({
@@ -2322,7 +2359,11 @@ export const updateDocumentResponseContentEightTwoContactEmailRegExp = new RegEx
 export const updateDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
 
 export const updateDocumentResponseSeoTitleMax = 70;
+
+export const updateDocumentResponseSeoDescriptionMax = 180;
+
 export const updateDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const UpdateDocumentResponse = zod.object({
@@ -2757,6 +2798,11 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentEightTwoCon
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentNineVisualReferencesItemAltTextMax = 500;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotSeoTitleMax = 70;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotSeoDescriptionMax = 180;
+
+
+
 export const ListDocumentRevisionsResponse = zod.object({
   "page": zod.number().min(1).multipleOf(listDocumentRevisionsResponseOnePageMultipleOf),
   "pageSize": zod.number().min(1).multipleOf(listDocumentRevisionsResponseOnePageSizeMultipleOf),
@@ -3118,6 +3164,7 @@ export const listDocumentEditionsResponseItemsItemRevisionNumberMultipleOf = 1;
 export const listDocumentEditionsResponseItemsItemEffectiveRevisionNumberMultipleOf = 1;
 
 
+
 export const ListDocumentEditionsResponse = zod.object({
   "documentId": zod.string(),
   "items": zod.array(zod.object({
@@ -3214,6 +3261,11 @@ export const createDocumentEditionOverrideResponseSnapshotContentEightTwoContact
 export const createDocumentEditionOverrideResponseSnapshotContentNineVisualReferencesItemAltTextMax = 500;
 
 export const createDocumentEditionOverrideResponseSnapshotSeoTitleMax = 70;
+
+export const createDocumentEditionOverrideResponseSnapshotSeoDescriptionMax = 180;
+
+
+
 export const CreateDocumentEditionOverrideResponse = zod.object({
   "id": zod.string(),
   "documentId": zod.string(),
@@ -3686,6 +3738,11 @@ export const getDocumentRevisionResponseSnapshotContentEightTwoContactEmailRegEx
 export const getDocumentRevisionResponseSnapshotContentNineVisualReferencesItemAltTextMax = 500;
 
 export const getDocumentRevisionResponseSnapshotSeoTitleMax = 70;
+
+export const getDocumentRevisionResponseSnapshotSeoDescriptionMax = 180;
+
+
+
 export const GetDocumentRevisionResponse = zod.object({
   "id": zod.string(),
   "documentId": zod.string(),
@@ -4038,6 +4095,7 @@ export const SubmitDocumentParams = zod.object({
 export const submitDocumentBodyNoteMax = 1000;
 
 
+
 export const SubmitDocumentBody = zod.object({
   "revisionId": zod.string(),
   "note": zod.string().max(submitDocumentBodyNoteMax).optional(),
@@ -4102,7 +4160,11 @@ export const submitDocumentResponseContentEightTwoContactEmailRegExp = new RegEx
 export const submitDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
 
 export const submitDocumentResponseSeoTitleMax = 70;
+
+export const submitDocumentResponseSeoDescriptionMax = 180;
+
 export const submitDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const SubmitDocumentResponse = zod.object({
@@ -4482,6 +4544,7 @@ export const AddDocumentReviewCommentParams = zod.object({
 export const addDocumentReviewCommentBodyBodyMax = 2000;
 
 
+
 export const AddDocumentReviewCommentBody = zod.object({
   "revisionId": zod.string(),
   "body": zod.string().min(1).max(addDocumentReviewCommentBodyBodyMax)
@@ -4504,6 +4567,7 @@ export const RejectDocumentRevisionParams = zod.object({
 })
 
 export const rejectDocumentRevisionBodyBodyMax = 2000;
+
 
 
 export const RejectDocumentRevisionBody = zod.object({
@@ -4569,7 +4633,11 @@ export const rejectDocumentRevisionResponseContentEightTwoContactEmailRegExp = n
 export const rejectDocumentRevisionResponseContentNineVisualReferencesItemAltTextMax = 500;
 
 export const rejectDocumentRevisionResponseSeoTitleMax = 70;
+
+export const rejectDocumentRevisionResponseSeoDescriptionMax = 180;
+
 export const rejectDocumentRevisionResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const RejectDocumentRevisionResponse = zod.object({
@@ -4928,6 +4996,7 @@ export const PublishDocumentParams = zod.object({
 export const publishDocumentBodyNoteMax = 1000;
 
 
+
 export const PublishDocumentBody = zod.object({
   "revisionId": zod.string(),
   "note": zod.string().max(publishDocumentBodyNoteMax).optional()
@@ -4991,7 +5060,11 @@ export const publishDocumentResponseContentEightTwoContactEmailRegExp = new RegE
 export const publishDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
 
 export const publishDocumentResponseSeoTitleMax = 70;
+
+export const publishDocumentResponseSeoDescriptionMax = 180;
+
 export const publishDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const PublishDocumentResponse = zod.object({
@@ -5350,6 +5423,7 @@ export const RollbackDocumentParams = zod.object({
 export const rollbackDocumentBodyNoteMax = 1000;
 
 
+
 export const RollbackDocumentBody = zod.object({
   "revisionId": zod.string(),
   "note": zod.string().max(rollbackDocumentBodyNoteMax).optional()
@@ -5413,7 +5487,11 @@ export const rollbackDocumentResponseContentEightTwoContactEmailRegExp = new Reg
 export const rollbackDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
 
 export const rollbackDocumentResponseSeoTitleMax = 70;
+
+export const rollbackDocumentResponseSeoDescriptionMax = 180;
+
 export const rollbackDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const RollbackDocumentResponse = zod.object({
@@ -5772,6 +5850,7 @@ export const ArchiveDocumentParams = zod.object({
 export const archiveDocumentBodyReasonMax = 1000;
 
 
+
 export const ArchiveDocumentBody = zod.object({
   "market": zod.string(),
   "locale": zod.string(),
@@ -5836,7 +5915,11 @@ export const archiveDocumentResponseContentEightTwoContactEmailRegExp = new RegE
 export const archiveDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
 
 export const archiveDocumentResponseSeoTitleMax = 70;
+
+export const archiveDocumentResponseSeoDescriptionMax = 180;
+
 export const archiveDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const ArchiveDocumentResponse = zod.object({
@@ -6195,6 +6278,7 @@ export const RestoreDocumentParams = zod.object({
 export const restoreDocumentBodyReasonMax = 1000;
 
 
+
 export const RestoreDocumentBody = zod.object({
   "market": zod.string(),
   "locale": zod.string(),
@@ -6259,7 +6343,11 @@ export const restoreDocumentResponseContentEightTwoContactEmailRegExp = new RegE
 export const restoreDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
 
 export const restoreDocumentResponseSeoTitleMax = 70;
+
+export const restoreDocumentResponseSeoDescriptionMax = 180;
+
 export const restoreDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const RestoreDocumentResponse = zod.object({
@@ -6678,7 +6766,11 @@ export const previewDocumentResponseDocumentContentEightTwoContactEmailRegExp = 
 export const previewDocumentResponseDocumentContentNineVisualReferencesItemAltTextMax = 500;
 
 export const previewDocumentResponseDocumentSeoTitleMax = 70;
+
+export const previewDocumentResponseDocumentSeoDescriptionMax = 180;
+
 export const previewDocumentResponseRevisionNumberMultipleOf = 1;
+
 
 
 export const PreviewDocumentResponse = zod.object({
@@ -7042,6 +7134,7 @@ export const listMarketEditionsQueryPageSizeMax = 100;
 export const listMarketEditionsQueryPageSizeMultipleOf = 1;
 
 
+
 export const ListMarketEditionsQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listMarketEditionsQueryPageMultipleOf).default(listMarketEditionsQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listMarketEditionsQueryPageSizeMax).multipleOf(listMarketEditionsQueryPageSizeMultipleOf).default(listMarketEditionsQueryPageSizeDefault)
@@ -7056,6 +7149,7 @@ export const listMarketEditionsResponseOneTotalMultipleOf = 1;
 
 export const listMarketEditionsResponseOneTotalPagesMin = 0;
 export const listMarketEditionsResponseOneTotalPagesMultipleOf = 1;
+
 
 
 export const ListMarketEditionsResponse = zod.object({
@@ -7092,6 +7186,7 @@ export const createMarketEditionBodyFallbackMarketCodeMax = 16;
 
 export const createMarketEditionBodyFallbackLocaleMin = 2;
 export const createMarketEditionBodyFallbackLocaleMax = 35;
+
 
 
 export const CreateMarketEditionBody = zod.object({
@@ -7155,6 +7250,7 @@ export const updateMarketEditionBodyDefaultLocaleMax = 35;
 export const updateMarketEditionBodyFallbackMarketCodeMax = 16;
 
 
+
 export const UpdateMarketEditionBody = zod.object({
   "code": zod.string().regex(updateMarketEditionBodyCodeRegExp).optional(),
   "displayName": zod.string().min(1).max(updateMarketEditionBodyDisplayNameMax).optional(),
@@ -7200,6 +7296,7 @@ export const listMediaQueryPageSizeMax = 100;
 export const listMediaQueryPageSizeMultipleOf = 1;
 
 export const listMediaQuerySearchMax = 200;
+
 
 
 export const ListMediaQueryParams = zod.object({
@@ -7275,6 +7372,7 @@ export const listMediaResponseTwoItemsItemFocalPointOneXMax = 1;
 
 export const listMediaResponseTwoItemsItemFocalPointOneYMin = 0;
 export const listMediaResponseTwoItemsItemFocalPointOneYMax = 1;
+
 
 
 export const ListMediaResponse = zod.object({
@@ -7485,6 +7583,7 @@ export const requestMediaUploadResponseMediaFocalPointOneYMin = 0;
 export const requestMediaUploadResponseMediaFocalPointOneYMax = 1;
 
 
+
 export const RequestMediaUploadResponse = zod.object({
   "media": zod.object({
   "id": zod.string(),
@@ -7605,6 +7704,7 @@ export const getMediaResponseFocalPointOneYMin = 0;
 export const getMediaResponseFocalPointOneYMax = 1;
 
 
+
 export const GetMediaResponse = zod.object({
   "id": zod.string(),
   "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
@@ -7718,6 +7818,7 @@ export const updateMediaBodyFocalPointOneYMin = 0;
 export const updateMediaBodyFocalPointOneYMax = 1;
 
 
+
 export const UpdateMediaBody = zod.object({
   "filename": zod.string().min(1).max(updateMediaBodyFilenameMax).optional(),
   "altText": zod.string().max(updateMediaBodyAltTextMax).nullish(),
@@ -7808,6 +7909,7 @@ export const updateMediaResponseFocalPointOneXMax = 1;
 
 export const updateMediaResponseFocalPointOneYMin = 0;
 export const updateMediaResponseFocalPointOneYMax = 1;
+
 
 
 export const UpdateMediaResponse = zod.object({
@@ -7954,6 +8056,7 @@ export const renewMediaUploadResponseMediaFocalPointOneYMin = 0;
 export const renewMediaUploadResponseMediaFocalPointOneYMax = 1;
 
 
+
 export const RenewMediaUploadResponse = zod.object({
   "media": zod.object({
   "id": zod.string(),
@@ -8076,6 +8179,7 @@ export const reviewMediaResponseFocalPointOneXMax = 1;
 
 export const reviewMediaResponseFocalPointOneYMin = 0;
 export const reviewMediaResponseFocalPointOneYMax = 1;
+
 
 
 export const ReviewMediaResponse = zod.object({
@@ -8274,6 +8378,7 @@ export const finalizeMediaUploadResponseFocalPointOneYMin = 0;
 export const finalizeMediaUploadResponseFocalPointOneYMax = 1;
 
 
+
 export const FinalizeMediaUploadResponse = zod.object({
   "id": zod.string(),
   "versionId": zod.string().describe('Immutable latest media version selected by this record.'),
@@ -8336,6 +8441,7 @@ export const listSubmissionsQueryPageSizeMax = 100;
 export const listSubmissionsQueryPageSizeMultipleOf = 1;
 
 export const listSubmissionsQuerySearchMax = 200;
+
 
 
 export const ListSubmissionsQueryParams = zod.object({
@@ -8419,6 +8525,7 @@ export const UpdateSubmissionParams = zod.object({
 export const updateSubmissionBodyNotesMax = 4000;
 
 
+
 export const UpdateSubmissionBody = zod.object({
   "status": zod.enum(['new', 'open', 'contacted', 'resolved', 'spam', 'unsubscribed']).optional(),
   "ownerId": zod.string().nullish(),
@@ -8461,6 +8568,7 @@ export const listUsersQueryPageSizeMultipleOf = 1;
 export const listUsersQuerySearchMax = 200;
 
 
+
 export const ListUsersQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listUsersQueryPageMultipleOf).default(listUsersQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listUsersQueryPageSizeMax).multipleOf(listUsersQueryPageSizeMultipleOf).default(listUsersQueryPageSizeDefault),
@@ -8482,6 +8590,7 @@ export const listUsersResponseOneTotalPagesMultipleOf = 1;
 export const listUsersResponseTwoItemsItemEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const listUsersResponseTwoItemsItemMarketCodesItemMin = 2;
 export const listUsersResponseTwoItemsItemMarketCodesItemMax = 24;
+
 
 
 export const ListUsersResponse = zod.object({
@@ -8520,6 +8629,7 @@ export const inviteUserBodyMarketCodesItemMin = 2;
 export const inviteUserBodyMarketCodesItemMax = 24;
 
 
+
 export const InviteUserBody = zod.object({
   "name": zod.string().min(inviteUserBodyNameMin).max(inviteUserBodyNameMax),
   "email": zod.string().max(inviteUserBodyEmailMax).regex(inviteUserBodyEmailRegExp),
@@ -8530,6 +8640,7 @@ export const InviteUserBody = zod.object({
 export const inviteUserResponseUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const inviteUserResponseUserMarketCodesItemMin = 2;
 export const inviteUserResponseUserMarketCodesItemMax = 24;
+
 
 
 export const InviteUserResponse = zod.object({
@@ -8567,6 +8678,7 @@ export const updateUserBodyMarketCodesItemMin = 2;
 export const updateUserBodyMarketCodesItemMax = 24;
 
 
+
 export const UpdateUserBody = zod.object({
   "name": zod.string().min(updateUserBodyNameMin).max(updateUserBodyNameMax).optional(),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']).optional(),
@@ -8577,6 +8689,7 @@ export const UpdateUserBody = zod.object({
 export const updateUserResponseEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const updateUserResponseMarketCodesItemMin = 2;
 export const updateUserResponseMarketCodesItemMax = 24;
+
 
 
 export const UpdateUserResponse = zod.object({
@@ -8629,6 +8742,7 @@ export const revokeUserSessionsResponseRevokedCountMin = 0;
 export const revokeUserSessionsResponseRevokedCountMultipleOf = 1;
 
 
+
 export const RevokeUserSessionsResponse = zod.object({
   "revokedCount": zod.number().min(revokeUserSessionsResponseRevokedCountMin).multipleOf(revokeUserSessionsResponseRevokedCountMultipleOf),
   "revokedAt": zod.coerce.date()
@@ -8644,6 +8758,7 @@ export const listAuditEventsQueryPageMultipleOf = 1;
 export const listAuditEventsQueryPageSizeDefault = 25;
 export const listAuditEventsQueryPageSizeMax = 100;
 export const listAuditEventsQueryPageSizeMultipleOf = 1;
+
 
 
 export const ListAuditEventsQueryParams = zod.object({
@@ -8704,6 +8819,7 @@ export const listPublishedContentQueryPageSizeMax = 100;
 export const listPublishedContentQueryPageSizeMultipleOf = 1;
 
 
+
 export const ListPublishedContentQueryParams = zod.object({
   "page": zod.coerce.number().min(1).multipleOf(listPublishedContentQueryPageMultipleOf).default(listPublishedContentQueryPageDefault),
   "pageSize": zod.coerce.number().min(1).max(listPublishedContentQueryPageSizeMax).multipleOf(listPublishedContentQueryPageSizeMultipleOf).default(listPublishedContentQueryPageSizeDefault),
@@ -8723,11 +8839,15 @@ export const listPublishedContentResponseOneTotalPagesMin = 0;
 export const listPublishedContentResponseOneTotalPagesMultipleOf = 1;
 
 export const listPublishedContentResponseTwoItemsItemSeoTitleMax = 70;
+
+export const listPublishedContentResponseTwoItemsItemSeoDescriptionMax = 180;
+
 export const listPublishedContentResponseTwoItemsItemMediaItemWidthMultipleOf = 1;
 
 export const listPublishedContentResponseTwoItemsItemMediaItemHeightMultipleOf = 1;
 
 export const listPublishedContentResponseTwoItemsItemRevisionMultipleOf = 1;
+
 
 
 export const ListPublishedContentResponse = zod.object({
@@ -8788,11 +8908,15 @@ export const GetPublishedContentParams = zod.object({
 })
 
 export const getPublishedContentResponseSeoTitleMax = 70;
+
+export const getPublishedContentResponseSeoDescriptionMax = 180;
+
 export const getPublishedContentResponseMediaItemWidthMultipleOf = 1;
 
 export const getPublishedContentResponseMediaItemHeightMultipleOf = 1;
 
 export const getPublishedContentResponseRevisionMultipleOf = 1;
+
 
 
 export const GetPublishedContentResponse = zod.object({
@@ -8861,6 +8985,7 @@ export const getPublicHeroFilmResponseSourcesMax = 2;
 export const getPublicHeroFilmResponseRevisionMultipleOf = 1;
 
 
+
 export const GetPublicHeroFilmResponse = zod.object({
   "slot": zod.enum(['homepage', 'industries']),
   "poster": zod.object({
@@ -8902,6 +9027,7 @@ export const getPublicContactConfigurationResponseContactEmailRegExp = new RegEx
 export const getPublicContactConfigurationResponseRevisionMultipleOf = 1;
 
 
+
 export const GetPublicContactConfigurationResponse = zod.object({
   "contactEmail": zod.string().max(getPublicContactConfigurationResponseContactEmailMax).regex(getPublicContactConfigurationResponseContactEmailRegExp),
   "market": zod.string(),
@@ -8923,6 +9049,7 @@ export const GetPublicSitemapQueryParams = zod.object({
 
 export const getPublicSitemapResponseItemsItemPriorityMin = 0;
 export const getPublicSitemapResponseItemsItemPriorityMax = 1;
+
 
 
 export const GetPublicSitemapResponse = zod.object({
@@ -8952,6 +9079,7 @@ export const recordAnalyticsEventBodyMarketMax = 35;
 export const recordAnalyticsEventBodyConsentVersionMax = 40;
 
 
+
 export const RecordAnalyticsEventBody = zod.object({
   "visitorId": zod.string(),
   "sessionId": zod.string(),
@@ -8978,6 +9106,7 @@ export const recordAnalyticsConsentBodyVersionMax = 40;
 export const recordAnalyticsConsentBodySourceMax = 100;
 
 
+
 export const RecordAnalyticsConsentBody = zod.object({
   "visitorId": zod.string(),
   "version": zod.string().min(1).max(recordAnalyticsConsentBodyVersionMax),
@@ -8996,40 +9125,3 @@ export const RecordAnalyticsConsentResponse = zod.object({
 })
 
 
-export const archiveDocumentResponseSeoDescriptionMax = 180;
-
-export const listPublishedContentResponseTwoItemsItemSeoDescriptionMax = 180;
-
-export const createDocumentEditionOverrideResponseSnapshotSeoDescriptionMax = 180;
-
-export const rejectDocumentRevisionResponseSeoDescriptionMax = 180;
-
-export const createDocumentResponseSeoDescriptionMax = 180;
-
-export const publishDocumentResponseSeoDescriptionMax = 180;
-
-export const updateDocumentBodySeoOneNoIndexDefault = false;
-
-export const listDocumentRevisionsResponseTwoItemsItemSnapshotSeoDescriptionMax = 180;
-
-export const restoreDocumentResponseSeoDescriptionMax = 180;
-
-export const getDocumentResponseSeoDescriptionMax = 180;
-
-export const getPublishedContentResponseSeoDescriptionMax = 180;
-
-export const listDocumentsResponseTwoItemsItemSeoDescriptionMax = 180;
-
-export const submitDocumentResponseSeoDescriptionMax = 180;
-
-export const getDocumentRevisionResponseSnapshotSeoDescriptionMax = 180;
-
-export const rollbackDocumentResponseSeoDescriptionMax = 180;
-
-export const updateDocumentBodySeoOneCanonicalUrlRegExp = new RegExp('^(?:$|[hH][tT][tT][pP][sS]?://.+)');
-
-export const previewDocumentResponseDocumentSeoDescriptionMax = 180;
-
-export const updateDocumentResponseSeoDescriptionMax = 180;
-
-export const updateDocumentBodySeoOneDescriptionMax = 180;

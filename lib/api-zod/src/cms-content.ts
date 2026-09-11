@@ -554,6 +554,13 @@ export const cmsSeoSchema = z.object({
   noIndex: z.boolean().default(false),
 }).strict();
 
+export const CMS_DRAFT_METADATA_LIMITS = {
+  title: 240,
+  summary: 2_000,
+  seoTitle: 70,
+  seoDescription: 180,
+} as const;
+
 export const cmsDraftMetadataSchema = z.object({
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(160),
   title: z.string().trim().min(1).max(CMS_DRAFT_METADATA_LIMITS.title),
@@ -1004,13 +1011,6 @@ export function collectCmsMediaReferences(
 }
 
 export type CmsMediaReferenceContract = z.infer<typeof cmsMediaReferenceSchema>;
-
-export const CMS_DRAFT_METADATA_LIMITS = {
-  title: 240,
-  summary: 2_000,
-  seoTitle: 70,
-  seoDescription: 180,
-} as const;
 
 export function validateCmsDraftMetadata(input: unknown) {
   const parsed = cmsDraftMetadataSchema.safeParse(input);

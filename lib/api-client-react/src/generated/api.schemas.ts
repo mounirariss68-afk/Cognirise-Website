@@ -2541,3 +2541,4 @@ export type GetPublicSitemapParams = {
 market?: string;
 locale?: string;
 };
+
