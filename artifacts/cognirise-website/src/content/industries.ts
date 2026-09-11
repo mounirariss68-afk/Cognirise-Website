@@ -49,6 +49,7 @@ export type IndustryContent = {
     roadmap: { horizon: string; title: string; body: string }[];
     leadershipTest: string;
   };
+  bankingPov?: import("@workspace/api-zod").BankingPov;
   verificationDate: string;
   reviewDate: string;
   visibility: "public" | "hidden" | "restricted";

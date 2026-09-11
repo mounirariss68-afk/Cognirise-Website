@@ -22,6 +22,13 @@ function educationContent(payload: unknown) {
   return payload.content;
 }
 
+function bankingContent(payload: unknown) {
+  if (!isObject(payload) || !isObject(payload.content)) return false;
+  if (payload.slug !== "financial-services" && payload.content.name !== "Financial Services") return false;
+  const pov = payload.content.bankingPov;
+  return isObject(pov) && typeof pov.market === "string" ? { content: payload.content, pov } : false;
+}
+
 function isEducationV2Payload(payload: unknown) {
   const content = educationContent(payload);
   if (!content) return false;
@@ -182,12 +189,25 @@ export function projectIndustrySnapshotForMarket<T>(
   requestedMarket: string,
   editionMarket?: string,
 ): T {
-  if (!EDUCATION_MARKETS.has(requestedMarket) || !educationContent(payload)) return payload;
+  if (!EDUCATION_MARKETS.has(requestedMarket)) return payload;
   const payloadMarkets = isObject(payload) && Array.isArray(payload.markets)
     ? payload.markets.filter((market): market is string => typeof market === "string")
     : [];
   const sourceEditionMarket = editionMarket
     ?? (payloadMarkets.length === 1 ? payloadMarkets[0] : undefined);
+  const banking = bankingContent(payload);
+  if (banking) {
+    if (banking.pov.market !== requestedMarket || (sourceEditionMarket && sourceEditionMarket !== requestedMarket)) {
+      throw new Error(`Banking delivery cannot fall back from ${banking.pov.market} to ${requestedMarket}; publish an explicitly reviewed market edition.`);
+    }
+    const projected = JSON.parse(JSON.stringify(payload)) as { markets?: unknown };
+    projected.markets = [requestedMarket];
+    if (containsForeignRegionalContent(projected, requestedMarket)) {
+      throw new Error(`Banking projection retained foreign regional content for ${requestedMarket}.`);
+    }
+    return projected as T;
+  }
+  if (!educationContent(payload)) return payload;
   if (!isEducationV2Payload(payload)) {
     const legacy = projectLegacyEducation(payload, requestedMarket);
     assertNoForeignRegionalLeak(legacy, requestedMarket);

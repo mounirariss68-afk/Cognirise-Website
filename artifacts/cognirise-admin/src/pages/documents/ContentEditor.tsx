@@ -345,6 +345,10 @@ export function ContentEditor({ kind, value, onChange, errors }: {
           <RecordList label="Roadmap" value={educationPov.roadmap} minimum={3} columns={[{ key: "horizon", label: "Horizon" }, { key: "title", label: "Title" }, { key: "body", label: "Description" }]} onChange={(next) => set("educationPov", { ...educationPov, roadmap: next })} />
           <Area label="Leadership test" value={educationPov.leadershipTest} onChange={(next) => set("educationPov", { ...educationPov, leadershipTest: next })} />
         </section>}
+        {(value.bankingPov || value.legacyPath === "/industries/banking") && <BankingPovEditor
+          value={value.bankingPov}
+          onChange={(bankingPov) => set("bankingPov", bankingPov)}
+        />}
       </>}
 
       {kind === "framework" && <>
@@ -396,6 +400,14 @@ export function ContentEditor({ kind, value, onChange, errors }: {
   );
 }
 
+const bankingDomains = [
+  ["credit-lending", "Credit & Lending"],
+  ["risk-fraud", "Risk & Fraud"],
+  ["operations-process", "Operations & Process"],
+  ["customer-sales", "Customer & Sales"],
+  ["engineering-it", "Engineering & IT"],
+  ["compliance-regulation", "Compliance & Regulation"],
+];
 const educationMarkets = ["all-markets", "uae", "ksa", "turkiye", "europe"];
 
 function EducationSignals({ value, onChange, version }: { value: unknown; onChange: (value: any[]) => void; version?: 2 }) {
@@ -525,4 +537,111 @@ function EducationDomains({ value, onChange, version }: { value: unknown; onChan
   const items = Array.isArray(value) ? value : [];
   const maximum = version === 2 ? 5 : 3;
   return <section className="space-y-3"><div className="flex justify-between"><Label>{version === 2 ? "Five value domains" : "Three value domains"} <Requirement required /></Label><Button type="button" size="sm" variant="outline" disabled={items.length >= maximum} onClick={() => onChange([...items, { title: "", body: "", examples: [] }])}>Add domain</Button></div>{items.map((item, index) => <fieldset key={index} className="space-y-3 rounded-md border p-3"><legend>Domain {index + 1}</legend><Field label={`Domain ${index + 1} title`} required value={item.title} onChange={(title) => onChange(items.map((current, i) => i === index ? { ...current, title } : current))} /><Area label={`Domain ${index + 1} description`} required value={item.body ?? ""} onChange={(body) => onChange(items.map((current, i) => i === index ? { ...current, body } : current))} /><StringList label={`Domain ${index + 1} examples`} required={version !== 2} value={item.examples} onChange={(examples) => onChange(items.map((current, i) => i === index ? { ...current, examples } : current))} /><Button type="button" variant="ghost" aria-label={`Remove domain ${index + 1}`} onClick={() => onChange(items.filter((_, i) => i !== index))}>Remove domain</Button></fieldset>)}</section>;
+}
+
+const bankingStartingPoints = [
+  ["core-banking-operations", "Core Banking Operations"],
+  ["contact-centre", "Contact Centre"],
+  ["software-delivery", "Software Delivery"],
+  ["marketing-intelligence", "Marketing Intelligence"],
+];
+
+const bankingJourneys = [
+  ["accounts-cards", "Accounts & cards"],
+  ["payments-transfers", "Payments & transfers"],
+  ["loans-deposits", "Loans & deposits"],
+  ["fraud-card-security", "Fraud & card security"],
+  ["digital-channel-support", "Digital channel support"],
+  ["collections-reminders", "Collections & reminders"],
+  ["campaigns-outbound", "Campaigns & outbound"],
+];
+
+function BankingProductionEditor({ value, onChange }: { value: Content; onChange: (value: Content) => void }) {
+  const production = value ?? {};
+  return <fieldset className="space-y-3 rounded-md border p-3"><legend>Production readiness — From permission to action</legend><Field label="Readiness eyebrow" required value={production.eyebrow} onChange={(eyebrow) => onChange({ ...production, eyebrow })} /><Field label="Readiness heading" required value={production.heading} onChange={(heading) => onChange({ ...production, heading })} /><Area label="Readiness narrative" required value={production.body ?? ""} onChange={(body) => onChange({ ...production, body })} /><StringList label="Production practices" required value={production.practices} onChange={(practices) => onChange({ ...production, practices })} /><MediaField label="Permission-to-action artwork" role="supporting" required value={production.image?.mediaId && production.image?.mediaVersionId ? production.image as MediaSelection : undefined} onChange={(image) => onChange({ ...production, image })} /><div className="grid gap-4 sm:grid-cols-2"><Field label="Artwork focal X (0–100)" required type="number" value={production.focalPoint?.x} onChange={(x) => onChange({ ...production, focalPoint: { ...production.focalPoint, x: Number(x) } })} /><Field label="Artwork focal Y (0–100)" required type="number" value={production.focalPoint?.y} onChange={(y) => onChange({ ...production, focalPoint: { ...production.focalPoint, y: Number(y) } })} /></div><Area label="Artwork annotation" required value={production.annotation ?? ""} onChange={(annotation) => onChange({ ...production, annotation })} /></fieldset>;
+}
+
+function BankingStartingPointEditor({ value, onChange }: { value: Content[]; onChange: (value: Content[]) => void }) {
+  const points = Array.isArray(value) ? value : [];
+  const update = (index: number, patch: Content) => onChange(points.map((item, current) => current === index ? { ...item, ...patch } : item));
+  return <section className="space-y-3"><Label>Four image-led starting points <Requirement required /></Label>{points.map((item, index) => <fieldset key={item.id ?? index} className="space-y-3 rounded-md border p-3"><legend>{item.title || `Starting point ${index + 1}`}</legend><Field label={`${item.title || "Starting point"} value proposition`} required value={item.valueProposition} onChange={(valueProposition) => update(index, { valueProposition })} /><Area label={`${item.title || "Starting point"} problem`} required value={item.problem ?? ""} onChange={(problem) => update(index, { problem })} /><Area label={`${item.title || "Starting point"} Cognirise role`} required value={item.cogniriseRole ?? ""} onChange={(cogniriseRole) => update(index, { cogniriseRole })} /><StringList label={`${item.title || "Starting point"} required inputs`} required value={item.requiredInputs} onChange={(requiredInputs) => update(index, { requiredInputs })} /><Area label={`${item.title || "Starting point"} first deliverable`} required value={item.firstDeliverable ?? ""} onChange={(firstDeliverable) => update(index, { firstDeliverable })} /><StringList label={`${item.title || "Starting point"} measures`} required value={item.measures} onChange={(measures) => update(index, { measures })} /><Area label={`${item.title || "Starting point"} decision boundary`} required value={item.decisionBoundary ?? ""} onChange={(decisionBoundary) => update(index, { decisionBoundary })} /><div className="grid gap-4 sm:grid-cols-2"><Field label={`${item.title || "Starting point"} CTA label`} required value={item.action?.label} onChange={(label) => update(index, { action: { ...item.action, label } })} /><Field label={`${item.title || "Starting point"} CTA link`} required value={item.action?.href} onChange={(href) => update(index, { action: { ...item.action, href } })} /></div><MediaField label={`${item.title || "Starting point"} card image`} role="supporting" required value={item.image?.mediaId && item.image?.mediaVersionId ? item.image as MediaSelection : undefined} onChange={(image) => update(index, { image })} /><div className="grid gap-4 sm:grid-cols-2"><Field label={`${item.title || "Starting point"} image focal X (0–100)`} required type="number" value={item.focalPoint?.x} onChange={(x) => update(index, { focalPoint: { ...item.focalPoint, x: Number(x) } })} /><Field label={`${item.title || "Starting point"} image focal Y (0–100)`} required type="number" value={item.focalPoint?.y} onChange={(y) => update(index, { focalPoint: { ...item.focalPoint, y: Number(y) } })} /></div></fieldset>)}</section>;
+}
+
+function BankingValueOutcomes({ value, onChange }: { value: Content[]; onChange: (value: Content[]) => void }) {
+  const values = Array.isArray(value) ? value : [];
+  return <section className="space-y-3"><Label>Three business value outcomes <Requirement required /></Label>{values.map((item, index) => <fieldset key={index} className="space-y-3 rounded-md border p-3"><legend>Outcome {index + 1}</legend><Field label={`Outcome ${index + 1} title`} required value={item.title} onChange={(title) => onChange(values.map((current, i) => i === index ? { ...current, title } : current))} /><Area label={`Outcome ${index + 1} explanation`} required value={item.body ?? ""} onChange={(body) => onChange(values.map((current, i) => i === index ? { ...current, body } : current))} /><StringList label={`Outcome ${index + 1} measures`} required value={item.measures} onChange={(measures) => onChange(values.map((current, i) => i === index ? { ...current, measures } : current))} /></fieldset>)}</section>;
+}
+
+function BankingPovEditor({ value, onChange }: { value: Content | undefined; onChange: (value: Content) => void }) {
+  if (!value) {
+    return <section className="space-y-3 rounded-md border p-4">
+      <h3 className="font-semibold">Banking POV structure</h3>
+      <p className="text-sm text-muted-foreground">This specialist structure is available only to Financial Services. It keeps evidence, controls, media pins, and the protected case receipt editable as structured fields.</p>
+      <Button type="button" variant="outline" onClick={() => onChange(bankingPovDraft())}>Add Banking POV v1</Button>
+    </section>;
+  }
+  const update = (patch: Content) => onChange({ ...value, ...patch });
+  return <section className="space-y-5 rounded-md border p-4">
+    <div>
+      <h3 className="font-semibold">Banking POV structure</h3>
+      <p className="text-sm text-muted-foreground">Publish requires the complete governed Banking POV, exact required sets, source associations, immutable approved media, and the captured public case receipt.</p>
+    </div>
+    <div className="grid gap-4 sm:grid-cols-2">
+      <Choice label="Banking market" required value={value.market ?? "uae"} options={["uae", "ksa", "turkiye", "europe"]} onChange={(market) => update({ market })} />
+      <Field label="Banking descriptor" required value={value.descriptor} onChange={(descriptor) => update({ descriptor })} />
+    </div>
+    <fieldset className="space-y-3 rounded-md border p-3"><legend>Hero</legend>
+      <Field label="Hero eyebrow" required value={value.hero?.eyebrow} onChange={(eyebrow) => update({ hero: { ...value.hero, eyebrow } })} />
+      <Field label="Hero heading" required value={value.hero?.heading} onChange={(heading) => update({ hero: { ...value.hero, heading } })} />
+      <Area label="Hero body" required value={value.hero?.body ?? ""} onChange={(body) => update({ hero: { ...value.hero, body } })} />
+      <div className="grid gap-4 sm:grid-cols-2"><Field label="Starting-points anchor label" required value={value.hero?.startingPointsAnchorLabel} onChange={(startingPointsAnchorLabel) => update({ hero: { ...value.hero, startingPointsAnchorLabel } })} /><Field label="Selected-work anchor label" required value={value.hero?.selectedWorkAnchorLabel} onChange={(selectedWorkAnchorLabel) => update({ hero: { ...value.hero, selectedWorkAnchorLabel } })} /></div>
+    </fieldset>
+    <RecordList label="Attributed evidence signals" value={value.evidenceSignals} minimum={1} columns={[{ key: "statement", label: "Claim supported" }, { key: "qualification", label: "Qualification" }, { key: "label", label: "Source title" }, { key: "publisher", label: "Publisher" }, { key: "publicationPeriod", label: "Publication period" }, { key: "accessedAt", label: "Accessed", type: "date" }, { key: "jurisdiction", label: "Jurisdiction" }, { key: "kind", label: "Evidence category" }, { key: "url", label: "Source URL" }]} onChange={(evidenceSignals) => update({ evidenceSignals })} />
+    <BankingValueOutcomes value={value.valueOutcomes} onChange={(valueOutcomes) => update({ valueOutcomes })} />
+    <BankingLevels value={value.adoptionLevels} onChange={(adoptionLevels) => update({ adoptionLevels })} />
+    <BankingDomains value={value.valueDomains} onChange={(valueDomains) => update({ valueDomains })} />
+    <BankingStartingPointEditor value={value.startingPoints} onChange={(startingPoints) => update({ startingPoints })} />
+    <BankingVoiceEditor value={value.voiceBanking} onChange={(voiceBanking) => update({ voiceBanking })} />
+    <BankingProductionEditor value={value.productionReadiness} onChange={(productionReadiness) => update({ productionReadiness })} />
+    <fieldset className="space-y-3 rounded-md border p-3"><legend>Delivery path</legend><RecordList label="Named delivery stages" value={value.deliveryPath?.stages} minimum={4} columns={[{ key: "stage", label: "Stage" }, { key: "owner", label: "Owner" }, { key: "outcome", label: "Outcome" }]} onChange={(stages) => update({ deliveryPath: { ...value.deliveryPath, stages } })} /><StringList label="Delivery-path practices" required value={value.deliveryPath?.practices} onChange={(practices) => update({ deliveryPath: { ...value.deliveryPath, practices } })} /></fieldset>
+    <RecordList label="Partner roles" value={value.partners} minimum={2} columns={[{ key: "name", label: "Partner" }, { key: "contribution", label: "Contribution" }, { key: "qualification", label: "Qualification" }, { key: "href", label: "External link" }]} onChange={(partners) => update({ partners })} />
+    <fieldset className="space-y-3 rounded-md border p-3"><legend>Existing Value Scan CTA</legend><Field label="CTA heading" required value={value.cta?.heading} onChange={(heading) => update({ cta: { ...value.cta, heading } })} /><Area label="CTA body" required value={value.cta?.body ?? ""} onChange={(body) => update({ cta: { ...value.cta, body } })} /><div className="grid gap-4 sm:grid-cols-2"><Field label="CTA label" required value={value.cta?.label} onChange={(label) => update({ cta: { ...value.cta, label } })} /><Field label="CTA destination" required value={value.cta?.href} onChange={(href) => update({ cta: { ...value.cta, href } })} /></div></fieldset>
+    <RecordList label="Protected published case receipt" value={value.caseMembershipSnapshot} minimum={1} columns={[{ key: "slug", label: "Case slug" }, { key: "title", label: "Published title" }, { key: "order", label: "Published order" }, { key: "digest", label: "Payload digest" }]} onChange={(caseMembershipSnapshot) => update({ caseMembershipSnapshot })} />
+  </section>;
+}
+
+function BankingDomains({ value, onChange }: { value: Content[]; onChange: (value: Content[]) => void }) {
+  const domains = Array.isArray(value) ? value : [];
+  const update = (index: number, patch: Content) => onChange(domains.map((item, current) => current === index ? { ...item, ...patch } : item));
+  return <section className="space-y-3"><Label>Six banking value domains <Requirement required /></Label>{domains.map((item, index) => <fieldset key={item.id ?? index} className="space-y-3 rounded-md border p-3"><legend>{item.title || `Domain ${index + 1}`}</legend><Area label={`${item.title || "Domain"} purpose`} required value={item.purpose ?? ""} onChange={(purpose) => update(index, { purpose })} /><StringList label={`${item.title || "Domain"} examples`} required value={item.examples} onChange={(examples) => update(index, { examples })} /><StringList label={`${item.title || "Domain"} observable measures`} required value={item.measures} onChange={(measures) => update(index, { measures })} /></fieldset>)}</section>;
+}
+
+function BankingVoiceEditor({ value, onChange }: { value: Content; onChange: (value: Content) => void }) {
+  const voice = value ?? {};
+  const journeys = Array.isArray(voice.journeys) ? voice.journeys : [];
+  const updateJourney = (index: number, patch: Content) => onChange({ ...voice, journeys: journeys.map((item, current) => current === index ? { ...item, ...patch } : item) });
+  return <section className="space-y-3"><Label>Voice banking explorer <Requirement required /></Label><fieldset className="space-y-3 rounded-md border p-3"><legend>Lupitor platform contribution</legend><Area label="Platform contribution" required value={voice.platform?.contribution ?? ""} onChange={(contribution) => onChange({ ...voice, platform: { ...voice.platform, name: "Lupitor", contribution } })} /><Field label="Platform link" required value={voice.platform?.href} onChange={(href) => onChange({ ...voice, platform: { ...voice.platform, name: "Lupitor", href } })} /><Area label="Platform claim qualification" required value={voice.platform?.qualification ?? ""} onChange={(qualification) => onChange({ ...voice, platform: { ...voice.platform, name: "Lupitor", qualification } })} /><Area label="Cognirise integration and operating role" required value={voice.cogniriseContribution ?? ""} onChange={(cogniriseContribution) => onChange({ ...voice, cogniriseContribution })} /></fieldset>{journeys.map((item, index) => <fieldset key={item.id ?? index} className="space-y-3 rounded-md border p-3"><legend>{item.title || `Voice journey ${index + 1}`}</legend><Area label={`${item.title || "Voice journey"} scope`} required value={item.scope ?? ""} onChange={(scope) => updateJourney(index, { scope })} /><StringList label={`${item.title || "Voice journey"} measures`} required value={item.measures} onChange={(measures) => updateJourney(index, { measures })} /><Area label={`${item.title || "Voice journey"} control boundary`} required value={item.controlBoundary ?? ""} onChange={(controlBoundary) => updateJourney(index, { controlBoundary })} /></fieldset>)}</section>;
+}
+
+function bankingPovDraft(): Content {
+  return {
+    version: 1, market: "uae", descriptor: "",
+    hero: { eyebrow: "Banking POV", heading: "One bank. Three levels of AI value.", body: "", startingPointsAnchorLabel: "Explore four starting points", selectedWorkAnchorLabel: "See selected work" },
+    evidenceSignals: [], valueOutcomes: [{ title: "", body: "", measures: [] }, { title: "", body: "", measures: [] }, { title: "", body: "", measures: [] }],
+    adoptionLevels: [1, 2, 3].map((level) => ({ level, title: "", value: "", illustrativeWork: [], owner: "", readiness: [], measures: [], decisionBoundary: "" })),
+    valueDomains: bankingDomains.map(([id, title]) => ({ id, title, purpose: "", examples: [], measures: [] })),
+    startingPoints: bankingStartingPoints.map(([id, title]) => ({ id, title, valueProposition: "", problem: "", cogniriseRole: "", requiredInputs: [], firstDeliverable: "", measures: [], decisionBoundary: "", action: { label: "Discuss this workflow", href: "/value-scan" }, focalPoint: { x: 50, y: 50 } })),
+    voiceBanking: { platform: { name: "Lupitor", contribution: "", href: "https://www.lupitor.com/industries/banking", qualification: "" }, cogniriseContribution: "", journeys: bankingJourneys.map(([id, title]) => ({ id, title, scope: "", measures: [], controlBoundary: "" })) },
+    productionReadiness: { eyebrow: "Production readiness", heading: "From permission to action.", body: "", practices: [], focalPoint: { x: 50, y: 50 }, annotation: "" },
+    deliveryPath: { stages: [{ stage: "Value discovery", owner: "", outcome: "" }, { stage: "Workflow design", owner: "", outcome: "" }, { stage: "Bounded pilot evaluation", owner: "", outcome: "" }, { stage: "Operational scaling", owner: "", outcome: "" }], practices: [] },
+    partners: [{ name: "Lupitor", contribution: "", qualification: "", href: "https://www.lupitor.com/" }, { name: "Ekimetrics", contribution: "", qualification: "", href: "https://www.ekimetrics.com/en-us/industries/financial-services" }],
+    cta: { heading: "", body: "", label: "Start a Value Scan", href: "/value-scan" },
+    caseMembershipSnapshot: [],
+  };
+}
+
+function BankingLevels({ value, onChange }: { value: Content[]; onChange: (value: Content[]) => void }) {
+  const levels = Array.isArray(value) ? value : [];
+  const update = (index: number, patch: Content) => onChange(levels.map((item, current) => current === index ? { ...item, ...patch } : item));
+  return <section className="space-y-3"><Label>Three accountable adoption levels <Requirement required /></Label>{levels.map((item, index) => <fieldset key={item.level ?? index} className="space-y-3 rounded-md border p-3"><legend>Level {item.level ?? index + 1}</legend><Field label={`Level ${index + 1} title`} required value={item.title} onChange={(title) => update(index, { title })} /><Area label={`Level ${index + 1} value`} required value={item.value ?? ""} onChange={(value) => update(index, { value })} /><Field label={`Level ${index + 1} accountable owner`} required value={item.owner} onChange={(owner) => update(index, { owner })} /><StringList label={`Level ${index + 1} illustrative work`} required value={item.illustrativeWork} onChange={(illustrativeWork) => update(index, { illustrativeWork })} /><StringList label={`Level ${index + 1} readiness conditions`} required value={item.readiness} onChange={(readiness) => update(index, { readiness })} /><StringList label={`Level ${index + 1} measures`} required value={item.measures} onChange={(measures) => update(index, { measures })} /><Area label={`Level ${index + 1} decision boundary`} required value={item.decisionBoundary ?? ""} onChange={(decisionBoundary) => update(index, { decisionBoundary })} /></fieldset>)}</section>;
 }

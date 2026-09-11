@@ -20,6 +20,7 @@ import {
   validateCmsSnapshot,
   validateCmsSnapshotForDelivery,
 } from "@workspace/api-zod";
+import { canAccessPendingPreviewMedia } from "../preview-access.js";
 import {
   authenticate,
   requireCsrf,
@@ -1969,6 +1970,17 @@ router.get(
       res.status(403).json({ error: "You are not assigned to this preview market." });
       return;
     }
+    const pending = await pool.query(
+      `SELECT 1 FROM cms_media_references ref
+        JOIN cms_media_assets a ON a.id=ref.asset_id
+       WHERE ref.document_id=$1 AND ref.field_path='revision:'||$2::text
+         AND a.status='pending-review' LIMIT 1`,
+      [String(row.document_id), String(row.revision_id)],
+    );
+    if (pending.rowCount && !canAccessPendingPreviewMedia((res.locals.auth as AuthContext).user.role)) {
+      res.status(403).json({ error: "Pending-review preview media requires editor, publisher, or administrator access." });
+      return;
+    }
     const requestedMarket = String(row.requested_market ?? row.market);
     const editionMarket = String(row.market);
     const projectedDocument = projectPreviewDocument(
@@ -1992,7 +2004,10 @@ router.get(
         WHERE ref.document_id=$1
           AND ref.field_path=$2
           AND a.id::text=ANY($3::text[])
-          AND a.status IN ('active','ready')`,
+           -- Preview sessions are authenticated, MFA-protected, market-scoped,
+           -- and no-store. They may render review-pending assets so editorial
+           -- review can assess a complete draft; public delivery never does.
+           AND a.status IN ('active','ready','pending-review')`,
       [
         String(row.document_id),
         `revision:${String(row.revision_id)}`,
@@ -2036,7 +2051,7 @@ router.get(
   requireMfa,
   asyncRoute(async (req, res) => {
     const asset = await pool.query(
-      `SELECT v.storage_key,r.payload,e.market,p.requested_market,
+      `SELECT v.storage_key,r.payload,e.market,p.requested_market,a.status,
           CASE WHEN v.metadata->>'rendition'='webp-1600' THEN 'image/webp' ELSE a.media_type END media_type
          FROM cms_preview_sessions p
          JOIN cms_market_editions e ON e.id=p.edition_id
@@ -2048,7 +2063,7 @@ router.get(
          JOIN cms_media_versions v ON v.asset_id=a.id AND v.id=ref.media_version_id
         WHERE p.token_digest=$1 AND p.expires_at>now()
           AND p.revoked_at IS NULL
-          AND a.id=$2 AND v.id=$3 AND a.status IN ('active','ready')
+          AND a.id=$2 AND v.id=$3 AND a.status IN ('active','ready','pending-review')
         LIMIT 1`,
       [
         hashToken(String(req.params.token)),
@@ -2058,6 +2073,11 @@ router.get(
     );
     if (!asset.rowCount || !previewMediaIds(asset.rows[0].payload).includes(String(req.params.mediaId))) {
       res.status(404).json({ error: "Preview media not found or expired." });
+      return;
+    }
+    if (asset.rows[0].status === "pending-review"
+      && !canAccessPendingPreviewMedia((res.locals.auth as AuthContext).user.role)) {
+      res.status(403).json({ error: "Pending-review preview media requires editor, publisher, or administrator access." });
       return;
     }
     if (!canAccessMarket(

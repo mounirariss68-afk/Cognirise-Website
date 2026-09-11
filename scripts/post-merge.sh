@@ -11,3 +11,7 @@ pnpm --filter @workspace/scripts cms:reconcile-value-to-scale-hero -- --apply-db
 pnpm --filter @workspace/scripts cms:reconcile-offices -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-methodologies-hero -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-methodologies-hero -- --verify-db --target=development
+# Banking remains a human-reviewed, unpublished successor. This applies or
+# replays only an exact candidate; a later editorial/published state is
+# explicitly receipted as preserved rather than retried or overwritten.
+pnpm --filter @workspace/scripts cms:setup-banking-postmerge -- --report-conflict

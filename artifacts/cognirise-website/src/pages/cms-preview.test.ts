@@ -69,3 +69,14 @@ test("Education previews use the editorial hierarchy with the requested market",
     /<Content/,
   );
 });
+
+test("Banking previews use the governed banking layout, capability media and published-only cases", async () => {
+  const preview = await readFile(pageUrl, "utf8");
+  assert.match(preview, /<BankingEditorial/);
+  assert.match(preview, /industry\.bankingPov\.market === preview\.requestedMarket/);
+  assert.match(preview, /media: preview\.media/);
+  assert.match(preview, /market: preview\.requestedMarket/);
+  assert.match(preview, /record\.disclosure === "restricted" \? \[\] : \[record\]/);
+  assert.doesNotMatch(preview, /from ["']@\/content\/banking/);
+  assert.match(preview, /canonicalUrl: null, noIndex: true/);
+});

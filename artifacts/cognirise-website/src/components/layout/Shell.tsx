@@ -373,6 +373,8 @@ export function Shell({
   }, [location]);
 
   useEffect(() => {
+    // These pages own governed metadata; do not overwrite their child effects.
+    if (currentPath.startsWith("/preview/") || currentPath === "/industries/financial-services") return;
     const articleTitle = currentPath.startsWith("/insights/") && "AI Transformation Perspective | Cognirise";
     const allianceSlug = currentPath.match(/^\/platforms\/(lupitor|datatoolpack|bunjee-ai)$/)?.[1] as keyof typeof ALLIANCE_PLATFORMS | undefined;
     const alliance = allianceSlug ? ALLIANCE_PLATFORMS[allianceSlug] : undefined;

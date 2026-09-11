@@ -33,3 +33,17 @@ test("protected Education preview projects the complete snapshot for requested a
   assert.match(previewRoute, /caption: asset\.metadata\?\.caption \?\? null/);
   assert.match(previewRoute, /X-Robots-Tag": "noindex, nofollow, noarchive"/);
 });
+
+test("pending media is available through both protected preview stages, never through a public bypass", async () => {
+  const route = await readFile(resolve(process.cwd(), "src/routes/documents.ts"), "utf8");
+  const metadataRoute = route.slice(route.indexOf('"/preview/:token"'), route.indexOf('"/preview/:token/media/:mediaId/:versionId"'));
+  const binaryRoute = route.slice(route.indexOf('"/preview/:token/media/:mediaId/:versionId"'));
+  for (const stage of [metadataRoute, binaryRoute]) {
+    assert.match(stage, /authenticate,\s*requireMfa/);
+    assert.match(stage, /a\.status IN \('active','ready','pending-review'\)/);
+    assert.match(stage, /canAccessMarket/);
+    assert.match(stage, /p\.revoked_at IS NULL/);
+    assert.match(stage, /no-store, private/);
+  }
+  assert.match(binaryRoute, /previewMediaIds\(asset\.rows\[0\]\.payload\)\.includes/);
+});

@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { useRoute } from "wouter";
-import { type CmsDocumentKind, type FrameworkContent, type IndustryContent, type OfficeContent, validateCmsSnapshot } from "@workspace/api-zod";
+import { type CmsDocumentKind, type FrameworkContent, type IndustryContent, type OfficeContent, validateCmsContent, validateCmsSnapshot } from "@workspace/api-zod";
+import { useListPublishedContent } from "@workspace/api-client-react";
 import NotFound from "@/pages/not-found";
 import { applyMetadata } from "@/lib/metadata";
 import { AgentAuthorityLayout } from "@/pages/AgentAuthorityModel";
-import { resolveCmsMedia, type CmsRecord } from "@/lib/cms";
+import { contentRecord, resolveCmsMedia, type CmsRecord } from "@/lib/cms";
 import { normalizeFrameworkPreviewContent } from "@/lib/framework-preview";
 import { OfficeContactCard } from "@/components/OfficeContactCard";
 import { EducationEditorialView } from "@/components/industries/EducationEditorial";
+import { BankingEditorial } from "@/components/industries/BankingEditorial";
+import type { PublicCaseStudy } from "@/components/work/case-study-ui";
 import { Shell, type PreviewNavigationSnapshot } from "@/components/layout/Shell";
 import type { Market } from "@/store/market";
 
@@ -57,6 +60,29 @@ function Content({ value }: { value: Record<string, any> }) {
         : <pre className="mt-3 overflow-auto whitespace-pre-wrap rounded-md bg-secondary p-4 text-sm">{JSON.stringify(item, null, 2)}</pre>}
     </section>
   ))}</div>;
+}
+
+function BankingPreview({ preview, content }: { preview: Preview; content: IndustryContent }) {
+  const cases = useListPublishedContent({
+    kind: "case-study",
+    market: preview.requestedMarket,
+    locale: preview.requestedLocale,
+    pageSize: 100,
+  });
+  const publishedCases = (cases.data?.items ?? []).flatMap((item) => {
+    const validation = validateCmsContent("case-study", item.content, "publish");
+    if (!validation.success) return [];
+    const record = contentRecord(item, "case-study") as PublicCaseStudy;
+    return record.disclosure === "restricted" ? [] : [record];
+  });
+  return <BankingEditorial
+    view={{
+      ...content,
+      slug: "financial-services",
+      media: preview.media,
+    } as Parameters<typeof BankingEditorial>[0]["view"]}
+    cases={publishedCases}
+  />;
 }
 
 export default function CmsPreview() {
@@ -125,6 +151,24 @@ export default function CmsPreview() {
   const educationMarket = ["uae", "ksa", "turkiye", "europe"].includes(preview.requestedMarket)
     ? preview.requestedMarket as Market
     : undefined;
+
+  if (preview.kind === "industry" && validation.success) {
+    const industry = validation.data.content as IndustryContent;
+    if (industry.bankingPov && industry.bankingPov.market === preview.requestedMarket) {
+      return (
+        <Shell navigationOverride={preview.navigation}>
+          <header className="sticky top-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-3 text-amber-950 sm:px-6 sm:py-4">
+            <div className="mx-auto flex max-w-[1100px] flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
+              <strong>Protected draft preview — not published</strong>
+              <span className="font-mono text-[10px] uppercase sm:text-xs">{preview.requestedMarket} / {preview.requestedLocale} · revision {preview.revisionNumber}</span>
+            </div>
+          </header>
+          {warningPanel}
+          <BankingPreview preview={preview} content={industry} />
+        </Shell>
+      );
+    }
+  }
 
   if (preview.kind === "framework" && framework) {
     return (

@@ -72,6 +72,8 @@ const safeLink = z.union([safeExternalUrl, safeInternalPath]);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD.");
 const optionalDate = date.optional();
 const stringList = z.array(z.string().trim().min(1).max(240)).max(50).default([]);
+
+const requiredBankingStringList = z.array(z.string().trim().min(1).max(240)).min(1).max(8);
 const idList = z.array(z.string().uuid()).max(50).default([]);
 
 /** A media selection is an immutable (asset, version) pair.  The asset id is
@@ -369,6 +371,7 @@ const educationPovV2Schema = z.object({
 
 const educationPovSchema = z.union([legacyEducationPovSchema, educationPovV2Schema]);
 
+const bankingMarketSchema = z.enum(["uae", "ksa", "turkiye", "europe"]);
 export const industryContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
   legacyPath: safeInternalPath,
@@ -413,6 +416,7 @@ export const industryContentSchema = z.object({
   }).strict()).min(1).max(12),
   sources: z.array(industrySourceSchema).min(1).max(30),
   educationPov: educationPovSchema.optional(),
+  bankingPov: z.lazy(() => bankingPovSchema).optional(),
   heroMedia: optionalMediaReference,
   heroMediaId: legacyMediaId,
   supportingMedia: z.array(cmsMediaReferenceSchema).max(8).optional(),
@@ -422,8 +426,26 @@ export const industryContentSchema = z.object({
   order: z.number().int().min(0).max(10_000).default(0),
   relatedIds: idList,
 }).strict().superRefine((value, context) => {
-  if (value.educationPov?.version !== 2) return;
+  if (value.bankingPov && value.name !== "Financial Services") {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["bankingPov"],
+      message: "The Banking POV is available only to Financial Services.",
+    });
+  }
   const sourceTrail = new Set(value.sources.map((source) => source.url));
+  if (value.bankingPov) {
+    for (const [index, source] of value.bankingPov.evidenceSignals.entries()) {
+      if (!sourceTrail.has(source.url)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["bankingPov", "evidenceSignals", index, "url"],
+          message: "Banking evidence URL must match a URL in the industry source trail.",
+        });
+      }
+    }
+  }
+  if (value.educationPov?.version !== 2) return;
   const associations = [
     ...value.educationPov.signals.flatMap((signal, index) =>
       signal.sourceUrls.map((url, sourceIndex) => ({
@@ -645,6 +667,8 @@ export type PlatformContent = z.infer<typeof platformContentSchema>;
 export type PublicationContent = z.infer<typeof publicationContentSchema>;
 export type CaseStudyContent = z.infer<typeof caseStudyContentSchema>;
 export type IndustryContent = z.infer<typeof industryContentSchema>;
+
+export type BankingPov = z.infer<typeof bankingPovSchema>;
 export type FrameworkContent = z.infer<typeof frameworkContentSchema>;
 export type OfficeContent = z.infer<typeof officeContentSchema>;
 
@@ -900,12 +924,38 @@ export function validateCmsSnapshotForDelivery(
   }
   const source = validateCmsSnapshotStructure(kind, input, mode);
   if (!source.success || mode !== "publish" || kind !== "industry") return source;
-  const errors = educationImmutableMediaErrors(source.data as z.infer<typeof cmsSnapshotSchema>);
+  const errors = [
+    ...educationImmutableMediaErrors(source.data as z.infer<typeof cmsSnapshotSchema>),
+    ...bankingDeliveryErrors(source.data),
+  ];
   return errors.length ? { success: false as const, errors } : source;
 }
 
 const EDUCATION_DELIVERY_MARKETS = ["uae", "ksa", "turkiye", "europe"] as const;
 
+function bankingDeliveryErrors(input: unknown): string[] {
+  const parsed = cmsSnapshotSchema.safeParse(input);
+  if (!parsed.success) return [];
+  const snapshot = parsed.data;
+  const content = snapshot.content as IndustryContent;
+  const banking = content.bankingPov;
+  if (!banking) return [];
+  const errors: string[] = [];
+  if (snapshot.slug !== "financial-services" || content.name !== "Financial Services") {
+    errors.push("Banking POV delivery is restricted to the Financial Services document.");
+  }
+  if (!snapshot.markets.includes(banking.market)) {
+    errors.push("Banking POV market must match a declared delivery market.");
+  }
+  const serialized = JSON.stringify({ bankingPov: banking, sources: content.sources });
+  if (banking.market === "uae" && /\bSaudi(?: Arabia| Arabian)?\b|\bKingdom\b|\bSDAIA\b|\.gov\.sa\b/i.test(serialized)) {
+    errors.push("UAE Banking POV delivery must not contain Saudi or Kingdom references.");
+  }
+  if (banking.market === "ksa" && /\bUAE\b|United Arab Emirates|\.gov\.ae\b/i.test(serialized)) {
+    errors.push("Saudi Banking POV delivery must not contain UAE references.");
+  }
+  return errors;
+}
 function educationDerivativeErrors(snapshot: z.infer<typeof cmsSnapshotSchema>): string[] {
   const content = snapshot.content as IndustryContent;
   if (content.educationPov?.version !== 2) return [];
@@ -972,6 +1022,7 @@ export function validateCmsSnapshot(
   if (!source.success || mode !== "publish" || kind !== "industry") return source;
   const errors = [
     ...educationImmutableMediaErrors(source.data as z.infer<typeof cmsSnapshotSchema>),
+    ...bankingDeliveryErrors(source.data),
     ...educationDerivativeErrors(source.data),
   ];
   return errors.length
@@ -1091,6 +1142,20 @@ export function collectCmsMediaReferences(
       }
     }
   }
+  if (kind === "industry" && record.bankingPov && typeof record.bankingPov === "object"
+    && !Array.isArray(record.bankingPov)) {
+    const banking = record.bankingPov as Record<string, unknown>;
+    for (const [index, startingPoint] of (Array.isArray(banking.startingPoints)
+      ? banking.startingPoints
+      : []).entries()) {
+      if (!startingPoint || typeof startingPoint !== "object") continue;
+      add((startingPoint as Record<string, unknown>).image, `content.bankingPov.startingPoints.${index}.image`, "supporting");
+    }
+    const readiness = banking.productionReadiness;
+    if (readiness && typeof readiness === "object" && !Array.isArray(readiness)) {
+      add((readiness as Record<string, unknown>).image, "content.bankingPov.productionReadiness.image", "supporting");
+    }
+  }
   return result;
 }
 
@@ -1113,3 +1178,176 @@ export type CmsRetiredLandingPagePath = (typeof CMS_RETIRED_LANDING_PAGE_PATHS)[
 export function isCmsRetiredLandingPagePath(path: string): path is CmsRetiredLandingPagePath {
   return (CMS_RETIRED_LANDING_PAGE_PATHS as readonly string[]).includes(path);
 }
+
+const bankingMediaReferenceSchema = cmsMediaReferenceSchema.extend({
+  role: z.literal("supporting"),
+});
+
+const bankingJourneyIds = [
+  "accounts-cards",
+  "payments-transfers",
+  "loans-deposits",
+  "fraud-card-security",
+  "digital-channel-support",
+  "collections-reminders",
+  "campaigns-outbound",
+] as const;
+
+export const bankingPovSchema = z.lazy(() => z.object({
+  version: z.literal(1),
+  market: bankingMarketSchema,
+  descriptor: z.string().trim().min(1).max(500),
+  hero: z.object({
+    eyebrow: z.string().trim().min(1).max(160),
+    heading: z.string().trim().min(1).max(240),
+    body: z.string().trim().min(1).max(2_000),
+    startingPointsAnchorLabel: z.string().trim().min(1).max(120),
+    selectedWorkAnchorLabel: z.string().trim().min(1).max(120),
+  }).strict(),
+  evidenceSignals: z.array(bankingSourceSchema).min(1).max(12),
+  valueOutcomes: z.array(z.object({
+    title: z.string().trim().min(1).max(160),
+    body: z.string().trim().min(1).max(1_000),
+    measures: requiredBankingStringList,
+  }).strict()).length(3),
+  adoptionLevels: z.array(bankingLevelSchema).length(3),
+  valueDomains: z.array(z.object({
+    id: z.enum(bankingDomainIds),
+    title: z.string().trim().min(1).max(160),
+    purpose: z.string().trim().min(1).max(1_000),
+    examples: requiredBankingStringList,
+    measures: requiredBankingStringList,
+  }).strict()).length(6),
+  startingPoints: z.array(z.object({
+    id: z.enum(bankingStartingPointIds),
+    title: z.string().trim().min(1).max(160),
+    valueProposition: z.string().trim().min(1).max(500),
+    problem: z.string().trim().min(1).max(1_000),
+    cogniriseRole: z.string().trim().min(1).max(1_000),
+    requiredInputs: requiredBankingStringList,
+    firstDeliverable: z.string().trim().min(1).max(1_000),
+    measures: requiredBankingStringList,
+    decisionBoundary: z.string().trim().min(1).max(1_000),
+    action: z.object({
+      label: z.string().trim().min(1).max(120),
+      href: safeLink,
+    }).strict(),
+    image: bankingMediaReferenceSchema,
+    focalPoint: bankingFocalPointSchema,
+  }).strict()).length(4),
+  voiceBanking: z.object({
+    platform: z.object({
+      name: z.literal("Lupitor"),
+      contribution: z.string().trim().min(1).max(1_000),
+      href: safeExternalUrl,
+      qualification: z.string().trim().min(1).max(1_000),
+    }).strict(),
+    cogniriseContribution: z.string().trim().min(1).max(1_000),
+    journeys: z.array(z.object({
+      id: z.enum(bankingJourneyIds),
+      title: z.string().trim().min(1).max(160),
+      scope: z.string().trim().min(1).max(1_000),
+      measures: requiredBankingStringList,
+      controlBoundary: z.string().trim().min(1).max(1_000),
+    }).strict()).length(7),
+  }).strict(),
+  productionReadiness: z.object({
+    eyebrow: z.string().trim().min(1).max(160),
+    heading: z.string().trim().min(1).max(240),
+    body: z.string().trim().min(1).max(2_000),
+    practices: requiredBankingStringList,
+    image: bankingMediaReferenceSchema,
+    focalPoint: bankingFocalPointSchema,
+    annotation: z.string().trim().min(1).max(1_000),
+  }).strict(),
+  deliveryPath: z.object({
+    stages: z.array(z.object({
+      stage: z.string().trim().min(1).max(160),
+      owner: z.string().trim().min(1).max(240),
+      outcome: z.string().trim().min(1).max(1_000),
+    }).strict()).min(4).max(6),
+    practices: requiredBankingStringList,
+  }).strict(),
+  partners: z.array(z.object({
+    name: z.enum(["Lupitor", "Ekimetrics"]),
+    contribution: z.string().trim().min(1).max(1_000),
+    qualification: z.string().trim().min(1).max(1_000),
+    href: safeExternalUrl.optional(),
+  }).strict()).length(2),
+  cta: z.object({
+    heading: z.string().trim().min(1).max(240),
+    body: z.string().trim().min(1).max(2_000),
+    label: z.string().trim().min(1).max(120),
+    href: safeInternalPath,
+  }).strict(),
+  caseMembershipSnapshot: z.array(z.object({
+    slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(160),
+    title: z.string().trim().min(1).max(240),
+    order: z.number().int().min(0).max(10_000),
+    digest: z.string().regex(/^[a-f0-9]{64}$/),
+  }).strict()).min(1).max(50),
+}).strict().superRefine((value, context) => {
+  const unique = (values: readonly string[], path: (string | number)[], label: string) => {
+    if (new Set(values).size !== values.length) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path, message: `${label} must be unique.` });
+    }
+  };
+  unique(value.adoptionLevels.map((item) => String(item.level)), ["adoptionLevels"], "Adoption levels");
+  unique(value.valueDomains.map((item) => String(item.id)), ["valueDomains"], "Banking value-domain IDs");
+  unique(value.startingPoints.map((item) => String(item.id)), ["startingPoints"], "Banking starting-point IDs");
+  unique(value.voiceBanking.journeys.map((item) => String(item.id)), ["voiceBanking", "journeys"], "Voice journey IDs");
+  unique(value.partners.map((item) => String(item.name)), ["partners"], "Partners");
+  unique(value.caseMembershipSnapshot.map((item) => item.slug), ["caseMembershipSnapshot"], "Case membership");
+  const expected = (actual: readonly string[], required: readonly string[], path: (string | number)[]) => {
+    if (actual.length !== required.length || required.some((item) => !actual.includes(item))) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path, message: "The governed Banking POV requires the complete prescribed set." });
+    }
+  };
+  expected(value.valueDomains.map((item) => String(item.id)), bankingDomainIds, ["valueDomains"]);
+  expected(value.startingPoints.map((item) => String(item.id)), bankingStartingPointIds, ["startingPoints"]);
+  expected(value.voiceBanking.journeys.map((item) => String(item.id)), bankingJourneyIds, ["voiceBanking", "journeys"]);
+}));
+
+const bankingFocalPointSchema = z.object({
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+}).strict();
+
+const bankingLevelSchema = z.object({
+  level: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  title: z.string().trim().min(1).max(160),
+  value: z.string().trim().min(1).max(1_000),
+  illustrativeWork: requiredBankingStringList,
+  owner: z.string().trim().min(1).max(240),
+  readiness: requiredBankingStringList,
+  measures: requiredBankingStringList,
+  decisionBoundary: z.string().trim().min(1).max(1_000),
+}).strict();
+
+const bankingStartingPointIds = [
+  "core-banking-operations",
+  "contact-centre",
+  "software-delivery",
+  "marketing-intelligence",
+] as const;
+
+const bankingDomainIds = [
+  "credit-lending",
+  "risk-fraud",
+  "operations-process",
+  "customer-sales",
+  "engineering-it",
+  "compliance-regulation",
+] as const;
+
+const bankingSourceSchema = z.object({
+  label: z.string().trim().min(1).max(240),
+  publisher: z.string().trim().min(1).max(240),
+  kind: z.enum(["Official source", "Independent study", "Company-reported", "Vendor claim"]),
+  url: safeExternalUrl,
+  accessedAt: date,
+  publicationPeriod: z.string().trim().min(1).max(120),
+  jurisdiction: z.string().trim().min(1).max(160),
+  statement: z.string().trim().min(1).max(1_000),
+  qualification: z.string().trim().min(1).max(1_000),
+}).strict();

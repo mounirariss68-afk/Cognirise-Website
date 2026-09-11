@@ -1,0 +1,17 @@
+{
+  "task": 289,
+  "mode": "apply",
+  "baselineDigest": "648edadb39862742be05b9be5ec2687528e78a8f3b0570565e7092fe85aa300c",
+  "receiptKey": "cms-banking-pov-v1-successor:7e168f5d-9a00-407d-a63d-ae5f65faef89:a9becd21-1772-4be7-afec-54b519ff13b5:4395de16b6c27a8aefa8c3cdd7380be01b9b6e873e4f0e299d453ed538abf37c:3bdcc3e34c4ece84281dac1b7a497b3cf4746737f6ec250506402c1189ef900d",
+  "documentId": "b05b2617-0584-4bf3-966d-8f78f3896027",
+  "editionId": "7e168f5d-9a00-407d-a63d-ae5f65faef89",
+  "publishedRevisionId": "a9becd21-1772-4be7-afec-54b519ff13b5",
+  "candidateDigest": "3bdcc3e34c4ece84281dac1b7a497b3cf4746737f6ec250506402c1189ef900d",
+  "preservedCaseCount": 8,
+  "action": "append-draft-for-editorial-review-only",
+  "publication": "No publication occurs here. CMS review, approved immutable media, and the established publisher procedure remain mandatory.",
+  "securePreview": "An authorized editor may create a scoped UAE/en preview using GET /api/documents/b05b2617-0584-4bf3-966d-8f78f3896027/preview?market=uae&locale=en&revisionId={draftRevisionId}; preview tokens are deliberately never written to this receipt.",
+  "disposition": "replayed",
+  "draftRevisionId": "bf8ccd16-1de1-43ec-8303-9d166ae23d62",
+  "securePreviewRequest": "/api/documents/b05b2617-0584-4bf3-966d-8f78f3896027/preview?market=uae&locale=en&revisionId=bf8ccd16-1de1-43ec-8303-9d166ae23d62"
+}

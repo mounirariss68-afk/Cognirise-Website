@@ -1,0 +1,1022 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-11T09:57:44.837Z",
+  "scope": "Published UAE/en Financial Services page and its UAE/en public selected-work case payloads; read-only comparison receipt.",
+  "page": [
+    {
+      "document_id": "b05b2617-0584-4bf3-966d-8f78f3896027",
+      "canonical_slug": "financial-services",
+      "edition_id": "7e168f5d-9a00-407d-a63d-ae5f65faef89",
+      "market": "uae",
+      "locale": "en",
+      "publication_state": "published",
+      "published_revision_id": "a9becd21-1772-4be7-afec-54b519ff13b5",
+      "revision_number": 6,
+      "workflow_state": "approved",
+      "content_digest": "4395de16b6c27a8aefa8c3cdd7380be01b9b6e873e4f0e299d453ed538abf37c",
+      "payload": {
+        "seo": {
+          "noIndex": false
+        },
+        "slug": "financial-services",
+        "title": "Financial Services",
+        "content": {
+          "dek": "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
+          "gcc": "Regional ambition is high, but public, comparable evidence of realised AI value remains limited. The credible route is to publish controls and measured outcomes together.",
+          "myth": {
+            "claim": "“A chatbot proves the bank is AI-native.”",
+            "verdict": "No. The harder evidence sits in governed fraud, credit, onboarding, collections and operations—where decisions can be tested and traced."
+          },
+          "name": "Financial Services",
+          "uses": [
+            {
+              "use": "Onboarding and KYC",
+              "boundary": "Human approval and complete evidence trail",
+              "evidence": "Measured process outcomes"
+            },
+            {
+              "use": "Fraud and credit models",
+              "boundary": "Independent validation and drift monitoring",
+              "evidence": "Established analytical practice"
+            },
+            {
+              "use": "Service assistance",
+              "boundary": "Escalation quality, not deflection alone",
+              "evidence": "Mixed company reports"
+            }
+          ],
+          "image": "/images/cognirise/industries/pulse-industry-financial.jpg",
+          "order": 1,
+          "accent": "trust is won.",
+          "thesis": "The model estate — not the chatbot — is where trust is won.",
+          "service": {
+            "href": "/#service-lines",
+            "label": "Sovereign AI Solutions",
+            "firstMove": "Map one exception-heavy, evidence-heavy decision."
+          },
+          "sources": [
+            {
+              "url": "https://www.federalreserve.gov/frrs/guidance/supervisory-guidance-on-model-risk-management.htm",
+              "kind": "Official source",
+              "label": "Model risk management guidance",
+              "publisher": "US Federal Reserve"
+            },
+            {
+              "url": "https://www.fsb.org/uploads/P14112024.pdf",
+              "kind": "Official source",
+              "label": "AI adoption and financial stability",
+              "publisher": "Financial Stability Board"
+            },
+            {
+              "url": "https://www.abc.net.au/news/2025-08-21/cba-backtracks-on-ai-job-cuts-as-chatbot-lifts-call-volumes/105679492/",
+              "kind": "Independent study",
+              "label": "Customer-service reversal",
+              "publisher": "ABC News"
+            }
+          ],
+          "variant": "ledger",
+          "imageAlt": "A cinematic financial landscape crossed by controlled luminous routes.",
+          "reversal": {
+            "body": "Publicly reported customer-service reversals at Klarna and Commonwealth Bank show why containment or headcount claims are not the same as sustained service quality.",
+            "title": "Automation can move work in the wrong direction."
+          },
+          "pressures": [
+            {
+              "body": "Non-deterministic systems still have to meet established model-risk expectations: clear purpose, testing, monitoring and accountable challenge.",
+              "title": "Validation before velocity"
+            },
+            {
+              "body": "Dependence on a small set of cloud, data and model providers can amplify third-party and systemic exposure.",
+              "title": "Concentration is an operating risk"
+            },
+            {
+              "body": "In the Gulf, residency, explainability and bilingual customer disclosure belong in the design brief, not the launch checklist.",
+              "title": "Sovereignty shapes the architecture"
+            }
+          ],
+          "shortName": "Finance",
+          "legacyPath": "/industries/banking",
+          "relatedIds": [],
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "heroMediaId": "83037506-bfde-4473-84ad-4337aeaf34f6",
+          "opportunity": "Turn fragmented controls and exception-heavy operations into faster, traceable decisions that improve customer outcomes without weakening model-risk discipline.",
+          "capabilities": [
+            {
+              "body": "Build bounded agents for onboarding, fraud and operations with approvals, explanations and complete evidence trails.",
+              "title": "Governed decision agents"
+            },
+            {
+              "body": "Connect models and data inside residency, security and third-party-risk boundaries.",
+              "title": "Sovereign intelligence platforms"
+            },
+            {
+              "body": "Rework priority journeys around measurable value, human authority and production controls.",
+              "title": "AI-native operating redesign"
+            }
+          ],
+          "selectedWork": {
+            "description": "Selected work should show the mandate, control boundary and measured operational outcome without exposing client-confidential decisions or data."
+          },
+          "schemaVersion": 1,
+          "verificationDate": "2026-09-06"
+        },
+        "markets": [
+          "uae"
+        ],
+        "summary": "Banks create durable value when intelligence enters governed decisions, evidence trails and human workflows—not when a conversational layer is mistaken for transformation.",
+        "mediaIds": [
+          "83037506-bfde-4473-84ad-4337aeaf34f6"
+        ]
+      }
+    }
+  ],
+  "cases": [
+    {
+      "document_id": "f2ca6554-d709-4ccd-9d5c-2b1d0b33aa41",
+      "canonical_slug": "making-market-information-searchable",
+      "edition_id": "dd2c15e0-d776-460d-a0e5-815b02b45642",
+      "market": "uae",
+      "locale": "en",
+      "publication_state": "published",
+      "published_revision_id": "c15b371f-47c4-4ec1-8bb7-5d0fa779295c",
+      "revision_number": 2,
+      "workflow_state": "approved",
+      "content_digest": "465a06bc9c55630694c7e45f79887e1bf7eeb87a1f8e82f97fdc37a31cdb0e4c",
+      "payload": {
+        "seo": {
+          "noIndex": false
+        },
+        "slug": "making-market-information-searchable",
+        "title": "Making market information searchable",
+        "content": {
+          "cta": {
+            "href": "/value-scan",
+            "label": "Discuss a similar mandate"
+          },
+          "work": [
+            {
+              "text": "A collection service gathers listings, prices and issuer disclosures, indexes their source and lets analysts search with citations.",
+              "type": "paragraph"
+            }
+          ],
+          "order": 4,
+          "sector": "Financial Services",
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "altText": "Cognirise Pulse workflow for making market information searchable, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "caption": "Issuer filings → Price watchlist → Source confidence.",
+            "template": "knowledge-assistant",
+            "fixtureLabels": [
+              "Issuer filings",
+              "Price watchlist",
+              "Source confidence"
+            ],
+            "textEquivalent": "A collection service gathers listings, prices and issuer disclosures, indexes their source and lets analysts search with citations. The visual follows Issuer filings, Price watchlist, Source confidence through a human or policy checkpoint to the resulting capability."
+          },
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "mandate": "Replace fragmented manual market-data collection with a searchable corpus.",
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 5",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "variant": "summary",
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "evidence": [
+            {
+              "source": {
+                "label": "Approved source presentation, slide 5",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true,
+              "statement": "Analysts can move from a market question to the underlying disclosure and price evidence in one governed search flow."
+            }
+          ],
+          "outcomes": [
+            "Analysts can move from a market question to the underlying disclosure and price evidence in one governed search flow."
+          ],
+          "disclosure": "anonymized",
+          "relatedIds": [],
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "deliveryStage": "pilot",
+          "schemaVersion": 1,
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "engagementType": "client-delivery",
+          "impactStatement": "Analysts can move from a market question to the underlying disclosure and price evidence in one governed search flow.",
+          "verificationDate": "2026-09-06",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "impactClassification": "pilot-demo",
+          "publicEvidenceStatus": "approved",
+          "organizationDescriptor": "Capital-markets information team"
+        },
+        "markets": [
+          "uae"
+        ],
+        "summary": "Replace fragmented manual market-data collection with a searchable corpus. A collection service gathers listings, prices and issuer disclosures, indexes their source and lets analysts search with citations.",
+        "mediaIds": [
+          "269aed4b-0c27-491e-8736-9b2261162600"
+        ]
+      }
+    },
+    {
+      "document_id": "b8febdcf-904b-4e61-9502-538b2b7a2b3b",
+      "canonical_slug": "automating-recurring-tax-preparation",
+      "edition_id": "22385487-761b-406a-a891-5a0cc6d38e9a",
+      "market": "uae",
+      "locale": "en",
+      "publication_state": "published",
+      "published_revision_id": "3f10668f-127f-4d17-bc96-c2c28b79e048",
+      "revision_number": 2,
+      "workflow_state": "approved",
+      "content_digest": "97f70aabeda60cebbca7cde9cb0162049ba051d6fa5c7d3be3fbd65dbd2838a4",
+      "payload": {
+        "seo": {
+          "noIndex": false
+        },
+        "slug": "automating-recurring-tax-preparation",
+        "title": "Automating recurring tax preparation",
+        "content": {
+          "cta": {
+            "href": "/value-scan",
+            "label": "Discuss a similar mandate"
+          },
+          "work": [
+            {
+              "text": "A workflow receives client documents, checks required fields and calculations, and holds the return for practitioner sign-off.",
+              "type": "paragraph"
+            }
+          ],
+          "order": 5,
+          "sector": "Financial Services",
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "altText": "Cognirise Pulse workflow for automating recurring tax preparation, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "caption": "Document intake → Schedule B checks → Awaiting sign-off.",
+            "template": "workflow-console",
+            "fixtureLabels": [
+              "Document intake",
+              "Schedule B checks",
+              "Awaiting sign-off"
+            ],
+            "textEquivalent": "A workflow receives client documents, checks required fields and calculations, and holds the return for practitioner sign-off. The visual follows Document intake, Schedule B checks, Awaiting sign-off through a human or policy checkpoint to the resulting capability."
+          },
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "mandate": "Reduce repetitive preparation and document-chasing work in recurring tax workflows.",
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 6",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "variant": "summary",
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "evidence": [
+            {
+              "source": {
+                "label": "Approved source presentation, slide 6",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true,
+              "statement": "Practitioners can see missing evidence, completed checks and approval status in one preparation queue."
+            }
+          ],
+          "outcomes": [
+            "Practitioners can see missing evidence, completed checks and approval status in one preparation queue."
+          ],
+          "disclosure": "anonymized",
+          "relatedIds": [],
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "deliveryStage": "proof-of-concept",
+          "schemaVersion": 1,
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "engagementType": "client-delivery",
+          "impactStatement": "Practitioners can see missing evidence, completed checks and approval status in one preparation queue.",
+          "verificationDate": "2026-09-06",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "impactClassification": "projected",
+          "publicEvidenceStatus": "approved",
+          "organizationDescriptor": "Accounting services practice"
+        },
+        "markets": [
+          "uae"
+        ],
+        "summary": "Reduce repetitive preparation and document-chasing work in recurring tax workflows. A workflow receives client documents, checks required fields and calculations, and holds the return for practitioner sign-off.",
+        "mediaIds": [
+          "f1905699-1f6a-4b60-8394-1174cb628fd1"
+        ]
+      }
+    },
+    {
+      "document_id": "bfea07f2-7b6e-4810-906f-fb1fffc823a0",
+      "canonical_slug": "governing-a-single-fee-schedule",
+      "edition_id": "19981c03-4655-4643-8a0b-3a1480cb017e",
+      "market": "uae",
+      "locale": "en",
+      "publication_state": "published",
+      "published_revision_id": "74c87f51-92f4-4259-aa3b-dc4597bb3a81",
+      "revision_number": 2,
+      "workflow_state": "approved",
+      "content_digest": "676cf59b27262b1c3fb87b952d84f345edefecb7510a9c106a056db482314f80",
+      "payload": {
+        "seo": {
+          "noIndex": false
+        },
+        "slug": "governing-a-single-fee-schedule",
+        "title": "Governing a single fee schedule",
+        "content": {
+          "cta": {
+            "href": "/value-scan",
+            "label": "Discuss a similar mandate"
+          },
+          "work": [
+            {
+              "text": "An authenticated application publishes the effective fee schedule, records changes and restricts updates to approved owners.",
+              "type": "paragraph"
+            }
+          ],
+          "order": 7,
+          "sector": "Financial Services",
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "altText": "Cognirise Pulse workflow for governing a single fee schedule, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "caption": "Fee schedule → Approval trail → Effective 01 / 07.",
+            "template": "workflow-console",
+            "fixtureLabels": [
+              "Fee schedule",
+              "Approval trail",
+              "Effective 01 / 07"
+            ],
+            "textEquivalent": "An authenticated application publishes the effective fee schedule, records changes and restricts updates to approved owners. The visual follows Fee schedule, Approval trail, Effective 01 / 07 through a human or policy checkpoint to the resulting capability."
+          },
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "mandate": "Replace emailed fee-schedule copies with one maintained source.",
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 8",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "variant": "summary",
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "evidence": [
+            {
+              "source": {
+                "label": "Approved source presentation, slide 8",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true,
+              "statement": "Teams can consult one current fee source with its approval and change trail attached."
+            }
+          ],
+          "outcomes": [
+            "Teams can consult one current fee source with its approval and change trail attached."
+          ],
+          "disclosure": "anonymized",
+          "relatedIds": [],
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "deliveryStage": "mvp",
+          "schemaVersion": 1,
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "engagementType": "client-delivery",
+          "impactStatement": "Teams can consult one current fee source with its approval and change trail attached.",
+          "verificationDate": "2026-09-06",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "impactClassification": "unavailable",
+          "publicEvidenceStatus": "approved",
+          "organizationDescriptor": "Financial brokerage team"
+        },
+        "markets": [
+          "uae"
+        ],
+        "summary": "Replace emailed fee-schedule copies with one maintained source. An authenticated application publishes the effective fee schedule, records changes and restricts updates to approved owners.",
+        "mediaIds": [
+          "804da406-cad4-45ff-a6be-2ff2830eaee4"
+        ]
+      }
+    },
+    {
+      "document_id": "98a1c177-00c2-412e-badb-f03af6c37de3",
+      "canonical_slug": "accelerating-governed-vehicle-offers",
+      "edition_id": "678b7551-5661-480d-91c7-3af140ce8ec9",
+      "market": "uae",
+      "locale": "en",
+      "publication_state": "published",
+      "published_revision_id": "7a0bb083-a2be-494d-a63b-1da4b7088ad8",
+      "revision_number": 2,
+      "workflow_state": "approved",
+      "content_digest": "0a5d97363fb10cfd762865602ed7abbb899948925bf8e02ed25414f35115b6d1",
+      "payload": {
+        "seo": {
+          "noIndex": false
+        },
+        "slug": "accelerating-governed-vehicle-offers",
+        "title": "Accelerating governed vehicle offers",
+        "content": {
+          "cta": {
+            "href": "/value-scan",
+            "label": "Discuss a similar mandate"
+          },
+          "work": [
+            {
+              "text": "An orchestrated workflow combines product rules, retrieved evidence and decision logic, with exceptions held for human approval.",
+              "type": "paragraph"
+            }
+          ],
+          "order": 9,
+          "sector": "Financial Services",
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "altText": "Cognirise Pulse workflow for accelerating governed vehicle offers, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "caption": "Offer rules → Eligibility path → Human checkpoint.",
+            "template": "workflow-console",
+            "fixtureLabels": [
+              "Offer rules",
+              "Eligibility path",
+              "Human checkpoint"
+            ],
+            "textEquivalent": "An orchestrated workflow combines product rules, retrieved evidence and decision logic, with exceptions held for human approval. The visual follows Offer rules, Eligibility path, Human checkpoint through a human or policy checkpoint to the resulting capability."
+          },
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "mandate": "Shorten offer preparation while retaining rules-based traceability.",
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 10",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "variant": "summary",
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "evidence": [
+            {
+              "source": {
+                "label": "Approved source presentation, slide 10",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true,
+              "statement": "Offer teams can generate a traceable proposal while keeping policy decisions and exceptions visible."
+            }
+          ],
+          "outcomes": [
+            "Offer teams can generate a traceable proposal while keeping policy decisions and exceptions visible."
+          ],
+          "disclosure": "anonymized",
+          "relatedIds": [],
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "deliveryStage": "production",
+          "schemaVersion": 1,
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "engagementType": "client-delivery",
+          "impactStatement": "Offer teams can generate a traceable proposal while keeping policy decisions and exceptions visible.",
+          "verificationDate": "2026-09-06",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "impactClassification": "unavailable",
+          "publicEvidenceStatus": "approved",
+          "organizationDescriptor": "Regulated vehicle-finance provider"
+        },
+        "markets": [
+          "uae"
+        ],
+        "summary": "Shorten offer preparation while retaining rules-based traceability. An orchestrated workflow combines product rules, retrieved evidence and decision logic, with exceptions held for human approval.",
+        "mediaIds": [
+          "0e108214-ccdd-4d66-81e4-07964b4214d2"
+        ]
+      }
+    },
+    {
+      "document_id": "ed6375ff-22b9-4a68-9a61-38877c302597",
+      "canonical_slug": "answering-general-investment-questions",
+      "edition_id": "917e2dc2-3e68-4a92-aba6-e4388ced0da5",
+      "market": "uae",
+      "locale": "en",
+      "publication_state": "published",
+      "published_revision_id": "908bf13c-c0bd-4931-99c8-85b8295577df",
+      "revision_number": 2,
+      "workflow_state": "approved",
+      "content_digest": "bd6c3695139fce66cd66ef203cdce03a2b504b56f63d00b54b77dbdf06604410",
+      "payload": {
+        "seo": {
+          "noIndex": false
+        },
+        "slug": "answering-general-investment-questions",
+        "title": "Answering general investment questions",
+        "content": {
+          "cta": {
+            "href": "/value-scan",
+            "label": "Discuss a similar mandate"
+          },
+          "work": [
+            {
+              "text": "A bilingual assistant answers from governed product documents, cites its sources and redirects advice requests to qualified people.",
+              "type": "paragraph"
+            }
+          ],
+          "order": 10,
+          "sector": "Financial Services",
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "altText": "Cognirise Pulse workflow for answering general investment questions, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "caption": "Product library → General question → Source citation.",
+            "template": "knowledge-assistant",
+            "fixtureLabels": [
+              "Product library",
+              "General question",
+              "Source citation"
+            ],
+            "textEquivalent": "A bilingual assistant answers from governed product documents, cites its sources and redirects advice requests to qualified people. The visual follows Product library, General question, Source citation through a human or policy checkpoint to the resulting capability."
+          },
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "mandate": "Provide consistent answers to general product questions while reserving advice for people.",
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 11",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "variant": "summary",
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "evidence": [
+            {
+              "source": {
+                "label": "Approved source presentation, slide 11",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true,
+              "statement": "Customers can receive consistent general information without crossing the boundary into personal advice."
+            }
+          ],
+          "outcomes": [
+            "Customers can receive consistent general information without crossing the boundary into personal advice."
+          ],
+          "disclosure": "anonymized",
+          "relatedIds": [],
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "deliveryStage": "mvp",
+          "schemaVersion": 1,
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "engagementType": "client-delivery",
+          "impactStatement": "Customers can receive consistent general information without crossing the boundary into personal advice.",
+          "verificationDate": "2026-09-06",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "impactClassification": "pilot-demo",
+          "publicEvidenceStatus": "approved",
+          "organizationDescriptor": "Regulated investment-services provider"
+        },
+        "markets": [
+          "uae"
+        ],
+        "summary": "Provide consistent answers to general product questions while reserving advice for people. A bilingual assistant answers from governed product documents, cites its sources and redirects advice requests to qualified people.",
+        "mediaIds": [
+          "9bcf7f6e-c7e9-462a-a6c4-d75e50b23845"
+        ]
+      }
+    },
+    {
+      "document_id": "42a4c7c1-b07a-4990-84e7-718de512e7f1",
+      "canonical_slug": "checking-calls-through-risk-gates",
+      "edition_id": "09b08e31-b1f9-42ff-bf91-a63661fad6eb",
+      "market": "uae",
+      "locale": "en",
+      "publication_state": "published",
+      "published_revision_id": "bd62dba1-c822-4f62-8b47-273f50c05d5f",
+      "revision_number": 2,
+      "workflow_state": "approved",
+      "content_digest": "e776c962a2ef91439a5e036d568cc59e311577c8740bd3061aa90cb82b9143c0",
+      "payload": {
+        "seo": {
+          "noIndex": false
+        },
+        "slug": "checking-calls-through-risk-gates",
+        "title": "Checking calls through risk gates",
+        "content": {
+          "cta": {
+            "href": "/value-scan",
+            "label": "Discuss a similar mandate"
+          },
+          "work": [
+            {
+              "text": "A compliance flow transcribes calls, applies four suitability and conduct gates, and sends flagged passages to reviewers.",
+              "type": "paragraph"
+            }
+          ],
+          "order": 13,
+          "sector": "Financial Services",
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "altText": "Cognirise Pulse workflow for checking calls through risk gates, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "caption": "Call transcript → Gate 02 / suitability → Escalation queue.",
+            "template": "governance-console",
+            "fixtureLabels": [
+              "Call transcript",
+              "Gate 02 / suitability",
+              "Escalation queue"
+            ],
+            "textEquivalent": "A compliance flow transcribes calls, applies four suitability and conduct gates, and sends flagged passages to reviewers. The visual follows Call transcript, Gate 02 / suitability, Escalation queue through a human or policy checkpoint to the resulting capability."
+          },
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "mandate": "Extend call review beyond small manual samples while preserving an audit queue.",
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 14",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "variant": "summary",
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "evidence": [
+            {
+              "source": {
+                "label": "Approved source presentation, slide 14",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true,
+              "statement": "Compliance teams can review each call against consistent gates while retaining the transcript and escalation trail."
+            }
+          ],
+          "outcomes": [
+            "Compliance teams can review each call against consistent gates while retaining the transcript and escalation trail."
+          ],
+          "disclosure": "anonymized",
+          "relatedIds": [],
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "deliveryStage": "proof-of-concept",
+          "schemaVersion": 1,
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "engagementType": "product-demonstration",
+          "impactStatement": "Compliance teams can review each call against consistent gates while retaining the transcript and escalation trail.",
+          "verificationDate": "2026-09-06",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "impactClassification": "simulated",
+          "publicEvidenceStatus": "approved",
+          "organizationDescriptor": "Regulated capital-markets firm"
+        },
+        "markets": [
+          "uae"
+        ],
+        "summary": "Extend call review beyond small manual samples while preserving an audit queue. A compliance flow transcribes calls, applies four suitability and conduct gates, and sends flagged passages to reviewers.",
+        "mediaIds": [
+          "a65763f9-f61e-4113-abd9-a499ae88aa02"
+        ]
+      }
+    },
+    {
+      "document_id": "2f678a15-e7f6-4fcd-9fc5-8700c56a7c2d",
+      "canonical_slug": "monitoring-portfolio-early-warning-signals",
+      "edition_id": "4b3e1b51-e5da-4c34-b8b7-19df62a93a95",
+      "market": "uae",
+      "locale": "en",
+      "publication_state": "published",
+      "published_revision_id": "b1b8c8e2-0dd7-4ec8-ba4e-79c7bc8dd432",
+      "revision_number": 2,
+      "workflow_state": "approved",
+      "content_digest": "fe4acec219c47c60cb2a5c679406c6b4313f2c55b9be6c5408a628626f51a029",
+      "payload": {
+        "seo": {
+          "noIndex": false
+        },
+        "slug": "monitoring-portfolio-early-warning-signals",
+        "title": "Monitoring portfolio early-warning signals",
+        "content": {
+          "cta": {
+            "href": "/value-scan",
+            "label": "Discuss a similar mandate"
+          },
+          "work": [
+            {
+              "text": "A monitoring workspace combines portfolio exposures, disclosure changes and concentration bands, then queues material signals for analyst review.",
+              "type": "paragraph"
+            }
+          ],
+          "order": 18,
+          "sector": "Financial Services",
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "altText": "Cognirise Pulse workflow for monitoring portfolio early-warning signals, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "caption": "Exposure watch → Concentration band → Analyst review.",
+            "template": "analytics-dashboard",
+            "fixtureLabels": [
+              "Exposure watch",
+              "Concentration band",
+              "Analyst review"
+            ],
+            "textEquivalent": "A monitoring workspace combines portfolio exposures, disclosure changes and concentration bands, then queues material signals for analyst review. The visual follows Exposure watch, Concentration band, Analyst review through a human or policy checkpoint to the resulting capability."
+          },
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "mandate": "Bring disclosures, concentration and early-warning signals into a human-gated review flow.",
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 19",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "variant": "summary",
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "evidence": [
+            {
+              "source": {
+                "label": "Approved source presentation, slide 19",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true,
+              "statement": "Credit teams can trace an early-warning signal to the exposure and disclosure evidence before recording a decision."
+            }
+          ],
+          "outcomes": [
+            "Credit teams can trace an early-warning signal to the exposure and disclosure evidence before recording a decision."
+          ],
+          "disclosure": "anonymized",
+          "relatedIds": [],
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "deliveryStage": "proof-of-concept",
+          "schemaVersion": 1,
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "engagementType": "product-demonstration",
+          "impactStatement": "Credit teams can trace an early-warning signal to the exposure and disclosure evidence before recording a decision.",
+          "verificationDate": "2026-09-06",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "impactClassification": "simulated",
+          "publicEvidenceStatus": "approved",
+          "organizationDescriptor": "Regulated commercial lender"
+        },
+        "markets": [
+          "uae"
+        ],
+        "summary": "Bring disclosures, concentration and early-warning signals into a human-gated review flow. A monitoring workspace combines portfolio exposures, disclosure changes and concentration bands, then queues material signals for analyst review.",
+        "mediaIds": [
+          "a3ee5df3-361d-4dde-9ad4-6bf4a49fbf0d"
+        ]
+      }
+    },
+    {
+      "document_id": "b3a9c58b-d528-48ba-a9f6-83eaf98e8338",
+      "canonical_slug": "tracing-provision-movements-earlier",
+      "edition_id": "d49b941f-3f93-49c7-ba60-aaede9588445",
+      "market": "uae",
+      "locale": "en",
+      "publication_state": "published",
+      "published_revision_id": "2d541007-6e44-4163-9d83-b5636c6ddf70",
+      "revision_number": 2,
+      "workflow_state": "approved",
+      "content_digest": "47e0f5703105aea82eb48cc1488db7bf7ae5845e017e6924f2fc7035f436b406",
+      "payload": {
+        "seo": {
+          "noIndex": false
+        },
+        "slug": "tracing-provision-movements-earlier",
+        "title": "Tracing provision movements earlier",
+        "content": {
+          "cta": {
+            "href": "/value-scan",
+            "label": "Discuss a similar mandate"
+          },
+          "work": [
+            {
+              "text": "An authenticated monitoring view connects portfolio movements to exposure drivers and raises threshold alerts for finance review.",
+              "type": "paragraph"
+            }
+          ],
+          "order": 20,
+          "sector": "Financial Services",
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "altText": "Cognirise Pulse workflow for tracing provision movements earlier, showing inputs, processing, a control checkpoint and the resulting capability.",
+            "caption": "Provision bridge → Exposure driver → Threshold alert.",
+            "template": "analytics-dashboard",
+            "fixtureLabels": [
+              "Provision bridge",
+              "Exposure driver",
+              "Threshold alert"
+            ],
+            "textEquivalent": "An authenticated monitoring view connects portfolio movements to exposure drivers and raises threshold alerts for finance review. The visual follows Provision bridge, Exposure driver, Threshold alert through a human or policy checkpoint to the resulting capability."
+          },
+          "context": "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+          "mandate": "Make provision movements and their exposure-level drivers visible before period end.",
+          "sources": [
+            {
+              "label": "Approved source presentation, slide 21",
+              "accessedAt": "2026-09-06"
+            }
+          ],
+          "variant": "summary",
+          "controls": [
+            "Human review remains required for consequential actions.",
+            "Public reconstruction contains no source-system data."
+          ],
+          "evidence": [
+            {
+              "source": {
+                "label": "Approved source presentation, slide 21",
+                "accessedAt": "2026-09-06"
+              },
+              "approved": true,
+              "statement": "Finance teams can inspect the accounts driving a provision movement and resolve exceptions before close."
+            }
+          ],
+          "outcomes": [
+            "Finance teams can inspect the accounts driving a provision movement and resolve exceptions before close."
+          ],
+          "disclosure": "anonymized",
+          "relatedIds": [],
+          "reviewDate": "2027-03-06",
+          "visibility": "public",
+          "constraints": [
+            "Do not infer organization identity from this summary.",
+            "Interface labels and values are anonymized fixtures."
+          ],
+          "deliveryStage": "proof-of-concept",
+          "schemaVersion": 1,
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "engagementType": "client-delivery",
+          "impactStatement": "Finance teams can inspect the accounts driving a provision movement and resolve exceptions before close.",
+          "verificationDate": "2026-09-06",
+          "relatedIndustries": [
+            "financial-services"
+          ],
+          "impactClassification": "pilot-demo",
+          "publicEvidenceStatus": "approved",
+          "organizationDescriptor": "Regulated commercial lender"
+        },
+        "markets": [
+          "uae"
+        ],
+        "summary": "Make provision movements and their exposure-level drivers visible before period end. An authenticated monitoring view connects portfolio movements to exposure drivers and raises threshold alerts for finance review.",
+        "mediaIds": [
+          "ccfdecfc-2519-4b04-8496-ead9549cf3fc"
+        ]
+      }
+    }
+  ],
+  "immutableMediaPins": [
+    {
+      "document_id": "2f678a15-e7f6-4fcd-9fc5-8700c56a7c2d",
+      "field_path": "revision:b1b8c8e2-0dd7-4ec8-ba4e-79c7bc8dd432",
+      "asset_id": "a3ee5df3-361d-4dde-9ad4-6bf4a49fbf0d",
+      "media_version_id": "cca1339e-bf3d-4c87-b32d-3545230390dd",
+      "checksum": "320c7aa38d080f334fff64c78c8fb14e6412017e629d0df129e9710ef36ebe4c",
+      "byte_size": 90531,
+      "storage_key": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/inventory-320c7aa38d080f334fff64c78c8fb14e6412017e629d0df129e9710ef36ebe4c",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "document_id": "42a4c7c1-b07a-4990-84e7-718de512e7f1",
+      "field_path": "revision:bd62dba1-c822-4f62-8b47-273f50c05d5f",
+      "asset_id": "a65763f9-f61e-4113-abd9-a499ae88aa02",
+      "media_version_id": "e3e5b0e6-9b3a-4e4a-93d9-e97d3ebf61cc",
+      "checksum": "a2c8ba18b49eceb65c2d2141a0f329ea3b3233ba1a39b1726d7ec3ca65734dfe",
+      "byte_size": 99364,
+      "storage_key": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/inventory-a2c8ba18b49eceb65c2d2141a0f329ea3b3233ba1a39b1726d7ec3ca65734dfe",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "document_id": "98a1c177-00c2-412e-badb-f03af6c37de3",
+      "field_path": "revision:7a0bb083-a2be-494d-a63b-1da4b7088ad8",
+      "asset_id": "0e108214-ccdd-4d66-81e4-07964b4214d2",
+      "media_version_id": "0121a376-47f0-40aa-a3c1-9dea5bd3911a",
+      "checksum": "2a44eda7a5d9c389b7859a05b9f59caa2e641458a50b6ac6a62948598d4c12ee",
+      "byte_size": 67910,
+      "storage_key": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/inventory-2a44eda7a5d9c389b7859a05b9f59caa2e641458a50b6ac6a62948598d4c12ee",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "document_id": "b05b2617-0584-4bf3-966d-8f78f3896027",
+      "field_path": "revision:a9becd21-1772-4be7-afec-54b519ff13b5",
+      "asset_id": "83037506-bfde-4473-84ad-4337aeaf34f6",
+      "media_version_id": "7753ca81-860c-440c-b3ae-8a156c2de516",
+      "checksum": "c3e273ee9fbade51617899dde33a49f19a2d2e8804486c91226013d0ad4f2b82",
+      "byte_size": 2529874,
+      "storage_key": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/approved-c3e273ee9fbade51617899dde33a49f19a2d2e8804486c91226013d0ad4f2b82",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "document_id": "b3a9c58b-d528-48ba-a9f6-83eaf98e8338",
+      "field_path": "revision:2d541007-6e44-4163-9d83-b5636c6ddf70",
+      "asset_id": "ccfdecfc-2519-4b04-8496-ead9549cf3fc",
+      "media_version_id": "751a5e6e-b2d8-4506-b1ea-121a48dcdd6e",
+      "checksum": "fe791c345f02f15295424067e48bbe056651f9af143d3c4ef2fd70ace2f5adb6",
+      "byte_size": 70993,
+      "storage_key": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/inventory-fe791c345f02f15295424067e48bbe056651f9af143d3c4ef2fd70ace2f5adb6",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "document_id": "b8febdcf-904b-4e61-9502-538b2b7a2b3b",
+      "field_path": "revision:3f10668f-127f-4d17-bc96-c2c28b79e048",
+      "asset_id": "f1905699-1f6a-4b60-8394-1174cb628fd1",
+      "media_version_id": "29313f2b-93a2-490b-a21c-5d66bbe8da02",
+      "checksum": "d599158118c07ba7f802083320f4bf0c2e1530ad7b59c5afea9260afe64f4b44",
+      "byte_size": 127759,
+      "storage_key": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/inventory-d599158118c07ba7f802083320f4bf0c2e1530ad7b59c5afea9260afe64f4b44",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "document_id": "bfea07f2-7b6e-4810-906f-fb1fffc823a0",
+      "field_path": "revision:74c87f51-92f4-4259-aa3b-dc4597bb3a81",
+      "asset_id": "804da406-cad4-45ff-a6be-2ff2830eaee4",
+      "media_version_id": "1374ca8c-b2f8-4867-9314-c3dc49340629",
+      "checksum": "2b242a4ee761b65e514f15345bc3e4ae962ad487c13facdba7562d65b980556d",
+      "byte_size": 67584,
+      "storage_key": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/inventory-2b242a4ee761b65e514f15345bc3e4ae962ad487c13facdba7562d65b980556d",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "document_id": "ed6375ff-22b9-4a68-9a61-38877c302597",
+      "field_path": "revision:908bf13c-c0bd-4931-99c8-85b8295577df",
+      "asset_id": "9bcf7f6e-c7e9-462a-a6c4-d75e50b23845",
+      "media_version_id": "fb278378-b4e2-4459-990c-f836089f44f8",
+      "checksum": "81ece7b6ecce7595a770510091c25735e67ab2efe5129c4632d475fb794a7ee4",
+      "byte_size": 82806,
+      "storage_key": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/inventory-81ece7b6ecce7595a770510091c25735e67ab2efe5129c4632d475fb794a7ee4",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "document_id": "f2ca6554-d709-4ccd-9d5c-2b1d0b33aa41",
+      "field_path": "revision:c15b371f-47c4-4ec1-8bb7-5d0fa779295c",
+      "asset_id": "269aed4b-0c27-491e-8736-9b2261162600",
+      "media_version_id": "0d94d0fe-6411-418c-9a4b-55aaf7938c6e",
+      "checksum": "d622199bf9a853b61d3255e7ff5638549b75a19b4a8e06d53e1ca874ca4f8728",
+      "byte_size": 63855,
+      "storage_key": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/inventory-d622199bf9a853b61d3255e7ff5638549b75a19b4a8e06d53e1ca874ca4f8728",
+      "width": 1600,
+      "height": 1000
+    }
+  ],
+  "digest": "648edadb39862742be05b9be5ec2687528e78a8f3b0570565e7092fe85aa300c"
+}

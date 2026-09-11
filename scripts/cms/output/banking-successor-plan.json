@@ -1,0 +1,13 @@
+{
+  "task": 289,
+  "mode": "dry-run",
+  "baselineDigest": "1b73b0eb25c6cfd43e47fcbecc503d3f4ac50cc12b62ee11d62d030e71370a1e",
+  "receiptKey": "cms-banking-pov-v1-successor:1b73b0eb25c6cfd43e47fcbecc503d3f4ac50cc12b62ee11d62d030e71370a1e:ad5b8c394628115efd9a2020e218beb63a6c34accabaaa2722ac4b03cac04997",
+  "documentId": "b05b2617-0584-4bf3-966d-8f78f3896027",
+  "editionId": "7e168f5d-9a00-407d-a63d-ae5f65faef89",
+  "publishedRevisionId": "a9becd21-1772-4be7-afec-54b519ff13b5",
+  "candidateDigest": "ad5b8c394628115efd9a2020e218beb63a6c34accabaaa2722ac4b03cac04997",
+  "preservedCaseCount": 8,
+  "action": "append-draft-for-editorial-review-only",
+  "publication": "No publication occurs here. CMS review, approved immutable media, and the established publisher procedure remain mandatory."
+}

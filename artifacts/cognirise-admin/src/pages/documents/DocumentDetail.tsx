@@ -47,6 +47,7 @@ import { officeLifecycleAction } from "./office-lifecycle";
 import { Check, Circle } from "lucide-react";
 import { collectContentMediaIds, CONTENT_GUIDANCE, documentReadiness, editionAuthoringActions, selectInitialExactEdition } from "./authoring";
 import { buildDraftSave, describeSaveFailure, isDraftSaveResponse, serverValidationIssues, type DraftSeo, type DraftSaveIssue } from "./draft-save";
+import { describeActionError } from "./action-error";
 
 export default function DocumentDetail() {
   const [, params] = useRoute("/content/:id");
@@ -54,6 +55,7 @@ export default function DocumentDetail() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [actionError, setActionError] = useState<ReturnType<typeof describeActionError> | null>(null);
 
   const { data: session, isLoading: isSessionLoading, isError: isSessionError } = useGetSession();
   const isAdministrator = session?.user?.role === "administrator";
@@ -508,6 +510,7 @@ export default function DocumentDetail() {
 
   const handleAction = (action: "submit" | "publish" | "archive" | "restore") => {
     if (updateDoc.isPending) return;
+    setActionError(null);
     const targetParams = { market: selectedMarket, locale: selectedLocale };
     const opts = {
       onSuccess: (updated: any) => {
@@ -523,7 +526,11 @@ export default function DocumentDetail() {
         });
         if (action === "publish") setPublishOpen(false);
       },
-      onError: (err: any) => toast({ title: "Action failed", description: err.error, variant: "destructive" })
+      onError: (err: unknown) => {
+        const failure = describeActionError(err);
+        setActionError(failure);
+        toast({ title: "Action could not be completed", description: failure.message, variant: "destructive" });
+      }
     };
 
     if (action === "submit" && selectedEdition?.revisionId) submitDoc.mutate({ documentId: id!, data: { revisionId: selectedEdition.revisionId } }, opts);
@@ -682,6 +689,26 @@ export default function DocumentDetail() {
         {/* Left Column: Editor */}
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar border-r border-border">
           <div className="max-w-3xl mx-auto space-y-8">
+            {actionError && (
+              <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/5 p-4" data-testid="action-error-summary">
+                <p className="text-sm font-semibold text-destructive">{actionError.message}</p>
+                {actionError.mediaBlocked && (
+                  <p className="mt-2 text-sm">
+                    Referenced images must be approved before submitting this page for review.
+                    Open the <a href={`${import.meta.env.BASE_URL}media`} target="_blank" rel="noopener noreferrer" className="underline font-medium">Media Library (new tab)</a>,
+                    review the pending assets and confirm their rights and accessibility checks. Then return here and submit again.
+                  </p>
+                )}
+                {!!actionError.issues.length && (
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-xs">
+                    {actionError.issues.map((issue, index) => (
+                      <li key={`${issue.path}-${index}`}><strong>{issue.path}</strong>: {issue.message}</li>
+                    ))}
+                  </ul>
+                )}
+                <Button type="button" variant="ghost" size="sm" className="mt-2" onClick={() => setActionError(null)}>Dismiss</Button>
+              </div>
+            )}
             {!!saveIssues.length && (
               <div role="alert" aria-labelledby="draft-error-title" className="rounded-md border border-destructive/40 bg-destructive/5 p-4" data-testid="draft-error-summary">
                 <p id="draft-error-title" className="text-sm font-semibold text-destructive">Fix these issues before saving</p>
