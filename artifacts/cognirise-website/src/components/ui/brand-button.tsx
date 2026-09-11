@@ -15,9 +15,83 @@ interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
   isLoading?: boolean;
 }
 
+type PulseActionMotionPhase = "rest" | "moving" | "arriving";
+const PULSE_ACTION_ARRIVAL_MS = 240;
+
+function usePulseActionMotion() {
+  const arrivalTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const phaseRef = React.useRef<PulseActionMotionPhase>("rest");
+  const motionNode = React.useRef<HTMLElement | null>(null);
+
+  const setMotionPhase = React.useCallback((next: PulseActionMotionPhase) => {
+    phaseRef.current = next;
+    motionNode.current?.setAttribute("data-pulse-action-motion", next);
+  }, []);
+
+  const isIconTravel = (event: TransitionEvent) =>
+    event.propertyName === "left" &&
+    event.target instanceof HTMLElement &&
+    event.target.classList.contains("pulse-action-icon");
+
+  const clearArrival = () => {
+    if (arrivalTimer.current) clearTimeout(arrivalTimer.current);
+    arrivalTimer.current = undefined;
+  };
+
+  const handleTransitionRun = React.useCallback((event: TransitionEvent) => {
+    if (!isIconTravel(event)) return;
+    clearArrival();
+    setMotionPhase("moving");
+  }, [setMotionPhase]);
+
+  const handleTransitionEnd = React.useCallback((event: TransitionEvent) => {
+    if (!isIconTravel(event) || phaseRef.current !== "moving") return;
+    clearArrival();
+    setMotionPhase("arriving");
+    arrivalTimer.current = setTimeout(() => {
+      arrivalTimer.current = undefined;
+      setMotionPhase("rest");
+    }, PULSE_ACTION_ARRIVAL_MS);
+  }, [setMotionPhase]);
+
+  const handleTransitionCancel = React.useCallback((event: TransitionEvent) => {
+    if (!isIconTravel(event)) return;
+    clearArrival();
+    setMotionPhase("rest");
+  }, [setMotionPhase]);
+
+  const motionListenerNode = React.useRef<HTMLElement | null>(null);
+  const motionNodeRef = React.useCallback((node: HTMLElement | null) => {
+    if (motionListenerNode.current) {
+      motionListenerNode.current.removeEventListener("transitionrun", handleTransitionRun);
+      motionListenerNode.current.removeEventListener("transitionend", handleTransitionEnd);
+      motionListenerNode.current.removeEventListener("transitioncancel", handleTransitionCancel);
+    }
+    motionNode.current = node;
+    motionListenerNode.current = node;
+    if (!node) return;
+    node.setAttribute("data-pulse-action-motion", phaseRef.current);
+    node.addEventListener("transitionrun", handleTransitionRun);
+    node.addEventListener("transitionend", handleTransitionEnd);
+    node.addEventListener("transitioncancel", handleTransitionCancel);
+  }, [handleTransitionCancel, handleTransitionEnd, handleTransitionRun]);
+
+  React.useEffect(() => () => {
+    if (motionListenerNode.current) {
+      motionListenerNode.current.removeEventListener("transitionrun", handleTransitionRun);
+      motionListenerNode.current.removeEventListener("transitionend", handleTransitionEnd);
+      motionListenerNode.current.removeEventListener("transitioncancel", handleTransitionCancel);
+    }
+    clearArrival();
+  }, [handleTransitionCancel, handleTransitionEnd, handleTransitionRun]);
+
+  return { motionNodeRef };
+}
+
 export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, BrandButtonProps & React.AnchorHTMLAttributes<HTMLAnchorElement>>(
   ({ children, variant = "primary", className, icon, href, isLoading, disabled, ...props }, ref) => {
     const { market } = useMarketStore();
+    const { motionNodeRef } = usePulseActionMotion();
     const isUnavailable = disabled || isLoading;
     const forcedTextColor =
       variant === "primary" || variant === "submit"
@@ -44,6 +118,8 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
           <span className="pulse-action-layout">
             <span className="pulse-action-label">{children}</span>
             <span className="pulse-action-icon" aria-hidden="true">
+              <span className="pulse-action-trail" aria-hidden="true" />
+              <span className="pulse-action-dot" aria-hidden="true" />
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (icon || <ArrowRight className="h-4 w-4" />)}
             </span>
           </span>
@@ -95,13 +171,18 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
       };
       const sharedAnchorProps = {
         ...anchorProps,
-        ref: ref as React.ForwardedRef<HTMLAnchorElement>,
+        ref: (node: HTMLAnchorElement | null) => {
+          motionNodeRef(node);
+          if (typeof ref === "function") ref(node);
+          else if (ref) ref.current = node;
+        },
         href,
         className: getClasses(),
         "aria-busy": isLoading || undefined,
         "aria-disabled": isUnavailable || undefined,
         tabIndex: isUnavailable ? -1 : anchorProps.tabIndex,
         onClick: onAnchorClick,
+        "data-pulse-action-motion": "rest",
         style: { ...anchorProps.style, color: forcedTextColor },
       };
 
@@ -124,11 +205,16 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
 
     return (
       <button
-        ref={ref as React.ForwardedRef<HTMLButtonElement>}
+        ref={(node) => {
+          motionNodeRef(node);
+          if (typeof ref === "function") ref(node);
+          else if (ref) ref.current = node;
+        }}
         className={getClasses()}
         disabled={isUnavailable}
         aria-busy={isLoading || undefined}
         {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+        data-pulse-action-motion="rest"
         style={{ ...props.style, color: forcedTextColor }}
       >
         {renderContent()}

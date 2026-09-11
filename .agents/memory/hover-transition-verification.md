@@ -14,3 +14,9 @@ Headless Chromium in this workspace can report no fine pointer or hover support 
 **Why:** Real pointer events matched `:hover` while the stylesheet's desktop-hover media query remained false, incorrectly making valid transitions look broken.
 
 **How to apply:** Assert the media query before sampling. For desktop checks, launch Chromium with `--blink-settings=availableHoverTypes=2,primaryHoverType=2,availablePointerTypes=4,primaryPointerType=4`; keep reduced-motion emulation separate.
+
+Tie decorative arrival feedback to actual CSS transition completion, not a timeout equal to the declared duration.
+
+**Why:** Browsers shorten reversed transitions, so a fixed delay pulses after the object has already stopped; input events can also occur without starting any transition. Reusing an animation name across direction states does not reliably restart that animation.
+
+**How to apply:** Use filtered transition lifecycle events for moving, cancelled and arrived states; reserve timers for the one-shot arrival effect. For orbital geometry, measure untransformed dimensions and centers rather than the rotating element's axis-aligned bounding box.

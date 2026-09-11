@@ -14,6 +14,8 @@ test("renders every main variant with the shared Pulse action structure", () => 
     assert.match(markup, new RegExp(`pulse-action-${variant}`));
     assert.match(markup, /pulse-action-layout/);
     assert.match(markup, /pulse-action-icon/);
+    assert.match(markup, /pulse-action-trail/);
+    assert.match(markup, /pulse-action-dot/);
     assert.match(markup, /pulse-action-sheen/);
     assert.doesNotMatch(markup, /pulse-signal-rail/);
   }
@@ -25,6 +27,7 @@ test("keeps editorial actions visually light", () => {
   assert.match(markup, /pulse-editorial-icon/);
   assert.match(markup, /focus-visible:ring-2/);
   assert.doesNotMatch(markup, /pulse-action-layout/);
+  assert.doesNotMatch(markup, /pulse-action-trail/);
   assert.doesNotMatch(markup, /pulse-signal-rail/);
 });
 
