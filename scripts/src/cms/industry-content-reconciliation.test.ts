@@ -215,7 +215,7 @@ test("Education successor accepts only an exact known authority and governed v2 
   }), "reuse-complete");
 });
 
-test("Education redesign replays from the exact approved v10 successor authority", () => {
+test("Education campus hero replacement replays from the exact approved v11 successor authority", () => {
   const canonicalPayload = {
     seo: { ...EDUCATION_SUCCESSOR_SEO, noIndex: false },
     content: {
@@ -228,7 +228,7 @@ test("Education redesign replays from the exact approved v10 successor authority
   };
   assert.equal(educationSuccessorAction({
     baselineAction: "append-and-publish",
-    latestNormalizedPayloadDigest: "cc208e07c47b59d8e27e80bd55a8f3515a88b79c1b7f91459bf6e251e0a050e5",
+    latestNormalizedPayloadDigest: "ba1408ae2bb721fcf743e9153ddae98ae0e6ec40d98a4e93a4370214996954f0",
     canonicalPayload,
   }), "append-and-publish");
   assert.equal(educationSuccessorAction({

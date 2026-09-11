@@ -79,17 +79,37 @@ const EDUCATION_V8_AUTHORITY_DIGEST =
 // handoff authority rather than treating it as arbitrary editorial drift.
 const EDUCATION_V10_AUTHORITY_DIGEST =
   "cc208e07c47b59d8e27e80bd55a8f3515a88b79c1b7f91459bf6e251e0a050e5";
+// The v11 imagery successor is the exact authority that the campus-hero
+// replacement is allowed to follow. This digest is computed after removing
+// mutable media selections while retaining the reviewed narrative and the
+// two now-retired supporting-scene paths.
+const EDUCATION_V11_AUTHORITY_DIGEST =
+  "41b812f54e57841f3ac16d0b508d17dfbc2889dd3497f12914c2f936d60f8e95";
+const EDUCATION_V11_LEGACY_AUTHORITY_DIGEST =
+  "ba1408ae2bb721fcf743e9153ddae98ae0e6ec40d98a4e93a4370214996954f0";
 const EDUCATION_KNOWN_AUTHORITY_DIGESTS = new Set([
   EDUCATION_V8_AUTHORITY_DIGEST,
   EDUCATION_V10_AUTHORITY_DIGEST,
+  EDUCATION_V11_AUTHORITY_DIGEST,
+  EDUCATION_V11_LEGACY_AUTHORITY_DIGEST,
 ]);
 export const EDUCATION_SUCCESSOR_SEO = {
   title: "Education AI | K–12 & Higher Education | Cognirise",
   description: "Build shared AI capability across schools, universities and education authorities: better learning, stronger educators and researchers, and responsible service redesign.",
 } as const;
 
-export function educationSuccessorRecoveryKey(externalId: string) {
-  return `cms-industry-education-successor-v11-recovery:${externalId}`;
+export function educationSuccessorRecoveryKey(externalId: string, version = "v11") {
+  return `cms-industry-education-successor-${version}-recovery:${externalId}`;
+}
+
+export function isEducationSuccessorOperation(operation: Pick<MigrationOperation, "idempotencyKey" | "kind" | "slug">) {
+  return operation.kind === "industry"
+    && operation.slug === "education"
+    && operation.idempotencyKey.startsWith("cms-industry-education-successor-v");
+}
+
+export function educationSuccessorVersion(idempotencyKey: string) {
+  return idempotencyKey.match(/^cms-industry-education-successor-(v\d+):/)?.[1];
 }
 
 export function isKnownEducationSuccessorAuthorityDigest(digest: string | undefined) {
@@ -340,7 +360,7 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
       ? record.fields.slug === "financial-services"
         ? `cms-industry-contract-v12:${record.externalId}`
         : record.fields.slug === "education"
-          ? `cms-industry-education-successor-v11:${record.externalId}`
+              ? `cms-industry-education-successor-v12:${record.externalId}`
         : `cms-industry-contract-v8:${record.externalId}`
       : record.type === "case-study"
         ? `cms-case-study-baseline-v2:${record.externalId}`

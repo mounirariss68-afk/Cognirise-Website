@@ -8,3 +8,9 @@ Use Cognirise Pulse as the shared design language: an off-white architectural ca
 **Why:** The user approved Cognirise Pulse as the creative standard, then explicitly rejected the inset-arrow CTA and later card-grid, thin-stepper and grey-box regressions as materially below that standard. The user also rejected both a boxed/downsampled blueprint and a full slide with hover layers as visually disconnected from the website. A page-wide parallax and repeated reveal implementation made the homepage feel stuck, unreliable and less intentional.
 
 **How to apply:** Use this direction across Cognirise website pages, presentations, campaign assets and related brand materials unless the user explicitly asks for a new visual direction. Translate each content model into its own clear spatial composition.
+
+For industry detail pages, the established shared editorial family takes priority over bespoke domain compositions. Keep Education's broad schools, universities, networks and authorities narrative within that family rather than making it a separate microsite.
+
+**Why:** The user explicitly rejected Education's floating hero card, local section menu, table-group artwork, scene-description captions and independent section organization, while retaining its approved narrative.
+
+**How to apply:** Use Public Sector, Telecoms and Energy as presentation references. Map richer material into shared editorial sections; do not treat the rejected Education renderer or screenshots as design targets.

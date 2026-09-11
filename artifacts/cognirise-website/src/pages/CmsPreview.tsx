@@ -7,10 +7,10 @@ import { AgentAuthorityLayout } from "@/pages/AgentAuthorityModel";
 import { resolveCmsMedia, type CmsRecord } from "@/lib/cms";
 import { normalizeFrameworkPreviewContent } from "@/lib/framework-preview";
 import { OfficeContactCard } from "@/components/OfficeContactCard";
-import { EducationEditorialView } from "@/components/industries/EducationEditorial";
 import { BankingEditorial } from "@/components/industries/BankingEditorial";
 import { Shell, type PreviewNavigationSnapshot } from "@/components/layout/Shell";
 import type { Market } from "@/store/market";
+import { IndustryEditorialView } from "@/components/industries/IndustryEditorial";
 
 type Preview = {
   kind: CmsDocumentKind;
@@ -203,8 +203,8 @@ export default function CmsPreview() {
           </div>
         </header>
         {warningPanel}
-        <EducationEditorialView
-          view={education as Parameters<typeof EducationEditorialView>[0]["view"]}
+        <IndustryEditorialView
+          view={education as Parameters<typeof IndustryEditorialView>[0]["view"]}
           marketOverride={educationMarket}
         />
       </Shell>

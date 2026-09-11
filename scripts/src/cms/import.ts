@@ -17,7 +17,9 @@ import {
   industryBaselineAction,
   educationSuccessorAction,
   educationSuccessorRecoveryKey,
+  educationSuccessorVersion,
   financialServicesPunctuationReconciliationPlan,
+  isEducationSuccessorOperation,
   personAvailabilityOperations,
   personGovernanceOperations,
   resolveMigrationMedia,
@@ -63,6 +65,7 @@ const input = args.find((argument) => argument.startsWith("--in="))?.slice(5) ??
 const destination = args.find((argument) => argument.startsWith("--out="))?.slice(6);
 const target = args.find((argument) => argument.startsWith("--target="))?.slice(9);
 
+const EDUCATION_V11_OPERATION_PREFIX = "cms-industry-education-successor-v11:";
 interface Inventory {
   schemaVersion: number;
   manifestDigest: string;
@@ -946,10 +949,11 @@ async function applyDatabase(
       for (const operation of operations) {
         const [receipt] = await tx.select().from(cmsOperationReceiptsTable)
           .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.idempotencyKey));
-        const educationRecoveryKey = operation.kind === "industry"
-          && operation.slug === "education"
-          && operation.idempotencyKey.startsWith("cms-industry-education-successor-v11:")
-          ? educationSuccessorRecoveryKey(operation.externalId)
+        const educationVersion = isEducationSuccessorOperation(operation)
+          ? educationSuccessorVersion(operation.idempotencyKey)
+          : undefined;
+        const educationRecoveryKey = educationVersion
+          ? educationSuccessorRecoveryKey(operation.externalId, educationVersion)
           : undefined;
         const [educationRecoveryReceipt] = educationRecoveryKey
           ? await tx.select().from(cmsOperationReceiptsTable)
@@ -1123,10 +1127,7 @@ async function applyDatabase(
           }
           const isIndustryContractOperation = operation.kind === "industry" && (
             operation.idempotencyKey.startsWith("cms-industry-contract-v8:")
-            || (
-              operation.slug === "education"
-              && operation.idempotencyKey.startsWith("cms-industry-education-successor-v11:")
-            )
+            || isEducationSuccessorOperation(operation)
             || (
               operation.slug === "financial-services"
               && operation.idempotencyKey.startsWith("cms-industry-contract-v12:")
@@ -1206,6 +1207,13 @@ async function applyDatabase(
             && pinnedMedia[0].mediaVersionId === pinnedMedia[0].versionId
             ? pinnedMedia[0]
             : null;
+          const educationPublishedPins = operation.slug === "education"
+            && publishedMediaIds.length === 3
+            && publishedReferences.length === 3
+            && publishedReferences.every((reference) =>
+              (reference.status === "active" || reference.status === "ready")
+                && Boolean(reference.mediaVersionId)
+            );
           const immediatelyPriorRevision = publishedRevision
             ? revisions.find((revision) =>
                 revision.revisionNumber === publishedRevision.revisionNumber - 1
@@ -1289,7 +1297,13 @@ async function applyDatabase(
                   revisionId: revision.id,
                 })
                 && audit?.action === "cms.inventory.imported"
-                && audit.targetType === "industry"
+                     && (
+                       audit.targetType === "industry"
+                       || (
+                         receipt.idempotencyKey === EDUCATION_V11_CUTOVER_KEY
+                         && audit.targetType === "document"
+                       )
+                     )
                 && audit.targetId === String(conflict.id)
                 && (audit.metadata as Record<string, unknown> | null)?.revisionId === revisionId
                 && typeof revision.contentDigest === "string";
@@ -1331,12 +1345,24 @@ async function applyDatabase(
                 const candidateMetadata = candidateAudit?.metadata as Record<string, unknown> | null;
                 const isVersionedIndustryOperation =
                   item.idempotencyKey.startsWith("cms-industry-contract-v")
-                  || item.idempotencyKey.startsWith("cms-industry-education-successor-v");
+                  || item.idempotencyKey.startsWith("cms-industry-education-successor-v")
+                  || item.idempotencyKey.startsWith(EDUCATION_V11_RECOVERY_KEY_PREFIX)
+                  || item.idempotencyKey === EDUCATION_V11_CUTOVER_KEY;
                 const isIndustryContractAudit =
                   candidateAudit?.action?.startsWith("cms.inventory.industry-contract")
                   || (
-                    item.idempotencyKey.startsWith("cms-industry-education-successor-v")
-                    && candidateAudit?.action === "cms.inventory.education-successor-published"
+                    (
+                      item.idempotencyKey.startsWith("cms-industry-education-successor-v")
+                      || item.idempotencyKey.startsWith(EDUCATION_V11_RECOVERY_KEY_PREFIX)
+                    )
+                    && (
+                      candidateAudit?.action === "cms.inventory.education-successor-published"
+                      || candidateAudit?.action === "cms.inventory.education-successor-pending-cutover"
+                    )
+                  )
+                  || (
+                    item.idempotencyKey === EDUCATION_V11_CUTOVER_KEY
+                    && candidateAudit?.action === "document.published"
                   );
                 return item.subjectId === String(conflict.id)
                   && isVersionedIndustryOperation
@@ -1351,16 +1377,50 @@ async function applyDatabase(
                     && (
                       audit?.action?.startsWith("cms.inventory.industry-contract")
                       || (
-                        receipt.idempotencyKey.startsWith("cms-industry-education-successor-v")
-                        && audit?.action === "cms.inventory.education-successor-published"
+                        (
+                          receipt.idempotencyKey.startsWith("cms-industry-education-successor-v")
+                          || receipt.idempotencyKey.startsWith(EDUCATION_V11_RECOVERY_KEY_PREFIX)
+                        )
+                        && (
+                          audit?.action === "cms.inventory.education-successor-published"
+                          || audit?.action === "cms.inventory.education-successor-pending-cutover"
+                        )
+                      )
+                      || (
+                        receipt.idempotencyKey === EDUCATION_V11_CUTOVER_KEY
+                        && audit?.action === "document.published"
                       )
                     )
-                    && audit.targetType === "industry"
+                     && (
+                       audit.targetType === "industry"
+                       || (
+                         receipt.idempotencyKey === EDUCATION_V11_CUTOVER_KEY
+                         && audit.targetType === "document"
+                       )
+                     )
                     && audit.targetId === String(conflict.id)
                     && metadata?.revisionId === revisionId
                     && typeof revision.contentDigest === "string"
                   )
                 : false;
+            }
+            if (
+              !provenanceValid
+              && operation.slug === "education"
+              && revisionId === String(edition.publishedRevisionId ?? "")
+            ) {
+              const priorCutoverReceipt = receiptByKey.get(EDUCATION_V11_CUTOVER_KEY);
+              const priorCutoverAudit = auditByRequest.get(EDUCATION_V11_CUTOVER_KEY);
+              const priorCutoverMetadata = priorCutoverAudit?.metadata as Record<string, unknown> | null;
+              provenanceValid = Boolean(
+                priorCutoverReceipt?.operation === "cms.industry.pulse-media-cutover"
+                && priorCutoverReceipt.subjectId === revisionId
+                && priorCutoverAudit?.action === "document.published"
+                && priorCutoverAudit.targetType === "document"
+                && priorCutoverAudit.targetId === String(conflict.id)
+                && priorCutoverMetadata?.revisionId === revisionId
+                && typeof revision.contentDigest === "string"
+              );
             }
             return {
               id: String(revision.id),
@@ -1371,7 +1431,8 @@ async function applyDatabase(
               provenanceValid,
               payloadFamilyDigest: normalizedPayloadDigest(revision.payload, true),
               matchesContractPayload: normalizedPayloadDigest(revision.payload, false) === expectedContractDigest,
-              hasValidMediaPin: revisionId === String(edition.publishedRevisionId) && Boolean(approvedPin),
+               hasValidMediaPin: revisionId === String(edition.publishedRevisionId)
+                 && (Boolean(approvedPin) || educationPublishedPins),
               hasKnownV3UnpinnedRef: revisionId === String(edition.publishedRevisionId)
                 && publishedReferences.length === 1
                 && publishedReferences[0].mediaVersionId === null
@@ -1382,13 +1443,74 @@ async function applyDatabase(
                 && Boolean(priorApprovedPin),
             };
           });
+          const isEducationSuccessor = isEducationSuccessorOperation(operation);
+          if (isEducationSuccessor && educationVersion === "v12") {
+            const priorKey = `${EDUCATION_V11_OPERATION_PREFIX}${operation.externalId}`;
+            const recoveryKey = `${EDUCATION_V11_RECOVERY_KEY_PREFIX}${operation.externalId}`;
+            const priorReceipt = receiptByKey.get(priorKey);
+            const priorAudit = auditByRequest.get(priorKey);
+            const priorMetadata = priorAudit?.metadata as Record<string, unknown> | null;
+            const recoveryReceipt = receiptByKey.get(recoveryKey);
+            const recoveryAudit = auditByRequest.get(recoveryKey);
+            const recoveryMetadata = recoveryAudit?.metadata as Record<string, unknown> | null;
+            const priorCutoverReceipt = receiptByKey.get(EDUCATION_V11_CUTOVER_KEY);
+            const priorCutoverAudit = auditByRequest.get(EDUCATION_V11_CUTOVER_KEY);
+            const priorCutoverMetadata = priorCutoverAudit?.metadata as Record<string, unknown> | null;
+            const latestRevision = revisions[0];
+            const priorAuthorityIsExact = Boolean(
+              priorReceipt
+              && priorReceipt.requestDigest === EDUCATION_V11_REQUEST_DIGEST
+              && (priorReceipt.operation === "cms.inventory.industry-contract-editorial-preserved"
+                || priorReceipt.operation === "cms.inventory.education-successor-pending-cutover"
+                || priorReceipt.operation === "cms.inventory.education-successor-published")
+              && priorReceipt.subjectId === String(conflict.id)
+              && priorAudit
+              && (priorAudit.action === "cms.inventory.industry-contract-editorial-preserved"
+                || priorAudit.action === "cms.inventory.education-successor-pending-cutover"
+                || priorAudit.action === "cms.inventory.education-successor-published")
+              && priorAudit.targetType === "industry"
+              && priorAudit.targetId === String(conflict.id)
+              && priorMetadata
+              && (
+                priorMetadata.revisionId === String(latestRevision?.id ?? "")
+                || priorMetadata.preservedRevisionId === String(recoveryMetadata?.previousRevisionId ?? "")
+              )
+              && recoveryReceipt
+              && recoveryReceipt.requestDigest === EDUCATION_V11_REQUEST_DIGEST
+              && recoveryReceipt.operation === "cms.inventory.education-successor-pending-cutover"
+              && recoveryReceipt.subjectId === String(conflict.id)
+              && recoveryAudit?.action === "cms.inventory.education-successor-pending-cutover"
+              && recoveryAudit.targetType === "industry"
+              && recoveryAudit.targetId === String(conflict.id)
+              && recoveryMetadata?.revisionId
+              && recoveryReceipt.resultDigest === resultDigest({
+                documentId: conflict.id,
+                editionId: edition.id,
+                revisionId: recoveryMetadata.revisionId,
+              })
+              && priorCutoverReceipt
+              && priorCutoverReceipt.operation === "cms.industry.pulse-media-cutover"
+              && priorCutoverReceipt.subjectId === String(latestRevision?.id ?? "")
+              && priorCutoverAudit?.action === "document.published"
+              && priorCutoverAudit.targetType === "document"
+              && priorCutoverAudit.targetId === String(conflict.id)
+              && priorCutoverMetadata?.revisionId === String(latestRevision?.id ?? "")
+              && priorCutoverMetadata.sourceRevisionId === String(recoveryMetadata.revisionId)
+              && edition.publicationState === "published"
+              && String(edition.publishedRevisionId ?? "") === String(latestRevision?.id ?? "")
+              && latestRevision?.workflowState === "approved"
+            );
+            if (!priorAuthorityIsExact) {
+              throw new Error(
+                `${operation.externalId}: Education campus hero replacement requires the exact approved v11 successor receipt and live revision; preserving current editorial authority.`,
+              );
+            }
+          }
           let baselineAction = industryBaselineAction(
             classifiedRevisions,
             edition.publishedRevisionId ? String(edition.publishedRevisionId) : null,
             edition.publicationState,
           );
-          const isEducationSuccessor = operation.slug === "education"
-            && operation.idempotencyKey.startsWith("cms-industry-education-successor-v11:");
           if (isEducationSuccessor) {
             baselineAction = educationSuccessorAction({
               baselineAction,
@@ -1421,10 +1543,10 @@ async function applyDatabase(
             baselineAction = "append-and-publish";
           }
           if (baselineAction === "append-and-publish" || baselineAction === "repair-v3-media") {
-            // Education v11 is a controlled handoff, not a one-media
-            // publication. Preserve the approved v2 edition, append the
-            // successor as a draft, then let the Education-only cutover add
-            // all three approved immutable pins in one publish transaction.
+             // Education successors are controlled handoffs, not direct
+             // publication. Preserve the approved edition, append the
+             // successor as a draft, then let the Education-only cutover add
+             // the reviewed immutable hero pin in one publish transaction.
             const educationSuccessorDraft = isEducationSuccessor
               && baselineAction === "append-and-publish";
             const publicationPin = educationSuccessorDraft
@@ -1471,7 +1593,7 @@ async function applyDatabase(
               reason: baselineAction === "repair-v3-media"
                 ? "Approved v4 repair of the known v3 industry hero-media pin defect; prior revisions preserved."
                 : isEducationSuccessor
-                  ? "Approved Education POV successor v11 with governed supporting imagery; prior revisions and immutable media preserved."
+                   ? "Approved Education campus-hero successor v12; rejected supporting imagery removed from the current revision while prior revisions and immutable media are preserved."
                 : "Approved financial-services punctuation baseline v12; prior revisions and media state preserved.",
             }).returning({ id: cmsRevisionsTable.id });
             if (!revision) throw new Error(`Could not append the ${operation.slug} contract baseline.`);
@@ -1504,7 +1626,7 @@ async function applyDatabase(
                   previousRevisionId: String(revisions[0].id),
                   workflowState: "draft",
                   publicationState: edition.publicationState,
-                  reason: "Education v11 successor is awaiting the governed three-image immutable-media cutover",
+                  reason: "Education v12 successor is awaiting the governed single-campus-hero immutable-media cutover",
                   ...(canRecoverPreservedEducation
                     ? { recoveredFromReceiptKey: operation.idempotencyKey }
                     : {}),
@@ -1586,7 +1708,7 @@ async function applyDatabase(
                 reason: baselineAction === "repair-v3-media"
                   ? "Known v3 unpinned square-JPG reference replaced in a new immutable revision using the prior approved Pulse pin"
                   : isEducationSuccessor
-                    ? "Approved Education v2 successor with strict market markers and prior immutable Pulse pin preserved"
+                   ? "Approved Education campus-hero successor v12 with strict market markers and prior immutable media preserved"
                   : "Approved financial-services punctuation baseline v12 with prior media state preserved",
                 repairedRevisionId: baselineAction === "repair-v3-media"
                   ? String(publishedRevision!.id)
@@ -2084,3 +2206,10 @@ main().catch((error: unknown) => {
   console.error(error instanceof Error ? error.message : error);
   process.exitCode = 1;
 });
+
+const EDUCATION_V11_REQUEST_DIGEST =
+  "f0b565465e2384da9afb278a4c06395353de7c768c0f21c9c9fff05674f8b76d";
+
+const EDUCATION_V11_CUTOVER_KEY = "cms-industry-education-imagery-v3:education";
+
+const EDUCATION_V11_RECOVERY_KEY_PREFIX = "cms-industry-education-successor-v11-recovery:";

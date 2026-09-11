@@ -129,7 +129,7 @@ test("the governed inventory produces six publishable industry cutover records i
       operation.slug === "financial-services"
         ? "cms-industry-contract-v12:"
         : operation.slug === "education"
-          ? "cms-industry-education-successor-v11:"
+          ? "cms-industry-education-successor-v12:"
         : "cms-industry-contract-v8:",
     )
   ));
@@ -161,16 +161,16 @@ test("the governed inventory produces six publishable industry cutover records i
   }
 });
 
-test("the Pulse industry family governs Education supporting scenes without creating another industry", () => {
+test("the Pulse industry family governs one Education hero without creating another industry", () => {
   const inventory = loadInventory();
   const media = mediaMigrationOperations(inventory.records);
   const mediaByPath = new Map(media.map((operation) => [operation.publicPath, operation]));
   const associated = pulseIndustryMedia.filter((item) => item.slug && item.role !== "supporting");
   const unassociated = pulseIndustryMedia.filter((item) => !item.slug);
 
-  assert.equal(pulseIndustryMedia.length, 11);
+  assert.equal(pulseIndustryMedia.length, 9);
   assert.equal(associated.length, 6);
-  assert.equal(pulseIndustryMedia.filter((item) => item.role === "supporting").length, 2);
+  assert.equal(pulseIndustryMedia.filter((item) => item.role === "supporting").length, 0);
   assert.deepEqual(
     unassociated.map((item) => item.sector),
     ["Manufacturing", "Defense", "Retail & CPG"],
@@ -182,8 +182,8 @@ test("the Pulse industry family governs Education supporting scenes without crea
     assert.equal(operation.cmsOwnership, "cms-candidate");
     assert.equal(operation.collection, "website");
     assert.equal(operation.mimeType, "image/png");
-    assert.equal(operation.width, 1536);
-    assert.equal(operation.height, 1024);
+    assert.equal(operation.width, item.width ?? 1536);
+    assert.equal(operation.height, item.height ?? 1024);
     assert.equal(operation.altText, item.altText);
   }
 
@@ -202,7 +202,7 @@ test("the Pulse industry family governs Education supporting scenes without crea
   assert.ok(unassociated.every((item) => !industryPaths.has(item.publicPath)));
 });
 
-test("Education reconciliation invokes the Education-only imagery cutover", () => {
+test("Education reconciliation invokes the Education-only hero cutover", () => {
   const reconcileSource = readFileSync(
     path.resolve(process.cwd(), "../../scripts/src/cms/reconcile.ts"),
     "utf8",
@@ -211,7 +211,7 @@ test("Education reconciliation invokes the Education-only imagery cutover", () =
     path.resolve(process.cwd(), "../../scripts/src/cms/industry-cutover.ts"),
     "utf8",
   );
-  assert.match(reconcileSource, /"cms:publish-education-imagery"/);
+  assert.match(reconcileSource, /"cms:publish-education-hero"/);
   assert.match(cutoverSource, /requestedSlug && requestedSlug !== "education"/);
   assert.match(cutoverSource, /fullPlan\.filter\(\(item\) => item\.definition\.slug === requestedSlug\)/);
   assert.match(cutoverSource, /if \(!requestedSlug\) \{/);

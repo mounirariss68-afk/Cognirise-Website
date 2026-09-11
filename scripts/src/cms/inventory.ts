@@ -18,7 +18,7 @@ import {
   caseStudyRecords,
   CASE_STUDY_TAXONOMY_COUNTS,
 } from "./case-studies.js";
-import { educationSupportingMedia, pulseIndustryMediaBySlug } from "./industry-media.js";
+import { pulseIndustryMediaBySlug } from "./industry-media.js";
 
 const args = process.argv.slice(2);
 const shouldWrite = args.includes("--write");
@@ -232,10 +232,7 @@ function industryRecords(items: SourceObject[], file: string) {
         slug,
         summary: String(item.dek),
         content,
-        mediaPaths: [
-          approvedMedia.publicPath,
-          ...(slug === "education" ? educationSupportingMedia.map((media) => media.publicPath) : []),
-        ],
+        mediaPaths: [approvedMedia.publicPath],
       },
       review: review([
         "Confirm opportunity, build capabilities, selected-work disclosure, hero-media rights, alt text, verification date, source classifications, and source URLs before publication.",
@@ -371,12 +368,12 @@ async function main() {
     throw new Error("The public website no longer matches the governed 5 partner / 5 platform / 3 article / 6 industry manifest.");
   }
   if (caseStudies.length !== 21) throw new Error(`Expected 21 governed case studies, found ${caseStudies.length}.`);
-   if (assets.length !== 88) throw new Error(`Expected 79 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
+   if (assets.length !== 86) throw new Error(`Expected 77 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
 
   const stable = {
     schemaVersion: 2,
     source: relative(websiteRoot),
-      expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, caseStudies: 21, caseStudyTaxonomy: CASE_STUDY_TAXONOMY_COUNTS, industries: 6, frameworks: 1, websiteAssets: 79, linkedinAssets: 9, assets: 88 },
+      expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, caseStudies: 21, caseStudyTaxonomy: CASE_STUDY_TAXONOMY_COUNTS, industries: 6, frameworks: 1, websiteAssets: 77, linkedinAssets: 9, assets: 86 },
     explicitOmissions: {
       povDocuments: "No genuine public POV documents are present in the current website.",
       employees: "No additional public employee profiles are present in the current website.",

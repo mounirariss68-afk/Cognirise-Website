@@ -2,9 +2,10 @@ export interface PulseIndustryMediaDefinition {
   sector: string;
   slug: string | null;
   role?: "hero" | "supporting";
-  imagerySlot?: "educatorPractice" | "researchCoordination";
   filename: string;
   publicPath: string;
+  width?: number;
+  height?: number;
   altText: string;
   usage: string;
 }
@@ -54,30 +55,12 @@ export const pulseIndustryMedia: PulseIndustryMediaDefinition[] = [
     sector: "Education",
     slug: "education",
     role: "hero",
-    filename: "pulse-industry-education-hero-v2.png",
-    publicPath: "/images/cognirise/industries/pulse-industry-education-hero-v2.png",
-    altText: "A school learner, university learner, educator and researcher collaborate around a learning table in a light-filled campus studio.",
+    filename: "pulse-industry-education-campus-v3.png",
+    publicPath: "/images/cognirise/industries/pulse-industry-education-campus-v3.png",
+    width: 1024,
+    height: 1024,
+    altText: "A sunlit education campus atrium connects library shelves, tiered learning spaces and glazed science rooms along restrained violet and coral light paths.",
     usage: "CMS industry hero: Education",
-  },
-  {
-    sector: "Education",
-    slug: "education",
-    role: "supporting",
-    imagerySlot: "educatorPractice",
-    filename: "pulse-industry-education-practice-v2.png",
-    publicPath: "/images/cognirise/industries/pulse-industry-education-practice-v2.png",
-    altText: "Four distinct educators collaboratively reviewing lesson materials around a table in a bright professional-learning studio.",
-    usage: "CMS industry supporting media: Education educator practice",
-  },
-  {
-    sector: "Education",
-    slug: "education",
-    role: "supporting",
-    imagerySlot: "researchCoordination",
-    filename: "pulse-industry-education-research-v2.png",
-    publicPath: "/images/cognirise/industries/pulse-industry-education-research-v2.png",
-    altText: "Three distinct university colleagues coordinate a reviewable research plan around a transparent table.",
-    usage: "CMS industry supporting media: Education research coordination",
   },
   {
     sector: "Manufacturing",
@@ -113,9 +96,22 @@ export const pulseIndustryMediaBySlug = new Map(
   pulseIndustryMedia.flatMap((item) => item.slug && item.role !== "supporting" ? [[item.slug, item] as const] : []),
 );
 
-export const educationSupportingMedia = pulseIndustryMedia.filter((item) =>
-  item.slug === "education" && item.role === "supporting",
-);
+export const educationDraftReceiptOperations = [
+  "cms.inventory.education-successor-pending-cutover",
+  "cms.inventory.import",
+] as const;
+
+/** Payload, document, key and request digest are checked by the caller.
+ * A generic import receipt can authorize only the first, unpublished draft. */
+export function educationDraftReceiptAllowed(
+  operation: string | undefined,
+  revisionNumber: number,
+  publishedRevisionId: string | null,
+): boolean {
+  return operation === educationDraftReceiptOperations[0]
+    || (operation === educationDraftReceiptOperations[1]
+      && revisionNumber === 1 && publishedRevisionId === null);
+}
 
 export function industryPublicationPinAction(input: {
   workflowState: string | null | undefined;

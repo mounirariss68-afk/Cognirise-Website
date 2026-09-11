@@ -92,13 +92,11 @@ async function evaluate(expression) {
 async function waitForEducation() {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     const ready = await evaluate(`document.readyState === "complete"
-      && document.querySelectorAll('[data-testid^="education-domain-"]').length === 5
-      && document.querySelectorAll('[data-testid^="education-capability-"]').length === 7
-      && document.querySelectorAll('[data-testid^="education-application-group-"]').length > 0`);
+      && document.getElementById("industry-title") !== null`);
     if (ready) return;
     await delay(100);
   }
-  throw new Error("Education editorial controls did not become ready");
+  throw new Error("Education editorial did not become ready");
 }
 
 async function setViewport(viewport) {
@@ -129,7 +127,7 @@ async function screenshot(name, fullPage = false) {
 
 async function screenshotHero(name) {
   const clip = await evaluate(`(() => {
-    const hero = document.querySelector('[aria-labelledby="education-title"]');
+    const hero = document.querySelector('[aria-labelledby="industry-title"]');
     const rect = hero.getBoundingClientRect();
     return {
       x: Math.max(0, rect.left + window.scrollX),
@@ -147,13 +145,19 @@ async function screenshotHero(name) {
   await writeFile(new URL(`${name}.png`, evidenceDirectory), Buffer.from(capture.data, "base64"));
 }
 
-async function navigateToEducation(viewport) {
+async function navigateToEducation(viewport, slug = "education") {
   await setViewport(viewport);
-  await send("Page.navigate", { url: `${baseUrl}/industries/education?market=uae` });
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `${baseUrl}/industries/${slug}?market=uae` });
   await waitForEducation();
   await evaluate(`(async () => {
+    await document.fonts.ready;
     await Promise.all([...document.images].map(async (image) => {
-      if (!image.complete) await new Promise((resolve) => image.addEventListener("load", resolve, { once: true }));
+      image.loading = "eager";
+      if (!image.complete) await Promise.race([
+        new Promise((resolve) => { image.addEventListener("load", resolve, { once: true }); image.addEventListener("error", resolve, { once: true }); }),
+        new Promise((resolve) => setTimeout(resolve, 15000))
+      ]);
       try { await image.decode(); } catch {}
     }));
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -163,17 +167,16 @@ async function navigateToEducation(viewport) {
 
 function containmentProbe() {
   return `(() => {
-    const hero = document.querySelector('[aria-labelledby="education-title"]');
+    const hero = document.querySelector('[aria-labelledby="industry-title"]');
     const heroImage = [...(hero?.querySelectorAll("img") ?? [])].find((image) => {
       const style = getComputedStyle(image);
       const rect = image.getBoundingClientRect();
       return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
     });
     const textNodes = [
-      document.querySelector('[data-testid="education-audience-label"]'),
-      document.getElementById("education-title"),
-      document.querySelector("#education-title + p"),
-      document.querySelector('[data-testid="education-hero-caption"]'),
+      document.querySelector('.ind-kicker'),
+      document.getElementById("industry-title"),
+      document.querySelector("#industry-title + p")
     ];
     const heroRect = hero?.getBoundingClientRect();
     const viewportWidth = document.documentElement.clientWidth;
@@ -239,91 +242,47 @@ try {
       await navigateToEducation(viewport);
       assertHeroContainment(await evaluate(containmentProbe()), viewport.label);
       await screenshot(`fullpage-${viewport.label}`, true);
+      await screenshotHero(`hero-${viewport.label}`);
     }
-
-    await navigateToEducation(viewports[0]);
-    const initialContent = await evaluate(`(() => ({
-    domains: [...document.querySelectorAll('[data-testid^="education-domain-"]')].map((button) => button.textContent.trim()),
-    applications: [...document.querySelectorAll('[data-testid^="education-application-group-"]')].map((button) => button.textContent.trim()),
-    capabilities: [...document.querySelectorAll('[data-testid^="education-capability-"]')].map((button) => button.textContent.trim()),
-    roadmap: [...document.querySelectorAll('[data-testid^="education-roadmap-"]')].map((button) => button.textContent.trim()),
-    }))()`);
-    assert.equal(initialContent.domains.length, 5);
-    assert.equal(initialContent.capabilities.length, 7);
-    assert.ok(initialContent.applications.length > 0);
-    assert.equal(initialContent.roadmap.length, 3);
-
-    for (const [group, detail] of [
-      ["education-domain", "education-journey-panel"],
-      ["education-application-group", "education-applications-detail"],
-      ["education-capability", "education-capabilities-detail"],
-      ["education-roadmap", "education-timeline-panel"],
-    ]) {
-      const count = await evaluate(`document.querySelectorAll('[data-testid^="${group}-"]').length`);
-      for (let index = 1; index <= count; index += 1) {
-        await evaluate(`document.querySelector('[data-testid="${group}-${index}"]').click(); true`);
-        await delay(250);
-        const state = await evaluate(`(() => {
-          const button = document.querySelector('[data-testid="${group}-${index}"]');
-          const detail = document.querySelector('[data-testid="${detail}"]');
-          return {
-            pressed: button.getAttribute("aria-pressed"),
-            selectedTitle: button.getAttribute("data-content-title"),
-            detailTitle: detail?.getAttribute("data-selected-title"),
-          };
-        })()`);
-        assert.equal(state.pressed, "true", `${group} ${index} did not become selected`);
-        assert.equal(state.detailTitle, state.selectedTitle, `${group} ${index} did not reveal its own content`);
+    for (const slug of ["public-sector", "telecoms", "energy-resources"]) {
+      for (const viewport of viewports.filter(({ label }) => label !== "360")) {
+        await navigateToEducation(viewport, slug);
+        await screenshot(`${slug}-fullpage-${viewport.label}`, true);
+        await screenshotHero(`${slug}-hero-${viewport.label}`);
       }
-      await evaluate(`document.querySelector('[data-testid="${group}-1"]').scrollIntoView({ block: "center" }); true`);
-      await screenshot(`interaction-${group}`, false);
     }
-
-    await evaluate(`document.querySelector('[data-testid="education-evidence-1"]').click(); true`);
-    await delay(250);
-    const evidence = await evaluate(`(() => {
-      const button = document.querySelector('[data-testid="education-evidence-1"]');
-      return { expanded: button.getAttribute("aria-expanded"), sources: document.querySelectorAll('#evidence a[target="_blank"]').length };
-    })()`);
-    assert.equal(evidence.expanded, "true");
-    assert.ok(evidence.sources > 0, "Expanded evidence has no source link");
-    await screenshot("interaction-evidence", false);
-
-    const anchorProbe = await evaluate(`(async () => {
-      const nav = document.querySelector('nav[aria-label="Education sections"]');
-      document.querySelector('a[href="#capabilities"]').click();
-      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      const header = document.querySelector("header").getBoundingClientRect();
-      const navRect = nav.getBoundingClientRect();
-      const targetRect = document.getElementById("capabilities").getBoundingClientRect();
-      return { targetTop: targetRect.top, minimumVisibleTop: header.height + navRect.height - 2 };
-    })()`);
-    assert.ok(anchorProbe.targetTop >= anchorProbe.minimumVisibleTop, `Capabilities anchor is obscured: ${JSON.stringify(anchorProbe)}`);
   }
 
   for (const viewport of viewports) {
     await navigateToEducation(viewport);
     const enlargedHero = await evaluate(`(() => {
-    const hero = document.querySelector('[aria-labelledby="education-title"]');
-    for (const node of [
-      document.querySelector('[data-testid="education-audience-label"]'),
-      document.getElementById("education-title"),
-      document.querySelector("#education-title + p"),
-      document.querySelector('[data-testid="education-hero-caption"]'),
-    ]) {
-      const style = getComputedStyle(node);
-      node.style.fontSize = \`\${parseFloat(style.fontSize) * 2}px\`;
-      node.style.lineHeight = \`\${parseFloat(style.lineHeight) * 2}px\`;
+    const freeze = document.createElement("style");
+    freeze.textContent = "* { animation:none!important; transition:none!important; }";
+    document.head.append(freeze);
+    // Snapshot ALL computed sizes before mutating any ancestor, preventing
+    // inherited sizes from compounding beyond the requested 200 percent.
+    const samples = [...document.querySelectorAll("main h1,main h2,main h3,main h4,main p,main li,main a,main strong,main span,main td,main th,main summary,main .ind-kicker")]
+      .map(node => { const s = getComputedStyle(node); return { node, font:parseFloat(s.fontSize), line:parseFloat(s.lineHeight) }; });
+    for (const {node,font,line} of samples) {
+      node.style.fontSize = \`\${font * 2}px\`;
+      node.style.lineHeight = Number.isFinite(line) ? \`\${line * 2}px\` : "normal";
     }
-    return hero.offsetHeight;
+    return document.querySelector(".ind-hero").offsetHeight;
     })()`);
     assert.ok(enlargedHero > 0, `${viewport.label} at 200% text: hero collapsed`);
     await evaluate(`new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))`);
     assertHeroContainment(
       await evaluate(containmentProbe()),
       `${viewport.label} at 200% text`,
-      null,
     );
+    const overflow = await evaluate(`(() => {
+      const width = document.documentElement.clientWidth;
+      return [...document.querySelectorAll("main h1,main h2,main h3,main p,main li,main td,main th,main a,main strong")]
+        .filter(node => !node.closest("thead") || getComputedStyle(node.closest("thead")).position !== "absolute")
+        .filter(node => { const r=node.getBoundingClientRect(); return r.right>width+1 || r.left< -1 || node.scrollWidth>node.clientWidth+2 && getComputedStyle(node).display!=="inline"; })
+        .slice(0,10).map(node=>({tag:node.tagName,text:node.textContent.slice(0,80),width:node.clientWidth,scroll:node.scrollWidth,right:node.getBoundingClientRect().right}));
+    })()`);
+    assert.deepEqual(overflow, [], `${viewport.label} at 200% text: clipped text ${JSON.stringify(overflow)}`);
     await screenshotHero(`hero-${viewport.label}-text-200`);
   }
 

@@ -992,6 +992,19 @@ function educationImmutableMediaErrors(snapshot: {
     snapshot.slug !== "education"
     || pov?.version !== 2
   ) return [];
+  if (!pov.imagery) {
+    const hero = content.heroMedia;
+    if (snapshot.mediaIds.length !== 1 || new Set(snapshot.mediaIds).size !== 1) {
+      return ["Education v2 publication without supporting imagery requires exactly one ordered immutable hero media ID."];
+    }
+    if (!hero) {
+      return ["Education v2 publication without supporting imagery requires an immutable hero media reference."];
+    }
+    if (hero.role !== "hero" || hero.mediaId !== snapshot.mediaIds[0]) {
+      return ["Education v2 immutable hero media reference must match the ordered hero media ID."];
+    }
+    return [];
+  }
   const expected = [
     content.heroMedia,
     pov.imagery?.educatorPractice.media,

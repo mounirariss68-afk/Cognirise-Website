@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-11T12:59:23.436Z",
-  "manifestDigest": "0a8c63c81ed24b289e6a5768c642cfec9b5cd816c8765f563acd53a7c725961c",
-  "dryRun": false,
-  "mode": "development-db-apply",
-  "note": "Applied the governed UAE/English inventory. Eligible case-study summaries publish only after evidence, source review, rights, accessibility, durable-storage, and immutable-version gates pass; all other content retains its governed state.",
+  "generatedAt": "2026-09-11T15:27:51.146Z",
+  "manifestDigest": "d9e3fed6f0c24ff5e5a731e0216a2f1cc78445669930d89b1fb93ff1a71b05e2",
+  "dryRun": true,
+  "mode": "payload-only",
+  "note": "No storage or database call was made. Use --apply-db --target=development to import governed drafts.",
   "operations": [
     {
       "externalId": "person:8a0e78e95b87db8e0acd",
@@ -3753,8 +3753,8 @@
           "selectedWork": {
             "description": "Cognirise brings consulting, engineering, data, platform and change capabilities together to redesign a complete school, university or authority journey and establish the shared layer that lets evidence-backed practices scale."
           },
-          "image": "/images/cognirise/industries/pulse-industry-education-hero-v2.png",
-          "imageAlt": "A school learner, university learner, educator and researcher collaborate around a learning table in a light-filled campus studio.",
+          "image": "/images/cognirise/industries/pulse-industry-education-campus-v3.png",
+          "imageAlt": "A sunlit education campus atrium connects library shelves, tiered learning spaces and glazed science rooms along restrained violet and coral light paths.",
           "variant": "network",
           "pressures": [
             {
@@ -3905,16 +3905,6 @@
           ],
           "educationPov": {
             "version": 2,
-            "imagery": {
-              "educatorPractice": {
-                "src": "/images/cognirise/industries/pulse-industry-education-practice-v2.png",
-                "altText": "Four distinct educators collaboratively reviewing lesson materials around a table in a bright professional-learning studio."
-              },
-              "researchCoordination": {
-                "src": "/images/cognirise/industries/pulse-industry-education-research-v2.png",
-                "altText": "Three distinct university colleagues coordinate a reviewable research plan around a transparent table."
-              }
-            },
             "introduction": "AI is already changing how learners learn, educators teach, researchers discover and institutions operate. Schools, universities, school networks and education authorities now need to shape that change around learning, human development and public trust. An institution-wide AI operating system is not a single product: it is the shared layer of trusted data, secure platforms, integration, policy, evaluation, capability and human oversight through which AI-enabled work is coordinated. In K–12, access and autonomy must be age-appropriate, safeguarded and educator-controlled. In higher education, specialised agents can act only within approved, reviewable workflows.",
             "strategicShift": "Move the unit of innovation from the individual chatbot or copilot to the complete learner, educator, researcher, family or employee journey—and measure educational, research, service, equity and trust outcomes rather than usage.",
             "patternQuote": "The repeatable pattern is purposeful specialisation plus governance: approved content, defined users, age-appropriate design, educator or expert oversight, protected data, equitable access and outcomes that can be evaluated.",
@@ -4187,12 +4177,10 @@
         ]
       },
       "mediaPaths": [
-        "/images/cognirise/industries/pulse-industry-education-hero-v2.png",
-        "/images/cognirise/industries/pulse-industry-education-practice-v2.png",
-        "/images/cognirise/industries/pulse-industry-education-research-v2.png"
+        "/images/cognirise/industries/pulse-industry-education-campus-v3.png"
       ],
-      "idempotencyKey": "cms-industry-education-successor-v11:industry:8c90ace640ac504ab64a",
-      "requestDigest": "f0b565465e2384da9afb278a4c06395353de7c768c0f21c9c9fff05674f8b76d"
+      "idempotencyKey": "cms-industry-education-successor-v12:industry:8c90ace640ac504ab64a",
+      "requestDigest": "774310ac4f6f7de6f12c874db6bc98efb476719aedffcd0364cc1587e18d5138"
     },
     {
       "externalId": "framework:agent-authority-model-v1",
@@ -5689,15 +5677,15 @@
       ]
     },
     {
-      "externalId": "asset:287f803ba075089a7b06",
-      "idempotencyKey": "cms-media-binary-v1:asset:287f803ba075089a7b06:2f8bad8d8cf3e42049836f335b3a63eec99abf00efaa93c8bab2589ce35ceb08",
-      "filename": "pulse-industry-education-hero-v2.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-hero-v2.png",
-      "publicPath": "/images/cognirise/industries/pulse-industry-education-hero-v2.png",
-      "checksum": "2f8bad8d8cf3e42049836f335b3a63eec99abf00efaa93c8bab2589ce35ceb08",
+      "externalId": "asset:2b97a4644d4df2519e73",
+      "idempotencyKey": "cms-media-binary-v1:asset:2b97a4644d4df2519e73:4715b760ca0f30d5e69968f2e8a6225ba9acdd61fbfd6ac3eae41726b7937a0a",
+      "filename": "pulse-industry-education-campus-v3.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-campus-v3.png",
+      "publicPath": "/images/cognirise/industries/pulse-industry-education-campus-v3.png",
+      "checksum": "4715b760ca0f30d5e69968f2e8a6225ba9acdd61fbfd6ac3eae41726b7937a0a",
       "mimeType": "image/png",
-      "byteSize": 1329910,
-      "width": 1536,
+      "byteSize": 1909265,
+      "width": 1024,
       "height": 1024,
       "cmsOwnership": "cms-candidate",
       "usages": [
@@ -5706,12 +5694,12 @@
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
-      "altText": "A school learner, university learner, educator and researcher collaborate around a learning table in a light-filled campus studio.",
+      "altText": "A sunlit education campus atrium connects library shelves, tiered learning spaces and glazed science rooms along restrained violet and coral light paths.",
       "credit": "Cognirise",
       "rightsStatus": "approved-use",
       "accessibilityStatus": "approved",
       "sourceReviewApproved": true,
-      "requestDigest": "63c677dcff85c36e38be5651fdc2d619395860f3a722c3e70b7266c10f427dad",
+      "requestDigest": "9d95424e539419c2ca968934e729135f22ad5e123b58cea6bca401393797cf20",
       "historicalReceipts": [],
       "acceptedPriorRequestDigests": []
     },
@@ -5753,60 +5741,6 @@
         "00a0493849f95e488cc6b1758053f3a75ded237d1be7c7f02e1f825a05be8b3f",
         "26ad41468c3fc8732b6597ae7fbd96bbd0b01c07ef55355696eff7a480b2f7b8"
       ]
-    },
-    {
-      "externalId": "asset:b6811caee5bd2400e86f",
-      "idempotencyKey": "cms-media-binary-v1:asset:b6811caee5bd2400e86f:feb060d742cfed99df3f468e1e1d8f812ce4a6df59b2f1e7d48fb57fa1f8197c",
-      "filename": "pulse-industry-education-practice-v2.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-practice-v2.png",
-      "publicPath": "/images/cognirise/industries/pulse-industry-education-practice-v2.png",
-      "checksum": "feb060d742cfed99df3f468e1e1d8f812ce4a6df59b2f1e7d48fb57fa1f8197c",
-      "mimeType": "image/png",
-      "byteSize": 1690894,
-      "width": 1536,
-      "height": 1024,
-      "cmsOwnership": "cms-candidate",
-      "usages": [
-        "CMS industry supporting media: Education educator practice"
-      ],
-      "collection": "website",
-      "linkedinAssetKind": null,
-      "campaignMetadata": null,
-      "altText": "Four distinct educators collaboratively reviewing lesson materials around a table in a bright professional-learning studio.",
-      "credit": "Cognirise",
-      "rightsStatus": "approved-use",
-      "accessibilityStatus": "approved",
-      "sourceReviewApproved": true,
-      "requestDigest": "dad80b0f5e15f98a595e9dd1fd25eb7dde0b3e5117ffdca787ddaf13c82d0e88",
-      "historicalReceipts": [],
-      "acceptedPriorRequestDigests": []
-    },
-    {
-      "externalId": "asset:f998ad1f8d824110c1fd",
-      "idempotencyKey": "cms-media-binary-v1:asset:f998ad1f8d824110c1fd:d8f7058a92fcd476b46556582bb81b982d76e5c92aa6e8f73f4b9e3a3de49218",
-      "filename": "pulse-industry-education-research-v2.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-research-v2.png",
-      "publicPath": "/images/cognirise/industries/pulse-industry-education-research-v2.png",
-      "checksum": "d8f7058a92fcd476b46556582bb81b982d76e5c92aa6e8f73f4b9e3a3de49218",
-      "mimeType": "image/png",
-      "byteSize": 2009279,
-      "width": 1536,
-      "height": 1024,
-      "cmsOwnership": "cms-candidate",
-      "usages": [
-        "CMS industry supporting media: Education research coordination"
-      ],
-      "collection": "website",
-      "linkedinAssetKind": null,
-      "campaignMetadata": null,
-      "altText": "Three distinct university colleagues coordinate a reviewable research plan around a transparent table.",
-      "credit": "Cognirise",
-      "rightsStatus": "approved-use",
-      "accessibilityStatus": "approved",
-      "sourceReviewApproved": true,
-      "requestDigest": "38e5d329ea95027f9f3abc22146313052f697c677078141a99fb100b190cfe8a",
-      "historicalReceipts": [],
-      "acceptedPriorRequestDigests": []
     },
     {
       "externalId": "asset:142ae134e579aa22b3fa",
@@ -7647,26 +7581,5 @@
         "a861c514d1885fddd698a2ccf6fa66769072c3cd3f26ff75cbd61a165292786b"
       ]
     }
-  ],
-  "database": {
-    "before": {
-      "documents": 55,
-      "editions": 55,
-      "revisions": 145,
-      "media": 125,
-      "receipts": 483,
-      "audits": 565
-    },
-    "created": 0,
-    "replayed": 49,
-    "mediaCreated": 0,
-    "mediaRepaired": 0,
-    "mediaReplayed": 87,
-    "availabilityCreated": 0,
-    "availabilityReplayed": 8,
-    "availabilityConflicts": [],
-    "governanceCreated": 0,
-    "governanceReplayed": 5,
-    "governanceConflicts": []
-  }
+  ]
 }

@@ -8,12 +8,13 @@ import {
   type InventoryRecord,
   repositoryRoot,
 } from "./common.js";
-import { industryPublicationPinAction, pulseIndustryMedia } from "./industry-media.js";
+import { educationDraftReceiptAllowed, educationDraftReceiptOperations, industryPublicationPinAction, pulseIndustryMedia } from "./industry-media.js";
 import {
   mediaMigrationOperations,
   migrationOperations,
   canonicalResultDigest,
   educationSuccessorRecoveryKey,
+  educationSuccessorVersion,
   resultDigest,
   type MediaMigrationOperation,
   type MigrationOperation,
@@ -27,7 +28,8 @@ const target = args.find((argument) => argument.startsWith("--target="))?.slice(
 const requestedSlug = args.find((argument) => argument.startsWith("--slug="))?.slice(7);
 const APPROVED_AT = "2026-09-08";
 const CUTOVER_PREFIX = "cms-industry-pulse-cutover-v2";
-const EDUCATION_V2_CUTOVER_PREFIX = "cms-industry-education-imagery-v3";
+const EDUCATION_HERO_CUTOVER_PREFIX = "cms-industry-education-hero-v4";
+const EDUCATION_PRIOR_CUTOVER_PREFIX = "cms-industry-education-imagery-v3";
 const LEGACY_CUTOVER_PREFIX = "cms-industry-pulse-cutover-v1";
 const MEDIA_APPROVAL_PREFIX = "cms-industry-pulse-media-approval-v2";
 const REFERENCE_REPAIR_PREFIX = "cms-industry-pulse-reference-repair-v1";
@@ -90,8 +92,8 @@ async function loadPlan() {
       operation.collection !== "website"
       || operation.cmsOwnership !== "cms-candidate"
       || operation.mimeType !== "image/png"
-      || operation.width !== 1536
-      || operation.height !== 1024
+      || operation.width !== (definition.width ?? 1536)
+      || operation.height !== (definition.height ?? 1024)
       || operation.altText !== definition.altText
     ) {
       throw new Error(`${definition.publicPath} does not match the approved media contract.`);
@@ -108,10 +110,7 @@ async function loadPlan() {
       && (
         contentOperation.mediaPaths[0] !== definition.publicPath
         || (definition.slug !== "education" && contentOperation.mediaPaths.length !== 1)
-        || (definition.slug === "education" && (
-          contentOperation.mediaPaths.length !== 3
-          || supportingMediaPaths(contentOperation.mediaPaths).length !== 2
-        ))
+        || (definition.slug === "education" && contentOperation.mediaPaths.length !== 1)
         || content?.image !== definition.publicPath
         || content?.imageAlt !== definition.altText
       )
@@ -126,7 +125,7 @@ async function loadPlan() {
   const associated = plan.filter((item) => item.definition.slug && item.definition.role !== "supporting");
   const supporting = plan.filter((item) => item.definition.role === "supporting");
   const expectedAssociated = requestedSlug ? 1 : 6;
-  const expectedSupporting = 2;
+  const expectedSupporting = 0;
   const expectedUnassociated = requestedSlug ? 0 : 3;
   if (
     associated.length !== expectedAssociated
@@ -134,16 +133,10 @@ async function loadPlan() {
     || plan.length !== expectedAssociated + expectedSupporting + expectedUnassociated
   ) {
     throw new Error(requestedSlug
-      ? "The Education cutover must contain exactly one hero and two supporting scenes."
-      : "The Pulse industry family must contain eleven assets, six hero associations, and two Education supporting scenes.");
+      ? "The Education cutover must contain exactly one reviewed hero."
+      : "The Pulse industry family must contain nine assets and six hero associations.");
   }
   return plan;
-}
-
-function supportingMediaPaths(paths: string[]) {
-  return paths.filter((path) => pulseIndustryMedia.some((media) =>
-    media.role === "supporting" && media.publicPath === path
-  ));
 }
 
 async function uploadApprovedMedia(
@@ -235,7 +228,7 @@ async function approveMedia(
       version = await client.query(
         `INSERT INTO cms_media_versions
           (asset_id,version_number,storage_key,checksum,byte_size,width,height,metadata)
-         VALUES ($1,$2,$3,$4,$5,1536,1024,$6)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
          RETURNING id::text,checksum,byte_size,width,height,metadata`,
         [
           media.asset_id,
@@ -243,6 +236,8 @@ async function approveMedia(
           storageKey,
           item.operation.checksum,
           item.operation.byteSize,
+           item.operation.width,
+           item.operation.height,
           metadata,
         ],
       );
@@ -251,8 +246,8 @@ async function approveMedia(
     if (
       approvedVersion.checksum !== item.operation.checksum
       || Number(approvedVersion.byte_size) !== item.operation.byteSize
-      || Number(approvedVersion.width) !== 1536
-      || Number(approvedVersion.height) !== 1024
+      || Number(approvedVersion.width) !== item.operation.width
+      || Number(approvedVersion.height) !== item.operation.height
     ) {
       throw new Error(`Approved immutable version parity failed for ${item.definition.publicPath}.`);
     }
@@ -321,7 +316,7 @@ async function applyCutover(
       const supporting = plan
         .filter((candidate) => candidate.definition.slug === slug && candidate.definition.role === "supporting")
         .map((candidate) => approvedMedia.get(candidate.definition.publicPath)!);
-      const idempotencyKey = `${slug === "education" ? EDUCATION_V2_CUTOVER_PREFIX : CUTOVER_PREFIX}:${slug}`;
+       const idempotencyKey = `${slug === "education" ? EDUCATION_HERO_CUTOVER_PREFIX : CUTOVER_PREFIX}:${slug}`;
       const editionResult = await client.query(
         `SELECT d.id::text document_id,e.id::text edition_id,e.locale,e.publication_state,
                 e.published_revision_id::text
@@ -342,6 +337,21 @@ async function applyCutover(
         "SELECT subject_id FROM cms_operation_receipts WHERE idempotency_key=$1",
         [`${LEGACY_CUTOVER_PREFIX}:${slug}`],
       );
+       if (slug === "education") {
+         const priorCutover = await client.query(
+           `SELECT operation,subject_id::text,request_digest,result_digest
+              FROM cms_operation_receipts
+             WHERE idempotency_key=$1`,
+           [`${EDUCATION_PRIOR_CUTOVER_PREFIX}:${slug}`],
+         );
+         if (
+           priorCutover.rowCount
+           && priorCutover.rows[0].operation !== "cms.industry.pulse-media-cutover"
+         ) {
+           throw new Error("Education replacement hero has an unexpected prior imagery receipt.");
+         }
+       }
+
       const receipt = await client.query(
         `SELECT r.request_digest,a.metadata
            FROM cms_operation_receipts r
@@ -506,10 +516,10 @@ async function applyCutover(
           [legacyReceipt.rows[0].subject_id, edition.edition_id],
         );
       } else if (slug === "education") {
-        // A v11 successor is intentionally imported as a governed draft. It
-        // must become the cutover source so the final immutable three-image
-        // publication retains its approved narrative rather than rebuilding
-        // from the obsolete v2 publication.
+         // A v12 successor is intentionally imported as a governed draft. It
+         // must become the cutover source so the final immutable hero
+         // publication retains its approved narrative rather than rebuilding
+         // from the obsolete published edition.
         sourceRevision = await client.query(
           `SELECT id::text,revision_number,payload,workflow_state
              FROM cms_revisions
@@ -547,19 +557,23 @@ async function applyCutover(
           }
         }
         const pendingReceipt = await client.query(
-          `SELECT idempotency_key
+          `SELECT idempotency_key,operation
              FROM cms_operation_receipts
             WHERE idempotency_key=ANY($1::text[])
-              AND operation='cms.inventory.education-successor-pending-cutover'
+              AND operation=ANY($4::text[])
               AND subject_id=$2
               AND request_digest=$3`,
           [
             [
-              item.contentOperation!.idempotencyKey,
-              educationSuccessorRecoveryKey(item.contentOperation!.externalId),
+               item.contentOperation!.idempotencyKey,
+               educationSuccessorRecoveryKey(
+                 item.contentOperation!.externalId,
+                 educationSuccessorVersion(item.contentOperation!.idempotencyKey) ?? "v11",
+               ),
             ],
             edition.document_id,
             item.contentOperation!.requestDigest,
+            [...educationDraftReceiptOperations],
           ],
         );
         if (
@@ -567,9 +581,14 @@ async function applyCutover(
           || candidate?.workflow_state !== "draft"
           || !normalizedCandidate
           || pendingReceipt.rowCount !== 1
+          || !educationDraftReceiptAllowed(
+            pendingReceipt.rows[0]?.operation,
+            Number(sourceRevision.rows[0]?.revision_number),
+            edition.published_revision_id ?? null,
+          )
           || canonicalResultDigest(normalizedCandidate) !== canonicalResultDigest(item.contentOperation!.payload)
         ) {
-          throw new Error("education has no exact governed v11 draft available for the three-image cutover.");
+           throw new Error("education has no exact governed v12 draft available for the reviewed-hero cutover.");
         }
       } else if (edition.published_revision_id) {
         sourceRevision = await client.query(
@@ -633,31 +652,6 @@ async function applyCutover(
           altText: item.definition.altText,
         },
       };
-      if (slug === "education") {
-        const content = payload.content as {
-          educationPov?: { version?: unknown; imagery?: Record<string, Record<string, unknown>> };
-        };
-        if (content.educationPov?.version === 2) {
-          const imagery = content.educationPov.imagery ?? (content.educationPov.imagery = {});
-          for (const item of supporting) {
-            const slot = item.definition.imagerySlot;
-            if (!slot) {
-              throw new Error(`Education supporting media ${item.definition.publicPath} has no imagery slot.`);
-            }
-            imagery[slot] = {
-              ...imagery[slot],
-              src: item.definition.publicPath,
-              altText: item.definition.altText,
-              media: {
-                mediaId: item.assetId,
-                mediaVersionId: item.versionId,
-                role: "supporting",
-                altText: item.definition.altText,
-              },
-            };
-          }
-        }
-      }
       const validation = validateCmsSnapshot("industry" as CmsDocumentKind, payload, "publish");
       if (!validation.success) {
         throw new Error(`${slug}: ${validation.errors.join("; ")}`);
@@ -736,7 +730,7 @@ async function applyCutover(
     }
     await verifyCutover(plan, client);
     await client.query("COMMIT");
-    console.log(`${requestedSlug === "education" ? "Education imagery" : "Pulse industry"} cutover applied: media=${plan.length} published=${published} repaired=${repaired} replayed=${replayed} unassociated=${plan.filter((item) => !item.definition.slug).length}.`);
+     console.log(`${requestedSlug === "education" ? "Education hero" : "Pulse industry"} cutover applied: media=${plan.length} published=${published} repaired=${repaired} replayed=${replayed} unassociated=${plan.filter((item) => !item.definition.slug).length}.`);
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -782,8 +776,8 @@ async function verifyCutover(
         || row.alt_text !== item.definition.altText
         || row.credit !== "Cognirise"
         || row.checksum !== item.operation.checksum
-        || Number(row.width) !== 1536
-        || Number(row.height) !== 1024
+         || Number(row.width) !== item.operation.width
+         || Number(row.height) !== item.operation.height
         || String(row.storage_key).startsWith("deferred/")
         || metadata?.accessibilityStatus !== "approved"
         || metadata?.rightsStatus !== "approved-use"
@@ -899,10 +893,10 @@ async function verifyCutover(
         throw new Error("Only the six existing public industries may be published by this cutover.");
       }
     }
-    if (supporting !== 2) throw new Error("Education supporting imagery is incomplete.");
+    if (supporting !== 0) throw new Error("Rejected Education supporting imagery must not be published.");
     const expectedAssociated = requestedSlug ? 1 : 6;
     if (associated !== expectedAssociated) throw new Error("Scoped industry publication count is incomplete.");
-    console.log(`Verified ${requestedSlug === "education" ? "Education imagery" : "Pulse industry"} cutover: approvedMedia=${plan.length} publishedIndustries=${associated} supportingMedia=${supporting} unassociatedMedia=${unassociated}.`);
+    console.log(`Verified ${requestedSlug === "education" ? "Education hero" : "Pulse industry"} cutover: approvedMedia=${plan.length} publishedIndustries=${associated} supportingMedia=${supporting} unassociatedMedia=${unassociated}.`);
   } finally {
     ownedClient?.release();
   }

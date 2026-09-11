@@ -3,7 +3,8 @@ import { Link } from "wouter";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { assetUrl } from "@/lib/assets";
-import { useMarketStore } from "@/store/market";
+import { useMarketStore, type Market } from "@/store/market";
+import { projectIndustrySnapshotForMarket } from "@workspace/api-zod";
 import type { IndustryContent } from "@/content/industries";
 import { contentRecord, useCmsEntry } from "@/lib/cms";
 
@@ -14,7 +15,7 @@ export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
   if (cms.isAuthoritative && cms.delivery === "loading") {
     return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]" aria-busy="true"><p>Loading industry perspective…</p></main>;
   }
-  if (cms.isAuthoritative && !published) {
+  if (cms.isAuthoritative && (!published || (industry.slug === "education" && !published.educationPov))) {
     return (
       <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]">
         <div className="mx-auto max-w-3xl">
@@ -28,16 +29,32 @@ export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
   return <IndustryEditorialView view={view} />;
 }
 
-export function IndustryEditorialView({ view }: { view: IndustryContent }) {
-  const { market } = useMarketStore();
+export function IndustryEditorialView({ view: baseView, marketOverride }: { view: IndustryContent; marketOverride?: Market }) {
+  const { market: selectedMarket } = useMarketStore();
+  const market = marketOverride ?? selectedMarket;
+  const view = React.useMemo(() => projectIndustrySnapshotForMarket({ content: baseView }, market).content as IndustryContent, [baseView, market]);
   const thesisParts = view.thesis.split(" — ");
   const opportunityValue = view.opportunity as unknown as string | { title: string; body: string };
   const opportunity = typeof opportunityValue === "string"
     ? { title: "The opportunity", body: opportunityValue }
     : opportunityValue;
+  const pov = view.educationPov as NonNullable<IndustryContent["educationPov"]> & {
+    version?: 2;
+    introduction?: string;
+    strategicShift?: string;
+    patternQuote?: string;
+    globalDirection?: string;
+    applications?: { title: string; items: { title: string; body: string; sourceUrls: string[]; market?: string; }[]; }[];
+  } | undefined;
   return (
-    <main className={`industry industry--${view.variant}`}>
+    <main className={`industry industry--${view.variant}`} data-education-editorial={pov ? "" : undefined}>
       <style>{`
+        .industry[data-education-editorial] .ind-hero>*{min-width:0}
+        .industry[data-education-editorial] :is(h1,h2,h3,p,strong,a,li,td,th){overflow-wrap:anywhere}
+        .industry[data-education-editorial] :is(.ind-capability-list,.ind-source,.ind-pressure-list,.ind-capabilities-head,.ind-cta)>*{min-width:0}
+        .industry[data-education-editorial] .ind-pressure article>div{min-width:0}
+        .industry[data-education-editorial] .ind-table{table-layout:fixed}
+        .industry[data-education-editorial] .ind-table a{max-width:100%}
         .industry{--ink:#102957;--deep:#071936;--paper:#fdfbf7;--soft:#eef0f5;--line:#cbd3e1;--violet:#7659df;--pink:#db509e;--coral:#ff775d;background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;overflow:hidden}
         .industry *{box-sizing:border-box}.industry h1,.industry h2,.industry h3{font-family:Comfortaa,sans-serif}.industry a{color:inherit}.industry :focus-visible{outline:3px solid var(--coral);outline-offset:4px}
         .ind-kicker{font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:10px}.ind-kicker:before{content:"";width:25px;height:2px;background:linear-gradient(90deg,var(--violet),var(--pink),var(--coral))}
@@ -77,27 +94,169 @@ export function IndustryEditorialView({ view }: { view: IndustryContent }) {
       </section>
       <section className="ind-opportunity" aria-labelledby="opportunity-title">
         <div><div className="ind-kicker">Industry opportunity</div><h2 id="opportunity-title">{opportunity.title}</h2></div>
-        <p>{opportunity.body}</p>
+        <div>
+          <p>{opportunity.body}</p>
+          {pov && pov.introduction && pov.strategicShift && (
+            <div style={{ marginTop: "40px", paddingTop: "35px", borderTop: "1px solid #ffffff30" }}>
+              <h3 style={{ fontSize: "24px", lineHeight: "1.4", marginBottom: "16px", color: "#ffffff" }}>{pov.introduction}</h3>
+              <p style={{ fontSize: "20px", color: "#d7dfed", fontStyle: "italic" }}>"{pov.strategicShift}"</p>
+            </div>
+          )}
+        </div>
       </section>
       <section className="ind-pressure" aria-labelledby="pressure-title">
         <div><div className="ind-kicker">Operating pressures</div><h2 id="pressure-title">Where the operating model resists the demo.</h2></div>
         <div className="ind-pressure-list">{view.pressures.map((p, i) => <article key={p.title}><span>0{i + 1}</span><div><h3>{p.title}</h3><p>{p.body}</p></div></article>)}</div>
       </section>
+
+      {pov?.convictions && (
+        <section className="ind-pressure" aria-labelledby="convictions-title" style={{ backgroundColor: "var(--soft)" }}>
+          <div><div className="ind-kicker">Strategic Convictions</div><h2 id="convictions-title">Lead with educational purpose.</h2></div>
+          <div className="ind-pressure-list">{pov.convictions.map((c, i) => <article key={c.title}><span>0{i + 1}</span><div><h3>{c.title}</h3><p>{c.body}</p></div></article>)}</div>
+        </section>
+      )}
       <section className="ind-capabilities" aria-labelledby="capabilities-title">
         <div className="ind-capabilities-head"><div><div className="ind-kicker">What Cognirise can build</div><h2 id="capabilities-title">From operating need to governed capability.</h2></div></div>
-        <div className="ind-capability-list">{view.capabilities.map((capability, i) => <article className="ind-capability" key={capability.title}><span>0{i + 1}</span><h3>{capability.title}</h3><p>{capability.body}</p></article>)}</div>
+        <div className="ind-capability-list">{(pov?.targetState || view.capabilities).map((capability, i) => <article className="ind-capability" key={capability.title}><span>0{i + 1}</span><h3>{capability.title}</h3><p>{capability.body}</p></article>)}</div>
       </section>
       <section className="ind-evidence" aria-labelledby="evidence-title">
         <div className="ind-evidence-head"><div><div className="ind-kicker">Representative use cases</div><h2 id="evidence-title">Where capability can meet real work.</h2></div><p>These representative patterns are not Cognirise client case studies. Evidence strength and decision boundaries stay visible.</p></div>
         <table className="ind-table"><thead><tr><th scope="col">Use case</th><th scope="col">Evidence</th><th scope="col">Required boundary</th></tr></thead><tbody>{view.uses.map((u) => <tr key={u.use}><th scope="row" data-label="Use case">{u.use}</th><td data-label="Evidence">{u.evidence}</td><td data-label="Required boundary">{u.boundary}</td></tr>)}</tbody></table>
       </section>
+
+      {pov?.valueDomains && (
+        <section className="ind-pressure" aria-labelledby="domains-title">
+          <div><div className="ind-kicker">Where value becomes tangible</div><h2 id="domains-title">Redesign complete institutional journeys.</h2></div>
+          <div className="ind-pressure-list">
+            {pov.valueDomains.map((d, i) => (
+              <article key={d.title}>
+                <span>0{i + 1}</span>
+                <div>
+                  <h3>{d.title}</h3>
+                  <p>{d.body}</p>
+                  {d.examples && d.examples.length > 0 && (
+                    <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--line)" }}>
+                      <strong style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--violet)", display: "block", marginBottom: "8px" }}>Supporting Examples</strong>
+                      <ul style={{ listStyleType: "square", paddingLeft: "20px", color: "var(--ink)", margin: 0, fontSize: "15px", lineHeight: "1.5" }}>
+                        {d.examples.map(ex => <li key={ex}>{ex}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {pov?.applications && pov.applications.length > 0 && (
+        <section className="ind-evidence" aria-labelledby="applications-title" style={{ backgroundColor: "var(--paper)", paddingTop: 0 }}>
+          <div className="ind-evidence-head"><div><div className="ind-kicker">Application Domains</div><h2 id="applications-title">Where the shift applies.</h2></div></div>
+          {pov.applications.map(group => (
+            <div key={group.title} style={{ marginTop: "40px" }}>
+              <h3 style={{ fontSize: "20px", marginBottom: "20px", color: "var(--ink)", fontFamily: "Comfortaa, sans-serif" }}>{group.title}</h3>
+              <table className="ind-table" style={{ marginTop: "0" }}>
+                <thead><tr><th scope="col">Application</th><th scope="col">Description & Sources</th></tr></thead>
+                <tbody>{group.items.map(item => (
+                  <tr key={item.title}>
+                    <th scope="row" data-label="Application">{item.title}</th>
+                    <td data-label="Description">
+                      {item.body}
+                      {item.sourceUrls && item.sourceUrls.length > 0 && (
+                        <div style={{ marginTop: "12px" }}>
+                          {item.sourceUrls.map(url => {
+                            const source = view.sources.find(s => s.url === url);
+                            if (!source) return null;
+                            return (
+                              <a key={url} href={url} target="_blank" rel="noreferrer" style={{ display: "inline-block", marginRight: "12px", fontSize: "12px", color: "var(--pink)", textDecoration: "underline" }}>
+                                {source.label} <ExternalLink size={12} style={{ display: "inline", verticalAlign: "baseline" }} />
+                              </a>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          ))}
+        </section>
+      )}
+      {pov?.roadmap && pov.roadmap.length > 0 && (
+        <section className="ind-pressure" aria-labelledby="roadmap-title">
+          <div><div className="ind-kicker">A practical sequence</div><h2 id="roadmap-title">Establish. Build. Scale.</h2></div>
+          <div className="ind-pressure-list">{pov.roadmap.map((step, i) => <article key={step.horizon}><span>0{i + 1}</span><div><div style={{ fontSize: "10px", letterSpacing: ".12em", textTransform: "uppercase", color: "var(--pink)", marginBottom: "4px" }}>{step.horizon}</div><h3>{step.title}</h3><p>{step.body}</p></div></article>)}</div>
+        </section>
+      )}
+
+      {pov?.signals && pov.signals.length > 0 && (
+        <section className="ind-evidence" aria-labelledby="signals-title" style={{ backgroundColor: "var(--soft)", paddingTop: "110px", paddingBottom: "110px" }}>
+          <div className="ind-evidence-head"><div><div className="ind-kicker">Institutional Signals</div><h2 id="signals-title">Market evidence and implications.</h2></div></div>
+          <table className="ind-table">
+            <thead><tr><th scope="col">Institution</th><th scope="col">Signal</th><th scope="col">Implication & Sources</th></tr></thead>
+            <tbody>{pov.signals.map((signal, idx) => (
+              <tr key={idx}>
+                <th scope="row" data-label="Institution">{signal.institution}</th>
+                <td data-label="Signal">{signal.signal}</td>
+                <td data-label="Implication">
+                  {signal.implication}
+                  {signal.sourceUrls && signal.sourceUrls.length > 0 && (
+                    <div style={{ marginTop: "12px" }}>
+                      {signal.sourceUrls.map(url => {
+                        const source = view.sources.find(s => s.url === url);
+                        if (!source) return null;
+                        return (
+                          <a key={url} href={url} target="_blank" rel="noreferrer" style={{ display: "inline-block", marginRight: "12px", fontSize: "12px", color: "var(--pink)", textDecoration: "underline" }}>
+                            {source.label} <ExternalLink size={12} style={{ display: "inline", verticalAlign: "baseline" }} />
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </section>
+      )}
+
       <section className="ind-support" aria-label="Supporting evidence and operating guardrails">
-        <div><div className="ind-kicker">Documented reversal</div><h2>{view.reversal.title}</h2><p>{view.reversal.body}</p></div>
-        <div><div className="ind-kicker">Myth / verdict</div><strong>{view.myth.claim}</strong><p>{view.myth.verdict}</p></div>
+        <div>
+          <div className="ind-kicker">Documented reversal</div>
+          <h2>{view.reversal.title}</h2>
+          <p>{view.reversal.body}</p>
+          {pov?.patternQuote && pov?.globalDirection && (
+            <div style={{ marginTop: "40px", paddingTop: "30px", borderTop: "1px solid #ffffff30" }}>
+              <div className="ind-kicker" style={{ color: "var(--coral)" }}>Global Direction</div>
+              <h3 style={{ fontSize: "22px", fontFamily: "Comfortaa, sans-serif", margin: "16px 0", fontStyle: "italic", color: "#fff" }}>"{pov.patternQuote}"</h3>
+              <p>{pov.globalDirection}</p>
+            </div>
+          )}
+        </div>
+        <div>
+          <div className="ind-kicker">Myth / verdict</div>
+          <strong>{view.myth.claim}</strong>
+          <p>{view.myth.verdict}</p>
+        </div>
       </section>
       <section className="ind-sources" aria-labelledby="sources-title"><div className="ind-kicker">Supporting evidence / source trail</div><h2 id="sources-title">Read the evidence behind this view.</h2><div className="ind-sources-list">{view.sources.map((s) => <a className="ind-source" href={s.url} target="_blank" rel="noreferrer" key={s.url}><strong>{s.label}</strong><span>{s.publisher}</span><span>{s.kind}</span><ExternalLink size={15} aria-hidden="true" /></a>)}</div></section>
-      <section className="ind-gcc" aria-labelledby="gcc-title"><div><div className="ind-kicker">Regional context / GCC</div><h2 id="gcc-title">Ambition is not the same as realised evidence.</h2></div><p>{view.gcc}</p></section>
-      <section className="ind-cta" aria-labelledby="cta-title"><div><div className="ind-kicker">Relevant next action</div><h2 id="cta-title">{view.service.firstMove}</h2><p>Bring the process, its evidence and the people accountable for the decision. Leave with a clearer route to a governed build.</p></div><aside><Link href={view.service.href}>Relevant service: {view.service.label} <ArrowRight size={14} /></Link><BrandButton href="/value-scan">Book a value scan</BrandButton></aside></section>
+      <section className="ind-gcc" aria-labelledby="gcc-title">
+        <div>
+          <div className="ind-kicker">Regional context / GCC</div>
+          <h2 id="gcc-title">Ambition is not the same as realised evidence.</h2>
+        </div>
+        <div>
+          <p>{view.gcc}</p>
+          {pov?.leadershipTest && (
+            <div style={{ marginTop: "30px", paddingTop: "20px", borderTop: "2px solid var(--coral)", fontWeight: "bold", color: "var(--ink)" }}>
+              <span style={{ display: "block", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--pink)", marginBottom: "8px" }}>Leadership test</span>
+              {pov.leadershipTest}
+            </div>
+          )}
+        </div>
+      </section>
+      <section className="ind-cta" aria-labelledby="cta-title"><div><div className="ind-kicker">Relevant next action</div><h2 id="cta-title">{view.service.firstMove}</h2>{pov && <p>{view.selectedWork.description}</p>}<p>Bring the process, its evidence and the people accountable for the decision. Leave with a clearer route to a governed build.</p></div><aside><Link href={view.service.href}>Relevant service: {view.service.label} <ArrowRight size={14} /></Link><BrandButton href="/value-scan">Book a value scan</BrandButton></aside></section>
     </main>
   );
 }

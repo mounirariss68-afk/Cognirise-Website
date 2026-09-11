@@ -10,6 +10,8 @@ import {
   canonicalResultDigest,
   EDUCATION_SUCCESSOR_SEO,
   educationSuccessorRecoveryKey,
+  educationSuccessorVersion,
+  isEducationSuccessorOperation,
   isKnownEducationSuccessorAuthorityDigest,
   historicalMediaReceipts,
   mediaMigrationOperations,
@@ -90,7 +92,7 @@ async function reconcilePublishedIndustryMedia() {
   await run("pnpm", [
     "--filter",
     "@workspace/scripts",
-    "cms:publish-education-imagery",
+    "cms:publish-education-hero",
     "--",
     "--apply-db",
     "--target=development",
@@ -197,10 +199,10 @@ async function inspectReconciliationState(
     const imagery = payload?.content?.educationPov?.imagery;
     const selectedReferences = [
       payload?.content?.heroMedia,
-      imagery?.educatorPractice?.media,
-      imagery?.researchCoordination?.media,
+      ...(imagery?.educatorPractice?.media ? [imagery.educatorPractice.media] : []),
+      ...(imagery?.researchCoordination?.media ? [imagery.researchCoordination.media] : []),
     ];
-    const hasExactPins = expectedEducationMedia.length === 3
+    const hasExactPins = expectedEducationMedia.length === mediaIds.length
       && mediaIds.length === expectedEducationMedia.length
       && selectedReferences.length === expectedEducationMedia.length
       && selectedReferences.every((selected, index) => {
@@ -415,9 +417,7 @@ async function main() {
   );
   const mediaOperations = mediaMigrationOperations(inventory.records);
   for (const operation of migrationOperations(inventory.records)) {
-    const educationSuccessor = operation.idempotencyKey.startsWith(
-      "cms-industry-education-successor-v11:",
-    );
+    const educationSuccessor = isEducationSuccessorOperation(operation);
     const normalizedOperationPayload = JSON.parse(JSON.stringify(operation.payload)) as {
       mediaIds?: unknown[];
       content?: Record<string, unknown>;
@@ -452,7 +452,9 @@ async function main() {
         && (operation.payload.content as Record<string, unknown>).publicEvidenceStatus === "approved"),
     });
     if (educationSuccessor) {
-      expected.set(educationSuccessorRecoveryKey(operation.externalId), {
+      const version = educationSuccessorVersion(operation.idempotencyKey);
+      if (!version) throw new Error(`Invalid Education successor operation key: ${operation.idempotencyKey}`);
+      expected.set(educationSuccessorRecoveryKey(operation.externalId, version), {
         requestDigest: operation.requestDigest,
         subjectType: "document",
         optional: true,

@@ -23,9 +23,9 @@
     },
     "industries": 6,
     "frameworks": 1,
-    "websiteAssets": 79,
+    "websiteAssets": 77,
     "linkedinAssets": 9,
-    "assets": 88
+    "assets": 86
   },
   "explicitOmissions": {
     "povDocuments": "No genuine public POV documents are present in the current website.",
@@ -4280,8 +4280,8 @@
           "selectedWork": {
             "description": "Cognirise brings consulting, engineering, data, platform and change capabilities together to redesign a complete school, university or authority journey and establish the shared layer that lets evidence-backed practices scale."
           },
-          "image": "/images/cognirise/industries/pulse-industry-education-hero-v2.png",
-          "imageAlt": "A school learner, university learner, educator and researcher collaborate around a learning table in a light-filled campus studio.",
+          "image": "/images/cognirise/industries/pulse-industry-education-campus-v3.png",
+          "imageAlt": "A sunlit education campus atrium connects library shelves, tiered learning spaces and glazed science rooms along restrained violet and coral light paths.",
           "variant": "network",
           "pressures": [
             {
@@ -4432,16 +4432,6 @@
           ],
           "educationPov": {
             "version": 2,
-            "imagery": {
-              "educatorPractice": {
-                "src": "/images/cognirise/industries/pulse-industry-education-practice-v2.png",
-                "altText": "Four distinct educators collaboratively reviewing lesson materials around a table in a bright professional-learning studio."
-              },
-              "researchCoordination": {
-                "src": "/images/cognirise/industries/pulse-industry-education-research-v2.png",
-                "altText": "Three distinct university colleagues coordinate a reviewable research plan around a transparent table."
-              }
-            },
             "introduction": "AI is already changing how learners learn, educators teach, researchers discover and institutions operate. Schools, universities, school networks and education authorities now need to shape that change around learning, human development and public trust. An institution-wide AI operating system is not a single product: it is the shared layer of trusted data, secure platforms, integration, policy, evaluation, capability and human oversight through which AI-enabled work is coordinated. In K–12, access and autonomy must be age-appropriate, safeguarded and educator-controlled. In higher education, specialised agents can act only within approved, reviewable workflows.",
             "strategicShift": "Move the unit of innovation from the individual chatbot or copilot to the complete learner, educator, researcher, family or employee journey—and measure educational, research, service, equity and trust outcomes rather than usage.",
             "patternQuote": "The repeatable pattern is purposeful specialisation plus governance: approved content, defined users, age-appropriate design, educator or expert oversight, protected data, equitable access and outcomes that can be evaluated.",
@@ -4704,9 +4694,7 @@
           "relatedIds": []
         },
         "mediaPaths": [
-          "/images/cognirise/industries/pulse-industry-education-hero-v2.png",
-          "/images/cognirise/industries/pulse-industry-education-practice-v2.png",
-          "/images/cognirise/industries/pulse-industry-education-research-v2.png"
+          "/images/cognirise/industries/pulse-industry-education-campus-v3.png"
         ]
       },
       "review": {
@@ -6247,17 +6235,17 @@
       "digest": "ab57adbe16350bd3b16ec1865a3bf7dc410dd55f196fe338da61969c9e56a969"
     },
     {
-      "externalId": "asset:287f803ba075089a7b06",
+      "externalId": "asset:2b97a4644d4df2519e73",
       "type": "asset",
-      "name": "pulse-industry-education-hero-v2.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-hero-v2.png",
+      "name": "pulse-industry-education-campus-v3.png",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-campus-v3.png",
       "fields": {
-        "publicPath": "/images/cognirise/industries/pulse-industry-education-hero-v2.png",
-        "bytes": 1329910,
+        "publicPath": "/images/cognirise/industries/pulse-industry-education-campus-v3.png",
+        "bytes": 1909265,
         "extension": ".png",
         "mimeType": "image/png",
-        "checksum": "2f8bad8d8cf3e42049836f335b3a63eec99abf00efaa93c8bab2589ce35ceb08",
-        "width": 1536,
+        "checksum": "4715b760ca0f30d5e69968f2e8a6225ba9acdd61fbfd6ac3eae41726b7937a0a",
+        "width": 1024,
         "height": 1024,
         "usages": [
           "CMS industry hero: Education"
@@ -6267,7 +6255,7 @@
         "linkedinAssetKind": null,
         "campaignMetadata": null,
         "accessibility": {
-          "altText": "A school learner, university learner, educator and researcher collaborate around a learning table in a light-filled campus studio.",
+          "altText": "A sunlit education campus atrium connects library shelves, tiered learning spaces and glazed science rooms along restrained violet and coral light paths.",
           "decorative": false
         },
         "rights": {
@@ -6282,7 +6270,7 @@
           "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
         ]
       },
-      "digest": "2f8bad8d8cf3e42049836f335b3a63eec99abf00efaa93c8bab2589ce35ceb08"
+      "digest": "4715b760ca0f30d5e69968f2e8a6225ba9acdd61fbfd6ac3eae41726b7937a0a"
     },
     {
       "externalId": "asset:bbbaa7ea7a2547b64df3",
@@ -6319,82 +6307,6 @@
         ]
       },
       "digest": "5a162d8e0f96b2cf4ff8773033aa9a4fe67988e478070be4b6449c964d00c5b3"
-    },
-    {
-      "externalId": "asset:b6811caee5bd2400e86f",
-      "type": "asset",
-      "name": "pulse-industry-education-practice-v2.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-practice-v2.png",
-      "fields": {
-        "publicPath": "/images/cognirise/industries/pulse-industry-education-practice-v2.png",
-        "bytes": 1690894,
-        "extension": ".png",
-        "mimeType": "image/png",
-        "checksum": "feb060d742cfed99df3f468e1e1d8f812ce4a6df59b2f1e7d48fb57fa1f8197c",
-        "width": 1536,
-        "height": 1024,
-        "usages": [
-          "CMS industry supporting media: Education educator practice"
-        ],
-        "cmsOwnership": "cms-candidate",
-        "collection": "website",
-        "linkedinAssetKind": null,
-        "campaignMetadata": null,
-        "accessibility": {
-          "altText": "Four distinct educators collaboratively reviewing lesson materials around a table in a bright professional-learning studio.",
-          "decorative": false
-        },
-        "rights": {
-          "status": "approved-use",
-          "owner": "Cognirise",
-          "source": "Approved Cognirise Pulse industry family"
-        }
-      },
-      "review": {
-        "status": "approved",
-        "reasons": [
-          "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
-        ]
-      },
-      "digest": "feb060d742cfed99df3f468e1e1d8f812ce4a6df59b2f1e7d48fb57fa1f8197c"
-    },
-    {
-      "externalId": "asset:f998ad1f8d824110c1fd",
-      "type": "asset",
-      "name": "pulse-industry-education-research-v2.png",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/industries/pulse-industry-education-research-v2.png",
-      "fields": {
-        "publicPath": "/images/cognirise/industries/pulse-industry-education-research-v2.png",
-        "bytes": 2009279,
-        "extension": ".png",
-        "mimeType": "image/png",
-        "checksum": "d8f7058a92fcd476b46556582bb81b982d76e5c92aa6e8f73f4b9e3a3de49218",
-        "width": 1536,
-        "height": 1024,
-        "usages": [
-          "CMS industry supporting media: Education research coordination"
-        ],
-        "cmsOwnership": "cms-candidate",
-        "collection": "website",
-        "linkedinAssetKind": null,
-        "campaignMetadata": null,
-        "accessibility": {
-          "altText": "Three distinct university colleagues coordinate a reviewable research plan around a transparent table.",
-          "decorative": false
-        },
-        "rights": {
-          "status": "approved-use",
-          "owner": "Cognirise",
-          "source": "Approved Cognirise Pulse industry family"
-        }
-      },
-      "review": {
-        "status": "approved",
-        "reasons": [
-          "Visual approval is complete; verify the six approved associations and keep the three additional sectors unassociated."
-        ]
-      },
-      "digest": "d8f7058a92fcd476b46556582bb81b982d76e5c92aa6e8f73f4b9e3a3de49218"
     },
     {
       "externalId": "asset:142ae134e579aa22b3fa",
@@ -8192,7 +8104,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "0a8c63c81ed24b289e6a5768c642cfec9b5cd816c8765f563acd53a7c725961c",
-  "generatedAt": "2026-09-11T12:54:41.374Z",
+  "manifestDigest": "d9e3fed6f0c24ff5e5a731e0216a2f1cc78445669930d89b1fb93ff1a71b05e2",
+  "generatedAt": "2026-09-11T15:27:48.930Z",
   "dryRun": false
 }

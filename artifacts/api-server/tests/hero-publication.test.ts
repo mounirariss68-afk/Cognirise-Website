@@ -5,7 +5,7 @@ import test from "node:test";
 
 test("generic review and publication validate site configuration and pin requested versions", async () => {
   const source = await readFile(resolve(process.cwd(), "src/routes/documents.ts"), "utf8");
-  assert.match(source, /validateSnapshot\(row\.kind, row\.payload, "draft"\)/);
+  assert.match(source, /validateSnapshot\([^,]+\.kind, [^,]+, "draft"\)/);
   assert.match(source, /validateSnapshot\(revision\.rows\[0\]\.kind, revision\.rows\[0\]\.payload, "publish"\)/);
   assert.match(source, /"\/documents\/:documentId\/publish",[\s\S]*?requirePublisher/);
   assert.match(source, /collectCmsMediaReferences/);

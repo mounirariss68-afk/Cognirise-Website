@@ -5,6 +5,12 @@ description: Why governed development data migrations need an explicit post-merg
 
 Give each binary import exactly one reconciliation owner; do not let a targeted importer and the generic inventory independently create it.
 
+Test the empty-database import path using the receipt type the real importer writes, as well as predecessor upgrades.
+
+**Why:** A media cutover accepted only successor-pending receipts, so an exact fresh inventory draft passed reconciliation inspection but could never reach publication.
+
+**How to apply:** Exercise fresh import → draft inspection → cutover authorization → immutable publication → replay. If accepting a generic import receipt, constrain it to the first unpublished revision and retain exact document, operation-key, request-digest and payload checks.
+
 **Why:** A checked-in inventory can temporarily omit a newly added image, hiding a duplicate-import problem until the next inventory refresh or fresh-environment setup.
 
 **How to apply:** Check freshly generated inventory classification, not only the current saved manifest, when adding targeted media reconciliation. Verify historical receipts against their immutable versions while preserving subsequent editorial metadata and replacement versions.

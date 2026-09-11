@@ -9,6 +9,12 @@ export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.met
 export const websiteRoot = path.join(repositoryRoot, "artifacts/cognirise-website");
 export const linkedinRoot = path.join(repositoryRoot, "artifacts/mockup-sandbox/public/images/cognirise/linkedin");
 export const defaultOutputDirectory = path.join(repositoryRoot, "scripts/cms/output");
+// Retain historical files and immutable receipts, but do not re-import them.
+const retiredEducationMedia = new Set([
+  "pulse-industry-education-hero-v2.png",
+  "pulse-industry-education-practice-v2.png",
+  "pulse-industry-education-research-v2.png",
+]);
 
 export type ReviewStatus = "needs-review" | "approved";
 export interface InventoryRecord {
@@ -65,6 +71,7 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
   const files = (await walk(directory)).filter((file) =>
     /\.(png|jpe?g)$/i.test(file)
     && path.basename(file) !== "blueprint-annotated.png"
+    && !retiredEducationMedia.has(path.basename(file))
     // The prior deterministic SVG-derived fixtures remain in the repository as
     // history, but the commissioned cinematic JPEGs are the CMS media source.
     && !/[\\/]cognirise[\\/]cases[\\/][^\\/]+\.png$/i.test(file)

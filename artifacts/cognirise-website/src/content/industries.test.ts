@@ -7,7 +7,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Router } from "wouter";
 import { projectIndustrySnapshotForMarket, validateCmsContent } from "@workspace/api-zod";
 import { IndustryEditorialView } from "@/components/industries/IndustryEditorial";
-import { EducationEditorialView } from "@/components/industries/EducationEditorial";
 import { INDUSTRIES } from "./industries";
 
 test("publishes exactly six complete, distinct industry records", () => {
@@ -112,16 +111,8 @@ test("publishes the education POV across schools, higher education and instituti
   assert.ok(education?.educationPov);
   assert.equal(education.educationPov.convictions.length, 5);
   assert.equal(education.educationPov.version, 2);
-  assert.deepEqual(
-    Object.keys(education.educationPov.imagery ?? {}).sort(),
-    ["educatorPractice", "researchCoordination"],
-  );
-  assert.ok(
-    Object.values(education.educationPov.imagery ?? {}).every((scene) =>
-      scene.src.startsWith("/images/cognirise/industries/pulse-industry-education-")
-        && scene.altText.length > 20
-    ),
-  );
+  assert.equal(education.educationPov.imagery, undefined);
+  assert.match(education.image, /pulse-industry-education-campus-v3\.png$/);
   assert.equal(education.educationPov.valueDomains.length, 5);
   assert.equal(education.educationPov.targetState.length, 7);
   assert.deepEqual(education.educationPov.roadmap.map((step) => step.horizon), ["0–90 days", "3–9 months", "9–18 months"]);
@@ -138,7 +129,7 @@ test("publishes the education POV across schools, higher education and instituti
   const html = renderToStaticMarkup(createElement(
     Router,
     { ssrPath: "/industries/education" },
-    createElement(EducationEditorialView, { view: education }),
+    createElement(IndustryEditorialView, { view: education }),
   ));
   assert.match(html, /Build the institution-wide AI operating system/);
   assert.match(html, /Learning, Teaching and Assessment/i);
@@ -148,7 +139,7 @@ test("publishes the education POV across schools, higher education and instituti
   assert.match(html, /Institutional signals/i);
   assert.match(html, /not Cognirise client/i);
   assert.match(html, /href="\/value-scan"/);
-  assert.doesNotMatch(html, /Operating pressures|governed capability|required boundary|supporting evidence and operating guardrails|route to a governed build/i);
+  assert.match(html, /Operating pressures/i);
 });
 
 test("keeps application and signal claims associated with the published source trail", () => {
@@ -166,6 +157,41 @@ test("keeps application and signal claims associated with the published source t
   if (harvard) assert.notEqual(harvard.kind, "Independent study");
 });
 
+test("shared Education presentation retains every approved narrative field without the rejected controls", () => {
+  const education = INDUSTRIES.find((industry) => industry.slug === "education")!;
+  const html = renderToStaticMarkup(createElement(Router, { ssrPath: "/industries/education" },
+    createElement(IndustryEditorialView, { view: education, marketOverride: "uae" })));
+  const strings = (value: unknown): string[] => {
+    if (typeof value === "string") return [value];
+    if (Array.isArray(value)) return value.flatMap(strings);
+    if (value && typeof value === "object") return Object.entries(value)
+      .filter(([key]) => key !== "market").flatMap(([, item]) => strings(item));
+    return [];
+  };
+  for (const text of strings(education.educationPov)) {
+    const escaped = renderToStaticMarkup(createElement("span", null, text)).slice(6, -7);
+    assert.ok(html.includes(escaped), `Missing approved Education material: ${text}`);
+  }
+  assert.ok(html.includes(education.selectedWork.description));
+  assert.match(html, /class="ind-hero"/);
+  assert.match(html, /class="ind-image"/);
+  assert.match(html, /Operating pressures/);
+  assert.doesNotMatch(html, /Education sections|education-hero-caption|Illustration:|id="selected-work"|aria-pressed=/);
+  assert.equal((html.match(/<img /g) ?? []).length, 1);
+});
+
+test("an already-projected Education preview honors its requested market over the global default", () => {
+  const education = INDUSTRIES.find((industry) => industry.slug === "education")!;
+  for (const market of ["ksa", "europe", "turkiye"] as const) {
+    const projected = projectIndustrySnapshotForMarket({ content: education }, market).content as typeof education;
+    const html = renderToStaticMarkup(createElement(Router, { ssrPath: "/preview/capability" },
+      createElement(IndustryEditorialView, { view: projected, marketOverride: market })));
+    assert.doesNotMatch(html, /\bUAE\b|United Arab Emirates/);
+    if (market === "ksa") assert.match(html, /Saudi Arabia/);
+    else assert.doesNotMatch(html, /Saudi/);
+  }
+});
+
 test("Education metadata reflects the broader audience without changing the route", () => {
   const shell = readFileSync(path.resolve(process.cwd(), "src/components/layout/Shell.tsx"), "utf8");
   const metadata = shell.match(/"\/industries\/education": \{([\s\S]*?)\n  \}/)?.[1];
@@ -181,7 +207,7 @@ test("keeps UAE and Saudi Education editions strictly separated", () => {
   const uaeHtml = renderToStaticMarkup(createElement(
     Router,
     { ssrPath: "/industries/education?market=uae" },
-    createElement(EducationEditorialView, { view: education, marketOverride: "uae" }),
+    createElement(IndustryEditorialView, { view: education, marketOverride: "uae" }),
   ));
   assert.match(uaeHtml, /\bUAE\b/);
   assert.doesNotMatch(uaeHtml, /Saudi/i);
@@ -189,7 +215,7 @@ test("keeps UAE and Saudi Education editions strictly separated", () => {
   const saudiHtml = renderToStaticMarkup(createElement(
     Router,
     { ssrPath: "/industries/education?market=ksa" },
-    createElement(EducationEditorialView, { view: education, marketOverride: "ksa" }),
+    createElement(IndustryEditorialView, { view: education, marketOverride: "ksa" }),
   ));
   assert.match(saudiHtml, /Saudi Arabia/);
   assert.doesNotMatch(saudiHtml, /\bUAE\b|United Arab Emirates/i);
@@ -198,7 +224,7 @@ test("keeps UAE and Saudi Education editions strictly separated", () => {
     const neutralHtml = renderToStaticMarkup(createElement(
       Router,
       { ssrPath: `/industries/education?market=${market}` },
-      createElement(EducationEditorialView, { view: education, marketOverride: market }),
+      createElement(IndustryEditorialView, { view: education, marketOverride: market }),
     ));
     assert.doesNotMatch(neutralHtml, /\bUAE\b|United Arab Emirates|Saudi/i);
   }
