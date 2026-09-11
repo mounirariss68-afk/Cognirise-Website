@@ -29,7 +29,12 @@ import {
 } from "./migration.js";
 import { mapWithConcurrency } from "./media-reconciliation.js";
 import { objectStorageClient } from "./object-storage.js";
-import { mediaMetadataUpdate, shouldUpdateMediaMetadata } from "./media-metadata.js";
+import {
+  mediaMetadataUpdate,
+  mediaReviewStatusUpdate,
+  mediaVersionIsExactCurrent,
+  shouldUpdateMediaMetadata,
+} from "./media-metadata.js";
 import {
   mediaRefreshReceiptDigestIsAccepted,
   resolveMediaImportAssetId,
@@ -328,10 +333,15 @@ async function applyDatabase(
             .where(eq(cmsMediaVersionsTable.assetId, asset.id))
             .orderBy(desc(cmsMediaVersionsTable.versionNumber))
             .limit(1);
-          const durableVersionIsCurrent = latestVersion
-            && latestVersion.checksum === operation.checksum
-            && latestVersion.byteSize === operation.byteSize
-            && !latestVersion.storageKey.startsWith("deferred/");
+          const durableVersionIsCurrent = mediaVersionIsExactCurrent({
+            asset,
+            version: latestVersion,
+            expected: {
+              checksum: operation.checksum,
+              byteSize: operation.byteSize,
+              mediaType: operation.mimeType,
+            },
+          });
           const refreshPlan = approvedCaseRefresh
             ? planCaseVisualRefresh({
                 receiptExists: Boolean(refreshReceipt),
@@ -396,6 +406,10 @@ async function applyDatabase(
                 checksum: operation.checksum,
               }),
               ...(!approvedCaseRefresh ? mediaMetadataUpdate(operation) : {}),
+              ...mediaReviewStatusUpdate({
+                exactCurrentVersion: durableVersionIsCurrent,
+                explicitlyApproved: approvedCaseRefresh,
+              }),
               updatedAt: new Date(),
             }).where(eq(cmsMediaAssetsTable.id, asset.id));
             if (approvedCaseRefresh && refreshKey) {

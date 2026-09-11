@@ -5,8 +5,12 @@ pnpm install --frozen-lockfile
 pnpm --filter @workspace/api-spec run codegen
 pnpm run typecheck:libs
 pnpm --filter @workspace/db prepare-schema-push
-pnpm --filter db push-force
+# A forced schema sync can drop columns/indexes before the receipt-backed
+# reconciliation runs. Keep this boundary non-destructive so immutable media
+# review metadata survives a merge.
+pnpm --filter @workspace/db push
 pnpm --filter @workspace/scripts cms:reconcile
+pnpm --filter @workspace/scripts cms:reconcile-site-hero-media -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-value-to-scale-hero -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-offices -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-methodologies-hero -- --apply-db --target=development

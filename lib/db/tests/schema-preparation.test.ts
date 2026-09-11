@@ -4,12 +4,17 @@ import { readFile } from "node:fs/promises";
 import pg from "pg";
 import { schemaPreparationSql } from "../scripts/schema-preparation.mjs";
 
-test("post-merge backfills media filenames before forced schema synchronization", async () => {
+test("post-merge prepares narrow media compatibility before safe schema synchronization", async () => {
   const source = await readFile(new URL("../../../scripts/post-merge.sh", import.meta.url), "utf8");
-  assert.ok(source.indexOf("prepare-schema-push") < source.indexOf("push-force"));
+  assert.ok(source.indexOf("prepare-schema-push") < source.indexOf("@workspace/db push"));
+  assert.doesNotMatch(source, /push-force/);
   assert.match(schemaPreparationSql, /ADD COLUMN IF NOT EXISTS "original_filename" text/);
   assert.match(schemaPreparationSql, /SET "original_filename" = "filename"/);
   assert.match(schemaPreparationSql, /ALTER COLUMN "original_filename" SET NOT NULL/);
+  assert.match(schemaPreparationSql, /ADD COLUMN IF NOT EXISTS "motion_metadata" jsonb/);
+  assert.match(schemaPreparationSql, /'website', 'linkedin', 'motion'/);
+  assert.match(schemaPreparationSql, /cms_media_assets_motion_type_check/);
+  assert.match(schemaPreparationSql, /cms_media_assets_motion_metadata_check/);
 });
 
 test("schema preparation preserves populated media rows and is idempotent", {
@@ -23,7 +28,10 @@ test("schema preparation preserves populated media rows and is idempotent", {
     await client.query(`
       CREATE TEMP TABLE cms_media_assets (
         id text PRIMARY KEY,
-        filename text NOT NULL
+        filename text NOT NULL,
+        media_type text NOT NULL DEFAULT 'image/png',
+        collection text NOT NULL DEFAULT 'website',
+        linkedin_asset_kind text
       )
     `);
     await client.query(`

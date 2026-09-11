@@ -698,7 +698,13 @@ export default function MediaLibrary() {
           ? { ...current, items: current.items.map((item) => item.id === updated.id ? updated : item) }
           : current,
       );
-      await queryClient.invalidateQueries({ queryKey: getListMediaQueryKey() });
+      // Keep the exact-asset consumer in step with the list response too. Document
+      // editors can have an approved asset selected while this library is open.
+      queryClient.setQueryData(getGetMediaQueryKey(updated.id), updated);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: getListMediaQueryKey() }),
+        queryClient.invalidateQueries({ queryKey: getGetMediaQueryKey(updated.id) }),
+      ]);
       toast({
         title: decision === "approve" ? "Asset approved" : "Asset rejected",
         description: decision === "approve"
@@ -710,7 +716,9 @@ export default function MediaLibrary() {
       const detail = typeof error === "object" && error && "data" in error
         && typeof error.data === "object" && error.data && "error" in error.data
         ? String(error.data.error)
-        : "The review decision could not be saved.";
+        : error instanceof Error && error.message.trim()
+          ? error.message
+          : "The review decision could not be saved.";
       const message = `${detail} Retry the decision, or refresh the library before reopening Review.`;
       setReviewError(message);
       toast({ title: "Review failed", description: message, variant: "destructive" });

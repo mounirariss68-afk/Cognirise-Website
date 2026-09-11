@@ -214,3 +214,51 @@ test("methodologies landing hero selects only approved media and reloads its exa
     queryClient.clear();
   }
 });
+
+test("a current approved list item wins over a stale exact-item review snapshot", {
+  concurrency: false,
+}, async () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false, staleTime: Infinity },
+      mutations: { retry: false },
+    },
+  });
+  const staleExact = {
+    ...approvedHero,
+    filename: "methodologies-hero-stale-review.webp",
+    status: "review",
+    versionId: "00000000-0000-4000-8000-000000000299",
+  };
+  queryClient.setQueryData(getListMediaQueryKey(mediaParams), {
+    items: [approvedHero, unavailableHero],
+    page: 1,
+    pageSize: 100,
+    total: 2,
+  });
+  queryClient.setQueryData(getGetMediaQueryKey(approvedHero.id), staleExact);
+
+  const selectedDraft = JSON.parse(JSON.stringify(methodologiesDraft));
+  selectedDraft.sections[0].references[0] = {
+    mediaId: approvedHero.id,
+    mediaVersionId: approvedHero.versionId,
+    role: "hero",
+    altText: approvedHero.altText,
+  };
+  const editor = await mountEditor(queryClient, selectedDraft);
+  try {
+    const selected = editor.container.querySelector<HTMLElement>(
+      '[data-testid="selected-media-media-1"]',
+    );
+    assert.ok(selected, "the saved hero selection should remain visible");
+    assert.match(selected.textContent ?? "", /methodologies-hero-approved\.webp/);
+    assert.doesNotMatch(selected.textContent ?? "", /stale-review/);
+    assert.match(
+      selected.textContent ?? "",
+      new RegExp(`Pinned version ${approvedHero.versionId.slice(0, 8)}`),
+    );
+  } finally {
+    await editor.unmount();
+    queryClient.clear();
+  }
+});

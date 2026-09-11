@@ -1,19 +1,36 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { validateCmsSnapshot } from "@workspace/api-zod";
 import { heroConfiguration, heroConfigurationSnapshot, heroMedia, motionMetadata } from "./hero-media.js";
 
-test("the governed manifest contains exactly both complete hero media families", () => {
-  assert.equal(heroMedia.length, 6);
-  for (const slot of ["homepage", "industries"]) {
+test("the governed manifest contains the site families and complete Platforms media", () => {
+  assert.equal(heroMedia.length, 10);
+  for (const slot of ["homepage", "industries"] as const) {
     assert.deepEqual(
       heroMedia.filter((item) => item.slot === slot).map((item) => item.role).sort(),
       ["mp4", "poster", "webm"],
     );
   }
-  assert.equal(new Set(heroMedia.map((item) => item.checksum)).size, 6);
+  assert.deepEqual(
+    heroMedia.filter((item) => item.slot === "platforms").map((item) => item.role).sort(),
+    ["fallback", "mp4", "poster", "webm"],
+  );
+  assert.equal(new Set(heroMedia.map((item) => item.checksum)).size, 10);
   assert.ok(heroMedia.every((item) => item.sourceFile.startsWith("artifacts/cognirise-website/public/")));
+});
+
+test("every governed hero manifest binary matches its recorded bytes", async () => {
+  for (const definition of heroMedia) {
+    const bytes = await readFile(new URL(`../../../${definition.sourceFile}`, import.meta.url));
+    assert.equal(bytes.length, definition.byteSize, definition.publicPath);
+    assert.equal(
+      createHash("sha256").update(bytes).digest("hex"),
+      definition.checksum,
+      definition.publicPath,
+    );
+  }
 });
 
 test("hero configuration pins every asset and immutable version", () => {
@@ -57,6 +74,10 @@ test("motion metadata points at the reconciled poster and preserves reduced-moti
       hasAudio: false,
     },
   });
+  assert.equal(
+    motionMetadata("platforms", "poster-1", "fallback-1").reducedMotionMediaId,
+    "fallback-1",
+  );
 });
 
 test("the executable is development-only, append-only, and receipt governed", async () => {
@@ -78,6 +99,12 @@ test("the executable is development-only, append-only, and receipt governed", as
   assert.match(source, /await reconcileObjects\(apply\)/);
   assert.match(source, /metadata\.contentType !== definition\.mimeType/);
   assert.match(source, /object\.download\(\)/);
+  assert.match(source, /stored\.length !== definition\.byteSize/);
+  assert.match(source, /storedChecksum !== definition\.checksum/);
+  assert.match(source, /--media-only/);
+  assert.match(source, /BEGIN READ ONLY/);
+  assert.match(source, /if \(!mediaOnly\)/);
+  assert.match(source, /pages untouched/);
   assert.match(source, /document_status !== "active"/);
   assert.match(source, /publication_state !== "published"/);
   assert.match(source, /published_revision_id !== receipt\.rows\[0\]\.subject_id/);
@@ -98,6 +125,14 @@ test("legacy hero authority has a controlled append-only v2 upgrade and replay",
   assert.match(source, /published_revision_id=\$2/);
   assert.match(source, /return "upgraded"/);
   assert.match(source, /return "replayed"/);
+  assert.match(source, /result_digest/);
+  assert.match(source, /no committed development media-only reconciliation exists/);
+  assert.match(source, /cms-site-hero-motion-metadata-v1/);
+  assert.match(source, /cms\.site-hero\.motion-metadata-reconciled/);
+  assert.match(source, /version_number\+1/);
+  assert.match(source, /media\.metadata-version-appended/);
+  assert.match(source, /Unreceipted Platforms motion metadata version exists/);
+  assert.doesNotMatch(source, /UPDATE cms_media_assets|UPDATE cms_media_versions|UPDATE cms_revisions/);
   assert.doesNotMatch(source, /UPDATE cms_operation_receipts|DELETE FROM cms_operation_receipts/);
   assert.doesNotMatch(source, /UPDATE cms_revisions|DELETE FROM cms_revisions/);
 });

@@ -237,10 +237,11 @@ test("post-merge does not rely on Drizzle push executing generated seed SQL", as
     readFile(new URL("../../../lib/db/scripts/schema-preparation.mjs", import.meta.url), "utf8"),
     readFile(new URL("../../../lib/db/migrations/0019_cms_landing_page_contract.sql", import.meta.url), "utf8"),
   ]);
-  assert.match(databasePackage, /drizzle-kit push --force/);
+   assert.match(databasePackage, /"push": "drizzle-kit push --config/);
+   assert.doesNotMatch(databasePackage, /"push-force"/);
   assert.doesNotMatch(preparation, /cms_landing_page_reconciliation|compiled:\/methodologies/);
   assert.ok(
-    hook.indexOf("push-force") < hook.indexOf("cms:reconcile-methodologies-hero"),
+     hook.indexOf("@workspace/db push") < hook.indexOf("cms:reconcile-methodologies-hero"),
     "narrow reconciliation must run after table-shape synchronization",
   );
   assert.match(

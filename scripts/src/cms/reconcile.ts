@@ -27,6 +27,7 @@ import {
   toleratesDocumentReceiptDigestDrift,
   type ExpectedReceipt,
 } from "./receipt-reconciliation.js";
+import { mediaVersionIsExactCurrent } from "./media-metadata.js";
 import { runReconciliationLifecycle } from "./reconcile-order.js";
 
 function normalizeEducationMediaPayload(payload: {
@@ -314,9 +315,15 @@ async function inspectReconciliationState(
     if (!asset || !version) {
       return `${operation.media.publicPath}: missing asset or immutable version`;
     }
-    if (asset.checksum !== operation.media.checksum || asset.byteSize !== operation.media.byteSize
-      || version.checksum !== operation.media.checksum || version.byteSize !== operation.media.byteSize
-      || version.storageKey.startsWith("deferred/")) {
+    if (!mediaVersionIsExactCurrent({
+      asset,
+      version,
+      expected: {
+        checksum: operation.media.checksum,
+        byteSize: operation.media.byteSize,
+        mediaType: operation.media.mimeType,
+      },
+    })) {
       return `${operation.media.publicPath}: database checksum, size, or storage key is incomplete`;
     }
     const object = bucket.file(version.storageKey);

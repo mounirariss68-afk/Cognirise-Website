@@ -1,10 +1,12 @@
 import { createHash } from "node:crypto";
 
-export type HeroSlot = "homepage" | "industries";
+export type HeroSlot = "homepage" | "industries" | "platforms";
+export type ConfiguredHeroSlot = Exclude<HeroSlot, "platforms">;
+export type HeroMediaRole = "poster" | "fallback" | "mp4" | "webm";
 
 export interface HeroMediaDefinition {
   slot: HeroSlot;
-  role: "poster" | "mp4" | "webm";
+  role: HeroMediaRole;
   publicPath: string;
   sourceFile: string;
   filename: string;
@@ -97,6 +99,58 @@ export const heroMedia: readonly HeroMediaDefinition[] = [
     height: 720,
     altText: "",
   },
+  {
+    slot: "platforms",
+    role: "poster",
+    publicPath: "/media/platforms/cognios-rotation-poster.jpg",
+    sourceFile: `${publicRoot}/media/platforms/cognios-rotation-poster.jpg`,
+    filename: "cognios-rotation-poster.jpg",
+    mimeType: "image/jpeg",
+    checksum: "3f0f37ea0f2ea2ff02951f2e78dd94356ac284ffd1f8acdc30d6fc9edd2f6cda",
+    byteSize: 82468,
+    width: 720,
+    height: 720,
+    altText: "A layered CogniOS ecosystem connected by a luminous central spine.",
+  },
+  {
+    slot: "platforms",
+    role: "fallback",
+    publicPath: "/media/platforms/cognios-rotation-fallback.jpg",
+    sourceFile: `${publicRoot}/media/platforms/cognios-rotation-fallback.jpg`,
+    filename: "cognios-rotation-fallback.jpg",
+    mimeType: "image/jpeg",
+    checksum: "fc856d336a4780e5c7568f0cb1b9e96dda8ee7d4fd1f7967df9ce37c0be3a781",
+    byteSize: 160562,
+    width: 1024,
+    height: 1024,
+    altText: "A layered CogniOS ecosystem connected by a luminous central spine.",
+  },
+  {
+    slot: "platforms",
+    role: "mp4",
+    publicPath: "/media/platforms/cognios-rotation.mp4",
+    sourceFile: `${publicRoot}/media/platforms/cognios-rotation.mp4`,
+    filename: "cognios-rotation.mp4",
+    mimeType: "video/mp4",
+    checksum: "8c31a002531438ad19f3c4c367b0a3e59fd63bc17b7f534cb343c3bbeabd0a1d",
+    byteSize: 1398073,
+    width: 720,
+    height: 720,
+    altText: "",
+  },
+  {
+    slot: "platforms",
+    role: "webm",
+    publicPath: "/media/platforms/cognios-rotation.webm",
+    sourceFile: `${publicRoot}/media/platforms/cognios-rotation.webm`,
+    filename: "cognios-rotation.webm",
+    mimeType: "video/webm",
+    checksum: "8a9fb14aad7094dcbd0e5c2f75af18c9d3e7b343c21f36c415e19afbcf1d4755",
+    byteSize: 1342022,
+    width: 720,
+    height: 720,
+    altText: "",
+  },
 ] as const;
 
 export function digest(value: unknown) {
@@ -109,7 +163,7 @@ export interface GovernedHeroMedia {
   versionId: string;
 }
 
-export function heroConfiguration(slot: HeroSlot, governed: readonly GovernedHeroMedia[]) {
+export function heroConfiguration(slot: ConfiguredHeroSlot, governed: readonly GovernedHeroMedia[]) {
   const selected = governed.filter((item) => item.definition.slot === slot);
   const byRole = new Map(selected.map((item) => [item.definition.role, item]));
   if (selected.length !== 3 || !byRole.get("poster") || !byRole.get("mp4") || !byRole.get("webm")) {
@@ -136,7 +190,7 @@ export function heroConfiguration(slot: HeroSlot, governed: readonly GovernedHer
   };
 }
 
-export function heroConfigurationSnapshot(slot: HeroSlot, governed: readonly GovernedHeroMedia[]) {
+export function heroConfigurationSnapshot(slot: ConfiguredHeroSlot, governed: readonly GovernedHeroMedia[]) {
   const configuration = heroConfiguration(slot, governed);
   const { mediaIds, ...content } = configuration;
   return {
@@ -149,14 +203,18 @@ export function heroConfigurationSnapshot(slot: HeroSlot, governed: readonly Gov
   };
 }
 
-export function motionMetadata(slot: HeroSlot, posterMediaId: string) {
+export function motionMetadata(
+  slot: HeroSlot,
+  posterMediaId: string,
+  reducedMotionMediaId = posterMediaId,
+) {
   return {
     groupId: `${slot}-hero`,
     variant: "desktop",
     autoplay: true,
     loop: true,
     posterMediaId,
-    reducedMotionMediaId: posterMediaId,
+    reducedMotionMediaId,
     accessibility: {
       decorative: true,
       hasAudio: false,

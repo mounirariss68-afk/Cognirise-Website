@@ -7,6 +7,7 @@ import {
   motionMetadata,
   digest,
   type GovernedHeroMedia,
+  type ConfiguredHeroSlot,
   type HeroSlot,
 } from "./hero-media.js";
 import { CMS_HERO_DOCUMENT_SLUGS, validateCmsSnapshot } from "@workspace/api-zod";
@@ -16,9 +17,12 @@ import { repositoryRoot } from "./common.js";
 const args = process.argv.slice(2);
 const shouldApply = args.includes("--apply-db");
 const shouldVerify = args.includes("--verify-db");
+const shouldMediaOnly = args.includes("--media-only");
 const target = args.find((argument) => argument.startsWith("--target="))?.slice(9);
 const PREFIX = "cms-site-hero-reconciliation-v1";
 const CONFIGURATION_V2_PREFIX = "cms-site-hero-reconciliation-v2";
+const PLATFORM_METADATA_PREFIX = "cms-site-hero-motion-metadata-v1";
+const PLATFORM_METADATA_OPERATION = "cms.site-hero.motion-metadata-reconciled";
 const APPROVAL = "Approved development reconciliation of existing website hero media.";
 const V2_APPROVAL = "Validated site hero configuration contract upgrade.";
 
@@ -77,21 +81,170 @@ async function reconcileObjects(allowCreate: boolean) {
       });
     }
     const [metadata] = await object.getMetadata();
+    // Provider metadata is not sufficient evidence that the durable object
+    // contains the governed binary. Always read the stored bytes back, even
+    // when the object reports the expected size and content type.
+    const [stored] = await object.download();
+    const storedChecksum = createHash("sha256").update(stored).digest("hex");
     if (
       Number(metadata.size) !== definition.byteSize
       || metadata.contentType !== definition.mimeType
+      || stored.length !== definition.byteSize
+      || storedChecksum !== definition.checksum
     ) {
-      throw new Error(`Existing hero object metadata conflicts with ${definition.publicPath}.`);
-    }
-    if (metadata.metadata?.checksum !== definition.checksum) {
-      const [stored] = await object.download();
-      if (createHash("sha256").update(stored).digest("hex") !== definition.checksum) {
-        throw new Error(`Existing hero object bytes conflict with ${definition.publicPath}.`);
-      }
+      throw new Error(`Existing hero object metadata or bytes conflict with ${definition.publicPath}.`);
     }
     keys.set(definition.publicPath, storageKey);
   }
   return keys;
+}
+
+async function reconcilePlatformsMotionMetadata(
+  client: SqlClient,
+  actor: { id: string; email: string },
+  definition: (typeof heroMedia)[number],
+  row: any,
+  versions: any[],
+  posterMediaId: string,
+  fallbackMediaId: string,
+  allowCreate: boolean,
+) {
+  if (
+    definition.slot !== "platforms"
+    || (definition.role !== "mp4" && definition.role !== "webm")
+  ) return;
+
+  const expectedMotionMetadata = motionMetadata(
+    definition.slot,
+    posterMediaId,
+    fallbackMediaId,
+  );
+  const legacyMotionMetadata = motionMetadata(definition.slot, posterMediaId);
+  const versionOne = versions.find((item) => Number(item.version_number) === 1);
+  if (!versionOne) throw new Error(`Missing immutable v1 for ${definition.publicPath}.`);
+
+  const receiptKey = `${PLATFORM_METADATA_PREFIX}:${definition.role}`;
+  const requestDigest = digest({
+    assetId: row.id,
+    sourceVersionId: versionOne.id,
+    sourceVersionNumber: 1,
+    sourceMotionMetadata: legacyMotionMetadata,
+    expectedMotionMetadata,
+  });
+  const receipt = await client.query(
+    `SELECT operation,subject_id::text,request_digest,result_digest
+       FROM cms_operation_receipts WHERE idempotency_key=$1`,
+    [receiptKey],
+  );
+
+  if (receipt.rowCount) {
+    if (
+      receipt.rows[0].operation !== PLATFORM_METADATA_OPERATION
+      || receipt.rows[0].request_digest !== requestDigest
+    ) {
+      throw new Error(`Platforms motion metadata receipt conflicts for ${definition.publicPath}.`);
+    }
+    const corrected = await client.query(
+      `SELECT id::text,asset_id::text,version_number,storage_key,checksum,byte_size,
+              width,height,metadata
+         FROM cms_media_versions
+        WHERE id=$1 AND asset_id=$2`,
+      [receipt.rows[0].subject_id, row.id],
+    );
+    const resultDigest = digest({
+      assetId: row.id,
+      sourceVersionId: versionOne.id,
+      versionId: corrected.rows[0]?.id,
+      motionMetadata: expectedMotionMetadata,
+    });
+    if (
+      corrected.rowCount !== 1
+      || Number(corrected.rows[0].version_number) !== 2
+      || corrected.rows[0].storage_key !== versionOne.storage_key
+      || corrected.rows[0].checksum !== versionOne.checksum
+      || Number(corrected.rows[0].byte_size) !== Number(versionOne.byte_size)
+      || Number(corrected.rows[0].width) !== Number(versionOne.width)
+      || Number(corrected.rows[0].height) !== Number(versionOne.height)
+      || canonicalJson(corrected.rows[0].metadata?.motionMetadata ?? null)
+        !== canonicalJson(expectedMotionMetadata)
+      || receipt.rows[0].result_digest !== resultDigest
+    ) {
+      throw new Error(`Platforms motion metadata version authority failed for ${definition.publicPath}.`);
+    }
+    return;
+  }
+
+  const versionOneMotionMetadata = versionOne.metadata?.motionMetadata ?? null;
+  if (
+    canonicalJson(versionOneMotionMetadata) !== canonicalJson(legacyMotionMetadata)
+    || canonicalJson(row.motion_metadata ?? null) !== canonicalJson(legacyMotionMetadata)
+  ) {
+    // A non-legacy v1 or asset classification is editorial authority. Do not
+    // reinterpret, overwrite, or append over that decision.
+    return;
+  }
+
+  const latestVersion = versions.at(-1);
+  if (latestVersion?.id !== versionOne.id) {
+    if (
+      canonicalJson(latestVersion?.metadata?.motionMetadata ?? null)
+      === canonicalJson(expectedMotionMetadata)
+    ) {
+      throw new Error(
+        `Unreceipted Platforms motion metadata version exists for ${definition.publicPath}.`,
+      );
+    }
+    // A later non-governed version is editorial drift and must remain intact.
+    return;
+  }
+  if (!allowCreate) {
+    throw new Error(
+      `Missing Platforms motion metadata correction receipt for ${definition.publicPath}.`,
+    );
+  }
+
+  const correctedMetadata = {
+    ...(versionOne.metadata && typeof versionOne.metadata === "object"
+      ? versionOne.metadata
+      : {}),
+    motionMetadata: expectedMotionMetadata,
+  };
+  const corrected = await client.query(
+    `INSERT INTO cms_media_versions
+      (asset_id,version_number,storage_key,checksum,byte_size,width,height,metadata)
+     SELECT asset_id,version_number+1,storage_key,checksum,byte_size,width,height,$2
+       FROM cms_media_versions
+      WHERE id=$1 AND version_number=1
+     RETURNING id::text,asset_id::text,version_number,storage_key,checksum,byte_size,
+               width,height,metadata`,
+    [versionOne.id, correctedMetadata],
+  );
+  if (corrected.rowCount !== 1) {
+    throw new Error(`Could not append Platforms motion metadata for ${definition.publicPath}.`);
+  }
+  const resultDigest = digest({
+    assetId: row.id,
+    sourceVersionId: versionOne.id,
+    versionId: corrected.rows[0].id,
+    motionMetadata: expectedMotionMetadata,
+  });
+  await client.query(
+    `INSERT INTO cms_operation_receipts
+      (idempotency_key,operation,subject_id,request_digest,result_digest)
+     VALUES ($1,$2,$3,$4,$5)`,
+    [receiptKey, PLATFORM_METADATA_OPERATION, corrected.rows[0].id, requestDigest, resultDigest],
+  );
+  await client.query(
+    `INSERT INTO cms_audit_events
+      (actor_user_id,actor_label,action,target_type,target_id,request_id,metadata)
+     VALUES ($1,$2,'media.metadata-version-appended','media',$3,$4,$5)`,
+    [actor.id, actor.email, row.id, receiptKey, {
+      publicPath: definition.publicPath,
+      sourceVersionId: versionOne.id,
+      mediaVersionId: corrected.rows[0].id,
+      reducedMotionMediaId: fallbackMediaId,
+    }],
+  );
 }
 
 async function reconcileMedia(
@@ -101,21 +254,27 @@ async function reconcileMedia(
   allowCreate: boolean,
 ) {
   const governed: GovernedHeroMedia[] = [];
-  // Posters are deliberately reconciled first: motion rows carry both the
-  // normal and reduced-motion poster identities in their DB-enforced metadata.
+  // Posters and fallbacks are deliberately reconciled first: motion rows
+  // carry both identities in their DB-enforced metadata.
   const definitions = [...heroMedia].sort((left, right) =>
-    Number(right.role === "poster") - Number(left.role === "poster"));
+    Number(right.role === "poster") - Number(left.role === "poster")
+    || Number(right.role === "fallback") - Number(left.role === "fallback"));
   const posterIds = new Map<HeroSlot, string>();
+  const fallbackIds = new Map<HeroSlot, string>();
   for (const definition of definitions) {
     const receiptKey = `${PREFIX}:media:${definition.slot}:${definition.role}`;
     const requestDigest = digest(definition);
     const receipt = await client.query(
-      "SELECT subject_id::text,request_digest FROM cms_operation_receipts WHERE idempotency_key=$1",
+      `SELECT operation,subject_id::text,request_digest,result_digest
+         FROM cms_operation_receipts WHERE idempotency_key=$1`,
       [receiptKey],
     );
     let asset;
     if (receipt.rowCount) {
-      if (receipt.rows[0].request_digest !== requestDigest) {
+      if (
+        receipt.rows[0].operation !== "cms.site-hero.media-reconciled"
+        || receipt.rows[0].request_digest !== requestDigest
+      ) {
         throw new Error(`Immutable hero media receipt conflicts for ${definition.publicPath}.`);
       }
       asset = await client.query(
@@ -125,7 +284,12 @@ async function reconcileMedia(
         [receipt.rows[0].subject_id],
       );
     } else {
-      if (!allowCreate) throw new Error(`Missing hero media reconciliation receipt for ${definition.publicPath}.`);
+      if (!allowCreate) {
+        throw new Error(
+          `Missing hero media reconciliation receipt for ${definition.publicPath}; ` +
+          "no committed development media-only reconciliation exists.",
+        );
+      }
       asset = await client.query(
         `SELECT id::text,storage_key,filename,media_type,byte_size,checksum,status,
                 collection,motion_metadata
@@ -149,16 +313,34 @@ async function reconcileMedia(
           definition.byteSize,
           definition.checksum,
           definition.altText,
-          definition.role === "poster" ? "website" : "motion",
-          definition.role === "poster"
+          definition.role === "poster" || definition.role === "fallback" ? "website" : "motion",
+          definition.role === "poster" || definition.role === "fallback"
             ? null
-            : motionMetadata(definition.slot, posterIds.get(definition.slot)!),
+            : motionMetadata(
+              definition.slot,
+              posterIds.get(definition.slot)!,
+              fallbackIds.get(definition.slot) ?? posterIds.get(definition.slot)!,
+            ),
           actor.id,
         ],
       );
     }
     if (asset.rowCount !== 1) throw new Error(`Missing governed hero media row for ${definition.publicPath}.`);
     const row = asset.rows[0];
+    const isMotion = definition.role === "mp4" || definition.role === "webm";
+    const expectedMotionMetadata = isMotion
+      ? motionMetadata(
+        definition.slot,
+        posterIds.get(definition.slot)!,
+        fallbackIds.get(definition.slot) ?? posterIds.get(definition.slot)!,
+      )
+      : null;
+    const rowMotionMetadata = row.motion_metadata ?? null;
+    const rowMotionMetadataValid = !isMotion
+      ? rowMotionMetadata === null
+      : definition.slot === "platforms"
+        ? rowMotionMetadata !== null
+        : canonicalJson(rowMotionMetadata) === canonicalJson(expectedMotionMetadata);
     if (
       row.storage_key !== keys.get(definition.publicPath)
       || row.filename !== definition.filename
@@ -166,22 +348,24 @@ async function reconcileMedia(
       || Number(row.byte_size) !== definition.byteSize
       || row.checksum !== definition.checksum
       || row.status !== "active"
-      || row.collection !== (definition.role === "poster" ? "website" : "motion")
+      || row.collection !== (
+        definition.role === "poster" || definition.role === "fallback" ? "website" : "motion"
+      )
+      || !rowMotionMetadataValid
     ) {
       throw new Error(`Governed hero media row has drifted for ${definition.publicPath}.`);
     }
-    const expectedMotionMetadata = definition.role === "poster"
-      ? null
-      : motionMetadata(definition.slot, posterIds.get(definition.slot)!);
-    if (canonicalJson(row.motion_metadata ?? null) !== canonicalJson(expectedMotionMetadata)) {
-      throw new Error(`Governed motion metadata drifted for ${definition.publicPath}.`);
-    }
-    let version = await client.query(
+    let versions = await client.query(
       `SELECT id::text,version_number,storage_key,checksum,byte_size,width,height,metadata
          FROM cms_media_versions
-        WHERE asset_id=$1 AND storage_key=$2 AND version_number=1`,
-      [row.id, row.storage_key],
+        WHERE asset_id=$1 AND (version_number=1 OR version_number>1)
+        ORDER BY version_number`,
+      [row.id],
     );
+    let version: { rowCount: number | null; rows: any[] } = {
+      rowCount: versions.rows.filter((item) => Number(item.version_number) === 1).length,
+      rows: versions.rows.filter((item) => Number(item.version_number) === 1),
+    };
     if (!version.rowCount && !receipt.rowCount) {
       version = await client.query(
         `INSERT INTO cms_media_versions
@@ -199,12 +383,25 @@ async function reconcileMedia(
             sourcePath: definition.publicPath,
             usage: `${definition.slot} hero ${definition.role}`,
             rightsStatus: "approved-use",
-            accessibilityStatus: definition.role === "poster" ? "approved" : "decorative",
+            accessibilityStatus:
+              definition.role === "poster" || definition.role === "fallback"
+                ? "approved"
+                : "decorative",
             ...(expectedMotionMetadata ? { motionMetadata: expectedMotionMetadata } : {}),
           },
         ],
       );
+      versions = {
+        rowCount: (versions.rowCount ?? 0) + (version.rowCount ?? 0),
+        rows: [...versions.rows, ...version.rows],
+      };
     }
+    const versionMotionMetadata = version.rows[0]?.metadata?.motionMetadata ?? null;
+    const versionMotionMetadataValid = !isMotion
+      ? versionMotionMetadata === null
+      : definition.slot === "platforms"
+        ? versionMotionMetadata !== null
+        : canonicalJson(versionMotionMetadata) === canonicalJson(expectedMotionMetadata);
     if (
       version.rowCount !== 1
       || Number(version.rows[0].version_number) !== 1
@@ -213,17 +410,29 @@ async function reconcileMedia(
       || Number(version.rows[0].byte_size) !== definition.byteSize
       || Number(version.rows[0].width) !== definition.width
       || Number(version.rows[0].height) !== definition.height
-      || (expectedMotionMetadata &&
-        canonicalJson(version.rows[0].metadata?.motionMetadata ?? null) !== canonicalJson(expectedMotionMetadata))
+      || !versionMotionMetadataValid
     ) {
       throw new Error(`Immutable hero media version authority failed for ${definition.publicPath}.`);
     }
+    if (isMotion && definition.slot === "platforms") {
+      await reconcilePlatformsMotionMetadata(
+        client,
+        actor,
+        definition,
+        row,
+        versions.rows,
+        posterIds.get(definition.slot)!,
+        fallbackIds.get(definition.slot)!,
+        allowCreate,
+      );
+    }
+    const resultDigest = digest({ assetId: row.id, versionId: version.rows[0].id });
     if (!receipt.rowCount) {
       await client.query(
         `INSERT INTO cms_operation_receipts
           (idempotency_key,operation,subject_id,request_digest,result_digest)
          VALUES ($1,'cms.site-hero.media-reconciled',$2,$3,$4)`,
-        [receiptKey, row.id, requestDigest, digest({ assetId: row.id, versionId: version.rows[0].id })],
+        [receiptKey, row.id, requestDigest, resultDigest],
       );
       await client.query(
         `INSERT INTO cms_audit_events
@@ -231,9 +440,12 @@ async function reconcileMedia(
          VALUES ($1,$2,'media.approved','media',$3,$4,$5)`,
         [actor.id, actor.email, row.id, receiptKey, { publicPath: definition.publicPath, versionId: version.rows[0].id }],
       );
+    } else if (receipt.rows[0].result_digest !== resultDigest) {
+      throw new Error(`Immutable hero media result receipt conflicts for ${definition.publicPath}.`);
     }
     governed.push({ definition, assetId: row.id, versionId: version.rows[0].id });
     if (definition.role === "poster") posterIds.set(definition.slot, row.id);
+    if (definition.role === "fallback") fallbackIds.set(definition.slot, row.id);
   }
   return governed;
 }
@@ -241,7 +453,7 @@ async function reconcileMedia(
 async function reconcileConfiguration(
   client: SqlClient,
   actor: { id: string; email: string },
-  slot: HeroSlot,
+  slot: ConfiguredHeroSlot,
   governed: readonly GovernedHeroMedia[],
   allowCreate: boolean,
 ) {
@@ -518,24 +730,30 @@ async function reconcileConfiguration(
   return "published";
 }
 
-async function run(apply: boolean) {
+async function run(apply: boolean, mediaOnly: boolean) {
   const keys = await reconcileObjects(apply);
   const { pool } = await import("@workspace/db");
   const client = await pool.connect();
   try {
-    await client.query("BEGIN");
+    await client.query(apply ? "BEGIN" : "BEGIN READ ONLY");
     const admins = await client.query(
       "SELECT id::text,email FROM cms_users WHERE role='administrator' AND status='active' ORDER BY created_at",
     );
     if (admins.rowCount !== 1) throw new Error("Hero reconciliation requires exactly one active CMS administrator.");
     const governed = await reconcileMedia(client, admins.rows[0], keys, apply);
-    const outcomes = [];
-    for (const slot of ["homepage", "industries"] as const) {
-      outcomes.push(`${slot}:${await reconcileConfiguration(client, admins.rows[0], slot, governed, apply)}`);
+    const outcomes: string[] = [];
+    if (!mediaOnly) {
+      for (const slot of ["homepage", "industries"] as const) {
+        outcomes.push(`${slot}:${await reconcileConfiguration(client, admins.rows[0], slot, governed, apply)}`);
+      }
     }
     if (apply) await client.query("COMMIT");
     else await client.query("ROLLBACK");
-    console.log(`Verified governed site heroes: media=6 ${outcomes.join(" ")}${apply ? "" : " (rolled back)"}.`);
+    console.log(
+      `Verified governed site hero media: media=${heroMedia.length}` +
+      `${mediaOnly ? " (media-only; pages untouched)" : ` ${outcomes.join(" ")}`}` +
+      `${apply ? "" : " (rolled back)"}.`,
+    );
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -549,13 +767,16 @@ async function main() {
   if (!shouldApply && !shouldVerify) {
     console.log(JSON.stringify({
       media: heroMedia.map(({ slot, role, publicPath, checksum }) => ({ slot, role, publicPath, checksum })),
-      configurations: ["site-homepage-hero", "site-industries-hero"],
+      mode: shouldMediaOnly ? "development-media-only" : "development-media-and-site-heroes",
+      configurations: shouldMediaOnly ? [] : ["site-homepage-hero", "site-industries-hero"],
     }, null, 2));
-    console.error("Dry run: pass --apply-db or --verify-db with --target=development.");
+    console.error(
+      "Dry run: pass --media-only --apply-db (or --verify-db) with --target=development.",
+    );
     return;
   }
   assertDevelopmentTarget();
-  await run(shouldApply);
+  await run(shouldApply, shouldMediaOnly);
 }
 
 if (process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).href) {

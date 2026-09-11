@@ -529,14 +529,17 @@ test("publisher-only review decisions enforce valid transitions and write audit 
   const assetId = "00000000-0000-4000-8000-000000000201";
   const rejectedAssetId = "00000000-0000-4000-8000-000000000202";
   const auditFailureAssetId = "00000000-0000-4000-8000-000000000203";
+  const failedApprovalAssetId = "00000000-0000-4000-8000-000000000204";
   const statuses = new Map([
     [assetId, "pending-review"],
     [rejectedAssetId, "pending-review"],
     [auditFailureAssetId, "pending-review"],
+    [failedApprovalAssetId, "pending-review"],
   ]);
   const audits: Array<{ action: string; assetId: string; metadata: unknown }> = [];
 
   const metadataVersions: Record<string, unknown>[] = [];
+  let failApprovalVersionInsert = true;
   t.mock.method(pool, "query", async (sql: unknown, values?: unknown[]) => {
     const statement = String(sql);
     if (statement.includes("FROM cms_sessions s")) {
@@ -591,6 +594,10 @@ test("publisher-only review decisions enforce valid transitions and write audit 
           return { rowCount: 1, rows: [{ metadata: { rightsStatus: "needs-review", accessibilityStatus: "needs-review" } }] };
         }
         if (statement.includes("INSERT INTO cms_media_versions")) {
+          if (String(values?.[0]) === failedApprovalAssetId && failApprovalVersionInsert) {
+            failApprovalVersionInsert = false;
+            throw new Error("metadata version store unavailable");
+          }
           metadataVersions.push(values?.[1] as Record<string, unknown>);
           return { rowCount: 1, rows: [{ id: "approved-version" }] };
         }
@@ -719,6 +726,22 @@ test("publisher-only review decisions enforce valid transitions and write audit 
   const failedAudit = await review("publisher-token", auditFailureAssetId, "approve");
   assert.equal(failedAudit.status, 500);
   assert.equal(statuses.get(auditFailureAssetId), "pending-review");
+
+  const metadataVersionsBeforeFailedApproval = metadataVersions.length;
+  const failedApproval = await review("publisher-token", failedApprovalAssetId, "approve");
+  assert.equal(failedApproval.status, 500);
+  assert.equal(statuses.get(failedApprovalAssetId), "pending-review");
+  assert.equal(
+    metadataVersions.length,
+    metadataVersionsBeforeFailedApproval,
+    "a failed approval must not append a clearance version",
+  );
+
+  const retriedApproval = await review("publisher-token", failedApprovalAssetId, "approve");
+  assert.equal(retriedApproval.status, 200);
+  assert.equal((await retriedApproval.json() as { status: string }).status, "ready");
+  assert.equal(statuses.get(failedApprovalAssetId), "active");
+  assert.equal(metadataVersions.length, metadataVersionsBeforeFailedApproval + 1);
 });
 
 test("distinct assets promote identical bytes to isolated immutable keys", {

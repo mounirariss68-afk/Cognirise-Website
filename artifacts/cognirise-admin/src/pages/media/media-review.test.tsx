@@ -464,6 +464,40 @@ if (typeof moduleMock !== "function") {
     }
   });
 
+  test("failed approval keeps both gates checked and leaves the review actionable", async () => {
+    resetState();
+    let firstAttempt = true;
+    reviewBehavior = async (input) => {
+      if (firstAttempt) {
+        firstAttempt = false;
+        throw new Error("Approval service unavailable.");
+      }
+      return performReview(input);
+    };
+    const view = await renderLibrary();
+    try {
+      await openReview(view.container);
+      await React.act(async () => checkboxes().forEach((item) => item.click()));
+      await clickAndSettle(button(document.body, "Confirm approval"));
+
+      assert.equal(reviewCalls.length, 1);
+      assert.match(document.body.textContent ?? "", /Approval service unavailable/);
+      assert.match(document.body.textContent ?? "", /Retry the decision/);
+      assert.deepEqual(
+        checkboxes().map((item) => item.getAttribute("aria-checked")),
+        ["true", "true"],
+      );
+      assert.equal(button(document.body, "Confirm approval").disabled, false);
+
+      await clickAndSettle(button(document.body, "Confirm approval"));
+      assert.equal(reviewCalls.length, 2);
+      assert.equal(document.body.textContent?.includes("Review media asset"), false);
+      assert.match(view.container.textContent ?? "", /Available/);
+    } finally {
+      await view.unmount();
+    }
+  });
+
   test("successful approval closes review and updates the asset to Available", async () => {
     resetState();
     const view = await renderLibrary();
@@ -484,6 +518,29 @@ if (typeof moduleMock !== "function") {
       assert.equal(view.container.textContent?.includes("Awaiting review"), false);
     } finally {
       await view.unmount();
+    }
+  });
+
+  test("successful approval remains Available after a library reload and cannot be reopened", async () => {
+    resetState();
+    const view = await renderLibrary();
+    let reloaded: Awaited<ReturnType<typeof renderLibrary>> | undefined;
+    try {
+      await openReview(view.container);
+      await React.act(async () => checkboxes().forEach((item) => item.click()));
+      await clickAndSettle(button(document.body, "Confirm approval"));
+      await view.unmount();
+
+      reloaded = await renderLibrary();
+      assert.match(reloaded.container.textContent ?? "", /Available/);
+      assert.equal(
+        [...reloaded.container.querySelectorAll<HTMLButtonElement>("button")]
+          .some((item) => item.textContent?.includes("Review")),
+        false,
+      );
+    } finally {
+      if (reloaded) await reloaded.unmount();
+      else if (view.container.isConnected) await view.unmount();
     }
   });
 }

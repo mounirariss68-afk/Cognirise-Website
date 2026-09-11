@@ -51,7 +51,11 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
     && Boolean(asset.versionId)
     && (accept === "pdf" ? asset.mimeType === "application/pdf" : asset.mimeType.startsWith("image/")),
   );
-  const selected = (exact.data as Asset | undefined) ?? assets.find((asset) => asset.id === selectedMediaId);
+  // Prefer the approved item from the current list over an older exact-item
+  // snapshot. Approval changes the API status and appends a metadata version,
+  // so a selected field must not keep rendering a stale review response.
+  const selected = assets.find((asset) => asset.id === selectedMediaId)
+    ?? (exact.data as Asset | undefined);
   const upload = async (file: File) => {
     if (!file.type.startsWith("image/") && accept !== "pdf") return;
     const requested = await requestUpload.mutateAsync({ data: {
