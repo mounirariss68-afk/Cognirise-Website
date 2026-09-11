@@ -11,7 +11,7 @@
       "assetId": "df2d410a-819b-4022-b87e-7695a36e0f75",
       "mediaVersionId": "4343f02f-a5b8-4c11-bfc2-399c2dae1a12",
       "storageKey": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/objects/banking-pov-v1-6df89ba5ba9d3fc17254be728e5f658d626284dd08a1f69aec9cf47e7b9a504f/sha256/6df89ba5ba9d3fc17254be728e5f658d626284dd08a1f69aec9cf47e7b9a504f",
-      "disposition": "created",
+      "disposition": "replayed",
       "status": "pending-review",
       "immutableReadbackVerified": true
     },
@@ -22,7 +22,7 @@
       "assetId": "f2144c4f-aa53-4f92-9432-b826e786596c",
       "mediaVersionId": "c1520472-40dc-4c38-a622-7842cc183c08",
       "storageKey": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/objects/banking-pov-v1-485fb397a7f2a583da703aefefb3eb3a12fe6661cc5b1e8dab23cc54812ad392/sha256/485fb397a7f2a583da703aefefb3eb3a12fe6661cc5b1e8dab23cc54812ad392",
-      "disposition": "created",
+      "disposition": "replayed",
       "status": "pending-review",
       "immutableReadbackVerified": true
     },
@@ -33,7 +33,7 @@
       "assetId": "20d3be48-6a7f-48eb-93b7-16da1840e2ce",
       "mediaVersionId": "9c847621-3173-4ffd-b194-585e7b5bd518",
       "storageKey": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/objects/banking-pov-v1-d01e9e9e1127abfd101ae86d62a36b4ef8085caace4f8f352ad43f9370811aa0/sha256/d01e9e9e1127abfd101ae86d62a36b4ef8085caace4f8f352ad43f9370811aa0",
-      "disposition": "created",
+      "disposition": "replayed",
       "status": "pending-review",
       "immutableReadbackVerified": true
     },
@@ -44,7 +44,7 @@
       "assetId": "8350af7e-f983-4d76-98d2-ca937c86e13b",
       "mediaVersionId": "7d382089-eb44-4844-adb9-9106e178ea4b",
       "storageKey": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/value-to-scale-hero-ad0ddce310568b7161ee26c1cab7ef5348db2e8252413eecb12a0860853733d5",
-      "disposition": "reused",
+      "disposition": "replayed",
       "status": "pending-review",
       "immutableReadbackVerified": true
     },
@@ -55,7 +55,7 @@
       "assetId": "de938b11-0d16-42ae-bca1-15a26d35b1fd",
       "mediaVersionId": "10650e07-6b2e-468c-916d-c45a29fede07",
       "storageKey": "replit-objstore-896989cd-16ab-42a8-b126-55615ae3f41e/.private/cms-media/objects/banking-pov-v1-4c542550089d635c309d178fae7e2155447e9d1d9083bc0aef4ad30c3400ccbc/sha256/4c542550089d635c309d178fae7e2155447e9d1d9083bc0aef4ad30c3400ccbc",
-      "disposition": "created",
+      "disposition": "replayed",
       "status": "pending-review",
       "immutableReadbackVerified": true
     }
