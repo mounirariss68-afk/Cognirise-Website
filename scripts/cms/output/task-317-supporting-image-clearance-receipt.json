@@ -1,0 +1,43 @@
+{
+  "task": 317,
+  "mode": "media-clearance",
+  "disposition": "recorded-owner-clearance",
+  "receiptKey": "cms-financial-services-task-317:supporting-image-rights-clearance-v1",
+  "operation": "cms.financial-services.task-317.supporting-image-rights-clearance",
+  "accessibility": "No accessibility approval was invented; existing non-empty alt text and image dimensions were validated.",
+  "pinReplacements": [
+    {
+      "assetId": "20d3be48-6a7f-48eb-93b7-16da1840e2ce",
+      "mediaVersionId": "40a6c4c5-0b6e-4458-b691-fa6f29ff6e8f",
+      "priorMediaVersionId": "9c847621-3173-4ffd-b194-585e7b5bd518"
+    },
+    {
+      "assetId": "8350af7e-f983-4d76-98d2-ca937c86e13b",
+      "mediaVersionId": "bf08f590-7d03-4d6d-a031-2453180df7ff",
+      "priorMediaVersionId": "7d382089-eb44-4844-adb9-9106e178ea4b"
+    },
+    {
+      "assetId": "de938b11-0d16-42ae-bca1-15a26d35b1fd",
+      "mediaVersionId": "62ddb003-9a91-4beb-ac3f-d6de7d94354d",
+      "priorMediaVersionId": "10650e07-6b2e-468c-916d-c45a29fede07"
+    },
+    {
+      "assetId": "df2d410a-819b-4022-b87e-7695a36e0f75",
+      "mediaVersionId": "095a8bd4-9d91-4d5c-b2d9-7afd39079b40",
+      "priorMediaVersionId": "4343f02f-a5b8-4c11-bfc2-399c2dae1a12"
+    },
+    {
+      "assetId": "f2144c4f-aa53-4f92-9432-b826e786596c",
+      "mediaVersionId": "9e876ac3-0384-4cdb-ad6c-86b8eeb0694d",
+      "priorMediaVersionId": "c1520472-40dc-4c38-a622-7842cc183c08"
+    }
+  ],
+  "heroPinUnchanged": {
+    "assetId": "83037506-bfde-4473-84ad-4337aeaf34f6",
+    "mediaVersionId": "7753ca81-860c-440c-b3ae-8a156c2de516"
+  },
+  "ownerChatClearance": "Yes—clear the images, update the pins, and publish UAE only.",
+  "uaeClearanceRevisionId": "ecc6e74d-e9ff-49f1-9f42-ada8ff593b9e",
+  "binaryIdentityPreserved": true,
+  "predecessorUaeRevisionId": "17b5abd8-a09e-438d-9751-4592b4570324"
+}

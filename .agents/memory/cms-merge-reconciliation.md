@@ -39,6 +39,12 @@ Absence of textual merge conflicts does not establish semantic correctness.
 
 **How to apply:** Validate changed behavioral boundaries after merging; syntax and type checks alone cannot establish that source selection and publication protections survived.
 
+Keep preparation evidence separate from completed-release verification output when a reconciliation operation supports both states.
+
+**Why:** Replaying a draft reconciler after publication can otherwise replace its original draft evidence with a release summary, even when database receipts remain immutable.
+
+**How to apply:** Select a distinct output artifact for release verification; do not reuse an earlier preparation receipt filename for a different lifecycle state.
+
 Historical-copy recovery stages a draft; it is not a separate publication authority.
 
 **Why:** A purpose-built recovery publisher can diverge from the CMS's media, destination, and administrator checks even when its copy provenance is exact. Permission to recover copy does not establish missing rights or verification facts.

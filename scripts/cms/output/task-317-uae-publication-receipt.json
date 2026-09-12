@@ -1,0 +1,100 @@
+{
+  "task": 317,
+  "mode": "apply",
+  "disposition": "published-uae-and-created-local-drafts",
+  "receiptKey": "cms-financial-services-task-317:uae-only-v1",
+  "requestDigest": "7fc959dbf11f930357effba1f7c26e3085e1bd4612a7f2541a099530b8845d10",
+  "uaeRevisionId": "ecc6e74d-e9ff-49f1-9f42-ada8ff593b9e",
+  "uaeCandidateDigest": "ac52a711106fe573073f618492af848f2d29f1a417af0c4366bb239d709d3408",
+  "pins": [
+    {
+      "assetId": "83037506-bfde-4473-84ad-4337aeaf34f6",
+      "mediaVersionId": "7753ca81-860c-440c-b3ae-8a156c2de516"
+    },
+    {
+      "assetId": "f2144c4f-aa53-4f92-9432-b826e786596c",
+      "mediaVersionId": "9e876ac3-0384-4cdb-ad6c-86b8eeb0694d"
+    },
+    {
+      "assetId": "20d3be48-6a7f-48eb-93b7-16da1840e2ce",
+      "mediaVersionId": "40a6c4c5-0b6e-4458-b691-fa6f29ff6e8f"
+    },
+    {
+      "assetId": "8350af7e-f983-4d76-98d2-ca937c86e13b",
+      "mediaVersionId": "bf08f590-7d03-4d6d-a031-2453180df7ff"
+    },
+    {
+      "assetId": "de938b11-0d16-42ae-bca1-15a26d35b1fd",
+      "mediaVersionId": "62ddb003-9a91-4beb-ac3f-d6de7d94354d"
+    },
+    {
+      "assetId": "df2d410a-819b-4022-b87e-7695a36e0f75",
+      "mediaVersionId": "095a8bd4-9d91-4d5c-b2d9-7afd39079b40"
+    }
+  ],
+  "localizedDrafts": [
+    {
+      "locale": "en",
+      "market": "europe",
+      "editionId": "21ca4c50-8a09-4e77-bb53-f9abe2d9980d",
+      "revisionId": "ab5796c8-97ce-4b1f-9951-32984137ad61",
+      "changedPaths": [
+        "content.sources",
+        "content.bankingPov.evidenceSignals"
+      ],
+      "candidateDigest": "99e7e25c13c37ef782d2376183b577ae3075f571d23fe199efe58bddfdd5400e",
+      "previousRevisionId": "aae91320-a389-4dea-af06-440e24ae97c9"
+    },
+    {
+      "locale": "en",
+      "market": "ksa",
+      "editionId": "657ddb7a-0195-42a7-aea8-8bf106f6da94",
+      "revisionId": "659e903c-d1ed-458d-8068-612493d30748",
+      "changedPaths": [
+        "content.sources",
+        "content.bankingPov.evidenceSignals"
+      ],
+      "candidateDigest": "c9e4a5c1cdcf0301c93218f2923998dac39aaf9b275f79f267dc40073fa752b9",
+      "previousRevisionId": "434b4fd0-1639-4f9a-845f-787f0a0e7f5c"
+    },
+    {
+      "locale": "en",
+      "market": "turkiye",
+      "editionId": "48fd1099-6458-49aa-8a85-cbe580bbd1f8",
+      "revisionId": "59a39f09-cf95-4177-946d-8a5964ede40c",
+      "changedPaths": [
+        "content.sources",
+        "content.bankingPov.evidenceSignals"
+      ],
+      "candidateDigest": "df0c4892f639e91f329610d5d2d3c34ec1c9888f937c56c2827fa0ef85d5d53c",
+      "previousRevisionId": "437afccf-290e-4b39-a4ac-b94322101683"
+    }
+  ],
+  "destinations": [
+    {
+      "marketEditionId": "b39e7bb0-ce97-44b5-aa13-a86422db4f06",
+      "locale": "en",
+      "decision": "off"
+    },
+    {
+      "marketEditionId": "1e1ad0b2-a186-4655-b7b0-29832f896f79",
+      "locale": "en",
+      "decision": "off"
+    },
+    {
+      "marketEditionId": "96c12a51-2b5c-4917-b150-cff8f17ddeaf",
+      "locale": "en",
+      "decision": "off"
+    },
+    {
+      "marketEditionId": "b966034c-17a7-4c81-be42-a3386f97d1e3",
+      "locale": "en",
+      "decision": "show"
+    }
+  ],
+  "verification": {
+    "uae": "Published source and approved immutable pins are bound to the Task 317 revision.",
+    "otherMarkets": "Europe, KSA and Türkiye have only custom draft editions and explicit off published destination decisions.",
+    "note": "This maintenance job does not start or probe an API server; public endpoint verification remains an external API operation."
+  }
+}

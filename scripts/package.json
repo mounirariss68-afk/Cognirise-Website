@@ -19,6 +19,8 @@
     "cms:reconcile-banking-successor": "tsx ./src/cms/banking-successor.ts",
     "cms:setup-banking-successor": "tsx ./src/cms/banking-successor.ts",
     "cms:reconcile-financial-services-thesis": "tsx ./src/cms/financial-services-thesis-successor.ts",
+    "cms:task-317-uae-publication": "tsx ./src/cms/task-317-uae-publication-and-localization.ts",
+    "cms:reconcile-task-317-drafts": "tsx ./src/cms/task-317-uae-publication-and-localization.ts --reconcile-drafts",
     "cms:setup-banking-postmerge": "pnpm cms:import-banking-media -- --apply-db --target=development --write && pnpm cms:reconcile-banking-successor -- --apply-db --target=development --write",
     "cms:reconcile-public-sector-editions": "tsx ./src/cms/public-sector-editions.ts",
     "cms:setup-public-sector-postmerge": "tsx ./src/cms/public-sector-editions.ts --apply-db --target=development --write --report-conflict",

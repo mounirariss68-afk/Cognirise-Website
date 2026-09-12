@@ -207,6 +207,11 @@ export function mediaGovernanceErrors(
   rows: Array<Record<string, any>>,
 ): string[] {
   const errors: string[] = [];
+  // The publisher approval endpoint writes `approved-use`; older imports use
+  // `approved`. Both are affirmative rights-review states. Keeping both here
+  // prevents a publisher-approved exact version from being rejected solely by
+  // a vocabulary mismatch, while every other governance check still applies.
+  const approvedRightsStatuses = new Set(["approved", "approved-use"]);
   const byAsset = new Map(rows.map((row) => [String(row.id), row]));
   for (const reference of references) {
     const row = byAsset.get(reference.mediaId);
@@ -249,7 +254,7 @@ export function mediaGovernanceErrors(
     }
     const rights = metadata.rights && typeof metadata.rights === "object" ? metadata.rights : {};
     const rightsStatus = metadata.rightsStatus ?? rights.status;
-    if (rightsStatus != null && rightsStatus !== "approved") {
+    if (rightsStatus != null && !approvedRightsStatuses.has(String(rightsStatus))) {
       errors.push(`${reference.fieldPath}: media rights are not approved.`);
     }
     const rightsExpiry = metadata.rightsExpiresAt ?? rights.expiresAt;

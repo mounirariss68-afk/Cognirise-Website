@@ -1,0 +1,77 @@
+{
+  "task": 317,
+  "mode": "localized-draft-reconciliation",
+  "disposition": "replayed",
+  "receiptKey": "cms-financial-services-task-317:localized-draft-isolation-v2",
+  "originalEvidence": {
+    "task": 317,
+    "reason": "Corrected an inherited UK qualification that said 'not a UAE ... estimate'; historic drafts were preserved and no live pointer or availability was changed.",
+    "operation": "cms.financial-services.task-317.localized-draft-isolation-reconciliation",
+    "publication": "Not attempted; normal publication media governance remains fail-closed.",
+    "immutablePins": [
+      {
+        "assetId": "83037506-bfde-4473-84ad-4337aeaf34f6",
+        "mediaVersionId": "7753ca81-860c-440c-b3ae-8a156c2de516"
+      },
+      {
+        "assetId": "f2144c4f-aa53-4f92-9432-b826e786596c",
+        "mediaVersionId": "c1520472-40dc-4c38-a622-7842cc183c08"
+      },
+      {
+        "assetId": "20d3be48-6a7f-48eb-93b7-16da1840e2ce",
+        "mediaVersionId": "9c847621-3173-4ffd-b194-585e7b5bd518"
+      },
+      {
+        "assetId": "8350af7e-f983-4d76-98d2-ca937c86e13b",
+        "mediaVersionId": "7d382089-eb44-4844-adb9-9106e178ea4b"
+      },
+      {
+        "assetId": "de938b11-0d16-42ae-bca1-15a26d35b1fd",
+        "mediaVersionId": "10650e07-6b2e-468c-916d-c45a29fede07"
+      },
+      {
+        "assetId": "df2d410a-819b-4022-b87e-7695a36e0f75",
+        "mediaVersionId": "4343f02f-a5b8-4c11-bfc2-399c2dae1a12"
+      }
+    ],
+    "correctedDrafts": [
+      {
+        "locale": "en",
+        "market": "europe",
+        "editionId": "21ca4c50-8a09-4e77-bb53-f9abe2d9980d",
+        "revisionId": "ab5796c8-97ce-4b1f-9951-32984137ad61",
+        "changedPaths": [
+          "content.sources",
+          "content.bankingPov.evidenceSignals"
+        ],
+        "candidateDigest": "99e7e25c13c37ef782d2376183b577ae3075f571d23fe199efe58bddfdd5400e",
+        "previousRevisionId": "aae91320-a389-4dea-af06-440e24ae97c9"
+      },
+      {
+        "locale": "en",
+        "market": "ksa",
+        "editionId": "657ddb7a-0195-42a7-aea8-8bf106f6da94",
+        "revisionId": "659e903c-d1ed-458d-8068-612493d30748",
+        "changedPaths": [
+          "content.sources",
+          "content.bankingPov.evidenceSignals"
+        ],
+        "candidateDigest": "c9e4a5c1cdcf0301c93218f2923998dac39aaf9b275f79f267dc40073fa752b9",
+        "previousRevisionId": "434b4fd0-1639-4f9a-845f-787f0a0e7f5c"
+      },
+      {
+        "locale": "en",
+        "market": "turkiye",
+        "editionId": "48fd1099-6458-49aa-8a85-cbe580bbd1f8",
+        "revisionId": "59a39f09-cf95-4177-946d-8a5964ede40c",
+        "changedPaths": [
+          "content.sources",
+          "content.bankingPov.evidenceSignals"
+        ],
+        "candidateDigest": "df0c4892f639e91f329610d5d2d3c34ec1c9888f937c56c2827fa0ef85d5d53c",
+        "previousRevisionId": "437afccf-290e-4b39-a4ac-b94322101683"
+      }
+    ],
+    "uaeDraftRevisionId": "17b5abd8-a09e-438d-9751-4592b4570324"
+  }
+}

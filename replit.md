@@ -41,6 +41,7 @@ _Describe the high-level user-facing capabilities of this app once they exist._
 ## User preferences
 
 - Never present the UAE and Saudi Arabia together in website or CMS copy. UAE editions may mention only the UAE; Saudi editions may mention only Saudi Arabia. Other markets must use their own or neutral copy.
+- An explicit instruction from the project owner in chat to publish content constitutes their editorial review and approval for that requested publication; do not require duplicate manual review or approval in the CMS. This does not waive revision-conflict checks, immutable media pins, market-delivery validation, or honest publication audit attribution.
 
 ## Gotchas
 

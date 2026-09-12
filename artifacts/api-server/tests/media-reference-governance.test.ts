@@ -39,6 +39,19 @@ test("review media governance rejects version, type, dimensions, accessibility a
   assert.match(governedErrors.join(" "), /dimensions/);
   assert.match(governedErrors.join(" "), /alternative text/);
   assert.match(governedErrors.join(" "), /rights/);
+
+  const publisherApproved = mediaGovernanceErrors(references, [{
+    id: mediaId,
+    version_id: versionId,
+    status: "active",
+    media_type: "image/png",
+    width: 1200,
+    height: 800,
+    alt_text: "Reviewed accessibility description.",
+    // This is the affirmative status emitted by the media publisher route.
+    metadata: { rightsStatus: "approved-use", accessibilityStatus: "approved" },
+  }]);
+  assert.doesNotMatch(publisherApproved.join(" "), /rights/);
 });
 
 test("revision synchronization inherits the prior immutable pin instead of selecting latest", async () => {

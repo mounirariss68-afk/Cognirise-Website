@@ -1,0 +1,29 @@
+{
+  "environment": "development",
+  "verification": "Actual public HTTP delivery after UAE-only publication",
+  "uae": {
+    "path": "/api/public/content/uae/en/industry/financial-services",
+    "httpStatus": 200,
+    "market": "uae",
+    "locale": "en",
+    "revision": 9,
+    "thesis": "Trust in AI comes from how it is governed and operated—not how well its chatbot performs."
+  },
+  "unpublishedDestinations": {
+    "ksa": 404,
+    "turkiye": 404,
+    "europe": 404
+  },
+  "mediaDelivery": {
+    "totalPinnedAssets": 6,
+    "successfulHttp200Responses": 6,
+    "heroContentType": "image/png",
+    "supportingContentTypes": ["image/jpeg", "image/jpeg", "image/png", "image/jpeg", "image/jpeg"]
+  },
+  "checks": [
+    "Public UAE endpoint returns the exact approved thesis at revision 9.",
+    "All three non-UAE public detail endpoints return 404.",
+    "All six published immutable media URLs return HTTP 200 with image content types.",
+    "Website preview renders the UAE banking page without browser runtime errors."
+  ]
+}

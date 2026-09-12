@@ -13,6 +13,10 @@ pnpm --filter @workspace/db push
 # generic inventory reconciliation so its edition lock can preserve a newer
 # editorial draft instead of allowing a full canonical payload merge.
 pnpm --filter @workspace/scripts cms:reconcile-financial-services-thesis -- --apply-db --target=development --write --report-conflict
+# Task 317's localized Financial Services drafts are receipt-bound. It verifies
+# a completed UAE-only release, replays an intact preparation, and reports an
+# explicit uninitialized state rather than silently dropping fresh-task work.
+pnpm --filter @workspace/scripts cms:reconcile-task-317-drafts -- --apply-db --target=development --write
 pnpm --filter @workspace/scripts cms:reconcile
 # Task 318's narrowly scoped historical recovery is the only people operation
 # in this hook. It creates a draft only; normal authenticated CMS Publish is
