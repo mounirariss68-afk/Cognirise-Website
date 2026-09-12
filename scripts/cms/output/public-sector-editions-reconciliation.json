@@ -4,7 +4,7 @@
   "results": [
     {
       "market": "uae",
-      "disposition": "staged-draft",
+      "disposition": "replayed",
       "editionId": "5c83c436-70fe-4a3b-8d9c-8ff0c0f9b7cc",
       "draftRevisionId": "dd2a9638-968f-42a1-b415-35713253dcb9",
       "securePreviewRequest": "/api/documents/a54232c0-0b4f-45b5-ae8e-f5cbd56a77b7/preview?market=uae&locale=en&revisionId=dd2a9638-968f-42a1-b415-35713253dcb9",
@@ -50,7 +50,7 @@
     },
     {
       "market": "ksa",
-      "disposition": "staged-draft",
+      "disposition": "replayed",
       "editionId": "b0dcd885-64e5-4e04-bc70-6d0b3298d24a",
       "draftRevisionId": "0cd32334-f037-420f-929f-af0103595022",
       "securePreviewRequest": "/api/documents/a54232c0-0b4f-45b5-ae8e-f5cbd56a77b7/preview?market=ksa&locale=en&revisionId=0cd32334-f037-420f-929f-af0103595022",
@@ -96,7 +96,7 @@
     },
     {
       "market": "turkiye",
-      "disposition": "staged-draft",
+      "disposition": "replayed",
       "editionId": "d19835f8-4409-4d21-af91-b6adeb0f93d3",
       "draftRevisionId": "cf458aab-1ecf-4d65-a0d5-c6b856c240b4",
       "securePreviewRequest": "/api/documents/a54232c0-0b4f-45b5-ae8e-f5cbd56a77b7/preview?market=turkiye&locale=en&revisionId=cf458aab-1ecf-4d65-a0d5-c6b856c240b4",
@@ -142,7 +142,7 @@
     },
     {
       "market": "europe",
-      "disposition": "staged-draft",
+      "disposition": "replayed",
       "editionId": "f085083e-26b3-463d-bec4-174f5bb58b6b",
       "draftRevisionId": "f9d44653-ac56-4446-a15d-e83667019098",
       "securePreviewRequest": "/api/documents/a54232c0-0b4f-45b5-ae8e-f5cbd56a77b7/preview?market=europe&locale=en&revisionId=f9d44653-ac56-4446-a15d-e83667019098",
