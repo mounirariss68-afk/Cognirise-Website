@@ -5,6 +5,7 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { FocalPoint } from './focalPoint';
 
 export interface PublicMedia {
   id: string;
@@ -21,4 +22,5 @@ export interface PublicMedia {
   caption?: string | null;
   /** @nullable */
   credit?: string | null;
+  focalPoint?: FocalPoint | null;
 }

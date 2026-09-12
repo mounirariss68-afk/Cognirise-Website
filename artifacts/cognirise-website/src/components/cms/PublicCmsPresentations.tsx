@@ -1,7 +1,9 @@
 import { ArrowRight } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
+import { cmsMediaObjectPosition } from "@/lib/cms";
 import type {
   CaseStudyContent,
+  FocalPoint,
   PartnerContent,
   PlatformContent,
   PublicationContent,
@@ -18,6 +20,7 @@ export type DeliveredCmsMedia = {
   credit?: string | null;
   width?: number | null;
   height?: number | null;
+  focalPoint?: FocalPoint | null;
 };
 
 type RichBlock = {
@@ -37,9 +40,11 @@ function mediaAlt(media: DeliveredCmsMedia | undefined, fallback: string) {
 export function CmsRichText({
   blocks,
   className = "space-y-5",
+  leadFirstParagraph = false,
 }: {
   blocks: RichBlock[] | undefined;
   className?: string;
+  leadFirstParagraph?: boolean;
 }) {
   if (!blocks?.length) return null;
   return (
@@ -66,7 +71,7 @@ export function CmsRichText({
             </blockquote>
           );
         }
-        return <p key={index}>{block.text}</p>;
+        return <p className={leadFirstParagraph && index === 0 ? "lead" : undefined} key={index}>{block.text}</p>;
       })}
     </div>
   );
@@ -133,7 +138,7 @@ export function PlatformPresentation({ title, content, summary, heroMedia, previ
   return (
     <main className="overflow-hidden" data-preview={preview ? "draft" : undefined}>
       <section className="relative bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12 md:py-32">
-        {heroMedia && <img src={heroMedia.url} alt={content.heroMedia?.altText || heroMedia.altText || ""} className="absolute inset-0 h-full w-full object-cover opacity-25" />}
+        {heroMedia && <img src={heroMedia.url} alt={content.heroMedia?.altText || heroMedia.altText || ""} className="absolute inset-0 h-full w-full object-cover opacity-25" style={{ objectPosition: cmsMediaObjectPosition(heroMedia) }} />}
         <div className="relative mx-auto max-w-[1200px]">
           <p className="text-xs font-bold uppercase tracking-[.2em] text-white/60">{content.category}</p>
           <h1 className="mt-7 max-w-[900px] text-5xl font-semibold leading-[.94] md:text-7xl">{title}</h1>
@@ -144,12 +149,9 @@ export function PlatformPresentation({ title, content, summary, heroMedia, previ
         {content.sections.map((section) => (
           <article key={section.heading} className="grid gap-8 border-t border-foreground pt-8 md:grid-cols-[.75fr_1.25fr]">
             <h2 className="text-3xl font-semibold">{section.heading}</h2>
-            <div className="prose max-w-none">{(Array.isArray(section.body) ? section.body : []).map((block, index) => {
-              if (block.type === "heading") return <h3 key={index}>{block.text}</h3>;
-              if (block.type === "list") return <ul key={index}>{block.items.map((item) => <li key={item}>{item}</li>)}</ul>;
-              if (block.type === "quote") return <blockquote key={index}>{block.text}</blockquote>;
-              return <p key={index}>{block.text}</p>;
-            })}</div>
+            <div className="prose max-w-none">
+              <CmsRichText blocks={Array.isArray(section.body) ? section.body : undefined} />
+            </div>
           </article>
         ))}
         {(content.capabilities.length > 0 || content.differentiators.length > 0) && (
@@ -185,12 +187,10 @@ function PublicationBody({ content, pdfMedia }: { content: PublicationContent; p
   }
   return (
     <>
-      {(Array.isArray(content.body) ? content.body : []).map((block, index) => {
-        if (block.type === "heading") return <h3 key={index}>{block.text}</h3>;
-        if (block.type === "list") return <ul key={index}>{block.items.map((item) => <li key={item}>{item}</li>)}</ul>;
-        if (block.type === "quote") return <blockquote key={index}>{block.text}</blockquote>;
-        return <p className={index === 0 ? "lead" : undefined} key={index}>{block.text}</p>;
-      })}
+      <CmsRichText
+        blocks={Array.isArray(content.body) ? content.body : undefined}
+        leadFirstParagraph
+      />
     </>
   );
 }
@@ -236,7 +236,7 @@ export function CaseStudyPreviewPresentation({ item, preview = false }: { item: 
       <p className="text-xs font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">{item.sector} · {item.deliveryStage}</p>
       <h1 className="mt-5 max-w-[950px] text-5xl font-semibold leading-none md:text-7xl">{item.title}</h1>
       <p className="mt-7 max-w-[750px] text-xl leading-8 text-muted-foreground">{item.summary || item.mandate}</p>
-      {item.media?.[0] && <figure className="mt-12 overflow-hidden"><img src={item.media[0].url} alt={mediaAlt(item.media[0], item.title)} className="max-h-[520px] w-full object-cover" loading={preview ? "eager" : "lazy"} /><figcaption className="mt-2 text-xs text-muted-foreground">{item.media[0].caption}</figcaption></figure>}
+      {item.media?.[0] && <figure className="mt-12 overflow-hidden"><img src={item.media[0].url} alt={mediaAlt(item.media[0], item.title)} className="max-h-[520px] w-full object-cover" style={{ objectPosition: cmsMediaObjectPosition(item.media[0]) }} loading={preview ? "eager" : "lazy"} /><figcaption className="mt-2 text-xs text-muted-foreground">{item.media[0].caption}</figcaption></figure>}
       <div className="mt-14 grid gap-10 border-t border-border pt-8 md:grid-cols-2">
         <section><h2 className="text-xs font-bold uppercase tracking-[.18em]">Mandate</h2><p className="mt-4 leading-8">{item.mandate}</p></section>
         <section><h2 className="text-xs font-bold uppercase tracking-[.18em]">Qualified impact</h2><p className="mt-4 leading-8">{item.impactStatement}</p></section>
@@ -258,7 +258,7 @@ export function SiteConfigurationPresentation({ content, media, preview = false 
     <main className="mx-auto max-w-[1200px] px-6 py-16 md:px-12" data-preview={preview ? "draft" : undefined}>
       <p className="text-xs font-bold uppercase tracking-[.18em] text-[hsl(var(--brand-pink))]">Site configuration · {content.page}</p>
       <h1 className="mt-5 text-5xl font-semibold">Hero film</h1>
-      {poster && <figure className="mt-10"><img src={poster.url} alt={mediaAlt(poster, `${content.page} hero poster`)} className="max-h-[600px] w-full object-cover" loading="eager" /><figcaption className="mt-2 text-xs text-muted-foreground">{poster.caption}</figcaption></figure>}
+      {poster && <figure className="mt-10"><img src={poster.url} alt={mediaAlt(poster, `${content.page} hero poster`)} className="max-h-[600px] w-full object-cover" style={{ objectPosition: cmsMediaObjectPosition(poster) }} loading="eager" /><figcaption className="mt-2 text-xs text-muted-foreground">{poster.caption}</figcaption></figure>}
       {sources.length > 0 && <video className="mt-10 max-h-[600px] w-full bg-black" controls poster={poster?.url} preload="metadata"><span>Your browser cannot play this hero film.</span>{sources.map((source) => <source key={`${source.id}:${source.versionId}`} src={source.url} type={source.mimeType || undefined} />)}</video>}
       <dl className="mt-10 grid gap-4 border-t border-border pt-6 sm:grid-cols-2">
         {content.hero.sources.map((source, index) => <div key={`${source.mediaId}:${source.mediaVersionId}`}><dt className="text-xs font-bold uppercase tracking-[.15em]">{source.mimeType}</dt><dd className="mt-2 break-all text-sm text-muted-foreground">{sources[index]?.url || "Source media unavailable in this revision."}</dd></div>)}

@@ -19,6 +19,7 @@ import {
 } from "../lib/auth";
 import { audit, pageOf } from "../lib/cms";
 import { asyncRoute } from "../lib/http";
+import { mediaVersionReviewStatus } from "../lib/media-version-governance";
 import {
   createMediaUpload,
   assertMediaType,
@@ -135,12 +136,18 @@ export function media(row: Record<string, any>) {
   const metadata = row.metadata && typeof row.metadata === "object" ? row.metadata : {};
   const governed = (key: string, legacy: unknown) =>
     Object.hasOwn(metadata, key) ? metadata[key] : legacy ?? null;
+  const versionReviewStatus = mediaVersionReviewStatus(metadata);
+  const status = versionReviewStatus === "pending"
+    ? "review"
+    : versionReviewStatus === "rejected"
+      ? "rejected"
+      : apiMediaStatus(row.status);
   return {
     id: String(row.id),
     versionId: String(row.version_id),
     filename: row.filename,
     objectPath: row.storage_key,
-    publicUrl: isPreviewableMediaStatus(row.status)
+    publicUrl: versionReviewStatus !== "rejected" && isPreviewableMediaStatus(row.status)
       ? `/api/media/${String(row.id)}/file`
       : null,
     mimeType: row.media_type,
@@ -156,7 +163,7 @@ export function media(row: Record<string, any>) {
     campaignMetadata: row.campaign_metadata ?? null,
     motionMetadata: governed("motionMetadata", row.motion_metadata),
     focalPoint: governed("focalPoint", null),
-    status: apiMediaStatus(row.status),
+    status,
     createdBy: row.uploaded_by_user_id ? String(row.uploaded_by_user_id) : undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -256,7 +263,11 @@ router.post("/media/upload-requests", requireCsrf, requireEditor, asyncRoute(asy
     ? deterministicMediaId(auth.user.id, idempotencyKey)
     : crypto.randomUUID();
   try {
-    const result = await pool.query(
+    const client = await pool.connect();
+    let responseStatus = 201;
+    try {
+      await client.query("BEGIN");
+      const result = await client.query(
       `INSERT INTO cms_media_assets(
           id,storage_key,filename,original_filename,media_type,byte_size,checksum,status,uploaded_by_user_id,
          collection,linkedin_asset_kind,campaign_metadata,motion_metadata)
@@ -268,31 +279,43 @@ router.post("/media/upload-requests", requireCsrf, requireEditor, asyncRoute(asy
         input.linkedinAssetKind ?? null, input.campaignMetadata ?? null,
         input.motionMetadata ?? null,
       ],
-    );
-    let row = result.rows[0] as Record<string, any> | undefined;
-    const created = Boolean(row);
-    if (!row) {
-      const existing = await pool.query("SELECT * FROM cms_media_assets WHERE id=$1", [id]);
-      row = existing.rows[0];
+      );
+      let row = result.rows[0] as Record<string, any> | undefined;
+      const created = Boolean(row);
+      if (!row) {
+        const existing = await client.query("SELECT * FROM cms_media_assets WHERE id=$1 FOR UPDATE", [id]);
+        row = existing.rows[0];
+      }
+      if (!row || (idempotencyKey && !uploadRequestMatches(row, input))) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "Idempotency-Key is already associated with a different upload request." });
+        return;
+      }
+      if (row.status !== "pending") {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "This upload request is already complete and cannot be restarted." });
+        return;
+      }
+      const upload = await mediaStorage.createUpload(id, input.mimeType, input.checksum);
+      if (created || row.storage_key === `pending:${id}`) {
+        await client.query("UPDATE cms_media_assets SET storage_key=$2 WHERE id=$1 AND status='pending'", [id, upload.objectPath]);
+        row.storage_key = upload.objectPath;
+        await audit(auth, "media.upload_requested", "media", id, {}, client);
+      } else if (row.storage_key !== upload.objectPath) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "This upload request has an invalid staging path." });
+        return;
+      }
+      responseStatus = created ? 201 : 200;
+      const response = uploadResponse(row, upload);
+      await client.query("COMMIT");
+      res.status(responseStatus).json(response);
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
     }
-    if (!row || (idempotencyKey && !uploadRequestMatches(row, input))) {
-      res.status(409).json({ error: "Idempotency-Key is already associated with a different upload request." });
-      return;
-    }
-    if (row.status !== "pending") {
-      res.status(409).json({ error: "This upload request is already complete and cannot be restarted." });
-      return;
-    }
-    const upload = await mediaStorage.createUpload(id, input.mimeType, input.checksum);
-    if (created || row.storage_key === `pending:${id}`) {
-      await pool.query("UPDATE cms_media_assets SET storage_key=$2 WHERE id=$1 AND status='pending'", [id, upload.objectPath]);
-      row.storage_key = upload.objectPath;
-      await audit(auth, "media.upload_requested", "media", id);
-    } else if (row.storage_key !== upload.objectPath) {
-      res.status(409).json({ error: "This upload request has an invalid staging path." });
-      return;
-    }
-    res.status(created ? 201 : 200).json(uploadResponse(row, upload));
   } catch (error) {
     req.log.error({ err: error }, "Media upload request failed");
     res.status(503).json({ error: "Media storage is temporarily unavailable." });
@@ -362,19 +385,19 @@ async function deliverProtectedMedia(req: Request, res: Response, attachment: bo
       result.rows[0].storage_key,
       range ?? undefined,
     );
-    const originalListeners = new Map(
-      stream.eventNames().map((event) => [event, stream.listeners(event)]),
-    );
+     const originalListeners = new Map(
+       stream.eventNames().map((event) => [event, stream.listeners(event)]),
+     );
     try {
       await pipeline(stream, res);
-    } finally {
-      for (const event of stream.eventNames()) {
-        const retained = originalListeners.get(event) ?? [];
-        for (const listener of stream.listeners(event)) {
-          if (!retained.includes(listener)) stream.removeListener(event, listener);
-        }
-      }
-    }
+     } finally {
+       for (const event of stream.eventNames()) {
+         const retained = originalListeners.get(event) ?? [];
+         for (const listener of stream.listeners(event)) {
+           if (!retained.includes(listener)) stream.removeListener(event, listener);
+         }
+       }
+     }
   } catch {
     if (!res.headersSent) res.status(404).json({ error: "Media object not found." });
     else res.destroy();
@@ -428,12 +451,34 @@ router.post(
         RETURNING id`,
         [mediaId, nextStatus],
       );
+      let versionReview = false;
       if (!result.rowCount) {
-        await client.query("ROLLBACK");
-        res.status(409).json({ error: "Only an awaiting-review asset can be reviewed." });
-        return;
+        const versionResult = await client.query(
+          `UPDATE cms_media_assets
+              SET updated_at=now()
+            WHERE id=$1 AND status IN ('active','ready')
+              AND (
+                (SELECT latest.metadata->>'rightsStatus'
+                   FROM cms_media_versions latest
+                  WHERE latest.asset_id=cms_media_assets.id
+                  ORDER BY latest.version_number DESC LIMIT 1)='needs-review'
+                OR
+                (SELECT latest.metadata->>'accessibilityStatus'
+                   FROM cms_media_versions latest
+                  WHERE latest.asset_id=cms_media_assets.id
+                  ORDER BY latest.version_number DESC LIMIT 1)='needs-review'
+              )
+           RETURNING id`,
+          [mediaId],
+        );
+        if (!versionResult.rowCount) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "Only an awaiting-review asset or metadata version can be reviewed." });
+          return;
+        }
+        versionReview = true;
       }
-      if (parsed.data.decision === "approve") {
+      if (parsed.data.decision === "approve" || versionReview) {
         const latest = await client.query(
           `SELECT metadata FROM cms_media_versions
              WHERE asset_id=$1 ORDER BY version_number DESC LIMIT 1`,
@@ -445,8 +490,8 @@ router.post(
           : {};
         const clearanceMetadata = {
           ...priorMetadata,
-          rightsStatus: "approved-use",
-          accessibilityStatus: "approved",
+          rightsStatus: parsed.data.decision === "approve" ? "approved-use" : "rejected",
+          accessibilityStatus: parsed.data.decision === "approve" ? "approved" : "rejected",
           sourceReview: {
             sourceRightsApproved,
             accessibilityApproved,
@@ -459,6 +504,8 @@ router.post(
         );
         if (!appended.rowCount) throw new Error("Media has no source version to snapshot.");
       }
+      const reviewed = await client.query(`${selectMedia} WHERE a.id=$1`, [mediaId]);
+      const reviewedAsset = media(reviewed.rows[0]);
       await client.query(
         `INSERT INTO cms_audit_events
           (actor_user_id,actor_label,action,target_type,target_id,metadata)
@@ -469,17 +516,17 @@ router.post(
           action,
           mediaId,
           {
-            previousStatus: "pending-review",
-            nextStatus,
+            previousStatus: versionReview ? "active" : "pending-review",
+            nextStatus: versionReview ? "active" : nextStatus,
+            mediaVersionId: reviewedAsset.versionId,
             ...(parsed.data.decision === "approve"
               ? { sourceRightsApproved, accessibilityApproved }
               : {}),
           },
         ],
       );
-      const reviewed = await client.query(`${selectMedia} WHERE a.id=$1`, [mediaId]);
       await client.query("COMMIT");
-      res.json(media(reviewed.rows[0]));
+      res.json(reviewedAsset);
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
@@ -500,6 +547,44 @@ router.get(
       return;
     }
     res.json(media(result.rows[0]));
+  }),
+);
+
+router.get(
+  "/media/:mediaId/reference-impact",
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `SELECT r.id reference_id,r.document_id,r.media_version_id,r.field_path,r.created_at,
+              d.kind document_kind,d.title document_title,d.canonical_slug,d.status document_status
+         FROM cms_media_references r
+         JOIN cms_documents d ON d.id=r.document_id
+        WHERE r.asset_id=$1
+        ORDER BY d.title,r.field_path,r.id`,
+      [req.params.mediaId],
+    );
+    if (!result.rowCount) {
+      const asset = await pool.query("SELECT id FROM cms_media_assets WHERE id=$1", [req.params.mediaId]);
+      if (!asset.rowCount) {
+        res.status(404).json({ error: "Media asset not found." });
+        return;
+      }
+    }
+    const references = result.rows.map((row) => ({
+      referenceId: String(row.reference_id),
+      documentId: String(row.document_id),
+      mediaVersionId: row.media_version_id ? String(row.media_version_id) : null,
+      fieldPath: row.field_path,
+      documentKind: row.document_kind,
+      documentTitle: row.document_title,
+      canonicalSlug: row.canonical_slug,
+      documentStatus: row.document_status,
+      createdAt: row.created_at,
+    }));
+    res.json({
+      mediaId: String(req.params.mediaId),
+      referenceCount: references.length,
+      references,
+    });
   }),
 );
 
@@ -559,22 +644,22 @@ router.patch(
       }
       const updated = await client.query(
         `UPDATE cms_media_assets SET filename=COALESCE($2,filename),
-         alt_text=CASE WHEN $3 THEN $4 ELSE alt_text END,
-          credit=CASE WHEN $5 THEN $6 ELSE credit END,
-          collection=COALESCE($7,collection),
-          linkedin_asset_kind=CASE WHEN $7='website' THEN NULL WHEN $8 THEN $9 ELSE linkedin_asset_kind END,
-          campaign_metadata=CASE WHEN $10 THEN $11 ELSE campaign_metadata END,
-          motion_metadata=CASE WHEN $12 THEN $13 ELSE motion_metadata END,
+          collection=COALESCE($3,collection),
+          linkedin_asset_kind=CASE WHEN $3='website' THEN NULL WHEN $4 THEN $5 ELSE linkedin_asset_kind END,
+          campaign_metadata=CASE WHEN $6 THEN $7 ELSE campaign_metadata END,
+          motion_metadata=CASE WHEN $8 THEN $9 ELSE motion_metadata END,
           updated_at=now()
          WHERE id=$1 RETURNING id`,
         [
-          req.params.mediaId, input.filename ?? null,
-          Object.hasOwn(input, "altText"), input.altText ?? null,
-          Object.hasOwn(input, "credit"), input.credit ?? null,
+          req.params.mediaId,
+          input.filename ?? null,
           input.collection ?? null,
-          Object.hasOwn(input, "linkedinAssetKind"), input.linkedinAssetKind ?? null,
-          Object.hasOwn(input, "campaignMetadata"), input.campaignMetadata ?? null,
-          Object.hasOwn(input, "motionMetadata"), input.motionMetadata ?? null,
+          Object.hasOwn(input, "linkedinAssetKind"),
+          input.linkedinAssetKind ?? null,
+          Object.hasOwn(input, "campaignMetadata"),
+          input.campaignMetadata ?? null,
+          Object.hasOwn(input, "motionMetadata"),
+          input.motionMetadata ?? null,
         ],
       );
       const governedChanged = ["caption", "altText", "credit", "motionMetadata", "focalPoint"]
@@ -587,6 +672,9 @@ router.patch(
           credit: effectiveValue("credit", "credit", current.credit),
           motionMetadata: effectiveValue("motionMetadata", "motionMetadata", current.motion_metadata),
           focalPoint: effectiveValue("focalPoint", "focalPoint", null),
+          rightsStatus: "needs-review",
+          accessibilityStatus: "needs-review",
+          sourceReview: null,
         };
         const appended = await client.query(
           appendMediaMetadataVersionSql,
@@ -596,6 +684,14 @@ router.patch(
       }
       const selected = await client.query(`${selectMedia} WHERE a.id=$1`, [req.params.mediaId]);
       response = media(selected.rows[0] ?? updated.rows[0]);
+      await audit(
+        res.locals.auth as AuthContext,
+        "media.updated",
+        "media",
+        String(req.params.mediaId),
+        { mediaVersionId: response.versionId },
+        client,
+      );
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK");
@@ -603,7 +699,6 @@ router.patch(
     } finally {
       client.release();
     }
-    await audit(res.locals.auth as AuthContext, "media.updated", "media", String(req.params.mediaId));
     res.json(response);
   }),
 );
@@ -613,17 +708,28 @@ router.delete(
   requireCsrf,
   requirePublisher,
   asyncRoute(async (req, res) => {
-    const result = await pool.query(
-      `DELETE FROM cms_media_assets a WHERE a.id=$1 AND NOT EXISTS(
-       SELECT 1 FROM cms_media_references r WHERE r.asset_id=a.id) RETURNING id`,
-      [req.params.mediaId],
-    );
-    if (!result.rowCount) {
-      res.status(409).json({ error: "Media is in use or does not exist." });
-      return;
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const result = await client.query(
+        `DELETE FROM cms_media_assets a WHERE a.id=$1 AND NOT EXISTS(
+         SELECT 1 FROM cms_media_references r WHERE r.asset_id=a.id) RETURNING id`,
+        [req.params.mediaId],
+      );
+      if (!result.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "Media is in use or does not exist." });
+        return;
+      }
+      await audit(res.locals.auth as AuthContext, "media.deleted", "media", String(req.params.mediaId), {}, client);
+      await client.query("COMMIT");
+      res.status(204).end();
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
     }
-    await audit(res.locals.auth as AuthContext, "media.deleted", "media", String(req.params.mediaId));
-    res.status(204).end();
   }),
 );
 
@@ -747,14 +853,19 @@ router.post("/media/:mediaId/finalize", requireCsrf, requireEditor, asyncRoute(a
           { ...metadata, rendition: "webp-1600" }],
       );
     }
+    const finalized = await client.query(`${selectMedia} WHERE a.id=$1`, [req.params.mediaId]);
+    response = media(finalized.rows[0] ?? result.rows[0]);
     await client.query(
       `INSERT INTO cms_audit_events
         (actor_user_id,actor_label,action,target_type,target_id,metadata)
        VALUES ($1,$2,'media.finalized','media',$3,$4)`,
-      [auth.user.id, auth.user.email, String(req.params.mediaId), { receipt }],
+      [
+        auth.user.id,
+        auth.user.email,
+        String(req.params.mediaId),
+        { receipt, mediaVersionId: response.versionId },
+      ],
     );
-    const finalized = await client.query(`${selectMedia} WHERE a.id=$1`, [req.params.mediaId]);
-    response = media(finalized.rows[0] ?? result.rows[0]);
     cleanupPath = input.objectPath;
     await client.query("COMMIT");
   } catch (error) {

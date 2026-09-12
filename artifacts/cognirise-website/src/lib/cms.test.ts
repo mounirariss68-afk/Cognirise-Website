@@ -7,6 +7,7 @@ import {
   governedLandingDelivery,
   publicContactConfigurationParams,
   resolveCmsMedia,
+  cmsMediaObjectPosition,
   resolvePublishedContactEmail,
   resolvePublishedHeroFilm,
   type HeroFilmSources,
@@ -74,6 +75,13 @@ test("structured media never degrades to legacy or a different delivered version
   }, "legacy-media");
 
   assert.equal(delivered, undefined);
+});
+
+test("immutable public and preview media focal metadata becomes a bounded crop position", () => {
+  assert.equal(cmsMediaObjectPosition({ focalPoint: { x: 0.2, y: 0.8 } }), "20% 80%");
+  assert.equal(cmsMediaObjectPosition({ focalPoint: { x: -1, y: 2 } }), "0% 100%");
+  assert.equal(cmsMediaObjectPosition({ focalPoint: null }), undefined);
+  assert.equal(cmsMediaObjectPosition(undefined), undefined);
 });
 
 test("compiled industry imagery remains available when no published hero is present", () => {

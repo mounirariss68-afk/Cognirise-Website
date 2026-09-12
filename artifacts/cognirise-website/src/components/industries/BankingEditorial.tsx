@@ -3,7 +3,7 @@ import { Link, useSearch } from "wouter";
 import { ArrowRight, ChevronDown, ExternalLink } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import type { IndustryContent } from "@/content/industries";
-import { resolveCmsMedia, type CmsRecord } from "@/lib/cms";
+import { cmsMediaObjectPosition, resolveCmsMedia, type CmsRecord } from "@/lib/cms";
 import { assetUrl } from "@/lib/assets";
 import type { BankingPov, CmsMediaReferenceContract, IndustryContent as CmsIndustryContent } from "@workspace/api-zod";
 import {
@@ -95,7 +95,7 @@ export function BankingEditorial({ view }: { view: BankingView }) {
           </nav>
         </div>
         <figure className="b-hero-image">
-          <img src={heroUrl} alt={view.heroMedia?.altText || hero?.altText || view.imageAlt} width={1440} height={1080} fetchPriority="high" />
+          <img src={heroUrl} alt={view.heroMedia?.altText || hero?.altText || view.imageAlt} width={1440} height={1080} style={{ objectPosition: cmsMediaObjectPosition(hero) }} fetchPriority="high" />
         </figure>
       </section>
 

@@ -9,6 +9,8 @@ import { AnalyticsBridge } from "@/lib/analytics";
 import { PublicSitemap } from "@/components/PublicSitemap";
 import { GovernedLandingRoute } from "@/components/GovernedLandingRoute";
 import { useMarketStore } from "@/store/market";
+import { ServiceError } from "@/components/error-boundary";
+import { cmsRequestIsUnavailable } from "@/lib/cms";
 
 function RedirectWithSearch({ to }: { to: string }) {
   const search = useSearch();
@@ -114,6 +116,13 @@ export function Router() {
   const unavailable = policy.data?.isConfigured === true
     && policy.data.pages.some((page) => page.path === path && !page.enabled);
   if (policy.isPending) return <Shell><div aria-busy="true" className="min-h-[60vh]" /></Shell>;
+  if (policy.isError && cmsRequestIsUnavailable(policy.error)) {
+    return (
+      <Shell>
+        <ServiceError onRetry={() => { void policy.refetch(); }} />
+      </Shell>
+    );
+  }
   if (policy.isError) return <Shell><NotFound /></Shell>;
   return (
     <Shell>

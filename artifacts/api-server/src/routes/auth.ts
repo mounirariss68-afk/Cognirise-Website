@@ -163,8 +163,18 @@ router.post(
       });
       return;
     }
-    await auditLogin(parsed.data.email, row.id, "success");
-    await pool.query("UPDATE cms_users SET last_login_at=now() WHERE id=$1", [row.id]);
+    const loginClient = await pool.connect();
+    try {
+      await loginClient.query("BEGIN");
+      await loginClient.query("UPDATE cms_users SET last_login_at=now() WHERE id=$1", [row.id]);
+      await auditLogin(parsed.data.email, row.id, "success", undefined, loginClient);
+      await loginClient.query("COMMIT");
+    } catch (error) {
+      await loginClient.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      loginClient.release();
+    }
     const created = await createSession(String(row.id), false, req, res);
     res.json({
       authenticated: true,
@@ -203,10 +213,20 @@ router.post(
       res.status(401).json(AUTH_ERROR);
       return;
     }
-    await auditLogin("", consumed.userId, "success", "mfa");
-    await pool.query("UPDATE cms_users SET last_login_at=now() WHERE id=$1", [
-      consumed.userId,
-    ]);
+    const loginClient = await pool.connect();
+    try {
+      await loginClient.query("BEGIN");
+      await loginClient.query("UPDATE cms_users SET last_login_at=now() WHERE id=$1", [
+        consumed.userId,
+      ]);
+      await auditLogin("", consumed.userId, "success", "mfa", loginClient);
+      await loginClient.query("COMMIT");
+    } catch (error) {
+      await loginClient.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      loginClient.release();
+    }
     const created = await createSession(consumed.userId, true, req, res);
     res.json({
       authenticated: true,
@@ -296,6 +316,7 @@ router.post(
         "UPDATE cms_sessions SET mfa_satisfied_at=now() WHERE id=$1",
         [auth.id],
       );
+      await auditAuth(auth.user.id, "auth.mfa_enrolled", auth.user.id, client);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK");
@@ -305,7 +326,6 @@ router.post(
     }
     enrollments.delete(auth.tokenHash);
     const session = { ...auth, mfaVerified: true, user: { ...auth.user, mfaEnabled: true } };
-    await auditAuth(auth.user.id, "auth.mfa_enrolled");
     res.json({
       authenticated: true,
       session: publicSession(session),
@@ -359,6 +379,7 @@ router.post(
           [userId],
         );
         await client.query("UPDATE cms_users SET last_login_at=now() WHERE id=$1", [userId]);
+        await auditAuth(String(userId), "auth.recovery_used", String(userId), client);
         recovered = true;
       }
       await client.query("COMMIT");
@@ -377,7 +398,6 @@ router.post(
     // Recovery deliberately creates an unenrolled session. Privileged routes
     // remain blocked until /auth/mfa/setup and /auth/mfa/confirm complete.
     const created = await createSession(String(userId), false, req, res);
-    await auditAuth(String(userId), "auth.recovery_used");
     res.json({ authenticated: true, session: publicSession(created.session), mfaChallenge: null, csrfToken: created.csrfToken });
   }),
 );
@@ -401,15 +421,25 @@ router.post(
       res.status(401).json(AUTH_ERROR);
       return;
     }
-    await pool.query(
-      `UPDATE cms_password_credentials SET password_hash=$2,algorithm='scrypt',
-       password_version=password_version+1,must_rotate=false,temporary_expires_at=NULL,changed_at=now()
-       WHERE user_id=$1`,
-      [auth.user.id, await hashPassword(parsed.data.newPassword)],
-    );
-    await pool.query("UPDATE cms_users SET status='active',updated_at=now() WHERE id=$1", [auth.user.id]);
-    await pool.query("UPDATE cms_sessions SET revoked_at=now() WHERE user_id=$1 AND id<>$2 AND revoked_at IS NULL", [auth.user.id,auth.id]);
-    await auditAuth(auth.user.id, "auth.password_changed");
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(
+        `UPDATE cms_password_credentials SET password_hash=$2,algorithm='scrypt',
+         password_version=password_version+1,must_rotate=false,temporary_expires_at=NULL,changed_at=now()
+         WHERE user_id=$1`,
+        [auth.user.id, await hashPassword(parsed.data.newPassword)],
+      );
+      await client.query("UPDATE cms_users SET status='active',updated_at=now() WHERE id=$1", [auth.user.id]);
+      await client.query("UPDATE cms_sessions SET revoked_at=now() WHERE user_id=$1 AND id<>$2 AND revoked_at IS NULL", [auth.user.id,auth.id]);
+      await auditAuth(auth.user.id, "auth.password_changed", auth.user.id, client);
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
     res.status(204).end();
   }),
 );
@@ -462,6 +492,7 @@ router.post(
           "UPDATE cms_sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL",
           [row.user_id],
         );
+        await auditAuth(String(row.user_id), `auth.${row.purpose}_consumed`, String(row.user_id), client);
         consumed = { userId: String(row.user_id), purpose: row.purpose };
       }
       await client.query("COMMIT");
@@ -475,21 +506,31 @@ router.post(
       res.status(410).json({ error: "This access link is invalid, expired, or has already been used." });
       return;
     }
-    await auditAuth(consumed.userId, `auth.${consumed.purpose}_consumed`);
     res.status(204).end();
   }),
 );
 
-async function auditAuth(actorId: string, action: string, targetId = actorId): Promise<void> {
-  await pool.query(
+async function auditAuth(
+  actorId: string,
+  action: string,
+  targetId = actorId,
+  executor: { query: (sql: string, values?: unknown[]) => Promise<any> } = pool,
+): Promise<void> {
+  await executor.query(
     `INSERT INTO cms_audit_events(actor_user_id,actor_label,action,target_type,target_id)
      SELECT id,email,$2,'user',$3 FROM cms_users WHERE id=$1`,
     [actorId, action, targetId],
   );
 }
 
-async function auditLogin(email: string, userId: string | null, outcome: string, failureCode?: string) {
-  await pool.query(
+async function auditLogin(
+  email: string,
+  userId: string | null,
+  outcome: string,
+  failureCode?: string,
+  executor: { query: (sql: string, values?: unknown[]) => Promise<any> } = pool,
+) {
+  await executor.query(
     `INSERT INTO cms_login_attempts(user_id,email_digest,ip_digest,outcome,failure_code,metadata)
      VALUES ($1,$2,NULL,$3,$4,'{}'::jsonb)`,
     [userId, hashToken(email.toLowerCase() || "unknown"), outcome, failureCode ?? null],
@@ -526,7 +567,18 @@ router.post(
   requireCsrf,
   asyncRoute(async (_req, res) => {
     const auth = res.locals.auth as AuthContext;
-    await pool.query("UPDATE cms_sessions SET revoked_at=now() WHERE id=$1", [auth.id]);
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("UPDATE cms_sessions SET revoked_at=now() WHERE id=$1", [auth.id]);
+      await auditAuth(auth.user.id, "auth.session_revoked", auth.id, client);
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
     clearSessionCookies(res);
     res.status(204).end();
   }),

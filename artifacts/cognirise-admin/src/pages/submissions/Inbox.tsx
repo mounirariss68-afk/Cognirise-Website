@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
+  exportSubmissions as exportSubmissionsRequest,
   getListSubmissionsQueryKey,
   getListUsersQueryKey,
   SubmissionKind,
+  type SubmissionExportInput,
   SubmissionStatus,
   useExportSubmissions,
   useListSubmissions,
@@ -24,6 +26,50 @@ import { useToast } from "@/hooks/use-toast";
 
 const PAGE_SIZE = 20;
 const STATUSES = Object.values(SubmissionStatus) as SubmissionStatus[];
+
+/** Keep export filters in lockstep with the list filters. */
+export function buildSubmissionExportFilters(
+  search: string,
+  status?: SubmissionStatus,
+  kind?: SubmissionKind,
+): SubmissionExportInput {
+  return {
+    format: "csv",
+    search: search.trim() || undefined,
+    status,
+    kind,
+  };
+}
+
+function normalizeExportFilters(filters: SubmissionExportInput) {
+  return {
+    format: filters.format,
+    search: filters.search?.trim() || undefined,
+    status: filters.status,
+    kind: filters.kind,
+    market: filters.market,
+    from: filters.from,
+    to: filters.to,
+  };
+}
+
+export function buildSubmissionExportIdempotencyScope(filters: SubmissionExportInput) {
+  const normalized = JSON.stringify(normalizeExportFilters(filters));
+  let hash = 2166136261;
+  for (let index = 0; index < normalized.length; index += 1) {
+    hash ^= normalized.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `export-${(hash >>> 0).toString(16)}`;
+}
+
+function createExportAttemptKey(filters: SubmissionExportInput) {
+  const scope = buildSubmissionExportIdempotencyScope(filters);
+  const nonce = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `${scope}-${nonce}`;
+}
 
 function errorMessage(error: unknown, fallback: string) {
   if (!error || typeof error !== "object") return fallback;
@@ -55,13 +101,18 @@ export default function Inbox() {
   const [statusDraft, setStatusDraft] = useState<SubmissionStatus>("new");
   const [ownerDraft, setOwnerDraft] = useState("__unassigned");
   const [notesDraft, setNotesDraft] = useState("");
+  const [ownerSearch, setOwnerSearch] = useState("");
+  const [exportInFlight, setExportInFlight] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const exportAttemptRef = useRef<{ scope: string; key: string } | null>(null);
+  const exportInFlightRef = useRef(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const listParams = {
     page,
     pageSize: PAGE_SIZE,
-    search: search || undefined,
+    search: search.trim() || undefined,
     status,
     kind,
   };
@@ -69,11 +120,19 @@ export default function Inbox() {
     query: { queryKey: getListSubmissionsQueryKey(listParams) },
   });
   const users = useListUsers(
-    { page: 1, pageSize: 100 },
-    { query: { queryKey: getListUsersQueryKey({ page: 1, pageSize: 100 }) } },
+    { page: 1, pageSize: 100, search: ownerSearch.trim() || undefined },
+    { query: { queryKey: getListUsersQueryKey({ page: 1, pageSize: 100, search: ownerSearch.trim() || undefined }) } },
   );
   const updateSubmission = useUpdateSubmission();
-  const exportSubmissions = useExportSubmissions();
+  const exportSubmissions = useExportSubmissions({
+    mutation: {
+      mutationFn: ({ data }) => exportSubmissionsRequest(data, {
+        headers: exportAttemptRef.current
+          ? { "Idempotency-Key": exportAttemptRef.current.key }
+          : undefined,
+      }),
+    },
+  });
 
   const ownerOptions = useMemo(() => {
     const all = users.data?.items ?? [];
@@ -86,10 +145,11 @@ export default function Inbox() {
     setStatusDraft(submission.status);
     setOwnerDraft(submission.ownerId ?? "__unassigned");
     setNotesDraft(submission.notes ?? "");
+    setOwnerSearch("");
   };
 
   const saveSubmission = async () => {
-    if (!selected) return;
+    if (!selected || updateSubmission.isPending) return;
     try {
       const updated = await updateSubmission.mutateAsync({
         submissionId: selected.id,
@@ -115,6 +175,7 @@ export default function Inbox() {
   };
 
   const handleExport = () => {
+    if (exportInFlightRef.current || exportSubmissions.isPending) return;
     if (isLoading || isError) {
       toast({
         title: "Export unavailable",
@@ -123,16 +184,24 @@ export default function Inbox() {
       });
       return;
     }
+    const filters = buildSubmissionExportFilters(search, status, kind);
+    const scope = buildSubmissionExportIdempotencyScope(filters);
+    if (!exportAttemptRef.current || exportAttemptRef.current.scope !== scope) {
+      exportAttemptRef.current = { scope, key: createExportAttemptKey(filters) };
+    }
+    exportInFlightRef.current = true;
+    setExportInFlight(true);
+    setExportError(null);
     exportSubmissions.mutate(
       {
-        data: {
-          format: "csv",
-          status,
-          kind,
-        },
+        data: filters,
       },
       {
         onSuccess: (response) => {
+          exportInFlightRef.current = false;
+          setExportInFlight(false);
+          setExportError(null);
+          exportAttemptRef.current = null;
           if (response.status === "ready" && response.downloadUrl) {
             const anchor = document.createElement("a");
             anchor.href = response.downloadUrl;
@@ -156,9 +225,13 @@ export default function Inbox() {
           }
         },
         onError: (error) => {
+          exportInFlightRef.current = false;
+          setExportInFlight(false);
+          const message = errorMessage(error, "The export result is uncertain. Retry to safely recover the same export.");
+          setExportError(message);
           toast({
             title: "Export failed",
-            description: errorMessage(error, "The CSV could not be prepared."),
+            description: message,
             variant: "destructive",
           });
         },
@@ -187,10 +260,24 @@ export default function Inbox() {
           </h1>
           <p className="text-sm text-muted-foreground font-mono mt-1">Website enquiries and subscriptions</p>
         </div>
-        <Button onClick={handleExport} disabled={exportSubmissions.isPending || isLoading || isError} variant="outline" className="gap-2 font-mono uppercase tracking-wider text-xs" title={isError ? "Fix the list error before exporting" : undefined}>
-          {exportSubmissions.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-          Export CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={handleExport} disabled={exportInFlight || exportSubmissions.isPending || isLoading || isError} variant="outline" className="gap-2 font-mono uppercase tracking-wider text-xs" title={isError ? "Fix the list error before exporting" : undefined}>
+            {exportInFlight || exportSubmissions.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {exportError ? "Retry Export CSV" : "Export CSV"}
+          </Button>
+          {exportError && !exportInFlight && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                exportAttemptRef.current = null;
+                setExportError(null);
+              }}
+            >
+              New export
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="bg-card border border-border rounded-xl shadow-sm flex flex-col flex-1 overflow-hidden">
@@ -305,6 +392,11 @@ export default function Inbox() {
           </DialogHeader>
           {selected && (
             <div className="space-y-5 py-2">
+              {updateSubmission.isPending && (
+                <p className="rounded-md border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground" role="status">
+                  Saving workflow changes… Keep this dialog open until the result is confirmed.
+                </p>
+              )}
               <div className="grid gap-3 rounded-md border border-border bg-muted/20 p-4 text-sm sm:grid-cols-2">
                 <div><p className="text-[10px] font-mono uppercase text-muted-foreground">Contact</p><p>{selected.name || "Unknown"}</p></div>
                 <div><p className="text-[10px] font-mono uppercase text-muted-foreground">Type</p><p>{selected.kind}</p></div>
@@ -325,6 +417,13 @@ export default function Inbox() {
                 </label>
                 <label className="space-y-2">
                   <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Owner</span>
+                  <Input
+                    aria-label="Search submission owners"
+                    placeholder="Search owners…"
+                    value={ownerSearch}
+                    onChange={(event) => setOwnerSearch(event.target.value)}
+                    disabled={updateSubmission.isPending}
+                  />
                   <Select value={ownerDraft} onValueChange={setOwnerDraft} disabled={updateSubmission.isPending || users.isError || users.isLoading}>
                     <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
                     <SelectContent>

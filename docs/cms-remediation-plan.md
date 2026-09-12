@@ -2,7 +2,7 @@
 
 Prepared: 12 September 2026
 
-Status: proposed implementation plan following two review passes. This document is not a claim that the changes have been implemented or that every workflow has passed live testing.
+Status: implementation executed following two review passes. See [execution evidence and verification limits](cms-remediation-execution.md) for delivered coverage and test results. This plan alone is not a claim that every workflow has passed live testing.
 
 ## 1. Purpose and boundaries
 
@@ -135,6 +135,13 @@ Acceptance:
 Tests: foreign-key teardown, interrupted fixture recovery, duplicate cleanup, schema migration replay and backward-compatibility checks.
 
 Primary areas: scripts/cms-owner-browser-fixture.ts; docs/cms-journey-matrix.md; docs/cms-browser-verification.md; lib/db/migrations; lib/db/scripts; scripts/post-merge.sh.
+
+Scoped implementation record: fixture teardown now discovers later browser-created
+documents through exact fixture identities, removes dependent rows before
+authors/users, refuses unsafe references, reports residual IDs, and supports a
+read-only mode-600 preservation baseline under `/tmp`. Focused helper coverage
+and a development baseline capture are complete; authenticated browser
+reverification and before/after comparison remain target-environment checks.
 
 ### W01 — Make persistence, audit and account-link delivery reliable
 
@@ -325,6 +332,16 @@ Acceptance:
 
 Tests: PNG/JPEG/WebP/GIF/PDF and supported video contracts; incorrect MIME/size/hash as applicable; expired upload URL; lost request/finalize response; duplicate replay; reload after PUT; rejected upload status; metadata review; referenced delete rejection; quota failure; cleanup retention.
 
+Scoped implementation record: the server-side staging janitor is now a
+separate dry-run-by-default CLI with explicit apply mode. It lists only the
+staging namespace, requires a storage generation and age proof, locks pending
+asset rows with `SKIP LOCKED`, records a terminal marker before deletion, and
+retains uncertain, active, referenced, immutable, or published state. Adapter
+tests cover dry-run non-mutation, rollback, interruption recovery,
+idempotence, lock contention, and published-version protection. Queue UI
+clear/discard behavior and target-environment operational approval remain
+browser/release verification work.
+
 ### W08 — Give Contact settings a focused, conflict-safe interface
 
 **Addresses:** 11, 26. **Depends on:** W02/W03.
@@ -415,6 +432,16 @@ Acceptance:
 - Production repair claims require actual production verification; development success alone is insufficient.
 
 Tests: fault-injected navigation responses; retry recovery; disabled market; fresh/upgrade schema; migration replay; root/nested admin paths; public lists/details/sitemap parity.
+
+Scoped implementation record: the website now renders a retryable temporary
+service-error state for navigation and authoritative CMS outages while keeping
+classified 404s unavailable; `/api/readyz` checks database, required schema
+columns including the 0027 receipt/outbox delivery tables, and a representative
+public-navigation probe, and startup performs the same non-mutating check.
+Fresh migration/replay coverage, focused readiness/error tests, and a
+development-only idempotent pre-push merge preparation are present.
+Published-host `/admin` redirect and production readiness remain unverified and
+must not be claimed as complete.
 
 ### W12 — Prove complete journeys, usability and release safety
 

@@ -78,6 +78,9 @@ test("protected Education preview projects the complete snapshot for requested a
   assert.match(previewRoute, /validateCmsSnapshotForDelivery\([\s\S]*projectedDocument,[\s\S]*"draft"/);
   assert.match(previewRoute, /url: `\/api\/preview\/\$\{encodeURIComponent/);
   assert.match(previewRoute, /caption: asset\.metadata\?\.caption \?\? null/);
+  assert.match(previewRoute, /Object\.hasOwn\(asset\.metadata \?\? \{\}, "altText"\)/);
+  assert.match(previewRoute, /Object\.hasOwn\(asset\.metadata \?\? \{\}, "credit"\)/);
+  assert.match(previewRoute, /Object\.hasOwn\(asset\.metadata \?\? \{\}, "focalPoint"\)/);
   assert.match(previewRoute, /X-Robots-Tag": "noindex, nofollow, noarchive"/);
 });
 

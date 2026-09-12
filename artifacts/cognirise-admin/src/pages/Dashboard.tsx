@@ -5,6 +5,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, TrendingUp, Users, FileText, Inbox, Activity, Clock, MousePointerClick, Zap, AlertTriangle, Monitor, Share2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 
+export const dashboardMetricCopy = {
+  overdueReview: "In-review drafts older than 7 days (UTC)",
+  valueScanConversion: "Value Scan submissions ÷ CTA clicks",
+} as const;
+
 function KpiCard({ title, value, label, icon: Icon, description, trend, trendValue }: { title: string, value: string | number, label?: string, icon: any, description?: string, trend?: 'up' | 'down' | 'neutral', trendValue?: string }) {
   return (
     <Card className="overflow-hidden bg-card border-border shadow-sm hover:shadow-md transition-shadow duration-200 group">
@@ -96,28 +101,28 @@ export default function Dashboard() {
             Editorial Pipeline
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard 
-              title="Awaiting Review" 
-              value={kpis.contentAwaitingReview} 
-              icon={Clock} 
+            <KpiCard
+              title="Awaiting Review"
+              value={kpis.contentAwaitingReview}
+              icon={Clock}
               description="Submitted drafts pending approval"
             />
-            <KpiCard 
-              title="Overdue Review" 
-              value={kpis.overdueContentReview} 
-              icon={AlertCircle} 
-              description="SLA breached (>48hrs)"
+            <KpiCard
+              title="Overdue Review"
+              value={kpis.overdueContentReview}
+              icon={AlertCircle}
+              description={dashboardMetricCopy.overdueReview}
             />
-            <KpiCard 
-              title="Publish Activity" 
-              value={kpis.publishActivity} 
-              icon={TrendingUp} 
+            <KpiCard
+              title="Publish Activity"
+              value={kpis.publishActivity}
+              icon={TrendingUp}
               description={`Successful pushes in ${period}`}
             />
-            <KpiCard 
-              title="Publish Failures" 
-              value={kpis.publishFailures} 
-              icon={AlertTriangle} 
+            <KpiCard
+              title="Publish Failures"
+              value={kpis.publishFailures}
+              icon={AlertTriangle}
               description={`Errors requiring attention`}
             />
           </div>
@@ -130,26 +135,26 @@ export default function Dashboard() {
             Traffic & Conversion
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard 
-              title="Sessions" 
-              value={analytics.sessions.toLocaleString()} 
-              icon={Users} 
+            <KpiCard
+              title="Sessions"
+              value={analytics.sessions.toLocaleString()}
+              icon={Users}
             />
-            <KpiCard 
-              title="Page Views" 
-              value={analytics.pageViews.toLocaleString()} 
-              icon={Monitor} 
+            <KpiCard
+              title="Page Views"
+              value={analytics.pageViews.toLocaleString()}
+              icon={Monitor}
             />
-            <KpiCard 
-              title="CTA Clicks" 
-              value={analytics.ctaClicks.toLocaleString()} 
-              icon={MousePointerClick} 
+            <KpiCard
+              title="CTA Clicks"
+              value={analytics.ctaClicks.toLocaleString()}
+              icon={MousePointerClick}
             />
-            <KpiCard 
-              title="Conversion Rate" 
-              value={`${(analytics.ctaConversionRate * 100).toFixed(1)}%`} 
-              icon={TrendingUp} 
-              description="Session to CTA engagement"
+            <KpiCard
+              title="Value Scan / CTA Conversion"
+              value={`${(analytics.ctaConversionRate * 100).toFixed(1)}%`}
+              icon={TrendingUp}
+              description={dashboardMetricCopy.valueScanConversion}
             />
           </div>
         </section>

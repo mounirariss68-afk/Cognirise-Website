@@ -6,7 +6,7 @@ import { AgentAuthorityAssessment } from "@/components/AgentAuthorityAssessment"
 import { BrandButton } from "@/components/ui/brand-button";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { assetUrl } from "@/lib/assets";
-import { type CmsRecord, cmsEntryRenderPolicy, contentRecord, resolveCmsMedia, text, useCmsEntry } from "@/lib/cms";
+import { cmsMediaObjectPosition, type CmsRecord, cmsEntryRenderPolicy, contentRecord, resolveCmsMedia, text, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import {
   type HScore,
@@ -466,6 +466,7 @@ export function AgentAuthorityLayout({
                  src={heroImage}
                  alt={framework?.heroMedia?.altText || heroMedia?.altText || "A luminous gateway marking the boundary between proposed and permitted agent authority."}
                  className="h-full w-full object-cover"
+                 style={{ objectPosition: cmsMediaObjectPosition(heroMedia) }}
                  eager
                />
              ) : (

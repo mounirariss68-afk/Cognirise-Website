@@ -281,6 +281,9 @@ router.put("/navigation", authenticate, requireMfa, requireCsrf, requireAdminist
         [parsed.data.market, parsed.data.locale, page.path, page.enabled, nextVersion, auth.user.id],
       );
     }
+    await audit(auth, "navigation.updated", "navigation", `${parsed.data.market}:${parsed.data.locale}`, {
+      market: parsed.data.market, locale: parsed.data.locale, version: nextVersion,
+    }, client);
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");
@@ -288,9 +291,6 @@ router.put("/navigation", authenticate, requireMfa, requireCsrf, requireAdminist
   } finally {
     client.release();
   }
-  await audit(auth, "navigation.updated", "navigation", `${parsed.data.market}:${parsed.data.locale}`, {
-    market: parsed.data.market, locale: parsed.data.locale, version: nextVersion,
-  });
   res.json(await settings(parsed.data.market, parsed.data.locale, false, true));
 }));
 
@@ -445,6 +445,7 @@ router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, requir
 router.post("/navigation/review", authenticate, requireMfa, requireCsrf, requireAdministrator, asyncRoute(async (req, res) => {
   const market = typeof req.body?.market === "string" ? req.body.market : "uae";
   const locale = typeof req.body?.locale === "string" ? req.body.locale : "en";
+  const auth = res.locals.auth as AuthContext;
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -462,6 +463,10 @@ router.post("/navigation/review", authenticate, requireMfa, requireCsrf, require
        WHERE market=$1 AND locale=$2 AND workflow_state='draft'`,
       [market, locale],
     );
+    await audit(auth, "navigation.reviewed", "navigation", `${market}:${locale}`, {
+      market,
+      locale,
+    }, client);
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");

@@ -48,6 +48,10 @@ export type QueueItem = {
   objectPath?: string;
   /** Durable boundary: a true value means the file must never be PUT again. */
   putCompleted?: boolean;
+  /** Local lifecycle timestamps used only for bounded queue retention. */
+  queuedAt?: number;
+  completedAt?: number;
+  failedAt?: number;
 };
 
 export type UploadResponse = {
@@ -88,7 +92,11 @@ export type QueueEngineOptions = {
   onChange?: (queue: QueueItem[], persistenceError?: string) => void;
   onError?: (item: QueueItem | undefined, message: string) => void;
   onCompleted?: (item: QueueItem) => void | Promise<void>;
+  now?: () => number;
 };
+
+export const MAX_QUEUE_ITEMS = 100;
+export const QUEUE_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 
 const workingStatuses: QueueItemStatus[] = ["requesting", "uploading", "finalizing"];
 const finalizedMediaStatuses = new Set(["review", "ready", "rejected"]);
@@ -104,8 +112,24 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "An error occurred during upload";
 }
 
+function isDisposableLocalItem(item: QueueItem): boolean {
+  return item.status === "completed" || (item.status === "error" && !item.started);
+}
+
+function boundedQueueItems(items: QueueItem[]): QueueItem[] {
+  if (items.length <= MAX_QUEUE_ITEMS) return items;
+  const disposable = items.filter(isDisposableLocalItem);
+  const protectedItems = items.filter((item) => !isDisposableLocalItem(item));
+  const terminalCapacity = Math.max(0, MAX_QUEUE_ITEMS - protectedItems.length);
+  const terminalToKeep = terminalCapacity ? disposable.slice(-terminalCapacity) : [];
+  const keepIds = new Set(terminalToKeep.map((item) => item.id));
+  // Never silently evict drafts, working uploads, or started failures. Only
+  // finalized rows and pre-start validation failures are bounded.
+  return items.filter((item) => !isDisposableLocalItem(item) || keepIds.has(item.id));
+}
+
 function persistedItems(items: QueueItem[]): QueueItem[] {
-  return items.map(({ file: _file, ...item }) => {
+  return boundedQueueItems(items).map(({ file: _file, ...item }) => {
     const safe = { ...item } as QueueItem & Record<string, unknown>;
     delete safe.uploadUrl;
     delete safe.method;
@@ -114,11 +138,11 @@ function persistedItems(items: QueueItem[]): QueueItem[] {
   });
 }
 
-function restoreItems(raw: string | null): QueueItem[] {
+function restoreItems(raw: string | null, now = Date.now()): QueueItem[] {
   if (!raw) return [];
   const parsed: unknown = JSON.parse(raw);
   if (!Array.isArray(parsed)) throw new Error("Saved upload queue is invalid");
-  return parsed
+  const restored = parsed
     .filter((item): item is QueueItem => Boolean(
       item && typeof item === "object" && typeof (item as QueueItem).id === "string"
       && typeof (item as QueueItem).filename === "string",
@@ -126,18 +150,30 @@ function restoreItems(raw: string | null): QueueItem[] {
     .map((item) => {
       const restored: QueueItem = { ...item, file: undefined };
       if (restored.status === "completed") {
+        restored.completedAt = restored.completedAt ?? now;
+        if (now - restored.completedAt > QUEUE_RETENTION_MS) return undefined;
         restored.progress = 100;
       } else if (restored.putCompleted && restored.mediaId && restored.objectPath) {
         restored.status = "error";
         restored.progress = 100;
         restored.error = "Finalization was interrupted. Retry to finish without re-uploading.";
+        restored.failedAt = restored.failedAt ?? now;
       } else {
         restored.status = "error";
         restored.progress = 0;
         restored.error = "File missing. Reselect the original file to continue.";
+        restored.failedAt = restored.failedAt ?? now;
       }
       return restored;
-    });
+    })
+    .filter((item): item is QueueItem => Boolean(item))
+    .filter((item) => !(
+      item.status === "error"
+      && !item.started
+      && item.failedAt !== undefined
+      && now - item.failedAt > QUEUE_RETENTION_MS
+    ));
+  return boundedQueueItems(restored);
 }
 
 export class UploadQueueEngine {
@@ -146,11 +182,13 @@ export class UploadQueueEngine {
   private readonly active = new Map<string, Promise<void>>();
   private transferTail: Promise<void> = Promise.resolve();
   private activeCount = 0;
+  private readonly now: () => number;
 
   constructor(private readonly options: QueueEngineOptions) {
+    this.now = options.now ?? Date.now;
     if (options.storage && options.storageKey) {
       try {
-        this.queue = restoreItems(options.storage.getItem(options.storageKey));
+        this.queue = restoreItems(options.storage.getItem(options.storageKey), this.now());
       } catch (error) {
         this.persistenceError = `Unable to read saved upload queue: ${errorMessage(error)}`;
       }
@@ -185,7 +223,20 @@ export class UploadQueueEngine {
     let result: QueueItem | undefined;
     this.queue = this.queue.map((item) => {
       if (item.id !== id) return item;
-      result = { ...item, ...updates };
+      const lifecycle: Partial<QueueItem> = {};
+      if (updates.status && updates.status !== item.status) {
+        if (updates.status === "completed") {
+          lifecycle.completedAt = this.now();
+          lifecycle.failedAt = undefined;
+        } else if (updates.status === "error") {
+          lifecycle.failedAt = this.now();
+          lifecycle.completedAt = undefined;
+        } else {
+          lifecycle.completedAt = undefined;
+          lifecycle.failedAt = undefined;
+        }
+      }
+      result = { ...item, ...updates, ...lifecycle };
       return result;
     });
     this.emit();
@@ -214,6 +265,13 @@ export class UploadQueueEngine {
   ): Promise<void> {
     const additions: QueueItem[] = [];
     for (const file of files) {
+      if (this.queue.length + additions.length >= MAX_QUEUE_ITEMS) {
+        this.options.onError?.(
+          undefined,
+          `Upload queue limit reached (${MAX_QUEUE_ITEMS} items). Clear completed or discard failed entries before adding more files.`,
+        );
+        break;
+      }
       try {
         additions.push({
           id: this.options.dependencies.makeId(),
@@ -236,6 +294,7 @@ export class UploadQueueEngine {
           started: false,
           status: "draft",
           progress: 0,
+          queuedAt: this.now(),
         });
       } catch (error) {
         this.options.onError?.(undefined, `Failed to process ${file.name}: ${errorMessage(error)}`);
@@ -252,6 +311,35 @@ export class UploadQueueEngine {
     if (!item || item.started) return;
     this.queue = this.queue.filter((candidate) => candidate.id !== id);
     this.emit();
+  }
+
+  /**
+   * Local queue cleanup never calls the media API. A completed item already
+   * represents a finalized server asset, so clearing this row cannot delete
+   * or unpublish that asset.
+   */
+  clearCompleted(): number {
+    const count = this.queue.filter((item) => item.status === "completed").length;
+    if (!count) return 0;
+    this.queue = this.queue.filter((item) => item.status !== "completed");
+    this.emit();
+    return count;
+  }
+
+  /**
+   * Remove only terminal local failures. In-flight work is intentionally not
+   * removable, and this operation does not attempt storage cleanup.
+   */
+  discardFailed(id?: string): number {
+    const removable = new Set(
+      this.queue
+        .filter((item) => item.status === "error" && !this.active.has(item.id) && (!id || item.id === id))
+        .map((item) => item.id),
+    );
+    if (!removable.size) return 0;
+    this.queue = this.queue.filter((item) => !removable.has(item.id));
+    this.emit();
+    return removable.size;
   }
 
   async reattachFile(id: string, file: File): Promise<boolean> {

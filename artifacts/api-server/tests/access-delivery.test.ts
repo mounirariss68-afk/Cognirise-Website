@@ -5,7 +5,11 @@ import {
   InviteUserResponse,
   ResetUserPasswordResponse,
 } from "@workspace/api-zod";
-import { accessLink } from "../src/lib/access-delivery.ts";
+import {
+  accessDeliveryCiphertext,
+  accessLink,
+  deliverAccessLink,
+} from "../src/lib/access-delivery.ts";
 import { canAccessAssignedMarket } from "../src/lib/policy.ts";
 
 test("access links carry the one-time token only to the configured admin origin", () => {
@@ -67,4 +71,55 @@ test("empty market assignments deny non-administrators but not administrators", 
   assert.equal(canAccessAssignedMarket("administrator", [], "ksa"), true);
   assert.equal(canAccessAssignedMarket("editor", [], "ksa"), false);
   assert.equal(canAccessAssignedMarket("publisher", ["uae"], "uae"), true);
+});
+
+test("durable delivery payloads do not persist the raw access token", () => {
+  const previousKey = process.env.ACCESS_DELIVERY_ENCRYPTION_KEY;
+  process.env.ACCESS_DELIVERY_ENCRYPTION_KEY = "test-only-delivery-key";
+  try {
+    const token = "opaque-token-that-must-not-be-stored";
+    const ciphertext = accessDeliveryCiphertext({
+      email: "editor@example.com",
+      name: "Editor",
+      purpose: "invitation",
+      token,
+      expiresAt: new Date("2026-09-12T00:00:00Z"),
+    });
+    assert.match(ciphertext, /^v1:/);
+    assert.equal(ciphertext.includes(token), false);
+  } finally {
+    if (previousKey === undefined) delete process.env.ACCESS_DELIVERY_ENCRYPTION_KEY;
+    else process.env.ACCESS_DELIVERY_ENCRYPTION_KEY = previousKey;
+  }
+});
+
+test("provider delivery carries a stable idempotency key", async () => {
+  const previousEndpoint = process.env.ACCESS_EMAIL_WEBHOOK_URL;
+  const previousOrigin = process.env.ADMIN_PUBLIC_URL;
+  process.env.ACCESS_EMAIL_WEBHOOK_URL = "https://mailer.example.test/send";
+  process.env.ADMIN_PUBLIC_URL = "https://cms.example.test/admin/";
+  const previousFetch = globalThis.fetch;
+  let request: Request | undefined;
+  globalThis.fetch = async (input, init) => {
+    request = new Request(input, init);
+    return new Response(null, { status: 202, headers: { "x-message-id": "provider-1" } });
+  };
+  try {
+    const result = await deliverAccessLink({
+      email: "editor@example.com",
+      name: "Editor",
+      purpose: "password-reset",
+      token: "opaque-token",
+      expiresAt: new Date("2026-09-12T00:00:00Z"),
+    }, "delivery-job-1");
+    assert.equal(result.providerMessageId, "provider-1");
+    assert.equal(request?.headers.get("idempotency-key"), "delivery-job-1");
+    assert.match(String(await request?.text()), /password-setup/);
+  } finally {
+    globalThis.fetch = previousFetch;
+    if (previousEndpoint === undefined) delete process.env.ACCESS_EMAIL_WEBHOOK_URL;
+    else process.env.ACCESS_EMAIL_WEBHOOK_URL = previousEndpoint;
+    if (previousOrigin === undefined) delete process.env.ADMIN_PUBLIC_URL;
+    else process.env.ADMIN_PUBLIC_URL = previousOrigin;
+  }
 });

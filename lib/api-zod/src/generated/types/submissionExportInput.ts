@@ -11,6 +11,8 @@ import type { SubmissionStatus } from './submissionStatus';
 
 export interface SubmissionExportInput {
   format: SubmissionExportInputFormat;
+  /** @maxLength 200 */
+  search?: string;
   kind?: SubmissionKind;
   status?: SubmissionStatus;
   market?: string;

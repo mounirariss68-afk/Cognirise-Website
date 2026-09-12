@@ -8308,6 +8308,34 @@ export const DeleteMediaResponse = zod.void()
 
 
 /**
+ * @summary Inspect governed document references to a media asset
+ */
+export const GetMediaReferenceImpactParams = zod.object({
+  "mediaId": zod.coerce.string()
+})
+
+export const getMediaReferenceImpactResponseReferenceCountMin = 0;
+
+
+
+export const GetMediaReferenceImpactResponse = zod.object({
+  "mediaId": zod.string(),
+  "referenceCount": zod.number().int().min(getMediaReferenceImpactResponseReferenceCountMin),
+  "references": zod.array(zod.object({
+  "referenceId": zod.string(),
+  "documentId": zod.string(),
+  "mediaVersionId": zod.string().nullish(),
+  "fieldPath": zod.string(),
+  "documentKind": zod.string(),
+  "documentTitle": zod.string(),
+  "canonicalSlug": zod.string().nullish(),
+  "documentStatus": zod.string(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
  * @summary Download protected preview media with byte-range support
  */
 export const GetMediaFileParams = zod.object({
@@ -8834,8 +8862,23 @@ export const ListSubmissionsResponse = zod.object({
 /**
  * @summary Export filtered submissions
  */
+export const exportSubmissionsHeaderIdempotencyKeyMax = 200;
+
+
+export const exportSubmissionsHeaderIdempotencyKeyRegExp = new RegExp('^[\\x21-\\x7E]+$');
+
+
+export const ExportSubmissionsHeader = zod.object({
+  "Idempotency-Key": zod.string().min(1).max(exportSubmissionsHeaderIdempotencyKeyMax).regex(exportSubmissionsHeaderIdempotencyKeyRegExp).optional().describe('Retry key scoped to the authenticated administrator and exact export filters.')
+})
+
+export const exportSubmissionsBodySearchMax = 200;
+
+
+
 export const ExportSubmissionsBody = zod.object({
   "format": zod.enum(['csv']),
+  "search": zod.string().max(exportSubmissionsBodySearchMax).optional(),
   "kind": zod.enum(['enquiry', 'newsletter']).optional(),
   "status": zod.enum(['new', 'open', 'contacted', 'resolved', 'spam', 'unsubscribed']).optional(),
   "market": zod.string().optional(),
@@ -8954,6 +8997,16 @@ export const ListUsersResponse = zod.object({
 /**
  * @summary Invite a CMS user
  */
+export const inviteUserHeaderIdempotencyKeyMax = 200;
+
+
+export const inviteUserHeaderIdempotencyKeyRegExp = new RegExp('^[\\x21-\\x7E]+$');
+
+
+export const InviteUserHeader = zod.object({
+  "Idempotency-Key": zod.string().min(1).max(inviteUserHeaderIdempotencyKeyMax).regex(inviteUserHeaderIdempotencyKeyRegExp).optional().describe('Retry key scoped to the authenticated administrator and invitation request.')
+})
+
 export const inviteUserBodyNameMin = 2;
 export const inviteUserBodyNameMax = 120;
 
@@ -8996,7 +9049,9 @@ export const InviteUserResponse = zod.object({
 }),
   "delivery": zod.enum(['email']),
   "expiresAt": zod.coerce.date(),
-  "createdAt": zod.coerce.date()
+  "createdAt": zod.coerce.date(),
+  "deliveryId": zod.string().optional(),
+  "deliveryStatus": zod.enum(['pending', 'sent', 'failed', 'expired']).optional()
 })
 
 
@@ -9050,6 +9105,16 @@ export const ResetUserPasswordParams = zod.object({
   "userId": zod.coerce.string()
 })
 
+export const resetUserPasswordHeaderIdempotencyKeyMax = 200;
+
+
+export const resetUserPasswordHeaderIdempotencyKeyRegExp = new RegExp('^[\\x21-\\x7E]+$');
+
+
+export const ResetUserPasswordHeader = zod.object({
+  "Idempotency-Key": zod.string().min(1).max(resetUserPasswordHeaderIdempotencyKeyMax).regex(resetUserPasswordHeaderIdempotencyKeyRegExp).optional().describe('Retry key scoped to the authenticated administrator and target account.')
+})
+
 export const ResetUserPasswordBody = zod.object({
 
 }).describe('Requests secure email delivery to the user\'s registered address.')
@@ -9057,7 +9122,9 @@ export const ResetUserPasswordBody = zod.object({
 export const ResetUserPasswordResponse = zod.object({
   "id": zod.string(),
   "delivery": zod.enum(['email']),
-  "expiresAt": zod.coerce.date()
+  "expiresAt": zod.coerce.date(),
+  "deliveryId": zod.string().optional(),
+  "deliveryStatus": zod.enum(['pending', 'sent', 'failed', 'expired']).optional()
 })
 
 
@@ -9082,6 +9149,62 @@ export const revokeUserSessionsResponseRevokedCountMultipleOf = 1;
 export const RevokeUserSessionsResponse = zod.object({
   "revokedCount": zod.number().min(revokeUserSessionsResponseRevokedCountMin).multipleOf(revokeUserSessionsResponseRevokedCountMultipleOf),
   "revokedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get the durable invitation or reset delivery state
+ */
+export const GetAccessDeliveryStatusParams = zod.object({
+  "userId": zod.coerce.string(),
+  "deliveryId": zod.coerce.string()
+})
+
+export const getAccessDeliveryStatusResponseAttemptsMin = 0;
+
+
+
+export const GetAccessDeliveryStatusResponse = zod.object({
+  "id": zod.string(),
+  "purpose": zod.enum(['invitation', 'password-reset']),
+  "status": zod.enum(['pending', 'sent', 'failed', 'expired']),
+  "attempts": zod.number().int().min(getAccessDeliveryStatusResponseAttemptsMin),
+  "retryAvailable": zod.boolean(),
+  "lastAttemptAt": zod.coerce.date().nullish(),
+  "sentAt": zod.coerce.date().nullish(),
+  "failedAt": zod.coerce.date().nullish(),
+  "expiresAt": zod.coerce.date(),
+  "lastError": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Retry a failed invitation or reset delivery
+ */
+export const RetryAccessDeliveryParams = zod.object({
+  "userId": zod.coerce.string(),
+  "deliveryId": zod.coerce.string()
+})
+
+export const retryAccessDeliveryResponseAttemptsMin = 0;
+
+
+
+export const RetryAccessDeliveryResponse = zod.object({
+  "id": zod.string(),
+  "purpose": zod.enum(['invitation', 'password-reset']),
+  "status": zod.enum(['pending', 'sent', 'failed', 'expired']),
+  "attempts": zod.number().int().min(retryAccessDeliveryResponseAttemptsMin),
+  "retryAvailable": zod.boolean(),
+  "lastAttemptAt": zod.coerce.date().nullish(),
+  "sentAt": zod.coerce.date().nullish(),
+  "failedAt": zod.coerce.date().nullish(),
+  "expiresAt": zod.coerce.date(),
+  "lastError": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
 })
 
 
@@ -9182,6 +9305,12 @@ export const listPublishedContentResponseTwoItemsItemMediaItemWidthMultipleOf = 
 
 export const listPublishedContentResponseTwoItemsItemMediaItemHeightMultipleOf = 1;
 
+export const listPublishedContentResponseTwoItemsItemMediaItemFocalPointOneXMin = 0;
+export const listPublishedContentResponseTwoItemsItemMediaItemFocalPointOneXMax = 1;
+
+export const listPublishedContentResponseTwoItemsItemMediaItemFocalPointOneYMin = 0;
+export const listPublishedContentResponseTwoItemsItemMediaItemFocalPointOneYMax = 1;
+
 export const listPublishedContentResponseTwoItemsItemRevisionMultipleOf = 1;
 
 
@@ -9214,7 +9343,11 @@ export const ListPublishedContentResponse = zod.object({
   "height": zod.number().multipleOf(listPublishedContentResponseTwoItemsItemMediaItemHeightMultipleOf).nullish(),
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
-  "credit": zod.string().nullish()
+  "credit": zod.string().nullish(),
+  "focalPoint": zod.union([zod.object({
+  "x": zod.number().min(listPublishedContentResponseTwoItemsItemMediaItemFocalPointOneXMin).max(listPublishedContentResponseTwoItemsItemMediaItemFocalPointOneXMax),
+  "y": zod.number().min(listPublishedContentResponseTwoItemsItemMediaItemFocalPointOneYMin).max(listPublishedContentResponseTwoItemsItemMediaItemFocalPointOneYMax)
+}),zod.null()]).optional()
 })).optional(),
   "market": zod.string(),
   "locale": zod.string(),
@@ -9251,6 +9384,12 @@ export const getPublishedContentResponseMediaItemWidthMultipleOf = 1;
 
 export const getPublishedContentResponseMediaItemHeightMultipleOf = 1;
 
+export const getPublishedContentResponseMediaItemFocalPointOneXMin = 0;
+export const getPublishedContentResponseMediaItemFocalPointOneXMax = 1;
+
+export const getPublishedContentResponseMediaItemFocalPointOneYMin = 0;
+export const getPublishedContentResponseMediaItemFocalPointOneYMax = 1;
+
 export const getPublishedContentResponseRevisionMultipleOf = 1;
 
 
@@ -9277,7 +9416,11 @@ export const GetPublishedContentResponse = zod.object({
   "height": zod.number().multipleOf(getPublishedContentResponseMediaItemHeightMultipleOf).nullish(),
   "altText": zod.string().nullish(),
   "caption": zod.string().nullish(),
-  "credit": zod.string().nullish()
+  "credit": zod.string().nullish(),
+  "focalPoint": zod.union([zod.object({
+  "x": zod.number().min(getPublishedContentResponseMediaItemFocalPointOneXMin).max(getPublishedContentResponseMediaItemFocalPointOneXMax),
+  "y": zod.number().min(getPublishedContentResponseMediaItemFocalPointOneYMin).max(getPublishedContentResponseMediaItemFocalPointOneYMax)
+}),zod.null()]).optional()
 })).optional(),
   "market": zod.string(),
   "locale": zod.string(),

@@ -6,9 +6,12 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { PasswordResetDelivery } from './passwordResetDelivery';
+import type { PasswordResetDeliveryStatus } from './passwordResetDeliveryStatus';
 
 export interface PasswordReset {
   id: string;
   delivery: PasswordResetDelivery;
   expiresAt: Date;
+  deliveryId?: string;
+  deliveryStatus?: PasswordResetDeliveryStatus;
 }

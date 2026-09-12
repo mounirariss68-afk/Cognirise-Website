@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { cp, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
@@ -9,6 +11,28 @@ import { Pool } from "pg";
 
 const migrationsFolder = fileURLToPath(new URL("../migrations", import.meta.url));
 const journalPath = new URL("../migrations/meta/_journal.json", import.meta.url);
+
+/**
+ * The generated baseline migration names its foreign-key targets in the
+ * public schema. A fresh-schema migration test must keep every FK inside its
+ * isolated schema, otherwise generated landing parity rows point at the
+ * development database's tables. Production remains on the checked-in
+ * migration files and public schema.
+ */
+async function isolatedMigrations(schema: string, context: { after: (callback: () => void | Promise<void>) => void }) {
+  const folder = await mkdtemp(join(tmpdir(), `cms-migrations-${schema}-`));
+  await cp(migrationsFolder, folder, { recursive: true });
+  const entries = await readdir(folder, { recursive: true, withFileTypes: true });
+  await Promise.all(entries
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".sql"))
+    .map(async (entry) => {
+      const filePath = join(entry.parentPath ?? entry.path, entry.name);
+      const sql = await readFile(filePath, "utf8");
+      await writeFile(filePath, sql.replaceAll('"public".', ""), "utf8");
+    }));
+  context.after(() => rm(folder, { recursive: true, force: true }));
+  return folder;
+}
 const expectedMigrations = [
   { idx: 8, when: 1788747983000, tag: "0008_cms_person_market_availability" },
   { idx: 9, when: 1788747983001, tag: "0009_cms_person_market_availability_staging" },
@@ -29,6 +53,8 @@ const expectedMigrations = [
   { idx: 24, when: 1788998400001, tag: "0024_cms_document_availability" },
   { idx: 25, when: 1788998400002, tag: "0025_cms_editorial_market" },
   { idx: 26, when: 1788998400003, tag: "0026_cms_navigation_publish_versions" },
+  { idx: 27, when: 1788998400004, tag: "0027_cms_access_delivery_jobs" },
+  { idx: 28, when: 1788998400005, tag: "0028_cms_access_delivery_leases" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {
@@ -43,6 +69,56 @@ test("registers migrations in ordered Drizzle history", async () => {
   assert.equal(new Set(journal.entries.map((entry) => entry.idx)).size, journal.entries.length);
   assert.equal(new Set(journal.entries.map((entry) => entry.when)).size, journal.entries.length);
   assert.ok(journal.entries.every((entry, index) => index === 0 || entry.when > journal.entries[index - 1].when));
+});
+
+test("applies the complete schema chain to a fresh database and replays safely", {
+  skip: !process.env.DATABASE_URL && "DATABASE_URL is not available",
+}, async (context) => {
+  const schema = `migration_fresh_${process.pid}_${Date.now()}`;
+  const adminPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 });
+  const migrationPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 1,
+    options: `-c search_path=${schema}`,
+  });
+  context.after(async () => {
+    await migrationPool.end();
+    await adminPool.query(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`);
+    await adminPool.end();
+  });
+  await adminPool.query(`CREATE SCHEMA "${schema}"`);
+  const testMigrationsFolder = await isolatedMigrations(schema, context);
+  await migrate(drizzle(migrationPool), {
+    migrationsFolder: testMigrationsFolder,
+    migrationsSchema: schema,
+    migrationsTable: "__drizzle_migrations",
+  });
+  const required = await migrationPool.query<{ table_name: string; column_name: string }>(
+    `SELECT table_name,column_name
+       FROM information_schema.columns
+      WHERE table_schema=$1
+        AND (
+          (table_name='cms_navigation_published_policies' AND column_name IN ('items','pages','published_version'))
+          OR (table_name='cms_market_editions' AND column_name IN ('content_mode','published_revision_id'))
+          OR (table_name='cms_document_availability_states' AND column_name IN ('shared_source_edition_id','published_source_revision_id'))
+          OR (table_name='cms_media_references' AND column_name='media_version_id')
+        )
+      ORDER BY table_name,column_name`,
+    [schema],
+  );
+  assert.ok(required.rows.length >= 8, "fresh migration must expose readiness-critical columns");
+  const appliedBeforeReplay = await migrationPool.query(
+    `SELECT created_at FROM "${schema}"."__drizzle_migrations" ORDER BY created_at`,
+  );
+  await migrate(drizzle(migrationPool), {
+    migrationsFolder: testMigrationsFolder,
+    migrationsSchema: schema,
+    migrationsTable: "__drizzle_migrations",
+  });
+  const appliedAfterReplay = await migrationPool.query(
+    `SELECT created_at FROM "${schema}"."__drizzle_migrations" ORDER BY created_at`,
+  );
+  assert.deepEqual(appliedAfterReplay.rows, appliedBeforeReplay.rows);
 });
 
 test("upgrades a migration-0007 database and resolves staged availability only after publish", {

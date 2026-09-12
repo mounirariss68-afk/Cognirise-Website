@@ -8,7 +8,7 @@ import { ServiceLineTiles } from "@/components/ServiceLineTiles";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import { BrandButton } from "@/components/ui/brand-button";
 import { PulseImage } from "@/components/ui/pulse-image";
-import { cmsEntryRenderPolicy, contentRecord, governedLandingDelivery, landingCta, landingMedia, landingNarrative, landingSections, landingText, landingVisualReferences, resolveCmsMedia, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { cmsEntryRenderPolicy, cmsMediaObjectPosition, contentRecord, governedLandingDelivery, landingCta, landingMedia, landingNarrative, landingSections, landingText, landingVisualReferences, resolveCmsMedia, useCmsCollection, useCmsEntry } from "@/lib/cms";
 import { IndustryPicker } from "@/components/IndustryPicker";
 
 const Kicker = ({ children, className = "text-[#102957]" }: { children: React.ReactNode, className?: string }) => (
@@ -251,6 +251,7 @@ export default function Home() {
             src={frameworkHero?.url ?? assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")}
             alt={frameworkHero?.altText || "A luminous gateway marking the boundary of permitted agent authority."}
             className="w-full h-full object-cover mix-blend-screen"
+            style={{ objectPosition: cmsMediaObjectPosition(frameworkHero) }}
           />
         </div>
         
@@ -393,7 +394,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <PulseImage src={governanceVisual.src} alt={governanceVisual.alt} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
+            <PulseImage src={governanceVisual.src} alt={governanceVisual.alt} style={{ objectPosition: governanceVisual.objectPosition }} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/75 to-transparent via-[#071936]/20" />
             <motion.figcaption
               className="absolute z-10 left-6 bottom-5 text-white"
@@ -414,7 +415,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
-            <PulseImage src={peopleVisual.src} alt={peopleVisual.alt} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
+            <PulseImage src={peopleVisual.src} alt={peopleVisual.alt} style={{ objectPosition: peopleVisual.objectPosition }} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/75 to-transparent via-[#071936]/20" />
             <motion.figcaption
               className="absolute z-10 left-6 bottom-5 text-white"
@@ -435,7 +436,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
-            <PulseImage src={platformVisual.src} alt={platformVisual.alt} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
+            <PulseImage src={platformVisual.src} alt={platformVisual.alt} style={{ objectPosition: platformVisual.objectPosition }} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/75 to-transparent via-[#071936]/20" />
             <motion.figcaption
               className="absolute z-10 left-6 bottom-5 text-white"
@@ -487,7 +488,7 @@ export default function Home() {
           </motion.div>
           
           <div className="h-[390px] lg:h-auto lg:mt-[-46px] relative overflow-hidden" style={{ clipPath: "polygon(0 8%, 100% 0, 100% 100%, 9% 92%)" }}>
-             <PulseImage src={convergenceVisual.src} alt={convergenceVisual.alt} className="w-full h-full object-cover" />
+             <PulseImage src={convergenceVisual.src} alt={convergenceVisual.alt} style={{ objectPosition: convergenceVisual.objectPosition }} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-[#071936]/10" />
             <div className="absolute right-6 bottom-6 text-white text-[10px] tracking-[0.11em] uppercase drop-shadow-md">
               {landingText(governedLanding, "home-convergence-image-caption", "people + agents")}

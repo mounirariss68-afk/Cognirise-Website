@@ -207,3 +207,56 @@ test("hero draft construction rejects incomplete records before reading versions
     /Choose a poster image, MP4 source, WebM source/,
   );
 });
+
+test("website image metadata uses the versioned update contract and preserves focal-point intent", async () => {
+  const source = await readFile(new URL("src/pages/media/MediaLibrary.tsx", adminRoot), "utf8");
+  const panel = await readFile(new URL("src/pages/media/MediaAssetDetailsPanel.tsx", adminRoot), "utf8");
+  const focalPoint = await readFile(new URL("src/pages/media/FocalPointPicker.tsx", adminRoot), "utf8");
+
+  assert.match(source, /editingAsset\.collection === "linkedin"\s+\? \{ \.\.\.commonMetadata, campaignMetadata/);
+  assert.match(source, /: commonMetadata;/);
+  assert.match(source, /focalPoint,/);
+  assert.match(source, /Edit image metadata/);
+  assert.match(source, /Metadata saved — awaiting publisher review/);
+  assert.match(source, /invalidateQueries/);
+  assert.match(source, /getGetMediaReferenceImpactQueryKey/);
+  assert.match(panel, /Metadata and focal-point changes create a new governed metadata version/);
+  assert.match(panel, /FocalPointPicker/);
+  assert.match(focalPoint, /Hero crop/);
+  assert.match(focalPoint, /Card crop/);
+  assert.match(focalPoint, /Square crop/);
+  assert.match(focalPoint, /onChange\(\{\s+x: clamp/);
+});
+
+test("media review history uses the existing administrator audit surface without changing published references", async () => {
+  const history = await readFile(new URL("src/pages/media/MediaReviewHistory.tsx", adminRoot), "utf8");
+  const panel = await readFile(new URL("src/pages/media/MediaAssetDetailsPanel.tsx", adminRoot), "utf8");
+
+  assert.match(history, /useListAuditEvents/);
+  assert.match(history, /entityType: "media"/);
+  assert.match(history, /entityId: asset\.id/);
+  assert.match(history, /Approved/);
+  assert.match(history, /Rejected/);
+  assert.match(history, /not recorded/);
+  assert.match(history, /metadata\?\.mediaVersionId/);
+  assert.match(history, /metadata\?\.versionId/);
+  assert.doesNotMatch(history, /: asset\.versionId/);
+  assert.match(panel, /Existing published references remain pinned/);
+  assert.match(panel, /useGetMediaReferenceImpact/);
+  assert.match(panel, /Affected draft\/live records/);
+  assert.match(panel, /Pinned version: \{reference\.mediaVersionId \?\? "not recorded"\}/);
+});
+
+test("upload queue cleanup is explicitly local and leaves protected server assets untouched", async () => {
+  const batch = await readFile(new URL("src/pages/media/BatchUploadZone.tsx", adminRoot), "utf8");
+  const queue = await readFile(new URL("src/pages/media/upload-queue-engine.ts", adminRoot), "utf8");
+
+  assert.match(batch, /Clear completed/);
+  assert.match(batch, /Discard failed/);
+  assert.match(batch, /only removes local rows/);
+  assert.match(batch, /never deletes an approved server asset/);
+  assert.match(queue, /clearCompleted\(\)/);
+  assert.match(queue, /discardFailed\(id\?: string\)/);
+  assert.match(queue, /MAX_QUEUE_ITEMS/);
+  assert.match(queue, /QUEUE_RETENTION_MS/);
+});

@@ -3,6 +3,7 @@ import { CmsPreviewRequestBoundary, type CmsRecord } from "@/lib/cms";
 import { PreviewMetadataBoundary } from "@/lib/metadata";
 import type { LandingPageContent } from "@workspace/api-zod";
 import { contentRecord, governedLandingDelivery, LandingSlotDeliveryError, useCmsCollection } from "@/lib/cms";
+import { ServiceError } from "@/components/error-boundary";
 
 export type GovernedLandingRouteProps = {
   pagePath: "/about" | "/partners" | "/platforms" | "/insights" | "/methodologies";
@@ -105,6 +106,14 @@ function GovernedLandingPublishedRoute({ pagePath, compiled: Compiled }: Governe
 
   if (delivery === "compiled-fallback") return <Compiled />;
   if (delivery === "loading") return <main aria-busy="true" className="min-h-[60vh] px-6 py-24">Loading published page…</main>;
+  if (delivery === "api-error" || delivery === "contract-error") {
+    return (
+      <ServiceError
+        onRetry={() => { void query.refetch(); }}
+        message="The published page could not be loaded. Please try again."
+      />
+    );
+  }
   if (delivery !== "cms") return <PageUnavailable />;
   if (!page) return <PageUnavailable missingEdition />;
 

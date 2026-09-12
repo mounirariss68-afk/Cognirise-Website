@@ -134,4 +134,20 @@ configured preview-domain fallback, before any fresh credential was read or
 submitted. The fresh fixture cleanup helper still exited 0 and removed the
 provisioned fixture. Therefore this retest has no new authenticated screenshot
 or trustworthy Rev 3 result; the prior omitted-path evidence above must not be
-interpreted as verification of the post-fix implementation.
+ interpreted as verification of the post-fix implementation.
+
+## W00 / W11 verification boundary
+
+The fixture teardown now discovers browser-created documents from exact fixture
+user ownership and revision authorship instead of relying only on setup-time
+IDs. It refuses prefix-only or external references and records residual-owned
+row failures rather than silently claiming cleanup. The preservation baseline
+command is read-only and writes only identifiers, pointers, counts/digests,
+availability decisions, and immutable media pins to a mode-600 file below
+`/tmp`; it does not print credentials or content payloads.
+
+The public website now distinguishes temporary CMS/navigation failures from
+genuine unavailable routes and offers retry. API readiness is exposed at
+`/api/readyz` in addition to the existing `/api/healthz`; no browser outage
+simulation or published-host `/admin` slash redirect check has been performed
+in this record.

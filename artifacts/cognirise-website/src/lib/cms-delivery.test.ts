@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { COMPILED_LANDING_ROUTES, cmsCollectionData, cmsCollectionDelivery, cmsCollectionIsCutOver, cmsEntryRenderPolicy, landingNarrative, landingSections, landingVisualReferences, type CmsDeliveryState } from "./cms";
+import { COMPILED_LANDING_ROUTES, cmsCollectionData, cmsCollectionDelivery, cmsCollectionIsCutOver, cmsEntryRenderPolicy, cmsRequestIsUnavailable, landingNarrative, landingSections, landingVisualReferences, type CmsDeliveryState } from "./cms";
 import type { LandingPageContent } from "@workspace/api-zod";
 
 test("people never select compiled profiles, even with legacy cutover disabled or no publication history", () => {
@@ -108,4 +108,11 @@ test("every governed landing section and visual reference is exposed to the rend
   } satisfies LandingPageContent;
   assert.deepEqual(landingSections(page).map((section) => section.type), ["narrative", "cta", "media", "legal"]);
   assert.equal(landingVisualReferences(page).length, 2);
+});
+
+test("CMS request classification preserves genuine 404s while surfacing outages", () => {
+  assert.equal(cmsRequestIsUnavailable(new Error("network timeout")), true);
+  assert.equal(cmsRequestIsUnavailable({ name: "ResponseParseError", status: 200 }), true);
+  assert.equal(cmsRequestIsUnavailable({ name: "ApiError", status: 404 }), false);
+  assert.equal(cmsRequestIsUnavailable({ name: "ApiError", status: 503 }), true);
 });

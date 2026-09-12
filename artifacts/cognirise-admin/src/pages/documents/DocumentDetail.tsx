@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Send, Globe, Archive, ChevronLeft, CheckCircle2, AlertTriangle, Eye, RotateCcw, Save, GitCompare, Trash2 } from "lucide-react";
+import { Loader2, Send, Globe, Archive, ChevronLeft, CheckCircle2, AlertTriangle, Eye, RotateCcw, Save, GitCompare, Trash2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -44,7 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { officeLifecycleAction } from "./office-lifecycle";
-import { Check, Circle } from "lucide-react";
+import { Check } from "lucide-react";
 import { collectContentMediaIds, CONTENT_GUIDANCE, documentReadiness, editionAuthoringActions } from "./authoring";
 import { buildDraftSave, describeSaveFailure, isDraftSaveResponse, serverValidationIssues, type DraftSeo, type DraftSaveIssue } from "./draft-save";
 import { describeActionError } from "./action-error";
@@ -53,6 +53,23 @@ import { IndustryVisualWorkspace } from "./IndustryVisualWorkspace";
 
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 import { applyLocalSuccessorToEditionMatrix, previewPinForEditionRevision } from "./preview-revision-lifecycle";
+import { createDraftRecoveryExport, downloadDraftRecovery } from "./draft-operation-safety";
+
+function documentListPath(kind: CmsDocumentKind): string {
+  switch (kind) {
+    case "person": return "/people";
+    case "partner": return "/partners";
+    case "platform": return "/platforms";
+    case "publication": return "/publications";
+    case "case-study": return "/case-studies";
+    case "industry": return "/industries";
+    case "framework": return "/frameworks";
+    case "office": return "/offices";
+    case "site-configuration": return "/contact-settings";
+    case "landing-page": return "/dashboard";
+  }
+}
+
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 export default function DocumentDetail() {
   const [, params] = useRoute("/content/:id");
@@ -113,11 +130,13 @@ export default function DocumentDetail() {
   const [saveRecovery, setSaveRecovery] = useState<"uncertain" | "committed" | null>(null);
   const [saveBlocked, setSaveBlocked] = useState(false);
   const [blockedRecovery, setBlockedRecovery] = useState<"conflict" | "uncertain" | "committed" | null>(null);
+  const [previewingRevisionId, setPreviewingRevisionId] = useState<string | null>(null);
   const hasAuthorRole = ["editor", "publisher", "administrator"].includes(session?.user?.role ?? "");
   const canEditSelectedMarket = hasAuthorRole && (
     isAdministrator || Boolean(session?.user?.marketCodes?.includes(selectedMarket))
   );
   const [previewRevisionId, setPreviewRevisionId] = useState<string | undefined>();
+  const [previewToOpenRevisionId, setPreviewToOpenRevisionId] = useState<string | null>(null);
   const [reviewComment, setReviewComment] = useState("");
   const previewParams = { market: selectedMarket, locale: selectedLocale, revisionId: previewRevisionId };
   const { refetch: createPreview } = usePreviewDocument(id!, previewParams, {
@@ -138,6 +157,42 @@ export default function DocumentDetail() {
     }
     return result.data;
   }, [createPreview]);
+  useEffect(() => {
+    const revisionId = previewToOpenRevisionId;
+    if (!revisionId || previewRevisionId !== revisionId) return;
+    let active = true;
+    setPreviewingRevisionId(revisionId);
+    void createPreview()
+      .then((result) => {
+        if (!active || result.isError || !result.data?.previewUrl) {
+          throw result.error ?? new Error("The protected preview capability could not be issued.");
+        }
+        if (result.data.revisionId !== revisionId) {
+          throw new Error("The protected preview did not return the requested saved revision.");
+        }
+        window.open(result.data.previewUrl, "_blank", "noopener,noreferrer");
+        toast({
+          title: "Saved revision preview opened",
+          description: `Revision ${result.data.revisionNumber} · ${result.data.requestedMarket.toUpperCase()} · ${result.data.requestedLocale}`,
+        });
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        toast({
+          title: "Saved, but preview could not be opened",
+          description: error instanceof Error ? error.message : "The exact saved revision remains available in Preview.",
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        if (!active) return;
+        setPreviewingRevisionId(null);
+        setPreviewToOpenRevisionId(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [createPreview, previewRevisionId, previewToOpenRevisionId, toast]);
   
   const hydratedEditionKey = useRef("");
   const hydratedRevision = useRef<number | undefined>(undefined);
@@ -168,6 +223,7 @@ export default function DocumentDetail() {
   // Dialog states
   const [publishOpen, setPublishOpen] = useState(false);
   const [removeOfficeOpen, setRemoveOfficeOpen] = useState(false);
+  const [removeDocumentOpen, setRemoveDocumentOpen] = useState(false);
   const [publishRevisionId, setPublishRevisionId] = useState<string | null>(null);
   const [publishAvailabilityVersion, setPublishAvailabilityVersion] = useState<number | null>(null);
   const [submittingSharedReview, setSubmittingSharedReview] = useState(false);
@@ -215,21 +271,21 @@ export default function DocumentDetail() {
   // Before unload protection
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedRef.current || preserveAfterFailedSave.current || saveBlocked || availabilitySelectionActive) {
+       if (hasUnsavedRef.current || preserveAfterFailedSave.current || saveBlocked || availabilitySelectionActive || previewingRevisionId !== null) {
         e.preventDefault();
         e.returnValue = "";
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [availabilitySelectionActive, hasUnsaved, saveBlocked]);
+  }, [availabilitySelectionActive, hasUnsaved, previewingRevisionId, saveBlocked]);
 
   useEffect(() => {
     const protectInternalNavigation = (event: MouseEvent) => {
       const target = event.target;
       const anchor = target instanceof Element ? target.closest("a[href]") : null;
       if (!anchor || anchor.getAttribute("target") === "_blank") return;
-      if (updateDoc.isPending) {
+       if (updateDoc.isPending || previewingRevisionId !== null) {
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -242,7 +298,7 @@ export default function DocumentDetail() {
     };
     document.addEventListener("click", protectInternalNavigation, true);
     return () => document.removeEventListener("click", protectInternalNavigation, true);
-  }, [availabilitySelectionActive, updateDoc.isPending]);
+  }, [availabilitySelectionActive, previewingRevisionId, updateDoc.isPending]);
 
   const mediaIds = useMemo(() => collectContentMediaIds(content), [content]);
   const contentValidation = useMemo(
@@ -399,6 +455,14 @@ export default function DocumentDetail() {
     () => doc ? documentReadiness(doc.kind as CmsDocumentKind, title, content, mediaIds) : [],
     [content, doc, mediaIds, title],
   );
+  const readinessWarnings = readiness.filter((item) => !item.ready && item.label === "Approved media");
+  const readinessBlockers = readiness.filter((item) => !item.ready && item.label !== "Approved media");
+  const readinessLabel = readinessBlockers.length
+    ? `${readinessBlockers.length} readiness blocker${readinessBlockers.length === 1 ? "" : "s"}`
+    : readinessWarnings.length
+      ? `${readinessWarnings.length} readiness warning${readinessWarnings.length === 1 ? "" : "s"}`
+      : "Ready for the next workflow step";
+  const readinessHasIssues = readinessBlockers.length > 0 || readinessWarnings.length > 0;
   const editionIsArchived = doc?.status === "archived";
   const authoringActions = editionAuthoringActions(
     selectedEdition,
@@ -409,11 +473,15 @@ export default function DocumentDetail() {
   );
   const fieldIssue = (path: string) => saveIssues.find((issue) => issue.path === path)?.message;
   const editorHydrated = hydratedEditionKey.current === currentEditorKey.current && hydratedRevision.current !== undefined;
-  const editorLocked = !editorHydrated || updateDoc.isPending || authoringActions.immutable
+  const editorLocked = !editorHydrated || updateDoc.isPending || previewingRevisionId !== null || authoringActions.immutable
     || !canEditSelectedEdition;
 
-  const handleSave = () => {
+  const handleSave = (intent: "save" | "save-preview" = "save") => {
     if (!doc || updateDoc.isPending || !editorHydrated || saveBlocked) return;
+    if (intent === "save-preview" && !hasUnsaved) {
+      void openPreview();
+      return;
+    }
     const editorKey = `${id}:${selectedMarket}:${selectedLocale}`;
     const targetParams = { market: selectedMarket, locale: selectedLocale };
     const prepared = buildDraftSave(doc.kind as CmsDocumentKind, {
@@ -488,6 +556,11 @@ export default function DocumentDetail() {
         queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
         queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("documents") || String(query.queryKey[0]).includes("published") });
         toast({ title: `${selectedMarket.toUpperCase()} edition saved successfully` });
+          if (intent === "save-preview" && updated.currentRevisionId) {
+            setPreviewingRevisionId(updated.currentRevisionId);
+            setPreviewRevisionId(updated.currentRevisionId);
+            setPreviewToOpenRevisionId(updated.currentRevisionId);
+          }
       },
       onError: (err) => {
         if (!mountedRef.current || operation !== saveSequence.current || editorKey !== currentEditorKey.current) return;
@@ -517,7 +590,7 @@ export default function DocumentDetail() {
   };
 
   const selectEdition = (market: string, locale: string) => {
-    if (updateDoc.isPending) return;
+    if (updateDoc.isPending || previewingRevisionId !== null) return;
     if (market === selectedMarket && locale === selectedLocale) return;
     if ((hasUnsavedRef.current || saveBlocked || preserveAfterFailedSave.current || availabilitySelectionActive)
       && !window.confirm("Discard local changes or a destination selection and switch editions?")) return;
@@ -534,6 +607,8 @@ export default function DocumentDetail() {
     setHasUnsaved(false);
     setSelectedMarket(market);
     setSelectedLocale(locale);
+    setPreviewingRevisionId(null);
+    setPreviewToOpenRevisionId(null);
     // Wait for the newly selected exact document response to establish the
     // latest saved revision. Reusing the matrix/source pointer here can pin a
     // just-opened editor to the prior draft when either cache is stale.
@@ -599,10 +674,39 @@ export default function DocumentDetail() {
   };
 
   const leaveEditor = (destination: string) => {
-    if (updateDoc.isPending) return;
+    if (updateDoc.isPending || previewingRevisionId !== null) return;
     if ((hasUnsavedRef.current || saveBlocked || preserveAfterFailedSave.current || availabilitySelectionActive)
       && !window.confirm("Discard local changes or a destination selection and leave this editor?")) return;
     setLocation(destination);
+  };
+
+  const downloadLocalDraft = () => {
+    if (!doc || !id) return;
+    const recovery = createDraftRecoveryExport(
+      {
+        slug: doc.slug,
+        title,
+        summary,
+        content,
+        seo,
+        mediaIds,
+        markets: doc.markets,
+      },
+      {
+        editorKey: `${id}:${selectedMarket}:${selectedLocale}`,
+        kind: doc.kind,
+        market: selectedMarket,
+        locale: selectedLocale,
+        revisionId: doc.currentRevisionId,
+      },
+    );
+    if (!downloadDraftRecovery(recovery)) {
+      toast({
+        title: "Local draft download unavailable",
+        description: "Your local inputs remain in this editor. Use a browser that permits downloads and try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const discardAndReloadLatest = () => {
@@ -616,12 +720,14 @@ export default function DocumentDetail() {
     setSaveBlocked(false);
     setBlockedRecovery(null);
     setHasUnsaved(false);
+    setPreviewingRevisionId(null);
+    setPreviewToOpenRevisionId(null);
     queryClient.resetQueries({ queryKey: getGetDocumentQueryKey(id!, documentParams), exact: true });
   };
 
   const navigationOnlyState = (message: string, loading = false, detail?: ReactNode) => (
     <div className="h-full p-8">
-      <Button variant="ghost" onClick={() => leaveEditor("/content")} disabled={updateDoc.isPending} className="mb-8">
+       <Button variant="ghost" onClick={() => leaveEditor("/content")} disabled={updateDoc.isPending || previewingRevisionId !== null} className="mb-8">
         <ChevronLeft className="mr-2 h-4 w-4" /> Back to content
       </Button>
       <div className="mx-auto max-w-lg rounded-lg border bg-card p-8 text-center">
@@ -779,7 +885,7 @@ export default function DocumentDetail() {
   };
 
   const handleAction = (action: "submit" | "publish" | "archive" | "restore") => {
-    if (updateDoc.isPending || reviewAvailability.isPending || submittingSharedReview || availabilitySelectionActive) return;
+    if (updateDoc.isPending || previewingRevisionId !== null || reviewAvailability.isPending || submittingSharedReview || availabilitySelectionActive) return;
     setActionError(null);
     const targetParams = { market: selectedMarket, locale: selectedLocale };
     const opts = {
@@ -976,6 +1082,33 @@ export default function DocumentDetail() {
     }
   };
 
+  const handleDeleteDocument = () => {
+    // canPermanentlyDelete is projected by the API from publication/history
+    // state. Do not infer eligibility from the visible workflow label.
+    if (!doc || doc.kind === "office" || !doc.canPermanentlyDelete || !canPublish || updateDoc.isPending || deleteDoc.isPending) return;
+    deleteDoc.mutate({ documentId: id! }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          predicate: (query) => String(query.queryKey[0]).includes("documents")
+            || String(query.queryKey[0]).includes("published"),
+        });
+        toast({
+          title: "Document deleted",
+          description: "The eligible unpublished document and its draft history were permanently deleted.",
+        });
+        setRemoveDocumentOpen(false);
+        setLocation(documentListPath(doc.kind as CmsDocumentKind));
+      },
+      onError: (error: any) => {
+        toast({
+          title: "Document deletion failed",
+          description: error?.data?.error || error?.error || error?.message || "The server did not allow permanent deletion. Published or history-bearing content was not changed.",
+          variant: "destructive",
+        });
+      },
+    });
+  };
+
   const handleRevCheckbox = (checked: boolean, revId: string) => {
     if (checked) {
       if (selectedRevs.length >= 2) {
@@ -988,13 +1121,15 @@ export default function DocumentDetail() {
     }
   };
 
-  const openPreview = async () => {
-    const result = await createPreview();
-    if (!result.data?.previewUrl) {
+  const openPreview = () => {
+    const revisionId = previewRevisionId ?? selectedEdition?.revisionId ?? doc.currentRevisionId ?? undefined;
+    if (!revisionId) {
       toast({ title: "Preview unavailable", description: "Save a valid edition revision first.", variant: "destructive" });
       return;
     }
-    window.open(result.data.previewUrl, "_blank", "noopener,noreferrer");
+    setPreviewingRevisionId(revisionId);
+    setPreviewRevisionId(revisionId);
+    setPreviewToOpenRevisionId(revisionId);
   };
   
   // Data for comparison
@@ -1007,7 +1142,7 @@ export default function DocumentDetail() {
       {/* Top Bar */}
       <header className="flex-none h-16 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-4">
-           <Button variant="ghost" size="icon" disabled={updateDoc.isPending} onClick={() => leaveEditor(doc.kind === "case-study" ? "/case-studies" : doc.kind === "industry" ? "/industries" : doc.kind === "framework" ? "/frameworks" : doc.kind === "site-configuration" ? "/contact-settings" : `/${doc.kind}s`)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+           <Button variant="ghost" size="icon" disabled={updateDoc.isPending || previewingRevisionId !== null} onClick={() => leaveEditor(doc.kind === "case-study" ? "/case-studies" : doc.kind === "industry" ? "/industries" : doc.kind === "framework" ? "/frameworks" : doc.kind === "site-configuration" ? "/contact-settings" : `/${doc.kind}s`)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <div className="h-4 w-px bg-border"></div>
@@ -1024,14 +1159,22 @@ export default function DocumentDetail() {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={openPreview} disabled={hasUnsaved} className="font-mono uppercase tracking-wider text-xs mr-2">
-            <Eye className="w-3.5 h-3.5 mr-2" /> {doc.kind === "framework" ? "Preview buyer view" : doc.kind === "office" ? "Preview contact card" : "Preview"}
+        <div className="flex flex-wrap items-center justify-end gap-2">
+           <div
+             role="status"
+             aria-live="polite"
+             data-testid="readiness-summary"
+             className={`hidden rounded border px-2 py-1 text-[10px] font-mono uppercase tracking-wider sm:block ${readinessBlockers.length ? "border-destructive/40 bg-destructive/5 text-destructive" : readinessHasIssues ? "border-amber-400/50 bg-amber-50 text-amber-800" : "border-emerald-400/50 bg-emerald-50 text-emerald-800"}`}
+           >
+             {readinessLabel}
+           </div>
+           <Button variant="outline" size="sm" onClick={openPreview} disabled={hasUnsaved || previewingRevisionId !== null} className="font-mono uppercase tracking-wider text-xs mr-2">
+             {previewingRevisionId ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Eye className="w-3.5 h-3.5 mr-2" />} {doc.kind === "framework" ? "Preview buyer view" : doc.kind === "office" ? "Preview contact card" : "Preview"}
           </Button>
 
           <Button 
-            onClick={handleSave} 
-            disabled={!editorHydrated || updateDoc.isPending || saveBlocked || !authoringActions.canSave}
+             onClick={() => handleSave()}
+             disabled={!editorHydrated || updateDoc.isPending || previewingRevisionId !== null || saveBlocked || !authoringActions.canSave}
             size="sm" 
             variant="default" 
             className="font-mono uppercase tracking-wider text-xs"
@@ -1039,9 +1182,21 @@ export default function DocumentDetail() {
             {updateDoc.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin"/> : <Save className="w-3.5 h-3.5 mr-2" />}
             {selectedEdition?.workflowState === "approved" ? "Start New Draft" : "Save Draft"}
           </Button>
+           <Button
+             type="button"
+             variant="outline"
+             size="sm"
+             onClick={() => handleSave("save-preview")}
+             disabled={!editorHydrated || updateDoc.isPending || previewingRevisionId !== null || saveBlocked || (!authoringActions.canSave && hasUnsaved)}
+             className="font-mono uppercase tracking-wider text-xs"
+             title="Save the current inputs, then open the protected preview for the exact returned revision"
+           >
+             {previewingRevisionId ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Eye className="w-3.5 h-3.5 mr-2" />}
+             Save and preview
+           </Button>
 
           {authoringActions.canSubmit && (
-             <Button variant="outline" size="sm" onClick={() => handleAction("submit")} disabled={updateDoc.isPending || submitDoc.isPending || reviewAvailability.isPending || submittingSharedReview || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs">
+              <Button variant="outline" size="sm" onClick={() => handleAction("submit")} disabled={updateDoc.isPending || previewingRevisionId !== null || submitDoc.isPending || reviewAvailability.isPending || submittingSharedReview || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs">
               <Send className="w-3.5 h-3.5 mr-2" /> Submit Review
             </Button>
           )}
@@ -1050,27 +1205,39 @@ export default function DocumentDetail() {
                 setPublishRevisionId(selectedEdition?.revisionId ?? null);
                 setPublishAvailabilityVersion(selectedIsSharedSource ? availabilityForReview?.draftVersion ?? null : null);
                 setPublishOpen(true);
-              }} disabled={updateDoc.isPending || reviewAvailability.isPending || submittingSharedReview || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+               }} disabled={updateDoc.isPending || previewingRevisionId !== null || reviewAvailability.isPending || submittingSharedReview || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
               <Globe className="w-3.5 h-3.5 mr-2" /> Publish...
             </Button>
           )}
-          {isAdministrator && doc.kind === "office" && doc.status !== "archived" && (
+           {isAdministrator && doc.kind === "office" && doc.status !== "archived" && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => setRemoveOfficeOpen(true)}
-               disabled={updateDoc.isPending || archiveDoc.isPending || deleteDoc.isPending}
+                disabled={updateDoc.isPending || previewingRevisionId !== null || archiveDoc.isPending || deleteDoc.isPending}
               className="font-mono uppercase tracking-wider text-xs text-destructive hover:text-destructive"
             >
               <Trash2 className="mr-2 h-4 w-4" /> Remove office
             </Button>
           )}
+           {canPublish && doc.kind !== "office" && doc.canPermanentlyDelete && (
+             <Button
+               variant="outline"
+               size="sm"
+               onClick={() => setRemoveDocumentOpen(true)}
+               disabled={updateDoc.isPending || previewingRevisionId !== null || deleteDoc.isPending}
+               className="font-mono uppercase tracking-wider text-xs text-destructive hover:text-destructive"
+               title="Permanently delete this document because the server marked it eligible"
+             >
+               <Trash2 className="mr-2 h-4 w-4" /> Delete draft
+             </Button>
+           )}
           {canPublish && doc.status === "archived" ? (
-            <Button variant="outline" size="sm" onClick={() => handleAction("restore")} disabled={updateDoc.isPending || restoreDoc.isPending} className="font-mono uppercase tracking-wider text-xs">
+             <Button variant="outline" size="sm" onClick={() => handleAction("restore")} disabled={updateDoc.isPending || previewingRevisionId !== null || restoreDoc.isPending} className="font-mono uppercase tracking-wider text-xs">
               <RotateCcw className="mr-2 h-4 w-4" /> Restore as draft
             </Button>
           ) : canPublish && doc.kind !== "office" ? (
-               <Button variant="ghost" size="sm" disabled={updateDoc.isPending} onClick={() => handleAction("archive")} className="text-muted-foreground hover:text-destructive" title="Archive Document">
+                <Button variant="ghost" size="sm" disabled={updateDoc.isPending || previewingRevisionId !== null} onClick={() => handleAction("archive")} className="text-muted-foreground hover:text-destructive" title="Archive Document">
                  <Archive className="w-4 h-4" />
                </Button>
           ) : null}
@@ -1142,6 +1309,39 @@ export default function DocumentDetail() {
                 </div>
               )}
             </section>
+             <section className="rounded-lg border bg-card p-4" aria-label="Publication readiness" data-testid="publication-readiness">
+               <div className="flex flex-wrap items-baseline justify-between gap-2">
+                 <h2 className="text-sm font-semibold">Readiness</h2>
+                 <span className={`text-xs font-medium ${readinessBlockers.length ? "text-destructive" : readinessHasIssues ? "text-amber-700" : "text-emerald-700"}`}>{readinessLabel}</span>
+               </div>
+               <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                 {readiness.map((item) => {
+                   const isMediaWarning = item.label === "Approved media" && !item.ready;
+                   const target = item.label === "Display title" ? "document-title" : undefined;
+                   return (
+                     <li key={item.label} className="flex items-start gap-2 rounded border bg-muted/10 p-2">
+                       {item.ready
+                         ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+                         : <AlertTriangle className={`mt-0.5 h-4 w-4 shrink-0 ${isMediaWarning ? "text-amber-600" : "text-destructive"}`} aria-hidden="true" />}
+                       <div className="min-w-0">
+                         <p className="text-xs font-medium">{item.label}{!item.ready && <span className="ml-1 text-[10px] font-normal uppercase tracking-wide text-muted-foreground">{isMediaWarning ? "warning" : "blocker"}</span>}</p>
+                         <p className="text-[10px] text-muted-foreground">{item.detail}</p>
+                         {!item.ready && target && (
+                           <button type="button" className="mt-1 text-[10px] font-medium text-primary underline" onClick={() => document.getElementById(target)?.focus()}>
+                             Focus field
+                           </button>
+                         )}
+                         {!item.ready && item.label === "Publication governance" && (
+                           <button type="button" className="mt-1 text-[10px] font-medium text-primary underline" onClick={() => setActiveSideTab("editions")}>
+                             Inspect editions
+                           </button>
+                         )}
+                       </div>
+                     </li>
+                   );
+                 })}
+               </ul>
+             </section>
             <div>
               <label htmlFor="document-title" className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Display Title <span className="text-destructive">(required)</span></label>
               <Input 
@@ -1391,17 +1591,6 @@ export default function DocumentDetail() {
                 </Button>
               )}
               {hasUnsaved && <p className="text-xs text-amber-700">Save shared content before creating a customization so it starts from this saved revision.</p>}
-              <div className="border-t pt-4">
-                <h3 className="text-sm font-semibold">Readiness checklist</h3>
-                <div className="mt-3 space-y-3">
-                  {readiness.map((item) => (
-                    <div key={item.label} className="flex gap-2" data-testid={`status-readiness-${item.label.toLowerCase().replaceAll(" ", "-")}`}>
-                      {item.ready ? <Check className="mt-0.5 h-4 w-4 text-emerald-600" /> : <Circle className="mt-0.5 h-4 w-4 text-amber-500" />}
-                      <div><p className="text-xs font-medium">{item.label}</p><p className="text-[10px] text-muted-foreground">{item.detail}</p></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </TabsContent>
             
             <TabsContent value="seo" className="flex-1 overflow-y-auto p-4 space-y-4 mt-0">
@@ -1516,10 +1705,13 @@ export default function DocumentDetail() {
           <AlertDialogHeader>
             <AlertDialogTitle>Review the revision conflict</AlertDialogTitle>
             <AlertDialogDescription>
-              Another editor saved a newer revision. Your local inputs are still here. Copy or review them before choosing to discard them and reload.
+               Another editor saved a newer revision. Your local inputs are still here. Review or download them before choosing to discard them and reload the latest exact revision.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
+             <Button type="button" variant="outline" onClick={downloadLocalDraft} data-testid="download-local-draft">
+               <Download className="mr-2 h-3.5 w-3.5" /> Download local draft
+             </Button>
             <AlertDialogCancel>Keep reviewing local changes</AlertDialogCancel>
             <AlertDialogAction onClick={discardAndReloadLatest}>Discard and reload latest</AlertDialogAction>
           </AlertDialogFooter>
@@ -1534,11 +1726,14 @@ export default function DocumentDetail() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               {saveRecovery === "committed"
-                ? "A revision was committed, but its confirmation did not complete normally. Your local inputs remain visible as evidence. Reload the latest server revision before making another save."
-                : "The request outcome could not be confirmed. Your local inputs remain unchanged. Review or copy them, then deliberately reload the latest server revision; do not retry against the old revision token."}
+                 ? "A revision was committed, but its confirmation did not complete normally. Your local inputs remain visible as evidence. Download them if needed, then reload the latest server revision before making another save."
+                 : "The request outcome could not be confirmed. Your local inputs remain unchanged. Review or download them, then deliberately reload the latest server revision; do not retry against the old revision token."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
+             <Button type="button" variant="outline" onClick={downloadLocalDraft} data-testid="download-local-draft">
+               <Download className="mr-2 h-3.5 w-3.5" /> Download local draft
+             </Button>
             <AlertDialogCancel>Keep reviewing local changes</AlertDialogCancel>
             <AlertDialogAction onClick={discardAndReloadLatest}>Discard and reload latest</AlertDialogAction>
           </AlertDialogFooter>
@@ -1641,6 +1836,28 @@ export default function DocumentDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={removeDocumentOpen} onOpenChange={setRemoveDocumentOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {doc.title}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The server marked this {doc.kind.replace("-", " ")} as eligible for permanent deletion because it has no protected publication history.
+              This removes the document and its draft history and cannot be undone. Published or history-bearing content must use archive instead.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteDocument}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteDoc.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Permanently delete draft
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={removeOfficeOpen} onOpenChange={setRemoveOfficeOpen}>
         <AlertDialogContent>

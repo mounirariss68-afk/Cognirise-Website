@@ -282,7 +282,7 @@ export default function InsightsEditorial() {
         <div className="ie-hero-rule" />
         <article className="ie-feature">
           <div className="ie-feature-visual">
-            <img src={heroVisual.src} alt={heroVisual.alt} />
+            <img src={heroVisual.src} alt={heroVisual.alt} style={{ objectPosition: heroVisual.objectPosition }} />
             <span className="ie-num">01 / featured point of view</span>
           </div>
           <div className="ie-feature-copy">
@@ -344,13 +344,13 @@ export default function InsightsEditorial() {
         </div>
         <div className="ie-collection-grid">
           <Link href="/insights/foundations-for-production" className="ie-collection">
-            <img src={foundationsVisual.src} alt={foundationsVisual.alt} />
+            <img src={foundationsVisual.src} alt={foundationsVisual.alt} style={{ objectPosition: foundationsVisual.objectPosition }} />
             <div className="ie-meta">{landingText(governedLanding, "insights-collection-foundations-label", "Collection / foundations")}</div>
             <h3>{landingText(governedLanding, "insights-collection-foundations-heading", "The conditions for AI that can hold up in production.")}</h3>
             <p>{landingText(governedLanding, "insights-collection-foundations-body", "Data, security, governance and architecture are not the preamble. They are the work.")}</p>
           </Link>
           <Link href="/insights/governed-digital-workforce" className="ie-collection">
-            <img src={workforceVisual.src} alt={workforceVisual.alt} />
+            <img src={workforceVisual.src} alt={workforceVisual.alt} style={{ objectPosition: workforceVisual.objectPosition }} />
             <div className="ie-meta">{landingText(governedLanding, "insights-collection-workforce-label", "Collection / platforms")}</div>
             <h3>{landingText(governedLanding, "insights-collection-workforce-heading", "From agent experiments to a governed digital workforce.")}</h3>
             <p>{landingText(governedLanding, "insights-collection-workforce-body", "What it takes to deploy agents into real operating environments—with people accountable at every decision point.")}</p>
@@ -404,7 +404,7 @@ export default function InsightsEditorial() {
             )}
           </div>
           <div className="ie-letter-art">
-            <img src={newsletterVisual.src} alt={newsletterVisual.alt} />
+            <img src={newsletterVisual.src} alt={newsletterVisual.alt} style={{ objectPosition: newsletterVisual.objectPosition }} />
             <div className="ie-letter-art-note">field notes / {market.toUpperCase()}</div>
           </div>
         </div>

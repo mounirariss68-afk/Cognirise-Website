@@ -1,5 +1,6 @@
 import {
   Component,
+  default as React,
   type ComponentType,
   type ErrorInfo,
   type ReactNode,
@@ -8,6 +9,42 @@ import {
 export interface ErrorFallbackProps {
   error: Error;
   resetError: () => void;
+}
+
+export interface ServiceErrorProps {
+  /** The failed request can be retried without changing the current route. */
+  onRetry?: () => void;
+  message?: string;
+}
+
+export function ServiceError({
+  onRetry,
+  message = "This service is temporarily unavailable. Please try again.",
+}: ServiceErrorProps) {
+  return (
+    <main
+      role="alert"
+      data-testid="service-error"
+      className="min-h-[60vh] px-6 py-24 flex items-center justify-center"
+    >
+      <div className="max-w-xl text-center">
+        <p className="text-xs font-semibold uppercase tracking-[.2em] text-muted-foreground">
+          Temporary service issue
+        </p>
+        <h1 className="mt-3 text-4xl font-semibold tracking-tight">We could not load this page</h1>
+        <p className="mt-4 text-muted-foreground">{message}</p>
+        {onRetry ? (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-7 rounded-full bg-[#102957] px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
+          >
+            Try again
+          </button>
+        ) : null}
+      </div>
+    </main>
+  );
 }
 
 interface ErrorBoundaryProps {

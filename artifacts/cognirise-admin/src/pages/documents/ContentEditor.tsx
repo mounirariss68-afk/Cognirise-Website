@@ -21,6 +21,19 @@ import {
   removeStringListItem,
   stringListItems,
 } from "./string-list-fields";
+import {
+  RichBlockEditor,
+  RichListItems,
+} from "./rich-block-controls";
+import {
+  removeRichBlock,
+  richBlockValues,
+} from "./rich-block-model";
+import {
+  EnumMultiSelect,
+  RecordPicker,
+  SafeDestinationField,
+} from "./relationship-controls";
 
 type Content = Record<string, any>;
 
@@ -29,21 +42,6 @@ function lines(value: unknown) {
 }
 function stringLines(value: string) {
   return value.split("\n").map((item) => item.trim()).filter(Boolean);
-}
-function richLines(value: unknown) {
-  return Array.isArray(value)
-    ? value.map((block) => `${block.type === "heading" ? `H${block.level ?? 2}` : block.type === "list" ? "LIST" : block.type === "quote" ? "QUOTE" : "P"}: ${block.text ?? (block.items ?? []).join("; ")}`).join("\n")
-    : "";
-}
-function parseRich(value: string) {
-  return stringLines(value).map((line) => {
-    const [prefix, ...rest] = line.split(":");
-    const text = rest.join(":").trim();
-    if (/^H[23]$/i.test(prefix.trim())) return { type: "heading", level: Number(prefix.trim()[1]), text };
-    if (prefix.trim().toUpperCase() === "LIST") return { type: "list", style: "bullet", items: text.split(";").map((item) => item.trim()).filter(Boolean) };
-    if (prefix.trim().toUpperCase() === "QUOTE") return { type: "quote", text };
-    return { type: "paragraph", text: text || line.trim() };
-  }).filter((block) => ("text" in block ? block.text : block.items.length));
 }
 
 function Requirement({ required }: { required?: boolean }) {
@@ -104,13 +102,13 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         <Field label="Next review date" type="date" value={value.reviewDate} onChange={(next) => set("reviewDate", next || undefined)} />
       </div>
       {kind !== "industry" && <RecordList label="Sources" value={value.sources} columns={[{ key: "label", label: "Label" }, { key: "url", label: "HTTP(S) URL" }, { key: "accessedAt", label: "Accessed date", type: "date" }]} onChange={(next) => set("sources", next)} />}
-      <Area label="Related record IDs" value={lines(value.relatedIds)} onChange={(next) => set("relatedIds", stringLines(next))} placeholder="One CMS record UUID per line" rows={3} />
+      <RecordPicker label="Related records" value={value.relatedIds} onChange={(next) => set("relatedIds", next)} />
     </section>
   );
 
   return (
     <div className="space-y-6">
-      {errors.length > 0 && <div role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-4"><p className="font-semibold text-destructive">Fix these structured-content issues before saving:</p><ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}
+      {errors.length > 0 && <div role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-4"><p className="font-semibold text-destructive">Fix these content-field issues before saving this draft:</p><p className="mt-1 text-xs text-muted-foreground">Drafts may remain incomplete; publication readiness is checked separately. These errors identify values that cannot be saved under the current contract.</p><ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}
 
       {kind === "person" && <>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -175,7 +173,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
           <Field label="Category" required error={fieldErrors.category} value={value.category} onChange={(next) => set("category", next)} />
           <Choice label="Template" value={value.template ?? "standard"} options={["standard", "cognios-specialist"]} onChange={(next) => set("template", next)} />
           <Field label="CTA label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan" } : undefined)} />
-          <Field label="CTA link" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Learn more", href: next } : undefined)} />
+          <SafeDestinationField label="CTA destination" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Learn more", href: next } : undefined)} />
         </div>
         <MediaField
           label="Hero image"
@@ -190,7 +188,21 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         <Area label="Summary" required error={fieldErrors.summary} value={value.summary ?? ""} onChange={(next) => set("summary", next)} />
         <StringList label="Capabilities" value={value.capabilities} onChange={(next) => set("capabilities", next)} />
         <StringList label="Differentiators" value={value.differentiators} onChange={(next) => set("differentiators", next)} />
-        <Area label="Standard page sections" value={Array.isArray(value.sections) ? value.sections.map((section: any) => `${section.heading}\n${richLines(section.body)}`).join("\n---\n") : ""} onChange={(next) => set("sections", next.split(/\n---\n/).map((section) => { const [heading, ...body] = section.split("\n"); return { heading: heading.trim(), body: parseRich(body.join("\n")) }; }).filter((section) => section.heading))} placeholder={"Section heading\nP: Paragraph\n---\nNext section"} rows={8} />
+        <section className="space-y-4">
+          <Label>Standard page sections</Label>
+          {(Array.isArray(value.sections) ? value.sections : []).map((section: any, index: number) => (
+            <fieldset key={index} className="space-y-3 rounded-md border p-3">
+              <legend className="px-1 text-xs font-medium">Section {index + 1}</legend>
+              <Field label={`Section ${index + 1} heading`} value={section.heading} onChange={(heading) => set("sections", value.sections.map((current: any, currentIndex: number) => currentIndex === index ? { ...current, heading } : current))} />
+              <RichBlockEditor
+                label={`Section ${index + 1} body`}
+                value={section.body}
+                onChange={(body) => set("sections", value.sections.map((current: any, currentIndex: number) => currentIndex === index ? { ...current, body } : current))}
+              />
+            </fieldset>
+          ))}
+          <Button type="button" variant="outline" onClick={() => set("sections", [...(Array.isArray(value.sections) ? value.sections : []), { heading: "", body: [{ type: "paragraph", text: "" }] }])}>Add section</Button>
+        </section>
       </>}
 
       {kind === "publication" && <>
@@ -204,11 +216,12 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         <div className="grid gap-4 sm:grid-cols-2"><MediaField label="Hero image" value={value.heroMedia} onChange={(next) => set("heroMedia", next)} /><MediaField label="POV PDF" role="document" accept="pdf" required={value.variant === "pov"} value={value.pdfMedia} onChange={(next) => set("pdfMedia", next)} /></div>
         <MediaField label="Social sharing image" role="og-image" value={value.social?.imageMedia} onChange={(next) => set("social", { ...value.social, imageMedia: next })} />
         <Area label="Teaser" required error={fieldErrors.teaser} value={value.teaser ?? ""} onChange={(next) => set("teaser", next)} />
-        <Area label="Structured body" value={richLines(value.body)} onChange={(next) => set("body", parseRich(next))} placeholder={"P: Paragraph\nH2: Heading\nLIST: First; Second\nQUOTE: Quotation"} rows={12} />
+        <RichBlockEditor label="Structured body" value={value.body} onChange={(next) => set("body", next)} />
         <div className="grid gap-4 sm:grid-cols-2">
           <Area label="Topics" value={lines(value.topics)} onChange={(next) => set("topics", stringLines(next))} />
           <Area label="Sectors" value={lines(value.sectors)} onChange={(next) => set("sectors", stringLines(next))} />
         </div>
+        <RecordPicker label="Related platforms" kind="platform" value={value.platformIds} onChange={(next) => set("platformIds", next)} />
       </>}
 
       {kind === "case-study" && <>
@@ -226,7 +239,20 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         <MediaField label="Case-study hero image" value={value.heroMedia} onChange={(next) => set("heroMedia", next)} />
         <Area label="Public capability statement" required error={fieldErrors.impactStatement} value={value.impactStatement ?? ""} onChange={(next) => set("impactStatement", next)} />
         <Area label="Disclosure note" required error={fieldErrors.disclosureNote} value={value.disclosureNote ?? ""} onChange={(next) => set("disclosureNote", next)} />
-        <StringList label="Related website industries" value={value.relatedIndustries} onChange={(next) => set("relatedIndustries", next)} />
+        <EnumMultiSelect
+          label="Related website industries"
+          value={value.relatedIndustries}
+          options={["financial-services", "telecoms", "travel-hospitality", "energy-resources", "public-sector", "education"]}
+          labels={{
+            "financial-services": "Financial Services",
+            telecoms: "Telecoms",
+            "travel-hospitality": "Travel & Hospitality",
+            "energy-resources": "Energy & Resources",
+            "public-sector": "Public Sector",
+            education: "Education",
+          }}
+          onChange={(next) => set("relatedIndustries", next)}
+        />
         <Area label="Visual caption" value={value.visual?.caption ?? ""} onChange={(next) => set("visual", { ...value.visual, kind: "illustrative-interface-reconstruction", caption: next })} />
         <Area label="Visual alternative text" value={value.visual?.altText ?? ""} onChange={(next) => set("visual", { ...value.visual, kind: "illustrative-interface-reconstruction", altText: next })} />
         <Area label="Visual text equivalent" value={value.visual?.textEquivalent ?? ""} onChange={(next) => set("visual", { ...value.visual, kind: "illustrative-interface-reconstruction", textEquivalent: next })} />
@@ -234,7 +260,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         <Area label="Mandate" value={value.mandate ?? ""} onChange={(next) => set("mandate", next)} />
         <Area label="Context" value={value.context ?? ""} onChange={(next) => set("context", next)} />
         <StringList label="Constraints" value={value.constraints} onChange={(next) => set("constraints", next)} />
-        <Area label="Work delivered" value={richLines(value.work)} onChange={(next) => set("work", parseRich(next))} rows={8} />
+        <RichBlockEditor label="Work delivered" value={value.work} onChange={(next) => set("work", next)} />
         <StringList label="Controls" value={value.controls} onChange={(next) => set("controls", next)} />
         <StringList label="Outcomes" value={value.outcomes} onChange={(next) => set("outcomes", next)} />
         <RecordList label="Approved evidence and claims" value={value.evidence} columns={[{ key: "statement", label: "Claim" }, { key: "source.label", label: "Source label" }, { key: "source.url", label: "Source URL" }, { key: "approved", label: "Approved", type: "checkbox" }]} onChange={(next) => set("evidence", next)} />
@@ -337,7 +363,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         </section>}
         {showIndustryPath("selectedWork") && <section className="space-y-4">
         <Area label="Selected work section description" value={value.selectedWork?.description ?? ""} onChange={(next) => set("selectedWork", { ...value.selectedWork, description: next })} placeholder="What evidence and disclosure this section should contain" />
-        <RecordList label="Relevant service and first move" value={value.service ? [value.service] : []} minimum={1} columns={[{ key: "label", label: "Service label" }, { key: "href", label: "Internal path" }, { key: "firstMove", label: "First move" }]} onChange={(next) => set("service", next[0] ?? {})} />
+         <RecordList label="Relevant service and first move" value={value.service ? [value.service] : []} minimum={1} columns={[{ key: "label", label: "Service label" }, { key: "href", label: "Internal path" }, { key: "firstMove", label: "First move" }]} onChange={(next) => set("service", next[0] ?? {})} />
         </section>}
         {showIndustryPath("sources") && <section className="space-y-4">
         <RecordList label="Industry source trail" value={value.sources} minimum={1} columns={[{ key: "label", label: "Label" }, { key: "publisher", label: "Publisher" }, { key: "kind", label: "Evidence kind" }, { key: "url", label: "URL" }, { key: "accessedAt", label: "Accessed date", type: "date" }, { key: "market", label: "Market", type: "market" }, { key: "supports", label: "Supports", type: "textarea" }, { key: "limitation", label: "Limitation", type: "textarea" }]} onChange={(next) => set("sources", next)} />
@@ -391,12 +417,12 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         <div className="grid gap-4 sm:grid-cols-2">
           <Choice label="Framework template" value={value.template ?? ""} options={["agent-authority"]} onChange={(next) => set("template", next)} />
           <Field label="CTA label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan" } : undefined)} />
-          <Field label="CTA link" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Start a Value Scan", href: next } : undefined)} />
+          <SafeDestinationField label="CTA destination" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Start a Value Scan", href: next } : undefined)} />
         </div>
         <MediaField label="Framework hero image" required value={value.heroMedia} onChange={(next) => set("heroMedia", next)} />
         <Area label="Teaser" value={value.teaser ?? ""} onChange={(next) => set("teaser", next)} />
         <Area label="Handover explanation" value={value.handoverExplanation ?? ""} onChange={(next) => set("handoverExplanation", next)} rows={6} />
-        <Area label="Methodology narrative" value={richLines(value.methodology)} onChange={(next) => set("methodology", parseRich(next))} placeholder={"H2: Heading\nP: Governed explanation\nLIST: First; Second"} rows={12} />
+        <RichBlockEditor label="Methodology narrative" value={value.methodology} onChange={(next) => set("methodology", next)} required />
         <RecordList label="Worked example" value={value.workedExample ? [value.workedExample] : []} minimum={1} columns={[{ key: "sector", label: "Sector" }, { key: "title", label: "Title" }, { key: "handover", label: "Handover type" }, { key: "reversibility", label: "Reversibility (R1–R4)" }, { key: "reach", label: "Reach (H1–H5)" }, { key: "exposureBand", label: "Exposure band" }, { key: "oversight", label: "Oversight" }, { key: "detail", label: "Explanation" }]} onChange={(next) => set("workedExample", { ...value.workedExample, ...(next[0] ?? {}) })} />
         <div className="grid gap-4 sm:grid-cols-2">
           <Choice
@@ -422,8 +448,8 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         <Area label="Opening narrative" required error={fieldErrors.narrative} value={value.narrative ?? ""} onChange={(next) => set("narrative", next)} rows={5} />
         <LandingSections value={value.sections} onChange={(sections) => set("sections", sections)} />
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="CTA label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan", style: value.cta?.style ?? "primary" } : undefined)} />
-          <Field label="CTA link" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Learn more", href: next, style: value.cta?.style ?? "primary" } : undefined)} />
+         <Field label="CTA label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan", style: value.cta?.style ?? "primary" } : undefined)} />
+          <SafeDestinationField label="CTA destination" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Learn more", href: next, style: value.cta?.style ?? "primary" } : undefined)} />
         </div>
         <Area label="SEO title" value={value.seo?.title ?? ""} onChange={(next) => set("seo", { ...value.seo, title: next || undefined })} />
         <Area label="SEO description" value={value.seo?.description ?? ""} onChange={(next) => set("seo", { ...value.seo, description: next || undefined })} rows={3} />
@@ -537,11 +563,11 @@ function LandingSections({ value, onChange }: {
       </div>
       {section.type === "narrative" && <>
         <Field label="Heading" value={section.heading} onChange={(heading) => update(index, { heading: heading || undefined })} />
-        <Area label="Structured narrative" required value={richLines(section.body)} onChange={(body) => update(index, { body: parseRich(body) })} placeholder={"H2: Heading\nP: Paragraph\nLIST: First; Second"} rows={6} />
+        <RichBlockEditor label="Structured narrative" required value={section.body} onChange={(body) => update(index, { body })} />
       </>}
       {section.type === "cta" && <div className="grid gap-4 sm:grid-cols-3">
         <Field label="Label" required value={section.label} onChange={(label) => update(index, { label })} />
-        <Field label="Destination" required value={section.href} onChange={(href) => update(index, { href })} />
+        <SafeDestinationField label="Destination" required value={section.href} onChange={(href) => update(index, { href })} />
         <Choice label="Style" value={section.style ?? "primary"} options={["primary", "secondary", "text"]} onChange={(style) => update(index, { style })} />
       </div>}
       {section.type === "legal" && <Area label="Legal text" required value={section.text ?? ""} onChange={(text) => update(index, { text })} />}
@@ -645,28 +671,40 @@ type PublicSectorRichBlock =
   | { type: "heading"; level: 2 | 3; text: string }
   | { type: "list"; style: "bullet" | "numbered"; items: string[] };
 
-function publicSectorRichBlocks(value: unknown): PublicSectorRichBlock[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((block): block is PublicSectorRichBlock =>
-    Boolean(block)
+function publicSectorRichBlocks(value: unknown): unknown[] {
+  return richBlockValues(value);
+}
+
+function isPublicSectorRichBlock(block: unknown): block is PublicSectorRichBlock {
+  return Boolean(block)
     && typeof block === "object"
-    && (block.type === "paragraph" || block.type === "heading" || block.type === "list")
-  );
+    && !Array.isArray(block)
+    && ((block as Record<string, unknown>).type === "paragraph"
+      || (block as Record<string, unknown>).type === "heading"
+      || (block as Record<string, unknown>).type === "list");
+}
+
+function publicSectorRichBlockText(block: PublicSectorRichBlock) {
+  return "text" in block ? block.text : block.items.join("\n");
+}
+
+function publicSectorRichBlockIsSupported(block: unknown): block is PublicSectorRichBlock {
+  return isPublicSectorRichBlock(block);
 }
 
 function PublicSectorRichBlockEditor({ label, value, onChange, required }: {
   label: string;
   value: unknown;
-  onChange: (value: PublicSectorRichBlock[]) => void;
+  onChange: (value: unknown[]) => void;
   required?: boolean;
 }) {
   const blocks = publicSectorRichBlocks(value);
-  const update = (index: number, next: PublicSectorRichBlock) =>
+  const update = (index: number, next: unknown) =>
     onChange(blocks.map((block, current) => current === index ? next : block));
   const changeType = (index: number, type: PublicSectorRichBlock["type"]) => {
     const current = blocks[index];
-    if (!current) return;
-    const text = "text" in current ? current.text : current.items.join("\n");
+    if (!isPublicSectorRichBlock(current)) return;
+    const text = publicSectorRichBlockText(current);
     update(index, type === "heading"
       ? { type, level: current.type === "heading" ? current.level : 2, text }
       : type === "list"
@@ -679,7 +717,14 @@ function PublicSectorRichBlockEditor({ label, value, onChange, required }: {
       <Button type="button" size="sm" variant="outline" onClick={() => onChange([...blocks, { type: "paragraph", text: "" }])}>Add block</Button>
     </div>
     <p className="text-xs text-muted-foreground">Blocks and list items are edited individually. Line breaks, numbering, and punctuation are preserved exactly.</p>
-    {blocks.map((block, index) => <fieldset key={index} className="space-y-3 rounded-md border p-3">
+    {blocks.map((block, index) => !publicSectorRichBlockIsSupported(block) ? (
+      <fieldset key={index} className="space-y-3 rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
+        <legend className="px-1 text-xs font-medium">Unsupported legacy block {index + 1}</legend>
+        <p role="alert" className="text-sm text-amber-800 dark:text-amber-200">This block is preserved unchanged because it is outside the Public Sector contract.</p>
+        <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded bg-background p-2 text-xs">{JSON.stringify(block, null, 2)}</pre>
+        <Button type="button" variant="ghost" onClick={() => onChange(removeRichBlock(value, index))}>Remove unsupported block</Button>
+      </fieldset>
+    ) : <fieldset key={index} className="space-y-3 rounded-md border p-3">
       <legend className="px-1 text-xs font-medium">{label} {index + 1}</legend>
       <div className="grid gap-3 sm:grid-cols-2">
         <Choice label={`${label} ${index + 1} type`} value={block.type} options={["paragraph", "heading", "list"]} onChange={(type) => changeType(index, type as PublicSectorRichBlock["type"])} />
@@ -689,28 +734,9 @@ function PublicSectorRichBlockEditor({ label, value, onChange, required }: {
       {block.type === "list"
         ? <RichListItems label={`${label} ${index + 1} items`} value={block.items} onChange={(items) => update(index, { ...block, items })} />
         : <Area label={`${label} ${index + 1} text`} required value={block.text} onChange={(text) => update(index, { ...block, text })} rows={5} />}
-      <Button type="button" variant="ghost" onClick={() => onChange(blocks.filter((_, current) => current !== index))}>Remove block</Button>
+      <Button type="button" variant="ghost" onClick={() => onChange(removeRichBlock(value, index))}>Remove block</Button>
     </fieldset>)}
     {blocks.length === 0 && <p className="text-xs text-muted-foreground">No blocks added.</p>}
-  </section>;
-}
-
-function RichListItems({ label, value, onChange }: {
-  label: string;
-  value: unknown;
-  onChange: (value: string[]) => void;
-}) {
-  const items = Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
-  return <section className="space-y-3 rounded-md bg-muted/30 p-3">
-    <div className="flex items-center justify-between">
-      <Label>{label} <Requirement required /></Label>
-      <Button type="button" size="sm" variant="outline" disabled={items.length >= 50} onClick={() => onChange([...items, ""])}>Add list item</Button>
-    </div>
-    {items.map((item, index) => <div key={index} className="space-y-2">
-      <Area label={`${label} ${index + 1}`} required value={item} onChange={(next) => onChange(items.map((current, currentIndex) => currentIndex === index ? next : current))} rows={3} />
-      <Button type="button" variant="ghost" onClick={() => onChange(items.filter((_, current) => current !== index))}>Remove item</Button>
-    </div>)}
-    {items.length === 0 && <p className="text-xs text-muted-foreground">No list items added.</p>}
   </section>;
 }
 

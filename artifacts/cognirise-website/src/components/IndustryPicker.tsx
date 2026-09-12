@@ -159,7 +159,14 @@ export function IndustryPicker({
 
       {loading && <div className="home-industry-status" role="status" data-testid="status-industry-picker">Loading industry points of view…</div>}
       {empty && <div className="home-industry-status" data-testid="status-industry-picker-empty">No industry points of view are currently published.</div>}
-      {unavailable && <div className="home-industry-status" role="alert" data-testid="status-industry-picker-error">Industry points of view are temporarily unavailable.</div>}
+      {unavailable && (
+        <div className="home-industry-status" role="alert" data-testid="status-industry-picker-error">
+          <span>Industry points of view are temporarily unavailable.</span>{" "}
+          <button type="button" className="underline" onClick={() => { void industryQuery.refetch(); }}>
+            Try again
+          </button>
+        </div>
+      )}
 
       {!loading && !empty && !unavailable && (
         <SpatialDisclosure

@@ -51,10 +51,8 @@ test("public media stays on the revision pin when a newer asset version appears"
       width: 1200,
       metadata: {
         caption: "Approved artwork",
-        altText: "Approved artwork",
-        credit: "Cognirise",
         motionMetadata: null,
-        focalPoint: null,
+        focalPoint: { x: 0.25, y: 0.75 },
       },
     }],
   ]);
@@ -248,8 +246,7 @@ test("public media stays on the revision pin when a newer asset version appears"
         };
       }
       if (statement.includes("UPDATE cms_media_assets SET filename")) {
-        assetAltText = values?.[2] ? values?.[3] as string | null : assetAltText;
-        assetCredit = values?.[4] ? values?.[5] as string | null : assetCredit;
+        assert.doesNotMatch(statement, /alt_text|credit/);
         return { rowCount: 1, rows: [{ id: assetId }] };
       }
       if (statement.includes("INSERT INTO cms_media_versions(")) {
@@ -437,6 +434,23 @@ test("public media stays on the revision pin when a newer asset version appears"
     false,
   );
   for (const stream of deliveredStreams) {
+    // node:stream pipeline detaches its abort/error handlers on a later turn
+    // after an aborted response. Drain that lifecycle before asserting the
+    // adapter-owned listener is the only retained listener.
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const errorListeners = getEventListeners(stream, "error");
+      const closeListeners = getEventListeners(stream, "close");
+      const endListeners = getEventListeners(stream, "end");
+      if (
+        errorListeners.length === 1 &&
+        errorListeners[0] === storageErrorListeners.get(stream) &&
+        closeListeners.length === 0 &&
+        endListeners.length === 0
+      ) {
+        break;
+      }
+      await new Promise<void>((resolve) => setImmediate(resolve));
+    }
     assert.deepEqual(getEventListeners(stream, "error"), [storageErrorListeners.get(stream)]);
     assert.equal(getEventListeners(stream, "close").length, 0);
     assert.equal(getEventListeners(stream, "end").length, 0);
@@ -471,31 +485,47 @@ test("public media stays on the revision pin when a newer asset version appears"
   });
   assert.equal(metadataPatch.status, 200);
   const patched = await metadataPatch.json() as {
-    caption: string; altText: null; credit: string;
+    caption: string; altText: null; credit: string; status: string;
   };
   assert.equal(patched.caption, "Revised caption");
   assert.equal(patched.altText, null);
   assert.equal(patched.credit, "Revised credit");
+  assert.equal(patched.status, "review");
   const metadataVersion = versions.get(revisions.second.versionId)!;
   assert.deepEqual(metadataVersion.metadata, {
     caption: "Revised caption",
     altText: null,
     credit: "Revised credit",
     motionMetadata: null,
-    focalPoint: null,
+    focalPoint: { x: 0.25, y: 0.75 },
+    rightsStatus: "needs-review",
+    accessibilityStatus: "needs-review",
+    sourceReview: null,
   });
 
   const unchangedContent = await (await fetch(contentUrl)).json() as {
-    media: Array<{ versionId: string; url: string; altText: string | null; caption: string; credit: string }>;
+    media: Array<{
+      versionId: string;
+      url: string;
+      altText: string | null;
+      caption: string;
+      credit: string;
+      focalPoint: { x: number; y: number } | null;
+    }>;
   };
   assert.equal(unchangedContent.media[0].versionId, revisions.first.versionId);
   assert.equal(unchangedContent.media[0].altText, "Approved artwork");
   assert.equal(unchangedContent.media[0].caption, "Approved artwork");
   assert.equal(unchangedContent.media[0].credit, "Cognirise");
+  assert.deepEqual(unchangedContent.media[0].focalPoint, { x: 0.25, y: 0.75 });
   assert.equal(
     await (await fetch(`${origin}${unchangedContent.media[0].url}`)).text(),
     "approved-version-one",
   );
+  const pendingMedia = await fetch(
+    `${origin}/api/public/media/${assetId}/${revisions.second.versionId}`,
+  );
+  assert.equal(pendingMedia.status, 404);
 
   publishedRevision = revisions.second;
   const republishedContent = await (await fetch(contentUrl)).json() as {
@@ -524,6 +554,6 @@ test("public media stays on the revision pin when a newer asset version appears"
     },
     body: JSON.stringify({ revisionId: pendingRevisionId }),
   });
-  assert.equal(publish.status, 200);
+  assert.equal(publish.status, 422);
   assert.equal(missingReferenceInserted, true);
 });

@@ -12,7 +12,18 @@ import { droppedFiles, validateIntake } from "./upload-intake";
 import { IMAGE_ACCEPT, VIDEO_ACCEPT, type MediaCollection, type LinkedInAssetKind } from "./MediaLibrary";
 
 export function BatchUploadZone() {
-  const { queue, addFiles, removeItem, updateItem, processItem, processAll, reattachFile, persistenceError } = useBatchUpload();
+  const {
+    queue,
+    addFiles,
+    removeItem,
+    clearCompleted,
+    discardFailed,
+    updateItem,
+    processItem,
+    processAll,
+    reattachFile,
+    persistenceError,
+  } = useBatchUpload();
   const { data: session } = useGetSession();
   const canUpload = ["editor", "publisher", "administrator"].includes(session?.user?.role ?? "");
   const [collection, setCollection] = useState<MediaCollection>("website");
@@ -24,6 +35,8 @@ export function BatchUploadZone() {
   const fileInput = useRef<HTMLInputElement>(null);
   const selected = queue.find((item) => item.id === metadataId);
   const busy = queue.some((item) => ["requesting", "uploading", "finalizing"].includes(item.status));
+  const completedCount = queue.filter((item) => item.status === "completed").length;
+  const failedCount = queue.filter((item) => item.status === "error").length;
 
   useEffect(() => {
     const preventFileNavigation = (event: DragEvent) => {
@@ -123,8 +136,23 @@ export function BatchUploadZone() {
       {queue.length > 0 && <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="font-semibold">Upload queue ({queue.length})</h3>
-          <Button onClick={() => void processAll()} disabled={busy || !queue.some((item) => item.reviewed && item.status !== "completed" && (item.file || item.putCompleted))}>Upload reviewed files</Button>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => void processAll()} disabled={busy || !queue.some((item) => item.reviewed && item.status !== "completed" && (item.file || item.putCompleted))}>Upload reviewed files</Button>
+            {completedCount > 0 && (
+              <Button variant="outline" onClick={() => clearCompleted()} disabled={busy}>
+                Clear completed ({completedCount})
+              </Button>
+            )}
+            {failedCount > 0 && (
+              <Button variant="outline" onClick={() => discardFailed()} disabled={busy}>
+                Discard failed ({failedCount})
+              </Button>
+            )}
+          </div>
         </div>
+         <p className="text-xs text-muted-foreground">
+           Queue cleanup only removes local rows. It never deletes an approved server asset, changes a published reference, or cancels an in-flight transfer.
+         </p>
         <div className="max-h-[480px] space-y-2 overflow-y-auto" aria-live="polite">
           {queue.map((item) => {
             const working = ["requesting", "uploading", "finalizing"].includes(item.status);
@@ -159,7 +187,8 @@ export function BatchUploadZone() {
                   </div>}
                   <Button variant="outline" size="sm" onClick={() => setMetadataId(item.id)}>{item.started ? "View metadata" : "Review metadata"}</Button>
                   {!completed && <Button size="sm" disabled={busy || !item.reviewed || missing} onClick={() => void processItem(item.id)}>{item.started ? "Retry" : "Upload"}</Button>}
-                  {!item.started && <Button variant="ghost" size="icon" aria-label={`Remove ${item.filename} from queue`} onClick={() => removeItem(item.id)}><Trash2 className="h-4 w-4" /></Button>}
+                  {item.status === "error" && <Button variant="ghost" size="icon" aria-label={`Discard failed ${item.filename}`} onClick={() => discardFailed(item.id)}><Trash2 className="h-4 w-4" /></Button>}
+                  {!item.started && item.status !== "error" && <Button variant="ghost" size="icon" aria-label={`Remove ${item.filename} from queue`} onClick={() => removeItem(item.id)}><Trash2 className="h-4 w-4" /></Button>}
                 </div>
               </div>
               {item.status === "uploading" && <progress className="mt-3 h-2 w-full accent-primary" aria-label={`Upload progress for ${item.filename}`} value={item.progress} max={100} />}

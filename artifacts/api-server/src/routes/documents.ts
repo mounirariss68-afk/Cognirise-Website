@@ -39,6 +39,10 @@ import { asyncRoute } from "../lib/http";
 import { hashToken, randomToken } from "../lib/security";
 import { canChangeCanonicalSlug } from "../lib/policy";
 import { downloadMediaObject } from "../lib/object-storage";
+import {
+  approvedMediaVersionMetadataSql,
+  mediaVersionReviewStatus,
+} from "../lib/media-version-governance";
 import { navigationCandidates, publishedNavigationPolicy } from "../lib/navigation-policy";
 import {
   DELETE_DOCUMENT_SQL,
@@ -256,6 +260,13 @@ export function mediaGovernanceErrors(
     const rightsStatus = metadata.rightsStatus ?? rights.status;
     if (rightsStatus != null && !approvedRightsStatuses.has(String(rightsStatus))) {
       errors.push(`${reference.fieldPath}: media rights are not approved.`);
+    }
+    const accessibility = metadata.accessibility && typeof metadata.accessibility === "object"
+      ? metadata.accessibility as Record<string, unknown>
+      : {};
+    const accessibilityStatus = metadata.accessibilityStatus ?? accessibility.status;
+    if (accessibilityStatus != null && accessibilityStatus !== "approved") {
+      errors.push(`${reference.fieldPath}: media accessibility review is not approved.`);
     }
     const rightsExpiry = metadata.rightsExpiresAt ?? rights.expiresAt;
     if (typeof rightsExpiry === "string" && Date.parse(rightsExpiry) < Date.now()) {
@@ -2576,6 +2587,7 @@ router.post(
                 WHERE asset_id=a.id ORDER BY version_number DESC LIMIT 1
              ) latest ON ref.media_version_id IS NULL
             WHERE a.id::text=ANY($1::text[]) AND a.status IN ('active','ready')
+              AND ${approvedMediaVersionMetadataSql("COALESCE(pinned.metadata,latest.metadata)")}
               AND COALESCE(pinned.id,latest.id) IS NOT NULL`,
           [mediaIds, id, `revision:${parsed.data.revisionId}`],
         )
@@ -3327,8 +3339,14 @@ router.get(
     const pending = await pool.query(
       `SELECT 1 FROM cms_media_references ref
         JOIN cms_media_assets a ON a.id=ref.asset_id
+        JOIN cms_media_versions v ON v.id=ref.media_version_id AND v.asset_id=a.id
        WHERE ref.document_id=$1 AND ref.field_path='revision:'||$2::text
-         AND a.status='pending-review' LIMIT 1`,
+         AND (
+           a.status='pending-review'
+           OR v.metadata->>'rightsStatus'='needs-review'
+           OR v.metadata->>'accessibilityStatus'='needs-review'
+         )
+        LIMIT 1`,
       [String(row.document_id), String(row.revision_id)],
     );
     if (pending.rowCount && !canAccessPendingPreviewMedia((res.locals.auth as AuthContext).user.role)) {
@@ -3393,9 +3411,16 @@ router.get(
         mimeType: asset.media_type,
         width: asset.width ?? null,
         height: asset.height ?? null,
-        altText: asset.alt_text ?? null,
+          altText: Object.hasOwn(asset.metadata ?? {}, "altText")
+            ? asset.metadata.altText
+            : asset.alt_text ?? null,
         caption: asset.metadata?.caption ?? null,
-        credit: asset.credit ?? null,
+          credit: Object.hasOwn(asset.metadata ?? {}, "credit")
+            ? asset.metadata.credit
+            : asset.credit ?? null,
+          focalPoint: Object.hasOwn(asset.metadata ?? {}, "focalPoint")
+            ? asset.metadata.focalPoint
+            : null,
       })),
       missingMediaIds: mediaIds.filter((id) => !availableIds.has(id)),
       validationWarnings: validation.success ? [] : validation.errors,
@@ -3409,7 +3434,7 @@ router.get(
   requireMfa,
   asyncRoute(async (req, res) => {
     const asset = await pool.query(
-      `SELECT d.id document_id,d.kind,v.storage_key,r.payload,e.market,e.locale,
+      `SELECT d.id document_id,d.kind,v.storage_key,v.metadata,r.payload,e.market,e.locale,
               p.requested_market,p.requested_locale,a.status,
           CASE WHEN v.metadata->>'rendition'='webp-1600' THEN 'image/webp' ELSE a.media_type END media_type
          FROM cms_preview_sessions p
@@ -3437,7 +3462,8 @@ router.get(
       res.status(404).json({ error: "Preview media not found or expired." });
       return;
     }
-    if (asset.rows[0].status === "pending-review"
+    if ((asset.rows[0].status === "pending-review"
+      || mediaVersionReviewStatus(asset.rows[0].metadata) === "pending")
       && !canAccessPendingPreviewMedia((res.locals.auth as AuthContext).user.role)) {
       res.status(403).json({ error: "Pending-review preview media requires editor, publisher, or administrator access." });
       return;

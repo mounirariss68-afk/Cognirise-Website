@@ -127,7 +127,7 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
             <p className="mt-8 max-w-[590px] text-lg leading-8 text-white/70">{heroBody}</p>
           </div>
           <figure className="clip-diagonal relative h-[390px] overflow-hidden lg:h-[520px]">
-            <img className="h-full w-full object-cover" src={leadershipVisual.src} alt={leadershipVisual.alt} />
+             <img className="h-full w-full object-cover" style={{ objectPosition: leadershipVisual.objectPosition }} src={leadershipVisual.src} alt={leadershipVisual.alt} />
             <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))]/80 via-transparent to-transparent" />
           </figure>
         </div>

@@ -117,12 +117,72 @@ This export is metadata-only: it excludes authentication secrets/sessions, forms
 
 ## Health checklist
 
-- [ ] API health endpoint (when implemented) returns expected authenticated/public status without sensitive details.
+- [ ] `/api/healthz` reports database liveness and `/api/readyz` reports generic
+  200/503 readiness for database, required schema compatibility, and a
+  representative public-navigation query, including the receipt/outbox
+  delivery schema; neither exposes SQL, content, or private data.
+- [ ] The additive 0027 receipt/outbox merge preparation is run only by the
+  development `prepare-schema-push` step before a safe schema push. Production
+  applies the checked-in migration chain; API startup performs no DDL.
 - [ ] Database connectivity, migration version, queue/job processing, durable media storage, and backup job status are healthy.
 - [ ] Public published-content query works for UAE and an override/fallback market.
 - [ ] Admin login, MFA, CSRF/origin rejection, and a non-mutating authorized request work in the approved environment.
 - [ ] Sitemap excludes drafts/restricted/admin routes; preview is no-store/no-index.
 - [ ] Health result, time, operator, environment, and incident link are recorded.
+
+## Disposable browser fixture and preservation baseline
+
+Provision browser fixtures only against an isolated development database:
+
+```sh
+NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture -- \
+  --development baseline --baseline /tmp/cognirise-cms-preservation-baseline.json
+NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture -- \
+  --development setup --credentials /tmp/cognirise-owner-fixture.json
+# Run the authenticated browser/API journey, then:
+NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture -- \
+  --development cleanup --credentials /tmp/cognirise-owner-fixture.json
+```
+
+The baseline command is read-only and must be run before approved fixture
+activity. Its mode-600 `/tmp` output contains only identifiers, publication
+pointers, revision counts/digests, market-availability decisions, and
+immutable media pins. Cleanup discovers later browser-created documents through
+exact fixture identities, deletes dependents before authors/users, and refuses
+to proceed when a non-fixture reference or residual owned row is found. Never
+use a prefix-only SQL deletion or place the state/baseline files in source
+control, logs, tickets, or chat.
+
+## Expired media staging janitor
+
+The staging janitor is deliberately a separate operator command, not API
+startup work and not part of media finalization. It is a dry run by default:
+
+```sh
+pnpm --filter @workspace/scripts cms:media-staging-janitor -- \
+  --older-than-hours=24
+```
+
+It lists only the private `cms-media/staging/` namespace and reports candidates
+without changing the database or storage. Apply requires an explicit flag:
+
+```sh
+pnpm --filter @workspace/scripts cms:media-staging-janitor -- \
+  --apply --older-than-hours=24
+```
+
+Before applying, review the report and confirm the configured bucket and
+private directory. A candidate must have an old storage generation, an old
+pending asset session (or a janitor terminal marker), no media versions, no
+media references, and no published revision payload reference. The janitor
+locks the asset row with `FOR UPDATE SKIP LOCKED`, commits a terminal marker
+before deleting, and uses the storage generation as a delete precondition.
+Finalization therefore either wins the row lock or observes the terminal
+state; it cannot race into a deleted staging object. Missing generation,
+recent objects, malformed paths, active/retryable sessions, committed
+immutable objects, published references, failed transactions, or uncertain
+storage state are retained and reported. A failed deletion is retryable from
+its committed marker, and repeat runs are idempotent.
 
 ## Published-revision migration gate
 

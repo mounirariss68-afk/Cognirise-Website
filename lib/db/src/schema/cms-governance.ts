@@ -1,5 +1,6 @@
 import {
   index,
+  integer,
   jsonb,
   pgTable,
   text,
@@ -89,6 +90,11 @@ export const cmsOperationReceiptsTable = pgTable(
     subjectId: text("subject_id").notNull(),
     requestDigest: text("request_digest").notNull(),
     resultDigest: text("result_digest"),
+    actorUserId: uuid("actor_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    response: jsonb("response").$type<Record<string, unknown>>(),
+    statusCode: integer("status_code"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [

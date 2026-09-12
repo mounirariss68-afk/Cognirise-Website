@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Search, Filter, MoreHorizontal, ArrowRight } from "lucide-react";
+import { Loader2, Plus, Search, Filter, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -74,16 +74,6 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     search: search || undefined,
     status
   }, { query: { queryKey: getListDocumentsQueryKey({ kind, page, pageSize: 20, search: search || undefined, status }) } });
-  const peopleMatrixParams = { kind: "person" as const, page: 1, pageSize: 100 };
-  const { data: peopleMatrixData } = useListDocuments(
-    peopleMatrixParams,
-    {
-      query: {
-        queryKey: getListDocumentsQueryKey(peopleMatrixParams),
-        enabled: kind === "person",
-      },
-    },
-  );
   const marketParams = { page: 1, pageSize: 100 };
   const { data: marketData, isLoading: areMarketsLoading, isError: marketsFailed } = useListMarketEditions(
     marketParams,
@@ -121,6 +111,12 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   useEffect(() => {
     setCreateContent(initialCmsContent(kind) as Record<string, any>);
   }, [kind]);
+
+  useEffect(() => {
+    if (pageData && page > Math.max(pageData.totalPages, 1)) {
+      setPage(Math.max(pageData.totalPages, 1));
+    }
+  }, [page, pageData]);
 
   const getKindLabel = (k: string) => {
     return k.charAt(0).toUpperCase() + k.slice(1).replace('-', ' ');
@@ -194,50 +190,68 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
         )}
       </div>
 
-      {kind === "person" && peopleMatrixData && enabledMarkets.length > 0 && (
-        <PeopleMarketMatrix
-          people={peopleMatrixData.items}
-          markets={enabledMarkets}
-          canManage={canManageAvailability}
-          isAdministrator={session?.user?.role === "administrator"}
-        />
-      )}
+       <div className="mb-4 flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+         <div className="relative min-w-[14rem] max-w-md flex-1">
+           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+           <Input
+             placeholder={`Search ${getKindLabel(kind)}s...`}
+             aria-label={`Search ${getKindLabel(kind)}s`}
+             className="bg-background pl-9"
+             value={search}
+             onChange={(e) => {
+               setSearch(e.target.value);
+               setPage(1);
+             }}
+           />
+         </div>
+         <Select
+           value={status || "all"}
+           onValueChange={(v) => {
+             setStatus(v === "all" ? undefined : v as DocumentStatus);
+             setPage(1);
+           }}
+         >
+           <SelectTrigger className="w-[180px] bg-background" aria-label="Filter documents by status">
+             <Filter className="mr-2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+             <SelectValue placeholder="All Statuses" />
+           </SelectTrigger>
+           <SelectContent>
+             <SelectItem value="all">All Statuses</SelectItem>
+             <SelectItem value="draft">Draft</SelectItem>
+             <SelectItem value="in-review">In Review</SelectItem>
+             <SelectItem value="approved">Approved</SelectItem>
+             <SelectItem value="scheduled">Scheduled</SelectItem>
+             <SelectItem value="published">Published</SelectItem>
+             <SelectItem value="archived">Archived</SelectItem>
+           </SelectContent>
+         </Select>
+       </div>
 
-      <div className="bg-card border border-border rounded-xl shadow-sm flex min-h-[24rem] max-h-[70vh] flex-col overflow-hidden">
-        <div className="p-4 border-b border-border flex flex-wrap items-center gap-4 bg-muted/20 shrink-0">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input 
-              placeholder={`Search ${getKindLabel(kind)}s...`} 
-              className="pl-9 bg-background"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <Select value={status || "all"} onValueChange={(v) => setStatus(v === "all" ? undefined : v as DocumentStatus)}>
-            <SelectTrigger className="w-[180px] bg-background">
-              <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="All Statuses" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="in-review">In Review</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-              <SelectItem value="archived">Archived</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+       {kind === "person" && (
+         <PeopleMarketMatrix
+           people={pageData?.items ?? []}
+           markets={enabledMarkets}
+           canManage={canManageAvailability}
+           isAdministrator={session?.user?.role === "administrator"}
+           isLoading={isLoading}
+           page={page}
+           pageSize={20}
+           total={pageData?.total ?? 0}
+           totalPages={pageData?.totalPages ?? 0}
+           onPageChange={setPage}
+         />
+       )}
 
+       {kind !== "person" && <div className="bg-card border border-border rounded-xl shadow-sm flex min-h-[24rem] max-h-[70vh] flex-col overflow-hidden">
         <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
-          <Table>
+           <Table aria-label={`${getKindLabel(kind)} content`}>
             <TableHeader className="bg-muted/30 sticky top-0 backdrop-blur-sm z-10">
               <TableRow className="border-border">
-                <TableHead className="font-mono text-xs uppercase tracking-wider">Title & Slug</TableHead>
-                <TableHead className="font-mono text-xs uppercase tracking-wider w-[120px]">Status</TableHead>
-                <TableHead className="font-mono text-xs uppercase tracking-wider w-[150px]">Markets</TableHead>
-                <TableHead className="font-mono text-xs uppercase tracking-wider w-[180px]">Last Updated</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
+                 <TableHead scope="col" className="font-mono text-xs uppercase tracking-wider">Title & Slug</TableHead>
+                 <TableHead scope="col" className="font-mono text-xs uppercase tracking-wider w-[120px]">Status</TableHead>
+                 <TableHead scope="col" className="font-mono text-xs uppercase tracking-wider w-[150px]">Markets</TableHead>
+                 <TableHead scope="col" className="font-mono text-xs uppercase tracking-wider w-[180px]">Last Updated</TableHead>
+                 <TableHead scope="col" className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -247,7 +261,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                     <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
                   </TableCell>
                 </TableRow>
-              ) : pageData?.items.length === 0 ? (
+               ) : !pageData || pageData.items.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-32 text-center text-muted-foreground font-mono text-sm">
                     No {kind}s found matching criteria.
@@ -255,10 +269,19 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                 </TableRow>
               ) : (
                 pageData?.items.map((doc) => (
-                  <TableRow key={doc.id} className="border-border/50 hover:bg-muted/20 cursor-pointer transition-colors" onClick={() => setLocation(`/content/${doc.id}`)}>
+                     <TableRow key={doc.id} className="border-border/50 hover:bg-muted/20 transition-colors">
                     <TableCell>
-                      <div className="font-medium text-foreground">{doc.title}</div>
-                      <div className="text-xs text-muted-foreground font-mono mt-0.5">{doc.slug}</div>
+                       <a
+                         href={`/content/${doc.id}`}
+                         className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                         onClick={(event) => {
+                           event.preventDefault();
+                           setLocation(`/content/${doc.id}`);
+                         }}
+                       >
+                         <div className="font-medium text-foreground">{doc.title}</div>
+                         <div className="text-xs text-muted-foreground font-mono mt-0.5">{doc.slug}</div>
+                       </a>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={`font-mono text-[10px] uppercase tracking-wider rounded-sm ${getStatusColor(doc.status)}`}>
@@ -280,15 +303,15 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent/10 hover:text-accent">
-                            <MoreHorizontal className="w-4 h-4" />
+                           <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent/10 hover:text-accent" aria-label={`Actions for ${doc.title}`}>
+                             <MoreHorizontal className="w-4 h-4" aria-hidden="true" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="font-mono text-xs">
                           <DropdownMenuItem onClick={() => setLocation(`/content/${doc.id}`)}>
                             Edit content
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => window.open(`/preview/${doc.slug}`, '_blank')}>
+                             <DropdownMenuItem onClick={() => window.open(`/preview/${doc.slug}`, '_blank', 'noopener,noreferrer')}>
                             Preview
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -307,12 +330,12 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
               Showing {((page - 1) * 20) + 1} to {Math.min(page * 20, pageData.total)} of {pageData.total}
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</Button>
-              <Button variant="outline" size="sm" disabled={page === pageData.totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
-            </div>
+               <Button variant="outline" size="sm" aria-label="Go to previous page" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</Button>
+               <Button variant="outline" size="sm" aria-label="Go to next page" disabled={page === pageData.totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
+             </div>
           </div>
         )}
-      </div>
+       </div>}
 
       <Dialog
         open={isCreateOpen}
@@ -331,7 +354,9 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
             <DialogDescription className="font-mono text-xs">
               {kind === "office"
                 ? "Create a complete office draft. You can continue editing it before review."
-                : `${CONTENT_GUIDANCE[kind]} Complete the required structured fields to initialize the governed draft.`}
+                : kind === "person"
+                  ? "Start with the profile name and market. Complete role, biography, identity and locale exceptions in the editor."
+                  : `${CONTENT_GUIDANCE[kind]} Complete the required structured fields to initialize the governed draft.`}
             </DialogDescription>
           </DialogHeader>
           
@@ -342,14 +367,14 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-mono text-xs uppercase tracking-wider">{kind === "office" ? "Office name / city" : "Title"}</FormLabel>
+                    <FormLabel className="font-mono text-xs uppercase tracking-wider">{kind === "office" ? "Office name / city" : kind === "person" ? "Person name" : "Title"}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={kind === "office" ? "Amsterdam" : "Internal Document Title"}
+                         placeholder={kind === "office" ? "Amsterdam" : kind === "person" ? "Ada Lovelace" : "Internal Document Title"}
                         {...field}
                         onChange={(event) => {
                           field.onChange(event);
-                          if (kind === "office" && !slugWasEdited) {
+                           if ((kind === "office" || kind === "person") && !slugWasEdited) {
                             form.setValue("slug", officeSlug(event.target.value), { shouldValidate: form.formState.isSubmitted });
                           }
                         }}
@@ -360,7 +385,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                 )}
               />
 
-              {kind !== "office" && (
+              {kind !== "office" && kind !== "person" && (
                 <div className="border-t pt-4">
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

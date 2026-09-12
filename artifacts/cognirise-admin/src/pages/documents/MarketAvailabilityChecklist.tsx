@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Send } from "lucide-react";
+import { Check, Circle, ChevronDown, ChevronRight, Loader2, Send } from "lucide-react";
 
 export type AvailabilityDestination = {
   market: string;
@@ -42,6 +42,8 @@ type Props = {
    * switches and is protected by the editor's navigation/unload guard. */
   selectionDraft?: AvailabilitySelectionDraft;
   onSelectionDraftChange?: (draft: AvailabilitySelectionDraft) => void;
+  /** Render one compact market summary suitable for the People table. */
+  compact?: boolean;
 };
 
 function errorMessage(error: unknown) {
@@ -74,6 +76,7 @@ export function MarketAvailabilityChecklist({
   onDestinationSelected,
   selectionDraft,
   onSelectionDraftChange,
+  compact = false,
 }: Props) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -230,6 +233,16 @@ export function MarketAvailabilityChecklist({
   const items: Array<any> = useLegacyPersonAvailability
     ? personAvailability.data?.items ?? []
     : sharedAvailability.data?.items ?? [];
+  // Keep the full matrix for versioned mutations. The compact People cell
+  // receives a deliberately scoped destination list, so it must render only
+  // those markets; document detail needs every server-returned item so a
+  // restricted editor can still start a customization for an assigned target
+  // even while its market catalog is loading or scoped differently.
+  const visibleItems = compact || releaseIndividually
+    ? items.filter((item) => destinations.some(
+      (destination) => destination.market === item.market,
+    ))
+    : items;
   const isUpdating = useLegacyPersonAvailability ? updatePerson.isPending : updateShared.isPending;
   const hasLocalSelection = Object.keys(currentSelections).length > 0;
   const hasCurrentReviewedSelection = sharedAvailability.data?.reviewedVersion !== null
@@ -253,9 +266,113 @@ export function MarketAvailabilityChecklist({
     return <p className="text-xs text-destructive" role="alert">{errorMessage(error) ?? "Destinations could not be loaded. Your editor inputs are unchanged."}</p>;
   }
 
+  if (compact) {
+    const compactItems = destinations.map((configured) => {
+      const matching = items.filter((item) => item.market === configured.market);
+      const item = matching.find((candidate) => candidate.locale === configured.locale) ?? matching[0];
+      if (!item) {
+        return { configured, item: null, extraLocales: 0 };
+      }
+      const pending = useLegacyPersonAvailability ? Boolean(item.pendingDecision) : item.pending;
+      const liveChecked = item.publishedEffectiveAvailable;
+      const pendingChecked = useLegacyPersonAvailability ? item.previewEffectiveAvailable : item.stagedDecision !== "off";
+      return {
+        configured,
+        item,
+        extraLocales: Math.max(matching.length - 1, 0),
+        pending,
+        liveChecked,
+        pendingChecked,
+      };
+    });
+    const hasLocaleExceptions = visibleItems.some((item) => {
+      const marketItems = visibleItems.filter((candidate) => candidate.market === item.market);
+      return destinations.some((destination) => destination.market === item.market) && marketItems.length > 1;
+    });
+
+    return (
+      <div className="space-y-1">
+        <span className="sr-only">✓ Live shown; * Pending change</span>
+        <div className="flex flex-wrap gap-1" role="list" aria-label="Live and pending availability by market">
+          {compactItems.map(({ configured, item, extraLocales, pending, liveChecked, pendingChecked }) => {
+            if (!item) {
+              return (
+                <span key={configured.market} className="rounded-md border border-dashed px-2 py-1 text-[11px] text-muted-foreground" role="listitem">
+                  {configured.displayName}: unavailable
+                </span>
+              );
+            }
+            const destination = allDestinations.find((candidate) => (
+              candidate.market === item.market
+              && (!item.locale || candidate.locale === item.locale)
+            )) ?? configured;
+            const checked = currentSelections[
+              useLegacyPersonAvailability ? `person:${item.marketEditionId}` : `${item.marketEditionId}:${item.locale}`
+            ] ?? pendingChecked;
+            const hasPendingState = pending || checked !== liveChecked;
+            const isDisabled = !canManageMarket(item.market)
+              || (!useLegacyPersonAvailability && !sharedAvailability.data?.canEditShared)
+              || isUpdating
+              || sharedAvailability.isLoading
+              || publishPerson.isPending;
+            const toggle = (next: boolean) => useLegacyPersonAvailability
+              ? stagePerson(item.marketEditionId, destination, next)
+              : stageShared(item.marketEditionId, item.locale, destination, next);
+            return (
+              <div key={`${configured.market}-${item.locale ?? ""}`} role="listitem">
+                <button
+                  type="button"
+                  aria-pressed={checked}
+                  aria-label={`${configured.displayName}: ${hasPendingState ? `staged ${checked ? "shown" : "excluded"}; live ${liveChecked ? "shown" : "excluded"}` : `live ${liveChecked ? "shown" : "excluded"}`}`}
+                  disabled={isDisabled}
+                  onClick={() => toggle(!checked)}
+                  className={`inline-flex min-h-8 items-center gap-1 rounded-md border px-2 py-1 text-left text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    checked ? "border-emerald-300 bg-emerald-50 text-emerald-900" : "border-border bg-background text-muted-foreground"
+                  } ${hasPendingState ? "border-dashed" : ""}`}
+                  title={hasPendingState
+                    ? `${configured.displayName}: staged ${checked ? "shown" : "excluded"}; live ${liveChecked ? "shown" : "excluded"}`
+                    : `${configured.displayName}: live ${liveChecked ? "shown" : "excluded"}`}
+                >
+                  {checked ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : <Circle className="h-3.5 w-3.5" aria-hidden="true" />}
+                  <span>{configured.displayName}</span>
+                  <span className="sr-only">{hasPendingState ? `Staged: ${checked ? "shown" : "excluded"}; Live: ${liveChecked ? "shown" : "excluded"}` : `Live: ${liveChecked ? "shown" : "excluded"}`}</span>
+                  {hasPendingState && <span aria-hidden="true" className="text-[10px]">*</span>}
+                  {extraLocales > 0 && <span className="text-[10px] text-muted-foreground">+{extraLocales}</span>}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        {hasLocaleExceptions && (
+          <details className="group">
+            <summary className="flex cursor-pointer list-none items-center gap-1 rounded-sm text-[10px] font-medium text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <ChevronRight className="h-3 w-3 group-open:hidden" aria-hidden="true" />
+              <ChevronDown className="hidden h-3 w-3 group-open:block" aria-hidden="true" />
+              Show locale exceptions
+            </summary>
+            <div className="mt-2 w-full space-y-2 rounded-md border border-border/70 bg-muted/20 p-2 text-xs" role="region" aria-label="Market and locale availability exceptions">
+              <p className="text-[11px] text-muted-foreground">Default-market ticks stay compact. Review each locale before sending or publishing a destination change.</p>
+              <MarketAvailabilityChecklist
+                documentId={documentId}
+                destinations={destinations}
+                canManageMarket={canManageMarket}
+                isAdministrator={isAdministrator}
+                releaseIndividually={releaseIndividually}
+                onOpenSharedContent={onOpenSharedContent}
+                onDestinationSelected={onDestinationSelected}
+                selectionDraft={selectionDraft}
+                onSelectionDraftChange={onSelectionDraftChange}
+              />
+            </div>
+          </details>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
-      {items.map((item) => {
+      {visibleItems.map((item) => {
         const destination = allDestinations.find((candidate) => (
           candidate.market === item.market
           && (!item.locale || candidate.locale === item.locale)
@@ -275,7 +392,8 @@ export function MarketAvailabilityChecklist({
         const checked = useLegacyPersonAvailability
           ? currentSelections[`person:${item.marketEditionId}`] ?? serverChecked
           : currentSelections[`${item.marketEditionId}:${item.locale}`] ?? serverChecked;
-        const canManage = canManageMarket(item.market);
+        const canManage = canManageMarket(item.market)
+          && (useLegacyPersonAvailability || Boolean(sharedAvailability.data?.canEditShared));
         return (
           <div key={`${item.marketEditionId}-${item.locale ?? ""}`} className="rounded-md border p-3">
             <div className="flex items-start gap-3">
@@ -330,35 +448,50 @@ export function MarketAvailabilityChecklist({
       })}
       {useLegacyPersonAvailability && sharedAvailability.data
         && sharedAvailability.data.reviewedVersion !== sharedAvailability.data.draftVersion && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="w-full"
-          disabled={hasLocalSelection || updatePerson.isPending || reviewAvailability.isPending || currentSaveFailed}
-          onClick={() => reviewAvailability.mutate({
-            documentId,
-            data: { version: sharedAvailability.data!.draftVersion },
-          }, {
-            onSuccess: (updated) => {
-              queryClient.setQueryData(getGetDocumentAvailabilityQueryKey(documentId), updated);
-              toast({ title: "People destinations sent for review", description: "This exact destination version is now required for publication." });
-            },
-            onError: (error) => toast({
-              title: "Destination review was not started",
-              description: errorMessage(error) ?? "Reload the people destinations before trying again.",
-              variant: "destructive",
-            }),
-          })}
-        >
-          {reviewAvailability.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-          Send people destinations for review
-        </Button>
+        <div className="space-y-2">
+          <p className="text-[11px] text-muted-foreground">
+            Pending destinations: {sharedAvailability.data.affectedEditions.length
+              ? sharedAvailability.data.affectedEditions.join(", ")
+              : "the changed market decisions"}{" "}
+            · exact version {sharedAvailability.data.draftVersion}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full"
+            disabled={hasLocalSelection || updatePerson.isPending || reviewAvailability.isPending || currentSaveFailed}
+            onClick={() => reviewAvailability.mutate({
+              documentId,
+              data: { version: sharedAvailability.data!.draftVersion },
+            }, {
+              onSuccess: (updated) => {
+                queryClient.setQueryData(getGetDocumentAvailabilityQueryKey(documentId), updated);
+                toast({ title: "People destinations sent for review", description: "This exact destination version is now required for publication." });
+              },
+              onError: (error) => toast({
+                title: "Destination review was not started",
+                description: errorMessage(error) ?? "Reload the people destinations before trying again.",
+                variant: "destructive",
+              }),
+            })}
+          >
+            {reviewAvailability.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+            Send people destinations for review
+          </Button>
+        </div>
       )}
       {releaseIndividually && !useLegacyPersonAvailability && onOpenSharedContent && (
-        <Button type="button" variant="outline" size="sm" className="w-full" onClick={onOpenSharedContent}>
-          Open shared content to review/publish
-        </Button>
+        <div className="space-y-2">
+          {sharedAvailability.data?.affectedEditions.length ? (
+            <p className="text-[11px] text-muted-foreground">
+              Pending destinations: {sharedAvailability.data.affectedEditions.join(", ")} · exact version {sharedAvailability.data.draftVersion}
+            </p>
+          ) : null}
+          <Button type="button" variant="outline" size="sm" className="w-full" onClick={onOpenSharedContent}>
+            Open shared content to review/publish
+          </Button>
+        </div>
       )}
       {useLegacyPersonAvailability && personReleaseConfirmation && (
         <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950">
@@ -395,7 +528,7 @@ export function MarketAvailabilityChecklist({
           </Button>
         </div>
       )}
-      {!items.length && <p className="text-xs text-muted-foreground">No enabled destinations are configured.</p>}
+      {!visibleItems.length && <p className="text-xs text-muted-foreground">No enabled destinations are configured.</p>}
     </div>
   );
 }

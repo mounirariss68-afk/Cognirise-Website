@@ -9,6 +9,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -161,6 +162,44 @@ export const insertCmsUserSchema = createInsertSchema(cmsUsersTable).omit({
   createdAt: true,
   updatedAt: true,
 });
+
+/**
+ * An access-link delivery is persisted with the account/token transaction.
+ * The payload is encrypted application data and is deliberately not exposed
+ * through the audit trail or API responses.
+ */
+export const cmsAccessDeliveryJobsTable = pgTable(
+  "cms_access_delivery_jobs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => cmsUsersTable.id, { onDelete: "cascade" }),
+    accessTokenId: uuid("access_token_id")
+      .notNull()
+      .references(() => cmsUserAccessTokensTable.id, { onDelete: "cascade" }),
+    purpose: text("purpose").notNull(),
+    status: text("status").notNull().default("pending"),
+    attempts: integer("attempts").notNull().default(0),
+    payloadCiphertext: text("payload_ciphertext"),
+    payloadExpiresAt: timestamp("payload_expires_at", { withTimezone: true }).notNull(),
+    availableAt: timestamp("available_at", { withTimezone: true }).notNull().defaultNow(),
+    processingLease: uuid("processing_lease"),
+    lastAttemptAt: timestamp("last_attempt_at", { withTimezone: true }),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    failedAt: timestamp("failed_at", { withTimezone: true }),
+    providerMessageId: text("provider_message_id"),
+    lastError: text("last_error"),
+    ...timestamps,
+  },
+  (table) => [
+    index("cms_access_delivery_jobs_due_idx").on(table.status, table.availableAt),
+    index("cms_access_delivery_jobs_user_idx").on(table.userId, table.createdAt),
+    index("cms_access_delivery_jobs_processing_lease_idx")
+      .on(table.processingLease)
+      .where(sql`${table.processingLease} IS NOT NULL`),
+  ],
+);
 export const insertCmsPasswordCredentialSchema = createInsertSchema(
   cmsPasswordCredentialsTable,
 );
@@ -177,6 +216,9 @@ export const insertCmsSessionSchema = createInsertSchema(cmsSessionsTable).omit(
 export const insertCmsLoginAttemptSchema = createInsertSchema(
   cmsLoginAttemptsTable,
 ).omit({ id: true, attemptedAt: true });
+export const insertCmsAccessDeliveryJobSchema = createInsertSchema(
+  cmsAccessDeliveryJobsTable,
+).omit({ id: true, createdAt: true, updatedAt: true });
 
 export type InsertCmsUser = z.infer<typeof insertCmsUserSchema>;
 export type CmsUser = typeof cmsUsersTable.$inferSelect;
@@ -187,3 +229,4 @@ export type CmsSession = typeof cmsSessionsTable.$inferSelect;
 export type CmsLoginAttempt = typeof cmsLoginAttemptsTable.$inferSelect;
 export type CmsUserMarketAssignment = typeof cmsUserMarketAssignmentsTable.$inferSelect;
 export type CmsUserAccessToken = typeof cmsUserAccessTokensTable.$inferSelect;
+export type CmsAccessDeliveryJob = typeof cmsAccessDeliveryJobsTable.$inferSelect;

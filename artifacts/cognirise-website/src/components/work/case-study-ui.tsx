@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { Link } from "wouter";
 import { ArrowRight, ExternalLink } from "lucide-react";
-import type { CmsRecord } from "@/lib/cms";
+import { cmsMediaObjectPosition, type CmsRecord } from "@/lib/cms";
 import { trackEvent } from "@/lib/analytics";
 import { useMarketStore, type Market } from "@/store/market";
 import {
@@ -165,7 +165,9 @@ function DeferredCaseRendition({
     >
       <img
         src={shouldLoad ? rendition.url : undefined}
-        style={shouldLoad ? undefined : { visibility: "hidden" }}
+        style={shouldLoad
+          ? { objectPosition: cmsMediaObjectPosition(rendition) }
+          : { visibility: "hidden" }}
         alt={item.visual?.altText || rendition.altText || "Illustrative interface reconstruction"}
         loading="lazy"
         draggable={false}

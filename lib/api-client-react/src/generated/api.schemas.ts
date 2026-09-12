@@ -2020,6 +2020,27 @@ export type MediaAssetPage = PageMetadata & {
   items: MediaAsset[];
 };
 
+export interface MediaReferenceImpactItem {
+  referenceId: string;
+  documentId: string;
+  /** @nullable */
+  mediaVersionId?: string | null;
+  fieldPath: string;
+  documentKind: string;
+  documentTitle: string;
+  /** @nullable */
+  canonicalSlug?: string | null;
+  documentStatus: string;
+  createdAt: string;
+}
+
+export interface MediaReferenceImpact {
+  mediaId: string;
+  /** @minimum 0 */
+  referenceCount: number;
+  references: MediaReferenceImpactItem[];
+}
+
 export type SubmissionKind = typeof SubmissionKind[keyof typeof SubmissionKind];
 
 
@@ -2087,6 +2108,8 @@ export const SubmissionExportInputFormat = {
 
 export interface SubmissionExportInput {
   format: SubmissionExportInputFormat;
+  /** @maxLength 200 */
+  search?: string;
   kind?: SubmissionKind;
   status?: SubmissionStatus;
   market?: string;
@@ -2140,12 +2163,24 @@ export const UserInvitationDelivery = {
   email: 'email',
 } as const;
 
+export type UserInvitationDeliveryStatus = typeof UserInvitationDeliveryStatus[keyof typeof UserInvitationDeliveryStatus];
+
+
+export const UserInvitationDeliveryStatus = {
+  pending: 'pending',
+  sent: 'sent',
+  failed: 'failed',
+  expired: 'expired',
+} as const;
+
 export interface UserInvitation {
   id: string;
   user: User;
   delivery: UserInvitationDelivery;
   expiresAt: string;
   createdAt: string;
+  deliveryId?: string;
+  deliveryStatus?: UserInvitationDeliveryStatus;
 }
 
 export interface UserUpdate {
@@ -2202,10 +2237,60 @@ export const PasswordResetDelivery = {
   email: 'email',
 } as const;
 
+export type PasswordResetDeliveryStatus = typeof PasswordResetDeliveryStatus[keyof typeof PasswordResetDeliveryStatus];
+
+
+export const PasswordResetDeliveryStatus = {
+  pending: 'pending',
+  sent: 'sent',
+  failed: 'failed',
+  expired: 'expired',
+} as const;
+
 export interface PasswordReset {
   id: string;
   delivery: PasswordResetDelivery;
   expiresAt: string;
+  deliveryId?: string;
+  deliveryStatus?: PasswordResetDeliveryStatus;
+}
+
+export type AccessDeliveryStatusPurpose = typeof AccessDeliveryStatusPurpose[keyof typeof AccessDeliveryStatusPurpose];
+
+
+export const AccessDeliveryStatusPurpose = {
+  invitation: 'invitation',
+  'password-reset': 'password-reset',
+} as const;
+
+export type AccessDeliveryStatusStatus = typeof AccessDeliveryStatusStatus[keyof typeof AccessDeliveryStatusStatus];
+
+
+export const AccessDeliveryStatusStatus = {
+  pending: 'pending',
+  sent: 'sent',
+  failed: 'failed',
+  expired: 'expired',
+} as const;
+
+export interface AccessDeliveryStatus {
+  id: string;
+  purpose: AccessDeliveryStatusPurpose;
+  status: AccessDeliveryStatusStatus;
+  /** @minimum 0 */
+  attempts: number;
+  retryAvailable: boolean;
+  /** @nullable */
+  lastAttemptAt?: string | null;
+  /** @nullable */
+  sentAt?: string | null;
+  /** @nullable */
+  failedAt?: string | null;
+  expiresAt: string;
+  /** @nullable */
+  lastError?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface SessionRevocationInput {
@@ -2264,6 +2349,7 @@ export interface PublicMedia {
   caption?: string | null;
   /** @nullable */
   credit?: string | null;
+  focalPoint?: FocalPoint | null;
 }
 
 export interface PublishedContent {

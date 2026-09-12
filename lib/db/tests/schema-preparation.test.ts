@@ -41,6 +41,10 @@ test("post-merge prepares narrow media compatibility before safe schema synchron
   assert.match(schemaPreparationSql, /'website', 'linkedin', 'motion'/);
   assert.match(schemaPreparationSql, /cms_media_assets_motion_type_check/);
   assert.match(schemaPreparationSql, /cms_media_assets_motion_metadata_check/);
+  assert.match(schemaPreparationSql, /Development-only merge preparation for the additive 0027/);
+  assert.match(schemaPreparationSql, /CREATE TABLE IF NOT EXISTS "cms_operation_receipts"/);
+  assert.match(schemaPreparationSql, /CREATE TABLE "cms_access_delivery_jobs"/);
+  assert.match(schemaPreparationSql, /cms_access_delivery_jobs_due_idx/);
 });
 
 test("schema preparation preserves populated media rows and is idempotent", {
@@ -83,6 +87,43 @@ test("schema preparation preserves populated media rows and is idempotent", {
          AND column_name = 'original_filename'
     `);
     assert.equal(nullable.rows[0]?.is_nullable, "NO");
+  } finally {
+    await client.query("ROLLBACK").catch(() => {});
+    await client.end();
+  }
+});
+
+test("schema preparation restores absent 0027 receipt and outbox structures idempotently", {
+  skip: !process.env.DATABASE_URL,
+}, async () => {
+  const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
+  await client.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SET LOCAL search_path TO pg_temp");
+    await client.query("CREATE TEMP TABLE cms_users (id uuid PRIMARY KEY)");
+    await client.query("CREATE TEMP TABLE cms_user_access_tokens (id uuid PRIMARY KEY)");
+    await client.query(schemaPreparationSql);
+    await client.query(schemaPreparationSql);
+    const columns = await client.query<{ table_name: string; column_name: string }>(`
+      SELECT table_name, column_name
+        FROM information_schema.columns
+       WHERE table_schema LIKE 'pg_temp_%'
+         AND table_name IN ('cms_operation_receipts', 'cms_access_delivery_jobs')
+       ORDER BY table_name, ordinal_position
+    `);
+    const found = new Set(columns.rows.map((row) => `${row.table_name}.${row.column_name}`));
+    for (const column of [
+      "cms_operation_receipts.idempotency_key",
+      "cms_operation_receipts.response",
+      "cms_operation_receipts.status_code",
+      "cms_access_delivery_jobs.id",
+      "cms_access_delivery_jobs.payload_ciphertext",
+      "cms_access_delivery_jobs.available_at",
+      "cms_access_delivery_jobs.updated_at",
+    ]) {
+      assert.ok(found.has(column), `missing prepared 0027 column ${column}`);
+    }
   } finally {
     await client.query("ROLLBACK").catch(() => {});
     await client.end();

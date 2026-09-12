@@ -1,8 +1,9 @@
 import { useRoute } from "wouter";
 import NotFound from "@/pages/not-found";
-import { contentRecord, useCmsCollection } from "@/lib/cms";
+import { cmsRequestIsUnavailable, contentRecord, useCmsCollection } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { CaseStudyLayout, type PublicCaseStudy } from "@/components/work/case-study-ui";
+import { ServiceError } from "@/components/error-boundary";
 
 export default function CaseStudyDetail() {
   const [match, params] = useRoute("/work/:slug");
@@ -21,7 +22,11 @@ export default function CaseStudyDetail() {
     description: record.objective || record.mandate || record.summary || "A Cognirise delivery record.",
     imageUrl: record.media?.[0]?.url,
   }) : undefined);
-  if (!match || !slug || (!query.isPending && (!record || !canRender))) return <NotFound />;
+  if (!match || !slug) return <NotFound />;
+  if (query.isError && cmsRequestIsUnavailable(query.error)) {
+    return <ServiceError onRetry={() => { void query.refetch(); }} />;
+  }
+  if (!query.isPending && (!record || !canRender)) return <NotFound />;
   if (!record || !canRender) return null;
   return <CaseStudyLayout item={record} />;
 }

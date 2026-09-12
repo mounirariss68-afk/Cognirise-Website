@@ -12,7 +12,15 @@ import {
   requireMfa,
   type AuthContext,
 } from "../lib/auth";
-import { audit, pageOf } from "../lib/cms";
+import {
+  audit,
+  existingOperationReceipt,
+  operationDigest,
+  pageOf,
+  requestDigest,
+  reserveOperationReceipt,
+  saveOperationReceipt,
+} from "../lib/cms";
 import { asyncRoute } from "../lib/http";
 
 const router: IRouter = Router();
@@ -165,6 +173,18 @@ router.patch(
           }),
         ],
       );
+      await audit(
+        res.locals.auth as AuthContext,
+        "submission.updated",
+        "submission",
+        String(req.params.submissionId),
+        {
+          statusChanged: hasStatus,
+          ownerChanged: hasOwner,
+          notesChanged: hasNotes,
+        },
+        client,
+      );
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK");
@@ -176,7 +196,6 @@ router.patch(
       res.status(404).json({ error: "Submission not found." });
       return;
     }
-    await audit(res.locals.auth as AuthContext, "submission.updated", "submission", String(req.params.submissionId), input);
     const detail = await pool.query(
       `SELECT w.id,w.source_type kind,
         CASE WHEN w.source_type='enquiry' THEN e.name END name,
@@ -208,40 +227,121 @@ router.post(
       res.status(400).json({ error: "Invalid export request." });
       return;
     }
-    const q = parsed.data;
-    const result = await pool.query(
-      `WITH submissions AS (
-        SELECT w.id,'enquiry'::text kind,e.name,e.email,e.organization,e.role,e.market,
-          e.process_area,w.status,w.assigned_to_user_id owner_id,w.notes->>'text' notes,
-          e.source_page,e.consent,e.created_at
-        FROM cms_submission_workflows w JOIN website_enquiries e ON e.id=w.source_id
-        WHERE w.source_type='enquiry'
-        UNION ALL
-        SELECT w.id,'newsletter',NULL,n.email,NULL,NULL,n.market,NULL,w.status,
-          w.assigned_to_user_id,w.notes->>'text',n.source_page,n.consent,n.created_at
-        FROM cms_submission_workflows w JOIN newsletter_subscriptions n ON n.id=w.source_id
-        WHERE w.source_type='newsletter'
-      )
-      SELECT id,kind,name,email,organization,role,market,process_area,status,
-              owner_id,notes,source_page,consent,created_at
-       FROM submissions WHERE ($1::text IS NULL OR kind=$1)
-         AND ($2::text IS NULL OR status=$2) AND ($3::text IS NULL OR market=$3)
-         AND ($4::timestamptz IS NULL OR created_at >= $4)
-         AND ($5::timestamptz IS NULL OR created_at <= $5)
-       ORDER BY created_at DESC LIMIT 10000`,
-      [q.kind ?? null, q.status ?? null, q.market ?? null, q.from ?? null, q.to ?? null],
-    );
-    const columns = ["id", "kind", "name", "email", "organization", "role", "market", "process_area", "status", "owner_id", "notes", "source_page", "consent", "created_at"];
-    const csv = [columns.join(","), ...result.rows.map((row) => columns.map((column) => csvCell(row[column])).join(","))].join("\r\n");
-    const id = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + 10 * 60_000);
-    await audit(res.locals.auth as AuthContext, "submissions.exported", "submission-export", id, { count: result.rows.length });
-    res.status(202).json({
-      id,
-      status: "ready",
-      downloadUrl: `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`,
-      expiresAt,
-    });
+    const q = parsed.data as typeof parsed.data & { search?: string };
+    const auth = res.locals.auth as AuthContext;
+    const idempotencyHeader = req.header("idempotency-key");
+    const bodyDigest = requestDigest(q);
+    const operationKey = idempotencyHeader
+      ? operationDigest(auth.user.id, "submissions.exported", "submissions", idempotencyHeader)
+      : null;
+    const client = await pool.connect();
+    let response: Record<string, unknown>;
+    try {
+      await client.query("BEGIN");
+      if (operationKey) {
+        const prior = await existingOperationReceipt(
+          client,
+          operationKey,
+          "submissions.exported",
+          "submissions",
+          bodyDigest,
+          auth.user.id,
+        );
+        if (prior) {
+          await client.query("ROLLBACK");
+          res.status(prior.statusCode ?? 202).json(prior.response);
+          return;
+        }
+        const reserved = await reserveOperationReceipt(client, {
+          idempotencyKey: operationKey,
+          operation: "submissions.exported",
+          subjectId: "submissions",
+          requestDigest: bodyDigest,
+          actorUserId: auth.user.id,
+        });
+        if (!reserved) {
+          const committed = await existingOperationReceipt(
+            client,
+            operationKey,
+            "submissions.exported",
+            "submissions",
+            bodyDigest,
+            auth.user.id,
+          );
+          if (committed) {
+            await client.query("ROLLBACK");
+            res.status(committed.statusCode ?? 202).json(committed.response);
+            return;
+          }
+          throw Object.assign(new Error("Idempotency-Key is already associated with an in-progress operation."), {
+            code: "IDEMPOTENCY_CONFLICT",
+          });
+        }
+      }
+      const result = await client.query(
+        `WITH submissions AS (
+          SELECT w.id,'enquiry'::text kind,e.name,e.email,e.organization,e.role,e.market,
+            e.process_area,w.status,w.assigned_to_user_id owner_id,w.notes->>'text' notes,
+            e.source_page,e.consent,e.created_at
+          FROM cms_submission_workflows w JOIN website_enquiries e ON e.id=w.source_id
+          WHERE w.source_type='enquiry'
+          UNION ALL
+          SELECT w.id,'newsletter',NULL,n.email,NULL,NULL,n.market,NULL,w.status,
+            w.assigned_to_user_id,w.notes->>'text',n.source_page,n.consent,n.created_at
+          FROM cms_submission_workflows w JOIN newsletter_subscriptions n ON n.id=w.source_id
+          WHERE w.source_type='newsletter'
+        )
+        SELECT id,kind,name,email,organization,role,market,process_area,status,
+                owner_id,notes,source_page,consent,created_at
+         FROM submissions WHERE ($1::text IS NULL OR name ILIKE '%'||$1||'%' OR email ILIKE '%'||$1||'%'
+                                  OR organization ILIKE '%'||$1||'%')
+           AND ($2::text IS NULL OR kind=$2)
+           AND ($3::text IS NULL OR status=$3) AND ($4::text IS NULL OR market=$4)
+           AND ($5::timestamptz IS NULL OR created_at >= $5)
+           AND ($6::timestamptz IS NULL OR created_at <= $6)
+         ORDER BY created_at DESC LIMIT 10000`,
+        [q.search ?? null, q.kind ?? null, q.status ?? null, q.market ?? null, q.from ?? null, q.to ?? null],
+      );
+      const columns = ["id", "kind", "name", "email", "organization", "role", "market", "process_area", "status", "owner_id", "notes", "source_page", "consent", "created_at"];
+      const csv = [columns.join(","), ...result.rows.map((row) => columns.map((column) => csvCell(row[column])).join(","))].join("\r\n");
+      const id = crypto.randomUUID();
+      const expiresAt = new Date(Date.now() + 10 * 60_000);
+      response = {
+        id,
+        status: "ready",
+        downloadUrl: `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`,
+        expiresAt,
+      };
+      await audit(auth, "submissions.exported", "submission-export", id, {
+        count: result.rows.length,
+        search: q.search ?? null,
+        kind: q.kind ?? null,
+        status: q.status ?? null,
+        market: q.market ?? null,
+      }, client);
+      if (operationKey) {
+        await saveOperationReceipt(client, {
+          idempotencyKey: operationKey,
+          operation: "submissions.exported",
+          subjectId: "submissions",
+          requestDigest: bodyDigest,
+          actorUserId: auth.user.id,
+          statusCode: 202,
+          response,
+        });
+      }
+      await client.query("COMMIT");
+      res.status(202).json(response);
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      if ((error as any)?.code === "IDEMPOTENCY_CONFLICT") {
+        res.status(409).json({ error: (error as Error).message });
+        return;
+      }
+      throw error;
+    } finally {
+      client.release();
+    }
   }),
 );
 

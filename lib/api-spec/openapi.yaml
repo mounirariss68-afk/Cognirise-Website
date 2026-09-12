@@ -1324,6 +1324,24 @@ paths:
           description: Media deleted
         "409":
           $ref: "#/components/responses/Conflict"
+  /media/{mediaId}/reference-impact:
+    get:
+      operationId: getMediaReferenceImpact
+      tags: [media]
+      summary: Inspect governed document references to a media asset
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/MediaId"
+      responses:
+        "200":
+          description: Media reference impact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaReferenceImpact"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /media/{mediaId}/file:
     get:
       operationId: getMediaFile
@@ -1522,6 +1540,16 @@ paths:
       security:
         - cookieAuth: []
           csrfToken: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Retry key scoped to the authenticated administrator and exact export filters.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+            pattern: '^[\x21-\x7E]+$'
       requestBody:
         required: true
         content:
@@ -1593,6 +1621,16 @@ paths:
       security:
         - cookieAuth: []
           csrfToken: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Retry key scoped to the authenticated administrator and invitation request.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+            pattern: '^[\x21-\x7E]+$'
       requestBody:
         required: true
         content:
@@ -1640,6 +1678,15 @@ paths:
         - cookieAuth: []
           csrfToken: []
       parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Retry key scoped to the authenticated administrator and target account.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+            pattern: '^[\x21-\x7E]+$'
         - $ref: "#/components/parameters/UserId"
       requestBody:
         required: true
@@ -1677,6 +1724,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SessionRevocation"
+  /users/{userId}/access-delivery/{deliveryId}:
+    get:
+      operationId: getAccessDeliveryStatus
+      tags: [users]
+      summary: Get the durable invitation or reset delivery state
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+        - $ref: "#/components/parameters/DeliveryId"
+      responses:
+        "200":
+          description: Access-link delivery state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessDeliveryStatus"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /users/{userId}/access-delivery/{deliveryId}/retry:
+    post:
+      operationId: retryAccessDelivery
+      tags: [users]
+      summary: Retry a failed invitation or reset delivery
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+        - $ref: "#/components/parameters/DeliveryId"
+      responses:
+        "202":
+          description: Delivery retry queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessDeliveryStatus"
+        "409":
+          $ref: "#/components/responses/Conflict"
 
   /audit:
     get:
@@ -1986,6 +2072,11 @@ components:
       schema: { type: string }
     UserId:
       name: userId
+      in: path
+      required: true
+      schema: { type: string }
+    DeliveryId:
+      name: deliveryId
       in: path
       required: true
       schema: { type: string }
@@ -3487,6 +3578,29 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/MediaAsset"
+    MediaReferenceImpact:
+      type: object
+      required: [mediaId, referenceCount, references]
+      properties:
+        mediaId: { type: string }
+        referenceCount: { type: integer, minimum: 0 }
+        references:
+          type: array
+          items:
+            $ref: "#/components/schemas/MediaReferenceImpactItem"
+    MediaReferenceImpactItem:
+      type: object
+      required: [referenceId, documentId, fieldPath, documentKind, documentTitle, documentStatus, createdAt]
+      properties:
+        referenceId: { type: string }
+        documentId: { type: string }
+        mediaVersionId: { type: ["string", "null"] }
+        fieldPath: { type: string }
+        documentKind: { type: string }
+        documentTitle: { type: string }
+        canonicalSlug: { type: ["string", "null"] }
+        documentStatus: { type: string }
+        createdAt: { type: string, format: date-time }
 
     SubmissionKind:
       type: string
@@ -3530,6 +3644,7 @@ components:
       required: [format]
       properties:
         format: { type: string, enum: [csv] }
+        search: { type: string, maxLength: 200 }
         kind:
           $ref: "#/components/schemas/SubmissionKind"
         status:
@@ -3606,6 +3721,8 @@ components:
           enum: [email]
         expiresAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
+        deliveryId: { type: string }
+        deliveryStatus: { type: string, enum: [pending, sent, failed, expired] }
     UserUpdate:
       type: object
       additionalProperties: false
@@ -3659,6 +3776,24 @@ components:
           type: string
           enum: [email]
         expiresAt: { type: string, format: date-time }
+        deliveryId: { type: string }
+        deliveryStatus: { type: string, enum: [pending, sent, failed, expired] }
+    AccessDeliveryStatus:
+      type: object
+      required: [id, purpose, status, attempts, retryAvailable, expiresAt, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        purpose: { type: string, enum: [invitation, password-reset] }
+        status: { type: string, enum: [pending, sent, failed, expired] }
+        attempts: { type: integer, minimum: 0 }
+        retryAvailable: { type: boolean }
+        lastAttemptAt: { type: ["string", "null"], format: date-time }
+        sentAt: { type: ["string", "null"], format: date-time }
+        failedAt: { type: ["string", "null"], format: date-time }
+        expiresAt: { type: string, format: date-time }
+        lastError: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
     SessionRevocationInput:
       type: object
       additionalProperties: false
@@ -3755,6 +3890,10 @@ components:
         altText: { type: ["string", "null"] }
         caption: { type: ["string", "null"] }
         credit: { type: ["string", "null"] }
+        focalPoint:
+          anyOf:
+            - $ref: "#/components/schemas/FocalPoint"
+            - type: "null"
     PublishedContentPage:
       allOf:
         - $ref: "#/components/schemas/PageMetadata"

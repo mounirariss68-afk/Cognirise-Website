@@ -8,3 +8,9 @@ Run shell-managed Chromium checks against the managed local proxy at `http://127
 **Why:** The Cognirise preview splits Vite assets and `/api` requests across separate managed workflows. The local port-80 proxy preserves that routing. Direct workflow ports bypass part of the app, while the external development domain can present a Replit preview-sharing interstitial to shell-run headless Chromium.
 
 **How to apply:** Keep browser-script defaults on the local port-80 proxy and allow an explicit base-URL override. If a route renders the generic 404, verify both workflows and the `/api/public/navigation` response before treating it as an application regression. Managed app-preview tooling can continue resolving the artifact route itself.
+
+Finish API generation checks before starting a browser pass.
+
+**Why:** The code-generation check regenerates shared sources, temporarily deleting files that running Vite clients import. Running it during authentication caused transient missing-module overlays and page reloads even though the check succeeded.
+
+**How to apply:** Treat code-generation checks as source-writing operations when scheduling integrated verification; complete them before workflow restart and browser testing.

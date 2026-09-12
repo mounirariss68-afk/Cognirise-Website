@@ -245,6 +245,7 @@ test("methodologies draft and public landing keep separate immutable hero pins",
     altText: "A governed methodology moving from evidence to action",
     credit: null,
     motionMetadata: null,
+    focalPoint: null,
   }]);
 
   latestAssetVersion = versions.later;

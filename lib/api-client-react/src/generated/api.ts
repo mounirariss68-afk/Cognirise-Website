@@ -20,6 +20,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AccessDeliveryStatus,
   AccessTokenConsumption,
   AnalyticsEventInput,
   AnalyticsReceipt,
@@ -80,6 +81,7 @@ import type {
   MediaAsset,
   MediaAssetPage,
   MediaFinalizeInput,
+  MediaReferenceImpact,
   MediaReviewDecision,
   MediaUpdate,
   MediaUpload,
@@ -4727,6 +4729,83 @@ export const useDeleteMedia = <TError = ErrorType<ConflictResponse>,
       return useMutation(getDeleteMediaMutationOptions(options));
     }
 
+export const getGetMediaReferenceImpactUrl = (mediaId: string,) => {
+
+
+
+
+  return `/api/media/${mediaId}/reference-impact`
+}
+
+/**
+ * @summary Inspect governed document references to a media asset
+ */
+export const getMediaReferenceImpact = async (mediaId: string, options?: Parameters<typeof customFetch>[1]): Promise<MediaReferenceImpact> => {
+
+  return customFetch<MediaReferenceImpact>(getGetMediaReferenceImpactUrl(mediaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMediaReferenceImpactQueryKey = (mediaId: string,) => {
+    return [
+    `/api/media/${mediaId}/reference-impact`
+    ] as const;
+    }
+
+
+export const getGetMediaReferenceImpactQueryOptions = <TData = Awaited<ReturnType<typeof getMediaReferenceImpact>>, TError = ErrorType<NotFoundResponse>>(mediaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMediaReferenceImpact>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMediaReferenceImpactQueryKey(mediaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMediaReferenceImpact>>> = ({ signal }) => getMediaReferenceImpact(mediaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: mediaId !== null && mediaId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMediaReferenceImpact>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMediaReferenceImpactQueryResult = NonNullable<Awaited<ReturnType<typeof getMediaReferenceImpact>>>
+export type GetMediaReferenceImpactQueryError = ErrorType<NotFoundResponse>
+
+
+/**
+ * @summary Inspect governed document references to a media asset
+ */
+
+export function useGetMediaReferenceImpact<TData = Awaited<ReturnType<typeof getMediaReferenceImpact>>, TError = ErrorType<NotFoundResponse>>(
+ mediaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMediaReferenceImpact>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMediaReferenceImpactQueryOptions(mediaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getGetMediaFileUrl = (mediaId: string,) => {
 
 
@@ -5692,6 +5771,161 @@ export const useRevokeUserSessions = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getRevokeUserSessionsMutationOptions(options));
+    }
+
+export const getGetAccessDeliveryStatusUrl = (userId: string,
+    deliveryId: string,) => {
+
+
+
+
+  return `/api/users/${userId}/access-delivery/${deliveryId}`
+}
+
+/**
+ * @summary Get the durable invitation or reset delivery state
+ */
+export const getAccessDeliveryStatus = async (userId: string,
+    deliveryId: string, options?: Parameters<typeof customFetch>[1]): Promise<AccessDeliveryStatus> => {
+
+  return customFetch<AccessDeliveryStatus>(getGetAccessDeliveryStatusUrl(userId,deliveryId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAccessDeliveryStatusQueryKey = (userId: string,
+    deliveryId: string,) => {
+    return [
+    `/api/users/${userId}/access-delivery/${deliveryId}`
+    ] as const;
+    }
+
+
+export const getGetAccessDeliveryStatusQueryOptions = <TData = Awaited<ReturnType<typeof getAccessDeliveryStatus>>, TError = ErrorType<NotFoundResponse>>(userId: string,
+    deliveryId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAccessDeliveryStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAccessDeliveryStatusQueryKey(userId,deliveryId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAccessDeliveryStatus>>> = ({ signal }) => getAccessDeliveryStatus(userId,deliveryId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined && deliveryId !== null && deliveryId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAccessDeliveryStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAccessDeliveryStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getAccessDeliveryStatus>>>
+export type GetAccessDeliveryStatusQueryError = ErrorType<NotFoundResponse>
+
+
+/**
+ * @summary Get the durable invitation or reset delivery state
+ */
+
+export function useGetAccessDeliveryStatus<TData = Awaited<ReturnType<typeof getAccessDeliveryStatus>>, TError = ErrorType<NotFoundResponse>>(
+ userId: string,
+    deliveryId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAccessDeliveryStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAccessDeliveryStatusQueryOptions(userId,deliveryId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRetryAccessDeliveryUrl = (userId: string,
+    deliveryId: string,) => {
+
+
+
+
+  return `/api/users/${userId}/access-delivery/${deliveryId}/retry`
+}
+
+/**
+ * @summary Retry a failed invitation or reset delivery
+ */
+export const retryAccessDelivery = async (userId: string,
+    deliveryId: string, options?: Parameters<typeof customFetch>[1]): Promise<AccessDeliveryStatus> => {
+
+  return customFetch<AccessDeliveryStatus>(getRetryAccessDeliveryUrl(userId,deliveryId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRetryAccessDeliveryMutationOptions = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryAccessDelivery>>, TError,{userId: string;deliveryId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof retryAccessDelivery>>, TError,{userId: string;deliveryId: string}, TContext> => {
+
+const mutationKey = ['retryAccessDelivery'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof retryAccessDelivery>>, {userId: string;deliveryId: string}> = (props) => {
+          const {userId,deliveryId} = props ?? {};
+
+          return  retryAccessDelivery(userId,deliveryId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RetryAccessDeliveryMutationResult = NonNullable<Awaited<ReturnType<typeof retryAccessDelivery>>>
+
+    export type RetryAccessDeliveryMutationError = ErrorType<ConflictResponse>
+
+    /**
+ * @summary Retry a failed invitation or reset delivery
+ */
+export const useRetryAccessDelivery = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryAccessDelivery>>, TError,{userId: string;deliveryId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof retryAccessDelivery>>,
+        TError,
+        {userId: string;deliveryId: string},
+        TContext
+      > => {
+      return useMutation(getRetryAccessDeliveryMutationOptions(options));
     }
 
 export const getListAuditEventsUrl = (params?: ListAuditEventsParams,) => {

@@ -152,6 +152,8 @@ if (typeof moduleMock !== "function") {
   mock.module("@workspace/api-client-react", {
     namedExports: {
       getListMediaQueryKey,
+      getListAuditEventsQueryKey: (params?: unknown) => ["/api/audit", ...(params === undefined ? [] : [params])],
+      getGetMediaReferenceImpactQueryKey: (id: string) => ["/api/media", id, "reference-impact"],
       getGetDocumentRevisionQueryKey: (...parts: unknown[]) => ["document-revision", ...parts],
       getGetMediaQueryKey: (id: string) => ["media", id],
       useGetSession: () => ({ data: { user: { role } }, isLoading: false, isError: false }),
@@ -166,6 +168,16 @@ if (typeof moduleMock !== "function") {
           staleTime: 60_000,
         });
       },
+      useListAuditEvents: () => ({
+        data: { items: [], total: 0, page: 1, pageSize: 25, totalPages: 0 },
+        isLoading: false,
+        isError: false,
+      }),
+      useGetMediaReferenceImpact: () => ({
+        data: { mediaId: sourceAsset.id, referenceCount: 0, references: [] },
+        isLoading: false,
+        isError: false,
+      }),
       useReviewMedia: () => ({
         isPending: false,
         mutateAsync: (input: ReviewInput) => {

@@ -65,3 +65,13 @@ target environment before release.
 - Automated API/database and authenticated browser checks are required before
   claiming target-environment release verification. Do not substitute a
   component-only or request-mock result for those checks.
+
+## W00 / W11 remediation coverage
+
+| Concern | Current control | Verification boundary |
+| --- | --- | --- |
+| Disposable owner fixture cleanup | Cleanup discovers documents through exact fixture user ownership/revision authorship, validates the fixture prefix, removes dependent revisions/comments/references/availability rows in dependency order, and refuses external references or residual owned rows. | Focused helper regression tests cover discovery and prefix refusal. A real browser/API fixture pass remains environment-dependent. |
+| Preservation baseline | The development-only fixture command can capture published pointers, revision counts/digests, market-availability decisions, and immutable media pins to a mode-600 `/tmp` file without content payloads or credentials. | Baseline capture is read-only; operators must retain the file privately and compare it before any approved remediation. |
+| Public navigation outage | Navigation-policy failures render a temporary service-error state with retry; genuine unavailable routes remain `NotFound`. Other authoritative CMS consumers use the same outage distinction where their request error is classifiable. | Component/helper tests cover retry and HTTP error classification. Browser outage/retry evidence is still required in the target environment. |
+| Release readiness | `/api/healthz` remains a liveness/database check. `/api/readyz` checks required schema columns and a representative public-navigation path, returning generic 503 status/checks without SQL details; startup performs the same non-mutating check. | Database-backed readiness and fresh/upgrade/replay schema checks must be run against the target environment before release. |
+| Admin slash route | Artifact routing accepts both `/admin` and `/admin/`; the static entry redirects the no-slash path to the configured canonical slash path. | Published-host redirect behavior remains unverified without a target artifact deployment. |

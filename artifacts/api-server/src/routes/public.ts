@@ -21,6 +21,7 @@ import { asyncRoute, throttle } from "../lib/http";
 import { pageOf } from "../lib/cms";
 import { SlidingWindowThrottle } from "../lib/security";
 import { downloadMediaObject, parseByteRange } from "../lib/object-storage";
+import { approvedMediaVersionMetadataSql } from "../lib/media-version-governance";
 import { isPublicContentVisible } from "../lib/policy";
 import { PUBLIC_KIND_CONFIGURATION_SQL } from "../lib/document-lifecycle-sql";
 import { navigationCandidates, isPublishedPageAvailable } from "../lib/navigation-policy";
@@ -384,7 +385,8 @@ async function published(row: Record<string, any>, snapshot = publicSnapshot(row
        JOIN cms_media_assets a ON a.id=ref.asset_id
        JOIN cms_media_versions v ON v.id=ref.media_version_id AND v.asset_id=a.id
       WHERE ref.document_id=$1 AND ref.field_path=$2
-        AND a.id::text=ANY($3::text[]) AND a.status IN ('active','ready')`,
+        AND a.id::text=ANY($3::text[]) AND a.status IN ('active','ready')
+        AND ${approvedMediaVersionMetadataSql("v.metadata")}`,
     [String(row.id), `revision:${String(row.revision_id)}`, mediaIds],
   );
   let projectedSnapshot: typeof snapshot;
@@ -431,6 +433,9 @@ async function published(row: Record<string, any>, snapshot = publicSnapshot(row
        motionMetadata: Object.hasOwn(asset.metadata ?? {}, "motionMetadata")
          ? asset.metadata.motionMetadata
          : asset.motion_metadata ?? null,
+       focalPoint: Object.hasOwn(asset.metadata ?? {}, "focalPoint")
+         ? asset.metadata.focalPoint
+         : null,
     })),
     market: row.market,
     locale: row.locale,
@@ -599,12 +604,13 @@ router.get("/public/hero-films/:slot", asyncRoute(async (req, res) => {
   }
   const ids = [shape.posterMediaId, ...shape.sources.map((source) => source.mediaId)];
   const assets = await pool.query(
-    `SELECT a.id,a.media_type,a.status,v.id version_id
+    `SELECT a.id,a.media_type,a.status,v.id version_id,v.metadata
        FROM cms_media_references ref
        JOIN cms_media_assets a ON a.id=ref.asset_id AND a.status IN ('active','ready')
        JOIN cms_media_versions v ON v.id=ref.media_version_id AND v.asset_id=a.id
       WHERE ref.document_id=$1 AND ref.field_path=$2
-        AND a.id::text=ANY($3::text[])`,
+        AND a.id::text=ANY($3::text[])
+        AND ${approvedMediaVersionMetadataSql("v.metadata")}`,
     [String(row.id), `revision:${String(row.revision_id)}`, ids],
   );
   const hero = heroFilmPayload(slot, row.payload, assets.rows);
@@ -772,6 +778,7 @@ router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
          AND ref.field_path='revision:'||r.id::text
          AND ref.asset_id=a.id AND ref.media_version_id=v.id
        WHERE a.id=$1 AND a.status IN ('active','ready') AND d.status<>'archived'
+        AND ${approvedMediaVersionMetadataSql("v.metadata")}
         AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE(r.payload->'mediaIds','[]'::jsonb)) media_id
           WHERE media_id=a.id::text)
           AND ${referencedRevisionHasEligibleDestinationClause("d.id", "e.id", "r.id")}
@@ -794,22 +801,22 @@ router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
   if (range) res.status(206).set("Content-Range", `bytes ${range.start}-${range.end}/${size}`);
   const stream = await publicMediaDelivery.download(publicAsset.storage_key, range ?? undefined);
 
-  const originalListeners = new Map(
-    stream.eventNames().map((event) => [event, stream.listeners(event)]),
-  );
+   const originalListeners = new Map(
+     stream.eventNames().map((event) => [event, stream.listeners(event)]),
+   );
   try {
     await pipeline(stream, res);
   } catch {
     if (!res.headersSent) res.status(404).json({ error: "Media object not found." });
     else res.destroy();
-  } finally {
-    for (const event of stream.eventNames()) {
-      const retained = originalListeners.get(event) ?? [];
-      for (const listener of stream.listeners(event)) {
-        if (!retained.includes(listener)) stream.removeListener(event, listener);
-      }
-    }
-  }
+   } finally {
+     for (const event of stream.eventNames()) {
+       const retained = originalListeners.get(event) ?? [];
+       for (const listener of stream.listeners(event)) {
+         if (!retained.includes(listener)) stream.removeListener(event, listener);
+       }
+     }
+   }
 }));
 
 router.get(

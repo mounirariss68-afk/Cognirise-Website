@@ -19,10 +19,26 @@ import {
   requireMfa,
   type AuthContext,
 } from "../lib/auth";
-import { audit, pageOf } from "../lib/cms";
+import {
+  audit,
+  existingOperationReceipt,
+  operationDigest,
+  pageOf,
+  requestDigest,
+  reserveOperationReceipt,
+  saveOperationReceipt,
+} from "../lib/cms";
 import { asyncRoute } from "../lib/http";
+import { logger } from "../lib/logger";
 import { hashToken, randomToken } from "../lib/security";
-import { AccessDeliveryError, deliverAccessLink } from "../lib/access-delivery";
+import {
+  AccessDeliveryError,
+  createAccessDeliveryJob,
+  deliverAccessDeliveryJob,
+  getAccessDeliveryJob,
+  publicAccessDeliveryJob,
+  retryAccessDeliveryJob,
+} from "../lib/access-delivery";
 
 const router: IRouter = Router();
 router.use(
@@ -184,9 +200,54 @@ router.post(
     }
     const token = randomToken();
     const expiresAt = new Date(Date.now() + 72 * 60 * 60_000);
+    const idempotencyHeader = req.header("idempotency-key");
+    const bodyDigest = requestDigest(parsed.data);
+    const operationKey = idempotencyHeader
+      ? operationDigest(auth.user.id, "user.invited", parsed.data.email.toLowerCase(), idempotencyHeader)
+      : null;
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
+      if (operationKey) {
+        const prior = await existingOperationReceipt(
+          client,
+          operationKey,
+          "user.invited",
+          parsed.data.email.toLowerCase(),
+          bodyDigest,
+          auth.user.id,
+        );
+        if (prior) {
+          await client.query("ROLLBACK");
+          res.status(prior.statusCode ?? 201).json(prior.response);
+          return;
+        }
+        const reserved = await reserveOperationReceipt(client, {
+          idempotencyKey: operationKey,
+          operation: "user.invited",
+          subjectId: parsed.data.email.toLowerCase(),
+          requestDigest: bodyDigest,
+          actorUserId: auth.user.id,
+        });
+        if (!reserved) {
+          const committed = await existingOperationReceipt(
+            client,
+            operationKey,
+            "user.invited",
+            parsed.data.email.toLowerCase(),
+            bodyDigest,
+            auth.user.id,
+          );
+          if (committed) {
+            await client.query("ROLLBACK");
+            res.status(committed.statusCode ?? 201).json(committed.response);
+            return;
+          }
+          throw Object.assign(new Error("Idempotency-Key is already associated with an in-progress operation."), {
+            code: "IDEMPOTENCY_CONFLICT",
+          });
+        }
+      }
       const result = await client.query(
         `INSERT INTO cms_users
          (display_name,email,role,status)
@@ -200,28 +261,58 @@ router.post(
       const user = userFromRow(result.rows[0]);
       await replaceMarketAssignments(client, user.id, parsed.data.marketCodes ?? []);
       user.marketCodes = parsed.data.marketCodes ?? [];
-      await client.query(
+      const tokenResult = await client.query(
         `INSERT INTO cms_user_access_tokens
           (user_id,purpose,token_digest,expires_at,created_by_user_id)
-         VALUES ($1,'invitation',$2,$3,$4)`,
+          VALUES ($1,'invitation',$2,$3,$4) RETURNING id`,
         [user.id, hashToken(token), expiresAt, auth.user.id],
       );
-      await deliverAccessLink({
-        email: user.email, name: user.name, purpose: "invitation", token, expiresAt,
+      const deliveryId = await createAccessDeliveryJob(client, {
+        userId: user.id,
+        accessTokenId: String(tokenResult.rows[0].id),
+        email: user.email,
+        name: user.name,
+        purpose: "invitation",
+        token,
+        expiresAt,
       });
-      await client.query("COMMIT");
-      await audit(auth, "user.invited", "user", user.id);
-      res.status(201).json({
+      const response = {
         id: user.id,
         user,
-        delivery: "email",
+        delivery: "email" as const,
+        deliveryId,
+        deliveryStatus: "pending" as const,
         expiresAt,
         createdAt: user.createdAt,
+      };
+      await audit(auth, "user.invited", "user", user.id, {
+        deliveryId,
+        deliveryStatus: "pending",
+      }, client);
+      if (operationKey) {
+        await saveOperationReceipt(client, {
+          idempotencyKey: operationKey,
+          operation: "user.invited",
+          subjectId: parsed.data.email.toLowerCase(),
+          requestDigest: bodyDigest,
+          actorUserId: auth.user.id,
+          statusCode: 201,
+          response,
+        });
+      }
+      await client.query("COMMIT");
+      void deliverAccessDeliveryJob(deliveryId).catch((error) => {
+        logger.error({ err: error, deliveryId }, "Access delivery dispatch failed");
       });
+      res.status(201).json(response);
     } catch (error: any) {
       await client.query("ROLLBACK");
       if (error instanceof AccessDeliveryError) {
-        res.status(503).json({ error: error.message });
+        res.status(503).json({ error: error.message, outcome: "rejected" });
+        return;
+      }
+      if (error?.code === "IDEMPOTENCY_CONFLICT") {
+        res.status(409).json({ error: error.message });
         return;
       }
       if (error?.code === "23505") {
@@ -271,6 +362,15 @@ router.patch(
       if (result.rowCount && parsed.data.marketCodes !== undefined) {
         await replaceMarketAssignments(client, userId, parsed.data.marketCodes);
       }
+      if (result.rowCount && parsed.data.status === "suspended") {
+        await client.query(
+          "UPDATE cms_sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL",
+          [userId],
+        );
+      }
+      if (result.rowCount) {
+        await audit(res.locals.auth as AuthContext, "user.updated", "user", userId, parsed.data, client);
+      }
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK");
@@ -282,13 +382,6 @@ router.patch(
       res.status(404).json({ error: "User not found." });
       return;
     }
-    if (parsed.data.status === "suspended") {
-      await pool.query(
-        "UPDATE cms_sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL",
-        [userId],
-      );
-    }
-    await audit(auth, "user.updated", "user", userId, parsed.data);
     const updated = userFromRow(result.rows[0]);
     updated.marketCodes = parsed.data.marketCodes ?? (await marketAssignments(userId));
     res.json(updated);
@@ -313,45 +406,174 @@ router.post(
       res.status(404).json({ error: "User not found." });
       return;
     }
+    const idempotencyHeader = req.header("idempotency-key");
+    const bodyDigest = requestDigest(parsed.data);
+    const subjectId = String(req.params.userId);
+    const operationKey = idempotencyHeader
+      ? operationDigest(auth.user.id, "user.password_reset", subjectId, idempotencyHeader)
+      : null;
     const client = await pool.connect();
+    let deliveryId = "";
+    let response: Record<string, unknown>;
     try {
       await client.query("BEGIN");
+      if (operationKey) {
+        const prior = await existingOperationReceipt(
+          client,
+          operationKey,
+          "user.password_reset",
+          subjectId,
+          bodyDigest,
+          auth.user.id,
+        );
+        if (prior) {
+          await client.query("ROLLBACK");
+          res.status(prior.statusCode ?? 202).json(prior.response);
+          return;
+        }
+        const reserved = await reserveOperationReceipt(client, {
+          idempotencyKey: operationKey,
+          operation: "user.password_reset",
+          subjectId,
+          requestDigest: bodyDigest,
+          actorUserId: auth.user.id,
+        });
+        if (!reserved) {
+          const committed = await existingOperationReceipt(
+            client,
+            operationKey,
+            "user.password_reset",
+            subjectId,
+            bodyDigest,
+            auth.user.id,
+          );
+          if (committed) {
+            await client.query("ROLLBACK");
+            res.status(committed.statusCode ?? 202).json(committed.response);
+            return;
+          }
+          throw Object.assign(new Error("Idempotency-Key is already associated with an in-progress operation."), {
+            code: "IDEMPOTENCY_CONFLICT",
+          });
+        }
+      }
       await client.query(
         "UPDATE cms_user_access_tokens SET consumed_at=now() WHERE user_id=$1 AND consumed_at IS NULL",
         [req.params.userId],
       );
-      await client.query(
+      const tokenResult = await client.query(
         `INSERT INTO cms_user_access_tokens
           (user_id,purpose,token_digest,expires_at,created_by_user_id)
-         VALUES ($1,'password-reset',$2,$3,$4)`,
+          VALUES ($1,'password-reset',$2,$3,$4) RETURNING id`,
         [req.params.userId, hashToken(token), expiresAt, auth.user.id],
       );
-      await deliverAccessLink({
+      deliveryId = await createAccessDeliveryJob(client, {
+        userId: subjectId,
+        accessTokenId: String(tokenResult.rows[0].id),
         email: user.rows[0].email,
         name: user.rows[0].display_name ?? user.rows[0].email,
         purpose: "password-reset",
         token,
         expiresAt,
       });
+      response = {
+        id: subjectId,
+        delivery: "email" as const,
+        deliveryId,
+        deliveryStatus: "pending" as const,
+        expiresAt,
+      };
+      await audit(auth, "user.password_reset", "user", subjectId, {
+        deliveryId,
+        deliveryStatus: "pending",
+      }, client);
+      if (operationKey) {
+        await saveOperationReceipt(client, {
+          idempotencyKey: operationKey,
+          operation: "user.password_reset",
+          subjectId,
+          requestDigest: bodyDigest,
+          actorUserId: auth.user.id,
+          statusCode: 202,
+          response,
+        });
+      }
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK");
       if (error instanceof AccessDeliveryError) {
-        res.status(503).json({ error: error.message });
+        res.status(503).json({ error: error.message, outcome: "rejected" });
+        return;
+      }
+      if ((error as any)?.code === "IDEMPOTENCY_CONFLICT") {
+        res.status(409).json({ error: (error as Error).message });
         return;
       }
       throw error;
     } finally {
       client.release();
     }
-    await audit(auth, "user.password_reset", "user", String(req.params.userId), {
-      delivery: "email",
+    void deliverAccessDeliveryJob(deliveryId).catch((error) => {
+      logger.error({ err: error, deliveryId }, "Access delivery dispatch failed");
     });
-    res.status(202).json({
-      id: String(req.params.userId),
-      delivery: "email",
-      expiresAt,
+    res.status(202).json(response);
+  }),
+);
+
+router.get(
+  "/users/:userId/access-delivery/:deliveryId",
+  requireAdministrator,
+  asyncRoute(async (req, res) => {
+    const job = await getAccessDeliveryJob(
+      pool,
+      String(req.params.deliveryId),
+      String(req.params.userId),
+    );
+    if (!job) {
+      res.status(404).json({ error: "Access delivery job not found." });
+      return;
+    }
+    res.json(publicAccessDeliveryJob(job));
+  }),
+);
+
+router.post(
+  "/users/:userId/access-delivery/:deliveryId/retry",
+  requireCsrf,
+  requireAdministrator,
+  asyncRoute(async (req, res) => {
+    const auth = res.locals.auth as AuthContext;
+    const client = await pool.connect();
+    let job: Record<string, any> | null = null;
+    try {
+      await client.query("BEGIN");
+      job = await retryAccessDeliveryJob(
+        client,
+        String(req.params.deliveryId),
+        String(req.params.userId),
+      );
+      if (!job) {
+        // retryAccessDeliveryJob also atomically purges an expired payload.
+        // Commit that terminal transition even though the retry itself was
+        // rejected, rather than rolling the secure purge back.
+        await client.query("COMMIT");
+        res.status(409).json({ error: "This access delivery is not eligible for retry." });
+        return;
+      }
+      await audit(auth, "user.access_delivery_retry", "user", String(req.params.userId), {
+        deliveryId: String(req.params.deliveryId),
+      }, client);
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+    void deliverAccessDeliveryJob(String(req.params.deliveryId)).catch((error) => {
+      logger.error({ err: error, deliveryId: String(req.params.deliveryId) }, "Access delivery retry failed");
     });
+    res.status(202).json(publicAccessDeliveryJob(job));
   }),
 );
 
@@ -409,15 +631,26 @@ router.post(
     }
     const auth = res.locals.auth as AuthContext;
     const now = new Date();
-    const result = await pool.query(
-      `UPDATE cms_sessions SET revoked_at=$3
-        WHERE user_id=$1 AND revoked_at IS NULL AND ($2::boolean=false OR id<>$4)
-        RETURNING id`,
-      [req.params.userId, parsed.data.exceptCurrent, now, auth.id],
-    );
-    await audit(auth, "sessions.revoked", "user", String(req.params.userId), {
-      count: result.rowCount ?? 0,
-    });
+    const client = await pool.connect();
+    let result;
+    try {
+      await client.query("BEGIN");
+      result = await client.query(
+        `UPDATE cms_sessions SET revoked_at=$3
+          WHERE user_id=$1 AND revoked_at IS NULL AND ($2::boolean=false OR id<>$4)
+          RETURNING id`,
+        [req.params.userId, parsed.data.exceptCurrent, now, auth.id],
+      );
+      await audit(auth, "sessions.revoked", "user", String(req.params.userId), {
+        count: result.rowCount ?? 0,
+      }, client);
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
     res.json({ revokedCount: result.rowCount ?? 0, revokedAt: now });
   }),
 );
@@ -489,21 +722,28 @@ router.post(
     }
     const input = parsed.data;
     try { await assertMarketFallbackSafe(input.code, input.fallbackMarketCode); } catch (error: any) { res.status(400).json({ error: error.message }); return; }
+    const auth = res.locals.auth as AuthContext;
+    const client = await pool.connect();
     try {
-      const result = await pool.query(
+      await client.query("BEGIN");
+      const result = await client.query(
         `INSERT INTO market_editions
           (code,display_name,default_locale,fallback_market_code,fallback_locale,is_canonical,enabled)
           VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
         [input.code,input.displayName,input.defaultLocale,input.fallbackMarketCode ?? null,input.fallbackLocale ?? null,input.isCanonical,input.enabled],
       );
-      await audit(res.locals.auth as AuthContext, "market.created", "market", String(result.rows[0].id));
+      await audit(auth, "market.created", "market", String(result.rows[0].id), {}, client);
+      await client.query("COMMIT");
       res.status(201).json(marketFromRow(result.rows[0]));
     } catch (error: any) {
+      await client.query("ROLLBACK").catch(() => undefined);
       if (error?.code === "23505" || error?.code === "23503") {
         res.status(409).json({ error: "Market configuration conflicts with an existing market." });
         return;
       }
       throw error;
+    } finally {
+      client.release();
     }
   }),
 );
@@ -549,7 +789,10 @@ router.patch(
       if (references.rowCount) { res.status(409).json({ error: "Market is referenced and cannot be renamed or disabled." }); return; }
     }
     try {
-      const result = await pool.query(
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        const result = await client.query(
         `UPDATE market_editions SET code=COALESCE($2,code),display_name=COALESCE($3,display_name),
           default_locale=COALESCE($4,default_locale),fallback_market_code=CASE WHEN $5 THEN $6 ELSE fallback_market_code END,
           fallback_locale=CASE WHEN $7 THEN $8 ELSE fallback_locale END,is_canonical=COALESCE($9,is_canonical),
@@ -558,13 +801,21 @@ router.patch(
         [req.params.marketEditionId,i.code ?? null,i.displayName ?? null,i.defaultLocale ?? null,
          Object.hasOwn(i,"fallbackMarketCode"),i.fallbackMarketCode ?? null,Object.hasOwn(i,"fallbackLocale"),
          i.fallbackLocale ?? null,i.isCanonical ?? null,i.enabled ?? null],
-      );
-      if (!result.rowCount) {
-        res.status(404).json({ error: "Market edition not found." });
-        return;
+        );
+        if (!result.rowCount) {
+          await client.query("ROLLBACK");
+          res.status(404).json({ error: "Market edition not found." });
+          return;
+        }
+        await audit(res.locals.auth as AuthContext, "market.updated", "market", String(req.params.marketEditionId), {}, client);
+        await client.query("COMMIT");
+        res.json(marketFromRow(result.rows[0]));
+      } catch (error) {
+        await client.query("ROLLBACK").catch(() => undefined);
+        throw error;
+      } finally {
+        client.release();
       }
-      await audit(res.locals.auth as AuthContext, "market.updated", "market", String(req.params.marketEditionId));
-      res.json(marketFromRow(result.rows[0]));
     } catch (error: any) {
       if (error?.code === "23505" || error?.code === "23503") {
         res.status(409).json({ error: "Market configuration conflicts with an existing market." });
@@ -580,24 +831,41 @@ router.delete(
   requireCsrf,
   requireAdministrator,
   asyncRoute(async (req, res) => {
-    const references = await pool.query(
-      `SELECT m.is_canonical,m.code,
-        EXISTS(SELECT 1 FROM market_editions x WHERE x.fallback_market_code=m.code) global_ref,
-        EXISTS(SELECT 1 FROM cms_market_editions x WHERE x.market=m.code) content_ref
-       FROM market_editions m WHERE m.id=$1`,
-      [req.params.marketEditionId],
-    );
-    if (!references.rowCount) { res.status(404).json({ error: "Market edition not found." }); return; }
-    if (references.rows[0].is_canonical || references.rows[0].code === "uae" || references.rows[0].global_ref || references.rows[0].content_ref) {
-      res.status(409).json({ error: "Referenced or canonical market cannot be deleted." }); return;
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const references = await client.query(
+        `SELECT m.is_canonical,m.code,
+          EXISTS(SELECT 1 FROM market_editions x WHERE x.fallback_market_code=m.code) global_ref,
+          EXISTS(SELECT 1 FROM cms_market_editions x WHERE x.market=m.code) content_ref
+         FROM market_editions m WHERE m.id=$1 FOR UPDATE`,
+        [req.params.marketEditionId],
+      );
+      if (!references.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(404).json({ error: "Market edition not found." });
+        return;
+      }
+      if (references.rows[0].is_canonical || references.rows[0].code === "uae" || references.rows[0].global_ref || references.rows[0].content_ref) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "Referenced or canonical market cannot be deleted." });
+        return;
+      }
+      const result = await client.query("DELETE FROM market_editions WHERE id=$1 AND NOT is_canonical AND code<>'uae' RETURNING id", [req.params.marketEditionId]);
+      if (!result.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(404).json({ error: "Market edition not found." });
+        return;
+      }
+      await audit(res.locals.auth as AuthContext, "market.deleted", "market", String(req.params.marketEditionId), {}, client);
+      await client.query("COMMIT");
+      res.status(204).end();
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
     }
-    const result = await pool.query("DELETE FROM market_editions WHERE id=$1 AND NOT is_canonical AND code<>'uae' RETURNING id", [req.params.marketEditionId]);
-    if (!result.rowCount) {
-      res.status(404).json({ error: "Market edition not found." });
-      return;
-    }
-    await audit(res.locals.auth as AuthContext, "market.deleted", "market", String(req.params.marketEditionId));
-    res.status(204).end();
   }),
 );
 

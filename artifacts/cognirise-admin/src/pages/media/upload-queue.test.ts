@@ -3,6 +3,8 @@ import test from "node:test";
 import { computeSha256 } from "./upload-queue";
 import {
   UploadQueueEngine,
+  MAX_QUEUE_ITEMS,
+  QUEUE_RETENTION_MS,
   type QueueEngineDependencies,
   type QueueStorage,
   type UploadResponse,
@@ -378,4 +380,76 @@ test("storage failure during a retry preserves the started metadata lock", async
   assert.equal(engine.getQueue()[0].started, true);
   engine.updateItem(id, { altText: "unsafe mutation" });
   assert.equal(engine.getQueue()[0].altText, "frozen snapshot");
+});
+
+test("queue cleanup clears completed rows and discards terminal failures without API deletion", async () => {
+  let failRequests = false;
+  const { engine, calls } = harness({
+    request: async (body, key) => {
+      if (failRequests) throw new Error("temporary request failure");
+      calls.request.push({ body, key });
+      return response(`media-${key}`);
+    },
+  });
+
+  const completedId = await reviewedItem(engine, file("completed.png"));
+  await engine.processItem(completedId);
+  failRequests = true;
+  const failedId = await reviewedItem(engine, file("failed.png"));
+  await engine.processItem(failedId);
+
+  assert.deepEqual(engine.getQueue().map((item) => item.status), ["completed", "error"]);
+  const requestCount = calls.request.length;
+  assert.equal(engine.clearCompleted(), 1);
+  assert.equal(engine.getQueue().map((item) => item.id).includes(completedId), false);
+  assert.equal(engine.discardFailed(failedId), 1);
+  assert.equal(engine.getQueue().length, 0);
+  assert.equal(calls.request.length, requestCount, "local cleanup must not issue another server request");
+});
+
+test("bounded retention drops only old terminal local rows and keeps started failures recoverable", async () => {
+  const storage = new MemoryStorage();
+  const first = harness({}, storage);
+  const completedId = await reviewedItem(first.engine, file("old-completed.png"));
+  await first.engine.processItem(completedId);
+  const saved = JSON.parse(storage.values.get("queue-user")!);
+  saved[0].completedAt = 0;
+  storage.values.set("queue-user", JSON.stringify(saved));
+
+  const restored = new UploadQueueEngine({
+    dependencies: first.dependencies,
+    storage,
+    storageKey: "queue-user",
+    now: () => QUEUE_RETENTION_MS + 1,
+  });
+  assert.equal(restored.getQueue().length, 0);
+});
+
+test("persistence bounds completed rows without evicting started recovery entries", () => {
+  const storage = new MemoryStorage();
+  const completed = Array.from({ length: MAX_QUEUE_ITEMS + 1 }, (_, index) => ({
+    id: `completed-${index}`,
+    filename: `${index}.png`,
+    size: 1,
+    mimeType: "image/png",
+    collection: "website",
+    title: String(index),
+    altText: "",
+    credit: "",
+    usage: "",
+    status: "completed",
+    progress: 100,
+    completedAt: index + 1,
+    started: true,
+  }));
+  storage.values.set("queue-user", JSON.stringify(completed));
+  const { dependencies } = harness({}, storage);
+  const engine = new UploadQueueEngine({
+    dependencies,
+    storage,
+    storageKey: "queue-user",
+    now: () => 10,
+  });
+  assert.equal(engine.getQueue().length, MAX_QUEUE_ITEMS);
+  assert.equal(engine.getQueue()[0].id, "completed-1", "the newest completed rows are retained");
 });

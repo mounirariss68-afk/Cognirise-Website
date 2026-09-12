@@ -102,6 +102,11 @@ test("keeps the parent iframe mounted while its child fetch is pending, then acc
   });
   const iframe = container.querySelector("iframe");
   assert.ok(iframe, "the iframe is mounted as soon as the capability is issued");
+  assert.match(
+    container.querySelector('[data-testid="industry-preview-revision-id"]')?.textContent ?? "",
+    /revision-one/,
+    "the protected preview identifies the exact saved revision",
+  );
   await React.act(async () => { await settle(); });
   assert.ok(iframe.isConnected, "a delayed child fetch sends no initial unavailable state that removes its iframe");
 

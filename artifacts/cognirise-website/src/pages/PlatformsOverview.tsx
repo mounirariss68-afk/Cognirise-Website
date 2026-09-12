@@ -81,7 +81,7 @@ export default function PlatformsOverview() {
           </div>
           
           <div className="platforms-hero-cut relative h-[400px] lg:h-[640px] bg-[hsl(var(--brand-deep))]">
-            <PlatformsHeroMedia fallbackSrc={heroVisual.src} fallbackAlt={heroVisual.alt} />
+            <PlatformsHeroMedia fallbackSrc={heroVisual.src} fallbackAlt={heroVisual.alt} objectPosition={heroVisual.objectPosition} />
             <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))] via-transparent to-transparent opacity-70" />
             
             <div className="absolute right-0 top-12 z-10 text-[100px] lg:text-[145px] font-display font-semibold leading-none text-white opacity-20 mix-blend-overlay tracking-tight pointer-events-none">

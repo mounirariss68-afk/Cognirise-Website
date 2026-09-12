@@ -90,6 +90,7 @@ export default function MethodologiesPortfolio() {
               key={heroMedia.src}
               src={heroMedia.src}
               alt={heroMedia.alt}
+               style={{ objectPosition: heroMedia.objectPosition }}
               className="h-full w-full object-cover opacity-90"
               eager
             />

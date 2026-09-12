@@ -169,6 +169,14 @@ export function useBatchUpload() {
   ) ?? Promise.resolve(), [currentEngine]);
 
   const removeItem = useCallback((id: string) => currentEngine()?.removeItem(id), [currentEngine]);
+  const clearCompleted = useCallback(
+    () => currentEngine()?.clearCompleted() ?? 0,
+    [currentEngine],
+  );
+  const discardFailed = useCallback(
+    (id?: string) => currentEngine()?.discardFailed(id) ?? 0,
+    [currentEngine],
+  );
   const updateItem = useCallback(
     (id: string, updates: Partial<QueueItem>) => currentEngine()?.updateItem(id, updates),
     [currentEngine],
@@ -190,6 +198,8 @@ export function useBatchUpload() {
     queue: state.owner === userId ? state.queue : [],
     addFiles,
     removeItem,
+    clearCompleted,
+    discardFailed,
     updateItem,
     processItem,
     processAll,

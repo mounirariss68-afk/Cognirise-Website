@@ -15,6 +15,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { chmod, lstat, open, readFile, unlink, writeFile, rename } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { resolveFixtureDocuments } from "./src/cms/owner-browser-fixture-helpers";
 
 type Role = "administrator" | "editor";
 type FixturePhase = "creating" | "ready";
@@ -72,13 +73,14 @@ const repositoryRoot = path.resolve(
   "..",
 );
 const args = process.argv.slice(2);
-const commands = ["setup", "totp", "cleanup"] as const;
+const commands = ["setup", "totp", "cleanup", "baseline"] as const;
 const requestedCommands = args.filter((value): value is (typeof commands)[number] =>
   (commands as readonly string[]).includes(value),
 );
 const command = requestedCommands[0];
 const developmentFlag = args.includes("--development");
 const credentialsPath = flagValue("--credentials");
+const baselinePath = flagValue("--baseline");
 const withSubmission = args.includes("--with-submission");
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const PREFIX = /^fixture-cms-owner-[0-9a-f-]+$/;
@@ -106,6 +108,8 @@ function usage(): void {
       "    --role administrator|editor",
       "  NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture --",
       "    --development cleanup --credentials /tmp/cognirise-owner-fixture.json",
+      "  NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture --",
+      "    --development baseline --baseline /tmp/cognirise-cms-preservation-baseline.json",
       "",
       "The totp command writes only the current six-digit code to stdout.",
       "Do not send that stdout through chat, logs, or a test report.",
@@ -138,43 +142,55 @@ function requireDevelopmentTarget(): void {
   }
 }
 
-function requireCredentialsPath(): string {
-  if (!credentialsPath) {
+function requirePrivatePath(
+  value: string | undefined,
+  flag: string,
+  description: string,
+): string {
+  if (!value) {
     throw new Error(
-      "--credentials is required and must point to a mode-600 file below /tmp.",
+      `${flag} is required and must point to a mode-600 file below /tmp.`,
     );
   }
-  const resolved = path.resolve(credentialsPath);
-  if (resolved !== "/tmp" && !resolved.startsWith("/tmp/")) {
-    throw new Error("The credentials file must be below /tmp.");
+  const resolved = path.resolve(value);
+  if (resolved === "/tmp" || !resolved.startsWith("/tmp/")) {
+    throw new Error(`The ${description} file must be below /tmp.`);
   }
   if (path.basename(resolved).startsWith(".")) {
-    throw new Error("The credentials file must use a non-hidden /tmp filename.");
+    throw new Error(`The ${description} file must use a non-hidden /tmp filename.`);
   }
   return resolved;
+}
+
+function requireCredentialsPath(): string {
+  return requirePrivatePath(credentialsPath, "--credentials", "credentials");
+}
+
+function requireBaselinePath(): string {
+  return requirePrivatePath(baselinePath, "--baseline", "baseline");
 }
 
 async function assertPrivateStateFile(filePath: string, mustExist: boolean): Promise<void> {
   try {
     const stats = await lstat(filePath);
     if (!stats.isFile()) {
-      throw new Error("The credentials path must be a regular file.");
+      throw new Error("The private state path must be a regular file.");
     }
     if ((stats.mode & 0o777) !== 0o600) {
-      throw new Error("The credentials file must have mode 600.");
+      throw new Error("The private state file must have mode 600.");
     }
     if (typeof process.getuid === "function" && stats.uid !== process.getuid()) {
-      throw new Error("The credentials file must be owned by the current user.");
+      throw new Error("The private state file must be owned by the current user.");
     }
     if (!mustExist) {
       throw new Error(
-        "The credentials file already exists. Run cleanup first or choose a new /tmp path.",
+        "The private state file already exists. Choose a new /tmp path or remove it explicitly.",
       );
     }
   } catch (error: unknown) {
     if ((error as NodeJS.ErrnoException)?.code === "ENOENT") {
       if (mustExist) {
-        const missing = new Error("The credentials file does not exist.");
+        const missing = new Error("The private state file does not exist.");
         (missing as NodeJS.ErrnoException).code = "ENOENT";
         throw missing;
       }
@@ -184,7 +200,7 @@ async function assertPrivateStateFile(filePath: string, mustExist: boolean): Pro
   }
 }
 
-async function writePrivateState(filePath: string, state: FixtureState): Promise<void> {
+async function writePrivateState(filePath: string, state: unknown): Promise<void> {
   const temporaryPath = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
   const contents = JSON.stringify(state) + "\n";
   try {
@@ -212,6 +228,134 @@ async function readPrivateState(filePath: string): Promise<FixtureState> {
     throw new Error("The credentials file is not valid JSON.");
   }
   return validateState(parsed);
+}
+
+interface PreservationBaseline {
+  version: 1;
+  capturedAt: string;
+  publishedPointers: Array<{
+    documentId: string;
+    editionId: string;
+    market: string;
+    locale: string;
+    revisionId: string;
+    revisionNumber: number;
+    contentDigest: string;
+  }>;
+  editionAvailability: Array<{
+    documentId: string;
+    marketEditionId: string;
+    locale: string;
+    publishedDecision: string;
+    draftDecision: string | null;
+  }>;
+  mediaPins: Array<{
+    documentId: string;
+    revisionId: string;
+    assetId: string;
+    mediaVersionId: string;
+    fieldPath: string;
+  }>;
+  revisionCounts: Array<{
+    editionId: string;
+    revisionCount: number;
+    contentDigests: string[];
+  }>;
+}
+
+async function capturePreservationBaseline(
+  pool: PoolLike,
+  filePath: string,
+): Promise<void> {
+  await assertPrivateStateFile(filePath, false);
+  // This command intentionally consists only of SELECTs. It records immutable
+  // identities and hashes, never content payloads, credentials, or submissions.
+  const pointers = await pool.query<{
+    document_id: string;
+    edition_id: string;
+    market: string;
+    locale: string;
+    revision_id: string;
+    revision_number: number;
+    content_digest: string;
+  }>(
+    `SELECT e.document_id::text document_id,e.id::text edition_id,e.market,e.locale,
+            r.id::text revision_id,r.revision_number,r.content_digest
+       FROM cms_market_editions e
+       JOIN cms_revisions r
+         ON r.id=e.published_revision_id AND r.edition_id=e.id
+      WHERE e.publication_state='published' AND e.published_revision_id IS NOT NULL
+      ORDER BY e.document_id,e.market,e.locale`,
+  );
+  const availability = await pool.query<{
+    document_id: string;
+    market_edition_id: string;
+    locale: string;
+    published_decision: string;
+    draft_decision: string | null;
+  }>(
+    `SELECT document_id::text document_id,market_edition_id::text market_edition_id,
+            locale,published_decision,draft_decision
+       FROM cms_document_market_availability
+      ORDER BY document_id,market_edition_id,locale`,
+  );
+  const mediaPins = await pool.query<{
+    document_id: string;
+    revision_id: string;
+    asset_id: string;
+    media_version_id: string;
+    field_path: string;
+  }>(
+    `SELECT ref.document_id::text document_id,substring(ref.field_path from 10)::text revision_id,
+            ref.asset_id::text asset_id,ref.media_version_id::text media_version_id,ref.field_path
+       FROM cms_media_references ref
+       JOIN cms_market_editions e ON e.document_id=ref.document_id
+       JOIN cms_revisions r
+         ON r.id=e.published_revision_id
+        AND r.edition_id=e.id
+        AND ref.field_path='revision:'||r.id::text
+      WHERE e.publication_state='published' AND e.published_revision_id IS NOT NULL
+      ORDER BY ref.document_id,ref.field_path,ref.asset_id,ref.media_version_id`,
+  );
+  const revisions = await pool.query<{
+    edition_id: string;
+    revision_count: number;
+    content_digests: string[];
+  }>(
+    `SELECT edition_id::text edition_id,count(*)::int revision_count,
+            array_agg(content_digest ORDER BY revision_number,id) content_digests
+       FROM cms_revisions
+      GROUP BY edition_id
+      ORDER BY edition_id`,
+  );
+  const baseline: PreservationBaseline = {
+    version: 1,
+    capturedAt: new Date().toISOString(),
+    publishedPointers: pointers.rows.map((row) => ({
+      documentId: row.document_id,
+      editionId: row.edition_id,
+      market: row.market,
+      locale: row.locale,
+      revisionId: row.revision_id,
+      revisionNumber: Number(row.revision_number),
+      contentDigest: row.content_digest,
+    })),
+    editionAvailability: availability.rows.map((row) => ({
+      documentId: row.document_id,
+      marketEditionId: row.market_edition_id,
+      locale: row.locale,
+      publishedDecision: row.published_decision,
+      draftDecision: row.draft_decision,
+    })),
+    mediaPins: mediaPins.rows,
+    revisionCounts: revisions.rows.map((row) => ({
+      editionId: row.edition_id,
+      revisionCount: Number(row.revision_count),
+      contentDigests: row.content_digests,
+    })),
+  };
+  await writePrivateState(filePath, baseline);
+  process.stdout.write(`CMS preservation baseline captured at ${filePath} (mode 600); content was not written.\n`);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -518,7 +662,27 @@ async function deleteFixtureRows(pool: PoolLike, state: FixtureState): Promise<v
       }
     }
 
-    for (const document of state.documents) {
+    // Browser-created documents are not known when setup commits. Discover
+    // them through exact fixture owner/revision identities, then use the
+    // prefix only as a safety assertion. Never delete by prefix alone.
+    const relatedDocuments = await client.query<{ id: string; canonical_slug: string | null }>(
+      `SELECT DISTINCT d.id::text id,d.canonical_slug
+         FROM cms_documents d
+         LEFT JOIN cms_market_editions e ON e.document_id=d.id
+         LEFT JOIN cms_revisions r ON r.edition_id=e.id
+        WHERE d.owner_id=ANY($1::uuid[])
+           OR r.created_by_user_id=ANY($1::uuid[])`,
+      [userIds],
+    );
+    const prefixedDocuments = await client.query<{ id: string; canonical_slug: string | null }>(
+      `SELECT id::text id,canonical_slug
+         FROM cms_documents
+        WHERE canonical_slug LIKE $1`,
+      [`${state.prefix}%`],
+    );
+    const documents = resolveFixtureDocuments(state, relatedDocuments.rows, prefixedDocuments.rows);
+
+    for (const document of documents) {
       const result = await client.query<{ id: string; canonical_slug: string | null }>(
         `SELECT id::text id,canonical_slug
            FROM cms_documents
@@ -531,6 +695,40 @@ async function deleteFixtureRows(pool: PoolLike, state: FixtureState): Promise<v
         (row.canonical_slug !== document.slug || !String(row.canonical_slug).startsWith(state.prefix))
       ) {
         throw new Error("Refusing cleanup because a recorded document no longer matches its fixture identity.");
+      }
+    }
+
+    if (documents.length) {
+      const documentIds = documents.map((document) => document.id);
+      const unrelatedTargetReferences = await client.query(
+        `SELECT source_document_id::text source_document_id,target_document_id::text target_document_id
+           FROM cms_document_references
+          WHERE target_document_id=ANY($1::uuid[])
+            AND NOT source_document_id=ANY($1::uuid[])`,
+        [documentIds],
+      );
+      if (unrelatedTargetReferences.rows.length) {
+        throw new Error("Refusing cleanup because a non-fixture document references fixture content.");
+      }
+      const protectedRedirects = await client.query(
+        `SELECT id::text id
+           FROM cms_redirects
+          WHERE destination_document_id=ANY($1::uuid[])`,
+        [documentIds],
+      );
+      if (protectedRedirects.rows.length) {
+        throw new Error("Refusing cleanup because a redirect points at fixture content.");
+      }
+      const authoredOutsideSet = await client.query(
+        `SELECT r.id::text id,e.document_id::text document_id
+           FROM cms_revisions r
+           JOIN cms_market_editions e ON e.id=r.edition_id
+          WHERE r.created_by_user_id=ANY($1::uuid[])
+            AND NOT e.document_id=ANY($2::uuid[])`,
+        [userIds, documentIds],
+      );
+      if (authoredOutsideSet.rows.length) {
+        throw new Error("Refusing cleanup because fixture authorship is attached to existing content.");
       }
     }
 
@@ -569,7 +767,7 @@ async function deleteFixtureRows(pool: PoolLike, state: FixtureState): Promise<v
     }
 
     const allTargetIds = [
-      ...state.documents.map((document) => document.id),
+      ...documents.map((document) => document.id),
       ...state.submissions.flatMap((submission) => [
         submission.workflowId,
         submission.sourceId,
@@ -587,12 +785,71 @@ async function deleteFixtureRows(pool: PoolLike, state: FixtureState): Promise<v
       [userIds],
     );
 
-    for (const document of state.documents) {
+    if (documents.length) {
+      const documentIds = documents.map((document) => document.id);
+      // Explicitly clear revision dependents before the document cascade.
+      // This keeps teardown correct when a revision author is protected by a
+      // foreign key and makes future fixture-owned dependencies visible.
+      await client.query(
+        `DELETE FROM cms_review_comments
+          WHERE revision_id IN (
+            SELECT r.id FROM cms_revisions r
+             JOIN cms_market_editions e ON e.id=r.edition_id
+            WHERE e.document_id=ANY($1::uuid[])
+          )`,
+        [documentIds],
+      );
+      await client.query(
+        `DELETE FROM cms_preview_sessions
+          WHERE edition_id IN (
+            SELECT id FROM cms_market_editions WHERE document_id=ANY($1::uuid[])
+          )`,
+        [documentIds],
+      );
+      await client.query(
+        `DELETE FROM cms_revisions
+          WHERE edition_id IN (
+            SELECT id FROM cms_market_editions WHERE document_id=ANY($1::uuid[])
+          )`,
+        [documentIds],
+      );
+      await client.query(
+        "DELETE FROM cms_media_references WHERE document_id=ANY($1::uuid[])",
+        [documentIds],
+      );
+      await client.query(
+        "DELETE FROM cms_document_terms WHERE document_id=ANY($1::uuid[])",
+        [documentIds],
+      );
+      await client.query(
+        "DELETE FROM cms_document_references WHERE source_document_id=ANY($1::uuid[])",
+        [documentIds],
+      );
+      await client.query(
+        "DELETE FROM cms_landing_page_reconciliation WHERE document_id=ANY($1::uuid[])",
+        [documentIds],
+      );
+      await client.query(
+        "DELETE FROM cms_document_market_availability WHERE document_id=ANY($1::uuid[])",
+        [documentIds],
+      );
+      await client.query(
+        "DELETE FROM cms_document_availability_states WHERE document_id=ANY($1::uuid[])",
+        [documentIds],
+      );
+      await client.query(
+        "DELETE FROM cms_document_availability_migration_reports WHERE document_id=ANY($1::uuid[])",
+        [documentIds],
+      );
+      await client.query(
+        "DELETE FROM cms_operation_receipts WHERE subject_id=ANY($1::text[])",
+        [allTargetIds],
+      );
       await client.query(
         `DELETE FROM cms_documents
-          WHERE id=$1::uuid AND canonical_slug=$2
-            AND canonical_slug LIKE $3`,
-        [document.id, document.slug, `${state.prefix}%`],
+          WHERE id=ANY($1::uuid[])
+            AND canonical_slug LIKE $2`,
+        [documentIds, `${state.prefix}%`],
       );
     }
 
@@ -624,6 +881,47 @@ async function deleteFixtureRows(pool: PoolLike, state: FixtureState): Promise<v
             AND email LIKE $4`,
         [user.id, user.email, user.role, `${state.prefix}%`],
       );
+    }
+    const residualUsers = await client.query<{ id: string }>(
+      "SELECT id::text id FROM cms_users WHERE id=ANY($1::uuid[])",
+      [userIds],
+    );
+    const residualDocuments = documents.length
+      ? await client.query<{ id: string }>(
+        "SELECT id::text id FROM cms_documents WHERE id=ANY($1::uuid[])",
+        [documents.map((document) => document.id)],
+      )
+      : { rows: [] };
+    const residualSubmissions = state.submissions.length
+      ? await client.query<{ id: string }>(
+        "SELECT id::text id FROM cms_submission_workflows WHERE id=ANY($1::uuid[])",
+        [state.submissions.map((submission) => submission.workflowId)],
+      )
+      : { rows: [] };
+    const residualSources: Array<{ id: string }> = [];
+    for (const submission of state.submissions) {
+      const sourceTable = submission.sourceType === "enquiry"
+        ? "website_enquiries"
+        : "newsletter_subscriptions";
+      const source = await client.query<{ id: string }>(
+        `SELECT id::text id FROM ${sourceTable} WHERE id=$1::uuid`,
+        [submission.sourceId],
+      );
+      residualSources.push(...source.rows);
+    }
+    if (
+      residualUsers.rows.length
+      || residualDocuments.rows.length
+      || residualSubmissions.rows.length
+      || residualSources.length
+    ) {
+      const residualIds = [
+        ...residualUsers.rows.map((row) => row.id),
+        ...residualDocuments.rows.map((row) => row.id),
+        ...residualSubmissions.rows.map((row) => row.id),
+        ...residualSources.map((row) => row.id),
+      ];
+      throw new Error(`Fixture cleanup left residual owned rows: ${residualIds.join(",")}`);
     }
     await client.query("COMMIT");
   } catch (error) {
@@ -658,16 +956,26 @@ async function printTotp(security: SecurityHelpers, filePath: string): Promise<v
 
 async function main(): Promise<void> {
   if (requestedCommands.length > 1) {
-    throw new Error("Pass exactly one of setup, totp, or cleanup.");
+    throw new Error("Pass exactly one of setup, totp, cleanup, or baseline.");
   }
   if (command === "--help" || command === "-h" || !command) {
     usage();
     return;
   }
-  if (!["setup", "totp", "cleanup"].includes(command)) {
+  if (!["setup", "totp", "cleanup", "baseline"].includes(command)) {
     throw new Error(`Unknown command ${command}. Use --help for usage.`);
   }
   requireDevelopmentTarget();
+  if (command === "baseline") {
+    const filePath = requireBaselinePath();
+    const pool = await loadPool();
+    try {
+      await capturePreservationBaseline(pool, filePath);
+    } finally {
+      await pool.end();
+    }
+    return;
+  }
   const filePath = requireCredentialsPath();
 
   if (command === "totp") {
@@ -713,9 +1021,11 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((error: unknown) => {
-  // Error messages are intentionally kept free of parsed state and secret
-  // values.  This output is safe for a local command failure log.
-  process.stderr.write(`${error instanceof Error ? error.message : "CMS fixture command failed."}\n`);
-  process.exitCode = 1;
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((error: unknown) => {
+    // Error messages are intentionally kept free of parsed state and secret
+    // values.  This output is safe for a local command failure log.
+    process.stderr.write(`${error instanceof Error ? error.message : "CMS fixture command failed."}\n`);
+    process.exitCode = 1;
+  });
+}

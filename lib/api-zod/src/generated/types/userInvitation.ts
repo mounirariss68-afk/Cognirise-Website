@@ -7,6 +7,7 @@
  */
 import type { User } from './user';
 import type { UserInvitationDelivery } from './userInvitationDelivery';
+import type { UserInvitationDeliveryStatus } from './userInvitationDeliveryStatus';
 
 export interface UserInvitation {
   id: string;
@@ -14,4 +15,6 @@ export interface UserInvitation {
   delivery: UserInvitationDelivery;
   expiresAt: Date;
   createdAt: Date;
+  deliveryId?: string;
+  deliveryStatus?: UserInvitationDeliveryStatus;
 }

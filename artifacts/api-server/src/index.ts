@@ -1,5 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { startAccessDeliveryWorker } from "./lib/access-delivery";
+import { runReadinessChecks } from "./routes/health";
 
 const rawPort = process.env["PORT"];
 
@@ -22,4 +24,10 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+  void runReadinessChecks().then((readiness) => {
+    if (readiness.status !== "ok") {
+      logger.warn({ checks: readiness.checks }, "API startup readiness check is unavailable");
+    }
+  });
+  startAccessDeliveryWorker();
 });

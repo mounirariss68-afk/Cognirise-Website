@@ -48,17 +48,44 @@ export type CmsRecord<T extends CmsContent = CmsContent> = T & {
 };
 export type CmsDeliveryState = "cms" | "compiled-fallback" | "intentional-empty" | "loading" | "api-error" | "contract-error";
 export type CmsEntryRenderPolicy = "cms" | "compiled-fallback" | "loading" | "unavailable";
+
+/** Distinguish an unavailable CMS service from a genuine public 404. */
+export function cmsRequestIsUnavailable(error: unknown): boolean {
+  if (!error || typeof error !== "object") return true;
+  const candidate = error as { name?: unknown; status?: unknown };
+  if (candidate.name === "ResponseParseError") return true;
+  if (typeof candidate.status !== "number") return true;
+  return candidate.status === 408 || candidate.status === 429 || candidate.status >= 500;
+}
 export type HeroFilmSources = {
   mp4: string;
   webm: string;
   poster: string;
 };
 type DeliveredCmsMedia = NonNullable<PublishedContent["media"]>[number];
+export type CmsMediaFocalPoint = { x: number; y: number };
 type ImmutableCmsMediaReference = {
   mediaId: string;
   mediaVersionId: string;
   altText?: string;
 };
+
+/** Convert immutable public/preview media crop metadata into a CSS position.
+ * Missing or invalid metadata intentionally leaves the browser's centered
+ * object-position unchanged. */
+export function cmsMediaObjectPosition(
+  media: Pick<DeliveredCmsMedia, "focalPoint"> | { focalPoint?: CmsMediaFocalPoint | null } | null | undefined,
+): string | undefined {
+  const point = media?.focalPoint;
+  if (
+    !point
+    || !Number.isFinite(point.x)
+    || !Number.isFinite(point.y)
+  ) return undefined;
+  const x = Math.max(0, Math.min(1, point.x));
+  const y = Math.max(0, Math.min(1, point.y));
+  return `${x * 100}% ${y * 100}%`;
+}
 
 const CmsPreviewRequestContext = createContext(false);
 
@@ -538,7 +565,7 @@ export function landingMedia(
   page: CmsRecord<LandingPageContent> | null | undefined,
   slot: string,
   fallback: { src: string; alt: string },
-): { src: string; alt: string } {
+): { src: string; alt: string; objectPosition?: string } {
   if (!page) return fallback;
   const section = landingSections(page).find((candidate) => candidate.id === slot);
   if (!section) return landingSlotError(page, slot, "required media slot is missing");
@@ -553,7 +580,12 @@ export function landingMedia(
     media.id === reference.mediaId && media.versionId === reference.mediaVersionId
   );
   if (!delivered) return landingSlotError(page, slot, "the exact referenced media version was not delivered");
-  return { src: delivered.url, alt: reference.altText ?? delivered.altText ?? fallback.alt };
+  const objectPosition = cmsMediaObjectPosition(delivered);
+  return {
+    src: delivered.url,
+    alt: reference.altText ?? delivered.altText ?? fallback.alt,
+    ...(objectPosition ? { objectPosition } : {}),
+  };
 }
 
 export class LandingSlotDeliveryError extends Error {

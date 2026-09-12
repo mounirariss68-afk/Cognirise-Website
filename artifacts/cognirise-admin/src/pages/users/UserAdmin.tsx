@@ -1,5 +1,24 @@
-import { useState } from "react";
-import { useListUsers, useInviteUser, useResetUserPassword, useUpdateUser, useListMarketEditions, getListUsersQueryKey, UserInvitation, User } from "@workspace/api-client-react";
+import { useMemo, useRef, useState } from "react";
+import {
+  getGetAccessDeliveryStatusQueryKey,
+  getListUsersQueryKey,
+  inviteUser as inviteUserRequest,
+  resetUserPassword as resetUserPasswordRequest,
+  retryAccessDelivery as retryAccessDeliveryRequest,
+  useGetAccessDeliveryStatus,
+  useInviteUser,
+  useListMarketEditions,
+  useListUsers,
+  useResetUserPassword,
+  useRetryAccessDelivery,
+  useUpdateUser,
+  type AccessDeliveryStatus,
+  type PasswordReset,
+  type User,
+  type UserInvitation,
+  type UserRole,
+  type UserStatus,
+} from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +35,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
+const USER_PAGE_SIZE = 25;
+
 const inviteSchema = z.object({
   name: z.string().min(2, "Name required"),
   email: z.string().email("Invalid email"),
@@ -23,22 +44,150 @@ const inviteSchema = z.object({
   ,marketCodes: z.array(z.string())
 });
 
+type DeliveryReceipt = {
+  delivery?: string;
+  deliveryId?: string | null;
+  deliveryStatus?: string | null;
+  deliveryState?: string | null;
+  status?: string | null;
+};
+
+/**
+ * The current API exposes the delivery channel and newer API responses may
+ * expose a durable delivery state. Keep both visible without claiming that a
+ * channel alone is proof of provider acceptance.
+ */
+export function describeDeliveryReceipt(receipt: DeliveryReceipt | null | undefined) {
+  if (!receipt) return "Not sent";
+  const state = receipt.deliveryStatus ?? receipt.deliveryState ?? receipt.status;
+  if (state) {
+    return state.replace(/[-_]/g, " ");
+  }
+  return receipt.delivery ? `${receipt.delivery} requested` : "Delivery status unavailable";
+}
+
+function createIdempotencyKey(scope: string) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `${scope}-${crypto.randomUUID()}`;
+  }
+  return `${scope}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function deliveryStatusLabel(status: string | null | undefined) {
+  return status ? status.replace(/[-_]/g, " ") : "pending";
+}
+
+type DeliveryStatusPanelProps = {
+  receipt: DeliveryReceipt;
+  liveStatus?: AccessDeliveryStatus;
+  isLoading: boolean;
+  isError: boolean;
+  retryReady: boolean;
+  retryPending: boolean;
+  onRetry: () => void;
+};
+
+function DeliveryStatusPanel({
+  receipt,
+  liveStatus,
+  isLoading,
+  isError,
+  retryReady,
+  retryPending,
+  onRetry,
+}: DeliveryStatusPanelProps) {
+  const status = liveStatus?.status ?? receipt.deliveryStatus ?? receipt.deliveryState ?? receipt.status;
+  const isFailed = status === "failed";
+
+  return (
+    <div className="space-y-3 rounded-md border border-border bg-background/60 p-4 text-sm" role="status" aria-live="polite">
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-medium">Live delivery status</span>
+        <Badge variant={isFailed ? "destructive" : "secondary"} className="font-mono text-[10px] uppercase">
+          {deliveryStatusLabel(status)}
+        </Badge>
+      </div>
+      {isLoading && <p className="text-xs text-muted-foreground">Checking the delivery worker…</p>}
+      {isError && <p className="text-xs text-amber-700">Live status is temporarily unavailable. The original delivery receipt is still shown.</p>}
+      {liveStatus && (
+        <dl className="grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
+          <div><dt className="inline font-medium">Attempts: </dt><dd className="inline">{liveStatus.attempts}</dd></div>
+          <div><dt className="inline font-medium">Updated: </dt><dd className="inline">{new Date(liveStatus.updatedAt).toLocaleString()}</dd></div>
+          {liveStatus.lastError && <div className="sm:col-span-2"><dt className="inline font-medium">Last error: </dt><dd className="inline">{liveStatus.lastError}</dd></div>}
+        </dl>
+      )}
+      {isFailed && liveStatus?.retryAvailable && (
+        <Button type="button" variant="outline" size="sm" onClick={onRetry} disabled={!retryReady || retryPending}>
+          {retryPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {retryPending ? "Retrying delivery…" : retryReady ? "Retry delivery" : "Preparing retry…"}
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export default function UserAdmin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [invitationData, setInvitationData] = useState<UserInvitation | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
 
   const [isResetOpen, setIsResetOpen] = useState(false);
   const [resetUserId, setResetUserId] = useState<string | null>(null);
+  const [resetReceipt, setResetReceipt] = useState<PasswordReset | null>(null);
+  const [resetError, setResetError] = useState<string | null>(null);
   const [accessUser, setAccessUser] = useState<User | null>(null);
   const [accessMarkets, setAccessMarkets] = useState<string[]>([]);
+  const [marketSearch, setMarketSearch] = useState("");
+  const [userSearch, setUserSearch] = useState("");
+  const [userRole, setUserRole] = useState<UserRole | undefined>();
+  const [userStatus, setUserStatus] = useState<UserStatus | undefined>();
+  const [page, setPage] = useState(1);
+  const [lockedUsers, setLockedUsers] = useState<Set<string>>(() => new Set());
+  const inviteRequestKeyRef = useRef<string | null>(null);
+  const invitePayloadRef = useRef<string | null>(null);
+  const resetRequestKeyRef = useRef<string | null>(null);
+  const retryDeliveryKeyRef = useRef<string | null>(null);
 
-  const { data, isLoading, isError, error } = useListUsers({ page: 1, pageSize: 50 }, { query: { queryKey: getListUsersQueryKey({ page: 1, pageSize: 50 }) } });
+  const listParams = useMemo(() => ({
+    page,
+    pageSize: USER_PAGE_SIZE,
+    search: userSearch.trim() || undefined,
+    role: userRole,
+    status: userStatus,
+  }), [page, userRole, userSearch, userStatus]);
+  const { data, isLoading, isError, error } = useListUsers(listParams, { query: { queryKey: getListUsersQueryKey(listParams) } });
   const { data: markets } = useListMarketEditions({ page: 1, pageSize: 100 });
-  
-  const inviteUser = useInviteUser();
-  const resetUserPassword = useResetUserPassword();
+
+  const inviteUser = useInviteUser({
+    mutation: {
+      mutationFn: ({ data }) => inviteUserRequest(data, {
+        headers: inviteRequestKeyRef.current
+          ? { "Idempotency-Key": inviteRequestKeyRef.current }
+          : undefined,
+      }),
+    },
+  });
+  const resetUserPassword = useResetUserPassword({
+    mutation: {
+      mutationFn: ({ userId, data }) => resetUserPasswordRequest(userId, data, {
+        headers: resetRequestKeyRef.current
+          ? { "Idempotency-Key": resetRequestKeyRef.current }
+          : undefined,
+      }),
+    },
+  });
+  const [retryDelivery, setRetryDelivery] = useState<{ userId: string; deliveryId: string; key: string } | null>(null);
+  const retryAccessDelivery = useRetryAccessDelivery({
+    mutation: {
+      mutationFn: ({ userId, deliveryId }) => retryAccessDeliveryRequest(userId, deliveryId, {
+        headers: retryDeliveryKeyRef.current
+          ? { "Idempotency-Key": retryDeliveryKeyRef.current }
+          : undefined,
+      }),
+    },
+  });
   const updateUser = useUpdateUser();
 
   const form = useForm<z.infer<typeof inviteSchema>>({
@@ -46,69 +195,217 @@ export default function UserAdmin() {
     defaultValues: { name: "", email: "", role: "editor", marketCodes: [] }
   });
   const inviteRole = form.watch("role");
+  const enabledMarkets = useMemo(
+    () => {
+      const query = marketSearch.trim().toLowerCase();
+      return (markets?.items ?? []).filter((market) => market.enabled && (!query || `${market.code} ${market.displayName}`.toLowerCase().includes(query)));
+    },
+    [marketSearch, markets?.items],
+  );
+
+  const invitationDelivery = useGetAccessDeliveryStatus(
+    invitationData?.user.id ?? "",
+    invitationData?.deliveryId ?? "",
+    {
+      query: {
+        queryKey: getGetAccessDeliveryStatusQueryKey(invitationData?.user.id ?? "", invitationData?.deliveryId ?? ""),
+        enabled: Boolean(invitationData?.user.id && invitationData?.deliveryId),
+        refetchInterval: (query) => {
+          const status = query.state.data?.status;
+          return status === undefined || status === "pending" ? 2000 : false;
+        },
+      },
+    },
+  );
+  const resetDelivery = useGetAccessDeliveryStatus(
+    resetUserId ?? "",
+    resetReceipt?.deliveryId ?? "",
+    {
+      query: {
+        queryKey: getGetAccessDeliveryStatusQueryKey(resetUserId ?? "", resetReceipt?.deliveryId ?? ""),
+        enabled: Boolean(resetUserId && resetReceipt?.deliveryId),
+        refetchInterval: (query) => {
+          const status = query.state.data?.status;
+          return status === undefined || status === "pending" ? 2000 : false;
+        },
+      },
+    },
+  );
+
+  const setUserLock = (userId: string, locked: boolean) => {
+    setLockedUsers((current) => {
+      const next = new Set(current);
+      if (locked) next.add(userId);
+      else next.delete(userId);
+      return next;
+    });
+  };
+
+  const isUserLocked = (userId: string) => lockedUsers.has(userId);
+  const invalidateUsers = () => queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
 
   const onSubmitInvite = (values: z.infer<typeof inviteSchema>) => {
+    if (inviteUser.isPending) return;
+    const payloadFingerprint = JSON.stringify(values);
+    if (!inviteRequestKeyRef.current || invitePayloadRef.current !== payloadFingerprint) {
+      inviteRequestKeyRef.current = createIdempotencyKey("invite");
+      invitePayloadRef.current = payloadFingerprint;
+    }
+    setInviteError(null);
     inviteUser.mutate({ data: values }, {
       onSuccess: (data) => {
         toast({ title: "User invited successfully" });
         setInvitationData(data);
-        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ page: 1, pageSize: 50 }) });
+        const retryKey = data.deliveryId ? createIdempotencyKey("delivery-retry") : null;
+        retryDeliveryKeyRef.current = retryKey;
+        setRetryDelivery(data.deliveryId && retryKey ? {
+          userId: data.user.id,
+          deliveryId: data.deliveryId,
+          key: retryKey,
+        } : null);
+        invalidateUsers();
         form.reset();
       },
-      onError: (err) => toast({ title: "Failed to invite", description: (err as any).error, variant: "destructive" })
+      onError: (err) => {
+        const message = (err as any).error || "The invitation request may have completed. Retry with the same idempotency key.";
+        setInviteError(message);
+        toast({ title: "Failed to invite", description: message, variant: "destructive" });
+      },
     });
   };
 
+  const startNewInvitation = () => {
+    setInvitationData(null);
+    setInviteError(null);
+    inviteRequestKeyRef.current = createIdempotencyKey("invite");
+    invitePayloadRef.current = null;
+    form.reset();
+    setMarketSearch("");
+  };
+
+  const openInviteDialog = () => {
+    if (invitationData || inviteError) {
+      setIsInviteOpen(true);
+      return;
+    }
+    startNewInvitation();
+    setIsInviteOpen(true);
+  };
+
   const openResetDialog = (userId: string) => {
+    if (isUserLocked(userId)) return;
+    if (resetUserId !== userId) {
+      setResetReceipt(null);
+      setResetError(null);
+      resetRequestKeyRef.current = createIdempotencyKey("password-reset");
+    } else if (!resetRequestKeyRef.current) {
+      resetRequestKeyRef.current = createIdempotencyKey("password-reset");
+    }
     setResetUserId(userId);
     setIsResetOpen(true);
   };
 
-  const handleConfirmReset = () => {
-    if (!resetUserId) return;
-    resetUserPassword.mutate({ 
-      userId: resetUserId,
-      data: {}
-    }, {
-      onSuccess: (data) => {
-        toast({ title: "Reset link sent", description: "A secure one-time link was delivered by email." });
-        setIsResetOpen(false);
-      },
-      onError: (err) => toast({ title: "Failed to reset password", description: (err as any).error, variant: "destructive" })
-    });
+  const handleConfirmReset = async () => {
+    if (!resetUserId || isUserLocked(resetUserId)) return;
+    const resetId = resetUserId;
+    setUserLock(resetId, true);
+    if (!resetRequestKeyRef.current) {
+      resetRequestKeyRef.current = createIdempotencyKey("password-reset");
+    }
+    setResetError(null);
+    try {
+      const data = await resetUserPassword.mutateAsync({
+        userId: resetId,
+        data: {},
+      });
+      setResetReceipt(data);
+      const retryKey = data.deliveryId ? createIdempotencyKey("delivery-retry") : null;
+      retryDeliveryKeyRef.current = retryKey;
+      setRetryDelivery(data.deliveryId && retryKey ? {
+        userId: resetId,
+        deliveryId: data.deliveryId,
+        key: retryKey,
+      } : null);
+      toast({ title: "Reset link requested", description: "The delivery result is shown below. No credential is displayed." });
+    } catch (err) {
+      const message = (err as any).error || "The reset request may have completed. Retry with the same idempotency key.";
+      setResetError(message);
+      toast({ title: "Failed to reset password", description: message, variant: "destructive" });
+    } finally {
+      setUserLock(resetId, false);
+    }
   };
 
-  const handleRoleChange = (user: User, role: User["role"]) => {
-    updateUser.mutate({ userId: user.id, data: { role } }, {
-      onSuccess: () => {
-        toast({ title: "Role updated" });
-        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ page: 1, pageSize: 50 }) });
+  const handleRetryDelivery = (userId: string, deliveryId: string) => {
+    if (retryAccessDelivery.isPending) return;
+    if (!retryDelivery || retryDelivery.userId !== userId || retryDelivery.deliveryId !== deliveryId) return;
+    retryDeliveryKeyRef.current = retryDelivery.key;
+    retryAccessDelivery.mutate(
+      { userId, deliveryId },
+      {
+        onSuccess: (status) => {
+          const queryKey = getGetAccessDeliveryStatusQueryKey(userId, deliveryId);
+          queryClient.setQueryData(queryKey, status);
+          queryClient.invalidateQueries({ queryKey });
+          const nextRetryKey = createIdempotencyKey("delivery-retry");
+          retryDeliveryKeyRef.current = nextRetryKey;
+          setRetryDelivery({ userId, deliveryId, key: nextRetryKey });
+          toast({ title: "Delivery retry requested", description: "The live delivery status will update automatically." });
+        },
+        onError: (err) => {
+          toast({
+            title: "Delivery retry failed",
+            description: (err as any).error || "The retry result is uncertain. Try again with the same idempotency key.",
+            variant: "destructive",
+          });
+        },
       },
-      onError: (err) => toast({ title: "Update failed", description: (err as any).error, variant: "destructive" }),
-    });
+    );
   };
 
-  const saveMarketAccess = () => {
-    if (!accessUser) return;
-    updateUser.mutate({ userId: accessUser.id, data: { marketCodes: accessMarkets } }, {
-      onSuccess: () => {
-        toast({ title: "Market access updated" });
-        setAccessUser(null);
-        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ page: 1, pageSize: 50 }) });
-      },
-      onError: (err) => toast({ title: "Update failed", description: (err as any).error, variant: "destructive" }),
-    });
+  const handleRoleChange = async (user: User, role: User["role"]) => {
+    if (isUserLocked(user.id)) return;
+    setUserLock(user.id, true);
+    try {
+      await updateUser.mutateAsync({ userId: user.id, data: { role } });
+      toast({ title: "Role updated" });
+      invalidateUsers();
+    } catch (err) {
+      toast({ title: "Update failed", description: (err as any).error, variant: "destructive" });
+    } finally {
+      setUserLock(user.id, false);
+    }
   };
 
-  const handleToggleStatus = (userId: string, currentStatus: string) => {
+  const saveMarketAccess = async () => {
+    if (!accessUser || isUserLocked(accessUser.id)) return;
+    const userId = accessUser.id;
+    setUserLock(userId, true);
+    try {
+      await updateUser.mutateAsync({ userId: accessUser.id, data: { marketCodes: accessMarkets } });
+      toast({ title: "Market access updated" });
+      setAccessUser(null);
+      invalidateUsers();
+    } catch (err) {
+      toast({ title: "Update failed", description: (err as any).error, variant: "destructive" });
+    } finally {
+      setUserLock(userId, false);
+    }
+  };
+
+  const handleToggleStatus = async (userId: string, currentStatus: string) => {
+    if (isUserLocked(userId)) return;
     const newStatus = currentStatus === "active" ? "suspended" : "active";
-    updateUser.mutate({ userId, data: { status: newStatus as any } }, {
-      onSuccess: () => {
-        toast({ title: `User ${newStatus}` });
-        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ page: 1, pageSize: 50 }) });
-      },
-      onError: (err) => toast({ title: "Update failed", description: (err as any).error, variant: "destructive" })
-    });
+    setUserLock(userId, true);
+    try {
+      await updateUser.mutateAsync({ userId, data: { status: newStatus as any } });
+      toast({ title: `User ${newStatus}` });
+      invalidateUsers();
+    } catch (err) {
+      toast({ title: "Update failed", description: (err as any).error, variant: "destructive" });
+    } finally {
+      setUserLock(userId, false);
+    }
   };
 
   if (isError) {
@@ -132,13 +429,48 @@ export default function UserAdmin() {
           </h1>
           <p className="text-sm text-muted-foreground font-mono mt-1">Manage platform access and permissions</p>
         </div>
-        <Button onClick={() => setIsInviteOpen(true)} className="gap-2 font-mono uppercase tracking-wider text-xs">
+        <Button onClick={openInviteDialog} className="gap-2 font-mono uppercase tracking-wider text-xs">
           <Plus className="w-4 h-4" />
           Invite User
         </Button>
       </div>
 
       <div className="bg-card border border-border rounded-xl shadow-sm flex flex-col flex-1 overflow-hidden">
+        <div className="flex flex-wrap items-center gap-3 border-b border-border bg-muted/20 p-4">
+          <Input
+            aria-label="Search users"
+            placeholder="Search name or email…"
+            value={userSearch}
+            onChange={(event) => {
+              setUserSearch(event.target.value);
+              setPage(1);
+            }}
+            className="w-full min-w-56 max-w-sm bg-background"
+          />
+          <Select value={userRole ?? "all"} onValueChange={(value) => { setUserRole(value === "all" ? undefined : value as UserRole); setPage(1); }}>
+            <SelectTrigger aria-label="Filter users by role" className="w-[170px] bg-background">
+              <SelectValue placeholder="All roles" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All roles</SelectItem>
+              <SelectItem value="administrator">Administrator</SelectItem>
+              <SelectItem value="publisher">Publisher</SelectItem>
+              <SelectItem value="editor">Editor</SelectItem>
+              <SelectItem value="viewer">Viewer</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={userStatus ?? "all"} onValueChange={(value) => { setUserStatus(value === "all" ? undefined : value as UserStatus); setPage(1); }}>
+            <SelectTrigger aria-label="Filter users by status" className="w-[170px] bg-background">
+              <SelectValue placeholder="All statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="invited">Invited</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="suspended">Suspended</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="flex-1 overflow-auto custom-scrollbar">
           <Table>
             <TableHeader className="bg-muted/30 sticky top-0 backdrop-blur-sm">
@@ -172,7 +504,7 @@ export default function UserAdmin() {
                       <div className="text-xs text-muted-foreground mt-0.5">{user.email}</div>
                     </TableCell>
                     <TableCell>
-                      <Select value={user.role} onValueChange={(role) => handleRoleChange(user, role as User["role"])}>
+                         <Select value={user.role} onValueChange={(role) => handleRoleChange(user, role as User["role"])} disabled={isUserLocked(user.id)}>
                         <SelectTrigger className="h-8 w-36 font-mono text-[10px] uppercase"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="viewer">Viewer</SelectItem>
@@ -209,19 +541,20 @@ export default function UserAdmin() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent/10 hover:text-accent">
+                           <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent/10 hover:text-accent" aria-label={`Actions for ${user.name}`} disabled={isUserLocked(user.id)}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="font-mono text-xs">
-                          <DropdownMenuItem onClick={() => openResetDialog(user.id)}>
+                           <DropdownMenuItem onClick={() => openResetDialog(user.id)} disabled={isUserLocked(user.id)}>
                             <KeyRound className="w-3.5 h-3.5 mr-2" /> Reset Password
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => { setAccessUser(user); setAccessMarkets(user.marketCodes); }}>
+                           <DropdownMenuItem onClick={() => { setAccessUser(user); setAccessMarkets(user.marketCodes); setMarketSearch(""); }} disabled={isUserLocked(user.id)}>
                             <Settings2 className="w-3.5 h-3.5 mr-2" /> Edit Market Access
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleToggleStatus(user.id, user.status)}
+                           <DropdownMenuItem
+                             onClick={() => handleToggleStatus(user.id, user.status)}
+                             disabled={isUserLocked(user.id)}
                             className={user.status === 'active' ? 'text-amber-600' : 'text-emerald-600'}
                           >
                             {user.status === 'active' ? (
@@ -239,39 +572,69 @@ export default function UserAdmin() {
             </TableBody>
           </Table>
         </div>
+        {data && data.totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-border bg-muted/10 p-4 text-sm font-mono text-muted-foreground">
+            <span>
+              Showing {((page - 1) * USER_PAGE_SIZE) + 1}–{Math.min(page * USER_PAGE_SIZE, data.total)} of {data.total}
+            </span>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((current) => current - 1)}>Previous</Button>
+              <Button variant="outline" size="sm" disabled={page === data.totalPages} onClick={() => setPage((current) => current + 1)}>Next</Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <Dialog open={isInviteOpen} onOpenChange={(open) => {
         if (!open) {
+          if (inviteUser.isPending) return;
           setIsInviteOpen(false);
-          setInvitationData(null);
         }
       }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{invitationData ? "Invitation Created" : "Invite New User"}</DialogTitle>
             <DialogDescription className="font-mono text-xs">
-              {invitationData 
-                ? "A secure one-time invitation link was delivered to the user's email."
+              {invitationData
+                ? "The invitation request completed. Review the delivery channel and status before closing."
                 : "Create a user account and deliver a secure one-time invitation link by email."}
             </DialogDescription>
           </DialogHeader>
-          
+
           {invitationData ? (
             <div className="space-y-4 pt-4">
               <div className="bg-emerald-500/10 p-4 rounded-md border border-emerald-500/20 text-sm text-emerald-700">
-                Email delivery confirmed. No credential is shown or stored here.
+                <p className="font-medium">Invitation created</p>
+                <p className="mt-1">Delivery status: {describeDeliveryReceipt(invitationData)}</p>
+                <p className="mt-1 text-xs">No credential is shown or stored here.</p>
               </div>
+              {invitationData.deliveryId && (
+                <DeliveryStatusPanel
+                  receipt={invitationData}
+                  liveStatus={invitationDelivery.data}
+                  isLoading={invitationDelivery.isLoading}
+                  isError={invitationDelivery.isError}
+                  retryReady={retryDelivery?.userId === invitationData.user.id && retryDelivery.deliveryId === invitationData.deliveryId}
+                  retryPending={retryAccessDelivery.isPending}
+                  onRetry={() => handleRetryDelivery(invitationData.user.id, invitationData.deliveryId!)}
+                />
+              )}
               <p className="text-[10px] text-muted-foreground font-mono text-center">
                 Valid until {format(new Date(invitationData.expiresAt), "MMM d, yyyy HH:mm")}
               </p>
               <DialogFooter>
+                <Button variant="outline" onClick={startNewInvitation}>Invite another user</Button>
                 <Button onClick={() => setIsInviteOpen(false)}>Done</Button>
               </DialogFooter>
             </div>
           ) : (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmitInvite)} className="space-y-4 pt-4">
+                {inviteError && (
+                  <p className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
+                    {inviteError} Retry with the same request key to safely recover an uncertain result.
+                  </p>
+                )}
                 <FormField
                   control={form.control}
                   name="name"
@@ -289,14 +652,22 @@ export default function UserAdmin() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-mono text-xs uppercase tracking-wider">Market Access</FormLabel>
+                      <Input
+                        aria-label="Search market access"
+                        placeholder="Filter markets…"
+                        value={marketSearch}
+                        onChange={(event) => setMarketSearch(event.target.value)}
+                        className="mb-2"
+                      />
                       <div className="grid grid-cols-2 gap-2 rounded-md border p-3">
-                        {markets?.items.filter((market) => market.enabled).map((market) => (
+                        {enabledMarkets.map((market) => (
                           <label key={market.code} className="flex items-center gap-2 text-sm">
                             <input type="checkbox" checked={field.value.includes(market.code)}
                               onChange={(event) => field.onChange(event.target.checked ? [...field.value, market.code] : field.value.filter((code) => code !== market.code))} />
                             {market.displayName}
                           </label>
                         ))}
+                        {enabledMarkets.length === 0 && <p className="col-span-2 text-xs text-muted-foreground">No enabled markets match this search.</p>}
                       </div>
                       <p className="text-[10px] text-muted-foreground">
                         {inviteRole === "administrator"
@@ -337,10 +708,10 @@ export default function UserAdmin() {
                   )}
                 />
                 <DialogFooter className="pt-4">
-                  <Button variant="ghost" type="button" onClick={() => setIsInviteOpen(false)}>Cancel</Button>
+                  <Button variant="ghost" type="button" onClick={() => setIsInviteOpen(false)} disabled={inviteUser.isPending}>Cancel</Button>
                   <Button type="submit" disabled={inviteUser.isPending}>
                     {inviteUser.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-                    Send Invitation
+                    {inviteError ? "Retry Invitation" : "Send Invitation"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -351,6 +722,7 @@ export default function UserAdmin() {
 
       <Dialog open={isResetOpen} onOpenChange={(open) => {
         if (!open) {
+          if (resetUserPassword.isPending) return;
           setIsResetOpen(false);
         }
       }}>
@@ -363,19 +735,56 @@ export default function UserAdmin() {
           </DialogHeader>
           
             <div className="pt-4 space-y-4">
-              <p className="text-sm text-foreground">Are you sure you want to send a reset link to this user?</p>
+              {resetUserPassword.isPending && (
+                <p className="rounded-md border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground" role="status">
+                  Sending the reset link… Keep this dialog open until the delivery result is available.
+                </p>
+              )}
+              {resetReceipt ? (
+                <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-700" role="status">
+                  <p className="font-medium">Reset delivery requested</p>
+                  <p className="mt-1">Delivery status: {describeDeliveryReceipt(resetReceipt)}</p>
+                  <p className="mt-1 text-xs">Valid until {format(new Date(resetReceipt.expiresAt), "MMM d, yyyy HH:mm")}. No credential is shown or stored here.</p>
+                </div>
+              ) : (
+                <>
+                  {resetError && (
+                    <p className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
+                      {resetError} Retry with the same request key to safely recover an uncertain result.
+                    </p>
+                  )}
+                  <p className="text-sm text-foreground">Are you sure you want to send a reset link to this user?</p>
+                </>
+              )}
+              {resetReceipt?.deliveryId && (
+                <DeliveryStatusPanel
+                  receipt={resetReceipt}
+                  liveStatus={resetDelivery.data}
+                  isLoading={resetDelivery.isLoading}
+                  isError={resetDelivery.isError}
+                  retryReady={retryDelivery?.userId === resetUserId && retryDelivery.deliveryId === resetReceipt.deliveryId}
+                  retryPending={retryAccessDelivery.isPending}
+                  onRetry={() => handleRetryDelivery(resetUserId!, resetReceipt.deliveryId!)}
+                />
+              )}
               <DialogFooter className="pt-4">
-                <Button variant="ghost" type="button" onClick={() => setIsResetOpen(false)}>Cancel</Button>
-                <Button onClick={handleConfirmReset} disabled={resetUserPassword.isPending}>
+                <Button variant="ghost" type="button" onClick={() => setIsResetOpen(false)} disabled={resetUserPassword.isPending}>Done</Button>
+                <Button onClick={handleConfirmReset} disabled={resetUserPassword.isPending || Boolean(resetReceipt)}>
                   {resetUserPassword.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <KeyRound className="w-4 h-4 mr-2" />}
-                  Send Reset Link
+                  {resetReceipt ? "Sent" : resetError ? "Retry Reset Link" : "Send Reset Link"}
                 </Button>
               </DialogFooter>
             </div>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(accessUser)} onOpenChange={(open) => { if (!open) setAccessUser(null); }}>
+      <Dialog open={Boolean(accessUser)} onOpenChange={(open) => {
+        if (!open) {
+          if (accessUser && isUserLocked(accessUser.id)) return;
+          setAccessUser(null);
+          setMarketSearch("");
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Market Access</DialogTitle>
@@ -386,18 +795,29 @@ export default function UserAdmin() {
                 : " No selection grants no market access."}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-2 py-4">
-            {markets?.items.filter((market) => market.enabled).map((market) => (
+          <div className="py-4">
+            <Input
+              aria-label="Search market access"
+              placeholder="Filter markets…"
+              value={marketSearch}
+              onChange={(event) => setMarketSearch(event.target.value)}
+              className="mb-2"
+              disabled={Boolean(accessUser && isUserLocked(accessUser.id))}
+            />
+            <div className="grid grid-cols-2 gap-2">
+            {enabledMarkets.map((market) => (
               <label key={market.code} className="flex items-center gap-2 rounded-md border p-3 text-sm">
                 <input type="checkbox" checked={accessMarkets.includes(market.code)}
                   onChange={(event) => setAccessMarkets(event.target.checked ? [...accessMarkets, market.code] : accessMarkets.filter((code) => code !== market.code))} />
                 {market.displayName}
               </label>
             ))}
+            {enabledMarkets.length === 0 && <p className="col-span-2 text-xs text-muted-foreground">No enabled markets match this search.</p>}
+            </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setAccessUser(null)}>Cancel</Button>
-            <Button onClick={saveMarketAccess} disabled={updateUser.isPending}>Save Access</Button>
+            <Button variant="ghost" onClick={() => setAccessUser(null)} disabled={Boolean(accessUser && isUserLocked(accessUser.id))}>Cancel</Button>
+            <Button onClick={saveMarketAccess} disabled={Boolean(accessUser && isUserLocked(accessUser.id))}>Save Access</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

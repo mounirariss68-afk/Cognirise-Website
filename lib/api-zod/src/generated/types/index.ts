@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.2.0
  */
 
+export * from './accessDeliveryStatus';
+export * from './accessDeliveryStatusPurpose';
+export * from './accessDeliveryStatusStatus';
 export * from './accessTokenConsumption';
 export * from './analyticsEventInput';
 export * from './analyticsEventInputName';
@@ -160,6 +163,8 @@ export * from './mediaAssetPage';
 export * from './mediaCampaignMetadata';
 export * from './mediaCollection';
 export * from './mediaFinalizeInput';
+export * from './mediaReferenceImpact';
+export * from './mediaReferenceImpactItem';
 export * from './mediaReviewDecision';
 export * from './mediaReviewDecisionDecision';
 export * from './mediaStatus';
@@ -191,6 +196,7 @@ export * from './pageSizeParameter';
 export * from './passwordChangeInput';
 export * from './passwordReset';
 export * from './passwordResetDelivery';
+export * from './passwordResetDeliveryStatus';
 export * from './passwordResetInput';
 export * from './previewDocumentParams';
 export * from './publicationInput';
@@ -248,6 +254,7 @@ export * from './updateNavigationSettings';
 export * from './user';
 export * from './userInvitation';
 export * from './userInvitationDelivery';
+export * from './userInvitationDeliveryStatus';
 export * from './userInvitationInput';
 export * from './userKpis';
 export * from './userPage';

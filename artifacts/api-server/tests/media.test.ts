@@ -462,6 +462,13 @@ test("upload requests and renewals preserve identity, ownership and retry safety
     }
     return { rowCount: 1, rows: [] };
   });
+  // The upload request now commits its asset and audit event together. Keep
+  // this in-memory fixture on the same fake executor while exercising the
+  // route's transaction boundaries.
+  t.mock.method(pool, "connect", async () => ({
+    query: (sql: unknown, values?: unknown[]) => pool.query(sql as never, values),
+    release: () => {},
+  }));
 
   const app = express();
   app.use(express.json());
@@ -748,6 +755,7 @@ test("publisher-only review decisions enforce valid transitions and write audit 
   assert.deepEqual(audits[0].metadata, {
     previousStatus: "pending-review",
     nextStatus: "active",
+    mediaVersionId: `${assetId.slice(0, -3)}101`,
     sourceRightsApproved: true,
     accessibilityApproved: true,
   });
@@ -813,6 +821,7 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
   const latestMetadata = new Map<string, Record<string, unknown>>();
   let promotionCount = 0;
   let finalizedAudits = 0;
+  let finalizedAuditMetadata: Record<string, unknown> | undefined;
   let failPromotion = false;
   let failVersionInsert = false;
   let deliveredKey: string | undefined;
@@ -896,6 +905,7 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
     }
     if (statement.includes("'media.finalized'")) {
       finalizedAudits++;
+      finalizedAuditMetadata = values?.[3] as Record<string, unknown>;
       return { rowCount: 1, rows: [] };
     }
     if (statement === protectedMediaFileSql || statement === protectedMediaDownloadSql) {
@@ -1014,6 +1024,7 @@ test("distinct assets promote identical bytes to isolated immutable keys", {
   });
   assert.equal(finalized.status, 200);
   assert.equal(finalizedAudits, 1);
+  assert.equal(finalizedAuditMetadata?.mediaVersionId, versionId);
   assert.equal((await finalized.json() as { status: string }).status, "review");
   const secondFinalized = await fetch(`${origin}/api/media/${secondAssetId}/finalize`, {
     method: "POST",

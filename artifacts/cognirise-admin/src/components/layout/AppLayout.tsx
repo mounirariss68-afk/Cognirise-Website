@@ -2,8 +2,7 @@ import { ReactNode, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useGetSession, useLogout, getGetSessionQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarGroup, SidebarGroupLabel } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarGroup, SidebarGroupLabel, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Loader2, LayoutDashboard, Users, UserSquare2, Component, Newspaper, Briefcase, Factory, PanelsTopLeft, Image as ImageIcon, Globe, Inbox, ShieldAlert, LogOut, ChevronUp, Lock, ListTree, MapPin, Mail } from "lucide-react";
@@ -83,11 +82,11 @@ function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild 
-                    isActive={location.startsWith(item.url)}
+                    isActive={location === item.url || location.startsWith(`${item.url}/`)}
                     tooltip={item.title}
                     className="font-medium tracking-tight h-9 data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:shadow-sm"
                   >
-                    <Link href={item.url} className="flex items-center gap-3">
+                    <Link href={item.url} className="flex items-center gap-3" aria-current={location === item.url || location.startsWith(`${item.url}/`) ? "page" : undefined}>
                       <item.icon className="w-4 h-4 opacity-80" />
                       <span>{item.title}</span>
                     </Link>
@@ -158,32 +157,50 @@ export function AppLayout({ children, administratorOnly = false }: { children: R
   if (administratorOnly && session.user.role !== "administrator") {
     return (
       <SidebarProvider defaultOpen>
-        <div className="flex min-h-screen w-full bg-sidebar text-foreground overflow-hidden">
-          <AppSidebar />
-          <main className="flex-1 flex flex-col items-center justify-center min-w-0 bg-background rounded-tl-2xl border-t border-l border-border/50 shadow-xl h-screen text-center p-8 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
-            <div className="relative z-10">
-              <Lock className="w-12 h-12 text-muted-foreground mb-4 opacity-50 mx-auto" />
-              <h1 className="text-2xl font-bold tracking-tight mb-2 text-foreground">Access Denied</h1>
-              <p className="text-sm text-muted-foreground font-mono">You do not have the required administrator privileges to view this section.</p>
-            </div>
-          </main>
-        </div>
+        <AppSidebar />
+        <SidebarInset className="overflow-hidden bg-background">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none z-0" />
+
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-1/2 focus:-translate-x-1/2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-md focus:outline-none focus:ring-2 focus:ring-ring">
+            Skip to main content
+          </a>
+
+          <header className="md:hidden flex items-center justify-between h-14 px-4 border-b border-border/10 bg-background relative z-40 shrink-0 shadow-sm">
+            <SidebarTrigger className="-ml-2" />
+            <CogniriseBrand compact />
+            <div className="w-8" />
+          </header>
+
+          <div id="main-content" tabIndex={-1} className="flex-1 flex flex-col items-center justify-center relative z-10 p-8 w-full h-full focus:outline-none">
+            <Lock className="w-12 h-12 text-muted-foreground mb-4 opacity-50 mx-auto" />
+            <h1 className="text-2xl font-bold tracking-tight mb-2 text-foreground">Access Denied</h1>
+            <p className="text-sm text-muted-foreground font-mono">You do not have the required administrator privileges to view this section.</p>
+          </div>
+        </SidebarInset>
       </SidebarProvider>
     );
   }
 
   return (
     <SidebarProvider defaultOpen>
-      <div className="flex min-h-screen w-full bg-sidebar text-foreground overflow-hidden">
-        <AppSidebar />
-        <main className="flex-1 flex flex-col min-w-0 bg-background rounded-tl-2xl border-t border-l border-border/50 shadow-xl overflow-hidden h-screen relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none" />
-          <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10">
-            {children}
-          </div>
-        </main>
-      </div>
+      <AppSidebar />
+      <SidebarInset className="overflow-hidden bg-background">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none z-0" />
+
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-1/2 focus:-translate-x-1/2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-md focus:outline-none focus:ring-2 focus:ring-ring">
+          Skip to main content
+        </a>
+
+        <header className="md:hidden flex items-center justify-between h-14 px-4 border-b border-border/10 bg-background relative z-40 shrink-0 shadow-sm">
+          <SidebarTrigger className="-ml-2" />
+          <CogniriseBrand compact />
+          <div className="w-8" />
+        </header>
+
+        <div id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto custom-scrollbar relative z-10 w-full h-full flex flex-col focus:outline-none">
+          {children}
+        </div>
+      </SidebarInset>
     </SidebarProvider>
   );
 }

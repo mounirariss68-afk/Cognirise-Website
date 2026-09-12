@@ -4,9 +4,10 @@ import { ArrowRight } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import { useMarketStore } from "@/store/market";
 import { BrandButton } from "@/components/ui/brand-button";
-import { contentRecord, resolveCmsMedia, useCmsEntry } from "@/lib/cms";
+import { cmsRequestIsUnavailable, contentRecord, resolveCmsMedia, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { PublicationPresentation } from "@/components/cms/PublicCmsPresentations";
+import { ServiceError } from "@/components/error-boundary";
 
 const articles = {
   "ai-should-move-the-business": {
@@ -149,9 +150,13 @@ export default function InsightArticle() {
     imageUrl: socialMedia?.url || heroMedia?.url,
   }));
 
-  if (!match || !slug || (!article && !cms.isPending) || (cms.isAuthoritative && cms.issue)) {
+  if (!match || !slug) {
     return <NotFound />;
   }
+  if (cms.isError && cmsRequestIsUnavailable(cms.error)) {
+    return <ServiceError onRetry={() => { void cms.refetch(); }} />;
+  }
+  if ((!article && !cms.isPending) || (cms.isAuthoritative && cms.issue)) return <NotFound />;
 
   if (!article) return null;
 

@@ -117,6 +117,7 @@ mock.module("wouter", {
 mock.module("@workspace/api-client-react", {
   namedExports: {
     DocumentStatus: {},
+    getListDocumentsQueryKey: (params: unknown) => ["documents", params],
     getGetDocumentQueryKey: (_id: string, params: unknown) => ["document", _id, params],
     getPreviewDocumentQueryKey: () => ["preview"],
     getListDocumentRevisionsQueryKey: () => ["revisions"],
@@ -126,6 +127,7 @@ mock.module("@workspace/api-client-react", {
     getGetMediaQueryKey: () => ["media"],
     getListMediaQueryKey: () => ["media-list"],
     useGetSession: () => ({ data: currentSession, isLoading: false, isError: false }),
+    useListDocuments: () => ({ data: { items: [] }, isLoading: false, isError: false }),
     useListDocumentEditions: () => ({ data: { items: currentEditions }, isLoading: false, isError: false }),
     useGetDocumentAvailability: () => {
       React.useSyncExternalStore(
@@ -521,6 +523,7 @@ test("the source destination can start a customization", async () => {
 test("rendered destination checkbox submits and persists the complete availability matrix", async () => {
   currentAvailability = {
     documentId: "document-1",
+    canEditShared: true,
     draftVersion: 7,
     reviewedVersion: null,
     publishedVersion: 1,
@@ -619,6 +622,7 @@ test("rendered destination checkbox submits and persists the complete availabili
 test("a failed shared destination save retains the clicked checkbox draft", async () => {
   currentAvailability = {
     documentId: "document-1",
+    canEditShared: true,
     draftVersion: 4,
     reviewedVersion: null,
     publishedVersion: 1,

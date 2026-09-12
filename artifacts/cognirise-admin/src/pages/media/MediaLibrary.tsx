@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import {
   useCreateDocument,
   getGetDocumentRevisionQueryKey,
+  getGetMediaReferenceImpactQueryKey,
   getGetMediaQueryKey,
+  getListAuditEventsQueryKey,
   getListMediaQueryKey,
   useGetSession,
   useGetDocumentRevision,
@@ -58,6 +60,9 @@ import {
   type CmsHeroFilmSlot,
 } from "@workspace/api-zod";
 import { BatchUploadZone } from "./BatchUploadZone";
+import { MediaAssetDetailsPanel } from "./MediaAssetDetailsPanel";
+import { MediaReviewHistory } from "./MediaReviewHistory";
+import type { FocalPoint } from "./FocalPointPicker";
 
 export type MediaCollection = "website" | "linkedin" | "motion";
 export type LinkedInAssetKind = "post" | "header";
@@ -106,6 +111,8 @@ export type ExtendedMediaAsset = {
   linkedinAssetKind?: LinkedInAssetKind | null;
   campaignMetadata?: CampaignMetadata | null;
   motionMetadata?: MotionMetadata | null;
+  focalPoint?: FocalPoint | null;
+  updatedAt?: string;
 };
 
 type HeroSlot = CmsHeroFilmSlot;
@@ -530,6 +537,7 @@ export default function MediaLibrary() {
   const [usage, setUsage] = useState("");
   const [altText, setAltText] = useState("");
   const [credit, setCredit] = useState("");
+  const [focalPoint, setFocalPoint] = useState<FocalPoint | null>(null);
   const [campaignFields, setCampaignFields] = useState<Record<CampaignField, string>>(EMPTY_CAMPAIGN);
   const [motionFields, setMotionFields] = useState<Record<MotionTextField, string>>(EMPTY_MOTION);
   const [motionVariant, setMotionVariant] = useState<MotionVariant>("landscape");
@@ -592,6 +600,7 @@ export default function MediaLibrary() {
     setUsage(asset.caption ?? "");
     setAltText(asset.altText ?? "");
     setCredit(asset.credit ?? "");
+    setFocalPoint(asset.focalPoint ?? null);
     setMotionFields({
       ...EMPTY_MOTION,
       ...Object.fromEntries(
@@ -616,17 +625,27 @@ export default function MediaLibrary() {
 
   const saveAssetMetadata = async () => {
     if (!editingAsset) return;
+    if (!title.trim()) {
+      toast({ title: "Asset title is required", description: "Enter a filename before saving metadata.", variant: "destructive" });
+      return;
+    }
     try {
       const extension = editingAsset.filename.match(/\.[^.]+$/)?.[0] ?? "";
+      const commonMetadata = {
+        filename: `${title.trim()}${extension}`,
+        altText: altText.trim() || null,
+        caption: usage.trim() || null,
+        credit: credit.trim() || null,
+        focalPoint,
+      };
       const updateData = editingAsset.collection === "motion"
         ? {
-            filename: `${title.trim()}${extension}`,
-            altText: altText.trim() || null,
-            caption: usage.trim() || null,
-            credit: credit.trim() || null,
+            ...commonMetadata,
             motionMetadata: buildMotionMetadata(motionFields, motionVariant, motionFlags),
           }
-        : { campaignMetadata: cleanCampaignMetadata(campaignFields) ?? null };
+        : editingAsset.collection === "linkedin"
+          ? { ...commonMetadata, campaignMetadata: cleanCampaignMetadata(campaignFields) ?? null }
+          : commonMetadata;
       const updated = await updateMedia.mutateAsync({
         mediaId: editingAsset.id,
         data: updateData,
@@ -637,8 +656,28 @@ export default function MediaLibrary() {
           ? { ...current, items: current.items.map((item) => item.id === updated.id ? updated : item) }
           : current,
       );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: getGetMediaQueryKey(editingAsset.id) }),
+        queryClient.invalidateQueries({ queryKey: getListMediaQueryKey() }),
+        queryClient.invalidateQueries({ queryKey: getGetMediaReferenceImpactQueryKey(editingAsset.id) }),
+        queryClient.invalidateQueries({
+          queryKey: getListAuditEventsQueryKey({
+            page: 1,
+            pageSize: 25,
+            entityType: "media",
+            entityId: editingAsset.id,
+          }),
+        }),
+      ]);
       setEditingAsset(null);
-      toast({ title: editingAsset.collection === "motion" ? "Video metadata saved" : "Campaign metadata saved" });
+      toast({
+        title: "Metadata saved — awaiting publisher review",
+        description: editingAsset.collection === "motion"
+          ? "The new video metadata version is pending publisher review."
+          : editingAsset.collection === "linkedin"
+            ? "The new campaign metadata version is pending publisher review."
+            : "The new image metadata and focal point are pending publisher review.",
+      });
     } catch (error: unknown) {
       const detail = typeof error === "object" && error && "error" in error ? String(error.error) : "An error occurred";
       toast({ title: "Metadata update failed", description: detail, variant: "destructive" });
@@ -804,14 +843,6 @@ export default function MediaLibrary() {
   );
   const motionForm = (
     <div className="grid gap-4 sm:grid-cols-2">
-      <div className="space-y-2">
-        <Label htmlFor="motion-title" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Title</Label>
-        <Input id="motion-title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={255} placeholder="Descriptive asset title" />
-      </div>
-      <div className="space-y-2 sm:col-span-2">
-        <Label htmlFor="motion-usage" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Approved usage</Label>
-        <Textarea id="motion-usage" value={usage} onChange={(event) => setUsage(event.target.value)} maxLength={500} placeholder="Where and how this motion asset may be used" className="resize-none" />
-      </div>
       <div className="space-y-2">
         <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Variant</Label>
         <Select value={motionVariant} onValueChange={(value) => setMotionVariant(value as MotionVariant)}>
@@ -1025,7 +1056,20 @@ export default function MediaLibrary() {
                       {asset.status === "review" && !canReview && (
                         <p className="text-[10px] font-mono text-amber-700">Awaiting a publisher review</p>
                       )}
-                      {assetActions(asset)}
+                       {assetActions(asset)}
+                       {collection === "website" && (
+                         <Button
+                           disabled={!canEdit}
+                           variant="outline"
+                           size="sm"
+                           className="w-full gap-1.5"
+                           onClick={() => openEditor(asset)}
+                           aria-label={`Edit image metadata for ${asset.filename}`}
+                         >
+                           <Pencil className="h-3.5 w-3.5" />
+                           Edit image metadata
+                         </Button>
+                       )}
                     </div>
                   </article>
                 );
@@ -1099,6 +1143,18 @@ export default function MediaLibrary() {
                             <p className="mb-2 text-[10px] font-mono text-amber-700">Awaiting publisher review</p>
                           )}
                           {assetActions(asset, true)}
+                           {collection === "website" && (
+                             <Button
+                               disabled={!canEdit}
+                               variant="link"
+                               size="sm"
+                               className="mt-1 h-auto p-0 text-xs"
+                               onClick={() => openEditor(asset)}
+                               aria-label={`Edit image metadata for ${asset.filename}`}
+                             >
+                               Edit image metadata
+                             </Button>
+                           )}
                         </td>
                       </tr>
                     );
@@ -1124,25 +1180,37 @@ export default function MediaLibrary() {
       <Dialog open={Boolean(editingAsset)} onOpenChange={(open) => !open && setEditingAsset(null)}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingAsset?.collection === "motion" ? "Edit video metadata" : "Edit LinkedIn campaign metadata"}</DialogTitle>
+            <DialogTitle>
+              {editingAsset?.collection === "motion"
+                ? "Edit video metadata"
+                : editingAsset?.collection === "linkedin"
+                  ? "Edit LinkedIn campaign metadata"
+                  : "Edit image metadata"}
+            </DialogTitle>
             <DialogDescription>
-              Keep the governed {editingAsset?.collection === "motion" ? "motion asset context" : "campaign context"} for {editingAsset?.filename} current.
+              Keep the governed metadata for {editingAsset?.filename} current without changing its source bytes.
             </DialogDescription>
           </DialogHeader>
           <fieldset disabled={!canEdit} className="space-y-4 py-4">
-            {editingAsset?.collection === "motion" && (
-              <>
-                <div className="space-y-2">
-                  <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Accessibility summary</Label>
-                  <Textarea value={altText} onChange={(event) => setAltText(event.target.value)} maxLength={300} placeholder="Concise description for assistive technology" className="resize-none" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Credit / rights</Label>
-                  <Input value={credit} onChange={(event) => setCredit(event.target.value)} maxLength={200} placeholder="Rights holder, source, and licence" />
-                </div>
-              </>
+            {editingAsset && (
+              <MediaAssetDetailsPanel
+                asset={editingAsset}
+                title={title}
+                usage={usage}
+                altText={altText}
+                credit={credit}
+                focalPoint={focalPoint}
+                disabled={!canEdit}
+                onTitleChange={setTitle}
+                onUsageChange={setUsage}
+                onAltTextChange={setAltText}
+                onCreditChange={setCredit}
+                onFocalPointChange={setFocalPoint}
+                onFocalPointClear={() => setFocalPoint(null)}
+              />
             )}
-            {editingAsset?.collection === "motion" ? motionForm : campaignForm}
+            {editingAsset?.collection === "motion" ? motionForm : editingAsset?.collection === "linkedin" ? campaignForm : null}
+            {editingAsset && <MediaReviewHistory asset={editingAsset} canInspect={session?.user?.role === "administrator"} />}
           </fieldset>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setEditingAsset(null)}>Cancel</Button>

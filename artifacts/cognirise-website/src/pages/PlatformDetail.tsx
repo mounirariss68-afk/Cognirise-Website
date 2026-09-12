@@ -1,8 +1,9 @@
 import { useRoute } from "wouter";
 import NotFound from "@/pages/not-found";
-import { contentRecord, resolveCmsMedia, useCmsEntry } from "@/lib/cms";
+import { cmsRequestIsUnavailable, contentRecord, resolveCmsMedia, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { PlatformPresentation } from "@/components/cms/PublicCmsPresentations";
+import { ServiceError } from "@/components/error-boundary";
 
 export default function PlatformDetail() {
   const [match, params] = useRoute("/platforms/:slug");
@@ -17,7 +18,11 @@ export default function PlatformDetail() {
     description: record?.summary ?? query.data.summary ?? "A Cognirise governed enterprise platform.",
     imageUrl: hero?.url,
   }));
-  if (!match || !slug || (!query.isPending && (!record || record.template !== "standard"))) return <NotFound />;
+  if (!match || !slug) return <NotFound />;
+  if (query.isError && cmsRequestIsUnavailable(query.error)) {
+    return <ServiceError onRetry={() => { void query.refetch(); }} />;
+  }
+  if (!query.isPending && (!record || record.template !== "standard")) return <NotFound />;
   if (!record || !query.data) return null;
   return <PlatformPresentation title={query.data.title} content={record} summary={record.summary} heroMedia={hero} />;
 }

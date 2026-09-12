@@ -38,6 +38,7 @@ export default function MarketEditions() {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [editingMarket, setEditingMarket] = useState<MarketEdition | null>(null);
+  const [lockedMarkets, setLockedMarkets] = useState<Set<string>>(() => new Set());
   const { data: session } = useGetSession();
   const isAdministrator = session?.user?.role === "administrator";
 
@@ -52,7 +53,33 @@ export default function MarketEditions() {
     defaultValues: { code: "", displayName: "", defaultLocale: "en-US", fallbackMarketCode: "", fallbackLocale: "", enabled: true, isCanonical: false }
   });
 
-  const onSubmit = (values: z.infer<typeof createMarketSchema>) => {
+  const setMarketLock = (marketId: string, locked: boolean) => {
+    setLockedMarkets((current) => {
+      const next = new Set(current);
+      if (locked) next.add(marketId);
+      else next.delete(marketId);
+      return next;
+    });
+  };
+
+  const isMarketLocked = (marketId: string) => lockedMarkets.has(marketId);
+  const isSaving = createMarket.isPending || updateMarket.isPending;
+  const requestCloseEditor = () => {
+    if (isSaving || (editingMarket && isMarketLocked(editingMarket.id))) {
+      toast({ title: "Market save in progress", description: "Keep this editor open until the request finishes.", variant: "destructive" });
+      return;
+    }
+    if (form.formState.isDirty) {
+      toast({ title: "Unsaved market changes", description: "Save or cancel the changes before closing this editor.", variant: "destructive" });
+      return;
+    }
+    setIsOpen(false);
+    setEditingMarket(null);
+    form.reset();
+  };
+
+  const onSubmit = async (values: z.infer<typeof createMarketSchema>) => {
+    if (isSaving || (editingMarket && isMarketLocked(editingMarket.id))) return;
     const data = {
       code: values.code,
       displayName: values.displayName,
@@ -63,16 +90,20 @@ export default function MarketEditions() {
       enabled: Boolean(values.enabled),
     };
     if (editingMarket) {
-      updateMarket.mutate({ marketEditionId: editingMarket.id, data }, {
-        onSuccess: () => {
-          toast({ title: "Market updated successfully" });
-          setIsOpen(false);
-          setEditingMarket(null);
-          form.reset();
-          queryClient.invalidateQueries({ queryKey: getListMarketEditionsQueryKey(listParams) });
-        },
-        onError: (err) => toast({ title: "Update failed", description: errorMessage(err, "The market could not be updated."), variant: "destructive" }),
-      });
+      const marketId = editingMarket.id;
+      setMarketLock(marketId, true);
+      try {
+        await updateMarket.mutateAsync({ marketEditionId: editingMarket.id, data });
+        toast({ title: "Market updated successfully" });
+        setIsOpen(false);
+        setEditingMarket(null);
+        form.reset();
+        queryClient.invalidateQueries({ queryKey: getListMarketEditionsQueryKey(listParams) });
+      } catch (err) {
+        toast({ title: "Update failed", description: errorMessage(err, "The market could not be updated."), variant: "destructive" });
+      } finally {
+        setMarketLock(marketId, false);
+      }
       return;
     }
     createMarket.mutate({ data }, {
@@ -100,15 +131,19 @@ export default function MarketEditions() {
     setIsOpen(true);
   };
 
-  const removeMarket = (market: MarketEdition) => {
+  const removeMarket = async (market: MarketEdition) => {
+    if (isMarketLocked(market.id)) return;
     if (!window.confirm(`Delete the ${market.displayName} market? Referenced or canonical markets cannot be deleted.`)) return;
-    deleteMarket.mutate({ marketEditionId: market.id }, {
-      onSuccess: () => {
-        toast({ title: "Market deleted" });
-        queryClient.invalidateQueries({ queryKey: getListMarketEditionsQueryKey(listParams) });
-      },
-      onError: (err) => toast({ title: "Delete failed", description: errorMessage(err, "The market could not be deleted."), variant: "destructive" }),
-    });
+    setMarketLock(market.id, true);
+    try {
+      await deleteMarket.mutateAsync({ marketEditionId: market.id });
+      toast({ title: "Market deleted" });
+      queryClient.invalidateQueries({ queryKey: getListMarketEditionsQueryKey(listParams) });
+    } catch (err) {
+      toast({ title: "Delete failed", description: errorMessage(err, "The market could not be deleted."), variant: "destructive" });
+    } finally {
+      setMarketLock(market.id, false);
+    }
   };
 
   return (
@@ -192,10 +227,10 @@ export default function MarketEditions() {
                   <TableCell>
                     {isAdministrator ? (
                        <div className="flex items-center gap-1">
-                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => openEditor(market)} aria-label={`Edit ${market.displayName}`}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" disabled={isMarketLocked(market.id)} onClick={() => openEditor(market)} aria-label={`Edit ${market.displayName}`}>
                            <Settings2 className="w-4 h-4" />
                          </Button>
-                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" disabled={deleteMarket.isPending || market.isCanonical} title={market.isCanonical ? "Canonical markets cannot be deleted" : "Delete market"} onClick={() => removeMarket(market)} aria-label={`Delete ${market.displayName}`}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" disabled={isMarketLocked(market.id) || market.isCanonical} title={market.isCanonical ? "Canonical markets cannot be deleted" : "Delete market"} onClick={() => removeMarket(market)} aria-label={`Delete ${market.displayName}`}>
                            <Trash2 className="w-4 h-4" />
                          </Button>
                        </div>
@@ -219,16 +254,23 @@ export default function MarketEditions() {
       </div>
 
       <Dialog open={isOpen} onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) {
-          setEditingMarket(null);
-          form.reset();
+        if (open) {
+          setIsOpen(true);
+          return;
         }
+        requestCloseEditor();
       }}>
-        <DialogContent>
+        <DialogContent
+          onEscapeKeyDown={(event) => {
+            if (isSaving || form.formState.isDirty) event.preventDefault();
+          }}
+          onPointerDownOutside={(event) => {
+            if (isSaving || form.formState.isDirty) event.preventDefault();
+          }}
+        >
           <DialogHeader>
             <DialogTitle>{editingMarket ? "Edit Market Edition" : "Add Market Edition"}</DialogTitle>
-            <DialogDescription className="font-mono text-xs mt-1">{editingMarket ? "Changes apply to this market configuration after administrator confirmation." : "Configure a new regional delivery target."}</DialogDescription>
+            <DialogDescription className="font-mono text-xs mt-1">{editingMarket ? "Changes apply after save. Unsaved values stay in this editor if the server rejects the request." : "Configure a new regional delivery target. Blank fallback fields explicitly clear fallback values."}</DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
@@ -248,7 +290,7 @@ export default function MarketEditions() {
                   <FormControl><Input placeholder="en-EU" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
               </div>
-              
+
               <div className="pt-4 border-t border-border mt-4">
                 <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-4">Fallback Resolution (Optional)</p>
                 <div className="grid grid-cols-2 gap-4">
@@ -279,9 +321,9 @@ export default function MarketEditions() {
                 </div>
               )}
               <DialogFooter className="pt-4 mt-2">
-                <Button variant="ghost" type="button" onClick={() => setIsOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={createMarket.isPending || updateMarket.isPending}>
-                  {(createMarket.isPending || updateMarket.isPending) ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+                  <Button variant="ghost" type="button" onClick={requestCloseEditor} disabled={isSaving}>Cancel</Button>
+                  <Button type="submit" disabled={isSaving || Boolean(editingMarket && isMarketLocked(editingMarket.id))}>
+                    {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
                   {editingMarket ? "Save Market" : "Create Market"}
                 </Button>
               </DialogFooter>

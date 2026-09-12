@@ -44,15 +44,22 @@ function PreviewState({ preview, currentRevisionId, hasUnsaved, failed, frameSta
   failed: boolean;
   frameStatus?: IndustryPreviewStatus;
 }) {
-  if (hasUnsaved) return <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-700">Unsaved edits are not in preview</Badge>;
-  if (frameStatus === "revoked") return <Badge variant="outline" className="border-destructive/40 text-destructive">Preview session revoked</Badge>;
-  if (frameStatus === "expired") return <Badge variant="outline" className="border-destructive/40 text-destructive">Preview session expired</Badge>;
-  if (frameStatus === "unavailable") return <Badge variant="outline" className="border-destructive/40 text-destructive">Preview unavailable</Badge>;
-  if (failed) return <Badge variant="outline" className="border-destructive/40 text-destructive">Preview unavailable</Badge>;
-  if (!preview) return <Badge variant="outline">Preparing saved revision…</Badge>;
-  if (new Date(preview.expiresAt).getTime() <= Date.now()) return <Badge variant="outline" className="border-destructive/40 text-destructive">Preview session expired</Badge>;
-  if (currentRevisionId && preview.revisionId !== currentRevisionId) return <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-700">Stale saved preview</Badge>;
-  return <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-700">Saved revision preview</Badge>;
+  const badge = hasUnsaved
+    ? <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-700">Unsaved edits are not in preview</Badge>
+    : frameStatus === "revoked"
+      ? <Badge variant="outline" className="border-destructive/40 text-destructive">Preview session revoked</Badge>
+      : frameStatus === "expired"
+        ? <Badge variant="outline" className="border-destructive/40 text-destructive">Preview session expired</Badge>
+        : frameStatus === "unavailable" || failed
+          ? <Badge variant="outline" className="border-destructive/40 text-destructive">Preview unavailable</Badge>
+          : !preview
+            ? <Badge variant="outline">Preparing saved revision…</Badge>
+            : new Date(preview.expiresAt).getTime() <= Date.now()
+              ? <Badge variant="outline" className="border-destructive/40 text-destructive">Preview session expired</Badge>
+              : currentRevisionId && preview.revisionId !== currentRevisionId
+                ? <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-700">Stale saved preview</Badge>
+                : <Badge variant="outline" className="border-emerald-500/40 text-emerald-700">Saved revision preview</Badge>;
+  return <span aria-live="polite" data-testid="industry-preview-state">{badge}</span>;
 }
 
 export function IndustryVisualWorkspace({
@@ -225,21 +232,27 @@ export function IndustryVisualWorkspace({
             {!governance && selectedDefinition.expandable && <Button type="button" variant="outline" size="sm" onClick={() => setDisclosure(nextIndustryDisclosureState)}><>{disclosure === "expanded" ? <ChevronUp className="mr-1 h-3.5 w-3.5" /> : <ChevronDown className="mr-1 h-3.5 w-3.5" />}{disclosure === "expanded" ? "Expanded" : "Collapsed"}</></Button>}
           </div>}
           {!reviewMode && <fieldset disabled={disabled} className="contents"><ContentEditor kind="industry" value={content} onChange={onChange} errors={errors} industrySection={governance ? "governance" : selected} /></fieldset>}
-          {reviewMode && <PreviewPane preview={preview} previewUrl={previewUrl} frameRef={frameRef} viewport={viewport} setViewport={setViewport} revisionNumber={revisionNumber} market={market} locale={locale} expires={expires} expired={previewExpired} failed={previewUnavailable} refresh={refreshPreview} onLoad={focusPreview} />}
+          {reviewMode && <PreviewPane preview={preview} previewUrl={previewUrl} frameRef={frameRef} viewport={viewport} setViewport={setViewport} revisionId={currentRevisionId} revisionNumber={revisionNumber} market={market} locale={locale} expires={expires} expired={previewExpired} failed={previewUnavailable} refresh={refreshPreview} onLoad={focusPreview} />}
         </div>
-        {!reviewMode && <PreviewPane className={workspaceLayout === "three-column" ? "" : workspaceLayout === "preview-row" ? "col-span-2" : ""} preview={preview} previewUrl={previewUrl} frameRef={frameRef} viewport={viewport} setViewport={setViewport} revisionNumber={revisionNumber} market={market} locale={locale} expires={expires} expired={previewExpired} failed={previewUnavailable} refresh={refreshPreview} onLoad={focusPreview} />}
+        {!reviewMode && <PreviewPane className={workspaceLayout === "three-column" ? "" : workspaceLayout === "preview-row" ? "col-span-2" : ""} preview={preview} previewUrl={previewUrl} frameRef={frameRef} viewport={viewport} setViewport={setViewport} revisionId={currentRevisionId} revisionNumber={revisionNumber} market={market} locale={locale} expires={expires} expired={previewExpired} failed={previewUnavailable} refresh={refreshPreview} onLoad={focusPreview} />}
       </div>
     </section>
   );
 }
 
-function PreviewPane({ className = "", preview, previewUrl, frameRef, viewport, setViewport, revisionNumber, market, locale, expires, expired, failed, refresh, onLoad }: {
+function PreviewPane({ className = "", preview, previewUrl, frameRef, viewport, setViewport, revisionId, revisionNumber, market, locale, expires, expired, failed, refresh, onLoad }: {
   className?: string; preview: DocumentPreview | null; previewUrl: string; frameRef: React.RefObject<HTMLIFrameElement | null>; viewport: Viewport; setViewport: (value: Viewport) => void;
-  revisionNumber?: number; market: string; locale: string; expires: Date | null; expired: boolean; failed: boolean; refresh: () => void; onLoad: () => void;
+  revisionId?: string; revisionNumber?: number; market: string; locale: string; expires: Date | null; expired: boolean; failed: boolean; refresh: () => void; onLoad: () => void;
 }) {
   return <aside className={`min-w-0 bg-muted/20 p-4 ${className}`} aria-label="Saved revision preview" data-testid="industry-preview-pane">
     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-      <div><p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Protected preview</p><p className="mt-1 text-xs font-medium">{market.toUpperCase()} · {locale} · Revision {preview?.revisionNumber ?? revisionNumber ?? "—"}</p></div>
+      <div>
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Protected preview</p>
+        <p className="mt-1 text-xs font-medium">{market.toUpperCase()} · {locale} · Revision {preview?.revisionNumber ?? revisionNumber ?? "—"}</p>
+        <p className="mt-1 max-w-[20rem] truncate font-mono text-[10px] text-muted-foreground" title={preview?.revisionId ?? revisionId ?? undefined} data-testid="industry-preview-revision-id">
+          Saved revision ID: {preview?.revisionId ?? revisionId ?? "—"}
+        </p>
+      </div>
       <div className="flex items-center gap-1" role="group" aria-label="Preview viewport">
         {([["desktop", Laptop], ["tablet", Tablet], ["mobile", Smartphone]] as const).map(([value, Icon]) => <Button key={value} type="button" variant={viewport === value ? "secondary" : "ghost"} size="icon" className="h-7 w-7" onClick={() => setViewport(value)} aria-label={`${value} preview`}><Icon className="h-3.5 w-3.5" /></Button>)}
       </div>
