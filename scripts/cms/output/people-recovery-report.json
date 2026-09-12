@@ -31,10 +31,8 @@
     "publishedRevisionId": null,
     "availabilityDecision": "show"
   },
-  "decision": "apply-with-conflicts",
-  "changedFields": [
-    "content.contribution"
-  ],
+  "decision": "already-current",
+  "changedFields": [],
   "conflicts": [
     {
       "field": "content.biography",

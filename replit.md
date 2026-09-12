@@ -28,6 +28,12 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 
 _Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
 
+## Editorial approval from chat
+
+- An explicit user instruction in this project chat to publish specific content constitutes editorial review and approval of that content. Do not require the user to repeat that approval in the CMS.
+- Record that chat authorization through the supported publication/audit process, without inventing a separate reviewer or additional confirmations. Scope approval to the requested content and destinations; preserve unrelated pending edits.
+- Approval does not waive authorization, required data, publication integrity, or media-rights checks. Explain genuine blockers rather than silently bypassing them. This is not blanket approval of future content or an instruction to publish anything without a specific request.
+
 ## Product
 
 _Describe the high-level user-facing capabilities of this app once they exist._
