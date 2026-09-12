@@ -4,6 +4,32 @@ import { readFile } from "node:fs/promises";
 import pg from "pg";
 import { schemaPreparationSql } from "../scripts/schema-preparation.mjs";
 
+test("navigation version preparation preserves policy data and replays safely", {
+  skip: !process.env.DATABASE_URL,
+}, async () => {
+  const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
+  await client.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SET LOCAL search_path TO pg_temp");
+    for (const table of ["cms_navigation_editions", "cms_page_availability", "cms_navigation_published_policies"]) {
+      await client.query(`CREATE TEMP TABLE ${table} (id integer PRIMARY KEY, payload text)`);
+      await client.query(`INSERT INTO ${table} VALUES (1, 'preserved-approved-policy')`);
+    }
+    await client.query(schemaPreparationSql);
+    await client.query("UPDATE cms_navigation_published_policies SET published_version=7");
+    await client.query(schemaPreparationSql);
+    for (const table of ["cms_navigation_editions", "cms_page_availability", "cms_navigation_published_policies"]) {
+      const column = table === "cms_navigation_published_policies" ? "published_version" : "version";
+      const result = await client.query(`SELECT payload, ${column} AS version FROM ${table}`);
+      assert.deepEqual(result.rows, [{ payload: "preserved-approved-policy", version: column === "published_version" ? 7 : 1 }]);
+    }
+  } finally {
+    await client.query("ROLLBACK");
+    await client.end();
+  }
+});
+
 test("post-merge prepares narrow media compatibility before safe schema synchronization", async () => {
   const source = await readFile(new URL("../../../scripts/post-merge.sh", import.meta.url), "utf8");
   assert.ok(source.indexOf("prepare-schema-push") < source.indexOf("@workspace/db push"));
