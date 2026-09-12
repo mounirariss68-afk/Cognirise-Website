@@ -267,3 +267,17 @@ mtime_ms = 1788991115718
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/40dac1be-0f4d-4799-9183-ec7f29e58438/6168f3f8-a54f-4077-b116-261050c907f4"
 storage_version_token = "1788991289523866"
 content_type = "application/pdf"
+
+[[outputs]]
+id = "KPeZGQFTlRkYTnT-jXM4y"
+uri = "file://docs/cms-remediation-plan.html"
+type = "text"
+title = "Detailed CMS reliability and usability plan"
+description = "A 5,700-word implementation plan covering all 30 findings, 13 work packages, dependencies, acceptance criteria, source evidence, and complete editing/save verification matrices."
+logical_id = "2ef0b0a9-f7a5-44c9-ac99-ba0a020e95e8"
+content_hash = "sha256:bf5090b53b86906f191734c7d3731a0e3a6d60886c3d4eece1b12b1dcbdcdf42"
+size = 49934
+mtime_ms = 1789243666268
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/2ef0b0a9-f7a5-44c9-ac99-ba0a020e95e8/d70f8737-594f-4dae-a0b4-ca9bf68510d7"
+storage_version_token = "1789243678748602"
+content_type = "text/html"
