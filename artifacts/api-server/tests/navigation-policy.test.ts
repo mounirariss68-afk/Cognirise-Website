@@ -253,6 +253,58 @@ test("published policy compatibility removes legacy Work without losing approved
   assert.equal(await isPublishedPageAvailable("/work/customer-story", "uae", "en"), true);
 });
 
+test("navigation hides a non-UAE Public Sector fallback route", async (t) => {
+  t.mock.method(pool, "query", async (sql: unknown) => {
+    const statement = String(sql);
+    if (statement.includes("FROM market_editions WHERE enabled=true")) {
+      return {
+        rowCount: 2,
+        rows: [
+          {
+            code: "ksa", default_locale: "en", fallback_market_code: "uae",
+            fallback_locale: "en", is_canonical: false,
+          },
+          {
+            code: "uae", default_locale: "en", fallback_market_code: null,
+            fallback_locale: null, is_canonical: true,
+          },
+        ],
+      };
+    }
+    if (statement.includes("cms_navigation_published_policies")) {
+      return {
+        rowCount: 1,
+        rows: [{
+          items: [{
+            id: "platforms", label: "Public Sector", parentId: null, order: 0,
+            destination: "/industries/public-sector", visible: true,
+          }],
+          pages: [{ path: "/industries/public-sector", enabled: true }],
+          published_at: new Date(),
+        }],
+      };
+    }
+    if (statement.includes("WITH represented_sources")) {
+      assert.match(statement, /d\.canonical_slug='public-sector'/);
+      assert.match(statement, /\$1<>'uae'/);
+      return {
+        rowCount: 1,
+        rows: [{
+          kind: "industry",
+          payload: { slug: "public-sector" },
+          available: false,
+          source_rank: null,
+          public_eligible: false,
+        }],
+      };
+    }
+    return { rowCount: 0, rows: [] };
+  });
+
+  const policy = await publishedNavigationPolicy("ksa", "en");
+  assert.equal(policy?.items[0]?.visible, false);
+});
+
 test("published navigation hides a destination whose published CMS document is unavailable", async (t) => {
   const platform = {
     slug: "unavailable-platform",
@@ -406,7 +458,8 @@ test("real navigation selection promotes a public shared source over a private e
         enabled boolean NOT NULL DEFAULT true
       );
       CREATE TABLE cms_documents (
-        id text PRIMARY KEY, kind text NOT NULL, status text NOT NULL DEFAULT 'active'
+        id text PRIMARY KEY, kind text NOT NULL, status text NOT NULL DEFAULT 'active',
+        canonical_slug text
       );
       CREATE TABLE cms_market_editions (
         id text PRIMARY KEY, document_id text NOT NULL, market text NOT NULL, locale text NOT NULL,

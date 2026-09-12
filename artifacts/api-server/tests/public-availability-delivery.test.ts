@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import test from "node:test";
 import {
   documentPublishedAvailabilityClause,
+  industryExactMarketDeliveryClause,
   industryDestinationEligibilityClause,
 } from "../src/lib/availability";
 import { projectIndustrySnapshotForMarket } from "@workspace/api-zod";
@@ -73,6 +74,10 @@ test("all public document delivery selectors apply published availability before
   assert.doesNotMatch(source, /e\.published_revision_id=delivery\.shared_source_revision_id/);
   assert.match(source, /r\.id=e\.published_revision_id/);
   assert.match(source, /e\.published_revision_id=delivery\.published_source_revision_id/);
+  assert.match(
+    source,
+    /industryExactMarketDeliveryClause\("d", "e", "destination\.code"\)/,
+  );
 
   for (const [marker, limit, ranksFallback] of [
     ['router.get(\n  "/public/content",', "LIMIT $5", false],
@@ -110,6 +115,8 @@ test("all public document delivery selectors apply published availability before
 test("navigation maps CMS routes before exposing policy destinations", async () => {
   const source = await readFile(resolve(process.cwd(), "src/lib/navigation-policy.ts"), "utf8");
   assert.match(source, /cmsPublicRoute/);
+  assert.match(source, /industryExactMarketDeliveryClause/);
+  assert.match(source, /industryExactMarketDeliveryClause\("d", "e", "\$1"\)/);
   assert.match(source, /cms_document_availability_states delivery/);
   assert.match(source, /e\.content_mode='shared'/);
   assert.match(source, /r\.id=e\.published_revision_id/);
@@ -170,7 +177,8 @@ test("media eligibility admits only the exact source selected for an eligible de
         enabled boolean NOT NULL DEFAULT true
       );
       CREATE TABLE cms_documents (
-        id text PRIMARY KEY, kind text NOT NULL DEFAULT 'platform', status text NOT NULL DEFAULT 'active'
+        id text PRIMARY KEY, kind text NOT NULL DEFAULT 'platform', status text NOT NULL DEFAULT 'active',
+        canonical_slug text
       );
       CREATE TABLE cms_market_editions (
         id text PRIMARY KEY, document_id text NOT NULL, market text NOT NULL, locale text NOT NULL,
@@ -200,7 +208,7 @@ test("media eligibility admits only the exact source selected for an eligible de
       INSERT INTO cms_documents (id,kind) VALUES
          ('mixed-document','platform'),('other-document','platform'),
          ('private-custom-document','platform'),('unapproved-custom-document','platform'),
-         ('banking-document','industry')
+         ('banking-document','industry'),('public-sector-document','industry')
        ON CONFLICT (id) DO UPDATE SET kind=EXCLUDED.kind;
       INSERT INTO cms_market_editions
          (id,document_id,market,locale,content_mode,publication_state,published_at,published_revision_id)
@@ -213,7 +221,8 @@ test("media eligibility admits only the exact source selected for an eligible de
         ('unapproved-shared','unapproved-custom-document','shared-source','und','shared','published',now(),'unapproved-shared-revision'),
          ('unapproved-ksa-custom','unapproved-custom-document','ksa','en','custom','published',now(),'unapproved-custom-revision'),
          ('banking-shared','banking-document','shared-source','und','shared','published',now(),'banking-shared-revision'),
-         ('banking-uae-custom','banking-document','uae','en','custom','published',now(),'banking-custom-revision');
+          ('banking-uae-custom','banking-document','uae','en','custom','published',now(),'banking-custom-revision'),
+          ('public-sector-shared','public-sector-document','shared-source','und','shared','published',now(),'public-sector-shared-revision');
        UPDATE cms_market_editions
           SET editorial_market=CASE id
             WHEN 'banking-shared' THEN 'uae'
@@ -229,7 +238,14 @@ test("media eligibility admits only the exact source selected for an eligible de
         ('unapproved-shared-revision','unapproved-shared','approved','{}'::jsonb),
          ('unapproved-custom-revision','unapproved-ksa-custom','draft','{}'::jsonb),
          ('banking-shared-revision','banking-shared','approved','{"content":{"bankingPov":{"market":"uae"}}}'::jsonb),
-         ('banking-custom-revision','banking-uae-custom','approved','{"content":{"bankingPov":{"market":"ksa"}}}'::jsonb);
+          ('banking-custom-revision','banking-uae-custom','approved','{"content":{"bankingPov":{"market":"ksa"}}}'::jsonb),
+          ('public-sector-shared-revision','public-sector-shared','approved','{"slug":"public-sector","title":"Public Sector","content":{"visibility":"public"}}'::jsonb);
+       UPDATE cms_documents
+          SET canonical_slug=CASE id
+            WHEN 'banking-document' THEN 'financial-services'
+            WHEN 'public-sector-document' THEN 'public-sector'
+          END
+        WHERE id IN ('banking-document','public-sector-document');
       INSERT INTO cms_document_availability_states
         (document_id,published_version,shared_source_edition_id,published_source_revision_id)
       VALUES
@@ -237,7 +253,8 @@ test("media eligibility admits only the exact source selected for an eligible de
         ('other-document',1,NULL,NULL),
         ('private-custom-document',1,'private-shared','private-shared-revision'),
          ('unapproved-custom-document',1,'unapproved-shared','unapproved-shared-revision'),
-         ('banking-document',1,'banking-shared','banking-shared-revision');
+          ('banking-document',1,'banking-shared','banking-shared-revision'),
+          ('public-sector-document',1,'public-sector-shared','public-sector-shared-revision');
       INSERT INTO cms_document_market_availability
         (document_id,market_edition_id,locale,published_decision)
       VALUES
@@ -250,7 +267,9 @@ test("media eligibility admits only the exact source selected for an eligible de
         ('unapproved-custom-document','destination-ksa','en','show'),
          ('unapproved-custom-document','destination-uae','en','off'),
          ('banking-document','destination-ksa','en','off'),
-         ('banking-document','destination-uae','en','show');
+          ('banking-document','destination-uae','en','show'),
+          ('public-sector-document','destination-ksa','en','show'),
+          ('public-sector-document','destination-uae','en','show');
       INSERT INTO cms_media_references (asset_id,document_id,field_path,media_version_id) VALUES
         ('custom-only','mixed-document','revision:mixed-custom-revision','custom-v1'),
         ('shared-asset','mixed-document','revision:mixed-shared-revision','shared-v1'),
@@ -305,9 +324,10 @@ test("media eligibility admits only the exact source selected for an eligible de
          JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
            AND r.workflow_state='approved'
          JOIN market_editions destination ON destination.code='ksa' AND destination.enabled=true
-         WHERE d.id IN ('private-custom-document','unapproved-custom-document','banking-document')
+          WHERE d.id IN ('private-custom-document','unapproved-custom-document','banking-document','public-sector-document')
           AND ${documentPublishedAvailabilityClause("d.id", "destination.code", "'en'")}
            AND ${industryDestinationEligibilityClause("d", "e", "r", "destination.code")}
+           AND ${industryExactMarketDeliveryClause("d", "e", "destination.code")}
           AND NOT ${customSourceExists}
         ORDER BY d.id`,
     );
@@ -315,6 +335,24 @@ test("media eligibility admits only the exact source selected for an eligible de
       { document_id: "private-custom-document" },
       { document_id: "unapproved-custom-document" },
     ]);
+    const publicSectorUaeSitemap = await client.query<{ document_id: string }>(
+      `SELECT d.id AS document_id
+         FROM cms_documents d
+         JOIN cms_document_availability_states delivery ON delivery.document_id=d.id
+         JOIN cms_market_editions e ON e.id=delivery.shared_source_edition_id
+           AND e.document_id=d.id AND e.content_mode='shared'
+           AND e.publication_state='published' AND e.published_at<=now()
+           AND e.published_revision_id=delivery.published_source_revision_id
+         JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
+           AND r.workflow_state='approved'
+         JOIN market_editions destination ON destination.code='uae' AND destination.enabled=true
+        WHERE d.id='public-sector-document'
+          AND ${documentPublishedAvailabilityClause("d.id", "destination.code", "'en'")}
+          AND ${industryDestinationEligibilityClause("d", "e", "r", "destination.code")}
+          AND ${industryExactMarketDeliveryClause("d", "e", "destination.code")}
+          AND NOT ${publishedCustomSourceExistsClause("d", "d.id", "destination.code", "'en'")}`,
+    );
+    assert.deepEqual(publicSectorUaeSitemap.rows, [{ document_id: "public-sector-document" }]);
     const uaeCustomExists = publishedCustomSourceExistsClause(
       "d",
       "d.id",

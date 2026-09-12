@@ -23,6 +23,10 @@ pnpm --filter @workspace/scripts cms:reconcile-site-hero-media -- --apply-db --t
 # Schema push applies columns and tables only; this development-only command
 # performs the guarded historical availability/source reconciliation afterwards.
 pnpm --filter @workspace/scripts cms:reconcile-document-availability -- --target=development
+# Task 319 stages four exact Public Sector market drafts after the immutable
+# hero and availability reconciliations. It never advances publication or
+# availability pointers; conflicts are reported and preserved.
+pnpm --filter @workspace/scripts cms:setup-public-sector-postmerge
 pnpm --filter @workspace/scripts cms:reconcile-value-to-scale-hero -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-offices -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-methodologies-hero -- --apply-db --target=development

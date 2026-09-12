@@ -42,6 +42,9 @@ export type CmsRecord<T extends CmsContent = CmsContent> = T & {
   seo: PublishedContent["seo"];
   publishedAt: string;
   updatedAt: string;
+  market: PublishedContent["market"];
+  requestedMarket: PublishedContent["requestedMarket"];
+  usedFallback: PublishedContent["usedFallback"];
 };
 export type CmsDeliveryState = "cms" | "compiled-fallback" | "intentional-empty" | "loading" | "api-error" | "contract-error";
 export type CmsEntryRenderPolicy = "cms" | "compiled-fallback" | "loading" | "unavailable";
@@ -370,6 +373,9 @@ export function contentRecord<K extends WebsiteCmsDocumentKind>(item: PublishedC
     seo: item.seo,
     publishedAt: item.publishedAt,
     updatedAt: item.updatedAt,
+    market: item.market,
+    requestedMarket: item.requestedMarket,
+    usedFallback: item.usedFallback,
   } as unknown as CmsRecord<CmsContentByKind[K]>;
 }
 

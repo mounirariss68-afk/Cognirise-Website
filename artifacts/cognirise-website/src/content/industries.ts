@@ -28,8 +28,23 @@ export type IndustryContent = {
   myth: { claim: string; verdict: string };
   gcc: string;
   service: { label: string; href: string; firstMove: string };
-  uses: { use: string; evidence: string; boundary: string }[];
-  sources: { label: string; publisher: string; kind: EvidenceKind; url: string; accessedAt?: string; market?: IndustryMarket }[];
+  uses: {
+    use: string;
+    description?: string;
+    evidence: string;
+    boundary: string;
+    sourceUrls?: string[];
+  }[];
+  sources: {
+    label: string;
+    publisher: string;
+    kind: EvidenceKind;
+    url: string;
+    accessedAt?: string;
+    market?: IndustryMarket;
+    supports?: string;
+    limitation?: string;
+  }[];
   educationPov?: {
     version?: 2;
     imagery?: {
@@ -57,6 +72,7 @@ export type IndustryContent = {
     leadershipTest: string;
   };
   bankingPov?: import("@workspace/api-zod").BankingPov;
+  publicSectorPov?: import("@workspace/api-zod").PublicSectorPov;
   verificationDate: string;
   reviewDate: string;
   visibility: "public" | "hidden" | "restricted";

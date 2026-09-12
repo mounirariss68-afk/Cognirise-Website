@@ -39,32 +39,32 @@ export const INDUSTRY_SECTION_CONTENT_PATHS: Readonly<Record<IndustrySectionId, 
   hero: [
     "legacyPath", "name", "shortName", "thesis", "accent", "dek", "image", "imageAlt", "heroMedia", "heroMediaId", "variant",
     "bankingPov.descriptor", "bankingPov.hero",
-    "educationPov.introduction",
+    "educationPov.introduction", "publicSectorPov.marketLabel",
   ],
   opportunity: [
-    "opportunity", "educationPov.strategicShift", "bankingPov.valueOutcomes",
+    "opportunity", "educationPov.strategicShift", "bankingPov.valueOutcomes", "publicSectorPov.opportunity",
   ],
   pressures: [
-    "pressures", "educationPov.convictions", "bankingPov.adoptionLevels",
+    "pressures", "educationPov.convictions", "bankingPov.adoptionLevels", "publicSectorPov.pressuresHeading",
   ],
   capabilities: [
     "capabilities", "educationPov.valueDomains", "educationPov.targetState", "educationPov.imagery",
-    "bankingPov.valueDomains", "bankingPov.startingPoints",
+    "bankingPov.valueDomains", "bankingPov.startingPoints", "publicSectorPov.capabilitiesIntroduction",
   ],
   applications: [
-    "uses", "educationPov.applications", "educationPov.signals", "bankingPov.voiceBanking",
+    "uses", "educationPov.applications", "educationPov.signals", "bankingPov.voiceBanking", "publicSectorPov.applicationsDisclaimer",
   ],
   perspective: [
     "reversal", "myth", "educationPov.patternQuote", "educationPov.globalDirection", "educationPov.roadmap",
     "bankingPov.productionReadiness", "bankingPov.deliveryPath",
   ],
   market: [
-    "gcc", "educationPov.leadershipTest", "bankingPov.market",
+    "gcc", "educationPov.leadershipTest", "bankingPov.market", "publicSectorPov.marketHeading", "publicSectorPov.marketContext",
   ],
   sources: [
-    "sources", "bankingPov.evidenceSignals", "bankingPov.partners", "bankingPov.caseMembershipSnapshot",
+    "sources", "bankingPov.evidenceSignals", "bankingPov.partners", "bankingPov.caseMembershipSnapshot", "publicSectorPov.sourcesIntroduction", "publicSectorPov.reviewBlockers",
   ],
-  cta: ["selectedWork", "service", "bankingPov.cta"],
+  cta: ["selectedWork", "service", "bankingPov.cta", "publicSectorPov.nextAction"],
 };
 
 export function belongsToIndustrySection(path: string, section: IndustrySectionId) {

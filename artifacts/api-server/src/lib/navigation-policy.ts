@@ -8,6 +8,7 @@ import {
 } from "@workspace/api-zod";
 import {
   documentPublishedAvailabilityClause,
+  industryExactMarketDeliveryClause,
   industryDestinationEligibilityClause,
   publicPayloadEligibilityClause,
 } from "./availability";
@@ -46,6 +47,7 @@ async function publishedDocumentRoutes(
                (
                  ${publicPayloadEligibilityClause("d", "r")}
                  AND ${industryDestinationEligibilityClause("d", "e", "r", "$1")}
+                  AND ${industryExactMarketDeliveryClause("d", "e", "$1")}
                ) AS public_eligible,
                CASE
                  WHEN e.content_mode='custom' AND e.market=$1 AND e.locale=$2 THEN 0

@@ -29,6 +29,13 @@ function bankingContent(payload: unknown) {
   return isObject(pov) && typeof pov.market === "string" ? { content: payload.content, pov } : false;
 }
 
+function publicSectorContent(payload: unknown) {
+  if (!isObject(payload) || !isObject(payload.content)) return false;
+  if (payload.slug !== "public-sector" && payload.content.name !== "Public Sector") return false;
+  const pov = payload.content.publicSectorPov;
+  return isObject(pov) && typeof pov.market === "string" ? { content: payload.content, pov } : false;
+}
+
 function isEducationV2Payload(payload: unknown) {
   const content = educationContent(payload);
   if (!content) return false;
@@ -195,6 +202,24 @@ export function projectIndustrySnapshotForMarket<T>(
     : [];
   const sourceEditionMarket = editionMarket
     ?? (payloadMarkets.length === 1 ? payloadMarkets[0] : undefined);
+  const publicSector = publicSectorContent(payload);
+  if (publicSector) {
+    if (
+      publicSector.pov.market !== requestedMarket
+      || (sourceEditionMarket && sourceEditionMarket !== requestedMarket)
+      || (payloadMarkets.length > 0 && (
+        payloadMarkets.length !== 1
+        || payloadMarkets[0] !== publicSector.pov.market
+      ))
+    ) {
+      throw new Error(
+        `Public Sector delivery cannot fall back from ${publicSector.pov.market} to ${requestedMarket}; publish an explicitly reviewed exact market edition.`,
+      );
+    }
+    const projected = JSON.parse(JSON.stringify(payload)) as { markets?: unknown };
+    projected.markets = [requestedMarket];
+    return projected as T;
+  }
   const banking = bankingContent(payload);
   if (banking) {
     if (banking.pov.market !== requestedMarket || (sourceEditionMarket && sourceEditionMarket !== requestedMarket)) {

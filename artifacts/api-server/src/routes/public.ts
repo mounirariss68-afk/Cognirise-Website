@@ -26,6 +26,7 @@ import { PUBLIC_KIND_CONFIGURATION_SQL } from "../lib/document-lifecycle-sql";
 import { navigationCandidates, isPublishedPageAvailable } from "../lib/navigation-policy";
 import {
   documentPublishedAvailabilityClause,
+  industryExactMarketDeliveryClause,
   industryDestinationEligibilityClause,
   publicPayloadEligibilityClause,
 } from "../lib/availability";
@@ -481,6 +482,7 @@ router.get(
              AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($2::text[])")}
             AND ${documentPublishedAvailabilityClause("d.id", "$3", "$4")}
              AND ${industryDestinationEligibilityClause("d", "e", "r", "$3")}
+             AND ${industryExactMarketDeliveryClause("d", "e", "$3")}
             AND ${PUBLIC_PAYLOAD_SQL}
        )
        SELECT *,count(*) OVER() total_count,$3::text requested_market,$4::text requested_locale
@@ -710,6 +712,7 @@ router.get(
             AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($4::text[])")}
             AND ${documentPublishedAvailabilityClause("d.id", "$3", "$5")}
              AND ${industryDestinationEligibilityClause("d", "e", "r", "$3")}
+             AND ${industryExactMarketDeliveryClause("d", "e", "$3")}
             AND ${PUBLIC_PAYLOAD_SQL}
        )
        SELECT id,kind,market,locale,editorial_market,published_at,updated_at,localized_slug,
@@ -859,6 +862,7 @@ router.get(
              )}
             AND ${documentPublishedAvailabilityClause("d.id", "destination.code", "destination_locale.locale")}
              AND ${industryDestinationEligibilityClause("d", "e", "r", "destination.code")}
+             AND ${industryExactMarketDeliveryClause("d", "e", "destination.code")}
             AND COALESCE((r.payload->'seo'->>'noIndex')::boolean,false)=false
             AND ${PUBLIC_PAYLOAD_SQL}
        )

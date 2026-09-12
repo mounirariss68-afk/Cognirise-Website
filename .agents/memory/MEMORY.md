@@ -35,3 +35,4 @@
 - [Media schema reconciliation](media-schema-reconciliation.md) — Library repair is not authorization to republish content or manufacture reviewer clearance.
 - [Shared content destinations](shared-content-destinations.md) — Separate saved and published source authority; preserve ambiguous regional history through explicit source selection.
 - [Visual inspector verification](visual-inspector-verification.md) — Test rendered field placement, not only section maps; locked review must retain preview controls.
+- [Editorial evidence joins](editorial-evidence-joins.md) — Match exact claims and markets; draft blockers never justify unrelated citations or invented attribution.

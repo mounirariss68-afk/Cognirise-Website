@@ -99,6 +99,29 @@ export function industryDestinationEligibilityClause(
   )`;
 }
 
+/**
+ * Public Sector has an exact-market editorial contract. Unlike the other
+ * industry records, a published UAE source must not be selected as a silent
+ * fallback for a non-UAE request while that market's own edition is still
+ * being prepared.
+ *
+ * Keep this restriction scoped to the public delivery selectors. It does not
+ * change market configuration, availability, or the shared-source review
+ * matrix; an exact custom edition can still win normally when it is published.
+ */
+export function industryExactMarketDeliveryClause(
+  documentAlias: string,
+  editionAlias: string,
+  requestedMarketSql: string,
+): string {
+  return `NOT (
+    ${documentAlias}.kind='industry'
+    AND ${documentAlias}.canonical_slug='public-sector'
+    AND ${requestedMarketSql}<>'uae'
+    AND ${editionAlias}.market<>${requestedMarketSql}
+  )`;
+}
+
 export function effectiveAvailability(
   publishedDecision: AvailabilityDecision | null | undefined,
   draftDecision?: AvailabilityDecision | null,

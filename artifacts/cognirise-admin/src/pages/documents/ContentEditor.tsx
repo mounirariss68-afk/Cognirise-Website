@@ -323,7 +323,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         </section>
         }
         {showIndustryPath("uses") && <section className="space-y-4">
-        <RecordList label="Use-case evidence" value={value.uses} minimum={1} columns={[{ key: "use", label: "Use case" }, { key: "evidence", label: "Evidence class" }, { key: "boundary", label: "Required boundary" }]} onChange={(next) => set("uses", next)} />
+        <IndustryUsesEditor value={value.uses} onChange={(uses) => set("uses", uses)} />
         </section>}
         {showIndustryPath("pressures") && <section className="space-y-4">
         <PairList label="Operating pressures" value={value.pressures} left="title" right="body" onChange={(next) => set("pressures", next)} />
@@ -340,7 +340,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         <RecordList label="Relevant service and first move" value={value.service ? [value.service] : []} minimum={1} columns={[{ key: "label", label: "Service label" }, { key: "href", label: "Internal path" }, { key: "firstMove", label: "First move" }]} onChange={(next) => set("service", next[0] ?? {})} />
         </section>}
         {showIndustryPath("sources") && <section className="space-y-4">
-        <RecordList label="Industry source trail" value={value.sources} minimum={1} columns={[{ key: "label", label: "Label" }, { key: "publisher", label: "Publisher" }, { key: "kind", label: "Evidence kind" }, { key: "url", label: "URL" }, { key: "accessedAt", label: "Accessed date", type: "date" }, { key: "market", label: "Market", type: "market" }]} onChange={(next) => set("sources", next)} />
+        <RecordList label="Industry source trail" value={value.sources} minimum={1} columns={[{ key: "label", label: "Label" }, { key: "publisher", label: "Publisher" }, { key: "kind", label: "Evidence kind" }, { key: "url", label: "URL" }, { key: "accessedAt", label: "Accessed date", type: "date" }, { key: "market", label: "Market", type: "market" }, { key: "supports", label: "Supports", type: "textarea" }, { key: "limitation", label: "Limitation", type: "textarea" }]} onChange={(next) => set("sources", next)} />
         </section>}
         {(value.educationPov || value.legacyPath === "/industries/education") && ["educationPov.introduction", "educationPov.strategicShift", "educationPov.convictions", "educationPov.valueDomains", "educationPov.applications", "educationPov.patternQuote", "educationPov.leadershipTest"].some(showIndustryPath) && <section className="space-y-4 rounded-md border p-4">
           <h3 className="font-semibold">Higher education POV structure</h3>
@@ -378,6 +378,11 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         {(value.bankingPov || value.legacyPath === "/industries/banking") && <BankingPovEditor
           value={value.bankingPov}
           onChange={(bankingPov) => set("bankingPov", bankingPov)}
+          section={industrySection}
+        />}
+        {(value.name === "Public Sector" || value.legacyPath === "/industries/public-sector") && <PublicSectorPovEditor
+          value={value.publicSectorPov}
+          onChange={(publicSectorPov) => set("publicSectorPov", publicSectorPov)}
           section={industrySection}
         />}
       </>}
@@ -555,7 +560,7 @@ function LandingSections({ value, onChange }: {
   </section>;
 }
 
-type RecordColumn = { key: string; label: string; type?: "text" | "date" | "checkbox" | "market" };
+type RecordColumn = { key: string; label: string; type?: "text" | "date" | "checkbox" | "market" | "textarea" };
 
 function RecordList({ label, value, columns, onChange, minimum = 0 }: {
   label: string; value: unknown; columns: RecordColumn[]; onChange: (value: Array<Record<string, any>>) => void; minimum?: number;
@@ -576,6 +581,8 @@ function RecordList({ label, value, columns, onChange, minimum = 0 }: {
           ? <input type="checkbox" className="ml-2" checked={Boolean(get(item, column.key))} onChange={(event) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, event.target.checked) : current))} />
           : column.type === "market"
             ? <Choice label={`${label} ${index + 1} ${column.label}`} value={get(item, column.key) ?? "all-markets"} options={educationMarkets} onChange={(next) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, next === "all-markets" ? undefined : next) : current))} />
+            : column.type === "textarea"
+              ? <Textarea aria-label={`${label} ${index + 1} ${column.label}`} rows={3} value={get(item, column.key) ?? ""} onChange={(event) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, event.target.value) : current))} />
             : <Input aria-label={`${label} ${index + 1} ${column.label}`} type={column.type ?? "text"} value={get(item, column.key) ?? ""} onChange={(event) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, event.target.value) : current))} />}
       </div>)}
       <Button type="button" variant="ghost" className="sm:col-span-2" disabled={items.length <= minimum} onClick={() => onChange(items.filter((_, currentIndex) => currentIndex !== index))}>Remove row</Button>
@@ -589,6 +596,158 @@ function PairList({ label, value, left, right, onChange }: {
   const items = Array.isArray(value) ? value as Array<Record<string, string>> : [];
   const update = (index: number, key: string, next: string) => onChange(items.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: next } : item));
   return <section className="space-y-3"><div className="flex items-center justify-between"><Label>{label} <Requirement /></Label><Button type="button" size="sm" variant="outline" onClick={() => onChange([...items, { [left]: "", [right]: "" }])}>Add row</Button></div>{items.map((item, index) => <fieldset key={index} className="grid gap-3 rounded-md border p-3 sm:grid-cols-2"><legend className="px-1 text-xs font-medium">{label} {index + 1}</legend><div><Label className="text-xs">{left.replaceAll(/([A-Z])/g, " $1")}</Label><Input value={item[left] ?? ""} onChange={(event) => update(index, left, event.target.value)} /></div><div><Label className="text-xs">{right.replaceAll(/([A-Z])/g, " $1")}</Label><Input value={item[right] ?? ""} onChange={(event) => update(index, right, event.target.value)} /></div><Button type="button" variant="ghost" className="sm:col-span-2" onClick={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}>Remove row</Button></fieldset>)}</section>;
+}
+
+function IndustryUsesEditor({ value, onChange }: {
+  value: unknown;
+  onChange: (value: Array<Record<string, any>>) => void;
+}) {
+  const items = Array.isArray(value) ? value as Array<Record<string, any>> : [];
+  const update = (index: number, patch: Record<string, unknown>) =>
+    onChange(items.map((item, current) => current === index ? { ...item, ...patch } : item));
+  return <section className="space-y-3">
+    <div className="flex items-center justify-between">
+      <div><Label>Use-case evidence <Requirement required /></Label><p className="text-xs text-muted-foreground">Use source URLs from the industry source trail to keep each claim attributable.</p></div>
+      <Button type="button" size="sm" variant="outline" disabled={items.length >= 12} onClick={() => onChange([...items, { use: "", description: "", evidence: "", boundary: "", sourceUrls: [] }])}>Add use case</Button>
+    </div>
+    {items.map((item, index) => <fieldset key={index} className="space-y-3 rounded-md border p-3">
+      <legend className="px-1 text-xs font-medium">Use case {index + 1}</legend>
+      <Field label={`Use case ${index + 1}`} required value={item.use} onChange={(use) => update(index, { use })} />
+      <Area label={`Use case ${index + 1} description`} value={item.description ?? ""} onChange={(description) => update(index, { description: description || undefined })} rows={4} />
+      <Area label={`Use case ${index + 1} evidence`} required value={item.evidence ?? ""} onChange={(evidence) => update(index, { evidence })} rows={5} />
+      <Area label={`Use case ${index + 1} required boundary`} required value={item.boundary ?? ""} onChange={(boundary) => update(index, { boundary })} rows={3} />
+      <StringList label={`Use case ${index + 1} source URLs`} required maximum={12} value={item.sourceUrls} onChange={(sourceUrls) => update(index, { sourceUrls })} />
+      <Button type="button" variant="ghost" disabled={items.length <= 1} onClick={() => onChange(items.filter((_, current) => current !== index))}>Remove use case</Button>
+    </fieldset>)}
+  </section>;
+}
+
+const publicSectorMarkets = ["uae", "ksa", "turkiye", "europe"];
+
+function publicSectorPovDraft(): Content {
+  return {
+    version: 1,
+    market: "uae",
+    marketLabel: "United Arab Emirates",
+    opportunity: [],
+    pressuresHeading: "",
+    capabilitiesIntroduction: "",
+    applicationsDisclaimer: "",
+    marketHeading: "",
+    marketContext: [],
+    sourcesIntroduction: "",
+    nextAction: [],
+  };
+}
+
+type PublicSectorRichBlock =
+  | { type: "paragraph"; text: string }
+  | { type: "heading"; level: 2 | 3; text: string }
+  | { type: "list"; style: "bullet" | "numbered"; items: string[] };
+
+function publicSectorRichBlocks(value: unknown): PublicSectorRichBlock[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((block): block is PublicSectorRichBlock =>
+    Boolean(block)
+    && typeof block === "object"
+    && (block.type === "paragraph" || block.type === "heading" || block.type === "list")
+  );
+}
+
+function PublicSectorRichBlockEditor({ label, value, onChange, required }: {
+  label: string;
+  value: unknown;
+  onChange: (value: PublicSectorRichBlock[]) => void;
+  required?: boolean;
+}) {
+  const blocks = publicSectorRichBlocks(value);
+  const update = (index: number, next: PublicSectorRichBlock) =>
+    onChange(blocks.map((block, current) => current === index ? next : block));
+  const changeType = (index: number, type: PublicSectorRichBlock["type"]) => {
+    const current = blocks[index];
+    if (!current) return;
+    const text = "text" in current ? current.text : current.items.join("\n");
+    update(index, type === "heading"
+      ? { type, level: current.type === "heading" ? current.level : 2, text }
+      : type === "list"
+        ? { type, style: current.type === "list" ? current.style : "bullet", items: current.type === "list" ? current.items : [text] }
+        : { type, text });
+  };
+  return <section className="space-y-3">
+    <div className="flex items-center justify-between">
+      <Label>{label} <Requirement required={required} /></Label>
+      <Button type="button" size="sm" variant="outline" onClick={() => onChange([...blocks, { type: "paragraph", text: "" }])}>Add block</Button>
+    </div>
+    <p className="text-xs text-muted-foreground">Blocks and list items are edited individually. Line breaks, numbering, and punctuation are preserved exactly.</p>
+    {blocks.map((block, index) => <fieldset key={index} className="space-y-3 rounded-md border p-3">
+      <legend className="px-1 text-xs font-medium">{label} {index + 1}</legend>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Choice label={`${label} ${index + 1} type`} value={block.type} options={["paragraph", "heading", "list"]} onChange={(type) => changeType(index, type as PublicSectorRichBlock["type"])} />
+        {block.type === "heading" && <Choice label={`${label} ${index + 1} level`} value={String(block.level)} options={["2", "3"]} onChange={(level) => update(index, { ...block, level: Number(level) as 2 | 3 })} />}
+        {block.type === "list" && <Choice label={`${label} ${index + 1} style`} value={block.style} options={["bullet", "numbered"]} onChange={(style) => update(index, { ...block, style: style as "bullet" | "numbered" })} />}
+      </div>
+      {block.type === "list"
+        ? <RichListItems label={`${label} ${index + 1} items`} value={block.items} onChange={(items) => update(index, { ...block, items })} />
+        : <Area label={`${label} ${index + 1} text`} required value={block.text} onChange={(text) => update(index, { ...block, text })} rows={5} />}
+      <Button type="button" variant="ghost" onClick={() => onChange(blocks.filter((_, current) => current !== index))}>Remove block</Button>
+    </fieldset>)}
+    {blocks.length === 0 && <p className="text-xs text-muted-foreground">No blocks added.</p>}
+  </section>;
+}
+
+function RichListItems({ label, value, onChange }: {
+  label: string;
+  value: unknown;
+  onChange: (value: string[]) => void;
+}) {
+  const items = Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+  return <section className="space-y-3 rounded-md bg-muted/30 p-3">
+    <div className="flex items-center justify-between">
+      <Label>{label} <Requirement required /></Label>
+      <Button type="button" size="sm" variant="outline" disabled={items.length >= 50} onClick={() => onChange([...items, ""])}>Add list item</Button>
+    </div>
+    {items.map((item, index) => <div key={index} className="space-y-2">
+      <Area label={`${label} ${index + 1}`} required value={item} onChange={(next) => onChange(items.map((current, currentIndex) => currentIndex === index ? next : current))} rows={3} />
+      <Button type="button" variant="ghost" onClick={() => onChange(items.filter((_, current) => current !== index))}>Remove item</Button>
+    </div>)}
+    {items.length === 0 && <p className="text-xs text-muted-foreground">No list items added.</p>}
+  </section>;
+}
+
+function PublicSectorPovEditor({ value, onChange, section }: {
+  value: Content | undefined;
+  onChange: (value: Content | undefined) => void;
+  section?: string;
+}) {
+  const show = (path: string) => !section || (isIndustrySectionId(section) && belongsToIndustrySection(path, section));
+  if (!value) {
+    if (!show("publicSectorPov.marketLabel")) return null;
+    return <section className="space-y-3 rounded-md border p-4">
+      <h3 className="font-semibold">Public Sector POV structure</h3>
+      <p className="text-sm text-muted-foreground">This market-specific editorial structure is available only to Public Sector. Its evidence and preview remain pinned to the exact selected market.</p>
+      <Button type="button" variant="outline" onClick={() => onChange(publicSectorPovDraft())}>Add Public Sector POV v1</Button>
+    </section>;
+  }
+  const update = (patch: Content) => onChange({ ...value, ...patch });
+  return <section className="space-y-4 rounded-md border p-4">
+    <div>
+      <h3 className="font-semibold">Public Sector POV structure</h3>
+      <p className="text-sm text-muted-foreground">Version 1 uses exact market copy. It cannot fall back to a different Public Sector market.</p>
+    </div>
+    {show("publicSectorPov.marketLabel") && <div className="grid gap-4 sm:grid-cols-2">
+      <Choice label="Public Sector market" required value={value.market ?? "uae"} options={publicSectorMarkets} onChange={(market) => update({ market })} />
+      <Field label="Market label" required value={value.marketLabel} onChange={(marketLabel) => update({ marketLabel })} />
+    </div>}
+    {show("publicSectorPov.opportunity") && <PublicSectorRichBlockEditor label="Public Sector opportunity blocks" required value={value.opportunity} onChange={(opportunity) => update({ opportunity })} />}
+    {show("publicSectorPov.pressuresHeading") && <Field label="Operating pressures heading" required value={value.pressuresHeading} onChange={(pressuresHeading) => update({ pressuresHeading })} />}
+    {show("publicSectorPov.capabilitiesIntroduction") && <Area label="Capabilities introduction" required value={value.capabilitiesIntroduction ?? ""} onChange={(capabilitiesIntroduction) => update({ capabilitiesIntroduction })} rows={5} />}
+    {show("publicSectorPov.applicationsDisclaimer") && <Area label="Applications disclaimer" required value={value.applicationsDisclaimer ?? ""} onChange={(applicationsDisclaimer) => update({ applicationsDisclaimer })} rows={5} />}
+    {show("publicSectorPov.marketHeading") && <Field label="Market context heading" required value={value.marketHeading} onChange={(marketHeading) => update({ marketHeading })} />}
+    {show("publicSectorPov.marketContext") && <PublicSectorRichBlockEditor label="Market context blocks" required value={value.marketContext} onChange={(marketContext) => update({ marketContext })} />}
+    {show("publicSectorPov.sourcesIntroduction") && <Area label="Sources introduction" required value={value.sourcesIntroduction ?? ""} onChange={(sourcesIntroduction) => update({ sourcesIntroduction })} rows={5} />}
+    {show("publicSectorPov.reviewBlockers") && <StringList label="Review blockers (publish gate)" maximum={30} value={value.reviewBlockers} onChange={(reviewBlockers) => update({ reviewBlockers: reviewBlockers.length ? reviewBlockers : undefined })} />}
+    {show("publicSectorPov.nextAction") && <PublicSectorRichBlockEditor label="Next action blocks" required value={value.nextAction} onChange={(nextAction) => update({ nextAction })} />}
+  </section>;
 }
 
 function EducationDomains({ value, onChange, version }: { value: unknown; onChange: (value: any[]) => void; version?: 2 }) {

@@ -271,6 +271,8 @@ const industrySourceSchema = z.object({
   url: safeExternalUrl,
   accessedAt: optionalDate,
   market: z.enum(["uae", "ksa", "turkiye", "europe"]).optional(),
+  supports: z.string().trim().max(2_000).optional(),
+  limitation: z.string().trim().max(2_000).optional(),
 }).strict();
 
 const titledBodyShape = {
@@ -372,6 +374,48 @@ const educationPovV2Schema = z.object({
 const educationPovSchema = z.union([legacyEducationPovSchema, educationPovV2Schema]);
 
 const bankingMarketSchema = z.enum(["uae", "ksa", "turkiye", "europe"]);
+export const publicSectorMarketSchema = z.enum(["uae", "ksa", "turkiye", "europe"]);
+
+/**
+ * Public-sector copy is deliberately a separate rich-block contract from the
+ * generic CMS narrative blocks.  Public-sector evidence often needs a whole
+ * sentence per list item, so the list item limit is materially larger than
+ * the compact 240-character list used by the other templates.
+ */
+export const publicSectorRichListBlockSchema = z.object({
+  type: z.literal("list"),
+  style: z.enum(["bullet", "numbered"]).default("bullet"),
+  items: z.array(z.string().trim().min(1).max(2_000)).max(50),
+}).strict();
+
+export const publicSectorRichBlockSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("heading"),
+    level: z.union([z.literal(2), z.literal(3)]),
+    text: z.string().trim().min(1).max(240),
+  }).strict(),
+  z.object({
+    type: z.literal("paragraph"),
+    text: z.string().trim().min(1).max(8_000),
+  }).strict(),
+  publicSectorRichListBlockSchema,
+]);
+
+export const publicSectorPovSchema = z.object({
+  version: z.literal(1),
+  market: publicSectorMarketSchema,
+  marketLabel: z.string().trim().min(1).max(160),
+  reviewBlockers: z.array(z.string().trim().min(1).max(1_000)).max(30).optional(),
+  opportunity: z.array(publicSectorRichBlockSchema).min(1).max(50),
+  pressuresHeading: z.string().trim().min(1).max(240),
+  capabilitiesIntroduction: z.string().trim().min(1).max(2_000),
+  applicationsDisclaimer: z.string().trim().min(1).max(2_000),
+  marketHeading: z.string().trim().min(1).max(240),
+  marketContext: z.array(publicSectorRichBlockSchema).min(1).max(50),
+  sourcesIntroduction: z.string().trim().min(1).max(2_000),
+  nextAction: z.array(publicSectorRichBlockSchema).min(1).max(50),
+}).strict();
+
 export const industryContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
   legacyPath: safeInternalPath,
@@ -411,12 +455,15 @@ export const industryContentSchema = z.object({
   }).strict(),
   uses: z.array(z.object({
     use: z.string().trim().min(1).max(160),
-    evidence: z.string().trim().min(1).max(240),
+    description: z.string().trim().max(2_000).optional(),
+    evidence: z.string().trim().min(1).max(3_000),
     boundary: z.string().trim().min(1).max(500),
+    sourceUrls: z.array(safeExternalUrl).max(12).optional(),
   }).strict()).min(1).max(12),
   sources: z.array(industrySourceSchema).min(1).max(30),
   educationPov: educationPovSchema.optional(),
   bankingPov: z.lazy(() => bankingPovSchema).optional(),
+  publicSectorPov: publicSectorPovSchema.optional(),
   heroMedia: optionalMediaReference,
   heroMediaId: legacyMediaId,
   supportingMedia: z.array(cmsMediaReferenceSchema).max(8).optional(),
@@ -433,6 +480,13 @@ export const industryContentSchema = z.object({
       message: "The Banking POV is available only to Financial Services.",
     });
   }
+  if (value.publicSectorPov && value.name !== "Public Sector") {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["publicSectorPov"],
+      message: "The Public Sector POV is available only to Public Sector.",
+    });
+  }
   const sourceTrail = new Set(value.sources.map((source) => source.url));
   if (value.bankingPov) {
     for (const [index, source] of value.bankingPov.evidenceSignals.entries()) {
@@ -445,27 +499,77 @@ export const industryContentSchema = z.object({
       }
     }
   }
-  if (value.educationPov?.version !== 2) return;
-  const associations = [
-    ...value.educationPov.signals.flatMap((signal, index) =>
-      signal.sourceUrls.map((url, sourceIndex) => ({
-        url,
-        path: ["educationPov", "signals", index, "sourceUrls", sourceIndex],
-      }))),
-    ...(value.educationPov.applications ?? []).flatMap((group, groupIndex) =>
-      group.items.flatMap((item, itemIndex) =>
-        item.sourceUrls.map((url, sourceIndex) => ({
+  if (value.educationPov?.version === 2) {
+    const associations = [
+      ...value.educationPov.signals.flatMap((signal, index) =>
+        signal.sourceUrls.map((url, sourceIndex) => ({
           url,
-          path: ["educationPov", "applications", groupIndex, "items", itemIndex, "sourceUrls", sourceIndex],
-        })))),
-  ];
-  for (const association of associations) {
-    if (!sourceTrail.has(association.url)) {
+          path: ["educationPov", "signals", index, "sourceUrls", sourceIndex],
+        }))),
+      ...(value.educationPov.applications ?? []).flatMap((group, groupIndex) =>
+        group.items.flatMap((item, itemIndex) =>
+          item.sourceUrls.map((url, sourceIndex) => ({
+            url,
+            path: ["educationPov", "applications", groupIndex, "items", itemIndex, "sourceUrls", sourceIndex],
+          })))),
+    ];
+    for (const association of associations) {
+      if (!sourceTrail.has(association.url)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: association.path,
+          message: "Source URL must match a URL in the industry source trail.",
+        });
+      }
+    }
+  }
+  for (const [index, use] of value.uses.entries()) {
+    if (value.publicSectorPov && !use.sourceUrls?.length) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        path: association.path,
-        message: "Source URL must match a URL in the industry source trail.",
+        path: ["uses", index, "sourceUrls"],
+        message: "A Public Sector use must include at least one source URL.",
       });
+    }
+    for (const [sourceIndex, url] of (use.sourceUrls ?? []).entries()) {
+      if (!sourceTrail.has(url)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["uses", index, "sourceUrls", sourceIndex],
+          message: "Source URL must match a URL in the industry source trail.",
+        });
+      }
+    }
+  }
+  if (value.publicSectorPov) {
+    for (const [index, source] of value.sources.entries()) {
+      if (!source.market) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["sources", index, "market"],
+          message: "A Public Sector source must include its market attribution.",
+        });
+      } else if (source.market !== value.publicSectorPov.market) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["sources", index, "market"],
+          message: "A Public Sector source market must match publicSectorPov.market.",
+        });
+      }
+      if (!source.supports) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["sources", index, "supports"],
+          message: "A Public Sector source must state what claim it supports.",
+        });
+      }
+      if (!source.limitation) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["sources", index, "limitation"],
+          message: "A Public Sector source must state its limitation.",
+        });
+      }
     }
   }
 });
@@ -669,6 +773,7 @@ export type CaseStudyContent = z.infer<typeof caseStudyContentSchema>;
 export type IndustryContent = z.infer<typeof industryContentSchema>;
 
 export type BankingPov = z.infer<typeof bankingPovSchema>;
+export type PublicSectorPov = z.infer<typeof publicSectorPovSchema>;
 export type FrameworkContent = z.infer<typeof frameworkContentSchema>;
 export type OfficeContent = z.infer<typeof officeContentSchema>;
 
@@ -717,6 +822,9 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
     if (industry.pressures.length < 3) errors.push("At least three operating pressures are required.");
     if (industry.capabilities.length < 2) errors.push("At least two build capabilities are required.");
     if (!industry.imageAlt) errors.push("Industry hero imagery requires alternative text.");
+    if (industry.publicSectorPov?.reviewBlockers?.length) {
+      errors.push("Public Sector review blockers must be cleared before publication.");
+    }
   }
   if (kind === "framework") {
     const framework = value as FrameworkContent;
@@ -927,6 +1035,7 @@ export function validateCmsSnapshotForDelivery(
   const errors = [
     ...educationImmutableMediaErrors(source.data as z.infer<typeof cmsSnapshotSchema>),
     ...bankingDeliveryErrors(source.data),
+    ...publicSectorDeliveryErrors(source.data),
   ];
   return errors.length ? { success: false as const, errors } : source;
 }
@@ -953,6 +1062,23 @@ function bankingDeliveryErrors(input: unknown): string[] {
   }
   if (banking.market === "ksa" && /\bUAE\b|United Arab Emirates|\.gov\.ae\b/i.test(serialized)) {
     errors.push("Saudi Banking POV delivery must not contain UAE references.");
+  }
+  return errors;
+}
+
+function publicSectorDeliveryErrors(input: unknown): string[] {
+  const parsed = cmsSnapshotSchema.safeParse(input);
+  if (!parsed.success) return [];
+  const snapshot = parsed.data;
+  const content = snapshot.content as IndustryContent;
+  const pov = content.publicSectorPov;
+  if (!pov) return [];
+  const errors: string[] = [];
+  if (snapshot.slug !== "public-sector" || content.name !== "Public Sector") {
+    errors.push("Public Sector POV delivery is restricted to the Public Sector document.");
+  }
+  if (snapshot.markets.length !== 1 || snapshot.markets[0] !== pov.market) {
+    errors.push("Public Sector POV market must match the single exact declared delivery market.");
   }
   return errors;
 }
@@ -1036,6 +1162,7 @@ export function validateCmsSnapshot(
   const errors = [
     ...educationImmutableMediaErrors(source.data as z.infer<typeof cmsSnapshotSchema>),
     ...bankingDeliveryErrors(source.data),
+    ...publicSectorDeliveryErrors(source.data),
     ...educationDerivativeErrors(source.data),
   ];
   return errors.length

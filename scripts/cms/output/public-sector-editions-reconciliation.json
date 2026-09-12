@@ -1,0 +1,215 @@
+{
+  "task": 319,
+  "mode": "apply",
+  "results": [
+    {
+      "market": "uae",
+      "disposition": "replayed",
+      "editionId": "5c83c436-70fe-4a3b-8d9c-8ff0c0f9b7cc",
+      "draftRevisionId": "497eaed7-e9b7-47f2-b4db-d650930ed558",
+      "securePreviewRequest": "/api/documents/a54232c0-0b4f-45b5-ae8e-f5cbd56a77b7/preview?market=uae&locale=en&revisionId=497eaed7-e9b7-47f2-b4db-d650930ed558",
+      "candidateDigest": "fd5f35402d9166c91b5d0e4d5be818d11559677da297d74a5023eb2cf5ad240b",
+      "publicationVerification": {
+        "publicationState": "published",
+        "publishedRevisionId": "a7f7dc79-d61e-4400-a6ea-3eaca39c9cea",
+        "publishedDigest": "a6c53b56ad169dbe40f5e9e2dbdffebfe18ffd78d6ee5c517e1b4aea427e2154",
+        "pointerMutated": false
+      },
+      "preservedState": [
+        "published revision pointer",
+        "revision history",
+        "availability decisions",
+        "immutable hero media reference"
+      ],
+      "draftBlockers": [
+        "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+        "UAE: exact Phase 1 Zero Government Bureaucracy results, UAE PASS connected-service/entity totals and TAMM 1,150-service figure require source-level reconciliation.",
+        "UAE: Federal Decree-Law 45 government-data exclusion and executive-regulation status require the decree-law/current regulations.",
+        "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+        "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+      ],
+      "evidenceReport": {
+        "version": 1,
+        "status": "review-required",
+        "sourceCount": 9,
+        "applicationCount": 3,
+        "draftBlockers": [
+          "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+          "UAE: exact Phase 1 Zero Government Bureaucracy results, UAE PASS connected-service/entity totals and TAMM 1,150-service figure require source-level reconciliation.",
+          "UAE: Federal Decree-Law 45 government-data exclusion and executive-regulation status require the decree-law/current regulations.",
+          "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+          "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+        ],
+        "fatalBlockers": []
+      },
+      "dateProvenance": "Inherited unchanged from the approved predecessor; Task 319 did not re-verify or advance either date.",
+      "approvalBlockers": [
+        "Normal authenticated CMS review and Publish controls remain required.",
+        "Inherited unchanged from the approved predecessor; Task 319 did not re-verify or advance either date."
+      ]
+    },
+    {
+      "market": "ksa",
+      "disposition": "replayed",
+      "editionId": "e0e0ec71-b2da-4145-9f43-110b9a59268c",
+      "draftRevisionId": "e3cd1a7b-7c6f-42ea-ab73-78f1cd59f187",
+      "securePreviewRequest": "/api/documents/a54232c0-0b4f-45b5-ae8e-f5cbd56a77b7/preview?market=ksa&locale=en&revisionId=e3cd1a7b-7c6f-42ea-ab73-78f1cd59f187",
+      "candidateDigest": "7bdea79d71c676c44ad38ed9e59a10a6158e0aca0bc942d6994e7e59c22275a2",
+      "publicationVerification": {
+        "publicationState": "draft",
+        "publishedRevisionId": null,
+        "publishedDigest": null,
+        "pointerMutated": false
+      },
+      "preservedState": [
+        "published revision pointer",
+        "revision history",
+        "availability decisions",
+        "immutable hero media reference"
+      ],
+      "draftBlockers": [
+        "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+        "Saudi Arabia: Nafath 3bn/23.5m/530-plus bundle and Absher 460-service/28m-identity figures need dated primary datasets.",
+        "Saudi Arabia: BALSAM supplied 22-model/12,786-question/0.88 figures do not match the checked benchmark paper.",
+        "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+        "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+      ],
+      "evidenceReport": {
+        "version": 1,
+        "status": "review-required",
+        "sourceCount": 10,
+        "applicationCount": 3,
+        "draftBlockers": [
+          "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+          "Saudi Arabia: Nafath 3bn/23.5m/530-plus bundle and Absher 460-service/28m-identity figures need dated primary datasets.",
+          "Saudi Arabia: BALSAM supplied 22-model/12,786-question/0.88 figures do not match the checked benchmark paper.",
+          "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+          "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+        ],
+        "fatalBlockers": []
+      },
+      "dateProvenance": "Inherited unchanged from the approved predecessor; Task 319 did not re-verify or advance either date.",
+      "approvalBlockers": [
+        "Normal authenticated CMS review and Publish controls remain required.",
+        "Inherited unchanged from the approved predecessor; Task 319 did not re-verify or advance either date."
+      ]
+    },
+    {
+      "market": "turkiye",
+      "disposition": "replayed",
+      "editionId": "94918f68-146c-44fd-9e80-9b80cc191ea5",
+      "draftRevisionId": "e3bb3286-dfc6-4520-a522-a2bdb894e750",
+      "securePreviewRequest": "/api/documents/a54232c0-0b4f-45b5-ae8e-f5cbd56a77b7/preview?market=turkiye&locale=en&revisionId=e3bb3286-dfc6-4520-a522-a2bdb894e750",
+      "candidateDigest": "d455ed55e887706e170f7e194b33459f459e29f39f3c15b2d3fe621f48ae1aa9",
+      "publicationVerification": {
+        "publicationState": "draft",
+        "publishedRevisionId": null,
+        "publishedDigest": null,
+        "pointerMutated": false
+      },
+      "preservedState": [
+        "published revision pointer",
+        "revision history",
+        "availability decisions",
+        "immutable hero media reference"
+      ],
+      "draftBlockers": [
+        "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+        "Türkiye: the Presidential Decree 183 row now links the dated 28 March 2025 Resmî Gazete issue page, but the page text was not exposed by the bounded fetch; decree-number and proposition confirmation remain an explicit legal-text blocker.",
+        "Türkiye: e-Devlet, MERNİS/KPS and BSYS supplied metric bundles need their named official reports; the checked BSYS source is a 2017 case study with different counts.",
+        "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+        "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+      ],
+      "evidenceReport": {
+        "version": 1,
+        "status": "review-required",
+        "sourceCount": 10,
+        "applicationCount": 3,
+        "draftBlockers": [
+          "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+          "Türkiye: the Presidential Decree 183 row now links the dated 28 March 2025 Resmî Gazete issue page, but the page text was not exposed by the bounded fetch; decree-number and proposition confirmation remain an explicit legal-text blocker.",
+          "Türkiye: e-Devlet, MERNİS/KPS and BSYS supplied metric bundles need their named official reports; the checked BSYS source is a 2017 case study with different counts.",
+          "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+          "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+        ],
+        "fatalBlockers": []
+      },
+      "dateProvenance": "Inherited unchanged from the approved predecessor; Task 319 did not re-verify or advance either date.",
+      "approvalBlockers": [
+        "Normal authenticated CMS review and Publish controls remain required.",
+        "Inherited unchanged from the approved predecessor; Task 319 did not re-verify or advance either date."
+      ]
+    },
+    {
+      "market": "europe",
+      "disposition": "replayed",
+      "editionId": "8216db13-1ae9-4859-9268-4e986d87b115",
+      "draftRevisionId": "c08f64e3-5ac5-43de-b637-e9b581c3c04a",
+      "securePreviewRequest": "/api/documents/a54232c0-0b4f-45b5-ae8e-f5cbd56a77b7/preview?market=europe&locale=en&revisionId=c08f64e3-5ac5-43de-b637-e9b581c3c04a",
+      "candidateDigest": "eca4171b72370d8ac1c6fac764991c4e509afdd140ab1e48a583ae2f28bc6799",
+      "publicationVerification": {
+        "publicationState": "draft",
+        "publishedRevisionId": null,
+        "publishedDigest": null,
+        "pointerMutated": false
+      },
+      "preservedState": [
+        "published revision pointer",
+        "revision history",
+        "availability decisions",
+        "immutable hero media reference"
+      ],
+      "draftBlockers": [
+        "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+        "EU: the exact 24 December 2026 EUDI deadline, 93-percent Single Digital Gateway statistic and 21-language EU20 performance figures need their exact table/article sources.",
+        "EU: Regulation (EU) 2026/1744 dates must not be compressed into one date; cite the separate Article 111 and Article 113 obligations.",
+        "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+        "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+      ],
+      "evidenceReport": {
+        "version": 1,
+        "status": "review-required",
+        "sourceCount": 9,
+        "applicationCount": 3,
+        "draftBlockers": [
+          "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+          "EU: the exact 24 December 2026 EUDI deadline, 93-percent Single Digital Gateway statistic and 21-language EU20 performance figures need their exact table/article sources.",
+          "EU: Regulation (EU) 2026/1744 dates must not be compressed into one date; cite the separate Article 111 and Article 113 obligations.",
+          "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+          "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+        ],
+        "fatalBlockers": []
+      },
+      "dateProvenance": "Inherited unchanged from the approved predecessor; Task 319 did not re-verify or advance either date.",
+      "approvalBlockers": [
+        "Normal authenticated CMS review and Publish controls remain required.",
+        "Inherited unchanged from the approved predecessor; Task 319 did not re-verify or advance either date."
+      ]
+    }
+  ],
+  "evidenceReport": {
+    "version": 1,
+    "status": "review-required",
+    "sourceCount": 30,
+    "applicationCount": 12,
+    "draftBlockers": [
+      "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+      "UAE: exact Phase 1 Zero Government Bureaucracy results, UAE PASS connected-service/entity totals and TAMM 1,150-service figure require source-level reconciliation.",
+      "UAE: Federal Decree-Law 45 government-data exclusion and executive-regulation status require the decree-law/current regulations.",
+      "Saudi Arabia: Nafath 3bn/23.5m/530-plus bundle and Absher 460-service/28m-identity figures need dated primary datasets.",
+      "Saudi Arabia: BALSAM supplied 22-model/12,786-question/0.88 figures do not match the checked benchmark paper.",
+      "Türkiye: the Presidential Decree 183 row now links the dated 28 March 2025 Resmî Gazete issue page, but the page text was not exposed by the bounded fetch; decree-number and proposition confirmation remain an explicit legal-text blocker.",
+      "Türkiye: e-Devlet, MERNİS/KPS and BSYS supplied metric bundles need their named official reports; the checked BSYS source is a 2017 case study with different counts.",
+      "EU: the exact 24 December 2026 EUDI deadline, 93-percent Single Digital Gateway statistic and 21-language EU20 performance figures need their exact table/article sources.",
+      "EU: Regulation (EU) 2026/1744 dates must not be compressed into one date; cite the separate Article 111 and Article 113 obligations.",
+      "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+      "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+    ],
+    "fatalBlockers": []
+  },
+  "publication": "Draft staging only. No edition was published or availability decision changed.",
+  "approvalBlockers": [
+    "Review each exact market in the authenticated CMS, resolve evidence/legal blockers, and use normal Publish controls.",
+    "Inherited unchanged from the approved predecessor; Task 319 did not re-verify or advance either date."
+  ]
+}

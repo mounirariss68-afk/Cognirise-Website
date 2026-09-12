@@ -1,0 +1,762 @@
+{
+  "version": 1,
+  "schemaVersion": "1.0",
+  "title": "Public Sector edition evidence reconciliation",
+  "editionStatus": "draft-pending-review",
+  "checkedDate": "2026-09-12",
+  "method": {
+    "boundedVerification": true,
+    "verificationRule": "verified means the cited URL was fetched or an official search result exposed the mapped proposition; partial means only a narrower proposition was checked; unverified means no bounded source established the proposition.",
+    "urlRule": "Only URLs actually fetched or returned by bounded web search are present. A source without a URL is retained as a draft blocker rather than assigned a placeholder.",
+    "lineRule": "lineSpan points to the supplied attachment or to the shared application paragraph in that attachment."
+  },
+  "sources": [
+    {
+      "id": "shared_govuk_chat",
+      "label": "GOV.UK Chat: five things learned from testing",
+      "publisher": "UK Government Digital Service",
+      "kind": "Official source",
+      "url": "https://insidegovuk.blog.gov.uk/2026/03/16/5-things-we-learned-testing-gov-uk-chat-an-ai-assistant-for-government",
+      "supports": "The GDS evaluation reports an 18-month test, two public pilots, more than 10,000 users, 26,000 questions, a latest reported accuracy figure and bounded guardrail testing.",
+      "limitation": "Self-reported service-owner evaluation; the measures do not establish readiness for transactions or universal public-sector performance.",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "scope": "shared-application"
+    },
+    {
+      "id": "shared_consult",
+      "label": "Evaluating Consult: an AI tool for public consultation analysis",
+      "publisher": "UK Government AI.gov.uk and Scottish Government evaluation",
+      "kind": "Official source",
+      "url": "https://ai.gov.uk/blogs/evaluating-consult-an-ai-tool-for-enhanced-public-consultation-analysis",
+      "supports": "The evaluation reports bounded theme-analysis results, including exact theme match, F1, reviewer agreement and review-time measures, with limitations.",
+      "limitation": "One live consultation and a specific tool/version; it is not evidence that the tool replaces accountable review.",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "scope": "shared-application"
+    },
+    {
+      "id": "shared_estonia_application",
+      "label": "Proactive family benefits, Estonia (shared application evidence)",
+      "publisher": "Estonian Social Insurance Board via OECD Observatory of Public Sector Innovation",
+      "kind": "Company-reported",
+      "url": "https://oecd-opsi.org/innovations/proactive-family-benefits",
+      "supports": "The case study describes a proactive family-benefit offer after a registered birth and reports that 97 percent of parents previously applied.",
+      "limitation": "Self-submitted case record; it does not establish the supplied processing-time or satisfaction figures, and it does not support the separate planning-document digitisation example.",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "scope": "shared-application"
+    },
+    {
+      "id": "uae_zgb",
+      "label": "Zero Government Bureaucracy Phase 2 launch and Phase 1 results",
+      "publisher": "UAE Government Media Office",
+      "kind": "Official source",
+      "url": "https://www.wam.ae/en/article/bk7sm9d-mohammed-bin-rashid-launches-phase-zero",
+      "supports": "Phase 2 launch of the Zero Government Bureaucracy programme and its service-simplification purpose.",
+      "limitation": "The WAM page returned a fetch error in this pass; the exact 4,000-plus, 1,600, 70-percent and 690-team figures were not line-checked.",
+      "market": "uae",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md",
+        "start": 127,
+        "end": 127
+      }
+    },
+    {
+      "id": "uae_agentic_government",
+      "label": "UAE to move 50% of government services to AI within two years",
+      "publisher": "UAE Government statement, reported",
+      "kind": "Official source",
+      "url": "https://www.mediaoffice.ae/en/news/2026/april/23-04/mohammed-bin-rashid-chairs-uae-cabinet-meeting",
+      "supports": "The April 2026 announcement of a two-year framework to deploy agentic AI across 50 percent of UAE government sectors, services and operations.",
+      "limitation": "The statement is a policy commitment; it does not establish delivery, accuracy or realised benefit.",
+      "market": "uae",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md",
+        "start": 128,
+        "end": 128
+      }
+    },
+    {
+      "id": "uae_dge_2025",
+      "label": "Abu Dhabi Digital Strategy 2025–2027",
+      "publisher": "Department of Government Enablement",
+      "kind": "Official source",
+      "url": "https://www.mediaoffice.abudhabi/en/government-affairs/abu-dhabi-government-launches-digital-strategy-2025-2027",
+      "supports": "AED 13 billion programme, AI-powered government ambition, sovereign-cloud target and more than 200 AI solutions.",
+      "limitation": "GDP and jobs figures are sponsor projections, not measured outcomes.",
+      "market": "uae",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md",
+        "start": 129,
+        "end": 129
+      }
+    },
+    {
+      "id": "uae_pass_scale",
+      "label": "World Economic Forum recognition of UAE PASS",
+      "publisher": "Digital Dubai",
+      "kind": "Official source",
+      "url": "http://digitaldubai.ae/newsroom/news/world-economic-forum-recognizes-the-uae-pass-as-a-global-model-for-integrated-government-digital-infrastructure",
+      "supports": "The UAE PASS recognition and a reported total exceeding 12 million registered users.",
+      "limitation": "Registration is not coverage; the checked result did not establish the supplied 15,000-service and 350-entity figures.",
+      "market": "uae",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md",
+        "start": 130,
+        "end": 130
+      }
+    },
+    {
+      "id": "uae_tamm_metrics",
+      "label": "TAMM 3.0 launch and service scope",
+      "publisher": "Department of Government Enablement",
+      "kind": "Official source",
+      "url": "http://dge.gov.ae/en/news/dge-abu-dhabi-launches-tamm-3",
+      "supports": "TAMM 3.0 as an AI-powered one-stop platform and its reported service scope.",
+      "limitation": "The checked result reported more than 800 services, not the supplied 1,150; it did not publish accuracy or containment metrics for the citizen assistant.",
+      "market": "uae",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md",
+        "start": 131,
+        "end": 131
+      }
+    },
+    {
+      "id": "uae_data_protection",
+      "label": "UAE data protection law overview",
+      "publisher": "u.ae",
+      "kind": "Official source",
+      "url": "https://u.ae/en/about-the-uae/digital-uae/data/data-protection-laws",
+      "supports": "Federal Decree-Law 45 of 2021 and the official UAE government's overview of its data-protection scope.",
+      "limitation": "The exact government-data/government-authority exclusion and executive-regulation status require the decree-law and current regulations, not only the overview page.",
+      "market": "uae",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md",
+        "start": 132,
+        "end": 132
+      }
+    },
+    {
+      "id": "ksa_dga_establishment",
+      "label": "Digital Government Authority establishment and mandate",
+      "publisher": "Digital Government Authority",
+      "kind": "Official source",
+      "url": "https://dga.gov.sa/en/about-DGA",
+      "supports": "DGA establishment by Cabinet decision on 9 March 2021 and its role as the national reference for digital government.",
+      "limitation": "The source establishes the authority and mandate, not every maturity or service statistic in the copy.",
+      "market": "ksa",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md",
+        "start": 127,
+        "end": 127
+      }
+    },
+    {
+      "id": "ksa_dga_maturity",
+      "label": "Digital Experience Maturity Index 2026 results",
+      "publisher": "Digital Government Authority, reported",
+      "kind": "Official source",
+      "url": "https://www.spa.gov.sa/en/N2652311",
+      "supports": "87.06 percent overall, 59 platforms, more than 805,500 participants and 76.98 percent digital inclusion in the 2026 index.",
+      "limitation": "Self-assessment by the issuing authority; assessed platform count changed year on year, so movement is not like-for-like.",
+      "market": "ksa",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md",
+        "start": 128,
+        "end": 128
+      }
+    },
+    {
+      "id": "ksa_nafath_scale",
+      "label": "Nafath adoption figures",
+      "publisher": "National official reporting",
+      "kind": "Official source",
+      "url": "https://sdaia.gov.sa/en/SDAIA/eParticipation/Documents/OpenDataReport.pdf",
+      "supports": "SDAIA's official open-data material identifies Nafath statistics as a published dataset.",
+      "limitation": "The checked source did not establish the supplied 3-billion, 23.5-million and 530-plus bundle with one reporting period and denominator.",
+      "market": "ksa",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md",
+        "start": 129,
+        "end": 129
+      }
+    },
+    {
+      "id": "ksa_absher_scale",
+      "label": "Absher service and transaction figures",
+      "publisher": "Ministry of Interior",
+      "kind": "Official source",
+      "url": "https://www.spa.gov.sa/en/N2307074",
+      "supports": "Absher processed 33,644,074 transactions across Individuals and Business during March 2025.",
+      "limitation": "The checked SPA report does not establish the supplied 460-service and 28-million-digital-identity figures.",
+      "market": "ksa",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md",
+        "start": 130,
+        "end": 130
+      }
+    },
+    {
+      "id": "ksa_egdi",
+      "label": "UN E-Government Survey 2024",
+      "publisher": "UN DESA",
+      "kind": "Official source",
+      "url": "https://publicadministration.un.org/egovkb/en-us/Data/Country-Information/id/149-Saudi-Arabia",
+      "supports": "Saudi Arabia ranked sixth in the 2024 UN E-Government Development Index with an EGDI value of 0.96022.",
+      "limitation": "The supplied source row's regional-ranking wording should be checked against the report narrative separately.",
+      "market": "ksa",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md",
+        "start": 131,
+        "end": 131
+      }
+    },
+    {
+      "id": "ksa_pdpl",
+      "label": "Personal Data Protection Law and Implementing Regulations",
+      "publisher": "Royal Decree M/19 as amended; SDAIA",
+      "kind": "Official source",
+      "url": "https://sdaia.gov.sa/en/SDAIA/about/Documents/PersonalDataProtectionLaw.pdf",
+      "supports": "The PDPL defines public entities as controllers and provides the legal framework for processing and transfers; SDAIA publishes implementing materials.",
+      "limitation": "Registration, transfer, cloud and breach propositions must each be cited to the current law, implementing regulation and relevant controls.",
+      "market": "ksa",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md",
+        "start": 132,
+        "end": 132
+      }
+    },
+    {
+      "id": "ksa_balsam",
+      "label": "BALSAM Arabic benchmark",
+      "publisher": "SDAIA and King Salman Global Academy",
+      "kind": "Independent study",
+      "url": "https://aclanthology.org/2025.arabicnlp-main.21",
+      "supports": "BALSAM is an Arabic LLM benchmark with 78 tasks across 14 categories and a large test/development corpus.",
+      "limitation": "The checked paper does not establish the supplied 22-model, 12,786-question and 0.88-convergence figures; it reports a different benchmark structure.",
+      "market": "ksa",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md",
+        "start": 133,
+        "end": 133
+      }
+    },
+    {
+      "id": "tr_action_plan",
+      "label": "Türkiye AI Action Plan 2026–2030",
+      "publisher": "Presidential Circular 2026/9, Resmî Gazete",
+      "kind": "Official source",
+      "url": "https://sanayi.gov.tr/yapayzekaeylemplani",
+      "supports": "The Ministry page identifies the Türkiye Artificial Intelligence Action Plan 2026–2030.",
+      "limitation": "The fetched page exposed a PDF loading shell; the four axes, 16 actions and governance text were not checked line by line.",
+      "market": "turkiye",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md",
+        "start": 127,
+        "end": 127
+      }
+    },
+    {
+      "id": "tr_decree_183",
+      "label": "Presidential Decree 183 of 28 March 2025",
+      "publisher": "Resmî Gazete",
+      "kind": "Official source",
+      "url": "https://www.resmigazete.gov.tr/eskiler/2025/03/20250328.htm",
+      "supports": "The supplied copy attributes consolidation of public-sector digital transformation and public AI applications to this decree.",
+      "limitation": "The dated official Gazette issue page was found, but its decree text was not exposed by the bounded fetch; the decree number and proposition still require issue-level legal-text confirmation.",
+      "market": "turkiye",
+      "verification": "blocked",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md",
+        "start": 128,
+        "end": 128
+      }
+    },
+    {
+      "id": "tr_central_portal",
+      "label": "e-Devlet Kapısı service statistics",
+      "publisher": "turkiye.gov.tr",
+      "kind": "Official source",
+      "url": "https://www.turkiye.gov.tr/?lang=en_US",
+      "supports": "The official gateway is a single access point for personal information, documents and services from public institutions.",
+      "limitation": "The fetched landing page did not establish the supplied 69.5-million users, 9,396 services and 1,128 institutions as at 31 August 2026.",
+      "market": "turkiye",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md",
+        "start": 129,
+        "end": 129
+      }
+    },
+    {
+      "id": "tr_mernis",
+      "label": "MERNİS and KPS",
+      "publisher": "Nüfus ve Vatandaşlık İşleri Genel Müdürlüğü",
+      "kind": "Official source",
+      "url": "https://www.nvi.gov.tr/mernis",
+      "supports": "The official NVI MERNİS page identifies the population-register system and its institutional context.",
+      "limitation": "The supplied 2000/2002 dates and 20-days-to-55-seconds processing claim were not line-checked on the fetched page.",
+      "market": "turkiye",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md",
+        "start": 130,
+        "end": 130
+      }
+    },
+    {
+      "id": "tr_social",
+      "label": "Integrated Social Assistance System",
+      "publisher": "Aile ve Sosyal Hizmetler Bakanlığı",
+      "kind": "Official source",
+      "url": "https://www.aile.gov.tr/SYGM/PDF/Turkeys_integrated_social_assistance_system.pdf",
+      "supports": "The ministry/World Bank case study describes Turkey's integrated social-assistance system, including data integration and electronic eligibility/payment workflows.",
+      "limitation": "The fetched study describes 22 institutions and 112 web services; it does not establish the supplied 52-query, 16-institution, 30-million-citizen and 340-million-transaction bundle.",
+      "market": "turkiye",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md",
+        "start": 131,
+        "end": 131
+      }
+    },
+    {
+      "id": "tr_egdi",
+      "label": "UN E-Government Survey 2024",
+      "publisher": "UN DESA",
+      "kind": "Official source",
+      "url": "https://publicadministration.un.org/egovkb/en-us/Data/Country-Information/id/176-Trkiye",
+      "supports": "The UN country page reports Türkiye at rank 27 with a 2024 EGDI of 0.8913.",
+      "limitation": "The supplied 76.1-percent citizen-use figure was not established by the checked country page.",
+      "market": "turkiye",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md",
+        "start": 132,
+        "end": 132
+      }
+    },
+    {
+      "id": "tr_mmlu",
+      "label": "TR-MMLU and TurkishMMLU",
+      "publisher": "Academic publications",
+      "kind": "Independent study",
+      "url": "https://arxiv.org/abs/2501.00593",
+      "supports": "TR-MMLU is a natively written Turkish benchmark with 6,200 multiple-choice questions across 62 sections; TurkishMMLU is a separate Turkish benchmark with more than 10,000 questions.",
+      "limitation": "The supplied copy's broader public-sector conclusions require the cited benchmark papers and should not be generalized beyond their test designs.",
+      "market": "turkiye",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md",
+        "start": 133,
+        "end": 133
+      }
+    },
+    {
+      "id": "eu_decade",
+      "label": "Decision (EU) 2022/2481 — Digital Decade Policy Programme",
+      "publisher": "EUR-Lex",
+      "kind": "Official source",
+      "url": "https://eur-lex.europa.eu/eli/dec/2022/2481/oj/eng",
+      "supports": "The Digital Decade 2030 targets for public services, health records and electronic identification.",
+      "limitation": "Targets are policy objectives and do not establish realised delivery.",
+      "market": "europe",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md",
+        "start": 127,
+        "end": 127
+      }
+    },
+    {
+      "id": "eu_sdg",
+      "label": "Regulation (EU) 2018/1724 — Single Digital Gateway",
+      "publisher": "EUR-Lex",
+      "kind": "Official source",
+      "url": "https://eur-lex.europa.eu/eli/reg/2018/1724/oj/eng",
+      "supports": "The Single Digital Gateway regulation and once-only technical-system framework, including the Annex II procedure context.",
+      "limitation": "The regulation is not evidence that every supplied implementation statistic has been realised.",
+      "market": "europe",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md",
+        "start": 128,
+        "end": 128
+      }
+    },
+    {
+      "id": "eu_eudi",
+      "label": "Regulation (EU) 2024/1183 — European Digital Identity",
+      "publisher": "EUR-Lex",
+      "kind": "Official source",
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1183/oj/eng",
+      "supports": "The European Digital Identity Framework and its wallet obligations.",
+      "limitation": "The exact 24 December 2026 deadline should be quoted from the implementing-act entry-into-force calculation, not inferred from a summary.",
+      "market": "europe",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md",
+        "start": 129,
+        "end": 129
+      }
+    },
+    {
+      "id": "eu_omnibus",
+      "label": "Regulation (EU) 2026/1744 — Digital Omnibus on AI",
+      "publisher": "Official Journal, 24 July 2026",
+      "kind": "Official source",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32026R1744",
+      "supports": "The amended AI Act dates, including Article 113's 2 December 2027 Annex III and 2 August 2028 Annex I dates and Article 111's distinct legacy public-authority step to 2 August 2030.",
+      "limitation": "The supplied line 102 compresses several distinct obligations; the consolidated act and relevant amendment provisions must be cited separately.",
+      "market": "europe",
+      "verification": "verified",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md",
+        "start": 130,
+        "end": 130
+      }
+    },
+    {
+      "id": "eu_benchmark",
+      "label": "eGovernment Benchmark 2025 and 2026",
+      "publisher": "Produced for the European Commission",
+      "kind": "Independent study",
+      "url": "https://digital-strategy.ec.europa.eu/en/library/digital-decade-2025-egovernment-benchmark-2025",
+      "supports": "The Commission benchmark methodology covering key public services and life events.",
+      "limitation": "The checked Commission page did not establish the supplied 93-percent Single Digital Gateway figure or its denominator.",
+      "market": "europe",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md",
+        "start": 131,
+        "end": 131
+      }
+    },
+    {
+      "id": "shared_estonia",
+      "label": "Proactive family benefits, Estonia",
+      "publisher": "OECD Observatory of Public Sector Innovation",
+      "kind": "Company-reported",
+      "url": "https://oecd-opsi.org/innovations/proactive-family-benefits",
+      "supports": "A self-submitted case describing proactive family-benefit offers after registered births and reporting that 97 percent of parents had previously applied.",
+      "limitation": "The fetched case study did not establish the supplied 9.8 out of 10, two-hour-to-thirty-second figures; it is a delivering-institution case record.",
+      "market": "europe",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md",
+        "start": 132,
+        "end": 132
+      }
+    },
+    {
+      "id": "eu20",
+      "label": "EU20 multilingual benchmark suite",
+      "publisher": "Academic publication",
+      "kind": "Independent study",
+      "url": "https://aclanthology.org/2026.lrec-1.710",
+      "supports": "Academic work studying quality assurance for the EU20 multilingual benchmark suite.",
+      "limitation": "The checked publication describes a 20-language translated suite; it does not establish the supplied 21-language performance-gap figures.",
+      "market": "europe",
+      "verification": "partial",
+      "checkedDate": "2026-09-12",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md",
+        "start": 133,
+        "end": 133
+      }
+    }
+  ],
+  "applications": [
+    {
+      "market": "uae",
+      "use": "Case intake and triage",
+      "sourceUrls": [
+        "https://insidegovuk.blog.gov.uk/2026/03/16/5-things-we-learned-testing-gov-uk-chat-an-ai-assistant-for-government"
+      ],
+      "evidence": "Shared example in attachment section 5, line 66: GOV.UK Chat, UK Government Digital Service (United Kingdom). The shared application source is linked separately from the exact 27 market source rows.",
+      "institution": "UK Government Digital Service (GDS)",
+      "jurisdiction": "United Kingdom",
+      "attribution": "UK Government Digital Service (GDS) (United Kingdom)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md",
+        "start": 66,
+        "end": 66
+      }
+    },
+    {
+      "market": "uae",
+      "use": "Decision support",
+      "sourceUrls": [
+        "https://ai.gov.uk/blogs/evaluating-consult-an-ai-tool-for-enhanced-public-consultation-analysis"
+      ],
+      "evidence": "Shared example in attachment section 5, line 67: Consult, UK Government AI.gov.uk and Scottish Government evaluation (United Kingdom/Scotland). The shared application source is linked separately from the exact 27 market source rows.",
+      "institution": "UK Government AI.gov.uk and Scottish Government evaluation",
+      "jurisdiction": "United Kingdom and Scotland",
+      "attribution": "UK Government AI.gov.uk and Scottish Government evaluation (United Kingdom and Scotland)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md",
+        "start": 67,
+        "end": 67
+      }
+    },
+    {
+      "market": "uae",
+      "use": "Service operations",
+      "sourceUrls": [
+        "https://oecd-opsi.org/innovations/proactive-family-benefits"
+      ],
+      "evidence": "Shared example in attachment section 5, line 68: proactive family benefits, Estonia. The linked OPSI case supports only the named proactive-benefit example; the separate planning-service document-digitisation example has no located institution/source and remains unresolved.",
+      "institution": "Estonian Social Insurance Board via OECD Observatory of Public Sector Innovation",
+      "jurisdiction": "Estonia",
+      "attribution": "Estonian Social Insurance Board via OECD Observatory of Public Sector Innovation (Estonia)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md",
+        "start": 68,
+        "end": 68
+      }
+    },
+    {
+      "market": "ksa",
+      "use": "Case intake and triage",
+      "sourceUrls": [
+        "https://insidegovuk.blog.gov.uk/2026/03/16/5-things-we-learned-testing-gov-uk-chat-an-ai-assistant-for-government"
+      ],
+      "evidence": "Shared example in attachment section 5, line 66: GOV.UK Chat, UK Government Digital Service (United Kingdom).",
+      "institution": "UK Government Digital Service (GDS)",
+      "jurisdiction": "United Kingdom",
+      "attribution": "UK Government Digital Service (GDS) (United Kingdom)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md",
+        "start": 66,
+        "end": 66
+      }
+    },
+    {
+      "market": "ksa",
+      "use": "Decision support",
+      "sourceUrls": [
+        "https://ai.gov.uk/blogs/evaluating-consult-an-ai-tool-for-enhanced-public-consultation-analysis"
+      ],
+      "evidence": "Shared example in attachment section 5, line 67: Consult, UK Government AI.gov.uk and Scottish Government evaluation (United Kingdom/Scotland).",
+      "institution": "UK Government AI.gov.uk and Scottish Government evaluation",
+      "jurisdiction": "United Kingdom and Scotland",
+      "attribution": "UK Government AI.gov.uk and Scottish Government evaluation (United Kingdom and Scotland)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md",
+        "start": 67,
+        "end": 67
+      }
+    },
+    {
+      "market": "ksa",
+      "use": "Service operations",
+      "sourceUrls": [
+        "https://oecd-opsi.org/innovations/proactive-family-benefits"
+      ],
+      "evidence": "Shared example in attachment section 5, line 68: proactive family benefits, Estonia. The linked OPSI case supports only the named proactive-benefit example; the separate planning-service document-digitisation example has no located institution/source and remains unresolved.",
+      "institution": "Estonian Social Insurance Board via OECD Observatory of Public Sector Innovation",
+      "jurisdiction": "Estonia",
+      "attribution": "Estonian Social Insurance Board via OECD Observatory of Public Sector Innovation (Estonia)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md",
+        "start": 68,
+        "end": 68
+      }
+    },
+    {
+      "market": "turkiye",
+      "use": "Case intake and triage",
+      "sourceUrls": [
+        "https://insidegovuk.blog.gov.uk/2026/03/16/5-things-we-learned-testing-gov-uk-chat-an-ai-assistant-for-government"
+      ],
+      "evidence": "Shared example in attachment section 5, line 66: GOV.UK Chat, UK Government Digital Service (United Kingdom).",
+      "institution": "UK Government Digital Service (GDS)",
+      "jurisdiction": "United Kingdom",
+      "attribution": "UK Government Digital Service (GDS) (United Kingdom)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md",
+        "start": 66,
+        "end": 66
+      }
+    },
+    {
+      "market": "turkiye",
+      "use": "Decision support",
+      "sourceUrls": [
+        "https://ai.gov.uk/blogs/evaluating-consult-an-ai-tool-for-enhanced-public-consultation-analysis"
+      ],
+      "evidence": "Shared example in attachment section 5, line 67: Consult, UK Government AI.gov.uk and Scottish Government evaluation (United Kingdom/Scotland).",
+      "institution": "UK Government AI.gov.uk and Scottish Government evaluation",
+      "jurisdiction": "United Kingdom and Scotland",
+      "attribution": "UK Government AI.gov.uk and Scottish Government evaluation (United Kingdom and Scotland)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md",
+        "start": 67,
+        "end": 67
+      }
+    },
+    {
+      "market": "turkiye",
+      "use": "Service operations",
+      "sourceUrls": [
+        "https://oecd-opsi.org/innovations/proactive-family-benefits"
+      ],
+      "evidence": "Shared example in attachment section 5, line 68: proactive family benefits, Estonia. The linked OPSI case supports only the named proactive-benefit example; the separate planning-service document-digitisation example has no located institution/source and remains unresolved.",
+      "institution": "Estonian Social Insurance Board via OECD Observatory of Public Sector Innovation",
+      "jurisdiction": "Estonia",
+      "attribution": "Estonian Social Insurance Board via OECD Observatory of Public Sector Innovation (Estonia)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md",
+        "start": 68,
+        "end": 68
+      }
+    },
+    {
+      "market": "europe",
+      "use": "Case intake and triage",
+      "sourceUrls": [
+        "https://insidegovuk.blog.gov.uk/2026/03/16/5-things-we-learned-testing-gov-uk-chat-an-ai-assistant-for-government"
+      ],
+      "evidence": "Shared example in attachment section 5, line 66: GOV.UK Chat, UK Government Digital Service (United Kingdom).",
+      "institution": "UK Government Digital Service (GDS)",
+      "jurisdiction": "United Kingdom",
+      "attribution": "UK Government Digital Service (GDS) (United Kingdom)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md",
+        "start": 66,
+        "end": 66
+      }
+    },
+    {
+      "market": "europe",
+      "use": "Decision support",
+      "sourceUrls": [
+        "https://ai.gov.uk/blogs/evaluating-consult-an-ai-tool-for-enhanced-public-consultation-analysis"
+      ],
+      "evidence": "Shared example in attachment section 5, line 67: Consult, UK Government AI.gov.uk and Scottish Government evaluation (United Kingdom/Scotland).",
+      "institution": "UK Government AI.gov.uk and Scottish Government evaluation",
+      "jurisdiction": "United Kingdom and Scotland",
+      "attribution": "UK Government AI.gov.uk and Scottish Government evaluation (United Kingdom and Scotland)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md",
+        "start": 67,
+        "end": 67
+      }
+    },
+    {
+      "market": "europe",
+      "use": "Service operations",
+      "sourceUrls": [
+        "https://oecd-opsi.org/innovations/proactive-family-benefits"
+      ],
+      "evidence": "Shared example in attachment section 5, line 68: proactive family benefits, Estonia. The linked OPSI case supports only the named proactive-benefit example; the separate planning-service document-digitisation example has no located institution/source and remains unresolved.",
+      "institution": "Estonian Social Insurance Board via OECD Observatory of Public Sector Innovation",
+      "jurisdiction": "Estonia",
+      "attribution": "Estonian Social Insurance Board via OECD Observatory of Public Sector Innovation (Estonia)",
+      "lineSpan": {
+        "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md",
+        "start": 68,
+        "end": 68
+      }
+    }
+  ],
+  "sectionMap": {
+    "uae": {
+      "1_hero_industry_perspective": { "lineSpan": { "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md", "start": 6, "end": 16 }, "sourceIds": [] },
+      "2_industry_opportunity": { "lineSpan": { "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md", "start": 18, "end": 26 }, "sourceIds": ["uae_zgb"] },
+      "3_operating_pressures": { "lineSpan": { "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md", "start": 28, "end": 44 }, "sourceIds": [] },
+      "4_value_domains_capabilities": { "lineSpan": { "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md", "start": 46, "end": 60 }, "sourceIds": [] },
+      "5_representative_applications": { "lineSpan": { "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md", "start": 62, "end": 70 }, "sourceIds": ["shared_estonia"] },
+      "6_critical_perspective": { "lineSpan": { "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md", "start": 72, "end": 92 }, "sourceIds": [] },
+      "7_market_context": { "lineSpan": { "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md", "start": 94, "end": 119 }, "sourceIds": ["uae_agentic_government", "uae_dge_2025", "uae_pass_scale", "uae_tamm_metrics", "uae_data_protection"] },
+      "8_supporting_evidence_source_trail": { "lineSpan": { "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md", "start": 121, "end": 134 }, "sourceIds": ["uae_zgb", "uae_agentic_government", "uae_dge_2025", "uae_pass_scale", "uae_tamm_metrics", "uae_data_protection"] },
+      "9_relevant_next_action": { "lineSpan": { "file": "attached_assets/public-sector_UAE_page-copy_1789205079143.md", "start": 136, "end": 160 }, "sourceIds": [] }
+    },
+    "ksa": {
+      "1_hero_industry_perspective": { "lineSpan": { "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md", "start": 6, "end": 16 }, "sourceIds": [] },
+      "2_industry_opportunity": { "lineSpan": { "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md", "start": 18, "end": 26 }, "sourceIds": ["ksa_dga_maturity", "ksa_dga_establishment"] },
+      "3_operating_pressures": { "lineSpan": { "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md", "start": 28, "end": 44 }, "sourceIds": [] },
+      "4_value_domains_capabilities": { "lineSpan": { "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md", "start": 46, "end": 60 }, "sourceIds": [] },
+      "5_representative_applications": { "lineSpan": { "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md", "start": 62, "end": 70 }, "sourceIds": ["shared_estonia"] },
+      "6_critical_perspective": { "lineSpan": { "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md", "start": 72, "end": 92 }, "sourceIds": [] },
+      "7_market_context": { "lineSpan": { "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md", "start": 94, "end": 119 }, "sourceIds": ["ksa_dga_establishment", "ksa_dga_maturity", "ksa_nafath_scale", "ksa_absher_scale", "ksa_egdi", "ksa_pdpl", "ksa_balsam"] },
+      "8_supporting_evidence_source_trail": { "lineSpan": { "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md", "start": 121, "end": 135 }, "sourceIds": ["ksa_dga_establishment", "ksa_dga_maturity", "ksa_nafath_scale", "ksa_absher_scale", "ksa_egdi", "ksa_pdpl", "ksa_balsam"] },
+      "9_relevant_next_action": { "lineSpan": { "file": "attached_assets/public-sector_KSA_page-copy_1789205152431.md", "start": 137, "end": 161 }, "sourceIds": [] }
+    },
+    "turkiye": {
+      "1_hero_industry_perspective": { "lineSpan": { "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md", "start": 6, "end": 16 }, "sourceIds": [] },
+      "2_industry_opportunity": { "lineSpan": { "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md", "start": 18, "end": 26 }, "sourceIds": ["tr_mernis", "tr_social"] },
+      "3_operating_pressures": { "lineSpan": { "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md", "start": 28, "end": 44 }, "sourceIds": [] },
+      "4_value_domains_capabilities": { "lineSpan": { "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md", "start": 46, "end": 60 }, "sourceIds": [] },
+      "5_representative_applications": { "lineSpan": { "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md", "start": 62, "end": 70 }, "sourceIds": ["shared_estonia"] },
+      "6_critical_perspective": { "lineSpan": { "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md", "start": 72, "end": 92 }, "sourceIds": [] },
+      "7_market_context": { "lineSpan": { "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md", "start": 94, "end": 119 }, "sourceIds": ["tr_action_plan", "tr_central_portal", "tr_mernis", "tr_social", "tr_egdi", "tr_mmlu"] },
+      "8_supporting_evidence_source_trail": { "lineSpan": { "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md", "start": 121, "end": 135 }, "sourceIds": ["tr_action_plan", "tr_decree_183", "tr_central_portal", "tr_mernis", "tr_social", "tr_egdi", "tr_mmlu"] },
+      "9_relevant_next_action": { "lineSpan": { "file": "attached_assets/public-sector_Turkiye_page-copy_1789205152432.md", "start": 137, "end": 161 }, "sourceIds": [] }
+    },
+    "europe": {
+      "1_hero_industry_perspective": { "lineSpan": { "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md", "start": 6, "end": 16 }, "sourceIds": [] },
+      "2_industry_opportunity": { "lineSpan": { "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md", "start": 18, "end": 26 }, "sourceIds": ["eu_sdg"] },
+      "3_operating_pressures": { "lineSpan": { "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md", "start": 28, "end": 44 }, "sourceIds": [] },
+      "4_value_domains_capabilities": { "lineSpan": { "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md", "start": 46, "end": 60 }, "sourceIds": [] },
+      "5_representative_applications": { "lineSpan": { "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md", "start": 62, "end": 70 }, "sourceIds": ["shared_estonia"] },
+      "6_critical_perspective": { "lineSpan": { "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md", "start": 72, "end": 92 }, "sourceIds": [] },
+      "7_market_context": { "lineSpan": { "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md", "start": 94, "end": 119 }, "sourceIds": ["eu_decade", "eu_eudi", "eu_omnibus", "eu_sdg", "eu_benchmark", "shared_estonia", "eu20"] },
+      "8_supporting_evidence_source_trail": { "lineSpan": { "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md", "start": 121, "end": 135 }, "sourceIds": ["eu_decade", "eu_sdg", "eu_eudi", "eu_omnibus", "eu_benchmark", "shared_estonia", "eu20"] },
+      "9_relevant_next_action": { "lineSpan": { "file": "attached_assets/public-sector_EU_page-copy_1789205152431.md", "start": 137, "end": 161 }, "sourceIds": [] }
+    }
+  },
+  "unresolved": [
+    "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+    "UAE: exact Phase 1 Zero Government Bureaucracy results, UAE PASS connected-service/entity totals and TAMM 1,150-service figure require source-level reconciliation.",
+    "UAE: Federal Decree-Law 45 government-data exclusion and executive-regulation status require the decree-law/current regulations.",
+    "Saudi Arabia: Nafath 3bn/23.5m/530-plus bundle and Absher 460-service/28m-identity figures need dated primary datasets.",
+    "Saudi Arabia: BALSAM supplied 22-model/12,786-question/0.88 figures do not match the checked benchmark paper.",
+    "Türkiye: the Presidential Decree 183 row now links the dated 28 March 2025 Resmî Gazete issue page, but the page text was not exposed by the bounded fetch; decree-number and proposition confirmation remain an explicit legal-text blocker.",
+    "Türkiye: e-Devlet, MERNİS/KPS and BSYS supplied metric bundles need their named official reports; the checked BSYS source is a 2017 case study with different counts.",
+    "EU: the exact 24 December 2026 EUDI deadline, 93-percent Single Digital Gateway statistic and 21-language EU20 performance figures need their exact table/article sources.",
+    "EU: Regulation (EU) 2026/1744 dates must not be compressed into one date; cite the separate Article 111 and Article 113 obligations.",
+    "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows."
+  ]
+}

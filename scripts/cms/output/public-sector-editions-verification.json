@@ -1,0 +1,216 @@
+{
+  "task": 319,
+  "mode": "read-only-verification",
+  "markets": [
+    {
+      "market": "uae",
+      "editionId": "5c83c436-70fe-4a3b-8d9c-8ff0c0f9b7cc",
+      "mode": "shared",
+      "fallbackMode": "none",
+      "status": "pending",
+      "publicResponse": {
+        "status": "pending",
+        "revisionId": "a7f7dc79-d61e-4400-a6ea-3eaca39c9cea",
+        "revisionNumber": 5,
+        "digest": "a6c53b56ad169dbe40f5e9e2dbdffebfe18ffd78d6ee5c517e1b4aea427e2154",
+        "exactMarketPayload": {
+          "valid": false,
+          "reason": "payload is not an exact market-isolated Public Sector edition"
+        }
+      },
+      "draftCandidate": {
+        "status": "draft",
+        "revisionId": "497eaed7-e9b7-47f2-b4db-d650930ed558",
+        "digest": "fd5f35402d9166c91b5d0e4d5be818d11559677da297d74a5023eb2cf5ad240b",
+        "receiptMatchesDraft": true,
+        "exactMarketPayload": {
+          "valid": true,
+          "reason": null
+        },
+        "reviewBlockers": [
+          "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+          "UAE: exact Phase 1 Zero Government Bureaucracy results, UAE PASS connected-service/entity totals and TAMM 1,150-service figure require source-level reconciliation.",
+          "UAE: Federal Decree-Law 45 government-data exclusion and executive-regulation status require the decree-law/current regulations.",
+          "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+          "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+        ]
+      },
+      "publicationUnchanged": true,
+      "publicationVerification": {
+        "stagedBeforeRevisionId": "a7f7dc79-d61e-4400-a6ea-3eaca39c9cea",
+        "currentPublishedRevisionId": "a7f7dc79-d61e-4400-a6ea-3eaca39c9cea",
+        "pointerMutated": false,
+        "evidence": "market-scoped staging audit metadata"
+      },
+      "httpVerification": {
+        "status": "mismatch",
+        "httpStatus": 200,
+        "url": "http://127.0.0.1:80/api/public/content/uae/en/industry/public-sector",
+        "revision": 5,
+        "exactMarketPayload": false,
+        "dbPayloadMatch": false,
+        "beforeComparison": {
+          "checked": true,
+          "unchanged": true,
+          "baselineRevision": 5,
+          "currentRevision": 5
+        }
+      },
+      "availability": "read-only check: no availability rows or decisions were changed",
+      "availabilitySnapshot": []
+    },
+    {
+      "market": "ksa",
+      "editionId": "e0e0ec71-b2da-4145-9f43-110b9a59268c",
+      "mode": "custom",
+      "fallbackMode": "none",
+      "status": "pending",
+      "publicResponse": {
+        "status": "pending",
+        "revisionId": null,
+        "revisionNumber": null,
+        "digest": null,
+        "exactMarketPayload": {
+          "valid": false,
+          "reason": "no published revision pointer"
+        }
+      },
+      "draftCandidate": {
+        "status": "draft",
+        "revisionId": "e3cd1a7b-7c6f-42ea-ab73-78f1cd59f187",
+        "digest": "7bdea79d71c676c44ad38ed9e59a10a6158e0aca0bc942d6994e7e59c22275a2",
+        "receiptMatchesDraft": true,
+        "exactMarketPayload": {
+          "valid": true,
+          "reason": null
+        },
+        "reviewBlockers": [
+          "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+          "Saudi Arabia: Nafath 3bn/23.5m/530-plus bundle and Absher 460-service/28m-identity figures need dated primary datasets.",
+          "Saudi Arabia: BALSAM supplied 22-model/12,786-question/0.88 figures do not match the checked benchmark paper.",
+          "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+          "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+        ]
+      },
+      "publicationUnchanged": true,
+      "publicationVerification": {
+        "stagedBeforeRevisionId": null,
+        "currentPublishedRevisionId": null,
+        "pointerMutated": false,
+        "evidence": "market-scoped staging audit metadata"
+      },
+      "httpVerification": {
+        "status": "unavailable",
+        "httpStatus": 404,
+        "url": "http://127.0.0.1:80/api/public/content/ksa/en/industry/public-sector",
+        "exactMarketPayload": false
+      },
+      "availability": "read-only check: no availability rows or decisions were changed",
+      "availabilitySnapshot": []
+    },
+    {
+      "market": "turkiye",
+      "editionId": "94918f68-146c-44fd-9e80-9b80cc191ea5",
+      "mode": "custom",
+      "fallbackMode": "none",
+      "status": "pending",
+      "publicResponse": {
+        "status": "pending",
+        "revisionId": null,
+        "revisionNumber": null,
+        "digest": null,
+        "exactMarketPayload": {
+          "valid": false,
+          "reason": "no published revision pointer"
+        }
+      },
+      "draftCandidate": {
+        "status": "draft",
+        "revisionId": "e3bb3286-dfc6-4520-a522-a2bdb894e750",
+        "digest": "d455ed55e887706e170f7e194b33459f459e29f39f3c15b2d3fe621f48ae1aa9",
+        "receiptMatchesDraft": true,
+        "exactMarketPayload": {
+          "valid": true,
+          "reason": null
+        },
+        "reviewBlockers": [
+          "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+          "Türkiye: the Presidential Decree 183 row now links the dated 28 March 2025 Resmî Gazete issue page, but the page text was not exposed by the bounded fetch; decree-number and proposition confirmation remain an explicit legal-text blocker.",
+          "Türkiye: e-Devlet, MERNİS/KPS and BSYS supplied metric bundles need their named official reports; the checked BSYS source is a 2017 case study with different counts.",
+          "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+          "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+        ]
+      },
+      "publicationUnchanged": true,
+      "publicationVerification": {
+        "stagedBeforeRevisionId": null,
+        "currentPublishedRevisionId": null,
+        "pointerMutated": false,
+        "evidence": "market-scoped staging audit metadata"
+      },
+      "httpVerification": {
+        "status": "unavailable",
+        "httpStatus": 404,
+        "url": "http://127.0.0.1:80/api/public/content/turkiye/en/industry/public-sector",
+        "exactMarketPayload": false
+      },
+      "availability": "read-only check: no availability rows or decisions were changed",
+      "availabilitySnapshot": []
+    },
+    {
+      "market": "europe",
+      "editionId": "8216db13-1ae9-4859-9268-4e986d87b115",
+      "mode": "custom",
+      "fallbackMode": "none",
+      "status": "pending",
+      "publicResponse": {
+        "status": "pending",
+        "revisionId": null,
+        "revisionNumber": null,
+        "digest": null,
+        "exactMarketPayload": {
+          "valid": false,
+          "reason": "no published revision pointer"
+        }
+      },
+      "draftCandidate": {
+        "status": "draft",
+        "revisionId": "c08f64e3-5ac5-43de-b637-e9b581c3c04a",
+        "digest": "eca4171b72370d8ac1c6fac764991c4e509afdd140ab1e48a583ae2f28bc6799",
+        "receiptMatchesDraft": true,
+        "exactMarketPayload": {
+          "valid": true,
+          "reason": null
+        },
+        "reviewBlockers": [
+          "Shared application mappings: all 12 rows now link bounded GOV.UK Chat, Consult or Estonia OPSI URLs and carry explicit institutions and jurisdictions. The separate planning-service document-digitisation example remains unresolved because its institution and source were not located.",
+          "EU: the exact 24 December 2026 EUDI deadline, 93-percent Single Digital Gateway statistic and 21-language EU20 performance figures need their exact table/article sources.",
+          "EU: Regulation (EU) 2026/1744 dates must not be compressed into one date; cite the separate Article 111 and Article 113 obligations.",
+          "The shared critical-perspective lines 78-80 and line 92 contain NYC/TIGTA/containment assertions, but the supplied section-8 tables do not include those source rows; preserve as editorial review blockers rather than inventing source rows.",
+          "Shared public-sector legal claim (section 3, line 32): the universal suspensive-appeal assertion is not legally verified; narrow the language or supply authoritative legal support before publication."
+        ]
+      },
+      "publicationUnchanged": true,
+      "publicationVerification": {
+        "stagedBeforeRevisionId": null,
+        "currentPublishedRevisionId": null,
+        "pointerMutated": false,
+        "evidence": "market-scoped staging audit metadata"
+      },
+      "httpVerification": {
+        "status": "unavailable",
+        "httpStatus": 404,
+        "url": "http://127.0.0.1:80/api/public/content/europe/en/industry/public-sector",
+        "exactMarketPayload": false
+      },
+      "availability": "read-only check: no availability rows or decisions were changed",
+      "availabilitySnapshot": []
+    }
+  ],
+  "summary": {
+    "sourceMarketsChecked": 4,
+    "pending": 4,
+    "publicationClaim": "At least one exact edition remains pending normal review/publication."
+  },
+  "action": "No preview session, approval, publication pointer, revision, media reference, or availability decision was mutated."
+}
