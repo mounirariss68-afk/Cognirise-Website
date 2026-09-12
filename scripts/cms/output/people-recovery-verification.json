@@ -1,0 +1,212 @@
+{
+  "ok": true,
+  "report": {
+    "schemaVersion": 1,
+    "operation": "cms-people-history-recovery-v1:person:8a0e78e95b87db8e0acd",
+    "mode": "read-only",
+    "target": {
+      "externalId": "person:8a0e78e95b87db8e0acd",
+      "slug": "mounir-ariss",
+      "market": "uae",
+      "locale": "en"
+    },
+    "source": {
+      "commit": "2ea600a573849c954374ebcd3b0aee3df72023f8",
+      "file": "artifacts/cognirise-website/src/pages/AboutPeople.tsx",
+      "lines": "14-35"
+    },
+    "authority": {
+      "fields": [
+        "content.biography",
+        "content.contribution"
+      ],
+      "historicalDigest": "47559b6c8e9b94c3e1be08300452759f4e3923dbc0e16620a9a236c4bfc66a60",
+      "knownCompiledValuesDigest": "2c7ea3853b72a719081cb243dced47e861a413ae4ae15f5683c3871e5b00fe5c"
+    },
+    "state": {
+      "documentId": "09a9d6bf-8264-4000-9900-1a2d17639efe",
+      "editionId": "6345efd8-8840-497e-b0ff-6800bf2241f0",
+      "latestRevisionId": "1ee1cf3f-4dfb-4c77-970b-bcc26136cd24",
+      "latestRevisionNumber": 3,
+      "latestWorkflowState": "draft",
+      "publicationState": "draft",
+      "publishedRevisionId": null,
+      "availabilityDecision": "show"
+    },
+    "decision": "already-current",
+    "changedFields": [],
+    "conflicts": [
+      {
+        "field": "content.biography",
+        "actual": "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage — now focused on one conviction: the next frontier isn't AI adoption, it's becoming an agentic enterprise.",
+        "expected": "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage. A career built on framing the decision architecture that makes enterprise-scale change possible, now focused entirely on the agentic enterprise.",
+        "reason": "Existing biography copy is non-empty and is preserved as newer editorial content."
+      }
+    ],
+    "validationErrors": [],
+    "pinnedMediaReferences": 0,
+    "receipt": {
+      "recovery": "cms.people.history-recovery.reconciled"
+    },
+    "historicalRoster": {
+      "source": {
+        "commit": "2ea600a573849c954374ebcd3b0aee3df72023f8",
+        "file": "artifacts/cognirise-website/src/pages/AboutPeople.tsx",
+        "lines": "14-35"
+      },
+      "historical": [
+        {
+          "slug": "mounir-ariss",
+          "name": "Mounir Ariss",
+          "currentDocumentId": "09a9d6bf-8264-4000-9900-1a2d17639efe",
+          "currentEditionId": "6345efd8-8840-497e-b0ff-6800bf2241f0",
+          "currentRevisionId": "1ee1cf3f-4dfb-4c77-970b-bcc26136cd24",
+          "currentRevisionNumber": 3,
+          "currentWorkflowState": "draft",
+          "publicationState": "draft",
+          "availabilityDecision": "show",
+          "visibility": "draft-show",
+          "contributionStatus": "exact",
+          "biographyStatus": "newer",
+          "newerFields": [
+            "content.biography"
+          ],
+          "safeRecoveryFields": [],
+          "recoveryDecision": "recovered-mounir"
+        },
+        {
+          "slug": "bulent-egrilmez",
+          "name": "Bülent Eğrilmez",
+          "currentDocumentId": "d82c53d7-4503-4fc6-9cce-cbb07ee6cf64",
+          "currentEditionId": "70d8334f-9573-4585-bf32-fdf5693f8132",
+          "currentRevisionId": "810860dc-becb-49fc-8c20-dc5b3cce962a",
+          "currentRevisionNumber": 1,
+          "currentWorkflowState": "draft",
+          "publicationState": "draft",
+          "availabilityDecision": "show",
+          "visibility": "draft-show",
+          "contributionStatus": "newer",
+          "biographyStatus": "newer",
+          "newerFields": [
+            "content.contribution",
+            "content.biography"
+          ],
+          "safeRecoveryFields": [],
+          "recoveryDecision": "preserved-newer"
+        },
+        {
+          "slug": "hisham-nofal-phd",
+          "name": "Hisham Nofal, PhD",
+          "currentDocumentId": "d71460fa-b612-477f-9a95-5c44fc93f7d0",
+          "currentEditionId": "83dccfb2-1ffa-49a3-b8b2-d8a66d116ef1",
+          "currentRevisionId": "2d0bb696-5b73-437f-b8b8-1817dc7532d1",
+          "currentRevisionNumber": 1,
+          "currentWorkflowState": "draft",
+          "publicationState": "draft",
+          "availabilityDecision": "show",
+          "visibility": "draft-show",
+          "contributionStatus": "newer",
+          "biographyStatus": "newer",
+          "newerFields": [
+            "content.contribution",
+            "content.biography"
+          ],
+          "safeRecoveryFields": [],
+          "recoveryDecision": "preserved-newer"
+        },
+        {
+          "slug": "alexis-lecanuet",
+          "name": "Alexis Lecanuet",
+          "currentDocumentId": "7c3289a9-9cae-45b0-a554-43f4e0abbe76",
+          "currentEditionId": "4cc8806a-484e-439c-989a-9a64d45d4d7d",
+          "currentRevisionId": "a925c13c-1482-4706-b100-9c27f34fc9e3",
+          "currentRevisionNumber": 2,
+          "currentWorkflowState": "draft",
+          "publicationState": "draft",
+          "availabilityDecision": "show",
+          "visibility": "draft-show",
+          "contributionStatus": "exact",
+          "biographyStatus": "newer",
+          "newerFields": [
+            "content.biography"
+          ],
+          "safeRecoveryFields": [],
+          "recoveryDecision": "preserved-newer"
+        },
+        {
+          "slug": "rami-aslan",
+          "name": "Rami Aslan",
+          "currentDocumentId": "b0d636ed-0a9c-4a05-bf89-b27af0d0948a",
+          "currentEditionId": "672e008d-577a-475b-9da5-6aef0453cb03",
+          "currentRevisionId": "e0f7f0c7-7012-409d-94dd-9ef7f2e8b25e",
+          "currentRevisionNumber": 2,
+          "currentWorkflowState": "draft",
+          "publicationState": "draft",
+          "availabilityDecision": "show",
+          "visibility": "draft-show",
+          "contributionStatus": "exact",
+          "biographyStatus": "newer",
+          "newerFields": [
+            "content.biography"
+          ],
+          "safeRecoveryFields": [],
+          "recoveryDecision": "preserved-newer"
+        },
+        {
+          "slug": "fadi-mattar",
+          "name": "Fadi Mattar",
+          "currentDocumentId": "edb026f4-4f45-4424-8812-dae49e2895f4",
+          "currentEditionId": "0f8906dd-cafb-4e9e-b163-a686c5be84a5",
+          "currentRevisionId": "0dc4ca2d-652e-45b4-97fe-d0a0420a47ca",
+          "currentRevisionNumber": 2,
+          "currentWorkflowState": "draft",
+          "publicationState": "draft",
+          "availabilityDecision": "show",
+          "visibility": "draft-show",
+          "contributionStatus": "newer",
+          "biographyStatus": "newer",
+          "newerFields": [
+            "content.contribution",
+            "content.biography"
+          ],
+          "safeRecoveryFields": [],
+          "recoveryDecision": "preserved-newer"
+        }
+      ],
+      "currentOnly": [
+        {
+          "slug": "gokhan-guney",
+          "name": "Gökhan Güney",
+          "documentId": "8777d2da-4211-4f29-9c04-859f5e6298cf",
+          "editionId": "b0c7d4af-a4dc-436c-a1f9-8b3f491ff9eb",
+          "publicationState": "draft",
+          "availabilityDecision": "off",
+          "visibility": "draft-hidden",
+          "status": "hidden"
+        },
+        {
+          "slug": "omer-barbaros-yis",
+          "name": "Omer Barbaros Yis",
+          "documentId": "a0a36edb-cf0b-4390-beee-fa10ceb189aa",
+          "editionId": "67a2d6b7-0ba0-4687-a609-9ab264822e84",
+          "publicationState": "draft",
+          "availabilityDecision": "off",
+          "visibility": "draft-hidden",
+          "status": "hidden"
+        }
+      ],
+      "summary": {
+        "historicalCount": 6,
+        "matchedCount": 6,
+        "missingProfileCount": 0,
+        "missingFieldCount": 0,
+        "exactContributionCount": 3,
+        "newerContributionCount": 3,
+        "currentOnlyCount": 2,
+        "hiddenCurrentOnlyCount": 2,
+        "safeRecoveryCount": 0
+      }
+    }
+  },
+  "errors": []
+}
