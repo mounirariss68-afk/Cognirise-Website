@@ -22,6 +22,8 @@ export type ApiErrorDetails = { [key: string]: unknown };
 export interface ApiError {
   error: string;
   code?: string;
+  /** The state transition committed even though the confirmation response failed; reload before retrying. */
+  committed?: boolean;
   details?: ApiErrorDetails;
 }
 
@@ -66,6 +68,8 @@ export interface NavigationSettings {
   isConfigured?: boolean;
   /** @nullable */
   updatedAt: string | null;
+  /** @minimum 1 */
+  version: number;
 }
 
 export interface UpdateNavigationSettings {
@@ -73,11 +77,30 @@ export interface UpdateNavigationSettings {
   pages: PageAvailability[];
   market: string;
   locale: string;
+  /** @minimum 1 */
+  version: number;
 }
 
 export interface NavigationEditionSelector {
   market: string;
   locale: string;
+  /** @minimum 1 */
+  version?: number;
+}
+
+export type PublishNavigationSettingsConfirmation = typeof PublishNavigationSettingsConfirmation[keyof typeof PublishNavigationSettingsConfirmation];
+
+
+export const PublishNavigationSettingsConfirmation = {
+  PUBLISH: 'PUBLISH',
+} as const;
+
+export interface PublishNavigationSettings {
+  market: string;
+  locale: string;
+  /** @minimum 1 */
+  version: number;
+  confirmation: PublishNavigationSettingsConfirmation;
 }
 
 export interface HealthStatus {
@@ -1456,6 +1479,11 @@ export interface PublicationInput {
   revisionId: string;
   /** @maxLength 1000 */
   note?: string;
+  /**
+     * The shared destination draft version observed when the publication confirmation opened. Required when publishing a shared source.
+     * @minimum 0
+     */
+  availabilityVersion?: number;
 }
 
 export interface RollbackInput {

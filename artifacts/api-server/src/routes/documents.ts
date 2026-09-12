@@ -63,13 +63,14 @@ function canAccessMarket(auth: AuthContext, market: string): boolean {
   return auth.user.role === "administrator" || auth.user.marketCodes.includes(market);
 }
 
-export function previewMediaIds(payload: unknown): string[] {
+export function previewMediaIds(payload: unknown, documentKind?: CmsDocumentKind): string[] {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return [];
   const snapshot = payload as Record<string, unknown>;
   const content = snapshot.content && typeof snapshot.content === "object" && !Array.isArray(snapshot.content)
     ? snapshot.content as Record<string, unknown>
     : {};
-  const kind = typeof snapshot.kind === "string" ? snapshot.kind : "landing-page";
+  const kind = documentKind
+    ?? (typeof snapshot.kind === "string" ? snapshot.kind : "landing-page");
   const candidates = collectCmsMediaReferences(
     kind as CmsDocumentKind,
     content,
@@ -150,17 +151,24 @@ async function syncMediaReferences(
   revisionId: string,
   snapshot: Record<string, any>,
   sourceRevisionId?: string,
+  documentKind?: CmsDocumentKind,
 ) {
   const references = collectCmsMediaReferences(
-    snapshot.kind as CmsDocumentKind,
+    documentKind ?? snapshot.kind as CmsDocumentKind,
     snapshot.content,
     Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds : [],
   );
-  const exactVersions = new Map(references
-    .filter((reference): reference is typeof reference & { mediaVersionId: string } => Boolean(reference.mediaVersionId))
-    .map((reference) => [reference.mediaId, reference.mediaVersionId]));
-  for (const assetId of Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds : []) {
-    const exactVersionId = exactVersions.get(String(assetId)) ?? null;
+  // A governed reference can live inside content (for example heroMedia or
+  // educationPov imagery), not only in the legacy top-level mediaIds list.
+  // Keep one pin per asset, preferring an explicit immutable version if the
+  // same asset is present in both representations.
+  const media = new Map<string, string | null>();
+  for (const reference of references) {
+    const assetId = String(reference.mediaId);
+    const exactVersionId = reference.mediaVersionId ? String(reference.mediaVersionId) : null;
+    if (!media.has(assetId) || exactVersionId) media.set(assetId, exactVersionId);
+  }
+  for (const [assetId, exactVersionId] of media) {
     await client.query(
       `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
        SELECT asset.id,COALESCE(requested.id,prior.media_version_id,latest.id),$3,$4
@@ -803,6 +811,7 @@ router.post(
         String(revision.rows[0].id),
         source.rows[0].payload,
         String(source.rows[0].id),
+        source.rows[0].kind as CmsDocumentKind,
       );
       await client.query("COMMIT");
       await audit(auth, "document.edition_override_created", "document", documentId, {
@@ -910,7 +919,14 @@ router.post(
          VALUES ($1,1,$2,$3,'draft',$4,'Initial shared draft') RETURNING id`,
         [edition.rows[0].id, snapshot, digest(snapshot), auth.user.id],
       );
-      await syncMediaReferences(client, String(root.rows[0].id), String(revision.rows[0].id), snapshot);
+      await syncMediaReferences(
+        client,
+        String(root.rows[0].id),
+        String(revision.rows[0].id),
+        snapshot,
+        undefined,
+        parsed.data.kind,
+      );
       await client.query(
         `INSERT INTO cms_document_market_availability
            (document_id,market_edition_id,locale,published_decision,draft_decision,updated_by_user_id)
@@ -1410,9 +1426,11 @@ router.post(
         return;
       }
       const source = await client.query(
-        `SELECT e.market,e.locale,COALESCE(e.editorial_market,e.market) editorial_market,r.id,r.payload
+        `SELECT e.market,e.locale,COALESCE(e.editorial_market,e.market) editorial_market,
+                d.kind,r.id,r.payload
            FROM cms_revisions r
            JOIN cms_market_editions e ON e.id=r.edition_id
+           JOIN cms_documents d ON d.id=e.document_id
           WHERE e.document_id=$1 AND r.id=$2
           FOR UPDATE`,
         [documentId, parsed.data.sourceRevisionId],
@@ -1449,6 +1467,7 @@ router.post(
         String(sharedRevision.rows[0].id),
         source.rows[0].payload,
         parsed.data.sourceRevisionId,
+        source.rows[0].kind as CmsDocumentKind,
       );
       await client.query(
         `UPDATE cms_document_availability_states
@@ -1695,7 +1714,7 @@ router.post(
     const auth = res.locals.auth as AuthContext;
     const version = req.body?.version;
     if (!Number.isInteger(version) || version < 0) {
-      res.status(400).json({ error: "A reviewed destination selection version is required." });
+      res.status(400).json({ error: "A saved destination selection version is required." });
       return;
     }
     const client = await pool.connect();
@@ -1708,7 +1727,7 @@ router.post(
         return;
       }
       const state = await client.query(
-        `SELECT reviewed_version,reviewed_selections,shared_source_revision_id,reviewed_source_revision_id
+        `SELECT draft_version,reviewed_version,reviewed_selections,shared_source_revision_id,reviewed_source_revision_id
            FROM cms_document_availability_states WHERE document_id=$1 FOR UPDATE`,
         [documentId],
       );
@@ -1717,16 +1736,21 @@ router.post(
         [marketEditionId],
       );
       const reviewed = state.rowCount ? availabilitySelections(state.rows[0].reviewed_selections) : [];
-      if (!state.rowCount || Number(state.rows[0].reviewed_version) !== version
-        || state.rows[0].shared_source_revision_id
-        || state.rows[0].reviewed_source_revision_id !== state.rows[0].shared_source_revision_id
-        || !reviewed.some((selection) =>
+      const directSavedDecision = state.rowCount
+        && Number(state.rows[0].draft_version) === version
+        && !state.rows[0].shared_source_revision_id;
+      const reviewedDecision = state.rowCount
+        && Number(state.rows[0].reviewed_version) === version
+        && !state.rows[0].shared_source_revision_id
+        && state.rows[0].reviewed_source_revision_id === state.rows[0].shared_source_revision_id
+        && reviewed.some((selection) =>
           selection.marketEditionId === marketEditionId
             && selection.locale === targetMarket.rows[0]?.default_locale,
-        )) {
+        );
+      if (!directSavedDecision && !reviewedDecision) {
         await client.query("ROLLBACK");
         res.status(409).json({
-          error: "This person decision is not part of the current reviewed destination selection.",
+          error: "This person decision is not part of the current saved destination selection.",
         });
         return;
       }
@@ -1914,13 +1938,14 @@ router.patch(
           FROM cms_revisions WHERE edition_id=$1 RETURNING id`,
         [edition.rows[0].id, snapshot, digest(snapshot), auth.user.id],
       );
-       await syncMediaReferences(
-         client,
-         id,
-         String(revision.rows[0].id),
-         snapshot,
-         String(edition.rows[0].revision_id),
-       );
+      await syncMediaReferences(
+        client,
+        id,
+        String(revision.rows[0].id),
+        snapshot,
+        String(edition.rows[0].revision_id),
+        current.kind as CmsDocumentKind,
+      );
       if (edition.rows[0].content_mode === "shared") {
         await ensureAvailabilityState(client, id);
         await client.query(
@@ -2082,92 +2107,142 @@ router.post(
       return;
     }
     const id = String(req.params.documentId);
-    const candidate = await pool.query(
-      `SELECT r.id,r.payload,r.workflow_state,d.kind,d.canonical_slug,e.market,e.locale FROM cms_revisions r
-       JOIN cms_market_editions e ON e.id=r.edition_id
-       JOIN cms_documents d ON d.id=e.document_id
-       WHERE e.document_id=$1 AND r.id=$2
-         AND r.revision_number=(SELECT max(x.revision_number) FROM cms_revisions x
-                                WHERE x.edition_id=r.edition_id)`,
-      [id, parsed.data.revisionId],
-    );
-    if (!candidate.rowCount) {
-      res.status(409).json({ error: "Document has no draft revision." });
-      return;
-    }
     const auth = res.locals.auth as AuthContext;
-    if (!await canAccessEditionTarget(
-      pool,
-      auth,
-      id,
-      String(candidate.rows[0].market),
-      String(candidate.rows[0].locale),
-    )) {
-      res.status(403).json({ error: "You are not assigned to this market." });
-      return;
+    const client = await pool.connect();
+    let candidate: any;
+    try {
+      await client.query("BEGIN");
+      // Lock the exact edition before reading its latest revision. A single
+      // statement which waits inside a lateral latest-revision query can keep
+      // its pre-wait snapshot under READ COMMITTED and submit a stale draft.
+      const lockedEdition = await client.query(
+        `SELECT e.id
+           FROM cms_revisions r
+           JOIN cms_market_editions e ON e.id=r.edition_id
+          WHERE r.id=$2 AND e.document_id=$1
+          FOR UPDATE OF e`,
+        [id, parsed.data.revisionId],
+      );
+      if (!lockedEdition.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "The selected revision does not exist for this document." });
+        return;
+      }
+      candidate = await client.query(
+        `SELECT r.id,r.payload,r.workflow_state,d.kind,d.canonical_slug,e.market,e.locale FROM cms_revisions r
+         JOIN cms_market_editions e ON e.id=r.edition_id
+         JOIN cms_documents d ON d.id=e.document_id
+         WHERE e.document_id=$1 AND r.id=$2
+           AND r.revision_number=(SELECT max(x.revision_number) FROM cms_revisions x
+                                  WHERE x.edition_id=r.edition_id)`,
+        [id, parsed.data.revisionId],
+      );
+      if (!candidate.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "The selected revision is stale. Reload the latest draft before submitting." });
+        return;
+      }
+      if (!await canAccessEditionTarget(
+        client,
+        auth,
+        id,
+        String(candidate.rows[0].market),
+        String(candidate.rows[0].locale),
+      )) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this market." });
+        return;
+      }
+      if (candidate.rows[0].workflow_state !== "draft" && candidate.rows[0].workflow_state !== "rejected") {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "Only the latest draft or rejected revision can be submitted." });
+        return;
+      }
+      if (!isCmsConfigurationIdentityValid(
+        candidate.rows[0].kind,
+        candidate.rows[0].canonical_slug,
+        candidate.rows[0].payload,
+      )) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "Site configuration does not match its canonical singleton identity." });
+        return;
+      }
+      const validation = validateSnapshot(candidate.rows[0].kind, candidate.rows[0].payload, "publish");
+      if (!validation.success) {
+        await client.query("ROLLBACK");
+        res.status(422).json({ error: "Review readiness validation failed.", details: validation.errors });
+        return;
+      }
+      // An asset may have been selected while awaiting its own approval. Resolve
+      // the declared exact version now; legacy ids are pinned once for migration.
+      await syncMediaReferences(
+        client,
+        id,
+        String(candidate.rows[0].id),
+        validation.data as Record<string, any>,
+        undefined,
+        candidate.rows[0].kind as CmsDocumentKind,
+      );
+      const mediaErrors = await revisionMediaGovernanceErrors(
+        client,
+        id,
+        String(candidate.rows[0].id),
+        candidate.rows[0].kind as CmsDocumentKind,
+        candidate.rows[0].payload,
+      );
+      if (mediaErrors.length) {
+        await client.query("ROLLBACK");
+        res.status(422).json({ error: "Review references unavailable or unapproved media.", details: mediaErrors });
+        return;
+      }
+      const submitted = await client.query(
+        `WITH submitted AS (
+           UPDATE cms_revisions SET workflow_state='in-review'
+            WHERE id=$1 AND workflow_state IN ('draft','rejected')
+            RETURNING edition_id
+         )
+         UPDATE cms_market_editions e
+            SET publication_state=CASE
+                  WHEN e.publication_state='published' THEN 'published'
+                  ELSE 'in-review'
+                END,
+                updated_at=now()
+          FROM submitted WHERE e.id=submitted.edition_id
+          RETURNING e.id`,
+        [parsed.data.revisionId],
+      );
+      if (!submitted.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "The selected revision is no longer a draft." });
+        return;
+      }
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
     }
-    if (candidate.rows[0].workflow_state !== "draft" && candidate.rows[0].workflow_state !== "rejected") {
-      res.status(409).json({ error: "Only the latest draft or rejected revision can be submitted." });
-      return;
+    try {
+      await audit(auth, "document.submitted", "document", id, {
+        ...parsed.data,
+        market: candidate.rows[0].market,
+        locale: candidate.rows[0].locale,
+      });
+      res.json(await getDocument(
+        id,
+        auth,
+        candidate.rows[0].market,
+        candidate.rows[0].locale,
+      ));
+    } catch (error) {
+      req.log.error({ err: error, documentId: id, revisionId: parsed.data.revisionId }, "Document submitted but response hydration failed");
+      res.status(500).json({
+        code: "DOCUMENT_SUBMIT_COMMITTED",
+        committed: true,
+        error: "The document was submitted, but its confirmation could not be loaded. Reload this edition before trying again.",
+      });
     }
-    if (!isCmsConfigurationIdentityValid(
-      candidate.rows[0].kind,
-      candidate.rows[0].canonical_slug,
-      candidate.rows[0].payload,
-    )) {
-      res.status(409).json({ error: "Site configuration does not match its canonical singleton identity." });
-      return;
-    }
-    const validation = validateSnapshot(candidate.rows[0].kind, candidate.rows[0].payload, "publish");
-    if (!validation.success) {
-      res.status(422).json({ error: "Review readiness validation failed.", details: validation.errors });
-      return;
-    }
-    // An asset may have been selected while awaiting its own approval. Resolve
-    // the declared exact version now; legacy ids are pinned once for migration.
-    await syncMediaReferences(
-      pool,
-      id,
-      String(candidate.rows[0].id),
-      validation.data as Record<string, any>,
-    );
-    const mediaErrors = await revisionMediaGovernanceErrors(
-      pool,
-      id,
-      String(candidate.rows[0].id),
-      candidate.rows[0].kind as CmsDocumentKind,
-      candidate.rows[0].payload,
-    );
-    if (mediaErrors.length) {
-      res.status(422).json({ error: "Review references unavailable or unapproved media.", details: mediaErrors });
-      return;
-    }
-    await pool.query(
-      `WITH submitted AS (
-         UPDATE cms_revisions SET workflow_state='in-review'
-          WHERE id=$1 AND workflow_state IN ('draft','rejected')
-          RETURNING edition_id
-       )
-       UPDATE cms_market_editions e
-          SET publication_state=CASE
-                WHEN e.publication_state='published' THEN 'published'
-                ELSE 'in-review'
-              END,
-              updated_at=now()
-        FROM submitted WHERE e.id=submitted.edition_id`,
-      [parsed.data.revisionId],
-    );
-    await audit(auth, "document.submitted", "document", id, {
-      ...parsed.data,
-      market: candidate.rows[0].market,
-      locale: candidate.rows[0].locale,
-    });
-    res.json(await getDocument(
-      id,
-      auth,
-      candidate.rows[0].market,
-      candidate.rows[0].locale,
-    ));
   }),
 );
 
@@ -2349,8 +2424,25 @@ router.post(
     const id = String(req.params.documentId);
     const auth = res.locals.auth as AuthContext;
     const client = await pool.connect();
+    let publicationCommitted = false;
     try {
     await client.query("BEGIN");
+    // Serialize publication with saves on the exact edition before reading the
+    // latest revision. Otherwise a waiter can retain a pre-wait snapshot and
+    // publish an older revision or report a false conflict.
+    const lockedEdition = await client.query(
+      `SELECT e.id
+         FROM cms_revisions r
+         JOIN cms_market_editions e ON e.id=r.edition_id
+        WHERE r.id=$1 AND e.document_id=$2
+        FOR UPDATE OF e`,
+      [parsed.data.revisionId, id],
+    );
+    if (!lockedEdition.rowCount) {
+      await client.query("ROLLBACK");
+      res.status(409).json({ error: "The selected revision does not exist for this document." });
+      return;
+    }
     const revision = await client.query(
       `SELECT r.id,r.edition_id,r.payload,d.kind,d.canonical_slug,r.workflow_state,
               e.market,e.locale,COALESCE(e.editorial_market,e.market) editorial_market,
@@ -2391,12 +2483,18 @@ router.post(
       res.status(403).json({ error: "You are not assigned to this market." });
       return;
     }
-    if (
-      revision.rows[0].workflow_state !== "in-review" ||
-      !["in-review", "published"].includes(String(revision.rows[0].publication_state))
-    ) {
+    const directAdministratorPublish = auth.user.role === "administrator"
+      && ["draft", "rejected"].includes(String(revision.rows[0].workflow_state))
+      && ["draft", "published"].includes(String(revision.rows[0].publication_state));
+    const reviewedPublish = revision.rows[0].workflow_state === "in-review"
+      && ["in-review", "published"].includes(String(revision.rows[0].publication_state));
+    if (!directAdministratorPublish && !reviewedPublish) {
       await client.query("ROLLBACK");
-      res.status(409).json({ error: "Only the latest exact-edition revision currently in review can be published." });
+      res.status(409).json({
+        error: auth.user.role === "administrator"
+          ? "Only the latest saved draft or in-review exact-edition revision can be published."
+          : "Only the latest exact-edition revision currently in review can be published.",
+      });
       return;
     }
     const validation = validateSnapshot(revision.rows[0].kind, revision.rows[0].payload, "publish");
@@ -2423,11 +2521,11 @@ router.post(
         return;
       }
     }
-    const mediaIds = validation.data.mediaIds;
     const references = expectedMedia(
       revision.rows[0].kind as CmsDocumentKind,
       validation.data as Record<string, any>,
     );
+    const mediaIds = [...new Set(references.map((reference) => reference.mediaId))];
     const expectedVersions = new Map<string, string>(references
       .filter((reference): reference is typeof reference & { mediaVersionId: string } =>
         Boolean(reference.mediaVersionId))
@@ -2502,25 +2600,65 @@ router.post(
     let reviewedAvailabilityVersion: number | null = null;
     if (revision.rows[0].content_mode === "shared") {
       const availabilityState = await client.query(
-        `SELECT reviewed_version,published_version,reviewed_selections,reviewed_source_revision_id
+        `SELECT draft_version,reviewed_version,published_version,reviewed_selections,
+                shared_source_revision_id,reviewed_source_revision_id
            FROM cms_document_availability_states
           WHERE document_id=$1 FOR UPDATE`,
         [id],
       );
-      if (!availabilityState.rowCount
-        || availabilityState.rows[0].reviewed_source_revision_id !== parsed.data.revisionId) {
+      if (!availabilityState.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({
+          error: "This shared revision has no destination availability state.",
+        });
+        return;
+      }
+      const availabilityRow = availabilityState.rows[0];
+      const requestedAvailabilityVersion = parsed.data.availabilityVersion;
+      if (
+        requestedAvailabilityVersion === undefined
+        || Number(availabilityRow.draft_version) !== requestedAvailabilityVersion
+      ) {
+        await client.query("ROLLBACK");
+        res.status(409).json({
+          error: "Destination selection changed since publication confirmation opened. Reload and confirm the current destination version.",
+        });
+        return;
+      }
+      if (directAdministratorPublish) {
+        // A direct administrator publish is the review boundary for a saved
+        // shared source: freeze the current destination draft and source
+        // revision in this same transaction rather than requiring a separate
+        // availability-review action.
+        if (availabilityRow.shared_source_revision_id !== parsed.data.revisionId) {
+          await client.query("ROLLBACK");
+          res.status(409).json({
+            error: "The selected shared source is not the current saved destination version. Reload before publishing.",
+          });
+          return;
+        }
+        reviewedAvailabilityVersion = Number(availabilityRow.draft_version);
+      } else if (availabilityRow.reviewed_source_revision_id !== parsed.data.revisionId) {
         await client.query("ROLLBACK");
         res.status(409).json({
           error: "This shared revision must be reviewed with its exact destination selection before publication.",
         });
         return;
-      }
-      reviewedAvailabilityVersion = Number(availabilityState.rows[0].reviewed_version);
-      reviewedAvailability = availabilitySelections(availabilityState.rows[0].reviewed_selections);
-      if (!reviewedAvailability.length) {
-        await client.query("ROLLBACK");
-        res.status(409).json({ error: "The reviewed destination selection is empty." });
-        return;
+      } else {
+        if (Number(availabilityRow.draft_version) !== Number(availabilityRow.reviewed_version)) {
+          await client.query("ROLLBACK");
+          res.status(409).json({
+            error: "Newer destination changes are staged after review. Review the current destination version before publication.",
+          });
+          return;
+        }
+        reviewedAvailabilityVersion = Number(availabilityRow.reviewed_version);
+        reviewedAvailability = availabilitySelections(availabilityRow.reviewed_selections);
+        if (!reviewedAvailability.length) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "The reviewed destination selection is empty." });
+          return;
+        }
       }
       // Hold configuration stable through the revision and availability
       // release. SHARE blocks concurrent market inserts and enablement changes,
@@ -2528,6 +2666,8 @@ router.post(
       await client.query("LOCK TABLE market_editions IN SHARE MODE");
       const availabilityMarkets = await client.query(
         `SELECT m.id,m.code,configured_locale.locale,
+                CASE WHEN a.market_edition_id IS NULL THEN 'off'
+                     ELSE COALESCE(a.draft_decision,a.published_decision,'inherit') END staged_decision,
                 ${publishedCustomIndustryWinnerClause(
                   "$1",
                   "m.code",
@@ -2538,10 +2678,20 @@ router.post(
              SELECT DISTINCT locale FROM unnest(ARRAY[m.default_locale,m.fallback_locale]) locale
               WHERE locale IS NOT NULL
            ) configured_locale
+           LEFT JOIN cms_document_market_availability a
+             ON a.document_id=$1 AND a.market_edition_id=m.id
+            AND a.locale=configured_locale.locale
           WHERE m.enabled=true
            FOR UPDATE OF m`,
         [id],
       );
+      if (directAdministratorPublish) {
+        reviewedAvailability = availabilityMarkets.rows.map((market: Record<string, unknown>) => ({
+          marketEditionId: String(market.id),
+          locale: String(market.locale),
+          decision: String(market.staged_decision) as AvailabilityDecision,
+        }));
+      }
       if (!availabilitySelectionKeysMatchDestinations(reviewedAvailability, availabilityMarkets.rows)) {
         await client.query("ROLLBACK");
         res.status(409).json({
@@ -2633,17 +2783,27 @@ router.post(
         [selectedVersionIds, id, `revision:${parsed.data.revisionId}`],
       );
     }
-    const approved = await client.query(
-      `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,
-       approved_at=now() WHERE id=$1 AND workflow_state='in-review'`,
-      [parsed.data.revisionId, auth.user.id],
-    );
+    const approved = directAdministratorPublish
+      ? await client.query(
+        `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,
+         approved_at=now() WHERE id=$1 AND workflow_state IN ('draft','rejected')`,
+        [parsed.data.revisionId, auth.user.id],
+      )
+      : await client.query(
+        `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,
+         approved_at=now() WHERE id=$1 AND workflow_state='in-review'`,
+        [parsed.data.revisionId, auth.user.id],
+      );
     // Rejection and publication race on this exact revision.  The conditional
     // transition is the serialization point: never advance the edition's
     // public pointer unless this transaction actually won the transition.
     if (approved.rowCount !== 1) {
       await client.query("ROLLBACK");
-      res.status(409).json({ error: "The selected revision is no longer in review." });
+      res.status(409).json({
+        error: directAdministratorPublish
+          ? "The selected revision is no longer a saved draft or rejected revision."
+          : "The selected revision is no longer in review.",
+      });
       return;
     }
     await client.query(
@@ -2664,32 +2824,64 @@ router.post(
           [id, selection.marketEditionId, selection.locale, selection.decision, auth.user.id],
         );
       }
-      await client.query(
-        `UPDATE cms_document_availability_states
-            SET published_version=$2,published_source_revision_id=$4,
-                published_by_user_id=$3,published_at=now(),updated_at=now()
-          WHERE document_id=$1 AND reviewed_version=$2
-            AND reviewed_source_revision_id=$4`,
-        [id, reviewedAvailabilityVersion, auth.user.id, parsed.data.revisionId],
-      );
+      if (directAdministratorPublish) {
+        await client.query(
+          `UPDATE cms_document_availability_states
+              SET published_version=$2,published_source_revision_id=$4,
+                  published_by_user_id=$3,published_at=now(),updated_at=now()
+            WHERE document_id=$1 AND draft_version=$2
+              AND shared_source_revision_id=$4`,
+          [id, reviewedAvailabilityVersion, auth.user.id, parsed.data.revisionId],
+        );
+      } else {
+        await client.query(
+          `UPDATE cms_document_availability_states
+              SET published_version=$2,published_source_revision_id=$4,
+                  published_by_user_id=$3,published_at=now(),updated_at=now()
+            WHERE document_id=$1 AND reviewed_version=$2
+              AND reviewed_source_revision_id=$4`,
+          [id, reviewedAvailabilityVersion, auth.user.id, parsed.data.revisionId],
+        );
+      }
     }
     await client.query(
       `INSERT INTO cms_audit_events(actor_user_id,actor_label,action,target_type,target_id,metadata)
        VALUES ($1,$2,'document.published','document',$3,$4)`,
        [auth.user.id, auth.user.email, id, {
          scheduled: false,
+         directAdministratorPublish,
          editionId: String(revision.rows[0].edition_id),
          revisionId: parsed.data.revisionId,
        }],
     );
     await client.query("COMMIT");
-    res.json(await getDocument(
-      id,
-      auth,
-      revision.rows[0].market,
-      revision.rows[0].locale,
-    ));
+     publicationCommitted = true;
+     try {
+       res.json(await getDocument(
+         id,
+         auth,
+         revision.rows[0].market,
+         revision.rows[0].locale,
+       ));
+     } catch (error) {
+       req.log.error({ err: error, documentId: id, revisionId: parsed.data.revisionId }, "Document published but response hydration failed");
+       res.status(500).json({
+         code: "DOCUMENT_PUBLISH_COMMITTED",
+         committed: true,
+         error: "The document was published, but its confirmation could not be loaded. Reload this edition before trying again.",
+       });
+     }
     } catch (error) {
+      if (publicationCommitted) {
+        if (!res.headersSent) {
+          res.status(500).json({
+            code: "DOCUMENT_PUBLISH_COMMITTED",
+            committed: true,
+            error: "The document was published, but its confirmation could not be loaded. Reload this edition before trying again.",
+          });
+        }
+        return;
+      }
       await client.query("ROLLBACK");
       throw error;
     } finally {
@@ -2766,6 +2958,8 @@ router.post(
         id,
         String(revision.rows[0].id),
         old.rows[0].payload,
+        undefined,
+        old.rows[0].kind as CmsDocumentKind,
       );
       if (old.rows[0].content_mode === "shared") {
         await ensureAvailabilityState(client, id);
@@ -2936,6 +3130,7 @@ router.post(
           successorRevisionId,
           successor.rows[0].payload,
           String(sourceRevisionId),
+          edition.kind as CmsDocumentKind,
         );
         if (edition.content_mode === "shared") {
           await ensureAvailabilityState(client, id);
@@ -3148,7 +3343,11 @@ router.get(
       projectedDocument,
       "draft",
     );
-    const mediaIds = validation.success ? validation.data.mediaIds : previewMediaIds(projectedDocument);
+    // Delivery validation intentionally does not carry the document kind or
+    // every structured media reference. Re-collect from the authoritative
+    // kind and snapshot so hero/logo/PDF/social and other governed references
+    // receive the same exact pinned-version capability as legacy mediaIds.
+    const mediaIds = previewMediaIds(projectedDocument, row.kind as CmsDocumentKind);
     const availableMedia = mediaIds.length ? await pool.query(
       `SELECT a.id,v.id version_id,v.width,v.height,v.metadata,
           a.media_type,a.alt_text,a.credit
@@ -3205,7 +3404,7 @@ router.get(
   requireMfa,
   asyncRoute(async (req, res) => {
     const asset = await pool.query(
-      `SELECT d.id document_id,v.storage_key,r.payload,e.market,e.locale,
+      `SELECT d.id document_id,d.kind,v.storage_key,r.payload,e.market,e.locale,
               p.requested_market,p.requested_locale,a.status,
           CASE WHEN v.metadata->>'rendition'='webp-1600' THEN 'image/webp' ELSE a.media_type END media_type
          FROM cms_preview_sessions p
@@ -3226,7 +3425,10 @@ router.get(
         req.params.versionId,
       ],
     );
-    if (!asset.rowCount || !previewMediaIds(asset.rows[0].payload).includes(String(req.params.mediaId))) {
+    if (!asset.rowCount || !previewMediaIds(
+      asset.rows[0].payload,
+      asset.rows[0].kind as CmsDocumentKind,
+    ).includes(String(req.params.mediaId))) {
       res.status(404).json({ error: "Preview media not found or expired." });
       return;
     }

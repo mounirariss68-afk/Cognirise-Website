@@ -44,6 +44,9 @@ export function IndustryEditorialView({ view: baseView, marketOverride }: { view
   const { market: selectedMarket } = useMarketStore();
   const market = marketOverride ?? selectedMarket;
   const view = React.useMemo(() => projectIndustrySnapshotForMarket({ content: baseView }, market).content as IndustryContent, [baseView, market]);
+  const imageSource = view.image.startsWith("http://") || view.image.startsWith("https://")
+    ? view.image
+    : assetUrl(view.image);
   const thesisParts = view.thesis.split(" — ");
   const opportunityValue = view.opportunity as unknown as string | { title: string; body: string };
   const opportunity = typeof opportunityValue === "string" ? { title: "The opportunity", body: opportunityValue } : opportunityValue;
@@ -58,7 +61,7 @@ export function IndustryEditorialView({ view: baseView, marketOverride }: { view
           <h1 id="industry-title">{thesisParts.map((part, index) => <React.Fragment key={`${part}-${index}`}>{index > 0 && <> <span className="ind-thesis-dash">—</span> </>}{part}</React.Fragment>)}</h1>
           <p>{view.dek}</p>
         </div>
-        <figure className="ind-image"><img src={assetUrl(view.image)} alt={view.imageAlt} /><span>01 / industry perspective</span></figure>
+        <figure className="ind-image"><img src={imageSource} alt={view.imageAlt} /><span>01 / industry perspective</span></figure>
       </IndustrySection>
 
       <IndustrySection id="opportunity" className="ind-opportunity" aria-labelledby="opportunity-title">
@@ -131,7 +134,7 @@ function EducationImagery({ imagery }: { imagery: NonNullable<EducationPov["imag
     { id: "educator-practice", label: "Educator practice", ...imagery.educatorPractice },
     { id: "research-coordination", label: "Research coordination", ...imagery.researchCoordination },
   ];
-  return <div className="ind-nested-module ind-education-imagery" aria-label="Education practice and research scenes"><div className="ind-kicker">Approved education scenes</div><div className="ind-education-imagery-grid">{scenes.map((scene) => <figure key={scene.id} data-education-media={scene.media?.mediaVersionId}><img src={assetUrl(scene.src)} alt={scene.altText} loading="lazy" /><figcaption>{scene.label}</figcaption></figure>)}</div></div>;
+  return <div className="ind-nested-module ind-education-imagery" aria-label="Education practice and research scenes"><div className="ind-kicker">Approved education scenes</div><div className="ind-education-imagery-grid">{scenes.map((scene) => { const sceneSource = scene.src.startsWith("http://") || scene.src.startsWith("https://") ? scene.src : assetUrl(scene.src); return <figure key={scene.id} data-education-media={scene.media?.mediaVersionId}><img src={sceneSource} alt={scene.altText} loading="lazy" /><figcaption>{scene.label}</figcaption></figure>; })}</div></div>;
 }
 
 function ApplicationTable({ uses }: { uses: IndustryContent["uses"] }) {

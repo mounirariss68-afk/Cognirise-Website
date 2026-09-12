@@ -169,6 +169,7 @@ export default function DocumentDetail() {
   const [publishOpen, setPublishOpen] = useState(false);
   const [removeOfficeOpen, setRemoveOfficeOpen] = useState(false);
   const [publishRevisionId, setPublishRevisionId] = useState<string | null>(null);
+  const [publishAvailabilityVersion, setPublishAvailabilityVersion] = useState<number | null>(null);
   const [submittingSharedReview, setSubmittingSharedReview] = useState(false);
   const [legacySourceRevisionId, setLegacySourceRevisionId] = useState("");
 
@@ -281,7 +282,7 @@ export default function DocumentDetail() {
     && selectedMarket === sharedSource.market
     && selectedLocale === sharedSource.locale,
   );
-  const selectedEdition = matrixSelectedEdition ?? (selectedIsSharedSource ? {
+  const selectedEditionBase = matrixSelectedEdition ?? (selectedIsSharedSource ? {
     market: sharedSource!.market,
     locale: sharedSource!.locale,
     exact: true,
@@ -290,6 +291,25 @@ export default function DocumentDetail() {
     workflowState: doc?.status ?? "draft",
     publicationState: doc?.status === "published" ? "published" : "draft",
   } as any : undefined);
+  // The matrix and availability state are cached independently from the exact
+  // document response. On initial load either can still point at the prior
+  // revision while the editor has already loaded the latest saved draft. Use
+  // the loaded exact response as the authority for the active edition; once a
+  // preview/history pin exists, previewPinForEditionRevision deliberately
+  // keeps that immutable selection.
+  const loadedLatestRevisionId = !isDocumentLoading && doc?.currentRevisionId
+    ? doc.currentRevisionId
+    : undefined;
+  const selectedEdition = selectedEditionBase && loadedLatestRevisionId
+    ? {
+        ...selectedEditionBase,
+        revisionId: loadedLatestRevisionId,
+        revisionNumber: doc?.revisionNumber ?? selectedEditionBase.revisionNumber,
+        workflowState: ["draft", "in-review", "approved"].includes(String(doc?.status))
+          ? doc?.status
+          : selectedEditionBase.workflowState,
+      }
+    : selectedEditionBase;
   const selectedIsCustomization = Boolean(
     selectedEdition
     && selectedEdition.exact
@@ -366,9 +386,15 @@ export default function DocumentDetail() {
     // A matrix refresh caused by another editor must not silently exchange a
     // capability the reviewer already has open. A local save/action explicitly
     // advances this pin in its success handler.
+    if (isDocumentLoading || !doc?.currentRevisionId) return;
     setPreviewRevisionId((pinned) =>
-      previewPinForEditionRevision(pinned, selectedEdition?.revisionId, false));
-  }, [previewRevisionId, selectedEdition?.revisionId, selectedEdition?.revisionNumber]);
+      previewPinForEditionRevision(
+        pinned,
+        selectedEdition?.revisionId,
+        false,
+        doc.currentRevisionId,
+      ));
+  }, [doc?.currentRevisionId, isDocumentLoading, previewRevisionId, selectedEdition?.revisionId, selectedEdition?.revisionNumber]);
   const readiness = useMemo(
     () => doc ? documentReadiness(doc.kind as CmsDocumentKind, title, content, mediaIds) : [],
     [content, doc, mediaIds, title],
@@ -379,6 +405,7 @@ export default function DocumentDetail() {
     canEditSelectedEdition && !editionIsArchived,
     canPublishSelectedEdition && !editionIsArchived,
     hasUnsaved,
+    isAdministrator,
   );
   const fieldIssue = (path: string) => saveIssues.find((issue) => issue.path === path)?.message;
   const editorHydrated = hydratedEditionKey.current === currentEditorKey.current && hydratedRevision.current !== undefined;
@@ -507,7 +534,10 @@ export default function DocumentDetail() {
     setHasUnsaved(false);
     setSelectedMarket(market);
     setSelectedLocale(locale);
-    setPreviewRevisionId(isSharedTarget ? sharedSource?.revisionId ?? undefined : target?.exact ? target.revisionId ?? undefined : undefined);
+    // Wait for the newly selected exact document response to establish the
+    // latest saved revision. Reusing the matrix/source pointer here can pin a
+    // just-opened editor to the prior draft when either cache is stale.
+    setPreviewRevisionId(undefined);
   };
 
   const createCustomization = (targetMarket: string, targetLocale: string) => {
@@ -771,10 +801,12 @@ export default function DocumentDetail() {
         queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
         queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("documents") || String(query.queryKey[0]).includes("published") || String(query.queryKey[0]).includes("preview") });
         toast({
-          title: action === "publish" && selectedIsSharedSource
-            ? "Shared content and reviewed destinations published"
-            : action === "publish"
-              ? "Selected customization published"
+           title: action === "publish" && selectedEdition?.workflowState !== "in-review"
+             ? "Saved draft published directly"
+             : action === "publish" && selectedIsSharedSource
+               ? "Shared content and reviewed destinations published"
+               : action === "publish"
+                 ? "Selected customization published"
               : action === "submit"
                 ? "Latest edition revisions submitted for review"
                 : action === "restore"
@@ -782,10 +814,12 @@ export default function DocumentDetail() {
                   : "Document archived",
           description: action === "restore"
             ? "This edition is not public. Its restored draft must pass review before it can be published again."
-            : action === "publish" && selectedIsSharedSource
-              ? "The server released this exact reviewed source revision and its reviewed destination selection together."
-              : action === "publish"
-                ? "Only this customization revision was published. Destination choices remain pending until shared content is published."
+             : action === "publish" && selectedEdition?.workflowState !== "in-review"
+               ? "The server released this exact saved revision after rechecking publication governance."
+               : action === "publish" && selectedIsSharedSource
+                 ? "The server released this exact reviewed source revision and its reviewed destination selection together."
+                 : action === "publish"
+                   ? "Only this customization revision was published. Destination choices remain pending until shared content is published."
             : undefined,
         });
         if (action === "publish") setPublishOpen(false);
@@ -874,7 +908,13 @@ export default function DocumentDetail() {
     if (action === "archive") archiveDoc.mutate({ documentId: id!, data: { market: selectedMarket, locale: selectedLocale } }, opts);
     if (action === "restore") restoreDoc.mutate({ documentId: id!, data: { market: selectedMarket, locale: selectedLocale } }, opts);
     if (action === "publish" && publishRevisionId) {
-      publishDoc.mutate({ documentId: id!, data: { revisionId: publishRevisionId } }, opts);
+      publishDoc.mutate({
+        documentId: id!,
+        data: {
+          revisionId: publishRevisionId,
+          ...(publishAvailabilityVersion === null ? {} : { availabilityVersion: publishAvailabilityVersion }),
+        },
+      }, opts);
     }
   };
 
@@ -1005,8 +1045,12 @@ export default function DocumentDetail() {
               <Send className="w-3.5 h-3.5 mr-2" /> Submit Review
             </Button>
           )}
-           {authoringActions.canPublish && (
-              <Button size="sm" onClick={() => { setPublishRevisionId(selectedEdition?.revisionId ?? null); setPublishOpen(true); }} disabled={updateDoc.isPending || reviewAvailability.isPending || submittingSharedReview || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+          {authoringActions.canPublish && (
+              <Button size="sm" onClick={() => {
+                setPublishRevisionId(selectedEdition?.revisionId ?? null);
+                setPublishAvailabilityVersion(selectedIsSharedSource ? availabilityForReview?.draftVersion ?? null : null);
+                setPublishOpen(true);
+              }} disabled={updateDoc.isPending || reviewAvailability.isPending || submittingSharedReview || !contentValidation.success} className="font-mono uppercase tracking-wider text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
               <Globe className="w-3.5 h-3.5 mr-2" /> Publish...
             </Button>
           )}
@@ -1041,6 +1085,11 @@ export default function DocumentDetail() {
             {actionError && (
               <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/5 p-4" data-testid="action-error-summary">
                 <p className="text-sm font-semibold text-destructive">{actionError.message}</p>
+                {actionError.committed && (
+                  <p className="mt-2 text-sm">
+                    The server reports that this action was committed. Reload the selected edition before retrying so you do not submit or publish against an old revision.
+                  </p>
+                )}
                 {actionError.mediaBlocked && (
                   <p className="mt-2 text-sm">
                     Referenced images must be approved before submitting this page for review.
@@ -1081,7 +1130,7 @@ export default function DocumentDetail() {
               </p>
               {authoringActions.immutable && <p className="mt-2 text-xs text-amber-600">This edition is in review and cannot be edited until it is approved or rejected.</p>}
               {doc.status === "draft" && doc.publishedRevisionId && (
-                <p className="mt-2 text-xs text-amber-600">This draft is not publicly visible. Submit it for review and publish it to return this edition to the website.</p>
+                 <p className="mt-2 text-xs text-amber-600">This draft is not publicly visible. An administrator can publish this saved revision directly, or submit it for optional review first.</p>
               )}
               {saveBlocked && (
                 <div className="mt-2 flex items-center justify-between gap-3 rounded border border-destructive/30 p-2">
@@ -1214,15 +1263,49 @@ export default function DocumentDetail() {
                 </div>
                 <Textarea value={reviewComment} onChange={(event) => setReviewComment(event.target.value)} placeholder="Leave reviewer guidance…" rows={3} data-testid="textarea-review-comment" />
                 <div className="flex gap-2">
-                  <Button type="button" size="sm" variant="outline" disabled={!reviewComment.trim() || addReviewComment.isPending || !selectedEdition?.revisionId} onClick={() => addReviewComment.mutate({ documentId: id!, data: { revisionId: selectedEdition!.revisionId!, body: reviewComment.trim() } }, { onSuccess: () => { setReviewComment(""); queryClient.invalidateQueries({ queryKey: getListDocumentReviewCommentsQueryKey(id!, reviewCommentsParams) }); } })} data-testid="button-add-review-comment">Add comment</Button>
+                  <Button type="button" size="sm" variant="outline" disabled={!reviewComment.trim() || addReviewComment.isPending || !selectedEdition?.revisionId} onClick={() => {
+                    if (!selectedEdition?.revisionId) return;
+                    const revisionId = selectedEdition.revisionId;
+                    const body = reviewComment.trim();
+                    setActionError(null);
+                    addReviewComment.mutate({ documentId: id!, data: { revisionId, body } }, {
+                      onSuccess: () => {
+                        setReviewComment("");
+                        queryClient.invalidateQueries({
+                          queryKey: getListDocumentReviewCommentsQueryKey(id!, { revisionId }),
+                        });
+                        toast({ title: "Review comment added" });
+                      },
+                      onError: (error: unknown) => {
+                        const failure = describeActionError(error);
+                        setActionError(failure);
+                        toast({ title: "Review comment could not be added", description: failure.message, variant: "destructive" });
+                      },
+                    });
+                  }} data-testid="button-add-review-comment">Add comment</Button>
                   {selectedEdition?.workflowState === "in-review" && canPublish && <Button type="button" size="sm" variant="destructive" disabled={!reviewComment.trim() || rejectRevision.isPending || !selectedEdition.revisionId} onClick={() => {
                     const targetParams = { market: selectedMarket, locale: selectedLocale };
-                    rejectRevision.mutate({ documentId: id!, data: { revisionId: selectedEdition.revisionId!, body: reviewComment.trim() } }, { onSuccess: () => {
-                      setReviewComment("");
-                      queryClient.invalidateQueries({ queryKey: getGetDocumentQueryKey(id!, targetParams) });
-                      queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
-                      queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
-                    } });
+                    const revisionId = selectedEdition.revisionId!;
+                    const body = reviewComment.trim();
+                    setActionError(null);
+                    rejectRevision.mutate({ documentId: id!, data: { revisionId, body } }, {
+                      onSuccess: (updated) => {
+                        setReviewComment("");
+                        setActionError(null);
+                        queryClient.setQueryData(getGetDocumentQueryKey(id!, targetParams), updated);
+                        queryClient.invalidateQueries({
+                          queryKey: getListDocumentReviewCommentsQueryKey(id!, { revisionId }),
+                        });
+                        queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
+                        queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
+                        toast({ title: "Revision rejected", description: "The revision was returned to draft with your review comment." });
+                      },
+                      onError: (error: unknown) => {
+                        const failure = describeActionError(error);
+                        setActionError(failure);
+                        toast({ title: "Revision could not be rejected", description: failure.message, variant: "destructive" });
+                      },
+                    });
                   }} data-testid="button-reject-revision">Reject revision</Button>}
                 </div>
               </div>
@@ -1465,9 +1548,15 @@ export default function DocumentDetail() {
       <Dialog open={publishOpen} onOpenChange={setPublishOpen}>
         <DialogContent>
           <DialogHeader>
-             <DialogTitle>{selectedIsSharedSource ? "Publish Shared Content" : "Publish Customization"}</DialogTitle>
+             <DialogTitle>
+               {selectedEdition?.workflowState !== "in-review"
+                 ? "Publish Saved Draft"
+                 : selectedIsSharedSource ? "Publish Shared Content" : "Publish Customization"}
+             </DialogTitle>
             <DialogDescription className="font-mono text-xs mt-2">
-                {selectedIsSharedSource
+                 {selectedEdition?.workflowState !== "in-review"
+                   ? "Confirm direct administrator publication of this exact saved revision. The server will recheck content, media clearance, immutable version pins, and destination governance before releasing it."
+                   : selectedIsSharedSource
                   ? "Confirm the reviewed snapshot. The selected content and destination choices below are released together; saving or review alone never changes the live website."
                   : "Confirm this selected customization revision. Destination choices are not released by customization publication and remain pending until shared content is published."}
             </DialogDescription>
@@ -1505,7 +1594,9 @@ export default function DocumentDetail() {
                   ) : (
                     <p className="mt-1 text-xs text-muted-foreground">
                       {!availabilityForReview?.sharedSource?.publishedRevisionId
-                        ? "Not published yet. This reviewed source and destination snapshot will establish the first live content."
+                         ? selectedEdition?.workflowState !== "in-review" && isAdministrator
+                           ? "Not published yet. This saved source and current destination snapshot will establish the first live content."
+                           : "Not published yet. This reviewed source and destination snapshot will establish the first live content."
                         : "No pending destination changes. Only the selected content revision is affected."}
                     </p>
                   )}
@@ -1520,7 +1611,9 @@ export default function DocumentDetail() {
               )}
               {selectedIsSharedSource && (
                 <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
-                  Shared publishing requires this exact saved source revision and its reviewed destination selection. Send destinations for review again whenever the source or a destination changes.
+                   {selectedEdition?.workflowState !== "in-review" && isAdministrator
+                     ? "Direct administrator publishing captures this exact saved source revision and the current saved destination choices atomically. No separate destination-review action is required."
+                     : "Shared publishing requires this exact saved source revision and its reviewed destination selection. Send destinations for review again whenever the source or a destination changes."}
                 </p>
               )}
           </div>
@@ -1533,8 +1626,11 @@ export default function DocumentDetail() {
                 || availabilitySelectionActive
                 || !publishRevisionId
                 || (selectedIsSharedSource && (
-                  availabilityForReview?.reviewedVersion !== availabilityForReview?.draftVersion
-                  || availabilityForReview?.sharedSource?.revisionId !== publishRevisionId
+                   availabilityForReview?.sharedSource?.revisionId !== publishRevisionId
+                   || (publishAvailabilityVersion === null
+                     || publishAvailabilityVersion !== availabilityForReview?.draftVersion)
+                   || (selectedEdition?.workflowState === "in-review"
+                     && availabilityForReview?.reviewedVersion !== availabilityForReview?.draftVersion)
                 ))
               }
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-mono uppercase tracking-wider text-xs"

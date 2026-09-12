@@ -771,6 +771,25 @@ test("customization publish confirmation never promises destination release", as
   }
 });
 
+test("administrator publish confirmation names direct saved-draft publication", async () => {
+  currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
+  currentEditions = [{ ...edition, workflowState: "draft" }];
+  currentAvailability = undefined;
+  const view = await renderDetail({ ...documentBase, status: "draft" });
+  try {
+    await React.act(async () => button(view.container, "Publish...").click());
+    const dialog = document.body.textContent ?? "";
+    assert.match(dialog, /Publish Saved Draft/);
+    assert.match(dialog, /direct administrator publication of this exact saved revision/);
+    assert.match(dialog, /media clearance/);
+  } finally {
+    await view.unmount();
+    currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
+    currentEditions = [edition];
+    currentAvailability = undefined;
+  }
+});
+
 test("restoring a shared source retains its successor matrix row and invalidates the source availability snapshot", async () => {
   currentAvailability = {
     documentId: "document-1",

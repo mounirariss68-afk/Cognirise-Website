@@ -11,9 +11,10 @@ export function previewPinForEditionRevision(
   pinnedRevisionId: string | undefined,
   editionRevisionId: string | null | undefined,
   localSuccessor: boolean,
+  latestSavedRevisionId?: string | null,
 ) {
   if (localSuccessor && editionRevisionId) return editionRevisionId;
-  return pinnedRevisionId ?? editionRevisionId ?? undefined;
+  return pinnedRevisionId ?? latestSavedRevisionId ?? editionRevisionId ?? undefined;
 }
 
 /** Updates only the exact edition that produced a confirmed local successor. */

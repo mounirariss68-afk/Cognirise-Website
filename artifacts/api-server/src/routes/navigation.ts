@@ -9,6 +9,7 @@ import {
   isActiveNavigationItemId,
   parsePersistedNavigationPolicy,
   RETIRED_NAVIGATION_PAGE_PATHS,
+  PublishNavigationSettingsBody,
   UpdateNavigationSettingsSchema,
 } from "@workspace/api-zod";
 import {
@@ -32,8 +33,20 @@ type StoredNavigationRow = {
   sort_order: number;
   destination: string;
   visible: boolean;
+  version?: number;
   workflow_state?: string;
 };
+
+function editionVersion(rows: Array<{ version?: unknown }>) {
+  return Math.max(1, ...rows.map((row) => Number(row.version) || 1));
+}
+
+function releaseVersion(
+  items: Array<{ version?: unknown }>,
+  pages: Array<{ version?: unknown }>,
+) {
+  return editionVersion([...items, ...pages]);
+}
 
 function completeEdition(
   rows: StoredNavigationRow[],
@@ -95,6 +108,7 @@ async function settings(requestedMarket: string, requestedLocale: string, allowF
         ...publicPolicy,
         isConfigured: true,
         updatedAt: new Date(policy.publishedAt).toISOString(),
+        version: policy.version,
       });
     }
     const legacy = await pool.query(`SELECT id,COALESCE(visible,enabled) AS visible,updated_at FROM cms_navigation_items`);
@@ -118,6 +132,7 @@ async function settings(requestedMarket: string, requestedLocale: string, allowF
       updatedAt: legacy.rows.length
         ? new Date(Math.max(...legacy.rows.map((row) => Number(new Date(row.updated_at))))).toISOString()
         : null,
+      version: 1,
     });
   }
   let effective = search[0];
@@ -126,13 +141,13 @@ async function settings(requestedMarket: string, requestedLocale: string, allowF
   for (const choice of search) {
     const [navigationResult, pageResult] = await Promise.all([
       pool.query(
-        `SELECT item_id,label,parent_id,sort_order,destination,visible,updated_at
+        `SELECT item_id,label,parent_id,sort_order,destination,visible,version,updated_at
            FROM cms_navigation_editions WHERE market=$1 AND locale=$2
              AND ($3::boolean OR workflow_state='approved') ORDER BY sort_order,item_id`,
         [choice.market, choice.locale, includeDraft],
       ),
       pool.query(
-        `SELECT path,enabled,updated_at FROM cms_page_availability
+        `SELECT path,enabled,version,updated_at FROM cms_page_availability
           WHERE market=$1 AND locale=$2 AND ($3::boolean OR workflow_state='approved') ORDER BY path`,
         [choice.market, choice.locale, includeDraft],
       ),
@@ -177,6 +192,7 @@ async function settings(requestedMarket: string, requestedLocale: string, allowF
     usedFallback: effective.market !== requestedMarket || effective.locale !== requestedLocale,
     isConfigured: Boolean(rows.length || pages.length || legacy.rows.length),
     updatedAt: timestamps.length ? new Date(Math.max(...timestamps.map(Number))).toISOString() : null,
+    version: releaseVersion(rows, pages),
   });
 }
 
@@ -204,13 +220,32 @@ router.put("/navigation", authenticate, requireMfa, requireCsrf, requireAdminist
   }
   const auth = res.locals.auth as AuthContext;
   const client = await pool.connect();
+  let nextVersion = 1;
   try {
     await client.query("BEGIN");
+    await client.query(
+      "SELECT pg_advisory_xact_lock(hashtext($1))",
+      [`navigation:${parsed.data.market}:${parsed.data.locale}`],
+    );
     const existing = await client.query(
-      `SELECT item_id,label,parent_id,sort_order,destination,visible,workflow_state
+      `SELECT item_id,label,parent_id,sort_order,destination,visible,version,workflow_state
          FROM cms_navigation_editions WHERE market=$1 AND locale=$2 FOR UPDATE`,
       [parsed.data.market, parsed.data.locale],
     );
+    const existingPages = await client.query(
+      `SELECT version FROM cms_page_availability WHERE market=$1 AND locale=$2 FOR UPDATE`,
+      [parsed.data.market, parsed.data.locale],
+    );
+    const currentVersion = releaseVersion(existing.rows, existingPages.rows);
+    if (parsed.data.version !== currentVersion) {
+      await client.query("ROLLBACK");
+      res.status(409).json({
+        error: "Navigation changed since this draft was loaded.",
+        currentVersion,
+      });
+      return;
+    }
+    nextVersion = currentVersion + 1;
     const completeItems = completeEdition(existing.rows, parsed.data.items);
     const hierarchy = NavigationPolicySnapshotSchema.safeParse({ items: completeItems, pages: [] });
     if (!hierarchy.success) {
@@ -224,25 +259,26 @@ router.put("/navigation", authenticate, requireMfa, requireCsrf, requireAdminist
     const effectiveParents = new Map<string, string | null>(
       completeItems.map((item) => [item.id, item.parentId]),
     );
-    for (const item of parsed.data.items) {
+    for (const item of completeItems) {
       await client.query(
         `INSERT INTO cms_navigation_editions
-          (market,locale,item_id,label,parent_id,sort_order,destination,visible,workflow_state,updated_by_user_id,updated_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9,now())
+          (market,locale,item_id,label,parent_id,sort_order,destination,visible,version,workflow_state,updated_by_user_id,updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'draft',$10,now())
          ON CONFLICT (market,locale,item_id) DO UPDATE SET
           label=excluded.label,parent_id=excluded.parent_id,sort_order=excluded.sort_order,
-          destination=excluded.destination,visible=excluded.visible,workflow_state='draft',
-          updated_by_user_id=excluded.updated_by_user_id,updated_at=now()`,
+          destination=excluded.destination,visible=excluded.visible,version=excluded.version,
+          workflow_state='draft',updated_by_user_id=excluded.updated_by_user_id,updated_at=now()`,
         [parsed.data.market, parsed.data.locale, item.id, item.label, effectiveParents.get(item.id) ?? null, item.order,
-          item.destination, item.visible, auth.user.id],
+          item.destination, item.visible, nextVersion, auth.user.id],
       );
     }
     for (const page of parsed.data.pages) {
       await client.query(
-        `INSERT INTO cms_page_availability (market,locale,path,enabled,workflow_state,updated_by_user_id,updated_at)
-         VALUES ($1,$2,$3,$4,'draft',$5,now()) ON CONFLICT (market,locale,path) DO UPDATE SET
-          enabled=excluded.enabled,workflow_state='draft',updated_by_user_id=excluded.updated_by_user_id,updated_at=now()`,
-        [parsed.data.market, parsed.data.locale, page.path, page.enabled, auth.user.id],
+        `INSERT INTO cms_page_availability (market,locale,path,enabled,version,workflow_state,updated_by_user_id,updated_at)
+         VALUES ($1,$2,$3,$4,$5,'draft',$6,now()) ON CONFLICT (market,locale,path) DO UPDATE SET
+          enabled=excluded.enabled,version=excluded.version,workflow_state='draft',
+          updated_by_user_id=excluded.updated_by_user_id,updated_at=now()`,
+        [parsed.data.market, parsed.data.locale, page.path, page.enabled, nextVersion, auth.user.id],
       );
     }
     await client.query("COMMIT");
@@ -253,26 +289,37 @@ router.put("/navigation", authenticate, requireMfa, requireCsrf, requireAdminist
     client.release();
   }
   await audit(auth, "navigation.updated", "navigation", `${parsed.data.market}:${parsed.data.locale}`, {
-    market: parsed.data.market, locale: parsed.data.locale,
+    market: parsed.data.market, locale: parsed.data.locale, version: nextVersion,
   });
   res.json(await settings(parsed.data.market, parsed.data.locale, false, true));
 }));
 
 router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, requireAdministrator, asyncRoute(async (req, res) => {
-  const market = typeof req.body?.market === "string" ? req.body.market : "uae";
-  const locale = typeof req.body?.locale === "string" ? req.body.locale : "en";
+  const parsedRequest = PublishNavigationSettingsBody.safeParse(req.body);
+  if (!parsedRequest.success) {
+    res.status(400).json({
+      error: "Publishing requires the exact draft version and explicit PUBLISH confirmation.",
+      details: parsedRequest.error.issues,
+    });
+    return;
+  }
+  const { market, locale, version } = parsedRequest.data;
   const auth = res.locals.auth as AuthContext;
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    await client.query(
+      "SELECT pg_advisory_xact_lock(hashtext($1))",
+      [`navigation:${market}:${locale}`],
+    );
     const items = await client.query(
-        `SELECT item_id,label,parent_id,sort_order,destination,visible,workflow_state
+        `SELECT item_id,label,parent_id,sort_order,destination,visible,version,workflow_state
            FROM cms_navigation_editions WHERE market=$1 AND locale=$2
            ORDER BY sort_order,item_id FOR UPDATE`,
         [market, locale],
       );
     const pages = await client.query(
-        `SELECT path,enabled,workflow_state FROM cms_page_availability
+        `SELECT path,enabled,version,workflow_state FROM cms_page_availability
           WHERE market=$1 AND locale=$2 ORDER BY path FOR UPDATE`,
         [market, locale],
       );
@@ -280,14 +327,25 @@ router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, requir
     // are not part of a new publication and must not make a Work-only review
     // appear publishable.
     const releaseItems = items.rows.filter((item) =>
-      item.workflow_state === "in-review" && isActiveNavigationItemId(String(item.item_id))
+      ["draft", "in-review"].includes(String(item.workflow_state))
+      && isActiveNavigationItemId(String(item.item_id))
     );
     const releasePages = pages.rows.filter((page) =>
-      page.workflow_state === "in-review" && !isRetiredNavigationPagePath(String(page.path))
+      ["draft", "in-review"].includes(String(page.workflow_state))
+      && !isRetiredNavigationPagePath(String(page.path))
     );
+    const currentVersion = releaseVersion(items.rows, pages.rows);
+    if (version !== currentVersion) {
+      await client.query("ROLLBACK");
+      res.status(409).json({
+        error: "This navigation version is stale. Reload the draft before publishing.",
+        currentVersion,
+      });
+      return;
+    }
     if (!releaseItems.length && !releasePages.length) {
       await client.query("ROLLBACK");
-      res.status(409).json({ error: "Navigation must be submitted for review before publication." });
+      res.status(409).json({ error: "Navigation has no saved draft or in-review changes to publish." });
       return;
     }
 
@@ -340,23 +398,37 @@ router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, requir
     });
     await client.query(
       `INSERT INTO cms_navigation_published_policies
-        (market,locale,items,pages,published_by_user_id,published_at)
-       VALUES ($1,$2,$3::jsonb,$4::jsonb,$5,now())
+        (market,locale,items,pages,published_version,published_by_user_id,published_at)
+       VALUES ($1,$2,$3::jsonb,$4::jsonb,$5,$6,now())
        ON CONFLICT (market,locale) DO UPDATE SET items=excluded.items,pages=excluded.pages,
-         published_by_user_id=excluded.published_by_user_id,published_at=excluded.published_at`,
-      [market, locale, JSON.stringify(snapshot.items), JSON.stringify(snapshot.pages), auth.user.id],
+         published_version=excluded.published_version,published_by_user_id=excluded.published_by_user_id,
+         published_at=excluded.published_at`,
+      [market, locale, JSON.stringify(snapshot.items), JSON.stringify(snapshot.pages), currentVersion, auth.user.id],
     );
     await client.query(
       `UPDATE cms_navigation_editions SET workflow_state='approved',updated_at=now()
-       WHERE market=$1 AND locale=$2 AND workflow_state='in-review'
+       WHERE market=$1 AND locale=$2 AND workflow_state IN ('draft','in-review')
          AND item_id = ANY($3::text[])`,
       [market, locale, NAVIGATION_ITEM_IDS],
     );
     await client.query(
       `UPDATE cms_page_availability SET workflow_state='approved',updated_at=now()
-       WHERE market=$1 AND locale=$2 AND workflow_state='in-review'
+       WHERE market=$1 AND locale=$2 AND workflow_state IN ('draft','in-review')
          AND path <> ALL($3::text[])`,
       [market, locale, RETIRED_NAVIGATION_PAGE_PATHS],
+    );
+    await client.query(
+      `INSERT INTO cms_audit_events
+        (actor_user_id,actor_label,action,target_type,target_id,metadata)
+       VALUES ($1,$2,$3,$4,$5,$6)`,
+      [
+        auth.user.id,
+        auth.user.email,
+        "navigation.published",
+        "navigation",
+        `${market}:${locale}`,
+        { market, locale, version, direct: true, confirmation: "PUBLISH" },
+      ],
     );
     await client.query("COMMIT");
   } catch (error) {
@@ -376,6 +448,10 @@ router.post("/navigation/review", authenticate, requireMfa, requireCsrf, require
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    await client.query(
+      "SELECT pg_advisory_xact_lock(hashtext($1))",
+      [`navigation:${market}:${locale}`],
+    );
     await client.query(
       `UPDATE cms_navigation_editions SET workflow_state='in-review',updated_at=now()
        WHERE market=$1 AND locale=$2 AND workflow_state='draft'`,

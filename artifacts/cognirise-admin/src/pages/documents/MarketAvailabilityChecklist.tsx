@@ -198,13 +198,15 @@ export function MarketAvailabilityChecklist({
   };
 
   const release = (marketEditionId: string, destination: AvailabilityDestination) => {
-    const reviewedVersion = sharedAvailability.data?.reviewedVersion;
-    if (reviewedVersion === null || reviewedVersion === undefined
-      || reviewedVersion !== sharedAvailability.data?.draftVersion) return;
+    const publishVersion = isAdministrator
+      ? sharedAvailability.data?.draftVersion
+      : sharedAvailability.data?.reviewedVersion;
+    if (publishVersion === null || publishVersion === undefined
+      || publishVersion !== sharedAvailability.data?.draftVersion) return;
     publishPerson.mutate({
       documentId,
       marketEditionId,
-      data: { version: reviewedVersion },
+      data: { version: publishVersion },
     }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetDocumentMarketAvailabilityQueryKey(documentId) });
@@ -232,6 +234,10 @@ export function MarketAvailabilityChecklist({
   const hasLocalSelection = Object.keys(currentSelections).length > 0;
   const hasCurrentReviewedSelection = sharedAvailability.data?.reviewedVersion !== null
     && sharedAvailability.data?.reviewedVersion === sharedAvailability.data?.draftVersion;
+  const hasCurrentPublishSelection = isAdministrator
+    ? sharedAvailability.data?.draftVersion !== null
+      && sharedAvailability.data?.draftVersion !== undefined
+    : hasCurrentReviewedSelection;
   const allDestinations = useLegacyPersonAvailability
     ? destinations
     : items.map((item) => ({
@@ -314,9 +320,9 @@ export function MarketAvailabilityChecklist({
             </div>
             {onDestinationSelected?.(destination)}
             {useLegacyPersonAvailability && isAdministrator && pending && (
-              <Button type="button" variant="outline" size="sm" className="ml-7 mt-3 h-7 gap-1 text-[10px]" disabled={!hasCurrentReviewedSelection || publishPerson.isPending || updatePerson.isPending} onClick={() => setPersonReleaseConfirmation({ marketEditionId: item.marketEditionId, destination })}>
+              <Button type="button" variant="outline" size="sm" className="ml-7 mt-3 h-7 gap-1 text-[10px]" disabled={!hasCurrentPublishSelection || publishPerson.isPending || updatePerson.isPending} onClick={() => setPersonReleaseConfirmation({ marketEditionId: item.marketEditionId, destination })}>
                 {publishPerson.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
-                Publish availability
+             {isAdministrator && !hasCurrentReviewedSelection ? "Publish saved availability" : "Publish availability"}
               </Button>
             )}
           </div>
@@ -357,7 +363,9 @@ export function MarketAvailabilityChecklist({
       {useLegacyPersonAvailability && personReleaseConfirmation && (
         <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950">
           <p>
-            Publish the reviewed destination version {sharedAvailability.data?.reviewedVersion} for{" "}
+             Publish the {isAdministrator && !hasCurrentReviewedSelection ? "saved" : "reviewed"} destination version {isAdministrator && !hasCurrentReviewedSelection
+               ? sharedAvailability.data?.draftVersion
+               : sharedAvailability.data?.reviewedVersion} for{" "}
             <strong>{displayDestination(personReleaseConfirmation.destination, allDestinations)}</strong>?
             This changes the live people listing.
           </p>

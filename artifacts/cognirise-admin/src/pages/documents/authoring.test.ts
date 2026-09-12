@@ -95,6 +95,13 @@ test("first draft can submit and in-review editions deny editing", () => {
   assert.equal(editionAuthoringActions(edition("ksa", "in-review"), true, true, false).canPublish, true);
 });
 
+test("administrator can publish a saved draft directly while collaborators retain review", () => {
+  assert.equal(editionAuthoringActions(edition("ksa", "draft"), true, true, false).canPublish, false);
+  assert.equal(editionAuthoringActions(edition("ksa", "draft"), true, true, false, true).canPublish, true);
+  assert.equal(editionAuthoringActions(edition("ksa", "draft"), true, true, true, true).canPublish, false);
+  assert.equal(editionAuthoringActions(edition("ksa", "rejected"), true, true, false, true).canPublish, true);
+});
+
 test("an approved latest exact revision can start a successor draft", () => {
   const actions = editionAuthoringActions(edition("uae", "approved"), true, true, false);
   assert.equal(actions.canSave, true);

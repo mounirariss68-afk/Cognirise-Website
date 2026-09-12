@@ -31,7 +31,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
   ]);
 
   const now = new Date("2026-10-01T12:00:00Z");
-  let role: "editor" | "publisher" = "editor";
+  let role: "editor" | "publisher" | "administrator" = "editor";
   const draftDocumentId = "00000000-0000-4000-8000-000000000101";
   const approvedDocumentId = "00000000-0000-4000-8000-000000000102";
   const inheritedDocumentId = "00000000-0000-4000-8000-000000000103";
@@ -654,6 +654,22 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
           }],
         };
       }
+      if (
+        statement.includes("FOR UPDATE OF e")
+        && statement.includes("JOIN cms_market_editions e ON e.id=r.edition_id")
+        && !statement.includes("FOR UPDATE OF e,r")
+        && (
+          statement.includes("WHERE r.id=$2 AND e.document_id=$1")
+          || statement.includes("WHERE r.id=$1 AND e.document_id=$2")
+        )
+      ) {
+        const revisionId = String(statement.includes("r.id=$2") ? values[1] : values[0]);
+        const revisionEdition = [...documents.values()].flatMap((document) => document.editions)
+          .find((candidate) => candidate.revisions.some((revision) => revision.id === revisionId));
+        return revisionEdition
+          ? { rowCount: 1, rows: [{ id: revisionEdition.id }] }
+          : { rowCount: 0, rows: [] };
+      }
       if (statement.includes("WITH config AS") && statement.includes("effective published revision")) {
         return { rowCount: 0, rows: [] };
       }
@@ -748,12 +764,27 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
         edition.revisions.push(revision);
         return { rowCount: 1, rows: [{ id: revision.id, revision_number: number, created_at: now }] };
       }
-      if (statement.includes("UPDATE cms_revisions SET workflow_state='approved'")) {
+      if (
+        statement.includes("UPDATE cms_revisions SET workflow_state='approved'")
+        && !statement.includes("IN ('draft','rejected')")
+      ) {
         const revisionId = String(values[0]);
         const revision = [...documents.values()].flatMap((document) => document.editions)
           .flatMap((edition) => edition.revisions)
           .find((candidate) => candidate.id === revisionId);
         if (!revision || revision.workflow !== "in-review") return { rowCount: 0, rows: [] };
+        revision.workflow = "approved";
+        return { rowCount: 1, rows: [] };
+      }
+      if (
+        statement.includes("UPDATE cms_revisions SET workflow_state='approved'")
+        && statement.includes("IN ('draft','rejected')")
+      ) {
+        const revisionId = String(values[0]);
+        const revision = [...documents.values()].flatMap((document) => document.editions)
+          .flatMap((edition) => edition.revisions)
+          .find((candidate) => candidate.id === revisionId);
+        if (!revision || !["draft", "rejected"].includes(revision.workflow)) return { rowCount: 0, rows: [] };
         revision.workflow = "approved";
         return { rowCount: 1, rows: [] };
       }
@@ -1244,6 +1275,26 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
     mediaVersionA,
     "submission and publication must retain the inherited source pin",
   );
+
+  role = "administrator";
+  const directDraftPublish = await fetch(`${origin}/api/documents/${draftDocumentId}/publish`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ revisionId: "00000000-0000-4000-8000-000000000302" }),
+  });
+  const directDraftPublishBody = await directDraftPublish.json() as {
+    status?: string;
+    publishedRevisionId?: string;
+    error?: string;
+  };
+  assert.equal(directDraftPublish.status, 200, JSON.stringify(directDraftPublishBody));
+  assert.equal(directDraftPublishBody.status, "published");
+  assert.equal(
+    directDraftPublishBody.publishedRevisionId,
+    "00000000-0000-4000-8000-000000000302",
+    "an administrator can publish an eligible saved draft without a mandatory review transition",
+  );
+  assert.equal(latest(findEdition(draftDocumentId, "uae", "en")!).workflow, "approved");
 
   role = "editor";
   const openedContact = await fetch(

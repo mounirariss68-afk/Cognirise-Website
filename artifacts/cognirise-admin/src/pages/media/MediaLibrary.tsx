@@ -110,7 +110,7 @@ export type ExtendedMediaAsset = {
 
 type HeroSlot = CmsHeroFilmSlot;
 
-function HeroAssignments() {
+function HeroAssignments({ canEdit }: { canEdit: boolean }) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -248,6 +248,7 @@ function HeroAssignments() {
   const errors = (slot: HeroSlot) => heroSelectionIssues(selection[slot]);
 
   const saveDraft = async (slot: HeroSlot) => {
+    if (!canEdit) return;
     try {
       const issues = errors(slot);
       if (issues.length) throw new Error(issues.join(" "));
@@ -301,7 +302,7 @@ function HeroAssignments() {
   const chooser = (slot: HeroSlot, role: keyof HeroAssetSelection, label: string, mimeType: string) => (
     <div className="space-y-1">
       <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{label}</Label>
-      <Select value={selection[slot][role]?.id} onValueChange={(value) =>
+      <Select disabled={!canEdit} value={selection[slot][role]?.id} onValueChange={(value) =>
         setSelection((current) => ({ ...current, [slot]: { ...current[slot], [role]: retainedAssets.get(value) ?? null } }))
       }>
         <SelectTrigger aria-label={`${slot} ${label}`}><SelectValue placeholder={`Select ${label.toLowerCase()}`} /></SelectTrigger>
@@ -319,7 +320,7 @@ function HeroAssignments() {
           <h2 className="font-semibold">Website hero assignments</h2>
           <p className="text-xs text-muted-foreground">Create a governed draft with immutable versions. Publication remains in the publisher document control.</p>
         </div>
-        <Input className="w-64" aria-label="Search active hero media" placeholder="Search active media…" value={search} onChange={(event) => setSearch(event.target.value)} />
+        <Input disabled={!canEdit} className="w-64" aria-label="Search active hero media" placeholder="Search active media…" value={search} onChange={(event) => setSearch(event.target.value)} />
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         {(["homepage", "industries"] as const).map((slot) => (
@@ -329,9 +330,10 @@ function HeroAssignments() {
             {chooser(slot, "mp4", "MP4 source", "video/mp4")}
             {chooser(slot, "webm", "WebM source", "video/webm")}
             {errors(slot).length > 0 && <div role="alert" className="text-xs text-destructive">{errors(slot).join(" ")}</div>}
-            <Button onClick={() => saveDraft(slot)} disabled={createDocument.isPending || updateDocument.isPending || submitDocument.isPending}>
+             <Button onClick={() => saveDraft(slot)} disabled={!canEdit || createDocument.isPending || updateDocument.isPending || submitDocument.isPending}>
               Save draft &amp; submit for review
             </Button>
+             {!canEdit && <p className="text-xs text-muted-foreground">Viewers can inspect hero assignments but cannot change or submit them.</p>}
             {(slot === "homepage" ? homepageDocument : industriesDocument) && (
               <Button
                 variant="outline"
@@ -547,6 +549,7 @@ export default function MediaLibrary() {
   const reviewMedia = useReviewMedia();
   const { data: session } = useGetSession();
   const canReview = session?.user?.role === "administrator" || session?.user?.role === "publisher";
+  const canEdit = session?.user?.role !== "viewer";
 
   const websiteCount = useListMedia({ page: 1, pageSize: 1, collection: "website" });
   const linkedinCount = useListMedia({ page: 1, pageSize: 1, collection: "linkedin" });
@@ -577,6 +580,7 @@ export default function MediaLibrary() {
   };
 
   const openEditor = (asset: ExtendedMediaAsset) => {
+    if (!canEdit) return;
     setEditingAsset(asset);
     setCampaignFields({
       ...EMPTY_CAMPAIGN,
@@ -899,7 +903,7 @@ export default function MediaLibrary() {
         </TabsList>
       </Tabs>
 
-      {collection === "motion" && <HeroAssignments />}
+      {collection === "motion" && <HeroAssignments canEdit={canEdit} />}
 
       <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/20 p-4">
@@ -990,7 +994,7 @@ export default function MediaLibrary() {
                                {campaign.pulseSource && <p className="truncate text-muted-foreground">Pulse: {campaign.pulseSource}</p>}
                                {campaign.approvedUse && <p className="line-clamp-2 text-muted-foreground">Approved: {campaign.approvedUse}</p>}
                              </div>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => openEditor(asset)} aria-label={`Edit campaign metadata for ${asset.filename}`}>
+                             <Button disabled={!canEdit} variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => openEditor(asset)} aria-label={`Edit campaign metadata for ${asset.filename}`}>
                                <Pencil className="h-3.5 w-3.5" />
                              </Button>
                            </div>
@@ -1008,7 +1012,7 @@ export default function MediaLibrary() {
                               )}
                               {asset.caption && <p className="line-clamp-2 text-muted-foreground">Usage: {asset.caption}</p>}
                             </div>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => openEditor(asset)} aria-label={`Edit video metadata for ${asset.filename}`}>
+                            <Button disabled={!canEdit} variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => openEditor(asset)} aria-label={`Edit video metadata for ${asset.filename}`}>
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
                           </div>
@@ -1067,7 +1071,7 @@ export default function MediaLibrary() {
                              {campaign.purpose && <p className="mt-1 max-w-72 text-xs text-muted-foreground">Purpose: {campaign.purpose}</p>}
                              {campaign.pulseSource && <p className="max-w-72 text-xs text-muted-foreground">Pulse: {campaign.pulseSource}</p>}
                              {campaign.approvedUse && <p className="max-w-72 text-xs text-muted-foreground">Approved: {campaign.approvedUse}</p>}
-                             <Button variant="link" size="sm" className="mt-1 h-auto p-0 text-xs" onClick={() => openEditor(asset)}>Edit metadata</Button>
+                              <Button disabled={!canEdit} variant="link" size="sm" className="mt-1 h-auto p-0 text-xs" onClick={() => openEditor(asset)}>Edit metadata</Button>
                           </td>
                         )}
                         {collection === "motion" && (
@@ -1081,7 +1085,7 @@ export default function MediaLibrary() {
                             <p className="truncate text-xs text-muted-foreground">
                               Poster: {asset.motionMetadata?.posterMediaId || "Not assigned"} • Fallback: {asset.motionMetadata?.reducedMotionMediaId || "Not assigned"}
                             </p>
-                            <Button variant="link" size="sm" className="mt-1 h-auto p-0 text-xs" onClick={() => openEditor(asset)}>Edit metadata</Button>
+                            <Button disabled={!canEdit} variant="link" size="sm" className="mt-1 h-auto p-0 text-xs" onClick={() => openEditor(asset)}>Edit metadata</Button>
                           </td>
                         )}
                         <td className="max-w-64 px-4 py-3">
@@ -1125,7 +1129,7 @@ export default function MediaLibrary() {
               Keep the governed {editingAsset?.collection === "motion" ? "motion asset context" : "campaign context"} for {editingAsset?.filename} current.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <fieldset disabled={!canEdit} className="space-y-4 py-4">
             {editingAsset?.collection === "motion" && (
               <>
                 <div className="space-y-2">
@@ -1139,10 +1143,10 @@ export default function MediaLibrary() {
               </>
             )}
             {editingAsset?.collection === "motion" ? motionForm : campaignForm}
-          </div>
+          </fieldset>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setEditingAsset(null)}>Cancel</Button>
-            <Button onClick={saveAssetMetadata} disabled={updateMedia.isPending}>
+            <Button onClick={saveAssetMetadata} disabled={!canEdit || updateMedia.isPending}>
               {updateMedia.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save metadata
             </Button>

@@ -180,7 +180,14 @@ test("legacy root restore activates only the selected authorized edition", { con
         rootStatus = "active";
         return { rowCount: 1, rows: [] };
       }
-      if (statement.includes("SELECT e.id,e.published_revision_id,d.kind")) {
+      if (
+        statement.includes("SELECT e.id")
+        && statement.includes("WHERE r.id=$2")
+        && statement.includes("FOR UPDATE OF e")
+      ) {
+        return { rowCount: 1, rows: [{ id: "ksa-edition" }] };
+      }
+      if (statement.includes("SELECT e.id,e.published_revision_id,e.content_mode,d.kind")) {
         assert.deepEqual(values.slice(0, 3), ["legacy-document", "ksa", "en"]);
         return {
           rowCount: 1,
@@ -207,9 +214,55 @@ test("legacy root restore activates only the selected authorized edition", { con
           }],
         };
       }
+      if (
+        statement.includes("FROM cms_revisions r")
+        && statement.includes("r.revision_number=(SELECT max")
+      ) {
+        return {
+          rowCount: 1,
+          rows: [{
+            id: latestRevisionId,
+            edition_id: "ksa-edition",
+            payload,
+            kind: "publication",
+            canonical_slug: "legacy-document",
+            workflow_state: latestWorkflow,
+            market: "ksa",
+            locale: "en",
+          }],
+        };
+      }
+      if (
+        statement.includes("WITH submitted AS")
+        && statement.includes("workflow_state='in-review'")
+      ) {
+        latestWorkflow = "in-review";
+        states.ksa = "in-review";
+        return { rowCount: 1, rows: [{ id: "ksa-edition" }] };
+      }
       if (statement.includes("SET publication_state='draft'")) {
         states.ksa = "draft";
         return { rowCount: 1, rows: [{ id: "ksa-edition" }] };
+      }
+      if (
+        statement.includes("FROM cms_revisions r")
+        && statement.includes("WHERE r.id=$1 AND e.document_id=$2")
+      ) {
+        if (values[0] !== latestRevisionId) return { rowCount: 0, rows: [] };
+        return {
+          rowCount: 1,
+          rows: [{
+            id: latestRevisionId,
+            edition_id: "ksa-edition",
+            payload,
+            kind: "publication",
+            canonical_slug: "legacy-document",
+            workflow_state: latestWorkflow,
+            publication_state: states.ksa,
+            market: "ksa",
+            locale: "en",
+          }],
+        };
       }
       if (statement.includes("SELECT r.id,r.edition_id,r.payload,d.kind")) {
         if (values[0] !== latestRevisionId) return { rowCount: 0, rows: [] };

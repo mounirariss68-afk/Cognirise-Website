@@ -551,6 +551,7 @@ test("navigation settings enforce the authoritative market-aware menu contract",
   const valid = {
     market: "ksa",
     locale: "en",
+    version: 1,
     pages: [
       { path: "/platforms", enabled: true },
       { path: "/platforms/cognios", enabled: false },
@@ -597,6 +598,7 @@ test("navigation settings enforce the authoritative market-aware menu contract",
     usedFallback: false,
     isConfigured: true,
     updatedAt: null,
+    version: 1,
   }).success, true);
   assert.equal(NavigationSettingsSchema.safeParse({
     ...valid,
@@ -608,6 +610,7 @@ test("navigation settings enforce the authoritative market-aware menu contract",
     usedFallback: false,
     isConfigured: true,
     updatedAt: null,
+    version: 1,
   }).success, false);
 });
 

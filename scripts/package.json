@@ -10,6 +10,8 @@
     "cms:inventory": "tsx ./src/cms/inventory.ts",
     "cms:import": "tsx ./src/cms/import.ts",
     "cms:reconcile": "tsx ./src/cms/reconcile.ts",
+    "cms:recover-people": "tsx ./src/cms/people-recovery.ts",
+    "cms:verify-people-recovery": "tsx ./src/cms/people-recovery-verify.ts",
     "cms:reconcile-document-availability": "tsx ./src/cms/document-availability-reconciliation.ts",
     "cms:verify": "tsx ./src/cms/verify.ts",
     "cms:import-task-295-media": "tsx ./src/cms/task-295-media-import.ts",
@@ -29,7 +31,8 @@
     "cms:reconcile-offices": "tsx ./src/cms/office-reconciliation.ts",
     "cms:backup": "tsx ./src/cms/backup.ts",
     "cms:verify-backup": "tsx ./src/cms/verify-backup.ts",
-    "cms:rehearse-rollback": "tsx ./src/cms/rehearse-rollback.ts"
+    "cms:rehearse-rollback": "tsx ./src/cms/rehearse-rollback.ts",
+    "cms:owner-browser-fixture": "tsx ./cms-owner-browser-fixture.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "^8.0.1",

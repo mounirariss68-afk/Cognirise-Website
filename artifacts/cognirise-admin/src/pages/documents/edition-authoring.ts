@@ -33,6 +33,7 @@ export function editionAuthoringActions(
   canEdit: boolean,
   canPublish: boolean,
   hasUnsaved: boolean,
+  allowDirectPublish = false,
 ): EditionAuthoringActions {
   if (!edition?.exact || !edition.revisionId) {
     return { canSave: false, canSubmit: false, canPublish: false, immutable: true };
@@ -44,7 +45,10 @@ export function editionAuthoringActions(
     canSave: canEdit && !immutable
       && (workflow === "approved" || (["draft", "rejected"].includes(workflow ?? "") && hasUnsaved)),
     canSubmit: canEdit && !hasUnsaved && ["draft", "rejected"].includes(workflow ?? ""),
-    canPublish: canPublish && !hasUnsaved && workflow === "in-review",
+    canPublish: canPublish && !hasUnsaved && (
+      workflow === "in-review"
+      || (allowDirectPublish && ["draft", "rejected"].includes(workflow ?? ""))
+    ),
     immutable,
   };
 }

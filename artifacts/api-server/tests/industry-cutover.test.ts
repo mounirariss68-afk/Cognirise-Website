@@ -127,7 +127,7 @@ test("the governed inventory produces six publishable industry cutover records i
   assert.ok(industries.every((operation) =>
     operation.idempotencyKey.startsWith(
       operation.slug === "financial-services"
-        ? "cms-industry-contract-v12:"
+        ? "cms-industry-financial-services-thesis-v13:"
         : operation.slug === "education"
           ? "cms-industry-education-successor-v12:"
         : "cms-industry-contract-v8:",

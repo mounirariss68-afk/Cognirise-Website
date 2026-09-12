@@ -6,6 +6,7 @@ import { useMarketStore } from "@/store/market";
 import { BrandButton } from "@/components/ui/brand-button";
 import { contentRecord, resolveCmsMedia, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
+import { PublicationPresentation } from "@/components/cms/PublicCmsPresentations";
 
 const articles = {
   "ai-should-move-the-business": {
@@ -153,6 +154,19 @@ export default function InsightArticle() {
   }
 
   if (!article) return null;
+
+  if (cms.data && record) {
+    return (
+      <PublicationPresentation
+        title={cms.data.title}
+        summary={cms.data.summary}
+        content={record}
+        heroMedia={heroMedia}
+        pdfMedia={pdfMedia}
+        socialMedia={socialMedia}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col">

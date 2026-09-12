@@ -36,3 +36,15 @@ test("a remote edition update leaves an already-open exact iframe pin stale rath
     "the initial edition still receives a preview pin",
   );
 });
+
+test("initial preview follows the loaded latest revision even when an edition matrix pointer is stale", () => {
+  assert.equal(
+    previewPinForEditionRevision(undefined, "revision-2", false, "revision-3"),
+    "revision-3",
+  );
+  assert.equal(
+    previewPinForEditionRevision("revision-2", "revision-2", false, "revision-3"),
+    "revision-2",
+    "an already-open intentional history pin remains exact",
+  );
+});

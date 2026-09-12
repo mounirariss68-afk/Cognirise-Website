@@ -38,3 +38,9 @@ Absence of textual merge conflicts does not establish semantic correctness.
 **Why:** Automated merging has moved valid code between unrelated scopes without leaving conflict markers. Some resulting tests remained syntactically valid while checking the wrong behavior.
 
 **How to apply:** Validate changed behavioral boundaries after merging; syntax and type checks alone cannot establish that source selection and publication protections survived.
+
+Historical-copy recovery stages a draft; it is not a separate publication authority.
+
+**Why:** A purpose-built recovery publisher can diverge from the CMS's media, destination, and administrator checks even when its copy provenance is exact. Permission to recover copy does not establish missing rights or verification facts.
+
+**How to apply:** Preserve immutable media pins and newer editorial fields during reconciliation, then use the normal authenticated, confirmed CMS Publish operation. Report unresolved approval blockers rather than fabricating clearance.

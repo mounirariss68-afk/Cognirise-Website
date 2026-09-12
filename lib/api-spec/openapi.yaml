@@ -166,7 +166,7 @@ paths:
     post:
       operationId: reviewNavigationSettings
       tags: [navigation]
-      summary: Submit navigation and page availability for review
+      summary: Optionally submit navigation and page availability for collaborator review
       security:
         - cookieAuth: []
           csrfToken: []
@@ -187,7 +187,7 @@ paths:
     post:
       operationId: publishNavigationSettings
       tags: [navigation]
-      summary: Publish reviewed navigation and page availability
+      summary: Publish an explicitly confirmed navigation version
       security:
         - cookieAuth: []
           csrfToken: []
@@ -196,7 +196,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NavigationEditionSelector"
+              $ref: "#/components/schemas/PublishNavigationSettings"
       responses:
         "200":
           description: Published navigation
@@ -899,6 +899,10 @@ paths:
       operationId: submitDocument
       tags: [documents]
       summary: Submit a document for review
+      description: >
+        Submits the latest exact saved draft or rejected revision. If the
+        transition commits but confirmation hydration fails, the response is
+        a 500 ApiError with committed=true; reload before retrying.
       security:
         - cookieAuth: []
           csrfToken: []
@@ -919,6 +923,12 @@ paths:
                 $ref: "#/components/schemas/Document"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          description: Submission committed but confirmation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
   /documents/{documentId}/review-comments:
     get:
       operationId: listDocumentReviewComments
@@ -989,7 +999,12 @@ paths:
     post:
       operationId: publishDocument
       tags: [documents]
-      summary: Publish or schedule a document
+      summary: Publish a saved document (administrators may publish eligible drafts directly)
+      description: >
+        Publishers can publish only the latest exact-edition revision that is in review.
+        An administrator can publish the latest saved draft or rejected revision directly
+        after the same content, media, immutable-version, and shared-destination governance
+        checks. The request never publishes unsaved or stale editor state.
       security:
         - cookieAuth: []
           csrfToken: []
@@ -1010,6 +1025,12 @@ paths:
                 $ref: "#/components/schemas/Document"
         "409":
           $ref: "#/components/responses/Conflict"
+        "500":
+          description: Publication committed but confirmation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
   /documents/{documentId}/rollback:
     post:
       operationId: rollbackDocument
@@ -2023,6 +2044,9 @@ components:
       properties:
         error: { type: string }
         code: { type: string }
+        committed:
+          type: boolean
+          description: The state transition committed even though the confirmation response failed; reload before retrying.
         details:
           type: object
           additionalProperties: true
@@ -2060,7 +2084,7 @@ components:
     NavigationSettings:
       type: object
       additionalProperties: false
-      required: [items, pages, requestedMarket, requestedLocale, market, locale, usedFallback, updatedAt]
+      required: [items, pages, requestedMarket, requestedLocale, market, locale, usedFallback, updatedAt, version]
       properties:
         items:
           type: array
@@ -2079,10 +2103,14 @@ components:
         updatedAt:
           type: ["string", "null"]
           format: date-time
+        version:
+          type: number
+          minimum: 1
+          multipleOf: 1
     UpdateNavigationSettings:
       type: object
       additionalProperties: false
-      required: [items, pages, market, locale]
+      required: [items, pages, market, locale, version]
       properties:
         items:
           type: array
@@ -2094,6 +2122,10 @@ components:
             $ref: "#/components/schemas/PageAvailability"
         market: { type: string }
         locale: { type: string }
+        version:
+          type: number
+          minimum: 1
+          multipleOf: 1
     NavigationEditionSelector:
       type: object
       additionalProperties: false
@@ -2101,6 +2133,24 @@ components:
       properties:
         market: { type: string }
         locale: { type: string }
+        version:
+          type: number
+          minimum: 1
+          multipleOf: 1
+    PublishNavigationSettings:
+      type: object
+      additionalProperties: false
+      required: [market, locale, version, confirmation]
+      properties:
+        market: { type: string }
+        locale: { type: string }
+        version:
+          type: number
+          minimum: 1
+          multipleOf: 1
+        confirmation:
+          type: string
+          enum: [PUBLISH]
     HealthStatus:
       type: object
       required: [status]
@@ -3013,6 +3063,13 @@ components:
       properties:
         revisionId: { type: string }
         note: { type: string, maxLength: 1000 }
+        availabilityVersion:
+          type: number
+          multipleOf: 1
+          minimum: 0
+          description: >
+            The shared destination draft version observed when the publication
+            confirmation opened. Required when publishing a shared source.
     RollbackInput:
       type: object
       additionalProperties: false

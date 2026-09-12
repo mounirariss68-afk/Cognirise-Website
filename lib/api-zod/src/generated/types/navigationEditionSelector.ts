@@ -9,4 +9,6 @@
 export interface NavigationEditionSelector {
   market: string;
   locale: string;
+  /** @minimum 1 */
+  version?: number;
 }

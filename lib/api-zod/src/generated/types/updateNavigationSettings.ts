@@ -13,4 +13,6 @@ export interface UpdateNavigationSettings {
   pages: PageAvailability[];
   market: string;
   locale: string;
+  /** @minimum 1 */
+  version: number;
 }

@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
+import * as React from "react";
 import type { PersonContent } from "@workspace/api-zod";
 import { assetUrl } from "@/lib/assets";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
@@ -8,6 +9,7 @@ import {
   landingCta,
   landingMedia,
   landingText,
+  type CmsRecord,
   type CmsDeliveryState,
   useCmsCollection,
 } from "@/lib/cms";
@@ -20,6 +22,7 @@ type TeamProfile = {
   background: string;
   contribution: string;
 };
+type PreviewPersonRecord = CmsRecord<PersonContent> & { content: PersonContent };
 
 function ProfileList({ profiles, label, delivery }: { profiles: TeamProfile[]; label: string; delivery: CmsDeliveryState }) {
   if (delivery !== "cms" && delivery !== "intentional-empty") return null;
@@ -65,7 +68,7 @@ function PeopleDeliveryStatus({ delivery }: { delivery: CmsDeliveryState }) {
   return null;
 }
 
-export default function AboutPeople() {
+export default function AboutPeople({ previewPerson }: { previewPerson?: PreviewPersonRecord } = {}) {
   const governedLanding = useGovernedLanding();
   const heroEyebrow = landingText(governedLanding, "about-hero-eyebrow", "Our Team");
   const heroHeading = landingText(governedLanding, "about-hero-heading", "Judgment stays close to the work.");
@@ -89,12 +92,29 @@ export default function AboutPeople() {
       group: content.role === "advisor" ? "advisor" as const : "leadership" as const,
       title: personContent.title,
       background: content.biography || "",
-      contribution: content.contribution || content.focusAreas.map((focus) => focus.detail).join(" "),
+      contribution: content.contribution || "",
     };
   });
+  const previewProfile = previewPerson
+    ? (() => {
+        const content = previewPerson.content;
+        if (content.role !== "founder" && content.role !== "leader" && content.role !== "advisor") return undefined;
+        const name = previewPerson.title;
+        return {
+          initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 3),
+          name,
+          group: content.role === "advisor" ? "advisor" as const : "leadership" as const,
+          title: content.title,
+          background: content.biography || "",
+          contribution: content.contribution || "",
+        };
+      })()
+    : undefined;
   const visiblePeople = peopleQuery.delivery === "cms" ? peopleQuery.data : [];
-  const leadership = visiblePeople.filter((profile) => profile.group === "leadership");
-  const advisors = visiblePeople.filter((profile) => profile.group === "advisor");
+  const renderedPeople = previewProfile ? [previewProfile] : visiblePeople;
+  const peopleDelivery = previewPerson ? "cms" as const : peopleQuery.delivery;
+  const leadership = renderedPeople.filter((profile) => profile.group === "leadership");
+  const advisors = renderedPeople.filter((profile) => profile.group === "advisor");
 
   return (
     <main className="overflow-hidden bg-background">
@@ -118,8 +138,8 @@ export default function AboutPeople() {
           <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">{leadershipEyebrow}</p>
           <h2 id="leadership-team" className="text-4xl font-semibold md:text-6xl">{leadershipTitle}</h2>
         </div>
-        <PeopleDeliveryStatus delivery={peopleQuery.delivery} />
-        <ProfileList profiles={leadership} label="Leadership Team" delivery={peopleQuery.delivery} />
+        <PeopleDeliveryStatus delivery={peopleDelivery} />
+        <ProfileList profiles={leadership} label="Leadership Team" delivery={peopleDelivery} />
       </section>
 
       <section id="board-of-advisors" className="scroll-mt-24 bg-secondary px-6 py-24 md:px-12 md:py-32" aria-labelledby="board-of-advisors-heading">
@@ -131,7 +151,7 @@ export default function AboutPeople() {
               <p className="mt-5 max-w-[650px] leading-7 text-muted-foreground">{advisoryBody}</p>
             </div>
           </div>
-          <ProfileList profiles={advisors} label="Board of Advisors" delivery={peopleQuery.delivery} />
+          <ProfileList profiles={advisors} label="Board of Advisors" delivery={peopleDelivery} />
         </div>
       </section>
 

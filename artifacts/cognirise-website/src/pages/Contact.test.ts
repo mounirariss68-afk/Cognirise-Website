@@ -5,17 +5,19 @@ import test from "node:test";
 const websiteRoot = new URL("../../", import.meta.url);
 
 test("Contact renders the ordered published office collection from the CMS", async () => {
-  const [contact, cms] = await Promise.all([
+  const [contact, cms, officeCard] = await Promise.all([
     readFile(new URL("src/pages/Contact.tsx", websiteRoot), "utf8"),
     readFile(new URL("src/lib/cms.ts", websiteRoot), "utf8"),
+    readFile(new URL("src/components/OfficeContactCard.tsx", websiteRoot), "utf8"),
   ]);
 
   assert.match(contact, /useCmsCollection\("office"/);
   assert.match(contact, /contentRecord\(item, "office"\)/);
   assert.match(contact, /\.toSorted\(\(left, right\) => left\.order - right\.order\)/);
   assert.match(contact, /phone: office\.phone/);
-  assert.match(contact, /office\.phone \? \(/);
-  assert.match(contact, /href=\{`tel:\$\{office\.phone\}`\}/);
+  assert.match(contact, /<OfficeContactCard[^>]+\{\.\.\.office\}/);
+  assert.match(officeCard, /phone \? \(/);
+  assert.match(officeCard, /href=\{`tel:\$\{phone\}`\}/);
   assert.doesNotMatch(contact, /OFFICE_LOCATIONS\.dubai\.address/);
   assert.match(cms, /office: true/);
 });

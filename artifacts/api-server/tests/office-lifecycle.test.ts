@@ -128,7 +128,7 @@ test("published offices with later drafts archive, restore, and never use perman
       if (statement.includes("SELECT status FROM cms_documents")) {
         return { rowCount: 1, rows: [{ status: rootStatus }] };
       }
-      if (statement.includes("SELECT e.id,e.published_revision_id,d.kind")) {
+      if (statement.includes("SELECT e.id,e.published_revision_id,e.content_mode,d.kind")) {
         return {
           rowCount: 1,
           rows: [{

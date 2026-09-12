@@ -10,4 +10,9 @@ export interface PublicationInput {
   revisionId: string;
   /** @maxLength 1000 */
   note?: string;
+  /**
+     * The shared destination draft version observed when the publication confirmation opened. Required when publishing a shared source.
+     * @minimum 0
+     */
+  availabilityVersion?: number;
 }

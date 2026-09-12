@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useListMarketEditions, useCreateMarketEdition, getListMarketEditionsQueryKey, useGetSession } from "@workspace/api-client-react";
+import { useListMarketEditions, useCreateMarketEdition, useUpdateMarketEdition, useDeleteMarketEdition, getListMarketEditionsQueryKey, useGetSession, type MarketEdition } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Settings2, Plus, Shield, ShieldAlert, Check } from "lucide-react";
+import { Loader2, Settings2, Plus, Shield, ShieldAlert, Check, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
@@ -19,44 +19,95 @@ const createMarketSchema = z.object({
   defaultLocale: z.string().min(2, "Default Locale required"),
   fallbackMarketCode: z.string().optional(),
   fallbackLocale: z.string().optional(),
+  enabled: z.boolean().optional(),
+  isCanonical: z.boolean().optional(),
 });
+
+function errorMessage(error: unknown, fallback: string) {
+  if (!error || typeof error !== "object") return fallback;
+  const candidate = error as { data?: { error?: unknown } | string; error?: unknown; message?: unknown };
+  if (candidate.data && typeof candidate.data === "object" && typeof candidate.data.error === "string") return candidate.data.error;
+  if (typeof candidate.data === "string" && candidate.data.trim()) return candidate.data;
+  if (typeof candidate.error === "string" && candidate.error.trim()) return candidate.error;
+  if (typeof candidate.message === "string" && candidate.message.trim()) return candidate.message;
+  return fallback;
+}
 
 export default function MarketEditions() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [editingMarket, setEditingMarket] = useState<MarketEdition | null>(null);
   const { data: session } = useGetSession();
   const isAdministrator = session?.user?.role === "administrator";
 
-  const { data, isLoading } = useListMarketEditions({ page: 1, pageSize: 50 }, { query: { queryKey: getListMarketEditionsQueryKey({ page: 1, pageSize: 50 }) } });
+  const listParams = { page: 1, pageSize: 50 };
+  const { data, isLoading, isError, error } = useListMarketEditions(listParams, { query: { queryKey: getListMarketEditionsQueryKey(listParams) } });
   const createMarket = useCreateMarketEdition();
+  const updateMarket = useUpdateMarketEdition();
+  const deleteMarket = useDeleteMarketEdition();
 
   const form = useForm<z.infer<typeof createMarketSchema>>({
     resolver: zodResolver(createMarketSchema),
-    defaultValues: { code: "", displayName: "", defaultLocale: "en-US", fallbackMarketCode: "", fallbackLocale: "" }
+    defaultValues: { code: "", displayName: "", defaultLocale: "en-US", fallbackMarketCode: "", fallbackLocale: "", enabled: true, isCanonical: false }
   });
 
   const onSubmit = (values: z.infer<typeof createMarketSchema>) => {
-    createMarket.mutate({
-      data: {
-        code: values.code,
-        displayName: values.displayName,
-        defaultLocale: values.defaultLocale,
-        fallbackMarketCode: values.fallbackMarketCode || null,
-        fallbackLocale: values.fallbackLocale || null,
-        isCanonical: false, // New markets are never canonical by default
-        enabled: true
-      }
-    }, {
+    const data = {
+      code: values.code,
+      displayName: values.displayName,
+      defaultLocale: values.defaultLocale,
+      fallbackMarketCode: values.fallbackMarketCode || null,
+      fallbackLocale: values.fallbackLocale || null,
+      isCanonical: Boolean(values.isCanonical),
+      enabled: Boolean(values.enabled),
+    };
+    if (editingMarket) {
+      updateMarket.mutate({ marketEditionId: editingMarket.id, data }, {
+        onSuccess: () => {
+          toast({ title: "Market updated successfully" });
+          setIsOpen(false);
+          setEditingMarket(null);
+          form.reset();
+          queryClient.invalidateQueries({ queryKey: getListMarketEditionsQueryKey(listParams) });
+        },
+        onError: (err) => toast({ title: "Update failed", description: errorMessage(err, "The market could not be updated."), variant: "destructive" }),
+      });
+      return;
+    }
+    createMarket.mutate({ data }, {
       onSuccess: () => {
         toast({ title: "Market created successfully" });
         setIsOpen(false);
         form.reset();
-        queryClient.invalidateQueries({ queryKey: getListMarketEditionsQueryKey({ page: 1, pageSize: 50 }) });
+        queryClient.invalidateQueries({ queryKey: getListMarketEditionsQueryKey(listParams) });
       },
-      onError: (err) => {
-        toast({ title: "Creation failed", description: (err as any).error, variant: "destructive" });
-      }
+      onError: (err) => toast({ title: "Creation failed", description: errorMessage(err, "The market could not be created."), variant: "destructive" }),
+    });
+  };
+
+  const openEditor = (market: MarketEdition) => {
+    setEditingMarket(market);
+    form.reset({
+      code: market.code,
+      displayName: market.displayName,
+      defaultLocale: market.defaultLocale,
+      fallbackMarketCode: market.fallbackMarketCode ?? "",
+      fallbackLocale: market.fallbackLocale ?? "",
+      enabled: market.enabled,
+      isCanonical: market.isCanonical,
+    });
+    setIsOpen(true);
+  };
+
+  const removeMarket = (market: MarketEdition) => {
+    if (!window.confirm(`Delete the ${market.displayName} market? Referenced or canonical markets cannot be deleted.`)) return;
+    deleteMarket.mutate({ marketEditionId: market.id }, {
+      onSuccess: () => {
+        toast({ title: "Market deleted" });
+        queryClient.invalidateQueries({ queryKey: getListMarketEditionsQueryKey(listParams) });
+      },
+      onError: (err) => toast({ title: "Delete failed", description: errorMessage(err, "The market could not be deleted."), variant: "destructive" }),
     });
   };
 
@@ -68,7 +119,11 @@ export default function MarketEditions() {
           <p className="text-sm text-muted-foreground font-mono mt-1">Regional configurations, locales, and fallbacks</p>
         </div>
         {isAdministrator && (
-          <Button onClick={() => setIsOpen(true)} className="gap-2">
+          <Button onClick={() => {
+            setEditingMarket(null);
+            form.reset();
+            setIsOpen(true);
+          }} className="gap-2">
             <Plus className="w-4 h-4" />
             Add Market
           </Button>
@@ -76,6 +131,7 @@ export default function MarketEditions() {
       </div>
 
       <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+        {isError && <div role="alert" className="border-b border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">Market editions could not be loaded. {errorMessage(error, "Check your administrator session and try again.")}</div>}
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow>
@@ -135,9 +191,14 @@ export default function MarketEditions() {
                   </TableCell>
                   <TableCell>
                     {isAdministrator ? (
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                        <Settings2 className="w-4 h-4" />
-                      </Button>
+                       <div className="flex items-center gap-1">
+                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => openEditor(market)} aria-label={`Edit ${market.displayName}`}>
+                           <Settings2 className="w-4 h-4" />
+                         </Button>
+                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" disabled={deleteMarket.isPending || market.isCanonical} title={market.isCanonical ? "Canonical markets cannot be deleted" : "Delete market"} onClick={() => removeMarket(market)} aria-label={`Delete ${market.displayName}`}>
+                           <Trash2 className="w-4 h-4" />
+                         </Button>
+                       </div>
                     ) : null}
                   </TableCell>
                 </TableRow>
@@ -157,11 +218,17 @@ export default function MarketEditions() {
         </div>
       </div>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) {
+          setEditingMarket(null);
+          form.reset();
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Market Edition</DialogTitle>
-            <DialogDescription className="font-mono text-xs mt-1">Configure a new regional delivery target.</DialogDescription>
+            <DialogTitle>{editingMarket ? "Edit Market Edition" : "Add Market Edition"}</DialogTitle>
+            <DialogDescription className="font-mono text-xs mt-1">{editingMarket ? "Changes apply to this market configuration after administrator confirmation." : "Configure a new regional delivery target."}</DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
@@ -195,11 +262,27 @@ export default function MarketEditions() {
                   )} />
                 </div>
               </div>
+              {editingMarket && (
+                <div className="flex gap-6 border-t border-border pt-4">
+                  <FormField control={form.control} name="enabled" render={({ field }) => (
+                    <FormItem className="flex items-center gap-2 space-y-0">
+                      <FormControl><input type="checkbox" checked={field.value ?? false} onChange={field.onChange} /></FormControl>
+                      <FormLabel className="font-mono text-xs uppercase tracking-wider">Enabled for delivery</FormLabel>
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="isCanonical" render={({ field }) => (
+                    <FormItem className="flex items-center gap-2 space-y-0">
+                      <FormControl><input type="checkbox" checked={field.value ?? false} onChange={field.onChange} disabled={editingMarket.isCanonical} /></FormControl>
+                      <FormLabel className="font-mono text-xs uppercase tracking-wider">Canonical baseline</FormLabel>
+                    </FormItem>
+                  )} />
+                </div>
+              )}
               <DialogFooter className="pt-4 mt-2">
                 <Button variant="ghost" type="button" onClick={() => setIsOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={createMarket.isPending}>
-                  {createMarket.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
-                  Create Market
+                <Button type="submit" disabled={createMarket.isPending || updateMarket.isPending}>
+                  {(createMarket.isPending || updateMarket.isPending) ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+                  {editingMarket ? "Save Market" : "Create Market"}
                 </Button>
               </DialogFooter>
             </form>

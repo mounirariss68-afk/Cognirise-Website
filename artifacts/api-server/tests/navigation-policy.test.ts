@@ -91,6 +91,7 @@ test("persisted policies drop only retired Work records and keep approved settin
 const base = {
   market: "ksa",
   locale: "en",
+  version: 1,
   pages: [
     { path: "/platforms", enabled: true },
     { path: "/platforms/cognios", enabled: false },
@@ -425,7 +426,7 @@ test("real navigation selection promotes a public shared source over a private e
       );
       CREATE TABLE cms_navigation_published_policies (
         market text NOT NULL, locale text NOT NULL, items jsonb NOT NULL, pages jsonb NOT NULL,
-        published_at timestamptz NOT NULL
+        published_version integer NOT NULL DEFAULT 1, published_at timestamptz NOT NULL
       );
       INSERT INTO market_editions (id,code,default_locale,is_canonical)
       VALUES ('destination-ksa','ksa','en',true);
@@ -446,12 +447,12 @@ test("real navigation selection promotes a public shared source over a private e
       INSERT INTO cms_document_market_availability
         (document_id,market_edition_id,locale,published_decision)
       VALUES ('document','destination-ksa','en','show');
-      INSERT INTO cms_navigation_published_policies (market,locale,items,pages,published_at)
+      INSERT INTO cms_navigation_published_policies (market,locale,items,pages,published_version,published_at)
       VALUES (
         'ksa','en',
         '[{"id":"platforms","label":"Shared","parentId":null,"order":0,"destination":"/platforms/shared-platform","visible":true},{"id":"methodologies","label":"Private","parentId":null,"order":1,"destination":"/platforms/private-platform","visible":true}]'::jsonb,
         '[{"path":"/platforms/shared-platform","enabled":true},{"path":"/platforms/private-platform","enabled":true}]'::jsonb,
-        now()
+        1, now()
       );
     `);
     t.mock.method(pool, "query", async (sql: string, values?: unknown[]) =>

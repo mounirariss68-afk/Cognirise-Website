@@ -101,6 +101,7 @@ import type {
   PublicHeroFilm,
   PublicHeroSlot,
   PublicationInput,
+  PublishNavigationSettings,
   PublishedContent,
   PublishedContentPage,
   ReadinessAssessment,
@@ -778,7 +779,7 @@ export const getReviewNavigationSettingsUrl = () => {
 }
 
 /**
- * @summary Submit navigation and page availability for review
+ * @summary Optionally submit navigation and page availability for collaborator review
  */
 export const reviewNavigationSettings = async (navigationEditionSelector: NavigationEditionSelector, options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
 
@@ -827,7 +828,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type ReviewNavigationSettingsMutationError = ErrorType<unknown>
 
     /**
- * @summary Submit navigation and page availability for review
+ * @summary Optionally submit navigation and page availability for collaborator review
  */
 export const useReviewNavigationSettings = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewNavigationSettings>>, TError,{data: BodyType<NavigationEditionSelector>}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -849,16 +850,16 @@ export const getPublishNavigationSettingsUrl = () => {
 }
 
 /**
- * @summary Publish reviewed navigation and page availability
+ * @summary Publish an explicitly confirmed navigation version
  */
-export const publishNavigationSettings = async (navigationEditionSelector: NavigationEditionSelector, options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
+export const publishNavigationSettings = async (publishNavigationSettings: PublishNavigationSettings, options?: Parameters<typeof customFetch>[1]): Promise<NavigationSettings> => {
 
   return customFetch<NavigationSettings>(getPublishNavigationSettingsUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(navigationEditionSelector)
+    body: JSON.stringify(publishNavigationSettings)
   }
 );}
 
@@ -867,8 +868,8 @@ export const publishNavigationSettings = async (navigationEditionSelector: Navig
 
 
 export const getPublishNavigationSettingsMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishNavigationSettings>>, TError,{data: BodyType<NavigationEditionSelector>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof publishNavigationSettings>>, TError,{data: BodyType<NavigationEditionSelector>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishNavigationSettings>>, TError,{data: BodyType<PublishNavigationSettings>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publishNavigationSettings>>, TError,{data: BodyType<PublishNavigationSettings>}, TContext> => {
 
 const mutationKey = ['publishNavigationSettings'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -880,7 +881,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishNavigationSettings>>, {data: BodyType<NavigationEditionSelector>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishNavigationSettings>>, {data: BodyType<PublishNavigationSettings>}> = (props) => {
           const {data} = props ?? {};
 
           return  publishNavigationSettings(data,requestOptions)
@@ -894,18 +895,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PublishNavigationSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof publishNavigationSettings>>>
-    export type PublishNavigationSettingsMutationBody = BodyType<NavigationEditionSelector>
+    export type PublishNavigationSettingsMutationBody = BodyType<PublishNavigationSettings>
     export type PublishNavigationSettingsMutationError = ErrorType<unknown>
 
     /**
- * @summary Publish reviewed navigation and page availability
+ * @summary Publish an explicitly confirmed navigation version
  */
 export const usePublishNavigationSettings = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishNavigationSettings>>, TError,{data: BodyType<NavigationEditionSelector>}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishNavigationSettings>>, TError,{data: BodyType<PublishNavigationSettings>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof publishNavigationSettings>>,
         TError,
-        {data: BodyType<NavigationEditionSelector>},
+        {data: BodyType<PublishNavigationSettings>},
         TContext
       > => {
       return useMutation(getPublishNavigationSettingsMutationOptions(options));
@@ -3301,6 +3302,7 @@ export const getSubmitDocumentUrl = (documentId: string,) => {
 }
 
 /**
+ * Submits the latest exact saved draft or rejected revision. If the transition commits but confirmation hydration fails, the response is a 500 ApiError with committed=true; reload before retrying.
  * @summary Submit a document for review
  */
 export const submitDocument = async (documentId: string,
@@ -3319,7 +3321,7 @@ export const submitDocument = async (documentId: string,
 
 
 
-export const getSubmitDocumentMutationOptions = <TError = ErrorType<ConflictResponse>,
+export const getSubmitDocumentMutationOptions = <TError = ErrorType<ConflictResponse | ApiError>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitDocument>>, TError,{documentId: string;data: BodyType<ReviewSubmissionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof submitDocument>>, TError,{documentId: string;data: BodyType<ReviewSubmissionInput>}, TContext> => {
 
@@ -3348,12 +3350,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type SubmitDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof submitDocument>>>
     export type SubmitDocumentMutationBody = BodyType<ReviewSubmissionInput>
-    export type SubmitDocumentMutationError = ErrorType<ConflictResponse>
+    export type SubmitDocumentMutationError = ErrorType<ConflictResponse | ApiError>
 
     /**
  * @summary Submit a document for review
  */
-export const useSubmitDocument = <TError = ErrorType<ConflictResponse>,
+export const useSubmitDocument = <TError = ErrorType<ConflictResponse | ApiError>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitDocument>>, TError,{documentId: string;data: BodyType<ReviewSubmissionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof submitDocument>>,
@@ -3606,7 +3608,8 @@ export const getPublishDocumentUrl = (documentId: string,) => {
 }
 
 /**
- * @summary Publish or schedule a document
+ * Publishers can publish only the latest exact-edition revision that is in review. An administrator can publish the latest saved draft or rejected revision directly after the same content, media, immutable-version, and shared-destination governance checks. The request never publishes unsaved or stale editor state.
+ * @summary Publish a saved document (administrators may publish eligible drafts directly)
  */
 export const publishDocument = async (documentId: string,
     publicationInput: PublicationInput, options?: Parameters<typeof customFetch>[1]): Promise<Document> => {
@@ -3624,7 +3627,7 @@ export const publishDocument = async (documentId: string,
 
 
 
-export const getPublishDocumentMutationOptions = <TError = ErrorType<ConflictResponse>,
+export const getPublishDocumentMutationOptions = <TError = ErrorType<ConflictResponse | ApiError>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishDocument>>, TError,{documentId: string;data: BodyType<PublicationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof publishDocument>>, TError,{documentId: string;data: BodyType<PublicationInput>}, TContext> => {
 
@@ -3653,12 +3656,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type PublishDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof publishDocument>>>
     export type PublishDocumentMutationBody = BodyType<PublicationInput>
-    export type PublishDocumentMutationError = ErrorType<ConflictResponse>
+    export type PublishDocumentMutationError = ErrorType<ConflictResponse | ApiError>
 
     /**
- * @summary Publish or schedule a document
+ * @summary Publish a saved document (administrators may publish eligible drafts directly)
  */
-export const usePublishDocument = <TError = ErrorType<ConflictResponse>,
+export const usePublishDocument = <TError = ErrorType<ConflictResponse | ApiError>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishDocument>>, TError,{documentId: string;data: BodyType<PublicationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof publishDocument>>,

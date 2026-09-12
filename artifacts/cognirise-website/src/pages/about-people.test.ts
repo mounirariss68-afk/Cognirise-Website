@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import * as React from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { renderToStaticMarkup } from "react-dom/server";
+import { Router } from "wouter";
+import { CmsPreviewRequestBoundary, type CmsRecord } from "@/lib/cms";
+import type { PersonContent } from "@workspace/api-zod";
+import AboutPeople from "./AboutPeople";
 
 const websiteRoot = new URL("../../", import.meta.url);
 
@@ -10,8 +17,9 @@ test("uses the CMS people collection in API order without a compiled roster", as
   assert.doesNotMatch(source, /\bpeopleFallback\b|\bprofileOrder\b/);
   assert.match(source, /const visiblePeople = peopleQuery\.delivery === "cms" \? peopleQuery\.data : \[\]/);
   assert.doesNotMatch(source, /\.sort\(/);
-  assert.match(source, /const leadership = visiblePeople\.filter/);
-  assert.match(source, /const advisors = visiblePeople\.filter/);
+  assert.match(source, /const renderedPeople = previewProfile \? \[previewProfile\] : visiblePeople/);
+  assert.match(source, /const leadership = renderedPeople\.filter/);
+  assert.match(source, /const advisors = renderedPeople\.filter/);
   assert.match(source, /String\(profiles\.length\)/);
 });
 
@@ -47,4 +55,48 @@ test("retires the advisors destination while retaining the board on Our Team", a
   assert.doesNotMatch(sitemap, /\/advisors/);
   assert.match(publicSitemap, /path !== "\/advisors"/);
   assert.doesNotMatch(publicSitemap, /retiredPaths/);
+});
+
+test("draft About override renders the person immediately without the suppressed-query loading state", () => {
+  const person = {
+    id: "person-founder-preview",
+    slug: "founder-preview",
+    title: "Mounir Founder",
+    summary: null,
+    content: {
+      schemaVersion: 1,
+      role: "founder",
+      title: "Founder & Partner",
+      biography: "A draft founder background.",
+      contribution: "A draft contribution that must remain visible in the About aside.",
+      focusAreas: [{ title: "Structured focus", detail: "Editorial-only detail." }],
+      profileLinks: [{ label: "Profile", url: "https://example.com/profile" }],
+      identityMedia: undefined,
+      approvedFallback: "initials",
+    },
+    media: [],
+    publishedAt: "",
+    updatedAt: "",
+  } as unknown as CmsRecord<PersonContent> & { content: PersonContent };
+  const client = new QueryClient();
+  const markup = renderToStaticMarkup(
+    React.createElement(
+      QueryClientProvider,
+      { client },
+      React.createElement(
+        Router,
+        { ssrPath: "/preview/person" },
+        React.createElement(
+          CmsPreviewRequestBoundary,
+          null,
+          React.createElement(AboutPeople, { previewPerson: person }),
+        ),
+      ),
+    ),
+  );
+
+  assert.match(markup, /Mounir Founder/);
+  assert.match(markup, /A draft contribution that must remain visible in the About aside/);
+  assert.doesNotMatch(markup, /Loading team profiles/);
+  assert.doesNotMatch(markup, /Structured focus/);
 });

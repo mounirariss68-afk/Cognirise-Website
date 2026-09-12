@@ -132,6 +132,8 @@ export const GetPublicNavigationSettingsQueryParams = zod.object({
 export const getPublicNavigationSettingsResponseItemsItemOrderMin = 0;
 export const getPublicNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
 
+export const getPublicNavigationSettingsResponseVersionMultipleOf = 1;
+
 
 
 export const GetPublicNavigationSettingsResponse = zod.object({
@@ -153,7 +155,8 @@ export const GetPublicNavigationSettingsResponse = zod.object({
   "locale": zod.string(),
   "usedFallback": zod.boolean(),
   "isConfigured": zod.boolean().optional(),
-  "updatedAt": zod.coerce.date().nullable()
+  "updatedAt": zod.coerce.date().nullable(),
+  "version": zod.number().min(1).multipleOf(getPublicNavigationSettingsResponseVersionMultipleOf)
 })
 
 
@@ -170,6 +173,8 @@ export const GetNavigationSettingsQueryParams = zod.object({
 
 export const getNavigationSettingsResponseItemsItemOrderMin = 0;
 export const getNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
+
+export const getNavigationSettingsResponseVersionMultipleOf = 1;
 
 
 
@@ -192,7 +197,8 @@ export const GetNavigationSettingsResponse = zod.object({
   "locale": zod.string(),
   "usedFallback": zod.boolean(),
   "isConfigured": zod.boolean().optional(),
-  "updatedAt": zod.coerce.date().nullable()
+  "updatedAt": zod.coerce.date().nullable(),
+  "version": zod.number().min(1).multipleOf(getNavigationSettingsResponseVersionMultipleOf)
 })
 
 
@@ -201,6 +207,8 @@ export const GetNavigationSettingsResponse = zod.object({
  */
 export const updateNavigationSettingsBodyItemsItemOrderMin = 0;
 export const updateNavigationSettingsBodyItemsItemOrderMultipleOf = 1;
+
+export const updateNavigationSettingsBodyVersionMultipleOf = 1;
 
 
 
@@ -218,11 +226,14 @@ export const UpdateNavigationSettingsBody = zod.object({
   "enabled": zod.boolean()
 })),
   "market": zod.string(),
-  "locale": zod.string()
+  "locale": zod.string(),
+  "version": zod.number().min(1).multipleOf(updateNavigationSettingsBodyVersionMultipleOf)
 })
 
 export const updateNavigationSettingsResponseItemsItemOrderMin = 0;
 export const updateNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
+
+export const updateNavigationSettingsResponseVersionMultipleOf = 1;
 
 
 
@@ -245,20 +256,28 @@ export const UpdateNavigationSettingsResponse = zod.object({
   "locale": zod.string(),
   "usedFallback": zod.boolean(),
   "isConfigured": zod.boolean().optional(),
-  "updatedAt": zod.coerce.date().nullable()
+  "updatedAt": zod.coerce.date().nullable(),
+  "version": zod.number().min(1).multipleOf(updateNavigationSettingsResponseVersionMultipleOf)
 })
 
 
 /**
- * @summary Submit navigation and page availability for review
+ * @summary Optionally submit navigation and page availability for collaborator review
  */
+export const reviewNavigationSettingsBodyVersionMultipleOf = 1;
+
+
+
 export const ReviewNavigationSettingsBody = zod.object({
   "market": zod.string(),
-  "locale": zod.string()
+  "locale": zod.string(),
+  "version": zod.number().min(1).multipleOf(reviewNavigationSettingsBodyVersionMultipleOf).optional()
 })
 
 export const reviewNavigationSettingsResponseItemsItemOrderMin = 0;
 export const reviewNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
+
+export const reviewNavigationSettingsResponseVersionMultipleOf = 1;
 
 
 
@@ -281,20 +300,29 @@ export const ReviewNavigationSettingsResponse = zod.object({
   "locale": zod.string(),
   "usedFallback": zod.boolean(),
   "isConfigured": zod.boolean().optional(),
-  "updatedAt": zod.coerce.date().nullable()
+  "updatedAt": zod.coerce.date().nullable(),
+  "version": zod.number().min(1).multipleOf(reviewNavigationSettingsResponseVersionMultipleOf)
 })
 
 
 /**
- * @summary Publish reviewed navigation and page availability
+ * @summary Publish an explicitly confirmed navigation version
  */
+export const publishNavigationSettingsBodyVersionMultipleOf = 1;
+
+
+
 export const PublishNavigationSettingsBody = zod.object({
   "market": zod.string(),
-  "locale": zod.string()
+  "locale": zod.string(),
+  "version": zod.number().min(1).multipleOf(publishNavigationSettingsBodyVersionMultipleOf),
+  "confirmation": zod.enum(['PUBLISH'])
 })
 
 export const publishNavigationSettingsResponseItemsItemOrderMin = 0;
 export const publishNavigationSettingsResponseItemsItemOrderMultipleOf = 1;
+
+export const publishNavigationSettingsResponseVersionMultipleOf = 1;
 
 
 
@@ -317,7 +345,8 @@ export const PublishNavigationSettingsResponse = zod.object({
   "locale": zod.string(),
   "usedFallback": zod.boolean(),
   "isConfigured": zod.boolean().optional(),
-  "updatedAt": zod.coerce.date().nullable()
+  "updatedAt": zod.coerce.date().nullable(),
+  "version": zod.number().min(1).multipleOf(publishNavigationSettingsResponseVersionMultipleOf)
 })
 
 
@@ -4385,6 +4414,7 @@ export const GetDocumentRevisionResponse = zod.object({
 
 
 /**
+ * Submits the latest exact saved draft or rejected revision. If the transition commits but confirmation hydration fails, the response is a 500 ApiError with committed=true; reload before retrying.
  * @summary Submit a document for review
  */
 export const SubmitDocumentParams = zod.object({
@@ -5286,7 +5316,8 @@ export const RejectDocumentRevisionResponse = zod.object({
 
 
 /**
- * @summary Publish or schedule a document
+ * Publishers can publish only the latest exact-edition revision that is in review. An administrator can publish the latest saved draft or rejected revision directly after the same content, media, immutable-version, and shared-destination governance checks. The request never publishes unsaved or stale editor state.
+ * @summary Publish a saved document (administrators may publish eligible drafts directly)
  */
 export const PublishDocumentParams = zod.object({
   "documentId": zod.coerce.string()
@@ -5294,11 +5325,15 @@ export const PublishDocumentParams = zod.object({
 
 export const publishDocumentBodyNoteMax = 1000;
 
+export const publishDocumentBodyAvailabilityVersionMin = 0;
+export const publishDocumentBodyAvailabilityVersionMultipleOf = 1;
+
 
 
 export const PublishDocumentBody = zod.object({
   "revisionId": zod.string(),
-  "note": zod.string().max(publishDocumentBodyNoteMax).optional()
+  "note": zod.string().max(publishDocumentBodyNoteMax).optional(),
+  "availabilityVersion": zod.number().min(publishDocumentBodyAvailabilityVersionMin).multipleOf(publishDocumentBodyAvailabilityVersionMultipleOf).optional().describe('The shared destination draft version observed when the publication confirmation opened. Required when publishing a shared source.\n')
 })
 
 export const publishDocumentResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');

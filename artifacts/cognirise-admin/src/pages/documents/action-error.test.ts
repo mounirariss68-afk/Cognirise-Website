@@ -24,6 +24,19 @@ test("keeps structured content errors distinct from media approval", () => {
   assert.equal(result.mediaBlocked, false);
 });
 
+test("marks committed action failures so the editor does not retry a stale revision", () => {
+  const result = describeActionError({
+    status: 500,
+    data: {
+      code: "DOCUMENT_SUBMIT_COMMITTED",
+      committed: true,
+      error: "The document was submitted, but its confirmation could not be loaded.",
+    },
+  });
+  assert.equal(result.committed, true);
+  assert.match(result.message, /submitted/i);
+});
+
 test("supports legacy responses, session errors and network errors", () => {
   assert.equal(describeActionError({ error: "Session expired" }).message, "Session expired");
   assert.equal(describeActionError(new Error("Network unavailable")).message, "Network unavailable");

@@ -19,4 +19,6 @@ export interface NavigationSettings {
   isConfigured?: boolean;
   /** @nullable */
   updatedAt: Date | null;
+  /** @minimum 1 */
+  version: number;
 }

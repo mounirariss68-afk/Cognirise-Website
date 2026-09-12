@@ -10,5 +10,7 @@ import type { ApiErrorDetails } from './apiErrorDetails';
 export interface ApiError {
   error: string;
   code?: string;
+  /** The state transition committed even though the confirmation response failed; reload before retrying. */
+  committed?: boolean;
   details?: ApiErrorDetails;
 }

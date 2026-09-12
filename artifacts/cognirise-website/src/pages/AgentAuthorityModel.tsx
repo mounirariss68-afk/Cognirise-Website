@@ -397,7 +397,10 @@ export function AgentAuthorityLayout({
   const cta = framework?.cta && typeof framework.cta.label === "string" && typeof framework.cta.href === "string"
     ? framework.cta
     : { label: "Bring us one process", href: "/value-scan" };
-  const imageUrl = heroMedia?.url ?? `${window.location.origin}${assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")}`;
+  const heroImage = heroMedia?.url ?? (preview ? undefined : assetUrl("/images/cognirise/cognirise-pulse-governance.jpg"));
+  const imageUrl = heroImage
+    ? (heroImage.startsWith("http") ? heroImage : `${window.location.origin}${heroImage}`)
+    : undefined;
   useDynamicMetadata(preview ? {
     title: `Draft preview: ${title} | Cognirise`,
     description: "Protected CMS draft preview.",
@@ -458,12 +461,18 @@ export function AgentAuthorityLayout({
             transition={{ duration: reducedMotion ? 0 : 1, ease: [0.16, 1, 0.3, 1] }}
           >
             <figure data-methodology-hero-frame className="clip-diagonal relative h-[430px] overflow-hidden bg-[#071936] lg:h-[650px]">
-            <PulseImage
-              src={heroMedia?.url ?? assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")}
-              alt={framework?.heroMedia?.altText || heroMedia?.altText || "A luminous gateway marking the boundary between proposed and permitted agent authority."}
-              className="h-full w-full object-cover"
-              eager
-            />
+             {heroImage ? (
+               <PulseImage
+                 src={heroImage}
+                 alt={framework?.heroMedia?.altText || heroMedia?.altText || "A luminous gateway marking the boundary between proposed and permitted agent authority."}
+                 className="h-full w-full object-cover"
+                 eager
+               />
+             ) : (
+               <div className="grid h-full place-items-center p-8 text-center text-sm text-white/70">
+                 Draft hero media is not available in this revision.
+               </div>
+             )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/80 via-transparent to-transparent" />
             <figcaption className="absolute bottom-[11%] left-8 right-8 max-w-[480px] text-white">
               <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/65">The governing rule</span>

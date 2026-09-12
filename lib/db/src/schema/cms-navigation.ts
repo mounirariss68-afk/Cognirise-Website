@@ -18,6 +18,7 @@ export const cmsNavigationEditionsTable = pgTable("cms_navigation_editions", {
   sortOrder: integer("sort_order").notNull().default(0),
   destination: text("destination").notNull(),
   visible: boolean("visible").notNull().default(true),
+  version: integer("version").notNull().default(1),
   workflowState: text("workflow_state").notNull().default("approved"),
   updatedByUserId: uuid("updated_by_user_id").references(() => cmsUsersTable.id, { onDelete: "set null" }),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -28,6 +29,7 @@ export const cmsPageAvailabilityTable = pgTable("cms_page_availability", {
   locale: text("locale").notNull(),
   path: text("path").notNull(),
   enabled: boolean("enabled").notNull().default(true),
+  version: integer("version").notNull().default(1),
   workflowState: text("workflow_state").notNull().default("approved"),
   updatedByUserId: uuid("updated_by_user_id").references(() => cmsUsersTable.id, { onDelete: "set null" }),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -38,6 +40,7 @@ export const cmsNavigationPublishedPoliciesTable = pgTable("cms_navigation_publi
   locale: text("locale").notNull(),
   items: jsonb("items").notNull(),
   pages: jsonb("pages").notNull(),
+  publishedVersion: integer("published_version").notNull().default(1),
   publishedByUserId: uuid("published_by_user_id").references(() => cmsUsersTable.id, { onDelete: "set null" }),
   publishedAt: timestamp("published_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [primaryKey({ columns: [table.market, table.locale] })]);

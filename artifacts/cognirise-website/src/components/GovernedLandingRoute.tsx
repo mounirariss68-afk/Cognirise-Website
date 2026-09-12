@@ -1,11 +1,13 @@
 import { Component, createContext, useContext, useEffect, type ComponentType, type ErrorInfo, type ReactNode } from "react";
-import type { CmsRecord } from "@/lib/cms";
+import { CmsPreviewRequestBoundary, type CmsRecord } from "@/lib/cms";
+import { PreviewMetadataBoundary } from "@/lib/metadata";
 import type { LandingPageContent } from "@workspace/api-zod";
 import { contentRecord, governedLandingDelivery, LandingSlotDeliveryError, useCmsCollection } from "@/lib/cms";
 
 export type GovernedLandingRouteProps = {
   pagePath: "/about" | "/partners" | "/platforms" | "/insights" | "/methodologies";
   compiled: ComponentType;
+  pageOverride?: CmsRecord<LandingPageContent>;
 };
 const GovernedLandingContext = createContext<CmsRecord<LandingPageContent> | null>(null);
 export const useGovernedLanding = () => useContext(GovernedLandingContext);
@@ -34,7 +36,21 @@ class LandingSlotErrorBoundary extends Component<{ children: ReactNode }, { erro
   }
 }
 
-export function GovernedLandingRoute({ pagePath, compiled: Compiled }: GovernedLandingRouteProps) {
+function GovernedLandingPreviewRoute({ compiled: Compiled, pageOverride }: Required<Pick<GovernedLandingRouteProps, "compiled" | "pageOverride">>) {
+  return (
+    <CmsPreviewRequestBoundary>
+      <PreviewMetadataBoundary>
+        <LandingSlotErrorBoundary key={`${pageOverride.id}:${pageOverride.updatedAt}`}>
+          <GovernedLandingContext.Provider value={pageOverride}>
+            <Compiled />
+          </GovernedLandingContext.Provider>
+        </LandingSlotErrorBoundary>
+      </PreviewMetadataBoundary>
+    </CmsPreviewRequestBoundary>
+  );
+}
+
+function GovernedLandingPublishedRoute({ pagePath, compiled: Compiled }: GovernedLandingRouteProps) {
   const query = useCmsCollection("landing-page", [], (item) => contentRecord(item, "landing-page"));
   const page = query.data.find((candidate) => candidate.pagePath === pagePath);
   const delivery = governedLandingDelivery(
@@ -99,4 +115,9 @@ export function GovernedLandingRoute({ pagePath, compiled: Compiled }: GovernedL
       </GovernedLandingContext.Provider>
     </LandingSlotErrorBoundary>
   );
+}
+
+export function GovernedLandingRoute({ pageOverride, ...props }: GovernedLandingRouteProps) {
+  if (pageOverride) return <GovernedLandingPreviewRoute compiled={props.compiled} pageOverride={pageOverride} />;
+  return <GovernedLandingPublishedRoute {...props} />;
 }

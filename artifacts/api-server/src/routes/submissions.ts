@@ -85,22 +85,94 @@ router.patch(
       return;
     }
     const input = parsed.data;
-    const result = await pool.query(
-      `UPDATE cms_submission_workflows SET status=COALESCE($2,status),
-       assigned_to_user_id=CASE WHEN $3 THEN $4 ELSE assigned_to_user_id END,
-       notes=CASE WHEN $5 THEN jsonb_build_object('text',$6::text) ELSE notes END,
-       resolved_at=CASE WHEN $2='resolved' THEN now() ELSE resolved_at END,
-       updated_at=now() WHERE id=$1 RETURNING id`,
-      [
-        req.params.submissionId,
-        input.status ?? null,
-        Object.hasOwn(input, "ownerId"),
-        input.ownerId ?? null,
-        Object.hasOwn(input, "notes"),
-        input.notes ?? null,
-      ],
-    );
-    if (!result.rowCount) {
+    const hasStatus = Object.hasOwn(input, "status");
+    const hasOwner = Object.hasOwn(input, "ownerId");
+    const hasNotes = Object.hasOwn(input, "notes");
+    if (!hasStatus && !hasOwner && !hasNotes) {
+      res.status(400).json({ error: "At least one submission field must be changed." });
+      return;
+    }
+
+    // Keep workflow updates and their immutable history in one transaction. In
+    // addition to making the inbox refresh safe, this prevents a successful
+    // status/owner edit from losing the corresponding workflow event.
+    const client = await pool.connect();
+    let result;
+    let previous: Record<string, any> | undefined;
+    try {
+      await client.query("BEGIN");
+      const current = await client.query(
+        `SELECT id,status,assigned_to_user_id owner_id,notes
+           FROM cms_submission_workflows WHERE id=$1 FOR UPDATE`,
+        [req.params.submissionId],
+      );
+      if (!current.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(404).json({ error: "Submission not found." });
+        return;
+      }
+      previous = current.rows[0];
+
+      if (hasOwner && input.ownerId && String(input.ownerId) !== String(previous!.owner_id ?? "")) {
+        const owner = await client.query(
+          "SELECT id,status FROM cms_users WHERE id=$1",
+          [input.ownerId],
+        );
+        if (!owner.rowCount) {
+          await client.query("ROLLBACK");
+          res.status(400).json({ error: "The selected owner does not exist." });
+          return;
+        }
+        if (owner.rows[0].status !== "active") {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "Only an active CMS user can own a submission." });
+          return;
+        }
+      }
+
+      result = await client.query(
+        `UPDATE cms_submission_workflows SET status=CASE WHEN $2 THEN $3 ELSE status END,
+         assigned_to_user_id=CASE WHEN $4 THEN $5 ELSE assigned_to_user_id END,
+         notes=CASE WHEN $6 THEN CASE WHEN $7::text IS NULL OR btrim($7::text)='' THEN NULL
+           ELSE jsonb_build_object('text',$7::text) END ELSE notes END,
+         resolved_at=CASE WHEN $2 AND $3='resolved' THEN now()
+           WHEN $2 AND $3 IN ('new','open','contacted') THEN NULL ELSE resolved_at END,
+         first_responded_at=CASE WHEN $2 AND $3='contacted' AND first_responded_at IS NULL
+           THEN now() ELSE first_responded_at END,
+         updated_at=now() WHERE id=$1 RETURNING id`,
+        [
+          req.params.submissionId,
+          hasStatus,
+          input.status ?? null,
+          hasOwner,
+          input.ownerId ?? null,
+          hasNotes,
+          input.notes ?? null,
+        ],
+      );
+      await client.query(
+        `INSERT INTO cms_submission_events
+          (workflow_id,actor_user_id,event_type,from_status,to_status,details)
+         VALUES ($1,$2,'workflow.updated',$3,$4,$5::jsonb)`,
+        [
+          req.params.submissionId,
+          (res.locals.auth as AuthContext).user.id,
+          previous!.status,
+          input.status ?? previous!.status,
+          JSON.stringify({
+            ...(hasOwner ? { ownerId: input.ownerId ?? null } : {}),
+            ...(hasNotes ? { notesChanged: true } : {}),
+          }),
+        ],
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+    if (!result?.rowCount) {
       res.status(404).json({ error: "Submission not found." });
       return;
     }

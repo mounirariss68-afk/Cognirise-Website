@@ -132,6 +132,7 @@ export const NavigationSettingsSchema = z.object({
   usedFallback: z.boolean(),
   isConfigured: z.boolean(),
   updatedAt: z.string().datetime().nullable(),
+  version: z.number().int().min(1),
 }).strict().superRefine((value, context) => {
   validateNavigationHierarchy(value.items, context);
 });
@@ -197,6 +198,7 @@ export const UpdateNavigationSettingsSchema = z.object({
   pages: z.array(PageAvailabilitySchema),
   market: z.string().min(1),
   locale: z.string().min(1),
+  version: z.number().int().min(1),
 }).strict().superRefine((value, context) => {
   const ids = value.items.map((item) => item.id);
   if (new Set(ids).size !== ids.length) {

@@ -14,6 +14,11 @@ pnpm --filter @workspace/db push
 # editorial draft instead of allowing a full canonical payload merge.
 pnpm --filter @workspace/scripts cms:reconcile-financial-services-thesis -- --apply-db --target=development --write --report-conflict
 pnpm --filter @workspace/scripts cms:reconcile
+# Task 318's narrowly scoped historical recovery is the only people operation
+# in this hook. It creates a draft only; normal authenticated CMS Publish is
+# the sole publication path.
+pnpm --filter @workspace/scripts cms:recover-people -- --apply-db --target=development --write
+pnpm --filter @workspace/scripts cms:verify-people-recovery -- --target=development --write
 pnpm --filter @workspace/scripts cms:reconcile-site-hero-media -- --apply-db --target=development
 # Schema push applies columns and tables only; this development-only command
 # performs the guarded historical availability/source reconciliation afterwards.

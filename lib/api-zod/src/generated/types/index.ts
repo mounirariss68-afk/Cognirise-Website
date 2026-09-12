@@ -205,6 +205,8 @@ export * from './publicMedia';
 export * from './publishedContent';
 export * from './publishedContentContent';
 export * from './publishedContentPage';
+export * from './publishNavigationSettings';
+export * from './publishNavigationSettingsConfirmation';
 export * from './readinessAnswer';
 export * from './readinessAnswers';
 export * from './readinessAssessment';

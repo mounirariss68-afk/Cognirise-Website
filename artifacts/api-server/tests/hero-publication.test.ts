@@ -16,9 +16,9 @@ test("generic review and publication validate site configuration and pin request
 
 test("publication aborts before pointer advancement when review transition loses a race", async () => {
   const source = await readFile(resolve(process.cwd(), "src/routes/documents.ts"), "utf8");
-  assert.match(source, /const approved = await client\.query\([\s\S]*?workflow_state='in-review'/);
+  assert.match(source, /const approved = directAdministratorPublish[\s\S]*?workflow_state='in-review'/);
   assert.match(source, /if \(approved\.rowCount !== 1\) \{[\s\S]*?ROLLBACK[\s\S]*?selected revision is no longer in review/);
-  const transition = source.indexOf("const approved = await client.query");
+  const transition = source.indexOf("const approved = directAdministratorPublish");
   const pointer = source.indexOf("UPDATE cms_market_editions SET publication_state", transition);
   assert.ok(transition >= 0 && pointer > transition);
   assert.ok(source.indexOf("if (approved.rowCount !== 1)", transition) < pointer);

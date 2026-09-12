@@ -1,3 +1,4 @@
+import { createContext, createElement, useContext, type ReactNode } from "react";
 import { getGetPublicContactConfigurationQueryKey, getGetPublicHeroFilmQueryKey, getGetPublishedContentQueryKey, useGetPublishedContent, useGetPublicContactConfiguration, useGetPublicHeroFilm, useListPublishedContent } from "@workspace/api-client-react";
 import type { DocumentKind, PublishedContent } from "@workspace/api-client-react";
 import {
@@ -55,6 +56,14 @@ type ImmutableCmsMediaReference = {
   mediaVersionId: string;
   altText?: string;
 };
+
+const CmsPreviewRequestContext = createContext(false);
+
+/** Render a compiled public route against an issued preview snapshot without
+ * making a second public CMS request for the route's related collections. */
+export function CmsPreviewRequestBoundary({ children }: { children: ReactNode }) {
+  return createElement(CmsPreviewRequestContext.Provider, { value: true }, children);
+}
 
 /** The fixed industry-outline identifiers accepted by a protected preview. */
 export { INDUSTRY_SECTION_IDS as INDUSTRY_PREVIEW_SECTION_IDS };
@@ -395,17 +404,21 @@ export function useCmsCollection<T>(
   mapper: (item: PublishedContent, index: number) => T | null,
 ) {
   const { market, locale } = useMarketStore();
+  const previewRequestDisabled = useContext(CmsPreviewRequestContext);
   const params = { kind: kind as DocumentKind, market, locale, pageSize: 100 };
   const query = useListPublishedContent(params, {
-    query: kind === "person" ? {
+    query: {
       queryKey: getListPublishedContentQueryKey(params),
-      staleTime: 0,
-      refetchOnMount: "always",
-      refetchOnWindowFocus: true,
-      placeholderData: undefined,
-    } : undefined,
+      ...(kind === "person" ? {
+        staleTime: 0,
+        refetchOnMount: "always",
+        refetchOnWindowFocus: true,
+        placeholderData: undefined,
+      } : {}),
+      ...(previewRequestDisabled ? { enabled: false } : {}),
+    },
   });
-  const response = query.data as (typeof query.data & {
+  const response = (previewRequestDisabled ? undefined : query.data) as (typeof query.data & {
     isConfigured?: boolean;
     configuredPagePaths?: string[];
   }) | undefined;
@@ -450,6 +463,7 @@ export function useCmsCollection<T>(
 
 export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
   const { market, locale } = useMarketStore();
+  const previewRequestDisabled = useContext(CmsPreviewRequestContext);
   // Collection landing narratives are intentionally code-owned; only entity
   // details are CMS-owned. Do not model landings as sentinel entity records.
   const codeOwnedLanding = ["about", "partners", "platforms", "insights", "work"].includes(slug);
@@ -458,11 +472,13 @@ export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
   const query = useGetPublishedContent(market, locale, kind as DocumentKind, slug, {
     query: {
       enabled: !codeOwnedLanding && !cutoverGated,
+      ...(previewRequestDisabled ? { enabled: false } : {}),
       queryKey: getGetPublishedContentQueryKey(market, locale, kind as DocumentKind, slug),
     },
   });
-  const validation = query.data
-    ? validateCmsContent(kind as CmsDocumentKind, query.data.content, "publish")
+  const deliveredData = previewRequestDisabled ? undefined : query.data;
+  const validation = deliveredData
+    ? validateCmsContent(kind as CmsDocumentKind, deliveredData.content, "publish")
     : undefined;
   const issue = query.isError
     ? `CMS detail request failed for ${kind}/${slug}.`
@@ -472,11 +488,11 @@ export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
   if (issue) console.error(issue);
   return {
     ...query,
-    data: codeOwnedLanding || cutoverGated ? undefined : validation?.success ? query.data : undefined,
+    data: codeOwnedLanding || cutoverGated ? undefined : validation?.success ? deliveredData : undefined,
     delivery: codeOwnedLanding || cutoverGated ? "compiled-fallback" as const
       : query.isPending ? "loading" as const
       : issue ? (validation && !validation.success ? "contract-error" : "api-error") as CmsDeliveryState
-      : query.data ? "cms" as const
+      : deliveredData ? "cms" as const
       : "intentional-empty" as const,
     issue,
     isAuthoritative: cutover,

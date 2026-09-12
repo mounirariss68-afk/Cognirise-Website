@@ -14,9 +14,55 @@ test("protected preview returns only revision-pinned media with private response
   assert.match(previewRoute, /ref\.field_path=\$2/);
   assert.match(previewRoute, /`revision:\$\{String\(row\.revision_id\)\}`/);
   assert.match(previewRoute, /r\.id=p\.revision_id/);
+  assert.match(previewRoute, /previewMediaIds\(projectedDocument, row\.kind as CmsDocumentKind\)/);
+  assert.match(previewRoute, /SELECT d\.id document_id,d\.kind,v\.storage_key/);
   assert.match(previewRoute, /\/api\/preview\/\$\{encodeURIComponent\(String\(req\.params\.token\)\)\}\/media/);
   assert.match(previewRoute, /"\/preview\/:token\/media\/:mediaId\/:versionId"/);
   assert.match(previewRoute, /p\.revoked_at IS NULL/);
+});
+
+test("preview media capability collection includes structured references for the authoritative kind", async () => {
+  const { previewMediaIds } = await import("../src/routes/documents.ts");
+  const hero = "00000000-0000-4000-8000-000000000101";
+  const social = "00000000-0000-4000-8000-000000000102";
+  const legacy = "00000000-0000-4000-8000-000000000103";
+  const educatorImage = "00000000-0000-4000-8000-000000000104";
+  const researchImage = "00000000-0000-4000-8000-000000000105";
+  const payload = {
+    content: {
+      schemaVersion: 1,
+      variant: "article",
+      teaser: "Preview fixture",
+      body: [],
+      author: "Preview fixture",
+      publicationDate: "2026-10-01",
+      heroMedia: { mediaId: hero, mediaVersionId: "00000000-0000-4000-8000-000000000201", role: "hero" },
+      social: {
+        imageMedia: {
+          mediaId: social,
+          mediaVersionId: "00000000-0000-4000-8000-000000000202",
+          role: "og-image",
+        },
+      },
+      educationPov: {
+        imagery: {
+          educatorPractice: {
+            media: { mediaId: educatorImage, role: "supporting" },
+          },
+          researchCoordination: {
+            media: { mediaId: researchImage, role: "supporting" },
+          },
+        },
+      },
+    },
+    mediaIds: [legacy],
+  };
+  assert.deepEqual(previewMediaIds(payload, "industry"), [
+    legacy, hero, educatorImage, researchImage, social,
+  ]);
+  // The old inference fallback must not make an unknown structured kind look
+  // like a landing page; the capability route always supplies row.kind.
+  assert.deepEqual(previewMediaIds(payload), [legacy, hero, social]);
 });
 
 test("protected Education preview projects the complete snapshot for requested and edition markets", async () => {
@@ -45,7 +91,7 @@ test("preview sessions distinguish expiry and revocation without weakening capab
   assert.match(previewRoute, /authenticate,\s*requireMfa/);
   assert.match(previewRoute, /p\.expires_at,p\.revoked_at/);
   assert.match(previewRoute, /WHERE p\.token_digest=\$1/);
-  assert.match(previewRoute, /canAccessMarket[\s\S]*row\.revoked_at/);
+  assert.match(previewRoute, /canAccessEditionTarget[\s\S]*row\.revoked_at/);
   assert.match(previewRoute, /status\(410\)\.json\(\{ error: "Preview session has been revoked\.", reason: "revoked" \}\)/);
   assert.match(previewRoute, /status\(410\)\.json\(\{ error: "Preview session has expired\.", reason: "expired" \}\)/);
   assert.match(previewRoute, /Cache-Control": "no-store, private"/);
@@ -65,5 +111,5 @@ test("pending media is available through both protected preview stages, never th
   }
   assert.match(metadataRoute, /row\.revoked_at/);
   assert.match(binaryRoute, /p\.revoked_at IS NULL/);
-  assert.match(binaryRoute, /previewMediaIds\(asset\.rows\[0\]\.payload\)\.includes/);
+  assert.match(binaryRoute, /previewMediaIds\([\s\S]*asset\.rows\[0\]\.payload,[\s\S]*asset\.rows\[0\]\.kind as CmsDocumentKind/);
 });

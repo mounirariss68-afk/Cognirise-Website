@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 const pageUrl = new URL("./CmsPreview.tsx", import.meta.url);
 const layoutUrl = new URL("./AgentAuthorityModel.tsx", import.meta.url);
 const cmsUrl = new URL("../lib/cms.ts", import.meta.url);
+const presentationsUrl = new URL("../components/cms/PublicCmsPresentations.tsx", import.meta.url);
 
 test("framework previews use the buyer layout without a public CMS request", async () => {
   const [preview, layout] = await Promise.all([
@@ -118,4 +119,95 @@ test("embedded previews report only their opaque availability state to the same-
     preview.slice(preview.indexOf('type: "industry-preview-status"'), preview.indexOf('type: "industry-preview-status"') + 120),
     /token|revision|document|message/,
   );
+});
+
+test("every non-industry CMS family has an explicit public presentation", async () => {
+  const [preview, presentations] = await Promise.all([
+    readFile(pageUrl, "utf8"),
+    readFile(presentationsUrl, "utf8"),
+  ]);
+
+  for (const kind of ["person", "partner", "platform", "publication", "case-study", "landing-page", "site-configuration"]) {
+    assert.match(preview, new RegExp(`preview\\.kind === "${kind}"`), `missing ${kind} preview branch`);
+  }
+  for (const component of [
+    "PartnerProfilePresentation",
+    "PlatformPresentation",
+    "PublicationPresentation",
+    "CaseStudyPreviewPresentation",
+    "SiteConfigurationPresentation",
+  ]) {
+    assert.match(presentations, new RegExp(`export function ${component}`), `missing ${component}`);
+  }
+  assert.match(preview, /<GovernedLandingRoute/);
+  assert.doesNotMatch(preview, /<LandingPagePresentation/);
+  assert.doesNotMatch(preview, /<Content value=/);
+});
+
+test("person previews inject the draft into About and keep structured fields editorial-only", async () => {
+  const [preview, about, presentations] = await Promise.all([
+    readFile(pageUrl, "utf8"),
+    readFile(new URL("./AboutPeople.tsx", import.meta.url), "utf8"),
+    readFile(presentationsUrl, "utf8"),
+  ]);
+
+  assert.match(preview, /resolvePinnedCmsMedia\(media, person\.identityMedia\)/);
+  assert.match(preview, /<AboutPeople previewPerson=\{personRecord\}/);
+  assert.match(preview, /<CmsPreviewRequestBoundary>/);
+  assert.match(preview, /person\.focusAreas\.map/);
+  assert.match(preview, /Draft-only editorial fields/);
+  assert.match(about, /type PreviewPersonRecord = CmsRecord<PersonContent> & \{ content: PersonContent \}/);
+  assert.match(about, /contribution: content\.contribution \|\| ""/);
+  assert.match(about, /<h4 className="mb-5[^>]*>Background/);
+  assert.match(about, /What \{profile\.name\.split\(" "\)\[0\]\} brings to Cognirise/);
+  assert.doesNotMatch(about, /focusAreas\.map/);
+  assert.doesNotMatch(presentations, /PersonProfilePresentation/);
+  assert.doesNotMatch(preview, /assetUrl\(/);
+});
+
+test("preview media gaps fail closed before a public asset can be substituted", async () => {
+  const [preview, layout] = await Promise.all([
+    readFile(pageUrl, "utf8"),
+    readFile(layoutUrl, "utf8"),
+  ]);
+
+  assert.match(preview, /preview\.missingMediaIds\.length/);
+  assert.match(preview, /It has not been completed with public media/);
+  assert.match(layout, /preview \? undefined : assetUrl/);
+  assert.match(layout, /Draft hero media is not available in this revision/);
+});
+
+test("landing previews use the public governed route with draft context and no public collection request", async () => {
+  const [preview, route, cms, partners] = await Promise.all([
+    readFile(pageUrl, "utf8"),
+    readFile(new URL("../components/GovernedLandingRoute.tsx", import.meta.url), "utf8"),
+    readFile(cmsUrl, "utf8"),
+    readFile(new URL("./Partners.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(preview, /landingCompiledRoutes/);
+  assert.match(preview, /pageOverride=\{page\}/);
+  assert.match(route, /pageOverride\?: CmsRecord<LandingPageContent>/);
+  assert.match(route, /CmsPreviewRequestBoundary/);
+  assert.match(route, /PreviewMetadataBoundary/);
+  assert.match(cms, /previewRequestDisabled/);
+  assert.match(cms, /enabled: false/);
+  assert.match(partners, /<PartnerProfilePresentation/);
+  assert.match(preview, /<PartnerProfilePresentation/);
+  assert.match(preview, /resolvePinnedCmsMedia\(media, partner\.logoMedia\)/);
+  assert.doesNotMatch(preview, /<LandingPagePresentation/);
+});
+
+test("public platform and publication layouts remain the source of preview composition", async () => {
+  const [platform, article, presentations] = await Promise.all([
+    readFile(new URL("./PlatformDetail.tsx", import.meta.url), "utf8"),
+    readFile(new URL("./InsightArticle.tsx", import.meta.url), "utf8"),
+    readFile(presentationsUrl, "utf8"),
+  ]);
+
+  assert.match(platform, /<PlatformPresentation/);
+  assert.match(article, /<PublicationPresentation/);
+  assert.match(presentations, /<BrandButton href=\{content\.cta\.href\}/);
+  assert.match(presentations, /Ready to move the work/);
+  assert.match(presentations, /PublicationBody/);
 });

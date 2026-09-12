@@ -160,7 +160,7 @@ export async function publishedNavigationPolicy(market: string, locale: string) 
   if (!candidates) return null;
   for (const candidate of candidates) {
     const result = await pool.query(
-      `SELECT items,pages,published_at FROM cms_navigation_published_policies
+      `SELECT items,pages,published_at,published_version FROM cms_navigation_published_policies
         WHERE market=$1 AND locale=$2`,
       [candidate.market, candidate.locale],
     );
@@ -185,6 +185,7 @@ export async function publishedNavigationPolicy(market: string, locale: string) 
         requestedLocale: locale,
         usedFallback: candidate.market !== market || candidate.locale !== locale,
         publishedAt: result.rows[0].published_at,
+        version: Math.max(1, Number(result.rows[0].published_version) || 1),
       };
     }
     throw new Error(`Published navigation policy is invalid: ${parsed.error.issues[0]?.message ?? "invalid hierarchy"}`);

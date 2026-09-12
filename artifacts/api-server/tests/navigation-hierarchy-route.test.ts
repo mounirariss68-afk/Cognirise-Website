@@ -79,6 +79,7 @@ test("navigation patch rejects grandchild outcomes before writing", { concurrenc
   const patch = {
     market: "uae",
     locale: "en",
+    version: 1,
     pages: [],
     items: [{
       id: "platforms",
@@ -90,6 +91,16 @@ test("navigation patch rejects grandchild outcomes before writing", { concurrenc
     }],
   };
 
+  const missingVersion = await fetch(`${origin}/api/navigation`, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(Object.fromEntries(
+      Object.entries(patch).filter(([key]) => key !== "version"),
+    )),
+  });
+  assert.equal(missingVersion.status, 400);
+  assert.equal(writes, 0);
+
   for (const rows of [
     [],
     [{
@@ -99,6 +110,7 @@ test("navigation patch rejects grandchild outcomes before writing", { concurrenc
       sort_order: 3,
       destination: "/platforms/cognios",
       visible: true,
+      version: 1,
       workflow_state: "approved",
     }],
   ]) {
@@ -128,6 +140,7 @@ test("explicit null promotion survives save, reload, review, and publish", { con
   const pageRows = new Map<string, Record<string, unknown>>();
   let publishedItems: Array<Record<string, unknown>> | null = null;
   let publishedPages: Array<Record<string, unknown>> | null = null;
+  let publishedVersion = 0;
   const client = {
     query: async (sql: unknown, values: unknown[] = []) => {
       const statement = String(sql);
@@ -143,16 +156,18 @@ test("explicit null promotion survives save, reload, review, and publish", { con
         rows.set(String(values[2]), {
           item_id: values[2], label: values[3], parent_id: values[4],
           sort_order: values[5], destination: values[6], visible: values[7],
+          version: values[8],
           workflow_state: "draft", updated_at: now,
         });
       }
-      if (statement.includes("SELECT path,enabled,workflow_state")) {
+      if (statement.includes("SELECT path,enabled,version,workflow_state")) {
         const values = [...pageRows.values()];
         return { rowCount: values.length, rows: values };
       }
       if (statement.includes("INSERT INTO cms_page_availability")) {
         pageRows.set(String(values[2]), {
-          path: values[2], enabled: values[3], workflow_state: "draft", updated_at: now,
+          path: values[2], enabled: values[3], version: values[4],
+          workflow_state: "draft", updated_at: now,
         });
       }
       if (statement.includes("SET workflow_state='in-review'")) {
@@ -167,6 +182,7 @@ test("explicit null promotion survives save, reload, review, and publish", { con
       if (statement.includes("cms_navigation_published_policies") && statement.includes("INSERT")) {
         publishedItems = JSON.parse(String(values[2]));
         publishedPages = JSON.parse(String(values[3]));
+        publishedVersion = Number(values[4]);
       }
       if (statement.includes("SET workflow_state='approved'")) {
         for (const row of rows.values()) {
@@ -203,7 +219,9 @@ test("explicit null promotion survives save, reload, review, and publish", { con
     }
     if (statement.includes("cms_navigation_published_policies") && statement.includes("SELECT")) {
       return publishedItems
-        ? { rowCount: 1, rows: [{ items: publishedItems, pages: publishedPages, published_at: now }] }
+        ? { rowCount: 1, rows: [{
+          items: publishedItems, pages: publishedPages, published_at: now, published_version: publishedVersion,
+        }] }
         : { rowCount: 0, rows: [] };
     }
     if (statement.includes("FROM cms_navigation_editions")) {
@@ -240,6 +258,7 @@ test("explicit null promotion survives save, reload, review, and publish", { con
     method: "PUT", headers,
     body: JSON.stringify({
       market: "uae", locale: "en", pages: [{ path: "/platforms/cognios", enabled: false }],
+      version: 1,
       items: [{
         id: "platforms.cognios", label: "Custom CogniOS", parentId: null, order: 2,
         destination: "/platforms/cognios", visible: false,
@@ -247,23 +266,35 @@ test("explicit null promotion survives save, reload, review, and publish", { con
     }),
   });
   assert.equal(save.status, 200);
-  promoted(await save.json());
+  const saveBody = await save.json() as { version: number; items: unknown[] };
+  promoted(saveBody);
 
   const reload = await fetch(`${origin}/api/navigation?market=uae&locale=en`, { headers });
   assert.equal(reload.status, 200);
   promoted(await reload.json());
 
-  const review = await fetch(`${origin}/api/navigation/review`, {
-    method: "POST", headers, body: JSON.stringify({ market: "uae", locale: "en" }),
+  const missingConfirmation = await fetch(`${origin}/api/navigation/publish`, {
+    method: "POST", headers, body: JSON.stringify({
+      market: "uae", locale: "en", version: saveBody.version,
+    }),
   });
-  assert.equal(review.status, 200);
-  promoted(await review.json());
+  assert.equal(missingConfirmation.status, 400);
+
+  const stalePublish = await fetch(`${origin}/api/navigation/publish`, {
+    method: "POST", headers, body: JSON.stringify({
+      market: "uae", locale: "en", version: saveBody.version + 1, confirmation: "PUBLISH",
+    }),
+  });
+  assert.equal(stalePublish.status, 409);
 
   const publish = await fetch(`${origin}/api/navigation/publish`, {
-    method: "POST", headers, body: JSON.stringify({ market: "uae", locale: "en" }),
+    method: "POST", headers, body: JSON.stringify({
+      market: "uae", locale: "en", version: saveBody.version, confirmation: "PUBLISH",
+    }),
   });
   assert.equal(publish.status, 200);
   promoted(await publish.json());
+  assert.equal(publishedVersion, saveBody.version);
   assert.equal(publishedItems?.find((item) => item.id === "platforms.cognios")?.parentId, null);
   assert.equal(publishedPages?.find((page) => page.path === "/platforms/cognios")?.enabled, false);
 
@@ -271,16 +302,20 @@ test("explicit null promotion survives save, reload, review, and publish", { con
     method: "PUT", headers,
     body: JSON.stringify({
       market: "uae", locale: "en", items: [],
+      version: saveBody.version,
       pages: [{ path: "/faq", enabled: false }],
     }),
   });
   assert.equal(pageOnlySave.status, 200);
+  const pageOnlySaveBody = await pageOnlySave.json() as { version: number };
   const pageOnlyReview = await fetch(`${origin}/api/navigation/review`, {
     method: "POST", headers, body: JSON.stringify({ market: "uae", locale: "en" }),
   });
   assert.equal(pageOnlyReview.status, 200);
   const pageOnlyPublish = await fetch(`${origin}/api/navigation/publish`, {
-    method: "POST", headers, body: JSON.stringify({ market: "uae", locale: "en" }),
+    method: "POST", headers, body: JSON.stringify({
+      market: "uae", locale: "en", version: pageOnlySaveBody.version, confirmation: "PUBLISH",
+    }),
   });
   assert.equal(pageOnlyPublish.status, 200);
   assert.equal(publishedPages?.find((page) => page.path === "/faq")?.enabled, false);
@@ -303,6 +338,7 @@ test("explicit null promotion survives save, reload, review, and publish", { con
     method: "PUT", headers,
     body: JSON.stringify({
       market: "uae", locale: "en", pages: [],
+      version: pageOnlySaveBody.version,
       items: [{
         id: "about", label: "Reviewed about", parentId: null, order: 30,
         destination: "/about", visible: true,
@@ -310,20 +346,23 @@ test("explicit null promotion survives save, reload, review, and publish", { con
     }),
   });
   assert.equal(secondSave.status, 200);
+  const secondSaveBody = await secondSave.json() as { version: number };
   const secondReview = await fetch(`${origin}/api/navigation/review`, {
     method: "POST", headers, body: JSON.stringify({ market: "uae", locale: "en" }),
   });
   assert.equal(secondReview.status, 200);
   rows.set("insights", {
     item_id: "insights", label: "Unreviewed insights", parent_id: null, sort_order: 31,
-    destination: "/insights", visible: false, workflow_state: "draft", updated_at: now,
+    destination: "/insights", visible: false, version: 4, workflow_state: "draft", updated_at: now,
   });
   rows.set("work", {
     item_id: "work", label: "Legacy reviewed Work", parent_id: null, sort_order: 32,
-    destination: "/work", visible: true, workflow_state: "in-review", updated_at: now,
+    destination: "/work", visible: true, version: 4, workflow_state: "in-review", updated_at: now,
   });
   const secondPublish = await fetch(`${origin}/api/navigation/publish`, {
-    method: "POST", headers, body: JSON.stringify({ market: "uae", locale: "en" }),
+    method: "POST", headers, body: JSON.stringify({
+      market: "uae", locale: "en", version: secondSaveBody.version, confirmation: "PUBLISH",
+    }),
   });
   assert.equal(secondPublish.status, 200);
   await secondPublish.json();
@@ -343,5 +382,5 @@ test("explicit null promotion survives save, reload, review, and publish", { con
   assert.equal(secondBody.pages.some((page) => page.path === "/work"), false);
   assert.equal(secondBody.items.some((item) => item.id === "work"), false);
   assert.equal(secondBody.items.find((item) => item.id === "about")?.label, "Reviewed about");
-  assert.equal(secondBody.items.find((item) => item.id === "insights")?.label, "Insights");
+  assert.equal(secondBody.items.find((item) => item.id === "insights")?.label, "Unreviewed insights");
 });

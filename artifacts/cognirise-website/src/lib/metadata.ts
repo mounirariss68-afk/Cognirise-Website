@@ -1,5 +1,11 @@
-import { useEffect } from "react";
+import { createContext, createElement, useContext, useEffect, type ReactNode } from "react";
 import type { SeoMetadata } from "@workspace/api-client-react";
+
+const PreviewMetadataContext = createContext(false);
+
+export function PreviewMetadataBoundary({ children }: { children: ReactNode }) {
+  return createElement(PreviewMetadataContext.Provider, { value: true }, children);
+}
 
 export interface PageMetadata {
   title: string;
@@ -58,7 +64,8 @@ export function metadataFromSeo(
 }
 
 export function useDynamicMetadata(metadata: PageMetadata | undefined) {
+  const preview = useContext(PreviewMetadataContext);
   useEffect(() => {
-    if (metadata) applyMetadata(metadata);
-  }, [metadata]);
+    if (metadata && !preview) applyMetadata(metadata);
+  }, [metadata, preview]);
 }

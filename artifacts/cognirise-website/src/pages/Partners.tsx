@@ -3,8 +3,22 @@ import { contentRecord, useCmsCollection } from "@/lib/cms";
 import { useDynamicMetadata } from "@/lib/metadata";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } from "@/lib/cms";
+import { PartnerProfilePresentation } from "@/components/cms/PublicCmsPresentations";
+import type { PartnerContent } from "@workspace/api-zod";
 
-const partnersFallback = [
+type PartnerCard = {
+  category: string;
+  name: string;
+  positioning: string;
+  facts: string[][];
+  coverage: string[];
+  evidence: string;
+  contribution: string;
+  source: string;
+  content?: PartnerContent;
+};
+
+const partnersFallback: PartnerCard[] = [
   {
     category: "engineering",
     name: "BGTS", positioning: "Software engineering & technology services · 30 years of engineering · London, Sheffield, Düsseldorf, Amsterdam, Istanbul, Ankara — Dubai opening",
@@ -80,7 +94,7 @@ export default function Partners() {
     alt: "Cognirise alliance partners connected through a governed enterprise network.",
   });
   const closingCta = landingCta(governedLanding, "partners-closing-cta", { label: "Talk to a partner", href: "/contact" });
-  const partnersQuery = useCmsCollection("partner", partnersFallback, (item) => {
+  const partnersQuery = useCmsCollection<PartnerCard>("partner", partnersFallback, (item) => {
     const content = contentRecord(item, "partner");
     const category = content.allianceCategory;
     if (category !== "engineering" && category !== "platform") return null;
@@ -91,8 +105,9 @@ export default function Partners() {
       facts: content.facts.map((fact) => [fact.value, fact.label]),
       coverage: content.coverage,
       evidence: content.evidence.map((evidence) => evidence.statement).join(" "),
-      contribution: content.contribution,
+      contribution: content.contribution || "",
       source: content.sources.map((source) => source.label).join("; "),
+      content,
     };
   });
   const governedSeo = governedLanding ? landingSeo(governedLanding) : undefined;
@@ -138,38 +153,30 @@ export default function Partners() {
               </div>
             </header>
             {groupPartners.map((partner, index) => (
-          <article key={partner.name} className="mb-24 border-t border-border pt-7 last:mb-0" data-testid={`profile-partner-${partner.name.toLowerCase().replaceAll(".", "-")}`}>
-            <div className="grid gap-10 lg:grid-cols-[.42fr_1fr]">
-              <header>
-                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-coral))]">0{index + 1} / {group.label}</p>
-                <h3 className="mt-6 text-5xl font-semibold md:text-7xl" data-testid={`text-partner-name-${partner.name.toLowerCase().replaceAll(".", "-")}`}>{partner.name}</h3>
-                <p className="mt-5 max-w-[430px] text-sm font-semibold leading-6 text-muted-foreground">{partner.positioning}</p>
-                {group.id === "platform" && ["Lupitor", "Datatoolpack", "bunjee.ai"].includes(partner.name) && (
-                  <div className="mt-8">
-                    <BrandButton
-                      href={`/platforms/${partner.name === "Lupitor" ? "lupitor" : partner.name === "Datatoolpack" ? "datatoolpack" : "bunjee-ai"}`}
-                      variant="secondary"
-                    >
-                      View Platform Integration
-                    </BrandButton>
-                  </div>
-                )}
-              </header>
-              <div>
-                <div className="grid bg-[hsl(var(--brand-deep))] text-white sm:grid-cols-3">
-                  {partner.facts.map(([value, label]) => <div key={value} className="border-b border-white/15 p-6 last:border-0 sm:border-b-0 sm:border-r sm:last:border-0"><strong className="block text-2xl text-[hsl(var(--brand-coral))]">{value}</strong><span className="mt-2 block text-xs leading-5 text-white/65">{label}</span></div>)}
-                </div>
-                <div className="mt-9 grid gap-9 md:grid-cols-[.7fr_1.3fr]">
-                  <div><h4 className="mb-4 text-[10px] font-bold uppercase tracking-[.2em]">Coverage</h4><div className="flex flex-wrap gap-2">{partner.coverage.map((item) => <span key={item} className="border border-border bg-secondary px-3 py-2 text-xs font-semibold">{item}</span>)}</div></div>
-                  <div><h4 className="mb-4 text-[10px] font-bold uppercase tracking-[.2em]">Platform, footprint & representative work</h4><p className="text-sm leading-7 text-muted-foreground">{partner.evidence}</p></div>
-                </div>
-                <aside className="mt-9 grid gap-5 bg-secondary p-7 md:grid-cols-[.42fr_1fr]">
-                  <h4 className="text-sm font-bold">What {partner.name} brings to Cognirise clients</h4>
-                  <div><p className="text-sm leading-7 text-muted-foreground">{partner.contribution}</p><p className="mt-6 border-t border-border pt-4 text-[10px] leading-5 text-muted-foreground">{partner.source}</p></div>
-                </aside>
-              </div>
-            </div>
-          </article>
+              <PartnerProfilePresentation
+                key={partner.name}
+                name={partner.name}
+                content={partner.content || {
+                  schemaVersion: 1,
+                  allianceCategory: partner.category,
+                  positioning: partner.positioning,
+                  facts: partner.facts.map(([value, label]) => ({ value, label })),
+                  coverage: partner.coverage,
+                  evidence: [{ statement: partner.evidence, source: { label: partner.source }, approved: true }],
+                  contribution: partner.contribution,
+                  relationshipStatus: "active",
+                  visibility: "public",
+                  order: index,
+                  sources: partner.source ? [{ label: partner.source }] : [],
+                } as PartnerContent}
+                index={index}
+                groupLabel={group.label}
+                source={partner.source}
+                evidenceText={partner.evidence}
+                platformHref={group.id === "platform" && ["Lupitor", "Datatoolpack", "bunjee.ai"].includes(partner.name)
+                  ? `/platforms/${partner.name === "Lupitor" ? "lupitor" : partner.name === "Datatoolpack" ? "datatoolpack" : "bunjee-ai"}`
+                  : undefined}
+              />
             ))}
           </section>
           );

@@ -13,6 +13,30 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+function actionErrorMessage(error: unknown, fallback: string) {
+  if (!error || typeof error !== "object") return fallback;
+  const candidate = error as {
+    data?: { error?: unknown; detail?: unknown; details?: Array<{ message?: string }> } | string;
+    message?: unknown;
+  };
+  if (candidate.data && typeof candidate.data === "object") {
+    const detail = candidate.data.details?.find((item) => item.message)?.message;
+    if (detail) return detail;
+    if (typeof candidate.data.error === "string") return candidate.data.error;
+    if (typeof candidate.data.detail === "string") return candidate.data.detail;
+  }
+  if (typeof candidate.data === "string" && candidate.data.trim()) return candidate.data;
+  return typeof candidate.message === "string" && candidate.message.trim() ? candidate.message : fallback;
+}
 
 export default function NavigationSettings() {
   const queryClient = useQueryClient();
@@ -28,6 +52,7 @@ export default function NavigationSettings() {
   const publish = usePublishNavigationSettings();
   const [draft, setDraft] = useState<NavigationSettings | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (query.data) {
@@ -52,25 +77,51 @@ export default function NavigationSettings() {
     if (!draft) return;
     setActionError(null);
     try {
-      await update.mutateAsync({
+      const saved = await update.mutateAsync({
         data: {
           items: draft.items,
           pages: draft.pages,
           market,
           locale,
+          version: draft.version,
         },
       });
+      setDraft(saved);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: getGetNavigationSettingsQueryKey(params) }),
         queryClient.invalidateQueries({ queryKey: getGetPublicNavigationSettingsQueryKey(params) }),
       ]);
       toast({ title: "Website navigation updated" });
     } catch (error) {
-      const data = typeof error === "object" && error !== null && "data" in error
-        ? (error as { data?: { details?: Array<{ message?: string }> } }).data
-        : undefined;
-      setActionError(data?.details?.find((detail) => detail.message)?.message
-        ?? (error instanceof Error ? error.message : "Navigation could not be saved."));
+      setActionError(actionErrorMessage(error, "Navigation could not be saved."));
+    }
+  };
+
+  const submitForReview = async () => {
+    setActionError(null);
+    try {
+      await review.mutateAsync({ data: { market, locale } });
+      const reviewed = await query.refetch();
+      if (reviewed.data) setDraft(reviewed.data);
+      toast({ title: "Navigation submitted for review" });
+    } catch (error) {
+      setActionError(actionErrorMessage(error, "Navigation could not be submitted for review. Save a valid draft and try again."));
+    }
+  };
+
+  const publishSaved = async () => {
+    if (!draft) return;
+    setActionError(null);
+    try {
+      const published = await publish.mutateAsync({
+        data: { market, locale, version: draft.version, confirmation: "PUBLISH" },
+      });
+      setDraft(published);
+      setPublishConfirmOpen(false);
+      await queryClient.invalidateQueries({ queryKey: getGetPublicNavigationSettingsQueryKey(params) });
+      toast({ title: `Navigation version ${draft.version} published` });
+    } catch (error) {
+      setActionError(actionErrorMessage(error, "Navigation could not be published. Save a valid draft and try again."));
     }
   };
 
@@ -89,30 +140,43 @@ export default function NavigationSettings() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-        <select aria-label="Market" className="h-10 rounded-md border bg-background px-3" value={market} onChange={(event) => setMarket(event.target.value)}>
+        <select aria-label="Market" className="h-10 rounded-md border bg-background px-3" value={market} onChange={(event) => { setMarket(event.target.value); setDraft(null); setActionError(null); }}>
           <option value="uae">UAE</option><option value="ksa">KSA</option>
           <option value="turkiye">Türkiye</option><option value="europe">Europe</option>
         </select>
-        <input aria-label="Locale" className="h-10 w-24 rounded-md border bg-background px-3" value={locale} onChange={(event) => setLocale(event.target.value)} />
-        <Button onClick={save} disabled={update.isPending || !draft}>
+        <input aria-label="Locale" className="h-10 w-24 rounded-md border bg-background px-3" value={locale} onChange={(event) => { setLocale(event.target.value); setDraft(null); setActionError(null); }} />
+        <Button onClick={save} disabled={query.isFetching || update.isPending || review.isPending || publish.isPending || !draft}>
           {update.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
           Save navigation
         </Button>
-        <Button variant="outline" onClick={async () => {
-          await review.mutateAsync({ data: { market, locale } });
-          await query.refetch();
-          toast({ title: "Navigation submitted for review" });
-        }} disabled={review.isPending || update.isPending}>Submit for review</Button>
-        <Button variant="outline" onClick={async () => {
-          await publish.mutateAsync({ data: { market, locale } });
-          await Promise.all([query.refetch(), queryClient.invalidateQueries({ queryKey: getGetPublicNavigationSettingsQueryKey(params) })]);
-          toast({ title: "Navigation published" });
-        }} disabled={publish.isPending || review.isPending}>Publish reviewed</Button>
+        <Button variant="outline" onClick={submitForReview} disabled={query.isFetching || review.isPending || update.isPending || publish.isPending || !draft}>Submit for review</Button>
+         <Button variant="outline" onClick={() => setPublishConfirmOpen(true)} disabled={query.isFetching || publish.isPending || review.isPending || update.isPending || !draft}>Publish version {draft?.version ?? "…"}</Button>
         </div>
       </header>
 
-      {query.isError && <div className="border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive" role="alert">Navigation settings could not be loaded.</div>}
+      {query.isError && <div className="border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive" role="alert">Navigation settings could not be loaded. {actionErrorMessage(query.error, "Check your administrator session and try again.")}</div>}
       {actionError && <div className="border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive" role="alert">{actionError}</div>}
+
+      <Dialog open={publishConfirmOpen} onOpenChange={setPublishConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Publish navigation version {draft?.version}</DialogTitle>
+            <DialogDescription>
+              This publishes the exact saved version for {market}/{locale} immediately. Collaborator review is optional; publishing does not require the separate review action.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded border bg-muted/30 p-3 text-sm">
+            Confirm that version <strong>{draft?.version}</strong> is the intended menu and availability configuration.
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setPublishConfirmOpen(false)} disabled={publish.isPending}>Cancel</Button>
+            <Button onClick={publishSaved} disabled={publish.isPending || !draft}>
+              {publish.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Confirm publish version {draft?.version}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="space-y-4">
         {groups.map((group) => (
