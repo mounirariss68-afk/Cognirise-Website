@@ -281,3 +281,31 @@ mtime_ms = 1789243666268
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/2ef0b0a9-f7a5-44c9-ac99-ba0a020e95e8/d70f8737-594f-4dae-a0b4-ca9bf68510d7"
 storage_version_token = "1789243678748602"
 content_type = "text/html"
+
+[[outputs]]
+id = "Faj-4qQGLBv_uoDORH4Hs"
+uri = "file://artifacts/cognirise-website/evidence/guardrails/after-1440-section-guardrails-are-not-an-authority-model.png"
+type = "image"
+title = "Guardrails subsection — desktop review"
+description = "Saved draft rendered through the preview component. Browser-only fixture; not a published page."
+logical_id = "f549f50f-11a3-427e-b0fc-27d7752e6226"
+content_hash = "sha256:ba4fde4c545c22ecb7823ccce846bbbc621f4ada5e51755698d987a86317e7b6"
+size = 850163
+mtime_ms = 1789302679254
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/f549f50f-11a3-427e-b0fc-27d7752e6226/e1ba1a22-a0f1-4327-8909-6437c19244d3"
+storage_version_token = "1789302838918473"
+content_type = "image/png"
+
+[[outputs]]
+id = "sN_BT0bBnwIAm8-VXsd4-"
+uri = "file://artifacts/cognirise-website/evidence/guardrails/after-390-section-guardrails-are-not-an-authority-model.png"
+type = "image"
+title = "Guardrails subsection — mobile review"
+description = "390px layout with stacked comparison rows and uncropped figures."
+logical_id = "8703612c-f926-4a4a-87be-781d023a1600"
+content_hash = "sha256:f1f1d092776f49f63a9fc77d49cad783498fcdbbd1276f85dac98d80ca36a258"
+size = 557712
+mtime_ms = 1789302675080
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/8703612c-f926-4a4a-87be-781d023a1600/ad7ca5f3-d4b1-4461-bda1-a567429d4c66"
+storage_version_token = "1789302840671827"
+content_type = "image/png"

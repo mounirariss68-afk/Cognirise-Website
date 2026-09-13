@@ -1,0 +1,25 @@
+ .agents/memory/social-asset-self-containment.md    |   8 +-
+ .../src/pages/documents/ContentEditor.tsx          |  78 +++++++++++++-
+ .../src/pages/documents/field-coverage.ts          |  21 ++++
+ .../src/lib/framework-preview.test.ts              |  44 ++++++++
+ .../cognirise-website/src/lib/framework-preview.ts | 117 ++++++++++++++++++++-
+ .../src/pages/AgentAuthorityModel.tsx              |  77 ++++++++++++++
+ lib/api-zod/src/cms-content.ts                     |  86 +++++++++++++++
+ scripts/package.json                               |   1 +
+ 8 files changed, 426 insertions(+), 6 deletions(-)
+
+New implementation files:
+ .../cognirise/aam-guardrails-vs-authority.svg      | 57 ++++++++++++++++++++++
+ 1 file changed, 57 insertions(+)
+ .../images/cognirise/aam-how-they-interact.svg     | 99 ++++++++++++++++++++++
+ 1 file changed, 99 insertions(+)
+ .../scripts/guardrails.browser-test.mjs            | 300 +++++++++++++++++++++
+ 1 file changed, 300 insertions(+)
+ .../pages/AgentAuthorityModel.guardrails.test.ts    | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+ .../src/cms/agent-authority-guardrails.ts          | 317 +++++++++++++++++++++
+ 1 file changed, 317 insertions(+)
+ .../src/cms/agent-authority-guardrails.test.ts     | 61 ++++++++++++++++++++++
+ 1 file changed, 61 insertions(+)
+
+9.0M	artifacts/cognirise-website/evidence/guardrails

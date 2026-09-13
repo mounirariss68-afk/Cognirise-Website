@@ -1,0 +1,218 @@
+[
+  {
+    "section": "baseline-1440-section-airline-disruption-re-accommodation.png",
+    "dimensions": [
+      1440,
+      778,
+      1440,
+      778
+    ],
+    "changedPixels": 6139,
+    "changedPercent": 0.5479684375892602,
+    "meanChannelDifference": 0.35200835475578407
+  },
+  {
+    "section": "baseline-1440-section-assessment.png",
+    "dimensions": [
+      1440,
+      1172,
+      1440,
+      1172
+    ],
+    "changedPixels": 15319,
+    "changedPercent": 0.9076957717102768,
+    "meanChannelDifference": 0.3442939419795222
+  },
+  {
+    "section": "baseline-1440-section-authority-ceiling.png",
+    "dimensions": [
+      1440,
+      1268,
+      1440,
+      1268
+    ],
+    "changedPixels": 55139,
+    "changedPercent": 3.019792762004907,
+    "meanChannelDifference": 1.7231715153639444
+  },
+  {
+    "section": "baseline-1440-section-bring-one-handover-under-pressure.png",
+    "dimensions": [
+      1440,
+      480,
+      1440,
+      480
+    ],
+    "changedPixels": 3933,
+    "changedPercent": 0.5690104166666666,
+    "meanChannelDifference": 0.34413917824074075
+  },
+  {
+    "section": "baseline-1440-section-published-practice-not-invented-vocabulary.png",
+    "dimensions": [
+      1440,
+      536,
+      1440,
+      536
+    ],
+    "changedPixels": 21058,
+    "changedPercent": 2.728285655058043,
+    "meanChannelDifference": 2.07757436774461
+  },
+  {
+    "section": "baseline-1440-section-six-answers-become-a-control-specification.png",
+    "dimensions": [
+      1440,
+      1247,
+      1440,
+      1247
+    ],
+    "changedPixels": 12092,
+    "changedPercent": 0.673393923193442,
+    "meanChannelDifference": 0.43608605096676467
+  },
+  {
+    "section": "baseline-1440-section-technology-does-not-determine-authority.png",
+    "dimensions": [
+      1440,
+      609,
+      1440,
+      609
+    ],
+    "changedPixels": 39,
+    "changedPercent": 0.004447181171319103,
+    "meanChannelDifference": 0.000025846864927324698
+  },
+  {
+    "section": "baseline-1440-section-the-agent-authority-model.png",
+    "dimensions": [
+      1440,
+      829,
+      1440,
+      829
+    ],
+    "changedPixels": 0,
+    "changedPercent": 0,
+    "meanChannelDifference": 0
+  },
+  {
+    "section": "baseline-1440-section-the-handover-not-the-agent.png",
+    "dimensions": [
+      1440,
+      881,
+      1440,
+      881
+    ],
+    "changedPixels": 1440,
+    "changedPercent": 0.11350737797956867,
+    "meanChannelDifference": 0.2534998108210367
+  },
+  {
+    "section": "baseline-390-section-airline-disruption-re-accommodation.png",
+    "dimensions": [
+      390,
+      1550,
+      390,
+      1550
+    ],
+    "changedPixels": 27812,
+    "changedPercent": 4.600827129859388,
+    "meanChannelDifference": 3.1005663082437276
+  },
+  {
+    "section": "baseline-390-section-assessment.png",
+    "dimensions": [
+      390,
+      1274,
+      390,
+      1274
+    ],
+    "changedPixels": 22715,
+    "changedPercent": 4.57171034094111,
+    "meanChannelDifference": 2.794422305411316
+  },
+  {
+    "section": "baseline-390-section-authority-ceiling.png",
+    "dimensions": [
+      390,
+      1662,
+      390,
+      1662
+    ],
+    "changedPixels": 19177,
+    "changedPercent": 2.9585917492054676,
+    "meanChannelDifference": 2.1183498410935235
+  },
+  {
+    "section": "baseline-390-section-bring-one-handover-under-pressure.png",
+    "dimensions": [
+      390,
+      531,
+      390,
+      531
+    ],
+    "changedPixels": 18388,
+    "changedPercent": 8.879231252112609,
+    "meanChannelDifference": 4.342958777987026
+  },
+  {
+    "section": "baseline-390-section-published-practice-not-invented-vocabulary.png",
+    "dimensions": [
+      390,
+      737,
+      390,
+      737
+    ],
+    "changedPixels": 4954,
+    "changedPercent": 1.723550081759037,
+    "meanChannelDifference": 1.156853262823412
+  },
+  {
+    "section": "baseline-390-section-six-answers-become-a-control-specification.png",
+    "dimensions": [
+      390,
+      1730,
+      390,
+      1730
+    ],
+    "changedPixels": 50182,
+    "changedPercent": 7.437676004149993,
+    "meanChannelDifference": 5.372832863988934
+  },
+  {
+    "section": "baseline-390-section-technology-does-not-determine-authority.png",
+    "dimensions": [
+      390,
+      631,
+      390,
+      631
+    ],
+    "changedPixels": 6668,
+    "changedPercent": 2.7095777967410295,
+    "meanChannelDifference": 2.093139366356482
+  },
+  {
+    "section": "baseline-390-section-the-agent-authority-model.png",
+    "dimensions": [
+      390,
+      930,
+      390,
+      930
+    ],
+    "changedPixels": 0,
+    "changedPercent": 0,
+    "meanChannelDifference": 0
+  },
+  {
+    "section": "baseline-390-section-the-handover-not-the-agent.png",
+    "dimensions": [
+      390,
+      1611,
+      390,
+      1611
+    ],
+    "changedPixels": 0,
+    "changedPercent": 0,
+    "meanChannelDifference": 0
+  }
+]

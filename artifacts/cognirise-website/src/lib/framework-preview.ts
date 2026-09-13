@@ -1,4 +1,8 @@
-import type { FrameworkContent } from "@workspace/api-zod";
+import {
+  FRAMEWORK_GUARDRAILS_FIGURE_ASSETS,
+  type FrameworkContent,
+  type FrameworkGuardrailsSubsection,
+} from "@workspace/api-zod";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -101,6 +105,116 @@ function normalizeMethodology(value: unknown): FrameworkContent["methodology"] {
   return blocks;
 }
 
+function boundedString(value: unknown, maximum: number): string | null {
+  return typeof value === "string" && value.trim().length > 0 && value.trim().length <= maximum
+    ? value.trim()
+    : null;
+}
+
+function boundedText(value: unknown, maximum: number): string | null {
+  return typeof value === "string" && value.trim().length <= maximum ? value.trim() : null;
+}
+
+function exactStrings(value: unknown, length: number, maximum: number): string[] | null {
+  if (!Array.isArray(value) || value.length !== length) return null;
+  const values = value.map((item) => boundedString(item, maximum));
+  return values.every((item): item is string => item !== null) ? values : null;
+}
+
+function normalizeGuardrails(value: unknown): FrameworkGuardrailsSubsection | undefined {
+  const source = record(value);
+  const bankExample = record(source?.bankExample);
+  const unit = record(source?.unit);
+  const interaction = record(source?.interaction);
+  const exposure = record(interaction?.exposure);
+  const evidence = record(interaction?.evidence);
+  const requiredControls = record(interaction?.requiredControls);
+  const compensatingControls = record(interaction?.compensatingControls);
+  const firstFigure = record(source?.firstFigure);
+  const secondFigure = record(source?.secondFigure);
+  const comparisonColumns = record(source?.comparisonColumns);
+  const designRule = record(source?.designRule);
+  const comparisonRows = Array.isArray(source?.comparisonRows) && source.comparisonRows.length === 3
+    ? source.comparisonRows.map(record)
+    : null;
+  const paragraphs = exactStrings(unit?.paragraphs, 2, 4_000);
+  if (!source || !bankExample || !unit || !interaction || !exposure || !evidence || !requiredControls
+    || !compensatingControls || !firstFigure || !secondFigure || !comparisonColumns || !designRule || !comparisonRows || !paragraphs) {
+    return undefined;
+  }
+  const figure = <T extends typeof FRAMEWORK_GUARDRAILS_FIGURE_ASSETS[number]>(candidate: UnknownRecord, asset: T) => {
+    const altText = boundedString(candidate.altText, 1_000);
+    const captionLabel = boundedString(candidate.captionLabel, 120);
+    const captionLead = boundedString(candidate.captionLead, 1_000);
+    const captionBody = boundedString(candidate.captionBody, 1_000);
+    return candidate.asset === asset && altText && captionLabel && captionLead && captionBody
+      ? { asset, altText, captionLabel, captionLead, captionBody }
+      : null;
+  };
+  const normalizedFirstFigure = figure(firstFigure, "aam-guardrails-vs-authority.svg");
+  const normalizedSecondFigure = figure(secondFigure, "aam-how-they-interact.svg");
+  const columnGuardrails = boundedString(comparisonColumns.guardrails, 240);
+  const columnAuthorityModel = boundedString(comparisonColumns.authorityModel, 240);
+  const bridgeText = requiredControls.betweenExamples === undefined
+    ? undefined
+    : boundedText(requiredControls.betweenExamples, 1_000);
+  const strings = [
+    boundedString(source.heading, 240), boundedString(source.opening, 2_000), boundedString(source.definition, 4_000),
+    boundedString(bankExample.beforeQuote, 4_000), boundedString(bankExample.quote, 1_000), boundedString(bankExample.afterQuote, 4_000),
+    boundedString(source.comparisonHeading, 240), boundedString(unit.heading, 240), boundedString(unit.emphasis, 1_000),
+    boundedString(interaction.heading, 240), boundedString(interaction.introduction, 1_000),
+    boundedString(exposure.lead, 240), boundedString(exposure.body, 4_000), boundedString(evidence.lead, 240), boundedString(evidence.body, 4_000),
+    boundedString(interaction.controlsIntroduction, 2_000), boundedString(requiredControls.lead, 240),
+    boundedString(requiredControls.bodyBeforeExamples, 4_000), boundedString(requiredControls.assuranceExample, 2_000),
+    boundedString(requiredControls.controlExample, 2_000), boundedString(requiredControls.conclusion, 1_000),
+    boundedString(compensatingControls.lead, 240), boundedString(compensatingControls.bodyBeforeContent, 4_000),
+    boundedString(compensatingControls.content, 240), boundedString(compensatingControls.bodyAfterContent, 4_000),
+    boundedString(designRule.heading, 240), boundedString(designRule.quote, 2_000),
+    boundedString(designRule.conclusion, 4_000), boundedString(designRule.failure, 4_000),
+    boundedString(designRule.closingEmphasis, 1_000),
+  ];
+  const rows = comparisonRows.map((row) => ({
+    label: boundedString(row?.label, 240),
+    guardrails: boundedString(row?.guardrails, 2_000),
+    authorityModel: boundedString(row?.authorityModel, 2_000),
+    guardrailsEmphasis: row?.guardrailsEmphasis === "plain" || row?.guardrailsEmphasis === "italic"
+      ? row.guardrailsEmphasis
+      : null,
+    authorityModelEmphasis: row?.authorityModelEmphasis === "plain" || row?.authorityModelEmphasis === "italic"
+      ? row.authorityModelEmphasis
+      : null,
+  }));
+  if (!normalizedFirstFigure || !normalizedSecondFigure || !columnGuardrails || !columnAuthorityModel || bridgeText === null || strings.some((item) => item === null)
+    || rows.some((row) => !row.label || !row.guardrails || !row.authorityModel || !row.guardrailsEmphasis || !row.authorityModelEmphasis)) return undefined;
+  return {
+    heading: strings[0]!, opening: strings[1]!, definition: strings[2]!,
+    bankExample: { beforeQuote: strings[3]!, quote: strings[4]!, afterQuote: strings[5]! },
+    comparisonHeading: strings[6]!,
+    comparisonColumns: { guardrails: columnGuardrails, authorityModel: columnAuthorityModel },
+    comparisonRows: rows as FrameworkGuardrailsSubsection["comparisonRows"],
+    unit: { heading: strings[7]!, paragraphs: [paragraphs[0]!, paragraphs[1]!], emphasis: strings[8]! },
+    firstFigure: normalizedFirstFigure,
+    interaction: {
+      heading: strings[9]!, introduction: strings[10]!,
+      exposure: { lead: strings[11]!, body: strings[12]! },
+      evidence: { lead: strings[13]!, body: strings[14]! },
+      controlsIntroduction: strings[15]!,
+      requiredControls: {
+        lead: strings[16]!, bodyBeforeExamples: strings[17]!, assuranceExample: strings[18]!,
+        ...(bridgeText === undefined ? {} : { betweenExamples: bridgeText }),
+        controlExample: strings[19]!, conclusion: strings[20]!,
+      },
+      compensatingControls: {
+        lead: strings[21]!, bodyBeforeContent: strings[22]!, content: strings[23]!, bodyAfterContent: strings[24]!,
+      },
+    },
+    secondFigure: normalizedSecondFigure,
+    designRule: {
+      heading: strings[25]!, quote: strings[26]!, conclusion: strings[27]!, failure: strings[28]!, closingEmphasis: strings[29]!,
+    },
+  };
+}
+
 export function normalizeFrameworkPreviewContent(value: unknown): FrameworkContent | null {
   const source = record(value);
   if (source?.template !== "agent-authority") return null;
@@ -127,6 +241,7 @@ export function normalizeFrameworkPreviewContent(value: unknown): FrameworkConte
     methodology: normalizeMethodology(source.methodology),
     workedExample: normalizeWorkedExample(source.workedExample),
     sectorExamples,
+    guardrails: normalizeGuardrails(source.guardrails),
     heroMedia: record(source.heroMedia)
       && typeof record(source.heroMedia)?.mediaId === "string"
       && typeof record(source.heroMedia)?.mediaVersionId === "string"

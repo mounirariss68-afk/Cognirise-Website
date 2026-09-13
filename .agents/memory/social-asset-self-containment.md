@@ -8,3 +8,9 @@ Downloadable social SVG masters must embed their raster imagery as data URIs rat
 **Why:** An SVG can load correctly as a document while its external images disappear when that SVG is rendered through an image element or opened away from the preview server. The failure leaves typography and overlays on an empty field and can survive source-only checks.
 
 **How to apply:** For image-led social exports, verify there are no environment-specific image references, confirm the expected number and dimensions of PNG renders, inspect a contact sheet, and package self-contained SVGs with their matching PNGs.
+
+External SVG diagrams must embed complete valid font bytes; page font loading does not establish SVG font fidelity.
+
+**Why:** A base64 font declaration can look correct in source yet fail the browser's OpenType sanitizer, silently replacing Comfortaa with a fallback.
+
+**How to apply:** Verify the rendered external image and browser font warnings, not only the font-family string or file parser. After font repairs, recheck geometry and palette so rebuilding from source does not restore off-brand rounded shapes.

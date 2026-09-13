@@ -1,0 +1,412 @@
+{
+  "route": "/preview/guardrails-visual-fixture",
+  "previewEndpoint": "/api/preview/guardrails-visual-fixture",
+  "navigationEndpoint": "/api/public/navigation?market=uae&locale=en",
+  "fixture": "/tmp/guardrails-draft.json",
+  "baselineLabel": "reconstructed baseline: same saved draft payload with content.guardrails removed; not an original screenshot",
+  "afterLabel": "exact saved draft payload from GUARDRAILS_FIXTURE",
+  "visualComparison": "browser Fetch interception only; no CMS/database mutation",
+  "viewports": {
+    "390": {
+      "baselineSections": [
+        {
+          "key": "heading:The Agent Authority Model",
+          "top": 140,
+          "bottom": 1069.3125,
+          "height": 929.3125,
+          "guardrails": false
+        },
+        {
+          "key": "heading:The handover, not the agent.",
+          "top": 1069.3125,
+          "bottom": 2680.1875,
+          "height": 1610.875,
+          "guardrails": false
+        },
+        {
+          "key": "id:authority-ceiling",
+          "top": 2680.1875,
+          "bottom": 4341.65625,
+          "height": 1661.46875,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Six answers become a control specification.",
+          "top": 4341.65625,
+          "bottom": 6071.328125,
+          "height": 1729.671875,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Airline disruption re-accommodation.",
+          "top": 6071.328125,
+          "bottom": 7621.1875,
+          "height": 1549.859375,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Technology does not determine authority.",
+          "top": 7621.1875,
+          "bottom": 8251.671875,
+          "height": 630.484375,
+          "guardrails": false
+        },
+        {
+          "key": "id:assessment",
+          "top": 8251.671875,
+          "bottom": 9525.578125,
+          "height": 1273.90625,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Published practice, not invented vocabulary.",
+          "top": 9525.578125,
+          "bottom": 10262.53125,
+          "height": 736.953125,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Bring one handover under pressure.",
+          "top": 10262.53125,
+          "bottom": 10792.84375,
+          "height": 530.3125,
+          "guardrails": false
+        }
+      ],
+      "afterSections": [
+        {
+          "key": "heading:The Agent Authority Model",
+          "top": 140,
+          "bottom": 1069.3125,
+          "height": 929.3125,
+          "guardrails": false
+        },
+        {
+          "key": "heading:The handover, not the agent.",
+          "top": 1069.3125,
+          "bottom": 2680.1875,
+          "height": 1610.875,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Guardrails are not an authority model",
+          "top": 2680.1875,
+          "bottom": 8730.921875,
+          "height": 6050.734375,
+          "guardrails": true
+        },
+        {
+          "key": "id:authority-ceiling",
+          "top": 8730.921875,
+          "bottom": 10392.390625,
+          "height": 1661.46875,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Six answers become a control specification.",
+          "top": 10392.390625,
+          "bottom": 12122.0625,
+          "height": 1729.671875,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Airline disruption re-accommodation.",
+          "top": 12122.0625,
+          "bottom": 13671.921875,
+          "height": 1549.859375,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Technology does not determine authority.",
+          "top": 13671.921875,
+          "bottom": 14302.40625,
+          "height": 630.484375,
+          "guardrails": false
+        },
+        {
+          "key": "id:assessment",
+          "top": 14302.40625,
+          "bottom": 15576.3125,
+          "height": 1273.90625,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Published practice, not invented vocabulary.",
+          "top": 15576.3125,
+          "bottom": 16313.265625,
+          "height": 736.953125,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Bring one handover under pressure.",
+          "top": 16313.265625,
+          "bottom": 16843.578125,
+          "height": 530.3125,
+          "guardrails": false
+        }
+      ],
+      "sectionDisplacements": [
+        {
+          "key": "heading:The Agent Authority Model",
+          "beforeY": 140,
+          "afterY": 140,
+          "displacement": 0
+        },
+        {
+          "key": "heading:The handover, not the agent.",
+          "beforeY": 1069.3125,
+          "afterY": 1069.3125,
+          "displacement": 0
+        },
+        {
+          "key": "id:authority-ceiling",
+          "beforeY": 2680.1875,
+          "afterY": 8730.921875,
+          "displacement": 6050.734375
+        },
+        {
+          "key": "heading:Six answers become a control specification.",
+          "beforeY": 4341.65625,
+          "afterY": 10392.390625,
+          "displacement": 6050.734375
+        },
+        {
+          "key": "heading:Airline disruption re-accommodation.",
+          "beforeY": 6071.328125,
+          "afterY": 12122.0625,
+          "displacement": 6050.734375
+        },
+        {
+          "key": "heading:Technology does not determine authority.",
+          "beforeY": 7621.1875,
+          "afterY": 13671.921875,
+          "displacement": 6050.734375
+        },
+        {
+          "key": "id:assessment",
+          "beforeY": 8251.671875,
+          "afterY": 14302.40625,
+          "displacement": 6050.734375
+        },
+        {
+          "key": "heading:Published practice, not invented vocabulary.",
+          "beforeY": 9525.578125,
+          "afterY": 15576.3125,
+          "displacement": 6050.734375
+        },
+        {
+          "key": "heading:Bring one handover under pressure.",
+          "beforeY": 10262.53125,
+          "afterY": 16313.265625,
+          "displacement": 6050.734375
+        }
+      ]
+    },
+    "1440": {
+      "baselineSections": [
+        {
+          "key": "heading:The Agent Authority Model",
+          "top": 139,
+          "bottom": 968,
+          "height": 829,
+          "guardrails": false
+        },
+        {
+          "key": "heading:The handover, not the agent.",
+          "top": 968,
+          "bottom": 1848.359375,
+          "height": 880.359375,
+          "guardrails": false
+        },
+        {
+          "key": "id:authority-ceiling",
+          "top": 1848.359375,
+          "bottom": 3115.765625,
+          "height": 1267.40625,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Six answers become a control specification.",
+          "top": 3115.765625,
+          "bottom": 4361.8125,
+          "height": 1246.046875,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Airline disruption re-accommodation.",
+          "top": 4361.8125,
+          "bottom": 5139.59375,
+          "height": 777.78125,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Technology does not determine authority.",
+          "top": 5139.59375,
+          "bottom": 5747.9375,
+          "height": 608.34375,
+          "guardrails": false
+        },
+        {
+          "key": "id:assessment",
+          "top": 5747.9375,
+          "bottom": 6919.46875,
+          "height": 1171.53125,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Published practice, not invented vocabulary.",
+          "top": 6919.46875,
+          "bottom": 7454.640625,
+          "height": 535.171875,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Bring one handover under pressure.",
+          "top": 7454.640625,
+          "bottom": 7934.578125,
+          "height": 479.9375,
+          "guardrails": false
+        }
+      ],
+      "afterSections": [
+        {
+          "key": "heading:The Agent Authority Model",
+          "top": 139,
+          "bottom": 968,
+          "height": 829,
+          "guardrails": false
+        },
+        {
+          "key": "heading:The handover, not the agent.",
+          "top": 968,
+          "bottom": 1848.359375,
+          "height": 880.359375,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Guardrails are not an authority model",
+          "top": 1848.359375,
+          "bottom": 6663.296875,
+          "height": 4814.9375,
+          "guardrails": true
+        },
+        {
+          "key": "id:authority-ceiling",
+          "top": 6663.296875,
+          "bottom": 7930.703125,
+          "height": 1267.40625,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Six answers become a control specification.",
+          "top": 7930.703125,
+          "bottom": 9176.75,
+          "height": 1246.046875,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Airline disruption re-accommodation.",
+          "top": 9176.75,
+          "bottom": 9954.53125,
+          "height": 777.78125,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Technology does not determine authority.",
+          "top": 9954.53125,
+          "bottom": 10562.875,
+          "height": 608.34375,
+          "guardrails": false
+        },
+        {
+          "key": "id:assessment",
+          "top": 10562.875,
+          "bottom": 11734.40625,
+          "height": 1171.53125,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Published practice, not invented vocabulary.",
+          "top": 11734.40625,
+          "bottom": 12269.578125,
+          "height": 535.171875,
+          "guardrails": false
+        },
+        {
+          "key": "heading:Bring one handover under pressure.",
+          "top": 12269.578125,
+          "bottom": 12749.515625,
+          "height": 479.9375,
+          "guardrails": false
+        }
+      ],
+      "sectionDisplacements": [
+        {
+          "key": "heading:The Agent Authority Model",
+          "beforeY": 139,
+          "afterY": 139,
+          "displacement": 0
+        },
+        {
+          "key": "heading:The handover, not the agent.",
+          "beforeY": 968,
+          "afterY": 968,
+          "displacement": 0
+        },
+        {
+          "key": "id:authority-ceiling",
+          "beforeY": 1848.359375,
+          "afterY": 6663.296875,
+          "displacement": 4814.9375
+        },
+        {
+          "key": "heading:Six answers become a control specification.",
+          "beforeY": 3115.765625,
+          "afterY": 7930.703125,
+          "displacement": 4814.9375
+        },
+        {
+          "key": "heading:Airline disruption re-accommodation.",
+          "beforeY": 4361.8125,
+          "afterY": 9176.75,
+          "displacement": 4814.9375
+        },
+        {
+          "key": "heading:Technology does not determine authority.",
+          "beforeY": 5139.59375,
+          "afterY": 9954.53125,
+          "displacement": 4814.9375
+        },
+        {
+          "key": "id:assessment",
+          "beforeY": 5747.9375,
+          "afterY": 10562.875,
+          "displacement": 4814.9375
+        },
+        {
+          "key": "heading:Published practice, not invented vocabulary.",
+          "beforeY": 6919.46875,
+          "afterY": 11734.40625,
+          "displacement": 4814.9375
+        },
+        {
+          "key": "heading:Bring one handover under pressure.",
+          "beforeY": 7454.640625,
+          "afterY": 12269.578125,
+          "displacement": 4814.9375
+        }
+      ]
+    }
+  },
+  "previewRequestCount": 4,
+  "consoleErrors": [],
+  "fixturePayloadKeys": [
+    "content",
+    "markets",
+    "mediaIds",
+    "seo",
+    "slug",
+    "summary",
+    "title"
+  ]
+}

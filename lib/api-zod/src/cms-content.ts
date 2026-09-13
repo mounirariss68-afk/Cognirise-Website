@@ -594,6 +594,90 @@ const frameworkWorkedExampleSchema = frameworkExampleSchema.extend({
   authorityArtefact: z.string().trim().min(1).max(1_000).optional(),
 }).strict();
 
+/** These diagrams are code-owned static assets, never editor-supplied paths. */
+export const FRAMEWORK_GUARDRAILS_FIGURE_ASSETS = [
+  "aam-guardrails-vs-authority.svg",
+  "aam-how-they-interact.svg",
+] as const;
+
+const frameworkGuardrailsFigureSchema = z.object({
+  asset: z.enum(FRAMEWORK_GUARDRAILS_FIGURE_ASSETS),
+  altText: z.string().trim().min(1).max(1_000),
+  captionLabel: z.string().trim().min(1).max(120),
+  captionLead: z.string().trim().min(1).max(1_000),
+  captionBody: z.string().trim().min(1).max(1_000),
+}).strict();
+
+export const frameworkGuardrailsSubsectionSchema = z.object({
+  heading: z.string().trim().min(1).max(240),
+  opening: z.string().trim().min(1).max(2_000),
+  definition: z.string().trim().min(1).max(4_000),
+  bankExample: z.object({
+    beforeQuote: z.string().trim().min(1).max(4_000),
+    quote: z.string().trim().min(1).max(1_000),
+    afterQuote: z.string().trim().min(1).max(4_000),
+  }).strict(),
+  comparisonHeading: z.string().trim().min(1).max(240),
+  comparisonColumns: z.object({
+    guardrails: z.string().trim().min(1).max(240),
+    authorityModel: z.string().trim().min(1).max(240),
+  }).strict(),
+  comparisonRows: z.array(z.object({
+    label: z.string().trim().min(1).max(240),
+    guardrails: z.string().trim().min(1).max(2_000),
+    authorityModel: z.string().trim().min(1).max(2_000),
+    guardrailsEmphasis: z.enum(["plain", "italic"]),
+    authorityModelEmphasis: z.enum(["plain", "italic"]),
+  }).strict()).length(3),
+  unit: z.object({
+    heading: z.string().trim().min(1).max(240),
+    paragraphs: z.array(z.string().trim().min(1).max(4_000)).length(2),
+    emphasis: z.string().trim().min(1).max(1_000),
+  }).strict(),
+  firstFigure: frameworkGuardrailsFigureSchema.extend({
+    asset: z.literal("aam-guardrails-vs-authority.svg"),
+  }).strict(),
+  interaction: z.object({
+    heading: z.string().trim().min(1).max(240),
+    introduction: z.string().trim().min(1).max(1_000),
+    exposure: z.object({
+      lead: z.string().trim().min(1).max(240),
+      body: z.string().trim().min(1).max(4_000),
+    }).strict(),
+    evidence: z.object({
+      lead: z.string().trim().min(1).max(240),
+      body: z.string().trim().min(1).max(4_000),
+    }).strict(),
+    controlsIntroduction: z.string().trim().min(1).max(2_000),
+    requiredControls: z.object({
+      lead: z.string().trim().min(1).max(240),
+      bodyBeforeExamples: z.string().trim().min(1).max(4_000),
+      assuranceExample: z.string().trim().min(1).max(2_000),
+      betweenExamples: z.string().trim().max(1_000).optional(),
+      controlExample: z.string().trim().min(1).max(2_000),
+      conclusion: z.string().trim().min(1).max(1_000),
+    }).strict(),
+    compensatingControls: z.object({
+      lead: z.string().trim().min(1).max(240),
+      bodyBeforeContent: z.string().trim().min(1).max(4_000),
+      content: z.string().trim().min(1).max(240),
+      bodyAfterContent: z.string().trim().min(1).max(4_000),
+    }).strict(),
+  }).strict(),
+  secondFigure: frameworkGuardrailsFigureSchema.extend({
+    asset: z.literal("aam-how-they-interact.svg"),
+  }).strict(),
+  designRule: z.object({
+    heading: z.string().trim().min(1).max(240),
+    quote: z.string().trim().min(1).max(2_000),
+    conclusion: z.string().trim().min(1).max(4_000),
+    failure: z.string().trim().min(1).max(4_000),
+    closingEmphasis: z.string().trim().min(1).max(1_000),
+  }).strict(),
+}).strict();
+
+export type FrameworkGuardrailsSubsection = z.infer<typeof frameworkGuardrailsSubsectionSchema>;
+
 export const frameworkContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
   template: z.literal("agent-authority"),
@@ -602,6 +686,8 @@ export const frameworkContentSchema = z.object({
   methodology: z.array(cmsRichBlockSchema).min(1).max(100),
   workedExample: frameworkWorkedExampleSchema,
   sectorExamples: z.array(frameworkExampleSchema).max(20).default([]),
+  /** Optional so legacy framework revisions remain valid and render unchanged. */
+  guardrails: frameworkGuardrailsSubsectionSchema.optional(),
   heroMedia: optionalMediaReference,
   heroMediaId: legacyMediaId,
   cta: z.object({ label: z.string().trim().min(1).max(120), href: safeLink }).strict().optional(),

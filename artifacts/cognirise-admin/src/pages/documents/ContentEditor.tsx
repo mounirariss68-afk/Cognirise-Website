@@ -431,6 +431,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
         <Area label="Teaser" value={value.teaser ?? ""} onChange={(next) => set("teaser", next)} />
         <Area label="Handover explanation" value={value.handoverExplanation ?? ""} onChange={(next) => set("handoverExplanation", next)} rows={6} />
         <RichBlockEditor label="Methodology narrative" value={value.methodology} onChange={(next) => set("methodology", next)} required />
+        <GuardrailsAuthorityEditor value={value.guardrails} onChange={(next) => set("guardrails", next)} />
         <RecordList label="Worked example" value={value.workedExample ? [value.workedExample] : []} minimum={1} columns={[{ key: "sector", label: "Sector" }, { key: "title", label: "Title" }, { key: "handover", label: "Handover type" }, { key: "reversibility", label: "Reversibility (R1–R4)" }, { key: "reach", label: "Reach (H1–H5)" }, { key: "exposureBand", label: "Exposure band" }, { key: "oversight", label: "Oversight" }, { key: "detail", label: "Explanation" }]} onChange={(next) => set("workedExample", { ...value.workedExample, ...(next[0] ?? {}) })} />
         <div className="grid gap-4 sm:grid-cols-2">
           <Choice
@@ -467,6 +468,73 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
 
       {kind !== "site-configuration" && (kind !== "industry" || editingIndustryGovernance) && common}
     </div>
+  );
+}
+
+function GuardrailsAuthorityEditor({ value, onChange }: { value: Content | undefined; onChange: (value: Content | undefined) => void }) {
+  const section = value ?? {};
+  const set = (key: string, next: unknown) => onChange({ ...section, [key]: next });
+  const interaction = section.interaction ?? {};
+  const requiredControls = interaction.requiredControls ?? {};
+  const compensatingControls = interaction.compensatingControls ?? {};
+  const figure = (key: "firstFigure" | "secondFigure", asset: string, label: string) => {
+    const current = section[key] ?? { asset, altText: "", captionLabel: "", captionLead: "", captionBody: "" };
+    return <section className="space-y-3 border-t pt-4">
+      <p className="text-sm font-medium">{label}</p>
+      <p className="text-xs text-muted-foreground">Fixed local asset: {asset}. Its alternative text and caption segments are editable.</p>
+      <Area label={`${label} alternative text`} value={current.altText ?? ""} onChange={(altText) => set(key, { ...current, asset, altText })} rows={3} />
+      <Field label={`${label} caption label`} value={current.captionLabel} onChange={(captionLabel) => set(key, { ...current, asset, captionLabel })} />
+      <Area label={`${label} italic caption opening`} value={current.captionLead ?? ""} onChange={(captionLead) => set(key, { ...current, asset, captionLead })} rows={3} />
+      <Area label={`${label} caption remainder`} value={current.captionBody ?? ""} onChange={(captionBody) => set(key, { ...current, asset, captionBody })} rows={3} />
+    </section>;
+  };
+  return (
+    <section className="space-y-4 border-t pt-6">
+      <div className="flex items-center justify-between gap-4">
+        <div><h3 className="font-semibold">Guardrails and authority subsection</h3><p className="mt-1 text-xs text-muted-foreground">Optional structured content. It is omitted from the page until a complete valid subsection is saved.</p></div>
+        {value ? <Button type="button" variant="outline" onClick={() => onChange(undefined)}>Remove subsection</Button> : <Button type="button" variant="outline" onClick={() => onChange({})}>Add subsection</Button>}
+      </div>
+      {value && <>
+        <Field label="Subsection heading" value={section.heading} onChange={(heading) => set("heading", heading)} />
+        <Area label="Opening paragraph" value={section.opening ?? ""} onChange={(opening) => set("opening", opening)} />
+        <Area label="Definition paragraph" value={section.definition ?? ""} onChange={(definition) => set("definition", definition)} rows={6} />
+        <Area label="Bank example before italic quote" value={section.bankExample?.beforeQuote ?? ""} onChange={(beforeQuote) => set("bankExample", { ...section.bankExample, beforeQuote })} rows={6} />
+        <Field label="Bank example italic quote" value={section.bankExample?.quote} onChange={(quote) => set("bankExample", { ...section.bankExample, quote })} />
+        <Area label="Bank example after italic quote" value={section.bankExample?.afterQuote ?? ""} onChange={(afterQuote) => set("bankExample", { ...section.bankExample, afterQuote })} rows={4} />
+        <Field label="Comparison heading" value={section.comparisonHeading} onChange={(comparisonHeading) => set("comparisonHeading", comparisonHeading)} />
+        <Field label="Comparison column: Guardrails" value={section.comparisonColumns?.guardrails} onChange={(guardrails) => set("comparisonColumns", { ...section.comparisonColumns, guardrails })} />
+        <Field label="Comparison column: The Agent Authority Model" value={section.comparisonColumns?.authorityModel} onChange={(authorityModel) => set("comparisonColumns", { ...section.comparisonColumns, authorityModel })} />
+        <RecordList label="Three comparison rows" value={section.comparisonRows} minimum={3} maximum={3} columns={[{ key: "label", label: "Row label" }, { key: "guardrails", label: "Guardrails" }, { key: "guardrailsEmphasis", label: "Guardrails emphasis", type: "emphasis" }, { key: "authorityModel", label: "The Agent Authority Model" }, { key: "authorityModelEmphasis", label: "Authority-model emphasis", type: "emphasis" }]} onChange={(comparisonRows) => set("comparisonRows", comparisonRows)} />
+        <Field label="Unit heading" value={section.unit?.heading} onChange={(heading) => set("unit", { ...section.unit, heading })} />
+        <Area label="Unit paragraph 1" value={section.unit?.paragraphs?.[0] ?? ""} onChange={(paragraph) => set("unit", { ...section.unit, paragraphs: [paragraph, section.unit?.paragraphs?.[1] ?? ""] })} rows={6} />
+        <Area label="Unit paragraph 2" value={section.unit?.paragraphs?.[1] ?? ""} onChange={(paragraph) => set("unit", { ...section.unit, paragraphs: [section.unit?.paragraphs?.[0] ?? "", paragraph] })} rows={6} />
+        <Field label="Unit closing emphasis" value={section.unit?.emphasis} onChange={(emphasis) => set("unit", { ...section.unit, emphasis })} />
+        {figure("firstFigure", "aam-guardrails-vs-authority.svg", "Illustration 1")}
+        <Field label="Interaction heading" value={interaction.heading} onChange={(heading) => set("interaction", { ...interaction, heading })} />
+        <Area label="Interaction introduction" value={interaction.introduction ?? ""} onChange={(introduction) => set("interaction", { ...interaction, introduction })} />
+        <Field label="Exposure rule emphasis" value={interaction.exposure?.lead} onChange={(lead) => set("interaction", { ...interaction, exposure: { ...interaction.exposure, lead } })} />
+        <Area label="Exposure rule body" value={interaction.exposure?.body ?? ""} onChange={(body) => set("interaction", { ...interaction, exposure: { ...interaction.exposure, body } })} />
+        <Field label="Evidence rule emphasis" value={interaction.evidence?.lead} onChange={(lead) => set("interaction", { ...interaction, evidence: { ...interaction.evidence, lead } })} />
+        <Area label="Evidence rule body" value={interaction.evidence?.body ?? ""} onChange={(body) => set("interaction", { ...interaction, evidence: { ...interaction.evidence, body } })} />
+        <Area label="Controls introduction" value={interaction.controlsIntroduction ?? ""} onChange={(controlsIntroduction) => set("interaction", { ...interaction, controlsIntroduction })} />
+        <Field label="Required controls emphasis" value={requiredControls.lead} onChange={(lead) => set("interaction", { ...interaction, requiredControls: { ...requiredControls, lead } })} />
+        <Area label="Required controls before examples" value={requiredControls.bodyBeforeExamples ?? ""} onChange={(bodyBeforeExamples) => set("interaction", { ...interaction, requiredControls: { ...requiredControls, bodyBeforeExamples } })} rows={6} />
+        <Area label="Required-controls assurance example" value={requiredControls.assuranceExample ?? ""} onChange={(assuranceExample) => set("interaction", { ...interaction, requiredControls: { ...requiredControls, assuranceExample } })} />
+        <Field label="Text between required-controls examples" value={requiredControls.betweenExamples} onChange={(betweenExamples) => set("interaction", { ...interaction, requiredControls: { ...requiredControls, betweenExamples } })} />
+        <Area label="Required-controls testable example" value={requiredControls.controlExample ?? ""} onChange={(controlExample) => set("interaction", { ...interaction, requiredControls: { ...requiredControls, controlExample } })} />
+        <Field label="Required-controls conclusion" value={requiredControls.conclusion} onChange={(conclusion) => set("interaction", { ...interaction, requiredControls: { ...requiredControls, conclusion } })} />
+        <Field label="Compensating-controls emphasis" value={compensatingControls.lead} onChange={(lead) => set("interaction", { ...interaction, compensatingControls: { ...compensatingControls, lead } })} />
+        <Area label="Compensating controls before emphasis" value={compensatingControls.bodyBeforeContent ?? ""} onChange={(bodyBeforeContent) => set("interaction", { ...interaction, compensatingControls: { ...compensatingControls, bodyBeforeContent } })} rows={6} />
+        <Field label="Compensating-controls content emphasis" value={compensatingControls.content} onChange={(content) => set("interaction", { ...interaction, compensatingControls: { ...compensatingControls, content } })} />
+        <Area label="Compensating controls after emphasis" value={compensatingControls.bodyAfterContent ?? ""} onChange={(bodyAfterContent) => set("interaction", { ...interaction, compensatingControls: { ...compensatingControls, bodyAfterContent } })} rows={6} />
+        {figure("secondFigure", "aam-how-they-interact.svg", "Illustration 2")}
+        <Field label="Design-rule heading" value={section.designRule?.heading} onChange={(heading) => set("designRule", { ...section.designRule, heading })} />
+        <Area label="Design-rule pull quote" value={section.designRule?.quote ?? ""} onChange={(quote) => set("designRule", { ...section.designRule, quote })} rows={5} />
+        <Area label="Design-rule conclusion" value={section.designRule?.conclusion ?? ""} onChange={(conclusion) => set("designRule", { ...section.designRule, conclusion })} rows={6} />
+        <Area label="Design-rule failure paragraph" value={section.designRule?.failure ?? ""} onChange={(failure) => set("designRule", { ...section.designRule, failure })} rows={5} />
+        <Field label="Closing emphasis" value={section.designRule?.closingEmphasis} onChange={(closingEmphasis) => set("designRule", { ...section.designRule, closingEmphasis })} />
+      </>}
+    </section>
   );
 }
 
@@ -594,10 +662,10 @@ function LandingSections({ value, onChange }: {
   </section>;
 }
 
-type RecordColumn = { key: string; label: string; type?: "text" | "date" | "checkbox" | "market" | "textarea" };
+type RecordColumn = { key: string; label: string; type?: "text" | "date" | "checkbox" | "market" | "textarea" | "emphasis" };
 
-function RecordList({ label, value, columns, onChange, minimum = 0 }: {
-  label: string; value: unknown; columns: RecordColumn[]; onChange: (value: Array<Record<string, any>>) => void; minimum?: number;
+function RecordList({ label, value, columns, onChange, minimum = 0, maximum }: {
+  label: string; value: unknown; columns: RecordColumn[]; onChange: (value: Array<Record<string, any>>) => void; minimum?: number; maximum?: number;
 }) {
   const items = Array.isArray(value) ? value as Array<Record<string, any>> : [];
   const get = (item: Record<string, any>, path: string) => path.split(".").reduce((current, key) => current?.[key], item);
@@ -606,7 +674,7 @@ function RecordList({ label, value, columns, onChange, minimum = 0 }: {
     return tail ? { ...item, [head]: { ...(item[head] ?? {}), [tail]: next } } : { ...item, [head]: next };
   };
   return <section className="space-y-3">
-    <div className="flex items-center justify-between"><Label>{label} <Requirement required={minimum > 0} /></Label><Button type="button" size="sm" variant="outline" onClick={() => onChange([...items, {}])}>Add row</Button></div>
+    <div className="flex items-center justify-between"><Label>{label} <Requirement required={minimum > 0} /></Label><Button type="button" size="sm" variant="outline" disabled={maximum !== undefined && items.length >= maximum} onClick={() => onChange([...items, {}])}>Add row</Button></div>
     {items.map((item, index) => <fieldset key={index} className="grid gap-3 rounded-md border p-3 sm:grid-cols-2">
       <legend className="px-1 text-xs font-medium">{label} {index + 1}</legend>
       {columns.map((column) => <div key={column.key} className={column.key.includes("body") || column.key.includes("statement") ? "sm:col-span-2" : ""}>
@@ -615,6 +683,8 @@ function RecordList({ label, value, columns, onChange, minimum = 0 }: {
           ? <input type="checkbox" className="ml-2" checked={Boolean(get(item, column.key))} onChange={(event) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, event.target.checked) : current))} />
           : column.type === "market"
             ? <Choice label={`${label} ${index + 1} ${column.label}`} value={get(item, column.key) ?? "all-markets"} options={educationMarkets} onChange={(next) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, next === "all-markets" ? undefined : next) : current))} />
+            : column.type === "emphasis"
+              ? <Choice label={`${label} ${index + 1} ${column.label}`} value={get(item, column.key) ?? "plain"} options={["plain", "italic"]} onChange={(next) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, next) : current))} />
             : column.type === "textarea"
               ? <Textarea aria-label={`${label} ${index + 1} ${column.label}`} rows={3} value={get(item, column.key) ?? ""} onChange={(event) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, event.target.value) : current))} />
             : <Input aria-label={`${label} ${index + 1} ${column.label}`} type={column.type ?? "text"} value={get(item, column.key) ?? ""} onChange={(event) => onChange(items.map((current, currentIndex) => currentIndex === index ? setPath(current, column.key, event.target.value) : current))} />}
