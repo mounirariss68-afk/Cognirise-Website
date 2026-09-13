@@ -52,6 +52,12 @@ test("an editor authorized for every destination can read shared-source/und whil
       assert.equal(values[2], values[1] === "shared-source" ? "und" : "ar");
       return { rowCount: 1, rows: [{ content_mode: "shared" }] };
     }
+    // This fixture is an unbound legacy shared source. The destination-wide
+    // authorization branch is therefore still authoritative after checking
+    // that no managed shared/adapted binding materializes this exact address.
+    if (statement.includes("FROM cms_market_edition_bindings binding")) {
+      return { rowCount: 0, rows: [] };
+    }
     if (statement === "SELECT code FROM market_editions WHERE enabled=true") {
       return { rowCount: 2, rows: [{ code: "ksa" }, { code: "uae" }] };
     }

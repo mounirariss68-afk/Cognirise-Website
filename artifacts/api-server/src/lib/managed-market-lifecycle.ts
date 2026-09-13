@@ -313,5 +313,5 @@ export async function assertManagedMarketPublication(
   ) {
     throw new Error("Managed market immutable media manifest does not match the revision media pins.");
   }
-  return binding.id;
+  return { bindingId: binding.id, mode: binding.mode };
 }

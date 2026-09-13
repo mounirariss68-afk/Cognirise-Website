@@ -20,3 +20,15 @@ Exercise newly added queue and review routes against PostgreSQL, not only existi
 **Why:** Surrounding lifecycle suites cannot validate a new endpoint's SQL or its compatibility with existing state transitions.
 
 **How to apply:** Verify the full requested-review, decision, successor, reassignment, and publication eligibility sequence with exact edition fixtures.
+
+Freeze delivery identity as well as the notification set across retries.
+
+**Why:** Provider idempotency keys do not protect retries that move to a different provider, connection or payload configuration after an uncertain outcome.
+
+**How to apply:** Block unbound legacy jobs and changed transport identities rather than inferring a new destination. Keep connection discovery outside database transactions; an SDK lookup without cancellation needs bounded waiting and single-flight protection.
+
+Use a distinct fixture reviewer who is neither the requester, accountable editor nor revision author.
+
+**Why:** An administrator who authored the fixture cannot legitimately approve it. Selecting a real user to get past that rule creates notifications outside the test's ownership boundary.
+
+**How to apply:** Prepare separate disposable author/editor/reviewer identities before a browser publication test. Clean fixture content and related events before deleting its reviewer account.

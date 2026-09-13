@@ -60,6 +60,7 @@ const expectedMigrations = [
   { idx: 31, when: 1788998400008, tag: "0031_cms_shared_pointer_integrity" },
   { idx: 32, when: 1788998400009, tag: "0032_cms_editorial_work" },
   { idx: 33, when: 1788998400010, tag: "0033_cms_editorial_review_hardening" },
+  { idx: 34, when: 1788998400011, tag: "0034_cms_editorial_digest_delivery_identity" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {

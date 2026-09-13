@@ -81,9 +81,41 @@ export function managedMarketPublicAuthorityActivatedClause(
          SELECT 1 FROM cms_audit_events publication
           WHERE publication.target_type='document'
             AND publication.target_id=binding.document_id::text
-            AND publication.action='document.published'
-            AND publication.metadata->>'managedBindingId'=binding.id::text
+             AND (
+               (
+                 publication.action='document.published'
+                 AND publication.metadata->>'managedBindingId'=binding.id::text
+               )
+               OR (
+                 publication.action='document.availability.published'
+                 AND publication.metadata->>'managedBindingId'=binding.id::text
+               )
+             )
        )
+  )`;
+}
+
+/**
+ * A historical shared-mode row can be the exact materialization of a managed
+ * destination. Its storage mode must not make it behave like the document-wide
+ * source: only a resolved revision belonging to the binding qualifies. This
+ * is intentionally independent from public authority activation, which the
+ * caller applies separately.
+ */
+export function managedMarketExactMaterializationClause(
+  documentIdSql: string,
+  editionAlias: string,
+  revisionIdSql = `${editionAlias}.published_revision_id`,
+): string {
+  return `EXISTS (
+    SELECT 1
+      FROM cms_market_edition_bindings binding
+      JOIN market_editions destination ON destination.id=binding.market_edition_id
+      JOIN cms_resolved_market_revisions resolved ON resolved.binding_id=binding.id
+     WHERE binding.document_id=${documentIdSql}
+       AND destination.code=${editionAlias}.market
+       AND binding.locale=${editionAlias}.locale
+       AND resolved.cms_revision_id=${revisionIdSql}
   )`;
 }
 

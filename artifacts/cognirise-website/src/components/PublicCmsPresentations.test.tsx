@@ -3,6 +3,7 @@ import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { PlatformContent, PublicationContent } from "@workspace/api-zod";
+import { resolveCmsMedia, resolvePinnedCmsMedia } from "@/lib/cms";
 
 // The application Vite transform supplies the automatic JSX runtime. The
 // direct SSR test runs through tsx, so expose the legacy JSX global before the
@@ -12,7 +13,7 @@ import type { PlatformContent, PublicationContent } from "@workspace/api-zod";
   pathname: "/",
   search: "",
 };
-const { PlatformPresentation, PublicationPresentation } = await import("./PublicCmsPresentations");
+const { PlatformPresentation, PublicationPresentation } = await import("./cms/PublicCmsPresentations");
 
 const platformContent = {
   schemaVersion: 1,
@@ -85,4 +86,60 @@ test("publication rendering shares the lossless rich renderer and keeps the lead
   assert.match(html, /<ol[^>]*list-decimal/);
   assert.match(html, /<blockquote[^>]*>.*The article quote\..*<cite[^>]*>Article source<\/cite>/);
   assert.doesNotMatch(html, /<ul[^>]*>.*A/);
+});
+
+test("public and protected publication previews render the exact resolved hero version", () => {
+  const heroReference = {
+    mediaId: "hero-a",
+    mediaVersionId: "hero-a-approved",
+    role: "hero" as const,
+    altText: "Approved hero A",
+  };
+  const media = [
+    {
+      id: "hero-a",
+      versionId: "hero-a-old",
+      url: "/api/public/media/hero-a/hero-a-old",
+      altText: "Old hero A",
+    },
+    {
+      id: "hero-a",
+      versionId: "hero-a-approved",
+      url: "/api/public/media/hero-a/hero-a-approved",
+      altText: "Approved hero A",
+    },
+    {
+      id: "hero-b",
+      versionId: "hero-b-approved",
+      url: "/api/public/media/hero-b/hero-b-approved",
+      altText: "Approved hero B",
+    },
+  ] as any;
+  const publicHero = resolveCmsMedia(media, heroReference, "hero-a");
+  const previewHero = resolvePinnedCmsMedia(media, heroReference);
+
+  assert.equal(publicHero?.url, "/api/public/media/hero-a/hero-a-approved");
+  assert.equal(previewHero?.url, "/api/public/media/hero-a/hero-a-approved");
+
+  for (const [preview, resolvedHero] of [[false, publicHero], [true, previewHero]] as const) {
+    const html = renderToStaticMarkup(
+      <PublicationPresentation
+        title="Publication title"
+        content={{ ...publicationContent, heroMedia: heroReference }}
+        heroMedia={resolvedHero}
+        preview={preview}
+      />,
+    );
+    assert.match(html, /data-testid="publication-hero"/);
+    assert.match(html, /src="\/api\/public\/media\/hero-a\/hero-a-approved"/);
+    assert.doesNotMatch(html, /hero-a-old|hero-b-approved|latest|fallback/);
+  }
+});
+
+test("publication hero is optional and does not render a replacement image", () => {
+  const html = renderToStaticMarkup(
+    <PublicationPresentation title="Publication title" content={publicationContent} />,
+  );
+  assert.doesNotMatch(html, /data-testid="publication-hero"/);
+  assert.doesNotMatch(html, /<img/);
 });

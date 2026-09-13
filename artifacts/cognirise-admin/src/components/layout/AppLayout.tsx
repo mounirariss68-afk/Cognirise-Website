@@ -159,7 +159,7 @@ export function AppLayout({ children, administratorOnly = false }: { children: R
     return (
       <SidebarProvider defaultOpen>
         <AppSidebar />
-        <SidebarInset className="overflow-hidden bg-background">
+        <SidebarInset className="min-w-0 overflow-hidden bg-background">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none z-0" />
 
           <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-1/2 focus:-translate-x-1/2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-md focus:outline-none focus:ring-2 focus:ring-ring">
@@ -172,7 +172,7 @@ export function AppLayout({ children, administratorOnly = false }: { children: R
             <div className="w-8" />
           </header>
 
-          <div id="main-content" tabIndex={-1} className="flex-1 flex flex-col items-center justify-center relative z-10 p-8 w-full h-full focus:outline-none">
+          <div id="main-content" tabIndex={-1} className="flex-1 min-w-0 flex flex-col items-center justify-center relative z-10 p-8 w-full h-full focus:outline-none">
             <Lock className="w-12 h-12 text-muted-foreground mb-4 opacity-50 mx-auto" />
             <h1 className="text-2xl font-bold tracking-tight mb-2 text-foreground">Access Denied</h1>
             <p className="text-sm text-muted-foreground font-mono">You do not have the required administrator privileges to view this section.</p>
@@ -185,7 +185,7 @@ export function AppLayout({ children, administratorOnly = false }: { children: R
   return (
     <SidebarProvider defaultOpen>
       <AppSidebar />
-      <SidebarInset className="overflow-hidden bg-background">
+      <SidebarInset className="min-w-0 overflow-hidden bg-background">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none z-0" />
 
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-1/2 focus:-translate-x-1/2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-md focus:outline-none focus:ring-2 focus:ring-ring">
@@ -198,7 +198,7 @@ export function AppLayout({ children, administratorOnly = false }: { children: R
           <div className="w-8" />
         </header>
 
-        <div id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto custom-scrollbar relative z-10 w-full h-full flex flex-col focus:outline-none">
+        <div id="main-content" tabIndex={-1} className="flex-1 min-w-0 overflow-y-auto custom-scrollbar relative z-10 w-full h-full flex flex-col focus:outline-none">
           {children}
         </div>
       </SidebarInset>

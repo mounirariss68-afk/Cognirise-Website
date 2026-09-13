@@ -7,7 +7,7 @@ Treat the saved shared source, the frozen published source, and the destination 
 
 **Why:** An editor must be able to customize from an unpublished saved revision without making that draft public or hiding an older approved revision. Publishing destinations separately from shared content can release an unreviewed combination.
 
-**How to apply:** Resolve public content only from approved published source pointers, apply requested-market/locale exclusions before fallback, and atomically release shared content with its reviewed destination snapshot. Validate locales for the requested market, not against the union of all market locales.
+**How to apply:** Resolve public content only from approved published source pointers and apply requested-market/locale exclusions before fallback. Changed Shared content must release with its reviewed destination snapshot. A separate reviewed-visibility release is safe only against already-approved published exact content or an unchanged live Shared source, without moving content pointers. Validate locales for the requested market, not their union.
 
 Never infer a shared source from equal regional payloads or choose an arbitrary region for a multi-edition legacy document.
 
@@ -38,3 +38,9 @@ Use a neutral, locale-specific Shared editorial baseline, never a permanent UAE 
 **Why:** Shared wording and market-specific imagery must evolve independently without turning one country's editorial ownership into authority over every other market. Market-only content remains legitimate without a baseline.
 
 **How to apply:** Keep unchanged fields inherited, record intentional field overrides, and require explicit comparison/adoption of shared successors. Creating a managed draft must preserve the previous live source; only reviewed publication transfers delivery authority. Source-market permissions remain relevant to inherited content even when an exact destination revision exists.
+
+Classify managed materializations separately from their legacy storage address, and authorize published history from immutable lineage.
+
+**Why:** A real-market edition formerly used as the Shared source can become an adaptation. Treating it as the global source causes false stale errors and an unreachable visibility-release action. Conversely, a newer Independent draft does not remove source restrictions from an older Adapted publication.
+
+**How to apply:** Use binding identity for current exact-edit intent. For historical release, follow the published revision's own lineage; a NULL baseline requires sealed Independent-publication evidence, not the binding's current mode. Confirm public 404→200, pinned media and draft isolation, not just a successful publish response.

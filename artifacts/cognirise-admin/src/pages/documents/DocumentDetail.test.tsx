@@ -62,6 +62,10 @@ let currentAvailability: any;
 let currentPersonAvailability: any = { items: [] };
 let currentSharedMatrix: any = { baselines: [], bindings: [] };
 let pendingSave: { input: any; options: any } | undefined;
+let pendingSubmit: { input: any; options: any } | undefined;
+let pendingPublish: { input: any; options: any } | undefined;
+let pendingAvailabilityPublish: { input: any; options: any } | undefined;
+let publishAvailabilityPending = false;
 let pendingBaselineSave: { input: any; options: any } | undefined;
 let sharedOverrideMutations = 0;
 let sharedOverrideInput: any;
@@ -80,6 +84,24 @@ const mutation = {
     pendingSave = { input, options };
     mutationPending = true;
     notify();
+  },
+};
+const submitMutation = {
+  isPending: false,
+  mutate(input: any, options: any) {
+    pendingSubmit = { input, options };
+  },
+};
+const publishMutation = {
+  isPending: false,
+  mutate(input: any, options: any) {
+    pendingPublish = { input, options };
+  },
+};
+const publishAvailabilityMutation = {
+  get isPending() { return publishAvailabilityPending; },
+  mutate(input: any, options: any) {
+    pendingAvailabilityPublish = { input, options };
   },
 };
 const inertMutation = { isPending: false, mutate() {} };
@@ -169,7 +191,14 @@ mock.module("@workspace/api-client-react", {
     getListDocumentReviewCommentsQueryKey: () => ["comments"],
     getGetMediaQueryKey: () => ["media"],
     getListMediaQueryKey: () => ["media-list"],
-    useGetSession: () => ({ data: currentSession, isLoading: false, isError: false }),
+    useGetSession: () => {
+      React.useSyncExternalStore(
+        (listener) => { listeners.add(listener); return () => listeners.delete(listener); },
+        () => JSON.stringify(currentSession),
+        () => "",
+      );
+      return { data: currentSession, isLoading: false, isError: false };
+    },
     customFetch: async () => ({ items: [] }),
     useListDocuments: () => ({ data: { items: [] }, isLoading: false, isError: false }),
     useListDocumentEditions: () => {
@@ -206,7 +235,7 @@ mock.module("@workspace/api-client-react", {
     }] }, isLoading: false, isError: false };
     },
     getGetDocumentAvailabilityQueryKey: () => ["availability"],
-    getDocumentAvailability: async () => ({
+    getDocumentAvailability: async () => currentAvailability ?? ({
       documentId: "document-1", draftVersion: 1, reviewedVersion: null, publishedVersion: 0,
       sharedSource: { editionId: "uae-edition", revisionId: "revision-1", market: "uae", locale: "en-US" },
       affectedEditions: [], items: [],
@@ -235,8 +264,8 @@ mock.module("@workspace/api-client-react", {
     },
     usePreviewDocument: () => ({ refetch: async () => ({ data: null }) }),
     useListDocumentReviewComments: () => ({ data: [] }),
-    useSubmitDocument: () => inertMutation,
-    usePublishDocument: () => inertMutation,
+    useSubmitDocument: () => submitMutation,
+    usePublishDocument: () => publishMutation,
     useArchiveDocument: () => inertMutation,
     useRestoreDocument: () => restoreMutation,
     useDeleteDocument: () => inertMutation,
@@ -244,7 +273,7 @@ mock.module("@workspace/api-client-react", {
     useCreateDocumentEditionOverride: () => inertMutation,
     useReviewDocumentAvailability: () => inertMutation,
     useSelectDocumentAvailabilitySource: () => inertMutation,
-    usePublishDocumentAvailability: () => inertMutation,
+    usePublishDocumentAvailability: () => publishAvailabilityMutation,
     useGetDocumentMarketAvailability: () => ({ data: currentPersonAvailability, isLoading: false, isError: false }),
     useUpdateDocumentAvailability: () => sharedAvailabilityMutation,
     useUpdateDocumentMarketAvailability: () => personAvailabilityMutation,
@@ -269,7 +298,12 @@ const { createRoot } = await import("react-dom/client");
 
 async function renderDetail(initialDocument: any = documentBase) {
   currentDocument = initialDocument ? { ...initialDocument } : undefined;
+  mutationPending = false;
   pendingSave = undefined;
+  pendingSubmit = undefined;
+  pendingPublish = undefined;
+  pendingAvailabilityPublish = undefined;
+  publishAvailabilityPending = false;
   sharedOverrideMutations = 0;
   sharedOverrideInput = undefined;
   resolveSharedInput = undefined;
@@ -380,6 +414,362 @@ test("rendered detail locks a deferred save, protects dirty refetch, advances re
     assert.match(document.body.textContent ?? "", /Review the revision conflict/);
   } finally {
     await view.unmount();
+  }
+});
+
+test("rendered publication saves serialize the default article variant", async () => {
+  const view = await renderDetail({
+    ...documentBase,
+    kind: "publication",
+    content: { schemaVersion: 1 },
+  });
+  try {
+    await change(view.container.querySelector<HTMLInputElement>("#document-title")!, "Publication title");
+    await React.act(async () => button(view.container, "Save Draft").click());
+    assert.equal(
+      pendingSave?.input.data.content.variant,
+      "article",
+      "saving a legacy publication draft must persist the editor's Article default",
+    );
+  } finally {
+    await view.unmount();
+  }
+});
+
+test("managed adapted editions submit their materialized exact revision instead of legacy shared-source state", async () => {
+  currentSession = { user: { role: "publisher", marketCodes: ["uae"] } };
+  currentSearch = "?market=uae&locale=en-US";
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en", enabled: true },
+  ];
+  const adaptedDocument = {
+    ...documentBase,
+    currentRevisionId: "revision-5",
+    revisionNumber: 5,
+  };
+  currentDocument = adaptedDocument;
+  currentEditions = [{ ...edition, revisionId: "revision-5", revisionNumber: 5 }];
+  currentSharedMatrix = {
+    baselines: [],
+    bindings: [{
+      id: "binding-adapted",
+      documentId: "document-1",
+      marketEditionId: "uae-edition",
+      locale: "en-US",
+      mode: "adapted",
+      baselineId: "baseline-1",
+      baselineRevisionId: "baseline-revision-4",
+      version: 4,
+      operations: [],
+      materializedRevisionId: "revision-5",
+      translationState: "current",
+    }],
+  };
+  currentAvailability = {
+    documentId: "document-1",
+    draftVersion: 4,
+    reviewedVersion: 4,
+    publishedVersion: 3,
+    sharedSource: {
+      editionId: "uae-edition",
+      revisionId: "revision-4",
+      market: "uae",
+      locale: "en-US",
+    },
+    affectedEditions: [],
+    items: [],
+  };
+  const view = await renderDetail(adaptedDocument);
+  try {
+    await React.act(async () => button(view.container, "Submit Review").click());
+    assert.equal(
+      pendingSubmit?.input.data.revisionId,
+      "revision-5",
+      "adapted exact editions must use their materialized revision and skip the legacy source token",
+    );
+    assert.doesNotMatch(view.container.textContent ?? "", /shared source changed on the server/i);
+  } finally {
+    await view.unmount();
+    currentDocument = documentBase;
+    currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
+    currentSearch = "";
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentEditions = [edition];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentAvailability = undefined;
+    pendingSubmit = undefined;
+  }
+});
+
+test("managed adapted publication omits legacy availability version and presents exact-edition messaging", async () => {
+  const adaptedDocument = {
+    ...documentBase,
+    status: "in-review",
+    currentRevisionId: "revision-5",
+    revisionNumber: 5,
+  };
+  currentDocument = adaptedDocument;
+  currentEditions = [{ ...edition, workflowState: "in-review", revisionId: "revision-5", revisionNumber: 5 }];
+  currentSharedMatrix = {
+    baselines: [],
+    bindings: [{
+      id: "binding-adapted",
+      documentId: "document-1",
+      marketEditionId: "uae-edition",
+      locale: "en-US",
+      mode: "adapted",
+      baselineId: "baseline-1",
+      baselineRevisionId: "baseline-revision-4",
+      version: 4,
+      operations: [],
+      materializedRevisionId: "revision-5",
+      translationState: "current",
+    }],
+  };
+  currentAvailability = {
+    documentId: "document-1",
+    draftVersion: 4,
+    reviewedVersion: 4,
+    publishedVersion: 3,
+    sharedSource: {
+      editionId: "uae-edition",
+      revisionId: "revision-4",
+      market: "uae",
+      locale: "en-US",
+    },
+    affectedEditions: [],
+    items: [],
+  };
+  const view = await renderDetail(adaptedDocument);
+  try {
+    assert.match(view.container.textContent ?? "", /Market adaptation/);
+    await React.act(async () => button(view.container, "Publish...").click());
+    const dialog = document.body.textContent ?? "";
+    assert.match(dialog, /Publish Customization/);
+    assert.match(dialog, /Only this selected edition will publish/);
+    assert.doesNotMatch(dialog, /Destination impact/);
+
+    await React.act(async () => button(document.body, "Confirm Publish").click());
+    assert.equal(pendingPublish?.input.data.revisionId, "revision-5");
+    assert.equal("availabilityVersion" in (pendingPublish?.input.data ?? {}), false);
+  } finally {
+    await view.unmount();
+    currentDocument = documentBase;
+    currentEditions = [edition];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentAvailability = undefined;
+    pendingPublish = undefined;
+  }
+});
+
+test("published adapted targets can explicitly release their reviewed destination snapshot", async () => {
+  currentSession = { user: { role: "publisher", marketCodes: ["uae", "ksa"] } };
+  currentSearch = "?market=uae&locale=en-US";
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en", enabled: true },
+  ];
+  const adaptedDocument = {
+    ...documentBase,
+    status: "published",
+    currentRevisionId: "revision-5",
+    revisionNumber: 5,
+  };
+  currentDocument = adaptedDocument;
+  currentEditions = [{
+    ...edition,
+    workflowState: "approved",
+    publicationState: "published",
+    effectivePublicationState: "published",
+    revisionId: "revision-5",
+    revisionNumber: 5,
+  }];
+  currentSharedMatrix = {
+    baselines: [],
+    bindings: [{
+      id: "binding-adapted",
+      documentId: "document-1",
+      marketEditionId: "uae-edition",
+      locale: "en-US",
+      mode: "adapted",
+      baselineId: "baseline-1",
+      baselineRevisionId: "baseline-revision-4",
+      version: 4,
+      operations: [],
+      materializedRevisionId: "revision-5",
+      translationState: "current",
+    }],
+  };
+  currentAvailability = {
+    documentId: "document-1",
+    draftVersion: 4,
+    reviewedVersion: 4,
+    publishedVersion: 0,
+    sharedSource: {
+      editionId: "uae-edition",
+      revisionId: "revision-4",
+      market: "uae",
+      locale: "en-US",
+    },
+    affectedEditions: ["uae/en-US"],
+    items: [
+      {
+        marketEditionId: "uae-edition",
+        market: "uae",
+        locale: "en-US",
+        displayName: "UAE",
+        stagedDecision: "show",
+        reviewedDecision: "show",
+        publishedDecision: "off",
+        publishedEffectiveAvailable: false,
+        pending: true,
+        customized: true,
+      },
+      {
+        marketEditionId: "ksa-edition",
+        market: "ksa",
+        locale: "en",
+        displayName: "KSA",
+        stagedDecision: "off",
+        reviewedDecision: "off",
+        publishedDecision: "off",
+        publishedEffectiveAvailable: false,
+        pending: false,
+        customized: false,
+      },
+    ],
+  };
+  const view = await renderDetail(adaptedDocument);
+  try {
+    const editionsTab = button(view.container, "Editions");
+    await React.act(async () => {
+      editionsTab.dispatchEvent(new dom.window.MouseEvent("mousedown", { bubbles: true, button: 0 }));
+      editionsTab.click();
+    });
+    const release = button(view.container, "Publish reviewed destinations");
+    assert.equal(release.disabled, false);
+    await React.act(async () => release.click());
+    const confirmation = document.body.textContent ?? "";
+    assert.match(confirmation, /Reviewed version:\s*4/);
+    assert.match(confirmation, /Current target:\s*UAE · en-US · revision 5/);
+    assert.match(confirmation, /UAE · en-US:\s*shown/);
+    await React.act(async () => button(document.body, "Confirm destination release").click());
+    assert.equal(pendingAvailabilityPublish?.input.data.version, 4);
+    assert.equal(pendingAvailabilityPublish?.input.data.revisionId, undefined);
+    const publishedSnapshot = {
+      ...currentAvailability,
+      publishedVersion: 4,
+      items: currentAvailability.items.map((item: any) => ({
+        ...item,
+        publishedDecision: item.market === "uae" ? "show" : item.publishedDecision,
+        publishedEffectiveAvailable: item.market === "uae" ? true : item.publishedEffectiveAvailable,
+        pending: item.market === "uae" ? false : item.pending,
+      })),
+    };
+    await React.act(async () => {
+      currentAvailability = publishedSnapshot;
+      pendingAvailabilityPublish!.options.onSuccess(publishedSnapshot);
+      notify();
+    });
+    assert.match(view.container.textContent ?? "", /Live:\s*Shown/);
+    assert.doesNotMatch(view.container.textContent ?? "", /Live:\s*Not published yet/);
+  } finally {
+    await view.unmount();
+    currentSearch = "";
+    currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentDocument = documentBase;
+    currentEditions = [edition];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentAvailability = undefined;
+    pendingAvailabilityPublish = undefined;
+  }
+});
+
+test("reviewed destination release stays disabled for unauthorized, stale, or busy adapted targets", async () => {
+  currentSearch = "?market=uae&locale=en-US";
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  const adaptedDocument = {
+    ...documentBase,
+    status: "published",
+    currentRevisionId: "revision-5",
+    revisionNumber: 5,
+  };
+  currentDocument = adaptedDocument;
+  currentEditions = [{
+    ...edition,
+    workflowState: "approved",
+    publicationState: "published",
+    revisionId: "revision-5",
+    revisionNumber: 5,
+  }];
+  currentSharedMatrix = {
+    baselines: [],
+    bindings: [{
+      id: "binding-adapted",
+      documentId: "document-1",
+      marketEditionId: "uae-edition",
+      locale: "en-US",
+      mode: "adapted",
+      materializedRevisionId: "revision-5",
+      version: 4,
+      operations: [],
+    }],
+  };
+  const availability = {
+    documentId: "document-1",
+    draftVersion: 4,
+    reviewedVersion: 4,
+    publishedVersion: 0,
+    sharedSource: { editionId: "uae-edition", revisionId: "revision-4", market: "uae", locale: "en-US" },
+    affectedEditions: ["uae/en-US"],
+    items: [{
+      marketEditionId: "uae-edition",
+      market: "uae",
+      locale: "en-US",
+      displayName: "UAE",
+      stagedDecision: "show",
+      reviewedDecision: "show",
+      publishedDecision: "off",
+      publishedEffectiveAvailable: false,
+      pending: true,
+      customized: true,
+    }],
+  };
+  currentAvailability = availability;
+  const view = await renderDetail(adaptedDocument);
+  try {
+    const editionsTab = button(view.container, "Editions");
+    await React.act(async () => {
+      editionsTab.dispatchEvent(new dom.window.MouseEvent("mousedown", { bubbles: true, button: 0 }));
+      editionsTab.click();
+    });
+    const release = button(view.container, "Publish reviewed destinations");
+    currentSession = { user: { role: "editor", marketCodes: ["uae"] } };
+    await React.act(async () => notify());
+    assert.equal(button(view.container, "Publish reviewed destinations").disabled, true);
+
+    currentSession = { user: { role: "publisher", marketCodes: ["uae"] } };
+    currentAvailability = { ...availability, draftVersion: 5 };
+    await React.act(async () => notify());
+    assert.equal(button(view.container, "Publish reviewed destinations").disabled, true);
+
+    currentAvailability = availability;
+    publishAvailabilityPending = true;
+    await React.act(async () => notify());
+    assert.equal(button(view.container, "Publish reviewed destinations").disabled, true);
+    assert.equal(release.disabled, true);
+  } finally {
+    await view.unmount();
+    currentSearch = "";
+    currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentDocument = documentBase;
+    currentEditions = [edition];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentAvailability = undefined;
+    publishAvailabilityPending = false;
   }
 });
 

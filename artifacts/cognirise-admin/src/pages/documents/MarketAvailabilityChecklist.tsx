@@ -385,7 +385,11 @@ export function MarketAvailabilityChecklist({
         const reviewed = !useLegacyPersonAvailability
           && sharedAvailability.data?.reviewedVersion === sharedAvailability.data?.draftVersion
           && item.reviewedDecision !== null;
-        const sharedSourceIsLive = Boolean(sharedAvailability.data?.sharedSource?.publishedRevisionId);
+        // Availability publication is its own versioned receipt. A managed
+        // destination can be live even when the legacy shared-source pointer
+        // is intentionally null or stale, so never infer this from
+        // sharedSource.publishedRevisionId.
+        const availabilityIsLive = (sharedAvailability.data?.publishedVersion ?? 0) > 0;
         const serverChecked = useLegacyPersonAvailability
           ? (pending ? item.previewEffectiveAvailable : item.publishedEffectiveAvailable)
           : item.stagedDecision !== "off";
@@ -421,14 +425,14 @@ export function MarketAvailabilityChecklist({
                         {reviewed ? "Reviewed" : "Pending"}: {(useLegacyPersonAvailability ? item.previewEffectiveAvailable : item.stagedDecision !== "off") ? "Shown" : "Excluded"}
                       </Badge>
                       <span className="text-[10px] text-muted-foreground">
-                        Live: {!useLegacyPersonAvailability && !sharedSourceIsLive
+                         Live: {!availabilityIsLive
                           ? "Not published yet"
                           : item.publishedEffectiveAvailable ? "Shown" : "Excluded"}
                       </span>
                     </>
                   ) : (
                     <span className="text-[10px] text-muted-foreground">
-                      Live: {!useLegacyPersonAvailability && !sharedSourceIsLive
+                       Live: {!availabilityIsLive
                         ? "Not published yet"
                         : item.publishedEffectiveAvailable ? "Shown" : "Excluded"}
                     </span>

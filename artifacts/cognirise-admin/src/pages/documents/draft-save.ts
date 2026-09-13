@@ -19,6 +19,20 @@ export type DraftSaveSource = {
   markets: string[];
 };
 
+/**
+ * Keep editor-created defaults in the serialized snapshot as well as in the
+ * form state. Older publication drafts may predate the variant selector and
+ * therefore arrive without a variant even though the editor displays Article
+ * as its effective choice.
+ */
+export function normalizeCmsDraftContent(
+  kind: CmsDocumentKind,
+  content: Record<string, unknown>,
+): Record<string, unknown> {
+  if (kind !== "publication" || content.variant !== undefined) return content;
+  return { ...content, variant: "article" };
+}
+
 function optionalText(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
@@ -64,11 +78,12 @@ export function buildDraftSave(
 ) {
   const seo = normalizeDraftSeo(editedSeo, hadSeo);
   const summary = optionalText(source.summary) ?? null;
+  const content = normalizeCmsDraftContent(kind, source.content);
   const snapshot = {
     slug: source.slug,
     title: source.title,
     summary,
-    content: source.content,
+    content,
     ...(seo && { seo }),
     mediaIds: source.mediaIds ?? [],
     markets: source.markets,

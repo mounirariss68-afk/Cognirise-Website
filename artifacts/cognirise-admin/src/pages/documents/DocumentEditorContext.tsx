@@ -47,8 +47,8 @@ export function DocumentEditorContext({
   const StatusIcon = status.icon;
 
   return (
-    <div className="bg-card border-b border-border p-4 flex flex-wrap items-center justify-between gap-4 shrink-0">
-      <div className="flex items-center gap-4">
+    <div className="flex shrink-0 flex-col gap-3 border-b border-border bg-card p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4 sm:p-4">
+      <div className="flex min-w-0 flex-wrap items-center gap-3">
         <Select 
           value={`${selectedMarket}|${selectedLocale}`} 
           onValueChange={(val) => {
@@ -57,7 +57,7 @@ export function DocumentEditorContext({
           }}
           disabled={isPending}
         >
-          <SelectTrigger className="w-[200px] h-9 bg-background">
+          <SelectTrigger className="h-9 w-full min-w-0 bg-background sm:w-[200px]">
             <SelectValue placeholder="Select edition" />
           </SelectTrigger>
           <SelectContent>
@@ -71,7 +71,7 @@ export function DocumentEditorContext({
           </SelectContent>
         </Select>
 
-        <div className="flex items-center gap-3 border-l border-border pl-4">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 border-t border-border pt-3 sm:flex-none sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
           <div className="flex flex-col">
             <span className="text-[10px] font-mono uppercase text-muted-foreground">Source</span>
             <span className="text-xs font-medium">
@@ -87,20 +87,20 @@ export function DocumentEditorContext({
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2 text-sm font-mono">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 sm:justify-end sm:gap-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm font-mono">
           {readinessBlockers > 0 ? (
-            <span className="flex items-center gap-1.5 text-destructive bg-destructive/10 px-2 py-1 rounded-sm">
+            <span className="flex items-center gap-1.5 rounded-sm bg-destructive/10 px-2 py-1 text-destructive">
               <AlertTriangle className="w-4 h-4" />
               {readinessBlockers} Blocker{readinessBlockers !== 1 && "s"}
             </span>
           ) : readinessWarnings > 0 ? (
-            <span className="flex items-center gap-1.5 text-amber-600 bg-amber-500/10 px-2 py-1 rounded-sm">
+            <span className="flex items-center gap-1.5 rounded-sm bg-amber-500/10 px-2 py-1 text-amber-600">
               <AlertTriangle className="w-4 h-4" />
               {readinessWarnings} Warning{readinessWarnings !== 1 && "s"}
             </span>
           ) : (
-            <span className="flex items-center gap-1.5 text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded-sm">
+            <span className="flex items-center gap-1.5 rounded-sm bg-emerald-500/10 px-2 py-1 text-emerald-600">
               <CheckCircle2 className="w-4 h-4" />
               Ready
             </span>
@@ -108,7 +108,7 @@ export function DocumentEditorContext({
         </div>
 
         {mode === "adapted" && (
-          <Button variant="outline" size="sm" onClick={onCompare} className="gap-2">
+          <Button variant="outline" size="sm" onClick={onCompare} className="w-full gap-2 sm:w-auto">
             <GitCompare className="w-4 h-4" />
             Compare to Shared
           </Button>

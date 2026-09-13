@@ -35,6 +35,7 @@ import { officeCreationContent, officeSlug } from "./office-creation";
 import { initialCmsContent, validateCmsContent } from "@workspace/api-zod";
 import { CONTENT_GUIDANCE, collectContentMediaIds } from "./authoring";
 import { ContentEditor } from "./ContentEditor";
+import { normalizeCmsDraftContent } from "./draft-save";
 
 const createDocSchema = z.object({
   title: z.string().trim().min(1, "Title is required"),
@@ -62,7 +63,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [slugWasEdited, setSlugWasEdited] = useState(false);
   const [createContent, setCreateContent] = useState<Record<string, any>>(
-    () => initialCmsContent(kind) as Record<string, any>,
+    () => normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>),
   );
 
   const canCreate = session?.user?.role !== "viewer";
@@ -113,7 +114,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   }, [form, primaryMarket]);
 
   useEffect(() => {
-    setCreateContent(initialCmsContent(kind) as Record<string, any>);
+    setCreateContent(normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>));
   }, [kind]);
 
   useEffect(() => {
@@ -145,7 +146,9 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
       });
       return;
     }
-    const contentToCreate = kind === "office" ? officeCreationContent(values) : createContent;
+    const contentToCreate = kind === "office"
+      ? officeCreationContent(values)
+      : normalizeCmsDraftContent(kind, createContent);
     createDocument.mutate({
       data: {
         kind,
@@ -162,7 +165,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
         setIsCreateOpen(false);
         form.reset({ title: "", slug: "", market: primaryMarket?.code ?? "", address: "", phone: "" });
         setSlugWasEdited(false);
-        setCreateContent(initialCmsContent(kind) as Record<string, any>);
+        setCreateContent(normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>));
         setLocation(`/content/${newDoc.id}`);
       },
       onError: (error) => {
@@ -388,7 +391,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
           if (!open && !createDocument.isPending) {
             form.reset({ title: "", slug: "", market: primaryMarket?.code ?? "", address: "", phone: "" });
             setSlugWasEdited(false);
-            setCreateContent(initialCmsContent(kind) as Record<string, any>);
+            setCreateContent(normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>));
           }
         }}
       >

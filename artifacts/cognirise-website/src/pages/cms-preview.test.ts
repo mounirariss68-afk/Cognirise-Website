@@ -199,14 +199,22 @@ test("landing previews use the public governed route with draft context and no p
 });
 
 test("public platform and publication layouts remain the source of preview composition", async () => {
-  const [platform, article, presentations] = await Promise.all([
+  const [platform, article, presentations, preview] = await Promise.all([
     readFile(new URL("./PlatformDetail.tsx", import.meta.url), "utf8"),
     readFile(new URL("./InsightArticle.tsx", import.meta.url), "utf8"),
     readFile(presentationsUrl, "utf8"),
+    readFile(pageUrl, "utf8"),
   ]);
 
   assert.match(platform, /<PlatformPresentation/);
   assert.match(article, /<PublicationPresentation/);
+  assert.match(article, /resolveCmsMedia\(cms\.data\.media, record\.heroMedia, record\.heroMediaId\)/);
+  assert.match(article, /heroMedia=\{heroMedia\}/);
+  assert.match(presentations, /heroMedia &&/);
+  assert.match(presentations, /src=\{heroMedia\.url\}/);
+  assert.match(presentations, /data-testid="publication-hero"/);
+  assert.match(presentations, /loading=\{preview \? "eager" : "lazy"\}/);
+  assert.match(preview, /heroMedia=\{resolvePinnedCmsMedia\(media, publication\.heroMedia\)\}/);
   assert.match(presentations, /<BrandButton href=\{content\.cta\.href\}/);
   assert.match(presentations, /Ready to move the work/);
   assert.match(presentations, /PublicationBody/);

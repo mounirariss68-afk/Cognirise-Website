@@ -37,7 +37,7 @@ import {
 import { audit, pageOf } from "../lib/cms";
 import { asyncRoute } from "../lib/http";
 import { hashToken, randomToken } from "../lib/security";
-import { canChangeCanonicalSlug } from "../lib/policy";
+import { canChangeCanonicalSlug, isPublicContentVisible } from "../lib/policy";
 import { downloadMediaObject } from "../lib/object-storage";
 import {
   approvedMediaVersionMetadataSql,
@@ -375,14 +375,13 @@ export async function canAccessEditionTarget(
   // that exact market/locale target: another locale can be custom while this
   // one is shared (or vice versa).
   if (!edition.rowCount) return canAccessMarket(auth, market);
-  if (edition.rows[0]?.content_mode === "shared") {
-    const destinations = await client.query(
-      "SELECT code FROM market_editions WHERE enabled=true",
-    );
-    return destinations.rows.length > 0
-      && destinations.rows.every((row: { code: string }) => canAccessMarket(auth, String(row.code)));
-  }
-  if (!canAccessMarket(auth, market)) return false;
+  // Non-shared editions have an unambiguous exact-market boundary, so reject
+  // them before binding discovery. A legacy shared source can be addressed at
+  // the internal `shared-source` market, which is deliberately not an editor
+  // assignment; it needs binding classification before its destination-wide
+  // authority can be evaluated.
+  const isLegacySharedSource = edition.rows[0]?.content_mode === "shared";
+  if (!isLegacySharedSource && !canAccessMarket(auth, market)) return false;
   const managedBinding = await client.query(
     `SELECT binding.mode,source_edition.market source_market
        FROM cms_market_edition_bindings binding
@@ -391,17 +390,74 @@ export async function canAccessEditionTarget(
          ON adopted.id=binding.based_on_baseline_revision_id
        LEFT JOIN cms_revisions source_revision ON source_revision.id=adopted.source_revision_id
        LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
-      WHERE binding.document_id=$1 AND destination.code=$2 AND binding.locale=$3
-        AND binding.mode IN ('shared','adapted')
+       WHERE binding.document_id=$1 AND destination.code=$2 AND binding.locale=$3
        FOR UPDATE OF binding`,
     [documentId, market, locale],
   );
-  // No managed shared/adapted binding (including independent bindings) keeps
-  // the normal exact-market boundary. A managed binding without a recoverable
-  // adopted baseline source is fail-closed rather than silently destination-only.
+  // A legacy source may still be physically addressed at a real market/locale.
+  // Once that address has a managed binding, it represents the binding's exact
+  // materialization—not the document-wide shared source. Preserve both the
+  // exact destination and adopted baseline-source permission checks below.
+  if (isLegacySharedSource && !managedBinding.rowCount) {
+    const destinations = await client.query(
+      "SELECT code FROM market_editions WHERE enabled=true",
+    );
+    return destinations.rows.length > 0
+      && destinations.rows.every((row: { code: string }) => canAccessMarket(auth, String(row.code)));
+  }
+  // A managed materialization is a real exact destination, even when its
+  // legacy source row retained content_mode='shared'.
+  if (!canAccessMarket(auth, market)) return false;
+  // An independent binding is an exact destination by definition; it has no
+  // inherited source boundary. This also classifies a legacy storage row that
+  // was later detached, rather than mistaking it for a document-wide source.
+  if (managedBinding.rows[0]?.mode === "independent") return true;
+  // A managed shared/adapted binding without a recoverable adopted baseline
+  // source is fail-closed rather than silently destination-only.
   if (!managedBinding.rowCount) return true;
   const sourceMarket = managedBinding.rows[0]?.source_market;
   return typeof sourceMarket === "string" && canAccessMarket(auth, sourceMarket);
+}
+
+/**
+ * A released managed revision keeps the baseline source that produced that
+ * immutable materialization. Do not authorize release from the binding's
+ * current adopted source: a later draft can legitimately advance that pointer.
+ * Missing lineage is ambiguous and therefore fail-closed.
+ */
+async function canAccessManagedPublishedRevisionSource(
+  client: Queryable,
+  auth: AuthContext,
+  bindingId: string,
+  revisionId: string,
+): Promise<boolean> {
+  const source = await client.query(
+    `SELECT resolved.baseline_revision_id::text baseline_revision_id,
+            source_edition.market source_market,
+            EXISTS (
+              SELECT 1 FROM cms_audit_events publication
+               WHERE publication.action='document.published'
+                 AND publication.metadata->>'managedBindingId'=resolved.binding_id::text
+                 AND publication.metadata->>'revisionId'=resolved.cms_revision_id::text
+                 AND publication.metadata->>'managedBindingMode'='independent'
+            ) independently_published
+       FROM cms_resolved_market_revisions resolved
+       LEFT JOIN cms_shared_baseline_revisions baseline
+         ON baseline.id=resolved.baseline_revision_id
+       LEFT JOIN cms_revisions source_revision ON source_revision.id=baseline.source_revision_id
+       LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
+      WHERE resolved.binding_id=$1 AND resolved.cms_revision_id=$2
+      FOR KEY SHARE OF resolved`,
+    [bindingId, revisionId],
+  );
+  if (source.rowCount !== 1) return false;
+  const lineage = source.rows[0];
+  // An independent revision is the only valid NULL-baseline materialization.
+  // Its immutable publication receipt records that fact at publication time;
+  // mutable binding.mode is deliberately never used as historical evidence.
+  if (!lineage.baseline_revision_id) return lineage.independently_published === true;
+  return typeof lineage.source_market === "string"
+    && canAccessMarket(auth, String(lineage.source_market));
 }
 
 function availabilitySelections(value: unknown): Array<{ marketEditionId: string; locale: string; decision: AvailabilityDecision }> {
@@ -1618,7 +1674,7 @@ router.post(
 router.post(
   "/documents/:documentId/availability/publish",
   requireCsrf,
-  requireAdministrator,
+  requirePublisher,
   asyncRoute(async (req, res) => {
     const parsed = PublishDocumentAvailabilityBody.safeParse(req.body);
     if (!parsed.success) {
@@ -1636,7 +1692,7 @@ router.post(
         res.status(404).json({ error: "Document not found." });
         return;
       }
-      const transactionAuth = await revalidateMutationAuth(client, auth, "administrator");
+      const transactionAuth = await revalidateMutationAuth(client, auth, "publisher");
       if (!transactionAuth) {
         await client.query("ROLLBACK");
         res.status(403).json({ error: "Authentication is no longer valid." });
@@ -1644,17 +1700,11 @@ router.post(
       }
       const state = await client.query(
         `SELECT draft_version,reviewed_version,reviewed_selections,
-                shared_source_revision_id,reviewed_source_revision_id
+                shared_source_edition_id,shared_source_revision_id,published_source_revision_id,
+                reviewed_source_revision_id
            FROM cms_document_availability_states WHERE document_id=$1 FOR UPDATE`,
         [documentId],
       );
-      if (document.rows[0].kind !== "person" || state.rows[0]?.shared_source_revision_id) {
-        await client.query("ROLLBACK");
-        res.status(409).json({
-          error: "Shared availability is released only with its reviewed document revision. Use document publication.",
-        });
-        return;
-      }
       if (!state.rowCount || Number(state.rows[0].reviewed_version) !== parsed.data.version
         || state.rows[0].reviewed_source_revision_id !== state.rows[0].shared_source_revision_id) {
         await client.query("ROLLBACK");
@@ -1693,6 +1743,136 @@ router.post(
         res.status(403).json({ error: "Publishing shared destinations requires authority for every affected market." });
         return;
       }
+      const editions = await client.query(
+        `SELECT e.id::text edition_id,e.market,e.locale,e.editorial_market,e.content_mode,
+                e.publication_state,e.published_revision_id::text,r.id::text revision_id,
+                r.workflow_state,r.payload
+           FROM cms_market_editions e
+           LEFT JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
+          WHERE e.document_id=$1
+          FOR UPDATE OF e`,
+        [documentId],
+      );
+      const bindings = await client.query(
+        `SELECT binding.id::text binding_id,binding.mode,destination.code market,binding.locale,
+                resolved.cms_revision_id::text revision_id
+           FROM cms_market_edition_bindings binding
+           JOIN market_editions destination ON destination.id=binding.market_edition_id
+           LEFT JOIN cms_resolved_market_revisions resolved ON resolved.binding_id=binding.id
+          WHERE binding.document_id=$1
+          FOR UPDATE OF binding`,
+        [documentId],
+      );
+      const byDestination = new Map(
+        editions.rows.map((edition: Record<string, unknown>) => [
+          `${String(edition.market)}|${String(edition.locale)}`,
+          edition,
+        ]),
+      );
+      const resolvedBindings = new Set(
+        bindings.rows.map((binding: Record<string, unknown>) =>
+          `${String(binding.market)}|${String(binding.locale)}|${String(binding.revision_id)}`),
+      );
+      const bindingByDestination = new Map(
+        bindings.rows.map((binding: Record<string, unknown>) => [
+          `${String(binding.market)}|${String(binding.locale)}`,
+          binding,
+        ]),
+      );
+      const source = state.rows[0].shared_source_edition_id
+        ? editions.rows.find((edition: Record<string, unknown>) =>
+          String(edition.edition_id) === String(state.rows[0].shared_source_edition_id))
+        : undefined;
+      const sourceIsAlreadyLive = Boolean(
+        source
+        && state.rows[0].shared_source_revision_id
+        && state.rows[0].shared_source_revision_id === state.rows[0].published_source_revision_id
+        && source.content_mode === "shared"
+        && source.publication_state === "published"
+        && source.published_revision_id === state.rows[0].published_source_revision_id
+        && source.revision_id === state.rows[0].published_source_revision_id
+        && source.workflow_state === "approved",
+      );
+      const validateLiveRevision = async (edition: Record<string, unknown>) => {
+        if (!edition.revision_id || !edition.payload
+          || !validateCmsSnapshotForDelivery(document.rows[0].kind as CmsDocumentKind, edition.payload, "publish").success
+          || !isPublicContentVisible(String(document.rows[0].kind), edition.payload as Record<string, unknown>)) {
+          return false;
+        }
+        const mediaErrors = await revisionMediaGovernanceErrors(
+          client,
+          documentId,
+          String(edition.revision_id),
+          document.rows[0].kind as CmsDocumentKind,
+          edition.payload as Record<string, unknown>,
+        );
+        return mediaErrors.length === 0;
+      };
+      // Availability publication is deliberately not a content publication.
+      // Every non-off destination must already have an approved, published
+      // exact revision (including a sealed managed materialization), or reuse
+      // the immutable shared source that is already publicly live. A staged
+      // source pointer, draft, or newly changed source can never become public
+      // through this endpoint.
+      const liveSourceValid = sourceIsAlreadyLive && await validateLiveRevision(source!);
+      if (liveSourceValid
+        && !canAccessMarket(transactionAuth, String(source!.editorial_market ?? source!.market))) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to the already-live shared source market." });
+        return;
+      }
+      const managedBindingIds = new Set<string>();
+      for (const selection of selections.filter((selection) => selection.decision !== "off")) {
+        const market = markets.rows.find((candidate: Record<string, unknown>) =>
+          String(candidate.id) === selection.marketEditionId && String(candidate.locale) === selection.locale);
+        const edition = market
+          ? byDestination.get(`${String(market.code)}|${selection.locale}`)
+          : undefined;
+        const exactIsAlreadyPublished = Boolean(
+          edition
+          && edition.publication_state === "published"
+          && edition.revision_id === edition.published_revision_id
+          && edition.workflow_state === "approved"
+          && (
+            edition.content_mode === "custom"
+            || resolvedBindings.has(`${String(market?.code)}|${selection.locale}|${String(edition.revision_id)}`)
+          )
+          && await validateLiveRevision(edition),
+        );
+        if (!exactIsAlreadyPublished && !liveSourceValid) {
+          await client.query("ROLLBACK");
+          res.status(409).json({
+            error: "Every shown destination must already resolve to approved published exact content or an unchanged live shared source.",
+          });
+          return;
+        }
+        if (edition && exactIsAlreadyPublished) {
+          const binding = bindingByDestination.get(`${String(market!.code)}|${selection.locale}`);
+          if (!await canAccessEditionTarget(client, transactionAuth, documentId, String(market!.code), selection.locale)) {
+            await client.query("ROLLBACK");
+            res.status(403).json({ error: "You are not assigned to the exact source authority for every shown destination." });
+            return;
+          }
+          // Historical classification comes from the published resolved row
+          // and sealed publication receipt, never the mutable current binding
+          // mode: an adapted A may later detach into independent draft B.
+          if (binding) {
+            if (!await canAccessManagedPublishedRevisionSource(
+              client,
+              transactionAuth,
+              String(binding.binding_id),
+              String(edition.revision_id),
+            )) {
+              await client.query("ROLLBACK");
+              res.status(403).json({
+                error: "You are not assigned to the published managed revision's historical source market.",
+              });
+              return;
+            }
+            managedBindingIds.add(String(binding.binding_id));
+          }
+        }
+      }
       for (const selection of selections) {
         await client.query(
           `INSERT INTO cms_document_market_availability
@@ -1710,6 +1890,16 @@ router.post(
           WHERE document_id=$1`,
         [documentId, transactionAuth.user.id],
       );
+      // This is an availability authority receipt, not a content publication:
+      // it records which already-published managed exact materializations may
+      // now be selected by public delivery. It never changes an edition,
+      // revision, source pointer, or binding.
+      for (const managedBindingId of managedBindingIds) {
+        await audit(transactionAuth, "document.availability.published", "document", documentId, {
+          version: parsed.data.version,
+          managedBindingId,
+        }, client);
+      }
       await client.query("COMMIT");
       await audit(transactionAuth, "document.availability.published", "document", documentId, {
         version: parsed.data.version, destinations: selections,
@@ -2748,9 +2938,9 @@ router.post(
       res.status(403).json({ error: "You are not assigned to this market." });
       return;
     }
-    let managedBindingId: string | null = null;
+    let managedBinding: { bindingId: string; mode: string } | null = null;
     try {
-      managedBindingId = await assertManagedMarketPublication(client, {
+      managedBinding = await assertManagedMarketPublication(client, {
         documentId: id,
         market: String(revision.rows[0].market),
         locale: String(revision.rows[0].locale),
@@ -2777,7 +2967,7 @@ router.post(
       });
       return;
     }
-    if (managedBindingId && !reviewedPublish) {
+    if (managedBinding && !reviewedPublish) {
       await client.query("ROLLBACK");
       res.status(409).json({
         error: "A managed market revision must complete exact-edition review before publication.",
@@ -2895,7 +3085,12 @@ router.post(
     }
     let reviewedAvailability: Array<{ marketEditionId: string; locale: string; decision: AvailabilityDecision }> = [];
     let reviewedAvailabilityVersion: number | null = null;
-    if (revision.rows[0].content_mode === "shared") {
+    // A legacy shared source may retain an exact real-market address. Once
+    // that exact address is the current materialization of a managed binding,
+    // it follows the ordinary exact-edition review/publish path instead of the
+    // document-wide shared-source availability confirmation. The immutable
+    // managed-binding check above remains the authority for that distinction.
+    if (revision.rows[0].content_mode === "shared" && !managedBinding) {
       const availabilityState = await client.query(
         `SELECT draft_version,reviewed_version,published_version,reviewed_selections,
                 shared_source_revision_id,reviewed_source_revision_id
@@ -3156,7 +3351,8 @@ router.post(
          directAdministratorPublish,
          editionId: String(revision.rows[0].edition_id),
          revisionId: parsed.data.revisionId,
-          managedBindingId,
+          managedBindingId: managedBinding?.bindingId ?? null,
+          managedBindingMode: managedBinding?.mode ?? null,
        }],
     );
     await client.query("COMMIT");

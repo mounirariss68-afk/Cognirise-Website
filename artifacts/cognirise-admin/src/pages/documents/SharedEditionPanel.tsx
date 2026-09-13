@@ -154,8 +154,8 @@ export function SharedEditionPanel({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-end gap-2">
-              {!selectedIsSource && source && <Button type="button" size="sm" variant="outline" onClick={() => onSelectEdition(source.market, source.locale)}>Open selected source</Button>}
+             <div className="flex flex-wrap items-end gap-2">
+               {!selectedIsSource && source && <Button type="button" size="sm" variant="outline" className="max-w-full whitespace-normal text-left leading-tight" onClick={() => onSelectEdition(source.market, source.locale)}>Open selected source</Button>}
               <Button
                 type="button"
                 size="sm"
@@ -196,9 +196,9 @@ export function SharedEditionPanel({
             </div>}
           </div>
           </>}
-          {localeBaselines.length > 0 && <div className="flex items-center justify-between rounded border bg-muted/20 p-2 text-xs">
-            <span>Active neutral baseline revision {localeBaselines[0]!.revisionNumber}; source revision remains pinned in lineage.</span>
-            {canManageBaselines && <Button type="button" size="sm" variant="outline" disabled={busy || hasUnsaved} onClick={() => onEditBaseline(localeBaselines[0]!)}>Edit Shared</Button>}
+           {localeBaselines.length > 0 && <div className="flex flex-wrap items-center justify-between gap-2 rounded border bg-muted/20 p-2 text-xs">
+             <span className="min-w-0 flex-1">Active neutral baseline revision {localeBaselines[0]!.revisionNumber}; source revision remains pinned in lineage.</span>
+             {canManageBaselines && <Button type="button" size="sm" variant="outline" className="shrink-0" disabled={busy || hasUnsaved} onClick={() => onEditBaseline(localeBaselines[0]!)}>Edit Shared</Button>}
           </div>}
           {binding && <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <span>Frozen baseline: {binding.baselineRevisionId ?? "none"}</span>
@@ -208,17 +208,18 @@ export function SharedEditionPanel({
           </div>}
           {frozenBinding && <div className="space-y-2 rounded border bg-muted/20 p-3">
             <p className="text-xs text-muted-foreground">This {binding!.mode} binding is frozen. To adopt another baseline, reset overrides, or detach, use Compare / resolve. Ordinary field saves derive local adaptations automatically; do not rebind this edition.</p>
-            <div className="flex flex-wrap items-end gap-2">
-              <div className="min-w-56 space-y-1">
+             <div className="flex flex-wrap items-end gap-2">
+               <div className="min-w-0 flex-1 space-y-1 sm:min-w-56">
                 <Label className="text-xs">Translation lineage acknowledgement</Label>
                 <Select value={translationRevisionId} onValueChange={setTranslationRevisionId}>
                   <SelectTrigger aria-label="Translation source acknowledgement"><SelectValue placeholder="Choose shared baseline revision" /></SelectTrigger>
                   <SelectContent>{(matrix?.baselines ?? []).map((item) => <SelectItem key={item.revisionId} value={item.revisionId}>Acknowledge {item.locale.toUpperCase()} baseline rev {item.revisionNumber}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <Button
+                 <Button
                 type="button"
                 size="sm"
+                  className="max-w-full whitespace-normal leading-tight"
                 disabled={busy || hasUnsaved || !translationBaseline || translationBaseline.revisionId === binding?.translationSourceRevisionId}
                 onClick={() => onBind({
                   marketEditionId: market.id,

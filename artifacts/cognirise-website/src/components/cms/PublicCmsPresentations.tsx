@@ -211,6 +211,18 @@ export function PublicationPresentation({ title, summary, content, heroMedia, pd
           <div className="hidden md:block w-1 h-1 rounded-full bg-border" />
           <div>{content.readingTimeMinutes ?? 1} min read</div>
         </div>
+        {heroMedia && (
+          <figure className="mb-12 overflow-hidden" data-testid="publication-hero">
+            <img
+              src={heroMedia.url}
+              alt={content.heroMedia?.altText || heroMedia.altText || title}
+              className="max-h-[560px] w-full object-cover"
+              style={{ objectPosition: cmsMediaObjectPosition(heroMedia) }}
+              loading={preview ? "eager" : "lazy"}
+              fetchPriority="high"
+            />
+          </figure>
+        )}
         <div className="prose prose-lg md:prose-xl max-w-none prose-headings:font-display prose-headings:font-semibold prose-headings:tracking-tight prose-a:text-[hsl(var(--brand-pink))] hover:prose-a:text-[hsl(var(--brand-coral))] prose-p:leading-relaxed prose-p:text-foreground/80">
           <style>{`.prose .lead { font-size: 1.25em; line-height: 1.6; color: hsl(var(--foreground)); font-weight: 500; margin-bottom: 2em; } .prose h3 { margin-top: 2em; margin-bottom: 1em; font-size: 1.75em; color: hsl(var(--brand-deep)); }`}</style>
           <PublicationBody content={content} pdfMedia={pdfMedia} />

@@ -31,6 +31,7 @@ import {
   industryExactMarketDeliveryClause,
   industryDestinationEligibilityClause,
   managedMarketPublicDeliveryClause,
+  managedMarketExactMaterializationClause,
   publicPayloadEligibilityClause,
 } from "../lib/availability";
 
@@ -67,7 +68,10 @@ function deliverySourceClause(
     )}`
     : "";
   return `(
-    (${edition}.content_mode='custom' AND ${candidateClause})
+    ((
+      ${edition}.content_mode='custom'
+      OR ${managedMarketExactMaterializationClause(`${edition}.document_id`, edition)}
+    ) AND ${candidateClause})
     OR (
       ${edition}.content_mode='shared'
       AND ${edition}.id=${state}.shared_source_edition_id
@@ -176,7 +180,10 @@ export function referencedRevisionHasEligibleDestinationClause(
                  "destination_locale.locale",
                )}
               AND (
-                (source_edition.content_mode='custom' AND candidates.market IS NOT NULL)
+                ((
+                  source_edition.content_mode='custom'
+                  OR ${managedMarketExactMaterializationClause(documentIdSql, "source_edition")}
+                ) AND candidates.market IS NOT NULL)
                 OR (
                   source_edition.content_mode='shared'
                   AND source_edition.id=source_delivery.shared_source_edition_id
@@ -184,7 +191,10 @@ export function referencedRevisionHasEligibleDestinationClause(
                 )
               )
             ORDER BY CASE
-              WHEN source_edition.content_mode='custom'
+              WHEN (
+                source_edition.content_mode='custom'
+                OR ${managedMarketExactMaterializationClause(documentIdSql, "source_edition")}
+              )
                AND source_edition.market=destination.code
                AND source_edition.locale=destination_locale.locale THEN 0
               WHEN source_edition.content_mode='shared' THEN 1
@@ -220,7 +230,10 @@ export function publishedCustomSourceExistsClause(
        AND custom_revision.edition_id=custom.id
        AND custom_revision.workflow_state='approved'
      WHERE custom.document_id=${documentIdSql}
-       AND custom.content_mode='custom'
+        AND (
+          custom.content_mode='custom'
+          OR ${managedMarketExactMaterializationClause(documentIdSql, "custom")}
+        )
        AND custom.market=${marketSql}
        AND custom.locale=${localeSql}
        AND custom.publication_state='published'
@@ -499,7 +512,10 @@ router.get(
                 row_number() OVER (
                   PARTITION BY d.id
                    ORDER BY CASE
-                     WHEN e.content_mode='custom' AND e.market=$3 AND e.locale=$4 THEN 0
+                     WHEN (
+                       e.content_mode='custom'
+                       OR ${managedMarketExactMaterializationClause("d.id", "e")}
+                     ) AND e.market=$3 AND e.locale=$4 THEN 0
                      WHEN e.content_mode='shared' THEN 1
                      ELSE 2
                    END,
@@ -607,7 +623,10 @@ router.get("/public/hero-films/:slot", asyncRoute(async (req, res) => {
          AND ${documentPublishedAvailabilityClause("d.id", "$3", "$4")}
         AND ${PUBLIC_PAYLOAD_SQL}
        ORDER BY CASE
-         WHEN e.content_mode='custom' AND e.market=$3 AND e.locale=$4 THEN 0
+         WHEN (
+           e.content_mode='custom'
+           OR ${managedMarketExactMaterializationClause("d.id", "e")}
+         ) AND e.market=$3 AND e.locale=$4 THEN 0
          WHEN e.content_mode='shared' THEN 1
          ELSE 2
        END,
@@ -680,7 +699,10 @@ router.get("/public/contact-configuration", asyncRoute(async (req, res) => {
          AND ${documentPublishedAvailabilityClause("d.id", "$3", "$4")}
          AND ${PUBLIC_PAYLOAD_SQL}
        ORDER BY CASE
-         WHEN e.content_mode='custom' AND e.market=$3 AND e.locale=$4 THEN 0
+         WHEN (
+           e.content_mode='custom'
+           OR ${managedMarketExactMaterializationClause("d.id", "e")}
+         ) AND e.market=$3 AND e.locale=$4 THEN 0
          WHEN e.content_mode='shared' THEN 1
          ELSE 2
        END,
@@ -730,7 +752,10 @@ router.get(
                 row_number() OVER (
                   PARTITION BY d.id
                   ORDER BY CASE
-                    WHEN e.content_mode='custom' AND e.market=$3 AND e.locale=$5 THEN 0
+                    WHEN (
+                      e.content_mode='custom'
+                      OR ${managedMarketExactMaterializationClause("d.id", "e")}
+                    ) AND e.market=$3 AND e.locale=$5 THEN 0
                     WHEN e.content_mode='shared' THEN 1
                     ELSE 2
                   END,
@@ -860,7 +885,10 @@ router.get(
            JOIN cms_market_editions e ON e.document_id=d.id
            JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
              AND r.workflow_state='approved'
-          WHERE d.status<>'archived' AND e.content_mode='custom'
+          WHERE d.status<>'archived' AND (
+                e.content_mode='custom'
+                OR ${managedMarketExactMaterializationClause("d.id", "e")}
+              )
             AND e.publication_state='published' AND e.published_at<=now()
             AND ($1::text IS NULL OR e.market=$1)
             AND ${documentPublishedAvailabilityClause("d.id", "e.market", "e.locale")}

@@ -12,6 +12,7 @@ import {
   industryDestinationEligibilityClause,
   managedMarketPublicAuthorityActivatedClause,
   managedMarketPublicDeliveryClause,
+  managedMarketExactMaterializationClause,
   publicPayloadEligibilityClause,
 } from "./availability";
 
@@ -55,7 +56,10 @@ async function publishedDocumentRoutes(
                   AND ${managedMarketPublicDeliveryClause("d.id", "e", "$1", "$2")}
                ) AS public_eligible,
                CASE
-                 WHEN e.content_mode='custom' AND e.market=$1 AND e.locale=$2 THEN 0
+                  WHEN (
+                    e.content_mode='custom'
+                    OR ${managedMarketExactMaterializationClause("d.id", "e")}
+                  ) AND e.market=$1 AND e.locale=$2 THEN 0
                  WHEN e.content_mode='shared' THEN 1
                  ELSE 2
                END AS source_kind_rank,
@@ -76,7 +80,10 @@ async function publishedDocumentRoutes(
               )
             )
            AND (
-             (e.content_mode='custom' AND (e.market||'|'||e.locale)=ANY($3::text[]))
+             ((
+               e.content_mode='custom'
+               OR ${managedMarketExactMaterializationClause("d.id", "e")}
+             ) AND (e.market||'|'||e.locale)=ANY($3::text[]))
              OR (
                e.content_mode='shared'
                AND e.id=delivery.shared_source_edition_id

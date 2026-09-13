@@ -32,6 +32,7 @@ test("navigation version preparation preserves policy data and replays safely", 
 
 test("post-merge prepares narrow media compatibility before safe schema synchronization", async () => {
   const source = await readFile(new URL("../../../scripts/post-merge.sh", import.meta.url), "utf8");
+  const contentSchema = await readFile(new URL("../src/schema/cms-content.ts", import.meta.url), "utf8");
   assert.ok(source.indexOf("prepare-schema-push") < source.indexOf("@workspace/db push"));
   assert.doesNotMatch(source, /push-force/);
   assert.match(schemaPreparationSql, /ADD COLUMN IF NOT EXISTS "original_filename" text/);
@@ -51,12 +52,18 @@ test("post-merge prepares narrow media compatibility before safe schema synchron
   assert.match(schemaPreparationSql, /CREATE TABLE IF NOT EXISTS cms_resolved_market_revisions/);
   assert.match(schemaPreparationSql, /cms_shared_baseline_revisions_immutable/);
   assert.match(schemaPreparationSql, /Development-only preparation for additive migration 0031/);
+  assert.match(schemaPreparationSql, /cms_editorial_digest_jobs_delivery_identity_check/);
+  assert.match(schemaPreparationSql, /delivery_configuration_fingerprint/);
   assert.match(schemaPreparationSql, /cannot prepare shared pointer integrity/);
   assert.match(schemaPreparationSql, /CREATE CONSTRAINT TRIGGER cms_market_edition_bindings_integrity/);
   assert.match(schemaPreparationSql, /DEFERRABLE INITIALLY DEFERRED/);
   assert.match(schemaPreparationSql, /cms_resolved_market_revisions_integrity/);
   assert.match(schemaPreparationSql, /cms_revisions_shared_pointer_integrity/);
   assert.match(schemaPreparationSql, /cms_assert_shared_pointer_dependency_integrity/);
+  assert.match(
+    contentSchema,
+    /cmsPersonMarketAvailabilityTable[\s\S]*?createdAt: timestamp\("created_at", \{ withTimezone: true \}\)\.notNull\(\)\.defaultNow\(\)/,
+  );
 });
 
 test("schema preparation preserves populated media rows and is idempotent", {

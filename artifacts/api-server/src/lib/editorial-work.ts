@@ -1,4 +1,5 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+import { ReplitConnectors } from "@replit/connectors-sdk";
 import { pool } from "@workspace/db";
 import { logger } from "./logger";
 import { type AuthContext } from "./auth";
@@ -9,24 +10,39 @@ const RETRY_DELAYS_MS = [60_000, 5 * 60_000, 30 * 60_000, 2 * 60 * 60_000, 12 * 
 const DIGEST_PROVIDER_FAILURE = "Editorial digest delivery failed.";
 const DIGEST_NOT_CONFIGURED = "Editorial digest delivery is not configured.";
 const DIGEST_ATTEMPTS_EXHAUSTED = "Editorial digest delivery attempts were exhausted.";
+const RESEND_DISCOVERY_TIMEOUT_MS = 5_000;
+const RESEND_DISCOVERY_COOLDOWN_MS = 30_000;
 
 type Queryable = {
   query: (sql: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }>;
 };
 type DigestFetch = (input: string, init: RequestInit) => Promise<{ ok: boolean }>;
+type ResendProxyFetch = DigestFetch;
 type DigestNotification = Record<string, any>;
+type WebhookDigestConfiguration = { provider: "webhook"; endpoint: string; recipient: string; adminUrl: URL };
+type ResendDigestConfiguration = { provider: "resend"; from: string; recipient: string; adminUrl: URL };
+type DigestConfiguration = WebhookDigestConfiguration | ResendDigestConfiguration;
+type DigestDeliveryIdentity = {
+  provider: DigestConfiguration["provider"];
+  configurationFingerprint: string;
+  connectionId: string | null;
+};
+type CurrentDigestDelivery = { configuration: DigestConfiguration; identity: DigestDeliveryIdentity };
 
 class DigestBlockedError extends Error {}
+const discoveryTimedOut = Symbol("resend-discovery-timed-out");
+let resendDiscoveryInFlight: Promise<Awaited<ReturnType<ReplitConnectors["listConnections"]>>> | undefined;
+let resendDiscoveryCooldownUntil = 0;
 
 function retryAt(attempt: number): Date {
   return new Date(Date.now() + RETRY_DELAYS_MS[Math.min(attempt, RETRY_DELAYS_MS.length - 1)]);
 }
 
-function configuredHttpUrl(value: string | undefined): URL | undefined {
+function configuredHttpsUrl(value: string | undefined): URL | undefined {
   if (!value) return undefined;
   try {
     const url = new URL(value);
-    return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password ? url : undefined;
+    return url.protocol === "https:" && !url.username && !url.password ? url : undefined;
   } catch {
     return undefined;
   }
@@ -37,15 +53,135 @@ function safeRecipient(): string | undefined {
   return recipient && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient) ? recipient : undefined;
 }
 
-function digestConfiguration(): { endpoint: string; recipient: string; adminUrl: URL } | undefined {
-  const endpoint = configuredHttpUrl(process.env.EDITORIAL_DIGEST_WEBHOOK_URL);
+function configuredFrom(): string | undefined {
+  const from = process.env.EDITORIAL_DIGEST_FROM?.trim();
+  // Resend accepts either address@example.test or Display Name <address@example.test>.
+  // Keep this deliberately narrow: no control characters or recipient lists can
+  // enter provider headers through configuration.
+  return from && /^(?:[^\r\n<>]+ <[^\s<>"\r\n@]+@[^\s<>"\r\n@]+\.[^\s<>"\r\n@]+>|[^\s<>"\r\n@]+@[^\s<>"\r\n@]+\.[^\s<>"\r\n@]+)$/.test(from)
+    ? from
+    : undefined;
+}
+
+function digestConfiguration(): DigestConfiguration | undefined {
+  const provider = process.env.EDITORIAL_DIGEST_PROVIDER?.trim().toLowerCase();
   const recipient = safeRecipient();
-  const adminUrl = configuredHttpUrl(process.env.ADMIN_PUBLIC_URL);
-  return endpoint && recipient && adminUrl ? { endpoint: endpoint.toString(), recipient, adminUrl } : undefined;
+  const adminUrl = configuredHttpsUrl(process.env.ADMIN_PUBLIC_URL);
+  if (!recipient || !adminUrl) return undefined;
+  if (provider === "webhook") {
+    const endpoint = configuredHttpsUrl(process.env.EDITORIAL_DIGEST_WEBHOOK_URL);
+    return endpoint ? { provider, endpoint: endpoint.toString(), recipient, adminUrl } : undefined;
+  }
+  if (provider === "resend") {
+    const from = configuredFrom();
+    return from ? { provider, from, recipient, adminUrl } : undefined;
+  }
+  return undefined;
 }
 
 export function editorialDigestConfigured(): boolean {
   return Boolean(digestConfiguration());
+}
+
+function digestConfigurationFingerprint(configuration: DigestConfiguration): string {
+  const stableConfiguration = configuration.provider === "webhook"
+    ? {
+      provider: configuration.provider,
+      endpoint: configuration.endpoint,
+      recipient: configuration.recipient,
+      adminUrl: configuration.adminUrl.toString(),
+    }
+    : {
+      provider: configuration.provider,
+      from: configuration.from,
+      recipient: configuration.recipient,
+      adminUrl: configuration.adminUrl.toString(),
+    };
+  return createHash("sha256").update(JSON.stringify(stableConfiguration)).digest("hex");
+}
+
+async function currentResendConnections(): Promise<Awaited<ReturnType<ReplitConnectors["listConnections"]>> | undefined> {
+  if (Date.now() < resendDiscoveryCooldownUntil) return undefined;
+  if (!resendDiscoveryInFlight) {
+    const connectors = new ReplitConnectors();
+    const discovery = connectors.listConnections({ connector_names: "resend", expand: [] });
+    resendDiscoveryInFlight = discovery;
+    void discovery.then(
+      () => {
+        if (resendDiscoveryInFlight === discovery) resendDiscoveryInFlight = undefined;
+      },
+      () => {
+        if (resendDiscoveryInFlight === discovery) resendDiscoveryInFlight = undefined;
+        resendDiscoveryCooldownUntil = Date.now() + RESEND_DISCOVERY_COOLDOWN_MS;
+      },
+    );
+  }
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  let result: Awaited<ReturnType<ReplitConnectors["listConnections"]>> | typeof discoveryTimedOut;
+  try {
+    result = await Promise.race([
+      resendDiscoveryInFlight,
+      new Promise<typeof discoveryTimedOut>((resolve) => {
+        timeout = setTimeout(() => resolve(discoveryTimedOut), RESEND_DISCOVERY_TIMEOUT_MS);
+      }),
+    ]);
+  } catch {
+    resendDiscoveryCooldownUntil = Date.now() + RESEND_DISCOVERY_COOLDOWN_MS;
+    return undefined;
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+  if (result === discoveryTimedOut) {
+    // listConnections has no documented RequestInit or AbortSignal argument.
+    // Keep one read-only discovery promise in flight, cool down retries, and
+    // fail closed rather than accumulating uncancellable connection lookups.
+    resendDiscoveryCooldownUntil = Date.now() + RESEND_DISCOVERY_COOLDOWN_MS;
+    return undefined;
+  }
+  return result;
+}
+
+async function currentDigestDelivery(): Promise<CurrentDigestDelivery | undefined> {
+  const configuration = digestConfiguration();
+  if (!configuration) return undefined;
+  const configurationFingerprint = digestConfigurationFingerprint(configuration);
+  if (configuration.provider === "webhook") {
+    return {
+      configuration,
+      identity: { provider: configuration.provider, configurationFingerprint, connectionId: null },
+    };
+  }
+  // The documented SDK proxy API accepts a connector name, not a connection
+  // identifier. Require exactly one Resend connection before every send and
+  // pin its SDK-returned ID on the job; an added, removed, or replaced
+  // connection therefore blocks rather than changing the account behind a
+  // retry's idempotency key. No connector credentials are read.
+  const connections = await currentResendConnections();
+  if (!connections) return undefined;
+  const resendConnections = connections.filter((connection) => connection.connector_name === "resend" && connection.id);
+  if (resendConnections.length !== 1) return undefined;
+  return {
+    configuration,
+    identity: {
+      provider: configuration.provider,
+      configurationFingerprint,
+      connectionId: resendConnections[0].id,
+    },
+  };
+}
+
+function jobHasDeliveryIdentity(row: Record<string, any>): boolean {
+  return (row.delivery_provider === "webhook" || row.delivery_provider === "resend")
+    && typeof row.delivery_configuration_fingerprint === "string"
+    && (row.delivery_provider === "webhook"
+      ? row.delivery_connection_id === null
+      : typeof row.delivery_connection_id === "string");
+}
+
+function deliveryIdentityMatches(row: Record<string, any>, identity: DigestDeliveryIdentity): boolean {
+  return row.delivery_provider === identity.provider
+    && row.delivery_configuration_fingerprint === identity.configurationFingerprint
+    && (row.delivery_connection_id ?? null) === identity.connectionId;
 }
 
 function administratorDeepLink(link: unknown, adminUrl: URL): string {
@@ -209,29 +345,71 @@ export async function sendEditorialDigest(
   notifications: DigestNotification[],
   jobId: string,
   fetcher: DigestFetch = (input, init) => fetch(input, init),
+  resendProxyFetch: ResendProxyFetch = async (input, init) => {
+    // createProxyFetch is the SDK's documented signal-capable proxy API. Its
+    // proxy() helper only accepts ProxyOptions and cannot receive AbortSignal.
+    const connectors = new ReplitConnectors();
+    return connectors.createProxyFetch("resend")(input, init);
+  },
+  expectedDeliveryIdentity?: DigestDeliveryIdentity,
 ): Promise<void> {
-  const configuration = digestConfiguration();
-  if (!configuration) throw new DigestBlockedError(DIGEST_NOT_CONFIGURED);
+  const currentDelivery = await currentDigestDelivery();
+  if (!currentDelivery) throw new DigestBlockedError(DIGEST_NOT_CONFIGURED);
+  const { configuration, identity } = currentDelivery;
+  if (expectedDeliveryIdentity
+    && (expectedDeliveryIdentity.provider !== identity.provider
+      || expectedDeliveryIdentity.configurationFingerprint !== identity.configurationFingerprint
+      || expectedDeliveryIdentity.connectionId !== identity.connectionId)) {
+    throw new DigestBlockedError("Digest delivery identity changed after the job was reserved.");
+  }
   if (recipientEmail.trim().toLowerCase() !== configuration.recipient) {
     throw new DigestBlockedError("Recipient is not the configured safe digest recipient.");
   }
-  const response = await fetcher(configuration.endpoint, {
-    method: "POST",
-    headers: { "content-type": "application/json", "idempotency-key": jobId },
-    body: JSON.stringify({
-      to: recipientEmail,
-      template: "editorial-digest",
-      notifications: notifications.map((notification) => ({
-        type: notification.type,
-        title: notification.title,
-        message: notification.message,
-        link: administratorDeepLink(notification.link, configuration.adminUrl),
-        createdAt: notification.created_at,
-      })),
-    }),
-    signal: AbortSignal.timeout(10_000),
-  });
+  const digestNotifications = notifications.map((notification) => ({
+    type: notification.type,
+    title: notification.title,
+    message: notification.message,
+    link: administratorDeepLink(notification.link, configuration.adminUrl),
+    createdAt: notification.created_at,
+  }));
+  const response = configuration.provider === "webhook"
+    ? await fetcher(configuration.endpoint, {
+      method: "POST",
+      headers: { "content-type": "application/json", "idempotency-key": jobId },
+      body: JSON.stringify({
+        to: recipientEmail,
+        template: "editorial-digest",
+        notifications: digestNotifications,
+      }),
+      signal: AbortSignal.timeout(10_000),
+    })
+    : await resendProxyFetch("/emails", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Idempotency-Key": jobId },
+      body: JSON.stringify({
+        from: configuration.from,
+        to: recipientEmail,
+        subject: `Editorial digest: ${digestNotifications.length} update${digestNotifications.length === 1 ? "" : "s"}`,
+        text: digestNotifications.map((notification) =>
+          `${notification.title}\n${notification.message}\n${notification.link}`,
+        ).join("\n\n"),
+        html: `<h1>Editorial digest</h1><ul>${digestNotifications.map((notification) =>
+          `<li><strong>${escapeHtml(String(notification.title))}</strong><br>${escapeHtml(String(notification.message))}<br><a href="${escapeHtml(String(notification.link))}">Open editorial work</a></li>`,
+        ).join("")}</ul>`,
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
   if (!response.ok) throw new Error(DIGEST_PROVIDER_FAILURE);
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[character] ?? character);
 }
 
 async function blockDigestJob(jobId: string, lease: string | undefined, reason: string): Promise<void> {
@@ -249,6 +427,11 @@ async function blockDigestJob(jobId: string, lease: string | undefined, reason: 
  * and idempotency key, rather than whatever notifications exist later.
  */
 export async function deliverEditorialDigestJob(jobId: string): Promise<void> {
+  // Connection discovery is network I/O and the SDK does not expose an abort
+  // signal for it. Complete its bounded, single-flight wait before acquiring a
+  // DB connection or row lock; a timeout can then block a job without holding
+  // its transaction open.
+  const deliveryAtClaim = await currentDigestDelivery();
   const client = await pool.connect();
   let claimed: Record<string, any> | undefined;
   let notifications: DigestNotification[] = [];
@@ -272,7 +455,11 @@ export async function deliverEditorialDigestJob(jobId: string): Promise<void> {
       return;
     }
     const row = result.rows[0] as Record<string, any>;
-    if (row.recipient_status !== "active" || !row.preference_enabled || !editorialDigestConfigured()) {
+    if (row.recipient_status !== "active"
+      || !row.preference_enabled
+      || !deliveryAtClaim
+      || !jobHasDeliveryIdentity(row)
+      || !deliveryIdentityMatches(row, deliveryAtClaim.identity)) {
       await client.query(
         `UPDATE cms_editorial_digest_jobs
             SET status='blocked',failed_at=now(),processing_lease=NULL,last_error=$2,updated_at=now()
@@ -281,7 +468,11 @@ export async function deliverEditorialDigestJob(jobId: string): Promise<void> {
           ? "Recipient is no longer active."
           : !row.preference_enabled
             ? "Editorial digest delivery is no longer enabled."
-            : DIGEST_NOT_CONFIGURED],
+            : !deliveryAtClaim
+              ? DIGEST_NOT_CONFIGURED
+              : !jobHasDeliveryIdentity(row)
+                ? "Digest delivery identity was not reserved."
+                : "Digest delivery identity no longer matches its reserved configuration."],
       );
       await client.query("COMMIT");
       return;
@@ -368,7 +559,11 @@ export async function deliverEditorialDigestJob(jobId: string): Promise<void> {
     if (!visible || visible.length !== notifications.length) {
       throw new DigestBlockedError("Digest notifications are no longer authorized.");
     }
-    await sendEditorialDigest(auth.user.email, visible, jobId);
+    const currentDelivery = await currentDigestDelivery();
+    if (!currentDelivery || !deliveryIdentityMatches(claimed, currentDelivery.identity)) {
+      throw new DigestBlockedError("Digest delivery identity no longer matches its reserved configuration.");
+    }
+    await sendEditorialDigest(auth.user.email, visible, jobId, undefined, undefined, currentDelivery.identity);
   } catch (error) {
     if (error instanceof DigestBlockedError) blockedReason = error.message;
     else failure = DIGEST_PROVIDER_FAILURE;
@@ -416,16 +611,26 @@ export async function deliverEditorialDigestJob(jobId: string): Promise<void> {
 }
 
 export async function pollEditorialWork(): Promise<void> {
-  await pool.query(
-    `INSERT INTO cms_editorial_digest_jobs(user_id,digest_date)
-     SELECT preference.user_id,current_date
+  const delivery = await currentDigestDelivery();
+  if (delivery) {
+    await pool.query(
+      `INSERT INTO cms_editorial_digest_jobs(
+         user_id,digest_date,delivery_provider,delivery_configuration_fingerprint,delivery_connection_id
+       )
+       SELECT preference.user_id,current_date,$1,$2,$3
        FROM cms_editorial_digest_preferences preference
        JOIN cms_users user_account ON user_account.id=preference.user_id
       WHERE preference.enabled AND user_account.status='active'
         AND EXISTS (SELECT 1 FROM cms_editorial_notifications n
                      WHERE n.user_id=preference.user_id AND n.digest_delivered_at IS NULL)
      ON CONFLICT (user_id,digest_date) DO NOTHING`,
-  );
+      [
+        delivery.identity.provider,
+        delivery.identity.configurationFingerprint,
+        delivery.identity.connectionId,
+      ],
+    );
+  }
   // A due reminder represents live work only. Editors receive it while the
   // edition still has an editable revision; reviewers receive it only for an
   // outstanding request for that exact current revision.

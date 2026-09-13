@@ -1345,7 +1345,7 @@ paths:
     post:
       operationId: publishDocumentAvailability
       tags: [documents]
-      summary: Publish the exact reviewed shared-content destination version
+      summary: Release a reviewed destination matrix only when its content is already publicly eligible
       security:
         - cookieAuth: []
           csrfToken: []

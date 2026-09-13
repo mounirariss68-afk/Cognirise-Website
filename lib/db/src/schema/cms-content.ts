@@ -283,6 +283,7 @@ export const cmsPersonMarketAvailabilityTable = pgTable(
     }),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [primaryKey({ columns: [table.documentId, table.marketEditionId] })],
 );

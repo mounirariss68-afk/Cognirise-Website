@@ -1,6 +1,8 @@
 # Shared and market-specific CMS editions
 
-## Repair verification
+## Earlier repair verification
+
+For the subsequent combined editorial, mobile, public-delivery and cover-rendering walkthrough, see [CMS integrated readiness](cms-final-readiness.md). The browser limitations recorded below describe the earlier repair pass, not the latest verification.
 
 The seven previously documented blockers have been repaired:
 
@@ -14,7 +16,7 @@ The seven previously documented blockers have been repaired:
 
 Consolidated review confirmed the principal repairs; its five additional authorization/translation findings were subsequently fixed and passed focused re-review.
 
-### Current checks and boundaries
+### Earlier checks and boundaries
 
 - API coverage: 202 cases across the full run and targeted fixture-reconciliation checks. The latest full run passed 197 and found five legacy SQL-fixture mismatches; all five affected files subsequently passed their focused run (8 tests) without weakening negative authorization expectations. The earlier nine fixture mismatches were also repaired and verified.
 - Admin full suite: 133 passed. Subsequent acknowledgement and delayed-query selection changes passed admin typecheck and the affected rendered-editor suite.

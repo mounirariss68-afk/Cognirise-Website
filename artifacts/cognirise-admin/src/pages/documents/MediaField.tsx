@@ -91,18 +91,18 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
       />}
       <Label>{label} <span className={required ? "text-destructive" : "text-muted-foreground"}>{required ? "(required)" : "(optional)"}</span></Label>
       {selected ? (
-        <div className="flex items-center gap-3 rounded-md border bg-muted/20 p-2" data-testid={`selected-media-${label.toLowerCase().replaceAll(" ", "-")}`}>
+        <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/20 p-2 sm:gap-3" data-testid={`selected-media-${label.toLowerCase().replaceAll(" ", "-")}`}>
           {selected.publicUrl && selected.mimeType.startsWith("image/") ? (
-            <img src={selected.publicUrl} alt={selected.altText || selected.filename} className="h-14 w-20 rounded object-cover" />
+            <img src={selected.publicUrl} alt={selected.altText || selected.filename} className="h-14 w-20 shrink-0 rounded object-cover" />
           ) : <ImageIcon className="h-8 w-8 text-muted-foreground" />}
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 basis-[10rem]">
             <p className="truncate text-sm font-medium">{selected.filename}</p>
             <p className="text-xs text-muted-foreground">
               {selected.width && selected.height ? `${selected.width} × ${selected.height} · ` : ""}
               {value?.mediaVersionId ? `Pinned version ${value.mediaVersionId.slice(0, 8)}` : "Saved legacy asset"}
             </p>
           </div>
-          <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)} data-testid={`button-replace-${label.toLowerCase().replaceAll(" ", "-")}`}>Replace</Button>
+          <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => setOpen(true)} data-testid={`button-replace-${label.toLowerCase().replaceAll(" ", "-")}`}>Replace</Button>
           <Button type="button" size="icon" variant="ghost" onClick={() => change(undefined)} aria-label={`Remove ${label}`} data-testid={`button-remove-${label.toLowerCase().replaceAll(" ", "-")}`}><X className="h-4 w-4" /></Button>
         </div>
       ) : (
@@ -112,7 +112,7 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
       )}
       <p className="text-xs text-muted-foreground">Choose by preview and filename. The saved revision pins the exact approved asset version.</p>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="w-[calc(100%-1rem)] max-w-3xl p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>Select {label}</DialogTitle>
             <DialogDescription>Only approved, versioned {accept === "pdf" ? "PDFs" : "images"} are shown.</DialogDescription>
@@ -132,7 +132,7 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
             <p className="mt-1 text-xs text-muted-foreground">The asset is finalized with this metadata and selected by immutable version. Publication remains blocked until media review approves it.</p>
             {uploadError && <p role="alert" className="mt-1 text-xs text-destructive">{uploadError}</p>}
           </div>
-          <div className="grid max-h-[55vh] grid-cols-2 gap-3 overflow-y-auto md:grid-cols-3">
+           <div className="grid max-h-[55vh] grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3">
             {assets.map((asset) => (
               <button
                 type="button"

@@ -239,6 +239,13 @@
       "when": 1788998400010,
       "tag": "0033_cms_editorial_review_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1788998400011,
+      "tag": "0034_cms_editorial_digest_delivery_identity",
+      "breakpoints": true
     }
   ]
 }
