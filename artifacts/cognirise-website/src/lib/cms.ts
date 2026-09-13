@@ -303,6 +303,20 @@ const CUTOVER: Record<WebsiteCmsDocumentKind, boolean> = {
   "landing-page": true,
 };
 
+/**
+ * Entry cutovers are explicit where a document kind contains a mixture of
+ * published and unpublished pages. Keep this list narrower than the framework
+ * collection flag so one approved framework cannot make every framework
+ * route authoritative.
+ */
+const ENTRY_CUTOVER: Partial<Record<WebsiteCmsDocumentKind, readonly string[]>> = {
+  framework: ["agent-authority-model"],
+};
+
+export function cmsEntryIsCutOver(kind: WebsiteCmsDocumentKind, slug: string): boolean {
+  return CUTOVER[kind] || ENTRY_CUTOVER[kind]?.includes(slug) === true;
+}
+
 export function cmsCollectionIsCutOver(
   kind: WebsiteCmsDocumentKind,
   isConfigured = true,
@@ -500,7 +514,7 @@ export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
   // Collection landing narratives are intentionally code-owned; only entity
   // details are CMS-owned. Do not model landings as sentinel entity records.
   const codeOwnedLanding = ["about", "partners", "platforms", "insights", "work"].includes(slug);
-  const cutover = CUTOVER[kind];
+  const cutover = cmsEntryIsCutOver(kind, slug);
   const cutoverGated = kind === "framework" && !cutover;
   const query = useGetPublishedContent(market, locale, kind as DocumentKind, slug, {
     query: {

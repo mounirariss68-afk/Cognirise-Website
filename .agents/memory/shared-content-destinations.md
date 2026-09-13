@@ -44,3 +44,9 @@ Classify managed materializations separately from their legacy storage address, 
 **Why:** A real-market edition formerly used as the Shared source can become an adaptation. Treating it as the global source causes false stale errors and an unreachable visibility-release action. Conversely, a newer Independent draft does not remove source restrictions from an older Adapted publication.
 
 **How to apply:** Use binding identity for current exact-edit intent. For historical release, follow the published revision's own lineage; a NULL baseline requires sealed Independent-publication evidence, not the binding's current mode. Confirm public 404→200, pinned media and draft isolation, not just a successful publish response.
+
+Verify the published subsection in the rendered page, not only in the public API.
+
+**Why:** A valid published response can still be ignored by a page whose CMS cutover is disabled. That leaves the old compiled page visible and makes successful publication appear to have done nothing.
+
+**How to apply:** Check the actual heading and figures in the public DOM after asynchronous loading. Activate only the authorized page when unrelated pages are not ready for CMS cutover.

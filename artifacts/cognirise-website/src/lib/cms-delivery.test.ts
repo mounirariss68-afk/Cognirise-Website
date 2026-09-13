@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { COMPILED_LANDING_ROUTES, cmsCollectionData, cmsCollectionDelivery, cmsCollectionIsCutOver, cmsEntryRenderPolicy, cmsRequestIsUnavailable, landingNarrative, landingSections, landingVisualReferences, type CmsDeliveryState } from "./cms";
+import { COMPILED_LANDING_ROUTES, cmsCollectionData, cmsCollectionDelivery, cmsCollectionIsCutOver, cmsEntryIsCutOver, cmsEntryRenderPolicy, cmsRequestIsUnavailable, landingNarrative, landingSections, landingVisualReferences, type CmsDeliveryState } from "./cms";
 import type { LandingPageContent } from "@workspace/api-zod";
 
 test("people never select compiled profiles, even with legacy cutover disabled or no publication history", () => {
@@ -28,6 +28,12 @@ test("compiled framework content is limited to explicit pre-cutover fallback", (
   }
   assert.equal(cmsEntryRenderPolicy(true, "loading"), "loading");
   assert.equal(cmsEntryRenderPolicy(true, "cms"), "cms");
+});
+
+test("only the approved Agent Authority framework entry is cut over when the framework collection is not", () => {
+  assert.equal(cmsEntryIsCutOver("framework", "agent-authority-model"), true);
+  assert.equal(cmsEntryIsCutOver("framework", "another-framework"), false);
+  assert.equal(cmsEntryIsCutOver("publication", "agent-authority-model"), false);
 });
 
 test("compiled landing inventory has a governed source key for every known route", () => {
