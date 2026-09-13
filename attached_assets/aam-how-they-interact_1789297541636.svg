@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="100%" font-family="Inter, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="t2">Exposure sets the ceiling. Evidence earns the climb. Guardrails do both jobs.</title>
+  <desc id="d2">A chart with authority on the vertical axis — in the loop at the bottom, on the loop in the middle, out of the loop at the top — and exposure rising left to right across four bands. A descending staircase marks the ceiling that exposure sets on authority. Everything below the staircase is permitted, and that is where required controls sit. Inside one band an arrow rises to show a handover promoted on measured evidence. In another band a marker sits above the ceiling, reached by a compensating control, with the note that authority there is carried by an approved template rather than by the agent.</desc>
+
+  <defs>
+    
+    
+    
+  </defs>
+
+  <rect width="1200" height="760" fill="#FFFFFF"/>
+
+  <text x="40" y="54" font-size="13" font-weight="600" fill="#DB509E" letter-spacing="1.6">HOW THE TWO INTERACT</text>
+  <text x="40" y="88" font-size="24" font-weight="600" fill="#102957" font-family="Comfortaa, Inter, sans-serif">Exposure sets the ceiling. Evidence earns the climb.</text>
+
+  
+  <rect x="230" y="150" width="920" height="348" fill="url(#hatch)" opacity="0.55"/>
+  
+  <path d="M230 150 L460 150 L460 266 L920 266 L920 382 L1150 382 L1150 498 L230 498 Z" fill="#EEF1F6"/>
+  
+  <path d="M230 150 L460 150 L460 266 L920 266 L920 382 L1150 382" fill="none" stroke="#102957" stroke-width="2.6"/>
+  <text x="618" y="256" font-size="12.5" font-weight="600" fill="#102957" text-anchor="middle" letter-spacing="1.2">THE CEILING SET BY EXPOSURE</text>
+  <text x="560" y="182" font-size="12.5" fill="#8A93A0" text-anchor="middle">not permitted by exposure</text>
+
+  
+  <g stroke="#CBD3E1" stroke-dasharray="3 4">
+    <line x1="230" y1="266" x2="1150" y2="266"/>
+    <line x1="230" y1="382" x2="1150" y2="382"/>
+  </g>
+  <line x1="230" y1="150" x2="230" y2="498" stroke="#60708D"/>
+  <line x1="230" y1="498" x2="1150" y2="498" stroke="#60708D"/>
+
+  <text x="40" y="140" font-size="11.5" font-weight="600" fill="#8A93A0" letter-spacing="1.2">AUTHORITY</text>
+  <g text-anchor="end" font-size="14" fill="#102957">
+    <text x="214" y="204" font-weight="600">out of the loop</text>
+    <text x="214" y="224" font-size="11.5" fill="#8A93A0">fully automatic</text>
+    <text x="214" y="320" font-weight="600">on the loop</text>
+    <text x="214" y="340" font-size="11.5" fill="#8A93A0">auto, sampled review</text>
+    <text x="214" y="436" font-weight="600">in the loop</text>
+    <text x="214" y="456" font-size="11.5" fill="#8A93A0">a person approves</text>
+  </g>
+
+  
+  <g text-anchor="middle">
+    <text x="345" y="528" font-size="13.5" font-weight="600" fill="#102957">R1–R2 · H1</text>
+    <text x="345" y="548" font-size="12" fill="#60708D">undone at will, internal only</text>
+    <text x="575" y="528" font-size="13.5" font-weight="600" fill="#102957">R2–R3 · H2</text>
+    <text x="575" y="548" font-size="12" fill="#60708D">undone at a cost, one customer</text>
+    <text x="805" y="528" font-size="13.5" font-weight="600" fill="#102957">R4 · H2</text>
+    <text x="805" y="548" font-size="12" fill="#60708D">irreversible, one customer</text>
+    <text x="1035" y="528" font-size="13.5" font-weight="600" fill="#102957">R3–R4 · H3+</text>
+    <text x="1035" y="548" font-size="12" fill="#60708D">regulator-visible, public or safety</text>
+  </g>
+  <text x="1150" y="580" font-size="11.5" font-weight="600" fill="#8A93A0" text-anchor="end" letter-spacing="1.2">EXPOSURE — HOW HARD TO UNDO, AND WHO IS EXPOSED →</text>
+
+  
+  <text x="345" y="330" font-size="12.5" font-weight="600" fill="#60708D" text-anchor="middle">REQUIRED CONTROLS</text>
+  <text x="345" y="352" font-size="12" fill="#60708D" text-anchor="middle">sit in here — the guardrails</text>
+  <text x="345" y="370" font-size="12" fill="#60708D" text-anchor="middle">the profile makes mandatory</text>
+  <g text-anchor="middle" font-size="11" fill="#FFFFFF">
+    <rect x="262" y="392" width="72" height="22" rx="11" fill="#60708D"/><text x="298" y="407">universal</text>
+    <rect x="342" y="392" width="62" height="22" rx="11" fill="#60708D"/><text x="373" y="407">by type</text>
+    <rect x="262" y="422" width="82" height="22" rx="11" fill="#60708D"/><text x="303" y="437">by authority</text>
+    <rect x="352" y="422" width="76" height="22" rx="11" fill="#60708D"/><text x="390" y="437">by exposure</text>
+  </g>
+
+  
+  <line x1="575" y1="452" x2="575" y2="300" stroke="#DB509E" stroke-width="2.4"/>
+  <circle cx="575" cy="452" r="6" fill="#FFFFFF" stroke="#DB509E" stroke-width="2.4"/>
+  <text x="592" y="404" font-size="12.5" font-weight="600" fill="#DB509E">evidence earns</text>
+  <text x="592" y="422" font-size="12.5" font-weight="600" fill="#DB509E">the climb</text>
+  <text x="592" y="446" font-size="11.5" fill="#8A93A0">launches one level</text>
+  <text x="592" y="462" font-size="11.5" fill="#8A93A0">below target</text>
+
+  
+  <line x1="805" y1="266" x2="805" y2="212" stroke="#4A76F5" stroke-width="2.4" stroke-dasharray="6 4"/>
+  <circle cx="805" cy="200" r="7" fill="#4A76F5"/>
+  <text x="805" y="180" font-size="12.5" font-weight="600" fill="#4A76F5" text-anchor="middle">a compensating control</text>
+  <text x="805" y="164" font-size="12.5" font-weight="600" fill="#4A76F5" text-anchor="middle">raises the ceiling</text>
+  <text x="805" y="300" font-size="11.5" fill="#60708D" text-anchor="middle">recall message to a patient:</text>
+  <text x="805" y="317" font-size="11.5" fill="#60708D" text-anchor="middle">no free text, approved template,</text>
+  <text x="805" y="334" font-size="11.5" fill="#60708D" text-anchor="middle">blocking gate on every send</text>
+
+  
+  <g>
+    <rect x="944" y="180" width="196" height="64" rx="10" fill="#FFF3EF" stroke="#FF775C"/>
+    <text x="1042" y="206" font-size="12.5" font-weight="600" fill="#FF775C" text-anchor="middle">A better model does not</text>
+    <text x="1042" y="224" font-size="12.5" font-weight="600" fill="#FF775C" text-anchor="middle">raise the ceiling.</text>
+  </g>
+
+  
+  <line x1="40" y1="620" x2="1160" y2="620" stroke="#CBD3E1"/>
+  <g>
+    <rect x="40" y="646" width="14" height="14" rx="3" fill="#EEF1F6" stroke="#102957"/>
+    <text x="66" y="652" font-size="13" font-weight="600" fill="#102957">Permitted</text>
+    <text x="66" y="672" font-size="12.5" fill="#60708D">Everything under the staircase. The controls</text>
+    <text x="66" y="690" font-size="12.5" fill="#60708D">required here are read off the profile, not chosen.</text>
+  </g>
+  <g>
+    <line x1="424" y1="653" x2="438" y2="653" stroke="#DB509E" stroke-width="2.4"/>
+    <text x="450" y="652" font-size="13" font-weight="600" fill="#102957">Promotion</text>
+    <text x="450" y="672" font-size="12.5" fill="#60708D">Guardrails as required controls. Meet them, hold</text>
+    <text x="450" y="690" font-size="12.5" fill="#60708D">the evidence, and the handover climbs one level.</text>
+  </g>
+  <g>
+    <line x1="808" y1="653" x2="822" y2="653" stroke="#4A76F5" stroke-width="2.4" stroke-dasharray="5 3"/>
+    <text x="834" y="652" font-size="13" font-weight="600" fill="#102957">Compensation</text>
+    <text x="834" y="672" font-size="12.5" fill="#60708D">Guardrails that carry the authority themselves.</text>
+    <text x="834" y="690" font-size="12.5" fill="#60708D">Only these move the ceiling.</text>
+  </g>
+  <text x="40" y="728" font-size="12" fill="#8A93A0">Reversibility R1–R4 and reach H1–H5 as defined in the Agent Authority Model. Handovers shown are illustrative.</text>
+</svg>
