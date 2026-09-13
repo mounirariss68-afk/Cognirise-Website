@@ -32,3 +32,9 @@ Treat a successful publication readback as insufficient evidence of live shared 
 **Why:** A targeted media cutover can update the edition publication while leaving the shared destination's approved source behind; the strict public gate then correctly hides the page despite a published database revision.
 
 **How to apply:** Targeted cutovers must release the reviewed shared source and its existing authorized destination snapshot together, including replay. Verify the public collection and actual media response, not only revision status.
+
+Use a neutral, locale-specific Shared editorial baseline, never a permanent UAE master or a public “Global” market.
+
+**Why:** Shared wording and market-specific imagery must evolve independently without turning one country's editorial ownership into authority over every other market. Market-only content remains legitimate without a baseline.
+
+**How to apply:** Keep unchanged fields inherited, record intentional field overrides, and require explicit comparison/adoption of shared successors. Creating a managed draft must preserve the previous live source; only reviewed publication transfers delivery authority. Source-market permissions remain relevant to inherited content even when an exact destination revision exists.

@@ -13,6 +13,7 @@ import {
 } from "./capability-fields";
 import { MediaField, type MediaSelection } from "./MediaField";
 import { contentErrorMap } from "./authoring";
+import { useOverrides } from "./OverridesContext";
 import { updateEducationPov } from "./education-fields";
 import { newLandingNarrativeSection, updateLandingSection } from "./landing-section-fields";
 import {
@@ -77,7 +78,13 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
   /** Industry documents are edited through the fixed visual workspace. */
   industrySection?: string;
 }) {
-  const set = (key: string, next: unknown) => onChange({ ...value, schemaVersion: 1, [key]: next });
+  const overrides = useOverrides();
+  // The regular document PATCH remains the persistence path.  This only keeps
+  // the field indicator truthful while that PATCH is pending.
+  const set = (key: string, next: unknown) => {
+    overrides.onOverride?.(`content.${key}`, next);
+    onChange({ ...value, schemaVersion: 1, [key]: next });
+  };
   const fieldErrors = contentErrorMap(errors);
   const capabilities = industryCapabilities(value.capabilities);
   const educationPov = value.educationPov ?? {
@@ -116,7 +123,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
           <Field label="Public title" required error={fieldErrors.title} value={value.title} onChange={(next) => set("title", next)} />
           <Choice label="Approved fallback" value={value.approvedFallback ?? ""} options={["initials", "brand-mark"]} onChange={(next) => set("approvedFallback", next)} />
         </div>
-        <MediaField label="Identity image" role="identity" value={value.identityMedia} onChange={(next) => set("identityMedia", next)} />
+        <MediaField label="Identity image" role="identity" value={value.identityMedia} overridePath="content.identityMedia" onChange={(next) => set("identityMedia", next)} />
         <Area label="Biography" value={value.biography ?? ""} onChange={(next) => set("biography", next)} />
         <Area label="Contribution" value={value.contribution ?? ""} onChange={(next) => set("contribution", next)} />
         <PairList label="Focus areas" value={value.focusAreas} left="title" right="detail" onChange={(next) => set("focusAreas", next)} />
@@ -129,7 +136,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
           <Choice label="Relationship status" required error={fieldErrors.relationshipStatus} value={value.relationshipStatus ?? ""} options={["active", "prospective", "paused", "ended"]} onChange={(next) => set("relationshipStatus", next)} />
           <Field label="Website" value={value.website} onChange={(next) => set("website", next || undefined)} />
         </div>
-        <MediaField label="Partner logo" role="logo" value={value.logoMedia} onChange={(next) => set("logoMedia", next)} />
+        <MediaField label="Partner logo" role="logo" value={value.logoMedia} overridePath="content.logoMedia" onChange={(next) => set("logoMedia", next)} />
         <Area label="Positioning" required error={fieldErrors.positioning} value={value.positioning ?? ""} onChange={(next) => set("positioning", next)} />
         <Area label="Contribution" value={value.contribution ?? ""} onChange={(next) => set("contribution", next)} />
         <PairList label="Facts" value={value.facts} left="value" right="label" onChange={(next) => set("facts", next)} />
@@ -179,6 +186,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
           label="Hero image"
           value={value.heroMedia}
           legacyMediaId={value.heroMediaId}
+          overridePath="content.heroMedia"
           onChange={(next) => {
             const updated: Content = { ...value, heroMedia: next };
             delete updated.heroMediaId;
@@ -213,8 +221,8 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
           <Field label="Updated date" type="date" value={value.updatedDate} onChange={(next) => set("updatedDate", next || undefined)} />
           <Field label="Reading time (minutes)" type="number" value={value.readingTimeMinutes} onChange={(next) => set("readingTimeMinutes", next ? Number(next) : undefined)} />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2"><MediaField label="Hero image" value={value.heroMedia} onChange={(next) => set("heroMedia", next)} /><MediaField label="POV PDF" role="document" accept="pdf" required={value.variant === "pov"} value={value.pdfMedia} onChange={(next) => set("pdfMedia", next)} /></div>
-        <MediaField label="Social sharing image" role="og-image" value={value.social?.imageMedia} onChange={(next) => set("social", { ...value.social, imageMedia: next })} />
+        <div className="grid gap-4 sm:grid-cols-2"><MediaField label="Hero image" value={value.heroMedia} overridePath="content.heroMedia" onChange={(next) => set("heroMedia", next)} /><MediaField label="POV PDF" role="document" accept="pdf" required={value.variant === "pov"} value={value.pdfMedia} overridePath="content.pdfMedia" onChange={(next) => set("pdfMedia", next)} /></div>
+        <MediaField label="Social sharing image" role="og-image" value={value.social?.imageMedia} overridePath="content.social.imageMedia" onChange={(next) => set("social", { ...value.social, imageMedia: next })} />
         <Area label="Teaser" required error={fieldErrors.teaser} value={value.teaser ?? ""} onChange={(next) => set("teaser", next)} />
         <RichBlockEditor label="Structured body" value={value.body} onChange={(next) => set("body", next)} />
         <div className="grid gap-4 sm:grid-cols-2">
@@ -236,7 +244,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
           <Field label="Organization descriptor" required error={fieldErrors.organizationDescriptor} value={value.organizationDescriptor} onChange={(next) => set("organizationDescriptor", next)} />
           <Choice label="Reconstruction template" value={value.visual?.template ?? ""} options={["knowledge-assistant", "analytics-dashboard", "workflow-console", "commerce-experience", "governance-console", "operations-console"]} onChange={(next) => set("visual", { ...value.visual, kind: "illustrative-interface-reconstruction", template: next })} />
         </div>
-        <MediaField label="Case-study hero image" value={value.heroMedia} onChange={(next) => set("heroMedia", next)} />
+        <MediaField label="Case-study hero image" value={value.heroMedia} overridePath="content.heroMedia" onChange={(next) => set("heroMedia", next)} />
         <Area label="Public capability statement" required error={fieldErrors.impactStatement} value={value.impactStatement ?? ""} onChange={(next) => set("impactStatement", next)} />
         <Area label="Disclosure note" required error={fieldErrors.disclosureNote} value={value.disclosureNote ?? ""} onChange={(next) => set("disclosureNote", next)} />
         <EnumMultiSelect
@@ -279,7 +287,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
           <Field label="Image alternative text" value={value.imageAlt} onChange={(next) => set("imageAlt", next)} />
           <Choice label="Editorial variant" value={value.variant ?? ""} options={["ledger", "network", "journey", "field", "factory"]} onChange={(next) => set("variant", next)} />
         </div>
-        <MediaField label="Industry hero image" value={value.heroMedia} onChange={(next) => set("heroMedia", next ? { ...(value.heroMedia ?? {}), ...next } : undefined)} />
+        <MediaField label="Industry hero image" value={value.heroMedia} overridePath="content.heroMedia" onChange={(next) => set("heroMedia", next ? { ...(value.heroMedia ?? {}), ...next } : undefined)} />
         <Area label="Opening thesis" value={value.thesis ?? ""} onChange={(next) => set("thesis", next)} />
         <Area label="Editorial summary" value={value.dek ?? ""} onChange={(next) => set("dek", next)} />
         </section>}
@@ -419,7 +427,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
           <Field label="CTA label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan" } : undefined)} />
           <SafeDestinationField label="CTA destination" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Start a Value Scan", href: next } : undefined)} />
         </div>
-        <MediaField label="Framework hero image" required value={value.heroMedia} onChange={(next) => set("heroMedia", next)} />
+        <MediaField label="Framework hero image" required value={value.heroMedia} overridePath="content.heroMedia" onChange={(next) => set("heroMedia", next)} />
         <Area label="Teaser" value={value.teaser ?? ""} onChange={(next) => set("teaser", next)} />
         <Area label="Handover explanation" value={value.handoverExplanation ?? ""} onChange={(next) => set("handoverExplanation", next)} rows={6} />
         <RichBlockEditor label="Methodology narrative" value={value.methodology} onChange={(next) => set("methodology", next)} required />

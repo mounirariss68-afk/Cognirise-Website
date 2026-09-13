@@ -10,6 +10,7 @@ import type { DocumentStatus } from './documentStatus';
 import type { PageParameter } from './pageParameter';
 import type { PageSizeParameter } from './pageSizeParameter';
 import type { SearchParameter } from './searchParameter';
+import type { SharedEditionReadiness } from './sharedEditionReadiness';
 
 export type ListDocumentsParams = {
 /**
@@ -29,4 +30,8 @@ kind?: DocumentKind;
 status?: DocumentStatus;
 market?: string;
 locale?: string;
+/**
+ * Filter the complete eligible result set before pagination.
+ */
+readiness?: SharedEditionReadiness;
 };

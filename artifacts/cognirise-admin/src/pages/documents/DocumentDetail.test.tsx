@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import test, { mock } from "node:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { UpdateDocumentAvailabilityBody } from "@workspace/api-zod";
+import { UpdateDocumentAvailabilityBody, validateCmsSnapshot } from "@workspace/api-zod";
 import { JSDOM } from "jsdom";
 import * as React from "react";
 import type { Root } from "react-dom/client";
@@ -18,7 +18,9 @@ Object.defineProperties(globalThis, {
   Element: { value: dom.window.Element, configurable: true },
   Node: { value: dom.window.Node, configurable: true },
   NodeFilter: { value: dom.window.NodeFilter, configurable: true },
+  DocumentFragment: { value: dom.window.DocumentFragment, configurable: true },
   HTMLInputElement: { value: dom.window.HTMLInputElement, configurable: true },
+  HTMLFormElement: { value: dom.window.HTMLFormElement, configurable: true },
   Event: { value: dom.window.Event, configurable: true },
   CustomEvent: { value: dom.window.CustomEvent, configurable: true },
   MouseEvent: { value: dom.window.MouseEvent, configurable: true },
@@ -30,8 +32,11 @@ Object.defineProperties(globalThis, {
 });
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
+Object.defineProperty(dom.window.HTMLElement.prototype, "scrollIntoView", { value: () => {}, configurable: true });
 
 const listeners = new Set<() => void>();
+let currentLocation = "/content/document-1";
+let currentSearch = "";
 const documentBase = {
   id: "document-1",
   kind: "site-configuration",
@@ -55,7 +60,14 @@ let currentDocument: any = documentBase;
 let currentSession: any = { user: { role: "administrator", marketCodes: ["uae"] } };
 let currentAvailability: any;
 let currentPersonAvailability: any = { items: [] };
+let currentSharedMatrix: any = { baselines: [], bindings: [] };
 let pendingSave: { input: any; options: any } | undefined;
+let pendingBaselineSave: { input: any; options: any } | undefined;
+let sharedOverrideMutations = 0;
+let sharedOverrideInput: any;
+let directSharedComparison: any;
+let currentSharedComparison: any;
+let resolveSharedInput: any;
 let pendingRestore: { input: any; options: any } | undefined;
 let mutationPending = false;
 let onSharedAvailabilityMutation: ((input: any, options: any) => void) | undefined;
@@ -70,6 +82,25 @@ const mutation = {
   },
 };
 const inertMutation = { isPending: false, mutate() {} };
+const sharedOverrideMutation = {
+  isPending: false,
+  mutate(input: any) {
+    sharedOverrideMutations += 1;
+    sharedOverrideInput = input;
+  },
+};
+const resolveSharedMutation = {
+  isPending: false,
+  mutate(input: any) {
+    resolveSharedInput = input;
+  },
+};
+const baselineMutation = {
+  isPending: false,
+  mutate(input: any, options: any) {
+    pendingBaselineSave = { input, options };
+  },
+};
 const restoreMutation = {
   isPending: false,
   mutate(input: any, options: any) {
@@ -95,7 +126,7 @@ const edition = {
   effectiveRevisionId: null, effectiveRevisionNumber: null, ready: true, readinessErrors: [],
 };
 let currentEditions: any[] = [edition];
-let currentMarkets: any[] = [{ code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+let currentMarkets: any[] = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
 
 if (typeof (mock as typeof mock & { module?: unknown }).module !== "function") {
   test("rendered DocumentDetail save state", async () => {
@@ -111,7 +142,8 @@ if (typeof (mock as typeof mock & { module?: unknown }).module !== "function") {
 mock.module("wouter", {
   namedExports: {
     useRoute: () => [true, { id: "document-1" }],
-    useLocation: () => ["/content/document-1", () => {}],
+    useLocation: () => [currentLocation, () => {}],
+    useSearch: () => currentSearch,
   },
 });
 mock.module("@workspace/api-client-react", {
@@ -123,12 +155,17 @@ mock.module("@workspace/api-client-react", {
     getListDocumentRevisionsQueryKey: () => ["revisions"],
     getListMarketEditionsQueryKey: () => ["markets"],
     getListDocumentEditionsQueryKey: () => ["editions"],
+    getGetSharedMarketEditionMatrixQueryKey: () => ["shared-market"],
+    getCompareSharedMarketBaselineQueryKey: () => ["shared-market-compare"],
     getListDocumentReviewCommentsQueryKey: () => ["comments"],
     getGetMediaQueryKey: () => ["media"],
     getListMediaQueryKey: () => ["media-list"],
     useGetSession: () => ({ data: currentSession, isLoading: false, isError: false }),
     useListDocuments: () => ({ data: { items: [] }, isLoading: false, isError: false }),
     useListDocumentEditions: () => ({ data: { items: currentEditions }, isLoading: false, isError: false }),
+    useGetSharedMarketEditionMatrix: () => ({ data: currentSharedMatrix }),
+    useCompareSharedMarketBaseline: () => ({ data: currentSharedComparison, refetch: async () => ({ data: currentSharedComparison }), isFetching: false }),
+    compareSharedMarketBaseline: async () => directSharedComparison,
     useGetDocumentAvailability: () => {
       React.useSyncExternalStore(
         (listener) => { listeners.add(listener); return () => listeners.delete(listener); },
@@ -198,6 +235,10 @@ mock.module("@workspace/api-client-react", {
     usePublishDocumentMarketAvailability: () => inertMutation,
     useAddDocumentReviewComment: () => inertMutation,
     useRejectDocumentRevision: () => inertMutation,
+    useEstablishSharedMarketBaseline: () => baselineMutation,
+    useBindSharedMarketEdition: () => inertMutation,
+    useSaveSharedMarketOverrides: () => sharedOverrideMutation,
+    useResolveSharedMarketBaselineUpdate: () => resolveSharedMutation,
     useGetMedia: () => ({ data: undefined }),
     useListMedia: () => ({ data: { items: [] } }),
     useRequestMediaUpload: () => inertMutation,
@@ -207,11 +248,15 @@ mock.module("@workspace/api-client-react", {
 
 const { default: DocumentDetail } = await import("./DocumentDetail");
 const { MarketAvailabilityChecklist } = await import("./MarketAvailabilityChecklist");
+const { buildSharedBaselineSnapshot } = await import("./SharedBaselineEditor");
 const { createRoot } = await import("react-dom/client");
 
 async function renderDetail(initialDocument: any = documentBase) {
   currentDocument = initialDocument ? { ...initialDocument } : undefined;
   pendingSave = undefined;
+  sharedOverrideMutations = 0;
+  sharedOverrideInput = undefined;
+  resolveSharedInput = undefined;
   mutationPending = false;
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   const container = document.createElement("div");
@@ -852,6 +897,286 @@ test("restoring a shared source retains its successor matrix row and invalidates
     await view.unmount();
     pendingRestore = undefined;
     currentAvailability = undefined;
+  }
+});
+
+test("shared edition panel renders real unbound exact context without inventing a shared source", async () => {
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentSharedMatrix = { baselines: [], bindings: [] };
+  const view = await renderDetail({ ...documentBase, kind: "platform" });
+  try {
+    assert.match(view.container.textContent ?? "", /Shared edition/);
+    assert.match(view.container.textContent ?? "", /unbound/i);
+    assert.doesNotMatch(view.container.textContent ?? "", /Shared Baseline/);
+  } finally {
+    await view.unmount();
+    currentMarkets = [{ code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+  }
+});
+
+test("shared baseline editor saves an edited neutral successor without submitting the regional draft", async () => {
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentSharedMatrix = {
+    baselines: [{
+      id: "baseline-1", documentId: "document-1", locale: "en-US",
+      revisionId: "baseline-revision-1", revisionNumber: 3, sourceRevisionId: "revision-1",
+      snapshot: { slug: "contact-email", title: "Neutral title", summary: null, content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "neutral@example.com" }, mediaIds: [], seo: null },
+      mediaReferences: [], createdAt: new Date("2026-01-01"),
+    }],
+    bindings: [],
+  };
+  const view = await renderDetail({ ...documentBase, kind: "platform" });
+  try {
+    await React.act(async () => button(view.container, "Edit Shared").click());
+    const title = document.body.querySelector<HTMLInputElement>("#shared-baseline-title")!;
+    assert.equal(title.value, "Neutral title");
+    await change(title, "Changed neutral title");
+    await React.act(async () => button(document.body, "Save shared baseline").click());
+    assert.equal(pendingBaselineSave?.input.data.sourceRevisionId, "revision-1");
+    assert.equal(pendingBaselineSave?.input.data.expectedRevisionNumber, 3);
+    assert.equal(pendingBaselineSave?.input.data.snapshot.title, "Changed neutral title");
+    assert.equal(pendingSave, undefined, "shared editing never submits the regional draft PATCH");
+  } finally {
+    await view.unmount();
+    pendingBaselineSave = undefined;
+    currentMarkets = [{ code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+  }
+});
+
+test("shared baseline payload omits null SEO and retains legacy root media pins", () => {
+  const source = {
+    slug: "contact-email",
+    title: "Neutral title",
+    summary: null,
+    content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "neutral@example.com" },
+    mediaIds: ["11111111-1111-4111-8111-111111111111"],
+    markets: ["uae"],
+  };
+  const payload = buildSharedBaselineSnapshot(source, { ...source, title: "Edited shared title", seo: null });
+  assert.equal("seo" in payload, false, "cms snapshot metadata permits omitted SEO but rejects seo: null");
+  assert.deepEqual(payload.mediaIds, ["11111111-1111-4111-8111-111111111111"]);
+  assert.equal(validateCmsSnapshot("site-configuration", payload, "draft").success, true);
+});
+
+test("resetting a persisted shared field cannot discard a dirty local title or its navigation guard", async () => {
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentSharedMatrix = {
+    baselines: [],
+    bindings: [{
+      id: "binding-1", marketEditionId: "uae-edition", locale: "en-US", mode: "adapted",
+      baselineRevisionId: "baseline-revision-1", sourceRevisionId: "revision-1", version: 4,
+      operations: [{ op: "replace", path: "summary", value: "Regional summary" }],
+    }],
+  };
+  const view = await renderDetail({ ...documentBase, title: "Server title", summary: "Regional summary" });
+  const originalConfirm = window.confirm;
+  window.confirm = () => false;
+  try {
+    const title = view.container.querySelector<HTMLInputElement>("#document-title")!;
+    await change(title, "Unsaved local title");
+    const resetSummary = view.container.querySelector<HTMLButtonElement>('[aria-label="Reset Summary / Deck (optional) to Shared"]');
+    assert.ok(resetSummary, "the persisted summary override exposes a reset control");
+    await React.act(async () => resetSummary.click());
+    assert.equal(sharedOverrideMutations, 0, "a reset must not mutate the server while any local draft field is dirty");
+    assert.equal(title.value, "Unsaved local title");
+
+    currentDocument = { ...currentDocument, title: "Background response", revisionNumber: 2 };
+    await React.act(async () => notify());
+    assert.equal(title.value, "Unsaved local title", "a refetch after blocked reset cannot hydrate over local input");
+
+    const link = document.createElement("a");
+    link.href = "/dashboard";
+    document.body.append(link);
+    const navigation = new dom.window.MouseEvent("click", { bubbles: true, cancelable: true });
+    link.dispatchEvent(navigation);
+    link.remove();
+    assert.equal(navigation.defaultPrevented, true, "blocked reset preserves dirty-navigation protection");
+  } finally {
+    window.confirm = originalConfirm;
+    await view.unmount();
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentDocument = documentBase;
+  }
+});
+
+test("successful ordinary saves clear pending shared field markers", async () => {
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentSharedMatrix = {
+    baselines: [],
+    bindings: [{
+      id: "binding-1", marketEditionId: "uae-edition", locale: "en-US", mode: "adapted",
+      baselineRevisionId: "baseline-revision-1", sourceRevisionId: "revision-1", version: 4, operations: [],
+    }],
+  };
+  const view = await renderDetail({ ...documentBase, title: "Server title" });
+  try {
+    await change(view.container.querySelector<HTMLInputElement>("#document-title")!, "Saved local title");
+    assert.ok(view.container.querySelector('[aria-label="Reset Display Title (required) to Shared"]'), "the unsaved local title is marked as a pending override");
+    await React.act(async () => button(view.container, "Save Draft").click());
+    const response = { ...currentDocument, title: "Saved local title", revisionNumber: 2, currentRevisionId: "revision-2" };
+    await React.act(async () => {
+      currentDocument = response;
+      mutationPending = false;
+      pendingSave!.options.onSuccess(response);
+      notify();
+    });
+    assert.equal(view.container.querySelector('[aria-label="Reset Display Title (required) to Shared"]'), null, "PATCH success clears the local-only marker until a persisted binding refresh supplies operations");
+  } finally {
+    await view.unmount();
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentDocument = documentBase;
+    mutationPending = false;
+  }
+});
+
+test("changing the exact edition clears pending field markers rather than carrying them into another market", async () => {
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en", enabled: true },
+  ];
+  currentEditions = [edition, { ...edition, market: "ksa", locale: "en", revisionId: "ksa-revision" }];
+  currentSharedMatrix = { baselines: [], bindings: [{ id: "binding-1", marketEditionId: "uae-edition", locale: "en-US", mode: "adapted", baselineRevisionId: "baseline-revision-1", version: 4, operations: [] }] };
+  const view = await renderDetail({ ...documentBase, title: "UAE title" });
+  const originalConfirm = window.confirm;
+  window.confirm = () => true;
+  try {
+    await change(view.container.querySelector<HTMLInputElement>("#document-title")!, "Unsaved UAE title");
+    assert.ok(view.container.querySelector('[aria-label="Reset Display Title (required) to Shared"]'));
+    const trigger = view.container.querySelector<HTMLButtonElement>('[role="combobox"]')!;
+    await React.act(async () => {
+      trigger.dispatchEvent(new dom.window.MouseEvent("mousedown", { bubbles: true, button: 0 }));
+      trigger.click();
+    });
+    const ksa = [...document.body.querySelectorAll<HTMLElement>('[role="option"]')].find((option) => option.textContent?.includes("KSA"));
+    assert.ok(ksa);
+    await React.act(async () => ksa.click());
+    assert.equal(view.container.querySelector('[aria-label="Reset Display Title (required) to Shared"]'), null);
+  } finally {
+    window.confirm = originalConfirm;
+    await view.unmount();
+    currentMarkets = [{ code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentEditions = [edition];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentDocument = documentBase;
+  }
+});
+
+test("shared adaptation panel exposes text, nested-object, and stable-array override paths for field reset", async () => {
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentSharedMatrix = {
+    baselines: [],
+    bindings: [{
+      id: "binding-1", marketEditionId: "uae-edition", locale: "en-US", mode: "adapted",
+      baselineRevisionId: "baseline-revision-1", version: 4,
+      operations: [
+        { op: "replace", path: "content.teaser", value: "Regional teaser" },
+        { op: "replace", path: "content.social.imageMedia", value: { mediaId: "11111111-1111-4111-8111-111111111111" } },
+        { op: "replace", path: "content.sections[id=hero].cta.label", value: "Regional CTA" },
+      ],
+    }],
+  };
+  directSharedComparison = {
+    binding: { version: 4, baselineRevisionId: "baseline-revision-1" },
+    previousSnapshot: { content: { teaser: "Shared teaser", social: { imageMedia: { mediaId: "11111111-1111-4111-8111-111111111111", caption: "Shared caption" } }, sections: [{ id: "hero", cta: { label: "Shared CTA" } }] } },
+  };
+  const view = await renderDetail();
+  try {
+    assert.match(view.container.textContent ?? "", /Content · teaser/);
+    assert.match(view.container.textContent ?? "", /Content · social · image Media/);
+    assert.match(view.container.textContent ?? "", /Content · sections \(hero\) · cta · label/);
+    const reset = view.container.querySelector<HTMLButtonElement>('[aria-label="Reset Content · sections (hero) · cta · label to Shared"]');
+    assert.ok(reset, "stable array selectors receive their own reset control");
+    await React.act(async () => reset.click());
+    assert.equal(sharedOverrideMutations, 1, "the panel routes a concrete sparse path to the real reset handler");
+  } finally {
+    await view.unmount();
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    directSharedComparison = undefined;
+  }
+});
+
+test("edition header uses exact workflow and availability state rather than a fixed Live label", async () => {
+  currentEditions = [{ ...edition, workflowState: "in-review", publicationState: "draft" }];
+  currentAvailability = {
+    documentId: "document-1", draftVersion: 1, reviewedVersion: null, publishedVersion: null,
+    sharedSource: { editionId: "uae-edition", revisionId: "revision-1", market: "uae", locale: "en-US" },
+    affectedEditions: [], items: [{ marketEditionId: "uae-edition", market: "uae", locale: "en-US", displayName: "UAE", stagedDecision: "show", reviewedDecision: null, publishedDecision: null, publishedEffectiveAvailable: false, pending: false, customized: false }],
+  };
+  const view = await renderDetail();
+  try {
+    assert.match(view.container.textContent ?? "", /Not available/);
+    assert.doesNotMatch(view.container.textContent ?? "", /\bLive\b/);
+  } finally {
+    await view.unmount();
+    currentEditions = [edition];
+    currentAvailability = undefined;
+  }
+});
+
+test("duplicate stable-array comparison conflicts render and submit one decision per path", async () => {
+  const binding = {
+    id: "binding-1", documentId: "document-1", marketEditionId: "uae-edition", locale: "en-US",
+    mode: "adapted", baselineRevisionId: "baseline-revision-1", version: 4, operations: [],
+    materializedRevisionId: "revision-1", translationState: "current",
+  };
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentSharedMatrix = { baselines: [], bindings: [binding] };
+  currentSharedComparison = {
+    binding,
+    baselineRevisionId: "baseline-revision-2",
+    previousSnapshot: { content: { sections: [{ id: "hero", order: 1 }] } },
+    currentSnapshot: { content: { sections: [{ id: "hero", order: 2 }] } },
+    localSnapshot: { content: { sections: [{ id: "hero", order: 3 }] } },
+    mergedSnapshot: {},
+    canAutoAdopt: false,
+    conflicts: [
+      { path: "content.sections[id=hero]", kind: "remove", message: "Shared removed the section." },
+      { path: "content.sections[id=hero]", kind: "add", message: "Market retained the section." },
+      { path: "content.sections[id=hero]", kind: "reorder", message: "Both changed its order." },
+    ],
+  };
+  const view = await renderDetail();
+  try {
+    await React.act(async () => button(view.container, "Compare to Shared").click());
+    const rendered = document.body.textContent ?? "";
+    assert.equal((rendered.match(/content\.sections\[id=hero\]/g) ?? []).length, 1, "deduplication produces one conflict card and one choice");
+    assert.match(rendered, /Shared removed the section\. Market retained the section\. Both changed its order\./);
+    await React.act(async () => button(document.body, "Adopt Update").click());
+    await React.act(async () => button(document.body, "Apply & Save Draft").click());
+    assert.deepEqual(resolveSharedInput?.data.conflictDecisions, [{ path: "content.sections[id=hero]", choice: "shared" }]);
+  } finally {
+    await view.unmount();
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentSharedComparison = undefined;
+    resolveSharedInput = undefined;
+  }
+});
+
+test("valid market deep links win over shared/default selection for market code and catalog UUID", async () => {
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en", enabled: true },
+  ];
+  currentEditions = [edition, { ...edition, market: "ksa", locale: "en", revisionId: "ksa-revision" }];
+  try {
+    for (const marketParam of ["ksa", "ksa-edition"]) {
+      currentLocation = "/content/document-1";
+      currentSearch = `?market=${marketParam}&locale=en`;
+      const view = await renderDetail();
+      try {
+        assert.match(view.container.querySelector('[role="combobox"]')?.textContent ?? "", /KSA/);
+      } finally {
+        await view.unmount();
+      }
+    }
+  } finally {
+    currentLocation = "/content/document-1";
+    currentSearch = "";
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentEditions = [edition];
   }
 });
 

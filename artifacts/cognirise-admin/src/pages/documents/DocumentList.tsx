@@ -8,6 +8,7 @@ import {
   DocumentStatus,
   getListDocumentsQueryKey
 } from "@workspace/api-client-react";
+import { SharedEditionReadiness } from "@workspace/api-client-react";
 import {
   getListMarketEditionsQueryKey,
   useListMarketEditions,
@@ -29,6 +30,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { useGetSession } from "@workspace/api-client-react";
 import { PeopleMarketMatrix } from "./PeopleMarketMatrix";
+import { DocumentMarketMatrix } from "./DocumentMarketMatrix";
 import { officeCreationContent, officeSlug } from "./office-creation";
 import { initialCmsContent, validateCmsContent } from "@workspace/api-zod";
 import { CONTENT_GUIDANCE, collectContentMediaIds } from "./authoring";
@@ -56,6 +58,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<DocumentStatus | undefined>();
+  const [readiness, setReadiness] = useState<SharedEditionReadiness | undefined>();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [slugWasEdited, setSlugWasEdited] = useState(false);
   const [createContent, setCreateContent] = useState<Record<string, any>>(
@@ -72,8 +75,9 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     page,
     pageSize: 20,
     search: search || undefined,
-    status
-  }, { query: { queryKey: getListDocumentsQueryKey({ kind, page, pageSize: 20, search: search || undefined, status }) } });
+    status,
+    readiness
+  }, { query: { queryKey: getListDocumentsQueryKey({ kind, page, pageSize: 20, search: search || undefined, status, readiness }) } });
   const marketParams = { page: 1, pageSize: 100 };
   const { data: marketData, isLoading: areMarketsLoading, isError: marketsFailed } = useListMarketEditions(
     marketParams,
@@ -113,8 +117,8 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   }, [kind]);
 
   useEffect(() => {
-    if (pageData && page > Math.max(pageData.totalPages, 1)) {
-      setPage(Math.max(pageData.totalPages, 1));
+    if (pageData && page > Math.max((pageData?.totalPages ?? 0), 1)) {
+      setPage(Math.max((pageData?.totalPages ?? 0), 1));
     }
   }, [page, pageData]);
 
@@ -225,6 +229,30 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
              <SelectItem value="archived">Archived</SelectItem>
            </SelectContent>
          </Select>
+
+         <Select
+           value={readiness || "all"}
+           onValueChange={(v) => {
+             setReadiness(v === "all" ? undefined : v as SharedEditionReadiness);
+             setPage(1);
+           }}
+         >
+           <SelectTrigger className="w-[180px] bg-background" aria-label="Filter documents by readiness">
+             <Filter className="mr-2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+             <SelectValue placeholder="All Readiness" />
+           </SelectTrigger>
+           <SelectContent>
+             <SelectItem value="all">All Readiness</SelectItem>
+             <SelectItem value="missing">Missing market content</SelectItem>
+             <SelectItem value="pending">Pending changes</SelectItem>
+             <SelectItem value="blocker">Review blockers</SelectItem>
+             <SelectItem value="updates">Shared updates available</SelectItem>
+             <SelectItem value="needs-baseline">No Shared baseline</SelectItem>
+             <SelectItem value="needs-resolution">Needs Resolution</SelectItem>
+             <SelectItem value="translation-stale">Translation Stale</SelectItem>
+             <SelectItem value="ready">Ready</SelectItem>
+           </SelectContent>
+         </Select>
        </div>
 
        {kind === "person" && (
@@ -242,7 +270,23 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
          />
        )}
 
-       {kind !== "person" && <div className="bg-card border border-border rounded-xl shadow-sm flex min-h-[24rem] max-h-[70vh] flex-col overflow-hidden">
+       {kind !== "person" && (
+         <DocumentMarketMatrix
+           kind={kind}
+           documents={pageData?.items ?? []}
+           markets={enabledMarkets}
+           canManage={canManageAvailability}
+           isAdministrator={session?.user?.role === "administrator"}
+           isLoading={isLoading}
+           page={page}
+           pageSize={20}
+           total={pageData?.total ?? 0}
+           totalPages={pageData?.totalPages ?? 0}
+           onPageChange={setPage}
+         />
+       )}
+
+       {false && <div className="bg-card border border-border rounded-xl shadow-sm flex min-h-[24rem] max-h-[70vh] flex-col overflow-hidden">
         <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
            <Table aria-label={`${getKindLabel(kind)} content`}>
             <TableHeader className="bg-muted/30 sticky top-0 backdrop-blur-sm z-10">
@@ -261,7 +305,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                     <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
                   </TableCell>
                 </TableRow>
-               ) : !pageData || pageData.items.length === 0 ? (
+               ) : !(pageData?.items?.length) ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-32 text-center text-muted-foreground font-mono text-sm">
                     No {kind}s found matching criteria.
@@ -324,14 +368,14 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
           </Table>
         </div>
         
-        {pageData && pageData.totalPages > 1 && (
+        {pageData && (pageData?.totalPages ?? 0) > 1 && (
           <div className="p-4 border-t border-border bg-muted/10 flex items-center justify-between text-sm font-mono text-muted-foreground">
             <div>
-              Showing {((page - 1) * 20) + 1} to {Math.min(page * 20, pageData.total)} of {pageData.total}
+              Showing {((page - 1) * 20) + 1} to {Math.min(page * 20, pageData?.total ?? 0)} of {(pageData?.total ?? 0)}
             </div>
             <div className="flex gap-2">
                <Button variant="outline" size="sm" aria-label="Go to previous page" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</Button>
-               <Button variant="outline" size="sm" aria-label="Go to next page" disabled={page === pageData.totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
+               <Button variant="outline" size="sm" aria-label="Go to next page" disabled={page === (pageData?.totalPages ?? 0)} onClick={() => setPage(p => p + 1)}>Next</Button>
              </div>
           </div>
         )}

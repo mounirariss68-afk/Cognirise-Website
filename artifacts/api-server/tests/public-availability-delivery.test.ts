@@ -197,6 +197,20 @@ test("media eligibility admits only the exact source selected for an eligible de
         document_id text NOT NULL, market_edition_id text NOT NULL, locale text NOT NULL,
         published_decision text, PRIMARY KEY (document_id, market_edition_id, locale)
       );
+      -- The public authority predicates are installed in production by the
+      -- shared-market migration. Keep this isolated legacy-delivery fixture
+      -- unmanaged while providing its exact referenced table shape.
+      CREATE TABLE cms_market_edition_bindings (
+        id text PRIMARY KEY, document_id text NOT NULL, market_edition_id text NOT NULL,
+        locale text NOT NULL, mode text NOT NULL
+      );
+      CREATE TABLE cms_resolved_market_revisions (
+        binding_id text NOT NULL, cms_revision_id text NOT NULL
+      );
+      CREATE TABLE cms_audit_events (
+        target_type text NOT NULL, target_id text NOT NULL, action text NOT NULL,
+        metadata jsonb NOT NULL DEFAULT '{}'::jsonb
+      );
       CREATE TABLE cms_media_references (
         asset_id text NOT NULL, document_id text NOT NULL, field_path text NOT NULL,
         media_version_id text NOT NULL

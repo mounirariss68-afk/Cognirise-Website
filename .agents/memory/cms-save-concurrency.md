@@ -14,3 +14,9 @@ Treat failure after commit differently from rejection, and preserve the editor's
 **Why:** Audit or response hydration can fail after persistence succeeds. Automatically retrying against a newer token risks overwriting another writer, while treating every error as “not saved” misleads editors.
 
 **How to apply:** Distinguish known committed, uncertain, validation, and revision-conflict outcomes. Never silently rebase a retry; retain inputs and require explicit latest-revision verification or discard/reload.
+
+Treat field-level resets as whole-revision writes, not local cosmetic actions.
+
+**Why:** A server-side reset can create a new revision and trigger editor rehydration. Clearing global dirty state for that one field can silently discard unrelated edits or allow stale values to overwrite the reset.
+
+**How to apply:** Require a clean draft before resetting, lock editing until the saved revision is reloaded, preserve uncertain outcomes, and scope temporary override indicators to the current hydrated edition.

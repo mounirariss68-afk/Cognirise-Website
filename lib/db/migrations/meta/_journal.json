@@ -204,6 +204,27 @@
       "when": 1788998400005,
       "tag": "0028_cms_access_delivery_leases",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1788998400006,
+      "tag": "0029_cms_shared_market_editions",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1788998400007,
+      "tag": "0030_cms_shared_history_cascade_deletes",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1788998400008,
+      "tag": "0031_cms_shared_pointer_integrity",
+      "breakpoints": true
     }
   ]
 }

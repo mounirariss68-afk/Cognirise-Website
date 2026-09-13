@@ -40,13 +40,14 @@ test("People table exposes staged/live labels and locale details without colour-
 
 test("generic filters reset the shared server page and controls have keyboard labels", async () => {
   const list = await readFile(new URL("src/pages/documents/DocumentList.tsx", adminRoot), "utf8");
+  const docMatrix = await readFile(new URL("src/pages/documents/DocumentMarketMatrix.tsx", adminRoot), "utf8");
 
   assert.match(list, /setSearch\(e\.target\.value\);\s*setPage\(1\)/);
   assert.match(list, /setStatus\(v === "all" \? undefined : v as DocumentStatus\);\s*setPage\(1\)/);
   assert.match(list, /aria-label=\{`Search \$\{getKindLabel\(kind\)\}s`\}/);
   assert.match(list, /aria-label="Filter documents by status"/);
-  assert.match(list, /aria-label="Go to previous page"/);
-  assert.match(list, /aria-label="Go to next page"/);
+  assert.match(docMatrix, /aria-label="Go to previous page"/);
+  assert.match(docMatrix, /aria-label="Go to next page"/);
   assert.match(list, /href=\{`\/content\/\$\{doc\.id\}`\}/);
 });
 

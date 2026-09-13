@@ -51,9 +51,17 @@ import {
 import {
   effectiveAvailability,
   industryDestinationEligibilityClause,
+  managedMarketPublicDeliveryClause,
   publicPayloadEligibilityClause,
   type AvailabilityDecision,
 } from "../lib/availability";
+import { registerSharedMarketEditionRoutes } from "../lib/shared-market-editions";
+import {
+  assertManagedMarketPublication,
+  ensureManagedMarketRevision,
+  synchronizeManagedMarketRevision,
+} from "../lib/managed-market-lifecycle";
+import { filterSharedMarketReadiness } from "../lib/shared-market-readiness";
 
 const router: IRouter = Router();
 export const previewMediaDelivery = {
@@ -66,6 +74,13 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 function canAccessMarket(auth: AuthContext, market: string): boolean {
   return auth.user.role === "administrator" || auth.user.marketCodes.includes(market);
 }
+
+registerSharedMarketEditionRoutes(router, {
+  canAccessMarket,
+  requireEditor,
+  requireAdministrator,
+  requireCsrf,
+});
 
 export function previewMediaIds(payload: unknown, documentKind?: CmsDocumentKind): string[] {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return [];
@@ -184,7 +199,7 @@ async function syncMediaReferences(
            AND prior.field_path=CASE WHEN $5::text IS NULL THEN '' ELSE 'revision:'||$5 END
           LEFT JOIN LATERAL (SELECT id FROM cms_media_versions
              WHERE asset_id=asset.id ORDER BY version_number DESC LIMIT 1) latest
-            ON requested.id IS NULL AND prior.media_version_id IS NULL
+             ON requested.id IS NULL AND prior.asset_id IS NULL
          WHERE asset.id=$1 AND asset.status IN ('active','ready')
             AND ($2::uuid IS NULL OR requested.id IS NOT NULL)
             AND COALESCE(requested.id,prior.media_version_id,latest.id) IS NOT NULL
@@ -332,9 +347,11 @@ type Queryable = { query: (sql: string, values?: unknown[]) => Promise<any> };
 /**
  * Shared source editions use an internal market/locale solely as an authoring
  * address. Authority is instead the authority to every enabled destination.
- * Custom editions retain their exact-market permission boundary.
+ * A managed shared/adapted exact edition additionally inherits the authority
+ * boundary of the immutable baseline source it adopted. Custom and independent
+ * editions retain their exact-market permission boundary.
  */
-async function canAccessEditionTarget(
+export async function canAccessEditionTarget(
   client: Queryable,
   auth: AuthContext,
   documentId: string,
@@ -353,12 +370,33 @@ async function canAccessEditionTarget(
   // that exact market/locale target: another locale can be custom while this
   // one is shared (or vice versa).
   if (!edition.rowCount) return canAccessMarket(auth, market);
-  if (edition.rows[0]?.content_mode !== "shared") return canAccessMarket(auth, market);
-  const destinations = await client.query(
-    "SELECT code FROM market_editions WHERE enabled=true",
+  if (edition.rows[0]?.content_mode === "shared") {
+    const destinations = await client.query(
+      "SELECT code FROM market_editions WHERE enabled=true",
+    );
+    return destinations.rows.length > 0
+      && destinations.rows.every((row: { code: string }) => canAccessMarket(auth, String(row.code)));
+  }
+  if (!canAccessMarket(auth, market)) return false;
+  const managedBinding = await client.query(
+    `SELECT binding.mode,source_edition.market source_market
+       FROM cms_market_edition_bindings binding
+       JOIN market_editions destination ON destination.id=binding.market_edition_id
+       LEFT JOIN cms_shared_baseline_revisions adopted
+         ON adopted.id=binding.based_on_baseline_revision_id
+       LEFT JOIN cms_revisions source_revision ON source_revision.id=adopted.source_revision_id
+       LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
+      WHERE binding.document_id=$1 AND destination.code=$2 AND binding.locale=$3
+        AND binding.mode IN ('shared','adapted')
+      FOR KEY SHARE OF binding`,
+    [documentId, market, locale],
   );
-  return destinations.rows.length > 0
-    && destinations.rows.every((row: { code: string }) => canAccessMarket(auth, String(row.code)));
+  // No managed shared/adapted binding (including independent bindings) keeps
+  // the normal exact-market boundary. A managed binding without a recoverable
+  // adopted baseline source is fail-closed rather than silently destination-only.
+  if (!managedBinding.rowCount) return true;
+  const sourceMarket = managedBinding.rows[0]?.source_market;
+  return typeof sourceMarket === "string" && canAccessMarket(auth, sourceMarket);
 }
 
 function availabilitySelections(value: unknown): Array<{ marketEditionId: string; locale: string; decision: AvailabilityDecision }> {
@@ -573,8 +611,10 @@ async function documentAvailability(
       market: source.rows[0].market,
       locale: source.rows[0].locale,
     } : null,
-    canEditShared: Boolean(stateRow.shared_source_edition_id)
-      && destinations.rows.length > 0
+    // Destination staging is document-wide. A legacy shared-source pointer is
+    // required only to release legacy shared delivery, not to stage the full
+    // market matrix for a neutral-baseline managed edition.
+    canEditShared: destinations.rows.length > 0
       && destinations.rows.every((row: { market: string }) => canAccessMarket(auth, String(row.market))),
     items,
     affectedEditions: changed.map((item) => `${item.market}/${item.locale}`),
@@ -723,6 +763,16 @@ router.get(
       }
     }
     if (q.status) items = items.filter((item) => item.status === q.status);
+    // Readiness is evaluated for every eligible document before pagination.
+    // It is intentionally opt-in while operations coordinates application of
+    // the additive shared-market migration.
+    if (q.readiness) {
+      const matchingIds = await filterSharedMarketReadiness(
+        pool, items.map((item) => item.id), q.readiness, requesterMarkets(res.locals.auth),
+        q.market, q.locale,
+      );
+      items = items.filter((item) => matchingIds.has(item.id));
+    }
     const total = items.length;
     items = items.slice((q.page - 1) * q.pageSize, q.page * q.pageSize);
     res.json(pageOf(items, total, q.page, q.pageSize));
@@ -1061,6 +1111,16 @@ router.get(
           .map((edition) => edition.locale),
       ].filter(Boolean))];
       for (const targetLocale of locales) {
+        // This listing carries exact revision/workflow metadata. Apply the
+        // same managed adopted-source guard as the editor read route rather
+        // than exposing a managed destination to a destination-only editor.
+        if (!await canAccessEditionTarget(
+          pool,
+          auth,
+          documentId,
+          String(target.code),
+          String(targetLocale),
+        )) continue;
         const candidates = await navigationCandidates(target.code, String(targetLocale)) ?? [];
         const exactResult = await pool.query(
         `SELECT e.publication_state,e.published_revision_id,
@@ -1094,8 +1154,9 @@ router.get(
              ) published ON true
             WHERE e.document_id=$1 AND e.market=$2
               AND ($3::text IS NULL OR e.locale=$3)
+               AND ${managedMarketPublicDeliveryClause("e.document_id", "e", "$4", "$5")}
             ORDER BY CASE WHEN e.locale=$3 THEN 0 ELSE 1 END,e.created_at,e.id LIMIT 1`,
-          [documentId, candidate.market, candidate.locale],
+           [documentId, candidate.market, candidate.locale, target.code, targetLocale],
         );
           if (found.rowCount && found.rows[0].revision_id) {
             effective = found.rows[0];
@@ -1962,6 +2023,16 @@ router.patch(
         String(edition.rows[0].revision_id),
         current.kind as CmsDocumentKind,
       );
+      await synchronizeManagedMarketRevision(client, {
+        documentId: id,
+        market: requestedMarket,
+        locale: requestedLocale,
+        revisionId: String(revision.rows[0].id),
+        snapshot,
+        kind: current.kind as CmsDocumentKind,
+        userId: auth.user.id,
+        sourceRevisionId: String(edition.rows[0].revision_id),
+      });
       if (edition.rows[0].content_mode === "shared") {
         await ensureAvailabilityState(client, id);
         await client.query(
@@ -2199,6 +2270,25 @@ router.post(
         undefined,
         candidate.rows[0].kind as CmsDocumentKind,
       );
+      try {
+        await ensureManagedMarketRevision(client, {
+          documentId: id,
+          market: String(candidate.rows[0].market),
+          locale: String(candidate.rows[0].locale),
+          revisionId: String(candidate.rows[0].id),
+          snapshot: validation.data as Record<string, unknown>,
+          kind: candidate.rows[0].kind as CmsDocumentKind,
+          userId: auth.user.id,
+        });
+      } catch (error) {
+        await client.query("ROLLBACK");
+        res.status(409).json({
+          error: error instanceof Error
+            ? error.message
+            : "Managed market revision could not be sealed for review.",
+        });
+        return;
+      }
       const mediaErrors = await revisionMediaGovernanceErrors(
         client,
         id,
@@ -2499,11 +2589,35 @@ router.post(
       res.status(403).json({ error: "You are not assigned to this market." });
       return;
     }
+    let managedBindingId: string | null = null;
+    try {
+      managedBindingId = await assertManagedMarketPublication(client, {
+        documentId: id,
+        market: String(revision.rows[0].market),
+        locale: String(revision.rows[0].locale),
+        revisionId: parsed.data.revisionId,
+      });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      res.status(409).json({
+        error: error instanceof Error
+          ? error.message
+          : "Managed market publication requires its current immutable materialization.",
+      });
+      return;
+    }
     const directAdministratorPublish = auth.user.role === "administrator"
       && ["draft", "rejected"].includes(String(revision.rows[0].workflow_state))
       && ["draft", "published"].includes(String(revision.rows[0].publication_state));
     const reviewedPublish = revision.rows[0].workflow_state === "in-review"
       && ["in-review", "published"].includes(String(revision.rows[0].publication_state));
+    if (managedBindingId && !reviewedPublish) {
+      await client.query("ROLLBACK");
+      res.status(409).json({
+        error: "A managed market revision must complete exact-edition review before publication.",
+      });
+      return;
+    }
     if (!directAdministratorPublish && !reviewedPublish) {
       await client.query("ROLLBACK");
       res.status(409).json({
@@ -2869,6 +2983,7 @@ router.post(
          directAdministratorPublish,
          editionId: String(revision.rows[0].edition_id),
          revisionId: parsed.data.revisionId,
+          managedBindingId,
        }],
     );
     await client.query("COMMIT");
@@ -2954,30 +3069,24 @@ router.post(
          FROM cms_revisions WHERE edition_id=$1 RETURNING id`,
         [old.rows[0].edition_id, old.rows[0].payload, digest(old.rows[0].payload), auth.user.id, parsed.data.note],
       );
-      await client.query(
-        `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
-         SELECT ref.asset_id,COALESCE(ref.media_version_id,latest.id),ref.document_id,$3
-           FROM cms_media_references ref
-           LEFT JOIN LATERAL (
-             SELECT id FROM cms_media_versions
-              WHERE asset_id=ref.asset_id ORDER BY version_number DESC LIMIT 1
-           ) latest ON ref.media_version_id IS NULL
-          WHERE ref.document_id=$1 AND ref.field_path=$2
-         ON CONFLICT DO NOTHING`,
-        [
-          id,
-          `revision:${parsed.data.revisionId}`,
-          `revision:${String(revision.rows[0].id)}`,
-        ],
-      );
       await syncMediaReferences(
         client,
         id,
         String(revision.rows[0].id),
         old.rows[0].payload,
-        undefined,
+        parsed.data.revisionId,
         old.rows[0].kind as CmsDocumentKind,
       );
+      await synchronizeManagedMarketRevision(client, {
+        documentId: id,
+        market: String(old.rows[0].market),
+        locale: String(old.rows[0].locale),
+        revisionId: String(revision.rows[0].id),
+        snapshot: old.rows[0].payload,
+        kind: old.rows[0].kind as CmsDocumentKind,
+        userId: auth.user.id,
+        sourceRevisionId: parsed.data.revisionId,
+      });
       if (old.rows[0].content_mode === "shared") {
         await ensureAvailabilityState(client, id);
         await client.query(
@@ -3149,6 +3258,16 @@ router.post(
           String(sourceRevisionId),
           edition.kind as CmsDocumentKind,
         );
+        await synchronizeManagedMarketRevision(client, {
+          documentId: id,
+          market: parsed.data.market,
+          locale: parsed.data.locale,
+          revisionId: successorRevisionId,
+          snapshot: successor.rows[0].payload,
+          kind: edition.kind as CmsDocumentKind,
+          userId: (res.locals.auth as AuthContext).user.id,
+          sourceRevisionId: String(sourceRevisionId),
+        });
         if (edition.content_mode === "shared") {
           await ensureAvailabilityState(client, id);
           await client.query(

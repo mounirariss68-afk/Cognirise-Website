@@ -45,6 +45,18 @@ test("post-merge prepares narrow media compatibility before safe schema synchron
   assert.match(schemaPreparationSql, /CREATE TABLE IF NOT EXISTS "cms_operation_receipts"/);
   assert.match(schemaPreparationSql, /CREATE TABLE "cms_access_delivery_jobs"/);
   assert.match(schemaPreparationSql, /cms_access_delivery_jobs_due_idx/);
+  assert.match(schemaPreparationSql, /Development-only preparation for additive migration 0029/);
+  assert.match(schemaPreparationSql, /CREATE TABLE IF NOT EXISTS cms_shared_baselines/);
+  assert.match(schemaPreparationSql, /CREATE TABLE IF NOT EXISTS cms_market_edition_bindings/);
+  assert.match(schemaPreparationSql, /CREATE TABLE IF NOT EXISTS cms_resolved_market_revisions/);
+  assert.match(schemaPreparationSql, /cms_shared_baseline_revisions_immutable/);
+  assert.match(schemaPreparationSql, /Development-only preparation for additive migration 0031/);
+  assert.match(schemaPreparationSql, /cannot prepare shared pointer integrity/);
+  assert.match(schemaPreparationSql, /CREATE CONSTRAINT TRIGGER cms_market_edition_bindings_integrity/);
+  assert.match(schemaPreparationSql, /DEFERRABLE INITIALLY DEFERRED/);
+  assert.match(schemaPreparationSql, /cms_resolved_market_revisions_integrity/);
+  assert.match(schemaPreparationSql, /cms_revisions_shared_pointer_integrity/);
+  assert.match(schemaPreparationSql, /cms_assert_shared_pointer_dependency_integrity/);
 });
 
 test("schema preparation preserves populated media rows and is idempotent", {

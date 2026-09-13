@@ -5,6 +5,7 @@ import {
   CMS_CONTACT_EMAIL_DOCUMENT_SLUG,
   CMS_HERO_DOCUMENT_SLUGS,
   CMS_HERO_FILM_SLOTS,
+  collectCmsMediaReferences,
   contactEmailConfigurationContentSchema,
   cmsPublicRoute,
   isCmsRetiredLandingPagePath,
@@ -29,6 +30,7 @@ import {
   documentPublishedAvailabilityClause,
   industryExactMarketDeliveryClause,
   industryDestinationEligibilityClause,
+  managedMarketPublicDeliveryClause,
   publicPayloadEligibilityClause,
 } from "../lib/availability";
 
@@ -47,7 +49,23 @@ const PUBLIC_PAYLOAD_SQL = publicPayloadEligibilityClause();
  * separately frozen published source pointer, rather than state’s editable
  * draft source pointer, must match the edition's approved published revision.
  */
-function deliverySourceClause(candidateClause: string, edition = "e", state = "delivery") {
+function deliverySourceClause(
+  candidateClause: string,
+  edition = "e",
+  state = "delivery",
+  requestedMarketSql?: string,
+  requestedLocaleSql?: string,
+) {
+  // A draft binding is not public authority.  The gate only activates after
+  // the exact destination has published its immutable resolved materialization.
+  const managedDestination = requestedMarketSql && requestedLocaleSql
+    ? `AND ${managedMarketPublicDeliveryClause(
+      `${edition}.document_id`,
+      edition,
+      requestedMarketSql,
+      requestedLocaleSql,
+    )}`
+    : "";
   return `(
     (${edition}.content_mode='custom' AND ${candidateClause})
     OR (
@@ -55,7 +73,7 @@ function deliverySourceClause(candidateClause: string, edition = "e", state = "d
       AND ${edition}.id=${state}.shared_source_edition_id
       AND ${edition}.published_revision_id=${state}.published_source_revision_id
     )
-  )`;
+  ) ${managedDestination}`;
 }
 
 /**
@@ -151,6 +169,12 @@ export function referencedRevisionHasEligibleDestinationClause(
                 "source_revision",
                 "destination.code",
               )}
+               AND ${managedMarketPublicDeliveryClause(
+                 documentIdSql,
+                 "source_edition",
+                 "destination.code",
+                 "destination_locale.locale",
+               )}
               AND (
                 (source_edition.content_mode='custom' AND candidates.market IS NOT NULL)
                 OR (
@@ -378,7 +402,11 @@ async function published(row: Record<string, any>, snapshot = publicSnapshot(row
   if (!snapshot) {
     throw new PublicContractError(`Published revision ${row.revision_number} is not eligible for public delivery.`);
   }
-  const mediaIds = Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds.map(String) : [];
+  const mediaIds = [...new Set(collectCmsMediaReferences(
+    row.kind as CmsDocumentKind,
+    snapshot.content,
+    Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds : [],
+  ).map((reference) => reference.mediaId))];
   const assets = await pool.query(
     `SELECT a.*,v.id version_id,v.width,v.height,v.metadata
        FROM cms_media_references ref
@@ -484,7 +512,7 @@ router.get(
              AND r.workflow_state='approved'
           WHERE d.status<>'archived' AND e.publication_state='published'
             AND e.published_at<=now() AND ($1::text IS NULL OR d.kind=$1)
-             AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($2::text[])")}
+              AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($2::text[])", "e", "delivery", "$3", "$4")}
             AND ${documentPublishedAvailabilityClause("d.id", "$3", "$4")}
              AND ${industryDestinationEligibilityClause("d", "e", "r", "$3")}
              AND ${industryExactMarketDeliveryClause("d", "e", "$3")}
@@ -574,7 +602,7 @@ router.get("/public/hero-films/:slot", asyncRoute(async (req, res) => {
          AND r.workflow_state='approved'
       WHERE d.kind='site-configuration'
         AND d.canonical_slug=$1
-        AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($2::text[])")}
+         AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($2::text[])", "e", "delivery", "$3", "$4")}
         AND e.publication_state='published' AND e.published_at<=now()
          AND ${documentPublishedAvailabilityClause("d.id", "$3", "$4")}
         AND ${PUBLIC_PAYLOAD_SQL}
@@ -647,7 +675,7 @@ router.get("/public/contact-configuration", asyncRoute(async (req, res) => {
          AND r.workflow_state='approved'
       WHERE d.kind='site-configuration' AND d.status<>'archived'
         AND d.canonical_slug=$1
-        AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($2::text[])")}
+         AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($2::text[])", "e", "delivery", "$3", "$4")}
         AND e.publication_state='published' AND e.published_at<=now()
          AND ${documentPublishedAvailabilityClause("d.id", "$3", "$4")}
          AND ${PUBLIC_PAYLOAD_SQL}
@@ -715,7 +743,7 @@ router.get(
              AND r.workflow_state='approved'
           WHERE d.status<>'archived' AND e.publication_state='published'
             AND e.published_at<=now() AND d.kind=$1
-            AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($4::text[])")}
+             AND ${deliverySourceClause("(e.market||'|'||e.locale)=ANY($4::text[])", "e", "delivery", "$3", "$5")}
             AND ${documentPublishedAvailabilityClause("d.id", "$3", "$5")}
              AND ${industryDestinationEligibilityClause("d", "e", "r", "$3")}
              AND ${industryExactMarketDeliveryClause("d", "e", "$3")}
@@ -779,8 +807,6 @@ router.get("/public/media/:mediaId/:versionId", asyncRoute(async (req, res) => {
          AND ref.asset_id=a.id AND ref.media_version_id=v.id
        WHERE a.id=$1 AND a.status IN ('active','ready') AND d.status<>'archived'
         AND ${approvedMediaVersionMetadataSql("v.metadata")}
-        AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE(r.payload->'mediaIds','[]'::jsonb)) media_id
-          WHERE media_id=a.id::text)
           AND ${referencedRevisionHasEligibleDestinationClause("d.id", "e.id", "r.id")}
         AND ${PUBLIC_PAYLOAD_SQL}`,
     [req.params.mediaId, req.params.versionId],
@@ -839,6 +865,7 @@ router.get(
             AND ($1::text IS NULL OR e.market=$1)
             AND ${documentPublishedAvailabilityClause("d.id", "e.market", "e.locale")}
              AND ${industryDestinationEligibilityClause("d", "e", "r", "e.market")}
+             AND ${managedMarketPublicDeliveryClause("d.id", "e", "e.market", "e.locale")}
             AND COALESCE((r.payload->'seo'->>'noIndex')::boolean,false)=false
             AND ${PUBLIC_PAYLOAD_SQL}
          UNION ALL
@@ -870,6 +897,12 @@ router.get(
             AND ${documentPublishedAvailabilityClause("d.id", "destination.code", "destination_locale.locale")}
              AND ${industryDestinationEligibilityClause("d", "e", "r", "destination.code")}
              AND ${industryExactMarketDeliveryClause("d", "e", "destination.code")}
+              AND ${managedMarketPublicDeliveryClause(
+                "d.id",
+                "e",
+                "destination.code",
+                "destination_locale.locale",
+              )}
             AND COALESCE((r.payload->'seo'->>'noIndex')::boolean,false)=false
             AND ${PUBLIC_PAYLOAD_SQL}
        )

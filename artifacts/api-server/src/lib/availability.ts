@@ -58,6 +58,64 @@ export function documentPublishedAvailabilityClause(
 }
 
 /**
+ * A binding is an authoring boundary, not public authority on its own.  It
+ * becomes public authority only after an approved exact-destination publication
+ * is recorded for one of that binding's immutable resolved revisions. Until
+ * then, legacy shared output remains selectable. Once activated, that durable
+ * record excludes every non-exact candidate even if the exact edition is later
+ * archived or becomes privately ineligible; a legacy fallback must not return.
+ */
+export function managedMarketPublicAuthorityActivatedClause(
+  documentIdSql: string,
+  requestedMarketSql: string,
+  requestedLocaleSql: string,
+): string {
+  return `EXISTS (
+    SELECT 1
+      FROM cms_market_edition_bindings binding
+      JOIN market_editions destination ON destination.id=binding.market_edition_id
+     WHERE binding.document_id=${documentIdSql}
+       AND destination.code=${requestedMarketSql}
+       AND binding.locale=${requestedLocaleSql}
+       AND EXISTS (
+         SELECT 1 FROM cms_audit_events publication
+          WHERE publication.target_type='document'
+            AND publication.target_id=binding.document_id::text
+            AND publication.action='document.published'
+            AND publication.metadata->>'managedBindingId'=binding.id::text
+       )
+  )`;
+}
+
+export function managedMarketPublicDeliveryClause(
+  documentIdSql: string,
+  editionAlias: string,
+  requestedMarketSql: string,
+  requestedLocaleSql: string,
+): string {
+  const activatedAuthority = managedMarketPublicAuthorityActivatedClause(
+    documentIdSql,
+    requestedMarketSql,
+    requestedLocaleSql,
+  );
+  return `(
+    NOT ${activatedAuthority}
+    OR EXISTS (
+      SELECT 1
+        FROM cms_market_edition_bindings binding
+        JOIN market_editions destination ON destination.id=binding.market_edition_id
+        JOIN cms_resolved_market_revisions resolved ON resolved.binding_id=binding.id
+       WHERE binding.document_id=${documentIdSql}
+         AND destination.code=${requestedMarketSql}
+         AND binding.locale=${requestedLocaleSql}
+         AND ${editionAlias}.market=${requestedMarketSql}
+         AND ${editionAlias}.locale=${requestedLocaleSql}
+         AND ${editionAlias}.published_revision_id=resolved.cms_revision_id
+    )
+  )`;
+}
+
+/**
  * Shared SQL predicate for source selection on public CMS surfaces. Alias
  * arguments are trusted query aliases, never request input. Keeping this in a
  * route-independent module prevents list/detail/media/navigation selectors

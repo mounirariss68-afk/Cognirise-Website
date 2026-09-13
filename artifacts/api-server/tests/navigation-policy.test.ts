@@ -477,6 +477,20 @@ test("real navigation selection promotes a public shared source over a private e
         document_id text NOT NULL, market_edition_id text NOT NULL, locale text NOT NULL,
         published_decision text, PRIMARY KEY (document_id, market_edition_id, locale)
       );
+      -- This fixture models legacy shared delivery, so it has no binding rows;
+      -- the production shared-market authority predicate nevertheless requires
+      -- these migrated relation shapes to be present.
+      CREATE TABLE cms_market_edition_bindings (
+        id text PRIMARY KEY, document_id text NOT NULL, market_edition_id text NOT NULL,
+        locale text NOT NULL, mode text NOT NULL
+      );
+      CREATE TABLE cms_resolved_market_revisions (
+        binding_id text NOT NULL, cms_revision_id text NOT NULL
+      );
+      CREATE TABLE cms_audit_events (
+        target_type text NOT NULL, target_id text NOT NULL, action text NOT NULL,
+        metadata jsonb NOT NULL DEFAULT '{}'::jsonb
+      );
       CREATE TABLE cms_navigation_published_policies (
         market text NOT NULL, locale text NOT NULL, items jsonb NOT NULL, pages jsonb NOT NULL,
         published_version integer NOT NULL DEFAULT 1, published_at timestamptz NOT NULL

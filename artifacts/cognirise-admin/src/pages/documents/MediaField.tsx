@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useOverrides } from "./OverridesContext";
+import { FieldOverrideIndicator } from "./FieldOverrideIndicator";
 
 type Asset = {
   id: string;
@@ -25,7 +27,7 @@ export type MediaSelection = {
   altText?: string;
 };
 
-export function MediaField({ label, value, legacyMediaId, onChange, accept = "image", required = false, role = "hero" }: {
+export function MediaField({ label, value, legacyMediaId, onChange, accept = "image", required = false, role = "hero", overridePath }: {
   label: string;
   value?: MediaSelection;
   legacyMediaId?: string;
@@ -33,6 +35,8 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
   accept?: "image" | "pdf";
   required?: boolean;
   role?: MediaSelection["role"];
+  /** Stable snapshot path, for example content.heroMedia. */
+  overridePath?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -43,6 +47,16 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
   const params = { page: 1, pageSize: 100, search: search || undefined, collection: "website" as const };
   const media = useListMedia(params, { query: { queryKey: getListMediaQueryKey(params), enabled: open || Boolean(value) } });
   const selectedMediaId = value?.mediaId ?? legacyMediaId ?? "";
+  const overrides = useOverrides();
+  const isOverride = Boolean(overridePath && overrides.operations.some((operation) =>
+    operation.path === overridePath
+      || operation.path.startsWith(`${overridePath}.`)
+      || overridePath.startsWith(`${operation.path}.`),
+  ));
+  const change = (selection: MediaSelection | undefined) => {
+    if (overridePath) overrides.onOverride?.(overridePath, selection);
+    onChange(selection);
+  };
   const exact = useGetMedia(selectedMediaId, {
     query: { queryKey: getGetMediaQueryKey(selectedMediaId), enabled: Boolean(selectedMediaId) },
   });
@@ -64,11 +78,17 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
     const stored = await fetch(requested.uploadUrl, { method: requested.method, headers: requested.headers, body: file });
     if (!stored.ok) throw new Error("Upload failed");
     const finalized = await finalizeUpload.mutateAsync({ mediaId: requested.media.id, data: { objectPath: requested.media.objectPath, altText: altText || undefined } });
-    onChange({ mediaId: finalized.id, mediaVersionId: finalized.versionId, role, altText: altText || undefined });
+    change({ mediaId: finalized.id, mediaVersionId: finalized.versionId, role, altText: altText || undefined });
   };
 
   return (
     <div className="space-y-2">
+      {overridePath && overrides.isAdapted && <FieldOverrideIndicator
+        label={label}
+        isOverride={isOverride}
+        canEdit={overrides.canEdit}
+        onResetToShared={() => overrides.onReset?.(overridePath)}
+      />}
       <Label>{label} <span className={required ? "text-destructive" : "text-muted-foreground"}>{required ? "(required)" : "(optional)"}</span></Label>
       {selected ? (
         <div className="flex items-center gap-3 rounded-md border bg-muted/20 p-2" data-testid={`selected-media-${label.toLowerCase().replaceAll(" ", "-")}`}>
@@ -83,7 +103,7 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
             </p>
           </div>
           <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)} data-testid={`button-replace-${label.toLowerCase().replaceAll(" ", "-")}`}>Replace</Button>
-          <Button type="button" size="icon" variant="ghost" onClick={() => onChange(undefined)} aria-label={`Remove ${label}`} data-testid={`button-remove-${label.toLowerCase().replaceAll(" ", "-")}`}><X className="h-4 w-4" /></Button>
+          <Button type="button" size="icon" variant="ghost" onClick={() => change(undefined)} aria-label={`Remove ${label}`} data-testid={`button-remove-${label.toLowerCase().replaceAll(" ", "-")}`}><X className="h-4 w-4" /></Button>
         </div>
       ) : (
         <Button type="button" variant="outline" onClick={() => setOpen(true)} data-testid={`button-choose-${label.toLowerCase().replaceAll(" ", "-")}`}>
@@ -117,7 +137,7 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
               <button
                 type="button"
                 key={asset.id}
-                onClick={() => { onChange({ mediaId: asset.id, mediaVersionId: asset.versionId, role, altText: asset.altText ?? undefined }); setOpen(false); }}
+               onClick={() => { change({ mediaId: asset.id, mediaVersionId: asset.versionId, role, altText: asset.altText ?? undefined }); setOpen(false); }}
                 className="overflow-hidden rounded-md border bg-card text-left hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 data-testid={`button-select-media-${asset.id}`}
               >

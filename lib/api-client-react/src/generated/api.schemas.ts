@@ -524,6 +524,249 @@ export const DocumentStatus = {
   archived: 'archived',
 } as const;
 
+export type SharedEditionReadiness = typeof SharedEditionReadiness[keyof typeof SharedEditionReadiness];
+
+
+export const SharedEditionReadiness = {
+  missing: 'missing',
+  pending: 'pending',
+  blocker: 'blocker',
+  updates: 'updates',
+  'needs-baseline': 'needs-baseline',
+  'needs-resolution': 'needs-resolution',
+  'translation-stale': 'translation-stale',
+  ready: 'ready',
+} as const;
+
+export type SharedMarketBindingMode = typeof SharedMarketBindingMode[keyof typeof SharedMarketBindingMode];
+
+
+export const SharedMarketBindingMode = {
+  shared: 'shared',
+  adapted: 'adapted',
+  independent: 'independent',
+} as const;
+
+export type SharedMarketOverride = {
+  op: 'set';
+  /** @minLength 1 */
+  path: string;
+  value: unknown;
+} | {
+  op: 'remove';
+  /** @minLength 1 */
+  path: string;
+} | {
+  op: 'array-add';
+  /** @minLength 1 */
+  path: string;
+  value: {
+  id: string;
+  [key: string]: unknown;
+};
+  afterId?: string;
+} | {
+  op: 'array-remove';
+  /** @minLength 1 */
+  path: string;
+  id: string;
+} | {
+  op: 'array-reorder';
+  /** @minLength 1 */
+  path: string;
+  /** @minItems 1 */
+  ids: string[];
+};
+
+export type SharedMarketConflictKind = typeof SharedMarketConflictKind[keyof typeof SharedMarketConflictKind];
+
+
+export const SharedMarketConflictKind = {
+  'invalid-path': 'invalid-path',
+  'unsupported-structure': 'unsupported-structure',
+  'deleted-baseline-value': 'deleted-baseline-value',
+  'concurrent-value-change': 'concurrent-value-change',
+  'array-add-conflict': 'array-add-conflict',
+  'array-remove-conflict': 'array-remove-conflict',
+  'array-reorder-conflict': 'array-reorder-conflict',
+} as const;
+
+export interface SharedMarketConflict {
+  path: string;
+  kind: SharedMarketConflictKind;
+  message: string;
+}
+
+export type SharedMarketConflictDecisionChoice = typeof SharedMarketConflictDecisionChoice[keyof typeof SharedMarketConflictDecisionChoice];
+
+
+export const SharedMarketConflictDecisionChoice = {
+  shared: 'shared',
+  market: 'market',
+} as const;
+
+export interface SharedMarketConflictDecision {
+  /** @minLength 1 */
+  path: string;
+  choice: SharedMarketConflictDecisionChoice;
+}
+
+export type SharedMarketBaselineInputSnapshot = { [key: string]: unknown };
+
+export interface SharedMarketBaselineInput {
+  /**
+     * @minLength 2
+     * @maxLength 16
+     */
+  locale: string;
+  sourceRevisionId: string;
+  snapshot: SharedMarketBaselineInputSnapshot;
+  /** @minimum 1 */
+  expectedRevisionNumber?: number;
+}
+
+export type SharedMarketBaselineSnapshot = { [key: string]: unknown };
+
+export type SharedMarketBaselineMediaReferencesItem = { [key: string]: unknown };
+
+export interface SharedMarketBaseline {
+  id: string;
+  documentId: string;
+  locale: string;
+  revisionId: string;
+  revisionNumber: number;
+  /** @nullable */
+  sourceRevisionId: string | null;
+  snapshot: SharedMarketBaselineSnapshot;
+  mediaReferences: SharedMarketBaselineMediaReferencesItem[];
+  createdAt: string;
+}
+
+export interface SharedMarketBindingInput {
+  marketEditionId: string;
+  /**
+     * @minLength 2
+     * @maxLength 16
+     */
+  locale: string;
+  mode: SharedMarketBindingMode;
+  baselineId?: string;
+  /** Required for Shared and Adapted bindings; freezes the exact neutral revision. */
+  baselineRevisionId?: string;
+  /** Required for Independent bindings; must be an exact saved destination revision. */
+  independentRevisionId?: string;
+  /** Explicit shared-baseline revision from which this locale was translated; setting it acknowledges the current translation lineage. */
+  translationSourceRevisionId?: string;
+  /**
+     * Use 0 only to create a previously unbound market edition; existing bindings require their exact positive version.
+     * @minimum 0
+     */
+  version: number;
+}
+
+export interface SharedMarketOverridesInput {
+  /** @minimum 1 */
+  version: number;
+  /** Exact adopted baseline revision against which the sparse operations were authored. */
+  baselineRevisionId: string;
+  operations: SharedMarketOverride[];
+}
+
+export type SharedMarketBindingTranslationState = typeof SharedMarketBindingTranslationState[keyof typeof SharedMarketBindingTranslationState];
+
+
+export const SharedMarketBindingTranslationState = {
+  current: 'current',
+  stale: 'stale',
+  'not-applicable': 'not-applicable',
+} as const;
+
+export interface SharedMarketBinding {
+  id: string;
+  documentId: string;
+  marketEditionId: string;
+  locale: string;
+  mode: SharedMarketBindingMode;
+  /** @nullable */
+  baselineId?: string | null;
+  /** @nullable */
+  baselineRevisionId?: string | null;
+  /**
+     * Explicitly held active baseline revision; null means no editor hold.
+     * @nullable
+     */
+  heldBaselineRevisionId?: string | null;
+  /**
+     * Explicit shared-baseline revision acknowledged as this locale's translation source.
+     * @nullable
+     */
+  translationSourceRevisionId?: string | null;
+  version: number;
+  operations: SharedMarketOverride[];
+  /** @nullable */
+  materializedRevisionId: string | null;
+  translationState: SharedMarketBindingTranslationState;
+  updatedAt: string;
+}
+
+export type SharedMarketComparisonPreviousSnapshot = { [key: string]: unknown };
+
+export type SharedMarketComparisonCurrentSnapshot = { [key: string]: unknown };
+
+export type SharedMarketComparisonLocalSnapshot = { [key: string]: unknown };
+
+export type SharedMarketComparisonMergedSnapshot = { [key: string]: unknown };
+
+export interface SharedMarketComparison {
+  binding: SharedMarketBinding;
+  baselineRevisionId: string;
+  previousSnapshot: SharedMarketComparisonPreviousSnapshot;
+  currentSnapshot: SharedMarketComparisonCurrentSnapshot;
+  localSnapshot: SharedMarketComparisonLocalSnapshot;
+  mergedSnapshot: SharedMarketComparisonMergedSnapshot;
+  conflicts: SharedMarketConflict[];
+  canAutoAdopt: boolean;
+}
+
+export type SharedMarketResolveInputAction = typeof SharedMarketResolveInputAction[keyof typeof SharedMarketResolveInputAction];
+
+
+export const SharedMarketResolveInputAction = {
+  adopt: 'adopt',
+  keep: 'keep',
+  reset: 'reset',
+  detach: 'detach',
+} as const;
+
+export interface SharedMarketResolveInput {
+  /** @minimum 1 */
+  version: number;
+  /** Exact active baseline revision shown in the comparison. */
+  baselineRevisionId: string;
+  action: SharedMarketResolveInputAction;
+  /** Required for each path that conflicts during adopt. Shared drops its local operation; market explicitly retains it. */
+  conflictDecisions?: SharedMarketConflictDecision[];
+}
+
+export interface SharedMarketEditionMatrix {
+  baselines: SharedMarketBaseline[];
+  bindings: SharedMarketBinding[];
+}
+
+export interface SharedMarketMigrationReportInput {
+  dryRun: boolean;
+}
+
+export type SharedMarketMigrationReportCandidatesItem = { [key: string]: unknown };
+
+export interface SharedMarketMigrationReport {
+  dryRun: boolean;
+  /** @nullable */
+  receiptId: string | null;
+  candidates: SharedMarketMigrationReportCandidatesItem[];
+  notes: string[];
+}
+
 export type CmsImmutableMediaReferenceRole = typeof CmsImmutableMediaReferenceRole[keyof typeof CmsImmutableMediaReferenceRole];
 
 
@@ -2613,6 +2856,10 @@ kind?: DocumentKind;
 status?: DocumentStatus;
 market?: string;
 locale?: string;
+/**
+ * Filter the complete eligible result set before pagination.
+ */
+readiness?: SharedEditionReadiness;
 };
 
 export type GetDocumentParams = {

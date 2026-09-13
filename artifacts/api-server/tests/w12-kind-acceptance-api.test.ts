@@ -769,6 +769,19 @@ test("W12 prioritized kinds save and reload through the actual document route", 
         return { rowCount: 1, rows: [{ id: currentRevisionId, revision_number: currentRevisionNumber }] };
       }
       if (statement.includes("INSERT INTO cms_media_references")) return { rowCount: 1, rows: [] };
+      // Unmanaged W12 fixtures must explicitly bypass the optional managed
+      // market lifecycle bridge; do not let its binding lookup consume a
+      // legacy fixture response intended for another query.
+      if (
+        statement.includes("FROM cms_market_edition_bindings binding")
+        && statement.includes("JOIN market_editions destination")
+        && (
+          statement.includes("FOR UPDATE OF binding")
+          || statement.includes("FOR KEY SHARE OF binding")
+        )
+      ) {
+        return { rowCount: 0, rows: [] };
+      }
       if (statement.includes("UPDATE cms_documents SET canonical_slug")) return { rowCount: 1, rows: [] };
       throw new Error(`unexpected lifecycle SQL: ${statement.slice(0, 140)}`);
     },

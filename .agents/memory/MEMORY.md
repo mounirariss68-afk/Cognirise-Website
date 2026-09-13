@@ -38,3 +38,4 @@
 - [Editorial evidence joins](editorial-evidence-joins.md) — Match exact claims and markets; draft blockers never justify unrelated citations or invented attribution.
 - [CMS editor simplicity](cms-editor-simplicity.md) — One People table with market ticks; simplify interaction while preserving pending/live distinctions and governance.
 - [Storage dry-run evidence](storage-dry-run-evidence.md) — Validate the upload namespace before trusting empty scans; zero candidates do not exercise retention decisions.
+- [Router query verification](router-query-verification.md) — Model pathname and search separately in deep-link tests; permissive mocks can hide wrong-market selection.

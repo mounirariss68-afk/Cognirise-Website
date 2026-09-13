@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback, type ReactNode } from "react";
-import { useRoute, useLocation } from "wouter";
+import { useRoute, useLocation, useSearch } from "wouter";
 import { 
   useGetDocument, 
   useUpdateDocument,
@@ -17,7 +17,13 @@ import {
   getListDocumentRevisionsQueryKey,
   DocumentStatus,
 } from "@workspace/api-client-react";
-import { getListMarketEditionsQueryKey, useListMarketEditions, getListDocumentEditionsQueryKey, useListDocumentEditions, useCreateDocumentEditionOverride as useCreateDocumentCustomization, getDocumentAvailability, getGetDocumentAvailabilityQueryKey, useGetDocumentAvailability, useReviewDocumentAvailability, useSelectDocumentAvailabilitySource, getListDocumentReviewCommentsQueryKey, useListDocumentReviewComments, useAddDocumentReviewComment, useRejectDocumentRevision } from "@workspace/api-client-react";
+import { getListMarketEditionsQueryKey, useListMarketEditions, getListDocumentEditionsQueryKey, useListDocumentEditions, useCreateDocumentEditionOverride as useCreateDocumentCustomization, getDocumentAvailability, getGetDocumentAvailabilityQueryKey, useGetDocumentAvailability, useReviewDocumentAvailability, useSelectDocumentAvailabilitySource, getListDocumentReviewCommentsQueryKey, useListDocumentReviewComments, useAddDocumentReviewComment, useRejectDocumentRevision, getGetSharedMarketEditionMatrixQueryKey, useGetSharedMarketEditionMatrix, getCompareSharedMarketBaselineQueryKey, useEstablishSharedMarketBaseline, useBindSharedMarketEdition, useSaveSharedMarketOverrides, useCompareSharedMarketBaseline, useResolveSharedMarketBaselineUpdate, type SharedMarketOverride } from "@workspace/api-client-react";
+import { DocumentEditorContext } from "./DocumentEditorContext";
+import { DocumentCompareModal } from "./DocumentCompareModal";
+import { FieldOverrideIndicator } from "./FieldOverrideIndicator";
+import { resetSharedOverridePath } from "@workspace/api-zod";
+import { compareSharedMarketBaseline } from "@workspace/api-client-react";
+import { OverridesContext } from "./OverridesContext";
 import { type CmsDocumentKind, validateCmsContent } from "@workspace/api-zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -50,6 +56,8 @@ import { buildDraftSave, describeSaveFailure, isDraftSaveResponse, serverValidat
 import { describeActionError } from "./action-error";
 import { MarketAvailabilityChecklist, type AvailabilityDestination, type AvailabilitySelectionDraft } from "./MarketAvailabilityChecklist";
 import { IndustryVisualWorkspace } from "./IndustryVisualWorkspace";
+import { SharedEditionPanel } from "./SharedEditionPanel";
+import { SharedBaselineEditor } from "./SharedBaselineEditor";
 
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 import { applyLocalSuccessorToEditionMatrix, previewPinForEditionRevision } from "./preview-revision-lifecycle";
@@ -74,7 +82,8 @@ function documentListPath(kind: CmsDocumentKind): string {
 export default function DocumentDetail() {
   const [, params] = useRoute("/content/:id");
   const id = params?.id;
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const search = useSearch();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [actionError, setActionError] = useState<ReturnType<typeof describeActionError> | null>(null);
@@ -84,6 +93,13 @@ export default function DocumentDetail() {
   const canPublish = isAdministrator || session?.user?.role === "publisher";
   const [selectedMarket, setSelectedMarket] = useState("");
   const [selectedLocale, setSelectedLocale] = useState("");
+  const [pendingOverridePaths, setPendingOverridePaths] = useState<string[]>([]);
+  const [resettingSharedField, setResettingSharedField] = useState(false);
+  const [sharedCompareOpen, setSharedCompareOpen] = useState(false);
+  const [compareConflicts, setCompareConflicts] = useState<any[]>([]);
+  const [isApplyingDecisions, setIsApplyingDecisions] = useState(false);
+  const [baselineEditorOpen, setBaselineEditorOpen] = useState(false);
+  const [baselineBeingEdited, setBaselineBeingEdited] = useState<any>(null);
 
   const {
     data: editionMatrix,
@@ -92,6 +108,15 @@ export default function DocumentDetail() {
   } = useListDocumentEditions(id!, {
     query: { enabled: Boolean(id && session), queryKey: getListDocumentEditionsQueryKey(id!) },
   });
+  const {
+    data: sharedMatrix
+  } = useGetSharedMarketEditionMatrix(id!, {
+    query: { enabled: Boolean(id && session), queryKey: getGetSharedMarketEditionMatrixQueryKey(id!) },
+  });
+  const establishSharedBaseline = useEstablishSharedMarketBaseline();
+  const bindSharedEdition = useBindSharedMarketEdition();
+  const saveSharedOverrides = useSaveSharedMarketOverrides();
+  const resolveSharedBaseline = useResolveSharedMarketBaselineUpdate();
   const matrixSelectedEdition = editionMatrix?.items.find((edition) => edition.market === selectedMarket && edition.locale === selectedLocale);
   const documentParams = { market: selectedMarket, locale: selectedLocale };
   const { data: doc, isLoading: isDocumentLoading, isError: isDocumentError, error: documentError } = useGetDocument(id!, documentParams, {
@@ -233,6 +258,7 @@ export default function DocumentDetail() {
   const [selectedRevs, setSelectedRevs] = useState<string[]>([]);
   const [compareModalOpen, setCompareModalOpen] = useState(false);
 
+
   useEffect(() => {
     if (doc && id && selectedMarket && selectedLocale && !updateDoc.isPending) {
       const responseKey = `${id}:${selectedMarket}:${selectedLocale}`;
@@ -253,6 +279,7 @@ export default function DocumentDetail() {
       setSaveBlocked(false);
       setBlockedRecovery(null);
       setHasUnsaved(false);
+      setPendingOverridePaths([]);
       setSaveIssues([]);
     }
   }, [doc, id, selectedLocale, selectedMarket, updateDoc.isPending]);
@@ -306,7 +333,7 @@ export default function DocumentDetail() {
     [content, doc],
   );
   const marketParams = { page: 1, pageSize: 100 };
-  const { data: marketData } = useListMarketEditions(marketParams, {
+  const { data: marketData, isLoading: isMarketDataLoading } = useListMarketEditions(marketParams, {
     query: { queryKey: getListMarketEditionsQueryKey(marketParams) },
   });
   const {
@@ -319,6 +346,40 @@ export default function DocumentDetail() {
   const sortedRevisions = [...(revisionsData?.items ?? [])].sort((a, b) => b.number - a.number || String(b.createdAt).localeCompare(String(a.createdAt)));
   const editionRevisions = sortedRevisions.filter((revision) => revision.market === selectedMarket && revision.locale === selectedLocale);
   const selectedMarketConfig = marketData?.items.find((market) => market.code === selectedMarket);
+  const selectedSharedBinding = sharedMatrix?.bindings.find((binding) => (
+    binding.marketEditionId === selectedMarketConfig?.id && binding.locale === selectedLocale
+  ));
+  const selectedBindingMode = selectedSharedBinding?.mode ?? "unbound";
+  const tracksSharedOverrides = selectedBindingMode === "shared" || selectedBindingMode === "adapted";
+  const { data: sharedComparison, refetch: refetchSharedComparison, isFetching: isSharedComparisonLoading } = useCompareSharedMarketBaseline(
+    id!,
+    selectedSharedBinding?.id ?? "",
+    { query: {
+      enabled: Boolean(id && selectedSharedBinding?.id && sharedCompareOpen),
+      queryKey: getCompareSharedMarketBaselineQueryKey(id!, selectedSharedBinding?.id ?? ""),
+    } },
+  );
+  const requestedExactEdition = useMemo(() => {
+    const query = new URLSearchParams(search);
+    const marketParam = query.get("market");
+    const localeParam = query.get("locale");
+    if (!marketParam || !localeParam) return undefined;
+    // Links may contain a catalog UUID while document APIs use its code.
+    const directExactMarket = editionMatrix?.items.some((edition) => edition.exact && edition.market === marketParam);
+    const marketCode = marketData?.items.find((market) => market.id === marketParam || market.code === marketParam)?.code
+      ?? (directExactMarket ? marketParam : undefined);
+    if (!marketCode) return undefined;
+    return editionMatrix?.items.find((edition) => edition.exact && edition.market === marketCode && edition.locale === localeParam);
+  }, [editionMatrix?.items, marketData?.items, search]);
+  const urlTargetAwaitingMarketCatalog = useMemo(() => {
+    const query = new URLSearchParams(search);
+    return Boolean(query.get("market") && query.get("locale") && !requestedExactEdition && (isMarketDataLoading || !marketData));
+  }, [isMarketDataLoading, marketData, requestedExactEdition, search]);
+  useEffect(() => {
+    if (selectedMarket || !requestedExactEdition) return;
+    setSelectedMarket(requestedExactEdition.market);
+    setSelectedLocale(requestedExactEdition.locale);
+  }, [requestedExactEdition, selectedMarket]);
   const destinations = useMemo<AvailabilityDestination[]>(
     () => (marketData?.items ?? [])
       .filter((market) => market.enabled)
@@ -369,7 +430,7 @@ export default function DocumentDetail() {
   const selectedIsCustomization = Boolean(
     selectedEdition
     && selectedEdition.exact
-    && !selectedIsSharedSource,
+    && (selectedBindingMode === "adapted" || (!selectedSharedBinding && !selectedIsSharedSource)),
   );
   const pendingDestinationChanges = useMemo(
     () => (availabilityForReview?.items ?? []).filter((item) => item.pending),
@@ -402,16 +463,20 @@ export default function DocumentDetail() {
   );
   useEffect(() => {
     if (selectedMarket) return;
+    // A valid explicit deep link always wins over default/shared-source
+    // selection. Deferring here prevents two initial effects racing in one
+    // render and silently opening a different market.
+    if (requestedExactEdition || urlTargetAwaitingMarketCatalog) return;
     // A legacy document has no authoritative shared address yet. Keep an
     // administrator on the explicit source-selection screen rather than
     // silently opening a historical customization first.
     if (!sharedSource) {
-      if (!isAdministrator) {
-        const existingCustomization = legacyCustomizations[0];
-        if (existingCustomization) {
-          setSelectedMarket(existingCustomization.market);
-          setSelectedLocale(existingCustomization.locale);
-        }
+      // Shared-market baselines are optional for legacy content. Opening an
+      // exact edition must not require an administrator to promote anything.
+      const exact = editionMatrix?.items.find((item) => item.exact && item.revisionId);
+      if (exact) {
+        setSelectedMarket(exact.market);
+        setSelectedLocale(exact.locale);
       }
       return;
     }
@@ -428,7 +493,7 @@ export default function DocumentDetail() {
       setSelectedMarket(existingCustomization.market);
       setSelectedLocale(existingCustomization.locale);
     }
-  }, [canManageSharedDestinations, isAdministrator, legacyCustomizations, selectedMarket, sharedSource]);
+  }, [canManageSharedDestinations, editionMatrix?.items, legacyCustomizations, requestedExactEdition, selectedMarket, sharedSource, urlTargetAwaitingMarketCatalog]);
   // An internal shared-source edition deliberately has no assignable market
   // code. Its authority is the complete set of destinations it controls, not
   // the synthetic `shared-source` market identity.
@@ -473,11 +538,11 @@ export default function DocumentDetail() {
   );
   const fieldIssue = (path: string) => saveIssues.find((issue) => issue.path === path)?.message;
   const editorHydrated = hydratedEditionKey.current === currentEditorKey.current && hydratedRevision.current !== undefined;
-  const editorLocked = !editorHydrated || updateDoc.isPending || previewingRevisionId !== null || authoringActions.immutable
+  const editorLocked = !editorHydrated || updateDoc.isPending || resettingSharedField || saveSharedOverrides.isPending || previewingRevisionId !== null || authoringActions.immutable
     || !canEditSelectedEdition;
 
   const handleSave = (intent: "save" | "save-preview" = "save") => {
-    if (!doc || updateDoc.isPending || !editorHydrated || saveBlocked) return;
+    if (!doc || editorLocked || !editorHydrated || saveBlocked) return;
     if (intent === "save-preview" && !hasUnsaved) {
       void openPreview();
       return;
@@ -548,12 +613,16 @@ export default function DocumentDetail() {
         setSeoOriginallyPresent(Boolean(submitted.seo));
         hasUnsavedRef.current = false;
         setHasUnsaved(false);
+        setPendingOverridePaths([]);
         queryClient.setQueryData(getGetDocumentQueryKey(id!, targetParams), updated);
         if (selectedIsSharedSource) {
           queryClient.invalidateQueries({ queryKey: getGetDocumentAvailabilityQueryKey(id!) });
         }
         queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
         queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
+        // The API derives sparse adapted overrides from this ordinary PATCH.
+        // Refresh lineage without routing this save through the shared endpoint.
+        queryClient.invalidateQueries({ queryKey: getGetSharedMarketEditionMatrixQueryKey(id!) });
         queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("documents") || String(query.queryKey[0]).includes("published") });
         toast({ title: `${selectedMarket.toUpperCase()} edition saved successfully` });
           if (intent === "save-preview" && updated.currentRevisionId) {
@@ -589,8 +658,108 @@ export default function DocumentDetail() {
     setContent(next);
   };
 
+  const invalidateSharedEdition = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: getGetSharedMarketEditionMatrixQueryKey(id!) });
+    queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
+    queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
+    queryClient.invalidateQueries({ queryKey: getGetDocumentQueryKey(id!, documentParams) });
+  }, [documentParams, id, queryClient]);
+
+  const snapshotForSharedBaseline = () => {
+    if (!doc) return undefined;
+    const prepared = buildDraftSave(doc.kind as CmsDocumentKind, {
+      slug: doc.slug, title, summary, content, mediaIds, markets: doc.markets,
+    }, seo, seoOriginallyPresent);
+    if (!prepared.success) {
+      setSaveIssues(prepared.issues);
+      toast({ title: "Cannot create baseline", description: prepared.issues[0]?.message ?? "Fix the current draft fields first.", variant: "destructive" });
+      return undefined;
+    }
+    return prepared.snapshot as Record<string, unknown>;
+  };
+
+  const resetSharedField = async (path: string) => {
+    if (!doc || !selectedSharedBinding?.id || !selectedSharedBinding.baselineRevisionId) return;
+    if (editorLocked || hasUnsavedRef.current || hasUnsaved || saveBlocked
+      || preserveAfterFailedSave.current || availabilitySelectionActive) {
+      toast({ title: "Save your changes before resetting a field", description: "A reset creates a saved revision. Save or discard your other edits first so they cannot be overwritten.", variant: "destructive" });
+      return;
+    }
+    setResettingSharedField(true);
+    let operations: SharedMarketOverride[];
+    try {
+      const comparison = await compareSharedMarketBaseline(id!, selectedSharedBinding.id);
+      if (comparison.binding.version !== selectedSharedBinding.version
+        || comparison.binding.baselineRevisionId !== selectedSharedBinding.baselineRevisionId) {
+        throw new Error("This market edition changed. Reload it before resetting a field.");
+      }
+      operations = resetSharedOverridePath(
+        comparison.previousSnapshot,
+        selectedSharedBinding.operations as SharedMarketOverride[],
+        path,
+        doc.kind as CmsDocumentKind,
+      ) as SharedMarketOverride[];
+    } catch (error) {
+      setResettingSharedField(false);
+      toast({ title: "Could not reset shared field", description: error instanceof Error ? error.message : "The adopted baseline could not be loaded.", variant: "destructive" });
+      return;
+    }
+    saveSharedOverrides.mutate({
+      documentId: id!,
+      bindingId: selectedSharedBinding.id,
+      data: { version: selectedSharedBinding.version, baselineRevisionId: selectedSharedBinding.baselineRevisionId, operations },
+    }, {
+      onSuccess: async () => {
+        // Rehydrate the exact server materialization, including stable-ID
+        // nested fields. Never clear unrelated dirty state in this callback.
+        setPendingOverridePaths([]);
+        try {
+          await queryClient.invalidateQueries(
+            { queryKey: getGetDocumentQueryKey(id!, documentParams), exact: true },
+            { throwOnError: true },
+          );
+          invalidateSharedEdition();
+          toast({ title: "Field reset to its frozen shared baseline" });
+        } catch {
+          setSaveBlocked(true);
+          toast({ title: "Reset saved; reload the edition before editing", description: "The saved revision could not be reloaded. Your editor has not been treated as the new saved snapshot.", variant: "destructive" });
+        } finally {
+          setResettingSharedField(false);
+        }
+      },
+      onError: (error: any) => {
+        setResettingSharedField(false);
+        toast({ title: "Could not reset shared field", description: error?.data?.error || error?.error || error?.message, variant: "destructive" });
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (!sharedComparison) return;
+    const at = (snapshot: Record<string, unknown>, path: string): unknown => path.split(".").reduce<unknown>((current, segment) => {
+      if (!current || typeof current !== "object") return undefined;
+      const match = /^([^\[]+)/.exec(segment);
+      return (current as Record<string, unknown>)[match?.[1] ?? segment];
+    }, snapshot);
+    const byPath = new Map<string, { path: string; message: string }>();
+    for (const conflict of sharedComparison.conflicts) {
+      const previous = byPath.get(conflict.path);
+      byPath.set(conflict.path, {
+        path: conflict.path,
+        message: previous ? `${previous.message} ${conflict.message}` : conflict.message,
+      });
+    }
+    setCompareConflicts([...byPath.values()].map((conflict) => ({
+      path: conflict.path,
+      previouslyAdopted: at(sharedComparison.previousSnapshot, conflict.path),
+      newShared: at(sharedComparison.currentSnapshot, conflict.path),
+      localOverride: at(sharedComparison.localSnapshot, conflict.path),
+      message: conflict.message,
+    })));
+  }, [sharedComparison]);
+
   const selectEdition = (market: string, locale: string) => {
-    if (updateDoc.isPending || previewingRevisionId !== null) return;
+    if (updateDoc.isPending || resettingSharedField || saveSharedOverrides.isPending || previewingRevisionId !== null) return;
     if (market === selectedMarket && locale === selectedLocale) return;
     if ((hasUnsavedRef.current || saveBlocked || preserveAfterFailedSave.current || availabilitySelectionActive)
       && !window.confirm("Discard local changes or a destination selection and switch editions?")) return;
@@ -605,6 +774,7 @@ export default function DocumentDetail() {
     saveSequence.current += 1;
     hasUnsavedRef.current = false;
     setHasUnsaved(false);
+    setPendingOverridePaths([]);
     setSelectedMarket(market);
     setSelectedLocale(locale);
     setPreviewingRevisionId(null);
@@ -720,6 +890,7 @@ export default function DocumentDetail() {
     setSaveBlocked(false);
     setBlockedRecovery(null);
     setHasUnsaved(false);
+    setPendingOverridePaths([]);
     setPreviewingRevisionId(null);
     setPreviewToOpenRevisionId(null);
     queryClient.resetQueries({ queryKey: getGetDocumentQueryKey(id!, documentParams), exact: true });
@@ -1343,11 +1514,20 @@ export default function DocumentDetail() {
                </ul>
              </section>
             <div>
-              <label htmlFor="document-title" className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Display Title <span className="text-destructive">(required)</span></label>
+
+              <FieldOverrideIndicator
+                label="Display Title (required)"
+                isOverride={Boolean(tracksSharedOverrides && (
+                  selectedSharedBinding?.operations.some((operation) => operation.path === "title" || operation.path.startsWith("title."))
+                  || pendingOverridePaths.includes("title")
+                ))}
+                canEdit={!editorLocked}
+                onResetToShared={() => resetSharedField("title")}
+              />
               <Input 
                 id="document-title"
                 value={title}
-                onChange={(e) => { hasUnsavedRef.current = true; setTitle(e.target.value); }}
+                onChange={(e) => { hasUnsavedRef.current = true; if (tracksSharedOverrides) setPendingOverridePaths((paths) => paths.includes("title") ? paths : [...paths, "title"]); setTitle(e.target.value); }}
                 disabled={editorLocked}
                 maxLength={240}
                 aria-invalid={Boolean(fieldIssue("title"))}
@@ -1359,11 +1539,20 @@ export default function DocumentDetail() {
             </div>
             
             <div>
-              <label htmlFor="document-summary" className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2 block">Summary / Deck <span>(optional)</span></label>
+
+              <FieldOverrideIndicator
+                label="Summary / Deck (optional)"
+                isOverride={Boolean(tracksSharedOverrides && (
+                  selectedSharedBinding?.operations.some((operation) => operation.path === "summary" || operation.path.startsWith("summary."))
+                  || pendingOverridePaths.includes("summary")
+                ))}
+                canEdit={!editorLocked}
+                onResetToShared={() => resetSharedField("summary")}
+              />
               <Textarea 
                 id="document-summary"
                 value={summary}
-                onChange={(e) => { hasUnsavedRef.current = true; setSummary(e.target.value); }}
+                onChange={(e) => { hasUnsavedRef.current = true; if (tracksSharedOverrides) setPendingOverridePaths((paths) => paths.includes("summary") ? paths : [...paths, "summary"]); setSummary(e.target.value); }}
                 disabled={editorLocked}
                 maxLength={2000}
                 aria-invalid={Boolean(fieldIssue("summary"))}
@@ -1390,12 +1579,80 @@ export default function DocumentDetail() {
                 requestPreview={requestIndustryPreview}
               />
             ) : (
-              <fieldset disabled={editorLocked} className="contents"><ContentEditor
+                      <div className="space-y-4"><DocumentEditorContext
+          selectedMarket={selectedMarket}
+          selectedLocale={selectedLocale}
+          markets={(editionMatrix?.items ?? [])
+            .filter((edition) => edition.exact && edition.revisionId)
+            .map((edition) => ({
+              market: edition.market,
+              locale: edition.locale,
+              displayName: marketData?.items.find((market) => market.code === edition.market)?.displayName ?? edition.market.toUpperCase(),
+            }))}
+          onSelectEdition={selectEdition}
+          mode={selectedBindingMode}
+          isPending={updateDoc.isPending || previewingRevisionId !== null}
+          onCompare={() => setSharedCompareOpen(true)}
+          readinessBlockers={readinessBlockers.length}
+          readinessWarnings={readinessWarnings.length}
+          workflowState={selectedEdition?.workflowState ?? doc.status}
+          publicationState={selectedEdition?.effectivePublicationState ?? selectedEdition?.publicationState}
+          availabilityPending={Boolean(availabilityForReview?.items.find((item) => item.market === selectedMarket && item.locale === selectedLocale)?.pending)}
+          availableInMarket={availabilityForReview?.items.find((item) => item.market === selectedMarket && item.locale === selectedLocale)?.publishedEffectiveAvailable}
+        />
+        <SharedEditionPanel
+          matrix={sharedMatrix}
+          markets={(marketData?.items ?? []).map((market) => ({ id: market.id, code: market.code, displayName: market.displayName }))}
+          exactEditions={(editionMatrix?.items ?? []).filter((edition) => edition.exact && edition.revisionId).map((edition) => ({ market: edition.market, locale: edition.locale, revisionId: edition.revisionId, revisionNumber: edition.revisionNumber }))}
+          selectedMarket={selectedMarket}
+          selectedLocale={selectedLocale}
+          currentRevisionId={doc.currentRevisionId}
+          currentRevisionNumber={doc.revisionNumber}
+          canEdit={canEditSelectedEdition}
+          canManageBaselines={isAdministrator}
+          hasUnsaved={hasUnsaved}
+          busy={establishSharedBaseline.isPending || bindSharedEdition.isPending || saveSharedOverrides.isPending || resolveSharedBaseline.isPending}
+          onSelectEdition={selectEdition}
+          onEstablishBaseline={(sourceRevisionId, locale, expectedRevisionNumber) => {
+            if (sourceRevisionId !== doc.currentRevisionId) {
+              toast({ title: "Open the selected exact source first", description: "A neutral baseline is copied only from the exact revision currently displayed.", variant: "destructive" });
+              return;
+            }
+            const snapshot = snapshotForSharedBaseline();
+            if (!snapshot) return;
+            establishSharedBaseline.mutate({ documentId: id!, data: { locale, sourceRevisionId, snapshot, expectedRevisionNumber } }, {
+              onSuccess: () => { invalidateSharedEdition(); toast({ title: "Neutral baseline saved", description: "It is pinned to the selected exact source revision." }); },
+              onError: (error: any) => toast({ title: "Baseline was not saved", description: error?.data?.error || error?.error || error?.message, variant: "destructive" }),
+            });
+          }}
+          onEditBaseline={(baseline) => {
+            setBaselineBeingEdited(baseline);
+            setBaselineEditorOpen(true);
+          }}
+          onBind={({ marketEditionId, locale, mode, baseline, independentRevisionId, translationSourceRevisionId, version }) => {
+            bindSharedEdition.mutate({ documentId: id!, data: {
+              marketEditionId, locale, mode, version,
+              ...(mode === "independent" ? { independentRevisionId } : { baselineId: baseline?.id, baselineRevisionId: baseline?.revisionId, translationSourceRevisionId }),
+            } }, {
+              onSuccess: () => { invalidateSharedEdition(); toast({ title: `${mode} binding saved`, description: "The selected revision and lineage are frozen until explicitly changed." }); },
+              onError: (error: any) => toast({ title: "Binding was not saved", description: error?.data?.error || error?.error || error?.message, variant: "destructive" }),
+            });
+          }}
+          onCompare={(binding) => { setSharedCompareOpen(true); void refetchSharedComparison(); }}
+          onResetOverride={resetSharedField}
+        />
+<OverridesContext.Provider value={{
+          isAdapted: tracksSharedOverrides,
+          canEdit: !editorLocked,
+          operations: (selectedSharedBinding?.operations ?? []) as SharedMarketOverride[],
+          onOverride: (path) => setPendingOverridePaths((paths) => paths.includes(path) ? paths : [...paths, path]),
+          onReset: resetSharedField,
+        }}><fieldset disabled={editorLocked} className="contents"><ContentEditor
                 kind={doc.kind as CmsDocumentKind}
                 value={content}
                 onChange={editorLocked ? () => {} : handleContentChange}
                 errors={contentValidation.success ? [] : contentValidation.errors}
-              /></fieldset>
+              /></fieldset></OverridesContext.Provider></div>
             )}
             {doc.kind !== "industry" && <details className="rounded-md border bg-muted/20 p-4">
               <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider">Advanced structured view (read only)</summary>
@@ -1700,6 +1957,110 @@ export default function DocumentDetail() {
         </div>
       </div>
 
+      <DocumentCompareModal
+        isOpen={sharedCompareOpen}
+        onOpenChange={setSharedCompareOpen}
+        comparison={sharedComparison}
+        conflicts={compareConflicts}
+        onResolveConflict={(path, decision) => {
+          setCompareConflicts(prev => prev.map(c => c.path === path ? { ...c, decision } : c));
+        }}
+        onApplyDecisions={() => {
+          if (!selectedSharedBinding || !sharedComparison) return;
+          const unresolved = compareConflicts.some((conflict) => !conflict.decision);
+          if (unresolved) return;
+          setIsApplyingDecisions(true);
+          resolveSharedBaseline.mutate({
+            documentId: id!,
+            bindingId: selectedSharedBinding.id,
+            data: {
+              version: selectedSharedBinding.version,
+              baselineRevisionId: sharedComparison.baselineRevisionId,
+              action: "adopt",
+              // The generated client may lag the server schema briefly; the
+              // server requires a choice for every real conflict.
+              conflictDecisions: compareConflicts.map((conflict) => ({
+                path: conflict.path,
+                choice: conflict.decision === "adopt" ? "shared" : "market",
+              })),
+            },
+          }, {
+            onSuccess: () => {
+              setIsApplyingDecisions(false);
+              setSharedCompareOpen(false);
+              invalidateSharedEdition();
+              toast({ title: "Shared update adopted into a new exact draft" });
+            },
+            onError: (error: any) => {
+              setIsApplyingDecisions(false);
+              toast({ title: "Shared update could not be resolved", description: error?.data?.error || error?.error || error?.message, variant: "destructive" });
+            },
+          });
+        }}
+        onResolve={(action) => {
+          if (!selectedSharedBinding || !sharedComparison) return;
+          if (action === "adopt" && compareConflicts.some((conflict) => !conflict.decision)) return;
+          setIsApplyingDecisions(true);
+          resolveSharedBaseline.mutate({
+            documentId: id!,
+            bindingId: selectedSharedBinding.id,
+            data: {
+              version: selectedSharedBinding.version,
+              baselineRevisionId: sharedComparison.baselineRevisionId,
+              action,
+              ...(action === "adopt" ? { conflictDecisions: compareConflicts.map((conflict) => ({ path: conflict.path, choice: conflict.decision === "adopt" ? "shared" : "market" })) } : {}),
+            },
+          }, {
+            onSuccess: () => {
+              setIsApplyingDecisions(false);
+              setSharedCompareOpen(false);
+              invalidateSharedEdition();
+              toast({ title: action === "detach" ? "Edition detached as independent" : `Shared baseline ${action}ed into a new draft` });
+            },
+            onError: (error: any) => {
+              setIsApplyingDecisions(false);
+              toast({ title: "Shared update could not be resolved", description: error?.data?.error || error?.error || error?.message, variant: "destructive" });
+            },
+          });
+        }}
+        isApplying={isApplyingDecisions || isSharedComparisonLoading}
+      />
+      <SharedBaselineEditor
+        baseline={baselineBeingEdited}
+        kind={doc.kind as CmsDocumentKind}
+        open={baselineEditorOpen}
+        busy={establishSharedBaseline.isPending}
+        onOpenChange={setBaselineEditorOpen}
+        onSave={(baseline, snapshot) => {
+          if (!baseline.sourceRevisionId) {
+            toast({ title: "Baseline source lineage is unavailable", description: "This legacy baseline cannot be edited until its exact source is restored.", variant: "destructive" });
+            return;
+          }
+          establishSharedBaseline.mutate({
+            documentId: id!,
+            data: {
+              locale: baseline.locale,
+              sourceRevisionId: baseline.sourceRevisionId,
+              expectedRevisionNumber: baseline.revisionNumber,
+              snapshot,
+            },
+          }, {
+            onSuccess: () => {
+              setBaselineEditorOpen(false);
+              setBaselineBeingEdited(null);
+              // Baseline editing must not replace or rehydrate the regional
+              // exact draft currently open in this editor.
+              queryClient.invalidateQueries({ queryKey: getGetSharedMarketEditionMatrixQueryKey(id!) });
+              toast({ title: "Shared baseline successor saved", description: "Regional drafts and live content are unchanged until an explicit resolution." });
+            },
+            onError: (error: any) => toast({
+              title: "Shared baseline was not saved",
+              description: error?.data?.error || error?.error || error?.message || "Your edited baseline remains open for review.",
+              variant: "destructive",
+            }),
+          });
+        }}
+      />
       <AlertDialog open={conflictOpen} onOpenChange={setConflictOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

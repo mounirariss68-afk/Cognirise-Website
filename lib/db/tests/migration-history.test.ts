@@ -55,6 +55,9 @@ const expectedMigrations = [
   { idx: 26, when: 1788998400003, tag: "0026_cms_navigation_publish_versions" },
   { idx: 27, when: 1788998400004, tag: "0027_cms_access_delivery_jobs" },
   { idx: 28, when: 1788998400005, tag: "0028_cms_access_delivery_leases" },
+  { idx: 29, when: 1788998400006, tag: "0029_cms_shared_market_editions" },
+  { idx: 30, when: 1788998400007, tag: "0030_cms_shared_history_cascade_deletes" },
+  { idx: 31, when: 1788998400008, tag: "0031_cms_shared_pointer_integrity" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {
@@ -119,6 +122,303 @@ test("applies the complete schema chain to a fresh database and replays safely",
     `SELECT created_at FROM "${schema}"."__drizzle_migrations" ORDER BY created_at`,
   );
   assert.deepEqual(appliedAfterReplay.rows, appliedBeforeReplay.rows);
+});
+
+test("shared pointer integrity rejects cross-boundary pointers while accepting deferred materialization", {
+  skip: !process.env.DATABASE_URL && "DATABASE_URL is not available",
+}, async (context) => {
+  const schema = `shared_pointer_${process.pid}_${Date.now()}`;
+  const adminPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 });
+  const migrationPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 1,
+    options: `-c search_path=${schema}`,
+  });
+  context.after(async () => {
+    await migrationPool.end();
+    await adminPool.query(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`);
+    await adminPool.end();
+  });
+  await adminPool.query(`CREATE SCHEMA "${schema}"`);
+  const testMigrationsFolder = await isolatedMigrations(schema, context);
+  await migrate(drizzle(migrationPool), {
+    migrationsFolder: testMigrationsFolder,
+    migrationsSchema: schema,
+    migrationsTable: "__drizzle_migrations",
+  });
+  // Drizzle replay must retain the deferred constraint triggers, not recreate
+  // them or replace their migration receipt.
+  await migrate(drizzle(migrationPool), {
+    migrationsFolder: testMigrationsFolder,
+    migrationsSchema: schema,
+    migrationsTable: "__drizzle_migrations",
+  });
+  const triggers = await migrationPool.query<{ tgname: string; tgdeferrable: boolean; tginitdeferred: boolean }>(
+    `SELECT tgname,tgdeferrable,tginitdeferred
+       FROM pg_trigger
+      WHERE tgrelid IN (
+        'cms_shared_baselines'::regclass,
+        'cms_shared_baseline_revisions'::regclass,
+        'cms_market_edition_bindings'::regclass,
+        'cms_resolved_market_revisions'::regclass
+      ) AND tgname LIKE '%_integrity'
+      ORDER BY tgname`,
+  );
+  assert.deepEqual(triggers.rows, [
+    { tgname: "cms_market_edition_bindings_integrity", tgdeferrable: true, tginitdeferred: true },
+    { tgname: "cms_resolved_market_revisions_integrity", tgdeferrable: true, tginitdeferred: true },
+    { tgname: "cms_shared_baseline_revisions_integrity", tgdeferrable: true, tginitdeferred: true },
+    { tgname: "cms_shared_baselines_integrity", tgdeferrable: true, tginitdeferred: true },
+  ]);
+
+  const ids = {
+    user: randomUUID(),
+    document: randomUUID(),
+    foreignDocument: randomUUID(),
+    uae: randomUUID(),
+    ksa: randomUUID(),
+    source: randomUUID(),
+    sourceArabic: randomUUID(),
+    sourceForeign: randomUUID(),
+    sourceInternal: randomUUID(),
+    destination: randomUUID(),
+    baseline: randomUUID(),
+    baselineRevision: randomUUID(),
+    successorBaselineRevision: randomUUID(),
+    foreignBaseline: randomUUID(),
+    foreignBaselineRevision: randomUUID(),
+    arabicBaseline: randomUUID(),
+    arabicBaselineRevision: randomUUID(),
+    binding: randomUUID(),
+    materialized: randomUUID(),
+    detachedMaterialized: randomUUID(),
+    wrongMaterialized: randomUUID(),
+    localeWrongRevision: randomUUID(),
+  };
+  await migrationPool.query(
+    `INSERT INTO cms_users(id,email) VALUES ($1,'shared-pointer@example.invalid')`,
+    [ids.user],
+  );
+  await migrationPool.query(
+    `INSERT INTO cms_documents(id,kind,title) VALUES
+       ($1,'case-study','Shared pointer document'),
+       ($2,'case-study','Foreign pointer document')`,
+    [ids.document, ids.foreignDocument],
+  );
+  await migrationPool.query(
+    `INSERT INTO market_editions(id,code,display_name,default_locale) VALUES
+       ($1,'pointer-uae','Pointer UAE','en'),
+       ($2,'pointer-ksa','Pointer KSA','en')`,
+    [ids.uae, ids.ksa],
+  );
+  await migrationPool.query(
+    `INSERT INTO cms_market_editions(id,document_id,market,locale) VALUES
+       ($1,$2,'pointer-ksa','en'),
+       ($3,$2,'pointer-ksa','ar'),
+       ($4,$5,'pointer-ksa','en'),
+       ($6,$2,'shared-source','und'),
+       ($7,$2,'pointer-uae','en')`,
+    [
+      ids.source, ids.document, ids.sourceArabic, ids.sourceForeign,
+      ids.foreignDocument, ids.sourceInternal, ids.destination,
+    ],
+  );
+  const insertRevision = async (id: string, editionId: string, number: number) => {
+    await migrationPool.query(
+      `INSERT INTO cms_revisions(id,edition_id,revision_number,payload,content_digest,created_by_user_id,reason)
+       VALUES ($1,$2,$3,'{}'::jsonb,$4,$5,'shared pointer fixture')`,
+      [id, editionId, number, `digest-${id}`, ids.user],
+    );
+  };
+  await insertRevision(ids.materialized, ids.destination, 1);
+  await insertRevision(ids.detachedMaterialized, ids.destination, 2);
+  await insertRevision(ids.wrongMaterialized, ids.source, 2);
+  await insertRevision(ids.localeWrongRevision, ids.sourceArabic, 1);
+  const sourceRevision = randomUUID();
+  const foreignSourceRevision = randomUUID();
+  const internalSourceRevision = randomUUID();
+  await insertRevision(sourceRevision, ids.source, 1);
+  await insertRevision(foreignSourceRevision, ids.sourceForeign, 2);
+  await insertRevision(internalSourceRevision, ids.sourceInternal, 1);
+
+  // A binding is intentionally inserted before its resolved history and
+  // materialized pointer. The deferrable checks inspect the coherent final
+  // transaction state, which is the route's real materialization order.
+  await migrationPool.query("BEGIN");
+  await migrationPool.query(
+    `INSERT INTO cms_shared_baselines(id,document_id,locale,created_by_user_id)
+     VALUES ($1,$2,'en',$3)`,
+    [ids.baseline, ids.document, ids.user],
+  );
+  await migrationPool.query(
+    `INSERT INTO cms_shared_baseline_revisions(
+       id,baseline_id,revision_number,snapshot,content_digest,source_revision_id,created_by_user_id
+     ) VALUES ($1,$2,1,'{}'::jsonb,'baseline-1',$3,$4)`,
+    [ids.baselineRevision, ids.baseline, sourceRevision, ids.user],
+  );
+  await migrationPool.query(
+    `UPDATE cms_shared_baselines SET active_revision_id=$2 WHERE id=$1`,
+    [ids.baseline, ids.baselineRevision],
+  );
+  await migrationPool.query(
+    `INSERT INTO cms_market_edition_bindings(
+       id,document_id,market_edition_id,locale,mode,baseline_id,based_on_baseline_revision_id
+     ) VALUES ($1,$2,$3,'en','shared',$4,$5)`,
+    [ids.binding, ids.document, ids.uae, ids.baseline, ids.baselineRevision],
+  );
+  await migrationPool.query(
+    `INSERT INTO cms_resolved_market_revisions(
+       binding_id,cms_revision_id,baseline_revision_id,snapshot,content_digest
+     ) VALUES ($1,$2,$3,'{}'::jsonb,'resolved-1')`,
+    [ids.binding, ids.materialized, ids.baselineRevision],
+  );
+  await migrationPool.query(
+    `UPDATE cms_market_edition_bindings SET materialized_revision_id=$2 WHERE id=$1`,
+    [ids.binding, ids.materialized],
+  );
+  await migrationPool.query("COMMIT");
+
+  const commitRejects = async (statement: string, values: unknown[], expected: RegExp) => {
+    await migrationPool.query("BEGIN");
+    try {
+      await migrationPool.query(statement, values);
+      await assert.rejects(migrationPool.query("COMMIT"), expected);
+    } finally {
+      await migrationPool.query("ROLLBACK").catch(() => {});
+    }
+  };
+  await commitRejects(
+    `UPDATE cms_revisions SET edition_id=$2 WHERE id=$1`,
+    [sourceRevision, ids.sourceForeign],
+    /shared baseline revision source must remain an exact real-market revision/,
+  );
+
+  // The foreign baseline itself is valid, so this is specifically a binding
+  // cross-document update rather than a missing-reference failure.
+  await migrationPool.query("BEGIN");
+  await migrationPool.query(
+    `INSERT INTO cms_shared_baselines(id,document_id,locale,created_by_user_id)
+     VALUES ($1,$2,'en',$3)`,
+    [ids.foreignBaseline, ids.foreignDocument, ids.user],
+  );
+  await migrationPool.query(
+    `INSERT INTO cms_shared_baseline_revisions(
+       id,baseline_id,revision_number,snapshot,content_digest,source_revision_id,created_by_user_id
+     ) VALUES ($1,$2,1,'{}'::jsonb,'foreign-baseline',$3,$4)`,
+    [ids.foreignBaselineRevision, ids.foreignBaseline, foreignSourceRevision, ids.user],
+  );
+  await migrationPool.query(
+    `UPDATE cms_shared_baselines SET active_revision_id=$2 WHERE id=$1`,
+    [ids.foreignBaseline, ids.foreignBaselineRevision],
+  );
+  await migrationPool.query("COMMIT");
+  await commitRejects(
+    `UPDATE cms_shared_baselines SET active_revision_id=$2 WHERE id=$1`,
+    [ids.baseline, ids.foreignBaselineRevision],
+    /shared baseline active revision must belong to its baseline/,
+  );
+  await commitRejects(
+    `UPDATE cms_market_edition_bindings
+        SET baseline_id=$2,based_on_baseline_revision_id=$3
+      WHERE id=$1`,
+    [ids.binding, ids.foreignBaseline, ids.foreignBaselineRevision],
+    /shared binding baseline must match its document and locale/,
+  );
+  await commitRejects(
+    `UPDATE cms_market_edition_bindings SET materialized_revision_id=$2 WHERE id=$1`,
+    [ids.binding, ids.wrongMaterialized],
+    /shared binding materialized revision must match its exact destination/,
+  );
+  await commitRejects(
+    `INSERT INTO cms_shared_baseline_revisions(
+       id,baseline_id,revision_number,snapshot,content_digest,source_revision_id,created_by_user_id
+     ) VALUES ($1,$2,2,'{}'::jsonb,'foreign-source',$3,$4)`,
+    [randomUUID(), ids.baseline, foreignSourceRevision, ids.user],
+    /shared baseline revision source must be an exact real-market revision/,
+  );
+  await commitRejects(
+    `INSERT INTO cms_shared_baseline_revisions(
+       id,baseline_id,revision_number,snapshot,content_digest,source_revision_id,created_by_user_id
+     ) VALUES ($1,$2,2,'{}'::jsonb,'wrong-source-locale',$3,$4)`,
+    [randomUUID(), ids.baseline, ids.localeWrongRevision, ids.user],
+    /shared baseline revision source must be an exact real-market revision/,
+  );
+  await commitRejects(
+    `INSERT INTO cms_shared_baseline_revisions(
+       id,baseline_id,revision_number,snapshot,content_digest,source_revision_id,created_by_user_id
+     ) VALUES ($1,$2,2,'{}'::jsonb,'internal-source',$3,$4)`,
+    [randomUUID(), ids.baseline, internalSourceRevision, ids.user],
+    /shared baseline revision source must be an exact real-market revision/,
+  );
+
+  await migrationPool.query("BEGIN");
+  await migrationPool.query(
+    `INSERT INTO cms_shared_baselines(id,document_id,locale,created_by_user_id)
+     VALUES ($1,$2,'ar',$3)`,
+    [ids.arabicBaseline, ids.document, ids.user],
+  );
+  await migrationPool.query(
+    `INSERT INTO cms_shared_baseline_revisions(
+       id,baseline_id,revision_number,snapshot,content_digest,source_revision_id,created_by_user_id
+     ) VALUES ($1,$2,1,'{}'::jsonb,'arabic-baseline',$3,$4)`,
+    [ids.arabicBaselineRevision, ids.arabicBaseline, ids.localeWrongRevision, ids.user],
+  );
+  await migrationPool.query(
+    `UPDATE cms_shared_baselines SET active_revision_id=$2 WHERE id=$1`,
+    [ids.arabicBaseline, ids.arabicBaselineRevision],
+  );
+  await migrationPool.query("COMMIT");
+  await commitRejects(
+    `INSERT INTO cms_resolved_market_revisions(
+       binding_id,cms_revision_id,baseline_revision_id,snapshot,content_digest
+     ) VALUES ($1,$2,$3,'{}'::jsonb,'wrong-baseline-locale')`,
+    [ids.binding, ids.detachedMaterialized, ids.arabicBaselineRevision],
+    /resolved market revision baseline must match its binding document and locale/,
+  );
+
+  // A newer baseline and an independent detach may be committed together.
+  // The older resolved row remains valid history even though its baseline is
+  // no longer the binding's mutable pointer.
+  await migrationPool.query("BEGIN");
+  await migrationPool.query(
+    `INSERT INTO cms_shared_baseline_revisions(
+       id,baseline_id,revision_number,snapshot,content_digest,source_revision_id,created_by_user_id
+     ) VALUES ($1,$2,2,'{}'::jsonb,'baseline-2',$3,$4)`,
+    [ids.successorBaselineRevision, ids.baseline, sourceRevision, ids.user],
+  );
+  await migrationPool.query(
+    `UPDATE cms_shared_baselines SET active_revision_id=$2 WHERE id=$1`,
+    [ids.baseline, ids.successorBaselineRevision],
+  );
+  await migrationPool.query(
+    `INSERT INTO cms_resolved_market_revisions(
+       binding_id,cms_revision_id,baseline_revision_id,snapshot,content_digest
+     ) VALUES ($1,$2,NULL,'{}'::jsonb,'resolved-detach')`,
+    [ids.binding, ids.detachedMaterialized],
+  );
+  await migrationPool.query(
+    `UPDATE cms_market_edition_bindings
+        SET mode='independent',baseline_id=NULL,based_on_baseline_revision_id=NULL,
+            held_baseline_revision_id=NULL,materialized_revision_id=$2
+      WHERE id=$1`,
+    [ids.binding, ids.detachedMaterialized],
+  );
+  await migrationPool.query("COMMIT");
+  const history = await migrationPool.query<{ count: string }>(
+    `SELECT count(*)::text AS count FROM cms_resolved_market_revisions WHERE binding_id=$1`,
+    [ids.binding],
+  );
+  assert.equal(history.rows[0]?.count, "2");
+
+  // 0030 keeps direct shared-history edits immutable but permits the document
+  // lifecycle's FK cascades. Integrity triggers remain deferred-only and do
+  // not interfere with that cleanup path.
+  await migrationPool.query(`DELETE FROM cms_documents WHERE id=$1`, [ids.document]);
+  const removedHistory = await migrationPool.query<{ count: string }>(
+    `SELECT count(*)::text AS count FROM cms_resolved_market_revisions WHERE binding_id=$1`,
+    [ids.binding],
+  );
+  assert.equal(removedHistory.rows[0]?.count, "0");
 });
 
 test("upgrades a migration-0007 database and resolves staged availability only after publish", {

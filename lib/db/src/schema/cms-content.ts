@@ -327,6 +327,167 @@ export const cmsRevisionsTable = pgTable(
   ],
 );
 
+/**
+ * A neutral baseline is deliberately not a cms_market_editions row.  It never
+ * participates in legacy delivery/source selection and therefore cannot turn a
+ * regional historical edition into a newly public shared source.
+ */
+export const cmsSharedBaselinesTable = pgTable(
+  "cms_shared_baselines",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => cmsDocumentsTable.id, { onDelete: "cascade" }),
+    locale: text("locale").notNull(),
+    activeRevisionId: uuid("active_revision_id"),
+    createdByUserId: uuid("created_by_user_id").notNull().references(() => cmsUsersTable.id, {
+      onDelete: "restrict",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("cms_shared_baselines_document_locale_uidx").on(table.documentId, table.locale),
+    index("cms_shared_baselines_active_revision_idx").on(table.activeRevisionId),
+  ],
+);
+
+/** Immutable snapshots and explicit source lineage for neutral baselines. */
+export const cmsSharedBaselineRevisionsTable = pgTable(
+  "cms_shared_baseline_revisions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    baselineId: uuid("baseline_id")
+      .notNull()
+      .references(() => cmsSharedBaselinesTable.id, { onDelete: "cascade" }),
+    revisionNumber: integer("revision_number").notNull(),
+    snapshot: jsonb("snapshot").$type<Record<string, unknown>>().notNull(),
+    mediaReferences: jsonb("media_references").$type<Record<string, unknown>[]>().notNull().default([]),
+    contentDigest: text("content_digest").notNull(),
+    sourceRevisionId: uuid("source_revision_id").references(() => cmsRevisionsTable.id, {
+      onDelete: "set null",
+    }),
+    createdByUserId: uuid("created_by_user_id").notNull().references(() => cmsUsersTable.id, {
+      onDelete: "restrict",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("cms_shared_baseline_revisions_number_uidx").on(
+      table.baselineId,
+      table.revisionNumber,
+    ),
+    index("cms_shared_baseline_revisions_source_idx").on(table.sourceRevisionId),
+  ],
+);
+
+/**
+ * Exact market bindings are additive metadata. Their mode is independent from
+ * legacy cms_market_editions.content_mode so no existing legacy publication
+ * pointer or availability state is reinterpreted by this feature.
+ */
+export const cmsMarketEditionBindingsTable = pgTable(
+  "cms_market_edition_bindings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => cmsDocumentsTable.id, { onDelete: "cascade" }),
+    marketEditionId: uuid("market_edition_id")
+      .notNull()
+      .references(() => marketEditionsTable.id, { onDelete: "cascade" }),
+    locale: text("locale").notNull(),
+    mode: text("mode").notNull(),
+    baselineId: uuid("baseline_id").references(() => cmsSharedBaselinesTable.id, {
+      onDelete: "set null",
+    }),
+    basedOnBaselineRevisionId: uuid("based_on_baseline_revision_id").references(
+      () => cmsSharedBaselineRevisionsTable.id,
+      { onDelete: "set null" },
+    ),
+    overrideOperations: jsonb("override_operations").$type<Record<string, unknown>[]>().notNull().default([]),
+    heldBaselineRevisionId: uuid("held_baseline_revision_id").references(
+      () => cmsSharedBaselineRevisionsTable.id,
+      { onDelete: "set null" },
+    ),
+    materializedRevisionId: uuid("materialized_revision_id").references(() => cmsRevisionsTable.id, {
+      onDelete: "set null",
+    }),
+    version: integer("version").notNull().default(1),
+    translationState: text("translation_state").notNull().default("current"),
+    translationSourceRevisionId: uuid("translation_source_revision_id").references(
+      () => cmsSharedBaselineRevisionsTable.id,
+      { onDelete: "set null" },
+    ),
+    updatedByUserId: uuid("updated_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("cms_market_edition_bindings_address_uidx").on(
+      table.documentId,
+      table.marketEditionId,
+      table.locale,
+    ),
+    check("cms_market_edition_bindings_mode_check", sql`${table.mode} IN ('shared','adapted','independent')`),
+    check(
+      "cms_market_edition_bindings_baseline_check",
+      sql`(${table.mode}='independent' AND ${table.baselineId} IS NULL)
+        OR (${table.mode} IN ('shared','adapted') AND ${table.baselineId} IS NOT NULL)`,
+    ),
+    check(
+      "cms_market_edition_bindings_translation_state_check",
+      sql`${table.translationState} IN ('current','stale','not-applicable')`,
+    ),
+    index("cms_market_edition_bindings_baseline_idx").on(table.baselineId, table.locale),
+    index("cms_market_edition_bindings_materialized_idx").on(table.materializedRevisionId),
+  ],
+);
+
+/** Immutable evidence of the exact resolved snapshot and its media pins. */
+export const cmsResolvedMarketRevisionsTable = pgTable(
+  "cms_resolved_market_revisions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bindingId: uuid("binding_id")
+      .notNull()
+      .references(() => cmsMarketEditionBindingsTable.id, { onDelete: "cascade" }),
+    cmsRevisionId: uuid("cms_revision_id")
+      .notNull()
+      .references(() => cmsRevisionsTable.id, { onDelete: "cascade" }),
+    baselineRevisionId: uuid("baseline_revision_id").references(() => cmsSharedBaselineRevisionsTable.id, {
+      onDelete: "set null",
+    }),
+    snapshot: jsonb("snapshot").$type<Record<string, unknown>>().notNull(),
+    mediaReferences: jsonb("media_references").$type<Record<string, unknown>[]>().notNull().default([]),
+    contentDigest: text("content_digest").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("cms_resolved_market_revisions_cms_revision_uidx").on(table.cmsRevisionId),
+    index("cms_resolved_market_revisions_binding_idx").on(table.bindingId, table.createdAt),
+  ],
+);
+
+/** Immutable dry-run/report receipts; no migration action creates a baseline. */
+export const cmsSharedEditionMigrationReceiptsTable = pgTable(
+  "cms_shared_edition_migration_receipts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    documentId: uuid("document_id").references(() => cmsDocumentsTable.id, { onDelete: "cascade" }),
+    requestedByUserId: uuid("requested_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    dryRun: boolean("dry_run").notNull(),
+    report: jsonb("report").$type<Record<string, unknown>>().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("cms_shared_edition_migration_receipts_document_idx").on(table.documentId, table.createdAt)],
+);
+
 export const cmsReviewCommentsTable = pgTable(
   "cms_review_comments",
   {
@@ -557,6 +718,10 @@ export type CmsDocumentMarketAvailability =
 export type CmsDocumentAvailabilityState =
   typeof cmsDocumentAvailabilityStatesTable.$inferSelect;
 export type CmsRevision = typeof cmsRevisionsTable.$inferSelect;
+export type CmsSharedBaseline = typeof cmsSharedBaselinesTable.$inferSelect;
+export type CmsSharedBaselineRevision = typeof cmsSharedBaselineRevisionsTable.$inferSelect;
+export type CmsMarketEditionBinding = typeof cmsMarketEditionBindingsTable.$inferSelect;
+export type CmsResolvedMarketRevision = typeof cmsResolvedMarketRevisionsTable.$inferSelect;
 export type CmsReviewComment = typeof cmsReviewCommentsTable.$inferSelect;
 export type CmsTaxonomy = typeof cmsTaxonomiesTable.$inferSelect;
 export type CmsTaxonomyTerm = typeof cmsTaxonomyTermsTable.$inferSelect;

@@ -117,6 +117,16 @@ import type {
   Session,
   SessionRevocation,
   SessionRevocationInput,
+  SharedMarketBaseline,
+  SharedMarketBaselineInput,
+  SharedMarketBinding,
+  SharedMarketBindingInput,
+  SharedMarketComparison,
+  SharedMarketEditionMatrix,
+  SharedMarketMigrationReport,
+  SharedMarketMigrationReportInput,
+  SharedMarketOverridesInput,
+  SharedMarketResolveInput,
   Sitemap,
   Submission,
   SubmissionExport,
@@ -2621,6 +2631,529 @@ export const useCreateDocumentEditionOverride = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getCreateDocumentEditionOverrideMutationOptions(options));
+    }
+
+export const getGetSharedMarketEditionMatrixUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/shared-market`
+}
+
+/**
+ * @summary Inspect neutral baselines and exact Shared, Adapted, or Independent market bindings
+ */
+export const getSharedMarketEditionMatrix = async (documentId: string, options?: Parameters<typeof customFetch>[1]): Promise<SharedMarketEditionMatrix> => {
+
+  return customFetch<SharedMarketEditionMatrix>(getGetSharedMarketEditionMatrixUrl(documentId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSharedMarketEditionMatrixQueryKey = (documentId: string,) => {
+    return [
+    `/api/documents/${documentId}/shared-market`
+    ] as const;
+    }
+
+
+export const getGetSharedMarketEditionMatrixQueryOptions = <TData = Awaited<ReturnType<typeof getSharedMarketEditionMatrix>>, TError = ErrorType<unknown>>(documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSharedMarketEditionMatrix>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSharedMarketEditionMatrixQueryKey(documentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSharedMarketEditionMatrix>>> = ({ signal }) => getSharedMarketEditionMatrix(documentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: documentId !== null && documentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSharedMarketEditionMatrix>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSharedMarketEditionMatrixQueryResult = NonNullable<Awaited<ReturnType<typeof getSharedMarketEditionMatrix>>>
+export type GetSharedMarketEditionMatrixQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Inspect neutral baselines and exact Shared, Adapted, or Independent market bindings
+ */
+
+export function useGetSharedMarketEditionMatrix<TData = Awaited<ReturnType<typeof getSharedMarketEditionMatrix>>, TError = ErrorType<unknown>>(
+ documentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSharedMarketEditionMatrix>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSharedMarketEditionMatrixQueryOptions(documentId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getEstablishSharedMarketBaselineUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/shared-market`
+}
+
+/**
+ * @summary Save a validated neutral editor snapshot with explicitly pinned historical source lineage
+ */
+export const establishSharedMarketBaseline = async (documentId: string,
+    sharedMarketBaselineInput: SharedMarketBaselineInput, options?: Parameters<typeof customFetch>[1]): Promise<SharedMarketBaseline> => {
+
+  return customFetch<SharedMarketBaseline>(getEstablishSharedMarketBaselineUrl(documentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(sharedMarketBaselineInput)
+  }
+);}
+
+
+
+
+
+export const getEstablishSharedMarketBaselineMutationOptions = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof establishSharedMarketBaseline>>, TError,{documentId: string;data: BodyType<SharedMarketBaselineInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof establishSharedMarketBaseline>>, TError,{documentId: string;data: BodyType<SharedMarketBaselineInput>}, TContext> => {
+
+const mutationKey = ['establishSharedMarketBaseline'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof establishSharedMarketBaseline>>, {documentId: string;data: BodyType<SharedMarketBaselineInput>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  establishSharedMarketBaseline(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EstablishSharedMarketBaselineMutationResult = NonNullable<Awaited<ReturnType<typeof establishSharedMarketBaseline>>>
+    export type EstablishSharedMarketBaselineMutationBody = BodyType<SharedMarketBaselineInput>
+    export type EstablishSharedMarketBaselineMutationError = ErrorType<ConflictResponse>
+
+    /**
+ * @summary Save a validated neutral editor snapshot with explicitly pinned historical source lineage
+ */
+export const useEstablishSharedMarketBaseline = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof establishSharedMarketBaseline>>, TError,{documentId: string;data: BodyType<SharedMarketBaselineInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof establishSharedMarketBaseline>>,
+        TError,
+        {documentId: string;data: BodyType<SharedMarketBaselineInput>},
+        TContext
+      > => {
+      return useMutation(getEstablishSharedMarketBaselineMutationOptions(options));
+    }
+
+export const getBindSharedMarketEditionUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/shared-market/bindings`
+}
+
+/**
+ * @summary Bind an exact market locale as Shared, Adapted, or Independent
+ */
+export const bindSharedMarketEdition = async (documentId: string,
+    sharedMarketBindingInput: SharedMarketBindingInput, options?: Parameters<typeof customFetch>[1]): Promise<SharedMarketBinding> => {
+
+  return customFetch<SharedMarketBinding>(getBindSharedMarketEditionUrl(documentId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(sharedMarketBindingInput)
+  }
+);}
+
+
+
+
+
+export const getBindSharedMarketEditionMutationOptions = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bindSharedMarketEdition>>, TError,{documentId: string;data: BodyType<SharedMarketBindingInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof bindSharedMarketEdition>>, TError,{documentId: string;data: BodyType<SharedMarketBindingInput>}, TContext> => {
+
+const mutationKey = ['bindSharedMarketEdition'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof bindSharedMarketEdition>>, {documentId: string;data: BodyType<SharedMarketBindingInput>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  bindSharedMarketEdition(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BindSharedMarketEditionMutationResult = NonNullable<Awaited<ReturnType<typeof bindSharedMarketEdition>>>
+    export type BindSharedMarketEditionMutationBody = BodyType<SharedMarketBindingInput>
+    export type BindSharedMarketEditionMutationError = ErrorType<ConflictResponse>
+
+    /**
+ * @summary Bind an exact market locale as Shared, Adapted, or Independent
+ */
+export const useBindSharedMarketEdition = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bindSharedMarketEdition>>, TError,{documentId: string;data: BodyType<SharedMarketBindingInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof bindSharedMarketEdition>>,
+        TError,
+        {documentId: string;data: BodyType<SharedMarketBindingInput>},
+        TContext
+      > => {
+      return useMutation(getBindSharedMarketEditionMutationOptions(options));
+    }
+
+export const getSaveSharedMarketOverridesUrl = (documentId: string,
+    bindingId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/shared-market/bindings/${bindingId}/overrides`
+}
+
+/**
+ * @summary Save sparse stable-ID overrides and materialize an immutable exact revision
+ */
+export const saveSharedMarketOverrides = async (documentId: string,
+    bindingId: string,
+    sharedMarketOverridesInput: SharedMarketOverridesInput, options?: Parameters<typeof customFetch>[1]): Promise<SharedMarketBinding> => {
+
+  return customFetch<SharedMarketBinding>(getSaveSharedMarketOverridesUrl(documentId,bindingId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(sharedMarketOverridesInput)
+  }
+);}
+
+
+
+
+
+export const getSaveSharedMarketOverridesMutationOptions = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveSharedMarketOverrides>>, TError,{documentId: string;bindingId: string;data: BodyType<SharedMarketOverridesInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveSharedMarketOverrides>>, TError,{documentId: string;bindingId: string;data: BodyType<SharedMarketOverridesInput>}, TContext> => {
+
+const mutationKey = ['saveSharedMarketOverrides'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveSharedMarketOverrides>>, {documentId: string;bindingId: string;data: BodyType<SharedMarketOverridesInput>}> = (props) => {
+          const {documentId,bindingId,data} = props ?? {};
+
+          return  saveSharedMarketOverrides(documentId,bindingId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveSharedMarketOverridesMutationResult = NonNullable<Awaited<ReturnType<typeof saveSharedMarketOverrides>>>
+    export type SaveSharedMarketOverridesMutationBody = BodyType<SharedMarketOverridesInput>
+    export type SaveSharedMarketOverridesMutationError = ErrorType<ConflictResponse>
+
+    /**
+ * @summary Save sparse stable-ID overrides and materialize an immutable exact revision
+ */
+export const useSaveSharedMarketOverrides = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveSharedMarketOverrides>>, TError,{documentId: string;bindingId: string;data: BodyType<SharedMarketOverridesInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof saveSharedMarketOverrides>>,
+        TError,
+        {documentId: string;bindingId: string;data: BodyType<SharedMarketOverridesInput>},
+        TContext
+      > => {
+      return useMutation(getSaveSharedMarketOverridesMutationOptions(options));
+    }
+
+export const getCompareSharedMarketBaselineUrl = (documentId: string,
+    bindingId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/shared-market/bindings/${bindingId}/compare`
+}
+
+/**
+ * @summary Perform an explicit three-way baseline update comparison
+ */
+export const compareSharedMarketBaseline = async (documentId: string,
+    bindingId: string, options?: Parameters<typeof customFetch>[1]): Promise<SharedMarketComparison> => {
+
+  return customFetch<SharedMarketComparison>(getCompareSharedMarketBaselineUrl(documentId,bindingId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getCompareSharedMarketBaselineQueryKey = (documentId: string,
+    bindingId: string,) => {
+    return [
+    `/api/documents/${documentId}/shared-market/bindings/${bindingId}/compare`
+    ] as const;
+    }
+
+
+export const getCompareSharedMarketBaselineQueryOptions = <TData = Awaited<ReturnType<typeof compareSharedMarketBaseline>>, TError = ErrorType<unknown>>(documentId: string,
+    bindingId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof compareSharedMarketBaseline>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCompareSharedMarketBaselineQueryKey(documentId,bindingId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof compareSharedMarketBaseline>>> = ({ signal }) => compareSharedMarketBaseline(documentId,bindingId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: documentId !== null && documentId !== undefined && bindingId !== null && bindingId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof compareSharedMarketBaseline>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type CompareSharedMarketBaselineQueryResult = NonNullable<Awaited<ReturnType<typeof compareSharedMarketBaseline>>>
+export type CompareSharedMarketBaselineQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Perform an explicit three-way baseline update comparison
+ */
+
+export function useCompareSharedMarketBaseline<TData = Awaited<ReturnType<typeof compareSharedMarketBaseline>>, TError = ErrorType<unknown>>(
+ documentId: string,
+    bindingId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof compareSharedMarketBaseline>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getCompareSharedMarketBaselineQueryOptions(documentId,bindingId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getResolveSharedMarketBaselineUpdateUrl = (documentId: string,
+    bindingId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/shared-market/bindings/${bindingId}/resolve`
+}
+
+/**
+ * @summary Explicitly adopt, keep, reset, or detach an exact active baseline revision and materialize a new draft
+ */
+export const resolveSharedMarketBaselineUpdate = async (documentId: string,
+    bindingId: string,
+    sharedMarketResolveInput: SharedMarketResolveInput, options?: Parameters<typeof customFetch>[1]): Promise<SharedMarketBinding> => {
+
+  return customFetch<SharedMarketBinding>(getResolveSharedMarketBaselineUpdateUrl(documentId,bindingId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(sharedMarketResolveInput)
+  }
+);}
+
+
+
+
+
+export const getResolveSharedMarketBaselineUpdateMutationOptions = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resolveSharedMarketBaselineUpdate>>, TError,{documentId: string;bindingId: string;data: BodyType<SharedMarketResolveInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof resolveSharedMarketBaselineUpdate>>, TError,{documentId: string;bindingId: string;data: BodyType<SharedMarketResolveInput>}, TContext> => {
+
+const mutationKey = ['resolveSharedMarketBaselineUpdate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resolveSharedMarketBaselineUpdate>>, {documentId: string;bindingId: string;data: BodyType<SharedMarketResolveInput>}> = (props) => {
+          const {documentId,bindingId,data} = props ?? {};
+
+          return  resolveSharedMarketBaselineUpdate(documentId,bindingId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResolveSharedMarketBaselineUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof resolveSharedMarketBaselineUpdate>>>
+    export type ResolveSharedMarketBaselineUpdateMutationBody = BodyType<SharedMarketResolveInput>
+    export type ResolveSharedMarketBaselineUpdateMutationError = ErrorType<ConflictResponse>
+
+    /**
+ * @summary Explicitly adopt, keep, reset, or detach an exact active baseline revision and materialize a new draft
+ */
+export const useResolveSharedMarketBaselineUpdate = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resolveSharedMarketBaselineUpdate>>, TError,{documentId: string;bindingId: string;data: BodyType<SharedMarketResolveInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof resolveSharedMarketBaselineUpdate>>,
+        TError,
+        {documentId: string;bindingId: string;data: BodyType<SharedMarketResolveInput>},
+        TContext
+      > => {
+      return useMutation(getResolveSharedMarketBaselineUpdateMutationOptions(options));
+    }
+
+export const getReportSharedMarketMigrationUrl = (documentId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/shared-market/migration-report`
+}
+
+/**
+ * @summary Produce a dry-run migration report or an immutable receipt without source promotion
+ */
+export const reportSharedMarketMigration = async (documentId: string,
+    sharedMarketMigrationReportInput: SharedMarketMigrationReportInput, options?: Parameters<typeof customFetch>[1]): Promise<SharedMarketMigrationReport> => {
+
+  return customFetch<SharedMarketMigrationReport>(getReportSharedMarketMigrationUrl(documentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(sharedMarketMigrationReportInput)
+  }
+);}
+
+
+
+
+
+export const getReportSharedMarketMigrationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reportSharedMarketMigration>>, TError,{documentId: string;data: BodyType<SharedMarketMigrationReportInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reportSharedMarketMigration>>, TError,{documentId: string;data: BodyType<SharedMarketMigrationReportInput>}, TContext> => {
+
+const mutationKey = ['reportSharedMarketMigration'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reportSharedMarketMigration>>, {documentId: string;data: BodyType<SharedMarketMigrationReportInput>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  reportSharedMarketMigration(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReportSharedMarketMigrationMutationResult = NonNullable<Awaited<ReturnType<typeof reportSharedMarketMigration>>>
+    export type ReportSharedMarketMigrationMutationBody = BodyType<SharedMarketMigrationReportInput>
+    export type ReportSharedMarketMigrationMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Produce a dry-run migration report or an immutable receipt without source promotion
+ */
+export const useReportSharedMarketMigration = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reportSharedMarketMigration>>, TError,{documentId: string;data: BodyType<SharedMarketMigrationReportInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reportSharedMarketMigration>>,
+        TError,
+        {documentId: string;data: BodyType<SharedMarketMigrationReportInput>},
+        TContext
+      > => {
+      return useMutation(getReportSharedMarketMigrationMutationOptions(options));
     }
 
 export const getGetDocumentMarketAvailabilityUrl = (documentId: string,) => {

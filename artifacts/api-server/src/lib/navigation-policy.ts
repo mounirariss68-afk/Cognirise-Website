@@ -10,6 +10,8 @@ import {
   documentPublishedAvailabilityClause,
   industryExactMarketDeliveryClause,
   industryDestinationEligibilityClause,
+  managedMarketPublicAuthorityActivatedClause,
+  managedMarketPublicDeliveryClause,
   publicPayloadEligibilityClause,
 } from "./availability";
 
@@ -45,9 +47,12 @@ async function publishedDocumentRoutes(
        SELECT d.id,d.kind,r.payload,
               ${documentPublishedAvailabilityClause("d.id", "$1", "$2")} AS available,
                (
-                 ${publicPayloadEligibilityClause("d", "r")}
+                  e.publication_state='published'
+                  AND e.published_at<=now()
+                  AND ${publicPayloadEligibilityClause("d", "r")}
                  AND ${industryDestinationEligibilityClause("d", "e", "r", "$1")}
                   AND ${industryExactMarketDeliveryClause("d", "e", "$1")}
+                  AND ${managedMarketPublicDeliveryClause("d.id", "e", "$1", "$2")}
                ) AS public_eligible,
                CASE
                  WHEN e.content_mode='custom' AND e.market=$1 AND e.locale=$2 THEN 0
@@ -61,8 +66,15 @@ async function publishedDocumentRoutes(
           LEFT JOIN cms_document_availability_states delivery ON delivery.document_id=d.id
           JOIN cms_revisions r ON r.id=e.published_revision_id AND r.edition_id=e.id
             AND r.workflow_state='approved'
-         WHERE d.status<>'archived' AND e.publication_state='published'
-           AND e.published_at<=now()
+          WHERE d.status<>'archived'
+            AND (
+              (e.publication_state='published' AND e.published_at<=now())
+              OR (
+                e.market=$1 AND e.locale=$2 AND e.published_revision_id IS NOT NULL
+                AND ${managedMarketPublicAuthorityActivatedClause("d.id", "$1", "$2")}
+                AND ${managedMarketPublicDeliveryClause("d.id", "e", "$1", "$2")}
+              )
+            )
            AND (
              (e.content_mode='custom' AND (e.market||'|'||e.locale)=ANY($3::text[]))
              OR (

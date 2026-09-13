@@ -536,6 +536,11 @@ paths:
         - name: locale
           in: query
           schema: { type: string }
+        - name: readiness
+          in: query
+          description: Filter the complete eligible result set before pagination.
+          schema:
+            $ref: "#/components/schemas/SharedEditionReadiness"
       responses:
         "200":
           description: Paginated documents
@@ -682,6 +687,170 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DocumentRevision"
+  /documents/{documentId}/shared-market:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    get:
+      operationId: getSharedMarketEditionMatrix
+      tags: [documents]
+      summary: Inspect neutral baselines and exact Shared, Adapted, or Independent market bindings
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Shared-market binding matrix
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedMarketEditionMatrix"
+    post:
+      operationId: establishSharedMarketBaseline
+      tags: [documents]
+      summary: Save a validated neutral editor snapshot with explicitly pinned historical source lineage
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SharedMarketBaselineInput"
+      responses:
+        "201":
+          description: Neutral baseline saved without changing the selected legacy edition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedMarketBaseline"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/shared-market/bindings:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    put:
+      operationId: bindSharedMarketEdition
+      tags: [documents]
+      summary: Bind an exact market locale as Shared, Adapted, or Independent
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SharedMarketBindingInput"
+      responses:
+        "200":
+          description: Materialized exact market binding
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedMarketBinding"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/shared-market/bindings/{bindingId}/overrides:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+      - name: bindingId
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      operationId: saveSharedMarketOverrides
+      tags: [documents]
+      summary: Save sparse stable-ID overrides and materialize an immutable exact revision
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SharedMarketOverridesInput"
+      responses:
+        "200":
+          description: Updated materialized binding
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedMarketBinding"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/shared-market/bindings/{bindingId}/compare:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+      - name: bindingId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      operationId: compareSharedMarketBaseline
+      tags: [documents]
+      summary: Perform an explicit three-way baseline update comparison
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Comparison and structural conflicts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedMarketComparison"
+  /documents/{documentId}/shared-market/bindings/{bindingId}/resolve:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+      - name: bindingId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      operationId: resolveSharedMarketBaselineUpdate
+      tags: [documents]
+      summary: Explicitly adopt, keep, reset, or detach an exact active baseline revision and materialize a new draft
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SharedMarketResolveInput"
+      responses:
+        "200":
+          description: Resolved materialized binding
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedMarketBinding"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/shared-market/migration-report:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    post:
+      operationId: reportSharedMarketMigration
+      tags: [documents]
+      summary: Produce a dry-run migration report or an immutable receipt without source promotion
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SharedMarketMigrationReportInput"
+      responses:
+        "200":
+          description: Dry-run report or stored receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedMarketMigrationReport"
   /documents/{documentId}/market-availability:
     parameters:
       - $ref: "#/components/parameters/DocumentId"
@@ -2547,6 +2716,178 @@ components:
     DocumentStatus:
       type: string
       enum: [draft, in-review, approved, scheduled, published, archived]
+    SharedEditionReadiness:
+      type: string
+      enum: [missing, pending, blocker, updates, needs-baseline, needs-resolution, translation-stale, ready]
+    SharedMarketBindingMode:
+      type: string
+      enum: [shared, adapted, independent]
+    SharedMarketOverride:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [op, path, value]
+          properties:
+            op: { type: string, enum: [set] }
+            path: { type: string, minLength: 1 }
+            value: {}
+        - type: object
+          additionalProperties: false
+          required: [op, path]
+          properties:
+            op: { type: string, enum: [remove] }
+            path: { type: string, minLength: 1 }
+        - type: object
+          additionalProperties: false
+          required: [op, path, value]
+          properties:
+            op: { type: string, enum: [array-add] }
+            path: { type: string, minLength: 1 }
+            value:
+              type: object
+              additionalProperties: {}
+              required: [id]
+              properties: { id: { type: string } }
+            afterId: { type: string }
+        - type: object
+          additionalProperties: false
+          required: [op, path, id]
+          properties:
+            op: { type: string, enum: [array-remove] }
+            path: { type: string, minLength: 1 }
+            id: { type: string }
+        - type: object
+          additionalProperties: false
+          required: [op, path, ids]
+          properties:
+            op: { type: string, enum: [array-reorder] }
+            path: { type: string, minLength: 1 }
+            ids: { type: array, items: { type: string }, minItems: 1 }
+    SharedMarketConflict:
+      type: object
+      required: [path, kind, message]
+      properties:
+        path: { type: string }
+        kind:
+          type: string
+          enum: [invalid-path, unsupported-structure, deleted-baseline-value, concurrent-value-change, array-add-conflict, array-remove-conflict, array-reorder-conflict]
+        message: { type: string }
+    SharedMarketConflictDecision:
+      type: object
+      additionalProperties: false
+      required: [path, choice]
+      properties:
+        path: { type: string, minLength: 1 }
+        choice:
+          type: string
+          enum: [shared, market]
+    SharedMarketBaselineInput:
+      type: object
+      additionalProperties: false
+      required: [locale, sourceRevisionId, snapshot]
+      properties:
+        locale: { type: string, minLength: 2, maxLength: 16 }
+        sourceRevisionId: { type: string }
+        snapshot: { type: object, additionalProperties: true }
+        expectedRevisionNumber: { type: number, multipleOf: 1, minimum: 1 }
+    SharedMarketBaseline:
+      type: object
+      required: [id, documentId, locale, revisionId, revisionNumber, sourceRevisionId, snapshot, mediaReferences, createdAt]
+      properties:
+        id: { type: string }
+        documentId: { type: string }
+        locale: { type: string }
+        revisionId: { type: string }
+        revisionNumber: { type: number, multipleOf: 1 }
+        sourceRevisionId: { type: ["string", "null"] }
+        snapshot: { type: object, additionalProperties: true }
+        mediaReferences: { type: array, items: { type: object, additionalProperties: true } }
+        createdAt: { type: string, format: date-time }
+    SharedMarketBindingInput:
+      type: object
+      additionalProperties: false
+      required: [marketEditionId, locale, mode, version]
+      properties:
+        marketEditionId: { type: string }
+        locale: { type: string, minLength: 2, maxLength: 16 }
+        mode: { $ref: "#/components/schemas/SharedMarketBindingMode" }
+        baselineId: { type: string }
+        baselineRevisionId: { type: string, description: Required for Shared and Adapted bindings; freezes the exact neutral revision. }
+        independentRevisionId: { type: string, description: Required for Independent bindings; must be an exact saved destination revision. }
+        translationSourceRevisionId: { type: string, description: Explicit shared-baseline revision from which this locale was translated; setting it acknowledges the current translation lineage. }
+        version: { type: number, multipleOf: 1, minimum: 0, description: "Use 0 only to create a previously unbound market edition; existing bindings require their exact positive version." }
+    SharedMarketOverridesInput:
+      type: object
+      additionalProperties: false
+      required: [version, baselineRevisionId, operations]
+      properties:
+        version: { type: number, multipleOf: 1, minimum: 1 }
+        baselineRevisionId: { type: string, description: Exact adopted baseline revision against which the sparse operations were authored. }
+        operations:
+          type: array
+          items: { $ref: "#/components/schemas/SharedMarketOverride" }
+    SharedMarketBinding:
+      type: object
+      required: [id, documentId, marketEditionId, locale, mode, version, operations, materializedRevisionId, translationState, updatedAt]
+      properties:
+        id: { type: string }
+        documentId: { type: string }
+        marketEditionId: { type: string }
+        locale: { type: string }
+        mode: { $ref: "#/components/schemas/SharedMarketBindingMode" }
+        baselineId: { type: ["string", "null"] }
+        baselineRevisionId: { type: ["string", "null"] }
+        heldBaselineRevisionId: { type: ["string", "null"], description: Explicitly held active baseline revision; null means no editor hold. }
+        translationSourceRevisionId: { type: ["string", "null"], description: Explicit shared-baseline revision acknowledged as this locale's translation source. }
+        version: { type: number, multipleOf: 1 }
+        operations: { type: array, items: { $ref: "#/components/schemas/SharedMarketOverride" } }
+        materializedRevisionId: { type: ["string", "null"] }
+        translationState: { type: string, enum: [current, stale, not-applicable] }
+        updatedAt: { type: string, format: date-time }
+    SharedMarketComparison:
+      type: object
+      required: [binding, baselineRevisionId, previousSnapshot, currentSnapshot, localSnapshot, mergedSnapshot, conflicts, canAutoAdopt]
+      properties:
+        binding: { $ref: "#/components/schemas/SharedMarketBinding" }
+        baselineRevisionId: { type: string }
+        previousSnapshot: { type: object, additionalProperties: true }
+        currentSnapshot: { type: object, additionalProperties: true }
+        localSnapshot: { type: object, additionalProperties: true }
+        mergedSnapshot: { type: object, additionalProperties: true }
+        conflicts: { type: array, items: { $ref: "#/components/schemas/SharedMarketConflict" } }
+        canAutoAdopt: { type: boolean }
+    SharedMarketResolveInput:
+      type: object
+      additionalProperties: false
+      required: [version, baselineRevisionId, action]
+      properties:
+        version: { type: number, multipleOf: 1, minimum: 1 }
+        baselineRevisionId: { type: string, description: Exact active baseline revision shown in the comparison. }
+        action: { type: string, enum: [adopt, keep, reset, detach] }
+        conflictDecisions:
+          type: array
+          description: Required for each path that conflicts during adopt. Shared drops its local operation; market explicitly retains it.
+          items: { $ref: "#/components/schemas/SharedMarketConflictDecision" }
+    SharedMarketEditionMatrix:
+      type: object
+      required: [baselines, bindings]
+      properties:
+        baselines: { type: array, items: { $ref: "#/components/schemas/SharedMarketBaseline" } }
+        bindings: { type: array, items: { $ref: "#/components/schemas/SharedMarketBinding" } }
+    SharedMarketMigrationReportInput:
+      type: object
+      additionalProperties: false
+      required: [dryRun]
+      properties:
+        dryRun: { type: boolean }
+    SharedMarketMigrationReport:
+      type: object
+      required: [dryRun, receiptId, candidates, notes]
+      properties:
+        dryRun: { type: boolean }
+        receiptId: { type: ["string", "null"] }
+        candidates: { type: array, items: { type: object, additionalProperties: true } }
+        notes: { type: array, items: { type: string } }
     CmsImmutableMediaReference:
       type: object
       additionalProperties: false

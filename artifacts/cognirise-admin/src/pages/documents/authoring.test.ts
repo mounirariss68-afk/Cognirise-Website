@@ -29,7 +29,7 @@ test("guided editor uses a shared-content destination checklist", async () => {
 test("content editor chooses governed media instead of accepting copied IDs", async () => {
   const editor = await readFile(new URL("src/pages/documents/ContentEditor.tsx", adminRoot), "utf8");
   const mediaField = await readFile(new URL("src/pages/documents/MediaField.tsx", adminRoot), "utf8");
-  assert.match(editor, /<MediaField label="Case-study hero image"/);
+  assert.match(editor, /<MediaField.*label="Case-study hero image"/);
   assert.doesNotMatch(editor, /label="Hero media ID"/);
   assert.match(editor, /legacyMediaId=\{value\.heroMediaId\}/);
   assert.match(mediaField, /value\?\.mediaId \?\? legacyMediaId/);

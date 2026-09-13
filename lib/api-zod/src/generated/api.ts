@@ -986,7 +986,8 @@ export const ListDocumentsQueryParams = zod.object({
   "kind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']).optional(),
   "status": zod.enum(['draft', 'in-review', 'approved', 'scheduled', 'published', 'archived']).optional(),
   "market": zod.coerce.string().optional(),
-  "locale": zod.coerce.string().optional()
+  "locale": zod.coerce.string().optional(),
+  "readiness": zod.enum(['missing', 'pending', 'blocker', 'updates', 'needs-baseline', 'needs-resolution', 'translation-stale', 'ready']).optional().describe('Filter the complete eligible result set before pagination.')
 })
 
 export const listDocumentsResponseOnePageMultipleOf = 1;
@@ -3635,6 +3636,451 @@ export const CreateDocumentEditionOverrideResponse = zod.object({
   "note": zod.string().nullish(),
   "createdBy": zod.string(),
   "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Inspect neutral baselines and exact Shared, Adapted, or Independent market bindings
+ */
+export const GetSharedMarketEditionMatrixParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const getSharedMarketEditionMatrixResponseBaselinesItemRevisionNumberMultipleOf = 1;
+
+export const getSharedMarketEditionMatrixResponseBindingsItemVersionMultipleOf = 1;
+
+
+
+
+
+
+
+
+
+export const GetSharedMarketEditionMatrixResponse = zod.object({
+  "baselines": zod.array(zod.object({
+  "id": zod.string(),
+  "documentId": zod.string(),
+  "locale": zod.string(),
+  "revisionId": zod.string(),
+  "revisionNumber": zod.number().multipleOf(getSharedMarketEditionMatrixResponseBaselinesItemRevisionNumberMultipleOf),
+  "sourceRevisionId": zod.string().nullable(),
+  "snapshot": zod.record(zod.string(), zod.unknown()),
+  "mediaReferences": zod.array(zod.record(zod.string(), zod.unknown())),
+  "createdAt": zod.coerce.date()
+})),
+  "bindings": zod.array(zod.object({
+  "id": zod.string(),
+  "documentId": zod.string(),
+  "marketEditionId": zod.string(),
+  "locale": zod.string(),
+  "mode": zod.enum(['shared', 'adapted', 'independent']),
+  "baselineId": zod.string().nullish(),
+  "baselineRevisionId": zod.string().nullish(),
+  "heldBaselineRevisionId": zod.string().nullish().describe('Explicitly held active baseline revision; null means no editor hold.'),
+  "translationSourceRevisionId": zod.string().nullish().describe('Explicit shared-baseline revision acknowledged as this locale\'s translation source.'),
+  "version": zod.number().multipleOf(getSharedMarketEditionMatrixResponseBindingsItemVersionMultipleOf),
+  "operations": zod.array(zod.union([zod.object({
+  "op": zod.enum(['set']),
+  "path": zod.string().min(1),
+  "value": zod.unknown()
+}),zod.object({
+  "op": zod.enum(['remove']),
+  "path": zod.string().min(1)
+}),zod.object({
+  "op": zod.enum(['array-add']),
+  "path": zod.string().min(1),
+  "value": zod.object({
+  "id": zod.string()
+}),
+  "afterId": zod.string().optional()
+}),zod.object({
+  "op": zod.enum(['array-remove']),
+  "path": zod.string().min(1),
+  "id": zod.string()
+}),zod.object({
+  "op": zod.enum(['array-reorder']),
+  "path": zod.string().min(1),
+  "ids": zod.array(zod.string()).min(1)
+})])),
+  "materializedRevisionId": zod.string().nullable(),
+  "translationState": zod.enum(['current', 'stale', 'not-applicable']),
+  "updatedAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Save a validated neutral editor snapshot with explicitly pinned historical source lineage
+ */
+export const EstablishSharedMarketBaselineParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const establishSharedMarketBaselineBodyLocaleMin = 2;
+export const establishSharedMarketBaselineBodyLocaleMax = 16;
+
+export const establishSharedMarketBaselineBodyExpectedRevisionNumberMultipleOf = 1;
+
+
+
+export const EstablishSharedMarketBaselineBody = zod.object({
+  "locale": zod.string().min(establishSharedMarketBaselineBodyLocaleMin).max(establishSharedMarketBaselineBodyLocaleMax),
+  "sourceRevisionId": zod.string(),
+  "snapshot": zod.record(zod.string(), zod.unknown()),
+  "expectedRevisionNumber": zod.number().min(1).multipleOf(establishSharedMarketBaselineBodyExpectedRevisionNumberMultipleOf).optional()
+})
+
+export const establishSharedMarketBaselineResponseRevisionNumberMultipleOf = 1;
+
+
+
+export const EstablishSharedMarketBaselineResponse = zod.object({
+  "id": zod.string(),
+  "documentId": zod.string(),
+  "locale": zod.string(),
+  "revisionId": zod.string(),
+  "revisionNumber": zod.number().multipleOf(establishSharedMarketBaselineResponseRevisionNumberMultipleOf),
+  "sourceRevisionId": zod.string().nullable(),
+  "snapshot": zod.record(zod.string(), zod.unknown()),
+  "mediaReferences": zod.array(zod.record(zod.string(), zod.unknown())),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Bind an exact market locale as Shared, Adapted, or Independent
+ */
+export const BindSharedMarketEditionParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const bindSharedMarketEditionBodyLocaleMin = 2;
+export const bindSharedMarketEditionBodyLocaleMax = 16;
+
+export const bindSharedMarketEditionBodyVersionMin = 0;
+export const bindSharedMarketEditionBodyVersionMultipleOf = 1;
+
+
+
+export const BindSharedMarketEditionBody = zod.object({
+  "marketEditionId": zod.string(),
+  "locale": zod.string().min(bindSharedMarketEditionBodyLocaleMin).max(bindSharedMarketEditionBodyLocaleMax),
+  "mode": zod.enum(['shared', 'adapted', 'independent']),
+  "baselineId": zod.string().optional(),
+  "baselineRevisionId": zod.string().optional().describe('Required for Shared and Adapted bindings; freezes the exact neutral revision.'),
+  "independentRevisionId": zod.string().optional().describe('Required for Independent bindings; must be an exact saved destination revision.'),
+  "translationSourceRevisionId": zod.string().optional().describe('Explicit shared-baseline revision from which this locale was translated; setting it acknowledges the current translation lineage.'),
+  "version": zod.number().min(bindSharedMarketEditionBodyVersionMin).multipleOf(bindSharedMarketEditionBodyVersionMultipleOf).describe('Use 0 only to create a previously unbound market edition; existing bindings require their exact positive version.')
+})
+
+export const bindSharedMarketEditionResponseVersionMultipleOf = 1;
+
+
+
+
+
+
+
+
+
+export const BindSharedMarketEditionResponse = zod.object({
+  "id": zod.string(),
+  "documentId": zod.string(),
+  "marketEditionId": zod.string(),
+  "locale": zod.string(),
+  "mode": zod.enum(['shared', 'adapted', 'independent']),
+  "baselineId": zod.string().nullish(),
+  "baselineRevisionId": zod.string().nullish(),
+  "heldBaselineRevisionId": zod.string().nullish().describe('Explicitly held active baseline revision; null means no editor hold.'),
+  "translationSourceRevisionId": zod.string().nullish().describe('Explicit shared-baseline revision acknowledged as this locale\'s translation source.'),
+  "version": zod.number().multipleOf(bindSharedMarketEditionResponseVersionMultipleOf),
+  "operations": zod.array(zod.union([zod.object({
+  "op": zod.enum(['set']),
+  "path": zod.string().min(1),
+  "value": zod.unknown()
+}),zod.object({
+  "op": zod.enum(['remove']),
+  "path": zod.string().min(1)
+}),zod.object({
+  "op": zod.enum(['array-add']),
+  "path": zod.string().min(1),
+  "value": zod.object({
+  "id": zod.string()
+}),
+  "afterId": zod.string().optional()
+}),zod.object({
+  "op": zod.enum(['array-remove']),
+  "path": zod.string().min(1),
+  "id": zod.string()
+}),zod.object({
+  "op": zod.enum(['array-reorder']),
+  "path": zod.string().min(1),
+  "ids": zod.array(zod.string()).min(1)
+})])),
+  "materializedRevisionId": zod.string().nullable(),
+  "translationState": zod.enum(['current', 'stale', 'not-applicable']),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Save sparse stable-ID overrides and materialize an immutable exact revision
+ */
+export const SaveSharedMarketOverridesParams = zod.object({
+  "documentId": zod.coerce.string(),
+  "bindingId": zod.coerce.string()
+})
+
+export const saveSharedMarketOverridesBodyVersionMultipleOf = 1;
+
+
+
+
+
+
+
+
+
+export const SaveSharedMarketOverridesBody = zod.object({
+  "version": zod.number().min(1).multipleOf(saveSharedMarketOverridesBodyVersionMultipleOf),
+  "baselineRevisionId": zod.string().describe('Exact adopted baseline revision against which the sparse operations were authored.'),
+  "operations": zod.array(zod.union([zod.object({
+  "op": zod.enum(['set']),
+  "path": zod.string().min(1),
+  "value": zod.unknown()
+}),zod.object({
+  "op": zod.enum(['remove']),
+  "path": zod.string().min(1)
+}),zod.object({
+  "op": zod.enum(['array-add']),
+  "path": zod.string().min(1),
+  "value": zod.object({
+  "id": zod.string()
+}),
+  "afterId": zod.string().optional()
+}),zod.object({
+  "op": zod.enum(['array-remove']),
+  "path": zod.string().min(1),
+  "id": zod.string()
+}),zod.object({
+  "op": zod.enum(['array-reorder']),
+  "path": zod.string().min(1),
+  "ids": zod.array(zod.string()).min(1)
+})]))
+})
+
+export const saveSharedMarketOverridesResponseVersionMultipleOf = 1;
+
+
+
+
+
+
+
+
+
+export const SaveSharedMarketOverridesResponse = zod.object({
+  "id": zod.string(),
+  "documentId": zod.string(),
+  "marketEditionId": zod.string(),
+  "locale": zod.string(),
+  "mode": zod.enum(['shared', 'adapted', 'independent']),
+  "baselineId": zod.string().nullish(),
+  "baselineRevisionId": zod.string().nullish(),
+  "heldBaselineRevisionId": zod.string().nullish().describe('Explicitly held active baseline revision; null means no editor hold.'),
+  "translationSourceRevisionId": zod.string().nullish().describe('Explicit shared-baseline revision acknowledged as this locale\'s translation source.'),
+  "version": zod.number().multipleOf(saveSharedMarketOverridesResponseVersionMultipleOf),
+  "operations": zod.array(zod.union([zod.object({
+  "op": zod.enum(['set']),
+  "path": zod.string().min(1),
+  "value": zod.unknown()
+}),zod.object({
+  "op": zod.enum(['remove']),
+  "path": zod.string().min(1)
+}),zod.object({
+  "op": zod.enum(['array-add']),
+  "path": zod.string().min(1),
+  "value": zod.object({
+  "id": zod.string()
+}),
+  "afterId": zod.string().optional()
+}),zod.object({
+  "op": zod.enum(['array-remove']),
+  "path": zod.string().min(1),
+  "id": zod.string()
+}),zod.object({
+  "op": zod.enum(['array-reorder']),
+  "path": zod.string().min(1),
+  "ids": zod.array(zod.string()).min(1)
+})])),
+  "materializedRevisionId": zod.string().nullable(),
+  "translationState": zod.enum(['current', 'stale', 'not-applicable']),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Perform an explicit three-way baseline update comparison
+ */
+export const CompareSharedMarketBaselineParams = zod.object({
+  "documentId": zod.coerce.string(),
+  "bindingId": zod.coerce.string()
+})
+
+export const compareSharedMarketBaselineResponseBindingVersionMultipleOf = 1;
+
+
+
+
+
+
+
+
+
+export const CompareSharedMarketBaselineResponse = zod.object({
+  "binding": zod.object({
+  "id": zod.string(),
+  "documentId": zod.string(),
+  "marketEditionId": zod.string(),
+  "locale": zod.string(),
+  "mode": zod.enum(['shared', 'adapted', 'independent']),
+  "baselineId": zod.string().nullish(),
+  "baselineRevisionId": zod.string().nullish(),
+  "heldBaselineRevisionId": zod.string().nullish().describe('Explicitly held active baseline revision; null means no editor hold.'),
+  "translationSourceRevisionId": zod.string().nullish().describe('Explicit shared-baseline revision acknowledged as this locale\'s translation source.'),
+  "version": zod.number().multipleOf(compareSharedMarketBaselineResponseBindingVersionMultipleOf),
+  "operations": zod.array(zod.union([zod.object({
+  "op": zod.enum(['set']),
+  "path": zod.string().min(1),
+  "value": zod.unknown()
+}),zod.object({
+  "op": zod.enum(['remove']),
+  "path": zod.string().min(1)
+}),zod.object({
+  "op": zod.enum(['array-add']),
+  "path": zod.string().min(1),
+  "value": zod.object({
+  "id": zod.string()
+}),
+  "afterId": zod.string().optional()
+}),zod.object({
+  "op": zod.enum(['array-remove']),
+  "path": zod.string().min(1),
+  "id": zod.string()
+}),zod.object({
+  "op": zod.enum(['array-reorder']),
+  "path": zod.string().min(1),
+  "ids": zod.array(zod.string()).min(1)
+})])),
+  "materializedRevisionId": zod.string().nullable(),
+  "translationState": zod.enum(['current', 'stale', 'not-applicable']),
+  "updatedAt": zod.coerce.date()
+}),
+  "baselineRevisionId": zod.string(),
+  "previousSnapshot": zod.record(zod.string(), zod.unknown()),
+  "currentSnapshot": zod.record(zod.string(), zod.unknown()),
+  "localSnapshot": zod.record(zod.string(), zod.unknown()),
+  "mergedSnapshot": zod.record(zod.string(), zod.unknown()),
+  "conflicts": zod.array(zod.object({
+  "path": zod.string(),
+  "kind": zod.enum(['invalid-path', 'unsupported-structure', 'deleted-baseline-value', 'concurrent-value-change', 'array-add-conflict', 'array-remove-conflict', 'array-reorder-conflict']),
+  "message": zod.string()
+})),
+  "canAutoAdopt": zod.boolean()
+})
+
+
+/**
+ * @summary Explicitly adopt, keep, reset, or detach an exact active baseline revision and materialize a new draft
+ */
+export const ResolveSharedMarketBaselineUpdateParams = zod.object({
+  "documentId": zod.coerce.string(),
+  "bindingId": zod.coerce.string()
+})
+
+export const resolveSharedMarketBaselineUpdateBodyVersionMultipleOf = 1;
+
+
+
+
+export const ResolveSharedMarketBaselineUpdateBody = zod.object({
+  "version": zod.number().min(1).multipleOf(resolveSharedMarketBaselineUpdateBodyVersionMultipleOf),
+  "baselineRevisionId": zod.string().describe('Exact active baseline revision shown in the comparison.'),
+  "action": zod.enum(['adopt', 'keep', 'reset', 'detach']),
+  "conflictDecisions": zod.array(zod.object({
+  "path": zod.string().min(1),
+  "choice": zod.enum(['shared', 'market'])
+})).optional().describe('Required for each path that conflicts during adopt. Shared drops its local operation; market explicitly retains it.')
+})
+
+export const resolveSharedMarketBaselineUpdateResponseVersionMultipleOf = 1;
+
+
+
+
+
+
+
+
+
+export const ResolveSharedMarketBaselineUpdateResponse = zod.object({
+  "id": zod.string(),
+  "documentId": zod.string(),
+  "marketEditionId": zod.string(),
+  "locale": zod.string(),
+  "mode": zod.enum(['shared', 'adapted', 'independent']),
+  "baselineId": zod.string().nullish(),
+  "baselineRevisionId": zod.string().nullish(),
+  "heldBaselineRevisionId": zod.string().nullish().describe('Explicitly held active baseline revision; null means no editor hold.'),
+  "translationSourceRevisionId": zod.string().nullish().describe('Explicit shared-baseline revision acknowledged as this locale\'s translation source.'),
+  "version": zod.number().multipleOf(resolveSharedMarketBaselineUpdateResponseVersionMultipleOf),
+  "operations": zod.array(zod.union([zod.object({
+  "op": zod.enum(['set']),
+  "path": zod.string().min(1),
+  "value": zod.unknown()
+}),zod.object({
+  "op": zod.enum(['remove']),
+  "path": zod.string().min(1)
+}),zod.object({
+  "op": zod.enum(['array-add']),
+  "path": zod.string().min(1),
+  "value": zod.object({
+  "id": zod.string()
+}),
+  "afterId": zod.string().optional()
+}),zod.object({
+  "op": zod.enum(['array-remove']),
+  "path": zod.string().min(1),
+  "id": zod.string()
+}),zod.object({
+  "op": zod.enum(['array-reorder']),
+  "path": zod.string().min(1),
+  "ids": zod.array(zod.string()).min(1)
+})])),
+  "materializedRevisionId": zod.string().nullable(),
+  "translationState": zod.enum(['current', 'stale', 'not-applicable']),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Produce a dry-run migration report or an immutable receipt without source promotion
+ */
+export const ReportSharedMarketMigrationParams = zod.object({
+  "documentId": zod.coerce.string()
+})
+
+export const ReportSharedMarketMigrationBody = zod.object({
+  "dryRun": zod.boolean()
+})
+
+export const ReportSharedMarketMigrationResponse = zod.object({
+  "dryRun": zod.boolean(),
+  "receiptId": zod.string().nullable(),
+  "candidates": zod.array(zod.record(zod.string(), zod.unknown())),
+  "notes": zod.array(zod.string())
 })
 
 
