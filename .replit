@@ -27,3 +27,7 @@ packages = ["libreoffice", "blender", "xorg.xorgserver", "mesa", "ffmpeg"]
 
 [userenv.development]
 VITE_CMS_CUTOVER_INDUSTRIES = "true"
+
+[userenv.shared]
+EDITORIAL_DIGEST_FROM = "Cognirise Editorial <support@cognirise.ai>"
+EDITORIAL_DIGEST_SAFE_RECIPIENT = "mounir@cognirise.ai"
