@@ -2,6 +2,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { startAccessDeliveryWorker } from "./lib/access-delivery";
 import { runReadinessChecks } from "./routes/health";
+import { startEditorialWorkWorker } from "./lib/editorial-work";
 
 const rawPort = process.env["PORT"];
 
@@ -30,4 +31,5 @@ app.listen(port, (err) => {
     }
   });
   startAccessDeliveryWorker();
+  startEditorialWorkWorker();
 });

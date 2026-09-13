@@ -170,6 +170,7 @@ mock.module("@workspace/api-client-react", {
     getGetMediaQueryKey: () => ["media"],
     getListMediaQueryKey: () => ["media-list"],
     useGetSession: () => ({ data: currentSession, isLoading: false, isError: false }),
+    customFetch: async () => ({ items: [] }),
     useListDocuments: () => ({ data: { items: [] }, isLoading: false, isError: false }),
     useListDocumentEditions: () => {
       React.useSyncExternalStore((listener) => { listeners.add(listener); return () => listeners.delete(listener); }, () => `${editionsLoading}:${JSON.stringify(currentEditions)}`, () => "");
@@ -1201,6 +1202,121 @@ test("valid market deep links win over shared/default selection for market code 
     currentSearch = "";
     currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
     currentEditions = [edition];
+  }
+});
+
+test("explicit market reload waits for both catalogues and never briefly selects the availability shared source", async () => {
+  const ksa = { ...edition, market: "ksa", locale: "en", revisionId: "ksa-revision" };
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en", enabled: true },
+  ];
+  currentEditions = [edition, ksa];
+  currentAvailability = {
+    documentId: "document-1", draftVersion: 1, reviewedVersion: null, publishedVersion: 1,
+    sharedSource: { editionId: "uae-edition", revisionId: "revision-1", market: "uae", locale: "en-US" },
+    affectedEditions: [], items: [],
+  };
+  try {
+    for (const [marketParam, first] of [["ksa", "availability"], ["ksa-edition", "catalog"]] as const) {
+      currentSearch = `?market=${marketParam}&locale=en`;
+      editionsLoading = true;
+      marketsLoading = true;
+      const view = await renderDetail();
+      try {
+        assert.doesNotMatch(view.container.textContent ?? "", /Editing:.*UAE/, "query-pending render must not fall back to availability source");
+        await React.act(async () => {
+          if (first === "catalog") marketsLoading = false;
+          else editionsLoading = false;
+          notify();
+        });
+        assert.doesNotMatch(view.container.textContent ?? "", /Editing:.*UAE/, "one ready catalogue still cannot choose a fallback");
+        await React.act(async () => {
+          editionsLoading = false;
+          marketsLoading = false;
+          notify();
+        });
+        assert.match(view.container.querySelector('[role="combobox"]')?.textContent ?? "", /KSA/);
+        assert.doesNotMatch(view.container.querySelector('[role="combobox"]')?.textContent ?? "", /UAE/);
+      } finally {
+        await view.unmount();
+      }
+    }
+    currentSearch = "?market=missing-market&locale=en";
+    editionsLoading = false;
+    marketsLoading = false;
+    const invalid = await renderDetail();
+    try {
+      assert.match(invalid.container.textContent ?? "", /requested MISSING-MARKET · en edition is unavailable/i);
+      assert.doesNotMatch(invalid.container.textContent ?? "", /Editing:.*UAE/);
+    } finally {
+      await invalid.unmount();
+    }
+  } finally {
+    currentLocation = "/content/document-1";
+    currentSearch = "";
+    editionsLoading = false;
+    marketsLoading = false;
+    currentAvailability = undefined;
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentEditions = [edition];
+  }
+});
+
+test("frozen adapted bindings expose comparison and lineage acknowledgement, never a forbidden rebind", async () => {
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentSharedMatrix = {
+    baselines: [
+      { id: "active-en-baseline", documentId: "document-1", locale: "en-US", revisionId: "active-en-revision", revisionNumber: 5, sourceRevisionId: "revision-1", snapshot: {}, mediaReferences: [], createdAt: new Date() },
+      { id: "translation-baseline", documentId: "document-1", locale: "ar", revisionId: "translation-revision", revisionNumber: 4, sourceRevisionId: "revision-1", snapshot: {}, mediaReferences: [], createdAt: new Date() },
+    ],
+    bindings: [{
+      id: "binding-1", documentId: "document-1", marketEditionId: "uae-edition", locale: "en-US", mode: "adapted",
+      baselineId: "historic-baseline", baselineRevisionId: "historic-revision", version: 7, operations: [],
+      materializedRevisionId: "revision-1", translationState: "stale", updatedAt: new Date(),
+    }],
+  };
+  const view = await renderDetail();
+  try {
+    assert.equal(view.container.querySelector('[aria-label="Shared binding mode"]'), null);
+    assert.equal([...view.container.querySelectorAll("button")].some((item) => item.textContent?.includes("Bind selected exact edition")), false);
+    assert.ok(button(view.container, "Compare / resolve"));
+    const trigger = view.container.querySelector<HTMLButtonElement>('[aria-label="Translation source acknowledgement"]')!;
+    await React.act(async () => { trigger.dispatchEvent(new dom.window.MouseEvent("mousedown", { bubbles: true, button: 0 })); trigger.click(); });
+    const translation = [...document.body.querySelectorAll<HTMLElement>('[role="option"]')].find((item) => item.textContent?.includes("AR baseline rev 4"));
+    assert.ok(translation);
+    await React.act(async () => translation.click());
+    await React.act(async () => button(view.container, "Acknowledge translation lineage").click());
+    assert.equal(bindSharedInput?.data.mode, "adapted");
+    assert.equal(bindSharedInput?.data.baselineId, "historic-baseline", "ACK retains a frozen baseline absent from active choices");
+    assert.equal(bindSharedInput?.data.baselineRevisionId, "historic-revision", "translation acknowledgement retains the frozen adopted baseline");
+    assert.equal(bindSharedInput?.data.translationSourceRevisionId, "translation-revision");
+    assert.equal(bindSharedInput?.data.version, 7);
+  } finally {
+    await view.unmount();
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    bindSharedInput = undefined;
+  }
+});
+
+test("an explicit Shared source link selects the exact internal edition without a market catalogue entry", async () => {
+  currentAvailability = {
+    documentId: "document-1", draftVersion: 1, reviewedVersion: null, publishedVersion: 1,
+    sharedSource: { editionId: "shared-edition-1", revisionId: "revision-1", market: "shared-source", locale: "und" },
+    affectedEditions: [], items: [],
+  };
+  currentSearch = "?market=shared-source&locale=und";
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentEditions = [edition];
+  const view = await renderDetail();
+  try {
+    assert.match(view.container.textContent ?? "", /Exact target: Shared source · und/);
+    assert.doesNotMatch(view.container.textContent ?? "", /requested SHARED-SOURCE.*unavailable/i);
+  } finally {
+    await view.unmount();
+    currentSearch = "";
+    currentAvailability = undefined;
   }
 });
 

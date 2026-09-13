@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarGroup, SidebarGroupLabel, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Loader2, LayoutDashboard, Users, UserSquare2, Component, Newspaper, Briefcase, Factory, PanelsTopLeft, Image as ImageIcon, Globe, Inbox, ShieldAlert, LogOut, ChevronUp, Lock, ListTree, MapPin, Mail } from "lucide-react";
+import { Loader2, LayoutDashboard, Users, UserSquare2, Component, Newspaper, Briefcase, Factory, PanelsTopLeft, Image as ImageIcon, Globe, Inbox, ShieldAlert, LogOut, ChevronUp, Lock, ListTree, MapPin, Mail, UserRoundCheck } from "lucide-react";
 import { CogniriseBrand } from "@/components/brand/CogniriseBrand";
 
 function AppSidebar() {
@@ -32,6 +32,7 @@ function AppSidebar() {
       title: "Overview",
       items: [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+        { title: "Editorial Work", url: "/editorial-work", icon: UserRoundCheck },
         ...(isAdministrator ? [{ title: "Submissions", url: "/submissions", icon: Inbox }] : []),
       ]
     },

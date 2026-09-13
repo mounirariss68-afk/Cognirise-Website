@@ -1402,6 +1402,7 @@ export const ListDocumentsResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf),
+  "editionId": zod.string().nullable().describe('Exact market-edition identity represented by this document response'),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
   "effectiveMarket": zod.string().nullable(),
@@ -1849,6 +1850,7 @@ export const CreateDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(createDocumentResponseRevisionNumberMultipleOf),
+  "editionId": zod.string().nullable().describe('Exact market-edition identity represented by this document response'),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
   "effectiveMarket": zod.string().nullable(),
@@ -2272,6 +2274,7 @@ export const GetDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(getDocumentResponseRevisionNumberMultipleOf),
+  "editionId": zod.string().nullable().describe('Exact market-edition identity represented by this document response'),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
   "effectiveMarket": zod.string().nullable(),
@@ -2728,6 +2731,7 @@ export const UpdateDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(updateDocumentResponseRevisionNumberMultipleOf),
+  "editionId": zod.string().nullable().describe('Exact market-edition identity represented by this document response'),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
   "effectiveMarket": zod.string().nullable(),
@@ -3636,6 +3640,531 @@ export const CreateDocumentEditionOverrideResponse = zod.object({
   "note": zod.string().nullish(),
   "createdBy": zod.string(),
   "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List the assignment for an exact editorial edition
+ */
+export const listEditorialAssignmentsQueryEditionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const listEditorialAssignmentsQueryMineDefault = false;
+
+export const ListEditorialAssignmentsQueryParams = zod.object({
+  "editionId": zod.coerce.string().regex(listEditorialAssignmentsQueryEditionIdRegExp),
+  "mine": zod.coerce.boolean().default(listEditorialAssignmentsQueryMineDefault),
+  "status": zod.enum(['active', 'completed', 'blocked']).optional()
+})
+
+export const listEditorialAssignmentsResponseItemsItemIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const listEditorialAssignmentsResponseItemsItemEditionIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const listEditorialAssignmentsResponseItemsItemDocumentIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const listEditorialAssignmentsResponseItemsItemEditorIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const listEditorialAssignmentsResponseItemsItemReviewerIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const listEditorialAssignmentsResponseItemsItemEditorOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const listEditorialAssignmentsResponseItemsItemReviewerOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const ListEditorialAssignmentsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string().regex(listEditorialAssignmentsResponseItemsItemIdRegExp),
+  "editionId": zod.union([zod.string().regex(listEditorialAssignmentsResponseItemsItemEditionIdOneRegExp),zod.null()]),
+  "documentId": zod.string().regex(listEditorialAssignmentsResponseItemsItemDocumentIdRegExp),
+  "editorId": zod.union([zod.string().regex(listEditorialAssignmentsResponseItemsItemEditorIdOneRegExp),zod.null()]),
+  "reviewerId": zod.union([zod.string().regex(listEditorialAssignmentsResponseItemsItemReviewerIdOneRegExp),zod.null()]),
+  "editor": zod.union([zod.object({
+  "id": zod.string().regex(listEditorialAssignmentsResponseItemsItemEditorOneIdRegExp),
+  "name": zod.string()
+}),zod.null()]),
+  "reviewer": zod.union([zod.object({
+  "id": zod.string().regex(listEditorialAssignmentsResponseItemsItemReviewerOneIdRegExp),
+  "name": zod.string()
+}),zod.null()]),
+  "dueAt": zod.coerce.date().nullable(),
+  "status": zod.enum(['active', 'completed', 'blocked']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Upsert the active assignment for an exact editorial edition
+ */
+export const upsertEditorialAssignmentPathEditionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const UpsertEditorialAssignmentParams = zod.object({
+  "editionId": zod.coerce.string().regex(upsertEditorialAssignmentPathEditionIdRegExp)
+})
+
+export const upsertEditorialAssignmentBodyEditorIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const upsertEditorialAssignmentBodyReviewerIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const UpsertEditorialAssignmentBody = zod.object({
+  "editorId": zod.union([zod.string().regex(upsertEditorialAssignmentBodyEditorIdOneRegExp),zod.null()]).optional(),
+  "reviewerId": zod.union([zod.string().regex(upsertEditorialAssignmentBodyReviewerIdOneRegExp),zod.null()]).optional(),
+  "dueAt": zod.coerce.date().nullish()
+})
+
+export const upsertEditorialAssignmentResponseAssignmentIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const upsertEditorialAssignmentResponseAssignmentEditionIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const upsertEditorialAssignmentResponseAssignmentDocumentIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const upsertEditorialAssignmentResponseAssignmentEditorIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const upsertEditorialAssignmentResponseAssignmentReviewerIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const upsertEditorialAssignmentResponseAssignmentEditorOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const upsertEditorialAssignmentResponseAssignmentReviewerOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const UpsertEditorialAssignmentResponse = zod.object({
+  "assignment": zod.object({
+  "id": zod.string().regex(upsertEditorialAssignmentResponseAssignmentIdRegExp),
+  "editionId": zod.union([zod.string().regex(upsertEditorialAssignmentResponseAssignmentEditionIdOneRegExp),zod.null()]),
+  "documentId": zod.string().regex(upsertEditorialAssignmentResponseAssignmentDocumentIdRegExp),
+  "editorId": zod.union([zod.string().regex(upsertEditorialAssignmentResponseAssignmentEditorIdOneRegExp),zod.null()]),
+  "reviewerId": zod.union([zod.string().regex(upsertEditorialAssignmentResponseAssignmentReviewerIdOneRegExp),zod.null()]),
+  "editor": zod.union([zod.object({
+  "id": zod.string().regex(upsertEditorialAssignmentResponseAssignmentEditorOneIdRegExp),
+  "name": zod.string()
+}),zod.null()]),
+  "reviewer": zod.union([zod.object({
+  "id": zod.string().regex(upsertEditorialAssignmentResponseAssignmentReviewerOneIdRegExp),
+  "name": zod.string()
+}),zod.null()]),
+  "dueAt": zod.coerce.date().nullable(),
+  "status": zod.enum(['active', 'completed', 'blocked']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+})
+
+
+/**
+ * @summary Clear the active assignment for an exact editorial edition
+ */
+export const clearEditorialAssignmentPathEditionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const ClearEditorialAssignmentParams = zod.object({
+  "editionId": zod.coerce.string().regex(clearEditorialAssignmentPathEditionIdRegExp)
+})
+
+export const ClearEditorialAssignmentResponse = zod.void()
+
+
+/**
+ * @summary List active users eligible for an exact editorial edition
+ */
+export const listEditorialAssigneesPathEditionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const ListEditorialAssigneesParams = zod.object({
+  "editionId": zod.coerce.string().regex(listEditorialAssigneesPathEditionIdRegExp)
+})
+
+export const listEditorialAssigneesResponseItemsItemIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const ListEditorialAssigneesResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string().regex(listEditorialAssigneesResponseItemsItemIdRegExp),
+  "name": zod.string(),
+  "role": zod.enum(['editor', 'publisher', 'administrator'])
+}))
+})
+
+
+/**
+ * @summary Request review of the current submitted revision
+ */
+export const requestEditorialReviewPathRevisionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const RequestEditorialReviewParams = zod.object({
+  "revisionId": zod.coerce.string().regex(requestEditorialReviewPathRevisionIdRegExp)
+})
+
+export const requestEditorialReviewBodyReviewerIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const requestEditorialReviewBodyNoteMax = 2000;
+
+
+
+export const RequestEditorialReviewBody = zod.object({
+  "reviewerId": zod.string().regex(requestEditorialReviewBodyReviewerIdRegExp).optional(),
+  "note": zod.string().max(requestEditorialReviewBodyNoteMax).optional()
+})
+
+export const requestEditorialReviewResponseReviewRequestIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const requestEditorialReviewResponseReviewRequestEditionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const requestEditorialReviewResponseReviewRequestRevisionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const requestEditorialReviewResponseReviewRequestRequesterIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const requestEditorialReviewResponseReviewRequestReviewerIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const requestEditorialReviewResponseReviewRequestNoteMax = 2000;
+
+export const requestEditorialReviewResponseReviewRequestDecisionNoteMax = 2000;
+
+
+
+export const RequestEditorialReviewResponse = zod.object({
+  "reviewRequest": zod.object({
+  "id": zod.string().regex(requestEditorialReviewResponseReviewRequestIdRegExp),
+  "editionId": zod.string().regex(requestEditorialReviewResponseReviewRequestEditionIdRegExp),
+  "revisionId": zod.string().regex(requestEditorialReviewResponseReviewRequestRevisionIdRegExp),
+  "requesterId": zod.string().regex(requestEditorialReviewResponseReviewRequestRequesterIdRegExp),
+  "reviewerId": zod.string().regex(requestEditorialReviewResponseReviewRequestReviewerIdRegExp),
+  "status": zod.enum(['requested', 'approved', 'rejected', 'superseded', 'blocked']),
+  "note": zod.string().max(requestEditorialReviewResponseReviewRequestNoteMax).nullable(),
+  "decisionNote": zod.string().max(requestEditorialReviewResponseReviewRequestDecisionNoteMax).nullable(),
+  "requestedAt": zod.coerce.date(),
+  "decidedAt": zod.coerce.date().nullable(),
+  "supersededAt": zod.coerce.date().nullable(),
+  "blockedReason": zod.string().nullable()
+})
+})
+
+
+/**
+ * @summary Approve or reject an exact revision review request
+ */
+export const decideEditorialReviewPathReviewRequestIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const DecideEditorialReviewParams = zod.object({
+  "reviewRequestId": zod.coerce.string().regex(decideEditorialReviewPathReviewRequestIdRegExp)
+})
+
+export const decideEditorialReviewBodyOneNoteMax = 2000;
+
+export const decideEditorialReviewBodyTwoNoteMax = 2000;
+
+
+export const decideEditorialReviewBodyTwoNoteRegExp = new RegExp('\\S');
+
+
+export const DecideEditorialReviewBody = zod.union([zod.object({
+  "decision": zod.enum(['approved']),
+  "note": zod.string().max(decideEditorialReviewBodyOneNoteMax).optional()
+}),zod.object({
+  "decision": zod.enum(['rejected']),
+  "note": zod.string().min(1).max(decideEditorialReviewBodyTwoNoteMax).regex(decideEditorialReviewBodyTwoNoteRegExp)
+})])
+
+export const decideEditorialReviewResponseReviewRequestIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const decideEditorialReviewResponseReviewRequestEditionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const decideEditorialReviewResponseReviewRequestRevisionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const decideEditorialReviewResponseReviewRequestRequesterIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const decideEditorialReviewResponseReviewRequestReviewerIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const decideEditorialReviewResponseReviewRequestNoteMax = 2000;
+
+export const decideEditorialReviewResponseReviewRequestDecisionNoteMax = 2000;
+
+
+
+export const DecideEditorialReviewResponse = zod.object({
+  "reviewRequest": zod.object({
+  "id": zod.string().regex(decideEditorialReviewResponseReviewRequestIdRegExp),
+  "editionId": zod.string().regex(decideEditorialReviewResponseReviewRequestEditionIdRegExp),
+  "revisionId": zod.string().regex(decideEditorialReviewResponseReviewRequestRevisionIdRegExp),
+  "requesterId": zod.string().regex(decideEditorialReviewResponseReviewRequestRequesterIdRegExp),
+  "reviewerId": zod.string().regex(decideEditorialReviewResponseReviewRequestReviewerIdRegExp),
+  "status": zod.enum(['requested', 'approved', 'rejected', 'superseded', 'blocked']),
+  "note": zod.string().max(decideEditorialReviewResponseReviewRequestNoteMax).nullable(),
+  "decisionNote": zod.string().max(decideEditorialReviewResponseReviewRequestDecisionNoteMax).nullable(),
+  "requestedAt": zod.coerce.date(),
+  "decidedAt": zod.coerce.date().nullable(),
+  "supersededAt": zod.coerce.date().nullable(),
+  "blockedReason": zod.string().nullable()
+})
+})
+
+
+/**
+ * @summary Get the caller's editorial work queue
+ */
+export const getMyEditorialWorkQueryIncludeUnassignedDefault = false;
+
+export const GetMyEditorialWorkQueryParams = zod.object({
+  "includeUnassigned": zod.coerce.boolean().default(getMyEditorialWorkQueryIncludeUnassignedDefault)
+})
+
+export const getMyEditorialWorkResponseItemsItemEditionIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getMyEditorialWorkResponseItemsItemDocumentIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getMyEditorialWorkResponseItemsItemEditorOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getMyEditorialWorkResponseItemsItemReviewerOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getMyEditorialWorkResponseItemsItemReviewRequestIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getMyEditorialWorkResponseItemsItemReviewRequestOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getMyEditorialWorkResponseItemsItemReviewRequestOneEditionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getMyEditorialWorkResponseItemsItemReviewRequestOneRevisionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getMyEditorialWorkResponseItemsItemReviewRequestOneRequesterIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getMyEditorialWorkResponseItemsItemReviewRequestOneReviewerIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getMyEditorialWorkResponseItemsItemReviewRequestOneNoteMax = 2000;
+
+export const getMyEditorialWorkResponseItemsItemReviewRequestOneDecisionNoteMax = 2000;
+
+export const getMyEditorialWorkResponseItemsItemReviewRevisionIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getMyEditorialWorkResponseItemsItemCurrentRevisionIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+export const getMyEditorialWorkResponseItemsItemPublishedRevisionIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const GetMyEditorialWorkResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "editionId": zod.union([zod.string().regex(getMyEditorialWorkResponseItemsItemEditionIdOneRegExp),zod.null()]),
+  "documentId": zod.string().regex(getMyEditorialWorkResponseItemsItemDocumentIdRegExp),
+  "documentTitle": zod.string(),
+  "documentKind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
+  "market": zod.string().nullable(),
+  "locale": zod.string().nullable(),
+  "editor": zod.union([zod.object({
+  "id": zod.string().regex(getMyEditorialWorkResponseItemsItemEditorOneIdRegExp),
+  "name": zod.string().nullable(),
+  "status": zod.enum(['invited', 'active', 'suspended'])
+}),zod.null()]),
+  "reviewer": zod.union([zod.object({
+  "id": zod.string().regex(getMyEditorialWorkResponseItemsItemReviewerOneIdRegExp),
+  "name": zod.string().nullable(),
+  "status": zod.enum(['invited', 'active', 'suspended'])
+}),zod.null()]),
+  "dueAt": zod.coerce.date().nullable(),
+  "overdue": zod.boolean(),
+  "status": zod.enum(['active', 'completed', 'blocked']),
+  "reviewRequestId": zod.union([zod.string().regex(getMyEditorialWorkResponseItemsItemReviewRequestIdOneRegExp),zod.null()]),
+  "reviewRequest": zod.union([zod.object({
+  "id": zod.string().regex(getMyEditorialWorkResponseItemsItemReviewRequestOneIdRegExp),
+  "editionId": zod.string().regex(getMyEditorialWorkResponseItemsItemReviewRequestOneEditionIdRegExp),
+  "revisionId": zod.string().regex(getMyEditorialWorkResponseItemsItemReviewRequestOneRevisionIdRegExp),
+  "requesterId": zod.string().regex(getMyEditorialWorkResponseItemsItemReviewRequestOneRequesterIdRegExp),
+  "reviewerId": zod.string().regex(getMyEditorialWorkResponseItemsItemReviewRequestOneReviewerIdRegExp),
+  "status": zod.enum(['requested', 'approved', 'rejected', 'superseded', 'blocked']),
+  "note": zod.string().max(getMyEditorialWorkResponseItemsItemReviewRequestOneNoteMax).nullable(),
+  "decisionNote": zod.string().max(getMyEditorialWorkResponseItemsItemReviewRequestOneDecisionNoteMax).nullable(),
+  "requestedAt": zod.coerce.date(),
+  "decidedAt": zod.coerce.date().nullable(),
+  "supersededAt": zod.coerce.date().nullable(),
+  "blockedReason": zod.string().nullable()
+}),zod.null()]),
+  "reviewRevisionId": zod.union([zod.string().regex(getMyEditorialWorkResponseItemsItemReviewRevisionIdOneRegExp),zod.null()]),
+  "currentRevisionId": zod.union([zod.string().regex(getMyEditorialWorkResponseItemsItemCurrentRevisionIdOneRegExp),zod.null()]),
+  "currentRevisionNumber": zod.number().int().min(1).nullable(),
+  "workflowState": zod.string().nullable(),
+  "publishedRevisionId": zod.union([zod.string().regex(getMyEditorialWorkResponseItemsItemPublishedRevisionIdOneRegExp),zod.null()]),
+  "link": zod.string().describe('Authenticated normal admin-relative link for the exact target.')
+})),
+  "emptyState": zod.union([zod.enum(['no-work', 'no-access', 'load-failed']),zod.null()])
+})
+
+
+/**
+ * @summary Get the publisher or administrator team queue
+ */
+export const getEditorialTeamWorkQueryAssigneeIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkQueryIncludeUnassignedDefault = true;
+
+export const GetEditorialTeamWorkQueryParams = zod.object({
+  "market": zod.coerce.string().optional(),
+  "assigneeId": zod.coerce.string().regex(getEditorialTeamWorkQueryAssigneeIdRegExp).optional(),
+  "status": zod.enum(['active', 'completed', 'blocked']).optional(),
+  "includeUnassigned": zod.coerce.boolean().default(getEditorialTeamWorkQueryIncludeUnassignedDefault)
+})
+
+export const getEditorialTeamWorkResponseItemsItemEditionIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkResponseItemsItemDocumentIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkResponseItemsItemEditorOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkResponseItemsItemReviewerOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkResponseItemsItemReviewRequestIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkResponseItemsItemReviewRequestOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkResponseItemsItemReviewRequestOneEditionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkResponseItemsItemReviewRequestOneRevisionIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkResponseItemsItemReviewRequestOneRequesterIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkResponseItemsItemReviewRequestOneReviewerIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkResponseItemsItemReviewRequestOneNoteMax = 2000;
+
+export const getEditorialTeamWorkResponseItemsItemReviewRequestOneDecisionNoteMax = 2000;
+
+export const getEditorialTeamWorkResponseItemsItemReviewRevisionIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const getEditorialTeamWorkResponseItemsItemCurrentRevisionIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+export const getEditorialTeamWorkResponseItemsItemPublishedRevisionIdOneRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const GetEditorialTeamWorkResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "editionId": zod.union([zod.string().regex(getEditorialTeamWorkResponseItemsItemEditionIdOneRegExp),zod.null()]),
+  "documentId": zod.string().regex(getEditorialTeamWorkResponseItemsItemDocumentIdRegExp),
+  "documentTitle": zod.string(),
+  "documentKind": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'site-configuration', 'landing-page']),
+  "market": zod.string().nullable(),
+  "locale": zod.string().nullable(),
+  "editor": zod.union([zod.object({
+  "id": zod.string().regex(getEditorialTeamWorkResponseItemsItemEditorOneIdRegExp),
+  "name": zod.string().nullable(),
+  "status": zod.enum(['invited', 'active', 'suspended'])
+}),zod.null()]),
+  "reviewer": zod.union([zod.object({
+  "id": zod.string().regex(getEditorialTeamWorkResponseItemsItemReviewerOneIdRegExp),
+  "name": zod.string().nullable(),
+  "status": zod.enum(['invited', 'active', 'suspended'])
+}),zod.null()]),
+  "dueAt": zod.coerce.date().nullable(),
+  "overdue": zod.boolean(),
+  "status": zod.enum(['active', 'completed', 'blocked']),
+  "reviewRequestId": zod.union([zod.string().regex(getEditorialTeamWorkResponseItemsItemReviewRequestIdOneRegExp),zod.null()]),
+  "reviewRequest": zod.union([zod.object({
+  "id": zod.string().regex(getEditorialTeamWorkResponseItemsItemReviewRequestOneIdRegExp),
+  "editionId": zod.string().regex(getEditorialTeamWorkResponseItemsItemReviewRequestOneEditionIdRegExp),
+  "revisionId": zod.string().regex(getEditorialTeamWorkResponseItemsItemReviewRequestOneRevisionIdRegExp),
+  "requesterId": zod.string().regex(getEditorialTeamWorkResponseItemsItemReviewRequestOneRequesterIdRegExp),
+  "reviewerId": zod.string().regex(getEditorialTeamWorkResponseItemsItemReviewRequestOneReviewerIdRegExp),
+  "status": zod.enum(['requested', 'approved', 'rejected', 'superseded', 'blocked']),
+  "note": zod.string().max(getEditorialTeamWorkResponseItemsItemReviewRequestOneNoteMax).nullable(),
+  "decisionNote": zod.string().max(getEditorialTeamWorkResponseItemsItemReviewRequestOneDecisionNoteMax).nullable(),
+  "requestedAt": zod.coerce.date(),
+  "decidedAt": zod.coerce.date().nullable(),
+  "supersededAt": zod.coerce.date().nullable(),
+  "blockedReason": zod.string().nullable()
+}),zod.null()]),
+  "reviewRevisionId": zod.union([zod.string().regex(getEditorialTeamWorkResponseItemsItemReviewRevisionIdOneRegExp),zod.null()]),
+  "currentRevisionId": zod.union([zod.string().regex(getEditorialTeamWorkResponseItemsItemCurrentRevisionIdOneRegExp),zod.null()]),
+  "currentRevisionNumber": zod.number().int().min(1).nullable(),
+  "workflowState": zod.string().nullable(),
+  "publishedRevisionId": zod.union([zod.string().regex(getEditorialTeamWorkResponseItemsItemPublishedRevisionIdOneRegExp),zod.null()]),
+  "link": zod.string().describe('Authenticated normal admin-relative link for the exact target.')
+})),
+  "emptyState": zod.union([zod.enum(['no-work', 'no-access', 'load-failed']),zod.null()])
+})
+
+
+/**
+ * @summary List the caller's in-app editorial notifications
+ */
+export const listEditorialNotificationsQueryUnreadOnlyDefault = false;
+export const listEditorialNotificationsQueryLimitDefault = 50;
+export const listEditorialNotificationsQueryLimitMax = 100;
+
+export const listEditorialNotificationsQueryOffsetDefault = 0;
+export const listEditorialNotificationsQueryOffsetMin = 0;
+
+
+
+export const ListEditorialNotificationsQueryParams = zod.object({
+  "unreadOnly": zod.coerce.boolean().default(listEditorialNotificationsQueryUnreadOnlyDefault),
+  "limit": zod.coerce.number().int().min(1).max(listEditorialNotificationsQueryLimitMax).default(listEditorialNotificationsQueryLimitDefault),
+  "offset": zod.coerce.number().int().min(listEditorialNotificationsQueryOffsetMin).default(listEditorialNotificationsQueryOffsetDefault)
+})
+
+export const listEditorialNotificationsResponseItemsItemIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+export const listEditorialNotificationsResponseNextOffsetMin = 0;
+
+
+
+export const ListEditorialNotificationsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string().regex(listEditorialNotificationsResponseItemsItemIdRegExp),
+  "type": zod.enum(['assignment', 'review-requested', 'review-approved', 'review-rejected', 'review-superseded', 'due-reminder', 'access-blocked', 'shared-update', 'shared-conflict']),
+  "title": zod.string(),
+  "message": zod.string(),
+  "link": zod.string().describe('Authenticated normal admin-relative link.'),
+  "createdAt": zod.coerce.date(),
+  "readAt": zod.coerce.date().nullable(),
+  "deliveryStatus": zod.enum(['in-app'])
+})),
+  "nextOffset": zod.number().int().min(listEditorialNotificationsResponseNextOffsetMin).nullable()
+})
+
+
+/**
+ * @summary Mark one editorial notification read
+ */
+export const markEditorialNotificationReadPathNotificationIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const MarkEditorialNotificationReadParams = zod.object({
+  "notificationId": zod.coerce.string().regex(markEditorialNotificationReadPathNotificationIdRegExp)
+})
+
+export const markEditorialNotificationReadResponseNotificationIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const MarkEditorialNotificationReadResponse = zod.object({
+  "notification": zod.object({
+  "id": zod.string().regex(markEditorialNotificationReadResponseNotificationIdRegExp),
+  "type": zod.enum(['assignment', 'review-requested', 'review-approved', 'review-rejected', 'review-superseded', 'due-reminder', 'access-blocked', 'shared-update', 'shared-conflict']),
+  "title": zod.string(),
+  "message": zod.string(),
+  "link": zod.string().describe('Authenticated normal admin-relative link.'),
+  "createdAt": zod.coerce.date(),
+  "readAt": zod.coerce.date().nullable(),
+  "deliveryStatus": zod.enum(['in-app'])
+})
+})
+
+
+/**
+ * @summary Mark one editorial notification unread
+ */
+export const markEditorialNotificationUnreadPathNotificationIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const MarkEditorialNotificationUnreadParams = zod.object({
+  "notificationId": zod.coerce.string().regex(markEditorialNotificationUnreadPathNotificationIdRegExp)
+})
+
+export const markEditorialNotificationUnreadResponseNotificationIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
+
+
+export const MarkEditorialNotificationUnreadResponse = zod.object({
+  "notification": zod.object({
+  "id": zod.string().regex(markEditorialNotificationUnreadResponseNotificationIdRegExp),
+  "type": zod.enum(['assignment', 'review-requested', 'review-approved', 'review-rejected', 'review-superseded', 'due-reminder', 'access-blocked', 'shared-update', 'shared-conflict']),
+  "title": zod.string(),
+  "message": zod.string(),
+  "link": zod.string().describe('Authenticated normal admin-relative link.'),
+  "createdAt": zod.coerce.date(),
+  "readAt": zod.coerce.date().nullable(),
+  "deliveryStatus": zod.enum(['in-app'])
+})
+})
+
+
+/**
+ * @summary Mark all editorial notifications read
+ */
+export const markAllEditorialNotificationsReadResponseCountMin = 0;
+
+
+
+export const MarkAllEditorialNotificationsReadResponse = zod.object({
+  "count": zod.number().int().min(markAllEditorialNotificationsReadResponseCountMin)
+})
+
+
+/**
+ * @summary Get the caller's editorial digest delivery status
+ */
+export const GetEditorialDigestStatusResponse = zod.object({
+  "enabled": zod.boolean(),
+  "configured": zod.boolean(),
+  "status": zod.enum(['disabled', 'pending', 'processing', 'sent', 'failed', 'blocked']),
+  "lastSentAt": zod.coerce.date().nullable(),
+  "lastError": zod.string().nullable()
+})
+
+
+/**
+ * @summary Enable or disable editorial digest delivery
+ */
+export const UpdateEditorialDigestPreferencesBody = zod.object({
+  "enabled": zod.boolean()
+})
+
+export const UpdateEditorialDigestPreferencesResponse = zod.object({
+  "enabled": zod.boolean(),
+  "configured": zod.boolean(),
+  "status": zod.enum(['disabled', 'pending', 'processing', 'sent', 'failed', 'blocked']),
+  "lastSentAt": zod.coerce.date().nullable(),
+  "lastError": zod.string().nullable()
 })
 
 
@@ -5276,6 +5805,7 @@ export const SubmitDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(submitDocumentResponseRevisionNumberMultipleOf),
+  "editionId": zod.string().nullable().describe('Exact market-edition identity represented by this document response'),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
   "effectiveMarket": zod.string().nullable(),
@@ -5749,6 +6279,7 @@ export const RejectDocumentRevisionResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(rejectDocumentRevisionResponseRevisionNumberMultipleOf),
+  "editionId": zod.string().nullable().describe('Exact market-edition identity represented by this document response'),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
   "effectiveMarket": zod.string().nullable(),
@@ -6181,6 +6712,7 @@ export const PublishDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(publishDocumentResponseRevisionNumberMultipleOf),
+  "editionId": zod.string().nullable().describe('Exact market-edition identity represented by this document response'),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
   "effectiveMarket": zod.string().nullable(),
@@ -6608,6 +7140,7 @@ export const RollbackDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(rollbackDocumentResponseRevisionNumberMultipleOf),
+  "editionId": zod.string().nullable().describe('Exact market-edition identity represented by this document response'),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
   "effectiveMarket": zod.string().nullable(),
@@ -7036,6 +7569,7 @@ export const ArchiveDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(archiveDocumentResponseRevisionNumberMultipleOf),
+  "editionId": zod.string().nullable().describe('Exact market-edition identity represented by this document response'),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
   "effectiveMarket": zod.string().nullable(),
@@ -7464,6 +7998,7 @@ export const RestoreDocumentResponse = zod.object({
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
   "revisionNumber": zod.number().min(1).multipleOf(restoreDocumentResponseRevisionNumberMultipleOf),
+  "editionId": zod.string().nullable().describe('Exact market-edition identity represented by this document response'),
   "canPermanentlyDelete": zod.boolean().describe('True only when permanent deletion is allowed; previously published offices must be archived.'),
   "inherited": zod.boolean().describe('True when this editorial discovery entry is the effective approved published fallback rather than an exact edition.'),
   "effectiveMarket": zod.string().nullable(),

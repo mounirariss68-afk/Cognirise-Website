@@ -22,6 +22,7 @@ import UserAdmin from '@/pages/users/UserAdmin';
 import AuditLog from '@/pages/audit/AuditLog';
 import NavigationSettings from '@/pages/NavigationSettings';
 import ContactSettings from '@/pages/ContactSettings';
+import EditorialWork from '@/pages/EditorialWork';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/password-setup" component={PasswordSetup} />
       
       <Route path="/dashboard" component={() => <AppLayout><Dashboard /></AppLayout>} />
+       <Route path="/editorial-work" component={() => <AppLayout><EditorialWork /></AppLayout>} />
       
       {/* Content routes */}
       <Route path="/people" component={() => <AppLayout><DocumentList kind="person" /></AppLayout>} />

@@ -52,11 +52,26 @@ import type {
   DocumentRevisionPage,
   DocumentUpdate,
   EditionOverrideInput,
+  EditorialAssigneeList,
+  EditorialAssignmentInput,
+  EditorialAssignmentList,
+  EditorialAssignmentResponse,
+  EditorialDigestPreferencesInput,
+  EditorialDigestStatus,
+  EditorialNotificationList,
+  EditorialNotificationReadAllResponse,
+  EditorialNotificationResponse,
+  EditorialQueueResponse,
+  EditorialReviewDecisionInput,
+  EditorialReviewRequestInput,
+  EditorialReviewRequestResponse,
   EnquiryInput,
   EnquiryReceipt,
   ForbiddenResponse,
   GetDashboardKpisParams,
   GetDocumentParams,
+  GetEditorialTeamWorkParams,
+  GetMyEditorialWorkParams,
   GetNavigationSettingsParams,
   GetPublicContactConfigurationParams,
   GetPublicHeroFilmParams,
@@ -66,6 +81,8 @@ import type {
   ListAuditEventsParams,
   ListDocumentReviewCommentsParams,
   ListDocumentsParams,
+  ListEditorialAssignmentsParams,
+  ListEditorialNotificationsParams,
   ListMarketEditionsParams,
   ListMediaParams,
   ListPublishedContentParams,
@@ -2631,6 +2648,1067 @@ export const useCreateDocumentEditionOverride = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getCreateDocumentEditionOverrideMutationOptions(options));
+    }
+
+export const getListEditorialAssignmentsUrl = (params: ListEditorialAssignmentsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/editorial-work/assignments?${stringifiedParams}` : `/api/editorial-work/assignments`
+}
+
+/**
+ * @summary List the assignment for an exact editorial edition
+ */
+export const listEditorialAssignments = async (params: ListEditorialAssignmentsParams, options?: Parameters<typeof customFetch>[1]): Promise<EditorialAssignmentList> => {
+
+  return customFetch<EditorialAssignmentList>(getListEditorialAssignmentsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListEditorialAssignmentsQueryKey = (params?: ListEditorialAssignmentsParams,) => {
+    return [
+    `/api/editorial-work/assignments`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListEditorialAssignmentsQueryOptions = <TData = Awaited<ReturnType<typeof listEditorialAssignments>>, TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(params: ListEditorialAssignmentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEditorialAssignments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListEditorialAssignmentsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listEditorialAssignments>>> = ({ signal }) => listEditorialAssignments(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listEditorialAssignments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListEditorialAssignmentsQueryResult = NonNullable<Awaited<ReturnType<typeof listEditorialAssignments>>>
+export type ListEditorialAssignmentsQueryError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+
+
+/**
+ * @summary List the assignment for an exact editorial edition
+ */
+
+export function useListEditorialAssignments<TData = Awaited<ReturnType<typeof listEditorialAssignments>>, TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+ params: ListEditorialAssignmentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEditorialAssignments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListEditorialAssignmentsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpsertEditorialAssignmentUrl = (editionId: string,) => {
+
+
+
+
+  return `/api/editorial-work/editions/${editionId}/assignment`
+}
+
+/**
+ * @summary Upsert the active assignment for an exact editorial edition
+ */
+export const upsertEditorialAssignment = async (editionId: string,
+    editorialAssignmentInput: EditorialAssignmentInput, options?: Parameters<typeof customFetch>[1]): Promise<EditorialAssignmentResponse> => {
+
+  return customFetch<EditorialAssignmentResponse>(getUpsertEditorialAssignmentUrl(editionId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(editorialAssignmentInput)
+  }
+);}
+
+
+
+
+
+export const getUpsertEditorialAssignmentMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upsertEditorialAssignment>>, TError,{editionId: string;data: BodyType<EditorialAssignmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof upsertEditorialAssignment>>, TError,{editionId: string;data: BodyType<EditorialAssignmentInput>}, TContext> => {
+
+const mutationKey = ['upsertEditorialAssignment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof upsertEditorialAssignment>>, {editionId: string;data: BodyType<EditorialAssignmentInput>}> = (props) => {
+          const {editionId,data} = props ?? {};
+
+          return  upsertEditorialAssignment(editionId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpsertEditorialAssignmentMutationResult = NonNullable<Awaited<ReturnType<typeof upsertEditorialAssignment>>>
+    export type UpsertEditorialAssignmentMutationBody = BodyType<EditorialAssignmentInput>
+    export type UpsertEditorialAssignmentMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>
+
+    /**
+ * @summary Upsert the active assignment for an exact editorial edition
+ */
+export const useUpsertEditorialAssignment = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upsertEditorialAssignment>>, TError,{editionId: string;data: BodyType<EditorialAssignmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof upsertEditorialAssignment>>,
+        TError,
+        {editionId: string;data: BodyType<EditorialAssignmentInput>},
+        TContext
+      > => {
+      return useMutation(getUpsertEditorialAssignmentMutationOptions(options));
+    }
+
+export const getClearEditorialAssignmentUrl = (editionId: string,) => {
+
+
+
+
+  return `/api/editorial-work/editions/${editionId}/assignment`
+}
+
+/**
+ * @summary Clear the active assignment for an exact editorial edition
+ */
+export const clearEditorialAssignment = async (editionId: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getClearEditorialAssignmentUrl(editionId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getClearEditorialAssignmentMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof clearEditorialAssignment>>, TError,{editionId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof clearEditorialAssignment>>, TError,{editionId: string}, TContext> => {
+
+const mutationKey = ['clearEditorialAssignment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof clearEditorialAssignment>>, {editionId: string}> = (props) => {
+          const {editionId} = props ?? {};
+
+          return  clearEditorialAssignment(editionId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClearEditorialAssignmentMutationResult = NonNullable<Awaited<ReturnType<typeof clearEditorialAssignment>>>
+
+    export type ClearEditorialAssignmentMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+
+    /**
+ * @summary Clear the active assignment for an exact editorial edition
+ */
+export const useClearEditorialAssignment = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof clearEditorialAssignment>>, TError,{editionId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof clearEditorialAssignment>>,
+        TError,
+        {editionId: string},
+        TContext
+      > => {
+      return useMutation(getClearEditorialAssignmentMutationOptions(options));
+    }
+
+export const getListEditorialAssigneesUrl = (editionId: string,) => {
+
+
+
+
+  return `/api/editorial-work/editions/${editionId}/assignees`
+}
+
+/**
+ * @summary List active users eligible for an exact editorial edition
+ */
+export const listEditorialAssignees = async (editionId: string, options?: Parameters<typeof customFetch>[1]): Promise<EditorialAssigneeList> => {
+
+  return customFetch<EditorialAssigneeList>(getListEditorialAssigneesUrl(editionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListEditorialAssigneesQueryKey = (editionId: string,) => {
+    return [
+    `/api/editorial-work/editions/${editionId}/assignees`
+    ] as const;
+    }
+
+
+export const getListEditorialAssigneesQueryOptions = <TData = Awaited<ReturnType<typeof listEditorialAssignees>>, TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(editionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEditorialAssignees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListEditorialAssigneesQueryKey(editionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listEditorialAssignees>>> = ({ signal }) => listEditorialAssignees(editionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: editionId !== null && editionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listEditorialAssignees>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListEditorialAssigneesQueryResult = NonNullable<Awaited<ReturnType<typeof listEditorialAssignees>>>
+export type ListEditorialAssigneesQueryError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+
+
+/**
+ * @summary List active users eligible for an exact editorial edition
+ */
+
+export function useListEditorialAssignees<TData = Awaited<ReturnType<typeof listEditorialAssignees>>, TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+ editionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEditorialAssignees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListEditorialAssigneesQueryOptions(editionId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRequestEditorialReviewUrl = (revisionId: string,) => {
+
+
+
+
+  return `/api/editorial-work/revisions/${revisionId}/request-review`
+}
+
+/**
+ * @summary Request review of the current submitted revision
+ */
+export const requestEditorialReview = async (revisionId: string,
+    editorialReviewRequestInput?: EditorialReviewRequestInput, options?: Parameters<typeof customFetch>[1]): Promise<EditorialReviewRequestResponse> => {
+
+  return customFetch<EditorialReviewRequestResponse>(getRequestEditorialReviewUrl(revisionId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(editorialReviewRequestInput)
+  }
+);}
+
+
+
+
+
+export const getRequestEditorialReviewMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestEditorialReview>>, TError,{revisionId: string;data?: BodyType<EditorialReviewRequestInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestEditorialReview>>, TError,{revisionId: string;data?: BodyType<EditorialReviewRequestInput>}, TContext> => {
+
+const mutationKey = ['requestEditorialReview'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestEditorialReview>>, {revisionId: string;data?: BodyType<EditorialReviewRequestInput>}> = (props) => {
+          const {revisionId,data} = props ?? {};
+
+          return  requestEditorialReview(revisionId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestEditorialReviewMutationResult = NonNullable<Awaited<ReturnType<typeof requestEditorialReview>>>
+    export type RequestEditorialReviewMutationBody = BodyType<EditorialReviewRequestInput> | undefined
+    export type RequestEditorialReviewMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>
+
+    /**
+ * @summary Request review of the current submitted revision
+ */
+export const useRequestEditorialReview = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestEditorialReview>>, TError,{revisionId: string;data?: BodyType<EditorialReviewRequestInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestEditorialReview>>,
+        TError,
+        {revisionId: string;data?: BodyType<EditorialReviewRequestInput>},
+        TContext
+      > => {
+      return useMutation(getRequestEditorialReviewMutationOptions(options));
+    }
+
+export const getDecideEditorialReviewUrl = (reviewRequestId: string,) => {
+
+
+
+
+  return `/api/editorial-work/review-requests/${reviewRequestId}/decision`
+}
+
+/**
+ * @summary Approve or reject an exact revision review request
+ */
+export const decideEditorialReview = async (reviewRequestId: string,
+    editorialReviewDecisionInput: EditorialReviewDecisionInput, options?: Parameters<typeof customFetch>[1]): Promise<EditorialReviewRequestResponse> => {
+
+  return customFetch<EditorialReviewRequestResponse>(getDecideEditorialReviewUrl(reviewRequestId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(editorialReviewDecisionInput)
+  }
+);}
+
+
+
+
+
+export const getDecideEditorialReviewMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideEditorialReview>>, TError,{reviewRequestId: string;data: BodyType<EditorialReviewDecisionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof decideEditorialReview>>, TError,{reviewRequestId: string;data: BodyType<EditorialReviewDecisionInput>}, TContext> => {
+
+const mutationKey = ['decideEditorialReview'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decideEditorialReview>>, {reviewRequestId: string;data: BodyType<EditorialReviewDecisionInput>}> = (props) => {
+          const {reviewRequestId,data} = props ?? {};
+
+          return  decideEditorialReview(reviewRequestId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DecideEditorialReviewMutationResult = NonNullable<Awaited<ReturnType<typeof decideEditorialReview>>>
+    export type DecideEditorialReviewMutationBody = BodyType<EditorialReviewDecisionInput>
+    export type DecideEditorialReviewMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>
+
+    /**
+ * @summary Approve or reject an exact revision review request
+ */
+export const useDecideEditorialReview = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideEditorialReview>>, TError,{reviewRequestId: string;data: BodyType<EditorialReviewDecisionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof decideEditorialReview>>,
+        TError,
+        {reviewRequestId: string;data: BodyType<EditorialReviewDecisionInput>},
+        TContext
+      > => {
+      return useMutation(getDecideEditorialReviewMutationOptions(options));
+    }
+
+export const getGetMyEditorialWorkUrl = (params?: GetMyEditorialWorkParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/editorial-work/my?${stringifiedParams}` : `/api/editorial-work/my`
+}
+
+/**
+ * @summary Get the caller's editorial work queue
+ */
+export const getMyEditorialWork = async (params?: GetMyEditorialWorkParams, options?: Parameters<typeof customFetch>[1]): Promise<EditorialQueueResponse> => {
+
+  return customFetch<EditorialQueueResponse>(getGetMyEditorialWorkUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyEditorialWorkQueryKey = (params?: GetMyEditorialWorkParams,) => {
+    return [
+    `/api/editorial-work/my`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMyEditorialWorkQueryOptions = <TData = Awaited<ReturnType<typeof getMyEditorialWork>>, TError = ErrorType<UnauthorizedResponse>>(params?: GetMyEditorialWorkParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyEditorialWork>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyEditorialWorkQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyEditorialWork>>> = ({ signal }) => getMyEditorialWork(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyEditorialWork>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyEditorialWorkQueryResult = NonNullable<Awaited<ReturnType<typeof getMyEditorialWork>>>
+export type GetMyEditorialWorkQueryError = ErrorType<UnauthorizedResponse>
+
+
+/**
+ * @summary Get the caller's editorial work queue
+ */
+
+export function useGetMyEditorialWork<TData = Awaited<ReturnType<typeof getMyEditorialWork>>, TError = ErrorType<UnauthorizedResponse>>(
+ params?: GetMyEditorialWorkParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyEditorialWork>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyEditorialWorkQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetEditorialTeamWorkUrl = (params?: GetEditorialTeamWorkParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/editorial-work/team?${stringifiedParams}` : `/api/editorial-work/team`
+}
+
+/**
+ * @summary Get the publisher or administrator team queue
+ */
+export const getEditorialTeamWork = async (params?: GetEditorialTeamWorkParams, options?: Parameters<typeof customFetch>[1]): Promise<EditorialQueueResponse> => {
+
+  return customFetch<EditorialQueueResponse>(getGetEditorialTeamWorkUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetEditorialTeamWorkQueryKey = (params?: GetEditorialTeamWorkParams,) => {
+    return [
+    `/api/editorial-work/team`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetEditorialTeamWorkQueryOptions = <TData = Awaited<ReturnType<typeof getEditorialTeamWork>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(params?: GetEditorialTeamWorkParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEditorialTeamWork>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEditorialTeamWorkQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEditorialTeamWork>>> = ({ signal }) => getEditorialTeamWork(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEditorialTeamWork>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetEditorialTeamWorkQueryResult = NonNullable<Awaited<ReturnType<typeof getEditorialTeamWork>>>
+export type GetEditorialTeamWorkQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+
+
+/**
+ * @summary Get the publisher or administrator team queue
+ */
+
+export function useGetEditorialTeamWork<TData = Awaited<ReturnType<typeof getEditorialTeamWork>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+ params?: GetEditorialTeamWorkParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEditorialTeamWork>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetEditorialTeamWorkQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListEditorialNotificationsUrl = (params?: ListEditorialNotificationsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/editorial-work/notifications?${stringifiedParams}` : `/api/editorial-work/notifications`
+}
+
+/**
+ * @summary List the caller's in-app editorial notifications
+ */
+export const listEditorialNotifications = async (params?: ListEditorialNotificationsParams, options?: Parameters<typeof customFetch>[1]): Promise<EditorialNotificationList> => {
+
+  return customFetch<EditorialNotificationList>(getListEditorialNotificationsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListEditorialNotificationsQueryKey = (params?: ListEditorialNotificationsParams,) => {
+    return [
+    `/api/editorial-work/notifications`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListEditorialNotificationsQueryOptions = <TData = Awaited<ReturnType<typeof listEditorialNotifications>>, TError = ErrorType<UnauthorizedResponse>>(params?: ListEditorialNotificationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEditorialNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListEditorialNotificationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listEditorialNotifications>>> = ({ signal }) => listEditorialNotifications(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listEditorialNotifications>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListEditorialNotificationsQueryResult = NonNullable<Awaited<ReturnType<typeof listEditorialNotifications>>>
+export type ListEditorialNotificationsQueryError = ErrorType<UnauthorizedResponse>
+
+
+/**
+ * @summary List the caller's in-app editorial notifications
+ */
+
+export function useListEditorialNotifications<TData = Awaited<ReturnType<typeof listEditorialNotifications>>, TError = ErrorType<UnauthorizedResponse>>(
+ params?: ListEditorialNotificationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEditorialNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListEditorialNotificationsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getMarkEditorialNotificationReadUrl = (notificationId: string,) => {
+
+
+
+
+  return `/api/editorial-work/notifications/${notificationId}/read`
+}
+
+/**
+ * @summary Mark one editorial notification read
+ */
+export const markEditorialNotificationRead = async (notificationId: string, options?: Parameters<typeof customFetch>[1]): Promise<EditorialNotificationResponse> => {
+
+  return customFetch<EditorialNotificationResponse>(getMarkEditorialNotificationReadUrl(notificationId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkEditorialNotificationReadMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markEditorialNotificationRead>>, TError,{notificationId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markEditorialNotificationRead>>, TError,{notificationId: string}, TContext> => {
+
+const mutationKey = ['markEditorialNotificationRead'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markEditorialNotificationRead>>, {notificationId: string}> = (props) => {
+          const {notificationId} = props ?? {};
+
+          return  markEditorialNotificationRead(notificationId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkEditorialNotificationReadMutationResult = NonNullable<Awaited<ReturnType<typeof markEditorialNotificationRead>>>
+
+    export type MarkEditorialNotificationReadMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | NotFoundResponse>
+
+    /**
+ * @summary Mark one editorial notification read
+ */
+export const useMarkEditorialNotificationRead = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markEditorialNotificationRead>>, TError,{notificationId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markEditorialNotificationRead>>,
+        TError,
+        {notificationId: string},
+        TContext
+      > => {
+      return useMutation(getMarkEditorialNotificationReadMutationOptions(options));
+    }
+
+export const getMarkEditorialNotificationUnreadUrl = (notificationId: string,) => {
+
+
+
+
+  return `/api/editorial-work/notifications/${notificationId}/unread`
+}
+
+/**
+ * @summary Mark one editorial notification unread
+ */
+export const markEditorialNotificationUnread = async (notificationId: string, options?: Parameters<typeof customFetch>[1]): Promise<EditorialNotificationResponse> => {
+
+  return customFetch<EditorialNotificationResponse>(getMarkEditorialNotificationUnreadUrl(notificationId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkEditorialNotificationUnreadMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markEditorialNotificationUnread>>, TError,{notificationId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markEditorialNotificationUnread>>, TError,{notificationId: string}, TContext> => {
+
+const mutationKey = ['markEditorialNotificationUnread'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markEditorialNotificationUnread>>, {notificationId: string}> = (props) => {
+          const {notificationId} = props ?? {};
+
+          return  markEditorialNotificationUnread(notificationId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkEditorialNotificationUnreadMutationResult = NonNullable<Awaited<ReturnType<typeof markEditorialNotificationUnread>>>
+
+    export type MarkEditorialNotificationUnreadMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | NotFoundResponse>
+
+    /**
+ * @summary Mark one editorial notification unread
+ */
+export const useMarkEditorialNotificationUnread = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | NotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markEditorialNotificationUnread>>, TError,{notificationId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markEditorialNotificationUnread>>,
+        TError,
+        {notificationId: string},
+        TContext
+      > => {
+      return useMutation(getMarkEditorialNotificationUnreadMutationOptions(options));
+    }
+
+export const getMarkAllEditorialNotificationsReadUrl = () => {
+
+
+
+
+  return `/api/editorial-work/notifications/read-all`
+}
+
+/**
+ * @summary Mark all editorial notifications read
+ */
+export const markAllEditorialNotificationsRead = async ( options?: Parameters<typeof customFetch>[1]): Promise<EditorialNotificationReadAllResponse> => {
+
+  return customFetch<EditorialNotificationReadAllResponse>(getMarkAllEditorialNotificationsReadUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkAllEditorialNotificationsReadMutationOptions = <TError = ErrorType<UnauthorizedResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markAllEditorialNotificationsRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markAllEditorialNotificationsRead>>, TError,void, TContext> => {
+
+const mutationKey = ['markAllEditorialNotificationsRead'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markAllEditorialNotificationsRead>>, void> = () => {
+
+
+          return  markAllEditorialNotificationsRead(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkAllEditorialNotificationsReadMutationResult = NonNullable<Awaited<ReturnType<typeof markAllEditorialNotificationsRead>>>
+
+    export type MarkAllEditorialNotificationsReadMutationError = ErrorType<UnauthorizedResponse>
+
+    /**
+ * @summary Mark all editorial notifications read
+ */
+export const useMarkAllEditorialNotificationsRead = <TError = ErrorType<UnauthorizedResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markAllEditorialNotificationsRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markAllEditorialNotificationsRead>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getMarkAllEditorialNotificationsReadMutationOptions(options));
+    }
+
+export const getGetEditorialDigestStatusUrl = () => {
+
+
+
+
+  return `/api/editorial-work/digest-status`
+}
+
+/**
+ * @summary Get the caller's editorial digest delivery status
+ */
+export const getEditorialDigestStatus = async ( options?: Parameters<typeof customFetch>[1]): Promise<EditorialDigestStatus> => {
+
+  return customFetch<EditorialDigestStatus>(getGetEditorialDigestStatusUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetEditorialDigestStatusQueryKey = () => {
+    return [
+    `/api/editorial-work/digest-status`
+    ] as const;
+    }
+
+
+export const getGetEditorialDigestStatusQueryOptions = <TData = Awaited<ReturnType<typeof getEditorialDigestStatus>>, TError = ErrorType<UnauthorizedResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEditorialDigestStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEditorialDigestStatusQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEditorialDigestStatus>>> = ({ signal }) => getEditorialDigestStatus({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEditorialDigestStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetEditorialDigestStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getEditorialDigestStatus>>>
+export type GetEditorialDigestStatusQueryError = ErrorType<UnauthorizedResponse>
+
+
+/**
+ * @summary Get the caller's editorial digest delivery status
+ */
+
+export function useGetEditorialDigestStatus<TData = Awaited<ReturnType<typeof getEditorialDigestStatus>>, TError = ErrorType<UnauthorizedResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEditorialDigestStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetEditorialDigestStatusQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateEditorialDigestPreferencesUrl = () => {
+
+
+
+
+  return `/api/editorial-work/digest-preferences`
+}
+
+/**
+ * @summary Enable or disable editorial digest delivery
+ */
+export const updateEditorialDigestPreferences = async (editorialDigestPreferencesInput: EditorialDigestPreferencesInput, options?: Parameters<typeof customFetch>[1]): Promise<EditorialDigestStatus> => {
+
+  return customFetch<EditorialDigestStatus>(getUpdateEditorialDigestPreferencesUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(editorialDigestPreferencesInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateEditorialDigestPreferencesMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEditorialDigestPreferences>>, TError,{data: BodyType<EditorialDigestPreferencesInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateEditorialDigestPreferences>>, TError,{data: BodyType<EditorialDigestPreferencesInput>}, TContext> => {
+
+const mutationKey = ['updateEditorialDigestPreferences'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateEditorialDigestPreferences>>, {data: BodyType<EditorialDigestPreferencesInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateEditorialDigestPreferences(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateEditorialDigestPreferencesMutationResult = NonNullable<Awaited<ReturnType<typeof updateEditorialDigestPreferences>>>
+    export type UpdateEditorialDigestPreferencesMutationBody = BodyType<EditorialDigestPreferencesInput>
+    export type UpdateEditorialDigestPreferencesMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ApiError>
+
+    /**
+ * @summary Enable or disable editorial digest delivery
+ */
+export const useUpdateEditorialDigestPreferences = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEditorialDigestPreferences>>, TError,{data: BodyType<EditorialDigestPreferencesInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateEditorialDigestPreferences>>,
+        TError,
+        {data: BodyType<EditorialDigestPreferencesInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateEditorialDigestPreferencesMutationOptions(options));
     }
 
 export const getGetSharedMarketEditionMatrixUrl = (documentId: string,) => {

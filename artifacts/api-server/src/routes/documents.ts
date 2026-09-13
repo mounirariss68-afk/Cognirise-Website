@@ -139,6 +139,9 @@ function mapDocument(row: Record<string, any>) {
     mediaIds: payload.mediaIds ?? [],
     markets: row.markets ?? [],
     revisionNumber: row.revision_number ?? 1,
+    // The edition is the actual editorial target; exposing it avoids forcing
+    // clients to infer an address from a market/locale pair.
+    editionId: row.edition_id ? String(row.edition_id) : null,
     canPermanentlyDelete: Boolean(row.can_permanently_delete),
     currentRevisionId: row.revision_id ? String(row.revision_id) : null,
     publishedRevisionId: row.published_revision_id ? String(row.published_revision_id) : null,
@@ -2565,9 +2568,17 @@ router.post(
         return;
       }
       const candidate = await client.query(
-        `SELECT r.id,e.id edition_id,e.market,e.locale
+        `SELECT r.id,r.created_by_user_id,e.id edition_id,e.market,e.locale,
+                assignment.editor_user_id
            FROM cms_revisions r
            JOIN cms_market_editions e ON e.id=r.edition_id
+           LEFT JOIN LATERAL (
+             SELECT editor_user_id FROM cms_editorial_assignments
+              WHERE document_id=e.document_id
+                AND (edition_id=e.id OR edition_id IS NULL)
+              ORDER BY (edition_id=e.id) DESC
+              LIMIT 1
+           ) assignment ON true
           WHERE r.id=$2 AND e.document_id=$1 AND r.workflow_state='in-review'
           FOR UPDATE OF e`,
         [req.params.documentId, parsed.data.revisionId],
@@ -2587,6 +2598,29 @@ router.post(
         await client.query("ROLLBACK");
         res.status(403).json({ error: "You are not assigned to this market." });
         return;
+      }
+      const pendingReview = await client.query(
+        `SELECT requester_user_id,reviewer_user_id
+           FROM cms_review_requests
+          WHERE revision_id=$1 AND status='requested'
+          FOR UPDATE`,
+        [parsed.data.revisionId],
+      );
+      if (pendingReview.rowCount) {
+        const review = pendingReview.rows[0];
+        const actorId = transactionAuth.user.id;
+        if (
+          String(review.reviewer_user_id) !== actorId
+          || String(candidate.rows[0].created_by_user_id) === actorId
+          || String(review.requester_user_id) === actorId
+          || String(candidate.rows[0].editor_user_id ?? "") === actorId
+        ) {
+          await client.query("ROLLBACK");
+          res.status(403).json({
+            error: "Only the designated independent reviewer may reject this pending exact-edition review.",
+          });
+          return;
+        }
       }
       const rejected = await client.query(
         `UPDATE cms_revisions SET workflow_state='rejected'
@@ -2676,7 +2710,8 @@ router.post(
     const revision = await client.query(
       `SELECT r.id,r.edition_id,r.payload,d.kind,d.canonical_slug,r.workflow_state,
               e.market,e.locale,COALESCE(e.editorial_market,e.market) editorial_market,
-              e.publication_state,e.content_mode
+              e.publication_state,e.content_mode,
+              EXISTS(SELECT 1 FROM cms_review_requests request WHERE request.revision_id=r.id) has_exact_review
          FROM cms_revisions r JOIN cms_market_editions e
         ON e.id=r.edition_id JOIN cms_documents d ON d.id=e.document_id
         WHERE r.id=$1 AND e.document_id=$2
@@ -2733,8 +2768,15 @@ router.post(
     const directAdministratorPublish = transactionAuth.user.role === "administrator"
       && ["draft", "rejected"].includes(String(revision.rows[0].workflow_state))
       && ["draft", "published"].includes(String(revision.rows[0].publication_state));
-    const reviewedPublish = revision.rows[0].workflow_state === "in-review"
+    const reviewedPublish = ["in-review", "approved"].includes(String(revision.rows[0].workflow_state))
       && ["in-review", "published"].includes(String(revision.rows[0].publication_state));
+    if (Boolean(revision.rows[0].has_exact_review) && revision.rows[0].workflow_state !== "approved") {
+      await client.query("ROLLBACK");
+      res.status(409).json({
+        error: "An exact-edition review request exists; only its approved revision can be published.",
+      });
+      return;
+    }
     if (managedBindingId && !reviewedPublish) {
       await client.query("ROLLBACK");
       res.status(409).json({
@@ -2746,8 +2788,8 @@ router.post(
       await client.query("ROLLBACK");
       res.status(409).json({
         error: auth.user.role === "administrator"
-          ? "Only the latest saved draft or in-review exact-edition revision can be published."
-          : "Only the latest exact-edition revision currently in review can be published.",
+          ? "Only the latest saved draft, in-review, or approved exact-edition revision can be published."
+          : "Only the latest exact-edition revision currently in review or approved can be published.",
       });
       return;
     }
@@ -3044,11 +3086,18 @@ router.post(
          approved_at=now() WHERE id=$1 AND workflow_state IN ('draft','rejected')`,
         [parsed.data.revisionId, transactionAuth.user.id],
       )
-      : await client.query(
-        `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,
-         approved_at=now() WHERE id=$1 AND workflow_state='in-review'`,
-        [parsed.data.revisionId, transactionAuth.user.id],
-      );
+      : revision.rows[0].workflow_state === "approved"
+        // Editorial approval is already the state transition. Preserve its
+        // approver evidence rather than overwriting it with the publisher.
+        ? await client.query(
+          "SELECT id FROM cms_revisions WHERE id=$1 AND workflow_state='approved'",
+          [parsed.data.revisionId],
+        )
+        : await client.query(
+          `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,
+           approved_at=now() WHERE id=$1 AND workflow_state='in-review'`,
+          [parsed.data.revisionId, transactionAuth.user.id],
+        );
     // Rejection and publication race on this exact revision.  The conditional
     // transition is the serialization point: never advance the edition's
     // public pointer unless this transaction actually won the transition.
@@ -3057,7 +3106,7 @@ router.post(
       res.status(409).json({
         error: directAdministratorPublish
           ? "The selected revision is no longer a saved draft or rejected revision."
-          : "The selected revision is no longer in review.",
+          : "The selected revision is no longer in review or approved.",
       });
       return;
     }

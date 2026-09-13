@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback, type ReactNode } from "react";
 import { useRoute, useLocation, useSearch } from "wouter";
-import { 
-  useGetDocument, 
+import {
+  useGetDocument,
   useUpdateDocument,
   useSubmitDocument,
   usePublishDocument,
@@ -62,6 +62,7 @@ import { SharedBaselineEditor } from "./SharedBaselineEditor";
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 import { applyLocalSuccessorToEditionMatrix, previewPinForEditionRevision } from "./preview-revision-lifecycle";
 import { createDraftRecoveryExport, downloadDraftRecovery } from "./draft-operation-safety";
+import { EditionAssignmentControl } from "./EditionAssignmentControl";
 
 function documentListPath(kind: CmsDocumentKind): string {
   switch (kind) {
@@ -78,6 +79,7 @@ function documentListPath(kind: CmsDocumentKind): string {
   }
 }
 
+// hint: Logic changed on both sides. Requires understanding intent of each change.
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 export default function DocumentDetail() {
   const [, params] = useRoute("/content/:id");
@@ -128,7 +130,7 @@ export default function DocumentDetail() {
       queryKey: getGetDocumentQueryKey(id!, documentParams),
     },
   });
-  
+
   const updateDoc = useUpdateDocument();
   const submitDoc = useSubmitDocument();
   const publishDoc = usePublishDocument();
@@ -218,7 +220,7 @@ export default function DocumentDetail() {
       active = false;
     };
   }, [createPreview, previewRevisionId, previewToOpenRevisionId, toast]);
-  
+
   const hydratedEditionKey = useRef("");
   const hydratedRevision = useRef<number | undefined>(undefined);
   const currentEditorKey = useRef("");
@@ -244,7 +246,7 @@ export default function DocumentDetail() {
       saveSequence.current += 1;
     };
   }, []);
-  
+
   // Dialog states
   const [publishOpen, setPublishOpen] = useState(false);
   const [removeOfficeOpen, setRemoveOfficeOpen] = useState(false);
@@ -268,7 +270,7 @@ export default function DocumentDetail() {
       const nextContent = (doc.content || {}) as Record<string, any>;
       setContent(nextContent);
       const formattedSeo: DraftSeo = doc.seo ? { ...doc.seo } : {};
-      
+
       setSeo(formattedSeo);
       setSeoOriginallyPresent(Boolean(doc.seo));
       lastSaved.current = { title: doc.title, summary: doc.summary || "", content: nextContent, seo: formattedSeo };
@@ -287,8 +289,8 @@ export default function DocumentDetail() {
   // Check for unsaved changes against lastSaved ref
   useEffect(() => {
     if (hydratedEditionKey.current !== `${id}:${selectedMarket}:${selectedLocale}`) return;
-    const isDirty = title !== lastSaved.current.title || 
-                    summary !== lastSaved.current.summary || 
+    const isDirty = title !== lastSaved.current.title ||
+                    summary !== lastSaved.current.summary ||
                     JSON.stringify(content) !== JSON.stringify(lastSaved.current.content) ||
                     JSON.stringify(seo) !== JSON.stringify(lastSaved.current.seo);
     setHasUnsaved(isDirty);
@@ -359,6 +361,7 @@ export default function DocumentDetail() {
       queryKey: getCompareSharedMarketBaselineQueryKey(id!, selectedSharedBinding?.id ?? ""),
     } },
   );
+  const sharedSource = availabilityForReview?.sharedSource;
   // A URL target is an explicit instruction, not a hint. Keep it pending until
   // both independent catalogues have settled; availability often arrives
   // earlier and must never win the initial-selection race.
@@ -369,10 +372,23 @@ export default function DocumentDetail() {
     if (!marketParam || !localeParam) return undefined;
     return { marketParam, localeParam };
   }, [search]);
-  const urlTargetAwaitingCatalogues = Boolean(requestedUrlTarget && (
+  const requestedSharedSource = requestedUrlTarget?.marketParam === "shared-source"
+    && requestedUrlTarget.localeParam === "und";
+  const urlTargetAwaitingCatalogues = Boolean(requestedUrlTarget && !requestedSharedSource && (
     isMarketDataLoading || !marketData || isEditionMatrixLoading || !editionMatrix
   ));
   const requestedExactEdition = useMemo(() => {
+    if (requestedSharedSource) {
+      if (!sharedSource?.revisionId) return undefined;
+      return {
+        market: sharedSource.market,
+        locale: sharedSource.locale,
+        exact: true,
+        revisionId: sharedSource.revisionId,
+        revisionNumber: null,
+        workflowState: null,
+      };
+    }
     if (!requestedUrlTarget || urlTargetAwaitingCatalogues) return undefined;
     const { marketParam, localeParam } = requestedUrlTarget;
     // Links may contain a catalog UUID while document APIs use its code.
@@ -381,7 +397,7 @@ export default function DocumentDetail() {
       ?? (directExactMarket ? marketParam : undefined);
     if (!marketCode) return undefined;
     return editionMatrix?.items.find((edition) => edition.exact && edition.market === marketCode && edition.locale === localeParam);
-  }, [editionMatrix?.items, marketData?.items, requestedUrlTarget, urlTargetAwaitingCatalogues]);
+  }, [editionMatrix?.items, marketData?.items, requestedSharedSource, requestedUrlTarget, sharedSource, urlTargetAwaitingCatalogues]);
   const requestedUrlTargetInvalid = Boolean(
     requestedUrlTarget && !urlTargetAwaitingCatalogues && !requestedExactEdition,
   );
@@ -403,7 +419,6 @@ export default function DocumentDetail() {
       }),
     [editionMatrix?.items, marketData?.items],
   );
-  const sharedSource = availabilityForReview?.sharedSource;
   const selectedIsSharedSource = Boolean(
     sharedSource
     && selectedMarket === sharedSource.market
@@ -418,6 +433,12 @@ export default function DocumentDetail() {
     workflowState: doc?.status ?? "draft",
     publicationState: doc?.status === "published" ? "published" : "draft",
   } as any : undefined);
+  // The immutable target identity is returned by the exact document response.
+  // Do not substitute a market catalogue ID: it is not an assignment target.
+  const responseEditionId = (doc as (typeof doc & { editionId?: string | null }) | undefined)?.editionId;
+  const selectedEditionId = selectedIsSharedSource
+    ? sharedSource?.editionId
+    : responseEditionId ?? null;
   // The matrix and availability state are cached independently from the exact
   // document response. On initial load either can still point at the prior
   // revision while the editor has already loaded the latest saved draft. Use
@@ -1095,7 +1116,7 @@ export default function DocumentDetail() {
         queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
         queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("documents") || String(query.queryKey[0]).includes("published") || String(query.queryKey[0]).includes("preview") });
         toast({
-           title: action === "publish" && selectedEdition?.workflowState !== "in-review"
+           title: action === "publish" && !["in-review", "approved"].includes(selectedEdition?.workflowState ?? "")
              ? "Saved draft published directly"
              : action === "publish" && selectedIsSharedSource
                ? "Shared content and reviewed destinations published"
@@ -1108,7 +1129,7 @@ export default function DocumentDetail() {
                   : "Document archived",
           description: action === "restore"
             ? "This edition is not public. Its restored draft must pass review before it can be published again."
-             : action === "publish" && selectedEdition?.workflowState !== "in-review"
+             : action === "publish" && !["in-review", "approved"].includes(selectedEdition?.workflowState ?? "")
                ? "The server released this exact saved revision after rechecking publication governance."
                : action === "publish" && selectedIsSharedSource
                  ? "The server released this exact reviewed source revision and its reviewed destination selection together."
@@ -1319,7 +1340,7 @@ export default function DocumentDetail() {
     setPreviewRevisionId(revisionId);
     setPreviewToOpenRevisionId(revisionId);
   };
-  
+
   // Data for comparison
   const compareRev1 = revisionsData?.items.find(r => r.id === selectedRevs[0]);
   const compareRev2 = revisionsData?.items.find(r => r.id === selectedRevs[1]);
@@ -1340,7 +1361,7 @@ export default function DocumentDetail() {
                 {doc.status.replace('-', ' ')}
               </Badge>
               <span className="font-mono text-xs text-muted-foreground">Rev {doc.revisionNumber}</span>
-              
+
               {hasUnsaved && (
                 <span className="font-mono text-[10px] text-amber-500 flex items-center"><AlertTriangle className="w-3 h-3 mr-1"/> Unsaved changes</span>
               )}
@@ -1360,11 +1381,11 @@ export default function DocumentDetail() {
              {previewingRevisionId ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Eye className="w-3.5 h-3.5 mr-2" />} {doc.kind === "framework" ? "Preview buyer view" : doc.kind === "office" ? "Preview contact card" : "Preview"}
           </Button>
 
-          <Button 
+          <Button
              onClick={() => handleSave()}
              disabled={!editorHydrated || updateDoc.isPending || previewingRevisionId !== null || saveBlocked || !authoringActions.canSave}
-            size="sm" 
-            variant="default" 
+            size="sm"
+            variant="default"
             className="font-mono uppercase tracking-wider text-xs"
           >
             {updateDoc.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin"/> : <Save className="w-3.5 h-3.5 mr-2" />}
@@ -1541,7 +1562,7 @@ export default function DocumentDetail() {
                 canEdit={!editorLocked}
                 onResetToShared={() => resetSharedField("title")}
               />
-              <Input 
+              <Input
                 id="document-title"
                 value={title}
                 onChange={(e) => { hasUnsavedRef.current = true; if (tracksSharedOverrides) setPendingOverridePaths((paths) => paths.includes("title") ? paths : [...paths, "title"]); setTitle(e.target.value); }}
@@ -1554,7 +1575,7 @@ export default function DocumentDetail() {
               <p id="document-title-help" className="mt-1 text-xs text-muted-foreground">{title.length}/240 characters</p>
               {fieldIssue("title") && <p id="document-title-error" className="mt-1 text-xs text-destructive">{fieldIssue("title")}</p>}
             </div>
-            
+
             <div>
 
               <FieldOverrideIndicator
@@ -1566,7 +1587,7 @@ export default function DocumentDetail() {
                 canEdit={!editorLocked}
                 onResetToShared={() => resetSharedField("summary")}
               />
-              <Textarea 
+              <Textarea
                 id="document-summary"
                 value={summary}
                 onChange={(e) => { hasUnsavedRef.current = true; if (tracksSharedOverrides) setPendingOverridePaths((paths) => paths.includes("summary") ? paths : [...paths, "summary"]); setSummary(e.target.value); }}
@@ -1662,6 +1683,17 @@ export default function DocumentDetail() {
           onCompare={(binding) => { setSharedCompareOpen(true); void refetchSharedComparison(); }}
           onResetOverride={resetSharedField}
         />
+        <EditionAssignmentControl
+          editionId={selectedEditionId}
+          documentId={id!}
+          market={selectedMarket}
+          locale={selectedLocale}
+          currentRevisionId={doc.currentRevisionId}
+          currentRevisionNumber={doc.revisionNumber}
+          canRequestReview={doc.status === "in-review"}
+          canManage={hasAuthorRole && canEditSelectedEdition}
+          currentUser={session?.user ? { id: session.user.id, name: session.user.name } : undefined}
+        />
 <OverridesContext.Provider value={{
           isAdapted: tracksSharedOverrides,
           canEdit: !editorLocked,
@@ -1691,13 +1723,13 @@ export default function DocumentDetail() {
               <TabsTrigger value="revisions" disabled={updateDoc.isPending} className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Revisions</TabsTrigger>
               <TabsTrigger value="editions" disabled={updateDoc.isPending} className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Editions</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="metadata" className="flex-1 overflow-y-auto p-4 space-y-6 mt-0">
               <div className="space-y-2">
                 <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">URL Slug</label>
                 <div className="font-mono text-sm text-foreground bg-muted/30 p-2 rounded border border-border/50 break-all">{doc.slug}</div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Market Targeting</label>
                 <div className="flex flex-wrap gap-2">
@@ -1870,11 +1902,11 @@ export default function DocumentDetail() {
               )}
               {hasUnsaved && <p className="text-xs text-amber-700">Save shared content before creating a customization so it starts from this saved revision.</p>}
             </TabsContent>
-            
+
             <TabsContent value="seo" className="flex-1 overflow-y-auto p-4 space-y-4 mt-0">
               <div className="space-y-2">
                 <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">SEO Title</Label>
-                <Input 
+                <Input
                   id="seo-title"
                   value={typeof seo.title === "string" ? seo.title : ""}
                   onChange={(e) => handleSeoChange("title", e.target.value)}
@@ -1888,10 +1920,10 @@ export default function DocumentDetail() {
                 <p id="seo-title-help" className="text-[10px] text-muted-foreground">{typeof seo.title === "string" ? seo.title.length : 0}/70 characters. Leave all SEO fields blank to omit SEO.</p>
                 {fieldIssue("seo.title") && <p id="seo-title-error" className="text-xs text-destructive">{fieldIssue("seo.title")}</p>}
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">SEO Description</Label>
-                <Textarea 
+                <Textarea
                   id="seo-description"
                   value={typeof seo.description === "string" ? seo.description : ""}
                   onChange={(e) => handleSeoChange("description", e.target.value)}
@@ -1908,7 +1940,7 @@ export default function DocumentDetail() {
 
               <div className="space-y-2">
                 <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Canonical URL</Label>
-                <Input 
+                <Input
                   id="seo-canonical-url"
                   value={typeof seo.canonicalUrl === "string" ? seo.canonicalUrl : ""}
                   onChange={(e) => handleSeoChange("canonicalUrl", e.target.value)}
@@ -1923,7 +1955,7 @@ export default function DocumentDetail() {
               </div>
 
               <div className="flex items-center space-x-2 pt-2">
-                <Switch 
+                <Switch
                   checked={Boolean(seo.noIndex)}
                   onCheckedChange={(c) => handleSeoChange("noIndex", c)}
                   disabled={editorLocked}
@@ -1936,9 +1968,9 @@ export default function DocumentDetail() {
             <TabsContent value="revisions" className="flex-1 overflow-y-auto p-0 mt-0 flex flex-col">
                <div className="p-3 bg-muted/20 border-b border-border sticky top-0 z-10 flex justify-between items-center">
                  <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Select 2 to Compare</span>
-                 <Button 
-                   size="sm" 
-                   variant="outline" 
+                 <Button
+                   size="sm"
+                   variant="outline"
                    disabled={selectedRevs.length !== 2}
                    onClick={() => setCompareModalOpen(true)}
                    className="h-7 text-[10px] uppercase tracking-wider font-mono px-2"
@@ -1948,7 +1980,7 @@ export default function DocumentDetail() {
                </div>
                 {editionRevisions.map(rev => (
                  <div key={rev.id} className="p-4 border-b border-border/50 hover:bg-muted/30 transition-colors group flex gap-3">
-                    <Checkbox 
+                    <Checkbox
                       checked={selectedRevs.includes(rev.id)}
                       onCheckedChange={(c) => handleRevCheckbox(!!c, rev.id)}
                       className="mt-1"
@@ -1959,7 +1991,7 @@ export default function DocumentDetail() {
                         <span className="font-mono text-[10px] text-muted-foreground">{format(new Date(rev.createdAt), "MMM d HH:mm")}</span>
                       </div>
                       {rev.note && <p className="text-[10px] text-muted-foreground font-mono mb-2">{rev.note}</p>}
-                      
+
                       <div className="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                          {isAdministrator && doc.revisionNumber !== rev.number && (
                           <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 font-mono uppercase tracking-wider" onClick={() => handleRollback(rev.id)}>
@@ -2126,12 +2158,12 @@ export default function DocumentDetail() {
         <DialogContent>
           <DialogHeader>
              <DialogTitle>
-               {selectedEdition?.workflowState !== "in-review"
+               {!["in-review", "approved"].includes(selectedEdition?.workflowState ?? "")
                  ? "Publish Saved Draft"
                  : selectedIsSharedSource ? "Publish Shared Content" : "Publish Customization"}
              </DialogTitle>
             <DialogDescription className="font-mono text-xs mt-2">
-                 {selectedEdition?.workflowState !== "in-review"
+                 {!["in-review", "approved"].includes(selectedEdition?.workflowState ?? "")
                    ? "Confirm direct administrator publication of this exact saved revision. The server will recheck content, media clearance, immutable version pins, and destination governance before releasing it."
                    : selectedIsSharedSource
                   ? "Confirm the reviewed snapshot. The selected content and destination choices below are released together; saving or review alone never changes the live website."
@@ -2141,7 +2173,7 @@ export default function DocumentDetail() {
           <div className="py-4 space-y-4">
              <div className="space-y-2">
                <Label className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Target Revision</Label>
-               <select 
+               <select
                   className="w-full font-mono text-sm p-2 bg-background border border-border rounded-md focus-visible:ring-1 focus-visible:ring-primary outline-none"
                   value={publishRevisionId || ""}
                   onChange={(e) => setPublishRevisionId(e.target.value)}
@@ -2171,7 +2203,7 @@ export default function DocumentDetail() {
                   ) : (
                     <p className="mt-1 text-xs text-muted-foreground">
                       {!availabilityForReview?.sharedSource?.publishedRevisionId
-                         ? selectedEdition?.workflowState !== "in-review" && isAdministrator
+                         ? !["in-review", "approved"].includes(selectedEdition?.workflowState ?? "") && isAdministrator
                            ? "Not published yet. This saved source and current destination snapshot will establish the first live content."
                            : "Not published yet. This reviewed source and destination snapshot will establish the first live content."
                         : "No pending destination changes. Only the selected content revision is affected."}
@@ -2188,7 +2220,7 @@ export default function DocumentDetail() {
               )}
               {selectedIsSharedSource && (
                 <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
-                   {selectedEdition?.workflowState !== "in-review" && isAdministrator
+                   {!["in-review", "approved"].includes(selectedEdition?.workflowState ?? "") && isAdministrator
                      ? "Direct administrator publishing captures this exact saved source revision and the current saved destination choices atomically. No separate destination-review action is required."
                      : "Shared publishing requires this exact saved source revision and its reviewed destination selection. Send destinations for review again whenever the source or a destination changes."}
                 </p>
@@ -2196,7 +2228,7 @@ export default function DocumentDetail() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setPublishOpen(false)}>Cancel</Button>
-            <Button 
+            <Button
               onClick={() => handleAction("publish")}
               disabled={
                 publishDoc.isPending
@@ -2206,7 +2238,7 @@ export default function DocumentDetail() {
                    availabilityForReview?.sharedSource?.revisionId !== publishRevisionId
                    || (publishAvailabilityVersion === null
                      || publishAvailabilityVersion !== availabilityForReview?.draftVersion)
-                   || (selectedEdition?.workflowState === "in-review"
+                   || (["in-review", "approved"].includes(selectedEdition?.workflowState ?? "")
                      && availabilityForReview?.reviewedVersion !== availabilityForReview?.draftVersion)
                 ))
               }
@@ -2275,7 +2307,7 @@ export default function DocumentDetail() {
               Comparing Revision {baseRev?.number} (Base) with Revision {targetRev?.number} (Target)
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="flex-1 overflow-hidden flex bg-muted/10">
             {/* Left: Base Rev */}
             <div className="flex-1 overflow-y-auto border-r border-border p-6 space-y-6 custom-scrollbar">

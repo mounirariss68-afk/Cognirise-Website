@@ -21,6 +21,7 @@ tags:
   - { name: public, description: Published public content }
   - { name: analytics, description: First-party analytics and consent }
   - { name: navigation, description: Governed public navigation visibility }
+  - { name: editorial-work, description: "Edition-scoped editorial assignments, reviews, queues, notifications, and digest preferences" }
 paths:
   /public/readiness-assessments:
     post:
@@ -687,6 +688,377 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DocumentRevision"
+  /editorial-work/assignments:
+    get:
+      operationId: listEditorialAssignments
+      tags: [editorial-work]
+      summary: List the assignment for an exact editorial edition
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: editionId
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/Uuid"
+        - name: mine
+          in: query
+          schema: { type: boolean, default: false }
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/EditorialWorkStatus"
+      responses:
+        "200":
+          description: Editorial assignments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialAssignmentList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /editorial-work/editions/{editionId}/assignment:
+    parameters:
+      - $ref: "#/components/parameters/EditorialEditionId"
+    put:
+      operationId: upsertEditorialAssignment
+      tags: [editorial-work]
+      summary: Upsert the active assignment for an exact editorial edition
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditorialAssignmentInput"
+      responses:
+        "200":
+          description: Assignment saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialAssignmentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      operationId: clearEditorialAssignment
+      tags: [editorial-work]
+      summary: Clear the active assignment for an exact editorial edition
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      responses:
+        "204":
+          description: Assignment cleared
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /editorial-work/editions/{editionId}/assignees:
+    parameters:
+      - $ref: "#/components/parameters/EditorialEditionId"
+    get:
+      operationId: listEditorialAssignees
+      tags: [editorial-work]
+      summary: List active users eligible for an exact editorial edition
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Eligible editors and reviewers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialAssigneeList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /editorial-work/revisions/{revisionId}/request-review:
+    parameters:
+      - $ref: "#/components/parameters/EditorialRevisionId"
+    post:
+      operationId: requestEditorialReview
+      tags: [editorial-work]
+      summary: Request review of the current submitted revision
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditorialReviewRequestInput"
+      responses:
+        "200":
+          description: Existing review request reused
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialReviewRequestResponse"
+        "201":
+          description: Review request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialReviewRequestResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /editorial-work/review-requests/{reviewRequestId}/decision:
+    parameters:
+      - $ref: "#/components/parameters/EditorialReviewRequestId"
+    post:
+      operationId: decideEditorialReview
+      tags: [editorial-work]
+      summary: Approve or reject an exact revision review request
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditorialReviewDecisionInput"
+      responses:
+        "200":
+          description: Review request decided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialReviewRequestResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /editorial-work/my:
+    get:
+      operationId: getMyEditorialWork
+      tags: [editorial-work]
+      summary: Get the caller's editorial work queue
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: includeUnassigned
+          in: query
+          schema: { type: boolean, default: false }
+      responses:
+        "200":
+          description: Editorial work queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialQueueResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /editorial-work/team:
+    get:
+      operationId: getEditorialTeamWork
+      tags: [editorial-work]
+      summary: Get the publisher or administrator team queue
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: market
+          in: query
+          schema: { type: string }
+        - name: assigneeId
+          in: query
+          schema:
+            $ref: "#/components/schemas/Uuid"
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/EditorialWorkStatus"
+        - name: includeUnassigned
+          in: query
+          schema: { type: boolean, default: true }
+      responses:
+        "200":
+          description: Team editorial work queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialQueueResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /editorial-work/notifications:
+    get:
+      operationId: listEditorialNotifications
+      tags: [editorial-work]
+      summary: List the caller's in-app editorial notifications
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: unreadOnly
+          in: query
+          schema: { type: boolean, default: false }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        "200":
+          description: In-app editorial notifications
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialNotificationList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /editorial-work/notifications/{notificationId}/read:
+    parameters:
+      - $ref: "#/components/parameters/EditorialNotificationId"
+    post:
+      operationId: markEditorialNotificationRead
+      tags: [editorial-work]
+      summary: Mark one editorial notification read
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      responses:
+        "200":
+          description: Notification marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialNotificationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /editorial-work/notifications/{notificationId}/unread:
+    parameters:
+      - $ref: "#/components/parameters/EditorialNotificationId"
+    post:
+      operationId: markEditorialNotificationUnread
+      tags: [editorial-work]
+      summary: Mark one editorial notification unread
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      responses:
+        "200":
+          description: Notification marked unread
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialNotificationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /editorial-work/notifications/read-all:
+    post:
+      operationId: markAllEditorialNotificationsRead
+      tags: [editorial-work]
+      summary: Mark all editorial notifications read
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      responses:
+        "200":
+          description: Number of notifications marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialNotificationReadAllResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /editorial-work/digest-status:
+    get:
+      operationId: getEditorialDigestStatus
+      tags: [editorial-work]
+      summary: Get the caller's editorial digest delivery status
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Digest delivery status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialDigestStatus"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /editorial-work/digest-preferences:
+    put:
+      operationId: updateEditorialDigestPreferences
+      tags: [editorial-work]
+      summary: Enable or disable editorial digest delivery
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditorialDigestPreferencesInput"
+      responses:
+        "200":
+          description: Digest preferences saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialDigestStatus"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: Digest provider is not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
   /documents/{documentId}/shared-market:
     parameters:
       - $ref: "#/components/parameters/DocumentId"
@@ -2249,6 +2621,30 @@ components:
       in: path
       required: true
       schema: { type: string }
+    EditorialEditionId:
+      name: editionId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    EditorialRevisionId:
+      name: revisionId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    EditorialReviewRequestId:
+      name: reviewRequestId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Uuid"
+    EditorialNotificationId:
+      name: notificationId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Uuid"
   responses:
     BadRequest:
       description: Invalid request
@@ -2709,6 +3105,315 @@ components:
       properties:
         active: { type: number, multipleOf: 1, minimum: 0 }
         invited: { type: number, multipleOf: 1, minimum: 0 }
+
+    Uuid:
+      type: string
+      pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+    EditorialWorkStatus:
+      type: string
+      enum: [active, completed, blocked]
+    EditorialReviewRequestStatus:
+      type: string
+      enum: [requested, approved, rejected, superseded, blocked]
+    EditorialNotificationType:
+      type: string
+      enum: [assignment, review-requested, review-approved, review-rejected, review-superseded, due-reminder, access-blocked, shared-update, shared-conflict]
+    EditorialAssignmentPerson:
+      type: object
+      additionalProperties: false
+      required: [id, name]
+      properties:
+        id:
+          $ref: "#/components/schemas/Uuid"
+        name: { type: string }
+    EditorialQueuePerson:
+      type: object
+      additionalProperties: false
+      required: [id, name, status]
+      properties:
+        id:
+          $ref: "#/components/schemas/Uuid"
+        name: { type: ["string", "null"] }
+        status:
+          $ref: "#/components/schemas/UserStatus"
+    EditorialAssignee:
+      type: object
+      additionalProperties: false
+      required: [id, name, role]
+      properties:
+        id:
+          $ref: "#/components/schemas/Uuid"
+        name: { type: string }
+        role:
+          type: string
+          enum: [editor, publisher, administrator]
+    EditorialAssignment:
+      type: object
+      additionalProperties: false
+      required: [id, editionId, documentId, editorId, reviewerId, editor, reviewer, dueAt, status, createdAt, updatedAt]
+      properties:
+        id:
+          $ref: "#/components/schemas/Uuid"
+        editionId:
+          anyOf:
+            - $ref: "#/components/schemas/Uuid"
+            - type: "null"
+        documentId:
+          $ref: "#/components/schemas/Uuid"
+        editorId:
+          anyOf:
+            - $ref: "#/components/schemas/Uuid"
+            - type: "null"
+        reviewerId:
+          anyOf:
+            - $ref: "#/components/schemas/Uuid"
+            - type: "null"
+        editor:
+          anyOf:
+            - $ref: "#/components/schemas/EditorialAssignmentPerson"
+            - type: "null"
+        reviewer:
+          anyOf:
+            - $ref: "#/components/schemas/EditorialAssignmentPerson"
+            - type: "null"
+        dueAt:
+          type: ["string", "null"]
+          format: date-time
+        status:
+          $ref: "#/components/schemas/EditorialWorkStatus"
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    EditorialAssignmentInput:
+      type: object
+      additionalProperties: false
+      properties:
+        editorId:
+          anyOf:
+            - $ref: "#/components/schemas/Uuid"
+            - type: "null"
+        reviewerId:
+          anyOf:
+            - $ref: "#/components/schemas/Uuid"
+            - type: "null"
+        dueAt:
+          type: ["string", "null"]
+          format: date-time
+    EditorialAssignmentList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EditorialAssignment"
+    EditorialAssignmentResponse:
+      type: object
+      additionalProperties: false
+      required: [assignment]
+      properties:
+        assignment:
+          $ref: "#/components/schemas/EditorialAssignment"
+    EditorialAssigneeList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EditorialAssignee"
+    EditorialReviewRequest:
+      type: object
+      additionalProperties: false
+      required: [id, editionId, revisionId, requesterId, reviewerId, status, note, decisionNote, requestedAt, decidedAt, supersededAt, blockedReason]
+      properties:
+        id:
+          $ref: "#/components/schemas/Uuid"
+        editionId:
+          $ref: "#/components/schemas/Uuid"
+        revisionId:
+          $ref: "#/components/schemas/Uuid"
+        requesterId:
+          $ref: "#/components/schemas/Uuid"
+        reviewerId:
+          $ref: "#/components/schemas/Uuid"
+        status:
+          $ref: "#/components/schemas/EditorialReviewRequestStatus"
+        note: { type: ["string", "null"], maxLength: 2000 }
+        decisionNote: { type: ["string", "null"], maxLength: 2000 }
+        requestedAt: { type: string, format: date-time }
+        decidedAt: { type: ["string", "null"], format: date-time }
+        supersededAt: { type: ["string", "null"], format: date-time }
+        blockedReason: { type: ["string", "null"] }
+    EditorialReviewRequestInput:
+      type: object
+      additionalProperties: false
+      properties:
+        reviewerId:
+          $ref: "#/components/schemas/Uuid"
+        note: { type: string, maxLength: 2000 }
+    EditorialReviewRequestResponse:
+      type: object
+      additionalProperties: false
+      required: [reviewRequest]
+      properties:
+        reviewRequest:
+          $ref: "#/components/schemas/EditorialReviewRequest"
+    EditorialReviewDecisionInput:
+      oneOf:
+        - $ref: "#/components/schemas/EditorialApprovalDecisionInput"
+        - $ref: "#/components/schemas/EditorialRejectionDecisionInput"
+    EditorialApprovalDecisionInput:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [approved]
+        note: { type: string, maxLength: 2000 }
+    EditorialRejectionDecisionInput:
+      type: object
+      additionalProperties: false
+      required: [decision, note]
+      properties:
+        decision:
+          type: string
+          enum: [rejected]
+        note: { type: string, minLength: 1, maxLength: 2000, pattern: '\S' }
+    EditorialQueueItem:
+      type: object
+      additionalProperties: false
+      required: [id, editionId, documentId, documentTitle, documentKind, market, locale, editor, reviewer, dueAt, overdue, status, reviewRequestId, reviewRequest, reviewRevisionId, currentRevisionId, currentRevisionNumber, workflowState, publishedRevisionId, link]
+      properties:
+        id: { type: string }
+        editionId:
+          anyOf:
+            - $ref: "#/components/schemas/Uuid"
+            - type: "null"
+        documentId:
+          $ref: "#/components/schemas/Uuid"
+        documentTitle: { type: string }
+        documentKind:
+          $ref: "#/components/schemas/DocumentKind"
+        market: { type: ["string", "null"] }
+        locale: { type: ["string", "null"] }
+        editor:
+          anyOf:
+            - $ref: "#/components/schemas/EditorialQueuePerson"
+            - type: "null"
+        reviewer:
+          anyOf:
+            - $ref: "#/components/schemas/EditorialQueuePerson"
+            - type: "null"
+        dueAt:
+          type: ["string", "null"]
+          format: date-time
+        overdue: { type: boolean }
+        status:
+          $ref: "#/components/schemas/EditorialWorkStatus"
+        reviewRequestId:
+          anyOf:
+            - $ref: "#/components/schemas/Uuid"
+            - type: "null"
+        reviewRequest:
+          anyOf:
+            - $ref: "#/components/schemas/EditorialReviewRequest"
+            - type: "null"
+        reviewRevisionId:
+          anyOf:
+            - $ref: "#/components/schemas/Uuid"
+            - type: "null"
+        currentRevisionId:
+          anyOf:
+            - $ref: "#/components/schemas/Uuid"
+            - type: "null"
+        currentRevisionNumber: { type: ["integer", "null"], minimum: 1 }
+        workflowState: { type: ["string", "null"] }
+        publishedRevisionId:
+          anyOf:
+            - $ref: "#/components/schemas/Uuid"
+            - type: "null"
+        link:
+          type: string
+          description: Authenticated normal admin-relative link for the exact target.
+    EditorialQueueResponse:
+      type: object
+      additionalProperties: false
+      required: [items, emptyState]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EditorialQueueItem"
+        emptyState:
+          anyOf:
+            - type: string
+              enum: [no-work, no-access, load-failed]
+            - type: "null"
+    EditorialNotification:
+      type: object
+      additionalProperties: false
+      required: [id, type, title, message, link, createdAt, readAt, deliveryStatus]
+      properties:
+        id:
+          $ref: "#/components/schemas/Uuid"
+        type:
+          $ref: "#/components/schemas/EditorialNotificationType"
+        title: { type: string }
+        message: { type: string }
+        link:
+          type: string
+          description: Authenticated normal admin-relative link.
+        createdAt: { type: string, format: date-time }
+        readAt: { type: ["string", "null"], format: date-time }
+        deliveryStatus:
+          type: string
+          enum: [in-app]
+    EditorialNotificationList:
+      type: object
+      additionalProperties: false
+      required: [items, nextOffset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EditorialNotification"
+        nextOffset:
+          type: ["integer", "null"]
+          minimum: 0
+    EditorialNotificationResponse:
+      type: object
+      additionalProperties: false
+      required: [notification]
+      properties:
+        notification:
+          $ref: "#/components/schemas/EditorialNotification"
+    EditorialNotificationReadAllResponse:
+      type: object
+      additionalProperties: false
+      required: [count]
+      properties:
+        count: { type: integer, minimum: 0 }
+    EditorialDigestStatus:
+      type: object
+      additionalProperties: false
+      required: [enabled, configured, status, lastSentAt, lastError]
+      properties:
+        enabled: { type: boolean }
+        configured: { type: boolean }
+        status:
+          type: string
+          enum: [disabled, pending, processing, sent, failed, blocked]
+        lastSentAt: { type: ["string", "null"], format: date-time }
+        lastError: { type: ["string", "null"] }
+    EditorialDigestPreferencesInput:
+      type: object
+      additionalProperties: false
+      required: [enabled]
+      properties:
+        enabled: { type: boolean }
 
     DocumentKind:
       type: string
@@ -3205,7 +3910,7 @@ components:
         items: { type: array, items: { type: string } }
     Document:
       type: object
-      required: [id, kind, slug, title, status, content, markets, revisionNumber, canPermanentlyDelete, inherited, effectiveMarket, effectiveLocale, createdAt, updatedAt]
+      required: [id, kind, slug, title, status, content, markets, revisionNumber, editionId, canPermanentlyDelete, inherited, effectiveMarket, effectiveLocale, createdAt, updatedAt]
       properties:
         id: { type: string }
         kind:
@@ -3226,6 +3931,7 @@ components:
           type: array
           items: { type: string }
         revisionNumber: { type: number, multipleOf: 1, minimum: 1 }
+        editionId: { type: ["string", "null"], description: Exact market-edition identity represented by this document response, when one exists. }
         canPermanentlyDelete:
           type: boolean
           description: True only when permanent deletion is allowed; previously published offices must be archived.

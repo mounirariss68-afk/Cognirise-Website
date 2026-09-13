@@ -87,6 +87,12 @@ test("initial selection opens an assigned non-UAE exact edition with its locale"
   assert.equal(selected?.locale, "ar-SA");
 });
 
+test("a reviewed approved edition can publish normally without administrator override", () => {
+  assert.equal(editionAuthoringActions(edition("ksa", "approved"), true, true, false).canPublish, true);
+  assert.equal(editionAuthoringActions(edition("ksa", "approved"), true, false, false).canPublish, false);
+  assert.equal(editionAuthoringActions(edition("ksa", "approved"), true, true, true).canPublish, false);
+});
+
 test("first draft can submit and in-review editions deny editing", () => {
   assert.equal(editionAuthoringActions(edition("ksa", "draft"), true, false, false).canSubmit, true);
   const review = editionAuthoringActions(edition("ksa", "in-review"), true, true, true);
@@ -106,7 +112,7 @@ test("an approved latest exact revision can start a successor draft", () => {
   const actions = editionAuthoringActions(edition("uae", "approved"), true, true, false);
   assert.equal(actions.canSave, true);
   assert.equal(actions.canSubmit, false);
-  assert.equal(actions.canPublish, false);
+  assert.equal(actions.canPublish, true);
 });
 
 test("detail rehydrates form state whenever the exact edition response changes", async () => {

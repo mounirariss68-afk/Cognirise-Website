@@ -10,6 +10,7 @@ import analyticsRouter from "./analytics";
 import mediaRouter from "./media";
 import navigationRouter from "./navigation";
 import readinessAssessmentsRouter from "./readiness-assessments";
+import editorialWorkRouter from "./editorial-work";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(analyticsRouter);
 router.use(mediaRouter);
 router.use(navigationRouter);
 router.use(readinessAssessmentsRouter);
+router.use(editorialWorkRouter);
 
 export default router;

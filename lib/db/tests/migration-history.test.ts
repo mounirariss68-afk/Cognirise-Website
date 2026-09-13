@@ -58,6 +58,8 @@ const expectedMigrations = [
   { idx: 29, when: 1788998400006, tag: "0029_cms_shared_market_editions" },
   { idx: 30, when: 1788998400007, tag: "0030_cms_shared_history_cascade_deletes" },
   { idx: 31, when: 1788998400008, tag: "0031_cms_shared_pointer_integrity" },
+  { idx: 32, when: 1788998400009, tag: "0032_cms_editorial_work" },
+  { idx: 33, when: 1788998400010, tag: "0033_cms_editorial_review_hardening" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {
@@ -105,11 +107,93 @@ test("applies the complete schema chain to a fresh database and replays safely",
           OR (table_name='cms_market_editions' AND column_name IN ('content_mode','published_revision_id'))
           OR (table_name='cms_document_availability_states' AND column_name IN ('shared_source_edition_id','published_source_revision_id'))
           OR (table_name='cms_media_references' AND column_name='media_version_id')
+           OR (table_name='cms_editorial_assignments' AND column_name IN ('edition_id','editor_user_id','reviewer_user_id','due_at'))
+           OR (table_name='cms_review_requests' AND column_name IN ('edition_id','revision_id','reviewer_user_id','status'))
+           OR (table_name='cms_editorial_notifications' AND column_name IN ('user_id','event_key','read_at'))
+           OR (table_name='cms_editorial_digest_jobs' AND column_name IN ('user_id','digest_date','processing_lease'))
         )
       ORDER BY table_name,column_name`,
     [schema],
   );
-  assert.ok(required.rows.length >= 8, "fresh migration must expose readiness-critical columns");
+  assert.ok(required.rows.length >= 22, "fresh migration must expose readiness-critical columns");
+  const editorialTriggers = await migrationPool.query<{ tgname: string }>(
+    `SELECT tgname FROM pg_trigger
+      WHERE tgrelid IN ('cms_editorial_assignments'::regclass,'cms_review_requests'::regclass,'cms_revisions'::regclass)
+        AND tgname IN (
+          'cms_editorial_assignment_target_integrity',
+          'cms_review_request_target_integrity',
+          'cms_editorial_revision_supersedes_review',
+          'cms_editorial_review_transition_notification'
+        )
+      ORDER BY tgname`,
+  );
+  assert.deepEqual(editorialTriggers.rows.map((row) => row.tgname), [
+    "cms_editorial_assignment_target_integrity",
+    "cms_editorial_review_transition_notification",
+    "cms_editorial_revision_supersedes_review",
+    "cms_review_request_target_integrity",
+  ]);
+  // Runtime proof for the non-Drizzle integrity: an open review is bound to
+  // its immutable revision and a later save supersedes it in the same
+  // transaction, rather than carrying review approval forward.
+  const writer = randomUUID();
+  const reviewer = randomUUID();
+  const documentId = randomUUID();
+  const editionId = randomUUID();
+  const revisionOne = randomUUID();
+  const revisionTwo = randomUUID();
+  await migrationPool.query(
+    `INSERT INTO cms_users(id,email,display_name,role,status) VALUES
+      ($1,'writer@example.test','Writer','editor','active'),
+      ($2,'reviewer@example.test','Reviewer','publisher','active')`,
+    [writer, reviewer],
+  );
+  await migrationPool.query(
+    "INSERT INTO cms_documents(id,kind,title,owner_id) VALUES ($1,'article','Editorial fixture',$2)",
+    [documentId, writer],
+  );
+  await migrationPool.query(
+    "INSERT INTO cms_market_editions(id,document_id,market,locale,content_mode) VALUES ($1,$2,'uae','en','custom')",
+    [editionId, documentId],
+  );
+  await migrationPool.query(
+    `INSERT INTO cms_revisions(id,edition_id,revision_number,payload,content_digest,workflow_state,created_by_user_id,reason)
+     VALUES ($1,$2,1,'{}'::jsonb,'one','in-review',$3,'fixture')`,
+    [revisionOne, editionId, writer],
+  );
+  const firstRequest = await migrationPool.query(
+    `INSERT INTO cms_review_requests(edition_id,revision_id,requester_user_id,reviewer_user_id)
+     VALUES ($1,$2,$3,$4) RETURNING id`,
+    [editionId, revisionOne, writer, reviewer],
+  );
+  await migrationPool.query(
+    `INSERT INTO cms_revisions(id,edition_id,revision_number,payload,content_digest,workflow_state,created_by_user_id,reason)
+     VALUES ($1,$2,2,'{}'::jsonb,'two','in-review',$3,'fixture')`,
+    [revisionTwo, editionId, writer],
+  );
+  const superseded = await migrationPool.query(
+    "SELECT status FROM cms_review_requests WHERE id=$1",
+    [firstRequest.rows[0].id],
+  );
+  assert.equal(superseded.rows[0].status, "superseded");
+  const supersessionNotice = await migrationPool.query(
+    "SELECT type FROM cms_editorial_notifications WHERE user_id=$1 AND review_request_id=$2",
+    [reviewer, firstRequest.rows[0].id],
+  );
+  assert.equal(supersessionNotice.rows[0].type, "review-superseded");
+  const secondRequest = await migrationPool.query(
+    `INSERT INTO cms_review_requests(edition_id,revision_id,requester_user_id,reviewer_user_id)
+     VALUES ($1,$2,$3,$4) RETURNING id`,
+    [editionId, revisionTwo, writer, reviewer],
+  );
+  await migrationPool.query("UPDATE cms_revisions SET workflow_state='approved' WHERE id=$1", [revisionTwo]);
+  const decided = await migrationPool.query("SELECT status FROM cms_review_requests WHERE id=$1", [secondRequest.rows[0].id]);
+  assert.equal(decided.rows[0].status, "approved");
+  const approvalNotice = await migrationPool.query(
+    "SELECT type FROM cms_editorial_notifications WHERE user_id=$1 AND review_request_id=$2",
+    [writer, secondRequest.rows[0].id],
+  );
+  assert.equal(approvalNotice.rows[0].type, "review-approved");
   const appliedBeforeReplay = await migrationPool.query(
     `SELECT created_at FROM "${schema}"."__drizzle_migrations" ORDER BY created_at`,
   );

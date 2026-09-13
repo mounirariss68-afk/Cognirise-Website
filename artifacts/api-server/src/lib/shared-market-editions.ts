@@ -398,15 +398,18 @@ export function registerSharedMarketEditionRoutes(
         );
         await client.query("UPDATE cms_shared_baselines SET active_revision_id=$2,updated_at=now() WHERE id=$1",
           [baseline.rows[0]!.id, revision.rows[0]!.id]);
-        // Baseline edits never cascade into market drafts/live output. A hold
-        // is an editor's explicit "keep this baseline" decision, not a marker
-        // that every successor was automatically accepted or rejected.
+        // The database successor trigger records a durable event for every
+        // affected assignee. Keep the route's state transition explicit too:
+        // isolated route-test schemas and pre-trigger development schemas
+        // still must never present a binding based on the replaced revision as
+        // current. The trigger covers direct operational pointer updates.
         await client.query(
           `UPDATE cms_market_edition_bindings
-               SET translation_state='stale',updated_at=now()
-             WHERE document_id=$1 AND mode IN ('shared','adapted')
-               AND translation_source_revision_id=$2`,
-          [documentId, exists.rows[0]?.active_revision_id ?? null],
+              SET translation_state='stale',updated_at=now()
+            WHERE document_id=$1 AND baseline_id=$2
+              AND mode IN ('shared','adapted')
+              AND based_on_baseline_revision_id=$3`,
+          [documentId, baseline.rows[0]!.id, exists.rows[0]?.active_revision_id ?? null],
         );
         await audit(auth, "shared-baseline-established", "document", documentId,
           { locale: body.locale, sourceRevisionId: body.sourceRevisionId }, client);

@@ -25,6 +25,11 @@ export interface Document {
   markets: string[];
   /** @minimum 1 */
   revisionNumber: number;
+  /**
+     * Exact market-edition identity represented by this document response
+     * @nullable
+     */
+  editionId: string | null;
   /** True only when permanent deletion is allowed; previously published offices must be archived. */
   canPermanentlyDelete: boolean;
   /** True when this editorial discovery entry is the effective approved published fallback rather than an exact edition. */

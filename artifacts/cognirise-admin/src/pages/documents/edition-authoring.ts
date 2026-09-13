@@ -46,7 +46,7 @@ export function editionAuthoringActions(
       && (workflow === "approved" || (["draft", "rejected"].includes(workflow ?? "") && hasUnsaved)),
     canSubmit: canEdit && !hasUnsaved && ["draft", "rejected"].includes(workflow ?? ""),
     canPublish: canPublish && !hasUnsaved && (
-      workflow === "in-review"
+      workflow === "in-review" || workflow === "approved"
       || (allowDirectPublish && ["draft", "rejected"].includes(workflow ?? ""))
     ),
     immutable,

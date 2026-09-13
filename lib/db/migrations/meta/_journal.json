@@ -225,6 +225,20 @@
       "when": 1788998400008,
       "tag": "0031_cms_shared_pointer_integrity",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1788998400009,
+      "tag": "0032_cms_editorial_work",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1788998400010,
+      "tag": "0033_cms_editorial_review_hardening",
+      "breakpoints": true
     }
   ]
 }

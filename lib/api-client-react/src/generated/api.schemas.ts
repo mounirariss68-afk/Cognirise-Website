@@ -496,6 +496,175 @@ export interface DashboardKpis {
   generatedAt: string;
 }
 
+/**
+ * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+ */
+export type Uuid = string;
+
+export type EditorialWorkStatus = typeof EditorialWorkStatus[keyof typeof EditorialWorkStatus];
+
+
+export const EditorialWorkStatus = {
+  active: 'active',
+  completed: 'completed',
+  blocked: 'blocked',
+} as const;
+
+export type EditorialReviewRequestStatus = typeof EditorialReviewRequestStatus[keyof typeof EditorialReviewRequestStatus];
+
+
+export const EditorialReviewRequestStatus = {
+  requested: 'requested',
+  approved: 'approved',
+  rejected: 'rejected',
+  superseded: 'superseded',
+  blocked: 'blocked',
+} as const;
+
+export type EditorialNotificationType = typeof EditorialNotificationType[keyof typeof EditorialNotificationType];
+
+
+export const EditorialNotificationType = {
+  assignment: 'assignment',
+  'review-requested': 'review-requested',
+  'review-approved': 'review-approved',
+  'review-rejected': 'review-rejected',
+  'review-superseded': 'review-superseded',
+  'due-reminder': 'due-reminder',
+  'access-blocked': 'access-blocked',
+  'shared-update': 'shared-update',
+  'shared-conflict': 'shared-conflict',
+} as const;
+
+export interface EditorialAssignmentPerson {
+  id: Uuid;
+  name: string;
+}
+
+export interface EditorialQueuePerson {
+  id: Uuid;
+  /** @nullable */
+  name: string | null;
+  status: UserStatus;
+}
+
+export type EditorialAssigneeRole = typeof EditorialAssigneeRole[keyof typeof EditorialAssigneeRole];
+
+
+export const EditorialAssigneeRole = {
+  editor: 'editor',
+  publisher: 'publisher',
+  administrator: 'administrator',
+} as const;
+
+export interface EditorialAssignee {
+  id: Uuid;
+  name: string;
+  role: EditorialAssigneeRole;
+}
+
+export interface EditorialAssignment {
+  id: Uuid;
+  editionId: Uuid | null;
+  documentId: Uuid;
+  editorId: Uuid | null;
+  reviewerId: Uuid | null;
+  editor: EditorialAssignmentPerson | null;
+  reviewer: EditorialAssignmentPerson | null;
+  /** @nullable */
+  dueAt: string | null;
+  status: EditorialWorkStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EditorialAssignmentInput {
+  editorId?: Uuid | null;
+  reviewerId?: Uuid | null;
+  /** @nullable */
+  dueAt?: string | null;
+}
+
+export interface EditorialAssignmentList {
+  items: EditorialAssignment[];
+}
+
+export interface EditorialAssignmentResponse {
+  assignment: EditorialAssignment;
+}
+
+export interface EditorialAssigneeList {
+  items: EditorialAssignee[];
+}
+
+export interface EditorialReviewRequest {
+  id: Uuid;
+  editionId: Uuid;
+  revisionId: Uuid;
+  requesterId: Uuid;
+  reviewerId: Uuid;
+  status: EditorialReviewRequestStatus;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  note: string | null;
+  /**
+     * @maxLength 2000
+     * @nullable
+     */
+  decisionNote: string | null;
+  requestedAt: string;
+  /** @nullable */
+  decidedAt: string | null;
+  /** @nullable */
+  supersededAt: string | null;
+  /** @nullable */
+  blockedReason: string | null;
+}
+
+export interface EditorialReviewRequestInput {
+  reviewerId?: Uuid;
+  /** @maxLength 2000 */
+  note?: string;
+}
+
+export interface EditorialReviewRequestResponse {
+  reviewRequest: EditorialReviewRequest;
+}
+
+export type EditorialApprovalDecisionInputDecision = typeof EditorialApprovalDecisionInputDecision[keyof typeof EditorialApprovalDecisionInputDecision];
+
+
+export const EditorialApprovalDecisionInputDecision = {
+  approved: 'approved',
+} as const;
+
+export interface EditorialApprovalDecisionInput {
+  decision: EditorialApprovalDecisionInputDecision;
+  /** @maxLength 2000 */
+  note?: string;
+}
+
+export type EditorialRejectionDecisionInputDecision = typeof EditorialRejectionDecisionInputDecision[keyof typeof EditorialRejectionDecisionInputDecision];
+
+
+export const EditorialRejectionDecisionInputDecision = {
+  rejected: 'rejected',
+} as const;
+
+export interface EditorialRejectionDecisionInput {
+  decision: EditorialRejectionDecisionInputDecision;
+  /**
+     * @minLength 1
+     * @maxLength 2000
+     * @pattern \S
+     */
+  note: string;
+}
+
+export type EditorialReviewDecisionInput = EditorialApprovalDecisionInput | EditorialRejectionDecisionInput;
+
 export type DocumentKind = typeof DocumentKind[keyof typeof DocumentKind];
 
 
@@ -511,6 +680,116 @@ export const DocumentKind = {
   'site-configuration': 'site-configuration',
   'landing-page': 'landing-page',
 } as const;
+
+export interface EditorialQueueItem {
+  id: string;
+  editionId: Uuid | null;
+  documentId: Uuid;
+  documentTitle: string;
+  documentKind: DocumentKind;
+  /** @nullable */
+  market: string | null;
+  /** @nullable */
+  locale: string | null;
+  editor: EditorialQueuePerson | null;
+  reviewer: EditorialQueuePerson | null;
+  /** @nullable */
+  dueAt: string | null;
+  overdue: boolean;
+  status: EditorialWorkStatus;
+  reviewRequestId: Uuid | null;
+  reviewRequest: EditorialReviewRequest | null;
+  reviewRevisionId: Uuid | null;
+  currentRevisionId: Uuid | null;
+  /**
+     * @minimum 1
+     * @nullable
+     */
+  currentRevisionNumber: number | null;
+  /** @nullable */
+  workflowState: string | null;
+  publishedRevisionId: Uuid | null;
+  /** Authenticated normal admin-relative link for the exact target. */
+  link: string;
+}
+
+export type EditorialQueueResponseEmptyState = typeof EditorialQueueResponseEmptyState[keyof typeof EditorialQueueResponseEmptyState] | null;
+
+
+export const EditorialQueueResponseEmptyState = {
+  'no-work': 'no-work',
+  'no-access': 'no-access',
+  'load-failed': 'load-failed',
+} as const;
+
+export interface EditorialQueueResponse {
+  items: EditorialQueueItem[];
+  emptyState: EditorialQueueResponseEmptyState;
+}
+
+export type EditorialNotificationDeliveryStatus = typeof EditorialNotificationDeliveryStatus[keyof typeof EditorialNotificationDeliveryStatus];
+
+
+export const EditorialNotificationDeliveryStatus = {
+  'in-app': 'in-app',
+} as const;
+
+export interface EditorialNotification {
+  id: Uuid;
+  type: EditorialNotificationType;
+  title: string;
+  message: string;
+  /** Authenticated normal admin-relative link. */
+  link: string;
+  createdAt: string;
+  /** @nullable */
+  readAt: string | null;
+  deliveryStatus: EditorialNotificationDeliveryStatus;
+}
+
+export interface EditorialNotificationList {
+  items: EditorialNotification[];
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  nextOffset: number | null;
+}
+
+export interface EditorialNotificationResponse {
+  notification: EditorialNotification;
+}
+
+export interface EditorialNotificationReadAllResponse {
+  /** @minimum 0 */
+  count: number;
+}
+
+export type EditorialDigestStatusStatus = typeof EditorialDigestStatusStatus[keyof typeof EditorialDigestStatusStatus];
+
+
+export const EditorialDigestStatusStatus = {
+  disabled: 'disabled',
+  pending: 'pending',
+  processing: 'processing',
+  sent: 'sent',
+  failed: 'failed',
+  blocked: 'blocked',
+} as const;
+
+export interface EditorialDigestStatus {
+  enabled: boolean;
+  configured: boolean;
+  status: EditorialDigestStatusStatus;
+  /** @nullable */
+  lastSentAt: string | null;
+  /** @nullable */
+  lastError: string | null;
+}
+
+export interface EditorialDigestPreferencesInput {
+  enabled: boolean;
+}
 
 export type DocumentStatus = typeof DocumentStatus[keyof typeof DocumentStatus];
 
@@ -1471,6 +1750,11 @@ export interface Document {
   markets: string[];
   /** @minimum 1 */
   revisionNumber: number;
+  /**
+     * Exact market-edition identity represented by this document response
+     * @nullable
+     */
+  editionId: string | null;
   /** True only when permanent deletion is allowed; previously published offices must be archived. */
   canPermanentlyDelete: boolean;
   /** True when this editorial discovery entry is the effective approved published fallback rather than an exact edition. */
@@ -2872,6 +3156,36 @@ readiness?: SharedEditionReadiness;
 export type GetDocumentParams = {
 market: string;
 locale: string;
+};
+
+export type ListEditorialAssignmentsParams = {
+editionId: Uuid;
+mine?: boolean;
+status?: EditorialWorkStatus;
+};
+
+export type GetMyEditorialWorkParams = {
+includeUnassigned?: boolean;
+};
+
+export type GetEditorialTeamWorkParams = {
+market?: string;
+assigneeId?: Uuid;
+status?: EditorialWorkStatus;
+includeUnassigned?: boolean;
+};
+
+export type ListEditorialNotificationsParams = {
+unreadOnly?: boolean;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };
 
 export type ListDocumentReviewCommentsParams = {
