@@ -68,6 +68,7 @@ let sharedOverrideInput: any;
 let directSharedComparison: any;
 let currentSharedComparison: any;
 let resolveSharedInput: any;
+let bindSharedInput: any;
 let pendingRestore: { input: any; options: any } | undefined;
 let mutationPending = false;
 let onSharedAvailabilityMutation: ((input: any, options: any) => void) | undefined;
@@ -93,6 +94,12 @@ const resolveSharedMutation = {
   isPending: false,
   mutate(input: any) {
     resolveSharedInput = input;
+  },
+};
+const bindSharedMutation = {
+  isPending: false,
+  mutate(input: any) {
+    bindSharedInput = input;
   },
 };
 const baselineMutation = {
@@ -127,6 +134,8 @@ const edition = {
 };
 let currentEditions: any[] = [edition];
 let currentMarkets: any[] = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+let editionsLoading = false;
+let marketsLoading = false;
 
 if (typeof (mock as typeof mock & { module?: unknown }).module !== "function") {
   test("rendered DocumentDetail save state", async () => {
@@ -162,7 +171,10 @@ mock.module("@workspace/api-client-react", {
     getListMediaQueryKey: () => ["media-list"],
     useGetSession: () => ({ data: currentSession, isLoading: false, isError: false }),
     useListDocuments: () => ({ data: { items: [] }, isLoading: false, isError: false }),
-    useListDocumentEditions: () => ({ data: { items: currentEditions }, isLoading: false, isError: false }),
+    useListDocumentEditions: () => {
+      React.useSyncExternalStore((listener) => { listeners.add(listener); return () => listeners.delete(listener); }, () => `${editionsLoading}:${JSON.stringify(currentEditions)}`, () => "");
+      return { data: editionsLoading ? undefined : { items: currentEditions }, isLoading: editionsLoading, isError: false };
+    },
     useGetSharedMarketEditionMatrix: () => ({ data: currentSharedMatrix }),
     useCompareSharedMarketBaseline: () => ({ data: currentSharedComparison, refetch: async () => ({ data: currentSharedComparison }), isFetching: false }),
     compareSharedMarketBaseline: async () => directSharedComparison,
@@ -216,7 +228,10 @@ mock.module("@workspace/api-client-react", {
       return mutation;
     },
     useListDocumentRevisions: () => ({ data: { items: [] } }),
-    useListMarketEditions: () => ({ data: { items: currentMarkets } }),
+    useListMarketEditions: () => {
+      React.useSyncExternalStore((listener) => { listeners.add(listener); return () => listeners.delete(listener); }, () => `${marketsLoading}:${JSON.stringify(currentMarkets)}`, () => "");
+      return { data: marketsLoading ? undefined : { items: currentMarkets }, isLoading: marketsLoading };
+    },
     usePreviewDocument: () => ({ refetch: async () => ({ data: null }) }),
     useListDocumentReviewComments: () => ({ data: [] }),
     useSubmitDocument: () => inertMutation,
@@ -236,7 +251,7 @@ mock.module("@workspace/api-client-react", {
     useAddDocumentReviewComment: () => inertMutation,
     useRejectDocumentRevision: () => inertMutation,
     useEstablishSharedMarketBaseline: () => baselineMutation,
-    useBindSharedMarketEdition: () => inertMutation,
+    useBindSharedMarketEdition: () => bindSharedMutation,
     useSaveSharedMarketOverrides: () => sharedOverrideMutation,
     useResolveSharedMarketBaselineUpdate: () => resolveSharedMutation,
     useGetMedia: () => ({ data: undefined }),
@@ -257,6 +272,7 @@ async function renderDetail(initialDocument: any = documentBase) {
   sharedOverrideMutations = 0;
   sharedOverrideInput = undefined;
   resolveSharedInput = undefined;
+  bindSharedInput = undefined;
   mutationPending = false;
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   const container = document.createElement("div");
@@ -1116,7 +1132,7 @@ test("edition header uses exact workflow and availability state rather than a fi
   }
 });
 
-test("duplicate stable-array comparison conflicts render and submit one decision per path", async () => {
+test("stable-array conflicts use unique decision identities while showing selector-aware values", async () => {
   const binding = {
     id: "binding-1", documentId: "document-1", marketEditionId: "uae-edition", locale: "en-US",
     mode: "adapted", baselineRevisionId: "baseline-revision-1", version: 4, operations: [],
@@ -1127,26 +1143,34 @@ test("duplicate stable-array comparison conflicts render and submit one decision
   currentSharedComparison = {
     binding,
     baselineRevisionId: "baseline-revision-2",
-    previousSnapshot: { content: { sections: [{ id: "hero", order: 1 }] } },
-    currentSnapshot: { content: { sections: [{ id: "hero", order: 2 }] } },
-    localSnapshot: { content: { sections: [{ id: "hero", order: 3 }] } },
+    previousSnapshot: { content: { sections: [{ id: "hero", title: "Old hero" }] } },
+    currentSnapshot: { content: { sections: [{ id: "hero", title: "New hero" }] } },
+    localSnapshot: { content: { sections: [{ id: "hero", title: "Local hero" }] } },
     mergedSnapshot: {},
     canAutoAdopt: false,
     conflicts: [
-      { path: "content.sections[id=hero]", kind: "remove", message: "Shared removed the section." },
-      { path: "content.sections[id=hero]", kind: "add", message: "Market retained the section." },
-      { path: "content.sections[id=hero]", kind: "reorder", message: "Both changed its order." },
+      { conflictId: "array-add:content.sections[id=hero].title:market:0", path: "content.sections[id=hero].title", kind: "remove", message: "Shared removed the section." },
+      { conflictId: "array-remove:content.sections[id=hero].title:hero:1", path: "content.sections[id=hero].title", kind: "add", message: "Market retained the section." },
+      { conflictId: "array-reorder:content.sections[id=hero].title:hero:2", path: "content.sections[id=hero].title", kind: "reorder", message: "Both changed its order." },
     ],
   };
   const view = await renderDetail();
   try {
     await React.act(async () => button(view.container, "Compare to Shared").click());
     const rendered = document.body.textContent ?? "";
-    assert.equal((rendered.match(/content\.sections\[id=hero\]/g) ?? []).length, 1, "deduplication produces one conflict card and one choice");
-    assert.match(rendered, /Shared removed the section\. Market retained the section\. Both changed its order\./);
-    await React.act(async () => button(document.body, "Adopt Update").click());
+    assert.equal((rendered.match(/content\.sections\[id=hero\]\.title/g) ?? []).length, 3, "same display path retains one choice per distinct operation");
+    assert.match(rendered, /Old hero/);
+    assert.match(rendered, /New hero/);
+    assert.match(rendered, /Local hero/);
+    const adoptButtons = [...document.body.querySelectorAll<HTMLButtonElement>("button")].filter((item) => item.textContent === "Adopt Update");
+    assert.equal(adoptButtons.length, 3);
+    await React.act(async () => adoptButtons.forEach((item) => item.click()));
     await React.act(async () => button(document.body, "Apply & Save Draft").click());
-    assert.deepEqual(resolveSharedInput?.data.conflictDecisions, [{ path: "content.sections[id=hero]", choice: "shared" }]);
+    assert.deepEqual(resolveSharedInput?.data.conflictDecisions, [
+      { conflictId: "array-add:content.sections[id=hero].title:market:0", choice: "shared" },
+      { conflictId: "array-remove:content.sections[id=hero].title:hero:1", choice: "shared" },
+      { conflictId: "array-reorder:content.sections[id=hero].title:hero:2", choice: "shared" },
+    ]);
   } finally {
     await view.unmount();
     currentSharedMatrix = { baselines: [], bindings: [] };
@@ -1177,6 +1201,101 @@ test("valid market deep links win over shared/default selection for market code 
     currentSearch = "";
     currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
     currentEditions = [edition];
+  }
+});
+
+test("explicit market reload waits for both catalogues and never briefly selects the availability shared source", async () => {
+  const ksa = { ...edition, market: "ksa", locale: "en", revisionId: "ksa-revision" };
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en", enabled: true },
+  ];
+  currentEditions = [edition, ksa];
+  currentAvailability = {
+    documentId: "document-1", draftVersion: 1, reviewedVersion: null, publishedVersion: 1,
+    sharedSource: { editionId: "uae-edition", revisionId: "revision-1", market: "uae", locale: "en-US" },
+    affectedEditions: [], items: [],
+  };
+  try {
+    for (const [marketParam, first] of [["ksa", "availability"], ["ksa-edition", "catalog"]] as const) {
+      currentSearch = `?market=${marketParam}&locale=en`;
+      editionsLoading = true;
+      marketsLoading = true;
+      const view = await renderDetail();
+      try {
+        assert.doesNotMatch(view.container.textContent ?? "", /Editing:.*UAE/, "query-pending render must not fall back to availability source");
+        await React.act(async () => {
+          if (first === "catalog") marketsLoading = false;
+          else editionsLoading = false;
+          notify();
+        });
+        assert.doesNotMatch(view.container.textContent ?? "", /Editing:.*UAE/, "one ready catalogue still cannot choose a fallback");
+        await React.act(async () => {
+          editionsLoading = false;
+          marketsLoading = false;
+          notify();
+        });
+        assert.match(view.container.querySelector('[role="combobox"]')?.textContent ?? "", /KSA/);
+        assert.doesNotMatch(view.container.querySelector('[role="combobox"]')?.textContent ?? "", /UAE/);
+      } finally {
+        await view.unmount();
+      }
+    }
+    currentSearch = "?market=missing-market&locale=en";
+    editionsLoading = false;
+    marketsLoading = false;
+    const invalid = await renderDetail();
+    try {
+      assert.match(invalid.container.textContent ?? "", /requested MISSING-MARKET · en edition is unavailable/i);
+      assert.doesNotMatch(invalid.container.textContent ?? "", /Editing:.*UAE/);
+    } finally {
+      await invalid.unmount();
+    }
+  } finally {
+    currentLocation = "/content/document-1";
+    currentSearch = "";
+    editionsLoading = false;
+    marketsLoading = false;
+    currentAvailability = undefined;
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentEditions = [edition];
+  }
+});
+
+test("frozen adapted bindings expose comparison and lineage acknowledgement, never a forbidden rebind", async () => {
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentSharedMatrix = {
+    baselines: [
+      { id: "active-en-baseline", documentId: "document-1", locale: "en-US", revisionId: "active-en-revision", revisionNumber: 5, sourceRevisionId: "revision-1", snapshot: {}, mediaReferences: [], createdAt: new Date() },
+      { id: "translation-baseline", documentId: "document-1", locale: "ar", revisionId: "translation-revision", revisionNumber: 4, sourceRevisionId: "revision-1", snapshot: {}, mediaReferences: [], createdAt: new Date() },
+    ],
+    bindings: [{
+      id: "binding-1", documentId: "document-1", marketEditionId: "uae-edition", locale: "en-US", mode: "adapted",
+      baselineId: "historic-baseline", baselineRevisionId: "historic-revision", version: 7, operations: [],
+      materializedRevisionId: "revision-1", translationState: "stale", updatedAt: new Date(),
+    }],
+  };
+  const view = await renderDetail();
+  try {
+    assert.equal(view.container.querySelector('[aria-label="Shared binding mode"]'), null);
+    assert.equal([...view.container.querySelectorAll("button")].some((item) => item.textContent?.includes("Bind selected exact edition")), false);
+    assert.ok(button(view.container, "Compare / resolve"));
+    const trigger = view.container.querySelector<HTMLButtonElement>('[aria-label="Translation source acknowledgement"]')!;
+    await React.act(async () => { trigger.dispatchEvent(new dom.window.MouseEvent("mousedown", { bubbles: true, button: 0 })); trigger.click(); });
+    const translation = [...document.body.querySelectorAll<HTMLElement>('[role="option"]')].find((item) => item.textContent?.includes("AR baseline rev 4"));
+    assert.ok(translation);
+    await React.act(async () => translation.click());
+    await React.act(async () => button(view.container, "Acknowledge translation lineage").click());
+    assert.equal(bindSharedInput?.data.mode, "adapted");
+    assert.equal(bindSharedInput?.data.baselineId, "historic-baseline", "ACK retains a frozen baseline absent from active choices");
+    assert.equal(bindSharedInput?.data.baselineRevisionId, "historic-revision", "translation acknowledgement retains the frozen adopted baseline");
+    assert.equal(bindSharedInput?.data.translationSourceRevisionId, "translation-revision");
+    assert.equal(bindSharedInput?.data.version, 7);
+  } finally {
+    await view.unmount();
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    bindSharedInput = undefined;
   }
 });
 

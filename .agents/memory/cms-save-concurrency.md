@@ -20,3 +20,9 @@ Treat field-level resets as whole-revision writes, not local cosmetic actions.
 **Why:** A server-side reset can create a new revision and trigger editor rehydration. Clearing global dirty state for that one field can silently discard unrelated edits or allow stale values to overwrite the reset.
 
 **How to apply:** Require a clean draft before resetting, lock editing until the saved revision is reloaded, preserve uncertain outcomes, and scope temporary override indicators to the current hydrated edition.
+
+Serialize managed lifecycle writes by document before locking editions or bindings; revalidate permissions within that same transaction.
+
+**Why:** Ordinary saves and Shared actions otherwise acquire edition/binding locks in opposite orders. A fresh permission read is also insufficient if role, status or assignments can change before commit.
+
+**How to apply:** Include availability, archive, restore and historical-source access—not just ordinary saves. Keep identity locks in administration's user-before-assignment order; key-share locks do not stabilize non-key role/status fields.

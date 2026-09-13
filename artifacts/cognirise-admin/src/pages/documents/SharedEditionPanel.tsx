@@ -37,6 +37,9 @@ export type SharedEditionPanelProps = {
     locale: string;
     mode: Mode;
     baseline?: SharedMarketBaseline;
+    /** Frozen IDs used only by a translation acknowledgement for an existing binding. */
+    bindingBaselineId?: string | null;
+    bindingBaselineRevisionId?: string | null;
     independentRevisionId?: string;
     translationSourceRevisionId?: string;
     version: number;
@@ -99,6 +102,8 @@ export function SharedEditionPanel({
     ?? localeBaselines.find((item) => item.revisionId === binding?.baselineRevisionId);
   const selectedIsSource = Boolean(source && source.market === selectedMarket && source.locale === selectedLocale);
   const bindingMode = binding?.mode ?? "unbound";
+  const frozenBinding = binding?.mode === "shared" || binding?.mode === "adapted";
+  const translationBaseline = (matrix?.baselines ?? []).find((item) => item.revisionId === translationRevisionId);
 
   const requestBind = () => {
     if (!market || !currentRevisionId) return;
@@ -163,7 +168,7 @@ export function SharedEditionPanel({
             </div>
           </div>
 
-          <div className="grid gap-3 border-t pt-3 sm:grid-cols-3">
+          {!frozenBinding && <><div className="grid gap-3 border-t pt-3 sm:grid-cols-3">
             <div className="space-y-1">
               <Label className="text-xs">Binding mode</Label>
               <Select value={mode} onValueChange={(value) => setMode(value as Mode)}>
@@ -190,6 +195,7 @@ export function SharedEditionPanel({
               </Select>
             </div>}
           </div>
+          </>}
           {localeBaselines.length > 0 && <div className="flex items-center justify-between rounded border bg-muted/20 p-2 text-xs">
             <span>Active neutral baseline revision {localeBaselines[0]!.revisionNumber}; source revision remains pinned in lineage.</span>
             {canManageBaselines && <Button type="button" size="sm" variant="outline" disabled={busy || hasUnsaved} onClick={() => onEditBaseline(localeBaselines[0]!)}>Edit Shared</Button>}
@@ -200,9 +206,41 @@ export function SharedEditionPanel({
             <span>· translation: {binding.translationState}</span>
             {binding.mode !== "independent" && <Button type="button" size="sm" variant="ghost" className="h-7" onClick={() => onCompare(binding)}><GitCompare className="mr-1 h-3 w-3" /> Compare / resolve</Button>}
           </div>}
-          <Button type="button" size="sm" disabled={busy || hasUnsaved || !currentRevisionId || (mode !== "independent" && !baseline)} onClick={requestBind}>
+          {frozenBinding && <div className="space-y-2 rounded border bg-muted/20 p-3">
+            <p className="text-xs text-muted-foreground">This {binding!.mode} binding is frozen. To adopt another baseline, reset overrides, or detach, use Compare / resolve. Ordinary field saves derive local adaptations automatically; do not rebind this edition.</p>
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="min-w-56 space-y-1">
+                <Label className="text-xs">Translation lineage acknowledgement</Label>
+                <Select value={translationRevisionId} onValueChange={setTranslationRevisionId}>
+                  <SelectTrigger aria-label="Translation source acknowledgement"><SelectValue placeholder="Choose shared baseline revision" /></SelectTrigger>
+                  <SelectContent>{(matrix?.baselines ?? []).map((item) => <SelectItem key={item.revisionId} value={item.revisionId}>Acknowledge {item.locale.toUpperCase()} baseline rev {item.revisionNumber}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                disabled={busy || hasUnsaved || !translationBaseline || translationBaseline.revisionId === binding?.translationSourceRevisionId}
+                onClick={() => onBind({
+                  marketEditionId: market.id,
+                  locale: selectedLocale,
+                  mode: binding!.mode as Mode,
+                  // The frozen baseline may be historical and intentionally absent
+                  // from the active baseline list. ACK must never derive it from
+                  // the translation source or current active options.
+                  bindingBaselineId: binding!.baselineId,
+                  bindingBaselineRevisionId: binding!.baselineRevisionId,
+                  translationSourceRevisionId: translationBaseline!.revisionId,
+                  version: binding!.version,
+                })}
+              >
+                Acknowledge translation lineage
+              </Button>
+            </div>
+            {!translationBaseline && <p className="text-xs text-muted-foreground">Choose a shared baseline revision to acknowledge translation lineage; the adopted baseline remains unchanged.</p>}
+          </div>}
+          {!frozenBinding && <Button type="button" size="sm" disabled={busy || hasUnsaved || !currentRevisionId || (mode !== "independent" && !baseline)} onClick={requestBind}>
             <Link2 className="mr-1 h-3.5 w-3.5" /> Bind selected exact edition
-          </Button>
+          </Button>}
         </>
       )}
       {binding?.mode === "adapted" && binding.operations.length > 0 && (

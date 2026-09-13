@@ -1,20 +1,29 @@
 # Shared and market-specific CMS editions
 
-## Acceptance status: not complete
+## Repair verification
 
-Completion review has not approved this work. Passing suites below do not establish release readiness. The latest comprehensive review identified these remaining blockers:
+The seven previously documented blockers have been repaired:
 
-- Ordinary revision writes lock the edition before the binding, while shared actions take the reverse order. Concurrent writes can deadlock rather than return an optimistic conflict.
-- Generic binding updates still allow an existing adoption to move to another baseline outside the compare/resolve workflow, potentially discarding overrides.
-- Binding updates can mark translations current while retaining an older translation-source revision without explicit acknowledgement.
-- Stable-array conflicts need operation/ID-specific choices that preserve unrelated safe operations; comparison value lookup must honor stable-ID selectors.
-- Restoring an archived edition with a newer draft or rejected revision does not reliably restore the approved published snapshot.
-- Independent bindings are incorrectly included in needs-baseline readiness.
-- Authorization must be revalidated within the same consistently locked mutation transaction, including archive/restore and concurrent rebinding.
+- All participating mutations acquire a document-first mutex and revalidate role/status/market assignments within the locked transaction. User and assignment locks follow the same order as administration writes. Controlled concurrent PostgreSQL requests prove a successful save plus a recoverable stale conflict, not a deadlock.
+- Existing Shared/Adapted bindings cannot change their adopted baseline or mode through generic binding updates. The editor directs those changes through comparison/resolution instead. Create-only version-zero protection remains intact.
+- Translation state stays stale through unrelated edits. Explicit acknowledgement requires an authorized, active source revision from the same document, including another locale. The editor submits the exact frozen destination IDs even when its old adopted revision is absent from active options.
+- Conflicts have per-operation identities separate from display paths. Shared/market decisions preserve unrelated safe operations, legacy path decisions work only when unambiguous, and comparison values honor stable-ID selectors.
+- Restore clones the exact approved published snapshot and pins into a new draft even when newer rejected/draft work exists, without reactivating publication. Never-published draft recovery is separately covered.
+- Independent editions no longer appear in Needs baseline; missing content, pending work and other applicable blockers remain independent facts.
+- Source authorization covers current, adopted and local historical comparison content and the exact approved history restored. Availability and Person destination actions use fresh transaction-time permissions, including administrator-only decisions.
 
-Separately, the most recent fixes now enforce existing-source authorization for generic binding transitions, reserve version zero for create-only binding requests, and read deep-link queries through Wouter's actual search hook. Targeted tests cover source permission denial, stale creation tokens and market-code/UUID selection.
+Consolidated review confirmed the principal repairs; its five additional authorization/translation findings were subsequently fixed and passed focused re-review.
 
-No completion or deployment should be inferred from the implemented features or historical test results below.
+### Current checks and boundaries
+
+- API coverage: 202 cases across the full run and targeted fixture-reconciliation checks. The latest full run passed 197 and found five legacy SQL-fixture mismatches; all five affected files subsequently passed their focused run (8 tests) without weakening negative authorization expectations. The earlier nine fixture mismatches were also repaired and verified.
+- Admin full suite: 133 passed. Subsequent acknowledgement and delayed-query selection changes passed admin typecheck and the affected rendered-editor suite.
+- Database/migration suite: 9 passed. Workspace typecheck and controlled PostgreSQL concurrency, permission, translation and restore regressions passed.
+- A bounded browser continuation proved conflict-ID adoption preserves an unrelated KSA summary. It exposed a cold-reload selection race, which now has delayed-catalog regression coverage. The focused browser recheck passed with KSA context, adopted title and local summary retained after reload.
+- The same-page 390px check retained context and keyboard access to Compare, but reported horizontal constraint in the long editor. This is not evidence of a complete responsive-publication walkthrough. The original broader publication browser journey was not rerun.
+- The repair fixture was cleaned up. Fresh before/after preservation checks confirmed all 31 publication-pointer records, 220 availability records, 28 media-pin records and 58 revision-count records unchanged.
+
+No production migration, deployment, bulk publication or downstream editorial/scheduling work was performed. Historical evidence below is retained as such; it does not expand the browser coverage stated above.
 
 ## Delivered behavior
 

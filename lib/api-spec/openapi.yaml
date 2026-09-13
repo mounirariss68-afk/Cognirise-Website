@@ -2765,8 +2765,9 @@ components:
             ids: { type: array, items: { type: string }, minItems: 1 }
     SharedMarketConflict:
       type: object
-      required: [path, kind, message]
+      required: [conflictId, path, kind, message]
       properties:
+        conflictId: { type: string, description: Stable sparse-operation identity used for conflict decisions; display paths are not unique. }
         path: { type: string }
         kind:
           type: string
@@ -2775,8 +2776,12 @@ components:
     SharedMarketConflictDecision:
       type: object
       additionalProperties: false
-      required: [path, choice]
+      required: [choice]
+      anyOf:
+        - required: [conflictId]
+        - required: [path]
       properties:
+        conflictId: { type: string, minLength: 1, description: Required by current clients; identifies exactly one conflicting sparse operation. }
         path: { type: string, minLength: 1 }
         choice:
           type: string
@@ -2866,7 +2871,7 @@ components:
         action: { type: string, enum: [adopt, keep, reset, detach] }
         conflictDecisions:
           type: array
-          description: Required for each path that conflicts during adopt. Shared drops its local operation; market explicitly retains it.
+          description: Required for each conflicting operation during adopt. Use conflictId; path is accepted only for legacy unambiguous conflicts.
           items: { $ref: "#/components/schemas/SharedMarketConflictDecision" }
     SharedMarketEditionMatrix:
       type: object

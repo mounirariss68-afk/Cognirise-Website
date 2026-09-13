@@ -134,6 +134,33 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
             }
           : { rowCount: 0, rows: [] };
       }
+      if (statement === "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE") {
+        const fixture = Object.values(fixtures).find(
+          (candidate) => candidate.row.id === String(values?.[0]),
+        );
+        return fixture
+          ? { rowCount: 1, rows: [{ id: fixture.row.id }] }
+          : { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+        return { rowCount: 1, rows: [{ role: "administrator", status: "active" }] };
+      }
+      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
+        return { rowCount: 1, rows: [{ market_code: "uae" }] };
+      }
+      if (statement.includes("SELECT e.id") && statement.includes("FROM cms_revisions r")
+        && statement.includes("FOR UPDATE OF e")) {
+        const fixture = Object.values(fixtures).find(
+          (candidate) => candidate.row.revision_id === String(values?.[0])
+            && candidate.row.id === String(values?.[1]),
+        );
+        return fixture
+          ? { rowCount: 1, rows: [{ id: fixture.editionId }] }
+          : { rowCount: 0, rows: [] };
+      }
       if (statement.includes("SELECT a.id::text id,COALESCE(pinned.id,latest.id)")) {
         const fixture = Object.values(fixtures).find(
           (candidate) => candidate.row.id === String(values?.[1]),
@@ -332,12 +359,32 @@ test("hero publication rolls back without moving the pointer on a stored MIME mi
     return { rowCount: 0, rows: [] };
   });
   const transactionClient = {
-    async query(sql: unknown) {
+    async query(sql: unknown, values?: unknown[]) {
       const statement = String(sql);
       if (statement === "BEGIN" || statement === "COMMIT") return { rowCount: 0, rows: [] };
       if (statement === "ROLLBACK") {
         rolledBack = true;
         return { rowCount: 0, rows: [] };
+      }
+      if (statement === "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE") {
+        return String(values?.[0]) === documentId
+          ? { rowCount: 1, rows: [{ id: documentId }] }
+          : { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+        return { rowCount: 1, rows: [{ role: "administrator", status: "active" }] };
+      }
+      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
+        return { rowCount: 1, rows: [{ market_code: "uae" }] };
+      }
+      if (statement.includes("SELECT e.id") && statement.includes("FROM cms_revisions r")
+        && statement.includes("FOR UPDATE OF e")) {
+        return String(values?.[0]) === candidateRevisionId && String(values?.[1]) === documentId
+          ? { rowCount: 1, rows: [{ id: editionId }] }
+          : { rowCount: 0, rows: [] };
       }
       if (statement.includes("SELECT r.id,r.edition_id,r.payload,d.kind")) {
         return {

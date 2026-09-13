@@ -5,6 +5,8 @@ import {
   type CmsDocumentKind,
 } from "@workspace/api-zod";
 import type { Queryable } from "./cms";
+import type { AuthContext } from "./auth";
+import { roleAtLeast } from "./policy";
 
 export { sparseOverridesForResolvedSnapshot } from "@workspace/api-zod";
 
@@ -20,6 +22,62 @@ type Binding = {
 
 const digest = (snapshot: unknown) =>
   createHash("sha256").update(JSON.stringify(snapshot)).digest("hex");
+
+/**
+ * All mutations which can affect an exact edition, its managed binding, or
+ * document-wide availability acquire this mutex first.  It deliberately
+ * serializes a first binding/materialization too: an absent binding has no row
+ * to lock, but it is still part of the same document state machine.
+ */
+export async function lockDocumentForMutation(client: Queryable, documentId: string) {
+  const result = await client.query(
+    "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE",
+    [documentId],
+  );
+  return result.rows[0] ?? null;
+}
+
+/**
+ * Request authentication is loaded before a route starts waiting for the
+ * document mutex. Re-read assignments after acquiring that mutex so a request
+ * which waited behind an assignment/rebinding change cannot authorize using
+ * its stale session snapshot. The table lock also keeps assignment changes out
+ * until this mutation commits or rolls back.
+ */
+export async function revalidateMutationAuth(
+  client: Queryable,
+  auth: AuthContext,
+  minimumRole?: AuthContext["user"]["role"],
+): Promise<AuthContext | null> {
+  const user = await client.query(
+    `SELECT role,status
+       FROM cms_users
+      WHERE id=$1 AND status IN ('active','invited')
+       FOR SHARE`,
+    [auth.user.id],
+  );
+  if (!user.rows[0] || (minimumRole && !roleAtLeast(user.rows[0].role, minimumRole))) return null;
+  // User administration updates the user row before replacing assignments.
+  // Lock in that same order: holding the assignment table first would invert
+  // against a role/assignment update that already owns the user row.
+  await client.query("LOCK TABLE cms_user_market_assignments IN SHARE MODE");
+  const assignments = await client.query(
+    `SELECT market_code
+       FROM cms_user_market_assignments
+      WHERE user_id=$1
+      ORDER BY market_code`,
+    [auth.user.id],
+  );
+  return {
+    ...auth,
+    user: {
+      ...auth.user,
+      role: user.rows[0].role,
+      status: user.rows[0].status,
+      marketCodes: assignments.rows.map((row: { market_code: string }) => String(row.market_code)),
+    },
+  };
+}
 
 async function bindingForEdition(
   client: Queryable,

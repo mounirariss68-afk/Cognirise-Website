@@ -19,7 +19,34 @@ test("published offices with later drafts archive, restore, and never use perman
   let publishedRevisionId: string | null = "published-revision-id";
   let archiveCount = 0;
   let restoreCount = 0;
+  let availabilityMutationAttempted = false;
   let deleteGuardChecked = false;
+  const approvedPayload = {
+    slug: "office-dubai",
+    title: "Dubai",
+    summary: null,
+    content: {
+      schemaVersion: 1,
+      city: "Dubai",
+      address: "Approved published address",
+      visibility: "public",
+      order: 0,
+      sources: [],
+      relatedIds: [],
+    },
+    mediaIds: [],
+    markets: ["uae"],
+  };
+  const draftPayload = {
+    ...approvedPayload,
+    content: {
+      ...approvedPayload.content,
+      address: "Edited draft address",
+    },
+  };
+  let latestRevisionId = "draft-revision-id";
+  let latestRevisionNumber = 2;
+  let latestPayload = draftPayload;
 
   t.mock.method(pool, "query", async (sql: unknown) => {
     const statement = String(sql);
@@ -91,24 +118,9 @@ test("published offices with later drafts archive, restore, and never use perman
           updated_at: now,
           markets: ["uae"],
           can_permanently_delete: false,
-          revision_id: "draft-revision-id",
-          revision_number: 2,
-          payload: {
-            slug: "office-dubai",
-            title: "Dubai",
-            summary: null,
-            content: {
-              schemaVersion: 1,
-              city: "Dubai",
-              address: "Edited draft address",
-              visibility: "public",
-              order: 0,
-              sources: [],
-              relatedIds: [],
-            },
-            mediaIds: [],
-            markets: ["uae"],
-          },
+           revision_id: latestRevisionId,
+           revision_number: latestRevisionNumber,
+           payload: latestPayload,
           workflow_state: "draft",
           publication_state: publicationState,
           published_revision_id: publishedRevisionId,
@@ -120,13 +132,41 @@ test("published offices with later drafts archive, restore, and never use perman
     return { rowCount: 0, rows: [] };
   });
   t.mock.method(pool, "connect", async () => ({
-    async query(sql: unknown) {
+    async query(sql: unknown, values: unknown[] = []) {
       const statement = String(sql);
       if (["BEGIN", "COMMIT", "ROLLBACK"].includes(statement)) {
         return { rowCount: 0, rows: [] };
       }
       if (statement.includes("SELECT status FROM cms_documents")) {
         return { rowCount: 1, rows: [{ status: rootStatus }] };
+      }
+      if (statement === "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE") {
+        return String(values[0]) === "office-id"
+          ? { rowCount: 1, rows: [{ id: "office-id" }] }
+          : { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+        return { rowCount: 1, rows: [{ role: "administrator", status: "active" }] };
+      }
+      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
+        return { rowCount: 1, rows: [{ market_code: "uae" }] };
+      }
+      if (statement.includes("cms_document_availability_states")) {
+        availabilityMutationAttempted = true;
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT id FROM cms_market_editions") && statement.includes("FOR UPDATE")) {
+        return String(values[0]) === "office-id" && values[1] === "uae" && values[2] === "en"
+          ? { rowCount: 1, rows: [{ id: "edition-id" }] }
+          : { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SET publication_state='archived'")) {
+        publicationState = "archived";
+        archiveCount += 1;
+        return { rowCount: 1, rows: [{ id: "edition-id" }] };
       }
       if (statement.includes("SELECT e.id,e.published_revision_id,e.content_mode,d.kind")) {
         return {
@@ -135,12 +175,37 @@ test("published offices with later drafts archive, restore, and never use perman
             id: "edition-id",
             published_revision_id: publishedRevisionId,
             kind: "office",
-            revision_id: "draft-revision-id",
-            revision_number: 2,
+            revision_id: latestRevisionId,
+            revision_number: latestRevisionNumber,
             workflow_state: "draft",
-            payload: {},
+            payload: latestPayload,
           }],
         };
+      }
+      if (
+        statement.includes("FROM cms_revisions published")
+        && statement.includes("cms_resolved_market_revisions")
+        && statement.includes("FOR KEY SHARE OF published")
+      ) {
+        assert.deepEqual(values, ["published-revision-id", "edition-id"]);
+        return { rowCount: 1, rows: [{ source_market: "uae" }] };
+      }
+      if (statement.includes("SELECT id,payload,content_digest FROM cms_revisions")) {
+        assert.deepEqual(values, ["published-revision-id", "edition-id"]);
+        return {
+          rowCount: 1,
+          rows: [{
+            id: "published-revision-id",
+            payload: approvedPayload,
+            content_digest: "approved-office-digest",
+          }],
+        };
+      }
+      if (statement.includes("INSERT INTO cms_revisions")) {
+        latestRevisionId = "restored-revision-id";
+        latestRevisionNumber = 3;
+        latestPayload = structuredClone(approvedPayload);
+        return { rowCount: 1, rows: [{ id: latestRevisionId, payload: latestPayload }] };
       }
       if (statement.includes("SET publication_state='draft'")) {
         publicationState = "draft";
@@ -200,11 +265,26 @@ test("published offices with later drafts archive, restore, and never use perman
     status: string;
     canPermanentlyDelete: boolean;
     publishedRevisionId: string | null;
+    currentRevisionId: string;
+    content: { address: string };
   };
   assert.equal(restoredDocument.status, "draft");
   assert.equal(restoredDocument.canPermanentlyDelete, false);
   assert.equal(restoredDocument.publishedRevisionId, "published-revision-id");
+  assert.equal(restoredDocument.currentRevisionId, "restored-revision-id");
+  assert.equal(restoredDocument.content.address, "Approved published address");
+  assert.deepEqual(
+    latestPayload,
+    approvedPayload,
+    "restore must draft a copy of the approved published office, not revive the later draft",
+  );
+  assert.notDeepEqual(latestPayload, draftPayload);
   assert.equal(restoreCount, 1);
+  assert.equal(
+    availabilityMutationAttempted,
+    false,
+    "restoring an exact office edition must not create or advance availability state",
+  );
 
   const publicOffices = await fetch(
     `${origin}/api/public/content?market=uae&locale=en&kind=office`,

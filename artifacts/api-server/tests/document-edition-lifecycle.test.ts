@@ -621,6 +621,26 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
         releaseEditionLock = undefined;
         return { rowCount: 0, rows: [] };
       }
+      if (statement === "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE") {
+        return documents.has(String(values[0]))
+          ? { rowCount: 1, rows: [{ id: values[0] }] }
+          : { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+        return {
+          rowCount: 1,
+          rows: [{ role, status: "active" }],
+        };
+      }
+      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
+        return {
+          rowCount: 1,
+          rows: [{ market_code: "ksa" }],
+        };
+      }
       if (statement.includes("SELECT id FROM cms_market_editions") && statement.includes("FOR UPDATE")) {
         const lockKey = `${values[0]}:${values[1]}:${values[2]}`;
         const predecessor = editionLockTails.get(lockKey) ?? Promise.resolve();
@@ -667,7 +687,15 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
         const revisionEdition = [...documents.values()].flatMap((document) => document.editions)
           .find((candidate) => candidate.revisions.some((revision) => revision.id === revisionId));
         return revisionEdition
-          ? { rowCount: 1, rows: [{ id: revisionEdition.id }] }
+          ? {
+              rowCount: 1,
+              rows: [{
+                id: revisionEdition.id,
+                edition_id: revisionEdition.id,
+                market: revisionEdition.market,
+                locale: revisionEdition.locale,
+              }],
+            }
           : { rowCount: 0, rows: [] };
       }
       if (statement.includes("WITH config AS") && statement.includes("effective published revision")) {
@@ -751,6 +779,17 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
           }],
         };
       }
+      if (statement.includes("WITH submitted AS") && statement.includes("workflow_state='in-review'")) {
+        const edition = [...documents.values()].flatMap((document) => document.editions)
+          .find((candidate) => candidate.revisions.some((revision) => revision.id === String(values[0])));
+        const revision = edition?.revisions.find((candidate) => candidate.id === String(values[0]));
+        if (!edition || !revision || !["draft", "rejected"].includes(revision.workflow)) {
+          return { rowCount: 0, rows: [] };
+        }
+        revision.workflow = "in-review";
+        if (edition.publicationState !== "published") edition.publicationState = "in-review";
+        return { rowCount: 1, rows: [{ id: revision.id }] };
+      }
       if (statement.includes("INSERT INTO cms_revisions")) {
         const edition = [...documents.values()].flatMap((document) => document.editions)
           .find((candidate) => candidate.id === values[0])!;
@@ -788,8 +827,8 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
         revision.workflow = "approved";
         return { rowCount: 1, rows: [] };
       }
-      if (statement.includes("UPDATE cms_revisions r SET workflow_state='rejected'")) {
-        const revisionId = String(values[1]);
+      if (statement.includes("UPDATE cms_revisions SET workflow_state='rejected'")) {
+        const revisionId = String(values[0]);
         const edition = [...documents.values()].flatMap((document) => document.editions)
           .find((candidate) => candidate.revisions.some((revision) => revision.id === revisionId));
         const revision = edition?.revisions.find((candidate) => candidate.id === revisionId);
@@ -901,6 +940,7 @@ test("authenticated exact-edition lifecycle remains market isolated", { concurre
   assert.equal(submittedBody.status, "in-review");
   const submittedRevisionId = firstSaved.currentRevisionId;
   const firstEdition = findEdition(draftDocumentId, "ksa", "en")!;
+  assert.equal(latest(firstEdition).workflow, "in-review");
   assert.equal(firstEdition.publishedRevisionId, null);
 
   role = "publisher";

@@ -3984,6 +3984,7 @@ export const CompareSharedMarketBaselineResponse = zod.object({
   "localSnapshot": zod.record(zod.string(), zod.unknown()),
   "mergedSnapshot": zod.record(zod.string(), zod.unknown()),
   "conflicts": zod.array(zod.object({
+  "conflictId": zod.string().describe('Stable sparse-operation identity used for conflict decisions; display paths are not unique.'),
   "path": zod.string(),
   "kind": zod.enum(['invalid-path', 'unsupported-structure', 'deleted-baseline-value', 'concurrent-value-change', 'array-add-conflict', 'array-remove-conflict', 'array-reorder-conflict']),
   "message": zod.string()
@@ -4005,14 +4006,16 @@ export const resolveSharedMarketBaselineUpdateBodyVersionMultipleOf = 1;
 
 
 
+
 export const ResolveSharedMarketBaselineUpdateBody = zod.object({
   "version": zod.number().min(1).multipleOf(resolveSharedMarketBaselineUpdateBodyVersionMultipleOf),
   "baselineRevisionId": zod.string().describe('Exact active baseline revision shown in the comparison.'),
   "action": zod.enum(['adopt', 'keep', 'reset', 'detach']),
-  "conflictDecisions": zod.array(zod.object({
-  "path": zod.string().min(1),
+  "conflictDecisions": zod.array(zod.union([zod.unknown(),zod.unknown()]).and(zod.object({
+  "conflictId": zod.string().min(1).optional().describe('Required by current clients; identifies exactly one conflicting sparse operation.'),
+  "path": zod.string().min(1).optional(),
   "choice": zod.enum(['shared', 'market'])
-})).optional().describe('Required for each path that conflicts during adopt. Shared drops its local operation; market explicitly retains it.')
+}))).optional().describe('Required for each conflicting operation during adopt. Use conflictId; path is accepted only for legacy unambiguous conflicts.')
 })
 
 export const resolveSharedMarketBaselineUpdateResponseVersionMultipleOf = 1;

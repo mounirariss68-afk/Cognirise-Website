@@ -27,7 +27,7 @@ test("availability publish rejects an enabled market or locale added after revie
     { id: "uae-id", code: "uae", locale: "en" },
   ];
   const statements: string[] = [];
-  const query = async (sql: unknown) => {
+  const query = async (sql: unknown, values: unknown[] = []) => {
     const statement = String(sql);
     statements.push(statement);
     if (statement.includes("FROM cms_sessions s")) {
@@ -54,7 +54,17 @@ test("availability publish rejects an enabled market or locale added after revie
       };
     }
     if (statement.includes("SELECT id,kind FROM cms_documents")) {
-      return { rowCount: 1, rows: [{ id: "document-id", kind: "person" }] };
+      return String(values[0]) === "document-id"
+        ? { rowCount: 1, rows: [{ id: "document-id", kind: "person" }] }
+        : { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+      assert.deepEqual(values, ["administrator-id"]);
+      return { rowCount: 1, rows: [{ role: "administrator", status: "active" }] };
+    }
+    if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
+      assert.deepEqual(values, ["administrator-id"]);
+      return { rowCount: 0, rows: [] };
     }
     if (statement.includes("SELECT draft_version,reviewed_version,reviewed_selections")) {
       return {

@@ -34,11 +34,24 @@ test("availability release paths reject stale, unauthorized, and standalone shar
       return { rowCount: 1, rows: [{ id: "document-id", kind: "publication" }] };
     }
     if (statement.includes("SELECT id FROM cms_documents")) {
-      return { rowCount: 1, rows: [{ id: "document-id" }] };
+      return values[0] === "document-id"
+        ? { rowCount: 1, rows: [{ id: "document-id" }] }
+        : { rowCount: 0, rows: [] };
     }
     if (statement.includes("SELECT kind FROM cms_documents WHERE id=$1 FOR KEY SHARE")) {
       if (values[0] === "missing-document-id") return { rowCount: 0, rows: [] };
       return { rowCount: 1, rows: [{ kind: "publication" }] };
+    }
+    if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+      assert.deepEqual(values, ["user-id"]);
+      return { rowCount: 1, rows: [{ role, status: "active" }] };
+    }
+    if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
+      assert.deepEqual(values, ["user-id"]);
+      return {
+        rowCount: role === "administrator" ? 0 : 1,
+        rows: role === "administrator" ? [] : [{ market_code: "ksa" }],
+      };
     }
     if (statement.includes("SELECT draft_version FROM cms_document_availability_states")) {
       return { rowCount: 1, rows: [{ draft_version: draftVersion, shared_source_edition_id: null }] };
@@ -61,7 +74,7 @@ test("availability release paths reject stale, unauthorized, and standalone shar
         ],
       };
     }
-    return { rowCount: 1, rows: [] };
+    return { rowCount: 0, rows: [] };
   };
   t.mock.method(pool, "query", query as never);
   t.mock.method(pool, "connect", async () => ({

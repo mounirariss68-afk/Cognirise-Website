@@ -8,6 +8,8 @@
 import type { SharedMarketConflictKind } from './sharedMarketConflictKind';
 
 export interface SharedMarketConflict {
+  /** Stable sparse-operation identity used for conflict decisions; display paths are not unique. */
+  conflictId: string;
   path: string;
   kind: SharedMarketConflictKind;
   message: string;

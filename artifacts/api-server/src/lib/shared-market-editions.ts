@@ -11,12 +11,17 @@ import {
   applySharedOverrideOperations,
   collectCmsMediaReferences,
   mergeSharedBaselineUpdate,
+  resolveSharedBaselineUpdate,
   type SharedOverrideOperation,
   validateCmsSnapshot,
 } from "@workspace/api-zod";
 import { audit, type Queryable } from "./cms";
 import type { AuthContext } from "./auth";
 import { asyncRoute } from "./http";
+import {
+  lockDocumentForMutation,
+  revalidateMutationAuth,
+} from "./managed-market-lifecycle";
 
 type BindingRow = Record<string, any>;
 const digest = (snapshot: unknown) => createHash("sha256").update(JSON.stringify(snapshot)).digest("hex");
@@ -139,6 +144,25 @@ async function copyMediaPins(
       [reference.assetId, reference.mediaVersionId, documentId, `revision:${revisionId}`],
     );
   }
+}
+
+/** Lock the ordinary exact edition before its managed binding. Existing
+ * shared/adapted bindings always have a materialized exact edition; an absent
+ * row is treated as corrupted lineage rather than creating state for a failed
+ * mutation. */
+async function lockManagedExactEdition(
+  client: Queryable,
+  documentId: string,
+  market: string,
+  locale: string,
+) {
+  const edition = await client.query(
+    `SELECT id FROM cms_market_editions
+      WHERE document_id=$1 AND market=$2 AND locale=$3
+      FOR UPDATE`,
+    [documentId, market, locale],
+  );
+  return edition.rows[0] ?? null;
 }
 
 async function materialize(
@@ -299,6 +323,17 @@ export function registerSharedMarketEditionRoutes(
       const client = await pool.connect();
       try {
         await client.query("BEGIN");
+        if (!await lockDocumentForMutation(client, documentId)) {
+          await client.query("ROLLBACK");
+          res.status(404).json({ error: "Document not found." });
+          return;
+        }
+        const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext, "administrator");
+        if (!auth) {
+          await client.query("ROLLBACK");
+          res.status(403).json({ error: "Authentication is no longer valid." });
+          return;
+        }
         // A neutral baseline is a copy of an explicitly named real-market
         // historical revision. No legacy source is inferred or relocated.
         const source = await client.query(
@@ -338,7 +373,7 @@ export function registerSharedMarketEditionRoutes(
         const baseline = exists.rows[0] ? { rows: [exists.rows[0]] } : await client.query(
             `INSERT INTO cms_shared_baselines(document_id,locale,created_by_user_id)
              VALUES ($1,$2,$3) RETURNING id,created_at`,
-            [documentId, body.locale, res.locals.auth.user.id],
+            [documentId, body.locale, auth.user.id],
           );
         const pins = await client.query(
           `SELECT asset_id "assetId",media_version_id "mediaVersionId"
@@ -359,7 +394,7 @@ export function registerSharedMarketEditionRoutes(
                    $2,$3,$4,$5,$6) RETURNING id,revision_number`,
             [baseline.rows[0]!.id, validation.data,
                JSON.stringify(baselineMediaReferences), digest(validation.data),
-            body.sourceRevisionId, res.locals.auth.user.id],
+             body.sourceRevisionId, auth.user.id],
         );
         await client.query("UPDATE cms_shared_baselines SET active_revision_id=$2,updated_at=now() WHERE id=$1",
           [baseline.rows[0]!.id, revision.rows[0]!.id]);
@@ -373,7 +408,7 @@ export function registerSharedMarketEditionRoutes(
                AND translation_source_revision_id=$2`,
           [documentId, exists.rows[0]?.active_revision_id ?? null],
         );
-        await audit(res.locals.auth, "shared-baseline-established", "document", documentId,
+        await audit(auth, "shared-baseline-established", "document", documentId,
           { locale: body.locale, sourceRevisionId: body.sourceRevisionId }, client);
         await client.query("COMMIT");
         res.status(201).json({
@@ -420,15 +455,55 @@ export function registerSharedMarketEditionRoutes(
       const client = await pool.connect();
       try {
         await client.query("BEGIN");
-        const document = await client.query("SELECT kind FROM cms_documents WHERE id=$1 FOR UPDATE", [documentId]);
-        if (!document.rows[0]) {
+        if (!await lockDocumentForMutation(client, documentId)) {
           await client.query("ROLLBACK");
           res.status(404).json({ error: "Document not found." });
           return;
         }
+        const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+        if (!transactionAuth) {
+          await client.query("ROLLBACK");
+          res.status(403).json({ error: "Authentication is no longer valid." });
+          return;
+        }
+        const lockedDestination = await client.query(
+          "SELECT code FROM market_editions WHERE id=$1 AND enabled=true FOR KEY SHARE",
+          [body.marketEditionId],
+        );
+        if (!lockedDestination.rows[0]) {
+          await client.query("ROLLBACK");
+          res.status(404).json({ error: "The market edition is unavailable." });
+          return;
+        }
+        const lockedMarket = String(lockedDestination.rows[0].code);
+        if (!options.canAccessMarket(transactionAuth, lockedMarket)) {
+          await client.query("ROLLBACK");
+          res.status(403).json({ error: "You are not assigned to this market." });
+          return;
+        }
+        const document = await client.query("SELECT kind FROM cms_documents WHERE id=$1", [documentId]);
         if (["person", "site-configuration"].includes(String(document.rows[0].kind))) {
           await client.query("ROLLBACK");
           res.status(409).json({ error: "This document kind retains its dedicated market contract." });
+          return;
+        }
+        // Existing bindings materialize an exact edition. Acquire that edition
+        // first so generic rebinds share ordinary save's edition→binding order.
+        const existingPreflight = await client.query(
+          `SELECT market.code market,binding.locale
+             FROM cms_market_edition_bindings binding
+             JOIN market_editions market ON market.id=binding.market_edition_id
+            WHERE binding.document_id=$1 AND binding.market_edition_id=$2 AND binding.locale=$3`,
+          [documentId, body.marketEditionId, body.locale],
+        );
+        if (existingPreflight.rows[0] && !await lockManagedExactEdition(
+          client,
+          documentId,
+          String(existingPreflight.rows[0].market),
+          String(existingPreflight.rows[0].locale),
+        )) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "The existing managed binding has no exact edition." });
           return;
         }
         const existing = await client.query(
@@ -454,9 +529,21 @@ export function registerSharedMarketEditionRoutes(
           return;
         }
         if (existingBinding && existingBinding.mode !== "independent"
-          && !sourceMarketAllowed(auth, existingBinding, options.canAccessMarket)) {
+          && !sourceMarketAllowed(transactionAuth, existingBinding, options.canAccessMarket)) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to the current shared baseline source market." });
+          return;
+        }
+        if (existingBinding && existingBinding.mode !== "independent" && (
+          body.mode === "independent"
+          || body.mode !== existingBinding.mode
+          || body.baselineId !== String(existingBinding.baseline_id)
+          || body.baselineRevisionId !== String(existingBinding.based_on_baseline_revision_id)
+        )) {
+          await client.query("ROLLBACK");
+          res.status(409).json({
+            error: "An existing Shared or Adapted binding can change baseline, mode, or local overrides only through Compare and Resolve.",
+          });
           return;
         }
         let baseline: Record<string, any> | undefined;
@@ -479,7 +566,7 @@ export function registerSharedMarketEditionRoutes(
             res.status(409).json({ error: "Shared and Adapted bindings require an explicit neutral baseline in this locale." });
             return;
           }
-          if (!sourceMarketAllowed(auth, baseline, options.canAccessMarket)) {
+          if (!sourceMarketAllowed(transactionAuth, baseline, options.canAccessMarket)) {
             await client.query("ROLLBACK");
             res.status(403).json({ error: "You are not assigned to the shared baseline source market." });
             return;
@@ -493,10 +580,11 @@ export function registerSharedMarketEditionRoutes(
                JOIN cms_shared_baselines source_baseline ON source_baseline.id=revision.baseline_id
                LEFT JOIN cms_revisions source_revision ON source_revision.id=revision.source_revision_id
                LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
-              WHERE revision.id=$1 AND source_baseline.document_id=$2`,
+               WHERE revision.id=$1 AND source_baseline.document_id=$2
+                AND source_baseline.active_revision_id=revision.id`,
             [body.translationSourceRevisionId, documentId],
           );
-          if (!translationSource.rows[0] || !sourceMarketAllowed(auth, translationSource.rows[0], options.canAccessMarket)) {
+          if (!translationSource.rows[0] || !sourceMarketAllowed(transactionAuth, translationSource.rows[0], options.canAccessMarket)) {
             await client.query("ROLLBACK");
             res.status(409).json({ error: "The translation source revision is not an authorized baseline for this document." });
             return;
@@ -509,7 +597,7 @@ export function registerSharedMarketEditionRoutes(
             `SELECT r.id,r.payload,r.workflow_state,e.id edition_id
                FROM cms_revisions r JOIN cms_market_editions e ON e.id=r.edition_id
               WHERE r.id=$1 AND e.document_id=$2 AND e.market=$3 AND e.locale=$4`,
-            [body.independentRevisionId, documentId, market, body.locale],
+            [body.independentRevisionId, documentId, lockedMarket, body.locale],
           );
           independent = result.rows[0];
           const validation = independent && validateCmsSnapshot(document.rows[0].kind, independent.payload, "draft");
@@ -529,7 +617,7 @@ export function registerSharedMarketEditionRoutes(
              ON CONFLICT (document_id,market_edition_id,locale) DO NOTHING
              RETURNING *`,
             [documentId, body.marketEditionId, body.locale, body.mode, baseline?.id ?? null,
-              baseline?.revision_id ?? null, translationSourceRevisionId, auth.user.id],
+              baseline?.revision_id ?? null, translationSourceRevisionId, transactionAuth.user.id],
           )
           : await client.query(
             `UPDATE cms_market_edition_bindings binding
@@ -542,12 +630,14 @@ export function registerSharedMarketEditionRoutes(
                       AND binding.based_on_baseline_revision_id=$4
                       THEN binding.override_operations ELSE '[]'::jsonb END,
                     held_baseline_revision_id=NULL,
-                    translation_state=CASE WHEN $2='independent' THEN 'not-applicable' ELSE 'current' END,
+                    translation_state=CASE WHEN $2='independent' THEN 'not-applicable'
+                      WHEN $5 IS NOT NULL THEN 'current'
+                      ELSE binding.translation_state END,
                     version=binding.version+1,updated_by_user_id=$6,updated_at=now()
               WHERE binding.id=$1 AND binding.version=$7
               RETURNING binding.*`,
             [existingBinding.id, body.mode, baseline?.id ?? null, baseline?.revision_id ?? null,
-              translationSourceRevisionId, auth.user.id, body.version],
+              translationSourceRevisionId, transactionAuth.user.id, body.version],
           );
         if (!binding.rows[0]) {
           await client.query("ROLLBACK");
@@ -566,8 +656,8 @@ export function registerSharedMarketEditionRoutes(
             return;
           }
           const revisionId = await materialize(client, {
-            documentId, market, locale: body.locale, snapshot: validation.data, baselineRevisionId: String(baseline.revision_id),
-            bindingId: String(saved.id), userId: auth.user.id,
+            documentId, market: lockedMarket, locale: body.locale, snapshot: validation.data, baselineRevisionId: String(baseline.revision_id),
+            bindingId: String(saved.id), userId: transactionAuth.user.id,
             mediaReferences: mediaPinsForSnapshot(snapshot, String(document.rows[0].kind), baseline.media_references ?? []),
           });
           await client.query(
@@ -614,8 +704,8 @@ export function registerSharedMarketEditionRoutes(
           );
           saved.materialized_revision_id = independent.id;
         }
-        await audit(auth, "shared-market-bound", "document", documentId,
-          { bindingId: saved.id, mode: body.mode, market, locale: body.locale }, client);
+        await audit(transactionAuth, "shared-market-bound", "document", documentId,
+          { bindingId: saved.id, mode: body.mode, market: lockedMarket, locale: body.locale }, client);
         await client.query("COMMIT");
         res.json(mapBinding(saved));
       } catch (error) {
@@ -648,6 +738,34 @@ export function registerSharedMarketEditionRoutes(
       const client = await pool.connect();
       try {
         await client.query("BEGIN");
+        if (!await lockDocumentForMutation(client, documentId)) {
+          await client.query("ROLLBACK");
+          res.status(404).json({ error: "Document not found." });
+          return;
+        }
+        const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext, "editor");
+        if (!auth) {
+          await client.query("ROLLBACK");
+          res.status(403).json({ error: "Authentication is no longer valid." });
+          return;
+        }
+        const preflight = await client.query(
+          `SELECT market.code market,binding.locale
+             FROM cms_market_edition_bindings binding
+             JOIN market_editions market ON market.id=binding.market_edition_id
+            WHERE binding.id=$1 AND binding.document_id=$2`,
+          [bindingId, documentId],
+        );
+        if (!preflight.rows[0] || !await lockManagedExactEdition(
+          client,
+          documentId,
+          String(preflight.rows[0].market),
+          String(preflight.rows[0].locale),
+        )) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "The managed binding has no exact edition to mutate." });
+          return;
+        }
         const bindingResult = await client.query(
          `SELECT binding.*,market.code market,document.kind document_kind,
                  source_edition.market source_market
@@ -667,12 +785,12 @@ export function registerSharedMarketEditionRoutes(
           res.status(404).json({ error: "Shared-market binding not found." });
           return;
         }
-        if (!options.canAccessMarket(res.locals.auth, String(binding.market))) {
+        if (!options.canAccessMarket(auth, String(binding.market))) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to this market." });
           return;
         }
-        if (!sourceMarketAllowed(res.locals.auth, binding, options.canAccessMarket)) {
+        if (!sourceMarketAllowed(auth, binding, options.canAccessMarket)) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to the shared baseline source market." });
           return;
@@ -718,7 +836,7 @@ export function registerSharedMarketEditionRoutes(
         }
         const revisionId = await materialize(client, {
           documentId, market: String(binding.market), locale: String(binding.locale), snapshot: validation.data,
-          baselineRevisionId: String(baseline.rows[0].id), bindingId, userId: res.locals.auth.user.id,
+          baselineRevisionId: String(baseline.rows[0].id), bindingId, userId: auth.user.id,
           mediaReferences: mediaPinsForSnapshot(
             snapshot,
             String(binding.document_kind),
@@ -731,9 +849,9 @@ export function registerSharedMarketEditionRoutes(
                    mode=CASE WHEN jsonb_array_length($2::jsonb)=0 THEN 'shared' ELSE 'adapted' END,
                    version=version+1,updated_by_user_id=$4,updated_at=now()
             WHERE id=$1 RETURNING *`,
-           [bindingId, JSON.stringify(operations), revisionId, res.locals.auth.user.id],
+           [bindingId, JSON.stringify(operations), revisionId, auth.user.id],
         );
-        await audit(res.locals.auth, "shared-market-overrides-saved", "document", documentId,
+        await audit(auth, "shared-market-overrides-saved", "document", documentId,
           { bindingId, operationCount: operations.length }, client);
         await client.query("COMMIT");
         res.json(mapBinding(updated.rows[0]!));
@@ -755,7 +873,10 @@ export function registerSharedMarketEditionRoutes(
       const result = await pool.query(
         `SELECT binding.*,target.code market,current_revision.id current_id,
                 current_revision.snapshot current_snapshot,previous_revision.snapshot previous_snapshot,
-                resolved.snapshot local_snapshot,source_edition.market source_market
+                 resolved.snapshot local_snapshot,
+                 source_edition.market current_source_market,
+                 adopted_source_edition.market adopted_source_market,
+                 resolved_source_edition.market local_source_market
            FROM cms_market_edition_bindings binding
            JOIN market_editions target ON target.id=binding.market_edition_id
            JOIN cms_shared_baselines base ON base.id=binding.baseline_id
@@ -766,6 +887,12 @@ export function registerSharedMarketEditionRoutes(
              ON resolved.cms_revision_id=binding.materialized_revision_id
            LEFT JOIN cms_revisions source_revision ON source_revision.id=current_revision.source_revision_id
            LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
+            LEFT JOIN cms_revisions adopted_source_revision ON adopted_source_revision.id=previous_revision.source_revision_id
+            LEFT JOIN cms_market_editions adopted_source_edition ON adopted_source_edition.id=adopted_source_revision.edition_id
+            LEFT JOIN cms_shared_baseline_revisions resolved_baseline
+              ON resolved_baseline.id=resolved.baseline_revision_id
+            LEFT JOIN cms_revisions resolved_source_revision ON resolved_source_revision.id=resolved_baseline.source_revision_id
+            LEFT JOIN cms_market_editions resolved_source_edition ON resolved_source_edition.id=resolved_source_revision.edition_id
           WHERE binding.id=$1 AND binding.document_id=$2`,
         [bindingId, documentId],
       );
@@ -774,8 +901,14 @@ export function registerSharedMarketEditionRoutes(
         res.status(404).json({ error: "Shared-market binding not found." });
         return;
       }
-      if (!options.canAccessMarket(res.locals.auth, String(row.market))
-        || !sourceMarketAllowed(res.locals.auth, row, options.canAccessMarket)) {
+      const auth = res.locals.auth as AuthContext;
+      const requiredSources = [
+        row.current_source_market,
+        row.adopted_source_market,
+        row.local_source_market,
+      ].filter((market): market is string => typeof market === "string" && market.length > 0);
+      if (!options.canAccessMarket(auth, String(row.market))
+        || requiredSources.some((market) => !options.canAccessMarket(auth, market))) {
         res.status(403).json({ error: "You are not assigned to this shared-market binding and source." });
         return;
       }
@@ -811,6 +944,34 @@ export function registerSharedMarketEditionRoutes(
       const client = await pool.connect();
       try {
         await client.query("BEGIN");
+        if (!await lockDocumentForMutation(client, documentId)) {
+          await client.query("ROLLBACK");
+          res.status(404).json({ error: "Document not found." });
+          return;
+        }
+        const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+        if (!transactionAuth) {
+          await client.query("ROLLBACK");
+          res.status(403).json({ error: "Authentication is no longer valid." });
+          return;
+        }
+        const preflight = await client.query(
+          `SELECT market.code market,binding.locale
+             FROM cms_market_edition_bindings binding
+             JOIN market_editions market ON market.id=binding.market_edition_id
+            WHERE binding.id=$1 AND binding.document_id=$2`,
+          [bindingId, documentId],
+        );
+        if (!preflight.rows[0] || !await lockManagedExactEdition(
+          client,
+          documentId,
+          String(preflight.rows[0].market),
+          String(preflight.rows[0].locale),
+        )) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "The managed binding has no exact edition to mutate." });
+          return;
+        }
         const bindingResult = await client.query(
           `SELECT binding.*,target.code market,document.kind document_kind,
                   adopted.snapshot adopted_snapshot,adopted.media_references adopted_media_references,
@@ -834,8 +995,8 @@ export function registerSharedMarketEditionRoutes(
           res.status(409).json({ error: "The binding changed, is independent, or has no baseline to resolve." });
           return;
         }
-        if (!options.canAccessMarket(auth, String(binding.market))
-          || !sourceMarketAllowed(auth, binding, options.canAccessMarket)) {
+        if (!options.canAccessMarket(transactionAuth, String(binding.market))
+          || !sourceMarketAllowed(transactionAuth, binding, options.canAccessMarket)) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to this shared-market binding and source." });
           return;
@@ -857,7 +1018,7 @@ export function registerSharedMarketEditionRoutes(
           res.status(409).json({ error: "The requested baseline revision is not available to resolve this binding." });
           return;
         }
-        if (!sourceMarketAllowed(auth, target, options.canAccessMarket)) {
+        if (!sourceMarketAllowed(transactionAuth, target, options.canAccessMarket)) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to the requested baseline source market." });
           return;
@@ -879,52 +1040,22 @@ export function registerSharedMarketEditionRoutes(
         let nextOperations = binding.override_operations ?? [];
         let nextHeld: string | null = null;
         if (action === "adopt") {
-          const merge = mergeSharedBaselineUpdate(
+          const resolvedUpdate = resolveSharedBaselineUpdate(
             binding.adopted_snapshot,
             target.snapshot,
             binding.override_operations ?? [],
+            parsed.data.conflictDecisions ?? [],
           );
-          const decisions = parsed.data.conflictDecisions ?? [];
-          const conflictPaths = new Set(merge.conflicts.map((conflict) => conflict.path));
-          const decisionByPath = new Map<string, "shared" | "market">();
-          const invalidDecision = decisions.find((decision) => {
-            if (!conflictPaths.has(decision.path) || decisionByPath.has(decision.path)) return true;
-            decisionByPath.set(decision.path, decision.choice);
-            return false;
-          });
-          if (invalidDecision) {
-            await client.query("ROLLBACK");
-            res.status(400).json({ error: "Conflict decisions must name each conflicting path exactly once." });
-            return;
-          }
-          const unresolved = merge.conflicts.filter((conflict) => !decisionByPath.has(conflict.path));
-          if (unresolved.length) {
+          if (!resolvedUpdate.success) {
             await client.query("ROLLBACK");
             res.status(409).json({
-              error: "The baseline update has unresolved local conflicts.",
-              conflicts: merge.conflicts,
+              error: resolvedUpdate.error,
+              conflicts: resolvedUpdate.conflicts,
             });
             return;
           }
-          // A shared choice drops only the operation(s) addressing that
-          // conflicting stable path. Market choices are replayed exactly on
-          // the frozen target; stable-ID array operations that cannot replay
-          // against its structure fail below rather than being approximated.
-          nextOperations = (binding.override_operations ?? []).filter((operation: SharedOverrideOperation) =>
-            decisionByPath.get(operation.path) !== "shared",
-          );
-          try {
-            snapshot = applySharedOverrideOperations(target.snapshot, nextOperations);
-          } catch (error) {
-            await client.query("ROLLBACK");
-            res.status(409).json({
-              error: error instanceof Error
-                ? `The selected market conflict decision cannot be replayed: ${error.message}`
-                : "The selected market conflict decision cannot be replayed.",
-              conflicts: merge.conflicts,
-            });
-            return;
-          }
+          snapshot = resolvedUpdate.snapshot;
+          nextOperations = resolvedUpdate.operations;
           mediaReferences = mediaPinsForSnapshot(snapshot, String(binding.document_kind), target.media_references ?? []);
           nextBasedOn = String(target.id);
           nextMode = nextOperations.length ? "adapted" : "shared";
@@ -973,7 +1104,7 @@ export function registerSharedMarketEditionRoutes(
           snapshot: validation.data,
           baselineRevisionId: nextBasedOn,
           bindingId,
-          userId: auth.user.id,
+          userId: transactionAuth.user.id,
           mediaReferences,
         });
         const update = await client.query(
@@ -985,9 +1116,9 @@ export function registerSharedMarketEditionRoutes(
                     WHEN translation_state='stale' THEN 'stale' ELSE 'current' END,
                   version=version+1,updated_by_user_id=$8,updated_at=now()
             WHERE id=$1 RETURNING *`,
-          [bindingId, nextMode, nextBaselineId, nextBasedOn, JSON.stringify(nextOperations), nextHeld, revisionId, auth.user.id],
+          [bindingId, nextMode, nextBaselineId, nextBasedOn, JSON.stringify(nextOperations), nextHeld, revisionId, transactionAuth.user.id],
         );
-        await audit(auth, "shared-market-baseline-resolved", "document", documentId,
+        await audit(transactionAuth, "shared-market-baseline-resolved", "document", documentId,
           { bindingId, action, baselineRevisionId: target.id, materializedRevisionId: revisionId }, client);
         await client.query("COMMIT");
         res.json(mapBinding(update.rows[0]!));

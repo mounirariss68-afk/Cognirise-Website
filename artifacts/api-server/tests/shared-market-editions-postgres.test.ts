@@ -8,6 +8,13 @@ type PoolLike = {
     values?: unknown[],
   ): Promise<{ rows: T[]; rowCount: number | null }>;
   end(): Promise<void>;
+  connect(): Promise<{
+    query<T = Record<string, unknown>>(
+      sql: string,
+      values?: unknown[],
+    ): Promise<{ rows: T[]; rowCount: number | null }>;
+    release(): void;
+  }>;
   options: { connectionString?: string };
 };
 
@@ -438,6 +445,39 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       403,
       "a destination-only editor cannot convert a shared binding without access to its current source",
     );
+    const beforeGenericRebind = await admin.query<{
+      version: number; materialized_revision_id: string; revision_count: string; pin_count: string;
+    }>(
+      `SELECT binding.version,binding.materialized_revision_id::text,
+              (SELECT count(*)::text FROM cms_revisions revision
+                JOIN cms_market_editions edition ON edition.id=revision.edition_id
+               WHERE edition.document_id=$1 AND edition.market='ksa' AND edition.locale='en') revision_count,
+              (SELECT count(*)::text FROM cms_media_references reference WHERE reference.document_id=$1) pin_count
+         FROM cms_market_edition_bindings binding WHERE binding.id=$2`,
+      [documentId, ksa.id],
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        marketEditionId: ksaMarketId, locale: "en", mode: "independent",
+        independentRevisionId: ksa.materializedRevisionId, version: ksa.version,
+      })).status,
+      409,
+      "generic binding PUT cannot detach a Shared/Adapted binding outside Compare and Resolve",
+    );
+    const afterGenericRebind = await admin.query(
+      `SELECT binding.version,binding.materialized_revision_id::text,
+              (SELECT count(*)::text FROM cms_revisions revision
+                JOIN cms_market_editions edition ON edition.id=revision.edition_id
+               WHERE edition.document_id=$1 AND edition.market='ksa' AND edition.locale='en') revision_count,
+              (SELECT count(*)::text FROM cms_media_references reference WHERE reference.document_id=$1) pin_count
+         FROM cms_market_edition_bindings binding WHERE binding.id=$2`,
+      [documentId, ksa.id],
+    );
+    assert.deepEqual(
+      afterGenericRebind.rows[0],
+      beforeGenericRebind.rows[0],
+      "rejected generic rebind leaves the binding, resolved snapshot revision, and pins unchanged",
+    );
     const legacySource = await admin.query<{ published_revision_id: string }>(
       "SELECT published_revision_id::text FROM cms_market_editions WHERE id=$1",
       [sourceEditionId],
@@ -646,7 +686,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     const compare = await json<{
       canAutoAdopt: boolean;
       localSnapshot: Record<string, unknown>;
-      conflicts: Array<{ path: string; kind: string }>;
+      conflicts: Array<{ conflictId: string; path: string; kind: string }>;
     }>(
       await request(`/api/documents/${documentId}/shared-market/bindings/${ksa.id}/compare`, "GET", undefined),
       200,
@@ -657,6 +697,10 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       { path: "title", kind: "concurrent-value-change" },
       { path: "summary", kind: "concurrent-value-change" },
     ]);
+    assert.ok(
+      compare.conflicts.every((conflict) => typeof conflict.conflictId === "string" && conflict.conflictId.length > 0),
+      "comparison exposes a stable operation conflict identity independent of display path",
+    );
     assert.deepEqual(
       compare.localSnapshot,
       resolvedSaudi.rows[0]?.snapshot,
@@ -716,8 +760,8 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
         baselineRevisionId: updatedBaseline.revisionId,
         action: "adopt",
         conflictDecisions: [
-          { path: "title", choice: "market" },
-          { path: "summary", choice: "shared" },
+          { conflictId: compare.conflicts.find((conflict) => conflict.path === "title")?.conflictId, choice: "market" },
+          { conflictId: compare.conflicts.find((conflict) => conflict.path === "summary")?.conflictId, choice: "shared" },
         ],
       }),
       200,
@@ -827,6 +871,493 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       normalSave.currentRevisionId,
       "a normal exact-edition save must advance the binding's materialized revision pointer",
     );
+    const beforeOverlap = await admin.query<{
+      revision_number: number;
+      version: number;
+      based_on_baseline_revision_id: string;
+    }>(
+      `SELECT revision.revision_number,binding.version,binding.based_on_baseline_revision_id::text
+         FROM cms_revisions revision
+         JOIN cms_market_edition_bindings binding ON binding.id=$2
+        WHERE revision.id=$1`,
+      [normalSave.currentRevisionId, ksa.id],
+    );
+    assert.ok(beforeOverlap.rows[0]);
+    const overlapPool = new PoolConstructor({
+      connectionString: withSearchPath(originalDatabaseUrl, schema),
+    });
+    const overlapLock = await overlapPool.connect();
+    try {
+      // Hold the common document mutex until both real HTTP clients have
+      // submitted their stale tokens. Once released, exactly one mutation can
+      // win; the other must observe fresh state and return a recoverable 409.
+      await overlapLock.query("BEGIN");
+      await overlapLock.query("SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE", [documentId]);
+      const ordinarySave = request(`/api/documents/${documentId}`, "PATCH", {
+        market: "ksa",
+        locale: "en",
+        revisionNumber: Number(beforeOverlap.rows[0].revision_number),
+        expectedRevisionId: normalSave.currentRevisionId,
+        title: "Concurrent ordinary save winner candidate",
+      });
+      const sharedOverride = request(
+        `/api/documents/${documentId}/shared-market/bindings/${ksa.id}/overrides`,
+        "PUT",
+        {
+          version: Number(beforeOverlap.rows[0].version),
+          baselineRevisionId: String(beforeOverlap.rows[0].based_on_baseline_revision_id),
+          operations: [{ op: "set", path: "title", value: "Concurrent shared override winner candidate" }],
+        },
+      );
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      await overlapLock.query("COMMIT");
+      const overlapResponses = await Promise.all([ordinarySave, sharedOverride]);
+      assert.deepEqual(
+        overlapResponses.map((response) => response.status).sort(),
+        [200, 409],
+        "controlled ordinary-save/shared-override overlap must elect one winner without deadlock or a 500",
+      );
+    } finally {
+      await overlapLock.query("ROLLBACK").catch(() => undefined);
+      overlapLock.release();
+      await overlapPool.end();
+    }
+    await admin.query(
+      "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,'qatar')",
+      [editorId],
+    );
+    const permissionRaceBefore = await admin.query<{
+      version: number;
+      materialized_revision_id: string | null;
+      revision_count: string;
+      pin_count: string;
+      success_audit_count: string;
+    }>(
+      `SELECT binding.version,binding.materialized_revision_id::text,
+              (SELECT count(*)::text FROM cms_revisions revision
+                 JOIN cms_market_editions edition ON edition.id=revision.edition_id
+                WHERE edition.document_id=$1) revision_count,
+              (SELECT count(*)::text FROM cms_media_references reference
+                WHERE reference.document_id=$1) pin_count,
+              (SELECT count(*)::text FROM cms_audit_events event
+                WHERE event.target_id=$1::text AND event.action='shared-market-bound') success_audit_count
+         FROM cms_market_edition_bindings binding
+        WHERE binding.id=$2`,
+      [independentDocumentId, independent.id],
+    );
+    const permissionRacePool = new PoolConstructor({
+      connectionString: withSearchPath(originalDatabaseUrl, schema),
+    });
+    const permissionRaceLock = await permissionRacePool.connect();
+    try {
+      await permissionRaceLock.query("BEGIN");
+      await permissionRaceLock.query(
+        "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE",
+        [independentDocumentId],
+      );
+      const deniedRebind = request(
+        `/api/documents/${independentDocumentId}/shared-market/bindings`,
+        "PUT",
+        {
+          marketEditionId: qatarMarketId,
+          locale: "en",
+          mode: "independent",
+          independentRevisionId,
+          version: independent.version,
+        },
+        headersFor(editorToken),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      // Match the production administrator write order: take the user row
+      // first, then replace assignments. The blocked mutation must neither
+      // deadlock with this order nor retain its pre-wait editor identity.
+      const identityUpdate = await admin.connect();
+      try {
+        await identityUpdate.query("BEGIN");
+        await identityUpdate.query("UPDATE cms_users SET role='viewer' WHERE id=$1", [editorId]);
+        await identityUpdate.query(
+          "DELETE FROM cms_user_market_assignments WHERE user_id=$1 AND market_code='qatar'",
+          [editorId],
+        );
+        await identityUpdate.query("COMMIT");
+      } finally {
+        await identityUpdate.query("ROLLBACK").catch(() => undefined);
+        identityUpdate.release();
+      }
+      await permissionRaceLock.query("COMMIT");
+      assert.equal(
+        (await deniedRebind).status,
+        403,
+        "a request authorized before waiting must re-check its role and destination assignment after the document lock",
+      );
+    } finally {
+      await permissionRaceLock.query("ROLLBACK").catch(() => undefined);
+      permissionRaceLock.release();
+      await permissionRacePool.end();
+    }
+    const permissionRaceAfter = await admin.query(
+      `SELECT binding.version,binding.materialized_revision_id::text,
+              (SELECT count(*)::text FROM cms_revisions revision
+                 JOIN cms_market_editions edition ON edition.id=revision.edition_id
+                WHERE edition.document_id=$1) revision_count,
+              (SELECT count(*)::text FROM cms_media_references reference
+                WHERE reference.document_id=$1) pin_count,
+              (SELECT count(*)::text FROM cms_audit_events event
+                WHERE event.target_id=$1::text AND event.action='shared-market-bound') success_audit_count
+         FROM cms_market_edition_bindings binding
+        WHERE binding.id=$2`,
+      [independentDocumentId, independent.id],
+    );
+    assert.deepEqual(
+      permissionRaceAfter.rows[0],
+      permissionRaceBefore.rows[0],
+      "a denied permission race leaves revisions, pins, and the binding pointer unchanged",
+    );
+    const neverPublishedBeforeRestore = await admin.query<{
+      revision_count: string;
+      latest_revision_id: string;
+      workflow_state: string;
+    }>(
+      `SELECT count(revision.*)::text revision_count,
+              (array_agg(revision.id::text ORDER BY revision.revision_number DESC,
+                 revision.created_at DESC,revision.id DESC))[1] latest_revision_id,
+              (array_agg(revision.workflow_state ORDER BY revision.revision_number DESC,
+                 revision.created_at DESC,revision.id DESC))[1] workflow_state
+         FROM cms_market_editions edition
+         JOIN cms_revisions revision ON revision.edition_id=edition.id
+        WHERE edition.document_id=$1 AND edition.market='qatar' AND edition.locale='en'`,
+      [independentDocumentId],
+    );
+    assert.equal(neverPublishedBeforeRestore.rows[0]?.workflow_state, "draft");
+    await json(
+      await request(`/api/documents/${independentDocumentId}/archive`, "POST", {
+        market: "qatar", locale: "en", reason: "Archive never-published recovery fixture",
+      }),
+      200,
+      "archive a never-published independent edition",
+    );
+    const neverPublishedRestored = await json<{ currentRevisionId: string; status: string }>(
+      await request(`/api/documents/${independentDocumentId}/restore`, "POST", {
+        market: "qatar", locale: "en", reason: "Restore never-published recovery fixture",
+      }),
+      200,
+      "restore retains never-published draft work",
+    );
+    const neverPublishedAfterRestore = await admin.query<{
+      revision_count: string;
+      latest_revision_id: string;
+      workflow_state: string;
+      publication_state: string;
+      published_revision_id: string | null;
+    }>(
+      `SELECT count(revision.*)::text revision_count,
+              (array_agg(revision.id::text ORDER BY revision.revision_number DESC,
+                 revision.created_at DESC,revision.id DESC))[1] latest_revision_id,
+              (array_agg(revision.workflow_state ORDER BY revision.revision_number DESC,
+                 revision.created_at DESC,revision.id DESC))[1] workflow_state,
+              (array_agg(edition.publication_state))[1] publication_state,
+              (array_agg(edition.published_revision_id::text))[1] published_revision_id
+         FROM cms_market_editions edition
+         JOIN cms_revisions revision ON revision.edition_id=edition.id
+        WHERE edition.document_id=$1 AND edition.market='qatar' AND edition.locale='en'`,
+      [independentDocumentId],
+    );
+    assert.equal(neverPublishedRestored.status, "draft");
+    assert.equal(neverPublishedAfterRestore.rows[0]?.workflow_state, "draft");
+    assert.equal(neverPublishedAfterRestore.rows[0]?.publication_state, "draft");
+    assert.equal(neverPublishedAfterRestore.rows[0]?.published_revision_id, null);
+    assert.deepEqual(
+      neverPublishedAfterRestore.rows[0]?.revision_count,
+      neverPublishedBeforeRestore.rows[0]?.revision_count,
+      "never-published recovery keeps its explicit draft/rejected history instead of synthesizing a publication clone",
+    );
+    assert.equal(
+      neverPublishedRestored.currentRevisionId,
+      neverPublishedBeforeRestore.rows[0]?.latest_revision_id,
+    );
+    const qatarBeforeAcknowledgement = await admin.query<{
+      version: number;
+      translation_state: string;
+      translation_source_revision_id: string | null;
+    }>(
+      `SELECT version,translation_state,translation_source_revision_id::text
+         FROM cms_market_edition_bindings
+        WHERE id=$1`,
+      [qatar.id],
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        marketEditionId: qatarMarketId,
+        locale: "en",
+        mode: "shared",
+        baselineId: englishBaseline.id,
+        baselineRevisionId: updatedBaseline.revisionId,
+        translationSourceRevisionId: englishBaseline.revisionId,
+        version: qatarBeforeAcknowledgement.rows[0]?.version,
+      })).status,
+      409,
+      "an acknowledgement of an obsolete baseline source must not falsely clear translation staleness",
+    );
+    const qatarAfterObsoleteAcknowledgement = await admin.query<{
+      version: number;
+      translation_state: string;
+      translation_source_revision_id: string | null;
+    }>(
+      `SELECT version,translation_state,translation_source_revision_id::text
+         FROM cms_market_edition_bindings
+        WHERE id=$1`,
+      [qatar.id],
+    );
+    assert.deepEqual(
+      qatarAfterObsoleteAcknowledgement.rows[0],
+      qatarBeforeAcknowledgement.rows[0],
+      "a rejected obsolete acknowledgement cannot mutate translation state or binding version",
+    );
+    const qatarCurrentAcknowledgement = await json<{ version: number; translationState: string }>(
+      await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        marketEditionId: qatarMarketId,
+        locale: "en",
+        mode: "shared",
+        baselineId: englishBaseline.id,
+        baselineRevisionId: updatedBaseline.revisionId,
+        translationSourceRevisionId: updatedBaseline.revisionId,
+        version: qatarBeforeAcknowledgement.rows[0]?.version,
+      }),
+      200,
+      "only the active authorized source baseline can acknowledge a translation",
+    );
+    assert.equal(qatarCurrentAcknowledgement.translationState, "current");
+    const qatarAfterCurrentAcknowledgement = await admin.query<{
+      translation_state: string;
+      translation_source_revision_id: string | null;
+    }>(
+      `SELECT translation_state,translation_source_revision_id::text
+         FROM cms_market_edition_bindings
+        WHERE id=$1`,
+      [qatar.id],
+    );
+    assert.equal(qatarAfterCurrentAcknowledgement.rows[0]?.translation_state, "current");
+    assert.equal(
+      qatarAfterCurrentAcknowledgement.rows[0]?.translation_source_revision_id,
+      updatedBaseline.revisionId,
+      "the database records the exact active source that was explicitly acknowledged",
+    );
+    const translationSuccessorId = randomUUID();
+    const translationSuccessorSnapshot = {
+      ...changedCommonSnapshot,
+      title: "Common published output revised after translation acknowledgement",
+    };
+    await admin.query(
+      `INSERT INTO cms_revisions
+         (id,edition_id,revision_number,payload,content_digest,workflow_state,created_by_user_id,reason)
+       VALUES ($1,$2,3,$3,'task321-translation-successor','approved',$4,'Task 321 translation successor')`,
+      [translationSuccessorId, sourceEditionId, translationSuccessorSnapshot, administratorId],
+    );
+    const acknowledgedSuccessor = await json<{ revisionId: string }>(
+      await request(`/api/documents/${documentId}/shared-market`, "POST", {
+        locale: "en",
+        sourceRevisionId: translationSuccessorId,
+        snapshot: translationSuccessorSnapshot,
+        expectedRevisionNumber: updatedBaseline.revisionNumber,
+      }),
+      201,
+      "a later active baseline successor marks a previously acknowledged translation stale",
+    );
+    const qatarAfterSuccessor = await admin.query<{
+      translation_state: string;
+      translation_source_revision_id: string | null;
+    }>(
+      `SELECT translation_state,translation_source_revision_id::text
+         FROM cms_market_edition_bindings
+        WHERE id=$1`,
+      [qatar.id],
+    );
+    assert.equal(qatarAfterSuccessor.rows[0]?.translation_state, "stale");
+    assert.equal(
+      qatarAfterSuccessor.rows[0]?.translation_source_revision_id,
+      updatedBaseline.revisionId,
+      "the stale marker retains the last explicitly acknowledged source rather than silently advancing it",
+    );
+    assert.notEqual(acknowledgedSuccessor.revisionId, updatedBaseline.revisionId);
+    const qatarBeforeCrossLocaleAcknowledgement = await admin.query<{ version: number }>(
+      "SELECT version FROM cms_market_edition_bindings WHERE id=$1",
+      [qatar.id],
+    );
+    const crossLocaleAcknowledgement = await json<{
+      translationState: string;
+      translationSourceRevisionId: string | null;
+    }>(
+      await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        marketEditionId: qatarMarketId,
+        locale: "en",
+        mode: "shared",
+        baselineId: englishBaseline.id,
+        baselineRevisionId: updatedBaseline.revisionId,
+        translationSourceRevisionId: arabicBaseline.revisionId,
+        version: qatarBeforeCrossLocaleAcknowledgement.rows[0]?.version,
+      }),
+      200,
+      "an active Arabic source can acknowledge an English destination's frozen baseline",
+    );
+    assert.equal(crossLocaleAcknowledgement.translationState, "current");
+    assert.equal(crossLocaleAcknowledgement.translationSourceRevisionId, arabicBaseline.revisionId);
+    const qatarCrossLocaleState = await admin.query<{
+      translation_state: string;
+      translation_source_revision_id: string | null;
+    }>(
+      `SELECT translation_state,translation_source_revision_id::text
+         FROM cms_market_edition_bindings WHERE id=$1`,
+      [qatar.id],
+    );
+    assert.deepEqual(qatarCrossLocaleState.rows[0], {
+      translation_state: "current",
+      translation_source_revision_id: arabicBaseline.revisionId,
+    });
+    await admin.query("UPDATE cms_users SET role='editor' WHERE id=$1", [editorId]);
+    await admin.query(
+      `INSERT INTO cms_user_market_assignments(user_id,market_code)
+       VALUES ($1,'ksa'),($1,'qatar'),($1,'oman'),($1,'bahrain')
+       ON CONFLICT DO NOTHING`,
+      [editorId],
+    );
+    const availabilityRacePool = new PoolConstructor({
+      connectionString: withSearchPath(originalDatabaseUrl, schema),
+    });
+    const availabilityRaceLock = await availabilityRacePool.connect();
+    try {
+      await availabilityRaceLock.query("BEGIN");
+      await availabilityRaceLock.query("SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE", [documentId]);
+      const revokedAvailabilityStage = request(
+        `/api/documents/${documentId}/availability`,
+        "PUT",
+        {
+          version: 0,
+          destinations: [
+            { marketEditionId: uaeMarketId, locale: "en", decision: "show" },
+            { marketEditionId: ksaMarketId, locale: "en", decision: "show" },
+            { marketEditionId: qatarMarketId, locale: "en", decision: "show" },
+            { marketEditionId: omanMarketId, locale: "en", decision: "show" },
+            { marketEditionId: bahrainMarketId, locale: "en", decision: "show" },
+          ],
+        },
+        headersFor(editorToken),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      const availabilityIdentityUpdate = await admin.connect();
+      try {
+        await availabilityIdentityUpdate.query("BEGIN");
+        await availabilityIdentityUpdate.query("UPDATE cms_users SET role='viewer' WHERE id=$1", [editorId]);
+        await availabilityIdentityUpdate.query(
+          "DELETE FROM cms_user_market_assignments WHERE user_id=$1 AND market_code='oman'",
+          [editorId],
+        );
+        await availabilityIdentityUpdate.query("COMMIT");
+      } finally {
+        await availabilityIdentityUpdate.query("ROLLBACK").catch(() => undefined);
+        availabilityIdentityUpdate.release();
+      }
+      await availabilityRaceLock.query("COMMIT");
+      assert.equal(
+        (await revokedAvailabilityStage).status,
+        403,
+        "availability staging rechecks a role/assignment revoked while it waits for the document mutex",
+      );
+    } finally {
+      await availabilityRaceLock.query("ROLLBACK").catch(() => undefined);
+      availabilityRaceLock.release();
+      await availabilityRacePool.end();
+    }
+    const availabilityRaceState = await admin.query<{
+      state_count: string;
+      decision_count: string;
+      success_audit_count: string;
+    }>(
+      `SELECT
+         (SELECT count(*)::text FROM cms_document_availability_states WHERE document_id=$1) state_count,
+         (SELECT count(*)::text FROM cms_document_market_availability WHERE document_id=$1) decision_count,
+         (SELECT count(*)::text FROM cms_audit_events
+           WHERE target_id=$1::text AND action='document.availability.staged') success_audit_count`,
+      [documentId],
+    );
+    assert.deepEqual(availabilityRaceState.rows[0], {
+      state_count: "0",
+      decision_count: "0",
+      success_audit_count: "0",
+    });
+    const crossSourceFixture = await admin.query<{
+      materialized_revision_id: string;
+      revision_count: string;
+    }>(
+      `SELECT binding.materialized_revision_id::text,
+              (SELECT count(*)::text FROM cms_revisions revision
+                 JOIN cms_market_editions edition ON edition.id=revision.edition_id
+                WHERE edition.document_id=$1 AND edition.market='qatar' AND edition.locale='en') revision_count
+         FROM cms_market_edition_bindings binding WHERE binding.id=$2`,
+      [documentId, qatar.id],
+    );
+    await admin.query("UPDATE cms_users SET role='publisher' WHERE id=$1", [editorId]);
+    await admin.query("DELETE FROM cms_user_market_assignments WHERE user_id=$1", [editorId]);
+    await admin.query(
+      "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,'qatar'),($1,'uae')",
+      [editorId],
+    );
+    // The current source is UAE and the adopted source is KSA. This models a
+    // binding whose historical local materialization has a different source
+    // boundary than its latest comparison target.
+    await admin.query(
+      `UPDATE cms_market_edition_bindings
+          SET based_on_baseline_revision_id=$2
+        WHERE id=$1`,
+      [qatar.id, arabicBaseline.revisionId],
+    );
+    assert.equal(
+      (await request(
+        `/api/documents/${documentId}/shared-market/bindings/${qatar.id}/compare`,
+        "GET",
+        undefined,
+        headersFor(editorToken),
+      )).status,
+      403,
+      "compare requires permission for the adopted historical source as well as the current source",
+    );
+    await admin.query("DELETE FROM cms_user_market_assignments WHERE user_id=$1", [editorId]);
+    await admin.query(
+      "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,'qatar'),($1,'ksa')",
+      [editorId],
+    );
+    await admin.query(
+      "UPDATE cms_revisions SET workflow_state='approved' WHERE id=$1",
+      [crossSourceFixture.rows[0]?.materialized_revision_id],
+    );
+    await admin.query(
+      `UPDATE cms_market_editions
+          SET published_revision_id=$1,publication_state='archived'
+        WHERE document_id=$2 AND market='qatar' AND locale='en'`,
+      [crossSourceFixture.rows[0]?.materialized_revision_id, documentId],
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/restore`, "POST", {
+        market: "qatar", locale: "en", reason: "Cross-source authorization denial fixture",
+      }, headersFor(editorToken))).status,
+      403,
+      "restore checks the archived approved revision's historical source before writing a successor",
+    );
+    const crossSourceAfterDeniedRestore = await admin.query<{
+      publication_state: string;
+      published_revision_id: string;
+      revision_count: string;
+    }>(
+      `SELECT edition.publication_state,edition.published_revision_id::text,
+              (SELECT count(*)::text FROM cms_revisions revision WHERE revision.edition_id=edition.id) revision_count
+         FROM cms_market_editions edition
+        WHERE edition.document_id=$1 AND edition.market='qatar' AND edition.locale='en'`,
+      [documentId],
+    );
+    assert.deepEqual(crossSourceAfterDeniedRestore.rows[0], {
+      publication_state: "archived",
+      published_revision_id: crossSourceFixture.rows[0]?.materialized_revision_id,
+      revision_count: crossSourceFixture.rows[0]?.revision_count,
+    });
   } finally {
     if (server) {
       await new Promise<void>((resolve, reject) =>

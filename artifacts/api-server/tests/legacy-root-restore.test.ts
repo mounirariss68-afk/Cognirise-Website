@@ -18,8 +18,9 @@ test("legacy root restore activates only the selected authorized edition", { con
   const staleInReviewRevisionId = "ksa-stale-in-review";
   let latestRevisionId = staleInReviewRevisionId;
   let latestWorkflow = "in-review";
+  let availabilityMutationAttempted = false;
   let committed = false;
-  const payload = {
+  const approvedPayload = {
     slug: "legacy-document",
     title: "Legacy document",
     summary: null,
@@ -48,6 +49,15 @@ test("legacy root restore activates only the selected authorized edition", { con
     mediaIds: [],
     markets: ["ksa"],
   };
+  const stalePayload = {
+    ...approvedPayload,
+    title: "Unapproved archived draft",
+    content: {
+      ...approvedPayload.content,
+      teaser: "This newer draft must not be restored.",
+    },
+  };
+  let latestPayload = stalePayload;
 
   t.mock.method(pool, "query", async (sql: unknown, values: unknown[] = []) => {
     const statement = String(sql);
@@ -101,7 +111,7 @@ test("legacy root restore activates only the selected authorized edition", { con
               localized_slug: "legacy-document",
               revision_id: latestRevisionId,
               revision_number: 3,
-              payload,
+              payload: latestPayload,
               total_count: 1,
               requested_market: "ksa",
               requested_locale: "en",
@@ -120,7 +130,7 @@ test("legacy root restore activates only the selected authorized edition", { con
         rowCount: 1,
         rows: [{
           id: latestRevisionId,
-          payload,
+          payload: latestPayload,
           workflow_state: latestWorkflow,
           kind: "publication",
           canonical_slug: "legacy-document",
@@ -151,7 +161,7 @@ test("legacy root restore activates only the selected authorized edition", { con
           can_permanently_delete: false,
           revision_id: latestRevisionId,
           revision_number: latestRevisionId === "ksa-successor" ? 3 : 2,
-          payload,
+          payload: latestPayload,
           workflow_state: latestWorkflow,
           publication_state: states.ksa,
           published_revision_id: "ksa-published",
@@ -170,6 +180,19 @@ test("legacy root restore activates only the selected authorized edition", { con
       }
       if (statement.includes("SELECT status FROM cms_documents")) {
         return { rowCount: 1, rows: [{ status: rootStatus }] };
+      }
+      if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+        return { rowCount: 1, rows: [{ role: "publisher", status: "active" }] };
+      }
+      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
+        return { rowCount: 1, rows: [{ market_code: "ksa" }] };
+      }
+      if (statement.includes("cms_document_availability_states")) {
+        availabilityMutationAttempted = true;
+        return { rowCount: 0, rows: [] };
       }
       if (statement.includes("SET publication_state='archived'")) {
         states.ksa = "archived";
@@ -198,19 +221,35 @@ test("legacy root restore activates only the selected authorized edition", { con
             revision_id: latestRevisionId,
             revision_number: 2,
             workflow_state: latestWorkflow,
-            payload,
+            payload: latestPayload,
           }],
+        };
+      }
+      if (
+        statement.includes("FROM cms_revisions published")
+        && statement.includes("cms_resolved_market_revisions")
+        && statement.includes("FOR KEY SHARE OF published")
+      ) {
+        assert.deepEqual(values, ["ksa-published", "ksa-edition"]);
+        return { rowCount: 1, rows: [{ source_market: "ksa" }] };
+      }
+      if (statement.includes("SELECT id,payload,content_digest FROM cms_revisions")) {
+        assert.deepEqual(values, ["ksa-published", "ksa-edition"]);
+        return {
+          rowCount: 1,
+          rows: [{ id: "ksa-published", payload: approvedPayload, content_digest: "approved-digest" }],
         };
       }
       if (statement.includes("INSERT INTO cms_revisions")) {
         assert.equal(values[1], "ksa-published");
         latestRevisionId = "ksa-successor";
         latestWorkflow = "draft";
+        latestPayload = structuredClone(approvedPayload);
         return {
           rowCount: 1,
           rows: [{
             id: latestRevisionId,
-            payload,
+            payload: approvedPayload,
           }],
         };
       }
@@ -223,7 +262,7 @@ test("legacy root restore activates only the selected authorized edition", { con
           rows: [{
             id: latestRevisionId,
             edition_id: "ksa-edition",
-            payload,
+            payload: latestPayload,
             kind: "publication",
             canonical_slug: "legacy-document",
             workflow_state: latestWorkflow,
@@ -254,7 +293,7 @@ test("legacy root restore activates only the selected authorized edition", { con
           rows: [{
             id: latestRevisionId,
             edition_id: "ksa-edition",
-            payload,
+            payload: latestPayload,
             kind: "publication",
             canonical_slug: "legacy-document",
             workflow_state: latestWorkflow,
@@ -271,7 +310,7 @@ test("legacy root restore activates only the selected authorized edition", { con
           rows: [{
             id: latestRevisionId,
             edition_id: "ksa-edition",
-            payload,
+            payload: latestPayload,
             kind: "publication",
             canonical_slug: "legacy-document",
             workflow_state: latestWorkflow,
@@ -330,9 +369,20 @@ test("legacy root restore activates only the selected authorized edition", { con
   assert.equal(restored.currentRevisionId, "ksa-successor");
   assert.equal(restored.publishedRevisionId, "ksa-published");
   assert.equal(latestWorkflow, "draft");
+  assert.deepEqual(
+    latestPayload,
+    approvedPayload,
+    "restore must clone the retained approved publication rather than the newer archived draft",
+  );
+  assert.notDeepEqual(latestPayload, stalePayload);
   assert.equal(rootStatus, "active");
   assert.equal(states.ksa, "draft");
   assert.equal(states.uae, "archived");
+  assert.equal(
+    availabilityMutationAttempted,
+    false,
+    "restoring a root-archived exact edition must not create or advance shared availability state",
+  );
   assert.equal(committed, true);
 
   const stalePublish = await fetch(`${origin}/api/documents/legacy-document/publish`, {
@@ -390,4 +440,9 @@ test("legacy root restore activates only the selected authorized edition", { con
   assert.equal(republishedItems.length, 1);
   assert.equal(republishedItems[0]?.id, "legacy-document");
   assert.equal(republishedItems[0]?.revision, 3);
+  assert.equal(
+    latestRevisionId,
+    "ksa-successor",
+    "republishing the restored revision must retain its successor identity",
+  );
 });

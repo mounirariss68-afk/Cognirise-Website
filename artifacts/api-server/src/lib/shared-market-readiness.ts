@@ -59,7 +59,7 @@ export async function filterSharedMarketReadiness(
   for (const row of result.rows) {
     const flags = facts.get(String(row.document_id)) ?? new Set<string>();
     facts.set(String(row.document_id), flags);
-    if (!row.baseline_id) flags.add("needs-baseline");
+    if (!row.baseline_id && row.mode !== "independent") flags.add("needs-baseline");
     const intended = (row.draft_decision ?? row.published_decision ?? "off") !== "off";
     if (intended && !row.latest_revision_id && !row.legacy_shared) flags.add("missing");
     if ((row.latest_revision_id && row.latest_revision_id !== row.published_revision_id)

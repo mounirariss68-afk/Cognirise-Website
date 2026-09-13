@@ -357,6 +357,42 @@ test("Task 321 managed publication activates only after review and stays pinned"
       [documentId, ksaMarketId],
     );
     assert.equal((await publicItem()).items[0]?.media[0]?.versionId, saudiVersionId);
+    const approvedBeforeArchive = await admin.query<{
+      payload: Record<string, unknown>;
+      media_version_id: string;
+    }>(
+      `SELECT revision.payload,reference.media_version_id::text
+         FROM cms_revisions revision
+         LEFT JOIN cms_media_references reference
+           ON reference.document_id=$1 AND reference.field_path='revision:'||revision.id::text
+        WHERE revision.id=$2
+        ORDER BY reference.asset_id`,
+      [documentId, saved.currentRevisionId],
+    );
+    const newerDraft = await expectJson<{ currentRevisionId: string; revisionNumber: number }>(
+      await request(`/api/documents/${documentId}`, "PATCH", {
+        market: "ksa",
+        locale: "en",
+        revisionNumber: saved.revisionNumber,
+        expectedRevisionId: saved.currentRevisionId,
+        title: "Newer draft that must not be restored",
+      }),
+      200,
+      "create newer managed draft before archive",
+    );
+    await expectJson(
+      await request(`/api/documents/${documentId}/submit`, "POST", { revisionId: newerDraft.currentRevisionId }),
+      200,
+      "submit newer managed draft before archive",
+    );
+    await expectJson(
+      await request(`/api/documents/${documentId}/reject`, "POST", {
+        revisionId: newerDraft.currentRevisionId,
+        body: "Keep the already-approved snapshot for recovery.",
+      }),
+      200,
+      "reject newer managed draft before archive",
+    );
     await expectJson(
       await request(`/api/documents/${documentId}/archive`, "POST", {
         market: "ksa", locale: "en", reason: "Task 321 managed archive",
@@ -388,6 +424,49 @@ test("Task 321 managed publication activates only after review and stays pinned"
       await isPublishedPageAvailable(`/insights/${shared.slug}`, "ksa", "en"),
       false,
       "the archived managed route must not be available through a policy fallback",
+    );
+    const restored = await expectJson<{ currentRevisionId: string; status: string }>(
+      await request(`/api/documents/${documentId}/restore`, "POST", {
+        market: "ksa", locale: "en", reason: "Task 321 managed restore",
+      }),
+      200,
+      "restore clones the approved managed history into a draft",
+    );
+    assert.equal(restored.status, "draft", "restore never automatically republishes an archived edition");
+    const restoredRevision = await admin.query<{
+      payload: Record<string, unknown>;
+      workflow_state: string;
+      publication_state: string;
+      published_revision_id: string | null;
+      media_version_id: string;
+    }>(
+      `SELECT revision.payload,revision.workflow_state,edition.publication_state,
+              edition.published_revision_id::text,reference.media_version_id::text
+         FROM cms_revisions revision
+         JOIN cms_market_editions edition ON edition.id=revision.edition_id
+         LEFT JOIN cms_media_references reference
+           ON reference.document_id=$1 AND reference.field_path='revision:'||revision.id::text
+        WHERE revision.id=$2
+        ORDER BY reference.asset_id`,
+      [documentId, restored.currentRevisionId],
+    );
+    assert.equal(restoredRevision.rows[0]?.workflow_state, "draft");
+    assert.equal(restoredRevision.rows[0]?.publication_state, "draft");
+    assert.equal(restoredRevision.rows[0]?.published_revision_id, saved.currentRevisionId);
+    assert.deepEqual(
+      restoredRevision.rows.map((row) => row.payload)[0],
+      approvedBeforeArchive.rows.map((row) => row.payload)[0],
+      "restore must reproduce the approved snapshot, not the newer rejected draft",
+    );
+    assert.deepEqual(
+      restoredRevision.rows.map((row) => row.media_version_id),
+      approvedBeforeArchive.rows.map((row) => row.media_version_id),
+      "restore must copy the exact approved immutable media pins",
+    );
+    assert.deepEqual(
+      (await publicItem()).items,
+      [],
+      "a restored draft remains unavailable until it is explicitly reviewed and published again",
     );
   } finally {
     if (server) await new Promise<void>((resolve, reject) => server.close((error: Error) => error ? reject(error) : resolve()));

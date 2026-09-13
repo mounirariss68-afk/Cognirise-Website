@@ -27,6 +27,8 @@ export type SharedMergeConflictKind =
   | "array-reorder-conflict";
 
 export interface SharedMergeConflict {
+  /** Stable operation identity; never use the display selector as a decision key. */
+  conflictId: string;
   path: string;
   kind: SharedMergeConflictKind;
   message: string;
@@ -36,6 +38,18 @@ export interface SharedMergeResult {
   snapshot: Record<string, unknown>;
   conflicts: SharedMergeConflict[];
 }
+
+export type SharedConflictDecision = {
+  /** Required for unambiguous modern clients. */
+  conflictId?: string;
+  /** Legacy clients may send a path only when it identifies exactly one conflict. */
+  path?: string;
+  choice: "shared" | "market";
+};
+
+export type SharedResolveResult =
+  | { success: true; snapshot: Record<string, unknown>; operations: SharedOverrideOperation[]; conflicts: [] }
+  | { success: false; snapshot: Record<string, unknown>; operations: SharedOverrideOperation[]; conflicts: SharedMergeConflict[]; error: string };
 
 type PathPart = { key: string; id?: string };
 const PATH = /^(?:[A-Za-z][A-Za-z0-9_]*)(?:\[[A-Za-z][A-Za-z0-9_-]*=[^\]/]+\])?(?:\.[A-Za-z][A-Za-z0-9_]*(?:\[[A-Za-z][A-Za-z0-9_-]*=[^\]/]+\])?)*$/;
@@ -83,6 +97,11 @@ function valueAt(root: Record<string, unknown>, parts: PathPart[], path: string)
     }
   }
   return current;
+}
+
+/** Read a selector-addressed value for compare UIs without treating array IDs as numeric indexes. */
+export function readSharedOverridePath(root: Record<string, unknown>, path: string): unknown {
+  return valueAt(root, parsePath(path), path);
 }
 
 function parentAt(root: Record<string, unknown>, parts: PathPart[], path: string) {
@@ -307,8 +326,16 @@ export function resetSharedOverridePath(
   return sparseOverridesForResolvedSnapshot(baseline, resolved);
 }
 
-function conflict(path: string, kind: SharedMergeConflictKind, message: string): SharedMergeConflict {
-  return { path, kind, message };
+function operationIdentity(operation: SharedOverrideOperation, index: number) {
+  const target = operation.op === "array-add" ? String(operation.value.id)
+    : operation.op === "array-remove" ? operation.id
+      : operation.op === "array-reorder" ? operation.ids.join(",")
+        : "";
+  return `${operation.op}:${operation.path}:${target}:${index}`;
+}
+
+function conflict(conflictId: string, path: string, kind: SharedMergeConflictKind, message: string): SharedMergeConflict {
+  return { conflictId, path, kind, message };
 }
 
 /**
@@ -323,14 +350,15 @@ export function mergeSharedBaselineUpdate(
   operations: readonly SharedOverrideOperation[],
 ): SharedMergeResult {
   const conflicts: SharedMergeConflict[] = [];
-  for (const operation of operations) {
+  for (const [index, operation] of operations.entries()) {
+    const conflictId = operationIdentity(operation, index);
     try {
       if (operation.op === "set" || operation.op === "remove") {
         const parts = parsePath(operation.path);
         const before = valueAt(previousBaseline, parts, operation.path);
         const after = valueAt(nextBaseline, parts, operation.path);
         if (!equal(before, after)) {
-          conflicts.push(conflict(operation.path, after === undefined ? "deleted-baseline-value" : "concurrent-value-change",
+          conflicts.push(conflict(conflictId, operation.path, after === undefined ? "deleted-baseline-value" : "concurrent-value-change",
             "The shared baseline changed this locally overridden value."));
         }
       } else {
@@ -340,7 +368,7 @@ export function mergeSharedBaselineUpdate(
         const afterById = new Map(after.map((item) => [String(item.id), item]));
         if (operation.op === "array-add") {
           if (afterById.has(String(operation.value.id))) {
-            conflicts.push(conflict(operation.path, "array-add-conflict",
+            conflicts.push(conflict(conflictId, operation.path, "array-add-conflict",
               `The shared baseline now contains local addition ID ${operation.value.id}.`));
           }
           // `afterId` is semantic placement, so replaying after a baseline
@@ -353,45 +381,123 @@ export function mergeSharedBaselineUpdate(
             .filter((id) => beforeById.has(id));
           const beforeStillPresent = beforeIds.filter((id) => afterById.has(id));
           if (!equal(beforeStillPresent, afterExistingIds)) {
-            conflicts.push(conflict(operation.path, "array-add-conflict",
+            conflicts.push(conflict(conflictId, operation.path, "array-add-conflict",
               "The shared baseline reordered this array, making the local addition's placement ambiguous."));
           } else if (operation.afterId !== undefined && !afterById.has(operation.afterId)) {
-            conflicts.push(conflict(operation.path, "array-add-conflict",
+            conflicts.push(conflict(conflictId, operation.path, "array-add-conflict",
               `The shared baseline removed the local addition anchor ${operation.afterId}.`));
           }
         } else if (operation.op === "array-remove") {
           const original = beforeById.get(operation.id);
           const changed = afterById.get(operation.id);
           if (!original || !changed) {
-            conflicts.push(conflict(operation.path, "array-remove-conflict",
+            conflicts.push(conflict(conflictId, operation.path, "array-remove-conflict",
               `The shared baseline removed stable ID ${operation.id}.`));
           } else if (!equal(original, changed)) {
-            conflicts.push(conflict(operation.path, "array-remove-conflict",
+            conflicts.push(conflict(conflictId, operation.path, "array-remove-conflict",
               `The shared baseline changed stable ID ${operation.id} while this market removes it.`));
           }
         } else {
           const beforeIds = before.map((item) => String(item.id));
           const afterIds = after.map((item) => String(item.id));
           if (!equal(beforeIds, afterIds)) {
-            conflicts.push(conflict(operation.path, "array-reorder-conflict",
+            conflicts.push(conflict(conflictId, operation.path, "array-reorder-conflict",
               "The shared baseline reordered or structurally changed this locally reordered array."));
           }
         }
       }
     } catch (error) {
-      conflicts.push(conflict(operation.path, "unsupported-structure",
+      conflicts.push(conflict(conflictId, operation.path, "unsupported-structure",
         error instanceof Error ? error.message : "The override addresses unsupported structure."));
     }
   }
-  if (conflicts.length) return { snapshot: clone(nextBaseline), conflicts };
+  const consolidated = [...new Map(conflicts.map((item) => [item.conflictId, item])).values()].map((item) => {
+    const messages = conflicts.filter((candidate) => candidate.conflictId === item.conflictId).map((candidate) => candidate.message);
+    return { ...item, message: messages.join(" ") };
+  });
+  if (consolidated.length) return { snapshot: clone(nextBaseline), conflicts: consolidated };
   try {
     return { snapshot: applySharedOverrideOperations(nextBaseline, operations), conflicts };
   } catch (error) {
     return {
       snapshot: clone(nextBaseline),
-      conflicts: [conflict("",
+      conflicts: [conflict("invalid:root:0",
+        "",
         "invalid-path",
         error instanceof Error ? error.message : "The override is invalid.")],
+    };
+  }
+}
+
+/**
+ * Resolves a comparison by the stable operation conflict identity, then
+ * validates the resulting replay before returning a materializable snapshot.
+ * A legacy path-only decision is accepted only when that path identifies one
+ * operation conflict; ambiguous stable-array paths must be chosen by ID.
+ */
+export function resolveSharedBaselineUpdate(
+  previousBaseline: Record<string, unknown>,
+  nextBaseline: Record<string, unknown>,
+  operations: readonly SharedOverrideOperation[],
+  decisions: readonly SharedConflictDecision[],
+): SharedResolveResult {
+  const compared = mergeSharedBaselineUpdate(previousBaseline, nextBaseline, operations);
+  if (!compared.conflicts.length) {
+    return { success: true, snapshot: compared.snapshot, operations: [...operations], conflicts: [] };
+  }
+  const decisionsById = new Map<string, SharedConflictDecision>();
+  for (const decision of decisions) {
+    let conflictId = decision.conflictId;
+    if (!conflictId && decision.path) {
+      const matches = compared.conflicts.filter((conflict) => conflict.path === decision.path);
+      if (matches.length !== 1) {
+        return {
+          success: false, snapshot: clone(nextBaseline), operations: [...operations], conflicts: compared.conflicts,
+          error: `Legacy path decision ${decision.path} is ambiguous; submit a conflictId.`,
+        };
+      }
+      conflictId = matches[0]!.conflictId;
+    }
+    if (!conflictId || !compared.conflicts.some((conflict) => conflict.conflictId === conflictId)) {
+      return {
+        success: false, snapshot: clone(nextBaseline), operations: [...operations], conflicts: compared.conflicts,
+        error: "A conflict decision does not identify a current conflict.",
+      };
+    }
+    if (decisionsById.has(conflictId)) {
+      return {
+        success: false, snapshot: clone(nextBaseline), operations: [...operations], conflicts: compared.conflicts,
+        error: `Conflict ${conflictId} has more than one decision.`,
+      };
+    }
+    decisionsById.set(conflictId, decision);
+  }
+  const missing = compared.conflicts.find((conflict) => !decisionsById.has(conflict.conflictId));
+  if (missing) {
+    return {
+      success: false, snapshot: clone(nextBaseline), operations: [...operations], conflicts: compared.conflicts,
+      error: `Conflict ${missing.conflictId} requires a decision.`,
+    };
+  }
+  const conflicted = new Set(compared.conflicts.map((item) => item.conflictId));
+  const remaining = operations.filter((operation, index) => {
+    const id = operationIdentity(operation, index);
+    return !conflicted.has(id) || decisionsById.get(id)?.choice === "market";
+  });
+  try {
+    return {
+      success: true,
+      snapshot: applySharedOverrideOperations(nextBaseline, remaining),
+      operations: remaining,
+      conflicts: [],
+    };
+  } catch (error) {
+    return {
+      success: false,
+      snapshot: clone(nextBaseline),
+      operations: remaining,
+      conflicts: compared.conflicts,
+      error: error instanceof Error ? `Market choice cannot be replayed: ${error.message}` : "Market choice cannot be replayed safely.",
     };
   }
 }

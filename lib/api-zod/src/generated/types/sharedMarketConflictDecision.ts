@@ -7,8 +7,13 @@
  */
 import type { SharedMarketConflictDecisionChoice } from './sharedMarketConflictDecisionChoice';
 
-export interface SharedMarketConflictDecision {
+export type SharedMarketConflictDecision = (unknown & {
+  /**
+     * Required by current clients; identifies exactly one conflicting sparse operation.
+     * @minLength 1
+     */
+  conflictId?: string;
   /** @minLength 1 */
-  path: string;
+  path?: string;
   choice: SharedMarketConflictDecisionChoice;
-}
+});

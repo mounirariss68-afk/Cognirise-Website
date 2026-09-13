@@ -229,6 +229,26 @@ test("public media stays on the revision pin when a newer asset version appears"
       if (statement === "BEGIN" || statement === "COMMIT" || statement === "ROLLBACK") {
         return { rowCount: 0, rows: [] };
       }
+      if (statement === "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE") {
+        return String(values?.[0]) === documentId
+          ? { rowCount: 1, rows: [{ id: documentId }] }
+          : { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+        return { rowCount: 1, rows: [{ role: "administrator", status: "active" }] };
+      }
+      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
+        return { rowCount: 1, rows: [{ market_code: "uae" }] };
+      }
+      if (statement.includes("SELECT e.id") && statement.includes("FROM cms_revisions r")
+        && statement.includes("FOR UPDATE OF e")) {
+        return String(values?.[0]) === pendingRevisionId && String(values?.[1]) === documentId
+          ? { rowCount: 1, rows: [{ id: "edition-id" }] }
+          : { rowCount: 0, rows: [] };
+      }
       if (statement.includes("SELECT a.*,v.metadata") && statement.includes("FOR UPDATE OF a")) {
         const version = versions.get(latestVersion.versionId)!;
         return {

@@ -589,6 +589,18 @@ test("W12 editor and publisher cannot mutate an unassigned market for any docume
       const statement = String(sql);
       touchedStatements.push(statement);
       if (statement === "BEGIN" || statement === "ROLLBACK") return { rowCount: 0, rows: [] };
+      if (statement === "LOCK TABLE cms_user_market_assignments IN SHARE MODE") {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+        return { rowCount: 1, rows: [{ role, status: "active" }] };
+      }
+      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
+        return { rowCount: 1, rows: [{ market_code: "ksa" }] };
+      }
+      if (statement.includes("SELECT id FROM cms_documents") && statement.includes("FOR UPDATE")) {
+        return { rowCount: 1, rows: [{ id: "w12-document" }] };
+      }
       if (statement.includes("SELECT id FROM cms_market_editions")) {
         return { rowCount: 1, rows: [{ id: "w12-edition" }] };
       }
@@ -740,6 +752,18 @@ test("W12 prioritized kinds save and reload through the actual document route", 
       mutationStatements.push(statement);
       if (statement === "BEGIN" || statement === "COMMIT" || statement === "ROLLBACK") {
         return { rowCount: 0, rows: [] };
+      }
+      if (statement === "LOCK TABLE cms_user_market_assignments IN SHARE MODE") {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+        return { rowCount: 1, rows: [{ role: "editor", status: "active" }] };
+      }
+      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
+        return { rowCount: 1, rows: [{ market_code: "uae" }] };
+      }
+      if (statement.includes("SELECT id FROM cms_documents") && statement.includes("FOR UPDATE")) {
+        return { rowCount: 1, rows: [{ id: "w12-document" }] };
       }
       if (statement.includes("SELECT id FROM cms_market_editions")) {
         return { rowCount: 1, rows: [{ id: "w12-edition" }] };

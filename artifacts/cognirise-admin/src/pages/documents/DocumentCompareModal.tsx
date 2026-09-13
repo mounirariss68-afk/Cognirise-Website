@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import type { SharedMarketComparison } from "@workspace/api-client-react";
 
 type CompareConflict = {
+  conflictId: string;
   path: string;
   previouslyAdopted: any;
   newShared: any;
@@ -19,7 +20,7 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   comparison?: SharedMarketComparison;
   conflicts: CompareConflict[];
-  onResolveConflict: (path: string, decision: "adopt" | "keep") => void;
+  onResolveConflict: (conflictId: string, decision: "adopt" | "keep") => void;
   onApplyDecisions: () => void;
   onResolve?: (action: "adopt" | "keep" | "reset" | "detach") => void;
   isApplying: boolean;
@@ -71,7 +72,7 @@ export function DocumentCompareModal({
               </div>
             ) : (
               conflicts.map((conflict, i) => (
-                <div key={conflict.path} className="border border-border rounded-lg overflow-hidden flex flex-col">
+                 <div key={conflict.conflictId} className="border border-border rounded-lg overflow-hidden flex flex-col">
                   <div className="bg-muted/30 px-3 py-2 border-b border-border flex justify-between items-center">
                      <div><span className="font-mono text-xs font-semibold">{conflict.path}</span>{conflict.message && <p className="mt-1 text-xs text-muted-foreground">{conflict.message}</p>}</div>
                     {conflict.decision && (
@@ -105,7 +106,7 @@ export function DocumentCompareModal({
                           size="sm" 
                           variant={conflict.decision === 'adopt' ? 'default' : 'outline'}
                           className="w-full text-xs"
-                          onClick={() => onResolveConflict(conflict.path, 'adopt')}
+                           onClick={() => onResolveConflict(conflict.conflictId, 'adopt')}
                         >
                           Adopt Update
                         </Button>
@@ -125,7 +126,7 @@ export function DocumentCompareModal({
                           size="sm" 
                           variant={conflict.decision === 'keep' ? 'default' : 'outline'}
                           className="w-full text-xs"
-                          onClick={() => onResolveConflict(conflict.path, 'keep')}
+                           onClick={() => onResolveConflict(conflict.conflictId, 'keep')}
                         >
                           Keep Override
                         </Button>

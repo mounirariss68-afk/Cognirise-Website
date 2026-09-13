@@ -592,6 +592,8 @@ export const SharedMarketConflictKind = {
 } as const;
 
 export interface SharedMarketConflict {
+  /** Stable sparse-operation identity used for conflict decisions; display paths are not unique. */
+  conflictId: string;
   path: string;
   kind: SharedMarketConflictKind;
   message: string;
@@ -605,11 +607,16 @@ export const SharedMarketConflictDecisionChoice = {
   market: 'market',
 } as const;
 
-export interface SharedMarketConflictDecision {
+export type SharedMarketConflictDecision = (unknown & {
+  /**
+     * Required by current clients; identifies exactly one conflicting sparse operation.
+     * @minLength 1
+     */
+  conflictId?: string;
   /** @minLength 1 */
-  path: string;
+  path?: string;
   choice: SharedMarketConflictDecisionChoice;
-}
+});
 
 export type SharedMarketBaselineInputSnapshot = { [key: string]: unknown };
 
@@ -744,7 +751,7 @@ export interface SharedMarketResolveInput {
   /** Exact active baseline revision shown in the comparison. */
   baselineRevisionId: string;
   action: SharedMarketResolveInputAction;
-  /** Required for each path that conflicts during adopt. Shared drops its local operation; market explicitly retains it. */
+  /** Required for each conflicting operation during adopt. Use conflictId; path is accepted only for legacy unambiguous conflicts. */
   conflictDecisions?: SharedMarketConflictDecision[];
 }
 

@@ -457,7 +457,7 @@ test("W12 parameterized PostgreSQL lifecycle is isolated and preserves published
       "x-csrf-token": csrf,
       cookie: `${auth.SESSION_COOKIE}=${token}; ${auth.CSRF_COOKIE}=${csrf}`,
     };
-    const request = (path: string, method: "POST" | "PATCH" | "DELETE", body?: Record<string, unknown>) =>
+    const request = (path: string, method: "GET" | "POST" | "PATCH" | "DELETE", body?: Record<string, unknown>) =>
       fetch(`${origin}${path}`, {
         method,
         headers,
@@ -548,10 +548,11 @@ test("W12 parameterized PostgreSQL lifecycle is isolated and preserves published
         published_revision_id: string;
         workflow_state: string;
         public_title: string;
+        public_payload: Record<string, unknown>;
         media_version_id: string | null;
         field_path: string | null;
       }>(
-        `SELECT e.published_revision_id::text,r.workflow_state,
+        `SELECT e.published_revision_id::text,r.workflow_state,r.payload public_payload,
                 r.payload->>'title' public_title,
                 ref.media_version_id::text,ref.field_path
            FROM cms_market_editions e
@@ -631,13 +632,49 @@ test("W12 parameterized PostgreSQL lifecycle is isolated and preserves published
         locale: "en",
       });
       await expectStatus(restore, 200, `${kind} restore`);
-      const restoredState = await admin.query<{ publication_state: string; published_revision_id: string }>(
-        `SELECT publication_state,published_revision_id::text
-           FROM cms_market_editions WHERE document_id=$1`,
+      const restoredState = await admin.query<{
+        publication_state: string; published_revision_id: string; restored_revision_id: string;
+        restored_payload: Record<string, unknown>; restored_workflow_state: string;
+      }>(
+        `SELECT e.publication_state,e.published_revision_id::text,
+                restored.id::text restored_revision_id,restored.payload restored_payload,
+                restored.workflow_state restored_workflow_state
+           FROM cms_market_editions e
+           JOIN LATERAL (
+             SELECT id,payload,workflow_state FROM cms_revisions
+              WHERE edition_id=e.id ORDER BY revision_number DESC,created_at DESC,id DESC LIMIT 1
+           ) restored ON true
+          WHERE e.document_id=$1`,
         [documentId],
       );
       assert.equal(restoredState.rows[0]?.publication_state, "draft");
       assert.equal(restoredState.rows[0]?.published_revision_id, revisionId);
+      assert.notEqual(restoredState.rows[0]?.restored_revision_id, revisionId);
+      assert.equal(restoredState.rows[0]?.restored_workflow_state, "draft");
+      assert.deepEqual(
+        restoredState.rows[0]?.restored_payload,
+        published.rows[0]?.public_payload,
+        `${kind} restore must clone the exact approved public snapshot, not the newer successor draft`,
+      );
+      const restoredPins = await admin.query<{ media_version_id: string }>(
+        `SELECT media_version_id::text FROM cms_media_references
+          WHERE document_id=$1 AND field_path=$2 ORDER BY media_version_id`,
+        [documentId, `revision:${restoredState.rows[0]?.restored_revision_id}`],
+      );
+      assert.deepEqual(
+        restoredPins.rows.map((row) => row.media_version_id),
+        fixturePins,
+        `${kind} restored draft must copy the exact approved immutable media pins`,
+      );
+      const publicAfterRestore = await expectJson<{ items: Array<{ id: string }> }>(await request(
+        `/api/public/content?market=uae&locale=en&kind=${encodeURIComponent(kind)}`,
+        "GET",
+      ), 200, `${kind} archived restore public response`);
+      assert.equal(
+        publicAfterRestore.items.some((item) => item.id === documentId),
+        false,
+        `${kind} archived restore must not reactivate public eligibility`,
+      );
 
       const rollback = await request(`/api/documents/${documentId}/rollback`, "POST", {
         revisionId,
@@ -648,7 +685,11 @@ test("W12 parameterized PostgreSQL lifecycle is isolated and preserves published
         content: Record<string, unknown>;
         currentRevisionId: string;
       }>(rollback, 200, `${kind} rollback`);
-      assert.equal(rolledBack.revisionNumber, 3);
+      assert.equal(
+        rolledBack.revisionNumber,
+        4,
+        `${kind} rollback follows the explicit restore draft rather than treating restore as a no-op`,
+      );
       assert.deepEqual(rolledBack.content, fixture.content);
       assert.notEqual(rolledBack.currentRevisionId, revisionId);
 

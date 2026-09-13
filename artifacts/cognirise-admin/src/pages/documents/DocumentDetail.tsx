@@ -21,7 +21,7 @@ import { getListMarketEditionsQueryKey, useListMarketEditions, getListDocumentEd
 import { DocumentEditorContext } from "./DocumentEditorContext";
 import { DocumentCompareModal } from "./DocumentCompareModal";
 import { FieldOverrideIndicator } from "./FieldOverrideIndicator";
-import { resetSharedOverridePath } from "@workspace/api-zod";
+import { readSharedOverridePath, resetSharedOverridePath } from "@workspace/api-zod";
 import { compareSharedMarketBaseline } from "@workspace/api-client-react";
 import { OverridesContext } from "./OverridesContext";
 import { type CmsDocumentKind, validateCmsContent } from "@workspace/api-zod";
@@ -359,22 +359,32 @@ export default function DocumentDetail() {
       queryKey: getCompareSharedMarketBaselineQueryKey(id!, selectedSharedBinding?.id ?? ""),
     } },
   );
-  const requestedExactEdition = useMemo(() => {
+  // A URL target is an explicit instruction, not a hint. Keep it pending until
+  // both independent catalogues have settled; availability often arrives
+  // earlier and must never win the initial-selection race.
+  const requestedUrlTarget = useMemo(() => {
     const query = new URLSearchParams(search);
     const marketParam = query.get("market");
     const localeParam = query.get("locale");
     if (!marketParam || !localeParam) return undefined;
+    return { marketParam, localeParam };
+  }, [search]);
+  const urlTargetAwaitingCatalogues = Boolean(requestedUrlTarget && (
+    isMarketDataLoading || !marketData || isEditionMatrixLoading || !editionMatrix
+  ));
+  const requestedExactEdition = useMemo(() => {
+    if (!requestedUrlTarget || urlTargetAwaitingCatalogues) return undefined;
+    const { marketParam, localeParam } = requestedUrlTarget;
     // Links may contain a catalog UUID while document APIs use its code.
     const directExactMarket = editionMatrix?.items.some((edition) => edition.exact && edition.market === marketParam);
     const marketCode = marketData?.items.find((market) => market.id === marketParam || market.code === marketParam)?.code
       ?? (directExactMarket ? marketParam : undefined);
     if (!marketCode) return undefined;
     return editionMatrix?.items.find((edition) => edition.exact && edition.market === marketCode && edition.locale === localeParam);
-  }, [editionMatrix?.items, marketData?.items, search]);
-  const urlTargetAwaitingMarketCatalog = useMemo(() => {
-    const query = new URLSearchParams(search);
-    return Boolean(query.get("market") && query.get("locale") && !requestedExactEdition && (isMarketDataLoading || !marketData));
-  }, [isMarketDataLoading, marketData, requestedExactEdition, search]);
+  }, [editionMatrix?.items, marketData?.items, requestedUrlTarget, urlTargetAwaitingCatalogues]);
+  const requestedUrlTargetInvalid = Boolean(
+    requestedUrlTarget && !urlTargetAwaitingCatalogues && !requestedExactEdition,
+  );
   useEffect(() => {
     if (selectedMarket || !requestedExactEdition) return;
     setSelectedMarket(requestedExactEdition.market);
@@ -466,7 +476,9 @@ export default function DocumentDetail() {
     // A valid explicit deep link always wins over default/shared-source
     // selection. Deferring here prevents two initial effects racing in one
     // render and silently opening a different market.
-    if (requestedExactEdition || urlTargetAwaitingMarketCatalog) return;
+    // An invalid explicit target must be shown as unavailable rather than
+    // silently falling back to a different market.
+    if (requestedExactEdition || urlTargetAwaitingCatalogues || requestedUrlTargetInvalid) return;
     // A legacy document has no authoritative shared address yet. Keep an
     // administrator on the explicit source-selection screen rather than
     // silently opening a historical customization first.
@@ -493,7 +505,7 @@ export default function DocumentDetail() {
       setSelectedMarket(existingCustomization.market);
       setSelectedLocale(existingCustomization.locale);
     }
-  }, [canManageSharedDestinations, editionMatrix?.items, legacyCustomizations, requestedExactEdition, selectedMarket, sharedSource, urlTargetAwaitingMarketCatalog]);
+  }, [canManageSharedDestinations, editionMatrix?.items, legacyCustomizations, requestedExactEdition, requestedUrlTargetInvalid, selectedMarket, sharedSource, urlTargetAwaitingCatalogues]);
   // An internal shared-source edition deliberately has no assignable market
   // code. Its authority is the complete set of destinations it controls, not
   // the synthetic `shared-source` market identity.
@@ -736,24 +748,24 @@ export default function DocumentDetail() {
 
   useEffect(() => {
     if (!sharedComparison) return;
-    const at = (snapshot: Record<string, unknown>, path: string): unknown => path.split(".").reduce<unknown>((current, segment) => {
-      if (!current || typeof current !== "object") return undefined;
-      const match = /^([^\[]+)/.exec(segment);
-      return (current as Record<string, unknown>)[match?.[1] ?? segment];
-    }, snapshot);
-    const byPath = new Map<string, { path: string; message: string }>();
+    const read = (snapshot: Record<string, unknown>, path: string) => {
+      try { return readSharedOverridePath(snapshot, path); } catch { return undefined; }
+    };
+    const byConflictId = new Map<string, { conflictId: string; path: string; message: string }>();
     for (const conflict of sharedComparison.conflicts) {
-      const previous = byPath.get(conflict.path);
-      byPath.set(conflict.path, {
+      const previous = byConflictId.get(conflict.conflictId);
+      byConflictId.set(conflict.conflictId, {
+        conflictId: conflict.conflictId,
         path: conflict.path,
         message: previous ? `${previous.message} ${conflict.message}` : conflict.message,
       });
     }
-    setCompareConflicts([...byPath.values()].map((conflict) => ({
+    setCompareConflicts([...byConflictId.values()].map((conflict) => ({
+      conflictId: conflict.conflictId,
       path: conflict.path,
-      previouslyAdopted: at(sharedComparison.previousSnapshot, conflict.path),
-      newShared: at(sharedComparison.currentSnapshot, conflict.path),
-      localOverride: at(sharedComparison.localSnapshot, conflict.path),
+      previouslyAdopted: read(sharedComparison.previousSnapshot, conflict.path),
+      newShared: read(sharedComparison.currentSnapshot, conflict.path),
+      localOverride: read(sharedComparison.localSnapshot, conflict.path),
       message: conflict.message,
     })));
   }, [sharedComparison]);
@@ -930,6 +942,11 @@ export default function DocumentDetail() {
   }
   if (isSessionError || isEditionMatrixError || isAvailabilityError) {
     return navigationOnlyState("We could not load the editions you can access. Please return to content and try again.");
+  }
+  if (requestedUrlTargetInvalid) {
+    return navigationOnlyState(
+      `The requested ${requestedUrlTarget!.marketParam.toUpperCase()} · ${requestedUrlTarget!.localeParam} edition is unavailable or has no exact revision. No other market was opened.`,
+    );
   }
   if (selectedMarket && isDocumentLoading) {
     return navigationOnlyState(`Loading ${selectedMarket.toUpperCase()} · ${selectedLocale}…`, true);
@@ -1629,10 +1646,14 @@ export default function DocumentDetail() {
             setBaselineBeingEdited(baseline);
             setBaselineEditorOpen(true);
           }}
-          onBind={({ marketEditionId, locale, mode, baseline, independentRevisionId, translationSourceRevisionId, version }) => {
+          onBind={({ marketEditionId, locale, mode, baseline, bindingBaselineId, bindingBaselineRevisionId, independentRevisionId, translationSourceRevisionId, version }) => {
             bindSharedEdition.mutate({ documentId: id!, data: {
               marketEditionId, locale, mode, version,
-              ...(mode === "independent" ? { independentRevisionId } : { baselineId: baseline?.id, baselineRevisionId: baseline?.revisionId, translationSourceRevisionId }),
+              ...(mode === "independent" ? { independentRevisionId } : {
+                baselineId: bindingBaselineId ?? baseline?.id ?? selectedSharedBinding?.baselineId ?? undefined,
+                baselineRevisionId: bindingBaselineRevisionId ?? baseline?.revisionId ?? selectedSharedBinding?.baselineRevisionId ?? undefined,
+                translationSourceRevisionId,
+              }),
             } }, {
               onSuccess: () => { invalidateSharedEdition(); toast({ title: `${mode} binding saved`, description: "The selected revision and lineage are frozen until explicitly changed." }); },
               onError: (error: any) => toast({ title: "Binding was not saved", description: error?.data?.error || error?.error || error?.message, variant: "destructive" }),
@@ -1962,8 +1983,8 @@ export default function DocumentDetail() {
         onOpenChange={setSharedCompareOpen}
         comparison={sharedComparison}
         conflicts={compareConflicts}
-        onResolveConflict={(path, decision) => {
-          setCompareConflicts(prev => prev.map(c => c.path === path ? { ...c, decision } : c));
+        onResolveConflict={(conflictId, decision) => {
+          setCompareConflicts(prev => prev.map(c => c.conflictId === conflictId ? { ...c, decision } : c));
         }}
         onApplyDecisions={() => {
           if (!selectedSharedBinding || !sharedComparison) return;
@@ -1980,7 +2001,7 @@ export default function DocumentDetail() {
               // The generated client may lag the server schema briefly; the
               // server requires a choice for every real conflict.
               conflictDecisions: compareConflicts.map((conflict) => ({
-                path: conflict.path,
+                conflictId: conflict.conflictId,
                 choice: conflict.decision === "adopt" ? "shared" : "market",
               })),
             },
@@ -2008,7 +2029,7 @@ export default function DocumentDetail() {
               version: selectedSharedBinding.version,
               baselineRevisionId: sharedComparison.baselineRevisionId,
               action,
-              ...(action === "adopt" ? { conflictDecisions: compareConflicts.map((conflict) => ({ path: conflict.path, choice: conflict.decision === "adopt" ? "shared" : "market" })) } : {}),
+              ...(action === "adopt" ? { conflictDecisions: compareConflicts.map((conflict) => ({ conflictId: conflict.conflictId, choice: conflict.decision === "adopt" ? "shared" : "market" })) } : {}),
             },
           }, {
             onSuccess: () => {

@@ -59,6 +59,8 @@ import { registerSharedMarketEditionRoutes } from "../lib/shared-market-editions
 import {
   assertManagedMarketPublication,
   ensureManagedMarketRevision,
+  lockDocumentForMutation,
+  revalidateMutationAuth,
   synchronizeManagedMarketRevision,
 } from "../lib/managed-market-lifecycle";
 import { filterSharedMarketReadiness } from "../lib/shared-market-readiness";
@@ -388,7 +390,7 @@ export async function canAccessEditionTarget(
        LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
       WHERE binding.document_id=$1 AND destination.code=$2 AND binding.locale=$3
         AND binding.mode IN ('shared','adapted')
-      FOR KEY SHARE OF binding`,
+       FOR UPDATE OF binding`,
     [documentId, market, locale],
   );
   // No managed shared/adapted binding (including independent bindings) keeps
@@ -798,6 +800,17 @@ router.post(
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
+      if (!await lockDocumentForMutation(client, documentId)) {
+        await client.query("ROLLBACK");
+        res.status(404).json({ error: "Document not found." });
+        return;
+      }
+      const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+      if (!transactionAuth || !canAccessMarket(transactionAuth, parsed.data.market)) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this market." });
+        return;
+      }
       // Creating a regional copy is authorized by the requested destination,
       // not by the internal shared-source address. If this target currently is
       // the shared source's legacy real-market address, the transaction below
@@ -1301,6 +1314,12 @@ router.put(
         res.status(404).json({ error: "Document not found." });
         return;
       }
+      const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "Authentication is no longer valid." });
+        return;
+      }
       await ensureAvailabilityState(client, documentId);
       const state = await client.query(
         `SELECT draft_version FROM cms_document_availability_states
@@ -1330,7 +1349,7 @@ router.put(
         });
         return;
       }
-      const denied = configured.rows.find((row) => !canAccessMarket(auth, String(row.code)));
+      const denied = configured.rows.find((row) => !canAccessMarket(transactionAuth, String(row.code)));
       if (denied) {
         await client.query("ROLLBACK");
         res.status(403).json({ error: "You are not assigned to every selected market." });
@@ -1344,7 +1363,7 @@ router.put(
            ON CONFLICT (document_id,market_edition_id,locale) DO UPDATE
              SET draft_decision=EXCLUDED.draft_decision,
                  updated_by_user_id=EXCLUDED.updated_by_user_id,updated_at=now()`,
-          [documentId, destination.marketEditionId, destination.locale, destination.decision, auth.user.id],
+          [documentId, destination.marketEditionId, destination.locale, destination.decision, transactionAuth.user.id],
         );
       }
       await client.query(
@@ -1353,14 +1372,14 @@ router.put(
                 reviewed_selections='[]'::jsonb,reviewed_source_revision_id=NULL,
                 updated_by_user_id=$2,updated_at=now()
           WHERE document_id=$1`,
-        [documentId, auth.user.id],
+        [documentId, transactionAuth.user.id],
       );
       await client.query("COMMIT");
-      await audit(auth, "document.availability.staged", "document", documentId, {
+      await audit(transactionAuth, "document.availability.staged", "document", documentId, {
         version: parsed.data.version + 1,
         destinations: parsed.data.destinations,
       });
-      res.json(await documentAvailability(pool, documentId, auth));
+      res.json(await documentAvailability(pool, documentId, transactionAuth));
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
@@ -1386,7 +1405,7 @@ router.post(
     try {
       await client.query("BEGIN");
       const kind = await client.query(
-        "SELECT kind FROM cms_documents WHERE id=$1 FOR KEY SHARE",
+        "SELECT kind FROM cms_documents WHERE id=$1 FOR UPDATE",
         [documentId],
       );
       if (!kind.rowCount) {
@@ -1394,10 +1413,20 @@ router.post(
         res.status(404).json({ error: "Document not found." });
         return;
       }
+      const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "Authentication is no longer valid." });
+        return;
+      }
       await ensureAvailabilityState(client, documentId);
       const state = await client.query(
-        `SELECT draft_version,shared_source_revision_id FROM cms_document_availability_states
-          WHERE document_id=$1 FOR UPDATE`,
+        `SELECT state.draft_version,state.shared_source_revision_id,
+                source_edition.editorial_market shared_source_market
+           FROM cms_document_availability_states state
+           LEFT JOIN cms_revisions source_revision ON source_revision.id=state.shared_source_revision_id
+           LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
+          WHERE state.document_id=$1 FOR UPDATE OF state`,
         [documentId],
       );
       if (!state.rowCount) {
@@ -1417,6 +1446,12 @@ router.post(
         });
         return;
       }
+      if (state.rows[0].shared_source_market
+        && !canAccessMarket(transactionAuth, String(state.rows[0].shared_source_market))) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to the saved shared source market." });
+        return;
+      }
       const rows = await client.query(
         `SELECT m.id,m.code,configured_locale.locale,
                 CASE WHEN a.market_edition_id IS NULL THEN 'off'
@@ -1431,7 +1466,7 @@ router.post(
           WHERE m.enabled=true FOR UPDATE OF m`,
         [documentId],
       );
-      if (rows.rows.some((row) => !canAccessMarket(auth, String(row.code)))) {
+      if (rows.rows.some((row) => !canAccessMarket(transactionAuth, String(row.code)))) {
         await client.query("ROLLBACK");
         res.status(403).json({ error: "Reviewing shared destinations requires authority for every affected market." });
         return;
@@ -1446,13 +1481,13 @@ router.post(
             SET reviewed_version=draft_version,reviewed_selections=$2::jsonb,
                 reviewed_source_revision_id=$3,reviewed_by_user_id=$4,reviewed_at=now(),updated_at=now()
           WHERE document_id=$1`,
-        [documentId, JSON.stringify(selections), state.rows[0].shared_source_revision_id, auth.user.id],
+        [documentId, JSON.stringify(selections), state.rows[0].shared_source_revision_id, transactionAuth.user.id],
       );
       await client.query("COMMIT");
-      await audit(auth, "document.availability.reviewed", "document", documentId, {
+      await audit(transactionAuth, "document.availability.reviewed", "document", documentId, {
         version: parsed.data.version, destinations: selections,
       });
-      res.json(await documentAvailability(pool, documentId, auth, parsed.data.version));
+      res.json(await documentAvailability(pool, documentId, transactionAuth, parsed.data.version));
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
@@ -1484,6 +1519,12 @@ router.post(
       if (!document.rowCount) {
         await client.query("ROLLBACK");
         res.status(404).json({ error: "Document not found." });
+        return;
+      }
+      const transactionAuth = await revalidateMutationAuth(client, auth, "administrator");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "Authentication is no longer valid." });
         return;
       }
       await ensureAvailabilityState(client, documentId);
@@ -1533,7 +1574,7 @@ router.post(
           sharedEdition.rows[0].id,
           source.rows[0].payload,
           digest(source.rows[0].payload),
-          auth.user.id,
+          transactionAuth.user.id,
           `Explicit shared source from ${source.rows[0].market}/${source.rows[0].locale}`,
           parsed.data.sourceRevisionId,
         ],
@@ -1552,16 +1593,16 @@ router.post(
                 reviewed_version=NULL,reviewed_source_revision_id=NULL,reviewed_selections='[]'::jsonb,
                 updated_by_user_id=$4,updated_at=now()
           WHERE document_id=$1`,
-        [documentId, sharedEdition.rows[0].id, sharedRevision.rows[0].id, auth.user.id],
+        [documentId, sharedEdition.rows[0].id, sharedRevision.rows[0].id, transactionAuth.user.id],
       );
       await client.query("COMMIT");
-      await audit(auth, "document.availability.source_selected", "document", documentId, {
+      await audit(transactionAuth, "document.availability.source_selected", "document", documentId, {
         version: parsed.data.version + 1,
         sourceRevisionId: parsed.data.sourceRevisionId,
         sharedEditionId: String(sharedEdition.rows[0].id),
         sharedRevisionId: String(sharedRevision.rows[0].id),
       });
-      res.status(201).json(await documentAvailability(pool, documentId, auth));
+      res.status(201).json(await documentAvailability(pool, documentId, transactionAuth));
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
@@ -1590,6 +1631,12 @@ router.post(
       if (!document.rowCount) {
         await client.query("ROLLBACK");
         res.status(404).json({ error: "Document not found." });
+        return;
+      }
+      const transactionAuth = await revalidateMutationAuth(client, auth, "administrator");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "Authentication is no longer valid." });
         return;
       }
       const state = await client.query(
@@ -1638,7 +1685,7 @@ router.post(
         });
         return;
       }
-      if (markets.rows.some((market) => !canAccessMarket(auth, String(market.code)))) {
+      if (markets.rows.some((market) => !canAccessMarket(transactionAuth, String(market.code)))) {
         await client.query("ROLLBACK");
         res.status(403).json({ error: "Publishing shared destinations requires authority for every affected market." });
         return;
@@ -1651,20 +1698,20 @@ router.post(
            ON CONFLICT (document_id,market_edition_id,locale) DO UPDATE
              SET published_decision=EXCLUDED.published_decision,draft_decision=NULL,
                  published_by_user_id=EXCLUDED.published_by_user_id,published_at=now(),updated_at=now()`,
-          [documentId, selection.marketEditionId, selection.locale, selection.decision, auth.user.id],
+           [documentId, selection.marketEditionId, selection.locale, selection.decision, transactionAuth.user.id],
         );
       }
       await client.query(
         `UPDATE cms_document_availability_states
             SET published_version=reviewed_version,published_by_user_id=$2,published_at=now(),updated_at=now()
           WHERE document_id=$1`,
-        [documentId, auth.user.id],
+        [documentId, transactionAuth.user.id],
       );
       await client.query("COMMIT");
-      await audit(auth, "document.availability.published", "document", documentId, {
+      await audit(transactionAuth, "document.availability.published", "document", documentId, {
         version: parsed.data.version, destinations: selections,
       });
-      res.json(await documentAvailability(pool, documentId, auth, parsed.data.version));
+      res.json(await documentAvailability(pool, documentId, transactionAuth, parsed.data.version));
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
@@ -1713,6 +1760,34 @@ router.put(
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
+      if (!await lockDocumentForMutation(client, documentId)) {
+        await client.query("ROLLBACK");
+        res.status(404).json({ error: "Document not found." });
+        return;
+      }
+      const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "Authentication is no longer valid." });
+        return;
+      }
+      const lockedTarget = await client.query(
+        `SELECT d.kind,m.code market,m.default_locale locale
+           FROM cms_documents d CROSS JOIN market_editions m
+          WHERE d.id=$1 AND m.id=$2
+          FOR KEY SHARE OF m`,
+        [documentId, marketEditionId],
+      );
+      if (!lockedTarget.rowCount || lockedTarget.rows[0].kind !== "person") {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "Market availability is only supported for people." });
+        return;
+      }
+      if (!canAccessMarket(transactionAuth, String(lockedTarget.rows[0].market))) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this market." });
+        return;
+      }
       await ensureAvailabilityState(client, documentId);
       const state = await client.query(
         "SELECT draft_version FROM cms_document_availability_states WHERE document_id=$1 FOR UPDATE",
@@ -1730,27 +1805,27 @@ router.put(
          ON CONFLICT (document_id,market_edition_id,locale) DO UPDATE
           SET draft_decision=EXCLUDED.draft_decision,updated_by_user_id=EXCLUDED.updated_by_user_id,
               updated_at=now()`,
-        [documentId, marketEditionId, target.rows[0].locale, decision, auth.user.id],
+        [documentId, marketEditionId, lockedTarget.rows[0].locale, decision, transactionAuth.user.id],
       );
       await client.query(
         `UPDATE cms_document_availability_states
             SET draft_version=draft_version+1,reviewed_version=NULL,reviewed_selections='[]'::jsonb,
                 reviewed_source_revision_id=NULL,updated_by_user_id=$2,updated_at=now()
           WHERE document_id=$1`,
-        [documentId, auth.user.id],
+        [documentId, transactionAuth.user.id],
       );
       await client.query("COMMIT");
+      await audit(transactionAuth, "person.market_availability.staged", "document", documentId, {
+        marketEditionId,
+        market: lockedTarget.rows[0].market,
+        decision,
+      });
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();
     }
-    await audit(auth, "person.market_availability.staged", "document", documentId, {
-      marketEditionId,
-      market: target.rows[0].market,
-      decision,
-    });
     const updated = await pool.query(
        `SELECT m.id market_edition_id,m.code market,m.display_name,m.enabled,
               a.published_decision,a.draft_decision,
@@ -1803,6 +1878,12 @@ router.post(
         res.status(404).json({ error: "Document not found." });
         return;
       }
+      const transactionAuth = await revalidateMutationAuth(client, auth, "administrator");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "Authentication is no longer valid." });
+        return;
+      }
       const state = await client.query(
         `SELECT draft_version,reviewed_version,reviewed_selections,shared_source_revision_id,reviewed_source_revision_id
            FROM cms_document_availability_states WHERE document_id=$1 FOR UPDATE`,
@@ -1840,7 +1921,7 @@ router.post(
           AND d.id=a.document_id AND d.kind='person' AND m.id=a.market_edition_id
           AND a.draft_decision IS NOT NULL
       RETURNING m.code market,a.published_decision,a.published_at`,
-        [documentId, marketEditionId, auth.user.id],
+        [documentId, marketEditionId, transactionAuth.user.id],
       );
       if (!published.rowCount) {
         await client.query("ROLLBACK");
@@ -1849,7 +1930,7 @@ router.post(
       }
       await client.query("COMMIT");
       const row = published.rows[0];
-    await audit(auth, "person.market_availability.published", "document", documentId, {
+    await audit(transactionAuth, "person.market_availability.published", "document", documentId, {
       marketEditionId,
       market: row.market,
       decision: row.published_decision,
@@ -1893,6 +1974,17 @@ router.patch(
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
+      if (!await lockDocumentForMutation(client, id)) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: `The ${requestedMarket}/${requestedLocale} edition does not exist.` });
+        return;
+      }
+      const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this edition's destinations." });
+        return;
+      }
       const lockedEdition = await client.query(
         `SELECT id FROM cms_market_editions
           WHERE document_id=$1 AND market=$2 AND locale=$3
@@ -1924,7 +2016,7 @@ router.patch(
         res.status(409).json({ error: `The ${requestedMarket}/${requestedLocale} edition does not exist.` });
         return;
       }
-      if (!await canAccessEditionTarget(client, auth, id, requestedMarket, requestedLocale)) {
+      if (!await canAccessEditionTarget(client, transactionAuth, id, requestedMarket, requestedLocale)) {
         await client.query("ROLLBACK");
         res.status(403).json({ error: "You are not assigned to this edition's destinations." });
         return;
@@ -1953,7 +2045,7 @@ router.patch(
                         ELSE COALESCE(a.draft_decision,a.published_decision,'inherit') END <> 'off'`,
           [id],
         );
-        if (affectedMarkets.rows.some((row) => !canAccessMarket(auth, String(row.code)))) {
+        if (affectedMarkets.rows.some((row) => !canAccessMarket(transactionAuth, String(row.code)))) {
           await client.query("ROLLBACK");
           res.status(403).json({
             error: "Editing shared content requires authority for every destination currently using it.",
@@ -2199,6 +2291,13 @@ router.post(
     let candidate: any;
     try {
       await client.query("BEGIN");
+      await lockDocumentForMutation(client, id);
+      const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this market." });
+        return;
+      }
       // Lock the exact edition before reading its latest revision. A single
       // statement which waits inside a lateral latest-revision query can keep
       // its pre-wait snapshot under READ COMMITTED and submit a stale draft.
@@ -2231,7 +2330,7 @@ router.post(
       }
       if (!await canAccessEditionTarget(
         client,
-        auth,
+        transactionAuth,
         id,
         String(candidate.rows[0].market),
         String(candidate.rows[0].locale),
@@ -2458,28 +2557,46 @@ router.post(
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
-      const rejected = await client.query(
-        `UPDATE cms_revisions r SET workflow_state='rejected'
-          FROM cms_market_editions e
-         WHERE r.id=$2 AND r.edition_id=e.id AND e.document_id=$1
-           AND r.workflow_state='in-review'
-          RETURNING r.id,e.id edition_id,e.market,e.locale`,
+      await lockDocumentForMutation(client, String(req.params.documentId));
+      const transactionAuth = await revalidateMutationAuth(client, auth, "publisher");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this market." });
+        return;
+      }
+      const candidate = await client.query(
+        `SELECT r.id,e.id edition_id,e.market,e.locale
+           FROM cms_revisions r
+           JOIN cms_market_editions e ON e.id=r.edition_id
+          WHERE r.id=$2 AND e.document_id=$1 AND r.workflow_state='in-review'
+          FOR UPDATE OF e`,
         [req.params.documentId, parsed.data.revisionId],
       );
-      if (!rejected.rowCount) {
+      if (!candidate.rowCount) {
         await client.query("ROLLBACK");
         res.status(409).json({ error: "Only an in-review revision can be rejected." });
         return;
       }
       if (!await canAccessEditionTarget(
         client,
-        auth,
+        transactionAuth,
         String(req.params.documentId),
-        String(rejected.rows[0].market),
-        String(rejected.rows[0].locale),
+        String(candidate.rows[0].market),
+        String(candidate.rows[0].locale),
       )) {
         await client.query("ROLLBACK");
         res.status(403).json({ error: "You are not assigned to this market." });
+        return;
+      }
+      const rejected = await client.query(
+        `UPDATE cms_revisions SET workflow_state='rejected'
+          WHERE id=$1 AND workflow_state='in-review'
+          RETURNING id`,
+        [parsed.data.revisionId],
+      );
+      if (!rejected.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "Only an in-review revision can be rejected." });
         return;
       }
       await client.query(
@@ -2494,19 +2611,19 @@ router.post(
                 END,
                 updated_at=now()
           WHERE id=$1`,
-        [rejected.rows[0].edition_id],
+        [candidate.rows[0].edition_id],
       );
       await client.query("COMMIT");
       await audit(auth, "document.rejected", "document", String(req.params.documentId), {
         revisionId: parsed.data.revisionId,
-        market: rejected.rows[0].market,
-        locale: rejected.rows[0].locale,
+        market: candidate.rows[0].market,
+        locale: candidate.rows[0].locale,
       });
       res.json(await getDocument(
         String(req.params.documentId),
         auth,
-        rejected.rows[0].market,
-        rejected.rows[0].locale,
+        candidate.rows[0].market,
+        candidate.rows[0].locale,
       ));
     } catch (error) {
       await client.query("ROLLBACK");
@@ -2533,6 +2650,13 @@ router.post(
     let publicationCommitted = false;
     try {
     await client.query("BEGIN");
+    await lockDocumentForMutation(client, id);
+    const transactionAuth = await revalidateMutationAuth(client, auth, "publisher");
+    if (!transactionAuth) {
+      await client.query("ROLLBACK");
+      res.status(403).json({ error: "You are not assigned to this market." });
+      return;
+    }
     // Serialize publication with saves on the exact edition before reading the
     // latest revision. Otherwise a waiter can retain a pre-wait snapshot and
     // publish an older revision or report a false conflict.
@@ -2580,7 +2704,7 @@ router.post(
     }
     if (!await canAccessEditionTarget(
       client,
-      auth,
+      transactionAuth,
       id,
       String(revision.rows[0].market),
       String(revision.rows[0].locale),
@@ -2606,7 +2730,7 @@ router.post(
       });
       return;
     }
-    const directAdministratorPublish = auth.user.role === "administrator"
+    const directAdministratorPublish = transactionAuth.user.role === "administrator"
       && ["draft", "rejected"].includes(String(revision.rows[0].workflow_state))
       && ["draft", "published"].includes(String(revision.rows[0].publication_state));
     const reviewedPublish = revision.rows[0].workflow_state === "in-review"
@@ -2830,7 +2954,7 @@ router.post(
         });
         return;
       }
-      if (availabilityMarkets.rows.some((market) => !canAccessMarket(auth, String(market.code)))) {
+      if (availabilityMarkets.rows.some((market) => !canAccessMarket(transactionAuth, String(market.code)))) {
         await client.query("ROLLBACK");
         res.status(403).json({
           error: "Publishing shared content requires authority for every reviewed destination market.",
@@ -2873,7 +2997,7 @@ router.post(
       // administrator. A publisher may still release a reviewed shared person
       // revision when its reviewed destinations are identical to live delivery,
       // but cannot use the atomic document release to alter that matrix.
-      if (revision.rows[0].kind === "person" && auth.user.role !== "administrator") {
+      if (revision.rows[0].kind === "person" && transactionAuth.user.role !== "administrator") {
         const liveAvailability = await client.query(
           `SELECT market_edition_id::text market_edition_id,locale,
                   COALESCE(published_decision,'inherit') decision
@@ -2918,12 +3042,12 @@ router.post(
       ? await client.query(
         `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,
          approved_at=now() WHERE id=$1 AND workflow_state IN ('draft','rejected')`,
-        [parsed.data.revisionId, auth.user.id],
+        [parsed.data.revisionId, transactionAuth.user.id],
       )
       : await client.query(
         `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,
          approved_at=now() WHERE id=$1 AND workflow_state='in-review'`,
-        [parsed.data.revisionId, auth.user.id],
+        [parsed.data.revisionId, transactionAuth.user.id],
       );
     // Rejection and publication race on this exact revision.  The conditional
     // transition is the serialization point: never advance the edition's
@@ -2952,7 +3076,7 @@ router.post(
            ON CONFLICT (document_id,market_edition_id,locale) DO UPDATE
              SET published_decision=EXCLUDED.published_decision,draft_decision=NULL,
                  published_by_user_id=EXCLUDED.published_by_user_id,published_at=now(),updated_at=now()`,
-          [id, selection.marketEditionId, selection.locale, selection.decision, auth.user.id],
+          [id, selection.marketEditionId, selection.locale, selection.decision, transactionAuth.user.id],
         );
       }
       if (directAdministratorPublish) {
@@ -2962,7 +3086,7 @@ router.post(
                   published_by_user_id=$3,published_at=now(),updated_at=now()
             WHERE document_id=$1 AND draft_version=$2
               AND shared_source_revision_id=$4`,
-          [id, reviewedAvailabilityVersion, auth.user.id, parsed.data.revisionId],
+          [id, reviewedAvailabilityVersion, transactionAuth.user.id, parsed.data.revisionId],
         );
       } else {
         await client.query(
@@ -2971,14 +3095,14 @@ router.post(
                   published_by_user_id=$3,published_at=now(),updated_at=now()
             WHERE document_id=$1 AND reviewed_version=$2
               AND reviewed_source_revision_id=$4`,
-          [id, reviewedAvailabilityVersion, auth.user.id, parsed.data.revisionId],
+          [id, reviewedAvailabilityVersion, transactionAuth.user.id, parsed.data.revisionId],
         );
       }
     }
     await client.query(
       `INSERT INTO cms_audit_events(actor_user_id,actor_label,action,target_type,target_id,metadata)
        VALUES ($1,$2,'document.published','document',$3,$4)`,
-       [auth.user.id, auth.user.email, id, {
+       [transactionAuth.user.id, transactionAuth.user.email, id, {
          scheduled: false,
          directAdministratorPublish,
          editionId: String(revision.rows[0].edition_id),
@@ -2991,7 +3115,7 @@ router.post(
      try {
        res.json(await getDocument(
          id,
-         auth,
+         transactionAuth,
          revision.rows[0].market,
          revision.rows[0].locale,
        ));
@@ -3038,6 +3162,13 @@ router.post(
     let old: any;
     try {
       await client.query("BEGIN");
+      await lockDocumentForMutation(client, id);
+      const transactionAuth = await revalidateMutationAuth(client, auth, "administrator");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this market." });
+        return;
+      }
       old = await client.query(
         `SELECT r.payload,r.edition_id,d.kind,d.canonical_slug,e.market,e.locale,e.content_mode
            FROM cms_revisions r
@@ -3050,6 +3181,17 @@ router.post(
       if (!old.rowCount) {
         await client.query("ROLLBACK");
         res.status(409).json({ error: "The selected revision does not exist." });
+        return;
+      }
+      if (!await canAccessEditionTarget(
+        client,
+        transactionAuth,
+        id,
+        String(old.rows[0].market),
+        String(old.rows[0].locale),
+      )) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this market." });
         return;
       }
       if (!isCmsConfigurationIdentityValid(
@@ -3121,30 +3263,59 @@ router.post(
       return;
     }
     const id = String(req.params.documentId);
-    if (!await canAccessEditionTarget(
-      pool,
-      res.locals.auth as AuthContext,
-      id,
-      parsed.data.market,
-      parsed.data.locale,
-    )) {
-      res.status(403).json({ error: "You are not assigned to this market." });
-      return;
+    const client = await pool.connect();
+    let archivedAuth: AuthContext | null = null;
+    try {
+      await client.query("BEGIN");
+      if (!await lockDocumentForMutation(client, id)) {
+        await client.query("ROLLBACK");
+        res.status(404).json({ error: "Document not found." });
+        return;
+      }
+      const transactionAuth = await revalidateMutationAuth(client, res.locals.auth as AuthContext, "publisher");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this market." });
+        return;
+      }
+      archivedAuth = transactionAuth;
+      const edition = await client.query(
+        `SELECT id FROM cms_market_editions
+          WHERE document_id=$1 AND market=$2 AND locale=$3
+          FOR UPDATE`,
+        [id, parsed.data.market, parsed.data.locale],
+      );
+      if (!edition.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(404).json({ error: "Exact document edition not found." });
+        return;
+      }
+      if (!await canAccessEditionTarget(
+        client,
+        transactionAuth,
+        id,
+        parsed.data.market,
+        parsed.data.locale,
+      )) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this market." });
+        return;
+      }
+      await client.query(
+        `UPDATE cms_market_editions SET publication_state='archived',updated_at=now() WHERE id=$1`,
+        [edition.rows[0].id],
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
     }
-    const result = await pool.query(
-      `UPDATE cms_market_editions SET publication_state='archived',updated_at=now()
-        WHERE document_id=$1 AND market=$2 AND locale=$3
-        RETURNING id`,
-      [id, parsed.data.market, parsed.data.locale],
-    );
-    if (!result.rowCount) {
-      res.status(404).json({ error: "Exact document edition not found." });
-      return;
-    }
-    await audit(res.locals.auth as AuthContext, "document.archived", "document", id, parsed.data);
+    await audit(archivedAuth!, "document.archived", "document", id, parsed.data);
     res.json(await getDocument(
       id,
-      res.locals.auth as AuthContext,
+      archivedAuth!,
       parsed.data.market,
       parsed.data.locale,
     ));
@@ -3162,18 +3333,9 @@ router.post(
       return;
     }
     const id = String(req.params.documentId);
-    if (!await canAccessEditionTarget(
-      pool,
-      res.locals.auth as AuthContext,
-      id,
-      parsed.data.market,
-      parsed.data.locale,
-    )) {
-      res.status(403).json({ error: "You are not assigned to this market." });
-      return;
-    }
     const client = await pool.connect();
     let successorRevisionId: string | null = null;
+    let restoredAuth: AuthContext | null = null;
     try {
       await client.query("BEGIN");
       const root = await client.query(
@@ -3185,7 +3347,72 @@ router.post(
         res.status(404).json({ error: "Document not found." });
         return;
       }
+      const transactionAuth = await revalidateMutationAuth(
+        client,
+        res.locals.auth as AuthContext,
+        "publisher",
+      );
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this market." });
+        return;
+      }
+      restoredAuth = transactionAuth;
       const legacyRootArchive = root.rows[0].status === "archived";
+      const selected = await client.query(
+        `SELECT e.id,e.published_revision_id,e.content_mode,d.kind,
+                latest.id revision_id,latest.revision_number,latest.workflow_state,latest.payload
+           FROM cms_market_editions e
+           JOIN cms_documents d ON d.id=e.document_id
+           LEFT JOIN LATERAL (
+             SELECT r.id,r.revision_number,r.workflow_state,r.payload
+               FROM cms_revisions r WHERE r.edition_id=e.id
+              ORDER BY r.revision_number DESC,r.created_at DESC,r.id DESC LIMIT 1
+           ) latest ON true
+           WHERE e.document_id=$1 AND e.market=$2 AND e.locale=$3
+             AND (e.publication_state='archived' OR $4::boolean)
+          FOR UPDATE OF e`,
+        [id, parsed.data.market, parsed.data.locale, legacyRootArchive],
+      );
+      if (!selected.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "Only an archived exact edition can be restored." });
+        return;
+      }
+      const edition = selected.rows[0];
+      if (!await canAccessEditionTarget(
+        client,
+        transactionAuth,
+        id,
+        parsed.data.market,
+        parsed.data.locale,
+      )) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "You are not assigned to this market." });
+        return;
+      }
+      if (edition.published_revision_id) {
+        const publishedOrigin = await client.query(
+          `SELECT COALESCE(baseline_edition.market,direct_edition.market) source_market
+             FROM cms_revisions published
+             LEFT JOIN cms_resolved_market_revisions resolved ON resolved.cms_revision_id=published.id
+             LEFT JOIN cms_shared_baseline_revisions baseline ON baseline.id=resolved.baseline_revision_id
+             LEFT JOIN cms_revisions baseline_source ON baseline_source.id=baseline.source_revision_id
+             LEFT JOIN cms_market_editions baseline_edition ON baseline_edition.id=baseline_source.edition_id
+             LEFT JOIN cms_revisions direct_source ON direct_source.id=published.source_revision_id
+             LEFT JOIN cms_market_editions direct_edition ON direct_edition.id=direct_source.edition_id
+            WHERE published.id=$1 AND published.edition_id=$2
+            FOR KEY SHARE OF published`,
+          [edition.published_revision_id, edition.id],
+        );
+        if (!publishedOrigin.rowCount
+          || (publishedOrigin.rows[0].source_market
+            && !canAccessMarket(transactionAuth, String(publishedOrigin.rows[0].source_market)))) {
+          await client.query("ROLLBACK");
+          res.status(403).json({ error: "You are not assigned to the approved revision's historical source market." });
+          return;
+        }
+      }
       if (legacyRootArchive) {
         await client.query(
           `UPDATE cms_market_editions
@@ -3198,32 +3425,21 @@ router.post(
           [id],
         );
       }
-      const selected = await client.query(
-        `SELECT e.id,e.published_revision_id,e.content_mode,d.kind,
-                latest.id revision_id,latest.revision_number,latest.workflow_state,latest.payload
-           FROM cms_market_editions e
-           JOIN cms_documents d ON d.id=e.document_id
-           LEFT JOIN LATERAL (
-             SELECT r.id,r.revision_number,r.workflow_state,r.payload
-               FROM cms_revisions r WHERE r.edition_id=e.id
-              ORDER BY r.revision_number DESC,r.created_at DESC,r.id DESC LIMIT 1
-           ) latest ON true
-          WHERE e.document_id=$1 AND e.market=$2 AND e.locale=$3
-            AND e.publication_state='archived'
-          FOR UPDATE OF e`,
-        [id, parsed.data.market, parsed.data.locale],
-      );
-      if (!selected.rowCount) {
-        await client.query("ROLLBACK");
-        res.status(409).json({ error: "Only an archived exact edition can be restored." });
-        return;
-      }
-      const edition = selected.rows[0];
-      if (!["draft", "rejected"].includes(String(edition.workflow_state))) {
-        const sourceRevisionId = edition.published_revision_id ?? edition.revision_id;
-        if (!sourceRevisionId) {
+      // A published edition always recovers the immutable approved publication,
+      // never whichever newer draft/rejected revision happens to sort latest.
+      // A never-published archive has no approved history to clone: recovery
+      // deliberately retains its existing draft/rejected work as a draft.
+      if (edition.published_revision_id) {
+        const sourceRevisionId = edition.published_revision_id;
+        const source = await client.query(
+          `SELECT id,payload,content_digest FROM cms_revisions
+            WHERE id=$1 AND edition_id=$2 AND workflow_state='approved'
+            FOR KEY SHARE`,
+          [sourceRevisionId, edition.id],
+        );
+        if (!source.rowCount) {
           await client.query("ROLLBACK");
-          res.status(409).json({ error: "The archived edition has no revision to restore." });
+          res.status(409).json({ error: "The archived edition's approved published history is unavailable." });
           return;
         }
         const successor = await client.query(
@@ -3241,7 +3457,7 @@ router.post(
           [
             edition.id,
             sourceRevisionId,
-            (res.locals.auth as AuthContext).user.id,
+            transactionAuth.user.id,
           ],
         );
         if (!successor.rowCount) {
@@ -3265,7 +3481,7 @@ router.post(
           revisionId: successorRevisionId,
           snapshot: successor.rows[0].payload,
           kind: edition.kind as CmsDocumentKind,
-          userId: (res.locals.auth as AuthContext).user.id,
+          userId: transactionAuth.user.id,
           sourceRevisionId: String(sourceRevisionId),
         });
         if (edition.content_mode === "shared") {
@@ -3276,9 +3492,15 @@ router.post(
                     reviewed_source_revision_id=NULL,reviewed_selections='[]'::jsonb,
                     updated_by_user_id=$3,updated_at=now()
               WHERE document_id=$1 AND shared_source_edition_id=$4`,
-            [id, successorRevisionId, (res.locals.auth as AuthContext).user.id, edition.id],
+            [id, successorRevisionId, transactionAuth.user.id, edition.id],
           );
         }
+      } else if (!edition.revision_id || !["draft", "rejected"].includes(String(edition.workflow_state))) {
+        await client.query("ROLLBACK");
+        res.status(409).json({
+          error: "A never-published archived edition can be recovered only when it retains a draft or rejected revision.",
+        });
+        return;
       }
       await client.query(
         `UPDATE cms_market_editions
@@ -3293,13 +3515,13 @@ router.post(
     } finally {
       client.release();
     }
-    await audit(res.locals.auth as AuthContext, "document.restored", "document", id, {
+    await audit(restoredAuth!, "document.restored", "document", id, {
       ...parsed.data,
       successorRevisionId,
     });
     res.json(await getDocument(
       id,
-      res.locals.auth as AuthContext,
+      restoredAuth!,
       parsed.data.market,
       parsed.data.locale,
     ));

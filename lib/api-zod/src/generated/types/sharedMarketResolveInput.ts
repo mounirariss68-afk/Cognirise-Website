@@ -14,6 +14,6 @@ export interface SharedMarketResolveInput {
   /** Exact active baseline revision shown in the comparison. */
   baselineRevisionId: string;
   action: SharedMarketResolveInputAction;
-  /** Required for each path that conflicts during adopt. Shared drops its local operation; market explicitly retains it. */
+  /** Required for each conflicting operation during adopt. Use conflictId; path is accepted only for legacy unambiguous conflicts. */
   conflictDecisions?: SharedMarketConflictDecision[];
 }

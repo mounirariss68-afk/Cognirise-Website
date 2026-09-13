@@ -129,7 +129,32 @@ test("person availability mutations use the versioned destination workflow", { c
     return { rowCount: 0, rows: [] };
   });
   t.mock.method(pool, "connect", async () => ({
-    query: (sql: unknown, values?: unknown[]) => pool.query(sql, values),
+    async query(sql: unknown, values: unknown[] = []) {
+      const statement = String(sql);
+      if (statement === "BEGIN" || statement === "COMMIT" || statement === "ROLLBACK") {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement === "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE") {
+        return String(values[0]) === "person-id"
+          ? { rowCount: 1, rows: [{ id: "person-id" }] }
+          : { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+        assert.deepEqual(values, ["user-id"]);
+        return { rowCount: 1, rows: [{ role, status: "active" }] };
+      }
+      if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
+        assert.deepEqual(values, ["user-id"]);
+        return {
+          rowCount: role === "administrator" ? 0 : marketCodes.length,
+          rows: role === "administrator" ? [] : marketCodes.map((market_code) => ({ market_code })),
+        };
+      }
+      return pool.query(sql, values);
+    },
     release: () => undefined,
   }) as never);
 
