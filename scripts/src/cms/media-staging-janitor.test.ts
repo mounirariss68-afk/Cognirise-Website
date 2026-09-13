@@ -5,7 +5,10 @@ import {
   type JanitorSqlPool,
   type StagingObject,
   type StagingStorageAdapter,
+  productionStagingStorage,
   runMediaStagingJanitor,
+  stagingNamespace,
+  storageGenerationPrecondition,
   STAGING_ORPHAN_MARKER,
 } from "./media-staging-janitor.js";
 
@@ -134,6 +137,82 @@ class FakePool implements JanitorSqlPool {
 function object(id: string, updatedAt = OLD): StagingObject {
   return { path: pathFor(id), generation: `generation-${id}`, updatedAt };
 }
+
+test("production-shaped storage uses the upload writer namespace in a dry run", async () => {
+  const id = "00000000-0000-4000-8000-000000000000";
+  const privateDirectory = "bucket-qualified/private";
+  const expectedPath = `${privateDirectory}/cms-media/staging/${id}`;
+  const expectedObject = {
+    name: expectedPath,
+    metadata: {
+      generation: "9007199254740993",
+      updated: OLD.toISOString(),
+    },
+  };
+  let listedPrefix: string | undefined;
+  let deleteCalls = 0;
+  const bucket = {
+    getFiles: async ({ prefix }: { prefix: string }) => {
+      listedPrefix = prefix;
+      return [[expectedObject]];
+    },
+    file: (_path: string) => ({
+      delete: async () => {
+        deleteCalls += 1;
+      },
+    }),
+  };
+  const storageClient = {
+    bucket: (name: string) => {
+      assert.equal(name, "bucket-id");
+      return bucket;
+    },
+  } as unknown as Pick<typeof import("./object-storage.js").objectStorageClient, "bucket">;
+  const storage = productionStagingStorage({
+    DEFAULT_OBJECT_STORAGE_BUCKET_ID: "bucket-id",
+    PRIVATE_OBJECT_DIR: `/${privateDirectory}/`,
+  }, storageClient);
+  assert.equal(storage.stagingPrefix, privateDirectory);
+  assert.equal(stagingNamespace(storage.stagingPrefix), `${privateDirectory}/cms-media/staging`);
+
+  const listed = await storage.listStagingObjects();
+  assert.deepEqual(listed, [{
+    path: expectedPath,
+    generation: expectedObject.metadata.generation,
+    updatedAt: OLD,
+  }]);
+  assert.equal(listedPrefix, `${privateDirectory}/cms-media/staging/`);
+
+  const pending = asset(id, { storage_key: expectedPath });
+  const pool = new FakePool([pending]);
+  const report = await runMediaStagingJanitor(pool, storage, { now: NOW });
+  assert.equal(report.mode, "dry-run");
+  assert.equal(report.scannedObjects, 1);
+  assert.equal(report.scannedDatabaseRows, 1);
+  assert.deepEqual(report.items, [{
+    path: expectedPath,
+    assetId: id,
+    action: "candidate",
+    reason: "expired-or-abandoned-staging-object",
+  }]);
+  assert.equal(deleteCalls, 0);
+  assert.equal(pending.status, "pending");
+  assert.deepEqual(pool.updates, []);
+  assert.deepEqual(pool.auditRows, []);
+});
+
+test("storage delete preconditions preserve full GCS generation precision", () => {
+  const generation = "9007199254740993";
+  assert.equal(storageGenerationPrecondition(generation), generation);
+  assert.throws(
+    () => storageGenerationPrecondition("generation-not-a-number"),
+    /Storage generation proof is invalid/,
+  );
+  assert.throws(
+    () => storageGenerationPrecondition(null),
+    /Storage generation proof is invalid/,
+  );
+});
 
 test("dry-run reports only proven candidates and never mutates storage or rows", async () => {
   const orphan = asset("00000000-0000-4000-8000-000000000001");

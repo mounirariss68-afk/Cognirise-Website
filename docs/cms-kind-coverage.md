@@ -1,5 +1,11 @@
 # W12 CMS document-kind coverage
 
+For the subsequent bounded Navigation/media/users/upload verification and
+read-only operational checks, see the
+[finding ledger](cms-findings-verification-ledger.md). Those results supplement
+this test inventory; they do not turn this all-kind API lifecycle evidence into
+ten complete browser journeys.
+
 This is the W12 acceptance-test record for the ten runtime CMS document
 kinds. It is intentionally narrower than a release sign-off: these tests use
 the shared validation/save functions, an in-process route adapter for focused

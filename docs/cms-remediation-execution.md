@@ -2,6 +2,14 @@
 
 Updated: 13 September 2026 (Asia/Dubai).
 
+Remaining-verification addendum: the final Navigation `xx` check now has browser
+evidence, and staging cleanup has a corrected read-only real-storage dry run.
+See the [30-finding ledger](cms-findings-verification-ledger.md),
+[browser results](cms-remaining-browser-verification.md), and
+[operational results](cms-remaining-operations-verification.md). The sections
+below preserve the earlier run's evidence and limits; the linked addenda
+supersede only the specifically rechecked paths, not the entire release matrix.
+
 This records implementation and verification of the 30 findings in
 [the remediation plan](cms-remediation-plan.md). It is not authorization to
 publish content or deploy, and does not claim exhaustive production verification.
@@ -78,7 +86,8 @@ It exposed a smaller unknown-language validation discrepancy (`xx`). The final
 repair now rejects unrecognized language subtags, retains the typed invalid
 value and dirty draft, and blocks switching until corrected. Rendered tests and
 TypeScript checking passed after that repair; this final small validation change
-was **not browser-retested**. The requested 390px check remained unperformed.
+was **not browser-retested in that earlier run**. Both checks are now confirmed
+in the remaining-browser-verification addendum.
 The second fixture cleanup succeeded, with exact residual user/document counts
 both zero.
 

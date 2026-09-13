@@ -102,8 +102,28 @@ function normalizedPrefix(prefix: string): string {
   return prefix.replace(/^\/+|\/+$/g, "");
 }
 
+/**
+ * Keep this namespace identical to the upload writer:
+ * `${normalizedPrivateDirectory}/cms-media/staging/${uploadId}`.
+ */
+export function stagingNamespace(prefix: string): string {
+  return `${normalizedPrefix(prefix)}/cms-media/staging`;
+}
+
+/**
+ * GCS generations are int64 values. Keep the provider's decimal string
+ * intact instead of converting it through JavaScript Number, which would
+ * silently lose precision for long-lived buckets.
+ */
+export function storageGenerationPrecondition(generation: string | null): string {
+  if (!generation || !/^[0-9]+$/.test(generation)) {
+    throw new Error("Storage generation proof is invalid.");
+  }
+  return generation;
+}
+
 export function stagingObjectIdentity(path: string, prefix: string): string | null {
-  const marker = `${normalizedPrefix(prefix)}/cms-media/staging/`;
+  const marker = `${stagingNamespace(prefix)}/`;
   if (!path.startsWith(marker)) return null;
   const identity = path.slice(marker.length);
   return UUID.test(identity) ? identity : null;
@@ -165,7 +185,7 @@ export async function runMediaStagingJanitor(
   const items: JanitorItem[] = [];
   const objects = await storage.listStagingObjects();
   const assetResult = await pool.query(assetSnapshotSql, [
-    `${normalizedPrefix(storage.stagingPrefix)}/cms-media/staging/%`,
+    `${stagingNamespace(storage.stagingPrefix)}/%`,
     STAGING_ORPHAN_MARKER,
   ]);
   const assets = assetResult.rows as AssetRow[];
@@ -254,7 +274,7 @@ async function markAssetAbandonedWithStorage(
   try {
     await client.query("BEGIN");
     const locked = await client.query(lockedAssetSql, [
-      `${normalizedPrefix(storage.stagingPrefix)}/cms-media/staging/%`,
+      `${stagingNamespace(storage.stagingPrefix)}/%`,
       STAGING_ORPHAN_MARKER,
       asset.asset_id,
     ]);
@@ -318,16 +338,22 @@ async function markAssetAbandonedWithStorage(
   }
 }
 
-export function productionStagingStorage(environment = process.env): StagingStorageAdapter {
+export function productionStagingStorage(
+  environment = process.env,
+  storageClient: Pick<typeof objectStorageClient, "bucket"> = objectStorageClient,
+): StagingStorageAdapter {
   const bucketName = environment.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
   const privateDirectory = environment.PRIVATE_OBJECT_DIR?.replace(/^\/+|\/+$/g, "");
   if (!bucketName || !privateDirectory) throw new Error("Object Storage is not configured.");
-  const stagingPrefix = `${privateDirectory}/cms-media/staging`;
-  const bucket = objectStorageClient.bucket(bucketName);
+  // `stagingPrefix` is the normalized private directory, not the full
+  // namespace. The janitor composes the same namespace used by the upload
+  // writer, while this adapter composes it for the storage listing.
+  const stagingPrefix = privateDirectory;
+  const bucket = storageClient.bucket(bucketName);
   return {
     stagingPrefix,
     async listStagingObjects() {
-      const [files] = await bucket.getFiles({ prefix: `${stagingPrefix}/` });
+      const [files] = await bucket.getFiles({ prefix: `${stagingNamespace(stagingPrefix)}/` });
       const objects: StagingObject[] = [];
       for (const file of files) {
         const metadata = file.metadata?.generation
@@ -342,11 +368,7 @@ export function productionStagingStorage(environment = process.env): StagingStor
       return objects;
     },
     async deleteStagingObject(object) {
-      if (!object.generation) throw new Error("Storage generation proof is required.");
-      const generation = Number(object.generation);
-      if (!Number.isSafeInteger(generation) || generation < 0) {
-        throw new Error("Storage generation proof is invalid.");
-      }
+      const generation = storageGenerationPrecondition(object.generation);
       await bucket.file(object.path).delete({
         ignoreNotFound: true,
         ifGenerationMatch: generation,
