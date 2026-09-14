@@ -59,6 +59,7 @@ export const guardrailsFixture = {
   content: {
     schemaVersion: 1,
     template: "guardrails",
+    contentVersion: "guardrails-legacy-v1",
     hero: {
       eyebrow: field(sections[0], "Eyebrow"),
       headline: paragraphAfter(sections[0], "**Headline:**"),

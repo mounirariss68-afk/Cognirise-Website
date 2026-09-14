@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import type { CmsRecord } from "@/lib/cms";
-import type { FrameworkContent } from "@workspace/api-zod";
+import type { GuardrailsLegacyContent } from "@workspace/api-zod";
 
 import { Kicker } from "@/components/guardrails/Kicker";
 import { MarkdownInline } from "@/components/guardrails/MarkdownInline";
@@ -12,8 +12,6 @@ import { ExposureInteraction } from "@/components/guardrails/ExposureInteraction
 import { QuestionsInteraction } from "@/components/guardrails/QuestionsInteraction";
 import { MethodInteraction } from "@/components/guardrails/MethodInteraction";
 import { ResponsiveTable } from "@/components/guardrails/ResponsiveTable";
-
-type GuardrailsContent = Extract<FrameworkContent, { template: "guardrails" }>;
 
 const colorMap: Record<string, string> = {
   policy: "var(--gf-ink)",
@@ -25,7 +23,7 @@ const colorMap: Record<string, string> = {
 export function LegacyGuardrailsLayout({
   framework,
 }: {
-  framework: CmsRecord<GuardrailsContent>;
+  framework: CmsRecord<GuardrailsLegacyContent>;
 }) {
   const reducedMotion = useReducedMotion();
   const content = framework;

@@ -776,8 +776,8 @@ async function deleteFixtureRows(pool: PoolLike, state: FixtureState): Promise<v
     ];
     await client.query(
       `DELETE FROM cms_audit_events
-        WHERE actor_user_id=ANY($1::uuid[])
-           OR target_id=ANY($2::text[])`,
+        WHERE target_id=ANY($2::text[])
+           OR (actor_user_id=ANY($1::uuid[]) AND target_id=ANY($2::text[]))`,
       [userIds, allTargetIds],
     );
     await client.query(

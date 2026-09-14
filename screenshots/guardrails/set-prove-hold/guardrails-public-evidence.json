@@ -1,0 +1,57 @@
+{
+  "route": "/methodologies/guardrails-framework",
+  "publicDelivery": true,
+  "results": {
+    "390": {
+      "title": "Set, Prove & Hold: AI Guardrails Framework | Cognirise",
+      "publicContent": true,
+      "actionCount": 12,
+      "layerCount": 4,
+      "matrixCount": 12,
+      "actionSelected": 1,
+      "layerSelected": 1,
+      "matrixSelected": 1,
+      "actionDetail": "SetAction 1 of 4Selected action detailName what must never happenWrite a rule someone could try to break this afternoon.Write a \"never\", not a value: \"be helpful and safe\" cannot be tested.Write it for this system rather than copying a vendor's generic list.Use the applicable law, the damage this system could cause, and known AI failure modes as inputs.OwnerRisk and legal, with the product ownerOutputA numbered, versioned rule listFailure conditionThe list is copied from a generic responsible-AI page, so it can miss the risks of this system.CalloutA guardrail that is not written as a testable rule cannot be evidenced.",
+      "matrixDetail": "Selected build / test / re-test explanation1 · PolicySet — build itWrite it in a document",
+      "dataflow": "Customer-data flow · selected boundaryScoping is before the model: only task-needed, authorised records reach the AI.Customer dataScoped records↓scopeAI modelOnly authorised, task-needed customer records reach the AI.↓responseDeliveryUser or connected systemWhat reaches AIOnly authorised, task-needed customer records reach the AI.LimitationIt depends on correct identity, authorization, and scoping design.",
+      "pageFits": true,
+      "tables": 2,
+      "reducedMotion": true,
+      "activeAnimations": 0
+    },
+    "768": {
+      "title": "Set, Prove & Hold: AI Guardrails Framework | Cognirise",
+      "publicContent": true,
+      "actionCount": 12,
+      "layerCount": 4,
+      "matrixCount": 12,
+      "actionSelected": 1,
+      "layerSelected": 1,
+      "matrixSelected": 1,
+      "actionDetail": "SetAction 1 of 4Selected action detailName what must never happenWrite a rule someone could try to break this afternoon.Write a \"never\", not a value: \"be helpful and safe\" cannot be tested.Write it for this system rather than copying a vendor's generic list.Use the applicable law, the damage this system could cause, and known AI failure modes as inputs.OwnerRisk and legal, with the product ownerOutputA numbered, versioned rule listFailure conditionThe list is copied from a generic responsible-AI page, so it can miss the risks of this system.CalloutA guardrail that is not written as a testable rule cannot be evidenced.",
+      "matrixDetail": "Selected build / test / re-test explanation1 · PolicySet — build itWrite it in a document",
+      "dataflow": "Customer-data flow · selected boundaryScoping is before the model: only task-needed, authorised records reach the AI.Customer dataScoped records↓scopeAI modelOnly authorised, task-needed customer records reach the AI.↓responseDeliveryUser or connected systemWhat reaches AIOnly authorised, task-needed customer records reach the AI.LimitationIt depends on correct identity, authorization, and scoping design.",
+      "pageFits": true,
+      "tables": 2,
+      "reducedMotion": true,
+      "activeAnimations": 0
+    },
+    "1440": {
+      "title": "Set, Prove & Hold: AI Guardrails Framework | Cognirise",
+      "publicContent": true,
+      "actionCount": 12,
+      "layerCount": 4,
+      "matrixCount": 12,
+      "actionSelected": 1,
+      "layerSelected": 1,
+      "matrixSelected": 1,
+      "actionDetail": "SetAction 1 of 4Selected action detailName what must never happenWrite a rule someone could try to break this afternoon.Write a \"never\", not a value: \"be helpful and safe\" cannot be tested.Write it for this system rather than copying a vendor's generic list.Use the applicable law, the damage this system could cause, and known AI failure modes as inputs.OwnerRisk and legal, with the product ownerOutputA numbered, versioned rule listFailure conditionThe list is copied from a generic responsible-AI page, so it can miss the risks of this system.CalloutA guardrail that is not written as a testable rule cannot be evidenced.",
+      "matrixDetail": "Selected build / test / re-test explanation1 · PolicySet — build itWrite it in a document",
+      "dataflow": "Customer-data flow · selected boundaryScoping is before the model: only task-needed, authorised records reach the AI.Customer dataScoped records↓scopeAI modelOnly authorised, task-needed customer records reach the AI.↓responseDeliveryUser or connected systemWhat reaches AIOnly authorised, task-needed customer records reach the AI.LimitationIt depends on correct identity, authorization, and scoping design.",
+      "pageFits": true,
+      "tables": 2,
+      "reducedMotion": true,
+      "activeAnimations": 0
+    }
+  }
+}

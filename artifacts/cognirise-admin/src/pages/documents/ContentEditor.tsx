@@ -548,45 +548,66 @@ const methodologyCanonicalIds: Record<string, Record<string, string[]>> = {
   "agentic-operations-readiness": { conditions: ["stability", "access", "observability", "fallback", "exceptions", "economics"], decisions: ["proceed", "prepare", "stop"] },
   "human-agent-operating-model": { designSteps: ["01", "02", "03", "04", "05"], decisionRights: ["frame", "recommend", "approve", "act", "intervene"], measures: ["use", "control", "capability", "outcome"] },
 };
+/**
+ * New standalone Guardrails records always start on the replacement contract.
+ * Historical revisions select their own legacy arm by contentVersion and are
+ * never migrated by opening them in the editor.
+ */
 export function guardrailsDraft(): Content {
   const text = "";
-  const layerIds = ["policy", "prompt", "runtime", "architecture"];
-  const bandIds = ["internal-reversible", "reversible-cost", "irreversible-customer", "regulator-public-safety", "above-ceiling"];
-  const destinations = ["prompt", "runtime", "runtime", "architecture", "architecture"];
-  const additions = ["monitoring", "none", "architectural-scoping", "independent-control", "authority-artefact"];
+  const actionMap = [
+    ["set-name", "set"], ["set-build", "set"], ["set-choose", "set"], ["set-assign", "set"],
+    ["prove-attack", "prove"], ["prove-red-team", "prove"], ["prove-count", "prove"], ["prove-record", "prove"],
+    ["hold-watch", "hold"], ["hold-retest", "hold"], ["hold-revisit", "hold"], ["hold-report", "hold"],
+  ] as const;
+  const layers = ["policy", "prompt", "runtime", "architecture"] as const;
+  const phaseMap = [
+    ["set", "sequential", ["set-name", "set-build", "set-choose", "set-assign"]],
+    ["prove", "pre-launch-tests", ["prove-attack", "prove-red-team", "prove-count", "prove-record"]],
+    ["hold", "concurrent", ["hold-watch", "hold-retest", "hold-revisit", "hold-report"]],
+  ] as const;
   return {
     schemaVersion: 1,
     template: "guardrails",
-    hero: { eyebrow: text, headline: text, subheadline: text, primaryAction: { label: text, href: "/contact" }, secondaryAction: { label: text, href: "/methodologies/agent-authority-model" } },
-    distinction: { heading: text, body: [text, text, text] },
+    contentVersion: "set-prove-hold-v1",
+    hero: {
+      eyebrow: text, headline: text, subheadline: text, strapline: text,
+      primaryAction: { label: text, href: "/contact" },
+      secondaryAction: { label: text, href: "/methodologies/agent-authority-model" },
+    },
+    overview: {
+      heading: text, intro: text,
+      phases: phaseMap.map(([id, mode, actionIds]) => ({ id, mode, actionIds, title: text, caption: text })),
+    },
     layers: {
-      heading: text, intro: text, exampleText: text, tableHeaders: [text, text, text, text, text],
-      table: layerIds.map((id, index) => ({ id, layer: text, whatItIs: text, inThisExample: text, whatGetsPastIt: text, strength: index + 1, strengthLabel: `${index + 1} of 4` })),
-      pullOut: text, closingLine: text, aside: { heading: text, body: text },
-      diagram: {
-        title: text, description: text, kicker: text, rule: text, thresholdAfter: "prompt", thresholdLabel: text, footer: text,
-        rows: layerIds.map((id, index) => ({ id, label: text, description: text, example: text, bypassLabel: text, bypass: text, strength: index + 1, strengthLabel: `${index + 1} of 4` })),
-      },
+      heading: text, intro: text, exampleRule: text, tableHeaders: [text, text, text, text, text],
+      rows: layers.map((id, index) => ({ id, title: text, whatItIs: text, customerDataExample: text, limitation: text, strength: index + 1 })),
+      callout: text,
     },
-    stoppingRule: {
-      heading: text, intro: text, tableHeaders: [text, text],
-      exposures: bandIds.map((id, index) => ({ id, handover: text, requirement: text, enforcementLayer: destinations[index], additionId: additions[index] })),
-      pullOut: text,
-      diagram: {
-        title: text, description: text, kicker: text, heading: text, bandHeading: text, destinationHeading: text, footer: text, note: text,
-        bands: bandIds.map((id, index) => ({ id, label: text, description: text, destination: destinations[index], additionId: additions[index] })),
-        destinations: ["prompt", "runtime", "architecture"].map((id) => ({ id, label: text, description: text })),
-        additions: ["monitoring", "architectural-scoping", "independent-control", "authority-artefact"].map((id) => ({ id, label: text })),
-      },
+    lifecycleMatrix: {
+      heading: text, intro: text, columnHeaders: [text, text, text, text],
+      rows: layers.map((layerId) => ({ layerId, layer: text, set: text, prove: text, hold: text })),
+      callout: text, measure: text,
     },
-    questions: { heading: text, intro: text, panels: ["enforcement", "presence", "afterwards"].map((id) => ({ id, title: text, body: text })) },
-    method: { heading: text, intro: text, phases: ["set", "prove", "hold"].map((id) => ({ id, name: text, caption: text, steps: [text, text, text, text] })) },
-    maintenance: { heading: text, tableHeaders: [text, text, text, text], table: layerIds.map((id) => ({ id, layer: text, set: text, prove: text, hold: text })), closingParagraph: text },
-    measurement: { heading: text, statement: text, supportingLine: text },
-    authority: { heading: text, body: [text, text, text, text, text], linkCard: { title: text, description: text, href: "/methodologies/agent-authority-model" } },
-    references: { heading: text, intro: [text, text], groups: ["forbid", "bypass", "measured"].map((id) => ({ id, title: text, items: text })) },
-    moves: { heading: text, moves: [1, 2, 3].map((number) => ({ number, title: text, body: text })), cta: { heading: text, body: text, button: { label: text, href: "/contact" } }, footerNote: text },
-    relatedLink: { title: text, body: text, href: "/methodologies/guardrails-framework" },
+    actions: actionMap.map(([id, phase], index) => ({
+      id, phase, order: (index % 4) + 1, title: text, statement: text,
+      explanation: [text], owner: text,
+      outputOrCadence: { label: phase === "hold" ? "Cadence" : "Output", value: text },
+      failureCondition: text, callout: text,
+    })),
+    references: {
+      heading: text, intro: text,
+      items: ["owasp-llm-top-10", "owasp-agent-control-standard", "mitre-atlas", "nist-ai-rmf", "nist-ai-600-1", "iso-42001"].map((id) => ({
+        id, title: text, version: text, url: "https://example.invalid", note: text,
+      })),
+      disclaimer: text,
+    },
+    moves: {
+      heading: text, intro: text,
+      items: ["one", "two", "three"].map((id, index) => ({ id, number: index + 1, title: text, body: text })),
+      cta: { heading: text, body: text, button: { label: text, href: "/contact" } },
+    },
+    relatedLink: { title: text, body: text, href: "/methodologies/agent-authority-model" },
     visibility: "hidden", order: 0, sources: [], relatedIds: [],
   };
 }
@@ -1163,9 +1184,14 @@ function GuardrailsFrameworkEditor({ value, onChange }: { value: Content; onChan
     (all[key] ??= []).push(path);
     return all;
   }, {});
+  const isSetProveHold = value.contentVersion === "set-prove-hold-v1";
   return <div className="space-y-5">
-    <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">This is a separate Guardrails page. Its reviewed structure and destinations are locked; every displayed prose, figure label, accessible text, source list, CTA label, and legal note below is editable.</p>
-    <MediaField label="Guardrails hero image" value={value.heroMedia} overridePath="content.heroMedia" onChange={(heroMedia) => onChange({ ...value, heroMedia })} />
+    <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+      {isSetProveHold
+        ? "Set, Prove & Hold is the current standalone Guardrails composition. Its action, layer, lifecycle, and move identifiers are locked; every displayed editorial field below remains editable. This native-diagram edition deliberately has no hero-media requirement."
+        : "This is a historical standalone Guardrails revision. Its reviewed structure and destinations are locked; every displayed prose, figure label, accessible text, source list, CTA label, and legal note below is editable."}
+    </p>
+    {!isSetProveHold && <MediaField label="Guardrails hero image" value={value.heroMedia} overridePath="content.heroMedia" onChange={(heroMedia) => onChange({ ...value, heroMedia })} />}
     {Object.entries(groups).map(([name, paths]) => section(name.replace(/([A-Z])/g, " $1"), <div className="space-y-4">{paths.map((path) => area(path.slice(1).join(" · ") || name, path, 4))}</div>))}
   </div>;
 }
@@ -1174,7 +1200,17 @@ function GuardrailsFrameworkEditor({ value, onChange }: { value: Content; onChan
  * governance fields are deliberately excluded from the Guardrails editor. */
 export function guardrailsEditableTextPaths(item: unknown, path: string[] = []): string[][] {
   if (path[0] === "sources" || path[0] === "relatedIds" || path[0] === "heroMedia" || path[0] === "heroMediaId") return [];
-  if (typeof item === "string") return guardrailsStructuralKeys.has(path.at(-1) ?? "") ? [] : [path];
+  if (typeof item === "string") {
+    const key = path.at(-1) ?? "";
+    // `version` is editorial evidence copy in references, while an action's
+    // Output/Cadence label is an enum-backed structural display contract.
+    if (
+      guardrailsStructuralKeys.has(key)
+      || (key === "version" && !(path[0] === "references" && path[1] === "items"))
+      || (key === "label" && path.includes("outputOrCadence"))
+    ) return [];
+    return [path];
+  }
   if (Array.isArray(item)) return item.flatMap((entry, index) => guardrailsEditableTextPaths(entry, [...path, String(index)]));
   if (item && typeof item === "object") return Object.entries(item).flatMap(([key, entry]) => guardrailsEditableTextPaths(entry, [...path, key]));
   return [];
@@ -1182,8 +1218,15 @@ export function guardrailsEditableTextPaths(item: unknown, path: string[] = []):
 
 const guardrailsStructuralKeys = new Set([
   "template",
+  "contentVersion",
   "id",
   "href",
+  "phase",
+  "mode",
+  "actionIds",
+  "sourceIds",
+  "sourceId",
+  "layerId",
   "enforcementLayer",
   "destination",
   "additionId",
@@ -1191,7 +1234,6 @@ const guardrailsStructuralKeys = new Set([
   "strength",
   "strengthLabel",
   "number",
-  "version",
   "schemaVersion",
   "visibility",
   "order",

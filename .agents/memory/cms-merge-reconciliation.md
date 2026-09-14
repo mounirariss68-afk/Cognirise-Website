@@ -5,6 +5,19 @@ description: Why governed development data migrations need an explicit post-merg
 
 Give each binary import exactly one reconciliation owner; do not let a targeted importer and the generic inventory independently create it.
 
+Disposable development publisher cleanup must retain audit events for real content.
+Classify cleanup by the fixture-owned target, not merely by the actor who performed
+the action. A completed release receipt must reference a surviving normal publication
+audit and the exact published snapshot.
+
+**Why:** An authenticated publication can succeed and then lose its audit when a
+temporary publisher is removed. An isolated task's public pointer also does not
+prove that the approved release will be reproduced after merge.
+
+**How to apply:** Exercise release, fixture cleanup, and receipt replay together.
+Use the normal authorized publication path for merge reconciliation, with exact
+target/digest checks; never fabricate a replacement audit or directly set pointers.
+
 Test the empty-database import path using the receipt type the real importer writes, as well as predecessor upgrades.
 
 **Why:** A media cutover accepted only successor-pending receipts, so an exact fresh inventory draft passed reconciliation inspection but could never reach publication.

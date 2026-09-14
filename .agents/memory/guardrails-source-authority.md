@@ -3,17 +3,18 @@ name: Guardrails source authority
 description: Editorial authority and interaction boundaries for the standalone Guardrails framework
 ---
 
-Keep the supplied page copy and diagram wording as separate editorial authorities.
-The approved redesign permits concise presentation summaries and consolidation,
-but compact diagram labels must not replace the fuller technical qualifications.
-The revised conceptual manuscript does not authorize importing stronger attack
-claims or citations.
+For the standalone Guardrails replacement, the supplied Set, Prove & Hold HTML
+supersedes the earlier manuscript and diagram attachments. Exclude its entire
+UAE-specific module and jurisdiction-dependent claims, not merely its navigation.
+Keep compact diagram labels distinct from the full action explanations and
+qualify absolute security claims rather than presenting them as guarantees.
 
-**Why:** The reviewed sources intentionally use different levels of detail. Treating
-them as interchangeable silently changes reviewed claims or diagram relationships.
+**Why:** The owner explicitly requested a source replacement, not a presentation
+layer over the previous manuscript. Requiring old exposure and stopping-rule
+sections would silently restore content outside the new source.
 
-**How to apply:** Check changes against the original page-copy and A/B SVG attachments,
-document differences, retain full review detail in labelled disclosures, and
-preserve existing Agent Authority canon. Presentation
-selection is not an assessment or a personalized security recommendation. The final
-exposure band does not inherit the preceding band’s independent-control addition.
+**How to apply:** Retain the full non-UAE HTML substance, including all twelve
+actions and supporting detail. Keep previous snapshots readable only as history.
+Preserve the separate Agent Authority page and its Guardrails subsection unchanged.
+Layer and lifecycle selections explain enforcement; they are not an assessment,
+security score, or personalized recommendation.

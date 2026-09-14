@@ -814,12 +814,13 @@ function requiresFixedOrder(
   };
 }
 
-/** Dedicated CMS composition for /methodologies/guardrails. The IDs, counts,
- * E1–E5 mapping, and control placement are contract-owned; prose is edited
- * only inside those fixed slots. */
-export const guardrailsFrameworkContentSchema = z.object({
+/** Historical standalone Guardrails composition. Keep this arm readable for
+ * revision history and preview, but do not impose its E1–E5 manuscript on
+ * the Set, Prove & Hold replacement. */
+export const legacyGuardrailsFrameworkContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
   template: z.literal("guardrails"),
+  contentVersion: z.literal("guardrails-legacy-v1"),
   hero: z.object({
     eyebrow: guardedText,
     headline: guardedText,
@@ -923,6 +924,174 @@ export const guardrailsFrameworkContentSchema = z.object({
   relatedLink: z.object({ title: guardedText, body: guardedText, href: z.literal("/methodologies/guardrails-framework") }).strict(),
 }).strict();
 
+const setProveHoldPhase = z.enum(["set", "prove", "hold"]);
+const setProveHoldActionSchema = z.object({
+  id: z.enum([
+    "set-name", "set-build", "set-choose", "set-assign",
+    "prove-attack", "prove-red-team", "prove-count", "prove-record",
+    "hold-watch", "hold-retest", "hold-revisit", "hold-report",
+  ]),
+  phase: setProveHoldPhase,
+  order: z.number().int().min(1).max(4),
+  title: guardedText,
+  statement: guardedText,
+  explanation: z.array(guardedText).min(1).max(5),
+  owner: guardedText,
+  outputOrCadence: z.object({ label: z.enum(["Output", "Cadence"]), value: guardedText }).strict(),
+  failureCondition: guardedText,
+  callout: guardedText,
+}).strict();
+
+const setProveHoldActionOrder = [
+  ["set-name", "set", 1], ["set-build", "set", 2],
+  ["set-choose", "set", 3], ["set-assign", "set", 4],
+  ["prove-attack", "prove", 1], ["prove-red-team", "prove", 2],
+  ["prove-count", "prove", 3], ["prove-record", "prove", 4],
+  ["hold-watch", "hold", 1], ["hold-retest", "hold", 2],
+  ["hold-revisit", "hold", 3], ["hold-report", "hold", 4],
+] as const;
+
+const setProveHoldLayerSchema = z.object({
+  id: z.enum(["policy", "prompt", "runtime", "architecture"]),
+  title: guardedText,
+  whatItIs: guardedText,
+  customerDataExample: guardedText,
+  limitation: guardedText,
+  strength: z.number().int().min(1).max(4),
+}).strict();
+
+/** Source replacement for the standalone Guardrails route. Its fixed action
+ * IDs make the 4 + 4 + 4 framework durable without carrying forward the
+ * retired E-band/stopping-rule fields. */
+export const setProveHoldGuardrailsFrameworkContentSchema = z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
+  template: z.literal("guardrails"),
+  contentVersion: z.literal("set-prove-hold-v1"),
+  hero: z.object({
+    eyebrow: guardedText,
+    headline: guardedText,
+    subheadline: guardedText,
+    strapline: guardedText,
+    primaryAction: z.object({ label: guardedText, href: z.literal("/contact") }).strict(),
+    secondaryAction: z.object({ label: guardedText, href: z.literal("/methodologies/agent-authority-model") }).strict(),
+  }).strict(),
+  heroMedia: optionalMediaReference,
+  heroMediaId: legacyMediaId,
+  overview: z.object({
+    heading: guardedText,
+    intro: guardedText,
+    phases: z.array(z.object({
+      id: setProveHoldPhase,
+      title: guardedText,
+      caption: guardedText,
+      mode: z.enum(["sequential", "pre-launch-tests", "concurrent"]),
+      actionIds: z.array(z.string()).length(4),
+    }).strict()).length(3).superRefine((phases, context) => {
+      const expected = [
+        ["set", "sequential", ["set-name", "set-build", "set-choose", "set-assign"]],
+        ["prove", "pre-launch-tests", ["prove-attack", "prove-red-team", "prove-count", "prove-record"]],
+        ["hold", "concurrent", ["hold-watch", "hold-retest", "hold-revisit", "hold-report"]],
+      ] as const;
+      if (phases.some((phase, index) => phase.id !== expected[index][0]
+        || phase.mode !== expected[index][1]
+        || phase.actionIds.some((id, actionIndex) => id !== expected[index][2][actionIndex]))) {
+        context.addIssue({ code: z.ZodIssueCode.custom, message: "overview.phases must retain the Set, Prove, Hold action map." });
+      }
+    }),
+  }).strict(),
+  layers: z.object({
+    heading: guardedText,
+    intro: guardedText,
+    exampleRule: guardedText,
+    tableHeaders: z.array(guardedText).length(5),
+    rows: z.array(setProveHoldLayerSchema).length(4).superRefine((rows, context) => {
+      const expected = ["policy", "prompt", "runtime", "architecture"];
+      if (rows.some((row, index) => row.id !== expected[index] || row.strength !== index + 1)) {
+        context.addIssue({ code: z.ZodIssueCode.custom, message: "layers.rows must retain four ordered enforcement layers and strengths." });
+      }
+    }),
+    callout: guardedText,
+  }).strict(),
+  lifecycleMatrix: z.object({
+    heading: guardedText,
+    intro: guardedText,
+    columnHeaders: z.array(guardedText).length(4),
+    rows: z.array(z.object({
+      layerId: z.enum(["policy", "prompt", "runtime", "architecture"]),
+      layer: guardedText,
+      set: guardedText,
+      prove: guardedText,
+      hold: guardedText,
+    }).strict()).length(4).superRefine((rows, context) => {
+      if (rows.some((row, index) => row.layerId !== ["policy", "prompt", "runtime", "architecture"][index])) {
+        context.addIssue({ code: z.ZodIssueCode.custom, message: "lifecycleMatrix.rows must retain layer order." });
+      }
+    }),
+    callout: guardedText,
+    measure: guardedText,
+  }).strict(),
+  actions: z.array(setProveHoldActionSchema).length(12).superRefine((actions, context) => {
+    if (actions.some((action, index) => action.id !== setProveHoldActionOrder[index][0]
+      || action.phase !== setProveHoldActionOrder[index][1]
+      || action.order !== setProveHoldActionOrder[index][2])) {
+      context.addIssue({ code: z.ZodIssueCode.custom, message: "actions must retain the reviewed 4 + 4 + 4 identifiers, phases, and order." });
+    }
+  }),
+  references: z.object({
+    heading: guardedText,
+    intro: guardedText,
+    items: z.array(z.object({
+      id: z.enum(["owasp-llm-top-10", "owasp-agent-control-standard", "mitre-atlas", "nist-ai-rmf", "nist-ai-600-1", "iso-42001"]),
+      title: guardedText,
+      version: guardedText,
+      url: safeExternalUrl,
+      note: guardedText,
+    }).strict()).length(6).superRefine((items, context) => {
+      const expected = ["owasp-llm-top-10", "owasp-agent-control-standard", "mitre-atlas", "nist-ai-rmf", "nist-ai-600-1", "iso-42001"];
+      if (items.some((item, index) => item.id !== expected[index])) {
+        context.addIssue({ code: z.ZodIssueCode.custom, message: "references.items must retain the verified non-UAE source order." });
+      }
+    }),
+    disclaimer: guardedText,
+  }).strict(),
+  moves: z.object({
+    heading: guardedText,
+    intro: guardedText,
+    items: z.array(z.object({
+      id: z.enum(["one", "two", "three"]),
+      number: z.number().int().min(1).max(3),
+      title: guardedText,
+      body: guardedText,
+    }).strict()).length(3).superRefine((items, context) => {
+      if (items.some((item, index) => item.id !== ["one", "two", "three"][index] || item.number !== index + 1)) {
+        context.addIssue({ code: z.ZodIssueCode.custom, message: "moves.items must retain numeric order." });
+      }
+    }),
+    cta: z.object({ heading: guardedText, body: guardedText, button: z.object({ label: guardedText, href: z.literal("/contact") }).strict() }).strict(),
+  }).strict(),
+  relatedLink: z.object({
+    title: guardedText,
+    body: guardedText,
+    href: z.literal("/methodologies/agent-authority-model"),
+  }).strict(),
+  ...governance,
+}).strict();
+
+/** A missing version occurs only on revisions written before the replacement;
+ * explicitly supplied versions stay fail-closed. */
+export const guardrailsFrameworkContentSchema = z.preprocess((value) => {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const content = value as Record<string, unknown>;
+    if (!Object.prototype.hasOwnProperty.call(content, "contentVersion")) {
+      return { ...content, contentVersion: "guardrails-legacy-v1" };
+    }
+  }
+  return value;
+}, z.discriminatedUnion("contentVersion", [
+  legacyGuardrailsFrameworkContentSchema,
+  setProveHoldGuardrailsFrameworkContentSchema,
+]));
+
 /**
  * The assessment engines and the IDAO delivery canon remain application-owned.
  * These records deliberately carry only their reviewed identifiers, in their
@@ -931,7 +1100,7 @@ export const guardrailsFrameworkContentSchema = z.object({
  * an assessment dimension, decision rule, or delivery stage.
  */
 const methodologyText = z.string().trim().min(1).max(8_000);
-const frameworkContentDiscriminatedUnion = z.lazy(() => z.discriminatedUnion("template", [
+const frameworkContentDiscriminatedUnion = z.lazy(() => z.union([
   agentAuthorityFrameworkContentSchema,
   guardrailsFrameworkContentSchema,
   idaoFrameworkContentSchema,
@@ -1131,6 +1300,8 @@ export type IndustryContent = z.infer<typeof industryContentSchema>;
 export type BankingPov = z.infer<typeof bankingPovSchema>;
 export type PublicSectorPov = z.infer<typeof publicSectorPovSchema>;
 export type FrameworkContent = z.infer<typeof frameworkContentSchema>;
+export type GuardrailsLegacyContent = z.infer<typeof legacyGuardrailsFrameworkContentSchema>;
+export type SetProveHoldGuardrailsContent = z.infer<typeof setProveHoldGuardrailsFrameworkContentSchema>;
 export type OfficeContent = z.infer<typeof officeContentSchema>;
 
 export type LandingPageContent = z.infer<typeof cmsLandingPageContentSchema>;
@@ -1185,7 +1356,7 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   if (kind === "framework") {
     const framework = value as FrameworkContent;
     if (framework.template === "guardrails") {
-      if (framework.presentation && !framework.heroMedia && !framework.heroMediaId) {
+      if ("presentation" in framework && framework.presentation && !framework.heroMedia && !framework.heroMediaId) {
         errors.push("The Guardrails redesign presentation requires immutable hero media.");
       }
       return errors;
@@ -1348,9 +1519,14 @@ export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: 
     "agentic-operations-readiness": agenticOperationsReadinessFrameworkContentSchema,
     "human-agent-operating-model": humanAgentOperatingModelFrameworkContentSchema,
   };
+  const guardrailsDraftContentVersion = frameworkDraftContent?.contentVersion;
   const frameworkDraftSchema = kind === "framework" && input && typeof input === "object" && !Array.isArray(input)
     ? (explicitFrameworkTemplate === "guardrails"
-      ? z.preprocess((value) => normalizeGuardrailsDraftText(value), guardrailsFrameworkContentSchema.deepPartial())
+      ? guardrailsDraftContentVersion === "set-prove-hold-v1"
+        ? z.preprocess((value) => normalizeGuardrailsDraftText(value), setProveHoldGuardrailsFrameworkContentSchema.deepPartial())
+        : guardrailsDraftContentVersion === undefined || guardrailsDraftContentVersion === "guardrails-legacy-v1"
+          ? z.preprocess((value) => normalizeGuardrailsDraftText(value), legacyGuardrailsFrameworkContentSchema.deepPartial())
+          : z.never()
       : typeof explicitFrameworkTemplate === "string" && methodologyFrameworkSchemas[explicitFrameworkTemplate]
         ? methodologyFrameworkSchemas[explicitFrameworkTemplate].deepPartial()
       : hasExplicitFrameworkTemplate && explicitFrameworkTemplate !== "agent-authority"

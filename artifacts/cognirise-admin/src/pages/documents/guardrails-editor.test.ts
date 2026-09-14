@@ -7,24 +7,22 @@ import {
   guardrailsEditableTextPaths,
 } from "./ContentEditor.tsx";
 
-test("Guardrails draft initializer has the final saveable structural shape", () => {
+test("Guardrails draft initializer starts new records on the Set, Prove & Hold structural shape", () => {
   const draft = guardrailsDraft();
 
   assert.equal(validateCmsContent("framework", draft, "draft").success, true);
   assert.equal(draft.template, "guardrails");
-  assert.equal(draft.layers.tableHeaders.length, 5);
-  assert.equal(draft.layers.diagram.rows.length, 4);
-  assert.equal(draft.layers.diagram.thresholdAfter, "prompt");
-  assert.deepEqual(draft.layers.diagram.rows.map((row: { strength: number }) => row.strength), [1, 2, 3, 4]);
-  assert.deepEqual(draft.layers.diagram.rows.map((row: { strengthLabel: string }) => row.strengthLabel), ["1 of 4", "2 of 4", "3 of 4", "4 of 4"]);
-  assert.equal(draft.stoppingRule.exposures.length, 5);
+  assert.equal(draft.contentVersion, "set-prove-hold-v1");
+  assert.equal(draft.layers.rows.length, 4);
+  assert.deepEqual(draft.layers.rows.map((row: { strength: number }) => row.strength), [1, 2, 3, 4]);
   assert.deepEqual(
-    draft.stoppingRule.diagram.bands.map((band: { destination: string; additionId: string }) => [band.destination, band.additionId]),
-    [["prompt", "monitoring"], ["runtime", "none"], ["runtime", "architectural-scoping"], ["architecture", "independent-control"], ["architecture", "authority-artefact"]],
+    draft.overview.phases.map((phase: { id: string; mode: string; actionIds: string[] }) => [phase.id, phase.mode, phase.actionIds.length]),
+    [["set", "sequential", 4], ["prove", "pre-launch-tests", 4], ["hold", "concurrent", 4]],
   );
-  assert.equal(draft.references.groups.length, 3);
-  assert.equal(draft.moves.moves.length, 3);
-  assert.equal("sourcesSection" in draft, false);
+  assert.equal(draft.actions.length, 12);
+  assert.equal(draft.moves.items.length, 3);
+  assert.equal("stoppingRule" in draft, false);
+  assert.equal("authority" in draft, false);
 });
 
 test("Guardrails editor exposes prose, never structural or governance slots", () => {
@@ -44,12 +42,14 @@ test("Guardrails editor exposes prose, never structural or governance slots", ()
     },
   });
   const structuralKeys = new Set([
-    "template", "id", "href", "enforcementLayer", "destination", "additionId",
+    "template", "contentVersion", "id", "href", "phase", "mode", "actionIds", "sourceIds", "sourceId", "layerId", "enforcementLayer", "destination", "additionId",
     "thresholdAfter", "strength", "strengthLabel", "number", "schemaVersion",
     "visibility", "order", "verificationDate", "reviewDate", "relatedIds",
   ]);
 
   assert(paths.some((path) => path.join(".") === "hero.headline"));
+  assert.equal(paths.some((path) => path.join(".") === "references.items.0.version"), true);
+  assert.equal(paths.some((path) => path.join(".") === "actions.0.outputOrCadence.label"), false);
   assert.equal(paths.some((path) => structuralKeys.has(path.at(-1) ?? "")), false);
   assert.equal(paths.some((path) => path[0] === "sources"), false);
   assert.equal(paths.some((path) => path[0] === "relatedIds"), false);

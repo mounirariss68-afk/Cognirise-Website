@@ -200,6 +200,12 @@
   --gf-tracking-measure: 0.2em;
 }
 
+.guardrails-page[data-guardrails-page] {
+  --gf-content-wide: 1180px;
+  --gf-h2: clamp(32px, 4vw, 52px);
+  --gf-h3: clamp(26px, 3vw, 38px);
+}
+
 /* Tailwind treats an untyped custom property arbitrary value as a color.
    Keep the legacy Guardrails utility spellings typographic until all CMS
    templates have migrated to text-[length:var(...)]. */

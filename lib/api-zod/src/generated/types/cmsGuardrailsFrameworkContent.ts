@@ -5,53 +5,10 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
-import type { CmsGuardrailsAuthority } from './cmsGuardrailsAuthority';
-import type { CmsGuardrailsDistinction } from './cmsGuardrailsDistinction';
-import type { CmsGuardrailsFrameworkContentSchemaVersion } from './cmsGuardrailsFrameworkContentSchemaVersion';
-import type { CmsGuardrailsFrameworkContentTemplate } from './cmsGuardrailsFrameworkContentTemplate';
-import type { CmsGuardrailsHero } from './cmsGuardrailsHero';
-import type { CmsGuardrailsLayers } from './cmsGuardrailsLayers';
-import type { CmsGuardrailsMaintenance } from './cmsGuardrailsMaintenance';
-import type { CmsGuardrailsMeasurement } from './cmsGuardrailsMeasurement';
-import type { CmsGuardrailsMethod } from './cmsGuardrailsMethod';
-import type { CmsGuardrailsMoves } from './cmsGuardrailsMoves';
-import type { CmsGuardrailsPresentation } from './cmsGuardrailsPresentation';
-import type { CmsGuardrailsQuestions } from './cmsGuardrailsQuestions';
-import type { CmsGuardrailsReferences } from './cmsGuardrailsReferences';
-import type { CmsGuardrailsRelatedLink } from './cmsGuardrailsRelatedLink';
-import type { CmsGuardrailsStoppingRule } from './cmsGuardrailsStoppingRule';
-import type { CmsImmutableMediaReference } from './cmsImmutableMediaReference';
-import type { CmsSource } from './cmsSource';
-import type { CmsVisibility } from './cmsVisibility';
+import type { CmsGuardrailsLegacyFrameworkContent } from './cmsGuardrailsLegacyFrameworkContent';
+import type { CmsSetProveHoldGuardrailsFrameworkContent } from './cmsSetProveHoldGuardrailsFrameworkContent';
 
-export interface CmsGuardrailsFrameworkContent {
-  schemaVersion?: CmsGuardrailsFrameworkContentSchemaVersion;
-  template: CmsGuardrailsFrameworkContentTemplate;
-  hero: CmsGuardrailsHero;
-  heroMedia?: CmsImmutableMediaReference;
-  heroMediaId?: string;
-  presentation?: CmsGuardrailsPresentation;
-  distinction: CmsGuardrailsDistinction;
-  layers: CmsGuardrailsLayers;
-  stoppingRule: CmsGuardrailsStoppingRule;
-  questions: CmsGuardrailsQuestions;
-  method: CmsGuardrailsMethod;
-  maintenance: CmsGuardrailsMaintenance;
-  measurement: CmsGuardrailsMeasurement;
-  authority: CmsGuardrailsAuthority;
-  references: CmsGuardrailsReferences;
-  moves: CmsGuardrailsMoves;
-  visibility?: CmsVisibility;
-  /**
-     * @minimum 0
-     * @maximum 10000
-     */
-  order?: number;
-  /** @maxItems 30 */
-  sources?: CmsSource[];
-  verificationDate?: Date;
-  reviewDate?: Date;
-  /** @maxItems 50 */
-  relatedIds?: string[];
-  relatedLink: CmsGuardrailsRelatedLink;
-}
+/**
+ * Versioned standalone Guardrails composition. Omitted contentVersion is accepted only for historical legacy revisions.
+ */
+export type CmsGuardrailsFrameworkContent = CmsGuardrailsLegacyFrameworkContent | CmsSetProveHoldGuardrailsFrameworkContent;

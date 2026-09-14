@@ -53,6 +53,48 @@ pnpm --filter @workspace/scripts cms:reconcile-methodology-editorial -- --verify
 # replays only an exact candidate; a later editorial/published state is
 # explicitly receipted as preserved rather than retried or overwritten.
 pnpm --filter @workspace/scripts cms:setup-banking-postmerge -- --report-conflict
-# Carry the reviewed Guardrails source into development as a hidden draft.
-# The receipt replays without publication and conflicts preserve editorial work.
-pnpm --filter @workspace/scripts exec tsx src/cms/guardrails-reconciliation.ts --apply-db --target=development
+# Task 340 must not send this release through a possibly stale managed API
+# process: post-merge precedes workflow reconciliation. Build the current API
+# source and use a temporary local process on an ephemeral port instead.
+guardrails_api_port="$(node -e 'const net=require("node:net"); const server=net.createServer(); server.listen(0,"127.0.0.1",()=>{console.log(server.address().port); server.close();});')"
+guardrails_api_log="$(mktemp /tmp/cognirise-guardrails-api.XXXXXX)"
+guardrails_api_pid=""
+guardrails_fixture_credentials="$(mktemp /tmp/cognirise-guardrails-release.XXXXXX)"
+rm -f "$guardrails_fixture_credentials"
+cleanup_guardrails_release() {
+  if [[ -f "$guardrails_fixture_credentials" ]]; then
+    NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture -- \
+      --development cleanup --credentials "$guardrails_fixture_credentials" || true
+  fi
+  if [[ -n "$guardrails_api_pid" ]]; then
+    kill "$guardrails_api_pid" 2>/dev/null || true
+    wait "$guardrails_api_pid" 2>/dev/null || true
+  fi
+  rm -f "$guardrails_api_log"
+}
+trap cleanup_guardrails_release EXIT
+pnpm --filter @workspace/api-server build
+PORT="$guardrails_api_port" NODE_ENV=development pnpm --filter @workspace/api-server start \
+  >"$guardrails_api_log" 2>&1 &
+guardrails_api_pid="$!"
+for _ in $(seq 1 80); do
+  if curl --fail --silent --show-error "http://127.0.0.1:${guardrails_api_port}/api/healthz" >/dev/null; then
+    break
+  fi
+  sleep 0.25
+done
+if ! curl --fail --silent --show-error "http://127.0.0.1:${guardrails_api_port}/api/healthz" >/dev/null; then
+  echo "Fresh private CMS API did not become healthy for the authorized Guardrails release." >&2
+  exit 1
+fi
+# The established isolated-development fixture lifecycle provisions an
+# ephemeral MFA-enrolled administrator. It then calls the normal login/CSRF
+# API release and protected preview capability; preview tokens never leave the
+# process. Fixture teardown retains audit evidence for the real document.
+NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture -- \
+  --development setup --credentials "$guardrails_fixture_credentials"
+NODE_ENV=development pnpm --filter @workspace/scripts cms:release-guardrails-set-prove-hold -- \
+  --credentials="$guardrails_fixture_credentials" \
+  --api-base="http://127.0.0.1:${guardrails_api_port}/api" --verify-preview
+cleanup_guardrails_release
+trap - EXIT

@@ -1,10 +1,8 @@
 import React, { useState, useRef } from "react";
-import type { FrameworkContent } from "@workspace/api-zod";
+import type { GuardrailsLegacyContent } from "@workspace/api-zod";
 import { MarkdownInline } from "./MarkdownInline";
 
-type GuardrailsContent = Extract<FrameworkContent, { template: "guardrails" }>;
-
-export function ExposureExplorer({ content }: { content: GuardrailsContent }) {
+export function ExposureExplorer({ content }: { content: GuardrailsLegacyContent }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   

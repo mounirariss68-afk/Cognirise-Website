@@ -1712,18 +1712,25 @@ export interface CmsAgentAuthorityFrameworkContent {
   relatedIds?: string[];
 }
 
-export type CmsGuardrailsFrameworkContentSchemaVersion = typeof CmsGuardrailsFrameworkContentSchemaVersion[keyof typeof CmsGuardrailsFrameworkContentSchemaVersion];
+export type CmsGuardrailsLegacyFrameworkContentSchemaVersion = typeof CmsGuardrailsLegacyFrameworkContentSchemaVersion[keyof typeof CmsGuardrailsLegacyFrameworkContentSchemaVersion];
 
 
-export const CmsGuardrailsFrameworkContentSchemaVersion = {
+export const CmsGuardrailsLegacyFrameworkContentSchemaVersion = {
   NUMBER_1: 1,
 } as const;
 
-export type CmsGuardrailsFrameworkContentTemplate = typeof CmsGuardrailsFrameworkContentTemplate[keyof typeof CmsGuardrailsFrameworkContentTemplate];
+export type CmsGuardrailsLegacyFrameworkContentTemplate = typeof CmsGuardrailsLegacyFrameworkContentTemplate[keyof typeof CmsGuardrailsLegacyFrameworkContentTemplate];
 
 
-export const CmsGuardrailsFrameworkContentTemplate = {
+export const CmsGuardrailsLegacyFrameworkContentTemplate = {
   guardrails: 'guardrails',
+} as const;
+
+export type CmsGuardrailsLegacyFrameworkContentContentVersion = typeof CmsGuardrailsLegacyFrameworkContentContentVersion[keyof typeof CmsGuardrailsLegacyFrameworkContentContentVersion];
+
+
+export const CmsGuardrailsLegacyFrameworkContentContentVersion = {
+  'guardrails-legacy-v1': 'guardrails-legacy-v1',
 } as const;
 
 /**
@@ -2245,9 +2252,10 @@ export interface CmsGuardrailsRelatedLink {
   href: CmsGuardrailsRelatedLinkHref;
 }
 
-export interface CmsGuardrailsFrameworkContent {
-  schemaVersion?: CmsGuardrailsFrameworkContentSchemaVersion;
-  template: CmsGuardrailsFrameworkContentTemplate;
+export interface CmsGuardrailsLegacyFrameworkContent {
+  schemaVersion?: CmsGuardrailsLegacyFrameworkContentSchemaVersion;
+  template: CmsGuardrailsLegacyFrameworkContentTemplate;
+  contentVersion?: CmsGuardrailsLegacyFrameworkContentContentVersion;
   hero: CmsGuardrailsHero;
   heroMedia?: CmsImmutableMediaReference;
   heroMediaId?: string;
@@ -2276,6 +2284,342 @@ export interface CmsGuardrailsFrameworkContent {
   relatedIds?: string[];
   relatedLink: CmsGuardrailsRelatedLink;
 }
+
+export type CmsSetProveHoldGuardrailsFrameworkContentSchemaVersion = typeof CmsSetProveHoldGuardrailsFrameworkContentSchemaVersion[keyof typeof CmsSetProveHoldGuardrailsFrameworkContentSchemaVersion];
+
+
+export const CmsSetProveHoldGuardrailsFrameworkContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export type CmsSetProveHoldGuardrailsFrameworkContentTemplate = typeof CmsSetProveHoldGuardrailsFrameworkContentTemplate[keyof typeof CmsSetProveHoldGuardrailsFrameworkContentTemplate];
+
+
+export const CmsSetProveHoldGuardrailsFrameworkContentTemplate = {
+  guardrails: 'guardrails',
+} as const;
+
+export type CmsSetProveHoldGuardrailsFrameworkContentContentVersion = typeof CmsSetProveHoldGuardrailsFrameworkContentContentVersion[keyof typeof CmsSetProveHoldGuardrailsFrameworkContentContentVersion];
+
+
+export const CmsSetProveHoldGuardrailsFrameworkContentContentVersion = {
+  'set-prove-hold-v1': 'set-prove-hold-v1',
+} as const;
+
+export interface CmsSetProveHoldHero {
+  eyebrow: CmsGuardrailsText;
+  headline: CmsGuardrailsText;
+  subheadline: CmsGuardrailsText;
+  strapline: CmsGuardrailsText;
+  primaryAction: CmsGuardrailsContactAction;
+  secondaryAction: CmsGuardrailsAuthorityAction;
+}
+
+export type CmsSetProveHoldPhaseId = typeof CmsSetProveHoldPhaseId[keyof typeof CmsSetProveHoldPhaseId];
+
+
+export const CmsSetProveHoldPhaseId = {
+  set: 'set',
+  prove: 'prove',
+  hold: 'hold',
+} as const;
+
+export type CmsSetProveHoldPhaseMode = typeof CmsSetProveHoldPhaseMode[keyof typeof CmsSetProveHoldPhaseMode];
+
+
+export const CmsSetProveHoldPhaseMode = {
+  sequential: 'sequential',
+  'pre-launch-tests': 'pre-launch-tests',
+  concurrent: 'concurrent',
+} as const;
+
+export type CmsSetProveHoldPhaseActionIdsItem = typeof CmsSetProveHoldPhaseActionIdsItem[keyof typeof CmsSetProveHoldPhaseActionIdsItem];
+
+
+export const CmsSetProveHoldPhaseActionIdsItem = {
+  'set-name': 'set-name',
+  'set-build': 'set-build',
+  'set-choose': 'set-choose',
+  'set-assign': 'set-assign',
+  'prove-attack': 'prove-attack',
+  'prove-red-team': 'prove-red-team',
+  'prove-count': 'prove-count',
+  'prove-record': 'prove-record',
+  'hold-watch': 'hold-watch',
+  'hold-retest': 'hold-retest',
+  'hold-revisit': 'hold-revisit',
+  'hold-report': 'hold-report',
+} as const;
+
+export interface CmsSetProveHoldPhase {
+  id: CmsSetProveHoldPhaseId;
+  title: CmsGuardrailsText;
+  caption: CmsGuardrailsText;
+  mode: CmsSetProveHoldPhaseMode;
+  /**
+     * @minItems 4
+     * @maxItems 4
+     */
+  actionIds: CmsSetProveHoldPhaseActionIdsItem[];
+}
+
+export interface CmsSetProveHoldOverview {
+  heading: CmsGuardrailsText;
+  intro: CmsGuardrailsText;
+  /**
+     * @minItems 3
+     * @maxItems 3
+     */
+  phases: CmsSetProveHoldPhase[];
+}
+
+export type CmsSetProveHoldLayerId = typeof CmsSetProveHoldLayerId[keyof typeof CmsSetProveHoldLayerId];
+
+
+export const CmsSetProveHoldLayerId = {
+  policy: 'policy',
+  prompt: 'prompt',
+  runtime: 'runtime',
+  architecture: 'architecture',
+} as const;
+
+export interface CmsSetProveHoldLayer {
+  id: CmsSetProveHoldLayerId;
+  title: CmsGuardrailsText;
+  whatItIs: CmsGuardrailsText;
+  customerDataExample: CmsGuardrailsText;
+  limitation: CmsGuardrailsText;
+  /**
+     * @minimum 1
+     * @maximum 4
+     */
+  strength: number;
+}
+
+export interface CmsSetProveHoldLayers {
+  heading: CmsGuardrailsText;
+  intro: CmsGuardrailsText;
+  exampleRule: CmsGuardrailsText;
+  /**
+     * @minItems 5
+     * @maxItems 5
+     */
+  tableHeaders: CmsGuardrailsText[];
+  /**
+     * @minItems 4
+     * @maxItems 4
+     */
+  rows: CmsSetProveHoldLayer[];
+  callout: CmsGuardrailsText;
+}
+
+export type CmsSetProveHoldMatrixRowLayerId = typeof CmsSetProveHoldMatrixRowLayerId[keyof typeof CmsSetProveHoldMatrixRowLayerId];
+
+
+export const CmsSetProveHoldMatrixRowLayerId = {
+  policy: 'policy',
+  prompt: 'prompt',
+  runtime: 'runtime',
+  architecture: 'architecture',
+} as const;
+
+export interface CmsSetProveHoldMatrixRow {
+  layerId: CmsSetProveHoldMatrixRowLayerId;
+  layer: CmsGuardrailsText;
+  set: CmsGuardrailsText;
+  prove: CmsGuardrailsText;
+  hold: CmsGuardrailsText;
+}
+
+export interface CmsSetProveHoldLifecycleMatrix {
+  heading: CmsGuardrailsText;
+  intro: CmsGuardrailsText;
+  /**
+     * @minItems 4
+     * @maxItems 4
+     */
+  columnHeaders: CmsGuardrailsText[];
+  /**
+     * @minItems 4
+     * @maxItems 4
+     */
+  rows: CmsSetProveHoldMatrixRow[];
+  callout: CmsGuardrailsText;
+  measure: CmsGuardrailsText;
+}
+
+export type CmsSetProveHoldActionId = typeof CmsSetProveHoldActionId[keyof typeof CmsSetProveHoldActionId];
+
+
+export const CmsSetProveHoldActionId = {
+  'set-name': 'set-name',
+  'set-build': 'set-build',
+  'set-choose': 'set-choose',
+  'set-assign': 'set-assign',
+  'prove-attack': 'prove-attack',
+  'prove-red-team': 'prove-red-team',
+  'prove-count': 'prove-count',
+  'prove-record': 'prove-record',
+  'hold-watch': 'hold-watch',
+  'hold-retest': 'hold-retest',
+  'hold-revisit': 'hold-revisit',
+  'hold-report': 'hold-report',
+} as const;
+
+export type CmsSetProveHoldActionPhase = typeof CmsSetProveHoldActionPhase[keyof typeof CmsSetProveHoldActionPhase];
+
+
+export const CmsSetProveHoldActionPhase = {
+  set: 'set',
+  prove: 'prove',
+  hold: 'hold',
+} as const;
+
+export type CmsSetProveHoldOutputOrCadenceLabel = typeof CmsSetProveHoldOutputOrCadenceLabel[keyof typeof CmsSetProveHoldOutputOrCadenceLabel];
+
+
+export const CmsSetProveHoldOutputOrCadenceLabel = {
+  Output: 'Output',
+  Cadence: 'Cadence',
+} as const;
+
+export interface CmsSetProveHoldOutputOrCadence {
+  label: CmsSetProveHoldOutputOrCadenceLabel;
+  value: CmsGuardrailsText;
+}
+
+export interface CmsSetProveHoldAction {
+  id: CmsSetProveHoldActionId;
+  phase: CmsSetProveHoldActionPhase;
+  /**
+     * @minimum 1
+     * @maximum 4
+     */
+  order: number;
+  title: CmsGuardrailsText;
+  statement: CmsGuardrailsText;
+  /**
+     * @minItems 1
+     * @maxItems 5
+     */
+  explanation: CmsGuardrailsText[];
+  owner: CmsGuardrailsText;
+  outputOrCadence: CmsSetProveHoldOutputOrCadence;
+  failureCondition: CmsGuardrailsText;
+  callout: CmsGuardrailsText;
+}
+
+export type CmsSetProveHoldReferenceId = typeof CmsSetProveHoldReferenceId[keyof typeof CmsSetProveHoldReferenceId];
+
+
+export const CmsSetProveHoldReferenceId = {
+  'owasp-llm-top-10': 'owasp-llm-top-10',
+  'owasp-agent-control-standard': 'owasp-agent-control-standard',
+  'mitre-atlas': 'mitre-atlas',
+  'nist-ai-rmf': 'nist-ai-rmf',
+  'nist-ai-600-1': 'nist-ai-600-1',
+  'iso-42001': 'iso-42001',
+} as const;
+
+export interface CmsSetProveHoldReference {
+  id: CmsSetProveHoldReferenceId;
+  title: CmsGuardrailsText;
+  version: CmsGuardrailsText;
+  url: string;
+  note: CmsGuardrailsText;
+}
+
+export interface CmsSetProveHoldReferences {
+  heading: CmsGuardrailsText;
+  intro: CmsGuardrailsText;
+  /**
+     * @minItems 6
+     * @maxItems 6
+     */
+  items: CmsSetProveHoldReference[];
+  disclaimer: CmsGuardrailsText;
+}
+
+export type CmsSetProveHoldMoveId = typeof CmsSetProveHoldMoveId[keyof typeof CmsSetProveHoldMoveId];
+
+
+export const CmsSetProveHoldMoveId = {
+  one: 'one',
+  two: 'two',
+  three: 'three',
+} as const;
+
+export interface CmsSetProveHoldMove {
+  id: CmsSetProveHoldMoveId;
+  /**
+     * @minimum 1
+     * @maximum 3
+     */
+  number: number;
+  title: CmsGuardrailsText;
+  body: CmsGuardrailsText;
+}
+
+export interface CmsSetProveHoldMoves {
+  heading: CmsGuardrailsText;
+  intro: CmsGuardrailsText;
+  /**
+     * @minItems 3
+     * @maxItems 3
+     */
+  items: CmsSetProveHoldMove[];
+  cta: CmsGuardrailsCta;
+}
+
+export type CmsSetProveHoldRelatedLinkHref = typeof CmsSetProveHoldRelatedLinkHref[keyof typeof CmsSetProveHoldRelatedLinkHref];
+
+
+export const CmsSetProveHoldRelatedLinkHref = {
+  '/methodologies/agent-authority-model': '/methodologies/agent-authority-model',
+} as const;
+
+export interface CmsSetProveHoldRelatedLink {
+  title: CmsGuardrailsText;
+  body: CmsGuardrailsText;
+  href: CmsSetProveHoldRelatedLinkHref;
+}
+
+export interface CmsSetProveHoldGuardrailsFrameworkContent {
+  schemaVersion?: CmsSetProveHoldGuardrailsFrameworkContentSchemaVersion;
+  template: CmsSetProveHoldGuardrailsFrameworkContentTemplate;
+  contentVersion: CmsSetProveHoldGuardrailsFrameworkContentContentVersion;
+  hero: CmsSetProveHoldHero;
+  heroMedia?: CmsImmutableMediaReference;
+  heroMediaId?: string;
+  overview: CmsSetProveHoldOverview;
+  layers: CmsSetProveHoldLayers;
+  lifecycleMatrix: CmsSetProveHoldLifecycleMatrix;
+  /**
+     * @minItems 12
+     * @maxItems 12
+     */
+  actions: CmsSetProveHoldAction[];
+  references: CmsSetProveHoldReferences;
+  moves: CmsSetProveHoldMoves;
+  relatedLink: CmsSetProveHoldRelatedLink;
+  visibility?: CmsVisibility;
+  /**
+     * @minimum 0
+     * @maximum 10000
+     */
+  order?: number;
+  /** @maxItems 30 */
+  sources?: CmsSource[];
+  verificationDate?: string;
+  reviewDate?: string;
+  /** @maxItems 50 */
+  relatedIds?: string[];
+}
+
+/**
+ * Versioned standalone Guardrails composition. Omitted contentVersion is accepted only for historical legacy revisions.
+ */
+export type CmsGuardrailsFrameworkContent = CmsGuardrailsLegacyFrameworkContent | CmsSetProveHoldGuardrailsFrameworkContent;
 
 export type CmsMethodologyFrameworkContentSchemaVersion = typeof CmsMethodologyFrameworkContentSchemaVersion[keyof typeof CmsMethodologyFrameworkContentSchemaVersion];
 
