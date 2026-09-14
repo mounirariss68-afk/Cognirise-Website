@@ -57,6 +57,12 @@ Generated landing inventory is a seed for absent authority, not a replacement fo
 
 **How to apply:** Validate and preserve the stored baseline, report generated-copy drift, and use the stored payload if its initial draft needs reconstructing. Keep publication and editorial-history conflict checks intact.
 
+Original People inventory receipts are one-time seed evidence, not continuing authority over recovered or edited profile copy.
+
+**Why:** Historical roster recovery changed generated biographies for profiles outside the controlled-governance subset. The importer safely preserved their original receipts, but a stricter verifier then blocked unrelated merges.
+
+**How to apply:** Allow reported copy drift only for original person seed identities while still validating stored subjects. Keep availability, controlled-governance decisions, and new successor operation receipts strict; never rewrite historical receipts or republish to resolve a seed mismatch.
+
 Do not install a draft-only one-shot reconciler as a permanent fail-fast merge hook.
 
 **Why:** Normal review, publication, or later editing can invalidate its draft-only replay preconditions and then break every unrelated merge.

@@ -90,6 +90,12 @@ export function toleratesDocumentReceiptDigestDrift(
   governedExternalIds: ReadonlySet<string>,
 ) {
   return governedExternalIds.has(operation.externalId)
+    // The original People inventory is a one-time seed, not continuing
+    // authority over biographies or later historical-copy recovery. The
+    // importer preserves an existing receipt and document on digest drift.
+    // Do not extend this to availability/governance or successor operations.
+    || (operation.kind === "person"
+      && operation.idempotencyKey === `cms-inventory-v2:${operation.externalId}`)
     || operation.kind === "industry"
     || operation.idempotencyKey.startsWith("cms-case-study-baseline-v1:")
     || operation.idempotencyKey.startsWith("cms-case-study-baseline-v2:");

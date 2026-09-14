@@ -330,6 +330,53 @@ test("intentional governed industry digest drift remains reconcilable across con
   assert.equal(coverage.missingCount, 0);
 });
 
+test("original People seeds preserve historical receipts without weakening later decisions", () => {
+  const externalId = "person:historical-profile";
+  const idempotencyKey = `cms-inventory-v2:${externalId}`;
+  const tolerateDigestDrift = toleratesDocumentReceiptDigestDrift({
+    externalId, idempotencyKey, kind: "person",
+  }, new Set());
+  assert.equal(tolerateDigestDrift, true);
+  const expected = new Map([[idempotencyKey, {
+    requestDigest: "recovered-inventory-copy",
+    subjectType: "document" as const,
+    tolerateDigestDrift,
+  }]]);
+  const receipt = {
+    idempotencyKey,
+    requestDigest: "original-import-copy",
+    subjectId: "preserved-person",
+  };
+  const before = JSON.stringify(receipt);
+  const coverage = inspectReceiptCoverage(expected, [receipt]);
+  assert.deepEqual(coverage.conflicts, []);
+  assert.equal(coverage.missingCount, 0);
+  assert.equal(JSON.stringify(receipt), before);
+  assert.equal(inspectReceiptCoverage(expected, []).missingCount, 1);
+
+  for (const key of [
+    `cms-person-market-availability-v1:${externalId}`,
+    `cms-person-governance-v1:${externalId}`,
+    `cms-inventory-v3:${externalId}`,
+    "cms-inventory-v2:person:another-profile",
+  ]) {
+    const tolerance = toleratesDocumentReceiptDigestDrift({
+      externalId, idempotencyKey: key, kind: "person",
+    }, new Set());
+    assert.equal(tolerance, false, key);
+    assert.equal(inspectReceiptCoverage(new Map([[key, {
+      requestDigest: "changed-decision",
+      subjectType: "document",
+      tolerateDigestDrift: tolerance,
+    }]]), [{ ...receipt, idempotencyKey: key }]).conflicts.length, 1);
+  }
+  assert.equal(toleratesDocumentReceiptDigestDrift({
+    externalId: "framework:other",
+    idempotencyKey: "cms-inventory-v2:framework:other",
+    kind: "framework",
+  }, new Set()), false);
+});
+
 test("a base-version current-binary receipt upgrades on the existing asset", () => {
   const { expected, historical: [historical], operation } = replacementExpectations();
   const priorUnversionedRequestDigest = historical.acceptedRequestDigests.find(

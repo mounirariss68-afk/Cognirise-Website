@@ -147,6 +147,13 @@ async function inspectReconciliationState(
   const mediaIds: string[] = [];
   for (const receipt of relevantReceipts) {
     const operation = expected.get(receipt.idempotencyKey)!;
+    if (operation.tolerateDigestDrift
+      && receipt.idempotencyKey.startsWith("cms-inventory-v2:person:")
+      && receipt.requestDigest !== operation.requestDigest) {
+      console.warn(
+        `Preserving historical People seed ${receipt.idempotencyKey}; generated copy differs. Existing receipts and editorial/publication authority remain unchanged.`,
+      );
+    }
     if (operation.subjectType === "document") documentIds.push(receipt.subjectId);
     else mediaIds.push(receipt.subjectId);
   }
