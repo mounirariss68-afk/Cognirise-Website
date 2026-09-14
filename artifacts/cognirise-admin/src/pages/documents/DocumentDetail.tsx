@@ -16,7 +16,7 @@ import {
   getListDocumentRevisionsQueryKey,
   DocumentStatus,
 } from "@workspace/api-client-react";
-import { getListMarketEditionsQueryKey, useListMarketEditions, getListDocumentEditionsQueryKey, useListDocumentEditions, useCreateDocumentEditionOverride as useCreateDocumentCustomization, getDocumentAvailability, getGetDocumentAvailabilityQueryKey, useGetDocumentAvailability, useReviewDocumentAvailability, usePublishDocumentAvailability, useSelectDocumentAvailabilitySource, getListDocumentReviewCommentsQueryKey, useListDocumentReviewComments, useAddDocumentReviewComment, useRejectDocumentRevision, getGetSharedMarketEditionMatrixQueryKey, useGetSharedMarketEditionMatrix, getCompareSharedMarketBaselineQueryKey, useEstablishSharedMarketBaseline, useBindSharedMarketEdition, useSaveSharedMarketOverrides, useCompareSharedMarketBaseline, useResolveSharedMarketBaselineUpdate, type SharedMarketOverride } from "@workspace/api-client-react";
+import { getListMarketEditionsQueryKey, useListMarketEditions, getListDocumentEditionsQueryKey, useListDocumentEditions, useCreateDocumentEditionOverride as useCreateDocumentCustomization, getDocumentAvailability, getGetDocumentAvailabilityQueryKey, useGetDocumentAvailability, useReviewDocumentAvailability, usePublishDocumentAvailability, useSelectDocumentAvailabilitySource, getListDocumentReviewCommentsQueryKey, useListDocumentReviewComments, useAddDocumentReviewComment, useRejectDocumentRevision, getGetSharedMarketEditionMatrixQueryKey, useGetSharedMarketEditionMatrix, getCompareSharedMarketBaselineQueryKey, useEstablishSharedMarketBaseline, useBindSharedMarketEdition, useSaveSharedMarketOverrides, useCompareSharedMarketBaseline, useResolveSharedMarketBaselineUpdate, type SharedMarketBinding, type SharedMarketOverride } from "@workspace/api-client-react";
 import { DocumentEditorContext } from "./DocumentEditorContext";
 import { DocumentCompareModal } from "./DocumentCompareModal";
 import { FieldOverrideIndicator } from "./FieldOverrideIndicator";
@@ -37,7 +37,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ContentEditor } from "./ContentEditor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,8 +48,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { officeLifecycleAction } from "./office-lifecycle";
-import { Check } from "lucide-react";
-import { collectContentMediaIds, CONTENT_GUIDANCE, documentReadiness, editionAuthoringActions } from "./authoring";
 import { buildDraftSave, describeSaveFailure, isDraftSaveResponse, serverValidationIssues, type DraftSeo, type DraftSaveIssue } from "./draft-save";
 import { describeActionError } from "./action-error";
 import { MarketAvailabilityChecklist, type AvailabilityDestination, type AvailabilitySelectionDraft } from "./MarketAvailabilityChecklist";
@@ -62,6 +59,10 @@ import { SharedBaselineEditor } from "./SharedBaselineEditor";
 import { applyLocalSuccessorToEditionMatrix, previewPinForEditionRevision, previewResponseMatchesTarget, type PreviewTarget } from "./preview-revision-lifecycle";
 import { createDraftRecoveryExport, downloadDraftRecovery } from "./draft-operation-safety";
 import { EditionAssignmentControl } from "./EditionAssignmentControl";
+import { ContentEditor, contentFieldId } from "./ContentEditor";
+import { buildDocumentReadiness as documentReadiness, collectContentMediaIds, CONTENT_GUIDANCE, editionAuthoringActions, readinessCounts, type ReadinessIssue } from "./authoring";
+import { reuseFailureOutcome } from "./edition-reuse";
+import { ReadinessPanel } from "./ReadinessPanel";
 
 function documentListPath(kind: CmsDocumentKind): string {
   switch (kind) {
@@ -235,6 +236,10 @@ export default function DocumentDetail() {
   const [pendingOverridePaths, setPendingOverridePaths] = useState<string[]>([]);
   const [resettingSharedField, setResettingSharedField] = useState(false);
   const [sharedCompareOpen, setSharedCompareOpen] = useState(false);
+  // Compare/resolve can be launched from a reuse source while a different
+  // frozen destination is selected in the editor. Keep the launched binding
+  // explicit so query, mutation, and labels never drift back to the source.
+  const [sharedCompareBinding, setSharedCompareBinding] = useState<SharedMarketBinding | null>(null);
   const [compareConflicts, setCompareConflicts] = useState<any[]>([]);
   const [isApplyingDecisions, setIsApplyingDecisions] = useState(false);
   const [baselineEditorOpen, setBaselineEditorOpen] = useState(false);
@@ -497,15 +502,23 @@ export default function DocumentDetail() {
   const selectedSharedBinding = sharedMatrix?.bindings.find((binding) => (
     binding.marketEditionId === selectedMarketConfig?.id && binding.locale === selectedLocale
   ));
+  const comparedSharedBinding = sharedCompareBinding && (
+    sharedMatrix?.bindings.find((binding) => binding.id === sharedCompareBinding.id)
+    ?? sharedCompareBinding
+  );
+  const comparedMarket = marketData?.items.find((market) => market.id === comparedSharedBinding?.marketEditionId);
+  const canResolveComparedBinding = Boolean(comparedSharedBinding && hasAuthorRole && (
+    isAdministrator || Boolean(comparedMarket && session?.user?.marketCodes?.includes(comparedMarket.code))
+  ));
   const selectedIsManagedMaterializedEdition = Boolean(selectedSharedBinding?.materializedRevisionId);
   const selectedBindingMode = selectedSharedBinding?.mode ?? "unbound";
   const tracksSharedOverrides = selectedBindingMode === "shared" || selectedBindingMode === "adapted";
-  const { data: sharedComparison, refetch: refetchSharedComparison, isFetching: isSharedComparisonLoading } = useCompareSharedMarketBaseline(
+  const { data: sharedComparison, isFetching: isSharedComparisonLoading } = useCompareSharedMarketBaseline(
     id!,
-    selectedSharedBinding?.id ?? "",
+    comparedSharedBinding?.id ?? "",
     { query: {
-      enabled: Boolean(id && selectedSharedBinding?.id && sharedCompareOpen),
-      queryKey: getCompareSharedMarketBaselineQueryKey(id!, selectedSharedBinding?.id ?? ""),
+      enabled: Boolean(id && comparedSharedBinding?.id && sharedCompareOpen),
+      queryKey: getCompareSharedMarketBaselineQueryKey(id!, comparedSharedBinding?.id ?? ""),
     } },
   );
   const sharedSource = availabilityForReview?.sharedSource;
@@ -840,18 +853,6 @@ export default function DocumentDetail() {
         doc.currentRevisionId,
       ));
   }, [doc?.currentRevisionId, isDocumentLoading, previewRevisionId, selectedEdition?.revisionId, selectedEdition?.revisionNumber]);
-  const readiness = useMemo(
-    () => doc ? documentReadiness(doc.kind as CmsDocumentKind, title, content, mediaIds) : [],
-    [content, doc, mediaIds, title],
-  );
-  const readinessWarnings = readiness.filter((item) => !item.ready && item.label === "Approved media");
-  const readinessBlockers = readiness.filter((item) => !item.ready && item.label !== "Approved media");
-  const readinessLabel = readinessBlockers.length
-    ? `${readinessBlockers.length} readiness blocker${readinessBlockers.length === 1 ? "" : "s"}`
-    : readinessWarnings.length
-      ? `${readinessWarnings.length} readiness warning${readinessWarnings.length === 1 ? "" : "s"}`
-      : "Ready for the next workflow step";
-  const readinessHasIssues = readinessBlockers.length > 0 || readinessWarnings.length > 0;
   const editionIsArchived = doc?.status === "archived";
   const authoringActions = editionAuthoringActions(
     selectedEdition,
@@ -860,6 +861,87 @@ export default function DocumentDetail() {
     hasUnsaved,
     isAdministrator,
   );
+  const selectedAvailability = availabilityForReview?.items.find((item) => (
+    item.market === selectedMarket && item.locale === selectedLocale
+  ));
+  const readiness = useMemo(
+    () => doc ? documentReadiness({
+      kind: doc.kind as CmsDocumentKind,
+      title,
+      content,
+      mediaIds,
+      exact: Boolean(selectedEdition?.exact && selectedEdition.revisionId),
+      readinessErrors: selectedEdition?.readinessErrors,
+      readinessIssues: selectedEdition?.readinessIssues,
+      workflowState: doc.status === "archived" ? "archived" : selectedEdition?.workflowState ?? doc.status,
+      publicationState: selectedEdition?.effectivePublicationState ?? selectedEdition?.publicationState,
+      hasUnsaved,
+      canEdit: canEditSelectedEdition && !editionIsArchived,
+      canPublish: canPublishSelectedEdition && !editionIsArchived,
+      canRestore: canPublishSelectedEdition,
+      availabilityPending: Boolean(selectedAvailability?.pending),
+      availableInMarket: selectedAvailability?.publishedEffectiveAvailable,
+    }) : [],
+    [canEditSelectedEdition, canPublishSelectedEdition, content, doc, editionIsArchived, hasUnsaved, mediaIds, selectedAvailability?.pending, selectedAvailability?.publishedEffectiveAvailable, selectedEdition?.exact, selectedEdition?.readinessErrors, selectedEdition?.readinessIssues, selectedEdition?.revisionId, selectedEdition?.workflowState, selectedEdition?.publicationState, selectedEdition?.effectivePublicationState, title],
+  );
+  const { blockers: readinessBlockers, warnings: readinessWarnings } = readinessCounts(readiness);
+  const readinessLabel = readinessBlockers
+    ? `${readinessBlockers} readiness blocker${readinessBlockers === 1 ? "" : "s"}`
+    : readinessWarnings
+      ? `${readinessWarnings} readiness warning${readinessWarnings === 1 ? "" : "s"}`
+      : "Ready for the next workflow step";
+  const readinessHasIssues = readinessBlockers > 0 || readinessWarnings > 0;
+  const readinessPanelId = "document-readiness-panel";
+  const focusReadinessPanel = useCallback(() => {
+    const panel = document.getElementById(readinessPanelId);
+    panel?.scrollIntoView({ behavior: "smooth", block: "start" });
+    panel?.focus({ preventScroll: true });
+  }, []);
+  const focusReadinessTarget = useCallback((target: string, fallbackTarget?: string) => {
+    window.setTimeout(() => {
+      const element = document.getElementById(target) ?? (fallbackTarget ? document.getElementById(fallbackTarget) : null);
+      element?.scrollIntoView({ behavior: "smooth", block: "center" });
+      element?.focus({ preventScroll: true });
+    }, 0);
+  }, []);
+  const handleReadinessAction = useCallback((issue: ReadinessIssue) => {
+    switch (issue.action) {
+      case "focus-title":
+        focusReadinessTarget("document-title");
+        return;
+      case "focus-content-field":
+        focusReadinessTarget(contentFieldId(issue.path), `${readinessPanelId}-${issue.id}`);
+        return;
+      case "focus-seo":
+        setActiveSideTab("seo");
+        focusReadinessTarget(issue.path === "seo.description"
+          ? "seo-description"
+          : issue.path === "seo.canonicalUrl"
+            ? "seo-canonical-url"
+            : "seo-title");
+        return;
+      case "open-editions":
+        setActiveSideTab("editions");
+        focusReadinessTarget("editions-readiness-anchor");
+        return;
+      case "open-review-comments":
+        setActiveSideTab("metadata");
+        focusReadinessTarget("review-comment");
+        return;
+      case "focus-restore":
+        focusReadinessTarget("restore-draft");
+        return;
+      case "focus-save":
+        focusReadinessTarget("save-draft");
+        return;
+      case "focus-submit-review":
+        focusReadinessTarget("submit-review");
+        return;
+      case "review-access":
+        focusReadinessTarget(`${readinessPanelId}-${issue.id}`);
+        return;
+    }
+  }, [focusReadinessTarget]);
   const fieldIssue = (path: string) => saveIssues.find((issue) => issue.path === path)?.message;
   const editorHydrated = hydratedEditionKey.current === currentEditorKey.current && hydratedRevision.current !== undefined;
   const editorLocked = !editorHydrated || updateDoc.isPending || resettingSharedField || saveSharedOverrides.isPending || previewingRevisionId !== null || authoringActions.immutable
@@ -1732,19 +1814,22 @@ export default function DocumentDetail() {
           </div>
         </div>
          <div className="grid w-full min-w-0 max-w-full grid-cols-2 items-stretch gap-1.5 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-end sm:gap-2">
-           <div
-             role="status"
+            <button
+              type="button"
+              aria-controls={readinessPanelId}
+              onClick={focusReadinessPanel}
              aria-live="polite"
              data-testid="readiness-summary"
-             className={`hidden rounded border px-2 py-1 text-[10px] font-mono uppercase tracking-wider sm:block ${readinessBlockers.length ? "border-destructive/40 bg-destructive/5 text-destructive" : readinessHasIssues ? "border-amber-400/50 bg-amber-50 text-amber-800" : "border-emerald-400/50 bg-emerald-50 text-emerald-800"}`}
+              className={`hidden rounded border px-2 py-1 text-[10px] font-mono uppercase tracking-wider underline-offset-2 hover:underline sm:block ${readinessBlockers ? "border-destructive/40 bg-destructive/5 text-destructive" : readinessHasIssues ? "border-amber-400/50 bg-amber-50 text-amber-800" : "border-emerald-400/50 bg-emerald-50 text-emerald-800"}`}
            >
              {readinessLabel}
-           </div>
+            </button>
              <Button variant="outline" size="sm" onClick={openPreview} disabled={hasUnsaved || previewingRevisionId !== null} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
              {previewingRevisionId ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Eye className="w-3.5 h-3.5 mr-2" />} {doc.kind === "framework" ? "Preview buyer view" : doc.kind === "office" ? "Preview contact card" : "Preview"}
           </Button>
 
           <Button
+              id="save-draft"
              onClick={() => handleSave()}
              disabled={!editorHydrated || updateDoc.isPending || previewingRevisionId !== null || saveBlocked || !authoringActions.canSave}
             size="sm"
@@ -1768,7 +1853,7 @@ export default function DocumentDetail() {
            </Button>
 
           {authoringActions.canSubmit && (
-                <Button variant="outline" size="sm" onClick={() => handleAction("submit")} disabled={updateDoc.isPending || previewingRevisionId !== null || submitDoc.isPending || reviewAvailability.isPending || submittingSharedReview || !contentValidation.success} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
+                <Button id="submit-review" variant="outline" size="sm" onClick={() => handleAction("submit")} disabled={updateDoc.isPending || previewingRevisionId !== null || submitDoc.isPending || reviewAvailability.isPending || submittingSharedReview || !contentValidation.success} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
               <Send className="w-3.5 h-3.5 mr-2" /> Submit Review
             </Button>
           )}
@@ -1805,7 +1890,7 @@ export default function DocumentDetail() {
              </Button>
            )}
           {canPublish && doc.status === "archived" ? (
-               <Button variant="outline" size="sm" onClick={() => handleAction("restore")} disabled={updateDoc.isPending || previewingRevisionId !== null || restoreDoc.isPending} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
+                <Button id="restore-draft" variant="outline" size="sm" onClick={() => handleAction("restore")} disabled={updateDoc.isPending || previewingRevisionId !== null || restoreDoc.isPending} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
               <RotateCcw className="mr-2 h-4 w-4" /> Restore as draft
             </Button>
           ) : canPublish && doc.kind !== "office" ? (
@@ -1919,7 +2004,11 @@ export default function DocumentDetail() {
               <p className="text-xs font-semibold uppercase tracking-wider text-primary">{doc.kind.replace("-", " ")} authoring guide</p>
               <p className="mt-1 text-sm text-muted-foreground">{CONTENT_GUIDANCE[doc.kind as CmsDocumentKind]}</p>
               <p className="mt-3 text-xs font-medium">
-                Editing: <strong>{selectedIsCustomization ? `Customization for ${selectedMarketConfig?.displayName ?? selectedMarket}` : "Shared content"}</strong>
+                Editing: <strong data-testid="editing-context">{!selectedMarket
+                  ? "Awaiting exact edition"
+                  : selectedIsCustomization
+                    ? `Customization for ${selectedMarketConfig?.displayName ?? selectedMarket}`
+                    : "Shared content"}</strong>
                 {selectedIsCustomization && <Button type="button" variant="link" size="sm" className="ml-1 h-auto px-1 text-xs" onClick={() => sharedSource && selectEdition(sharedSource.market, sharedSource.locale)}>Return to shared content</Button>}
               </p>
               {authoringActions.immutable && <p className="mt-2 text-xs text-amber-600">This edition is in review and cannot be edited until it is approved or rejected.</p>}
@@ -1936,39 +2025,7 @@ export default function DocumentDetail() {
                 </div>
               )}
             </section>
-             <section className="rounded-lg border bg-card p-4" aria-label="Publication readiness" data-testid="publication-readiness">
-               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                 <h2 className="text-sm font-semibold">Readiness</h2>
-                 <span className={`text-xs font-medium ${readinessBlockers.length ? "text-destructive" : readinessHasIssues ? "text-amber-700" : "text-emerald-700"}`}>{readinessLabel}</span>
-               </div>
-               <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-                 {readiness.map((item) => {
-                   const isMediaWarning = item.label === "Approved media" && !item.ready;
-                   const target = item.label === "Display title" ? "document-title" : undefined;
-                   return (
-                     <li key={item.label} className="flex items-start gap-2 rounded border bg-muted/10 p-2">
-                       {item.ready
-                         ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
-                         : <AlertTriangle className={`mt-0.5 h-4 w-4 shrink-0 ${isMediaWarning ? "text-amber-600" : "text-destructive"}`} aria-hidden="true" />}
-                       <div className="min-w-0">
-                         <p className="text-xs font-medium">{item.label}{!item.ready && <span className="ml-1 text-[10px] font-normal uppercase tracking-wide text-muted-foreground">{isMediaWarning ? "warning" : "blocker"}</span>}</p>
-                         <p className="text-[10px] text-muted-foreground">{item.detail}</p>
-                         {!item.ready && target && (
-                           <button type="button" className="mt-1 text-[10px] font-medium text-primary underline" onClick={() => document.getElementById(target)?.focus()}>
-                             Focus field
-                           </button>
-                         )}
-                         {!item.ready && item.label === "Publication governance" && (
-                           <button type="button" className="mt-1 text-[10px] font-medium text-primary underline" onClick={() => setActiveSideTab("editions")}>
-                             Inspect editions
-                           </button>
-                         )}
-                       </div>
-                     </li>
-                   );
-                 })}
-               </ul>
-             </section>
+             <ReadinessPanel id={readinessPanelId} issues={readiness} onAction={handleReadinessAction} />
             <div>
 
               <FieldOverrideIndicator
@@ -2021,6 +2078,7 @@ export default function DocumentDetail() {
             </div>
 
             {doc.kind === "industry" ? (
+              <div id="document-content" tabIndex={-1} className="outline-none">
               <IndustryVisualWorkspace
                 content={content}
                 onChange={editorLocked ? () => {} : handleContentChange}
@@ -2034,6 +2092,7 @@ export default function DocumentDetail() {
                 hasUnsaved={hasUnsaved}
                 requestPreview={requestIndustryPreview}
               />
+              </div>
             ) : (
                       <div className="space-y-4"><DocumentEditorContext
           selectedMarket={selectedMarket}
@@ -2048,18 +2107,35 @@ export default function DocumentDetail() {
           onSelectEdition={selectEdition}
           mode={selectedBindingMode}
           isPending={updateDoc.isPending || previewingRevisionId !== null}
-          onCompare={() => setSharedCompareOpen(true)}
-          readinessBlockers={readinessBlockers.length}
-          readinessWarnings={readinessWarnings.length}
+          onCompare={() => {
+            if (!selectedSharedBinding) return;
+            setSharedCompareBinding(selectedSharedBinding);
+            setSharedCompareOpen(true);
+          }}
+          readinessIssues={readiness}
+          readinessPanelId={readinessPanelId}
+          onOpenReadiness={focusReadinessPanel}
           workflowState={selectedEdition?.workflowState ?? doc.status}
           publicationState={selectedEdition?.effectivePublicationState ?? selectedEdition?.publicationState}
           availabilityPending={Boolean(availabilityForReview?.items.find((item) => item.market === selectedMarket && item.locale === selectedLocale)?.pending)}
           availableInMarket={availabilityForReview?.items.find((item) => item.market === selectedMarket && item.locale === selectedLocale)?.publishedEffectiveAvailable}
         />
         <SharedEditionPanel
+          documentId={id!}
           matrix={sharedMatrix}
-          markets={(marketData?.items ?? []).map((market) => ({ id: market.id, code: market.code, displayName: market.displayName }))}
-          exactEditions={(editionMatrix?.items ?? []).filter((edition) => edition.exact && edition.revisionId).map((edition) => ({ market: edition.market, locale: edition.locale, revisionId: edition.revisionId, revisionNumber: edition.revisionNumber }))}
+          markets={(marketData?.items ?? []).map((market) => ({
+            id: market.id,
+            code: market.code,
+            displayName: market.displayName,
+            defaultLocale: market.defaultLocale,
+            fallbackLocale: market.fallbackLocale,
+          }))}
+          exactEditions={(editionMatrix?.items ?? []).filter((edition) => edition.exact).map((edition) => ({
+            market: edition.market,
+            locale: edition.locale,
+            revisionId: edition.revisionId,
+            revisionNumber: edition.revisionNumber,
+          }))}
           selectedMarket={selectedMarket}
           selectedLocale={selectedLocale}
           currentRevisionId={doc.currentRevisionId}
@@ -2085,21 +2161,65 @@ export default function DocumentDetail() {
             setBaselineBeingEdited(baseline);
             setBaselineEditorOpen(true);
           }}
-          onBind={({ marketEditionId, locale, mode, baseline, bindingBaselineId, bindingBaselineRevisionId, independentRevisionId, translationSourceRevisionId, version }) => {
+          onBind={({ marketEditionId, locale, mode, baseline, bindingBaselineId, bindingBaselineRevisionId, independentRevisionId, expectedDestinationRevisionId, expectedActiveBaselineRevisionId, translationSourceRevisionId, version }) => {
             bindSharedEdition.mutate({ documentId: id!, data: {
               marketEditionId, locale, mode, version,
               ...(mode === "independent" ? { independentRevisionId } : {
                 baselineId: bindingBaselineId ?? baseline?.id ?? selectedSharedBinding?.baselineId ?? undefined,
                 baselineRevisionId: bindingBaselineRevisionId ?? baseline?.revisionId ?? selectedSharedBinding?.baselineRevisionId ?? undefined,
                 translationSourceRevisionId,
+                expectedDestinationRevisionId,
+                expectedActiveBaselineRevisionId,
               }),
             } }, {
               onSuccess: () => { invalidateSharedEdition(); toast({ title: `${mode} binding saved`, description: "The selected revision and lineage are frozen until explicitly changed." }); },
               onError: (error: any) => toast({ title: "Binding was not saved", description: error?.data?.error || error?.error || error?.message, variant: "destructive" }),
             });
           }}
-          onCompare={(binding) => { setSharedCompareOpen(true); void refetchSharedComparison(); }}
+          onCompare={(binding) => {
+            setSharedCompareBinding(binding);
+            setSharedCompareOpen(true);
+          }}
           onResetOverride={resetSharedField}
+          canEditDestination={(market) => hasAuthorRole && (
+            isAdministrator || Boolean(session?.user?.marketCodes?.includes(market))
+          )}
+          onApplyReuse={async (baseline, requests) => {
+            const outcomes = await Promise.all(requests.map(async (request) => {
+              try {
+                await bindSharedEdition.mutateAsync({
+                  documentId: id!,
+                  data: {
+                    marketEditionId: request.marketEditionId,
+                    locale: request.locale,
+                    mode: "shared",
+                    baselineId: baseline.id,
+                    baselineRevisionId: baseline.revisionId,
+                    expectedDestinationRevisionId: request.expectedDestinationRevisionId,
+                    expectedActiveBaselineRevisionId: request.expectedActiveBaselineRevisionId,
+                    version: request.version,
+                  },
+                });
+                return {
+                  key: request.key,
+                  market: request.market,
+                  locale: request.locale,
+                  status: "success" as const,
+                  message: request.replacesCustomization
+                    ? "Customization replaced in a new draft; its prior revision remains in history."
+                    : "Saved content is now used in a new draft.",
+                };
+              } catch (error) {
+                return reuseFailureOutcome(request, error);
+              }
+            }));
+            await Promise.all([
+              queryClient.invalidateQueries({ queryKey: getGetSharedMarketEditionMatrixQueryKey(id!) }),
+              queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) }),
+              queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) }),
+            ]);
+            return outcomes;
+          }}
         />
         <EditionAssignmentControl
           editionId={selectedEditionId}
@@ -2112,7 +2232,7 @@ export default function DocumentDetail() {
           canManage={hasAuthorRole && canEditSelectedEdition}
           currentUser={session?.user ? { id: session.user.id, name: session.user.name } : undefined}
         />
-<OverridesContext.Provider value={{
+<div id="document-content" tabIndex={-1} className="outline-none"><OverridesContext.Provider value={{
           isAdapted: tracksSharedOverrides,
           canEdit: !editorLocked,
           operations: (selectedSharedBinding?.operations ?? []) as SharedMarketOverride[],
@@ -2123,7 +2243,8 @@ export default function DocumentDetail() {
                 value={content}
                 onChange={editorLocked ? () => {} : handleContentChange}
                 errors={contentValidation.success ? [] : contentValidation.errors}
-              /></fieldset></OverridesContext.Provider></div>
+                readinessPaths={readiness.filter((issue) => issue.path.startsWith("content.")).map((issue) => issue.path)}
+              /></fieldset></OverridesContext.Provider></div></div>
             )}
             {doc.kind !== "industry" && <details className="rounded-md border bg-muted/20 p-4">
               <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider">Advanced structured view (read only)</summary>
@@ -2189,7 +2310,7 @@ export default function DocumentDetail() {
                 <div className="max-h-32 space-y-2 overflow-y-auto">
                   {(reviewComments ?? []).map((comment) => <p key={comment.id} className="rounded border bg-muted/20 p-2 text-xs">{comment.body}</p>)}
                 </div>
-                <Textarea value={reviewComment} onChange={(event) => setReviewComment(event.target.value)} placeholder="Leave reviewer guidance…" rows={3} data-testid="textarea-review-comment" />
+                <Textarea id="review-comment" value={reviewComment} onChange={(event) => setReviewComment(event.target.value)} placeholder="Leave reviewer guidance…" rows={3} data-testid="textarea-review-comment" />
                 <div className="flex gap-2">
                   <Button type="button" size="sm" variant="outline" disabled={!reviewComment.trim() || addReviewComment.isPending || !selectedEdition?.revisionId} onClick={() => {
                     if (!selectedEdition?.revisionId) return;
@@ -2239,8 +2360,8 @@ export default function DocumentDetail() {
               </div>
             </TabsContent>
 
-              <TabsContent value="editions" id="edition-controls" tabIndex={-1} className="mt-0 flex-1 space-y-4 overflow-visible p-4 md:overflow-y-auto">
-              <div>
+             <TabsContent value="editions" id="edition-controls" tabIndex={-1} className="mt-0 flex-1 space-y-4 overflow-visible p-4 md:overflow-y-auto">
+              <div id="editions-readiness-anchor" tabIndex={-1}>
                 <h3 className="text-sm font-semibold">Show this content in</h3>
                 <p className="mt-1 text-xs text-muted-foreground">Destination changes are saved for review. They do not change the live website until the reviewed snapshot is published.</p>
                 {!canManageSharedDestinations && <p className="mt-2 text-xs text-amber-700">Shared destinations affect every selected market. Your assigned markets do not cover this shared selection.</p>}
@@ -2477,22 +2598,27 @@ export default function DocumentDetail() {
 
       <DocumentCompareModal
         isOpen={sharedCompareOpen}
-        onOpenChange={setSharedCompareOpen}
+        onOpenChange={(open) => {
+          setSharedCompareOpen(open);
+          if (!open) setSharedCompareBinding(null);
+        }}
         comparison={sharedComparison}
+        targetLabel={comparedMarket ? `${comparedMarket.displayName} · ${comparedSharedBinding?.locale}` : undefined}
+        canResolve={canResolveComparedBinding}
         conflicts={compareConflicts}
         onResolveConflict={(conflictId, decision) => {
           setCompareConflicts(prev => prev.map(c => c.conflictId === conflictId ? { ...c, decision } : c));
         }}
         onApplyDecisions={() => {
-          if (!selectedSharedBinding || !sharedComparison) return;
+          if (!comparedSharedBinding || !sharedComparison || !canResolveComparedBinding) return;
           const unresolved = compareConflicts.some((conflict) => !conflict.decision);
           if (unresolved) return;
           setIsApplyingDecisions(true);
           resolveSharedBaseline.mutate({
             documentId: id!,
-            bindingId: selectedSharedBinding.id,
+            bindingId: comparedSharedBinding.id,
             data: {
-              version: selectedSharedBinding.version,
+              version: comparedSharedBinding.version,
               baselineRevisionId: sharedComparison.baselineRevisionId,
               action: "adopt",
               // The generated client may lag the server schema briefly; the
@@ -2516,14 +2642,14 @@ export default function DocumentDetail() {
           });
         }}
         onResolve={(action) => {
-          if (!selectedSharedBinding || !sharedComparison) return;
+          if (!comparedSharedBinding || !sharedComparison || !canResolveComparedBinding) return;
           if (action === "adopt" && compareConflicts.some((conflict) => !conflict.decision)) return;
           setIsApplyingDecisions(true);
           resolveSharedBaseline.mutate({
             documentId: id!,
-            bindingId: selectedSharedBinding.id,
+            bindingId: comparedSharedBinding.id,
             data: {
-              version: selectedSharedBinding.version,
+              version: comparedSharedBinding.version,
               baselineRevisionId: sharedComparison.baselineRevisionId,
               action,
               ...(action === "adopt" ? { conflictDecisions: compareConflicts.map((conflict) => ({ conflictId: conflict.conflictId, choice: conflict.decision === "adopt" ? "shared" : "market" })) } : {}),

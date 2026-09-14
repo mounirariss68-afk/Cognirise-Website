@@ -229,6 +229,8 @@ test("Task 321 managed publication activates only after review and stays pinned"
         mode: "adapted",
         baselineId: baseline.id,
         baselineRevisionId: baseline.revisionId,
+        expectedDestinationRevisionId: null,
+        expectedActiveBaselineRevisionId: baseline.revisionId,
         version: 0,
       }),
       200,

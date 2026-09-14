@@ -106,22 +106,34 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
   const documentId = randomUUID();
   const independentDocumentId = randomUUID();
   const foreignDocumentId = randomUUID();
+
+  const personDocumentId = randomUUID();
   const uaeMarketId = randomUUID();
   const ksaMarketId = randomUUID();
   const qatarMarketId = randomUUID();
   const omanMarketId = randomUUID();
   const bahrainMarketId = randomUUID();
+
+  const guardMarketId = randomUUID();
   const disabledMarketId = randomUUID();
   const sourceEditionId = randomUUID();
   const arabicSourceEditionId = randomUUID();
   const sharedSourceEditionId = randomUUID();
   const independentEditionId = randomUUID();
   const foreignEditionId = randomUUID();
+
+  const personSourceEditionId = randomUUID();
+  const personLiveEditionId = randomUUID();
+  const guardEditionId = randomUUID();
   const sourceRevisionId = randomUUID();
   const arabicSourceRevisionId = randomUUID();
   const sharedSourceRevisionId = randomUUID();
   const independentRevisionId = randomUUID();
   const foreignRevisionId = randomUUID();
+
+  const personSourceRevisionId = randomUUID();
+  const personLiveRevisionId = randomUUID();
+  const guardRevisionId = randomUUID();
   const commonImageId = randomUUID();
   const commonImageVersionId = randomUUID();
   const conflictingCommonImageVersionId = randomUUID();
@@ -176,6 +188,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       [qatarMarketId, "qatar", true, false, "uae"],
       [omanMarketId, "oman", true, false, "uae"],
       [bahrainMarketId, "bahrain", true, false, "uae"],
+       [guardMarketId, "guard", true, false, "uae"],
       [disabledMarketId, "disabled", false, false, "uae"],
     ] as const) {
       await admin.query(
@@ -225,15 +238,38 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       slug: `task-321-ar-${documentId.slice(0, 8)}`,
       title: "النشرة المشتركة",
     };
+
+    const personSnapshot = {
+      slug: `person-${personDocumentId.slice(0, 8)}`,
+      title: "Shared person fixture",
+      summary: null,
+      mediaIds: [],
+      markets: ["uae", "ksa"],
+      content: {
+        schemaVersion: 1,
+        role: "employee",
+        title: "Shared person fixture",
+        biography: "A governed person profile copied only as a draft.",
+        focusAreas: [],
+        profileLinks: [],
+        approvedFallback: "initials",
+        visibility: "public",
+        order: 0,
+        sources: [],
+        relatedIds: [],
+      },
+    };
     await admin.query(
       `INSERT INTO cms_documents(id,kind,canonical_slug,title,owner_id,status)
        VALUES ($1,'publication',$2,$3,$4,'active'),
               ($5,'publication',$6,'Independent publication',$4,'active'),
-              ($7,'publication',$8,'Foreign source',$4,'active')`,
+              ($7,'publication',$8,'Foreign source',$4,'active'),
+              ($9,'person',$10,$11,$4,'active')`,
       [
         documentId, commonSnapshot.slug, commonSnapshot.title, administratorId,
         independentDocumentId, `independent-${independentDocumentId.slice(0, 8)}`,
         foreignDocumentId, `foreign-${foreignDocumentId.slice(0, 8)}`,
+        personDocumentId, personSnapshot.slug, personSnapshot.title,
       ],
     );
     await admin.query(
@@ -244,13 +280,19 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
          ($4,$2,'ksa','ar',$5,'published','custom'),
          ($6,$2,'shared-source','en',$3,'published','shared'),
          ($7,$8,'qatar','en',$9,'draft','custom'),
-         ($10,$11,'uae','en',$12,'published','custom')`,
+         ($10,$11,'uae','en',$12,'published','custom'),
+         ($13,$2,'guard','en',$14,'draft','custom'),
+         ($15,$16,'uae','en',$17,'draft','custom'),
+         ($18,$16,'ksa','en',$19,'published','custom')`,
       [
         sourceEditionId, documentId, commonSnapshot.slug,
         arabicSourceEditionId, arabicSnapshot.slug,
         sharedSourceEditionId,
         independentEditionId, independentDocumentId, `independent-${independentDocumentId.slice(0, 8)}`,
         foreignEditionId, foreignDocumentId, `foreign-${foreignDocumentId.slice(0, 8)}`,
+        guardEditionId, `guard-${documentId.slice(0, 8)}`,
+        personSourceEditionId, personDocumentId, personSnapshot.slug,
+        personLiveEditionId, `person-ksa-${personDocumentId.slice(0, 8)}`,
       ],
     );
     await admin.query(
@@ -261,33 +303,48 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
          ($5,$6,1,$7,'task321-arabic','approved',$4,'Task 321 Arabic source fixture'),
          ($8,$9,1,$3,'task321-shared-source','approved',$4,'Must never become a baseline'),
          ($10,$11,1,$3,'task321-independent','draft',$4,'Independent destination fixture'),
-         ($12,$13,1,$3,'task321-foreign','approved',$4,'Different document source fixture')`,
+         ($12,$13,1,$3,'task321-foreign','approved',$4,'Different document source fixture'),
+         ($14,$15,1,$3,'task321-guard','draft',$4,'Guided reuse target fixture'),
+         ($16,$17,1,$18,'task321-person-source','draft',$4,'Person shared source fixture'),
+         ($19,$20,1,$18,'task321-person-live','approved',$4,'Person live destination fixture')`,
       [
         sourceRevisionId, sourceEditionId, commonSnapshot, administratorId,
         arabicSourceRevisionId, arabicSourceEditionId, arabicSnapshot,
         sharedSourceRevisionId, sharedSourceEditionId,
         independentRevisionId, independentEditionId,
         foreignRevisionId, foreignEditionId,
+        guardRevisionId, guardEditionId,
+        personSourceRevisionId, personSourceEditionId, personSnapshot,
+        personLiveRevisionId, personLiveEditionId,
       ],
     );
     await admin.query(
       `UPDATE cms_market_editions
           SET published_revision_id=CASE id
             WHEN $1 THEN $2::uuid WHEN $3 THEN $4::uuid
-            WHEN $5 THEN $6::uuid WHEN $7 THEN $8::uuid END,
+            WHEN $5 THEN $6::uuid WHEN $7 THEN $8::uuid
+            WHEN $9 THEN $10::uuid END,
               published_at=now()
-        WHERE id IN ($1,$3,$5,$7)`,
+        WHERE id IN ($1,$3,$5,$7,$9)`,
       [
         sourceEditionId, sourceRevisionId,
         arabicSourceEditionId, arabicSourceRevisionId,
         sharedSourceEditionId, sharedSourceRevisionId,
         foreignEditionId, foreignRevisionId,
+        personLiveEditionId, personLiveRevisionId,
       ],
     );
     await admin.query(
       `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
        VALUES ($1,$2,$3,$4)`,
       [commonImageId, commonImageVersionId, documentId, `revision:${sourceRevisionId}`],
+    );
+    await admin.query(
+      `INSERT INTO cms_document_market_availability
+         (document_id,market_edition_id,locale,published_decision,draft_decision,
+          updated_by_user_id,published_by_user_id,published_at)
+       VALUES ($1,$2,'en','show',NULL,$3,$3,'2026-10-01T00:00:00.000Z')`,
+      [personDocumentId, ksaMarketId, administratorId],
     );
 
     routePool.options.connectionString = withSearchPath(originalDatabaseUrl, schema);
@@ -379,6 +436,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       201,
       "establish Arabic baseline",
     );
+
     assert.notEqual(englishBaseline.id, arabicBaseline.id);
     assert.equal(arabicBaseline.sourceRevisionId, arabicSourceRevisionId);
 
@@ -406,6 +464,154 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       403,
       "viewers cannot create independent bindings",
     );
+
+    const personBaseline = await json<{ id: string; revisionId: string }>(
+      await request(`/api/documents/${personDocumentId}/shared-market`, "POST", {
+        locale: "en", sourceRevisionId: personSourceRevisionId, snapshot: personSnapshot,
+      }),
+      201,
+      "establish a person baseline without publishing",
+    );
+    const personBaselineSuccessor = await json<{ id: string; revisionId: string }>(
+      await request(`/api/documents/${personDocumentId}/shared-market`, "POST", {
+        locale: "en", sourceRevisionId: personSourceRevisionId, snapshot: personSnapshot,
+        expectedRevisionNumber: 1,
+      }),
+      201,
+      "save a successor that retains the same person source revision",
+    );
+    const personLiveReceipt = async () => admin.query<{
+      published_revision_id: string; publication_state: string; payload: string; availability_receipt: string;
+    }>(
+      `SELECT edition.published_revision_id::text,edition.publication_state,
+              revision.payload::text,
+              (SELECT to_jsonb(availability)::text
+                 FROM cms_document_market_availability availability
+                WHERE availability.document_id=$1 AND availability.market_edition_id=$2 AND availability.locale='en')
+                availability_receipt
+         FROM cms_market_editions edition
+         JOIN cms_revisions revision ON revision.id=edition.published_revision_id
+        WHERE edition.id=$3`,
+      [personDocumentId, ksaMarketId, personLiveEditionId],
+    );
+    const personLiveBeforeReuse = await personLiveReceipt();
+    assert.equal(
+      (await request(`/api/documents/${personDocumentId}/shared-market/bindings`, "PUT", {
+        marketEditionId: ksaMarketId, locale: "en", mode: "shared",
+        baselineId: personBaseline.id, baselineRevisionId: personBaseline.revisionId,
+        expectedDestinationRevisionId: personLiveRevisionId,
+        expectedActiveBaselineRevisionId: personBaseline.revisionId,
+        version: 0,
+      })).status,
+      409,
+      "a baseline successor invalidates a previously inspected person reuse confirmation",
+    );
+    assert.deepEqual((await personLiveReceipt()).rows[0], personLiveBeforeReuse.rows[0],
+      "a stale person reuse request preserves the live revision and availability receipt");
+    const personBinding = await json<{ materializedRevisionId: string | null }>(
+      await request(`/api/documents/${personDocumentId}/shared-market/bindings`, "PUT", {
+        marketEditionId: ksaMarketId, locale: "en", mode: "shared",
+        baselineId: personBaselineSuccessor.id, baselineRevisionId: personBaselineSuccessor.revisionId,
+        expectedDestinationRevisionId: personLiveRevisionId,
+        expectedActiveBaselineRevisionId: personBaselineSuccessor.revisionId,
+        version: 0,
+      }),
+      200,
+      "materialize a person shared draft in a governed destination",
+    );
+    assert.ok(personBinding.materializedRevisionId);
+    const personDestination = await admin.query<{
+      publication_state: string; published_revision_id: string | null; workflow_state: string;
+    }>(
+      `SELECT edition.publication_state,edition.published_revision_id::text,revision.workflow_state
+         FROM cms_market_editions edition
+         JOIN cms_revisions revision ON revision.id=$2 AND revision.edition_id=edition.id
+        WHERE edition.document_id=$1 AND edition.market='ksa' AND edition.locale='en'`,
+      [personDocumentId, personBinding.materializedRevisionId],
+    );
+    assert.deepEqual(personDestination.rows[0], {
+      publication_state: "published",
+      published_revision_id: personLiveRevisionId,
+      workflow_state: "draft",
+    }, "person reuse appends only a draft and preserves its existing live pointer");
+    assert.deepEqual((await personLiveReceipt()).rows[0], personLiveBeforeReuse.rows[0],
+      "person reuse leaves the live person revision and published availability receipt byte-for-byte unchanged");
+
+    const guardedReuse = {
+      marketEditionId: guardMarketId,
+      locale: "en",
+      mode: "shared",
+      baselineId: englishBaseline.id,
+      baselineRevisionId: englishBaseline.revisionId,
+      expectedActiveBaselineRevisionId: englishBaseline.revisionId,
+    };
+    const guardState = async () => admin.query<{
+      revision_count: string; binding_count: string; latest_revision_id: string;
+    }>(
+      `SELECT
+         (SELECT count(*)::text FROM cms_revisions WHERE edition_id=$1) revision_count,
+         (SELECT count(*)::text FROM cms_market_edition_bindings
+           WHERE document_id=$2 AND market_edition_id=$3 AND locale='en') binding_count,
+         (SELECT id::text FROM cms_revisions WHERE edition_id=$1
+           ORDER BY revision_number DESC,created_at DESC,id DESC LIMIT 1) latest_revision_id`,
+      [guardEditionId, documentId, guardMarketId],
+    );
+    const beforeGuardRejections = await guardState();
+    assert.equal(
+      (await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        ...guardedReuse, version: 0,
+      })).status,
+      422,
+      "new shared materialization cannot omit an inspected destination token",
+    );
+    const { expectedActiveBaselineRevisionId: _omittedActiveBaselineToken, ...reuseWithoutActiveBaselineToken } = guardedReuse;
+    assert.equal(
+      (await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        ...reuseWithoutActiveBaselineToken, version: 0, expectedDestinationRevisionId: guardRevisionId,
+      })).status,
+      422,
+      "new shared materialization cannot omit an inspected active baseline token",
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        ...guardedReuse, version: 0, expectedDestinationRevisionId: null,
+      })).status,
+      409,
+      "a null inspected token cannot overwrite a destination saved after an empty comparison",
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        ...guardedReuse, version: 0, expectedDestinationRevisionId: randomUUID(),
+      })).status,
+      409,
+      "a missing inspected destination revision cannot materialize over current content",
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        ...guardedReuse, version: 1, expectedDestinationRevisionId: guardRevisionId,
+      })).status,
+      409,
+      "an absent binding cannot be created with an existing-binding version token",
+    );
+    assert.deepEqual((await guardState()).rows[0], beforeGuardRejections.rows[0],
+      "all rejected guided-reuse guards preserve the destination revision and binding state");
+    const guardedBinding = await json<{ version: number; materializedRevisionId: string }>(
+      await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        ...guardedReuse, version: 0, expectedDestinationRevisionId: guardRevisionId,
+      }),
+      200,
+      "an inspected current destination may be safely reused",
+    );
+    const beforeStaleBindingVersion = await guardState();
+    assert.equal(
+      (await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        ...guardedReuse, version: 0, expectedDestinationRevisionId: guardedBinding.materializedRevisionId,
+      })).status,
+      409,
+      "a stale create version cannot overwrite the newly bound destination",
+    );
+    assert.deepEqual((await guardState()).rows[0], beforeStaleBindingVersion.rows[0],
+      "a stale binding version leaves the materialized draft and binding untouched");
     const independent = await json<{ mode: string; baselineId: string | null; materializedRevisionId: string | null }>(
       await request(`/api/documents/${independentDocumentId}/shared-market/bindings`, "PUT", {
         marketEditionId: qatarMarketId, locale: "en", mode: "independent",
@@ -423,7 +629,8 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     }>(
       await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
         marketEditionId: ksaMarketId, locale: "en", mode: "adapted", baselineId: englishBaseline.id,
-        baselineRevisionId: englishBaseline.revisionId, version: 0,
+        baselineRevisionId: englishBaseline.revisionId, expectedDestinationRevisionId: null,
+        expectedActiveBaselineRevisionId: englishBaseline.revisionId, version: 0,
       }),
       200,
       "create Saudi adapted binding",
@@ -507,7 +714,8 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     const qatar = await json<{ id: string; version: number }>(
       await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
         marketEditionId: qatarMarketId, locale: "en", mode: "shared", baselineId: englishBaseline.id,
-        baselineRevisionId: englishBaseline.revisionId, version: 0,
+        baselineRevisionId: englishBaseline.revisionId, expectedDestinationRevisionId: null,
+        expectedActiveBaselineRevisionId: englishBaseline.revisionId, version: 0,
       }),
       200,
       "create shared binding to adopt",
@@ -523,7 +731,8 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     const oman = await json<{ id: string; version: number }>(
       await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
         marketEditionId: omanMarketId, locale: "en", mode: "adapted", baselineId: englishBaseline.id,
-        baselineRevisionId: englishBaseline.revisionId, version: 0,
+        baselineRevisionId: englishBaseline.revisionId, expectedDestinationRevisionId: null,
+        expectedActiveBaselineRevisionId: englishBaseline.revisionId, version: 0,
       }),
       200,
       "create adapted binding to reset",
@@ -531,7 +740,8 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     const bahrain = await json<{ id: string; version: number }>(
       await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
         marketEditionId: bahrainMarketId, locale: "en", mode: "adapted", baselineId: englishBaseline.id,
-        baselineRevisionId: englishBaseline.revisionId, version: 0,
+        baselineRevisionId: englishBaseline.revisionId, expectedDestinationRevisionId: null,
+        expectedActiveBaselineRevisionId: englishBaseline.revisionId, version: 0,
       }),
       200,
       "create adapted binding to detach",

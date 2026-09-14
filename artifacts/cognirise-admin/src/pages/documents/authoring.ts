@@ -2,6 +2,7 @@ import type { CmsDocumentKind } from "@workspace/api-zod";
 import { validateCmsContent } from "@workspace/api-zod";
 export { editionAuthoringActions, selectInitialExactEdition } from "./edition-authoring";
 export { buildDraftSave, describeSaveFailure, isDraftSaveResponse, normalizeDraftSeo, parseDraftIssues, serverValidationIssues } from "./draft-save";
+export { buildDocumentReadiness, dedupeReadinessIssues, readinessCounts, type DocumentReadinessInput, type ReadinessAction, type ReadinessIssue, type ReadinessScope, type ReadinessSeverity } from "./document-readiness";
 
 export type ReadinessItem = {
   label: string;

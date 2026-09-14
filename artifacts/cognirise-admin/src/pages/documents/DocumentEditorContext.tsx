@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, CheckCircle2, AlertTriangle, GitCompare, CircleDotDashed, CircleOff, Clock3 } from "lucide-react";
+import type { ReadinessIssue } from "./document-readiness";
 
 type Props = {
   selectedMarket: string;
@@ -11,8 +12,9 @@ type Props = {
   mode?: "shared" | "adapted" | "independent" | "unbound";
   isPending: boolean;
   onCompare: () => void;
-  readinessBlockers: number;
-  readinessWarnings: number;
+  readinessIssues: ReadinessIssue[];
+  readinessPanelId: string;
+  onOpenReadiness: () => void;
   workflowState?: string | null;
   publicationState?: string | null;
   availabilityPending?: boolean;
@@ -27,13 +29,16 @@ export function DocumentEditorContext({
   mode = "unbound",
   isPending,
   onCompare,
-  readinessBlockers,
-  readinessWarnings,
+  readinessIssues,
+  readinessPanelId,
+  onOpenReadiness,
   workflowState,
   publicationState,
   availabilityPending = false,
   availableInMarket,
 }: Props) {
+  const readinessBlockers = readinessIssues.filter((issue) => issue.severity === "blocker").length;
+  const readinessWarnings = readinessIssues.filter((issue) => issue.severity === "warning").length;
   const status = (() => {
     if (availableInMarket === false) return { label: "Not available", icon: CircleOff, className: "text-muted-foreground" };
     if (availabilityPending) return { label: "Availability pending", icon: Clock3, className: "text-amber-600" };
@@ -90,20 +95,20 @@ export function DocumentEditorContext({
       <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 sm:justify-end sm:gap-4">
         <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm font-mono">
           {readinessBlockers > 0 ? (
-            <span className="flex items-center gap-1.5 rounded-sm bg-destructive/10 px-2 py-1 text-destructive">
+            <button type="button" aria-controls={readinessPanelId} onClick={onOpenReadiness} className="flex items-center gap-1.5 rounded-sm bg-destructive/10 px-2 py-1 text-destructive underline-offset-2 hover:underline">
               <AlertTriangle className="w-4 h-4" />
               {readinessBlockers} Blocker{readinessBlockers !== 1 && "s"}
-            </span>
+            </button>
           ) : readinessWarnings > 0 ? (
-            <span className="flex items-center gap-1.5 rounded-sm bg-amber-500/10 px-2 py-1 text-amber-600">
+            <button type="button" aria-controls={readinessPanelId} onClick={onOpenReadiness} className="flex items-center gap-1.5 rounded-sm bg-amber-500/10 px-2 py-1 text-amber-600 underline-offset-2 hover:underline">
               <AlertTriangle className="w-4 h-4" />
               {readinessWarnings} Warning{readinessWarnings !== 1 && "s"}
-            </span>
+            </button>
           ) : (
-            <span className="flex items-center gap-1.5 rounded-sm bg-emerald-500/10 px-2 py-1 text-emerald-600">
+            <button type="button" aria-controls={readinessPanelId} onClick={onOpenReadiness} className="flex items-center gap-1.5 rounded-sm bg-emerald-500/10 px-2 py-1 text-emerald-600 underline-offset-2 hover:underline">
               <CheckCircle2 className="w-4 h-4" />
               Ready
-            </span>
+            </button>
           )}
         </div>
 

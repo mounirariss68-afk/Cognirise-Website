@@ -19,22 +19,26 @@ type Props = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   comparison?: SharedMarketComparison;
+  targetLabel?: string;
   conflicts: CompareConflict[];
   onResolveConflict: (conflictId: string, decision: "adopt" | "keep") => void;
   onApplyDecisions: () => void;
   onResolve?: (action: "adopt" | "keep" | "reset" | "detach") => void;
   isApplying: boolean;
+  canResolve?: boolean;
 };
 
 export function DocumentCompareModal({
   isOpen,
   onOpenChange,
   comparison,
+  targetLabel,
   conflicts,
   onResolveConflict,
   onApplyDecisions,
   onResolve,
   isApplying,
+  canResolve = true,
 }: Props) {
   const unresolvedCount = conflicts.filter(c => !c.decision).length;
   const hasUpdatesAvailable = Boolean(comparison && (
@@ -51,6 +55,7 @@ export function DocumentCompareModal({
             Compare with Shared Updates
           </DialogTitle>
           <DialogDescription>
+             {targetLabel && <span className="mb-1 block font-mono text-xs">Resolving: {targetLabel}</span>}
             {hasUpdatesAvailable
               ? "New shared content is available. Review conflicts between your market-specific overrides and the updated shared content." 
               : "Compare your market-specific overrides against the adopted shared baseline."}
@@ -145,16 +150,16 @@ export function DocumentCompareModal({
               {unresolvedCount > 0 ? `${unresolvedCount} conflict${unresolvedCount !== 1 ? 's' : ''} remaining` : "All conflicts resolved"}
             </span>
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-              <Button className="w-full sm:w-auto" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-               {onResolve && <Button className="w-full sm:w-auto" variant="outline" disabled={isApplying} onClick={() => onResolve("detach")}>Detach as independent</Button>}
-               {onResolve && <Button className="w-full sm:w-auto" variant="outline" disabled={isApplying} onClick={() => onResolve("reset")}>Reset to shared</Button>}
-               {onResolve && <Button className="w-full whitespace-normal sm:w-auto" disabled={isApplying || unresolvedCount > 0} onClick={() => onResolve(comparison?.canAutoAdopt ? "adopt" : "keep")}>
+               <Button className="w-full sm:w-auto" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+                {onResolve && <Button className="w-full sm:w-auto" variant="outline" disabled={isApplying || !canResolve} onClick={() => onResolve("detach")}>Detach as independent</Button>}
+                {onResolve && <Button className="w-full sm:w-auto" variant="outline" disabled={isApplying || !canResolve} onClick={() => onResolve("reset")}>Reset to shared</Button>}
+                {onResolve && <Button className="w-full whitespace-normal sm:w-auto" disabled={isApplying || !canResolve || unresolvedCount > 0} onClick={() => onResolve(comparison?.canAutoAdopt ? "adopt" : "keep")}>
                  {comparison?.canAutoAdopt ? "Adopt shared update" : "Keep frozen baseline"}
                </Button>}
               <Button
                 className="w-full whitespace-normal sm:w-auto"
                 onClick={onApplyDecisions} 
-                disabled={unresolvedCount > 0 || isApplying}
+                disabled={!canResolve || unresolvedCount > 0 || isApplying}
               >
                 {isApplying ? "Applying..." : "Apply & Save Draft"}
               </Button>

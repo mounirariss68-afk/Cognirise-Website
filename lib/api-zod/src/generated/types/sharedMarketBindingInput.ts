@@ -20,6 +20,13 @@ export interface SharedMarketBindingInput {
   baselineRevisionId?: string;
   /** Required for Independent bindings; must be an exact saved destination revision. */
   independentRevisionId?: string;
+  /**
+     * Required for every Shared or Adapted operation that materializes a destination draft. Exact destination revision inspected before reuse; null asserts that no saved exact destination existed. Translation-lineage acknowledgements that do not materialize remain compatible without it.
+     * @nullable
+     */
+  expectedDestinationRevisionId?: string | null;
+  /** Required for every Shared or Adapted operation that materializes a destination draft. Active frozen baseline revision inspected before reuse; the binding fails if that baseline has a successor. Translation-lineage acknowledgements that do not materialize remain compatible without it. */
+  expectedActiveBaselineRevisionId?: string;
   /** Explicit shared-baseline revision from which this locale was translated; setting it acknowledges the current translation lineage. */
   translationSourceRevisionId?: string;
   /**

@@ -6,18 +6,27 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertTriangle, Check, GitCompare, Link2, Loader2 } from "lucide-react";
 import { FieldOverrideIndicator } from "./FieldOverrideIndicator";
+import { EditionReuseFlow } from "./EditionReuseFlow";
+import { localeLanguage, type ReuseDestinationOutcome, type ReuseDestinationRequest } from "./edition-reuse";
 
-type ExactEdition = {
+export type ExactEdition = {
   market: string;
   locale: string;
   revisionId: string | null;
   revisionNumber: number | null;
 };
 
-type Market = { id: string; code: string; displayName: string };
+export type Market = {
+  id: string;
+  code: string;
+  displayName: string;
+  defaultLocale?: string;
+  fallbackLocale?: string | null;
+};
 type Mode = "shared" | "adapted" | "independent";
 
 export type SharedEditionPanelProps = {
+  documentId: string;
   matrix?: SharedMarketEditionMatrix;
   markets: Market[];
   exactEditions: ExactEdition[];
@@ -41,11 +50,24 @@ export type SharedEditionPanelProps = {
     bindingBaselineId?: string | null;
     bindingBaselineRevisionId?: string | null;
     independentRevisionId?: string;
+    expectedDestinationRevisionId?: string | null;
+    expectedActiveBaselineRevisionId?: string;
     translationSourceRevisionId?: string;
     version: number;
   }) => void;
   onCompare: (binding: SharedMarketBinding) => void;
   onResetOverride: (path: string) => void;
+  /**
+   * Runs one explicitly selected, same-language reuse request per destination.
+   * The caller owns the authorized API mutations and must retain the outcome
+   * for every request rather than treating a partial result as a success.
+   */
+  onApplyReuse?: (
+    baseline: SharedMarketBaseline,
+    requests: ReuseDestinationRequest[],
+  ) => Promise<ReuseDestinationOutcome[]>;
+  /** Destination-specific UI permission. The server still verifies each call. */
+  canEditDestination?: (market: string) => boolean;
 };
 
 function overrideLabel(path: string) {
@@ -62,6 +84,7 @@ function overrideLabel(path: string) {
  * remain ordinary PATCH saves and are never promoted to a baseline here.
  */
 export function SharedEditionPanel({
+  documentId,
   matrix,
   markets,
   exactEditions,
@@ -79,15 +102,19 @@ export function SharedEditionPanel({
   onBind,
   onCompare,
   onResetOverride,
+  onApplyReuse,
+  canEditDestination,
 }: SharedEditionPanelProps) {
   const market = markets.find((item) => item.code === selectedMarket);
   const binding = matrix?.bindings.find((item) => item.marketEditionId === market?.id && item.locale === selectedLocale);
   const localeBaselines = useMemo(
-    () => (matrix?.baselines ?? []).filter((item) => item.locale === selectedLocale),
+    () => (matrix?.baselines ?? []).filter((item) => localeLanguage(item.locale) === localeLanguage(selectedLocale)),
     [matrix?.baselines, selectedLocale],
   );
   const sourceCandidates = useMemo(
-    () => exactEditions.filter((item) => Boolean(item.revisionId) && item.locale === selectedLocale && item.market !== "shared-source"),
+    () => exactEditions.filter((item) => Boolean(item.revisionId)
+      && localeLanguage(item.locale) === localeLanguage(selectedLocale)
+      && item.market !== "shared-source"),
     [exactEditions, selectedLocale],
   );
   const [sourceRevisionId, setSourceRevisionId] = useState("");
@@ -101,23 +128,35 @@ export function SharedEditionPanel({
   const baseline = localeBaselines.find((item) => item.revisionId === baselineRevisionId)
     ?? localeBaselines.find((item) => item.revisionId === binding?.baselineRevisionId);
   const selectedIsSource = Boolean(source && source.market === selectedMarket && source.locale === selectedLocale);
+  const currentExactEdition = exactEditions.find((item) => (
+    item.market === selectedMarket && item.locale === selectedLocale
+  ));
   const bindingMode = binding?.mode ?? "unbound";
   const frozenBinding = binding?.mode === "shared" || binding?.mode === "adapted";
   const translationBaseline = (matrix?.baselines ?? []).find((item) => item.revisionId === translationRevisionId);
+  const destinationPermission = canEditDestination
+    ?? ((marketCode: string) => canEdit && marketCode === selectedMarket);
 
   const requestBind = () => {
     if (!market || !currentRevisionId) return;
     if (mode !== "independent" && !baseline) return;
+    // Shared/Adapted binding materializes a draft. A saved destination must
+    // instead use the inspected guided path below.
+    if (mode !== "independent" && currentExactEdition?.revisionId) return;
     setConfirming(true);
   };
   const confirmBind = () => {
     if (!market || !currentRevisionId || (mode !== "independent" && !baseline)) return;
+    if (mode !== "independent" && currentExactEdition?.revisionId) return;
     onBind({
       marketEditionId: market.id,
       locale: selectedLocale,
       mode,
       baseline,
       independentRevisionId: mode === "independent" ? currentRevisionId : undefined,
+      expectedDestinationRevisionId: mode === "independent"
+        ? undefined : currentExactEdition?.revisionId ?? null,
+      expectedActiveBaselineRevisionId: mode === "independent" ? undefined : baseline?.revisionId,
       translationSourceRevisionId: mode === "independent" ? undefined : (translationRevisionId || undefined),
       version: binding?.version ?? 0,
     });
@@ -125,21 +164,60 @@ export function SharedEditionPanel({
   };
 
   return (
-    <section className="space-y-3 rounded-lg border bg-card p-4" aria-label="Shared edition">
+    <section className="space-y-3 rounded-lg border bg-card p-4" aria-label="Content reuse and shared edition">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold">Shared edition</h3>
+          <h3 className="text-sm font-semibold">Content reuse</h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            This is an explicit lineage editor. It never promotes an ordinary market save automatically.
+            Saved content, market visibility, and reviewed publication are separate. Reuse changes drafts and never moves a live pointer.
           </p>
         </div>
         <Badge variant="outline" className="uppercase">{bindingMode}</Badge>
       </div>
 
       {!market && <p className="rounded border border-amber-400/50 bg-amber-50 p-2 text-xs text-amber-900">This selected market is not in the market catalog, so it cannot be bound to shared content.</p>}
+      <div className="space-y-1">
+        <Label className="text-xs">Saved source</Label>
+        <Select value={sourceRevisionId || currentRevisionId || ""} onValueChange={setSourceRevisionId}>
+          <SelectTrigger aria-label="Saved source for reuse"><SelectValue placeholder="Choose a saved same-language edition" /></SelectTrigger>
+          <SelectContent>
+            {sourceCandidates.map((candidate) => (
+              <SelectItem key={candidate.revisionId!} value={candidate.revisionId!}>
+                {candidate.market.toUpperCase()} · {candidate.locale} · saved revision {candidate.revisionNumber}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">Choose the exact saved content to reuse. This does not select where it appears on the website.</p>
+      </div>
+      <EditionReuseFlow
+        key={sourceRevisionId || currentRevisionId || "no-source"}
+        documentId={documentId}
+        matrix={matrix}
+        markets={markets}
+        exactEditions={exactEditions}
+        sourceRevisionId={sourceRevisionId || currentRevisionId || ""}
+        currentRevisionId={currentRevisionId}
+          legacySharedSource={selectedMarket === "shared-source" && selectedLocale === "und"}
+        canManageBaselines={canManageBaselines}
+        canEditDestination={destinationPermission}
+        hasUnsaved={hasUnsaved}
+        busy={busy}
+        onOpenSource={onSelectEdition}
+        onSaveSource={onEstablishBaseline}
+        onCompare={onCompare}
+        onApply={onApplyReuse}
+      />
+      {!frozenBinding && mode !== "independent" && currentExactEdition?.revisionId && (
+        <p className="rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-950">
+          This exact destination already has saved content. To replace it, choose the source above and use the inspected “Use this content in other editions” flow; advanced binding never overwrites a customization.
+        </p>
+      )}
 
       {canEdit && market && (
-        <>
+        <details className="rounded border bg-muted/10 p-3">
+          <summary className="cursor-pointer text-xs font-semibold">Advanced lineage details</summary>
+          <div className="mt-3 space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <Label className="text-xs">Neutral baseline source</Label>
@@ -161,7 +239,7 @@ export function SharedEditionPanel({
                 size="sm"
                 variant="outline"
                 disabled={!canManageBaselines || !selectedIsSource || !source?.revisionId || busy || hasUnsaved}
-                onClick={() => onEstablishBaseline(source!.revisionId!, selectedLocale, localeBaselines[0]?.revisionNumber)}
+                 onClick={() => onEstablishBaseline(source!.revisionId!, source!.locale, localeBaselines.find((item) => item.locale === source!.locale)?.revisionNumber)}
               >
                 {busy && <Loader2 className="mr-1 h-3 w-3 animate-spin" />} Save neutral baseline
               </Button>
@@ -231,6 +309,7 @@ export function SharedEditionPanel({
                   bindingBaselineId: binding!.baselineId,
                   bindingBaselineRevisionId: binding!.baselineRevisionId,
                   translationSourceRevisionId: translationBaseline!.revisionId,
+                   expectedDestinationRevisionId: currentExactEdition?.revisionId ?? null,
                   version: binding!.version,
                 })}
               >
@@ -239,10 +318,11 @@ export function SharedEditionPanel({
             </div>
             {!translationBaseline && <p className="text-xs text-muted-foreground">Choose a shared baseline revision to acknowledge translation lineage; the adopted baseline remains unchanged.</p>}
           </div>}
-          {!frozenBinding && <Button type="button" size="sm" disabled={busy || hasUnsaved || !currentRevisionId || (mode !== "independent" && !baseline)} onClick={requestBind}>
+           {!frozenBinding && <Button type="button" size="sm" disabled={busy || hasUnsaved || !currentRevisionId || (mode !== "independent" && (!baseline || Boolean(currentExactEdition?.revisionId)))} onClick={requestBind}>
             <Link2 className="mr-1 h-3.5 w-3.5" /> Bind selected exact edition
           </Button>}
-        </>
+          </div>
+        </details>
       )}
       {binding?.mode === "adapted" && binding.operations.length > 0 && (
         <section className="space-y-2 border-t pt-3" aria-label="Market-specific fields">

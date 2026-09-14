@@ -25,6 +25,7 @@ import {
   lockDocumentForMutation,
   revalidateMutationAuth,
 } from "./managed-market-lifecycle";
+import { destinationRevisionMatchesExpected, localeLanguageIdentity } from "./shared-market-reuse-guard";
 
 type BindingRow = Record<string, any>;
 const digest = (snapshot: unknown) => createHash("sha256").update(JSON.stringify(snapshot)).digest("hex");
@@ -340,9 +341,9 @@ export async function recordIndependentBindingRevision(
 }
 
 /**
- * Register only additive shared-market routes. Existing People/contact routes,
- * availability state, and legacy shared-source pointers are intentionally not
- * read or modified here.
+ * Register only additive shared-market routes. Person availability and legacy
+ * shared-source pointers remain governed separately: person materialization
+ * creates a draft exact edition but never publishes or changes availability.
  */
 export function registerSharedMarketEditionRoutes(
   router: IRouter,
@@ -924,11 +925,38 @@ export function registerSharedMarketEditionRoutes(
           return;
         }
         const document = await client.query("SELECT kind FROM cms_documents WHERE id=$1", [documentId]);
-        if (["person", "site-configuration"].includes(String(document.rows[0].kind))) {
+        if (String(document.rows[0].kind) === "site-configuration") {
           await client.query("ROLLBACK");
           res.status(409).json({ error: "This document kind retains its dedicated market contract." });
           return;
         }
+        const destinationLanguage = localeLanguageIdentity(body.locale);
+        if (body.mode !== "independent" && !destinationLanguage) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "Shared content requires an explicit localized destination; und is never a reusable language." });
+          return;
+        }
+        // Reuse can replace an unbound legacy/custom exact edition. A binding
+        // version cannot protect that case because there is no binding yet, so
+        // lock the exact target and verify the revision the editor inspected
+        // before materializing a new draft over it. The optional token keeps
+        // older technical callers compatible while guided reuse always sends
+        // it when a destination already has saved content.
+        const destinationEdition = await client.query(
+          `SELECT e.id,latest.id revision_id
+             FROM cms_market_editions e
+             LEFT JOIN LATERAL (
+               SELECT r.id FROM cms_revisions r
+                WHERE r.edition_id=e.id
+                ORDER BY r.revision_number DESC,r.created_at DESC,r.id DESC LIMIT 1
+             ) latest ON true
+            WHERE e.document_id=$1 AND e.market=$2 AND e.locale=$3
+            ORDER BY e.created_at,e.id LIMIT 1
+            FOR UPDATE OF e`,
+          [documentId, lockedMarket, body.locale],
+        );
+        const destinationRevisionId = destinationEdition.rows[0]?.revision_id
+          ? String(destinationEdition.rows[0].revision_id) : null;
         // Existing bindings materialize an exact edition. Acquire that edition
         // first so generic rebinds share ordinary save's edition→binding order.
         const existingPreflight = await client.query(
@@ -988,24 +1016,71 @@ export function registerSharedMarketEditionRoutes(
           });
           return;
         }
+        // Translation acknowledgement is the only backwards-compatible
+        // non-materializing shared/adapted update. It cannot replace the
+        // destination snapshot; every new/adopting materialization must carry
+        // the inspected target token (including null for an empty target).
+        const nonMaterializingTranslationAcknowledgement = Boolean(
+          existingBinding
+          && existingBinding.mode !== "independent"
+          && body.mode === existingBinding.mode
+          && body.baselineId === String(existingBinding.baseline_id)
+          && body.baselineRevisionId === String(existingBinding.based_on_baseline_revision_id)
+          && body.translationSourceRevisionId,
+        );
+        const materializesSharedDestination = body.mode !== "independent"
+          && !nonMaterializingTranslationAcknowledgement;
+        if (materializesSharedDestination && body.expectedDestinationRevisionId === undefined) {
+          await client.query("ROLLBACK");
+          res.status(422).json({
+            error: "An inspected destination revision token is required before shared content can materialize a draft.",
+          });
+          return;
+        }
+        if (materializesSharedDestination && body.expectedActiveBaselineRevisionId === undefined) {
+          await client.query("ROLLBACK");
+          res.status(422).json({
+            error: "An inspected active baseline revision token is required before shared content can materialize a draft.",
+          });
+          return;
+        }
+        if (body.expectedDestinationRevisionId !== undefined
+          && !destinationRevisionMatchesExpected(body.expectedDestinationRevisionId, destinationRevisionId)) {
+          await client.query("ROLLBACK");
+          res.status(409).json({
+            error: "This destination has a newer saved revision than the one you compared. Reload its differences before replacing it.",
+          });
+          return;
+        }
         let baseline: Record<string, any> | undefined;
         if (body.mode !== "independent") {
           const baselineId = body.baselineId ?? existingBinding?.baseline_id;
           const result = await client.query(
-         `SELECT b.id,r.id revision_id,r.snapshot,r.media_references,
+          `SELECT b.id,b.active_revision_id,r.id revision_id,r.snapshot,r.media_references,
                  source_edition.market source_market
                FROM cms_shared_baselines b
                 JOIN cms_shared_baseline_revisions r ON r.id=$4
                 LEFT JOIN cms_revisions source_revision ON source_revision.id=r.source_revision_id
                 LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
-               WHERE b.id=$1 AND b.document_id=$2 AND b.locale=$3 AND r.baseline_id=b.id
+                WHERE b.id=$1 AND b.document_id=$2
+                  AND lower(split_part(b.locale,'-',1))=$3
+                  AND lower(b.locale)<>'und'
+                  AND r.baseline_id=b.id
                FOR UPDATE OF b`,
-             [baselineId, documentId, body.locale, body.baselineRevisionId],
+              [baselineId, documentId, destinationLanguage, body.baselineRevisionId],
           );
           baseline = result.rows[0];
           if (!baseline) {
             await client.query("ROLLBACK");
-            res.status(409).json({ error: "Shared and Adapted bindings require an explicit neutral baseline in this locale." });
+            res.status(409).json({ error: "Shared and Adapted bindings require an explicit neutral baseline in the same language." });
+            return;
+          }
+          if (body.expectedActiveBaselineRevisionId !== undefined
+            && String(baseline.active_revision_id) !== body.expectedActiveBaselineRevisionId) {
+            await client.query("ROLLBACK");
+            res.status(409).json({
+              error: "The reusable baseline changed after comparison. Reload its differences before reusing it.",
+            });
             return;
           }
           if (!sourceMarketAllowed(transactionAuth, baseline, options.canAccessMarket)) {
@@ -1087,7 +1162,7 @@ export function registerSharedMarketEditionRoutes(
           return;
         }
         const saved = binding.rows[0]!;
-        if (baseline) {
+        if (baseline && materializesSharedDestination) {
           const snapshot = body.mode === "adapted"
             ? applySharedOverrideOperations(baseline.snapshot, (saved.override_operations ?? []) as any)
             : baseline.snapshot;

@@ -336,7 +336,10 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
     const adapted = await json<{ id: string; version: number; materializedRevisionId: string | null }>(
       await request(`/api/documents/${ids.legacySharedDocument}/shared-market/bindings`, "PUT", {
         marketEditionId: ids.uae, locale: "en", mode: "adapted",
-        baselineId: baseline.id, baselineRevisionId: baseline.revisionId, version: 0,
+        baselineId: baseline.id, baselineRevisionId: baseline.revisionId,
+        expectedDestinationRevisionId: ids.legacySharedRevisionFour,
+        expectedActiveBaselineRevisionId: baseline.revisionId,
+        version: 0,
       }, tokens.editor),
       200, "the legacy source can materialize an adapted UAE exact revision",
     );

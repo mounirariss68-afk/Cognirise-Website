@@ -1,4 +1,5 @@
 import type { CmsDocumentKind } from "@workspace/api-zod";
+import * as React from "react";
 import { belongsToIndustrySection, isIndustrySectionId } from "@workspace/api-zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,11 @@ import {
 
 type Content = Record<string, any>;
 
+/** Stable target shared with readiness actions for direct content correction. */
+export function contentFieldId(path: string) {
+  return `content-${path.replace(/^content\./, "").replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
 function lines(value: unknown) {
   return Array.isArray(value) ? value.join("\n") : "";
 }
@@ -45,23 +51,41 @@ function stringLines(value: string) {
   return value.split("\n").map((item) => item.trim()).filter(Boolean);
 }
 
+function readinessPath(error: string) {
+  const separator = error.indexOf(":");
+  const rawPath = (separator < 0 ? "content" : error.slice(0, separator)).trim() || "content";
+  return rawPath.startsWith("content.") ? rawPath : `content.${rawPath}`;
+}
+
+function pathWords(path: string) {
+  const leaf = path.split(".").at(-1)?.replace(/\[\d+\]/g, "") ?? "";
+  return leaf.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[^a-zA-Z0-9]+/g, " ").trim().toLowerCase();
+}
+
+function isDirectContentField(path: string) {
+  return /^content\.[^.[]+$/.test(path);
+}
+
 function Requirement({ required }: { required?: boolean }) {
   return <span className={required ? "text-destructive" : "text-muted-foreground"}>{required ? "(required)" : "(optional)"}</span>;
 }
-function Field({ label, value, onChange, placeholder, type = "text", required, error }: {
-  label: string; value: unknown; onChange: (value: string) => void; placeholder?: string; type?: string; required?: boolean; error?: string;
+function Field({ label, value, onChange, placeholder, type = "text", required, error, path }: {
+  label: string; value: unknown; onChange: (value: string) => void; placeholder?: string; type?: string; required?: boolean; error?: string; path?: string;
 }) {
-  return <div className="space-y-2"><Label>{label} <Requirement required={required} /></Label><Input aria-label={label} aria-invalid={Boolean(error)} type={type} value={typeof value === "string" || typeof value === "number" ? value : ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
+  const id = path ? contentFieldId(path) : undefined;
+  return <div className="space-y-2"><Label htmlFor={id}>{label} <Requirement required={required} /></Label><Input id={id} data-field-path={path} aria-label={label} aria-invalid={Boolean(error)} type={type} value={typeof value === "string" || typeof value === "number" ? value : ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
 }
-function Area({ label, value, onChange, placeholder, rows = 4, required, error }: {
-  label: string; value: string; onChange: (value: string) => void; placeholder?: string; rows?: number; required?: boolean; error?: string;
+function Area({ label, value, onChange, placeholder, rows = 4, required, error, path }: {
+  label: string; value: string; onChange: (value: string) => void; placeholder?: string; rows?: number; required?: boolean; error?: string; path?: string;
 }) {
-  return <div className="space-y-2"><Label>{label} <Requirement required={required} /></Label><Textarea aria-label={label} aria-invalid={Boolean(error)} rows={rows} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
+  const id = path ? contentFieldId(path) : undefined;
+  return <div className="space-y-2"><Label htmlFor={id}>{label} <Requirement required={required} /></Label><Textarea id={id} data-field-path={path} aria-label={label} aria-invalid={Boolean(error)} rows={rows} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
 }
-function Choice({ label, value, options, onChange, required, error }: {
-  label: string; value: string; options: string[]; onChange: (value: string) => void; required?: boolean; error?: string;
+function Choice({ label, value, options, onChange, required, error, path }: {
+  label: string; value: string; options: string[]; onChange: (value: string) => void; required?: boolean; error?: string; path?: string;
 }) {
-  return <div className="space-y-2"><Label>{label} <Requirement required={required} /></Label><Select value={value || undefined} onValueChange={onChange}><SelectTrigger aria-label={label} aria-invalid={Boolean(error)}><SelectValue placeholder={`Select ${label.toLowerCase()}`} /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem value={option} key={option}>{option.replaceAll("-", " ")}</SelectItem>)}</SelectContent></Select>{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
+  const id = path ? contentFieldId(path) : undefined;
+  return <div className="space-y-2"><Label htmlFor={id}>{label} <Requirement required={required} /></Label><Select value={value || undefined} onValueChange={onChange}><SelectTrigger id={id} data-field-path={path} aria-label={label} aria-invalid={Boolean(error)}><SelectValue placeholder={`Select ${label.toLowerCase()}`} /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem value={option} key={option}>{option.replaceAll("-", " ")}</SelectItem>)}</SelectContent></Select>{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
 }
 
 function StringList({ label, value, onChange, required = false, maximum }: {
@@ -70,15 +94,18 @@ function StringList({ label, value, onChange, required = false, maximum }: {
   const items = stringListItems(value);
   return <section className="space-y-3"><div className="flex items-center justify-between"><Label>{label} <Requirement required={required} /></Label><Button type="button" size="sm" variant="outline" disabled={maximum !== undefined && items.length >= maximum} onClick={() => onChange(addStringListItem(items))}>Add item</Button></div>{items.map((item, index) => <div key={index} className="flex gap-2"><Input value={item} onChange={(event) => onChange(changeStringListItem(items, index, event.target.value))} aria-label={`${label} ${index + 1}`} /><Button type="button" variant="ghost" onClick={() => onChange(removeStringListItem(items, index))}>Remove</Button></div>)}{items.length === 0 && <p className="text-xs text-muted-foreground">No items added.</p>}</section>;
 }
-export function ContentEditor({ kind, value, onChange, errors, industrySection }: {
+export function ContentEditor({ kind, value, onChange, errors, readinessPaths = [], industrySection }: {
   kind: CmsDocumentKind;
   value: Content;
   onChange: (content: Content) => void;
   errors: string[];
+  /** Canonical publish/edition paths used only to register direct focus targets. */
+  readinessPaths?: string[];
   /** Industry documents are edited through the fixed visual workspace. */
   industrySection?: string;
 }) {
   const overrides = useOverrides();
+  const editorRef = React.useRef<HTMLDivElement>(null);
   // The regular document PATCH remains the persistence path.  This only keeps
   // the field indicator truthful while that PATCH is pending.
   const set = (key: string, next: unknown) => {
@@ -86,6 +113,28 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
     onChange({ ...value, schemaVersion: 1, [key]: next });
   };
   const fieldErrors = contentErrorMap(errors);
+  React.useLayoutEffect(() => {
+    const root = editorRef.current;
+    if (!root) return;
+    for (const candidate of [...errors.map(readinessPath), ...readinessPaths]) {
+      const path = candidate.startsWith("content.") ? candidate : `content.${candidate}`;
+      if (root.querySelector(`[data-field-path="${path}"]`)) continue;
+      // Nested records can contain repeated leaf names (for example,
+      // hero.heading and sections[0].heading). Never guess which one owns a
+      // readiness path; their action keeps focus on its named readiness row
+      // until that control has explicit full-path metadata.
+      if (!isDirectContentField(path)) continue;
+      const words = pathWords(path);
+      if (!words) continue;
+      const controls = [...root.querySelectorAll<HTMLElement>("[aria-label]")]
+        .filter((element) => !element.dataset.fieldPath && element.getAttribute("aria-label")?.toLowerCase().includes(words));
+      if (controls.length === 1) {
+        const control = controls[0];
+        control.id = contentFieldId(path);
+        control.dataset.fieldPath = path;
+      }
+    }
+  }, [errors, readinessPaths]);
   const capabilities = industryCapabilities(value.capabilities);
   const educationPov = value.educationPov ?? {
     convictions: [],
@@ -114,13 +163,13 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
   );
 
   return (
-    <div className="space-y-6">
+    <div ref={editorRef} className="space-y-6">
       {errors.length > 0 && <div role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-4"><p className="font-semibold text-destructive">Fix these content-field issues before saving this draft:</p><p className="mt-1 text-xs text-muted-foreground">Drafts may remain incomplete; publication readiness is checked separately. These errors identify values that cannot be saved under the current contract.</p><ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}
 
       {kind === "person" && <>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Choice label="Role" required error={fieldErrors.role} value={value.role ?? ""} options={["founder", "leader", "employee", "advisor"]} onChange={(next) => set("role", next)} />
-          <Field label="Public title" required error={fieldErrors.title} value={value.title} onChange={(next) => set("title", next)} />
+          <Choice label="Role" required error={fieldErrors.role} path="content.role" value={value.role ?? ""} options={["founder", "leader", "employee", "advisor"]} onChange={(next) => set("role", next)} />
+          <Field label="Public title" required error={fieldErrors.title} path="content.title" value={value.title} onChange={(next) => set("title", next)} />
           <Choice label="Approved fallback" value={value.approvedFallback ?? ""} options={["initials", "brand-mark"]} onChange={(next) => set("approvedFallback", next)} />
         </div>
         <MediaField label="Identity image" role="identity" value={value.identityMedia} overridePath="content.identityMedia" onChange={(next) => set("identityMedia", next)} />
@@ -132,12 +181,12 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
 
       {kind === "partner" && <>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Alliance category" required error={fieldErrors.allianceCategory} value={value.allianceCategory} onChange={(next) => set("allianceCategory", next)} />
-          <Choice label="Relationship status" required error={fieldErrors.relationshipStatus} value={value.relationshipStatus ?? ""} options={["active", "prospective", "paused", "ended"]} onChange={(next) => set("relationshipStatus", next)} />
+          <Field label="Alliance category" required error={fieldErrors.allianceCategory} path="content.allianceCategory" value={value.allianceCategory} onChange={(next) => set("allianceCategory", next)} />
+          <Choice label="Relationship status" required error={fieldErrors.relationshipStatus} path="content.relationshipStatus" value={value.relationshipStatus ?? ""} options={["active", "prospective", "paused", "ended"]} onChange={(next) => set("relationshipStatus", next)} />
           <Field label="Website" value={value.website} onChange={(next) => set("website", next || undefined)} />
         </div>
         <MediaField label="Partner logo" role="logo" value={value.logoMedia} overridePath="content.logoMedia" onChange={(next) => set("logoMedia", next)} />
-        <Area label="Positioning" required error={fieldErrors.positioning} value={value.positioning ?? ""} onChange={(next) => set("positioning", next)} />
+        <Area label="Positioning" required error={fieldErrors.positioning} path="content.positioning" value={value.positioning ?? ""} onChange={(next) => set("positioning", next)} />
         <Area label="Contribution" value={value.contribution ?? ""} onChange={(next) => set("contribution", next)} />
         <PairList label="Facts" value={value.facts} left="value" right="label" onChange={(next) => set("facts", next)} />
         <Area label="Coverage" value={lines(value.coverage)} onChange={(next) => set("coverage", stringLines(next))} placeholder="One area per line" />
@@ -145,11 +194,12 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
       </>}
 
       {kind === "office" && <>
-        <Field label="City" required error={fieldErrors.city} value={value.city} onChange={(next) => set("city", next)} placeholder="Dubai" />
+        <Field label="City" required error={fieldErrors.city} path="content.city" value={value.city} onChange={(next) => set("city", next)} placeholder="Dubai" />
         <Area
           label="Full postal address"
           required
           error={fieldErrors.address}
+          path="content.address"
           value={value.address ?? ""}
           onChange={(next) => set("address", next)}
           placeholder="Office, building, street, city, country"
@@ -165,6 +215,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
             type="email"
             required
             error={fieldErrors.contactEmail}
+            path="content.contactEmail"
             value={value.contactEmail}
             onChange={(next) => set("contactEmail", next)}
             placeholder="hello@cognirise.ai"
@@ -177,7 +228,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
 
       {kind === "platform" && <>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Category" required error={fieldErrors.category} value={value.category} onChange={(next) => set("category", next)} />
+          <Field label="Category" required error={fieldErrors.category} path="content.category" value={value.category} onChange={(next) => set("category", next)} />
           <Choice label="Template" value={value.template ?? "standard"} options={["standard", "cognios-specialist"]} onChange={(next) => set("template", next)} />
           <Field label="CTA label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan" } : undefined)} />
           <SafeDestinationField label="CTA destination" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Learn more", href: next } : undefined)} />
@@ -193,7 +244,7 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
             onChange(updated);
           }}
         />
-        <Area label="Summary" required error={fieldErrors.summary} value={value.summary ?? ""} onChange={(next) => set("summary", next)} />
+          <Area label="Summary" required error={fieldErrors.summary} path="content.summary" value={value.summary ?? ""} onChange={(next) => set("summary", next)} />
         <StringList label="Capabilities" value={value.capabilities} onChange={(next) => set("capabilities", next)} />
         <StringList label="Differentiators" value={value.differentiators} onChange={(next) => set("differentiators", next)} />
         <section className="space-y-4">
@@ -215,15 +266,15 @@ export function ContentEditor({ kind, value, onChange, errors, industrySection }
 
       {kind === "publication" && <>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Choice label="Publication variant" required error={fieldErrors.variant} value={value.variant ?? "article"} options={["article", "pov"]} onChange={(next) => set("variant", next)} />
-          <Field label="Author" required error={fieldErrors.author} value={value.author} onChange={(next) => set("author", next)} />
-          <Field label="Publication date" required error={fieldErrors.publicationDate} type="date" value={value.publicationDate} onChange={(next) => set("publicationDate", next)} />
+          <Choice label="Publication variant" required error={fieldErrors.variant} path="content.variant" value={value.variant ?? "article"} options={["article", "pov"]} onChange={(next) => set("variant", next)} />
+          <Field label="Author" required error={fieldErrors.author} path="content.author" value={value.author} onChange={(next) => set("author", next)} />
+          <Field label="Publication date" required error={fieldErrors.publicationDate} path="content.publicationDate" type="date" value={value.publicationDate} onChange={(next) => set("publicationDate", next)} />
           <Field label="Updated date" type="date" value={value.updatedDate} onChange={(next) => set("updatedDate", next || undefined)} />
           <Field label="Reading time (minutes)" type="number" value={value.readingTimeMinutes} onChange={(next) => set("readingTimeMinutes", next ? Number(next) : undefined)} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2"><MediaField label="Hero image" value={value.heroMedia} overridePath="content.heroMedia" onChange={(next) => set("heroMedia", next)} /><MediaField label="POV PDF" role="document" accept="pdf" required={value.variant === "pov"} value={value.pdfMedia} overridePath="content.pdfMedia" onChange={(next) => set("pdfMedia", next)} /></div>
         <MediaField label="Social sharing image" role="og-image" value={value.social?.imageMedia} overridePath="content.social.imageMedia" onChange={(next) => set("social", { ...value.social, imageMedia: next })} />
-        <Area label="Teaser" required error={fieldErrors.teaser} value={value.teaser ?? ""} onChange={(next) => set("teaser", next)} />
+        <Area label="Teaser" required error={fieldErrors.teaser} path="content.teaser" value={value.teaser ?? ""} onChange={(next) => set("teaser", next)} />
         <RichBlockEditor label="Structured body" value={value.body} onChange={(next) => set("body", next)} />
         <div className="grid gap-4 sm:grid-cols-2">
           <Area label="Topics" value={lines(value.topics)} onChange={(next) => set("topics", stringLines(next))} />

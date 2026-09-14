@@ -372,6 +372,11 @@ export function MarketAvailabilityChecklist({
 
   return (
     <div className="space-y-2">
+      <p className="text-xs text-muted-foreground">
+        Destination visibility only: these ticks do not copy or translate content.
+        Use “Use this content in other editions” to reuse saved content.
+        Visibility and content changes remain separate from reviewed publication.
+      </p>
       {visibleItems.map((item) => {
         const destination = allDestinations.find((candidate) => (
           candidate.market === item.market

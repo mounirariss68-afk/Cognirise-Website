@@ -302,6 +302,7 @@ mock.module("@workspace/api-client-react", {
     useResolveSharedMarketBaselineUpdate: () => resolveSharedMutation,
     useGetMedia: () => ({ data: undefined }),
     useListMedia: () => ({ data: { items: [] } }),
+    getDocumentRevision: async () => ({ snapshot: {} }),
     useRequestMediaUpload: () => inertMutation,
     useFinalizeMediaUpload: () => inertMutation,
   },
@@ -1647,7 +1648,8 @@ test("shared edition panel renders real unbound exact context without inventing 
   currentSharedMatrix = { baselines: [], bindings: [] };
   const view = await renderDetail({ ...documentBase, kind: "platform" });
   try {
-    assert.match(view.container.textContent ?? "", /Shared edition/);
+    assert.match(view.container.textContent ?? "", /Content reuse/);
+    assert.match(view.container.textContent ?? "", /Saved content, market visibility, and reviewed publication are separate/);
     assert.match(view.container.textContent ?? "", /unbound/i);
     assert.doesNotMatch(view.container.textContent ?? "", /Shared Baseline/);
   } finally {
@@ -1905,6 +1907,59 @@ test("stable-array conflicts use unique decision identities while showing select
   }
 });
 
+test("reuse comparison resolves the frozen destination binding without switching away from its source edition", async () => {
+  const targetBinding = {
+    id: "ksa-frozen-binding", documentId: "document-1", marketEditionId: "ksa-edition", locale: "en-US",
+    mode: "adapted", baselineId: "baseline-1", baselineRevisionId: "baseline-revision-1", version: 7,
+    operations: [], materializedRevisionId: "ksa-revision-1", translationState: "current",
+  };
+  currentDocument = { ...documentBase, markets: ["uae", "ksa"] };
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en-US", enabled: true },
+  ];
+  currentEditions = [
+    edition,
+    { ...edition, market: "ksa", revisionId: "ksa-revision-1", revisionNumber: 1 },
+  ];
+  currentSharedMatrix = {
+    baselines: [{
+      id: "baseline-1", documentId: "document-1", locale: "en-US", revisionId: "baseline-revision-1",
+      revisionNumber: 1, sourceRevisionId: "revision-1", snapshot: {}, mediaReferences: [],
+    }],
+    bindings: [targetBinding],
+  };
+  currentSharedComparison = {
+    binding: targetBinding,
+    baselineRevisionId: "baseline-revision-2",
+    previousSnapshot: { title: "Old shared" },
+    currentSnapshot: { title: "New shared" },
+    localSnapshot: { title: "KSA local" },
+    mergedSnapshot: {},
+    canAutoAdopt: true,
+    conflicts: [],
+  };
+  const view = await renderDetail(currentDocument);
+  try {
+    assert.equal(view.container.querySelector<HTMLInputElement>("#document-title")?.value, "Contact email");
+    await React.act(async () => button(view.container, "Compare and decide").click());
+    assert.match(document.body.textContent ?? "", /Resolving: KSA · en-US/);
+    await React.act(async () => button(document.body, "Apply & Save Draft").click());
+    assert.equal(resolveSharedInput?.bindingId, "ksa-frozen-binding");
+    assert.equal(resolveSharedInput?.data.version, 7);
+    assert.equal(view.container.querySelector<HTMLInputElement>("#document-title")?.value, "Contact email",
+      "opening and resolving the destination comparison never rehydrates or selects it as the source editor");
+  } finally {
+    await view.unmount();
+    currentDocument = documentBase;
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentEditions = [edition];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentSharedComparison = undefined;
+    resolveSharedInput = undefined;
+  }
+});
+
 test("valid market deep links win over shared/default selection for market code and catalog UUID", async () => {
   currentMarkets = [
     { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
@@ -1949,13 +2004,17 @@ test("explicit market reload waits for both catalogues and never briefly selects
       marketsLoading = true;
       const view = await renderDetail();
       try {
-        assert.doesNotMatch(view.container.textContent ?? "", /Editing:.*UAE/, "query-pending render must not fall back to availability source");
+        assert.match(view.container.textContent ?? "", /Loading your accessible document editions/, "query-pending render must not fall back to availability source");
         await React.act(async () => {
           if (first === "catalog") marketsLoading = false;
           else editionsLoading = false;
           notify();
         });
-        assert.doesNotMatch(view.container.textContent ?? "", /Editing:.*UAE/, "one ready catalogue still cannot choose a fallback");
+        if (first === "catalog") {
+          assert.match(view.container.textContent ?? "", /Loading your accessible document editions/, "the remaining edition catalogue keeps selection pending");
+        } else {
+          assert.match(view.container.querySelector('[data-testid="editing-context"]')?.textContent ?? "", /Awaiting exact edition/, "the remaining market catalogue keeps the exact selection pending");
+        }
         await React.act(async () => {
           editionsLoading = false;
           marketsLoading = false;
@@ -2064,13 +2123,17 @@ test("explicit market reload waits for both catalogues and never briefly selects
       marketsLoading = true;
       const view = await renderDetail();
       try {
-        assert.doesNotMatch(view.container.textContent ?? "", /Editing:.*UAE/, "query-pending render must not fall back to availability source");
+        assert.match(view.container.textContent ?? "", /Loading your accessible document editions/, "query-pending render must not fall back to availability source");
         await React.act(async () => {
           if (first === "catalog") marketsLoading = false;
           else editionsLoading = false;
           notify();
         });
-        assert.doesNotMatch(view.container.textContent ?? "", /Editing:.*UAE/, "one ready catalogue still cannot choose a fallback");
+        if (first === "catalog") {
+          assert.match(view.container.textContent ?? "", /Loading your accessible document editions/, "the remaining edition catalogue keeps selection pending");
+        } else {
+          assert.match(view.container.querySelector('[data-testid="editing-context"]')?.textContent ?? "", /Awaiting exact edition/, "the remaining market catalogue keeps the exact selection pending");
+        }
         await React.act(async () => {
           editionsLoading = false;
           marketsLoading = false;
@@ -2137,6 +2200,205 @@ test("frozen adapted bindings expose comparison and lineage acknowledgement, nev
     currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
     currentSharedMatrix = { baselines: [], bindings: [] };
     bindSharedInput = undefined;
+  }
+});
+
+async function activateReadinessAction(container: ParentNode, path: string) {
+  const issue = [...container.querySelectorAll<HTMLElement>("[data-readiness-issue]")]
+    .find((item) => item.textContent?.includes(`Path: ${path}`));
+  assert.ok(issue, `Expected actionable readiness issue for ${path}`);
+  const action = issue.querySelector<HTMLButtonElement>("button");
+  assert.ok(action, `Expected an action for ${path}`);
+  await React.act(async () => {
+    action.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+}
+
+test("structured workflow readiness focuses Submit Review instead of presenting its server message as a content correction", async () => {
+  currentEditions = [{
+    ...edition,
+    workflowState: "draft",
+    readinessErrors: ["This saved revision must be submitted and approved before publication."],
+    readinessIssues: [{
+      category: "workflow",
+      action: "review",
+      message: "This saved revision must be submitted and approved before publication.",
+    }],
+  }];
+  const view = await renderDetail();
+  try {
+    const workflow = [...view.container.querySelectorAll<HTMLElement>("[data-readiness-issue]")]
+      .find((item) => item.textContent?.includes("Path: workflow.review"));
+    assert.ok(workflow);
+    assert.match(workflow.textContent ?? "", /Review submission required/);
+    assert.doesNotMatch(workflow.textContent ?? "", /Path: content/);
+    await activateReadinessAction(view.container, "workflow.review");
+    assert.equal(document.activeElement?.id, "submit-review");
+  } finally {
+    await view.unmount();
+    currentDocument = documentBase;
+    currentEditions = [edition];
+  }
+});
+
+test("rendered readiness merges one normalized correction across gates while retaining three distinct next steps", async () => {
+  currentEditions = [{ ...edition, readinessErrors: ["content.contactEmail: Invalid input"] }];
+  const view = await renderDetail({
+    ...documentBase,
+    content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "not-an-email" },
+  });
+  try {
+    await change(view.container.querySelector<HTMLInputElement>("#document-title")!, "Unsaved contact page");
+    const issues = [...view.container.querySelectorAll<HTMLElement>("[data-readiness-issue]")];
+    assert.equal(issues.length, 3, "one contact correction, media attention, and the unsaved draft remain distinct");
+    const contact = issues.find((item) => item.textContent?.includes("Path: content.contactEmail"));
+    assert.ok(contact);
+    assert.match(contact.textContent ?? "", /Draft \+ Publish \+ Edition/);
+    await activateReadinessAction(view.container, "content.contactEmail");
+    assert.equal(document.activeElement?.id, "content-contactEmail");
+  } finally {
+    await view.unmount();
+    currentDocument = documentBase;
+    currentEditions = [edition];
+  }
+});
+
+test("case-study publish readiness focuses its required organization descriptor control", async () => {
+  const view = await renderDetail({
+    ...documentBase,
+    kind: "case-study",
+    content: { schemaVersion: 1 },
+  });
+  try {
+    await activateReadinessAction(view.container, "content.organizationDescriptor");
+    assert.equal(document.activeElement?.id, "content-organizationDescriptor");
+  } finally {
+    await view.unmount();
+    currentDocument = documentBase;
+  }
+});
+
+test("same-leaf nested readiness paths keep their own scoped fallback rather than focusing the first matching control", async () => {
+  currentEditions = [{
+    ...edition,
+    readinessErrors: [
+      "content.hero.heading: Add the hero heading.",
+      "content.sections[0].heading: Add the first section heading.",
+    ],
+  }];
+  const view = await renderDetail({
+    ...documentBase,
+    kind: "platform",
+    content: {
+      schemaVersion: 1,
+      category: "Technology",
+      summary: "A concise platform summary.",
+      sections: [{ heading: "", body: [{ type: "paragraph", text: "" }] }],
+    },
+  });
+  try {
+    const heroIssue = [...view.container.querySelectorAll<HTMLElement>("[data-readiness-issue]")]
+      .find((item) => item.textContent?.includes("Path: content.hero.heading"));
+    const sectionIssue = [...view.container.querySelectorAll<HTMLElement>("[data-readiness-issue]")]
+      .find((item) => item.textContent?.includes("Path: content.sections[0].heading"));
+    assert.ok(heroIssue);
+    assert.ok(sectionIssue);
+    await React.act(async () => {
+      button(heroIssue, "Find content correction").click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    assert.equal(document.activeElement, heroIssue);
+    await React.act(async () => {
+      button(sectionIssue, "Find content correction").click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    assert.equal(document.activeElement, sectionIssue);
+  } finally {
+    await view.unmount();
+    currentDocument = documentBase;
+    currentEditions = [edition];
+  }
+});
+
+test("readiness actions focus the exact correction control or destination, rather than a generic workflow target", async () => {
+  const titleView = await renderDetail({ ...documentBase, title: "" });
+  try {
+    await activateReadinessAction(titleView.container, "title");
+    assert.equal(document.activeElement?.id, "document-title");
+  } finally {
+    await titleView.unmount();
+  }
+
+  const contentView = await renderDetail({
+    ...documentBase,
+    content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "not-an-email" },
+  });
+  try {
+    await activateReadinessAction(contentView.container, "content.contactEmail");
+    assert.equal(document.activeElement?.id, "content-contactEmail");
+  } finally {
+    await contentView.unmount();
+  }
+
+  currentEditions = [{ ...edition, readinessErrors: ["seo.canonicalUrl: Use an HTTP(S) URL."] }];
+  const seoView = await renderDetail();
+  try {
+    await activateReadinessAction(seoView.container, "seo.canonicalUrl");
+    assert.equal(document.activeElement?.id, "seo-canonical-url");
+  } finally {
+    await seoView.unmount();
+    currentEditions = [edition];
+  }
+
+  const unsavedView = await renderDetail();
+  try {
+    await change(unsavedView.container.querySelector<HTMLInputElement>("#document-title")!, "Changed but not saved");
+    await activateReadinessAction(unsavedView.container, "workflow.unsaved");
+    assert.equal(document.activeElement?.id, "save-draft");
+  } finally {
+    await unsavedView.unmount();
+  }
+
+  currentEditions = [{ ...edition, workflowState: "in-review" }];
+  const reviewView = await renderDetail({ ...documentBase, status: "in-review" });
+  try {
+    await activateReadinessAction(reviewView.container, "workflow.state");
+    assert.equal(document.activeElement?.id, "review-comment");
+  } finally {
+    await reviewView.unmount();
+    currentEditions = [edition];
+  }
+
+  const archivedView = await renderDetail({ ...documentBase, status: "archived" });
+  try {
+    await activateReadinessAction(archivedView.container, "workflow.state");
+    assert.equal(document.activeElement?.id, "restore-draft");
+  } finally {
+    await archivedView.unmount();
+    currentDocument = documentBase;
+  }
+});
+
+test("archived readiness gives permission guidance instead of focusing a restore control the editor cannot use", async () => {
+  currentSession = { user: { role: "editor", marketCodes: ["uae"] } };
+  const view = await renderDetail({ ...documentBase, status: "archived" });
+  try {
+    const issue = [...view.container.querySelectorAll<HTMLElement>("[data-readiness-issue]")]
+      .find((item) => item.textContent?.includes("Archived edition"));
+    assert.ok(issue);
+    assert.match(issue.textContent ?? "", /publisher or administrator must restore/i);
+    assert.ok(button(issue, "Review required access"));
+    assert.equal(view.container.querySelector("#restore-draft"), null);
+    await React.act(async () => {
+      button(issue, "Review required access").click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    assert.equal(document.activeElement, issue);
+  } finally {
+    await view.unmount();
+    currentDocument = documentBase;
+    currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
   }
 });
 

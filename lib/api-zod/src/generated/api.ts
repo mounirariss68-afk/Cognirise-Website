@@ -4287,6 +4287,8 @@ export const BindSharedMarketEditionBody = zod.object({
   "baselineId": zod.string().optional(),
   "baselineRevisionId": zod.string().optional().describe('Required for Shared and Adapted bindings; freezes the exact neutral revision.'),
   "independentRevisionId": zod.string().optional().describe('Required for Independent bindings; must be an exact saved destination revision.'),
+  "expectedDestinationRevisionId": zod.string().nullish().describe('Required for every Shared or Adapted operation that materializes a destination draft. Exact destination revision inspected before reuse; null asserts that no saved exact destination existed. Translation-lineage acknowledgements that do not materialize remain compatible without it.'),
+  "expectedActiveBaselineRevisionId": zod.string().optional().describe('Required for every Shared or Adapted operation that materializes a destination draft. Active frozen baseline revision inspected before reuse; the binding fails if that baseline has a successor. Translation-lineage acknowledgements that do not materialize remain compatible without it.'),
   "translationSourceRevisionId": zod.string().optional().describe('Explicit shared-baseline revision from which this locale was translated; setting it acknowledges the current translation lineage.'),
   "version": zod.number().min(bindSharedMarketEditionBodyVersionMin).multipleOf(bindSharedMarketEditionBodyVersionMultipleOf).describe('Use 0 only to create a previously unbound market edition; existing bindings require their exact positive version.')
 })
