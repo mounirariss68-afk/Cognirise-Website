@@ -17,7 +17,7 @@ import {
 } from "./availability";
 
 export type PolicyCandidate = { market: string; locale: string };
-type PublishedDocumentRoutes = { known: Set<string>; available: Set<string> };
+export type PublishedDocumentRoutes = { known: Set<string>; available: Set<string> };
 // This route is CMS-owned from its first release. Treat it as known before a
 // source edition exists, so an older published navigation snapshot cannot make
 // an unpublished framework discoverable.
@@ -25,6 +25,11 @@ const GOVERNED_FRAMEWORK_ROUTES = ["/methodologies/guardrails-framework"] as con
 
 function publicPath(value: string) {
   return value.split(/[?#]/)[0]!.replace(/\/+$/, "") || "/";
+}
+
+export function isNavigationDestinationAvailable(routes: PublishedDocumentRoutes, destination: string) {
+  const normalizedPath = publicPath(destination);
+  return !routes.known.has(normalizedPath) || routes.available.has(normalizedPath);
 }
 
 function representedRoute(kind: string, payload: Record<string, unknown>) {
@@ -42,7 +47,7 @@ function representedRoute(kind: string, payload: Record<string, unknown>) {
  * may be delivered to the requested destination. Navigation destinations that
  * do not map to a CMS document retain their policy-controlled behavior.
  */
-async function publishedDocumentRoutes(
+export async function publishedDocumentRoutes(
   market: string,
   locale: string,
   candidates: PolicyCandidate[],
@@ -199,8 +204,7 @@ export async function publishedNavigationPolicy(market: string, locale: string) 
       return {
         ...parsed.data,
         items: parsed.data.items.map((item) => {
-          const destination = publicPath(item.destination);
-          return routes.known.has(destination) && !routes.available.has(destination)
+          return !isNavigationDestinationAvailable(routes, item.destination)
             ? { ...item, visible: false }
             : item;
         }),

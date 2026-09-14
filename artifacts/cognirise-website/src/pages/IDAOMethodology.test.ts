@@ -30,7 +30,7 @@ test("navigation makes What we do direct and exposes the methodology portfolio i
   );
   assert.deepEqual(
     NAVIGATION_ITEM_REGISTRY.filter((item) => item.id === "methodologies" || ("parentId" in item && item.parentId === "methodologies")).map((item) => item.id),
-    ["methodologies", "methodologies.overview", "methodologies.value-to-scale", "methodologies.use-case-prioritization", "methodologies.idao", "methodologies.agent-authority"],
+    ["methodologies", "methodologies.overview", "methodologies.value-to-scale", "methodologies.use-case-prioritization", "methodologies.idao", "methodologies.agent-authority", "methodologies.guardrails"],
   );
 });
 

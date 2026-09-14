@@ -14,3 +14,9 @@ The user explicitly approved an additive, locally generated Pulse results PDF fo
 **Why:** Consistent assessment exports are an approved exception to the protection boundary, not permission to redesign or reinterpret the canonical framework.
 
 **How to apply:** Maintain this distinction in later export work. The planned AI Guardrails framework is complementary to Agent Authority; do not merge their logic or invent Guardrails content before it is supplied and approved.
+
+The user also approved a presentation-only redesign of the Agent Authority guardrails subsection, including native diagrams and placement after assessment.
+
+**Why:** The legacy interaction artwork uses four illustrative exposure buckets, but those are examples rather than an alternative scoring system. The approved redesign must use canonical E1–E5 geometry while retaining those examples as annotations and keeping compensation distinct from unrestricted agent discretion.
+
+**How to apply:** Preserve governed copy, legacy asset compatibility, and assessment policy. This exception does not authorize revisions to either canonical methodology or to the separate Guardrails Framework.

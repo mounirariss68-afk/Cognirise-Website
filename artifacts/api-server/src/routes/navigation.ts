@@ -21,7 +21,12 @@ import {
 } from "../lib/auth";
 import { audit } from "../lib/cms";
 import { asyncRoute } from "../lib/http";
-import { navigationCandidates, publishedNavigationPolicy } from "../lib/navigation-policy";
+import {
+  isNavigationDestinationAvailable,
+  navigationCandidates,
+  publishedDocumentRoutes,
+  publishedNavigationPolicy,
+} from "../lib/navigation-policy";
 
 const router: IRouter = Router();
 const defaultPages = [...new Set(NAVIGATION_ITEM_REGISTRY.map((item) => item.destination.split(/[?#]/)[0]))];
@@ -113,6 +118,7 @@ async function settings(requestedMarket: string, requestedLocale: string, allowF
     }
     const legacy = await pool.query(`SELECT id,COALESCE(visible,enabled) AS visible,updated_at FROM cms_navigation_items`);
     const legacyVisibility = new Map(legacy.rows.map((row) => [String(row.id), Boolean(row.visible)]));
+    const routes = await publishedDocumentRoutes(requestedMarket, requestedLocale, choices);
     return NavigationSettingsSchema.parse({
       items: NAVIGATION_ITEM_REGISTRY.map((item, order) => ({
         id: item.id,
@@ -120,9 +126,13 @@ async function settings(requestedMarket: string, requestedLocale: string, allowF
         parentId: "parentId" in item ? item.parentId : null,
         order,
         destination: item.destination,
-        visible: legacyVisibility.get(item.id) ?? true,
+        visible: (legacyVisibility.get(item.id) ?? true)
+          && isNavigationDestinationAvailable(routes, item.destination),
       })),
-      pages: defaultPages.map((path) => ({ path, enabled: true })),
+      pages: defaultPages.map((path) => ({
+        path,
+        enabled: isNavigationDestinationAvailable(routes, path),
+      })),
       requestedMarket,
       requestedLocale,
       market: requestedMarket,

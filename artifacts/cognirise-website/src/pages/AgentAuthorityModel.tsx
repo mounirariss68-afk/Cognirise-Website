@@ -18,6 +18,8 @@ import {
   getCeiling,
   getEBand,
 } from "@/lib/agent-authority";
+import { ComparisonDiagram } from "@/components/agent-authority/ComparisonDiagram";
+import { InteractionChart } from "@/components/agent-authority/InteractionChart";
 
 const COMPILED = {
   title: "The Agent Authority Model",
@@ -552,82 +554,6 @@ export function AgentAuthorityLayout({
         </ol>
       </section>
 
-      {guardrails && (
-        <section className="px-6 py-20 md:px-[4.8vw] lg:py-28">
-            <Kicker>Guardrails and authority</Kicker>
-            <h3 id="guardrails-and-authority" className="mt-5 max-w-[850px] scroll-mt-20 font-display text-[clamp(36px,4.5vw,62px)] font-semibold leading-[0.98] tracking-[-0.075em]">
-              {guardrails.heading}
-            </h3>
-            <div className="mt-8 max-w-[850px] space-y-5 text-[16px] leading-[1.7] text-[#405777]">
-              <p>{guardrails.opening}</p>
-              <p>{guardrails.definition}</p>
-              <p>{guardrails.bankExample.beforeQuote} <em>{guardrails.bankExample.quote}</em>{guardrails.bankExample.afterQuote}</p>
-            </div>
-
-            <div className="mt-14 border-t border-[#102957] pt-6">
-              <h4 className="font-display text-[clamp(28px,3vw,40px)] font-semibold tracking-[-0.055em]">{guardrails.comparisonHeading}</h4>
-              <table className="mt-7 w-full border-collapse text-left">
-                <thead className="max-sm:hidden">
-                  <tr className="border-b-2 border-[#102957] text-[10px] uppercase tracking-[0.1em] text-[#647491]">
-                    <th className="p-4"> </th>
-                    <th className="p-4">{guardrails.comparisonColumns.guardrails}</th>
-                    <th className="p-4">{guardrails.comparisonColumns.authorityModel}</th>
-                  </tr>
-                </thead>
-                <tbody className="max-sm:grid max-sm:gap-5">
-                  {guardrails.comparisonRows.map((row) => (
-                    <tr key={row.label} className="border-b border-[#cbd3e1] text-sm max-sm:grid max-sm:border max-sm:border-[#cbd3e1]">
-                      <th scope="row" className="p-4 align-top font-bold max-sm:border-b max-sm:border-[#cbd3e1]">{row.label}</th>
-                      <td className="p-4 align-top text-[#405777] max-sm:border-b max-sm:border-[#cbd3e1]"><span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.1em] text-[#647491] sm:hidden">{guardrails.comparisonColumns.guardrails}</span>{row.guardrailsEmphasis === "italic" ? <em>{row.guardrails}</em> : row.guardrails}</td>
-                      <td className="p-4 align-top text-[#405777]"><span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.1em] text-[#647491] sm:hidden">{guardrails.comparisonColumns.authorityModel}</span>{row.authorityModelEmphasis === "italic" ? <em>{row.authorityModel}</em> : row.authorityModel}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="mt-16 max-w-[850px]">
-              <h4 className="font-display text-[clamp(28px,3vw,40px)] font-semibold tracking-[-0.055em]">{guardrails.unit.heading}</h4>
-              <div className="mt-6 space-y-5 text-[16px] leading-[1.7] text-[#405777]">
-                {guardrails.unit.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-                <p className="font-semibold text-[#102957]">{guardrails.unit.emphasis}</p>
-              </div>
-            </div>
-            <figure className="mt-9 border border-[#cbd3e1] bg-white p-3 sm:p-5">
-              <img src={assetUrl(`/images/cognirise/${guardrails.firstFigure.asset}`)} alt={guardrails.firstFigure.altText} className="h-auto w-full" />
-              <figcaption className="border-t border-[#cbd3e1] px-1 pt-4 text-sm leading-[1.6] text-[#536887]"><strong>{guardrails.firstFigure.captionLabel}</strong> <em>{guardrails.firstFigure.captionLead}</em> {guardrails.firstFigure.captionBody}</figcaption>
-            </figure>
-
-            <div className="mt-16 max-w-[850px]">
-              <h4 className="font-display text-[clamp(28px,3vw,40px)] font-semibold tracking-[-0.055em]">{guardrails.interaction.heading}</h4>
-              <div className="mt-6 space-y-5 text-[16px] leading-[1.7] text-[#405777]">
-                <p>{guardrails.interaction.introduction}</p>
-                <p><strong className="text-[#102957]">{guardrails.interaction.exposure.lead}</strong> {guardrails.interaction.exposure.body}</p>
-                <p><strong className="text-[#102957]">{guardrails.interaction.evidence.lead}</strong> {guardrails.interaction.evidence.body}</p>
-                <p>{guardrails.interaction.controlsIntroduction}</p>
-                <p><strong className="text-[#102957]">{guardrails.interaction.requiredControls.lead}</strong> {guardrails.interaction.requiredControls.bodyBeforeExamples} <em>{guardrails.interaction.requiredControls.assuranceExample}</em>{" "}{guardrails.interaction.requiredControls.betweenExamples ? <>{guardrails.interaction.requiredControls.betweenExamples} </> : null}<em>{guardrails.interaction.requiredControls.controlExample}</em> {guardrails.interaction.requiredControls.conclusion}</p>
-                <p><strong className="text-[#102957]">{guardrails.interaction.compensatingControls.lead}</strong> {guardrails.interaction.compensatingControls.bodyBeforeContent} <strong className="text-[#102957]">{guardrails.interaction.compensatingControls.content}</strong>{guardrails.interaction.compensatingControls.bodyAfterContent}</p>
-              </div>
-            </div>
-            <figure className="mt-9 border border-[#cbd3e1] bg-white p-3 sm:p-5">
-              <img src={assetUrl(`/images/cognirise/${guardrails.secondFigure.asset}`)} alt={guardrails.secondFigure.altText} className="h-auto w-full" />
-              <figcaption className="border-t border-[#cbd3e1] px-1 pt-4 text-sm leading-[1.6] text-[#536887]"><strong>{guardrails.secondFigure.captionLabel}</strong> <em>{guardrails.secondFigure.captionLead}</em> {guardrails.secondFigure.captionBody}</figcaption>
-            </figure>
-
-            <div className="mt-16 max-w-[850px]">
-              <h4 className="font-display text-[clamp(28px,3vw,40px)] font-semibold tracking-[-0.055em]">{guardrails.designRule.heading}</h4>
-              <blockquote className="mt-7 border-l-4 border-[hsl(var(--brand-coral))] pl-5 font-display text-[clamp(23px,2.6vw,34px)] font-semibold leading-[1.2] tracking-[-0.045em] text-[#102957]">
-                {guardrails.designRule.quote}
-              </blockquote>
-              <div className="mt-7 space-y-5 text-[16px] leading-[1.7] text-[#405777]">
-                <p>{guardrails.designRule.conclusion}</p>
-                <p>{guardrails.designRule.failure}</p>
-                <p className="font-semibold text-[#102957]">{guardrails.designRule.closingEmphasis}</p>
-              </div>
-            </div>
-        </section>
-      )}
-
       <section id="authority-ceiling" className="scroll-mt-20 bg-[#071936] px-6 py-20 text-white md:px-[4.8vw] lg:py-28">
         <div className="mb-12 grid gap-8 lg:grid-cols-[1fr_0.8fr] lg:items-end">
           <div>
@@ -755,6 +681,84 @@ export function AgentAuthorityLayout({
       </section>
 
       <AgentAuthorityAssessment />
+
+      {guardrails && (
+        <section className="border-y border-[#cbd3e1] px-6 py-20 [overflow-wrap:anywhere] md:px-[4.8vw] lg:py-28">
+          <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-[8vw]">
+            <div>
+            <Kicker>Guardrails and authority</Kicker>
+            <h2 id="guardrails-and-authority" className="mt-5 scroll-mt-20 font-display text-[clamp(40px,5vw,72px)] font-semibold leading-[1.12] tracking-[-0.06em]">
+              {guardrails.heading}
+            </h2>
+            </div>
+            <div className="space-y-5 text-[16px] leading-[1.65] text-[#405777]">
+              <p>{guardrails.opening}</p>
+              <p>{guardrails.definition}</p>
+              <p>{guardrails.bankExample.beforeQuote} <em>{guardrails.bankExample.quote}</em>{" "}{guardrails.bankExample.afterQuote}</p>
+            </div>
+          </div>
+
+            <div className="mt-14 border-t border-[#102957] pt-6">
+              <h3 className="font-display text-[clamp(28px,3vw,40px)] font-semibold leading-[1.25] tracking-[-0.055em]">{guardrails.comparisonHeading}</h3>
+              <table className="mt-7 w-full border-collapse text-left text-[16px] leading-[1.65]">
+                <thead className="max-sm:hidden">
+                  <tr className="border-b-2 border-[#102957] text-[10px] uppercase tracking-[0.1em] text-[#647491]">
+                    <th className="p-4"> </th>
+                    <th className="p-4">{guardrails.comparisonColumns.guardrails}</th>
+                    <th className="p-4">{guardrails.comparisonColumns.authorityModel}</th>
+                  </tr>
+                </thead>
+                <tbody className="max-sm:grid max-sm:gap-5">
+                  {guardrails.comparisonRows.map((row) => (
+                    <tr key={row.label} className="border-b border-[#cbd3e1] max-sm:grid max-sm:border max-sm:border-[#cbd3e1]">
+                      <th scope="row" className="p-4 align-top font-bold max-sm:border-b max-sm:border-[#cbd3e1]">{row.label}</th>
+                      <td className="p-4 align-top text-[#405777] max-sm:border-b max-sm:border-[#cbd3e1]"><span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.1em] text-[#647491] sm:hidden">{guardrails.comparisonColumns.guardrails}</span>{row.guardrailsEmphasis === "italic" ? <em>{row.guardrails}</em> : row.guardrails}</td>
+                      <td className="p-4 align-top text-[#405777]"><span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.1em] text-[#647491] sm:hidden">{guardrails.comparisonColumns.authorityModel}</span>{row.authorityModelEmphasis === "italic" ? <em>{row.authorityModel}</em> : row.authorityModel}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-16 max-w-[850px]">
+              <h3 className="font-display text-[clamp(28px,3vw,40px)] font-semibold leading-[1.25] tracking-[-0.055em]">{guardrails.unit.heading}</h3>
+              <div className="mt-6 space-y-5 text-[16px] leading-[1.7] text-[#405777]">
+                {guardrails.unit.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                <p className="font-semibold text-[#102957]">{guardrails.unit.emphasis}</p>
+              </div>
+            </div>
+            <ComparisonDiagram figure={guardrails.firstFigure} />
+
+            <div className="mt-16">
+              <h3 className="font-display text-[clamp(28px,3vw,40px)] font-semibold leading-[1.25] tracking-[-0.055em]">{guardrails.interaction.heading}</h3>
+              <div className="mt-6 space-y-8 text-[16px] leading-[1.65] text-[#405777]">
+                <p className="max-w-[850px]">{guardrails.interaction.introduction}</p>
+                <div className="grid gap-8 border-t border-[#cbd3e1] pt-6 lg:grid-cols-2 lg:gap-14">
+                <p><strong className="text-[#102957]">{guardrails.interaction.exposure.lead}</strong> {guardrails.interaction.exposure.body}</p>
+                <p><strong className="text-[#102957]">{guardrails.interaction.evidence.lead}</strong> {guardrails.interaction.evidence.body}</p>
+                </div>
+                <p>{guardrails.interaction.controlsIntroduction}</p>
+                <div className="grid gap-8 border-t border-[#cbd3e1] pt-6 lg:grid-cols-2 lg:gap-14">
+                <p><strong className="text-[#102957]">{guardrails.interaction.requiredControls.lead}</strong> {guardrails.interaction.requiredControls.bodyBeforeExamples} <em>{guardrails.interaction.requiredControls.assuranceExample}</em>{" "}{guardrails.interaction.requiredControls.betweenExamples ? <>{guardrails.interaction.requiredControls.betweenExamples} </> : null}<em>{guardrails.interaction.requiredControls.controlExample}</em> {guardrails.interaction.requiredControls.conclusion}</p>
+                <p><strong className="text-[#102957]">{guardrails.interaction.compensatingControls.lead}</strong> {guardrails.interaction.compensatingControls.bodyBeforeContent} <strong className="text-[#102957]">{guardrails.interaction.compensatingControls.content}</strong>{" "}{guardrails.interaction.compensatingControls.bodyAfterContent}</p>
+                </div>
+              </div>
+            </div>
+            <InteractionChart figure={guardrails.secondFigure} />
+
+            <div className="mt-16 max-w-[850px]">
+              <h3 className="font-display text-[clamp(28px,3vw,40px)] font-semibold leading-[1.25] tracking-[-0.055em]">{guardrails.designRule.heading}</h3>
+              <blockquote className="mt-7 border-l-4 border-[hsl(var(--brand-coral))] pl-5 font-display text-[clamp(23px,2.6vw,34px)] font-semibold leading-[1.2] tracking-[-0.045em] text-[#102957]">
+                {guardrails.designRule.quote}
+              </blockquote>
+              <div className="mt-7 space-y-5 text-[16px] leading-[1.7] text-[#405777]">
+                <p>{guardrails.designRule.conclusion}</p>
+                <p>{guardrails.designRule.failure}</p>
+                <p className="font-semibold text-[#102957]">{guardrails.designRule.closingEmphasis}</p>
+              </div>
+            </div>
+        </section>
+      )}
 
       <section className="px-6 py-20 md:px-[4.8vw] lg:py-28">
         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
