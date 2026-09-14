@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="100%" font-family="Inter, system-ui, sans-serif">
+  <title id="tB">Exposure sets the minimum enforcement layer</title>
+  <desc id="dB">Five exposure bands on the left connect to a minimum enforcement layer on the right. Internal and easily reversed connects to prompt with monitoring. Reversible at a cost and affecting one customer connects to runtime. Irreversible and affecting one customer connects to runtime plus architectural scoping. Regulator-visible, public or safety-implicating connects to architecture plus an independent second control. A handover running above its exposure ceiling connects to architecture plus a named artefact that carries the authority.</desc>
+  <rect width="1200" height="720" fill="#FFFFFF"/>
+
+  <text x="56" y="50" font-size="13" font-weight="600" fill="#DB509E" letter-spacing="1.6">THE STOPPING RULE</text>
+  <text x="56" y="84" font-size="22" font-weight="600" fill="#102957" font-family="Comfortaa, Inter, sans-serif">Exposure decides how strong is strong enough</text>
+
+  <text x="56" y="126" font-size="11.5" font-weight="600" fill="#8A93A0" letter-spacing="1.3">IF THE HANDOVER IS…</text>
+  <text x="1144" y="126" font-size="11.5" font-weight="600" fill="#8A93A0" letter-spacing="1.3" text-anchor="end">…ENFORCE AT LEAST HERE</text>
+
+  <g stroke="#CBD3E1" stroke-width="1.6" fill="none">
+    <path d="M520 186 C 640 186, 660 210, 780 210"/>
+    <path d="M520 288 C 640 288, 660 330, 780 330"/>
+    <path d="M520 390 C 640 390, 660 360, 780 360"/>
+    <path d="M520 492 C 640 492, 660 500, 780 500"/>
+    <path d="M520 594 C 640 594, 660 530, 780 530"/>
+  </g>
+
+  
+  <g>
+    <rect x="56" y="150" width="464" height="72" rx="10" fill="#F9F7F4" stroke="#CBD3E1"/>
+    <text x="82" y="180" font-size="15" font-weight="600" fill="#102957">Undone at will, internal only</text>
+    <text x="82" y="202" font-size="12.5" fill="#60708D">Nobody outside the organisation is affected</text>
+  </g>
+  <g>
+    <rect x="56" y="252" width="464" height="72" rx="10" fill="#F9F7F4" stroke="#CBD3E1"/>
+    <text x="82" y="282" font-size="15" font-weight="600" fill="#102957">Reversible at a cost, one customer</text>
+    <text x="82" y="304" font-size="12.5" fill="#60708D">Undoing it involves another party</text>
+  </g>
+  <g>
+    <rect x="56" y="354" width="464" height="72" rx="10" fill="#FFF3EF" stroke="#FF775C"/>
+    <text x="82" y="384" font-size="15" font-weight="600" fill="#102957">Irreversible, one customer</text>
+    <text x="82" y="406" font-size="12.5" fill="#60708D">Sent, paid, published or acted upon</text>
+  </g>
+  <g>
+    <rect x="56" y="456" width="464" height="72" rx="10" fill="#FDF2F8" stroke="#DB509E"/>
+    <text x="82" y="486" font-size="15" font-weight="600" fill="#102957">Regulator-visible, public, or safety</text>
+    <text x="82" y="508" font-size="12.5" fill="#60708D">A supervisor can inspect it, or anyone can see it</text>
+  </g>
+  <g>
+    <rect x="56" y="558" width="464" height="72" rx="10" fill="#102957"/>
+    <text x="82" y="588" font-size="15" font-weight="600" fill="#FFFFFF">Running above its exposure ceiling</text>
+    <text x="82" y="610" font-size="12.5" fill="#8FA3C8">More authority than the exposure alone permits</text>
+  </g>
+
+  
+  <g>
+    <rect x="780" y="176" width="364" height="68" rx="10" fill="#FFF3EF" stroke="#FF775C"/>
+    <text x="806" y="205" font-size="16" font-weight="600" fill="#102957" font-family="Comfortaa, Inter, sans-serif">Prompt</text>
+    <text x="806" y="227" font-size="12.5" fill="#60708D">with monitoring</text>
+  </g>
+  <g>
+    <rect x="780" y="296" width="364" height="98" rx="10" fill="#FFFFFF" stroke="#4A76F5"/>
+    <text x="806" y="325" font-size="16" font-weight="600" fill="#102957" font-family="Comfortaa, Inter, sans-serif">Runtime</text>
+    <text x="806" y="347" font-size="12.5" fill="#60708D">a check outside the model, on the way in or out</text>
+    <line x1="806" y1="358" x2="1118" y2="358" stroke="#CBD3E1"/>
+    <text x="806" y="379" font-size="12.5" font-weight="600" fill="#4A76F5">+ architectural scoping of the data and tools reached</text>
+  </g>
+  <g>
+    <rect x="780" y="446" width="364" height="128" rx="10" fill="#102957"/>
+    <text x="806" y="475" font-size="16" font-weight="600" fill="#FFFFFF" font-family="Comfortaa, Inter, sans-serif">Architecture</text>
+    <text x="806" y="497" font-size="12.5" fill="#8FA3C8">the model is given only what the task needs</text>
+    <line x1="806" y1="508" x2="1118" y2="508" stroke="#2E4571"/>
+    <text x="806" y="529" font-size="12.5" font-weight="600" fill="#FFFFFF">+ an independent second control</text>
+    <text x="806" y="554" font-size="12.5" font-weight="600" fill="#DB509E">+ a named artefact that carries the authority</text>
+  </g>
+
+  <line x1="56" y1="656" x2="1144" y2="656" stroke="#CBD3E1"/>
+  <text x="56" y="684" font-size="13.5" font-weight="600" fill="#102957">“The strongest layer you can” is advice. This is a decision — so a design review can close.</text>
+  <text x="56" y="706" font-size="12.5" fill="#8A93A0">Exposure is rated exactly as it is in the Agent Authority Model: how hard the output is to undo, and who is exposed if it is wrong.</text>
+</svg>

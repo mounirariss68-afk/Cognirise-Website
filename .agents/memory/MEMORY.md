@@ -40,3 +40,4 @@
 - [Storage dry-run evidence](storage-dry-run-evidence.md) — Validate the upload namespace before trusting empty scans; zero candidates do not exercise retention decisions.
 - [Router query verification](router-query-verification.md) — Model pathname and search separately in deep-link tests; permissive mocks can hide wrong-market selection.
 - [Editorial notification authority](editorial-notification-authority.md) — Reuse exact-target access, freeze digest event sets across retries, and test new queues against PostgreSQL.
+- [Assessment PDF verification](assessment-pdf-verification.md) — Validate actual browser downloads, font extraction and single-field overflow rather than relying on fallback fixtures.

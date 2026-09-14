@@ -1,11 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { motion, useReducedMotion } from "framer-motion";
-import { Plus, ArrowRight, Info, Trash2 } from "lucide-react";
+import { Plus, ArrowRight, Download, Info, Printer, RotateCcw, Trash2 } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { MethodologyRelationship } from "@/components/MethodologyRelationship";
 import { MethodPageHero } from "@/components/MethodPageHero";
-import { useMethodSessionState } from "@/lib/use-method-session-state";
+import { useMethodSessionState, useUnsavedWorkWarning } from "@/lib/use-method-session-state";
+import { downloadPrioritizationResultsPdf } from "@/lib/pulse-assessment-reports";
 
 export type UseCase = {
   id: string;
@@ -294,6 +295,13 @@ export default function AIUseCasePrioritization() {
     DEFAULT_USE_CASES,
     { validate: isUseCaseSessionState },
   );
+  const [downloadError, setDownloadError] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
+  const downloadLock = useRef(false);
+  const cleanBaseline = useRef(JSON.stringify(DEFAULT_USE_CASES));
+  const completeUseCases = useCases.length > 0 && useCases.every((useCase) => useCase.name.trim() && useCase.description.trim());
+  const answeredUseCases = useCases.filter((useCase) => useCase.name.trim() && useCase.description.trim()).length;
+  useUnsavedWorkWarning(JSON.stringify(useCases) !== cleanBaseline.current);
 
   const addUseCase = () => {
     const newId = `uc-${Date.now()}`;
@@ -313,6 +321,26 @@ export default function AIUseCasePrioritization() {
 
   const removeUseCase = (id: string) => {
     setUseCases(useCases.filter(uc => uc.id !== id));
+  };
+
+  const resetAssessment = () => {
+    setUseCases(DEFAULT_USE_CASES.map((useCase) => ({ ...useCase, scores: { ...useCase.scores } })));
+    setDownloadError("");
+  };
+
+  const downloadResults = async () => {
+    if (!completeUseCases || isDownloading || downloadLock.current) return;
+    downloadLock.current = true;
+    setIsDownloading(true);
+    setDownloadError("");
+    try {
+      await downloadPrioritizationResultsPdf(useCases);
+    } catch (error) {
+      setDownloadError(error instanceof Error ? error.message : "Your results PDF could not be created. Please try again.");
+    } finally {
+      downloadLock.current = false;
+      setIsDownloading(false);
+    }
   };
 
   const analysis = useMemo(() => {
@@ -402,6 +430,16 @@ export default function AIUseCasePrioritization() {
            >
              <Plus size={18} /> Add another opportunity
            </button>
+            <div className="mt-8 border border-[#cbd3e1] bg-white p-5" aria-live="polite">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491]">Assessment progress</p>
+                  <p className="mt-2 text-sm font-semibold text-[#102957]">{answeredUseCases} of {useCases.length} opportunities have a name and outcome.</p>
+                  <p className="mt-1 text-xs leading-relaxed text-[#647491]">Answers remain in this page only. Reloading or leaving clears unsaved work.</p>
+                </div>
+                <button type="button" onClick={resetAssessment} className="inline-flex items-center gap-2 text-xs font-bold text-[#102957] underline underline-offset-4"><RotateCcw size={14} /> Reset assessment</button>
+              </div>
+            </div>
          </div>
       </section>
 
@@ -463,6 +501,17 @@ export default function AIUseCasePrioritization() {
                     <Link href="/methodologies/idao" data-testid="link-idao-methodology" className="text-[13px] font-bold text-[hsl(var(--brand-pink))] hover:text-white transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] w-fit">
                      Explore the methodology <ArrowRight size={16} />
                    </Link>
+                    <div className="mt-8 border-t border-white/10 pt-6">
+                      <div className="flex flex-wrap gap-3">
+                        <button type="button" onClick={downloadResults} disabled={!completeUseCases || isDownloading} className="inline-flex items-center gap-2 bg-white px-4 py-2.5 text-xs font-bold text-[#102957] disabled:cursor-not-allowed disabled:opacity-45">
+                          <Download size={14} /> {isDownloading ? "Creating report…" : "Download results (PDF)"}
+                        </button>
+                        <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 px-2 py-2.5 text-xs font-bold text-white underline underline-offset-4"><Printer size={14} /> Print</button>
+                      </div>
+                      {!completeUseCases && <p className="mt-3 text-xs leading-relaxed text-[#b9c7db]">Add a name and outcome to every opportunity before exporting a complete result.</p>}
+                      {downloadError && <p role="alert" className="mt-3 border-l-2 border-[#ff9fcf] pl-3 text-xs leading-relaxed text-white">{downloadError}</p>}
+                      <p className="mt-3 text-xs leading-relaxed text-[#b9c7db]">The designed Pulse PDF is generated locally. Opportunity notes are never sent to Cognirise.</p>
+                    </div>
                  </div>
               </div>
            </div>

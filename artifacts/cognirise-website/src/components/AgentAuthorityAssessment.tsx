@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Download, Printer } from "lucide-react";
 import {
   type AssessmentData,
   type HScore,
@@ -15,6 +16,8 @@ import {
   isRequestedAboveCeiling,
   isRoleVague,
 } from "@/lib/agent-authority";
+import { downloadAuthorityResultsPdf } from "@/lib/pulse-assessment-reports";
+import { useUnsavedWorkWarning } from "@/lib/use-method-session-state";
 
 const STEP_LABELS = [
   "Handover",
@@ -59,6 +62,9 @@ export function AgentAuthorityAssessment() {
   const [errors, setErrors] = useState<string[]>([]);
   const [changesThing, setChangesThing] = useState<"yes" | "no">();
   const [fixesOutcome, setFixesOutcome] = useState<"yes" | "no">();
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+  const downloadLock = useRef(false);
   const assessmentRef = useRef<HTMLElement>(null);
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
 
@@ -70,6 +76,7 @@ export function AgentAuthorityAssessment() {
     isRequestedAboveCeiling(data.requestedOversight, ceiling),
   );
   const result = step === 7 ? evaluateAssessment(data) : null;
+  useUnsavedWorkWarning(Object.keys(data).length > 0 && !result);
 
   useEffect(() => {
     stepHeadingRef.current?.focus({ preventScroll: true });
@@ -114,12 +121,28 @@ export function AgentAuthorityAssessment() {
   };
 
   const reset = () => {
+    if (isDownloading) return;
     setData({});
     setErrors([]);
     setChangesThing(undefined);
     setFixesOutcome(undefined);
     setStep(1);
     assessmentRef.current?.scrollIntoView({ block: "start" });
+  };
+
+  const downloadResults = async () => {
+    if (!result || isDownloading || downloadLock.current) return;
+    downloadLock.current = true;
+    setIsDownloading(true);
+    setDownloadError("");
+    try {
+      await downloadAuthorityResultsPdf(result);
+    } catch (error) {
+      setDownloadError(error instanceof Error ? error.message : "Your control brief PDF could not be created. Please try again.");
+    } finally {
+      downloadLock.current = false;
+      setIsDownloading(false);
+    }
   };
 
   const progressText = useMemo(
@@ -148,8 +171,9 @@ export function AgentAuthorityAssessment() {
             </h2>
           </div>
           <p className="text-[14px] leading-[1.6] text-[#536887]">
-            Nothing is sent to Cognirise or saved in your browser. Assess one handover, copy the control brief,
-            then restart for every other handover the same agent makes.
+             Nothing is sent to Cognirise or saved in your browser. Answers remain in this page only and are cleared
+             when you leave or reload. Assess one handover, download the local control brief, then restart for every
+             other handover the same agent makes.
           </p>
         </div>
 
@@ -439,11 +463,28 @@ export function AgentAuthorityAssessment() {
 
                 <button
                   type="button"
-                  onClick={reset}
+                   onClick={downloadResults}
+                   disabled={isDownloading}
+                   data-testid="button-download-authority-pdf"
+                   className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 bg-[#102957] px-6 text-sm font-bold text-white transition-colors hover:bg-[hsl(var(--brand-pink))] disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--brand-coral))]/40"
+                 >
+                   <Download size={16} /> {isDownloading ? "Creating report…" : "Download control brief (PDF)"}
+                 </button>
+                 <button
+                   type="button"
+                   onClick={() => window.print()}
+                   className="mt-8 ml-3 inline-flex min-h-12 items-center justify-center gap-2 px-2 text-sm font-bold text-[#102957] underline underline-offset-4"
+                 >
+                   <Printer size={15} /> Print
+                 </button>
+                 <button
+                   type="button"
+                   onClick={reset}
                   className="mt-8 inline-flex min-h-12 items-center justify-center bg-[#102957] px-6 text-sm font-bold text-white transition-colors hover:bg-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--brand-coral))]/40"
                 >
                   Assess another handover
                 </button>
+                 {downloadError && <p role="alert" className="mt-4 border-l-2 border-[hsl(var(--brand-coral))] pl-3 text-sm text-[#704d45]">{downloadError}</p>}
               </div>
             )}
           </div>

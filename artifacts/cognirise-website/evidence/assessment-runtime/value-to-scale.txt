@@ -1,0 +1,95 @@
+COGNIRISE PULSE · DIRECTIONAL ASSESSMENT
+
+AI Value-to-Scale
+A personal evidence map for deciding what your organisation needs to earn
+next.
+
+Generated September 14, 2026
+
+COGNIRISE PULSE · VALUE-TO-SCALE
+
+Page 1
+
+Result · Activating · 3.0 / 5
+Evidence is converted into adopted workflows with named controls and owners. The label is a
+summary, not the decision: the dimension pattern and missing evidence determine the next work.
+Answers remain on this page and are represented in the following evidence record.
+
+Your seven answers
+1. Value strategy — 3 / 5 · Activating
+Evidence is converted into adopted workflows with named controls and owners.
+Evidence prompt: Named outcome owner, baseline, value hypothesis and review cadence.
+
+2. Use-case portfolio — 3 / 5 · Activating
+Evidence is converted into adopted workflows with named controls and owners.
+Evidence prompt: Visible opportunity register, selection criteria, stop decisions and dependency map.
+
+3. Data & platform readiness — 3 / 5 · Activating
+Evidence is converted into adopted workflows with named controls and owners.
+Evidence prompt: Approved access paths, quality measures, reusable interfaces and production support
+ownership.
+
+4. Operating model — 3 / 5 · Activating
+Evidence is converted into adopted workflows with named controls and owners.
+Evidence prompt: Named decision rights, cross-functional team, acceptance gates and service ownership.
+
+5. Workforce adoption — 3 / 5 · Activating
+Evidence is converted into adopted workflows with named controls and owners.
+Evidence prompt: Redesigned roles, workflow measures, capability plans, adoption signals and feedback.
+
+6. Governance & authority — 3 / 5 · Activating
+Evidence is converted into adopted workflows with named controls and owners.
+Evidence prompt: Handover inventory, authority ceilings, monitoring, exception path and automatic demotion.
+
+7. Measured outcomes — 3 / 5 · Activating
+Evidence is converted into adopted workflows with named controls and owners.
+Evidence prompt: Operational baseline, outcome trend, control indicators, adoption measures and benefit
+owner.
+
+Priorities, evidence and next actions
+01 · Value strategy (3 / 5)
+Evidence check: confirm named outcome owner, baseline, value hypothesis and review cadence.
+Next action: Choose one material outcome, establish its baseline and name the executive owner.
+
+COGNIRISE PULSE · VALUE-TO-SCALE
+
+Page 2
+
+02 · Use-case portfolio (3 / 5)
+Evidence check: confirm visible opportunity register, selection criteria, stop decisions and dependency
+map.
+Next action: Score current opportunities by value, feasibility, time to evidence, friction, control burden and
+reuse.
+
+03 · Data & platform readiness (3 / 5)
+Evidence check: confirm approved access paths, quality measures, reusable interfaces and production
+support ownership.
+Next action: Map the data and tool access needed for the highest-value workflow and close its first blocking
+gap.
+
+04 · Operating model (3 / 5)
+Evidence check: confirm named decision rights, cross-functional team, acceptance gates and service
+ownership.
+Next action: Name the team that owns the route from evidence through operation, including its decision rights.
+
+05 · Workforce adoption (3 / 5)
+Evidence check: confirm redesigned roles, workflow measures, capability plans, adoption signals and
+feedback.
+Next action: Redesign one role and handover around the target workflow, then measure use and operating
+impact.
+
+Next steps
+01 Use the lowest-scoring dimensions to choose the next evidence review, not to claim a maturity benchmark.
+02 Optionally take the separate Value Scan when a facilitated value and delivery conversation is useful.
+03 Reassess after the evidence, ownership or operating context changes.
+
+Privacy and limitations
+This is a directional planning tool, not an audit, certification or benchmark.
+Answers are generated locally from this page and are not sent to Cognirise or included in the separate Value Scan form.
+Method version: AI Value-to-Scale · current public questionnaire.
+
+COGNIRISE PULSE · VALUE-TO-SCALE
+
+Page 3
+
+

@@ -8,7 +8,7 @@ const routeMap = readFileSync(new URL("../components/MethodologyRouteMap.tsx", i
 
 test("publishes the workflow readiness method and portfolio route", () => {
   assert.match(app, /path="\/methodologies\/agentic-operations-readiness"/);
-  assert.match(routeMap, /method: "Agentic Operations Readiness"/);
+  assert.match(routeMap, /Agentic Operations Readiness/);
   assert.match(routeMap, /href: "\/methodologies\/agentic-operations-readiness"/);
 });
 
@@ -39,13 +39,10 @@ test("dates sources and separates them from Cognirise proprietary logic", () => 
   }
 });
 
-test("keeps validated local working state in saved-record-specific session namespaces", () => {
+test("keeps answers in page memory while preserving legacy record reopening", () => {
   assert.match(page, /useMethodSessionState<Partial<ReadinessAnswers>>/);
   assert.match(page, /requestedSavedId \?[\s\S]*?isReadinessAnswersSessionState/);
   assert.match(page, /setAnswers\(record\.answers\)/);
-  assert.match(page, /setSessionNamespace\(record\.id\)/);
-  assert.match(page, /forgetReadinessSession\(saved\.id\)/);
-  for (const field of ["answers", "workflow-scope", "governance-review", "condition-records"]) {
-    assert.match(page, new RegExp(`"${field}"`));
-  }
+  assert.match(page, /downloadReadinessResultsPdf/);
+  assert.doesNotMatch(page, /createReadinessAssessment|copyShareLink|saveReadinessAssessment/);
 });

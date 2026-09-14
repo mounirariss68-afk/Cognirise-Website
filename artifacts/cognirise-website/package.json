@@ -89,5 +89,11 @@
     "vite": "catalog:",
     "wouter": "^3.3.5",
     "zod": "catalog:"
+  },
+  "dependencies": {
+    "@fontsource/comfortaa": "5.3.0",
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/noto-sans-arabic": "5.3.0",
+    "fontkit": "2.0.4"
   }
 }

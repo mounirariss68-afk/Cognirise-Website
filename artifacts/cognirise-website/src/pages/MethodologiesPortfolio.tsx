@@ -70,7 +70,7 @@ export default function MethodologiesPortfolio() {
             </h1>
             <div className="border-t border-[#102957] pt-8 max-w-[620px]">
               <p className="text-[19px] leading-[1.58] text-[#405777]" data-testid="portfolio-description">
-                {governedHero?.text ?? "Choose the decision you need to make. Find a practical method to assess the evidence, define the next action and move forward responsibly."}
+                {governedHero?.text ?? "Start with the decision in front of you—not a framework name. Choose one of seven situations to see what you may already have, what needs deciding and which existing method can help. Strategy, operations and implementation are context, not a required sequence."}
               </p>
               
               <a 
@@ -108,13 +108,16 @@ export default function MethodologiesPortfolio() {
             Start with your situation
           </h2>
           <p className="mt-6 text-[19px] leading-[1.58] text-[#536887]">
-            Select the decision in front of you. See which method can help, what it produces, and when IDAO delivery or an Agent Authority decision becomes relevant.
+            Select the decision in front of you. See what you may already have, the practical output to work toward, and which existing method fits. IDAO delivery and specialist authority decisions remain conditional on evidence.
           </p>
         </div>
         
         <div data-testid="route-navigator-container">
           <MethodologyRouteMap />
         </div>
+        <p className="mt-8 max-w-3xl text-[14px] leading-[1.6] text-[#647491]">
+          Value Scan remains a separate optional facilitated enquiry, not a scored assessment. IDAO and the Human–Agent Operating Model remain delivery and playbook content; they are not presented here as compulsory questionnaires.
+        </p>
       </section>
     </main>
   );

@@ -1,0 +1,205 @@
+COGNIRISE PULSE · PORTFOLIO DECISION
+
+AI Use-Case Portfolio
+A working record of the opportunities, evidence and dependencies behind your
+current sequence.
+
+Generated September 14, 2026
+
+COGNIRISE PULSE · USE-CASE-PRIORITIZATION
+
+Page 1
+
+Result · 1 opportunity reviewed
+Recommendations remain method-specific: score totals support comparison, while threshold rules
+determine Stop, Innovate, Demonstrate or Activate.
+Answers remain on this page and are represented in the following evidence record.
+
+Portfolio criteria
+Each opportunity is scored on a 1–5 planning scale. These are not market benchmarks, probabilities or a
+certification.
+Value & Impact: Marginal - Transformational (Strategic and economic return.) · Feasibility: Unproven Production-ready (Data readiness and technical maturity.) · Time to Evidence: Quarters - Days (Speed to
+prove value.) · Adoption Friction: High Disruption - Seamless (Workflow disruption.) · Control Burden: Critical
+Risk - Standard Controls (Risk and compliance overhead.) · Reuse Potential: Isolated - Foundational
+(Component or agent reuse.)
+
+Current opportunity record
+01 · Invoice exception review · Activate · 24 / 30
+Shorten review time
+Value & Impact 4/5 · Feasibility 4/5 · Time to Evidence 4/5 · Adoption Friction 4/5 · Control Burden 4/5 · Reuse
+Potential 4/5 · Dependencies: Approved data access · Caveat: Evidence retained for operational review.
+Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+
+COGNIRISE PULSE · USE-CASE-PRIORITIZATION
+
+Page 2
+
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+
+COGNIRISE PULSE · USE-CASE-PRIORITIZATION
+
+Page 3
+
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review. Evidence
+retained for operational review. Evidence retained for operational review. Evidence retained for operational
+review. Evidence retained for operational review. Evidence retained for operational review. Evidence retained for
+operational review. Evidence retained for operational review. Evidence retained for operational review.
+WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+LAST_MARKER_RETAINED
+
+COGNIRISE PULSE · USE-CASE-PRIORITIZATION
+
+Page 4
+
+Interpretation
+Invoice exception review · Activate
+High feasibility and low adoption friction indicate the workflow is ready for production integration and
+scaling.
+Suggested delivery entry: IDAO stage review.
+
+Next steps
+01 Record uncertainty as a caveat and revisit a score when evidence, dependencies or ownership changes.
+02 Bring the highest-value, best-evidenced opportunity to a separate Value Scan if a facilitated route to proof
+is useful.
+03 Use Agent Authority separately when a consequential handover exists; Control Burden is not an authority
+ceiling.
+
+Privacy and limitations
+This is a transparent comparative planning tool, not a financial business case, ROI calculator or roadmap-to-delivery
+package.
+Answers and free-text opportunity evidence were generated locally from this page and are not sent to Cognirise.
+Method version: AI Use-Case Portfolio Prioritization · current public questionnaire.
+
+COGNIRISE PULSE · USE-CASE-PRIORITIZATION
+
+Page 5
+
+

@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 740" width="100%" font-family="Inter, system-ui, sans-serif">
+  <title id="tA">One rule, four different ways to enforce it</title>
+  <desc id="dA">The rule "never reveal another customer's data" written at four layers. Policy is a line in a document and anyone who has not read it gets past. Prompt is a line in the AI's instructions and an attacker who can iterate gets past. Above a dividing line the rule is a request; below it, at runtime and architecture, it is enforced. Runtime is software outside the AI checking inputs and outputs, reliable against opportunistic misuse and unreliable against a motivated attacker. Architecture gives the AI only the data and tools the task needs, and only what the scope itself permits gets past.</desc>
+  <rect width="1200" height="740" fill="#FFFFFF"/>
+
+  <text x="60" y="52" font-size="13" font-weight="600" fill="#DB509E" letter-spacing="1.6">ONE RULE, FOUR DIFFERENT WAYS</text>
+  <text x="60" y="86" font-size="22" font-weight="600" fill="#102957" font-family="Comfortaa, Inter, sans-serif">“Never reveal another customer’s data.”</text>
+
+  
+  <g>
+    <rect x="60" y="116" width="1080" height="112" rx="12" fill="#F9F7F4" stroke="#CBD3E1"/>
+    <rect x="60" y="116" width="5" height="112" rx="2.5" fill="#8A93A0"/>
+    <text x="92" y="152" font-size="18" font-weight="600" fill="#102957" font-family="Comfortaa, Inter, sans-serif">Policy</text>
+    <text x="92" y="176" font-size="13" fill="#8A93A0">A rule in a document</text>
+    <text x="92" y="204" font-size="13.5" fill="#60708D">A line in the AI usage policy. The system never sees it.</text>
+    <text x="470" y="152" font-size="11.5" font-weight="600" fill="#8A93A0" letter-spacing="1.2">WHAT GETS PAST IT</text>
+    <text x="470" y="178" font-size="14" fill="#102957">Anyone who has not read it — and every automated</text>
+    <text x="470" y="198" font-size="14" fill="#102957">path, which has nobody in it to read anything</text>
+    <g><circle cx="1000" cy="172" r="9" fill="#8A93A0"/><circle cx="1036" cy="172" r="9" fill="none" stroke="#CBD3E1" stroke-width="2"/><circle cx="1072" cy="172" r="9" fill="none" stroke="#CBD3E1" stroke-width="2"/><circle cx="1108" cy="172" r="9" fill="none" stroke="#CBD3E1" stroke-width="2"/></g>
+  </g>
+
+  
+  <g>
+    <rect x="60" y="240" width="1080" height="112" rx="12" fill="#FFF3EF" stroke="#FF775C"/>
+    <rect x="60" y="240" width="5" height="112" rx="2.5" fill="#FF775C"/>
+    <text x="92" y="276" font-size="18" font-weight="600" fill="#102957" font-family="Comfortaa, Inter, sans-serif">Prompt</text>
+    <text x="92" y="300" font-size="13" fill="#8A93A0">A line in the AI’s instructions</text>
+    <text x="92" y="328" font-size="13.5" fill="#60708D">The AI is told not to. The data is still in front of it.</text>
+    <text x="470" y="276" font-size="11.5" font-weight="600" fill="#8A93A0" letter-spacing="1.2">WHAT GETS PAST IT</text>
+    <text x="470" y="302" font-size="14" fill="#102957">An attacker who can iterate. Against adaptive attack,</text>
+    <text x="470" y="322" font-size="14" fill="#102957">instruction-level defences fail more often than they hold.</text>
+    <g><circle cx="1000" cy="296" r="9" fill="#FF775C"/><circle cx="1036" cy="296" r="9" fill="#FF775C"/><circle cx="1072" cy="296" r="9" fill="none" stroke="#CBD3E1" stroke-width="2"/><circle cx="1108" cy="296" r="9" fill="none" stroke="#CBD3E1" stroke-width="2"/></g>
+  </g>
+
+  
+  <line x1="60" y1="384" x2="366" y2="384" stroke="#102957" stroke-width="1.6" stroke-dasharray="6 5"/>
+  <line x1="834" y1="384" x2="1140" y2="384" stroke="#102957" stroke-width="1.6" stroke-dasharray="6 5"/>
+  <text x="600" y="389" font-size="12.5" font-weight="600" fill="#102957" text-anchor="middle" letter-spacing="1.1">ABOVE THIS LINE YOU ARE ASKING · BELOW IT YOU ARE NOT</text>
+
+  
+  <g>
+    <rect x="60" y="416" width="1080" height="128" rx="12" fill="#FFFFFF" stroke="#4A76F5"/>
+    <rect x="60" y="416" width="5" height="128" rx="2.5" fill="#4A76F5"/>
+    <text x="92" y="452" font-size="18" font-weight="600" fill="#102957" font-family="Comfortaa, Inter, sans-serif">Runtime</text>
+    <text x="92" y="476" font-size="13" fill="#8A93A0">Software outside the AI that checks</text>
+    <text x="92" y="494" font-size="13" fill="#8A93A0">what goes in and out</text>
+    <text x="92" y="522" font-size="13.5" fill="#60708D">Any answer containing another customer’s record is</text>
+    <text x="92" y="540" font-size="13.5" fill="#60708D">blocked before it leaves.</text>
+    <text x="560" y="452" font-size="11.5" font-weight="600" fill="#8A93A0" letter-spacing="1.2">WHAT GETS PAST IT</text>
+    <text x="560" y="478" font-size="14" fill="#102957">Reliable against opportunistic misuse. Unreliable</text>
+    <text x="560" y="498" font-size="14" fill="#102957">against a motivated attacker: character and encoding</text>
+    <text x="560" y="518" font-size="14" fill="#102957">evasion has reached complete bypass, and unsafe</text>
+    <text x="560" y="538" font-size="14" fill="#102957">responses rise sharply in lower-resourced languages.</text>
+    <g><circle cx="1000" cy="452" r="9" fill="#4A76F5"/><circle cx="1036" cy="452" r="9" fill="#4A76F5"/><circle cx="1072" cy="452" r="9" fill="#4A76F5"/><circle cx="1108" cy="452" r="9" fill="none" stroke="#CBD3E1" stroke-width="2"/></g>
+  </g>
+
+  
+  <g>
+    <rect x="60" y="556" width="1080" height="128" rx="12" fill="#102957"/>
+    <text x="92" y="592" font-size="18" font-weight="600" fill="#FFFFFF" font-family="Comfortaa, Inter, sans-serif">Architecture</text>
+    <text x="92" y="616" font-size="13" fill="#8FA3C8">The AI is given only the data and</text>
+    <text x="92" y="634" font-size="13" fill="#8FA3C8">tools the task needs</text>
+    <text x="92" y="662" font-size="13.5" fill="#DCE4F0">The search returns only the signed-in customer’s</text>
+    <text x="92" y="680" font-size="13.5" fill="#DCE4F0">own records.</text>
+    <text x="560" y="592" font-size="11.5" font-weight="600" fill="#8FA3C8" letter-spacing="1.2">WHAT GETS PAST IT</text>
+    <text x="560" y="620" font-size="15" font-weight="600" fill="#FFFFFF">Only what the scope itself permits —</text>
+    <text x="560" y="642" font-size="15" font-weight="600" fill="#FFFFFF">which is why the scope, not the guardrail,</text>
+    <text x="560" y="664" font-size="15" font-weight="600" fill="#FFFFFF">becomes the thing to review.</text>
+    <g><circle cx="1000" cy="592" r="9" fill="#DB509E"/><circle cx="1036" cy="592" r="9" fill="#DB509E"/><circle cx="1072" cy="592" r="9" fill="#DB509E"/><circle cx="1108" cy="592" r="9" fill="#DB509E"/></g>
+  </g>
+
+  <text x="60" y="720" font-size="12.5" fill="#8A93A0">Architecture is not about withholding. The AI still gets everything it needs to do the job — it just never gets more than that.</text>
+</svg>

@@ -13,6 +13,7 @@ describe("Methodology Relationships and Boundaries", () => {
 
   const analytics = readFileSync(resolve(root, "src/lib/analytics.ts"), "utf8");
   const portfolio = readFileSync(resolve(root, "src/pages/MethodologiesPortfolio.tsx"), "utf8");
+  const landingInventory = readFileSync(resolve(root, "../../lib/db/landing-page-inventory.json"), "utf8");
   const relBlock = readFileSync(resolve(root, "src/components/MethodologyRelationship.tsx"), "utf8");
   const vts = readFileSync(resolve(root, "src/pages/AIValueToScale.tsx"), "utf8");
   const ucp = readFileSync(resolve(root, "src/pages/AIUseCasePrioritization.tsx"), "utf8");
@@ -28,15 +29,34 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.match(relBlock, /Does not decide/);
   });
 
-  it("verifies IDAO entry points, loopback, and K/D/A in route map", () => {
+  it("verifies the seven approved decision-first situations and protected anchors", () => {
     assert.match(routeMap, /Innovate, Demonstrate, Activate/);
-    assert.match(routeMap, /loopback/i);
     assert.match(routeMap, /Knowledge/);
     assert.match(routeMap, /Decision/);
     assert.match(routeMap, /Action/);
-    for (const situation of ["Organization-wide constraint", "Multiple opportunities", "One use case or workflow", "Human–agent work design", "Specific handover authority", "Evidence from live operation"]) {
+    for (const situation of [
+      "We need to know where AI is worth investing.",
+      "We have several AI ideas and need to choose.",
+      "We have an AI strategy and need to implement it.",
+      "We need to improve a specific process.",
+      "We have a pilot and need to put it into everyday use.",
+      "AI works in one area. We need to expand it.",
+      "Our AI is in use, but the results are falling short.",
+    ]) {
       assert.match(routeMap, new RegExp(situation));
     }
+    for (const retired of ["Organization-wide constraint", "Multiple opportunities", "One use case or workflow", "Human–agent work design", "Specific handover authority", "Evidence from live operation"]) {
+      assert.doesNotMatch(routeMap, new RegExp(`label: "${retired}`));
+    }
+    assert.match(routeMap, /Existing assets/);
+    assert.match(routeMap, /Actual output/);
+    assert.match(routeMap, /not a complete business case; producing a full business case is additional engagement work/);
+    assert.match(routeMap, /Turning a strategy or roadmap into delivery is additional engagement work beyond this self-service route/);
+    assert.match(routeMap, /Relevant methods and why they fit/);
+    assert.match(routeMap, /Conditional IDAO connection/);
+    assert.match(routeMap, /planned as a complementary specialist method alongside Agent Authority/);
+    assert.match(routeMap, /No standalone Guardrails framework or assessment is published/);
+    assert.match(routeMap, /#guardrails-and-authority/);
   });
 
   it("verifies the new method overview image and routing approach in portfolio", () => {
@@ -44,10 +64,14 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.match(portfolio, /src=\{heroMedia\.src\}/);
     assert.match(portfolio, /alt=\{heroMedia\.alt\}/);
     assert.match(portfolio, /route-navigator/);
+    assert.match(portfolio, /seven situations/);
+    assert.match(portfolio, /Value Scan remains a separate optional facilitated enquiry/);
+    assert.match(landingInventory, /Start with the decision in front of you—not a framework name/);
     assert.doesNotMatch(portfolio, /AI Value-to-Scale Maturity Model/);
     assert.doesNotMatch(portfolio, /Complete static route/i);
     assert.doesNotMatch(portfolio, /Download the VTS assessment worksheet/i);
     assert.match(routeMap, /Start with your situation/i);
+    assert.match(routeMap, /Direct specialist access/);
   });
 
   it("tracks methodology route choices and fixed destinations without free-form content", () => {

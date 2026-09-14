@@ -7,12 +7,13 @@ const exec = promisify(execFile);
 const normalize = (text) => text.replace(/\s+/g, " ").trim();
 const prefix = "/methodologies/";
 export const routeExpectations = [
-  { id: "org-wide", situation: "Organization-wide constraint", method: "AI Value-to-Scale", destinations: [`${prefix}ai-value-to-scale#assessment`, `${prefix}ai-value-to-scale`] },
-  { id: "multiple-opps", situation: "Multiple opportunities", method: "AI Use-Case Prioritization", destinations: [`${prefix}ai-use-case-prioritization`] },
-  { id: "one-workflow", situation: "One use case or workflow", method: "Agentic Operations Readiness", destinations: [`${prefix}agentic-operations-readiness`] },
-  { id: "work-design", situation: "Human–agent work design", method: "Human–Agent Operating Model", destinations: [`${prefix}human-agent-operating-model`] },
-  { id: "authority", situation: "Specific handover authority", method: "Agent Authority Model", destinations: [`${prefix}agent-authority-model`] },
-  { id: "live-evidence", situation: "Evidence from live operation", method: "IDAO Loopback", destinations: [`${prefix}idao`] },
+  { id: "investment", situation: "We need to know where AI is worth investing.", destinations: [`${prefix}idao`, `${prefix}ai-use-case-prioritization`] },
+  { id: "competing-ideas", situation: "We have several AI ideas and need to choose.", destinations: [`${prefix}ai-use-case-prioritization`, `${prefix}idao`] },
+  { id: "existing-strategy", situation: "We have an AI strategy and need to implement it.", destinations: [`${prefix}idao`, `${prefix}ai-use-case-prioritization`] },
+  { id: "process-problem", situation: "We need to improve a specific process.", destinations: [`${prefix}idao`, `${prefix}human-agent-operating-model`, `${prefix}agentic-operations-readiness`] },
+  { id: "pilot-release", situation: "We have a pilot and need to put it into everyday use.", destinations: [`${prefix}idao`, `${prefix}agentic-operations-readiness`, `${prefix}human-agent-operating-model`] },
+  { id: "proven-expansion", situation: "AI works in one area. We need to expand it.", destinations: [`${prefix}idao`, `${prefix}ai-value-to-scale`, `${prefix}ai-use-case-prioritization`] },
+  { id: "underperformance", situation: "Our AI is in use, but the results are falling short.", destinations: [`${prefix}idao`, `${prefix}human-agent-operating-model`, `${prefix}ai-value-to-scale`] },
 ];
 
 // Uses the existing Chromium/CDP harness and Poppler's pdftotext/pdfinfo tools.
@@ -71,7 +72,7 @@ export async function assertMethodologyPrint({ send, evaluate, screenRoutes, wid
     assert.equal(print.media, true);
     assert.equal(print.screenHidden, true, `${tag}: interactive selector must not print`);
     assert.equal(print.rootVisible, true, `${tag}: static map must print`);
-    assert.deepEqual(print.cards.map(card => card.id), routeExpectations.map(route => route.id), `${tag}: six distinct routes`);
+    assert.deepEqual(print.cards.map(card => card.id), routeExpectations.map(route => route.id), `${tag}: seven distinct routes`);
     assert.deepEqual(print.anchors.links.map(({ text, href }) => ({ text, href })), [
       { text: "IDAO Delivery Framework", href: `${prefix}idao` },
       { text: "Agent Authority Model", href: `${prefix}agent-authority-model` },
@@ -80,7 +81,7 @@ export async function assertMethodologyPrint({ send, evaluate, screenRoutes, wid
     for (const [index, card] of print.cards.entries()) {
       const expected = routeExpectations[index];
       const text = normalize(card.paragraphs.join(" "));
-      for (const copy of [expected.situation, expected.method, ...screenRoutes[index].copy]) {
+      for (const copy of [expected.situation, ...screenRoutes[index].copy]) {
         assert.ok(text.includes(normalize(copy)), `${tag}: ${card.id} missing ${copy}`);
       }
       assert.deepEqual(card.links.map(link => link.href), expected.destinations, `${tag}: ${card.id} destinations`);
@@ -111,8 +112,9 @@ export async function assertMethodologyPrint({ send, evaluate, screenRoutes, wid
     for (const block of [...print.cards, print.anchors]) {
       // Every paragraph and destination of a card must survive on ONE page.
       const expected = [...block.paragraphs, ...block.links.map(link => link.href)].map(normalize);
+      const closestPage = [...pages].sort((a, b) => expected.filter(copy => b.includes(copy)).length - expected.filter(copy => a.includes(copy)).length)[0] ?? "";
       assert.ok(pages.some(page => expected.every(copy => page.includes(copy))),
-        `${tag}: ${block.id || "governing anchors"} split or missing in PDF`);
+        `${tag}: ${block.id || "governing anchors"} split or missing in PDF; missing from closest page: ${JSON.stringify(expected.filter(copy => !closestPage.includes(copy)))}; page: ${closestPage}`);
       for (const link of block.links) {
         assert.ok(urls.split("\n").some(line => line.trim().endsWith(link.href)),
           `${tag}: PDF lost clickable destination ${link.href}`);
@@ -127,7 +129,7 @@ export async function assertMethodologyPrint({ send, evaluate, screenRoutes, wid
         `${tag}: PDF text outside printable page bounds`);
       }
     }
-    console.log(`${tag}: six complete route cards, two anchors and PDF destinations verified (${pages.length} pages)`);
+    console.log(`${tag}: seven complete route cards, two anchors and PDF destinations verified (${pages.length} pages)`);
   } finally {
     await send("Emulation.setEmulatedMedia", { media: "screen" });
   }

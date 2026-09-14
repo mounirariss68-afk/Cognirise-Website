@@ -1795,7 +1795,7 @@
     "snapshot": {
       "slug": "methodologies",
       "title": "Methodologies",
-      "summary": "Choose the decision you need to make. Find a practical method to assess the evidence, define the next action and move forward responsibly.",
+      "summary": "Start with the decision in front of you—not a framework name. Choose one of seven situations to see what you may already have, what needs deciding and which existing method can help. Strategy, operations and implementation are context, not a required sequence.",
       "markets": [
         "uae"
       ],
@@ -1813,7 +1813,7 @@
             "body": [
               {
                 "type": "paragraph",
-                "text": "Choose the decision you need to make. Find a practical method to assess the evidence, define the next action and move forward responsibly."
+                "text": "Start with the decision in front of you—not a framework name. Choose one of seven situations to see what you may already have, what needs deciding and which existing method can help. Strategy, operations and implementation are context, not a required sequence."
               }
             ],
             "order": 0

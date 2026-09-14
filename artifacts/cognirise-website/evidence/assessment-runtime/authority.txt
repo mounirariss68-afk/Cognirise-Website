@@ -1,0 +1,78 @@
+COGNIRISE PULSE · HANDOVER ASSESSMENT
+
+Agent Authority Control
+Brief
+Review a bounded invoice exception
+
+Generated September 14, 2026
+
+COGNIRISE PULSE · AGENT-AUTHORITY
+
+Page 1
+
+Result · Action handover · E2
+The requested authority is within the calculated ceiling for this handover.
+Answers remain on this page and are represented in the following evidence record.
+
+Calculated authority
+Reversibility
+R2 · We undo it ourselves, inside a known window.
+
+Reach
+H2 · One named customer, patient, or citizen.
+
+Exposure band
+E2
+
+Permitted ceiling
+Out of the loop
+
+Requested authority
+Out of the loop
+
+Comparison
+Within the permitted ceiling.
+
+Operating controls
+Accountable owner
+Accounts payable lead
+
+Intervention window
+Not required at this ceiling.
+
+Promotion evidence
+Reviewed test cases
+
+Automatic demotion
+New unexplained exceptions
+
+Additional artefact / control
+Not required for the requested authority.
+
+Control instruction
+Permit this action handover no further than out-of-loop. The requested authority is within the calculated
+ceiling. The Accounts payable lead owns promotion evidence and must demote authority automatically when:
+
+COGNIRISE PULSE · AGENT-AUTHORITY
+
+Page 2
+
+New unexplained exceptions
+
+Next steps
+01 Carry this control brief into the operating design for the one assessed handover.
+02 Reassess when the reach, reversibility, intervention window, artefact or accountable role changes.
+03 Repeat the assessment for every other consequential handover; this brief does not set a ceiling for an entire
+agent.
+
+Privacy and limitations
+The questionnaire, calculation, exposure bands and authority rules are the approved Agent Authority Model and are
+unchanged.
+This report was generated locally from this page. Answers were not sent to Cognirise or stored in the browser.
+Method version: Agent Authority Model · current public questionnaire.
+
+COGNIRISE PULSE · AGENT-AUTHORITY
+
+Page 3
+
+

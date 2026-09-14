@@ -172,18 +172,23 @@ async function assertRelationshipLayout(pathname, width, scale) {
 
 async function assertRouteMap(width, scale) {
   await setViewport(width);
-  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 6`);
+  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
   const context = "Route map at " + width + "px / " + scale * 100 + "% text";
   // Restore a known selection, then enter through the real roving-tabindex group.
   await evaluate(`document.querySelector('[data-route-index="0"]').click()`);
   await delay(50);
   await resizeText(evaluate, routeMap, scale);
   await tabInto('[data-testid="situation-radiogroup"]');
-  const methods = [
-    "AI Value-to-Scale", "AI Use-Case Prioritization", "Agentic Operations Readiness",
-    "Human–Agent Operating Model", "Agent Authority Model", "IDAO Loopback",
+  const situations = [
+    "We need to know where AI is worth investing.",
+    "We have several AI ideas and need to choose.",
+    "We have an AI strategy and need to implement it.",
+    "We need to improve a specific process.",
+    "We have a pilot and need to put it into everyday use.",
+    "AI works in one area. We need to expand it.",
+    "Our AI is in use, but the results are falling short.",
   ];
-  for (let index = 0; index < methods.length; index += 1) {
+  for (let index = 0; index < situations.length; index += 1) {
     if (index) await pressKey("ArrowDown", "ArrowDown", 40);
     // React replaces the selected panel. Re-snapshot unscaled styles, never
     // compound the scale or accidentally test newly mounted text at 100%.
@@ -191,7 +196,7 @@ async function assertRouteMap(width, scale) {
     const radio = '[data-route-index="' + index + '"]';
     await assertFocusedVisible(evaluate, radio, context + " keyboard route " + index);
     assert.equal(await evaluate(`document.querySelector(${JSON.stringify(radio)}).getAttribute("aria-checked")`), "true");
-    assert.equal(await evaluate(`document.querySelector('[data-testid="route-detail-method"]').textContent`), methods[index]);
+    assert.equal(await evaluate(`document.querySelector('[data-testid="route-detail-situation"]').textContent.trim()`), situations[index]);
     await assertNoClipping(evaluate, routeMap, context + " selection " + index);
     const overlapping = await evaluate(`(() => {
       const panels = [...document.querySelector(${JSON.stringify(routeMap)}).children].map(el => el.getBoundingClientRect());
@@ -215,12 +220,12 @@ async function assertRouteMap(width, scale) {
   await pressKey("ArrowDown", "ArrowDown", 40);
   assert.equal(await evaluate(`document.activeElement?.getAttribute("data-route-index")`), "0", context + " arrow navigation wraps");
   await pressKey("ArrowLeft", "ArrowLeft", 37);
-  assert.equal(await evaluate(`document.activeElement?.getAttribute("data-route-index")`), "5", context + " reverse arrow navigation wraps");
+  assert.equal(await evaluate(`document.activeElement?.getAttribute("data-route-index")`), "6", context + " reverse arrow navigation wraps");
 }
 
 async function assertPrintRoutes() {
   await setViewport(1440);
-  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 6`);
+  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
   const screenRoutes = [];
   for (const width of [1440, 390]) {
     await setViewport(width, width === 390 ? 844 : 1000, width === 390);
@@ -230,14 +235,14 @@ async function assertPrintRoutes() {
       const route = await evaluate(`(() => {
         const panel = document.getElementById("selected-route-output");
         return {
-          method: panel.querySelector('[data-testid="route-detail-method"]').textContent.trim(),
+           method: panel.querySelector('[data-testid="route-detail-situation"]').textContent.trim(),
           copy: ['route-detail-decision', 'route-detail-output', 'route-anchor-idao', 'route-anchor-authority']
             .map(id => panel.querySelector('[data-testid="' + id + '"] p').textContent.trim()),
           destinations: [...panel.querySelectorAll('[data-testid="route-actions"] a')].map(link => link.getAttribute('href')),
           anchors: [...panel.querySelectorAll('[data-testid^="route-anchor-"] a')].map(link => link.getAttribute('href')),
         };
       })()`);
-      assert.equal(route.method, expected.method, `${width}px route ${index} method`);
+       assert.equal(route.method, expected.situation, `${width}px route ${index} situation`);
       assert.deepEqual(route.destinations, expected.destinations, `${width}px route ${index} destinations`);
       assert.deepEqual(route.anchors, destinations);
       if (width === 1440) screenRoutes.push(route);

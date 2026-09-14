@@ -7,7 +7,6 @@ const baseUrl = process.env.PULSE_BROWSER_BASE_URL || "http://127.0.0.1:80";
 const debuggingPort = 9341;
 const profilePath = `/tmp/cognirise-readiness-browser-test-${process.pid}`;
 const conditionIds = ["stability", "access", "observability", "fallback", "exceptions", "economics"];
-let createdRecord = null;
 
 await rm(profilePath, { recursive: true, force: true });
 
@@ -40,18 +39,10 @@ async function getDebugTarget() {
 const target = await getDebugTarget();
 const socket = new WebSocket(target.webSocketDebuggerUrl);
 const pending = new Map();
-const pausedRequests = [];
-const pausedRequestWaiters = [];
 let commandId = 0;
 
 socket.onmessage = ({ data }) => {
   const message = JSON.parse(data);
-  if (message.method === "Fetch.requestPaused") {
-    const waiter = pausedRequestWaiters.shift();
-    if (waiter) waiter(message.params);
-    else pausedRequests.push(message.params);
-    return;
-  }
   if (!message.id || !pending.has(message.id)) return;
   const { resolve, reject } = pending.get(message.id);
   pending.delete(message.id);
@@ -70,16 +61,6 @@ function send(method, params = {}) {
     pending.set(commandId, { resolve, reject });
     socket.send(JSON.stringify({ id: commandId, method, params }));
   });
-}
-
-function waitForPausedRequest() {
-  if (pausedRequests.length > 0) return Promise.resolve(pausedRequests.shift());
-  return Promise.race([
-    new Promise((resolve) => pausedRequestWaiters.push(resolve)),
-    delay(5000).then(() => {
-      throw new Error("Timed out waiting for a paused readiness API request");
-    }),
-  ]);
 }
 
 async function evaluate(expression) {
@@ -190,176 +171,31 @@ try {
   assert.match(state.text, /Current decision · 6\/6 answered[\s\S]*Stop/i);
   assert.deepEqual(state.unresolved, ["economics"]);
 
-  await send("Fetch.enable", {
-    patterns: [{
-      urlPattern: "*api/public/readiness-assessments*",
-      requestStage: "Request",
-    }],
-  });
-  await evaluate(`document.querySelector("[data-readiness-save]").click(); true`);
-  const saveRequest = await waitForPausedRequest();
-  assert.equal(saveRequest.request.method, "POST");
+  const hasCreateControl = await evaluate(`Boolean(document.querySelector("[data-readiness-save]"))`);
+  assert.equal(hasCreateControl, false, "Anonymous readiness creation should not be offered");
 
-  const saveLock = await evaluate(`(() => {
-    const answers = [...document.querySelectorAll("[data-readiness-answer]")];
-    const reset = document.querySelector('[data-testid="button-reset-assessment"]');
-    answers.find((element) => element.dataset.readinessAnswer === "economics:ready").click();
-    reset.click();
-    return {
-      disabledAnswers: answers.filter((element) => element.disabled).length,
-      resetDisabled: reset.disabled,
-      economicsStopSelected: document.querySelector('[data-readiness-answer="economics:stop"]').getAttribute("aria-checked"),
-      answered: answers.filter((element) => element.getAttribute("aria-checked") === "true").length,
-    };
-  })()`);
-  assert.deepEqual(saveLock, {
-    disabledAnswers: 18,
-    resetDisabled: true,
-    economicsStopSelected: "true",
-    answered: 6,
-  }, "Answer edits and reset should be locked while a save response is pending");
-
-  await send("Fetch.continueRequest", { requestId: saveRequest.requestId });
-  for (let attempt = 0; attempt < 50; attempt += 1) {
-    const saved = await evaluate(`location.search.includes("readiness=")
-      && document.body.innerText.includes("Decision saved")`);
-    if (saved) break;
-    if (attempt === 49) throw new Error("Saved readiness decision did not finish");
-    await delay(100);
-  }
-
-  const sharedRecord = await evaluate(`(() => {
-    const id = new URLSearchParams(location.search).get("readiness");
-    return {
-      id,
-      token: localStorage.getItem("cognirise:readiness-delete:" + id),
-      url: location.href,
-    };
-  })()`);
-  createdRecord = sharedRecord;
-  assert.match(sharedRecord.id, /^[0-9a-f-]{36}$/);
-  assert.ok(sharedRecord.token, "The creator browser should retain the deletion token");
-  assert.equal(sharedRecord.url.includes(sharedRecord.token), false, "The share URL must not expose the deletion token");
-
-  await evaluate(`document.querySelector('[data-testid="button-delete-readiness-record"]').click(); true`);
-  const deleteRequest = await waitForPausedRequest();
-  assert.equal(deleteRequest.request.method, "DELETE");
-  const deleteLock = await evaluate(`(() => {
-    const answers = [...document.querySelectorAll("[data-readiness-answer]")];
-    const reset = document.querySelector('[data-testid="button-reset-assessment"]');
-    answers.find((element) => element.dataset.readinessAnswer === "economics:ready").click();
-    reset.click();
-    return {
-      disabledAnswers: answers.filter((element) => element.disabled).length,
-      resetDisabled: reset.disabled,
-      saveVisible: Boolean(document.querySelector("[data-readiness-save]")),
-      economicsStopSelected: document.querySelector('[data-readiness-answer="economics:stop"]').getAttribute("aria-checked"),
-    };
-  })()`);
-  assert.deepEqual(deleteLock, {
-    disabledAnswers: 18,
-    resetDisabled: true,
-    saveVisible: false,
-    economicsStopSelected: "true",
-  }, "Answer edits, reset, and a subsequent save should be locked while deletion is pending");
-  await send("Fetch.continueRequest", { requestId: deleteRequest.requestId });
-  for (let attempt = 0; attempt < 50; attempt += 1) {
-    const removed = await evaluate(`!location.search.includes("readiness=")
-      && document.body.innerText.includes("Saved record deleted")`);
-    if (removed) break;
-    if (attempt === 49) throw new Error("Saved readiness decision did not delete");
-    await delay(100);
-  }
-  createdRecord = null;
-
-  await selectWithKeyboard("economics", "ready");
-  await evaluate(`document.querySelector("[data-readiness-save]").click(); true`);
-  const replacementSaveRequest = await waitForPausedRequest();
-  assert.equal(replacementSaveRequest.request.method, "POST");
-  await send("Fetch.continueRequest", { requestId: replacementSaveRequest.requestId });
-  for (let attempt = 0; attempt < 50; attempt += 1) {
-    const saved = await evaluate(`location.search.includes("readiness=")
-      && document.body.innerText.includes("Decision saved")`);
-    if (saved) break;
-    if (attempt === 49) throw new Error("Replacement readiness decision did not save");
-    await delay(100);
-  }
-  const replacementRecord = await evaluate(`(() => {
-    const id = new URLSearchParams(location.search).get("readiness");
-    return {
-      id,
-      token: localStorage.getItem("cognirise:readiness-delete:" + id),
-      url: location.href,
-    };
-  })()`);
-  createdRecord = replacementRecord;
-
-  await evaluate(`localStorage.removeItem("cognirise:readiness-delete:" + ${JSON.stringify(replacementRecord.id)}); true`);
-  await send("Page.navigate", { url: replacementRecord.url });
-  const loadRequest = await waitForPausedRequest();
-  assert.equal(loadRequest.request.method, "GET");
-
-  const loadLock = await evaluate(`(() => {
-    const answers = [...document.querySelectorAll("[data-readiness-answer]")];
-    answers.find((element) => element.dataset.readinessAnswer === "stability:stop").click();
-    return {
-      disabledAnswers: answers.filter((element) => element.disabled).length,
-      selectedAnswers: answers.filter((element) => element.getAttribute("aria-checked") === "true").length,
-      resetVisible: Boolean(document.querySelector('[data-testid="button-reset-assessment"]')),
-    };
-  })()`);
-  assert.deepEqual(loadLock, {
-    disabledAnswers: 18,
-    selectedAnswers: 0,
-    resetVisible: false,
-  }, "Answer edits should be locked from the first render while a saved decision is loading");
-
-  await send("Fetch.continueRequest", { requestId: loadRequest.requestId });
-  for (let attempt = 0; attempt < 50; attempt += 1) {
-    const reopened = await evaluate(`document.body.innerText.includes("Saved decision reopened")
-      && document.querySelectorAll('[data-readiness-answer][aria-checked="true"]').length === 6`);
-    if (reopened) break;
-    if (attempt === 49) throw new Error("Shared readiness decision did not reopen");
-    await delay(100);
-  }
-  state = await decisionState();
-  assert.match(state.text, /Current decision · 6\/6 answered[\s\S]*Proceed/i);
-  assert.deepEqual(state.unresolved, []);
-  assert.equal(
-    await evaluate(`document.querySelector('[data-readiness-answer="economics:ready"]').getAttribute("aria-checked")`),
-    "true",
-  );
-  assert.equal(
-    await evaluate(`document.body.innerText.includes("Delete saved record")`),
-    false,
-    "A second browser without the token must not be offered deletion",
-  );
-
-  const deleted = await fetch(`${baseUrl}/api/public/readiness-assessments/${replacementRecord.id}`, {
-    method: "DELETE",
-    headers: {
-      Origin: new URL(baseUrl).origin,
-      "Sec-Fetch-Site": "same-origin",
-      "X-Delete-Token": replacementRecord.token,
-    },
-  });
-  assert.equal(deleted.status, 204);
-  createdRecord = null;
-  const afterDelete = await fetch(`${baseUrl}/api/public/readiness-assessments/${replacementRecord.id}`);
-  assert.equal(afterDelete.status, 404);
-
-  console.log("Readiness save, share, reopen, and delayed lifecycle race regression passed");
-} finally {
-  if (createdRecord?.id && createdRecord?.token) {
-    await fetch(`${baseUrl}/api/public/readiness-assessments/${createdRecord.id}`, {
-      method: "DELETE",
-      headers: {
-        Origin: new URL(baseUrl).origin,
-        "Sec-Fetch-Site": "same-origin",
-        "X-Delete-Token": createdRecord.token,
+  const retiredResponse = await evaluate(`fetch("/api/public/readiness-assessments", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      answers: {
+        stability: "ready",
+        access: "prepare",
+        observability: "ready",
+        fallback: "ready",
+        exceptions: "stop",
+        economics: "ready",
       },
-    }).catch(() => {});
-  }
+    }),
+  }).then(async (response) => ({
+    status: response.status,
+    body: await response.json(),
+  }))`);
+  assert.equal(retiredResponse.status, 410);
+  assert.match(retiredResponse.body.error, /anonymous readiness saves are no longer available/i);
+
+  console.log("Readiness decision and retired anonymous creation regression passed");
+} finally {
   socket.close();
   browser.kill("SIGTERM");
   await Promise.race([browserExited, delay(2000)]);

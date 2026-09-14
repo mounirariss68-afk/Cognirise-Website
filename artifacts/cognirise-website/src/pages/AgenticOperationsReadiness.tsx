@@ -1,11 +1,10 @@
-import { ArrowDown, ArrowRight, Check, Copy, Printer, RotateCcw, Save, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowRight, Check, Download, Printer, RotateCcw, Trash2 } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { useDynamicMetadata } from "@/lib/metadata";
 import { MethodologyRelationship } from "@/components/MethodologyRelationship";
 import { MethodPageHero } from "@/components/MethodPageHero";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  createReadinessAssessment,
   deleteReadinessAssessment,
   getReadinessAssessment,
   type ReadinessAnswers,
@@ -16,11 +15,9 @@ import {
   getReadinessDeleteToken,
   getSavedReadinessId,
   isCompleteReadinessAnswers,
-  readinessShareUrl,
-  replaceReadinessUrl,
-  storeReadinessDeleteToken,
 } from "@/lib/readiness-assessment";
-import { useMethodSessionState } from "@/lib/use-method-session-state";
+import { useMethodSessionState, useUnsavedWorkWarning } from "@/lib/use-method-session-state";
+import { downloadReadinessResultsPdf } from "@/lib/pulse-assessment-reports";
 
 type Answer = ReadinessAnswers[keyof ReadinessAnswers];
 
@@ -89,15 +86,6 @@ const CONDITIONS = [
 const READINESS_SESSION_PREFIX = "cognirise:method:agentic-operations-readiness";
 const readinessSessionKey = (namespace: string, field: string) =>
   `${READINESS_SESSION_PREFIX}:${namespace}:${field}`;
-const READINESS_SESSION_FIELDS = ["answers", "workflow-scope", "governance-review", "condition-records"] as const;
-
-const forgetReadinessSession = (namespace: string) => {
-  try {
-    READINESS_SESSION_FIELDS.forEach((field) => sessionStorage.removeItem(readinessSessionKey(namespace, field)));
-  } catch {
-    // Session storage may be disabled; the in-memory assessment still resets.
-  }
-};
 
 export const isReadinessAnswersSessionState = (value: unknown): value is Partial<ReadinessAnswers> => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -157,7 +145,7 @@ export default function AgenticOperationsReadiness() {
   const [answers, setAnswers] = useMethodSessionState<Partial<ReadinessAnswers>>(
     readinessSessionKey(sessionNamespace, "answers"),
     {},
-    { validate: requestedSavedId ? ((value: unknown): value is Partial<ReadinessAnswers> => false) : isReadinessAnswersSessionState },
+    { validate: isReadinessAnswersSessionState },
   );
   const [workflowScope, setWorkflowScope] = useMethodSessionState(
     readinessSessionKey(sessionNamespace, "workflow-scope"),
@@ -175,8 +163,11 @@ export default function AgenticOperationsReadiness() {
     { validate: isConditionRecordsSessionState },
   );
   const [isLoadingSaved, setIsLoadingSaved] = useState(Boolean(requestedSavedId));
-  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const downloadLock = useRef(false);
+  const cleanBaseline = useRef(JSON.stringify({ answers: {}, workflowScope: "", governanceReview: "", conditionRecords: {} }));
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -186,6 +177,12 @@ export default function AgenticOperationsReadiness() {
     const controller = new AbortController();
     getReadinessAssessment(id, { signal: controller.signal })
       .then((record) => {
+        cleanBaseline.current = JSON.stringify({
+          answers: record.answers,
+          workflowScope: "",
+          governanceReview: "",
+          conditionRecords: {},
+        });
         setAnswers(record.answers);
         setSaved(record);
         setLoadError(null);
@@ -217,7 +214,8 @@ export default function AgenticOperationsReadiness() {
   const completed = Object.keys(answers).length;
   const assessmentComplete = completed === CONDITIONS.length;
   const completeAnswers = isCompleteReadinessAnswers(answers) ? answers : null;
-  const assessmentLocked = isLoadingSaved || isSaving || isDeleting;
+  useUnsavedWorkWarning(JSON.stringify({ answers, workflowScope, governanceReview, conditionRecords }) !== cleanBaseline.current);
+  const assessmentLocked = isLoadingSaved || isDeleting || isDownloading;
   const updateConditionRecord = (id: (typeof CONDITIONS)[number]["id"], field: keyof ConditionRecord, value: string) => {
     setConditionRecords((current) => ({
       ...current,
@@ -226,24 +224,18 @@ export default function AgenticOperationsReadiness() {
   };
   const updateAnswer = (id: (typeof CONDITIONS)[number]["id"], answer: Answer) => {
     setAnswers((current) => ({ ...current, [id]: answer }));
-    if (saved) {
-      setSaved(null);
-      setSessionNamespace("draft");
-      replaceReadinessUrl(null);
-    }
     setStatusMessage(null);
     setLoadError(null);
+    setDownloadError(null);
   };
   const resetAssessment = () => {
     setAnswers({});
     setWorkflowScope("");
     setGovernanceReview("");
     setConditionRecords({});
-    setSaved(null);
-    setSessionNamespace("draft");
-    replaceReadinessUrl(null);
     setStatusMessage(null);
     setLoadError(null);
+    setDownloadError(null);
   };
   const printReadinessRecord = () => {
     const printClass = "readiness-record-printing";
@@ -251,32 +243,6 @@ export default function AgenticOperationsReadiness() {
     document.body.classList.add(printClass);
     window.addEventListener("afterprint", cleanup, { once: true });
     window.requestAnimationFrame(() => window.print());
-  };
-  const saveAssessment = async () => {
-    if (!completeAnswers || isSaving) return;
-    setIsSaving(true);
-    setStatusMessage(null);
-    try {
-      const record = await createReadinessAssessment({ answers: completeAnswers });
-      storeReadinessDeleteToken(record.id, record.deleteToken);
-      setSaved(record);
-      setSessionNamespace(record.id);
-      replaceReadinessUrl(record.id);
-      setStatusMessage("Decision saved. Copy the link to share this fixed record.");
-    } catch (error) {
-      setStatusMessage(error instanceof Error ? error.message : "The decision could not be saved.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-  const copyShareLink = async () => {
-    if (!saved) return;
-    try {
-      await navigator.clipboard.writeText(readinessShareUrl(saved.id));
-      setStatusMessage("Share link copied.");
-    } catch {
-      setStatusMessage("Copy the link from your browser address bar.");
-    }
   };
   const deleteSavedAssessment = async () => {
     if (!saved || isDeleting) return;
@@ -291,11 +257,8 @@ export default function AgenticOperationsReadiness() {
         headers: { "X-Delete-Token": deleteToken },
       });
       forgetReadinessDeleteToken(saved.id);
-      forgetReadinessSession(saved.id);
       setSaved(null);
-      setSessionNamespace("draft");
-      replaceReadinessUrl(null);
-      setStatusMessage("Saved record deleted. Your selected answers remain on this page.");
+      setStatusMessage("Legacy saved record deleted. Your selected answers remain on this page.");
     } catch (error) {
       setStatusMessage(error instanceof Error ? error.message : "The saved record could not be deleted.");
     } finally {
@@ -324,6 +287,31 @@ export default function AgenticOperationsReadiness() {
           detail: "Resolve the named conditions below. Reassess before committing the workflow to agent delivery.",
           color: "#db509e",
         };
+  const downloadResults = async () => {
+    if (!completeAnswers || isDownloading || downloadLock.current) return;
+    downloadLock.current = true;
+    setIsDownloading(true);
+    setDownloadError(null);
+    try {
+      await downloadReadinessResultsPdf({
+        legacyRecord: Boolean(saved),
+        answers: answers as Record<string, Answer>,
+        conditions: CONDITIONS,
+        workflowScope,
+        governanceReview,
+        conditionRecords: conditionRecords as Record<string, ConditionRecord>,
+        result,
+        resultLabel: resultCopy.label,
+        resultLine: resultCopy.line,
+        resultDetail: resultCopy.detail,
+      });
+    } catch (error) {
+      setDownloadError(error instanceof Error ? error.message : "Your results PDF could not be created. Please try again.");
+    } finally {
+      downloadLock.current = false;
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <article className="readiness-page overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
@@ -416,7 +404,7 @@ export default function AgenticOperationsReadiness() {
           <div className="mt-16 border border-[#cbd3e1] bg-white shadow-[0_2px_10px_rgba(16,41,87,0.02)] p-8 lg:p-10 relative">
             <div className="absolute top-0 left-0 w-1 h-full bg-[#102957]" />
             <label htmlFor="workflow-scope" className="text-[12px] font-bold uppercase tracking-[0.15em] text-[#102957]">Workflow scope</label>
-            <p className="mt-3 max-w-3xl text-[14px] leading-relaxed text-[#536887]">Name the bounded workflow, trigger, start and end point, business area and material exclusions. This stays in this browser session and is only included when you print.</p>
+            <p className="mt-3 max-w-3xl text-[14px] leading-relaxed text-[#536887]">Name the bounded workflow, trigger, start and end point, business area and material exclusions. This stays in page memory and is included only in the local results PDF or optional print.</p>
             <textarea
               id="workflow-scope"
               data-testid="input-workflow-scope"
@@ -434,24 +422,21 @@ export default function AgenticOperationsReadiness() {
             {loadError && (
               <>
                 <p className="text-sm font-semibold text-[#b43b2b]">This saved decision is unavailable or has expired.</p>
-                <p className="mt-1 text-xs leading-[1.55] text-[#647491]">You can still complete and save a new assessment below.</p>
+                <p className="mt-1 text-xs leading-[1.55] text-[#647491]">You can still complete a new local assessment below. New anonymous saves and share links are no longer created.</p>
               </>
             )}
             {saved && (
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold">Saved decision reopened</p>
+                  <p className="text-sm font-semibold">Legacy saved decision reopened</p>
                   <p className="mt-1 text-xs leading-[1.55] text-[#647491]">
                     This fixed record expires {new Date(saved.expiresAt).toLocaleDateString(undefined, {
                       day: "numeric",
                       month: "long",
                       year: "numeric",
-                    })}. It contains only the six selected answers and their derived outcome.
+                    })}. It contains only the six selected answers and their derived outcome; free-text evidence was not stored in this legacy record.
                   </p>
                 </div>
-                <button type="button" onClick={copyShareLink} className="inline-flex items-center gap-2 border border-[#102957] px-4 py-2 text-xs font-bold hover:bg-[#102957] hover:text-white">
-                  <Copy size={14} /> Copy share link
-                </button>
               </div>
             )}
           </div>
@@ -514,22 +499,12 @@ export default function AgenticOperationsReadiness() {
           </div>
           <div className="mt-6 border-t border-white/15 pt-5">
             <div className="flex flex-wrap items-center gap-3">
-              {!saved && (
-                <button
-                  type="button"
-                  data-readiness-save
-                  disabled={!completeAnswers || isSaving}
-                  onClick={saveAssessment}
-                  className="inline-flex items-center gap-2 bg-white px-4 py-2.5 text-xs font-bold text-[#102957] disabled:cursor-not-allowed disabled:opacity-45"
-                >
-                  <Save size={14} /> {isSaving ? "Saving…" : "Save this decision"}
-                </button>
-              )}
+              <button type="button" data-readiness-download disabled={!completeAnswers || isDownloading} onClick={downloadResults} className="inline-flex items-center gap-2 bg-white px-4 py-2.5 text-xs font-bold text-[#102957] disabled:cursor-not-allowed disabled:opacity-45">
+                <Download size={14} /> {isDownloading ? "Creating report…" : "Download results (PDF)"}
+              </button>
+              {completeAnswers && <button type="button" onClick={printReadinessRecord} className="inline-flex items-center gap-2 px-2 py-2.5 text-xs font-bold text-white underline underline-offset-4"><Printer size={14} /> Print</button>}
               {saved && (
                 <>
-                  <button type="button" onClick={copyShareLink} className="inline-flex items-center gap-2 bg-white px-4 py-2.5 text-xs font-bold text-[#102957]">
-                    <Copy size={14} /> Copy share link
-                  </button>
                   {getReadinessDeleteToken(saved.id) && (
                     <button data-testid="button-delete-readiness-record" type="button" disabled={isDeleting} onClick={deleteSavedAssessment} className="inline-flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-white/75 underline underline-offset-4 hover:text-white disabled:opacity-50">
                       <Trash2 size={14} /> {isDeleting ? "Deleting…" : "Delete saved record"}
@@ -539,11 +514,12 @@ export default function AgenticOperationsReadiness() {
               )}
               <p className="text-xs leading-[1.5] text-[#b9c7db]">
                 {completeAnswers
-                  ? "Saves fixed choices only—workflow scope, evidence notes, owners and dates stay in this browser. Records expire after 90 days."
-                  : "Answer all six conditions to save a shareable decision."}
+                  ? "Generated locally from the current page. New anonymous saves and share links are disabled; only legacy records can be read or deleted."
+                  : "Answer all six conditions to generate a complete local result."}
               </p>
             </div>
             {statusMessage && <p className="mt-3 text-xs font-semibold text-white" role="status">{statusMessage}</p>}
+            {downloadError && <p role="alert" className="mt-3 border-l-2 border-[#ff9fcf] pl-3 text-xs font-semibold text-white">{downloadError}</p>}
           </div>
         </div>
       </section>

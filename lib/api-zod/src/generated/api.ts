@@ -9,7 +9,7 @@ import * as zod from 'zod';
 
 
 /**
- * @summary Save a completed readiness decision
+ * @summary Anonymous readiness saves are retired
  */
 export const CreateReadinessAssessmentBody = zod.object({
   "answers": zod.object({
@@ -22,26 +22,7 @@ export const CreateReadinessAssessmentBody = zod.object({
 })
 })
 
-export const createReadinessAssessmentResponseOneIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$');
-
-
-export const CreateReadinessAssessmentResponse = zod.object({
-  "id": zod.string().regex(createReadinessAssessmentResponseOneIdRegExp),
-  "answers": zod.object({
-  "stability": zod.enum(['ready', 'prepare', 'stop']),
-  "access": zod.enum(['ready', 'prepare', 'stop']),
-  "observability": zod.enum(['ready', 'prepare', 'stop']),
-  "fallback": zod.enum(['ready', 'prepare', 'stop']),
-  "exceptions": zod.enum(['ready', 'prepare', 'stop']),
-  "economics": zod.enum(['ready', 'prepare', 'stop'])
-}),
-  "decision": zod.enum(['proceed', 'prepare', 'stop']),
-  "unresolvedConditionIds": zod.array(zod.enum(['stability', 'access', 'observability', 'fallback', 'exceptions', 'economics'])),
-  "createdAt": zod.coerce.date(),
-  "expiresAt": zod.coerce.date()
-}).and(zod.object({
-  "deleteToken": zod.string()
-}))
+export const CreateReadinessAssessmentResponse = zod.void()
 
 
 /**
@@ -4868,7 +4849,7 @@ export const SelectDocumentAvailabilitySourceResponse = zod.object({
 
 
 /**
- * @summary Publish the exact reviewed shared-content destination version
+ * @summary Release a reviewed destination matrix only when its content is already publicly eligible
  */
 export const PublishDocumentAvailabilityParams = zod.object({
   "documentId": zod.coerce.string()

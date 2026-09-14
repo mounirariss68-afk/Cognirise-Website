@@ -27,7 +27,7 @@ paths:
     post:
       operationId: createReadinessAssessment
       tags: [public]
-      summary: Save a completed readiness decision
+      summary: Anonymous readiness saves are retired
       requestBody:
         required: true
         content:
@@ -35,14 +35,12 @@ paths:
             schema:
               $ref: "#/components/schemas/ReadinessAssessmentInput"
       responses:
-        "201":
-          description: Saved readiness decision
+        "410":
+          description: Anonymous readiness saves are no longer available
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReadinessAssessmentReceipt"
-        "400":
-          $ref: "#/components/responses/BadRequest"
+                $ref: "#/components/schemas/ApiError"
   /public/readiness-assessments/{id}:
     parameters:
       - in: path

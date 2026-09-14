@@ -125,7 +125,6 @@ import type {
   PublishedContentPage,
   ReadinessAssessment,
   ReadinessAssessmentInput,
-  ReadinessAssessmentReceipt,
   RecoveryInput,
   ReviewComment,
   ReviewCommentInput,
@@ -196,11 +195,11 @@ export const getCreateReadinessAssessmentUrl = () => {
 }
 
 /**
- * @summary Save a completed readiness decision
+ * @summary Anonymous readiness saves are retired
  */
-export const createReadinessAssessment = async (readinessAssessmentInput: ReadinessAssessmentInput, options?: Parameters<typeof customFetch>[1]): Promise<ReadinessAssessmentReceipt> => {
+export const createReadinessAssessment = async (readinessAssessmentInput: ReadinessAssessmentInput, options?: Parameters<typeof customFetch>[1]): Promise<unknown> => {
 
-  return customFetch<ReadinessAssessmentReceipt>(getCreateReadinessAssessmentUrl(),
+  return customFetch<unknown>(getCreateReadinessAssessmentUrl(),
   {
     ...options,
     method: 'POST',
@@ -213,7 +212,7 @@ export const createReadinessAssessment = async (readinessAssessmentInput: Readin
 
 
 
-export const getCreateReadinessAssessmentMutationOptions = <TError = ErrorType<BadRequestResponse>,
+export const getCreateReadinessAssessmentMutationOptions = <TError = ErrorType<ApiError>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReadinessAssessment>>, TError,{data: BodyType<ReadinessAssessmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createReadinessAssessment>>, TError,{data: BodyType<ReadinessAssessmentInput>}, TContext> => {
 
@@ -242,12 +241,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CreateReadinessAssessmentMutationResult = NonNullable<Awaited<ReturnType<typeof createReadinessAssessment>>>
     export type CreateReadinessAssessmentMutationBody = BodyType<ReadinessAssessmentInput>
-    export type CreateReadinessAssessmentMutationError = ErrorType<BadRequestResponse>
+    export type CreateReadinessAssessmentMutationError = ErrorType<ApiError>
 
     /**
- * @summary Save a completed readiness decision
+ * @summary Anonymous readiness saves are retired
  */
-export const useCreateReadinessAssessment = <TError = ErrorType<BadRequestResponse>,
+export const useCreateReadinessAssessment = <TError = ErrorType<ApiError>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReadinessAssessment>>, TError,{data: BodyType<ReadinessAssessmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createReadinessAssessment>>,
@@ -4613,7 +4612,7 @@ export const getPublishDocumentAvailabilityUrl = (documentId: string,) => {
 }
 
 /**
- * @summary Publish the exact reviewed shared-content destination version
+ * @summary Release a reviewed destination matrix only when its content is already publicly eligible
  */
 export const publishDocumentAvailability = async (documentId: string,
     documentAvailabilityVersion: DocumentAvailabilityVersion, options?: Parameters<typeof customFetch>[1]): Promise<DocumentAvailability> => {
@@ -4663,7 +4662,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PublishDocumentAvailabilityMutationError = ErrorType<ConflictResponse>
 
     /**
- * @summary Publish the exact reviewed shared-content destination version
+ * @summary Release a reviewed destination matrix only when its content is already publicly eligible
  */
 export const usePublishDocumentAvailability = <TError = ErrorType<ConflictResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishDocumentAvailability>>, TError,{documentId: string;data: BodyType<DocumentAvailabilityVersion>}, TContext>, request?: SecondParameter<typeof customFetch>}

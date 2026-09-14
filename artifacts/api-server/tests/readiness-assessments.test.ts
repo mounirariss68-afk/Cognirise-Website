@@ -12,7 +12,7 @@ function queryValues(value: unknown, seen = new WeakSet<object>()): unknown[] {
   return Object.values(value).flatMap((child) => queryValues(child, seen));
 }
 
-test("anonymous readiness records save, reopen, expire, and require the deletion token", {
+test("retired readiness creation preserves legacy reopen, expiry, and token deletion", {
   concurrency: false,
 }, async (t) => {
   const priorDatabaseUrl = process.env.DATABASE_URL;
@@ -24,10 +24,12 @@ test("anonymous readiness records save, reopen, expire, and require the deletion
     expressModule,
     { db },
     { default: readinessRouter },
+    { hashToken },
   ] = await Promise.all([
     import("express"),
     import("@workspace/db"),
     import("../src/routes/readiness-assessments.ts"),
+    import("../src/lib/security.ts"),
   ]);
   const database = db as unknown as {
     insert: (...args: unknown[]) => unknown;
@@ -45,18 +47,34 @@ test("anonymous readiness records save, reopen, expire, and require the deletion
     expiresAt: Date;
   } | null = null;
 
-  t.mock.method(database, "insert", () => ({
-    values(values: Omit<NonNullable<typeof stored>, "id" | "createdAt">) {
-      stored = {
-        id,
-        createdAt: new Date("2026-09-10T00:00:00.000Z"),
-        ...values,
-      };
-      return {
-        returning: async () => [stored],
-      };
-    },
-  }));
+  const answers = {
+    stability: "ready",
+    access: "prepare",
+    observability: "ready",
+    fallback: "ready",
+    exceptions: "stop",
+    economics: "ready",
+  };
+  const deleteToken = "legacy-readiness-delete-token-with-valid-length";
+  stored = {
+    id,
+    answers,
+    decision: "stop",
+    unresolvedConditionIds: ["access", "exceptions"],
+    deleteTokenHash: hashToken(deleteToken),
+    createdAt: new Date("2026-09-10T00:00:00.000Z"),
+    expiresAt: new Date(Date.now() + 60_000),
+  };
+  const seededRecord = {
+    ...stored,
+    answers: { ...stored.answers },
+    unresolvedConditionIds: [...stored.unresolvedConditionIds],
+  };
+  let insertCalls = 0;
+  t.mock.method(database, "insert", () => {
+    insertCalls += 1;
+    throw new Error("Retired readiness creation must not write to the database");
+  });
   t.mock.method(database, "select", () => ({
     from: () => ({
       where: (condition: unknown) => ({
@@ -106,15 +124,7 @@ test("anonymous readiness records save, reopen, expire, and require the deletion
     else process.env.SESSION_SECRET = priorSessionSecret;
   });
 
-  const answers = {
-    stability: "ready",
-    access: "prepare",
-    observability: "ready",
-    fallback: "ready",
-    exceptions: "stop",
-    economics: "ready",
-  };
-  const createdResponse = await fetch(`${baseUrl}/public/readiness-assessments`, {
+  const retiredResponse = await fetch(`${baseUrl}/public/readiness-assessments`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -122,15 +132,12 @@ test("anonymous readiness records save, reopen, expire, and require the deletion
       evidence: "must not be accepted or persisted",
     }),
   });
-  assert.equal(createdResponse.status, 201);
-  const created = await createdResponse.json() as Record<string, unknown>;
-  assert.equal(created.id, id);
-  assert.equal(created.decision, "stop");
-  assert.deepEqual(created.unresolvedConditionIds, ["access", "exceptions"]);
-  assert.equal(typeof created.deleteToken, "string");
-  assert.equal("deleteTokenHash" in created, false);
-  assert.deepEqual(stored?.answers, answers);
-  assert.equal("evidence" in (stored?.answers ?? {}), false);
+  assert.equal(retiredResponse.status, 410);
+  assert.deepEqual(await retiredResponse.json(), {
+    error: "Anonymous readiness saves are no longer available.",
+  });
+  assert.equal(insertCalls, 0);
+  assert.deepEqual(stored, seededRecord);
 
   const reopenedResponse = await fetch(`${baseUrl}/public/readiness-assessments/${id}`);
   assert.equal(reopenedResponse.status, 200);
@@ -152,7 +159,7 @@ test("anonymous readiness records save, reopen, expire, and require the deletion
   assert.equal(wrongDelete.status, 403);
   const deleted = await fetch(`${baseUrl}/public/readiness-assessments/${id}`, {
     method: "DELETE",
-    headers: { "X-Delete-Token": String(created.deleteToken) },
+    headers: { "X-Delete-Token": deleteToken },
   });
   assert.equal(deleted.status, 204);
   assert.equal((await fetch(`${baseUrl}/public/readiness-assessments/${id}`)).status, 404);

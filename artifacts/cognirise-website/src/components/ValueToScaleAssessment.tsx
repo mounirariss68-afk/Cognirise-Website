@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
-import { Download, RotateCcw } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Download, Printer, RotateCcw } from "lucide-react";
 import { calculateMaturity, MATURITY_DIMENSIONS, MATURITY_STAGES, type MaturityAnswers } from "@/lib/value-to-scale";
 import { downloadVtsResultsPdf } from "@/lib/vts-results-pdf";
-import { useMethodSessionState } from "@/lib/use-method-session-state";
+import { useMethodSessionState, useUnsavedWorkWarning } from "@/lib/use-method-session-state";
 import { BrandButton } from "@/components/ui/brand-button";
 
 const VTS_SESSION_KEY = "cognirise:vts-assessment:v1";
@@ -20,15 +20,25 @@ function isMaturityAnswers(value: unknown): value is MaturityAnswers {
 export function ValueToScaleAssessment() {
   const [answers, setAnswers] = useMethodSessionState<MaturityAnswers>(VTS_SESSION_KEY, {}, { validate: isMaturityAnswers });
   const [downloadError, setDownloadError] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
+  const downloadLock = useRef(false);
   const complete = MATURITY_DIMENSIONS.every((dimension) => answers[dimension.id]);
+  const answered = Object.keys(answers).length;
+  useUnsavedWorkWarning(answered > 0 && !complete);
   const result = useMemo(() => calculateMaturity(answers), [answers]);
 
-  const downloadResults = () => {
+  const downloadResults = async () => {
+    if (isDownloading || downloadLock.current) return;
+    downloadLock.current = true;
     setDownloadError("");
+    setIsDownloading(true);
     try {
-      downloadVtsResultsPdf(answers);
+      await downloadVtsResultsPdf(answers);
     } catch (error) {
       setDownloadError(error instanceof Error ? error.message : "Your results PDF could not be created. Please try again.");
+    } finally {
+      downloadLock.current = false;
+      setIsDownloading(false);
     }
   };
 
@@ -46,7 +56,7 @@ export function ValueToScaleAssessment() {
             <h2 id="maturity-assessment-title" className="mt-4 font-display text-[clamp(40px,5.5vw,76px)] font-semibold leading-[.96] tracking-[-.08em]">Find the next evidence to earn.</h2>
           </div>
           <div>
-            <p className="text-sm leading-[1.65] text-[#536887]">Your selections are stored only in this browser tab so they survive navigation and reloads. They are cleared when the tab's session ends and are never saved to a server or sent to Cognirise. This is a directional planning tool, not an audit, certification or benchmark.</p>
+            <p className="text-sm leading-[1.65] text-[#536887]">Your selections live only in this page. Leaving, reloading or closing the tab clears unsaved answers; nothing is written to browser storage, a URL, analytics or a server. This is a directional planning tool, not an audit, certification or benchmark.</p>
           </div>
         </div>
 
@@ -70,7 +80,7 @@ export function ValueToScaleAssessment() {
         </div>
 
         {!complete ? (
-          <p role="status" className="mt-7 border-l-4 border-[hsl(var(--brand-coral))] bg-white p-4 text-sm font-semibold text-[#405777]">Choose one evidence-backed stage for every dimension to see your result.</p>
+          <p role="status" className="mt-7 border-l-4 border-[hsl(var(--brand-coral))] bg-white p-4 text-sm font-semibold text-[#405777]">Progress: {answered} of {MATURITY_DIMENSIONS.length} dimensions answered. Choose one evidence-backed stage for every dimension to see your result.</p>
         ) : (
           <div className="mt-10 border border-[#102957] bg-[#102957] p-6 text-white md:p-9" aria-live="polite">
             <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#ff9fcf]">Directional result</p>
@@ -90,12 +100,13 @@ export function ValueToScaleAssessment() {
               </div>
             </div>
             <div className="mt-9 flex flex-wrap gap-4 border-t border-white/20 pt-6">
-              <button type="button" onClick={downloadResults} className="inline-flex items-center gap-2 bg-white px-5 py-3 text-sm font-bold text-[#102957] transition-colors hover:bg-[#f0effa] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#ff9fcf]"><Download size={16} /> Download my results (PDF)</button>
+              <button type="button" onClick={downloadResults} disabled={isDownloading} className="inline-flex items-center gap-2 bg-white px-5 py-3 text-sm font-bold text-[#102957] transition-colors hover:bg-[#f0effa] disabled:cursor-wait disabled:opacity-60 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#ff9fcf]"><Download size={16} /> {isDownloading ? "Creating report…" : "Download my results (PDF)"}</button>
+              <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 px-3 text-sm font-bold text-white underline underline-offset-4"><Printer size={15} /> Print page</button>
               <BrandButton href="/value-scan" variant="inverse">Optionally discuss a Value Scan</BrandButton>
               <button type="button" onClick={clearAnswers} className="inline-flex items-center gap-2 px-3 text-sm font-bold text-white underline underline-offset-4"><RotateCcw size={15} /> Clear my answers</button>
             </div>
             {downloadError ? <p role="alert" className="mt-4 border-l-2 border-[#ff9fcf] pl-3 text-sm text-white">{downloadError}</p> : null}
-            <p className="mt-4 text-xs text-white/55">Contact is optional. Your assessment answers are not included when you open or submit the separate Value Scan form.</p>
+            <p className="mt-4 text-xs text-white/55">Contact is optional. Your assessment answers are not included when you open or submit the separate Value Scan form. The designed PDF is generated locally and includes this completed result.</p>
           </div>
         )}
       </div>
