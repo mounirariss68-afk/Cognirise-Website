@@ -136,7 +136,7 @@ export function BlueprintJourney() {
             .blueprint-description { font-size: 14.5px; }
             .blueprint-outcome { font-size: 13.5px; }
             .blueprint-trigger { padding: 30px 28px 24px; }
-            .blueprint-trigger > * { width: calc(var(--blueprint-active-width) - 56px); }
+            .blueprint-trigger > * { width: 100%; }
             .blueprint-panel-content { width: calc(var(--blueprint-active-width) - 56px); padding: 0 28px 28px; }
           }
           @media (max-width: 1023px) {
@@ -156,7 +156,7 @@ export function BlueprintJourney() {
           preview
           previewOverridesSelection
           previewExpands
-          defaultValue="2"
+          defaultValue={null}
           className="blueprint-disclosure blueprint-row"
         >
           {IDAO_STAGES.map((stage) => (

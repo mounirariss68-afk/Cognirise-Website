@@ -8,7 +8,7 @@ import { ServiceLineTiles } from "@/components/ServiceLineTiles";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import { BrandButton } from "@/components/ui/brand-button";
 import { PulseImage } from "@/components/ui/pulse-image";
-import { cmsEntryRenderPolicy, cmsMediaObjectPosition, contentRecord, governedLandingDelivery, landingCta, landingMedia, landingNarrative, landingSections, landingText, landingVisualReferences, resolveCmsMedia, useCmsCollection, useCmsEntry } from "@/lib/cms";
+import { contentRecord, governedLandingDelivery, landingCta, landingMedia, landingNarrative, landingSections, landingText, landingVisualReferences, useCmsCollection } from "@/lib/cms";
 import { IndustryPicker } from "@/components/IndustryPicker";
 
 const Kicker = ({ children, className = "text-[#102957]" }: { children: React.ReactNode, className?: string }) => (
@@ -29,7 +29,6 @@ export default function Home() {
   const { market } = useMarketStore();
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
-  const frameworkQuery = useCmsEntry("framework", "agent-authority-model");
   const landingQuery = useCmsCollection("landing-page", [], (item) => contentRecord(item, "landing-page"));
   const homepage = landingQuery.data.find((page) => page.pagePath === "/" && page.template === "landing");
   const homepageDelivery = governedLandingDelivery(
@@ -53,18 +52,14 @@ export default function Home() {
   const frameworkIdaoCta = landingCta(governedLanding, "home-framework-idao-cta", { label: "Explore IDAO", href: "/methodologies/idao" });
   const frameworkAuthorityCta = landingCta(governedLanding, "home-framework-authority-cta", { label: "Agent Authority Model", href: "/methodologies/agent-authority-model" });
   const frameworkPortfolioCta = landingCta(governedLanding, "home-framework-portfolio-cta", { label: "View methodology portfolio", href: "/methodologies" });
+  const imageLedgerFirstCta = landingCta(governedLanding, "home-image-ledger-first-cta", { label: "Agent Authority Model", href: "/methodologies/agent-authority-model" });
+  const imageLedgerSecondCta = landingCta(governedLanding, "home-image-ledger-second-cta", { label: "Human–Agent Operating Model", href: "/methodologies/human-agent-operating-model" });
+  const imageLedgerThirdCta = landingCta(governedLanding, "home-image-ledger-third-cta", { label: "CogniOS architecture", href: "/platforms/cognios#architecture" });
   const convergenceCta = landingCta(governedLanding, "home-convergence-cta", { label: "Meet the team", href: "/about" });
   const startCta = landingCta(governedLanding, "home-start-cta", { label: "Book a consultation", href: "/contact" });
   const visualUrl = (mediaId: string, mediaVersionId: string) =>
     homepage?.media?.find((media) => media.id === mediaId &&
       (!mediaVersionId || media.versionId === mediaVersionId))?.url;
-  const frameworkRenderPolicy = cmsEntryRenderPolicy(frameworkQuery.isAuthoritative, frameworkQuery.delivery);
-  const frameworkRecord = frameworkQuery.data ? contentRecord(frameworkQuery.data, "framework") : null;
-  const featuredFramework = frameworkRecord?.template === "agent-authority" ? frameworkRecord : null;
-  const frameworkHero = featuredFramework
-    ? resolveCmsMedia(featuredFramework.media, featuredFramework.heroMedia, featuredFramework.heroMediaId)
-    : undefined;
-  
   const marketLocation = getMarketLocationLabel(market);
 
   const { scrollYProgress: heroScrollProgress } = useScroll({
@@ -243,62 +238,6 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* METHODOLOGIES */}
-      {frameworkRenderPolicy !== "loading" && frameworkRenderPolicy !== "unavailable" && (
-      <section className="mx-6 md:mx-[4.8vw] mb-6 lg:mb-10 bg-[hsl(var(--brand-deep))] text-white px-6 md:px-12 py-16 lg:py-24 relative overflow-hidden group">
-        <div className="absolute inset-0 pointer-events-none opacity-20 transition-opacity duration-700 group-hover:opacity-40">
-          <PulseImage
-            src={frameworkHero?.url ?? assetUrl("/images/cognirise/cognirise-pulse-governance.jpg")}
-            alt={frameworkHero?.altText || "A luminous gateway marking the boundary of permitted agent authority."}
-            className="w-full h-full object-cover mix-blend-screen"
-            style={{ objectPosition: cmsMediaObjectPosition(frameworkHero) }}
-          />
-        </div>
-        
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
-          <motion.div
-            initial={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <Kicker className="text-white/80">{landingText(governedLanding, "home-framework-label", "How we do it")}</Kicker>
-            <h2 className="font-display font-semibold text-[clamp(42px,5.3vw,80px)] tracking-[-0.075em] leading-[0.96] my-4 max-w-[600px]">
-              {featuredFramework?.title ?? landingText(governedLanding, "home-framework-title", "The Agent Authority Model.")}
-            </h2>
-            <p className="max-w-[450px] text-[15px] leading-[1.6] text-[#dce4f0] mb-10">
-              {featuredFramework?.teaser ?? landingText(governedLanding, "home-framework-teaser", "A deterministic way to set how much authority each agent handover may exercise on its own.")}
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <BrandButton href={frameworkPortfolioCta.href} variant="inverse">{frameworkPortfolioCta.label}</BrandButton>
-              <BrandButton href={frameworkIdaoCta.href} variant="inverse">{frameworkIdaoCta.label}</BrandButton>
-              <BrandButton href={frameworkAuthorityCta.href} variant="inverse">{frameworkAuthorityCta.label}</BrandButton>
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="hidden lg:flex flex-col gap-4 pl-10 border-l border-white/20"
-            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.2, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className="text-xs uppercase tracking-widest text-white/50 mb-2">{landingText(governedLanding, "home-framework-applications-label", "Framework Applications")}</div>
-            {[
-              { title: landingText(governedLanding, "home-framework-autonomy-title", "Levels of Autonomy"), desc: landingText(governedLanding, "home-framework-autonomy-body", "Define explicit boundaries for model operation.") },
-              { title: landingText(governedLanding, "home-framework-authority-title", "The Authority Matrix"), desc: landingText(governedLanding, "home-framework-authority-body", "Map capability against enterprise risk.") },
-              { title: landingText(governedLanding, "home-framework-promotion-title", "Promotion Evidence"), desc: landingText(governedLanding, "home-framework-promotion-body", "Deterministic requirements for agent escalation.") }
-            ].map(item => (
-              <div key={item.title} className="pb-4 border-b border-white/10 last:border-0 last:pb-0">
-                <strong className="block text-lg font-display text-[hsl(var(--brand-pink))] mb-1">{item.title}</strong>
-                <span className="text-sm text-[#dce4f0]">{item.desc}</span>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-      )}
-
       {/* MODEL */}
       <section id="service-lines" className="px-6 md:px-[4.8vw] py-[82px] lg:py-[125px]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-end">
@@ -319,7 +258,12 @@ export default function Home() {
           </motion.p>
         </div>
         
-        <ServiceLineTiles variant="summary" source="homepage" className="mt-10 lg:mt-[65px]" />
+        <ServiceLineTiles
+          variant="summary"
+          source="homepage"
+          methodologyCtas={[frameworkPortfolioCta, frameworkIdaoCta, frameworkAuthorityCta]}
+          className="mt-10 lg:mt-[65px]"
+        />
       </section>
 
       {/* BLUEPRINT */}
@@ -397,14 +341,17 @@ export default function Home() {
             <PulseImage src={governanceVisual.src} alt={governanceVisual.alt} style={{ objectPosition: governanceVisual.objectPosition }} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/75 to-transparent via-[#071936]/20" />
             <motion.figcaption
-              className="absolute z-10 left-6 bottom-5 text-white"
+              className="absolute z-10 left-6 right-6 bottom-5 text-white flex flex-col items-start"
               initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.3 }}
             >
               <span className="block text-[10px] uppercase tracking-[0.12em] opacity-75 mb-2">{landingText(governedLanding, "home-image-ledger-first-label", "First condition")}</span>
-               <strong className="font-display font-semibold text-[clamp(25px,3.4vw,48px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">{landingText(governedLanding, "home-image-ledger-first-caption", "Boundaries you can see.")}</strong>
+                <strong className="block max-w-full font-display font-semibold text-[clamp(25px,3.4vw,48px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">{landingText(governedLanding, "home-image-ledger-first-caption", "Boundaries you control.")}</strong>
+                <div className="mt-3 max-w-full">
+                  <BrandButton href={imageLedgerFirstCta.href} variant="editorial" className="max-w-full text-white border-white/70">{imageLedgerFirstCta.label}</BrandButton>
+                </div>
             </motion.figcaption>
           </motion.figure>
           
@@ -418,14 +365,17 @@ export default function Home() {
             <PulseImage src={peopleVisual.src} alt={peopleVisual.alt} style={{ objectPosition: peopleVisual.objectPosition }} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/75 to-transparent via-[#071936]/20" />
             <motion.figcaption
-              className="absolute z-10 left-6 bottom-5 text-white"
+              className="absolute z-10 left-6 right-6 bottom-5 text-white flex flex-col items-start"
               initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.4 }}
             >
               <span className="block text-[10px] uppercase tracking-[0.12em] opacity-75 mb-2">{landingText(governedLanding, "home-image-ledger-second-label", "Second condition")}</span>
-               <strong className="font-display font-semibold text-[clamp(19px,2.2vw,30px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">{landingText(governedLanding, "home-image-ledger-second-caption", "Work that flows.")}</strong>
+                <strong className="block max-w-full font-display font-semibold text-[clamp(19px,2.2vw,30px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">{landingText(governedLanding, "home-image-ledger-second-caption", "Work that flows.")}</strong>
+                <div className="mt-3 max-w-full">
+                  <BrandButton href={imageLedgerSecondCta.href} variant="editorial" className="max-w-full text-white border-white/70">{imageLedgerSecondCta.label}</BrandButton>
+                </div>
             </motion.figcaption>
           </motion.figure>
           
@@ -439,14 +389,17 @@ export default function Home() {
             <PulseImage src={platformVisual.src} alt={platformVisual.alt} style={{ objectPosition: platformVisual.objectPosition }} className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/75 to-transparent via-[#071936]/20" />
             <motion.figcaption
-              className="absolute z-10 left-6 bottom-5 text-white"
+              className="absolute z-10 left-6 right-6 bottom-5 text-white flex flex-col items-start"
               initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.5 }}
             >
               <span className="block text-[10px] uppercase tracking-[0.12em] opacity-75 mb-2">{landingText(governedLanding, "home-image-ledger-third-label", "Third condition")}</span>
-               <strong className="font-display font-semibold text-[clamp(19px,2.2vw,30px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">{landingText(governedLanding, "home-image-ledger-third-caption", "A platform that remembers.")}</strong>
+                <strong className="block max-w-full font-display font-semibold text-[clamp(19px,2.2vw,30px)] leading-none tracking-[-0.06em] group-hover:text-[hsl(var(--brand-pink))] transition-colors duration-300">{landingText(governedLanding, "home-image-ledger-third-caption", "A platform that remembers.")}</strong>
+                <div className="mt-3 max-w-full">
+                  <BrandButton href={imageLedgerThirdCta.href} variant="editorial" className="max-w-full text-white border-white/70">{imageLedgerThirdCta.label}</BrandButton>
+                </div>
             </motion.figcaption>
           </motion.figure>
         </div>

@@ -14,6 +14,7 @@ import { trackEvent } from "@/lib/analytics";
 import { useMarketStore } from "@/store/market";
 
 type ServiceLineTilesSource = "homepage";
+type ServiceLineCta = { label: string; href: string };
 
 const SERVICE_VISUALS: Record<string, { img: string; pos: string }> = {
   "consulting-engineering": {
@@ -34,10 +35,12 @@ export function ServiceLineTiles({
   className = "",
   variant = "full",
   source,
+  methodologyCtas = [],
 }: {
   className?: string;
   variant?: "full" | "summary";
   source: ServiceLineTilesSource;
+  methodologyCtas?: readonly ServiceLineCta[];
 }) {
   return (
     <SpatialDisclosure
@@ -80,6 +83,9 @@ export function ServiceLineTiles({
         .cps-tile-dest{display:inline-flex;align-items:center;gap:6px;width:max-content;max-width:100%;padding:2px 0;font-size:12px;line-height:1.35;font-weight:650;color:var(--ink);text-decoration:underline;text-decoration-color:rgba(220,80,159,.35);text-decoration-thickness:1px;text-underline-offset:4px;transition:color .2s ease,text-decoration-color .2s ease}
         .cps-tile-dest svg{flex:0 0 auto}
         .cps-tile-dest:hover{color:var(--pink);text-decoration-color:var(--pink)}
+        .cps-tile-methodologies{border-top:1px solid var(--line);padding-top:14px;margin-top:2px}
+        .cps-tile-methodologies>strong{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--pink);display:block;margin-bottom:8px}
+        .cps-tile-methodology-links{gap:5px 16px}
         .cps-tile-visual{position:relative;z-index:1;height:200px;overflow:hidden;background:#f3f1f7}
         .cps-tile-visual img{display:block;position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;opacity:1;visibility:visible;transition:transform .7s cubic-bezier(.19,1,.22,1),filter .7s cubic-bezier(.19,1,.22,1)}
         .cps-tile.active .cps-tile-visual img{transform:scale(1.02)}
@@ -106,12 +112,20 @@ export function ServiceLineTiles({
         @keyframes cpsTileFadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
         @media(prefers-reduced-motion:reduce){.cps-line-component *,.cps-line-component *:before,.cps-line-component *:after{animation:none!important;transition:none!important}}
       `}</style>
-      <SpatialDisclosureTiles variant={variant} source={source} />
+      <SpatialDisclosureTiles variant={variant} source={source} methodologyCtas={methodologyCtas} />
     </SpatialDisclosure>
   );
 }
 
-function SpatialDisclosureTiles({ variant, source }: { variant: "full" | "summary"; source: ServiceLineTilesSource }) {
+function SpatialDisclosureTiles({
+  variant,
+  source,
+  methodologyCtas,
+}: {
+  variant: "full" | "summary";
+  source: ServiceLineTilesSource;
+  methodologyCtas: readonly ServiceLineCta[];
+}) {
   const { activeIndex, selectedIndex, preview, toggle } = useSpatialDisclosure();
   const { market } = useMarketStore();
 
@@ -175,6 +189,25 @@ function SpatialDisclosureTiles({ variant, source }: { variant: "full" | "summar
                   <div className="cps-tile-copy">
                     <SpatialDisclosurePanel id={id} className="cps-tile-copy-inner" data-testid={`service-panel-${service.id}`}>
                       <p className="cps-tile-short">{service.short}</p>
+                      {service.id === "consulting-engineering" && methodologyCtas.length > 0 && (
+                        <div className="cps-tile-methodologies" data-testid="service-methodologies" aria-label="Methodologies">
+                          <strong>Methodologies</strong>
+                          <div className="cps-tile-dests cps-tile-methodology-links">
+                            {methodologyCtas.map((cta) => (
+                              <Link
+                                href={cta.href}
+                                key={cta.href}
+                                className="cps-tile-dest cps-tile-methodology-link group"
+                                tabIndex={isActive ? 0 : -1}
+                                onClick={() => trackDestinationClick(service.id, cta.href)}
+                              >
+                                {cta.label}
+                                <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       {variant === "full" ? (
                         <>
                           <div className="cps-tile-desc">

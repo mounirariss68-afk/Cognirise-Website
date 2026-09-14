@@ -257,67 +257,12 @@
             "order": 21
           },
           {
-            "type": "narrative",
-            "id": "home-framework-applications-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Framework Applications"
-              }
-            ],
-            "order": 22
-          },
-          {
-            "type": "narrative",
-            "id": "home-framework-authority-body",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Map capability against enterprise risk."
-              }
-            ],
-            "order": 23
-          },
-          {
             "type": "cta",
             "id": "home-framework-authority-cta",
             "label": "Agent Authority Model",
             "href": "/methodologies/agent-authority-model",
             "style": "primary",
-            "order": 24
-          },
-          {
-            "type": "narrative",
-            "id": "home-framework-authority-title",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "The Authority Matrix"
-              }
-            ],
-            "order": 25
-          },
-          {
-            "type": "narrative",
-            "id": "home-framework-autonomy-body",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Define explicit boundaries for model operation."
-              }
-            ],
-            "order": 26
-          },
-          {
-            "type": "narrative",
-            "id": "home-framework-autonomy-title",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Levels of Autonomy"
-              }
-            ],
-            "order": 27
+            "order": 22
           },
           {
             "type": "cta",
@@ -325,62 +270,15 @@
             "label": "Explore IDAO",
             "href": "/methodologies/idao",
             "style": "primary",
-            "order": 28
+            "order": 23
           },
           {
-            "type": "narrative",
-            "id": "home-framework-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "How we do it"
-              }
-            ],
-            "order": 29
-          },
-          {
-            "type": "narrative",
-            "id": "home-framework-promotion-body",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Deterministic requirements for agent escalation."
-              }
-            ],
-            "order": 30
-          },
-          {
-            "type": "narrative",
-            "id": "home-framework-promotion-title",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Promotion Evidence"
-              }
-            ],
-            "order": 31
-          },
-          {
-            "type": "narrative",
-            "id": "home-framework-teaser",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "A deterministic way to set how much authority each agent handover may exercise on its own."
-              }
-            ],
-            "order": 32
-          },
-          {
-            "type": "narrative",
-            "id": "home-framework-title",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "The Agent Authority Model."
-              }
-            ],
-            "order": 33
+            "type": "cta",
+            "id": "home-framework-portfolio-cta",
+            "label": "View methodology portfolio",
+            "href": "/methodologies",
+            "style": "primary",
+            "order": 24
           },
           {
             "type": "migration-media",
@@ -389,7 +287,7 @@
             "altText": "Visual representation of operational boundaries.",
             "ownership": "compiled-landing",
             "resolution": "unresolved",
-            "order": 34
+            "order": 25
           },
           {
             "type": "narrative",
@@ -400,7 +298,7 @@
                 "text": "We build the path, the controls and the capacity to keep the work moving after the first release."
               }
             ],
-            "order": 35
+            "order": 26
           },
           {
             "type": "narrative",
@@ -408,10 +306,18 @@
             "body": [
               {
                 "type": "paragraph",
-                "text": "Boundaries you can see."
+                "text": "Boundaries you control."
               }
             ],
-            "order": 36
+            "order": 27
+          },
+          {
+            "type": "cta",
+            "id": "home-image-ledger-first-cta",
+            "label": "Agent Authority Model",
+            "href": "/methodologies/agent-authority-model",
+            "style": "primary",
+            "order": 28
           },
           {
             "type": "narrative",
@@ -422,7 +328,7 @@
                 "text": "First condition"
               }
             ],
-            "order": 37
+            "order": 29
           },
           {
             "type": "narrative",
@@ -433,7 +339,7 @@
                 "text": "Three conditions for change that holds."
               }
             ],
-            "order": 38
+            "order": 30
           },
           {
             "type": "narrative",
@@ -444,7 +350,7 @@
                 "text": "The system in motion"
               }
             ],
-            "order": 39
+            "order": 31
           },
           {
             "type": "narrative",
@@ -455,7 +361,15 @@
                 "text": "Work that flows."
               }
             ],
-            "order": 40
+            "order": 32
+          },
+          {
+            "type": "cta",
+            "id": "home-image-ledger-second-cta",
+            "label": "Human–Agent Operating Model",
+            "href": "/methodologies/human-agent-operating-model",
+            "style": "primary",
+            "order": 33
           },
           {
             "type": "narrative",
@@ -466,7 +380,7 @@
                 "text": "Second condition"
               }
             ],
-            "order": 41
+            "order": 34
           },
           {
             "type": "narrative",
@@ -477,7 +391,15 @@
                 "text": "A platform that remembers."
               }
             ],
-            "order": 42
+            "order": 35
+          },
+          {
+            "type": "cta",
+            "id": "home-image-ledger-third-cta",
+            "label": "CogniOS architecture",
+            "href": "/platforms/cognios#architecture",
+            "style": "primary",
+            "order": 36
           },
           {
             "type": "narrative",
@@ -488,7 +410,7 @@
                 "text": "Third condition"
               }
             ],
-            "order": 43
+            "order": 37
           },
           {
             "type": "migration-media",
@@ -497,7 +419,7 @@
             "altText": "Visual representation of people and agents in a shared architecture.",
             "ownership": "compiled-landing",
             "resolution": "unresolved",
-            "order": 44
+            "order": 38
           },
           {
             "type": "migration-media",
@@ -506,7 +428,7 @@
             "altText": "Visual representation of a durable system.",
             "ownership": "compiled-landing",
             "resolution": "unresolved",
-            "order": 45
+            "order": 39
           },
           {
             "type": "narrative",
@@ -517,7 +439,7 @@
                 "text": "Complex enterprise & government"
               }
             ],
-            "order": 46
+            "order": 40
           },
           {
             "type": "narrative",
@@ -528,7 +450,7 @@
                 "text": "Focus"
               }
             ],
-            "order": 47
+            "order": 41
           },
           {
             "type": "narrative",
@@ -539,7 +461,7 @@
                 "text": "Advisory + Engineering"
               }
             ],
-            "order": 48
+            "order": 42
           },
           {
             "type": "narrative",
@@ -550,7 +472,7 @@
                 "text": "Model"
               }
             ],
-            "order": 49
+            "order": 43
           },
           {
             "type": "narrative",
@@ -561,7 +483,7 @@
                 "text": "CogniOS (Four native engines)"
               }
             ],
-            "order": 50
+            "order": 44
           },
           {
             "type": "narrative",
@@ -572,7 +494,7 @@
                 "text": "Platform"
               }
             ],
-            "order": 51
+            "order": 45
           },
           {
             "type": "narrative",
@@ -583,7 +505,7 @@
                 "text": "Middle East & Europe"
               }
             ],
-            "order": 52
+            "order": 46
           },
           {
             "type": "narrative",
@@ -594,7 +516,7 @@
                 "text": "Presence"
               }
             ],
-            "order": 53
+            "order": 47
           },
           {
             "type": "narrative",
@@ -605,7 +527,7 @@
                 "text": "We don't hand over a presentation and wish you luck. We deploy senior teams who take accountability for the architecture, the code and the outcome."
               }
             ],
-            "order": 54
+            "order": 48
           },
           {
             "type": "narrative",
@@ -616,7 +538,7 @@
                 "text": "We combine strategy, engineering and platform."
               }
             ],
-            "order": 55
+            "order": 49
           },
           {
             "type": "narrative",
@@ -627,7 +549,7 @@
                 "text": "How we work"
               }
             ],
-            "order": 56
+            "order": 50
           },
           {
             "type": "narrative",
@@ -638,7 +560,7 @@
                 "text": "Speak with a partner about deploying governed intelligence into your core workflows."
               }
             ],
-            "order": 57
+            "order": 51
           },
           {
             "type": "cta",
@@ -646,7 +568,7 @@
             "label": "Book a consultation",
             "href": "/contact",
             "style": "primary",
-            "order": 58
+            "order": 52
           },
           {
             "type": "narrative",
@@ -657,7 +579,7 @@
                 "text": "Ready for operational reality?"
               }
             ],
-            "order": 59
+            "order": 53
           },
           {
             "type": "narrative",
@@ -668,7 +590,7 @@
                 "text": "Start"
               }
             ],
-            "order": 60
+            "order": 54
           },
           {
             "type": "cta",
@@ -676,7 +598,7 @@
             "label": "Explore our practice",
             "href": "/#service-lines",
             "style": "primary",
-            "order": 61
+            "order": 55
           }
         ],
         "cta": {

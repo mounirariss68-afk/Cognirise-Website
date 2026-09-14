@@ -16,7 +16,7 @@ import { MediaField, type MediaSelection } from "./MediaField";
 import { contentErrorMap } from "./authoring";
 import { useOverrides } from "./OverridesContext";
 import { updateEducationPov } from "./education-fields";
-import { newLandingNarrativeSection, updateLandingSection } from "./landing-section-fields";
+import { governedLandingSlotType, newLandingNarrativeSection, updateLandingSection } from "./landing-section-fields";
 import {
   addStringListItem,
   changeStringListItem,
@@ -675,10 +675,12 @@ function LandingSections({ value, onChange }: {
       <div><Label>Governed page sections <Requirement required /></Label><p className="text-xs text-muted-foreground">Sections render in numeric order; IDs and order values must be unique.</p></div>
       <Button type="button" size="sm" variant="outline" onClick={add}>Add section</Button>
     </div>
-    {sections.map((section, index) => <fieldset key={`${section.id}-${index}`} className="space-y-4 rounded-md border p-4">
-      <legend className="px-1 text-sm font-medium">Section {index + 1}</legend>
+    {sections.map((section, index) => {
+      const governedType = governedLandingSlotType((value as Record<string, unknown> & { pagePath?: unknown }).pagePath, section.id);
+      return <fieldset key={`${section.id}-${index}`} className="space-y-4 rounded-md border p-4">
+       <legend className="px-1 text-sm font-medium">Section {index + 1}{governedType ? ` · governed ${governedType} slot` : ""}</legend>
       <div className="grid gap-4 sm:grid-cols-3">
-        <Choice label="Type" required value={section.type ?? "narrative"} options={["narrative", "cta", "legal", "media"]} onChange={(type) => {
+         <Choice label="Type" required value={section.type ?? "narrative"} options={governedType ? [governedType] : ["narrative", "cta", "legal", "media"]} onChange={(type) => {
           const common = { id: section.id, order: section.order };
           replace(index, type === "narrative" ? { ...common, type, body: [{ type: "paragraph", text: "" }] }
             : type === "cta" ? { ...common, type, label: "", href: "/", style: "primary" }
@@ -709,7 +711,8 @@ function LandingSections({ value, onChange }: {
         <Button type="button" size="sm" variant="outline" onClick={() => update(index, { references: [...(section.references ?? []), { mediaId: "", role: "supporting" }] })}>Add media</Button>
       </div>}
       <Button type="button" variant="ghost" onClick={() => onChange(sections.filter((_, current) => current !== index))}>Remove section</Button>
-    </fieldset>)}
+      </fieldset>;
+    })}
   </section>;
 }
 

@@ -10,7 +10,13 @@ type Seed = {
   path: string;
   snapshot: {
     content: {
-      sections: Array<{ id: string; type: string }>;
+      sections: Array<{
+        id: string;
+        type: string;
+        label?: string;
+        href?: string;
+        body?: Array<{ type: string; text?: string }>;
+      }>;
     };
   };
 };
@@ -20,7 +26,7 @@ const seeds = JSON.parse(
   readFileSync(resolve(workspace, "lib/db/landing-page-inventory.json"), "utf8"),
 ) as Seed[];
 const expectedCounts = {
-  "/": 62,
+  "/": 56,
   "/about": 12,
   "/partners": 16,
   "/platforms": 17,
@@ -29,6 +35,10 @@ const expectedCounts = {
 };
 
 test("generated landing inventory is current and has every unique governed slot", () => {
+  execFileSync(process.execPath, ["scripts/generate-landing-parity.mjs", "--page=/", "--check"], {
+    cwd: workspace,
+    stdio: "pipe",
+  });
   execFileSync(process.execPath, ["scripts/generate-landing-parity.mjs", "--page=/methodologies", "--check"], {
     cwd: workspace,
     stdio: "pipe",
@@ -42,6 +52,63 @@ test("generated landing inventory is current and has every unique governed slot"
     assert.equal(new Set(ids).size, ids.length, `${seed.path} has duplicate section IDs`);
     assert.ok(ids.includes("hero"), `${seed.path} is missing its bound hero narrative`);
   }
+});
+
+test("homepage inventory retains only framework CTAs and binds outcome CTAs", () => {
+  const homepage = seeds.find((seed) => seed.path === "/");
+  assert.ok(homepage);
+  const sections = homepage.snapshot.content.sections;
+  const frameworkSlots = sections.filter((section) => section.id.startsWith("home-framework-"));
+  assert.deepEqual(
+    frameworkSlots.map(({ id, type, label, href }) => ({ id, type, label, href })),
+    [
+      {
+        id: "home-framework-authority-cta",
+        type: "cta",
+        label: "Agent Authority Model",
+        href: "/methodologies/agent-authority-model",
+      },
+      {
+        id: "home-framework-idao-cta",
+        type: "cta",
+        label: "Explore IDAO",
+        href: "/methodologies/idao",
+      },
+      {
+        id: "home-framework-portfolio-cta",
+        type: "cta",
+        label: "View methodology portfolio",
+        href: "/methodologies",
+      },
+    ],
+  );
+  assert.deepEqual(
+    sections
+      .filter((section) => section.id.startsWith("home-image-ledger-") && section.id.endsWith("-cta"))
+      .map(({ id, type, label, href }) => ({ id, type, label, href })),
+    [
+      {
+        id: "home-image-ledger-first-cta",
+        type: "cta",
+        label: "Agent Authority Model",
+        href: "/methodologies/agent-authority-model",
+      },
+      {
+        id: "home-image-ledger-second-cta",
+        type: "cta",
+        label: "Human–Agent Operating Model",
+        href: "/methodologies/human-agent-operating-model",
+      },
+      {
+        id: "home-image-ledger-third-cta",
+        type: "cta",
+        label: "CogniOS architecture",
+        href: "/platforms/cognios#architecture",
+      },
+    ],
+  );
+  const firstCaption = sections.find((section) => section.id === "home-image-ledger-first-caption");
+  assert.deepEqual(firstCaption?.body, [{ type: "paragraph", text: "Boundaries you control." }]);
 });
 
 test("all generated landing envelopes pass the real draft validator", () => {

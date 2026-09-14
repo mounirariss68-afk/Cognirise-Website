@@ -16,6 +16,24 @@ test("persistent selection outranks pointer or keyboard preview", () => {
   assert.equal(resolveSpatialDisclosureActiveIndex(null, null), null);
 });
 
+test("homepage-style editorial disclosure initially collapses every stage", () => {
+  const html = renderToString(
+    <SpatialDisclosure mode="editorial" orientation="horizontal" defaultValue={null} allowCollapse preview previewOverridesSelection previewExpands>
+      {["1", "2", "3", "4"].map(id => (
+        <SpatialDisclosureItem id={id} key={id}>
+          <SpatialDisclosureTrigger id={id}>Stage {id}</SpatialDisclosureTrigger>
+          <SpatialDisclosurePanel id={id}>Details {id}</SpatialDisclosurePanel>
+        </SpatialDisclosureItem>
+      ))}
+    </SpatialDisclosure>
+  );
+  assert.equal((html.match(/aria-expanded="false"/g) ?? []).length, 4);
+  assert.equal((html.match(/aria-hidden="true" inert=""/g) ?? []).length, 4);
+  assert.doesNotMatch(html, /data-selected="true"/);
+  assert.equal(resolveSpatialDisclosureActiveIndex(null, "2", true), "2");
+  assert.equal(resolveSpatialDisclosureActiveIndex(null, null, true), null);
+});
+
 test("preview can explicitly override a persistent selection for hover-driven panels", () => {
   assert.equal(
     resolveSpatialDisclosureActiveIndex("selected", "preview", true),

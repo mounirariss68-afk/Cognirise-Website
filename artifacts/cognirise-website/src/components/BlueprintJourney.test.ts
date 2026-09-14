@@ -40,7 +40,7 @@ test("BlueprintJourney keeps image crop and text measure stable while cards expa
   assert.match(source, /transform: translateX\(-50%\)/);
   assert.doesNotMatch(source, /transform: scale\(/);
   assert.match(source, /--blueprint-active-width:/);
-  assert.match(source, /\.blueprint-trigger > \* \{ width: calc\(var\(--blueprint-active-width\) - 56px\); \}/);
+  assert.match(source, /\.blueprint-trigger > \* \{ width: 100%; \}/);
   assert.match(source, /\.blueprint-panel-content \{ width: calc\(var\(--blueprint-active-width\) - 56px\);/);
 });
 
@@ -56,6 +56,14 @@ test("BlueprintJourney preserves the IDAO stage order and timing commitments", (
   assert.match(content, /time: "48 hours"/);
   assert.match(content, /time: "2–4 weeks \(MVP\)"/);
   assert.match(source, /prototype in 48 hours/);
+});
+
+test("homepage blueprint starts equally collapsed while retaining previews and explicit disclosure", () => {
+  assert.match(source, /defaultValue=\{null\}/);
+  assert.match(source, /allowCollapse/);
+  assert.match(source, /previewExpands/);
+  assert.match(source, /flex: 1 1 0/);
+  assert.doesNotMatch(source, /defaultValue="2"/);
 });
 
 test("each IDAO stage explains the client role and tangible outcome", () => {

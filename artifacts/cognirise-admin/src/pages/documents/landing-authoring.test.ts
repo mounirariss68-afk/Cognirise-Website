@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { newLandingNarrativeSection, updateLandingSection } from "./landing-section-fields.ts";
+import { governedLandingSlotType, newLandingNarrativeSection, updateLandingSection } from "./landing-section-fields.ts";
 
 test("landing structured controls create and edit a publish-ready shape without JSON input", () => {
   const initial = newLandingNarrativeSection(0);
@@ -33,4 +33,11 @@ test("landing structured controls create and edit a publish-ready shape without 
     order: 0,
     body: [{ type: "paragraph", text: "" }],
   });
+});
+
+test("landing editor resolves generated homepage bindings without changing slot identity", () => {
+  assert.equal(governedLandingSlotType("/", "home-image-ledger-first-cta"), "cta");
+  assert.equal(governedLandingSlotType("/", "home-framework-authority-cta"), "cta");
+  assert.equal(governedLandingSlotType("/", "home-framework-authority-body"), undefined);
+  assert.equal(governedLandingSlotType("/about", "home-image-ledger-first-cta"), undefined);
 });

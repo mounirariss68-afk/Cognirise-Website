@@ -72,6 +72,20 @@ test("service interest analytics distinguish card activation from destination na
   assert.match(home, /source="homepage"/);
 });
 
+test("consulting keeps service destinations and adds a distinct governed methodology group", async () => {
+  const [tiles, home] = await Promise.all([
+    readFile(new URL("../components/ServiceLineTiles.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../pages/Home.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.match(home, /methodologyCtas=\{\[frameworkPortfolioCta, frameworkIdaoCta, frameworkAuthorityCta\]\}/);
+  assert.match(tiles, /service\.id === "consulting-engineering" && methodologyCtas\.length > 0/);
+  assert.match(tiles, /data-testid="service-methodologies"/);
+  assert.match(tiles, /methodologyCtas\.map/);
+  assert.match(tiles, /trackDestinationClick\(service\.id, cta\.href\)/);
+  assert.match(tiles, /className="cps-tile-dest cps-tile-methodology-link group"/);
+  assert.equal(tiles.match(/service\.destinations\.map/g)?.length, 2);
+});
+
 test("service tiles use Pulse raster illustrations instead of generated vector drawings", async () => {
   const source = await readFile(new URL("../components/ServiceLineTiles.tsx", import.meta.url), "utf8");
   assert.match(source, /SERVICE_VISUALS/);
