@@ -1,0 +1,1085 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Set, Prove & Hold - an AI guardrails framework for any sector, with a UAE public-sector layer.">
+<style>
+  html { color-scheme: light dark; }
+  body { margin: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+<title>Set, Prove &amp; Hold</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper:      #F8F7F4;
+    --surface:    #FFFFFF;
+    --surface-2:  #F1F1EE;
+    --ink:        #102957;
+    --ink-soft:   #4A5B7C;
+    --ink-faint:  #8493AC;
+    --rule:       #D7DBE3;
+    --rule-soft:  #E7E9ED;
+    --set:        #6B54C8;
+    --set-bg:     #F0ECFB;
+    --prove:      #C4348A;
+    --prove-bg:   #FAECF4;
+    --hold:       #D4522F;
+    --hold-bg:    #FBEDE8;
+    --accent:     #C4348A;
+    --stop:       #A3341F;
+    --stop-bg:    #FCF1ED;
+    --good:       #2C6E52;
+
+    --f-display: "Comfortaa", "Trebuchet MS", sans-serif;
+    --f-body:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --f-mono:    "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #071936;
+      --surface:    #0D2246;
+      --surface-2:  #112A54;
+      --ink:        #E9F0FB;
+      --ink-soft:   #A5B6D0;
+      --ink-faint:  #6E82A3;
+      --rule:       #1E3A69;
+      --rule-soft:  #17305A;
+      --set:        #A38FF2;
+      --set-bg:     #1A2A5E;
+      --prove:      #F06FB4;
+      --prove-bg:   #351E45;
+      --hold:       #FF9877;
+      --hold-bg:    #37203A;
+      --accent:     #F06FB4;
+      --stop:       #FF8A6E;
+      --stop-bg:    #331B26;
+      --good:       #5FBE9B;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #071936;
+    --surface:    #0D2246;
+    --surface-2:  #112A54;
+    --ink:        #E9F0FB;
+    --ink-soft:   #A5B6D0;
+    --ink-faint:  #6E82A3;
+    --rule:       #1E3A69;
+    --rule-soft:  #17305A;
+    --set:        #A38FF2;
+    --set-bg:     #1A2A5E;
+    --prove:      #F06FB4;
+    --prove-bg:   #351E45;
+    --hold:       #FF9877;
+    --hold-bg:    #37203A;
+    --accent:     #F06FB4;
+    --stop:       #FF8A6E;
+    --stop-bg:    #331B26;
+    --good:       #5FBE9B;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: var(--f-body); font-size: 16px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 820px; margin: 0 auto; padding-inline: 22px; }
+  .gradient-rule { height: 3px; background: linear-gradient(90deg, #7759DF 0%, #DB509E 52%, #FE765E 100%); }
+
+  .eyebrow {
+    font-family: var(--f-mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+
+  header.top { padding-block: 50px 0; }
+  h1 {
+    font-family: var(--f-display); font-weight: 700;
+    font-size: clamp(30px, 5.7vw, 46px); line-height: 1.08;
+    letter-spacing: -.015em; margin: 14px 0 0; text-wrap: balance;
+  }
+  h1 .amp { color: var(--accent); font-weight: 400; }
+  .standfirst {
+    font-size: clamp(16px, 2.3vw, 19px); line-height: 1.5;
+    color: var(--ink-soft); margin: 18px 0 0; text-wrap: pretty; max-width: 62ch;
+  }
+  .strap {
+    margin-top: 22px; padding: 14px 0 14px 18px;
+    border-left: 3px solid var(--accent);
+    font-family: var(--f-display); font-size: clamp(17px, 2.5vw, 21px);
+    font-weight: 600; color: var(--ink); line-height: 1.3; max-width: 34ch;
+  }
+
+  /* tabs */
+  .tabs {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--paper); border-bottom: 1px solid var(--rule); margin-top: 32px;
+  }
+  .tablist { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+  .tabs button {
+    font-family: var(--f-body); font-size: 14px; font-weight: 500;
+    color: var(--ink-soft); background: none; border: 0;
+    border-bottom: 2px solid transparent; padding: 13px 14px;
+    cursor: pointer; white-space: nowrap;
+  }
+  .tabs button:hover { color: var(--ink); }
+  .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+  .tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+
+  section { padding-block: 44px; }
+  section + section { border-top: 1px solid var(--rule-soft); }
+
+  h2 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: clamp(22px, 3.4vw, 27px); line-height: 1.15;
+    letter-spacing: -.01em; margin: 0 0 14px; text-wrap: balance;
+  }
+  .h2c { font-family: var(--f-display); font-weight: 400; font-size: .74em; color: var(--ink-faint); margin-left: 8px; }
+  h3 { font-family: var(--f-display); font-weight: 600; font-size: 17px; margin: 0; line-height: 1.25; }
+  h4 {
+    font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-faint);
+    margin: 40px 0 14px; font-weight: 500;
+    padding-bottom: 8px; border-bottom: 1px solid var(--rule);
+  }
+  p { margin: 0 0 14px; color: var(--ink-soft); }
+  p:last-child { margin-bottom: 0; }
+  p.lead { color: var(--ink); font-size: 17px; max-width: 68ch; }
+  strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- the ladder table ---------- */
+  table.ladder { min-width: 720px; }
+  table.ladder tbody th { white-space: nowrap; font-family: var(--f-display); font-size: 14px; }
+  table.ladder td { font-size: 13.5px; }
+  table.ladder td.gp { color: var(--stop); }
+  table.ladder td.gp.ok { color: var(--good); }
+  table.ladder td.dots {
+    font-family: var(--f-mono); font-size: 14px; letter-spacing: .14em;
+    text-align: right; white-space: nowrap;
+  }
+  table.ladder tr.r1 th { border-left: 3px solid var(--stop); }
+  table.ladder tr.r1 td.dots { color: var(--stop); }
+  table.ladder tr.r2 th { border-left: 3px solid var(--ink-faint); }
+  table.ladder tr.r2 td.dots { color: var(--ink-faint); }
+  table.ladder tr.r3 th { border-left: 3px solid var(--ink-soft); }
+  table.ladder tr.r3 td.dots { color: var(--ink-soft); }
+  table.ladder tr.r4 th { border-left: 3px solid var(--good); }
+  table.ladder tr.r4 td.dots { color: var(--good); }
+  table.ladder tr.r4 td, table.ladder tr.r4 th { background: var(--surface-2); }
+  .exline {
+    border: 1px solid var(--rule); background: var(--surface-2);
+    padding: 13px 16px; margin-bottom: 14px; font-size: 14.5px; color: var(--ink);
+  }
+  .exline span {
+    display: block; font-family: var(--f-mono); font-size: 10px; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 5px;
+  }
+
+  /* ---------- matrix ---------- */
+  table.matrix { min-width: 720px; }
+  table.matrix tbody th { white-space: nowrap; font-family: var(--f-display); font-size: 14px; }
+  table.matrix td { font-size: 13.5px; }
+  table.matrix td.nil { color: var(--ink-faint); }
+  table.matrix thead th.c-set   { color: var(--set); }
+  table.matrix thead th.c-prove { color: var(--prove); }
+  table.matrix thead th.c-hold  { color: var(--hold); }
+  table.matrix tr.r1 th { border-left: 3px solid var(--stop); }
+  table.matrix tr.r2 th { border-left: 3px solid var(--ink-faint); }
+  table.matrix tr.r3 th { border-left: 3px solid var(--ink-soft); }
+  table.matrix tr.r4 th { border-left: 3px solid var(--good); }
+  table.matrix tr.r4 td, table.matrix tr.r4 th { background: var(--surface-2); }
+
+  /* ---------- three columns ---------- */
+  .flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .col { border: 1px solid var(--rule); padding: 18px 18px 20px; background: var(--surface); }
+  .col.c-set   { background: var(--set-bg);   border-top: 3px solid var(--set); }
+  .col.c-prove { background: var(--prove-bg); border-top: 3px solid var(--prove); }
+  .col.c-hold  { background: var(--hold-bg);  border-top: 3px solid var(--hold); }
+  .col .ctitle { font-family: var(--f-display); font-weight: 600; font-size: 18px; }
+  .col .ctitle .cnt { font-weight: 500; font-size: .72em; margin-left: 6px; }
+  .col.c-set   .cnt { color: var(--set); }
+  .col.c-prove .cnt { color: var(--prove); }
+  .col.c-hold  .cnt { color: var(--hold); }
+  .col .cnote {
+    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-faint); margin-top: 4px;
+  }
+  .col ol { margin: 14px 0 0; padding-left: 18px; font-size: 14.5px; color: var(--ink-soft); }
+  .col p { margin: 13px 0 0; font-size: 14.5px; }
+  .col li { margin-bottom: 7px; }
+  .col li:last-child { margin-bottom: 0; }
+  .col li b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 720px) { .flow { grid-template-columns: 1fr; } }
+
+  /* ---------- tiles ---------- */
+  .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .tile {
+    border: 1px solid var(--rule); background: var(--surface); padding: 16px 18px 18px;
+    display: grid; grid-template-columns: 26px 1fr; gap: 4px 12px; align-items: start;
+  }
+  .tile .bn {
+    width: 22px; height: 22px; display: grid; place-items: center;
+    font-family: var(--f-mono); font-size: 11px; font-weight: 500;
+    color: var(--paper); margin-top: 2px;
+  }
+  .tile h3 { font-size: 16px; }
+  .tile p { grid-column: 2; font-size: 14px; margin: 6px 0 0; }
+  @media (max-width: 620px) { .tiles { grid-template-columns: 1fr; } }
+
+  /* ---------- maps ---------- */
+  .map { display: grid; gap: 8px; margin-bottom: 30px; grid-template-columns: repeat(4, 1fr); }
+  .mapcell { border: 1px solid var(--rule); background: var(--surface); padding: 12px 13px; position: relative; }
+  .map.m-set   .mapcell { border-top: 3px solid var(--set); }
+  .map.m-prove .mapcell { border-top: 3px solid var(--prove); }
+  .map.m-hold  .mapcell { border-top: 3px solid var(--hold); }
+  .mapcell .mn {
+    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em;
+    color: var(--ink-faint); display: block; margin-bottom: 3px;
+  }
+  .mapcell .mt { font-family: var(--f-display); font-weight: 600; font-size: 14.5px; line-height: 1.2; }
+  .map.m-set .mapcell:not(:last-child)::after {
+    content: "\203A"; position: absolute; right: -7px; top: 50%; transform: translateY(-50%);
+    color: var(--set); font-size: 16px; line-height: 1; z-index: 2; background: var(--paper); padding: 2px 0;
+  }
+  .maplabel {
+    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 2px;
+  }
+  @media (max-width: 680px) {
+    .map { grid-template-columns: repeat(2, 1fr); }
+    .map .mapcell::after { display: none; }
+  }
+
+  /* ---------- cards ---------- */
+  .card { border: 1px solid var(--rule); background: var(--surface); margin-bottom: 14px; }
+  .card-head { display: grid; grid-template-columns: 30px 1fr; gap: 4px 16px; padding: 18px 20px 0; align-items: start; }
+  .card .bn {
+    width: 26px; height: 26px; display: grid; place-items: center;
+    font-family: var(--f-mono); font-size: 12px; font-weight: 500;
+    color: var(--paper); margin-top: 1px;
+  }
+  .card.c-set   { border-top: 3px solid var(--set); }
+  .card.c-prove { border-top: 3px solid var(--prove); }
+  .card.c-hold  { border-top: 3px solid var(--hold); }
+  .card.c-set   .bn { background: var(--set); }
+  .card.c-prove .bn { background: var(--prove); }
+  .card.c-hold  .bn { background: var(--hold); }
+  .tiles.t-set   .bn { background: var(--set); }
+  .tiles.t-prove .bn { background: var(--prove); }
+  .tiles.t-hold  .bn { background: var(--hold); }
+  .statement { grid-column: 2; font-size: 15.5px; color: var(--ink); margin: 6px 0 0; line-height: 1.4; }
+  .card-body { padding: 12px 20px 16px 66px; }
+  @media (max-width: 520px) { .card-body { padding-left: 20px; } }
+
+  .plist { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+  .plist li { position: relative; padding-left: 18px; font-size: 14px; color: var(--ink-soft); }
+  .plist li::before { content: ""; position: absolute; left: 0; top: .66em; width: 8px; height: 1px; background: var(--ink-faint); }
+  .plist li b { color: var(--ink); font-weight: 600; }
+  .aside {
+    margin-top: 14px; padding: 11px 14px; background: var(--surface-2);
+    font-size: 13.5px; color: var(--ink-soft); border-left: 2px solid var(--rule);
+  }
+  .aside b { color: var(--ink); }
+
+  .metaline {
+    border-top: 1px solid var(--rule-soft);
+    padding: 11px 20px 12px;
+    display: flex; flex-wrap: wrap; gap: 5px 22px;
+    font-size: 12.5px; color: var(--ink-soft);
+  }
+  .metaline .k {
+    font-family: var(--f-mono); font-size: 10px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-faint); margin-right: 6px;
+  }
+
+  .failband {
+    display: grid; grid-template-columns: auto 1fr; gap: 12px;
+    padding: 12px 20px 13px; background: var(--stop-bg); border-top: 1px solid var(--rule-soft);
+  }
+  .failband .k {
+    font-family: var(--f-mono); font-size: 10px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--stop); white-space: nowrap; padding-top: 2px;
+  }
+  .failband .v { font-size: 13.5px; color: var(--stop); line-height: 1.45; }
+  @media (max-width: 560px) { .failband { grid-template-columns: 1fr; gap: 3px; } }
+
+  /* ---------- tables ---------- */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); }
+  table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 13.5px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  thead th {
+    background: var(--surface-2); font-family: var(--f-mono); font-size: 10.5px; font-weight: 500;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft);
+    border-bottom: 1px solid var(--rule); white-space: nowrap;
+  }
+  tbody th { font-weight: 600; color: var(--ink); background: var(--surface); }
+  td { color: var(--ink-soft); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+  td.mono { font-family: var(--f-mono); font-size: 12.5px; }
+  td.stop { color: var(--stop); font-weight: 500; }
+  th .sub { display: block; font-weight: 400; color: var(--ink-faint); font-size: 12px; margin-top: 2px; }
+  .tnote { font-size: 13px; color: var(--ink-faint); margin-top: 10px; }
+
+  /* ---------- anchors ---------- */
+  .anchors { border-top: 1px solid var(--rule); }
+  .anchor {
+    display: grid; grid-template-columns: 176px 1fr 78px; gap: 4px 16px;
+    padding: 14px 0; border-bottom: 1px solid var(--rule-soft); align-items: baseline;
+  }
+  .anchor .aname { font-weight: 600; font-size: 14.5px; }
+  .anchor .aname span {
+    display: block; font-family: var(--f-mono); font-size: 10.5px; font-weight: 400;
+    color: var(--ink-faint); letter-spacing: .04em; margin-top: 2px;
+  }
+  .anchor .awhat { color: var(--ink-soft); font-size: 14.5px; }
+  .tag {
+    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em;
+    text-transform: uppercase; padding: 3px 7px; border: 1px solid var(--rule);
+    white-space: nowrap; justify-self: start; color: var(--ink-faint);
+  }
+  .tag.t-binds { color: var(--stop); border-color: var(--stop); }
+  .tag.t-guides { color: var(--ink-faint); }
+  @media (max-width: 620px) {
+    .anchor { grid-template-columns: 1fr; }
+    .tag { margin-top: 4px; }
+  }
+
+  .callout { border-left: 3px solid var(--accent); padding: 4px 0 4px 18px; margin-top: 28px; }
+  .callout p { color: var(--ink); }
+
+  .start { display: grid; gap: 10px; }
+  .start .step {
+    display: grid; grid-template-columns: 66px 1fr; gap: 14px; align-items: baseline;
+    border: 1px solid var(--rule); background: var(--surface); padding: 15px 17px;
+  }
+  .start .step .sn {
+    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .start .step p { margin: 0; font-size: 15px; }
+  @media (max-width: 520px) { .start .step { grid-template-columns: 1fr; gap: 4px; } }
+
+  footer {
+    border-top: 1px solid var(--rule); padding-block: 26px 48px;
+    font-size: 13px; color: var(--ink-faint); line-height: 1.55;
+  }
+
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+</head>
+<body>
+<div class="gradient-rule"></div>
+
+<header class="top">
+  <div class="wrap">
+    <span class="eyebrow">AI guardrails framework / any sector</span>
+    <h1>Set, Prove <span class="amp">&amp;</span> Hold</h1>
+    <p class="standfirst">The usual pattern: write down what the AI must never do, put the rule in the AI&#39;s instructions, and call it a guardrail. This is about the difference between a rule the AI has been <strong>asked</strong> to follow and one it <strong>cannot break</strong>.</p>
+    <p class="strap">A guardrail is only as strong as the layer it is actually built into.</p>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="wrap">
+    <div class="tablist" role="tablist" aria-label="Sections">
+      <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+      <button type="button" role="tab" id="tab-set" aria-controls="panel-set" aria-selected="false">Set</button>
+      <button type="button" role="tab" id="tab-prove" aria-controls="panel-prove" aria-selected="false">Prove</button>
+      <button type="button" role="tab" id="tab-hold" aria-controls="panel-hold" aria-selected="false">Hold</button>
+      <button type="button" role="tab" id="tab-uae" aria-controls="panel-uae" aria-selected="false">UAE public sector</button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ==================== OVERVIEW ==================== -->
+<div id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
+
+<section>
+  <div class="wrap">
+    <h2>Set, Prove &amp; Hold <span class="h2c">(4 + 4 + 4)</span></h2>
+    <p class="lead">Three things happen to every guardrail. Four steps in each.</p>
+
+    <div class="flow" style="margin-top:22px;">
+      <div class="col c-set">
+        <div class="ctitle">Set<span class="cnt">(4)</span></div>
+        <div class="cnote">Steps · before you build</div>
+        <ol>
+          <li><b>Name</b> what must never happen</li>
+          <li><b>Build</b> it into the strongest layer you can</li>
+          <li><b>Choose</b> what happens when it triggers</li>
+          <li><b>Give</b> each rule an owner</li>
+        </ol>
+      </div>
+      <div class="col c-prove">
+        <div class="ctitle">Prove<span class="cnt">(4)</span></div>
+        <div class="cnote">Tests · before you launch</div>
+        <ol>
+          <li><b>Attack</b> each rule directly</li>
+          <li><b>Widen</b> the attack to the whole system</li>
+          <li><b>Count</b> what it blocks wrongly</li>
+          <li><b>Record</b> the result, with a date</li>
+        </ol>
+      </div>
+      <div class="col c-hold">
+        <div class="ctitle">Hold<span class="cnt">(4)</span></div>
+        <div class="cnote">Disciplines · every day after</div>
+        <ol>
+          <li><b>Watch</b> the blocked attempts</li>
+          <li><b>Re-test</b> on every change</li>
+          <li><b>Add</b> new rules, retire old ones</li>
+          <li><b>Report</b> strength, not count</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Where the rule is enforced decides everything else</h2>
+    <p class="lead">The first decision inside Set is which of four places the rule lives in. The same rule can be written in any of them, and the choice decides whether someone determined can get past it.</p>
+
+    <div class="exline" style="margin-top:24px;">
+      <span>One rule, written four different ways</span>
+      <b>&ldquo;Never reveal another customer&#39;s data.&rdquo;</b>
+    </div>
+
+    <div class="tablewrap">
+      <table class="ladder">
+        <thead>
+          <tr>
+            <th scope="col">Layer</th>
+            <th scope="col">What it is</th>
+            <th scope="col">In this example</th>
+            <th scope="col">What gets past it</th>
+            <th scope="col" style="text-align:right;">Strength</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="r1">
+            <th scope="row">1 &middot; Policy</th>
+            <td>A rule in a document</td>
+            <td>A line in the AI usage policy. The system never sees it.</td>
+            <td class="gp">Anyone who has not read it</td>
+            <td class="dots">&#9679;&#9675;&#9675;&#9675;</td>
+          </tr>
+          <tr class="r2">
+            <th scope="row">2 &middot; Prompt</th>
+            <td>A line in the AI&#39;s instructions</td>
+            <td>The AI is told not to. The other customer&#39;s data is still in front of it.</td>
+            <td class="gp">One well-crafted instruction, typed or hidden in a document</td>
+            <td class="dots">&#9679;&#9679;&#9675;&#9675;</td>
+          </tr>
+          <tr class="r3">
+            <th scope="row">3 &middot; Runtime</th>
+            <td>Software outside the AI that checks what goes in and out</td>
+            <td>Any answer containing another customer&#39;s record is blocked before it leaves.</td>
+            <td class="gp">Gaps in what the scanner recognises — an odd format, another language</td>
+            <td class="dots">&#9679;&#9679;&#9679;&#9675;</td>
+          </tr>
+          <tr class="r4">
+            <th scope="row">4 &middot; Architecture</th>
+            <td>The AI is given only the data and tools the task needs</td>
+            <td>The search returns only the signed-in customer&#39;s own records.</td>
+            <td class="gp ok">Nothing — the data was never sent</td>
+            <td class="dots">&#9679;&#9679;&#9679;&#9679;</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="tnote"><strong>Layer 4 is not about withholding.</strong> The AI still gets everything it needs to do the job — it just never gets more than that.</p>
+
+    <div class="callout">
+      <p><strong>Build every rule into the strongest layer that can carry it.</strong> Layers 1 and 2 ask the AI to behave. Layers 3 and 4 do not ask. Stop at layer 2 and your guardrails are requests, not controls.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>The layer decides how you build it, test it and re-test it</h2>
+    <p class="lead">This grid is the framework. Layers down the side, the three stages across the top.</p>
+
+    <div class="tablewrap" style="margin-top:22px;">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th scope="col">Layer</th>
+            <th scope="col" class="c-set">Set &mdash; how you build it</th>
+            <th scope="col" class="c-prove">Prove &mdash; how you test it</th>
+            <th scope="col" class="c-hold">Hold &mdash; when you re-test</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="r1">
+            <th scope="row">1 &middot; Policy</th>
+            <td>Write it in a document</td>
+            <td class="nil">Nothing to test</td>
+            <td class="nil">Never — it is not connected to anything</td>
+          </tr>
+          <tr class="r2">
+            <th scope="row">2 &middot; Prompt</th>
+            <td>Put it in the AI&#39;s instructions</td>
+            <td>Attack it. Expect it to fail some of the time.</td>
+            <td>Every model or instruction change — so, constantly</td>
+          </tr>
+          <tr class="r3">
+            <th scope="row">3 &middot; Runtime</th>
+            <td>Add a check outside the AI, on the way in or out</td>
+            <td>Attack it, and count what it blocks wrongly</td>
+            <td>When the scanner, the model or the languages change</td>
+          </tr>
+          <tr class="r4">
+            <th scope="row">4 &middot; Architecture</th>
+            <td>Give the AI only the data and tools the task needs</td>
+            <td>Check the scoping is actually in place</td>
+            <td>Only when the architecture changes — rarely</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <p><strong>Read the bottom row against the second.</strong> A rule in the AI&#39;s instructions is quick to write and then needs re-testing every time anything moves. The same rule built into the architecture is real work once, and then holds by itself. Layer choice is a maintenance decision as much as a security one.</p>
+    </div>
+
+    <p style="margin-top:26px;"><strong>One number is worth tracking above the rest:</strong> how many of your guardrails sit at each layer. Set assigns it, Prove tells you whether the claimed layer is real, Hold reports it over time.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What this is built from</h2>
+    <p>Nothing invented here. The ethics frameworks tell you what to forbid. The security ones tell you how it gets bypassed. A policy built on the first alone will name the right rules and miss every way around them.</p>
+
+    <div class="anchors" style="margin-top:22px;">
+      <div class="anchor">
+        <div class="aname">OWASP GenAI LLM Top 10<span>2026 edition</span></div>
+        <div class="awhat">The ten ways these systems break. Each one is a rule you need</div>
+        <div class="tag t-guides">Guides</div>
+      </div>
+      <div class="anchor">
+        <div class="aname">OWASP Agent Control Standard<span>v0.1</span></div>
+        <div class="awhat">Every tool, model and data source an agent can reach, and where to limit it</div>
+        <div class="tag t-guides">Guides</div>
+      </div>
+      <div class="anchor">
+        <div class="aname">MITRE ATLAS<span>threat knowledge base</span></div>
+        <div class="awhat">A catalogue of attacks that have worked. Use it to write the tests</div>
+        <div class="tag t-guides">Guides</div>
+      </div>
+      <div class="anchor">
+        <div class="aname">NIST AI RMF + 600-1<span>GenAI profile</span></div>
+        <div class="awhat">The common vocabulary for AI risk, plus the generative-specific list</div>
+        <div class="tag t-guides">Guides</div>
+      </div>
+      <div class="anchor">
+        <div class="aname">ISO/IEC 42001<span>certifiable</span></div>
+        <div class="awhat">The management standard this sits inside, and the only AI certification</div>
+        <div class="tag t-guides">Guides</div>
+      </div>
+      <div class="anchor">
+        <div class="aname">UAE PDPL<span>Decree-Law 45 / 2021</span></div>
+        <div class="awhat">Personal data, and filtering to prevent unlawful output</div>
+        <div class="tag t-binds">Binds</div>
+      </div>
+      <div class="anchor">
+        <div class="aname">UAE Charter for AI<span>June 2024</span></div>
+        <div class="awhat">12 principles. Non-binding, and the language a government counterpart uses</div>
+        <div class="tag t-guides">Guides</div>
+      </div>
+      <div class="anchor">
+        <div class="aname">EU AI Act Article 5<span>prohibited practices</span></div>
+        <div class="awhat">Not in force here, but the clearest published list of things AI must never do</div>
+        <div class="tag t-guides">Guides</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Where to start</h2>
+    <p>Three moves, in this order. The first takes an afternoon.</p>
+    <div class="start" style="margin-top:22px;">
+      <div class="step">
+        <span class="sn">Move 1</span>
+        <p><strong>List every guardrail you think you have, and mark which layer each one lives at.</strong> Then count how many sit at layers 3 and 4. That number is the finding.</p>
+      </div>
+      <div class="step">
+        <span class="sn">Move 2</span>
+        <p><strong>Take the three that matter most and try to break them.</strong> Two people, one afternoon. Whatever survives is worth keeping; whatever does not was never a control.</p>
+      </div>
+      <div class="step">
+        <span class="sn">Move 3</span>
+        <p><strong>Move one guardrail to a stronger layer.</strong> Start with the least technical option: narrow what the AI is given to what the task actually needs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+</div>
+<!-- ==================== SET ==================== -->
+<div id="panel-set" role="tabpanel" aria-labelledby="tab-set" hidden>
+
+<section>
+  <div class="wrap">
+    <h2>Set — deciding what must never happen <span class="h2c">(4)</span></h2>
+    <p class="lead">A guardrail is a rule you can test. "Be helpful and safe" cannot be tested. "Never tell an applicant whether they qualify" can — you can try to make it happen and see what the system does.</p>
+
+    <div class="maplabel" style="margin-top:28px;">4 steps · sequential</div>
+    <div class="map m-set">
+      <div class="mapcell"><span class="mn">Step 1</span><span class="mt">Name</span></div>
+      <div class="mapcell"><span class="mn">Step 2</span><span class="mt">Build</span></div>
+      <div class="mapcell"><span class="mn">Step 3</span><span class="mt">Choose</span></div>
+      <div class="mapcell"><span class="mn">Step 4</span><span class="mt">Assign</span></div>
+    </div>
+
+    <div class="card c-set">
+      <div class="card-head">
+        <span class="bn">1</span>
+        <h3>Name what must never happen</h3>
+        <p class="statement">A rule you could try to break this afternoon.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>Write a &ldquo;never&rdquo;, not a value</b> — &ldquo;be safe&rdquo; cannot be tested</li>
+          <li><b>Write it for this system</b> — not copied from a vendor&#39;s generic list</li>
+          <li><b>Three sources</b> — the law, the damage this system could do, the known ways AI breaks</li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Owner</span>Risk and legal, with the product owner</div>
+        <div><span class="k">Output</span>A numbered rule list, versioned</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">The list is copied from a vendor&#39;s responsible-AI page, so it names risks this system does not have and misses the ones it does.</span>
+      </div>
+    </div>
+    <div class="card c-set">
+      <div class="card-head">
+        <span class="bn">2</span>
+        <h3>Build it into the strongest layer you can</h3>
+        <p class="statement">Start at layer 4. Ask what the task needs before you ask what to forbid.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>Layer 4</b> — give the AI only the data and tools this task needs</li>
+          <li><b>Layer 3</b> — if not, add a check outside the AI on the way in or out</li>
+          <li><b>Layer 2</b> — only then the AI&#39;s instructions, marked as bypassable</li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Owner</span>Engineering, challenged by security</div>
+        <div><span class="k">Output</span>Every rule labelled with its layer</div>
+        <div><span class="k">Watch</span>How many sit at 3–4 versus 1–2</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">Every rule goes into the AI&#39;s instructions because that is fastest, until they are so long the AI follows them inconsistently.</span>
+      </div>
+    </div>
+    <div class="card c-set">
+      <div class="card-head">
+        <span class="bn">3</span>
+        <h3>Choose what happens when it triggers</h3>
+        <p class="statement">There are four options. Pick one per rule — and if you block, say why.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>Four responses</b> — block, redact, escalate to a human, or allow and log</li>
+          <li><b>Match the response to the rule</b>, rather than one setting for everything</li>
+          <li><b>Tell the user what to do instead</b> — a refused user does not stop needing the thing</li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Owner</span>Product owner, with risk</div>
+        <div><span class="k">Output</span>A response type and user wording per rule</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">Everything is set to block, so the business quietly builds a path around the system.</span>
+      </div>
+    </div>
+    <div class="card c-set">
+      <div class="card-head">
+        <span class="bn">4</span>
+        <h3>Give each rule an owner</h3>
+        <p class="statement">Someone who can say it is still needed, and who answers when it fails.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>A named role</b>, not a committee</li>
+          <li><b>Authority to retire it</b> — otherwise the list only grows until it is too long to test</li>
+          <li><b>A review date</b>, because rules go out of date as the system changes</li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Owner</span>AI governance</div>
+        <div><span class="k">Output</span>The guardrail register: rule · layer · response · owner</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">Ownership sits with a central team that did not write the rule and cannot judge whether it still applies.</span>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p>Set produces one list. Every line reads <em>rule · layer · what happens · who owns it</em>. A guardrail that is not on the list does not exist — and if the layer column is mostly 1s and 2s, the list is longer than the protection.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ==================== PROVE ==================== -->
+<div id="panel-prove" role="tabpanel" aria-labelledby="tab-prove" hidden>
+
+<section>
+  <div class="wrap">
+    <h2>Prove — showing it actually holds <span class="h2c">(4)</span></h2>
+    <p class="lead">Every step here produces evidence with a date on it. "We have a guardrail" is a claim. "It stopped 47 of 50 attempts on 12 September" is a control.</p>
+
+    <div class="maplabel" style="margin-top:28px;">4 tests · all four, before launch</div>
+    <div class="map m-prove">
+      <div class="mapcell"><span class="mn">Test 1</span><span class="mt">Attack</span></div>
+      <div class="mapcell"><span class="mn">Test 2</span><span class="mt">Red-team</span></div>
+      <div class="mapcell"><span class="mn">Test 3</span><span class="mt">Count</span></div>
+      <div class="mapcell"><span class="mn">Test 4</span><span class="mt">Record</span></div>
+    </div>
+
+    <div class="card c-prove">
+      <div class="card-head">
+        <span class="bn">1</span>
+        <h3>Attack each rule directly</h3>
+        <p class="statement">Test against the exact thing the rule exists to stop.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>One test set per rule</b>, written from the rule itself</li>
+          <li><b>Try it plainly, then sideways</b> — role-play, translation, or hidden inside a document</li>
+          <li><b>Test in every language you serve</b> — the checking software is weakest outside English</li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Source</span>OWASP GenAI LLM Top 10</div>
+        <div><span class="k">Output</span>Pass rate per rule, per language</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">The tests are the same examples the guardrail was tuned on, so they measure what it memorised.</span>
+      </div>
+    </div>
+    <div class="card c-prove">
+      <div class="card-head">
+        <span class="bn">2</span>
+        <h3>Widen the attack to the whole system</h3>
+        <p class="statement">Attacks arrive through the documents, the tools and the output path — not only through the chat box.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>Documents it reads</b> — text can contain instructions, and the AI may follow them</li>
+          <li><b>Tools it can use</b> — what it can set off, and whose permissions it borrows</li>
+          <li><b>Where the answer goes</b> — shown on a page, run as code, written into another system</li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Source</span>MITRE ATLAS</div>
+        <div><span class="k">Run by</span>Security, or a specialist for high-impact systems</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">The red team is given the model API instead of the deployed product, so it tests the one part the vendor already hardened.</span>
+      </div>
+    </div>
+    <div class="card c-prove">
+      <div class="card-head">
+        <span class="bn">3</span>
+        <h3>Count what it blocks wrongly</h3>
+        <p class="statement">If it gets in the way of real work, someone will turn it off — and that decision will not be written down anywhere.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>Run real traffic through it</b> before launch, not just attack cases</li>
+          <li><b>Agree a limit</b> on how often it may block legitimate work, and treat going over it as a bug</li>
+          <li><b>Tune it or move it to a stronger layer</b> — never relax it</li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Owner</span>Product owner, with the business users</div>
+        <div><span class="k">Output</span>How often it blocked legitimate work, against the agreed limit</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">Only attack blocks are reported, so guardrails look free and the ones quietly disabled later never appear anywhere.</span>
+      </div>
+    </div>
+    <div class="card c-prove">
+      <div class="card-head">
+        <span class="bn">4</span>
+        <h3>Record the result with a date on it</h3>
+        <p class="statement">&ldquo;We have a guardrail&rdquo; is a claim. &ldquo;It stopped 47 of 50 attempts on 12 September&rdquo; is a control.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>What was tested</b>, against which rule, in which languages</li>
+          <li><b>Which versions</b> — model, instructions, tools, documents</li>
+          <li><b>The date</b> — the evidence expires the moment any of those versions changes</li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Held in</span>The guardrail register</div>
+        <div><span class="k">Source</span>ISO/IEC 42001, which asks for proof that controls ran</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">The evidence names the product but not the AI model version, so nobody can tell whether it still applies.</span>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p>Four questions for any team that says its guardrails are in place: <em>what is the pass rate, against which attempts, on which version, and when was it measured?</em> If they cannot answer all four, the guardrails have not been tested.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ==================== HOLD ==================== -->
+<div id="panel-hold" role="tabpanel" aria-labelledby="tab-hold" hidden>
+
+<section>
+  <div class="wrap">
+    <h2>Hold — keeping them holding <span class="h2c">(4)</span></h2>
+    <p class="lead">Guardrails decay. The model changes, the prompt changes, the tools change, the attackers get better, and the prohibition list goes stale in both directions. These four run for as long as the system does.</p>
+
+    <div class="maplabel" style="margin-top:28px;">4 disciplines · concurrent</div>
+    <div class="map m-hold">
+      <div class="mapcell"><span class="mn">Discipline 1</span><span class="mt">Watch</span></div>
+      <div class="mapcell"><span class="mn">Discipline 2</span><span class="mt">Re-test</span></div>
+      <div class="mapcell"><span class="mn">Discipline 3</span><span class="mt">Revisit</span></div>
+      <div class="mapcell"><span class="mn">Discipline 4</span><span class="mt">Report</span></div>
+    </div>
+
+    <div class="card c-hold">
+      <div class="card-head">
+        <span class="bn">1</span>
+        <h3>Watch the blocked attempts</h3>
+        <p class="statement">Every block tells you what somebody wanted the system to do.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>Log enough context</b> to see what was being attempted, not just that it fired</li>
+          <li><b>Alert on spikes and on new techniques</b> — one method you have not seen before is worth more than a hundred repeats of one you have</li>
+          <li><b>Separate attackers from confused users</b> — most triggers are the second, which is a design problem</li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Owner</span>Security operations</div>
+        <div><span class="k">Cadence</span>Continuous, reviewed monthly</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">Triggers get counted but never read, so you know how often guardrails fired and nothing about what for.</span>
+      </div>
+    </div>
+    <div class="card c-hold">
+      <div class="card-head">
+        <span class="bn">2</span>
+        <h3>Re-test on every change</h3>
+        <p class="statement">A guardrail proven against last quarter&#39;s model is not proven.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>Five things move</b> — the model, the instructions, the tools, the documents, the guardrail itself</li>
+          <li><b>Automate the tests</b> so re-running them costs nothing; a check that takes a week gets skipped</li>
+          <li><b>A drop in pass rate blocks the release</b></li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Owner</span>Engineering, checked automatically before each release</div>
+        <div><span class="k">Cadence</span>Per release, and on vendor notice</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">The vendor updates the hosted model with no notification clause in the contract, so the first sign is a live failure.</span>
+      </div>
+    </div>
+    <div class="card c-hold">
+      <div class="card-head">
+        <span class="bn">3</span>
+        <h3>Add new rules, retire old ones</h3>
+        <p class="statement">New capabilities create new risks. Old rules outlive their reason.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>Every new tool or data source</b> needs its own rule</li>
+          <li><b>Retire what no longer applies</b>, with the owner&#39;s sign-off and a note of why</li>
+          <li><b>Move rules to stronger layers</b> when you can — anything still sitting in the instructions is a candidate</li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Owner</span>The rule&#39;s named owner</div>
+        <div><span class="k">Cadence</span>On change, and on a fixed review date</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">The list only ever grows, so it becomes too long to test and testing narrows to the few everyone remembers.</span>
+      </div>
+    </div>
+    <div class="card c-hold">
+      <div class="card-head">
+        <span class="bn">4</span>
+        <h3>Report how strong they are, not how many</h3>
+        <p class="statement">&ldquo;Forty-one guardrails&rdquo; is a press release. &ldquo;Six enforced by anything other than asking the AI&rdquo; is a finding.</p>
+      </div>
+      <div class="card-body">
+        <ul class="plist">
+          <li><b>How many sit at each layer</b> — the one number that shows real progress</li>
+          <li><b>Pass rates</b>, with the version they were measured on</li>
+          <li><b>Wrong blocks against that agreed limit</b>, so the cost sits next to the benefit</li>
+        </ul>
+      </div>
+      <div class="metaline">
+        <div><span class="k">Owner</span>AI governance</div>
+        <div><span class="k">Cadence</span>Monthly to committee, quarterly to board</div>
+      </div>
+      <div class="failband">
+        <span class="k">Fails when</span>
+        <span class="v">The report counts guardrails but not their strength, so the number grows while the protection weakens.</span>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p>The test of whether Hold is working: the last time the model was updated, did anyone re-run the guardrail tests before it went live? If not, the guardrails are only as good as whenever they were last proven.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ==================== UAE PUBLIC SECTOR ==================== -->
+<div id="panel-uae" role="tabpanel" aria-labelledby="tab-uae" hidden>
+
+<section>
+  <div class="wrap">
+    <h2>UAE public sector</h2>
+    <h4 style="margin-top:22px;">What binds, and what only guides</h4>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">Instrument</th><th scope="col">Status</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">PDPL — Decree-Law 45/2021</th><td class="stop">Binds · personal data, and filtering unlawful output</td></tr>
+          <tr><th scope="row">Cybercrime Law — Decree-Law 34/2021</th><td class="stop">Binds · false information, system security</td></tr>
+          <tr><th scope="row">Abu Dhabi AIATC — Law 3/2024</th><td class="stop">Binds in Abu Dhabi</td></tr>
+          <tr><th scope="row">DIFC Reg. 10 / ADGM s.20</th><td class="stop">Binds in zone · automated decisions about people</td></tr>
+          <tr><th scope="row">UAE Charter for AI — June 2024</th><td>Guides · 12 principles, the language the room speaks</td></tr>
+          <tr><th scope="row">Dubai AI Roadmap &amp; Ethics Guidelines</th><td>Guides</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tnote"><strong>There is no UAE or Dubai AI act.</strong> As of September 2026 no dedicated AI statute exists at federal or emirate level — AI is governed through the laws above. Claims of a binding &ldquo;Dubai AI Act&rdquo; with a 2027 deadline circulate online and do not survive checking against the law firm trackers. The federal counterpart is the <strong>UAE AI &amp; Data Authority</strong>, approved 14 June 2026, which merged the AI Office, the TDRA&#39;s digital government arm and the UAE Data Office — and can propose legislation, which none of them could.</p>
+
+    <h4>Eight rules to set by default</h4>
+    <p>A starting list for any public-sector deployment, before anything sector-specific. Six of the eight can be enforced by architecture, because a government entity usually controls its own deployment end to end.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">Must never happen</th><th scope="col">Enforce it at</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">An adverse decision reaches a person without a human having reviewed it</th><td class="mono">L4 — the system recommends, it cannot issue</td></tr>
+          <tr><th scope="row">One person&#39;s data appears in another person&#39;s session</th><td class="mono">L4 — search scoped to the signed-in identity</td></tr>
+          <tr><th scope="row">Citizen data leaves approved residency</th><td class="mono">L4 — deployment topology, network route</td></tr>
+          <tr><th scope="row">Profiling for enforcement without a separate legal basis</th><td class="mono">L4 — the data is not in the system</td></tr>
+          <tr><th scope="row">A person is not told they are talking to AI</th><td class="mono">L4 — disclosure in the interface</td></tr>
+          <tr><th scope="row">A decision is taken that cannot be reconstructed later</th><td class="mono">L4 — logging as a hard dependency</td></tr>
+          <tr><th scope="row">Output states a legal or eligibility decision as final</th><td class="mono">L3 — output check on determinative language</td></tr>
+          <tr><th scope="row">Service quality differs across the languages served</th><td class="mono">L3 — tested and reported per language</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Arabic is a guardrail problem, not a translation problem</h4>
+    <p>Easy to miss, and an international vendor has no reason to raise it.</p>
+    <ul class="plist" style="margin-top:14px;">
+      <li><b>The software that checks AI output is trained mostly on English</b> and is noticeably weaker in Arabic</li>
+      <li><b>Mixing both languages in one sentence is weaker still</b> — and it is how people here write</li>
+      <li><b>Gulf dialect and Arabic typed in Latin letters</b> are further outside the training data than Modern Standard Arabic</li>
+      <li><b>Report pass rates per language</b>, never one blended number that hides the gap</li>
+    </ul>
+    <div class="aside" style="margin-top:16px;">
+      <b>Put this in the procurement questions.</b> &ldquo;Supports Arabic&rdquo; means the model writes Arabic. It says nothing about whether the safety layer reads it. Different components, often different suppliers — and the second one is never in the demo.
+    </div>
+
+    <h4>Speaking the Charter&#39;s language</h4>
+    <p>The UAE Charter&#39;s 12 principles are non-binding, which is why mapping to them is cheap and worth doing: a government counterpart sees their own framework reflected back.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">Charter principle</th><th scope="col">Covered by</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Safety</th><td>The rule list, and everything in Prove</td></tr>
+          <tr><th scope="row">Data privacy</th><td>Rules 2, 3 and 4 above — all at layer 4</td></tr>
+          <tr><th scope="row">Transparency</th><td>Rule 5, plus dated evidence from Prove</td></tr>
+          <tr><th scope="row">Human oversight</th><td>Rule 1, and the escalate response in Set</td></tr>
+          <tr><th scope="row">Accountability</th><td>A named owner per rule</td></tr>
+          <tr><th scope="row">Inclusive access</th><td>Rule 8 — per-language pass rates</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <p>The question to ask a government entity early: <em>which of your guardrails would still hold if the AI decided to ignore them?</em> The honest answer is the ones built into the architecture — and the useful follow-up is why the rest were not.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Draft for discussion, September 2026. References: OWASP GenAI LLM Top 10 (2026 edition) and the OWASP Agent Control Standard v0.1; MITRE ATLAS; NIST AI Risk Management Framework 1.0 and AI 600-1 Generative AI Profile; ISO/IEC 42001:2023; UAE Federal Decree-Law No. 45 of 2021 (PDPL) and No. 34 of 2021 (Cybercrime); the UAE Charter for the Development and Use of Artificial Intelligence (June 2024); Abu Dhabi Law No. 3 of 2024; the UAE Artificial Intelligence and Data Authority (approved June 2026); Regulation (EU) 2024/1689 Article 5. Mappings are indicative and require confirmation against source text before adoption. Not legal advice.
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+    function select(tab) {
+      tabs.forEach(function (t) {
+        var on = (t === tab);
+        t.setAttribute('aria-selected', String(on));
+        var panel = document.getElementById(t.getAttribute('aria-controls'));
+        if (panel) panel.hidden = !on;
+      });
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(t); });
+      t.addEventListener('keydown', function (e) {
+        var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        var next = tabs[(i + d + tabs.length) % tabs.length];
+        next.focus();
+        select(next);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
