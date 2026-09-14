@@ -241,11 +241,16 @@ async function ensureMethodologiesAuthority(client: SqlClient, allowCreate: bool
       [documentRow.id, digest(compiled), compiled],
     );
   }
-  if (
-    reconciliation.rowCount !== 1
-    || canonicalJson(reconciliation.rows[0].compiled_payload) !== canonicalJson(compiled)
-  ) {
-    throw new Error("Existing /methodologies compiled authority differs from generated inventory.");
+  if (reconciliation.rowCount !== 1) {
+    throw new Error("Expected exactly one stored /methodologies compiled authority.");
+  }
+  const storedCompiled = reconciliation.rows[0].compiled_payload;
+  const storedValidation = validateCmsSnapshot("landing-page", storedCompiled, "draft");
+  if (!storedValidation.success) {
+    throw new Error(`Stored /methodologies authority is invalid: ${storedValidation.errors.join("; ")}`);
+  }
+  if (canonicalJson(storedCompiled) !== canonicalJson(compiled)) {
+    console.warn("Generated /methodologies inventory has changed; preserving the stored compiled authority and editorial history.");
   }
 
   const revisions = await client.query(
@@ -271,7 +276,7 @@ async function ensureMethodologiesAuthority(client: SqlClient, allowCreate: bool
         (edition_id,revision_number,payload_version,payload,content_digest,
          workflow_state,created_by_user_id,reason)
        VALUES ($1,1,1,$2,$3,'draft',$4,$5)`,
-      [editionRow.id, compiled, digest(compiled), author.rows[0].id, SEED_REASON],
+      [editionRow.id, storedCompiled, digest(storedCompiled), author.rows[0].id, SEED_REASON],
     );
   }
 }

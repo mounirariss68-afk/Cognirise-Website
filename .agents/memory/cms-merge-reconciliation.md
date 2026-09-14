@@ -50,3 +50,9 @@ Historical-copy recovery stages a draft; it is not a separate publication author
 **Why:** A purpose-built recovery publisher can diverge from the CMS's media, destination, and administrator checks even when its copy provenance is exact. Permission to recover copy does not establish missing rights or verification facts.
 
 **How to apply:** Preserve immutable media pins and newer editorial fields during reconciliation, then use the normal authenticated, confirmed CMS Publish operation. Report unresolved approval blockers rather than fabricating clearance.
+
+Generated landing inventory is a seed for absent authority, not a replacement for an existing stored baseline.
+
+**Why:** Approved source-copy changes can legitimately differ from the immutable baseline used by an earlier media reconciliation. Treating that difference as corruption blocks unrelated merges.
+
+**How to apply:** Validate and preserve the stored baseline, report generated-copy drift, and use the stored payload if its initial draft needs reconstructing. Keep publication and editorial-history conflict checks intact.

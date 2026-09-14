@@ -216,7 +216,10 @@ test("executable verifies object readback and preserves seeded and editorial his
   assert.match(source, /landing-page-inventory\.json/);
   assert.match(source, /Drizzle schema push synchronizes table shape but does not execute migration/);
   assert.match(source, /INSERT INTO cms_documents\(kind,canonical_slug,title,status\)/);
-  assert.match(source, /Existing \/methodologies compiled authority differs from generated inventory/);
+  assert.match(source, /preserving the stored compiled authority and editorial history/);
+  assert.match(source, /storedCompiled, digest\(storedCompiled\)/);
+  assert.match(source, /Stored \/methodologies authority is invalid/);
+  assert.doesNotMatch(source, /UPDATE cms_landing_page_reconciliation/);
   assert.match(source, /revision_number\) !== 1/);
   assert.match(source, /VALUES \(\$1,2,1,\$2,\$3,'approved'/);
   assert.match(source, /Refusing to replace an existing/);
