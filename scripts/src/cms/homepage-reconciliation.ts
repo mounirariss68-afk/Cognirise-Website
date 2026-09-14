@@ -320,12 +320,49 @@ async function ensureServiceAccount(client: SqlClient, allowCreate: boolean) {
   return result.rows[0] as { id: string; email: string; status: string };
 }
 
+// Schema push does not run the historical landing seed migration. Restore
+// only absent identities inside the caller's transaction, never a publication.
+export async function ensureHomepageIdentity(client: SqlClient) {
+  await client.query("SELECT pg_advisory_xact_lock(hashtext('cms:seed:compiled:/'))");
+  let document = await client.query(
+    "SELECT id::text,kind,status FROM cms_documents WHERE canonical_slug='homepage' FOR UPDATE",
+  );
+  if (!document.rowCount) {
+    document = await client.query(
+      `INSERT INTO cms_documents(kind,canonical_slug,title,status)
+       VALUES ('landing-page','homepage','Homepage','active')
+       RETURNING id::text,kind,status`,
+    );
+  }
+  if (document.rowCount !== 1 || document.rows[0].kind !== "landing-page" || document.rows[0].status !== "active") {
+    throw new Error("Conflicting homepage document identity; preserving existing content.");
+  }
+  const documentId = document.rows[0].id;
+  const editions = await client.query(
+    `SELECT document_id::text,localized_slug FROM cms_market_editions
+      WHERE market='uae' AND locale='en'
+        AND (document_id=$1 OR localized_slug='homepage') FOR UPDATE`,
+    [documentId],
+  );
+  if (!editions.rowCount) {
+    await client.query(
+      `INSERT INTO cms_market_editions
+        (document_id,market,locale,localized_slug,publication_state,fallback_mode,parity_complete)
+       VALUES ($1,'uae','en','homepage','draft','none',false)`,
+      [documentId],
+    );
+  } else if (editions.rowCount !== 1 || editions.rows[0].document_id !== documentId || editions.rows[0].localized_slug !== "homepage") {
+    throw new Error("Conflicting UAE/English homepage route; preserving existing content.");
+  }
+}
+
 async function reconcileHomepage(
   client: SqlClient,
   actor: { id: string; email: string },
   generated: HomepageSnapshot,
   allowCreate: boolean,
 ) {
+  if (allowCreate) await ensureHomepageIdentity(client);
   const authority = await client.query(
     `SELECT d.id::text document_id,d.kind,d.canonical_slug,d.status document_status,
             e.id::text edition_id,e.market,e.locale,e.localized_slug,
@@ -441,7 +478,7 @@ async function reconcileHomepage(
         HOMEPAGE_SOURCE_KEY,
         requestDigest,
         generated,
-        migrationVisualSources(generated),
+        JSON.stringify(migrationVisualSources(generated)),
       ],
     );
   } else if (canonicalJson(compiledPayload) !== canonicalJson(generated)) {
@@ -457,7 +494,7 @@ async function reconcileHomepage(
         HOMEPAGE_SOURCE_KEY,
         requestDigest,
         generated,
-        migrationVisualSources(generated),
+        JSON.stringify(migrationVisualSources(generated)),
       ],
     );
   }

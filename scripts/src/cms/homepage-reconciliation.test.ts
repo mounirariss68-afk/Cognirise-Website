@@ -5,10 +5,44 @@ import { validateCmsSnapshot } from "@workspace/api-zod";
 import {
   HOMEPAGE_PATH,
   HOMEPAGE_SOURCE_KEY,
+  ensureHomepageIdentity,
   loadCompiledHomepage,
   overlayHomepageSlots,
   planHomepageDraftReconciliation,
 } from "./homepage-reconciliation.js";
+
+test("missing homepage identities are seeded as draft only and replay without writes", async () => {
+  let exists = false;
+  const writes: string[] = [];
+  const client = { query: async (sql: string) => {
+    if (sql.includes("pg_advisory")) return { rowCount: 1, rows: [{}] };
+    if (sql.startsWith("SELECT id::text")) return { rowCount: exists ? 1 : 0, rows: exists ? [{ id: "home", kind: "landing-page", status: "active" }] : [] };
+    if (sql.includes("INSERT INTO cms_documents")) {
+      writes.push(sql);
+      return { rowCount: 1, rows: [{ id: "home", kind: "landing-page", status: "active" }] };
+    }
+    if (sql.includes("SELECT document_id")) return { rowCount: exists ? 1 : 0, rows: exists ? [{ document_id: "home", localized_slug: "homepage" }] : [] };
+    if (sql.includes("INSERT INTO cms_market_editions")) {
+      writes.push(sql); exists = true;
+      return { rowCount: 1, rows: [] };
+    }
+    throw new Error(`Unexpected query: ${sql}`);
+  } };
+  await ensureHomepageIdentity(client);
+  assert.equal(writes.length, 2);
+  assert.match(writes[1], /'draft','none',false/);
+  await ensureHomepageIdentity(client);
+  assert.equal(writes.length, 2);
+});
+
+test("homepage identity seed refuses a route owned by another document", async () => {
+  await assert.rejects(ensureHomepageIdentity({ query: async (sql) => {
+    if (sql.includes("pg_advisory")) return { rowCount: 1, rows: [{}] };
+    if (sql.startsWith("SELECT id::text")) return { rowCount: 1, rows: [{ id: "home", kind: "landing-page", status: "active" }] };
+    if (sql.includes("SELECT document_id")) return { rowCount: 1, rows: [{ document_id: "other", localized_slug: "homepage" }] };
+    throw new Error("Unexpected write");
+  } }), /Conflicting UAE\/English homepage route/);
+});
 
 test("generated homepage authority is the root page and includes the Task 330 slots", async () => {
   const snapshot = await loadCompiledHomepage();
@@ -160,6 +194,7 @@ test("homepage reconciliation has no publication or regional broad-write path", 
   const source = await readFile(new URL("./homepage-reconciliation.ts", import.meta.url), "utf8");
   assert.match(source, /market='uae' AND e\.locale='en'/);
   assert.match(source, /INSERT INTO cms_revisions/);
+  assert.equal(source.match(/JSON\.stringify\(migrationVisualSources\(generated\)\)/g)?.length, 2);
   assert.match(source, /publishedRevisionId/);
   assert.doesNotMatch(source, /UPDATE cms_revisions|DELETE FROM cms_revisions/);
   assert.doesNotMatch(source, /SET[^;]*published_revision_id/);
