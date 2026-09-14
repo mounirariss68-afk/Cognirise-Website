@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { type Document, type MarketEdition } from "@workspace/api-client-react";
-import { Lock, Loader2, Check, AlertCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { DocumentMarketRow } from "./DocumentMarketRow";
 import type { AvailabilitySelectionDraft } from "./MarketAvailabilityChecklist";
+import { MarketStatusLegend } from "./market-status";
 
 type Props = {
   kind: string;
@@ -14,6 +14,7 @@ type Props = {
   markets: MarketEdition[];
   canManage: boolean;
   isAdministrator: boolean;
+  assignedMarketCodes?: string[];
   isLoading?: boolean;
   page?: number;
   pageSize?: number;
@@ -28,6 +29,7 @@ export function DocumentMarketMatrix({
   markets,
   canManage,
   isAdministrator,
+  assignedMarketCodes,
   isLoading = false,
   page = 1,
   pageSize = 20,
@@ -45,9 +47,12 @@ export function DocumentMarketMatrix({
     window.addEventListener("beforeunload", guard);
     return () => window.removeEventListener("beforeunload", guard);
   }, [hasUnsaved]);
-  const open = (documentId: string, market?: string, language?: string) => {
+  const open = (documentId: string, market?: string, language?: string, focus?: "editor" | "review" | "editions") => {
     if (hasUnsaved && !window.confirm("Availability changes have not finished saving. Leave this page?")) return;
-    setLocation(`/content/${documentId}${market ? `?market=${encodeURIComponent(market)}&locale=${encodeURIComponent(language || locale)}` : ""}`);
+    const query = market
+      ? `?market=${encodeURIComponent(market)}&locale=${encodeURIComponent(language || locale)}${focus ? `&focus=${focus}` : ""}`
+      : "";
+    setLocation(`/content/${documentId}${query}`);
   };
 
   return (
@@ -63,13 +68,7 @@ export function DocumentMarketMatrix({
             </select>
           </label>
           {hasUnsaved && <p role="status" className="mt-2 text-xs text-amber-800">Finish or retry the availability save before changing pages or language.</p>}
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground" aria-label="Availability legend">
-            <span className="flex items-center gap-1"><Badge variant="outline" className="text-[9px] uppercase h-4 px-1 rounded-sm">Shared</Badge> Inherits shared baseline</span>
-            <span className="flex items-center gap-1"><Badge variant="outline" className="text-[9px] uppercase h-4 px-1 rounded-sm bg-blue-500/10 text-blue-500 border-blue-500/20">Adapted</Badge> Local overrides</span>
-            <span className="flex items-center gap-1"><Badge variant="outline" className="text-[9px] uppercase h-4 px-1 rounded-sm bg-amber-500/10 text-amber-500 border-amber-500/20">Indep</Badge> Independent branch</span>
-            <span className="flex items-center gap-1"><Check className="w-3 h-3 text-emerald-500" /> Live</span>
-            <span className="flex items-center gap-1"><AlertCircle className="w-3 h-3 text-amber-500" /> Pending</span>
-          </div>
+          <MarketStatusLegend />
         </div>
       </div>
       
@@ -101,9 +100,10 @@ export function DocumentMarketMatrix({
             ) : (
               documents.map((doc) => (
                 <DocumentMarketRow key={doc.id} document={doc} markets={markets} locale={locale}
-                  canManage={canManage} isAdministrator={isAdministrator} draft={drafts[doc.id]}
+                  canManageMarket={(market) => canManage && (isAdministrator || Boolean(assignedMarketCodes?.includes(market)))}
+                  isAdministrator={isAdministrator} draft={drafts[doc.id]}
                   onDraftChange={(draft) => setDrafts((previous) => ({ ...previous, [doc.id]: draft }))}
-                  onOpen={(market, language) => open(doc.id, market, language)} />
+                  onOpen={(market, language, focus) => open(doc.id, market, language, focus)} />
               ))
             )}
           </TableBody>

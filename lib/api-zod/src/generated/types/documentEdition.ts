@@ -5,6 +5,7 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { DocumentEditionReadinessIssue } from './documentEditionReadinessIssue';
 
 export interface DocumentEdition {
   market: string;
@@ -33,6 +34,9 @@ export interface DocumentEdition {
   effectiveRevisionId: string | null;
   /** @nullable */
   effectiveRevisionNumber: number | null;
+  /** True only when this market/locale resolves an approved, currently published effective revision. Combine with staged availability to display Live. */
+  hasEffectivePublishedRevision: boolean;
   ready: boolean;
   readinessErrors: string[];
+  readinessIssues: DocumentEditionReadinessIssue[];
 }

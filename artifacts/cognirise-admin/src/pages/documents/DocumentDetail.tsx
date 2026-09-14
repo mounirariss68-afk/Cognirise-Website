@@ -521,6 +521,10 @@ export default function DocumentDetail() {
   }, [search]);
   const requestedSharedSource = requestedUrlTarget?.marketParam === "shared-source"
     && requestedUrlTarget.localeParam === "und";
+  const requestedFocus = useMemo<"editor" | "review" | "editions" | undefined>(() => {
+    const focus = new URLSearchParams(search).get("focus");
+    return focus === "editor" || focus === "review" || focus === "editions" ? focus : undefined;
+  }, [search]);
   const urlTargetAwaitingCatalogues = Boolean(requestedUrlTarget && !requestedSharedSource && (
     isMarketDataLoading || !marketData || isEditionMatrixLoading || !editionMatrix
   ));
@@ -553,6 +557,23 @@ export default function DocumentDetail() {
     setSelectedMarket(requestedExactEdition.market);
     setSelectedLocale(requestedExactEdition.locale);
   }, [requestedExactEdition, selectedMarket]);
+  useEffect(() => {
+    // Matrix deep links are explicit workflow instructions. Do not select a
+    // tab until both catalogues verified the market address and the exact
+    // document has loaded; otherwise a stale shared/default response could
+    // put the reviewer in controls for another edition.
+    if (!requestedFocus || urlTargetAwaitingCatalogues || !requestedExactEdition || !doc
+      || selectedMarket !== requestedExactEdition.market || selectedLocale !== requestedExactEdition.locale) return;
+    const targetId = requestedFocus === "review" ? "review-controls"
+      : requestedFocus === "editions" ? "edition-controls"
+        : "document-title";
+    setActiveSideTab(requestedFocus === "editions" ? "editions" : "metadata");
+    requestAnimationFrame(() => {
+      const target = document.getElementById(targetId);
+      target?.focus({ preventScroll: true });
+      target?.scrollIntoView({ block: "nearest" });
+    });
+  }, [doc, requestedExactEdition, requestedFocus, selectedLocale, selectedMarket, urlTargetAwaitingCatalogues]);
   const destinations = useMemo<AvailabilityDestination[]>(
     () => (marketData?.items ?? [])
       .filter((market) => market.enabled)
@@ -1294,17 +1315,23 @@ export default function DocumentDetail() {
     return navigationOnlyState(`Loading ${selectedMarket.toUpperCase()} · ${selectedLocale}…`, true);
   }
   if (isDocumentError) {
-    return navigationOnlyState(`This edition could not be loaded. ${(documentError as any)?.error ?? (documentError as Error)?.message ?? ""}`);
+    const status = (documentError as { status?: number })?.status;
+    return navigationOnlyState(
+      status === 403
+        ? "You do not have permission to open this edition. No other market was opened; return to content to choose an edition assigned to you."
+        : `This edition could not be loaded. ${(documentError as any)?.error ?? (documentError as Error)?.message ?? ""}`,
+    );
   }
   if (!doc) {
     if (!sharedSource && (isAdministrator || legacyCustomizations.length)) {
       return navigationOnlyState(
-        "No shared source is configured for this legacy document. Existing customizations remain editable; an administrator must choose a shared source before shared content or destinations can be changed.",
+        "No explicit shared source is configured. This does not make independent market editions legacy: existing exact editions remain valid and editable. An administrator may select a historical source only when shared content or shared destinations are needed.",
         false,
         <div className="mt-6 space-y-2 border-t pt-4 text-left">
           {isAdministrator && (
             <div className="space-y-2 rounded-md border border-amber-300 bg-amber-50 p-3">
-              <Label htmlFor="legacy-shared-source" className="text-xs font-semibold">Create a shared source from an exact historical revision</Label>
+              <Label htmlFor="legacy-shared-source" className="text-xs font-semibold">Explicitly select a shared source from a historical revision</Label>
+              <p className="text-[10px] text-amber-900">This is source selection, not neutral-baseline setup. Open any exact edition and use Shared edition → Save neutral baseline when a baseline is deliberately required.</p>
               <select
                 id="legacy-shared-source"
                 className="w-full rounded border bg-background p-2 text-xs"
@@ -1327,7 +1354,7 @@ export default function DocumentDetail() {
                 onClick={selectLegacySharedSource}
               >
                 {selectAvailabilitySource.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-                Create shared source
+                Create a shared source from an exact historical revision
               </Button>
             </div>
           )}
@@ -2154,7 +2181,7 @@ export default function DocumentDetail() {
                   )}
                 </div>
               </div>
-              <div className="space-y-3 border-t pt-4">
+              <div id="review-controls" tabIndex={-1} className="space-y-3 border-t pt-4">
                 <div>
                   <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Review comments</label>
                   <p className="mt-1 text-xs text-muted-foreground">Comments attach to the selected {selectedMarket.toUpperCase()} revision.</p>
@@ -2212,7 +2239,7 @@ export default function DocumentDetail() {
               </div>
             </TabsContent>
 
-             <TabsContent value="editions" className="mt-0 flex-1 space-y-4 overflow-visible p-4 md:overflow-y-auto">
+              <TabsContent value="editions" id="edition-controls" tabIndex={-1} className="mt-0 flex-1 space-y-4 overflow-visible p-4 md:overflow-y-auto">
               <div>
                 <h3 className="text-sm font-semibold">Show this content in</h3>
                 <p className="mt-1 text-xs text-muted-foreground">Destination changes are saved for review. They do not change the live website until the reviewed snapshot is published.</p>

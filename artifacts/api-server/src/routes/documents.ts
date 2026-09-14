@@ -55,7 +55,10 @@ import {
   publicPayloadEligibilityClause,
   type AvailabilityDecision,
 } from "../lib/availability";
-import { registerSharedMarketEditionRoutes } from "../lib/shared-market-editions";
+import {
+  registerSharedMarketEditionRoutes,
+  savedRevisionReadiness,
+} from "../lib/shared-market-editions";
 import {
   assertManagedMarketPublication,
   ensureManagedMarketRevision,
@@ -79,6 +82,8 @@ function canAccessMarket(auth: AuthContext, market: string): boolean {
 
 registerSharedMarketEditionRoutes(router, {
   canAccessMarket,
+  canAccessEditionTarget,
+  revisionMediaGovernanceErrors,
   requireEditor,
   requireAdministrator,
   requireCsrf,
@@ -1238,10 +1243,40 @@ router.get(
             break;
           }
         }
-        const readinessPayload = exact?.payload;
-        const readiness = readinessPayload
-          ? validateSnapshot(document.rows[0].kind, readinessPayload, "publish")
-          : { success: false as const, errors: ["No exact edition exists."] };
+        let readiness = exact?.payload
+          ? savedRevisionReadiness(document.rows[0].kind, exact.payload, exact.workflow_state)
+          : {
+            ready: false,
+            readinessErrors: ["No exact edition exists."],
+            readinessIssues: [{
+              category: "missing" as const,
+              message: "No exact edition exists.",
+              action: "create" as const,
+            }],
+          };
+        if (exact?.payload && exact.revision_id) {
+          const mediaErrors = await revisionMediaGovernanceErrors(
+            pool,
+            documentId,
+            String(exact.revision_id),
+            document.rows[0].kind as CmsDocumentKind,
+            exact.payload as Record<string, any>,
+          );
+          if (mediaErrors.length) {
+            readiness = {
+              ready: false,
+              readinessErrors: [...readiness.readinessErrors, ...mediaErrors],
+              readinessIssues: [
+                ...readiness.readinessIssues,
+                ...mediaErrors.map((message) => ({
+                  category: "validation" as const,
+                  message,
+                  action: "edit" as const,
+                })),
+              ],
+            };
+          }
+        }
         items.push({
           market: target.code,
           locale: targetLocale,
@@ -1260,8 +1295,10 @@ router.get(
           effectiveWorkflowState: effective?.workflow_state ?? null,
           effectiveRevisionId: effective?.revision_id ? String(effective.revision_id) : null,
           effectiveRevisionNumber: effective?.revision_number ?? null,
-          ready: readiness.success,
-          readinessErrors: readiness.success ? [] : readiness.errors,
+          hasEffectivePublishedRevision: Boolean(effective?.revision_id),
+          ready: readiness.ready,
+          readinessErrors: readiness.readinessErrors,
+          readinessIssues: readiness.readinessIssues,
         });
       }
     }

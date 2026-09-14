@@ -1358,6 +1358,376 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       published_revision_id: crossSourceFixture.rows[0]?.materialized_revision_id,
       revision_count: crossSourceFixture.rows[0]?.revision_count,
     });
+
+    // Task 329's explicit geo-copy route must be independent from the older
+    // shared-source customization operation: it copies a named exact revision
+    // into a missing configured target without moving, approving, or publishing
+    // either edition.
+    const kuwaitMarketId = randomUUID();
+    await admin.query(
+      `INSERT INTO market_editions
+         (id,code,display_name,default_locale,fallback_market_code,fallback_locale,enabled,is_canonical)
+       VALUES ($1,'kuwait','kuwait','en','uae','en',true,false)`,
+      [kuwaitMarketId],
+    );
+    const publicBeforeGeoCopy = await json<{ items: Array<{ title: string }> }>(
+      await fetch(`${origin}/api/public/content?market=kuwait&locale=en&kind=publication`),
+      200,
+      "Kuwait fallback before an unpublished geo copy",
+    );
+    const latestSaudi = await admin.query<{
+      id: string; revision_number: number; workflow_state: string; publication_state: string;
+      published_revision_id: string | null; market: string; locale: string;
+    }>(
+      `SELECT revision.id::text,revision.revision_number,revision.workflow_state,
+              edition.publication_state,edition.published_revision_id::text,edition.market,edition.locale
+         FROM cms_revisions revision
+         JOIN cms_market_editions edition ON edition.id=revision.edition_id
+        WHERE edition.document_id=$1 AND edition.market='ksa' AND edition.locale='en'
+        ORDER BY revision.revision_number DESC,revision.created_at DESC,revision.id DESC LIMIT 1`,
+      [documentId],
+    );
+    assert.ok(latestSaudi.rows[0]);
+    const copyCandidates = await json<{
+      candidates: Array<{ revisionId: string; market: string; locale: string; workflowState: string;
+        publicationState: string; readinessIssues: Array<{ category: string }> }>;
+    }>(
+      await request(`/api/documents/${documentId}/market-copy-candidates/kuwait/en`, "GET", undefined),
+      200,
+      "authorized same-locale geo copy candidates",
+    );
+    const saudiCandidate = copyCandidates.candidates.find((candidate) => candidate.revisionId === latestSaudi.rows[0]?.id);
+    assert.deepEqual(
+      {
+        revisionId: saudiCandidate?.revisionId,
+        market: saudiCandidate?.market,
+        locale: saudiCandidate?.locale,
+        workflowState: saudiCandidate?.workflowState,
+        publicationState: saudiCandidate?.publicationState,
+      },
+      {
+        revisionId: latestSaudi.rows[0]?.id,
+        market: "ksa",
+        locale: "en",
+        workflowState: latestSaudi.rows[0]?.workflow_state,
+        publicationState: "saved",
+      },
+      "candidate identity and saved/published state are explicit",
+    );
+    assert.ok(
+      saudiCandidate?.readinessIssues.some((issue) => issue.category === "workflow"),
+      "saved revision readiness distinguishes the approval requirement from content validation",
+    );
+    const sourceBeforeCopy = await admin.query<{
+      published_revision_id: string | null; publication_state: string; revision_count: string;
+    }>(
+      `SELECT edition.published_revision_id::text,edition.publication_state,
+              count(revision.*)::text revision_count
+         FROM cms_market_editions edition
+         JOIN cms_revisions revision ON revision.edition_id=edition.id
+        WHERE edition.document_id=$1 AND edition.market='ksa' AND edition.locale='en'
+        GROUP BY edition.id`,
+      [documentId],
+    );
+    const copied = await json<{
+      editionId: string; revisionId: string; revisionNumber: number; market: string; locale: string;
+      sourceRevisionId: string; sourceMarket: string; sourceLocale: string; replayed: boolean;
+    }>(
+      await request(`/api/documents/${documentId}/market-edition-copies`, "POST", {
+        destinationMarketEditionId: kuwaitMarketId,
+        destinationLocale: "en",
+        sourceRevisionId: latestSaudi.rows[0]?.id,
+        expectedSourceRevisionId: latestSaudi.rows[0]?.id,
+      }),
+      201,
+      "copy an explicit exact Saudi revision to missing Kuwait",
+    );
+    assert.deepEqual(
+      {
+        market: copied.market, locale: copied.locale, sourceRevisionId: copied.sourceRevisionId,
+        sourceMarket: copied.sourceMarket, sourceLocale: copied.sourceLocale, replayed: copied.replayed,
+      },
+      {
+        market: "kuwait", locale: "en", sourceRevisionId: latestSaudi.rows[0]?.id,
+        sourceMarket: "ksa", sourceLocale: "en", replayed: false,
+      },
+    );
+    const copiedState = await admin.query<{
+      publication_state: string; published_revision_id: string | null; workflow_state: string;
+    }>(
+      `SELECT edition.publication_state,edition.published_revision_id::text,revision.workflow_state
+         FROM cms_market_editions edition JOIN cms_revisions revision ON revision.id=$2
+        WHERE edition.id=$1`,
+      [copied.editionId, copied.revisionId],
+    );
+    assert.deepEqual(copiedState.rows[0], {
+      publication_state: "draft",
+      published_revision_id: null,
+      workflow_state: "draft",
+    }, "a copied destination is editable and unpublished without inheriting approval");
+    const publicAfterGeoCopy = await json<{ items: Array<{ title: string }> }>(
+      await fetch(`${origin}/api/public/content?market=kuwait&locale=en&kind=publication`),
+      200,
+      "Kuwait fallback after an unpublished geo copy",
+    );
+    assert.deepEqual(
+      publicAfterGeoCopy.items,
+      publicBeforeGeoCopy.items,
+      "an unpublished copied draft cannot change effective public delivery",
+    );
+    const copiedPins = await admin.query<{ asset_id: string; media_version_id: string }>(
+      `SELECT asset_id::text,media_version_id::text FROM cms_media_references
+        WHERE document_id=$1 AND field_path=$2 ORDER BY asset_id,media_version_id`,
+      [documentId, `revision:${copied.revisionId}`],
+    );
+    const sourcePins = await admin.query<{ asset_id: string; media_version_id: string }>(
+      `SELECT asset_id::text,media_version_id::text FROM cms_media_references
+        WHERE document_id=$1 AND field_path=$2 ORDER BY asset_id,media_version_id`,
+      [documentId, `revision:${latestSaudi.rows[0]?.id}`],
+    );
+    assert.deepEqual(copiedPins.rows, sourcePins.rows, "copy preserves exact immutable media pins");
+    const replayed = await json<{ revisionId: string; replayed: boolean }>(
+      await request(`/api/documents/${documentId}/market-edition-copies`, "POST", {
+        destinationMarketEditionId: kuwaitMarketId,
+        destinationLocale: "en",
+        sourceRevisionId: latestSaudi.rows[0]?.id,
+        expectedSourceRevisionId: latestSaudi.rows[0]?.id,
+      }),
+      200,
+      "safe copy retry",
+    );
+    assert.equal(replayed.revisionId, copied.revisionId);
+    assert.equal(replayed.replayed, true);
+    assert.equal(replayed.market, copied.market);
+    assert.equal(replayed.locale, copied.locale);
+    const sourceAfterCopy = await admin.query<{
+      published_revision_id: string | null; publication_state: string; revision_count: string;
+    }>(
+      `SELECT edition.published_revision_id::text,edition.publication_state,
+              count(revision.*)::text revision_count
+         FROM cms_market_editions edition
+         JOIN cms_revisions revision ON revision.edition_id=edition.id
+        WHERE edition.document_id=$1 AND edition.market='ksa' AND edition.locale='en'
+        GROUP BY edition.id`,
+      [documentId],
+    );
+    assert.deepEqual(sourceAfterCopy.rows[0], sourceBeforeCopy.rows[0], "copy leaves source delivery and history unchanged");
+    const jordanMarketId = randomUUID();
+    await admin.query(
+      `INSERT INTO market_editions
+         (id,code,display_name,default_locale,fallback_market_code,fallback_locale,enabled,is_canonical)
+       VALUES ($1,'jordan','jordan','en','uae','en',true,false)`,
+      [jordanMarketId],
+    );
+    const publishedSourceCandidates = await json<{
+      candidates: Array<{ revisionId: string; market: string; publicationState: string; publishedRevisionId: string | null }>;
+    }>(
+      await request(`/api/documents/${documentId}/market-copy-candidates/jordan/en`, "GET", undefined),
+      200,
+      "both saved and published source candidates",
+    );
+    const uaeCandidates = publishedSourceCandidates.candidates.filter((candidate) => candidate.market === "uae");
+    assert.ok(
+      uaeCandidates.some((candidate) => candidate.revisionId === sourceRevisionId
+        && candidate.publicationState === "published"
+        && candidate.publishedRevisionId === sourceRevisionId),
+      "a published source remains an explicit candidate when a newer saved revision exists",
+    );
+    assert.ok(
+      uaeCandidates.some((candidate) => candidate.revisionId !== sourceRevisionId
+        && candidate.publicationState === "saved"
+        && candidate.publishedRevisionId === sourceRevisionId),
+      "a draft successor is truthfully labelled saved rather than Published",
+    );
+    assert.ok(
+      !publishedSourceCandidates.candidates.some((candidate) => candidate.revisionId === sharedSourceRevisionId),
+      "legacy shared-source storage is never offered as a geo copy candidate",
+    );
+    await admin.query("DELETE FROM cms_user_market_assignments WHERE user_id=$1", [editorId]);
+    await admin.query(
+      "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,'ksa'),($1,'jordan')",
+      [editorId],
+    );
+    const inheritedSourceCandidates = await json<{
+      candidates: Array<{ revisionId: string }>;
+    }>(
+      await request(
+        `/api/documents/${documentId}/market-copy-candidates/jordan/en`,
+        "GET",
+        undefined,
+        headersFor(editorToken),
+      ),
+      200,
+      "managed source candidates honor inherited authority",
+    );
+    assert.ok(
+      !inheritedSourceCandidates.candidates.some((candidate) => candidate.revisionId === latestSaudi.rows[0]?.id),
+      "a destination/source-market editor cannot inspect a managed revision without its inherited baseline source",
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/market-edition-copies`, "POST", {
+        destinationMarketEditionId: jordanMarketId,
+        destinationLocale: "en",
+        sourceRevisionId: latestSaudi.rows[0]?.id,
+        expectedSourceRevisionId: latestSaudi.rows[0]?.id,
+      }, headersFor(editorToken))).status,
+      403,
+      "copy fails closed when the managed source revision's immutable baseline authority is absent",
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/market-edition-copies`, "POST", {
+        destinationMarketEditionId: jordanMarketId,
+        destinationLocale: "en",
+        sourceRevisionId: sharedSourceRevisionId,
+        expectedSourceRevisionId: sharedSourceRevisionId,
+      })).status,
+      404,
+      "legacy shared-source storage cannot be copied through the geo-copy route",
+    );
+    const copyRacePool = new PoolConstructor({
+      connectionString: withSearchPath(originalDatabaseUrl, schema),
+    });
+    const copyRaceLock = await copyRacePool.connect();
+    try {
+      await copyRaceLock.query("BEGIN");
+      await copyRaceLock.query("SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE", [documentId]);
+      const copyBody = {
+        destinationMarketEditionId: jordanMarketId,
+        destinationLocale: "en",
+        sourceRevisionId,
+        expectedSourceRevisionId: sourceRevisionId,
+      };
+      const firstCopy = request(`/api/documents/${documentId}/market-edition-copies`, "POST", copyBody);
+      const secondCopy = request(`/api/documents/${documentId}/market-edition-copies`, "POST", copyBody);
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      await copyRaceLock.query("COMMIT");
+      const copyResponses = await Promise.all([firstCopy, secondCopy]);
+      assert.deepEqual(
+        copyResponses.map((response) => response.status).sort(),
+        [200, 201],
+        "concurrent duplicate copy submissions create one destination and recover the other request safely",
+      );
+    } finally {
+      await copyRaceLock.query("ROLLBACK").catch(() => undefined);
+      copyRaceLock.release();
+      await copyRacePool.end();
+    }
+    const concurrentCopies = await admin.query<{ edition_count: string; revision_count: string; audit_count: string }>(
+      `SELECT
+         (SELECT count(*)::text FROM cms_market_editions
+           WHERE document_id=$1 AND market='jordan' AND locale='en') edition_count,
+         (SELECT count(*)::text FROM cms_revisions revision
+           JOIN cms_market_editions edition ON edition.id=revision.edition_id
+           WHERE edition.document_id=$1 AND edition.market='jordan' AND edition.locale='en') revision_count,
+         (SELECT count(*)::text FROM cms_audit_events
+           WHERE target_id=$1::text AND action='document.market_edition_copied'
+             AND metadata->>'destinationMarket'='jordan'
+             AND metadata->>'destinationLocale'='en') audit_count`,
+      [documentId],
+    );
+    assert.deepEqual(concurrentCopies.rows[0], {
+      edition_count: "1",
+      revision_count: "1",
+      audit_count: "1",
+    }, "concurrent retries retain one Jordan draft and one Jordan audit receipt");
+    const jordanCopied = await admin.query<{ edition_id: string; revision_id: string }>(
+      `SELECT edition.id::text edition_id,revision.id::text revision_id
+         FROM cms_market_editions edition
+         JOIN cms_revisions revision ON revision.edition_id=edition.id
+        WHERE edition.document_id=$1 AND edition.market='jordan' AND edition.locale='en'
+        ORDER BY revision.revision_number DESC LIMIT 1`,
+      [documentId],
+    );
+    await admin.query(
+      `UPDATE cms_revisions SET workflow_state='approved' WHERE id=$1`,
+      [jordanCopied.rows[0]?.revision_id],
+    );
+    await admin.query(
+      `UPDATE cms_market_editions
+          SET publication_state='published',published_revision_id=$2,published_at=now()
+        WHERE id=$1`,
+      [jordanCopied.rows[0]?.edition_id, jordanCopied.rows[0]?.revision_id],
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/market-edition-copies`, "POST", {
+        destinationMarketEditionId: jordanMarketId,
+        destinationLocale: "en",
+        sourceRevisionId,
+        expectedSourceRevisionId: sourceRevisionId,
+      })).status,
+      409,
+      "a retry cannot reuse a copy receipt after the target draft has been reviewed or published",
+    );
+    const lebanonMarketId = randomUUID();
+    const lebanonEditionId = randomUUID();
+    const lebanonRevisionId = randomUUID();
+    await admin.query(
+      `INSERT INTO market_editions
+         (id,code,display_name,default_locale,fallback_market_code,fallback_locale,enabled,is_canonical)
+       VALUES ($1,'lebanon','lebanon','en','uae','en',true,false)`,
+      [lebanonMarketId],
+    );
+    await admin.query(
+      `INSERT INTO cms_market_editions
+         (id,document_id,market,locale,publication_state,content_mode,customized_from_revision_id)
+       VALUES ($1,$2,'lebanon','en','draft','custom',$3)`,
+      [lebanonEditionId, documentId, sourceRevisionId],
+    );
+    await admin.query(
+      `INSERT INTO cms_revisions
+         (id,edition_id,revision_number,payload,content_digest,workflow_state,created_by_user_id,reason,source_revision_id)
+       SELECT $1,$2,1,payload,'task329-unreceipted-lineage','draft',$3,
+              'Fixture sharing lineage without a copy receipt',$4
+         FROM cms_revisions WHERE id=$4`,
+      [lebanonRevisionId, lebanonEditionId, administratorId, sourceRevisionId],
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/market-edition-copies`, "POST", {
+        destinationMarketEditionId: lebanonMarketId,
+        destinationLocale: "en",
+        sourceRevisionId,
+        expectedSourceRevisionId: sourceRevisionId,
+      })).status,
+      409,
+      "a source lineage on an unrelated target cannot impersonate this target's immutable copy receipt",
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/market-edition-copies`, "POST", {
+        destinationMarketEditionId: kuwaitMarketId,
+        destinationLocale: "en",
+        sourceRevisionId: arabicSourceRevisionId,
+        expectedSourceRevisionId: arabicSourceRevisionId,
+      })).status,
+      409,
+      "incompatible source and destination locales cannot be copied",
+    );
+    await admin.query(
+      `INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,'kuwait')
+       ON CONFLICT DO NOTHING`,
+      [editorId],
+    );
+    await admin.query(
+      "DELETE FROM cms_user_market_assignments WHERE user_id=$1 AND market_code='ksa'",
+      [editorId],
+    );
+    assert.equal(
+      (await request(`/api/documents/${documentId}/market-edition-copies`, "POST", {
+        destinationMarketEditionId: kuwaitMarketId,
+        destinationLocale: "en",
+        sourceRevisionId: latestSaudi.rows[0]?.id,
+        expectedSourceRevisionId: latestSaudi.rows[0]?.id,
+      }, headersFor(editorToken))).status,
+      403,
+      "copy authorizes the selected exact historical source market, not a current binding alone",
+    );
+    const copyAudits = await admin.query<{ count: string }>(
+      `SELECT count(*)::text count FROM cms_audit_events
+        WHERE target_id=$1::text AND action='document.market_edition_copied'
+          AND metadata->>'destinationMarket'='kuwait'
+          AND metadata->>'destinationLocale'='en'`,
+      [documentId],
+    );
+    assert.equal(copyAudits.rows[0]?.count, "1", "safe retry does not create another copy audit event");
   } finally {
     if (server) {
       await new Promise<void>((resolve, reject) =>

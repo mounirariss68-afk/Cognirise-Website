@@ -280,6 +280,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
            markets={enabledMarkets}
            canManage={canManageAvailability}
            isAdministrator={session?.user?.role === "administrator"}
+            assignedMarketCodes={session?.user?.marketCodes}
            isLoading={isLoading}
            page={page}
            pageSize={20}

@@ -1053,6 +1053,79 @@ export interface SharedMarketMigrationReport {
   notes: string[];
 }
 
+export type DocumentEditionReadinessIssueCategory = typeof DocumentEditionReadinessIssueCategory[keyof typeof DocumentEditionReadinessIssueCategory];
+
+
+export const DocumentEditionReadinessIssueCategory = {
+  missing: 'missing',
+  validation: 'validation',
+  workflow: 'workflow',
+} as const;
+
+export type DocumentEditionReadinessIssueAction = typeof DocumentEditionReadinessIssueAction[keyof typeof DocumentEditionReadinessIssueAction];
+
+
+export const DocumentEditionReadinessIssueAction = {
+  create: 'create',
+  edit: 'edit',
+  review: 'review',
+} as const;
+
+export interface DocumentEditionReadinessIssue {
+  category: DocumentEditionReadinessIssueCategory;
+  message: string;
+  action: DocumentEditionReadinessIssueAction;
+}
+
+export interface DocumentMarketCopyCandidate {
+  editionId: string;
+  market: string;
+  locale: string;
+  revisionId: string;
+  /** @minimum 1 */
+  revisionNumber: number;
+  workflowState: string;
+  publicationState: string;
+  /** @nullable */
+  publishedRevisionId: string | null;
+  ready: boolean;
+  readinessErrors: string[];
+  readinessIssues: DocumentEditionReadinessIssue[];
+}
+
+export interface DocumentMarketCopyCandidates {
+  documentId: string;
+  targetMarket: string;
+  targetLocale: string;
+  candidates: DocumentMarketCopyCandidate[];
+}
+
+export interface DocumentMarketEditionCopyInput {
+  destinationMarketEditionId: string;
+  /** @pattern ^[a-z]{2}(?:-[A-Z]{2})?$ */
+  destinationLocale: string;
+  /** Exact saved source revision selected from market-copy-candidates. */
+  sourceRevisionId: string;
+  /** Must equal sourceRevisionId; protects the selected candidate from stale/replayed form submissions. */
+  expectedSourceRevisionId: string;
+}
+
+export interface DocumentMarketEditionCopy {
+  documentId: string;
+  editionId: string;
+  revisionId: string;
+  /** @minimum 1 */
+  revisionNumber: number;
+  market: string;
+  locale: string;
+  sourceRevisionId: string;
+  sourceMarket: string;
+  sourceLocale: string;
+  sourceWorkflowState: string;
+  sourcePublicationState: string;
+  replayed: boolean;
+}
+
 export type CmsImmutableMediaReferenceRole = typeof CmsImmutableMediaReferenceRole[keyof typeof CmsImmutableMediaReferenceRole];
 
 
@@ -2101,8 +2174,11 @@ export interface DocumentEdition {
   effectiveRevisionId: string | null;
   /** @nullable */
   effectiveRevisionNumber: number | null;
+  /** True only when this market/locale resolves an approved, currently published effective revision. Combine with staged availability to display Live. */
+  hasEffectivePublishedRevision: boolean;
   ready: boolean;
   readinessErrors: string[];
+  readinessIssues: DocumentEditionReadinessIssue[];
 }
 
 export interface DocumentEditionMatrix {

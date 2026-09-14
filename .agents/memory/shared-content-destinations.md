@@ -15,6 +15,12 @@ Never infer a shared source from equal regional payloads or choose an arbitrary 
 
 **How to apply:** Preserve historical regional versions and publication pointers; use an explicit administrator choice to create a separate unpublished shared source when the legacy source is ambiguous.
 
+Keep explicit geo copying separate from shared-source customization, and identify retries from a creation receipt rather than source lineage alone.
+
+**Why:** Shared customization may relocate source ownership, while geo copying must not. Different operations can share the same source revision; that alone does not prove an existing destination is the unchanged draft from a retried copy.
+
+**How to apply:** Copy only a deliberately selected saved or published revision, retain its immutable source permissions and media pins, and require a matching receipt plus unchanged unpublished draft state for replay.
+
 Separate secure defaults for new destinations from historical availability reconstruction.
 
 **Why:** A new destination must remain private until an approved release, but applying that default to legacy-baseline inserts can silently remove previously published content. Schema synchronization may also apply new defaults before historical reconciliation runs.

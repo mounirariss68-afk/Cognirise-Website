@@ -1221,6 +1221,86 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SharedMarketMigrationReport"
+  /documents/{documentId}/market-copy-candidates/{targetMarket}/{targetLocale}:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+      - name: targetMarket
+        in: path
+        required: true
+        schema: { type: string, minLength: 1 }
+      - name: targetLocale
+        in: path
+        required: true
+        schema: { type: string, pattern: '^[a-z]{2}(?:-[A-Z]{2})?$' }
+    get:
+      operationId: getDocumentMarketCopyCandidates
+      tags: [documents]
+      summary: List authorized, same-locale saved geo revisions that can explicitly seed a missing market edition
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Explicit copy candidates; no source is selected automatically
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentMarketCopyCandidates"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /documents/{documentId}/market-edition-copies:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    post:
+      operationId: copyDocumentMarketEdition
+      tags: [documents]
+      summary: Copy one explicitly selected same-document geo revision into a missing destination as an unpublished draft
+      description: The operation preserves the source revision and immutable media pins. It cannot relocate a source, copy approval, publish, or overwrite an existing destination. Retrying the same successful request returns the prior draft safely.
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentMarketEditionCopyInput"
+      responses:
+        "201":
+          description: Editable unpublished destination draft created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentMarketEditionCopy"
+        "200":
+          description: Prior matching copy returned after a safe retry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentMarketEditionCopy"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          description: The selected saved source fails the destination draft contract or immutable media pin validation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
   /documents/{documentId}/market-availability:
     parameters:
       - $ref: "#/components/parameters/DocumentId"
@@ -3596,6 +3676,75 @@ components:
         receiptId: { type: ["string", "null"] }
         candidates: { type: array, items: { type: object, additionalProperties: true } }
         notes: { type: array, items: { type: string } }
+    DocumentEditionReadinessIssue:
+      type: object
+      additionalProperties: false
+      required: [category, message, action]
+      properties:
+        category:
+          type: string
+          enum: [missing, validation, workflow]
+        message: { type: string }
+        action:
+          type: string
+          enum: [create, edit, review]
+    DocumentMarketCopyCandidate:
+      type: object
+      additionalProperties: false
+      required: [editionId, market, locale, revisionId, revisionNumber, workflowState, publicationState, publishedRevisionId, ready, readinessErrors, readinessIssues]
+      properties:
+        editionId: { type: string }
+        market: { type: string }
+        locale: { type: string }
+        revisionId: { type: string }
+        revisionNumber: { type: number, multipleOf: 1, minimum: 1 }
+        workflowState: { type: string }
+        publicationState: { type: string }
+        publishedRevisionId: { type: ["string", "null"] }
+        ready: { type: boolean }
+        readinessErrors:
+          type: array
+          items: { type: string }
+        readinessIssues:
+          type: array
+          items: { $ref: "#/components/schemas/DocumentEditionReadinessIssue" }
+    DocumentMarketCopyCandidates:
+      type: object
+      additionalProperties: false
+      required: [documentId, targetMarket, targetLocale, candidates]
+      properties:
+        documentId: { type: string }
+        targetMarket: { type: string }
+        targetLocale: { type: string }
+        candidates:
+          type: array
+          items: { $ref: "#/components/schemas/DocumentMarketCopyCandidate" }
+    DocumentMarketEditionCopyInput:
+      type: object
+      additionalProperties: false
+      required: [destinationMarketEditionId, destinationLocale, sourceRevisionId, expectedSourceRevisionId]
+      properties:
+        destinationMarketEditionId: { type: string }
+        destinationLocale: { type: string, pattern: '^[a-z]{2}(?:-[A-Z]{2})?$' }
+        sourceRevisionId: { type: string, description: Exact saved source revision selected from market-copy-candidates. }
+        expectedSourceRevisionId: { type: string, description: Must equal sourceRevisionId; protects the selected candidate from stale/replayed form submissions. }
+    DocumentMarketEditionCopy:
+      type: object
+      additionalProperties: false
+      required: [documentId, editionId, revisionId, revisionNumber, market, locale, sourceRevisionId, sourceMarket, sourceLocale, sourceWorkflowState, sourcePublicationState, replayed]
+      properties:
+        documentId: { type: string }
+        editionId: { type: string }
+        revisionId: { type: string }
+        revisionNumber: { type: number, multipleOf: 1, minimum: 1 }
+        market: { type: string }
+        locale: { type: string }
+        sourceRevisionId: { type: string }
+        sourceMarket: { type: string }
+        sourceLocale: { type: string }
+        sourceWorkflowState: { type: string }
+        sourcePublicationState: { type: string }
+        replayed: { type: boolean }
     CmsImmutableMediaReference:
       type: object
       additionalProperties: false
@@ -4267,7 +4416,7 @@ components:
     DocumentEdition:
       type: object
       additionalProperties: false
-      required: [market, locale, exact, effectiveMarket, effectiveLocale, usedFallback, fallbackReason, publicationState, workflowState, revisionId, revisionNumber, effectivePublicationState, effectiveWorkflowState, effectiveRevisionId, effectiveRevisionNumber, ready, readinessErrors]
+      required: [market, locale, exact, effectiveMarket, effectiveLocale, usedFallback, fallbackReason, publicationState, workflowState, revisionId, revisionNumber, effectivePublicationState, effectiveWorkflowState, effectiveRevisionId, effectiveRevisionNumber, hasEffectivePublishedRevision, ready, readinessErrors, readinessIssues]
       properties:
         market: { type: string }
         locale: { type: string }
@@ -4284,10 +4433,16 @@ components:
         effectiveWorkflowState: { type: ["string", "null"] }
         effectiveRevisionId: { type: ["string", "null"] }
         effectiveRevisionNumber: { type: ["number", "null"], multipleOf: 1 }
+        hasEffectivePublishedRevision:
+          type: boolean
+          description: True only when this market/locale resolves an approved, currently published effective revision. Combine with staged availability to display Live.
         ready: { type: boolean }
         readinessErrors:
           type: array
           items: { type: string }
+        readinessIssues:
+          type: array
+          items: { $ref: "#/components/schemas/DocumentEditionReadinessIssue" }
     DocumentEditionMatrix:
       type: object
       additionalProperties: false

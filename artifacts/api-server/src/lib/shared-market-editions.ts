@@ -3,8 +3,10 @@ import type { IRouter } from "express";
 import { pool } from "@workspace/db";
 import {
   BindSharedMarketEditionBody,
+  CopyDocumentMarketEditionBody,
   CompareSharedMarketBaselineParams,
   EstablishSharedMarketBaselineBody,
+  GetDocumentMarketCopyCandidatesParams,
   ReportSharedMarketMigrationBody,
   ResolveSharedMarketBaselineUpdateBody,
   SaveSharedMarketOverridesBody,
@@ -13,6 +15,7 @@ import {
   mergeSharedBaselineUpdate,
   resolveSharedBaselineUpdate,
   type SharedOverrideOperation,
+  type CmsDocumentKind,
   validateCmsSnapshot,
 } from "@workspace/api-zod";
 import { audit, type Queryable } from "./cms";
@@ -27,6 +30,90 @@ type BindingRow = Record<string, any>;
 const digest = (snapshot: unknown) => createHash("sha256").update(JSON.stringify(snapshot)).digest("hex");
 
 class InvalidImmutableMediaPinsError extends Error {}
+
+type ReadinessIssue = {
+  category: "missing" | "validation" | "workflow";
+  message: string;
+  action: "create" | "edit" | "review";
+};
+
+export function savedRevisionReadiness(kind: string, snapshot: unknown, workflowState: unknown) {
+  const validation = validateCmsSnapshot(kind as any, snapshot, "publish");
+  const issues: ReadinessIssue[] = validation.success
+    ? []
+    : validation.errors.map((message) => ({ category: "validation", message, action: "edit" }));
+  if (workflowState !== "approved") {
+    issues.push({
+      category: "workflow",
+      action: "review",
+      message: workflowState === "rejected"
+        ? "This saved revision was rejected and must be edited and submitted for review again."
+        : workflowState === "in-review"
+          ? "This saved revision is awaiting review and approval."
+          : "This saved revision must be submitted and approved before publication.",
+    });
+  }
+  return {
+    ready: issues.length === 0,
+    readinessErrors: issues.map((issue) => issue.message),
+    readinessIssues: issues,
+  };
+}
+
+function copyResponse(
+  documentId: string,
+  destination: Record<string, any>,
+  source: Record<string, any>,
+  replayed: boolean,
+) {
+  return {
+    documentId,
+    editionId: String(destination.edition_id),
+    revisionId: String(destination.revision_id),
+    revisionNumber: Number(destination.revision_number),
+    market: String(destination.market),
+    locale: String(destination.locale),
+    sourceRevisionId: String(source.id),
+    sourceMarket: String(source.market),
+    sourceLocale: String(source.locale),
+    sourceWorkflowState: String(source.workflow_state),
+    sourcePublicationState: String(source.source_revision_status),
+    replayed,
+  };
+}
+
+/**
+ * A resolved market revision is immutable history. Its source authority must
+ * therefore come from the baseline revision captured with that exact revision,
+ * not the mutable binding pointer used for ordinary editor access.
+ */
+async function canAccessCopiedRevisionLineage(
+  client: Queryable,
+  auth: AuthContext,
+  revisionId: string,
+  canAccessMarket: (auth: AuthContext, market: string) => boolean,
+) {
+  if (auth.user.role === "administrator") return true;
+  const resolved = await client.query(
+    `SELECT resolved.baseline_revision_id,
+            binding.mode,
+            source_edition.market source_market
+       FROM cms_resolved_market_revisions resolved
+       JOIN cms_market_edition_bindings binding ON binding.id=resolved.binding_id
+       LEFT JOIN cms_shared_baseline_revisions baseline
+         ON baseline.id=resolved.baseline_revision_id
+       LEFT JOIN cms_revisions source_revision ON source_revision.id=baseline.source_revision_id
+       LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
+      WHERE resolved.cms_revision_id=$1
+      FOR KEY SHARE OF resolved,binding`,
+    [revisionId],
+  );
+  if (!resolved.rows[0]) return true;
+  const lineage = resolved.rows[0];
+  if (!lineage.baseline_revision_id) return lineage.mode === "independent";
+  return typeof lineage.source_market === "string"
+    && canAccessMarket(auth, String(lineage.source_market));
+}
 
 function mediaPinsForSnapshot(
   snapshot: Record<string, unknown>,
@@ -261,11 +348,363 @@ export function registerSharedMarketEditionRoutes(
   router: IRouter,
   options: {
     canAccessMarket: (auth: AuthContext, market: string) => boolean;
+    canAccessEditionTarget: (
+      client: Queryable,
+      auth: AuthContext,
+      documentId: string,
+      market: string,
+      locale: string,
+    ) => Promise<boolean>;
+    revisionMediaGovernanceErrors: (
+      client: Queryable,
+      documentId: string,
+      revisionId: string,
+      kind: CmsDocumentKind,
+      snapshot: Record<string, any>,
+    ) => Promise<string[]>;
     requireEditor: any;
     requireAdministrator: any;
     requireCsrf: any;
   },
 ) {
+  router.get(
+    "/documents/:documentId/market-copy-candidates/:targetMarket/:targetLocale",
+    asyncRoute(async (req, res) => {
+      const parsed = GetDocumentMarketCopyCandidatesParams.safeParse(req.params);
+      if (!parsed.success) {
+        res.status(400).json({ error: "Invalid market copy target.", details: parsed.error.issues });
+        return;
+      }
+      const { documentId, targetMarket, targetLocale } = parsed.data;
+      const auth = res.locals.auth as AuthContext;
+      const target = await pool.query(
+        `SELECT id,code,default_locale,fallback_locale FROM market_editions WHERE code=$1 AND enabled=true`,
+        [targetMarket],
+      );
+      if (!target.rows[0]) {
+        res.status(404).json({ error: "The destination market edition is unavailable." });
+        return;
+      }
+      if (!options.canAccessMarket(auth, targetMarket)) {
+        res.status(403).json({ error: "You are not assigned to the destination market." });
+        return;
+      }
+      if (![target.rows[0].default_locale, target.rows[0].fallback_locale].includes(targetLocale)) {
+        res.status(409).json({ error: "The destination locale is not configured for this market edition." });
+        return;
+      }
+      const existing = await pool.query(
+        `SELECT id FROM cms_market_editions
+          WHERE document_id=$1 AND market=$2 AND locale=$3`,
+        [documentId, targetMarket, targetLocale],
+      );
+      if (existing.rows[0]) {
+        res.status(409).json({ error: "That exact market and locale edition already exists." });
+        return;
+      }
+      const candidates = await pool.query(
+        `SELECT d.kind,e.id edition_id,e.market,e.locale,e.published_revision_id,
+                selected.id revision_id,selected.revision_number,selected.workflow_state,selected.payload,
+                CASE WHEN selected.id=e.published_revision_id THEN 'published' ELSE 'saved' END source_revision_status
+           FROM cms_documents d
+           JOIN cms_market_editions e ON e.document_id=d.id
+           JOIN LATERAL (
+             SELECT r.id,r.revision_number,r.workflow_state,r.payload
+               FROM cms_revisions r
+              WHERE r.edition_id=e.id
+                AND (r.id=e.published_revision_id OR r.id=(
+                  SELECT latest.id FROM cms_revisions latest WHERE latest.edition_id=e.id
+                   ORDER BY latest.revision_number DESC,latest.created_at DESC,latest.id DESC LIMIT 1
+                ))
+           ) selected ON true
+          WHERE d.id=$1 AND e.market<>'shared-source' AND e.market<>$2 AND e.locale=$3
+            AND ($4::text[] IS NULL OR e.market=ANY($4::text[]))
+          ORDER BY e.market,e.id,
+                   CASE WHEN selected.id=e.published_revision_id THEN 1 ELSE 0 END,
+                   selected.revision_number DESC`,
+        [
+          documentId,
+          targetMarket,
+          targetLocale,
+          auth.user.role === "administrator" ? null : auth.user.marketCodes,
+        ],
+      );
+      const authorizedCandidates = [];
+      for (const candidate of candidates.rows) {
+        if (!await options.canAccessEditionTarget(
+          pool, auth, documentId, String(candidate.market), String(candidate.locale),
+        )) continue;
+        if (!await canAccessCopiedRevisionLineage(
+          pool, auth, String(candidate.revision_id), options.canAccessMarket,
+        )) continue;
+        const readiness = savedRevisionReadiness(
+          candidate.kind,
+          candidate.payload,
+          candidate.workflow_state,
+        );
+        const mediaErrors = await options.revisionMediaGovernanceErrors(
+          pool,
+          documentId,
+          String(candidate.revision_id),
+          candidate.kind as CmsDocumentKind,
+          candidate.payload as Record<string, any>,
+        );
+        authorizedCandidates.push({
+          ...candidate,
+          readiness: mediaErrors.length
+            ? {
+              ready: false,
+              readinessErrors: [...readiness.readinessErrors, ...mediaErrors],
+              readinessIssues: [
+                ...readiness.readinessIssues,
+                ...mediaErrors.map((message) => ({
+                  category: "validation" as const,
+                  message,
+                  action: "edit" as const,
+                })),
+              ],
+            }
+            : readiness,
+        });
+      }
+      res.json({
+        documentId,
+        targetMarket,
+        targetLocale,
+        candidates: authorizedCandidates.map((candidate) => ({
+          editionId: String(candidate.edition_id),
+          market: candidate.market,
+          locale: candidate.locale,
+          revisionId: String(candidate.revision_id),
+          revisionNumber: Number(candidate.revision_number),
+          workflowState: candidate.workflow_state,
+          publicationState: candidate.source_revision_status,
+          publishedRevisionId: candidate.published_revision_id
+            ? String(candidate.published_revision_id)
+            : null,
+          ...candidate.readiness,
+        })),
+      });
+    }),
+  );
+
+  router.post(
+    "/documents/:documentId/market-edition-copies",
+    options.requireCsrf,
+    options.requireEditor,
+    asyncRoute(async (req, res) => {
+      const parsed = CopyDocumentMarketEditionBody.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({ error: "Invalid market edition copy.", details: parsed.error.issues });
+        return;
+      }
+      const documentId = String(req.params.documentId);
+      const body = parsed.data;
+      if (body.sourceRevisionId !== body.expectedSourceRevisionId) {
+        res.status(409).json({ error: "The selected source revision changed; reopen copy candidates and try again." });
+        return;
+      }
+      const auth = res.locals.auth as AuthContext;
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        if (!await lockDocumentForMutation(client, documentId)) {
+          await client.query("ROLLBACK");
+          res.status(404).json({ error: "Document not found." });
+          return;
+        }
+        const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+        if (!transactionAuth) {
+          await client.query("ROLLBACK");
+          res.status(403).json({ error: "Authentication is no longer valid." });
+          return;
+        }
+        const destinationMarket = await client.query(
+          `SELECT id,code,default_locale,fallback_locale
+             FROM market_editions WHERE id=$1 AND enabled=true FOR KEY SHARE`,
+          [body.destinationMarketEditionId],
+        );
+        const destinationMarketRow = destinationMarket.rows[0];
+        if (!destinationMarketRow) {
+          await client.query("ROLLBACK");
+          res.status(404).json({ error: "The destination market edition is unavailable." });
+          return;
+        }
+        const destinationMarketCode = String(destinationMarketRow.code);
+        if (!options.canAccessMarket(transactionAuth, destinationMarketCode)) {
+          await client.query("ROLLBACK");
+          res.status(403).json({ error: "You are not assigned to the destination market." });
+          return;
+        }
+        if (![destinationMarketRow.default_locale, destinationMarketRow.fallback_locale].includes(body.destinationLocale)) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "The destination locale is not configured for this market edition." });
+          return;
+        }
+        const sourceResult = await client.query(
+          `SELECT d.kind,r.id,r.revision_number,r.workflow_state,r.payload,e.id edition_id,
+                  e.market,e.locale,
+                  latest.id latest_revision_id,e.published_revision_id,
+                  CASE WHEN r.id=e.published_revision_id THEN 'published' ELSE 'saved' END source_revision_status
+             FROM cms_revisions r
+             JOIN cms_market_editions e ON e.id=r.edition_id
+             JOIN cms_documents d ON d.id=e.document_id
+             JOIN LATERAL (
+               SELECT current.id FROM cms_revisions current WHERE current.edition_id=e.id
+                ORDER BY current.revision_number DESC,current.created_at DESC,current.id DESC LIMIT 1
+             ) latest ON true
+            WHERE d.id=$1 AND r.id=$2 AND e.market<>'shared-source'
+            FOR KEY SHARE OF r,e`,
+          [documentId, body.sourceRevisionId],
+        );
+        const source = sourceResult.rows[0];
+        if (!source) {
+          await client.query("ROLLBACK");
+          res.status(404).json({ error: "The selected source revision is not an exact geo revision in this document." });
+          return;
+        }
+        if (!await options.canAccessEditionTarget(
+          client, transactionAuth, documentId, String(source.market), String(source.locale),
+        ) || !await canAccessCopiedRevisionLineage(
+          client, transactionAuth, String(source.id), options.canAccessMarket,
+        )) {
+          await client.query("ROLLBACK");
+          res.status(403).json({ error: "You are not authorized for the selected source revision and its immutable lineage." });
+          return;
+        }
+        if (String(source.locale) !== body.destinationLocale || String(source.market) === destinationMarketCode) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "Copy requires distinct same-locale source and destination geo editions." });
+          return;
+        }
+        const existing = await client.query(
+          `SELECT e.id edition_id,e.market,e.locale,latest.id revision_id,latest.revision_number,
+                  latest.source_revision_id,latest.workflow_state,e.publication_state,e.published_revision_id
+             FROM cms_market_editions e
+             LEFT JOIN LATERAL (
+               SELECT r.id,r.revision_number,r.source_revision_id,r.workflow_state
+                 FROM cms_revisions r WHERE r.edition_id=e.id
+                ORDER BY r.revision_number DESC,r.created_at DESC,r.id DESC LIMIT 1
+             ) latest ON true
+            WHERE e.document_id=$1 AND e.market=$2 AND e.locale=$3
+            ORDER BY e.created_at,e.id LIMIT 1
+            FOR UPDATE OF e`,
+          [documentId, destinationMarketCode, body.destinationLocale],
+        );
+        if (existing.rows[0]) {
+          const prior = existing.rows[0];
+          const isInitialUnpublishedCopy = String(prior.source_revision_id) === String(source.id)
+            && Number(prior.revision_number) === 1
+            && prior.workflow_state === "draft"
+            && prior.publication_state === "draft"
+            && prior.published_revision_id == null;
+          const receipt = isInitialUnpublishedCopy
+            ? await client.query(
+              `SELECT 1 FROM cms_audit_events
+                WHERE target_type='document' AND target_id=$1::text
+                  AND action='document.market_edition_copied'
+                  AND metadata->>'sourceRevisionId'=$2
+                  AND metadata->>'destinationRevisionId'=$3
+                  AND metadata->>'destinationMarket'=$4
+                  AND metadata->>'destinationLocale'=$5
+                LIMIT 1`,
+              [
+                documentId,
+                String(source.id),
+                String(prior.revision_id),
+                destinationMarketCode,
+                body.destinationLocale,
+              ],
+            )
+            : { rows: [] };
+          if (isInitialUnpublishedCopy && receipt.rows[0]) {
+            await client.query("COMMIT");
+            res.json(copyResponse(documentId, prior, source, true));
+            return;
+          }
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "That exact market and locale edition already exists; use its deliberate editing workflow." });
+          return;
+        }
+        if (String(source.latest_revision_id) !== String(source.id)
+          && String(source.published_revision_id) !== String(source.id)) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "The selected source is no longer its saved or published copy candidate; reopen and select a current source explicitly." });
+          return;
+        }
+        const validation = validateCmsSnapshot(source.kind, source.payload, "draft");
+        if (!validation.success) {
+          await client.query("ROLLBACK");
+          res.status(422).json({
+            error: "The selected saved source revision fails the destination draft content contract.",
+            details: validation.errors,
+          });
+          return;
+        }
+        const pins = await client.query(
+          `SELECT asset_id "assetId",media_version_id "mediaVersionId"
+             FROM cms_media_references
+            WHERE document_id=$1 AND field_path=$2 AND media_version_id IS NOT NULL`,
+          [documentId, `revision:${source.id}`],
+        );
+        const mediaReferences = mediaPinsForSnapshot(validation.data, String(source.kind), pins.rows);
+        await assertExactImmutableMediaPins(client, mediaReferences);
+        const edition = await client.query(
+          `INSERT INTO cms_market_editions
+             (document_id,market,locale,localized_slug,publication_state,fallback_mode,content_mode,customized_from_revision_id)
+           VALUES ($1,$2,$3,$4,'draft','none','custom',$5)
+           RETURNING id,market,locale`,
+          [documentId, destinationMarketCode, body.destinationLocale, validation.data.slug ?? null, source.id],
+        );
+        const revision = await client.query(
+          `INSERT INTO cms_revisions
+             (edition_id,revision_number,payload,content_digest,workflow_state,created_by_user_id,reason,source_revision_id)
+           VALUES ($1,1,$2,$3,'draft',$4,$5,$6)
+           RETURNING id,revision_number`,
+          [
+            edition.rows[0].id,
+            validation.data,
+            digest(validation.data),
+            transactionAuth.user.id,
+            `Explicit geo copy from ${source.market}/${source.locale} revision ${source.revision_number}`,
+            source.id,
+          ],
+        );
+        const destination = {
+          edition_id: edition.rows[0].id,
+          market: edition.rows[0].market,
+          locale: edition.rows[0].locale,
+          revision_id: revision.rows[0].id,
+          revision_number: revision.rows[0].revision_number,
+        };
+        await copyMediaPins(client, documentId, String(revision.rows[0].id), mediaReferences);
+        await audit(transactionAuth, "document.market_edition_copied", "document", documentId, {
+          sourceRevisionId: String(source.id),
+          sourceMarket: String(source.market),
+          sourceLocale: String(source.locale),
+          destinationMarket: destinationMarketCode,
+          destinationLocale: body.destinationLocale,
+          destinationRevisionId: String(revision.rows[0].id),
+        }, client);
+        await client.query("COMMIT");
+        res.status(201).json(copyResponse(documentId, destination, source, false));
+      } catch (error) {
+        await client.query("ROLLBACK");
+        if (error instanceof InvalidImmutableMediaPinsError) {
+          res.status(422).json({ error: error.message });
+          return;
+        }
+        if (typeof error === "object" && error !== null && "code" in error && error.code === "23505") {
+          res.status(409).json({ error: "That exact market and locale edition was created concurrently; reopen it before retrying." });
+          return;
+        }
+        throw error;
+      } finally {
+        client.release();
+      }
+    }),
+  );
+
   router.get("/documents/:documentId/shared-market", asyncRoute(async (req, res) => {
     const documentId = String(req.params.documentId);
     const auth = res.locals.auth as AuthContext;
