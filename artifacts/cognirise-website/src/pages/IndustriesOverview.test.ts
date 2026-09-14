@@ -28,3 +28,9 @@ test("removes the duplicate and controls-led industry chapters", () => {
   assert.doesNotMatch(source, /io-view-link/);
   assert.doesNotMatch(source, /SpatialDisclosure/);
 });
+
+test("uses the approved inverse BrandButton for the closing value-scan CTA", () => {
+  assert.match(source, /import \{ BrandButton \} from "@\/components\/ui\/brand-button"/);
+  assert.match(source, /<BrandButton href="\/value-scan" variant="inverse" className="mt-5">Book a value scan<\/BrandButton>/);
+  assert.doesNotMatch(source, /io-primary/);
+});

@@ -1,6 +1,7 @@
 import { useState, useEffect, type KeyboardEvent, useRef } from "react";
-import { ArrowRight, BriefcaseBusiness, Building2, CircleGauge, Layers3, Route, Target, Workflow, CornerDownRight } from "lucide-react";
+import { BriefcaseBusiness, Building2, CircleGauge, Layers3, Route, Target, Workflow, CornerDownRight } from "lucide-react";
 import { Link } from "wouter";
+import { BrandButton } from "@/components/ui/brand-button";
 import { trackProjectEvent } from "@/lib/analytics";
 import "./MethodologyRouteMap.print.css";
 
@@ -418,25 +419,16 @@ export function MethodologyRouteMap() {
           {/* Actions Box */}
           <div className="flex flex-wrap items-center gap-6 mt-auto pt-8 border-t border-[#cbd3e1]" data-testid="route-actions">
             {activeRoute.actions.map((action, idx) => (
-              <Link 
+              <BrandButton
                 key={idx}
                 href={action.href}
                 onClick={() => openDestination(action.href)}
                 data-testid={`action-${action.type}`}
-                className={
-                  action.type === 'primary'
-                    ? "relative max-w-full min-w-0 inline-flex items-center gap-3 bg-[#102957] text-white px-7 py-4 hover:bg-[#1a3a75] text-[15px] font-bold transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--brand-pink))]"
-                    : "max-w-full min-w-0 inline-flex items-center gap-2 text-[15px] font-bold text-[#405777] hover:text-[#102957] underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#102957]"
-                }
+                variant={action.type}
+                className="max-w-full min-w-0"
               >
-                {action.type === 'primary' && (
-                  <div className="absolute top-0 left-0 bottom-0 w-1 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-                )}
-                <span className={action.type === 'primary' ? "min-w-0 pl-1" : "min-w-0"}>{action.label}</span>
-                {action.type === 'primary' && (
-                  <ArrowRight size={16} className="shrink-0 transition-transform group-hover:translate-x-1" />
-                )}
-              </Link>
+                {action.label}
+              </BrandButton>
             ))}
           </div>
         </div>

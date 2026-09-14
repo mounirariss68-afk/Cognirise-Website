@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { PulseImage } from "@/components/ui/pulse-image";
+import { BrandButton } from "@/components/ui/brand-button";
 import { assetUrl } from "@/lib/assets";
 import { MethodologyRouteMap } from "@/components/MethodologyRouteMap";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
@@ -46,7 +47,7 @@ export default function MethodologiesPortfolio() {
     });
   }, [location]);
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
     if (primaryAction.href !== "/methodologies#route-navigator") return;
     e.preventDefault();
     const el = document.getElementById("route-navigator");
@@ -73,15 +74,14 @@ export default function MethodologiesPortfolio() {
                 {governedHero?.text ?? "Start with the decision in front of you—not a framework name. Choose one of seven situations to see what you may already have, what needs deciding and which existing method can help. Strategy, operations and implementation are context, not a required sequence."}
               </p>
               
-              <a 
+              <BrandButton
                 href={primaryAction.href}
                 onClick={handleNavClick}
                 data-testid="hero-primary-cta"
-                className="mt-10 relative overflow-hidden inline-flex items-center gap-3 bg-[#102957] text-white px-7 py-4 hover:bg-[#1a3a75] text-[15px] font-bold transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[hsl(var(--brand-pink))]"
+                className="mt-10 max-w-full min-w-0"
               >
-                <div className="absolute top-0 left-0 bottom-0 w-1 bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-                <span className="pl-1">{primaryAction.label}</span>
-              </a>
+                {primaryAction.label}
+              </BrandButton>
             </div>
           </div>
           
