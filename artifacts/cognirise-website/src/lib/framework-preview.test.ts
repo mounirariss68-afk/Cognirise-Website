@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  idaoEditorial,
+  idaoHeroSeed,
+  methodologyCanonicalSeed,
+} from "@workspace/api-zod";
+import {
   FRAMEWORK_GUARDRAILS_SUMMARY_WARNING,
+  composeFrameworkPreviewRecord,
   frameworkPreviewWarnings,
   normalizeFrameworkPreviewContent,
 } from "./framework-preview";
@@ -126,4 +132,40 @@ test("framework preview preserves only complete summaries and warns before falli
 
   const legacy = { template: "agent-authority", guardrails };
   assert.deepEqual(frameworkPreviewWarnings(legacy), []);
+});
+
+test("validated methodology revision SEO reaches the framework preview record", () => {
+  const { media: _sourceHeroMedia, ...hero } = idaoHeroSeed;
+  const revisionSeo = {
+    title: "Revision-specific IDAO preview title",
+    description: "This exact saved methodology revision supplies its preview metadata.",
+    canonicalUrl: "https://cognirise.com/methodologies/idao",
+    noIndex: false,
+  };
+
+  const record = composeFrameworkPreviewRecord({
+    slug: "idao",
+    title: "IDAO",
+    summary: "A saved methodology revision.",
+    seo: revisionSeo,
+    content: {
+      schemaVersion: 1,
+      template: "idao",
+      hero,
+      editorial: idaoEditorial.seed,
+      canonical: methodologyCanonicalSeed("idao"),
+      visibility: "public",
+      order: 1,
+      sources: [],
+      relatedIds: [],
+    },
+    mediaIds: [],
+    markets: ["uae"],
+  }, {
+    revisionId: "revision-idao-seo",
+    media: [],
+  });
+  assert.ok(record, "the saved methodology snapshot should compose for preview");
+  assert.deepEqual(record.seo, revisionSeo);
+  assert.equal(record.id, "revision-idao-seo");
 });

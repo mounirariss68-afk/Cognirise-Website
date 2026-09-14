@@ -298,7 +298,10 @@ const CUTOVER: Record<WebsiteCmsDocumentKind, boolean> = {
   publication: env.VITE_CMS_CUTOVER_PUBLICATIONS === "true",
   "case-study": env.VITE_CMS_CUTOVER_CASE_STUDIES === "true",
   industry: env.VITE_CMS_CUTOVER_INDUSTRIES === "true",
-  framework: env.VITE_CMS_CUTOVER_FRAMEWORKS === "true",
+  // Framework delivery is explicitly authorised per route below. A collection
+  // flag must not turn every methodology into a CMS page merely because one
+  // edition was published.
+  framework: false,
   office: true,
   "landing-page": true,
 };
@@ -313,7 +316,15 @@ const ENTRY_CUTOVER: Partial<Record<WebsiteCmsDocumentKind, readonly string[]>> 
   // Framework detail routes are CMS-authoritative individually. In particular,
   // do not substitute compiled Guardrails copy while its source edition is
   // absent, unpublished, or unavailable.
-  framework: ["agent-authority-model", "guardrails-framework"],
+  framework: [
+    "agent-authority-model",
+    "guardrails-framework",
+    ...(env.VITE_CMS_CUTOVER_IDAO === "true" ? ["idao"] : []),
+    ...(env.VITE_CMS_CUTOVER_AI_USE_CASE_PRIORITIZATION === "true" ? ["ai-use-case-prioritization"] : []),
+    ...(env.VITE_CMS_CUTOVER_AI_VALUE_TO_SCALE === "true" ? ["ai-value-to-scale"] : []),
+    ...(env.VITE_CMS_CUTOVER_AGENTIC_OPERATIONS_READINESS === "true" ? ["agentic-operations-readiness"] : []),
+    ...(env.VITE_CMS_CUTOVER_HUMAN_AGENT_OPERATING_MODEL === "true" ? ["human-agent-operating-model"] : []),
+  ],
 };
 
 export function cmsEntryIsCutOver(kind: WebsiteCmsDocumentKind, slug: string): boolean {

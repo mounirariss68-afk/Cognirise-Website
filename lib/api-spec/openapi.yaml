@@ -3948,6 +3948,7 @@ components:
       oneOf:
         - $ref: "#/components/schemas/CmsAgentAuthorityFrameworkContent"
         - $ref: "#/components/schemas/CmsGuardrailsFrameworkContent"
+        - $ref: "#/components/schemas/CmsMethodologyFrameworkContent"
     CmsAgentAuthorityFrameworkContent:
       type: object
       additionalProperties: false
@@ -3969,6 +3970,55 @@ components:
         verificationDate: { type: string, format: date }
         reviewDate: { type: string, format: date }
         relatedIds: { type: array, items: { type: string } }
+    CmsMethodologyFrameworkContent:
+      description: >-
+        Editorial composition for the IDAO, AI Use-Case Prioritization, AI
+        Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating
+        Model routes. Canonical identifiers are validated in the shared Zod
+        contract; assessment calculation remains application-owned. The
+        `editorial` value is a strict, template-specific fixed slot map defined
+        by the shared methodology-editorial contract; consumers must not add
+        arbitrary regions, rows or fields.
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, template, hero, editorial, canonical]
+      properties:
+        schemaVersion: { type: number, enum: [1], default: 1 }
+        template: { type: string, enum: [idao, ai-use-case-prioritization, ai-value-to-scale, agentic-operations-readiness, human-agent-operating-model] }
+        hero:
+          type: object
+          additionalProperties: false
+          required: [breadcrumb, title, description]
+          properties:
+            breadcrumb: { type: string }
+            title: { type: string }
+            description: { type: string }
+            supportingText: { type: string }
+            media: { $ref: "#/components/schemas/CmsImmutableMediaReference" }
+            mediaId: { type: string, format: uuid, deprecated: true }
+            imagePosition: { type: string }
+            imageCaptionSubtitle: { type: string }
+            imageCaptionTitle: { type: string }
+        editorial:
+          type: object
+          description: Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.
+          additionalProperties: true
+        canonical:
+          type: object
+          description: Fixed reviewed IDs and order; identifiers differ by template.
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              additionalProperties: false
+              required: [id]
+              properties: { id: { type: string } }
+        visibility: { $ref: "#/components/schemas/CmsVisibility", default: public }
+        order: { type: integer, minimum: 0, maximum: 10000, default: 0 }
+        sources: { type: array, maxItems: 30, default: [], items: { $ref: "#/components/schemas/CmsSource" } }
+        verificationDate: { type: string, format: date }
+        reviewDate: { type: string, format: date }
+        relatedIds: { type: array, maxItems: 50, default: [], items: { type: string, format: uuid } }
     CmsGuardrailsFrameworkContent:
       type: object
       additionalProperties: false

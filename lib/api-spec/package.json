@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "codegen": "orval --config ./orval.config.ts",
+    "codegen": "orval --config ./orval.config.ts && perl -0pi -e 's/\\n+\\z/\\n/' ../../lib/api-client-react/src/generated/api.schemas.ts ../../lib/api-zod/src/generated/api.ts",
     "codegen:check": "bash ../../scripts/check-api-codegen.sh"
   },
   "devDependencies": {

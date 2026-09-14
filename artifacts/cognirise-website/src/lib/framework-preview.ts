@@ -1,11 +1,18 @@
 import {
+  agenticOperationsReadinessFrameworkContentSchema,
+  aiUseCasePrioritizationFrameworkContentSchema,
+  aiValueToScaleFrameworkContentSchema,
   FRAMEWORK_GUARDRAILS_FIGURE_ASSETS,
   frameworkGuardrailsSummarySchema,
   guardrailsFrameworkContentSchema,
+  humanAgentOperatingModelFrameworkContentSchema,
+  idaoFrameworkContentSchema,
+  validateCmsSnapshot,
   type FrameworkContent,
   type FrameworkGuardrailsSummary,
   type FrameworkGuardrailsSubsection,
 } from "@workspace/api-zod";
+import type { CmsRecord } from "./cms";
 
 type UnknownRecord = Record<string, unknown>;
 type AgentAuthorityFrameworkContent = Extract<FrameworkContent, { template: "agent-authority" }>;
@@ -248,6 +255,24 @@ export function normalizeFrameworkPreviewContent(value: unknown): FrameworkConte
     const parsed = guardrailsFrameworkContentSchema.safeParse(value);
     return parsed.success ? parsed.data : null;
   }
+  const methodologySchema = source?.template === "idao"
+    ? idaoFrameworkContentSchema
+    : source?.template === "ai-use-case-prioritization"
+      ? aiUseCasePrioritizationFrameworkContentSchema
+      : source?.template === "ai-value-to-scale"
+        ? aiValueToScaleFrameworkContentSchema
+        : source?.template === "agentic-operations-readiness"
+          ? agenticOperationsReadinessFrameworkContentSchema
+          : source?.template === "human-agent-operating-model"
+            ? humanAgentOperatingModelFrameworkContentSchema
+            : null;
+  if (methodologySchema) {
+    // Preview content is always the saved revision.  Do not hydrate a missing
+    // field from the compiled page, otherwise a draft could appear to contain
+    // copy or media that it never saved.
+    const parsed = methodologySchema.safeParse(value);
+    return parsed.success ? parsed.data : null;
+  }
   if (source?.template !== "agent-authority") return null;
   const sectorExamples = Array.isArray(source.sectorExamples)
     ? source.sectorExamples.map(normalizeExample).filter((item): item is NonNullable<typeof item> => item !== null)
@@ -291,4 +316,38 @@ export function normalizeFrameworkPreviewContent(value: unknown): FrameworkConte
       ? source.relatedIds.filter((item): item is string => typeof item === "string")
       : [],
   } as AgentAuthorityFrameworkContent;
+}
+
+/** Builds the record passed to the protected preview layout from one validated
+ * saved revision. Content, metadata, and SEO must remain revision-local. */
+export function composeFrameworkPreviewRecord(
+  document: unknown,
+  preview: {
+    revisionId: string;
+    media: CmsRecord<FrameworkContent>["media"];
+  },
+): CmsRecord<FrameworkContent> | null {
+  const validation = validateCmsSnapshot("framework", document, "draft");
+  const source = document && typeof document === "object" && !Array.isArray(document)
+    ? document as Record<string, unknown>
+    : {};
+  const frameworkContent = normalizeFrameworkPreviewContent(source.content);
+  if (!frameworkContent) return null;
+  const snapshot = validation.success ? validation.data as {
+    slug: string;
+    title: string;
+    summary?: string | null;
+    seo?: CmsRecord<FrameworkContent>["seo"];
+  } : null;
+  return {
+    ...frameworkContent,
+    id: preview.revisionId,
+    slug: snapshot?.slug ?? (typeof source.slug === "string" ? source.slug : "agent-authority-model"),
+    title: snapshot?.title ?? (typeof source.title === "string" ? source.title : ""),
+    summary: snapshot?.summary ?? (typeof source.summary === "string" ? source.summary : null),
+    media: preview.media,
+    seo: snapshot?.seo,
+    publishedAt: "",
+    updatedAt: "",
+  } as CmsRecord<FrameworkContent>;
 }

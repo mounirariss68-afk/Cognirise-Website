@@ -1303,6 +1303,21 @@ export const listDocumentsResponseTwoItemsItemContentSixTwoRelatedLinkTitleMax =
 
 export const listDocumentsResponseTwoItemsItemContentSixTwoRelatedLinkBodyMax = 4000;
 
+export const listDocumentsResponseTwoItemsItemContentSixThreeSchemaVersionDefault = 1;
+export const listDocumentsResponseTwoItemsItemContentSixThreeHeroMediaAltTextMax = 500;
+
+export const listDocumentsResponseTwoItemsItemContentSixThreeVisibilityDefault = `public`;
+export const listDocumentsResponseTwoItemsItemContentSixThreeOrderDefault = 0;
+export const listDocumentsResponseTwoItemsItemContentSixThreeOrderMin = 0;
+export const listDocumentsResponseTwoItemsItemContentSixThreeOrderMax = 10000;
+
+export const listDocumentsResponseTwoItemsItemContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentSixThreeSourcesDefault = [];
+export const listDocumentsResponseTwoItemsItemContentSixThreeSourcesMax = 30;
+
+export const listDocumentsResponseTwoItemsItemContentSixThreeRelatedIdsDefault = [];
+export const listDocumentsResponseTwoItemsItemContentSixThreeRelatedIdsMax = 50;
+
 export const listDocumentsResponseTwoItemsItemContentSevenCityMax = 160;
 
 export const listDocumentsResponseTwoItemsItemContentSevenAddressMax = 1000;
@@ -1838,7 +1853,40 @@ export const ListDocumentsResponse = zod.object({
   "body": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(listDocumentsResponseTwoItemsItemContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(listDocumentsResponseTwoItemsItemContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(listDocumentsResponseTwoItemsItemContentSixThreeOrderMin).max(listDocumentsResponseTwoItemsItemContentSixThreeOrderMax).default(listDocumentsResponseTwoItemsItemContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(listDocumentsResponseTwoItemsItemContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(listDocumentsResponseTwoItemsItemContentSixThreeSourcesMax).default(listDocumentsResponseTwoItemsItemContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(listDocumentsResponseTwoItemsItemContentSixThreeRelatedIdsMax).default(listDocumentsResponseTwoItemsItemContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSevenCityMax),
   "address": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSevenAddressMax),
@@ -2282,6 +2330,21 @@ export const createDocumentResponseContentSixTwoRelatedIdsMax = 50;
 export const createDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const createDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const createDocumentResponseContentSixThreeSchemaVersionDefault = 1;
+export const createDocumentResponseContentSixThreeHeroMediaAltTextMax = 500;
+
+export const createDocumentResponseContentSixThreeVisibilityDefault = `public`;
+export const createDocumentResponseContentSixThreeOrderDefault = 0;
+export const createDocumentResponseContentSixThreeOrderMin = 0;
+export const createDocumentResponseContentSixThreeOrderMax = 10000;
+
+export const createDocumentResponseContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentSixThreeSourcesDefault = [];
+export const createDocumentResponseContentSixThreeSourcesMax = 30;
+
+export const createDocumentResponseContentSixThreeRelatedIdsDefault = [];
+export const createDocumentResponseContentSixThreeRelatedIdsMax = 50;
 
 export const createDocumentResponseContentSevenCityMax = 160;
 
@@ -2812,7 +2875,40 @@ export const CreateDocumentResponse = zod.object({
   "body": zod.string().min(1).max(createDocumentResponseContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(createDocumentResponseContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentResponseContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(createDocumentResponseContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(createDocumentResponseContentSixThreeOrderMin).max(createDocumentResponseContentSixThreeOrderMax).default(createDocumentResponseContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentResponseContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(createDocumentResponseContentSixThreeSourcesMax).default(createDocumentResponseContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(createDocumentResponseContentSixThreeRelatedIdsMax).default(createDocumentResponseContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(createDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(createDocumentResponseContentSevenAddressMax),
@@ -3223,6 +3319,21 @@ export const getDocumentResponseContentSixTwoRelatedIdsMax = 50;
 export const getDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const getDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const getDocumentResponseContentSixThreeSchemaVersionDefault = 1;
+export const getDocumentResponseContentSixThreeHeroMediaAltTextMax = 500;
+
+export const getDocumentResponseContentSixThreeVisibilityDefault = `public`;
+export const getDocumentResponseContentSixThreeOrderDefault = 0;
+export const getDocumentResponseContentSixThreeOrderMin = 0;
+export const getDocumentResponseContentSixThreeOrderMax = 10000;
+
+export const getDocumentResponseContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentSixThreeSourcesDefault = [];
+export const getDocumentResponseContentSixThreeSourcesMax = 30;
+
+export const getDocumentResponseContentSixThreeRelatedIdsDefault = [];
+export const getDocumentResponseContentSixThreeRelatedIdsMax = 50;
 
 export const getDocumentResponseContentSevenCityMax = 160;
 
@@ -3753,7 +3864,40 @@ export const GetDocumentResponse = zod.object({
   "body": zod.string().min(1).max(getDocumentResponseContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(getDocumentResponseContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentResponseContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(getDocumentResponseContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(getDocumentResponseContentSixThreeOrderMin).max(getDocumentResponseContentSixThreeOrderMax).default(getDocumentResponseContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(getDocumentResponseContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(getDocumentResponseContentSixThreeSourcesMax).default(getDocumentResponseContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(getDocumentResponseContentSixThreeRelatedIdsMax).default(getDocumentResponseContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(getDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(getDocumentResponseContentSevenAddressMax),
@@ -4205,6 +4349,21 @@ export const updateDocumentResponseContentSixTwoRelatedIdsMax = 50;
 export const updateDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const updateDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const updateDocumentResponseContentSixThreeSchemaVersionDefault = 1;
+export const updateDocumentResponseContentSixThreeHeroMediaAltTextMax = 500;
+
+export const updateDocumentResponseContentSixThreeVisibilityDefault = `public`;
+export const updateDocumentResponseContentSixThreeOrderDefault = 0;
+export const updateDocumentResponseContentSixThreeOrderMin = 0;
+export const updateDocumentResponseContentSixThreeOrderMax = 10000;
+
+export const updateDocumentResponseContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentSixThreeSourcesDefault = [];
+export const updateDocumentResponseContentSixThreeSourcesMax = 30;
+
+export const updateDocumentResponseContentSixThreeRelatedIdsDefault = [];
+export const updateDocumentResponseContentSixThreeRelatedIdsMax = 50;
 
 export const updateDocumentResponseContentSevenCityMax = 160;
 
@@ -4735,7 +4894,40 @@ export const UpdateDocumentResponse = zod.object({
   "body": zod.string().min(1).max(updateDocumentResponseContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(updateDocumentResponseContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentResponseContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(updateDocumentResponseContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(updateDocumentResponseContentSixThreeOrderMin).max(updateDocumentResponseContentSixThreeOrderMax).default(updateDocumentResponseContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(updateDocumentResponseContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(updateDocumentResponseContentSixThreeSourcesMax).default(updateDocumentResponseContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(updateDocumentResponseContentSixThreeRelatedIdsMax).default(updateDocumentResponseContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(updateDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(updateDocumentResponseContentSevenAddressMax),
@@ -5162,6 +5354,21 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelat
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeSchemaVersionDefault = 1;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeHeroMediaAltTextMax = 500;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeVisibilityDefault = `public`;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeOrderDefault = 0;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeOrderMin = 0;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeOrderMax = 10000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeSourcesDefault = [];
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeSourcesMax = 30;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeRelatedIdsDefault = [];
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeRelatedIdsMax = 50;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenCityMax = 160;
 
@@ -5701,7 +5908,40 @@ export const ListDocumentRevisionsResponse = zod.object({
   "body": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeOrderMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeOrderMax).default(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeSourcesMax).default(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeRelatedIdsMax).default(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenCityMax),
   "address": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenAddressMax),
@@ -6148,6 +6388,21 @@ export const createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedId
 export const createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixThreeSchemaVersionDefault = 1;
+export const createDocumentEditionOverrideResponseSnapshotContentSixThreeHeroMediaAltTextMax = 500;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixThreeVisibilityDefault = `public`;
+export const createDocumentEditionOverrideResponseSnapshotContentSixThreeOrderDefault = 0;
+export const createDocumentEditionOverrideResponseSnapshotContentSixThreeOrderMin = 0;
+export const createDocumentEditionOverrideResponseSnapshotContentSixThreeOrderMax = 10000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentSixThreeSourcesDefault = [];
+export const createDocumentEditionOverrideResponseSnapshotContentSixThreeSourcesMax = 30;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixThreeRelatedIdsDefault = [];
+export const createDocumentEditionOverrideResponseSnapshotContentSixThreeRelatedIdsMax = 50;
 
 export const createDocumentEditionOverrideResponseSnapshotContentSevenCityMax = 160;
 
@@ -6681,7 +6936,40 @@ export const CreateDocumentEditionOverrideResponse = zod.object({
   "body": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(createDocumentEditionOverrideResponseSnapshotContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(createDocumentEditionOverrideResponseSnapshotContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(createDocumentEditionOverrideResponseSnapshotContentSixThreeOrderMin).max(createDocumentEditionOverrideResponseSnapshotContentSixThreeOrderMax).default(createDocumentEditionOverrideResponseSnapshotContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(createDocumentEditionOverrideResponseSnapshotContentSixThreeSourcesMax).default(createDocumentEditionOverrideResponseSnapshotContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(createDocumentEditionOverrideResponseSnapshotContentSixThreeRelatedIdsMax).default(createDocumentEditionOverrideResponseSnapshotContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSevenCityMax),
   "address": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSevenAddressMax),
@@ -8495,6 +8783,21 @@ export const getDocumentRevisionResponseSnapshotContentSixTwoRelatedLinkTitleMax
 
 export const getDocumentRevisionResponseSnapshotContentSixTwoRelatedLinkBodyMax = 4000;
 
+export const getDocumentRevisionResponseSnapshotContentSixThreeSchemaVersionDefault = 1;
+export const getDocumentRevisionResponseSnapshotContentSixThreeHeroMediaAltTextMax = 500;
+
+export const getDocumentRevisionResponseSnapshotContentSixThreeVisibilityDefault = `public`;
+export const getDocumentRevisionResponseSnapshotContentSixThreeOrderDefault = 0;
+export const getDocumentRevisionResponseSnapshotContentSixThreeOrderMin = 0;
+export const getDocumentRevisionResponseSnapshotContentSixThreeOrderMax = 10000;
+
+export const getDocumentRevisionResponseSnapshotContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentSixThreeSourcesDefault = [];
+export const getDocumentRevisionResponseSnapshotContentSixThreeSourcesMax = 30;
+
+export const getDocumentRevisionResponseSnapshotContentSixThreeRelatedIdsDefault = [];
+export const getDocumentRevisionResponseSnapshotContentSixThreeRelatedIdsMax = 50;
+
 export const getDocumentRevisionResponseSnapshotContentSevenCityMax = 160;
 
 export const getDocumentRevisionResponseSnapshotContentSevenAddressMax = 1000;
@@ -9027,7 +9330,40 @@ export const GetDocumentRevisionResponse = zod.object({
   "body": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(getDocumentRevisionResponseSnapshotContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(getDocumentRevisionResponseSnapshotContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(getDocumentRevisionResponseSnapshotContentSixThreeOrderMin).max(getDocumentRevisionResponseSnapshotContentSixThreeOrderMax).default(getDocumentRevisionResponseSnapshotContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(getDocumentRevisionResponseSnapshotContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(getDocumentRevisionResponseSnapshotContentSixThreeSourcesMax).default(getDocumentRevisionResponseSnapshotContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(getDocumentRevisionResponseSnapshotContentSixThreeRelatedIdsMax).default(getDocumentRevisionResponseSnapshotContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSevenCityMax),
   "address": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSevenAddressMax),
@@ -9434,6 +9770,21 @@ export const submitDocumentResponseContentSixTwoRelatedIdsMax = 50;
 export const submitDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const submitDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const submitDocumentResponseContentSixThreeSchemaVersionDefault = 1;
+export const submitDocumentResponseContentSixThreeHeroMediaAltTextMax = 500;
+
+export const submitDocumentResponseContentSixThreeVisibilityDefault = `public`;
+export const submitDocumentResponseContentSixThreeOrderDefault = 0;
+export const submitDocumentResponseContentSixThreeOrderMin = 0;
+export const submitDocumentResponseContentSixThreeOrderMax = 10000;
+
+export const submitDocumentResponseContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentSixThreeSourcesDefault = [];
+export const submitDocumentResponseContentSixThreeSourcesMax = 30;
+
+export const submitDocumentResponseContentSixThreeRelatedIdsDefault = [];
+export const submitDocumentResponseContentSixThreeRelatedIdsMax = 50;
 
 export const submitDocumentResponseContentSevenCityMax = 160;
 
@@ -9964,7 +10315,40 @@ export const SubmitDocumentResponse = zod.object({
   "body": zod.string().min(1).max(submitDocumentResponseContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(submitDocumentResponseContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(submitDocumentResponseContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(submitDocumentResponseContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(submitDocumentResponseContentSixThreeOrderMin).max(submitDocumentResponseContentSixThreeOrderMax).default(submitDocumentResponseContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(submitDocumentResponseContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(submitDocumentResponseContentSixThreeSourcesMax).default(submitDocumentResponseContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(submitDocumentResponseContentSixThreeRelatedIdsMax).default(submitDocumentResponseContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(submitDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(submitDocumentResponseContentSevenAddressMax),
@@ -10425,6 +10809,21 @@ export const rejectDocumentRevisionResponseContentSixTwoRelatedIdsMax = 50;
 export const rejectDocumentRevisionResponseContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const rejectDocumentRevisionResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixThreeSchemaVersionDefault = 1;
+export const rejectDocumentRevisionResponseContentSixThreeHeroMediaAltTextMax = 500;
+
+export const rejectDocumentRevisionResponseContentSixThreeVisibilityDefault = `public`;
+export const rejectDocumentRevisionResponseContentSixThreeOrderDefault = 0;
+export const rejectDocumentRevisionResponseContentSixThreeOrderMin = 0;
+export const rejectDocumentRevisionResponseContentSixThreeOrderMax = 10000;
+
+export const rejectDocumentRevisionResponseContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentSixThreeSourcesDefault = [];
+export const rejectDocumentRevisionResponseContentSixThreeSourcesMax = 30;
+
+export const rejectDocumentRevisionResponseContentSixThreeRelatedIdsDefault = [];
+export const rejectDocumentRevisionResponseContentSixThreeRelatedIdsMax = 50;
 
 export const rejectDocumentRevisionResponseContentSevenCityMax = 160;
 
@@ -10955,7 +11354,40 @@ export const RejectDocumentRevisionResponse = zod.object({
   "body": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(rejectDocumentRevisionResponseContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(rejectDocumentRevisionResponseContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(rejectDocumentRevisionResponseContentSixThreeOrderMin).max(rejectDocumentRevisionResponseContentSixThreeOrderMax).default(rejectDocumentRevisionResponseContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(rejectDocumentRevisionResponseContentSixThreeSourcesMax).default(rejectDocumentRevisionResponseContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(rejectDocumentRevisionResponseContentSixThreeRelatedIdsMax).default(rejectDocumentRevisionResponseContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(rejectDocumentRevisionResponseContentSevenCityMax),
   "address": zod.string().min(1).max(rejectDocumentRevisionResponseContentSevenAddressMax),
@@ -11375,6 +11807,21 @@ export const publishDocumentResponseContentSixTwoRelatedIdsMax = 50;
 export const publishDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const publishDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const publishDocumentResponseContentSixThreeSchemaVersionDefault = 1;
+export const publishDocumentResponseContentSixThreeHeroMediaAltTextMax = 500;
+
+export const publishDocumentResponseContentSixThreeVisibilityDefault = `public`;
+export const publishDocumentResponseContentSixThreeOrderDefault = 0;
+export const publishDocumentResponseContentSixThreeOrderMin = 0;
+export const publishDocumentResponseContentSixThreeOrderMax = 10000;
+
+export const publishDocumentResponseContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentSixThreeSourcesDefault = [];
+export const publishDocumentResponseContentSixThreeSourcesMax = 30;
+
+export const publishDocumentResponseContentSixThreeRelatedIdsDefault = [];
+export const publishDocumentResponseContentSixThreeRelatedIdsMax = 50;
 
 export const publishDocumentResponseContentSevenCityMax = 160;
 
@@ -11905,7 +12352,40 @@ export const PublishDocumentResponse = zod.object({
   "body": zod.string().min(1).max(publishDocumentResponseContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(publishDocumentResponseContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(publishDocumentResponseContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(publishDocumentResponseContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(publishDocumentResponseContentSixThreeOrderMin).max(publishDocumentResponseContentSixThreeOrderMax).default(publishDocumentResponseContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(publishDocumentResponseContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(publishDocumentResponseContentSixThreeSourcesMax).default(publishDocumentResponseContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(publishDocumentResponseContentSixThreeRelatedIdsMax).default(publishDocumentResponseContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(publishDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(publishDocumentResponseContentSevenAddressMax),
@@ -12320,6 +12800,21 @@ export const rollbackDocumentResponseContentSixTwoRelatedIdsMax = 50;
 export const rollbackDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const rollbackDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const rollbackDocumentResponseContentSixThreeSchemaVersionDefault = 1;
+export const rollbackDocumentResponseContentSixThreeHeroMediaAltTextMax = 500;
+
+export const rollbackDocumentResponseContentSixThreeVisibilityDefault = `public`;
+export const rollbackDocumentResponseContentSixThreeOrderDefault = 0;
+export const rollbackDocumentResponseContentSixThreeOrderMin = 0;
+export const rollbackDocumentResponseContentSixThreeOrderMax = 10000;
+
+export const rollbackDocumentResponseContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentSixThreeSourcesDefault = [];
+export const rollbackDocumentResponseContentSixThreeSourcesMax = 30;
+
+export const rollbackDocumentResponseContentSixThreeRelatedIdsDefault = [];
+export const rollbackDocumentResponseContentSixThreeRelatedIdsMax = 50;
 
 export const rollbackDocumentResponseContentSevenCityMax = 160;
 
@@ -12850,7 +13345,40 @@ export const RollbackDocumentResponse = zod.object({
   "body": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(rollbackDocumentResponseContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rollbackDocumentResponseContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(rollbackDocumentResponseContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(rollbackDocumentResponseContentSixThreeOrderMin).max(rollbackDocumentResponseContentSixThreeOrderMax).default(rollbackDocumentResponseContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rollbackDocumentResponseContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(rollbackDocumentResponseContentSixThreeSourcesMax).default(rollbackDocumentResponseContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(rollbackDocumentResponseContentSixThreeRelatedIdsMax).default(rollbackDocumentResponseContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(rollbackDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(rollbackDocumentResponseContentSevenAddressMax),
@@ -13266,6 +13794,21 @@ export const archiveDocumentResponseContentSixTwoRelatedIdsMax = 50;
 export const archiveDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const archiveDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const archiveDocumentResponseContentSixThreeSchemaVersionDefault = 1;
+export const archiveDocumentResponseContentSixThreeHeroMediaAltTextMax = 500;
+
+export const archiveDocumentResponseContentSixThreeVisibilityDefault = `public`;
+export const archiveDocumentResponseContentSixThreeOrderDefault = 0;
+export const archiveDocumentResponseContentSixThreeOrderMin = 0;
+export const archiveDocumentResponseContentSixThreeOrderMax = 10000;
+
+export const archiveDocumentResponseContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentSixThreeSourcesDefault = [];
+export const archiveDocumentResponseContentSixThreeSourcesMax = 30;
+
+export const archiveDocumentResponseContentSixThreeRelatedIdsDefault = [];
+export const archiveDocumentResponseContentSixThreeRelatedIdsMax = 50;
 
 export const archiveDocumentResponseContentSevenCityMax = 160;
 
@@ -13796,7 +14339,40 @@ export const ArchiveDocumentResponse = zod.object({
   "body": zod.string().min(1).max(archiveDocumentResponseContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(archiveDocumentResponseContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(archiveDocumentResponseContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(archiveDocumentResponseContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(archiveDocumentResponseContentSixThreeOrderMin).max(archiveDocumentResponseContentSixThreeOrderMax).default(archiveDocumentResponseContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(archiveDocumentResponseContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(archiveDocumentResponseContentSixThreeSourcesMax).default(archiveDocumentResponseContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(archiveDocumentResponseContentSixThreeRelatedIdsMax).default(archiveDocumentResponseContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(archiveDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(archiveDocumentResponseContentSevenAddressMax),
@@ -14212,6 +14788,21 @@ export const restoreDocumentResponseContentSixTwoRelatedIdsMax = 50;
 export const restoreDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const restoreDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const restoreDocumentResponseContentSixThreeSchemaVersionDefault = 1;
+export const restoreDocumentResponseContentSixThreeHeroMediaAltTextMax = 500;
+
+export const restoreDocumentResponseContentSixThreeVisibilityDefault = `public`;
+export const restoreDocumentResponseContentSixThreeOrderDefault = 0;
+export const restoreDocumentResponseContentSixThreeOrderMin = 0;
+export const restoreDocumentResponseContentSixThreeOrderMax = 10000;
+
+export const restoreDocumentResponseContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentSixThreeSourcesDefault = [];
+export const restoreDocumentResponseContentSixThreeSourcesMax = 30;
+
+export const restoreDocumentResponseContentSixThreeRelatedIdsDefault = [];
+export const restoreDocumentResponseContentSixThreeRelatedIdsMax = 50;
 
 export const restoreDocumentResponseContentSevenCityMax = 160;
 
@@ -14742,7 +15333,40 @@ export const RestoreDocumentResponse = zod.object({
   "body": zod.string().min(1).max(restoreDocumentResponseContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(restoreDocumentResponseContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(restoreDocumentResponseContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(restoreDocumentResponseContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(restoreDocumentResponseContentSixThreeOrderMin).max(restoreDocumentResponseContentSixThreeOrderMax).default(restoreDocumentResponseContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(restoreDocumentResponseContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(restoreDocumentResponseContentSixThreeSourcesMax).default(restoreDocumentResponseContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(restoreDocumentResponseContentSixThreeRelatedIdsMax).default(restoreDocumentResponseContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(restoreDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(restoreDocumentResponseContentSevenAddressMax),
@@ -15153,6 +15777,21 @@ export const previewDocumentResponseDocumentContentSixTwoRelatedIdsMax = 50;
 export const previewDocumentResponseDocumentContentSixTwoRelatedLinkTitleMax = 4000;
 
 export const previewDocumentResponseDocumentContentSixTwoRelatedLinkBodyMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixThreeSchemaVersionDefault = 1;
+export const previewDocumentResponseDocumentContentSixThreeHeroMediaAltTextMax = 500;
+
+export const previewDocumentResponseDocumentContentSixThreeVisibilityDefault = `public`;
+export const previewDocumentResponseDocumentContentSixThreeOrderDefault = 0;
+export const previewDocumentResponseDocumentContentSixThreeOrderMin = 0;
+export const previewDocumentResponseDocumentContentSixThreeOrderMax = 10000;
+
+export const previewDocumentResponseDocumentContentSixThreeSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentSixThreeSourcesDefault = [];
+export const previewDocumentResponseDocumentContentSixThreeSourcesMax = 30;
+
+export const previewDocumentResponseDocumentContentSixThreeRelatedIdsDefault = [];
+export const previewDocumentResponseDocumentContentSixThreeRelatedIdsMax = 50;
 
 export const previewDocumentResponseDocumentContentSevenCityMax = 160;
 
@@ -15681,7 +16320,40 @@ export const PreviewDocumentResponse = zod.object({
   "body": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoRelatedLinkBodyMax),
   "href": zod.enum(['/methodologies/guardrails-framework'])
 })
-})]),zod.object({
+}),zod.object({
+  "schemaVersion": zod.literal(1).default(previewDocumentResponseDocumentContentSixThreeSchemaVersionDefault),
+  "template": zod.enum(['idao', 'ai-use-case-prioritization', 'ai-value-to-scale', 'agentic-operations-readiness', 'human-agent-operating-model']),
+  "hero": zod.object({
+  "breadcrumb": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "supportingText": zod.string().optional(),
+  "media": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentSixThreeHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "mediaId": zod.string().uuid().optional(),
+  "imagePosition": zod.string().optional(),
+  "imageCaptionSubtitle": zod.string().optional(),
+  "imageCaptionTitle": zod.string().optional()
+}),
+  "editorial": zod.record(zod.string(), zod.unknown()).describe('Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.'),
+  "canonical": zod.record(zod.string(), zod.array(zod.object({
+  "id": zod.string()
+}))).describe('Fixed reviewed IDs and order; identifiers differ by template.'),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(previewDocumentResponseDocumentContentSixThreeVisibilityDefault),
+  "order": zod.number().int().min(previewDocumentResponseDocumentContentSixThreeOrderMin).max(previewDocumentResponseDocumentContentSixThreeOrderMax).default(previewDocumentResponseDocumentContentSixThreeOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(previewDocumentResponseDocumentContentSixThreeSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(previewDocumentResponseDocumentContentSixThreeSourcesMax).default(previewDocumentResponseDocumentContentSixThreeSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(previewDocumentResponseDocumentContentSixThreeRelatedIdsMax).default(previewDocumentResponseDocumentContentSixThreeRelatedIdsDefault)
+}).describe('Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.')]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(previewDocumentResponseDocumentContentSevenCityMax),
   "address": zod.string().min(1).max(previewDocumentResponseDocumentContentSevenAddressMax),
@@ -17925,5 +18597,3 @@ export const RecordAnalyticsConsentResponse = zod.object({
   "marketing": zod.boolean(),
   "recordedAt": zod.coerce.date()
 })
-
-

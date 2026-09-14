@@ -11,6 +11,12 @@ IDAO and the Agent Authority Model are read-only canonical frameworks unless the
 
 The user explicitly approved an additive, locally generated Pulse results PDF for the Agent Authority assessment, with its existing questions, calculations and authority rules unchanged.
 
+CMS integration of IDAO is authorized without changing its approved canon. Editorial values must replace their original values in the existing composition, not appear as a second generic narrative.
+
+**Why:** A generic CMS renderer can silently omit assessments and canonical interactions; appending CMS sections instead duplicates the approved page and creates competing editable interpretations.
+
+**How to apply:** Keep canonical stage identities, order and logic read-only and shared with the homepage. Inventory exact editorial and media occurrences, bind them in place, and verify edits in the real page layout rather than an isolated generic renderer.
+
 **Why:** Consistent assessment exports are an approved exception to the protection boundary, not permission to redesign or reinterpret the canonical framework.
 
 **How to apply:** Maintain this distinction in later export work. The planned AI Guardrails framework is complementary to Agent Authority; do not merge their logic or invent Guardrails content before it is supplied and approved.

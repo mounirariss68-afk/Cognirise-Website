@@ -40,6 +40,15 @@ pnpm --filter @workspace/scripts cms:reconcile-offices -- --apply-db --target=de
 pnpm --filter @workspace/scripts cms:reconcile-homepage -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-methodologies-hero -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-methodologies-hero -- --verify-db --target=development
+# Task 241 is intentionally separate from the general CMS inventory importer:
+# it creates its five exact page-owned editorial drafts on a fresh development
+# database (or replays/safely successors an exact known draft only), without
+# approvals, receipts, fixtures, or a publication transition. The dry run
+# inventories every nested media slot before the guarded development apply and
+# read-only all-seven framework verification.
+pnpm --filter @workspace/scripts cms:reconcile-methodology-editorial
+pnpm --filter @workspace/scripts cms:reconcile-methodology-editorial -- --apply-db --bootstrap --target=development
+pnpm --filter @workspace/scripts cms:reconcile-methodology-editorial -- --verify-db --bootstrap --target=development
 # Banking remains a human-reviewed, unpublished successor. This applies or
 # replays only an exact candidate; a later editorial/published state is
 # explicitly receipted as preserved rather than retried or overwritten.

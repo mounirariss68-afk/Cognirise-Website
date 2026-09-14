@@ -19,6 +19,10 @@ describe("Methodology Relationships and Boundaries", () => {
   const ucp = readFileSync(resolve(root, "src/pages/AIUseCasePrioritization.tsx"), "utf8");
   const aor = readFileSync(resolve(root, "src/pages/AgenticOperationsReadiness.tsx"), "utf8");
   const haom = readFileSync(resolve(root, "src/pages/HumanAgentOperatingModel.tsx"), "utf8");
+  const vtsEditorial = readFileSync(resolve(root, "../../lib/api-zod/src/methodology-editorial/ai-value-to-scale.ts"), "utf8");
+  const ucpEditorial = readFileSync(resolve(root, "../../lib/api-zod/src/methodology-editorial/ai-use-case-prioritization.ts"), "utf8");
+  const aorEditorial = readFileSync(resolve(root, "../../lib/api-zod/src/methodology-editorial/agentic-operations-readiness.ts"), "utf8");
+  const haomEditorial = readFileSync(resolve(root, "../../lib/api-zod/src/methodology-editorial/human-agent-operating-model.ts"), "utf8");
   it("has exactly seven headings in MethodologyRelationship", () => {
     assert.match(relBlock, /Start here when/i);
     assert.match(relBlock, /Decision/);
@@ -96,11 +100,11 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.doesNotMatch(routeMap, /trackProjectEvent\([^)]*(label|decision|output|idao|authority)/);
   });
 
-  it("verifies imagery refs exist in the pages", () => {
-    assert.match(vts, /method-vts-v2\.jpg/);
-    assert.match(ucp, /method-ucp-governed-ai-v3\.jpg/);
-    assert.match(aor, /method-aor-v2\.jpg/);
-    assert.match(haom, /method-haom-v2\.jpg/);
+  it("keeps hero image baselines in their shared template definitions", () => {
+    assert.match(vtsEditorial, /method-vts-v2\.jpg/);
+    assert.match(ucpEditorial, /method-ucp-governed-ai-v3\.jpg/);
+    assert.match(aorEditorial, /method-aor-v2\.jpg/);
+    assert.match(haomEditorial, /method-haom-v2\.jpg/);
   });
 
   it("uses the shared relationship block on every supporting methodology", () => {
@@ -114,11 +118,11 @@ describe("Methodology Relationships and Boundaries", () => {
   });
 
   it("keeps method-specific explanatory routes explicit", () => {
-    assert.match(vts, /Weak-condition evidence can move work to an earlier IDAO entry or loopback/);
-    assert.match(ucp, /Control Burden:[\s\S]*exposure and required oversight/);
-    assert.match(aor, /6 Conditions feed into:/);
-    assert.match(aor, /Proceed[\s\S]*Prepare[\s\S]*Stop/);
-    assert.match(haom, /Handover Choreography across IDAO/);
-    assert.match(haom, /propose, approve, act, intervene, and demotion right/);
+    assert.match(vtsEditorial, /Weak-condition evidence can move work to an earlier IDAO entry or loopback/);
+    assert.match(ucpEditorial, /Control Burden:[\s\S]*exposure and required oversight/);
+    assert.match(aorEditorial, /6 Conditions feed into:/);
+    assert.match(aorEditorial, /Proceed[\s\S]*Prepare[\s\S]*Stop/);
+    assert.match(haomEditorial, /Handover Choreography across IDAO/);
+    assert.match(haomEditorial, /propose, approve, act, intervene, and demotion right/);
   });
 });

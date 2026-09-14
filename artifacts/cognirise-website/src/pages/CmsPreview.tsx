@@ -43,7 +43,6 @@ import {
   SiteConfigurationPresentation,
 } from "@/components/cms/PublicCmsPresentations";
 import { CaseStudyLayout } from "@/components/work/case-study-ui";
-
 export type Preview = {
   kind: CmsDocumentKind;
   document: Record<string, unknown>;
@@ -666,3 +665,210 @@ export default function CmsPreview() {
   if (!match) return <NotFound />;
   return <CmsPreviewContent preview={preview} error={error} />;
 }
+/*
+ * Superseded inline preview branch. Its methodology media and SEO behavior is
+ * retained by CmsPreviewContent and CmsPreviewFramework above.
+export default function CmsPreview() {
+  const [match, params] = useRoute("/preview/:token");
+  const [preview, setPreview] = useState<Preview>();
+  const [error, setError] = useState<PreviewError>();
+  const [loading, setLoading] = useState(Boolean(match && params?.token));
+  const lastPreviewStatus = useRef<IndustryPreviewStatus | undefined>(undefined);
+  const previewStatus = industryPreviewStatus(preview, error, loading);
+
+  useEffect(() => {
+    applyMetadata({ title: "Draft preview | Cognirise", description: "Protected CMS draft preview.", canonicalUrl: null, noIndex: true });
+    // Each capability gets an independent delivery lifecycle. In particular,
+    // do not retain a prior ready state while its replacement is loading.
+    lastPreviewStatus.current = undefined;
+    setPreview(undefined);
+    setError(undefined);
+    setLoading(Boolean(params?.token));
+    if (!params?.token) return;
+
+    const controller = new AbortController();
+    let active = true;
+    let requestNumber = 0;
+    const load = async () => {
+      const currentRequest = ++requestNumber;
+      try {
+        const response = await fetch(`/api/preview/${encodeURIComponent(params.token)}`, {
+          credentials: "include",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const body: unknown = await response.json().catch(() => null);
+        if (!active || currentRequest !== requestNumber) return;
+        if (!response.ok) {
+          setPreview(undefined);
+          setError(fetchError(response, body));
+          setLoading(false);
+          return;
+        }
+        if (!isPreview(body)) {
+          setPreview(undefined);
+          setError({ kind: "invalid-response", message: "The preview server returned an invalid saved revision." });
+          setLoading(false);
+          return;
+        }
+        setError(undefined);
+        setPreview(body);
+        setLoading(false);
+      } catch (caught) {
+        if (!active || (caught instanceof DOMException && caught.name === "AbortError")) return;
+        setPreview(undefined);
+        setError({ kind: "unavailable", message: "The protected preview request could not be completed." });
+        setLoading(false);
+      }
+    };
+    void load();
+    const poll = window.setInterval(() => void load(), 30_000);
+    return () => {
+      active = false;
+      window.clearInterval(poll);
+      controller.abort();
+    };
+  }, [params?.token]);
+
+  useEffect(() => {
+    // The parent receives only an opaque delivery state. Capability tokens,
+    // revision data, diagnostics, and preview content remain in this frame.
+    if (!previewStatus || window.parent === window || lastPreviewStatus.current === previewStatus) return;
+    window.parent.postMessage(
+      { type: "industry-preview-status", status: previewStatus },
+      window.location.origin,
+    );
+    lastPreviewStatus.current = previewStatus;
+  }, [previewStatus]);
+
+  useEffect(() => {
+    const receiveFocusRequest = (event: MessageEvent<unknown>) => {
+      // This route is intentionally the only message receiver. A preview may
+      // be embedded by the same-origin CMS, never controlled by another frame.
+      if (
+        window.parent === window
+        || event.origin !== window.location.origin
+        || event.source !== window.parent
+      ) return;
+      if (!isIndustryPreviewFocusMessage(event.data)) return;
+      const section = document.querySelector<HTMLElement>(
+        `[data-industry-section="${event.data.section}"]`,
+      );
+      if (!section) return;
+      const disclosure = section.querySelector<HTMLElement>("[aria-expanded]");
+      if (event.data.state && disclosure && disclosure.getAttribute("aria-expanded") !== String(event.data.state === "expanded")) {
+        disclosure.click();
+      }
+      if (!section.hasAttribute("tabindex")) section.tabIndex = -1;
+      section.focus({ preventScroll: true });
+      section.scrollIntoView({
+        block: "start",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      });
+    };
+    window.addEventListener("message", receiveFocusRequest);
+    return () => window.removeEventListener("message", receiveFocusRequest);
+  }, []);
+
+  if (!match) return <NotFound />;
+  if (error) return <ProtectedPreviewError error={error} />;
+  if (!preview) return null;
+
+  const validation = validateCmsSnapshot(preview.kind, preview.document, "draft");
+  const warnings = [...preview.validationWarnings, ...(validation.success ? [] : validation.errors)];
+
+  if (preview.kind === "industry") {
+    if (!validation.success) {
+      return (
+        <Shell navigationOverride={preview.navigation}>
+          <PreviewBanner preview={preview} />
+          <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />
+          <ProtectedPreviewError error={{
+            kind: "invalid-response",
+            message: "This saved industry revision has validation errors and cannot be completed from public content.",
+          }} />
+        </Shell>
+      );
+    }
+    return (
+      <Shell navigationOverride={preview.navigation}>
+        <PreviewBanner preview={preview} />
+        <IndustryPreview preview={preview} content={validation.data.content as IndustryContent} />
+      </Shell>
+    );
+  }
+
+  const framework = preview.kind === "framework"
+    ? composeFrameworkPreviewRecord(preview.document, preview)
+    : null;
+
+  if (preview.kind === "framework" && framework) {
+    const missingFrameworkMedia = [
+      ...new Set([
+        ...preview.missingMediaIds,
+        ...unresolvedPinnedMedia(preview.document.content, preview.media ?? []),
+      ]),
+    ];
+    if (missingFrameworkMedia.length) {
+      return (
+        <Shell navigationOverride={preview.navigation}>
+          <PreviewBanner preview={preview} />
+          <PreviewWarningPanel warnings={warnings} missingMedia={missingFrameworkMedia} />
+          <ProtectedPreviewError error={{
+            kind: "invalid-response",
+            message: "This saved framework revision references draft media that is unavailable. It has not been completed with public media.",
+          }} />
+        </Shell>
+      );
+    }
+    return (
+      <Shell navigationOverride={preview.navigation}>
+        <main className="min-h-screen bg-background">
+          <PreviewBanner preview={preview} />
+          <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />
+          {framework.template === "agent-authority"
+            ? <AgentAuthorityLayout framework={framework} preview />
+            : framework.template === "guardrails"
+              ? <GuardrailsLayout framework={framework} preview />
+              : (
+                <MethodologyCmsPreviewBoundary framework={framework as CmsRecord<MethodologyFramework>}>
+                  {framework.template === "idao"
+                    ? <IDAOMethodology />
+                    : framework.template === "ai-use-case-prioritization"
+                      ? <AIUseCasePrioritization />
+                      : framework.template === "ai-value-to-scale"
+                        ? <AIValueToScale />
+                        : framework.template === "agentic-operations-readiness"
+                          ? <AgenticOperationsReadiness />
+                          : <HumanAgentOperatingModel />}
+                </MethodologyCmsPreviewBoundary>
+              )}
+        </main>
+      </Shell>
+    );
+  }
+
+  if (preview.kind === "office" && validation.success) {
+    const office = validation.data.content as OfficeContent;
+    return (
+      <main className="min-h-screen bg-background">
+        <PreviewBanner preview={preview} />
+        <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />
+        <section className="px-6 py-24">
+          <div className="mx-auto max-w-[720px] border border-border bg-[hsl(var(--secondary))] p-12">
+            <h3 className="mb-6 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-pink))]">Global Offices</h3>
+            <OfficeContactCard city={office.city} address={office.address} phone={office.phone} />
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <Shell navigationOverride={preview.navigation}>
+      <PreviewBanner preview={preview} />
+      <DraftPreviewContent preview={preview} warnings={warnings} />
+    </Shell>
+  );
+}
+*/

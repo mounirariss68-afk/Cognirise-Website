@@ -484,8 +484,25 @@ async function main() {
   const governedLegacyExternalIds = new Set(
     personGovernanceOperations(inventory.records).map((operation) => operation.externalId),
   );
-  const mediaOperations = mediaMigrationOperations(inventory.records);
-  for (const operation of migrationOperations(inventory.records)) {
+  const allOperations = migrationOperations(inventory.records);
+  const task241MethodologySlugs = new Set([
+    "idao",
+    "ai-use-case-prioritization",
+    "ai-value-to-scale",
+    "agentic-operations-readiness",
+    "human-agent-operating-model",
+  ]);
+  const task241MediaPaths = new Set(allOperations
+    .filter((operation) => operation.kind === "framework" && task241MethodologySlugs.has(operation.slug))
+    .flatMap((operation) => operation.mediaPaths));
+  // Task 241 uses a narrow, no-receipt draft-only reconciler. Do not let the
+  // broad inventory lifecycle create preservation receipts or use a generic
+  // top-level hero mapping for its page-owned nested media.
+  const mediaOperations = mediaMigrationOperations(inventory.records)
+    .filter((operation) => !task241MediaPaths.has(operation.publicPath));
+  for (const operation of allOperations.filter((operation) =>
+    operation.kind !== "framework" || !task241MethodologySlugs.has(operation.slug),
+  )) {
     const educationSuccessor = isEducationSuccessorOperation(operation);
     const financialServicesThesisSuccessor = isFinancialServicesThesisSuccessorOperation(operation);
     const normalizedOperationPayload = JSON.parse(JSON.stringify(operation.payload)) as {

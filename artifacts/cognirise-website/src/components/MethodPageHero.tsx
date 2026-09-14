@@ -11,6 +11,8 @@ interface MethodPageHeroProps {
   description: string;
   supportingText?: React.ReactNode;
   imageSrc: string;
+  /** CMS media URLs are already resolved and must not be rewritten as assets. */
+  imageResolved?: boolean;
   imageAlt: string;
   imagePosition?: string;
   imageCaptionSubtitle?: string;
@@ -23,6 +25,7 @@ export function MethodPageHero({
   description,
   supportingText,
   imageSrc,
+  imageResolved = false,
   imageAlt,
   imagePosition,
   imageCaptionSubtitle,
@@ -75,7 +78,7 @@ export function MethodPageHero({
           className="clip-diagonal relative h-[430px] overflow-hidden bg-[#071936] md:h-[520px] lg:h-[620px]"
         >
           <PulseImage
-            src={assetUrl(imageSrc)}
+            src={imageResolved ? imageSrc : assetUrl(imageSrc)}
             alt={imageAlt}
             className="h-full w-full object-cover"
             style={imagePosition ? { objectPosition: imagePosition } : undefined}

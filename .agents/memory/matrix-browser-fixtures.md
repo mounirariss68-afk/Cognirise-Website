@@ -4,12 +4,13 @@ description: Keep browser mutations scoped to the exact disposable document when
 ---
 
 Browser validation against mixed real and disposable CMS content must preserve
-the exact fixture document identity throughout every mutation.
+the exact fixture document identity and intended source revision throughout
+every mutation, including when an expected control is absent.
 
-**Why:** Market identifiers are shared across document rows. A control with the
-right market is not proof that it belongs to disposable test content; substituting
-another row can modify real editorial work.
+**Why:** Shared environments can contain real editorial work with matching
+markets or apparently equivalent controls. A missing disposable fixture is
+never permission to substitute a nearby row.
 
-**How to apply:** Bind mutation selectors to the fixture document ID and verify
-its source revision before confirmation. If the exact fixture cannot be found,
-stop that mutation rather than substituting another visible row.
+**How to apply:** Bind selectors to the disposable document ID, verify its
+source revision before confirmation, and stop the mutation if the target
+cannot be identified unambiguously.

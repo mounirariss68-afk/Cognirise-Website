@@ -62,11 +62,19 @@ const args = process.argv.slice(2);
 const shouldWrite = args.includes("--write");
 const shouldApplyDatabase = args.includes("--apply-db");
 const deferMediaUpload = args.includes("--defer-media-upload");
+const frameworksOnly = args.includes("--frameworks-only");
 const input = args.find((argument) => argument.startsWith("--in="))?.slice(5) ?? "scripts/cms/output/inventory.json";
 const destination = args.find((argument) => argument.startsWith("--out="))?.slice(6);
 const target = args.find((argument) => argument.startsWith("--target="))?.slice(9);
 
 const EDUCATION_V11_OPERATION_PREFIX = "cms-industry-education-successor-v11:";
+const METHODOLOGY_IMPORT_SLUGS = new Set([
+  "idao",
+  "ai-use-case-prioritization",
+  "ai-value-to-scale",
+  "agentic-operations-readiness",
+  "human-agent-operating-model",
+]);
 interface Inventory {
   schemaVersion: number;
   manifestDigest: string;
@@ -111,7 +119,7 @@ async function verifyStoredMedia(
 async function uploadMedia(operations: MediaMigrationOperation[]) {
   const bucket = objectStorageClient.bucket(process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID!);
   const prefix = process.env.PRIVATE_OBJECT_DIR!.replace(/^\/+|\/+$/g, "");
-  const candidates = operations.filter((item) => item.cmsOwnership === "cms-candidate");
+  const candidates = operations.filter((item) => item.cmsOwnership === "cms-candidate" || frameworksOnly);
   const entries = await mapWithConcurrency(candidates, 6, async (operation) => {
     if (!["image/jpeg", "image/png", "image/webp", "image/avif", "application/pdf"].includes(operation.mimeType)) {
       throw new Error(`CMS candidate ${operation.publicPath} has an unsupported media type.`);
@@ -210,6 +218,7 @@ async function applyDatabase(
       if (!serviceAccount) throw new Error("Could not provision migration attribution account.");
 
       const mediaByPath = new Map<string, string>();
+      const mediaVersionByPath = new Map<string, string>();
       const governedCaseByMediaPath = new Map(operations.flatMap((operation) =>
         operation.kind === "case-study" && operation.mediaPaths.length === 1
           ? [[operation.mediaPaths[0], operation] as const]
@@ -218,7 +227,9 @@ async function applyDatabase(
       let mediaCreated = 0;
       let mediaReplayed = 0;
       let mediaRepaired = 0;
-      for (const operation of mediaOperations.filter((item) => item.cmsOwnership === "cms-candidate")) {
+      for (const operation of mediaOperations.filter((item) =>
+        item.cmsOwnership === "cms-candidate" || frameworksOnly
+      )) {
         const [receipt] = await tx.select().from(cmsOperationReceiptsTable)
           .where(eq(cmsOperationReceiptsTable.idempotencyKey, operation.idempotencyKey));
         const historicalReceipts: Array<{
@@ -452,6 +463,15 @@ async function applyDatabase(
           }
         }
         mediaByPath.set(operation.publicPath, String(asset.id));
+        const [immutableVersion] = await tx.select({ id: cmsMediaVersionsTable.id })
+          .from(cmsMediaVersionsTable)
+          .where(eq(cmsMediaVersionsTable.assetId, asset.id))
+          .orderBy(desc(cmsMediaVersionsTable.versionNumber))
+          .limit(1);
+        if (!immutableVersion) {
+          throw new Error(`${operation.externalId}: imported media has no immutable version.`);
+        }
+        mediaVersionByPath.set(operation.publicPath, String(immutableVersion.id));
         if (!receipt) {
           await tx.insert(cmsOperationReceiptsTable).values({
             idempotencyKey: operation.idempotencyKey,
@@ -683,7 +703,7 @@ async function applyDatabase(
       for (const operation of operations.filter((item) =>
         item.kind === "case-study" && item.mediaPaths.length === 1
       )) {
-        const resolvedPayload = resolveMigrationMedia(operation, mediaByPath);
+        const resolvedPayload = resolveMigrationMedia(operation, mediaByPath, mediaVersionByPath);
         const mediaOperation = mediaOperations.find((item) =>
           item.publicPath === operation.mediaPaths[0] && item.cmsOwnership === "cms-candidate"
         );
@@ -1007,7 +1027,7 @@ async function applyDatabase(
           replayed++;
           continue;
         }
-        const resolvedPayload = resolveMigrationMedia(operation, mediaByPath);
+        const resolvedPayload = resolveMigrationMedia(operation, mediaByPath, mediaVersionByPath);
         if (conflict) {
           if (operation.kind === "case-study" && operation.idempotencyKey.startsWith("cms-case-study-baseline-v2:")) {
             const readiness = validateCmsSnapshot("case-study", resolvedPayload, "publish");
@@ -1134,6 +1154,61 @@ async function applyDatabase(
               requestId: operation.idempotencyKey,
               metadata: { sourceExternalId: operation.externalId, preservedEditorial: true },
             });
+            replayed++;
+            continue;
+          }
+          if (operation.kind === "framework"
+            && operation.idempotencyKey.startsWith("cms-framework-methodology-baseline-v1:")) {
+            // Framework content is editorial. A pre-existing canonical
+            // document might have a newer draft, review, or publication, so
+            // never adopt it or append over its history during inventory
+            // replay. Record the observed conflict as a repeatable
+            // preservation receipt and leave any reconciliation to an
+            // explicitly authorised editor workflow.
+            const [existingEdition] = await tx.select({
+              id: cmsMarketEditionsTable.id,
+            }).from(cmsMarketEditionsTable).where(and(
+              eq(cmsMarketEditionsTable.documentId, conflict.id),
+              eq(cmsMarketEditionsTable.market, "uae"),
+            ));
+            const [latestFrameworkRevision] = existingEdition ? await tx.select({
+              id: cmsRevisionsTable.id,
+              payload: cmsRevisionsTable.payload,
+            }).from(cmsRevisionsTable)
+              .where(eq(cmsRevisionsTable.editionId, existingEdition.id))
+              .orderBy(desc(cmsRevisionsTable.revisionNumber))
+              .limit(1) : [];
+            const existingFrameworkValid = latestFrameworkRevision
+              ? validateCmsSnapshot("framework", latestFrameworkRevision.payload, "draft").success
+              : false;
+            if (!existingFrameworkValid) {
+              throw new Error(
+                `${operation.externalId}: existing framework is incomplete or invalid and cannot receive a preservation receipt; reconcile it through an authorised framework workflow.`,
+              );
+            }
+            if (!receipt) {
+              await tx.insert(cmsOperationReceiptsTable).values({
+                idempotencyKey: operation.idempotencyKey,
+                operation: "cms.inventory.framework-baseline-preserved",
+                subjectId: String(conflict.id),
+                requestDigest: operation.requestDigest,
+                resultDigest: resultDigest({ documentId: conflict.id, preservedEditorial: true }),
+              });
+              await tx.insert(cmsAuditEventsTable).values({
+                actorUserId: serviceAccount.id,
+                actorLabel: "cms-inventory-migration",
+                action: "cms.inventory.framework-baseline-preserved",
+                targetType: "framework",
+                targetId: String(conflict.id),
+                requestId: operation.idempotencyKey,
+                metadata: {
+                  sourceExternalId: operation.externalId,
+                  reason: "A complete existing framework revision was preserved; no publication was created.",
+                },
+              });
+            } else if (receipt.operation !== "cms.inventory.framework-baseline-preserved") {
+              throw new Error(`${operation.externalId}: framework baseline receipt has an incompatible operation.`);
+            }
             replayed++;
             continue;
           }
@@ -1874,10 +1949,23 @@ async function applyDatabase(
             }).where(eq(cmsMediaVersionsTable.id, version.id));
           }
         }
+        const methodologyHeroVersionId = operation.kind === "framework"
+          && ["idao", "ai-use-case-prioritization", "ai-value-to-scale", "agentic-operations-readiness", "human-agent-operating-model"]
+            .includes(String((resolvedPayload.content as Record<string, unknown>).template))
+          ? mediaVersionByPath.get(operation.mediaPaths[0])
+          : undefined;
+        if (operation.kind === "framework"
+          && (resolvedPayload.content as Record<string, unknown>).template !== "agent-authority"
+          && (resolvedPayload.content as Record<string, unknown>).template !== "guardrails"
+          && !methodologyHeroVersionId) {
+          throw new Error(`${operation.externalId}: framework draft cannot be created without an exact immutable hero-media version.`);
+        }
         for (const mediaId of resolvedPayload.mediaIds) {
           await tx.insert(cmsMediaReferencesTable).values({
             assetId: mediaId,
-            mediaVersionId: mediaId === resolvedPayload.mediaIds[0] && pinnedVersionId ? pinnedVersionId : null,
+            mediaVersionId: mediaId === resolvedPayload.mediaIds[0]
+              ? pinnedVersionId ?? methodologyHeroVersionId ?? null
+              : null,
             documentId: document.id,
             fieldPath: `revision:${revision.id}`,
           });
@@ -2173,8 +2261,22 @@ async function main() {
   if (inventory.schemaVersion !== 2 || !Array.isArray(inventory.records) || !inventory.manifestDigest) {
     throw new Error("Unsupported or invalid inventory file.");
   }
-  const operations = migrationOperations(inventory.records);
-  const mediaOperations = mediaMigrationOperations(inventory.records);
+  const allOperations = migrationOperations(inventory.records);
+  if (frameworksOnly) {
+    throw new Error(
+      "The five methodology frameworks are owned by cms:reconcile-methodology-editorial; the general inventory importer cannot import them.",
+    );
+  }
+  const methodologyMediaPaths = new Set(allOperations
+    .filter((operation) => operation.kind === "framework" && METHODOLOGY_IMPORT_SLUGS.has(operation.slug))
+    .flatMap((operation) => operation.mediaPaths));
+  const operations = allOperations.filter((operation) =>
+    operation.kind !== "framework" || !METHODOLOGY_IMPORT_SLUGS.has(operation.slug),
+  );
+  const allMediaOperations = mediaMigrationOperations(inventory.records);
+  const mediaOperations = allMediaOperations.filter((operation) =>
+    !methodologyMediaPaths.has(operation.publicPath),
+  );
   const availabilityOperations = personAvailabilityOperations(inventory.records);
   const governanceOperations = personGovernanceOperations(inventory.records);
   let database;
@@ -2204,8 +2306,8 @@ async function main() {
     dryRun: !shouldApplyDatabase,
     mode: shouldApplyDatabase ? "development-db-apply" : "payload-only",
     note: shouldApplyDatabase
-      ? "Applied the governed UAE/English inventory. Eligible case-study summaries publish only after evidence, source review, rights, accessibility, durable-storage, and immutable-version gates pass; all other content retains its governed state."
-      : "No storage or database call was made. Use --apply-db --target=development to import governed drafts.",
+      ? "Applied the governed UAE/English inventory excluding the five methodology-editorial routes, which have their own draft-only reconciler. Eligible case-study summaries publish only after evidence, source review, rights, accessibility, durable-storage, and immutable-version gates pass; all other content retains its governed state."
+      : "No storage or database call was made. Use --apply-db --target=development to import governed drafts; use cms:reconcile-methodology-editorial for its five isolated methodology routes.",
     operations,
     availabilityOperations,
     governanceOperations,

@@ -16,25 +16,9 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: "Cognirise | Intelligence That Moves Work",
     description: "Cognirise redesigns consequential enterprise work around people, data, controls and intelligent execution.",
   },
-  "/methodologies/idao": {
-    title: "IDAO Methodology | Cognirise",
-    description: "Innovate, Demonstrate, Activate and Operate: Cognirise's methodology for moving consequential work from opportunity to sustained operation.",
-  },
   "/methodologies": {
     title: "AI Methodologies & Frameworks | Cognirise",
     description: "Explore Cognirise methods for moving valuable AI into sustained operation, from organisational maturity to workflow authority.",
-  },
-  "/methodologies/ai-value-to-scale": {
-    title: "AI Value-to-Scale Maturity Model | Cognirise",
-    description: "Assess seven evidence-backed conditions for repeatedly moving valuable AI from opportunity into sustained operation.",
-  },
-  "/methodologies/agentic-operations-readiness": {
-    title: "Agentic Operations Readiness Framework | Cognirise",
-    description: "Decide whether one workflow should proceed to agent delivery, needs preparation, or must stop—and identify the operating conditions to resolve.",
-  },
-  "/methodologies/ai-use-case-prioritization": {
-    title: "AI Use-Case Prioritization | Cognirise",
-    description: "A transparent working instrument for comparing AI opportunities across value, feasibility, friction and control burden.",
   },
   "/what-we-do/agentic-enterprise-transformation": {
     title: "Agentic Transformation Capability | Consulting & Engineering with AI",
@@ -141,6 +125,16 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     description: "A deterministic framework to measure, promote, and constrain intelligent agents based on evidence of capability and clear boundaries of operational authority.",
   },
 };
+
+/** These route components apply either their compiled baseline or the exact
+ * authoritative CMS revision SEO after client navigation. */
+export const ROUTE_OWNED_METADATA_PATHS = new Set([
+  "/methodologies/idao",
+  "/methodologies/ai-use-case-prioritization",
+  "/methodologies/ai-value-to-scale",
+  "/methodologies/agentic-operations-readiness",
+  "/methodologies/human-agent-operating-model",
+]);
 
 type NavigationItem = { id: string; label: string; href: string; group?: "own" | "partner"; items?: NavigationItem[] };
 const ownPlatformPaths = new Set(["/platforms/cognios", "/platforms/cognidocs", "/platforms/cogniagents", "/platforms/cognitalk", "/platforms/cogniware"]);
@@ -374,7 +368,11 @@ export function Shell({
 
   useEffect(() => {
     // These pages own governed metadata; do not overwrite their child effects.
-    if (currentPath.startsWith("/preview/") || currentPath === "/industries/financial-services") return;
+    if (
+      currentPath.startsWith("/preview/")
+      || currentPath === "/industries/financial-services"
+      || ROUTE_OWNED_METADATA_PATHS.has(currentPath)
+    ) return;
     const articleTitle = currentPath.startsWith("/insights/") && "AI Transformation Perspective | Cognirise";
     const allianceSlug = currentPath.match(/^\/platforms\/(lupitor|datatoolpack|bunjee-ai)$/)?.[1] as keyof typeof ALLIANCE_PLATFORMS | undefined;
     const alliance = allianceSlug ? ALLIANCE_PLATFORMS[allianceSlug] : undefined;

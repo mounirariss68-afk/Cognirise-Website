@@ -1,4 +1,8 @@
-import type { CmsDocumentKind } from "@workspace/api-zod";
+import {
+  methodologyEditorialDefinition,
+  type CmsDocumentKind,
+  type MethodologySlot,
+} from "@workspace/api-zod";
 import * as React from "react";
 import type { ReactNode } from "react";
 import { belongsToIndustrySection, isIndustrySectionId } from "@workspace/api-zod";
@@ -478,17 +482,21 @@ export function ContentEditor({ kind, value, onChange, errors, readinessPaths = 
           <Choice
             label="Framework template"
             value={value.template ?? ""}
-            options={["agent-authority", "guardrails"]}
+            options={["agent-authority", "guardrails", "idao", "ai-use-case-prioritization", "ai-value-to-scale", "agentic-operations-readiness", "human-agent-operating-model"]}
             onChange={(next) => {
               if (next === "guardrails" && value.template !== "guardrails") {
                 onChange({ ...guardrailsDraft(), visibility: value.visibility ?? "hidden", order: value.order ?? 0, sources: value.sources ?? [], relatedIds: value.relatedIds ?? [] });
+                return;
+              }
+              if (["idao", "ai-use-case-prioritization", "ai-value-to-scale", "agentic-operations-readiness", "human-agent-operating-model"].includes(next) && value.template !== next) {
+                onChange({ ...methodologyFrameworkDraft(next), visibility: value.visibility ?? "hidden", order: value.order ?? 0, sources: value.sources ?? [], relatedIds: value.relatedIds ?? [] });
                 return;
               }
               set("template", next);
             }}
           />
         </div>
-        {value.template === "guardrails" ? <GuardrailsFrameworkEditor value={value} onChange={onChange} /> : <>
+        {value.template === "guardrails" ? <GuardrailsFrameworkEditor value={value} onChange={onChange} /> : ["idao", "ai-use-case-prioritization", "ai-value-to-scale", "agentic-operations-readiness", "human-agent-operating-model"].includes(value.template) ? <MethodologyFrameworkEditor value={value} onChange={onChange} /> : <>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="CTA label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan" } : undefined)} />
             <SafeDestinationField label="CTA destination" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Start a Value Scan", href: next } : undefined)} />
@@ -533,6 +541,13 @@ export function ContentEditor({ kind, value, onChange, errors, readinessPaths = 
   );
 }
 
+const methodologyCanonicalIds: Record<string, Record<string, string[]>> = {
+  idao: { stages: ["innovate", "demonstrate", "activate", "operate"], layers: ["01", "02", "03", "04", "05"] },
+  "ai-use-case-prioritization": { dimensions: ["value", "feasibility", "timeToEvidence", "adoptionFriction", "controlBurden", "reusePotential"], decisionRules: ["stop", "innovate", "demonstrate", "activate"] },
+  "ai-value-to-scale": { dimensions: ["value", "portfolio", "platform", "operating", "workforce", "governance", "outcomes"], stages: ["1", "2", "3", "4", "5"] },
+  "agentic-operations-readiness": { conditions: ["stability", "access", "observability", "fallback", "exceptions", "economics"], decisions: ["proceed", "prepare", "stop"] },
+  "human-agent-operating-model": { designSteps: ["01", "02", "03", "04", "05"], decisionRights: ["frame", "recommend", "approve", "act", "intervene"], measures: ["use", "control", "capability", "outcome"] },
+};
 export function guardrailsDraft(): Content {
   const text = "";
   const layerIds = ["policy", "prompt", "runtime", "architecture"];
@@ -1184,3 +1199,166 @@ const guardrailsStructuralKeys = new Set([
   "reviewDate",
   "relatedIds",
 ]);
+
+function updateEditorialValue(value: unknown, path: readonly (string | number)[], next: unknown): unknown {
+  if (!path.length) return next;
+  const [key, ...remaining] = path;
+  if (Array.isArray(value)) {
+    return value.map((item, index) => index === key ? updateEditorialValue(item, remaining, next) : item);
+  }
+  const record = value && typeof value === "object" ? value as Record<string, unknown> : {};
+  return { ...record, [key]: updateEditorialValue(record[key], remaining, next) };
+}
+
+function MethodologyFrameworkEditor({ value, onChange }: { value: Content; onChange: (value: Content) => void }) {
+  const set = (key: string, next: unknown) => onChange({ ...value, [key]: next });
+  const hero = value.hero ?? {};
+  const definition = methodologyEditorialDefinition(String(value.template));
+  const immutableGroups = Object.entries(value.canonical ?? {}).map(([label, slots]: [string, any]) =>
+    `${label}: ${Array.isArray(slots) ? slots.map((slot) => slot.id).join(" · ") : ""}`,
+  );
+  return (
+    <section className="space-y-6 rounded-md border p-4">
+      <div>
+        <h3 className="font-semibold">Methodology editorial composition</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Edit only the fixed approved fields for this template. Assessment and canon identifiers below are fixed by the reviewed method.</p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Hero breadcrumb" value={hero.breadcrumb ?? ""} onChange={(next) => set("hero", { ...hero, breadcrumb: next })} />
+        <Field label="Hero title" value={hero.title ?? ""} onChange={(next) => set("hero", { ...hero, title: next })} />
+      </div>
+      <Area label="Hero description" value={hero.description ?? ""} onChange={(next) => set("hero", { ...hero, description: next })} />
+      <Area label="Hero supporting copy" value={hero.supportingText ?? ""} onChange={(next) => set("hero", { ...hero, supportingText: next || undefined })} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Hero caption label" value={hero.imageCaptionSubtitle ?? ""} onChange={(next) => set("hero", { ...hero, imageCaptionSubtitle: next || undefined })} />
+        <Field label="Hero caption" value={hero.imageCaptionTitle ?? ""} onChange={(next) => set("hero", { ...hero, imageCaptionTitle: next || undefined })} />
+        <Field label="Hero image position" value={hero.imagePosition ?? ""} onChange={(next) => set("hero", { ...hero, imagePosition: next || undefined })} placeholder="right center" />
+        <MediaField label="Framework hero image" required value={hero.media} overridePath="content.hero.media" onChange={(next) => set("hero", { ...hero, media: next })} />
+      </div>
+      {definition ? (
+        <div className="space-y-5">
+          <h4 className="font-semibold">Fixed editorial slots</h4>
+          <EditorialSlotEditor
+            slot={definition.slots}
+            value={value.editorial}
+            path={[]}
+            onChange={(editorial) => set("editorial", editorial)}
+          />
+        </div>
+      ) : <p role="alert" className="text-sm text-destructive">This methodology template has no registered slot definition.</p>}
+      <div className="rounded border bg-muted/30 p-3 text-sm text-muted-foreground">
+        <strong className="block text-foreground">Fixed method identifiers</strong>
+        {immutableGroups.map((group) => <p key={group} className="mt-1 font-mono text-xs">{group}</p>)}
+      </div>
+    </section>
+  );
+}
+
+/** New framework editions always start with their immutable method identity.
+ * The labels and prose surrounding these slots are editorial; their IDs and
+ * sequence are deliberately not editable controls. */
+export function methodologyFrameworkDraft(template: string): Content {
+  const canonical = methodologyCanonicalIds[template];
+  if (!canonical) throw new Error(`Unsupported methodology template "${template}".`);
+  const definition = methodologyEditorialDefinition(template);
+  if (!definition) throw new Error(`Methodology template "${template}" has no registered editorial slot definition.`);
+  // The descriptor's literal type can be deeply nested; admin form state is
+  // intentionally an untyped JSON record at this boundary.
+  const editorialSeed = definition.seed as Record<string, unknown>;
+  return {
+    schemaVersion: 1,
+    template,
+    hero: { breadcrumb: "", title: "", description: "", supportingText: "", imageCaptionSubtitle: "", imageCaptionTitle: "" },
+    editorial: structuredClone(editorialSeed),
+    canonical: Object.fromEntries(Object.entries(canonical).map(([key, ids]) => [key, ids.map((id) => ({ id }))])),
+    visibility: "hidden",
+    order: 0,
+    sources: [],
+    relatedIds: [],
+  };
+}
+
+function EditorialSlotEditor({
+  slot,
+  value,
+  path,
+  onChange,
+}: {
+  slot: MethodologySlot;
+  value: unknown;
+  path: readonly (string | number)[];
+  onChange: (next: unknown) => void;
+}) {
+  const fieldPath = `content.editorial.${path.join(".")}`;
+  switch (slot.kind) {
+    case "fixed":
+      return null;
+    case "text":
+      return slot.format === "short"
+        ? <Field label={slot.label} value={value} path={fieldPath} onChange={onChange} required />
+        : <Area label={slot.label} value={typeof value === "string" ? value : ""} path={fieldPath} onChange={onChange} required rows={4} />;
+    case "link": {
+      const current = value && typeof value === "object" ? value as { label?: string; href?: string } : {};
+      return (
+        <div className="grid gap-4 rounded border p-4 sm:grid-cols-2">
+          <Field label={`${slot.label} label`} value={current.label ?? ""} path={`${fieldPath}.label`} onChange={(label) => onChange({ ...current, label })} required />
+          <SafeDestinationField label={`${slot.label} destination`} value={current.href ?? ""} onChange={(href) => onChange({ ...current, href })} />
+        </div>
+      );
+    }
+    case "media": {
+      const current = value && typeof value === "object" ? value as { altText?: string; media?: MediaSelection } : {};
+      return (
+        <div className="grid gap-4 rounded border p-4 sm:grid-cols-2">
+          <Area label={`${slot.label} alternative text`} value={current.altText ?? ""} path={`${fieldPath}.altText`} onChange={(altText) => onChange({ ...current, altText })} required rows={3} />
+          <MediaField
+            label={slot.label}
+            role={slot.role}
+            required
+            value={current.media}
+            overridePath={`${fieldPath}.media`}
+            onChange={(media) => onChange({
+              ...current,
+              // Methodology accessibility copy is owned by the outer revision
+              // slot. Persist only its immutable asset pin here.
+              media: media && {
+                mediaId: media.mediaId,
+                mediaVersionId: media.mediaVersionId,
+                role: media.role,
+              },
+            })}
+          />
+        </div>
+      );
+    }
+    case "group":
+      return (
+        <div className="space-y-4">
+          {Object.entries(slot.fields).map(([key, child]) => (
+            <EditorialSlotEditor
+              key={key}
+              slot={child}
+              value={value && typeof value === "object" ? (value as Record<string, unknown>)[key] : undefined}
+              path={[...path, key]}
+              onChange={(next) => onChange(updateEditorialValue(value, [key], next))}
+            />
+          ))}
+        </div>
+      );
+    case "fixed-list":
+      return (
+        <fieldset className="space-y-4 rounded border p-4">
+          <legend className="px-1 text-sm font-semibold">{slot.label}</legend>
+          {slot.items.map((child, index) => (
+            <EditorialSlotEditor
+              key={index}
+              slot={child}
+              value={Array.isArray(value) ? value[index] : undefined}
+              path={[...path, index]}
+              onChange={(next) => onChange(updateEditorialValue(value, [index], next))}
+            />
+          ))}
+        </fieldset>
+      );
+  }
+}

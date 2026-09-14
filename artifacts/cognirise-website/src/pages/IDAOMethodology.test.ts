@@ -8,6 +8,8 @@ const content = readFileSync(new URL("../content/idao.ts", import.meta.url), "ut
 const blueprint = readFileSync(new URL("../components/BlueprintJourney.tsx", import.meta.url), "utf8");
 const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 const shell = readFileSync(new URL("../components/layout/Shell.tsx", import.meta.url), "utf8");
+const editorial = readFileSync(new URL("../../../../lib/api-zod/src/methodology-editorial/idao.ts", import.meta.url), "utf8");
+const idaoSurface = `${page}\n${content}\n${editorial}`;
 
 test("routes IDAO and redirects retired service overviews to the homepage practice section", () => {
   assert.match(app, /path="\/methodologies\/idao" component=\{IDAOMethodology\}/);
@@ -45,8 +47,8 @@ test("IDAO renders every stage from one shared, substantive content model", () =
   assert.equal(content.match(new RegExp(`imageAlt:`, "g"))?.length, 9);
   assert.match(page, /IDAO_STAGES\.map/);
   assert.match(blueprint, /IDAO_STAGES\.map/);
-  assert.match(page, /Every stage earns the next/);
-  assert.match(page, /href="\/value-scan"/);
+  assert.match(editorial, /Every stage earns the next/);
+  assert.match(editorial, /"\/value-scan"/);
 });
 
 test("IDAO keeps approved imagery, order and milestone commitments", () => {
@@ -57,8 +59,8 @@ test("IDAO keeps approved imagery, order and milestone commitments", () => {
   }
   assert.match(content, /time: "48 hours"/);
   assert.match(content, /time: "2–4 weeks \(MVP\)"/);
-  assert.match(page, /decision-ready prototype within[\s\S]*48 hours/i);
-  assert.match(page, /governed MVP within[\s\S]*2–4 weeks/i);
+  assert.match(editorial, /decision-ready prototype within[\s\S]*48 hours/i);
+  assert.match(editorial, /governed MVP within[\s\S]*2–4 weeks/i);
 });
 
 test("IDAO hero keeps the shared five-point silhouette and accessible reveal", () => {
@@ -83,7 +85,7 @@ test("IDAO explains progression, loops, assurance and ownership", () => {
     "handover discipline",
     "client-owned capability",
   ]) {
-    assert.match(`${page}\n${content}`, new RegExp(concept, "i"));
+    assert.match(idaoSurface, new RegExp(concept, "i"));
   }
   assert.doesNotMatch(page, /<details/);
   assert.match(page, /Across IDAO/);
@@ -101,18 +103,18 @@ test("IDAO explains progression, loops, assurance and ownership", () => {
 
 test("public IDAO copy protects internal recipes and vendor details", () => {
   for (const prohibited of ["Anthropic", "Claude", "OpenAI", "Perplexity", "Langfuse", "LangSmith", "Replit", "prompt libraries", "file convention", "numeric threshold"]) {
-    assert.doesNotMatch(`${page}\n${content}`, new RegExp(`\\b${prohibited}\\b`, "i"));
+    assert.doesNotMatch(idaoSurface, new RegExp(`\\b${prohibited}\\b`, "i"));
   }
 });
 
 test("IDAO opens with an accessible four-part human and agent delivery system", () => {
   for (const capability of ["Senior Leaders", "Forward Deployed Engineers", "Forward Deployed Agents", "Controls & Assurance"]) {
-    assert.match(page, new RegExp(capability));
+    assert.match(editorial, new RegExp(capability));
   }
-  assert.match(page, /Humans and AI agents working as/);
-  assert.match(page, /20\+ years/);
-  assert.match(page, /idao-human-agent-team\.png/);
-  assert.match(page, /alt="A single figure divided into a human leader and an AI agent/);
+  assert.match(editorial, /Humans and AI agents working as/);
+  assert.match(editorial, /20\+ years/);
+  assert.match(editorial, /idao-human-agent-team\.png/);
+  assert.match(page, /alt=\{teamImage\.altText\}/);
   assert.equal((page.match(/aria-pressed=\{isActive\}/g) ?? []).length, 2);
   assert.equal((page.match(/aria-expanded=\{isActive\}/g) ?? []).length, 2);
   assert.equal((page.match(/aria-controls="delivery-team-detail"/g) ?? []).length, 2);
@@ -127,4 +129,38 @@ test("IDAO opens with an accessible four-part human and agent delivery system", 
   assert.match(page, /max-w-\[1100px\]/);
   assert.doesNotMatch(page, /lg:absolute lg:bottom-0/);
   assert.match(page, /focus-visible:outline/);
+});
+
+test("IDAO keeps baseline editorial defaults and binds CMS edits in place", () => {
+  assert.match(editorial, /A governed route from a consequential opportunity to evidence, adoption and a capability your team can own\./);
+  assert.match(editorial, /The work ends in your hands, not ours\./);
+  assert.match(editorial, /Bring one process\. Leave with the next evidence to earn\./);
+  assert.equal((editorial.match(/id: "(?:hero-demonstrate|delivery-team|stage-|canon-)/g) ?? []).length, 11);
+
+  assert.match(page, /methodologyEditorial<"idao", typeof idaoEditorial>\("idao", cms, idaoEditorial\.seed\)/);
+  assert.match(page, /methodologyEditorialMedia\(cms, editorial\.delivery\.teamImage\)/);
+  assert.match(page, /methodologyEditorialMedia\(cms, editorial\.stageMedia\[index\]\.image\)/);
+  assert.match(page, /methodologyEditorialMedia\(cms, editorial\.canonMedia\[index\]\.image\)/);
+  assert.doesNotMatch(page, /assetUrl\(stage\.image\)/);
+  assert.doesNotMatch(page, /assetUrl\(layer\.image\)/);
+  assert.match(page, /editorial\.deliveryTeam\.filter/);
+  assert.match(page, /editorial\.startingPoint\.firstParagraph/);
+  assert.match(page, /editorial\.lifecycle\.description/);
+  assert.match(page, /editorial\.canonIntroduction\.firstEmphasis/);
+  assert.match(page, /editorial\.handover\.cta\.href/);
+  assert.match(page, /editorial\.closingCta\.cta\.label/);
+  assert.doesNotMatch(page, /MethodologyRelationship/);
+});
+
+test("IDAO media slots retain the fixed canonical stage and layer identities", () => {
+  const definition = editorial.slice(editorial.indexOf("export const idaoEditorial"));
+  for (const id of ["innovate", "demonstrate", "activate", "operate"]) {
+    assert.match(definition, new RegExp(`id: fixed\\("${id}"\\)`));
+  }
+  for (const id of ["01", "02", "03", "04", "05"]) {
+    assert.match(definition, new RegExp(`id: fixed\\("${id}"\\)`));
+  }
+  assert.equal((definition.match(/stageMedia: fixedList/g) ?? []).length, 1);
+  assert.equal((definition.match(/canonMedia: fixedList/g) ?? []).length, 1);
+  assert.equal((definition.match(/role: "supporting"/g) ?? []).length, 10);
 });

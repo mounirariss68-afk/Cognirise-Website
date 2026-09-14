@@ -39,7 +39,88 @@ const legacyPersonExternalIds: Record<string, string> = {
   "Fadi Mattar": "person:869b2b63e38d11b890d4",
 };
 
-function personRecords(items: SourceObject[], file: string) {
+/*
+ * AboutPeople is deliberately CMS collection-driven and has no compiled
+ * fallback. The inventory is still the bootstrap authority for the public
+ * roster that was legitimately compiled before that ownership hand-off.
+ *
+ * Keep this exact source in the generator rather than attempting to extract
+ * an absent `peopleFallback` from the current CMS-driven route or inventing
+ * a revision from live CMS state. The source is commit
+ * 9a7c7b0140f36310bfc0019cbb9e6ff236062caf; it was removed by cf259fc,
+ * whose only purpose was to make published CMS people authoritative.
+ */
+const PUBLIC_PEOPLE_BASELINE = [
+  {
+    name: "Mounir Ariss",
+    group: "leadership",
+    title: "CEO & Co-founder",
+    background: "Three decades helping enterprises across the region and beyond turn technology shifts into operating advantage, with senior accountability kept close to delivery.",
+    contribution: "Strategic judgment, practical transformation leadership and a focus on turning consequential AI decisions into operating results.",
+    enabled: true,
+  },
+  {
+    name: "Bulent Egrilmez",
+    group: "leadership",
+    title: "CTO & Co-founder",
+    background: "A technology leader focused on production-grade AI, LLM and RAG systems, multi-agent architecture, product delivery and enterprise transformation.",
+    contribution: "The engineering discipline to move AI from a promising prototype into secure, scalable systems that perform in production.",
+    enabled: true,
+  },
+  {
+    name: "Omer Barbaros Yis",
+    group: "leadership",
+    title: "Co-founder",
+    background: "An experienced business and technology leader helping organisations connect strategic ambition, operating priorities and executable transformation.",
+    contribution: "An operator’s perspective on shaping partnerships and practical routes from enterprise priorities to sustained value.",
+    enabled: true,
+  },
+  {
+    name: "Hisham Nofal, PhD.",
+    group: "leadership",
+    title: "Education Sector lead",
+    background: "More than two decades across education consulting, sector leadership and academia, with deep experience of GCC and MENA education systems and former leadership of KPMG Saudi Arabia’s education sector.",
+    contribution: "Sector depth that connects education policy and institutional ambition with workable, responsible transformation.",
+    enabled: true,
+  },
+  {
+    name: "Gökhan Güney",
+    group: "leadership",
+    title: "Co-founder",
+    background: "Decades of enterprise transformation leadership across Türkiye, Europe and the Gulf, building the engineering muscle that turns strategy into systems that run.",
+    contribution: "Delivery leadership, local operating knowledge and the discipline required to carry complex change into production.",
+    enabled: false,
+  },
+  {
+    name: "Alexis Lecanuet",
+    group: "advisor",
+    title: "Former Regional CEO, Accenture Middle East",
+    background: "A senior regional leader with extensive experience in strategy execution, client portfolio leadership and large-scale digital transformation across Europe and MENA.",
+    contribution: "An inside view of how transformation firms win and scale in the region, sharpening Cognirise’s senior-led, platform-powered model.",
+    enabled: true,
+  },
+  {
+    name: "Rami Aslan",
+    group: "advisor",
+    title: "Former CEO, Türk Telekom · Investor & Board Member",
+    background: "More than 25 years across North America, Europe, the Middle East and Africa, spanning telecom operations, corporate finance, investment and board leadership.",
+    contribution: "The operator’s seat on transformation at national scale, alongside investor discipline and deep telecom expertise.",
+    enabled: true,
+  },
+  {
+    name: "Fadi Mattar",
+    group: "advisor",
+    title: "Public & Government Affairs Director — IMEA & Türkiye, and Country Director Kuwait & Levant, Dow",
+    background: "A senior corporate-affairs and country leader whose career bridges energy and petrochemicals, financial services, government relations and business leadership in the Gulf.",
+    contribution: "A grounded understanding of how large industrial organisations and governments make decisions, strengthening our market and stakeholder perspective.",
+    enabled: true,
+  },
+] as const;
+
+const PUBLIC_PEOPLE_BASELINE_LABEL =
+  "Last compiled public About roster before CMS collection ownership (git 9a7c7b0140f36310bfc0019cbb9e6ff236062caf)";
+
+function personRecords(items: readonly SourceObject[], file: string, sourceLabel?: string) {
   return items.map((item, order): InventoryRecord => {
     const role = item.group === "advisor"
       ? "advisor" as const
@@ -58,7 +139,9 @@ function personRecords(items: SourceObject[], file: string) {
       profileLinks: [],
       visibility: "public",
       order,
-      sources: item.source ? [{ label: String(item.source), accessedAt: SOURCE_DATE }] : source(file),
+      sources: item.source
+        ? [{ label: String(item.source), accessedAt: SOURCE_DATE }]
+        : source(file, sourceLabel),
       relatedIds: [],
     };
     const validation = validateCmsContent("person", content, "draft");
@@ -311,7 +394,7 @@ function frameworkRecords(): InventoryRecord[] {
   };
   const validation = validateCmsContent("framework", content, "draft");
   if (!validation.success) throw new Error(`Agent Authority Model: ${validation.errors.join("; ")}`);
-  return [{
+  const records: InventoryRecord[] = [{
     externalId: "framework:agent-authority-model-v1",
     type: "framework",
     name: "The Agent Authority Model",
@@ -327,6 +410,7 @@ function frameworkRecords(): InventoryRecord[] {
       "Confirm the framework narrative, standards provenance, review date, and extracted gateway artwork before publication.",
     ]),
   }];
+  return records;
 }
 
 async function main() {
@@ -335,7 +419,7 @@ async function main() {
   const platformFile = "src/pages/PlatformsOverview.tsx";
   const articleFile = "src/pages/InsightArticle.tsx";
   const industryFile = "src/content/industries.ts";
-  const people = personRecords(await extractVariable(peopleFile, "peopleFallback") as SourceObject[], peopleFile);
+  const people = personRecords(PUBLIC_PEOPLE_BASELINE, peopleFile, PUBLIC_PEOPLE_BASELINE_LABEL);
   const partners = partnerRecords(await extractVariable(partnerFile, "partnersFallback") as SourceObject[], partnerFile);
   const platforms = platformRecords(await extractVariable(platformFile, "platformFallback") as SourceObject[], platformFile);
   const articles = articleRecords(await extractArticles(articleFile, "articles"), articleFile);
@@ -367,7 +451,28 @@ async function main() {
   if (partners.length !== 5 || platforms.length !== 5 || articles.length !== 3 || industries.length !== 6) {
     throw new Error("The public website no longer matches the governed 5 partner / 5 platform / 3 article / 6 industry manifest.");
   }
+  const expectedNonMethodologyRoutes = {
+    partners: ["bgts", "argano", "lupitor", "datatoolpack", "bunjee-ai"],
+    platforms: ["cognios", "cognidocs", "cogniagents", "cognitalk", "cogniware"],
+    articles: ["ai-should-move-the-business", "foundations-for-production", "governed-digital-workforce"],
+    industries: ["financial-services", "telecoms", "travel-hospitality", "energy-resources", "public-sector", "education"],
+  };
+  const actualNonMethodologyRoutes = {
+    partners: partners.map((record) => String(record.fields.slug)),
+    platforms: platforms.map((record) => String(record.fields.slug)),
+    articles: articles.map((record) => String(record.fields.slug)),
+    industries: industries.map((record) => String(record.fields.slug)),
+  };
+  if (JSON.stringify(actualNonMethodologyRoutes) !== JSON.stringify(expectedNonMethodologyRoutes)) {
+    throw new Error("The non-methodology CMS inventory no longer matches the governed public partner, platform, article, and industry routes.");
+  }
+  const financialServices = industries.find((record) => record.fields.slug === "financial-services");
+  if ((financialServices?.fields.content as SourceObject | undefined)?.thesis
+    !== "Trust in AI comes from how it is governed and operated—not how well its chatbot performs.") {
+    throw new Error("The governed Financial Services thesis is missing from the generated industry inventory.");
+  }
   if (caseStudies.length !== 21) throw new Error(`Expected 21 governed case studies, found ${caseStudies.length}.`);
+  if (frameworks.length !== 1) throw new Error(`Expected only the Agent Authority inventory framework; Task 241 methodology drafts have their own reconciler, found ${frameworks.length}.`);
    if (assets.length !== 86) throw new Error(`Expected 77 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
 
   const stable = {

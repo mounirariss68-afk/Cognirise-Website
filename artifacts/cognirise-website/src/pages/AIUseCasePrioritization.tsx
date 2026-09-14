@@ -7,6 +7,12 @@ import { MethodologyRelationship } from "@/components/MethodologyRelationship";
 import { MethodPageHero } from "@/components/MethodPageHero";
 import { useMethodSessionState, useUnsavedWorkWarning } from "@/lib/use-method-session-state";
 import { downloadPrioritizationResultsPdf } from "@/lib/pulse-assessment-reports";
+import { MethodologyCmsDelivery, methodologyEditorial, methodologyHero, useMethodologyCmsContent, useMethodologyCmsSeo } from "@/components/MethodologyCmsLayout";
+import {
+  aiUseCasePrioritizationEditorial,
+  aiUseCasePrioritizationHeroSeed,
+  methodologySeoSeed,
+} from "@workspace/api-zod";
 
 export type UseCase = {
   id: string;
@@ -26,24 +32,28 @@ export const DIMENSIONS = [
   { id: "reusePotential", label: "Reuse Potential", low: "Isolated", high: "Foundational", desc: "Component or agent reuse." },
 ] as const;
 
-const DEFAULT_USE_CASES: UseCase[] = [
-  {
-    id: "uc-1",
-    name: "Customer Onboarding Document Extraction",
-    description: "",
-    scores: { value: 4, feasibility: 4, timeToEvidence: 4, adoptionFriction: 3, controlBurden: 2, reusePotential: 4 },
-    caveats: "High data privacy requirements; PII handling must be strictly governed and approved.",
-    dependencies: "Approved data access, retention rules and a named information owner."
-  },
-  {
-    id: "uc-2",
-    name: "Legacy System Chat Interface",
-    description: "",
-    scores: { value: 2, feasibility: 2, timeToEvidence: 2, adoptionFriction: 1, controlBurden: 2, reusePotential: 1 },
-    caveats: "API access to the legacy core banking system is undocumented and notoriously unstable.",
-    dependencies: "A stable read-only integration contract and accountable system owner."
-  }
-];
+function defaultUseCases(
+  sampleOpportunities: typeof aiUseCasePrioritizationEditorial.seed.sampleOpportunities,
+): UseCase[] {
+  return [
+    {
+      id: "uc-1",
+      name: sampleOpportunities[0].name,
+      description: "",
+      scores: { value: 4, feasibility: 4, timeToEvidence: 4, adoptionFriction: 3, controlBurden: 2, reusePotential: 4 },
+      caveats: sampleOpportunities[0].caveats,
+      dependencies: sampleOpportunities[0].dependencies,
+    },
+    {
+      id: "uc-2",
+      name: sampleOpportunities[1].name,
+      description: "",
+      scores: { value: 2, feasibility: 2, timeToEvidence: 2, adoptionFriction: 1, controlBurden: 2, reusePotential: 1 },
+      caveats: sampleOpportunities[1].caveats,
+      dependencies: sampleOpportunities[1].dependencies,
+    },
+  ];
+}
 
 export const isUseCaseSessionState = (value: unknown): value is UseCase[] =>
   Array.isArray(value) && value.every((useCase) => {
@@ -127,7 +137,13 @@ function ScorePills({ value, onChange, dimensionId, useCaseId }: { value: number
   );
 }
 
-function UseCaseCard({ uc, index, updateUseCase, removeUseCase }: { uc: UseCase; index: number; updateUseCase: (id: string, data: Partial<UseCase>) => void; removeUseCase: (id: string) => void }) {
+function UseCaseCard({ uc, index, updateUseCase, removeUseCase, editorial }: {
+  uc: UseCase;
+  index: number;
+  updateUseCase: (id: string, data: Partial<UseCase>) => void;
+  removeUseCase: (id: string) => void;
+  editorial: typeof aiUseCasePrioritizationEditorial.seed.assessmentCard;
+}) {
   const rec = getRecommendation(uc);
   const reducedMotion = useReducedMotion();
 
@@ -143,44 +159,44 @@ function UseCaseCard({ uc, index, updateUseCase, removeUseCase }: { uc: UseCase;
         {/* Left Col: Info */}
         <div className="flex-[0.9] flex flex-col border-b lg:border-b-0 lg:border-r border-[#cbd3e1] pb-8 lg:pb-0 lg:pr-10">
            <div className="flex justify-between items-start mb-6">
-             <span className="text-[10px] font-bold text-[hsl(var(--brand-pink))] uppercase tracking-[0.15em] block">Opportunity 0{index + 1}</span>
-             <button onClick={() => removeUseCase(uc.id)} data-testid={`button-remove-use-case-${uc.id}`} className="text-[#a0afc0] hover:text-[hsl(var(--brand-coral))] transition-colors" aria-label="Remove opportunity"><Trash2 size={16} /></button>
+              <span className="text-[10px] font-bold text-[hsl(var(--brand-pink))] uppercase tracking-[0.15em] block">{editorial.opportunityPrefix}{index + 1}</span>
+              <button onClick={() => removeUseCase(uc.id)} data-testid={`button-remove-use-case-${uc.id}`} className="text-[#a0afc0] hover:text-[hsl(var(--brand-coral))] transition-colors" aria-label={editorial.removeOpportunity}><Trash2 size={16} /></button>
            </div>
            
            <input 
              value={uc.name} 
              onChange={e => updateUseCase(uc.id, { name: e.target.value })} 
              data-testid={`input-use-case-name-${uc.id}`}
-             placeholder="Opportunity Name"
+              placeholder={editorial.opportunityNamePlaceholder}
              className="font-display text-[28px] font-semibold text-[#102957] bg-transparent outline-none border-b border-transparent hover:border-[#cbd3e1] focus:border-[hsl(var(--brand-pink))] transition-colors w-full pb-2 tracking-[-0.03em]"
            />
 
-            <label className="mt-8 block text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491]" htmlFor={`description-${uc.id}`}>Outcome sought</label>
+             <label className="mt-8 block text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491]" htmlFor={`description-${uc.id}`}>{editorial.outcomeSought}</label>
             <textarea
               id={`description-${uc.id}`}
               value={uc.description}
               onChange={e => updateUseCase(uc.id, { description: e.target.value })}
               data-testid={`textarea-description-${uc.id}`}
-              placeholder="What business or service outcome would improve?"
+               placeholder={editorial.outcomePlaceholder}
               className="mt-3 h-24 w-full resize-none rounded-sm border border-[#cbd3e1] bg-[#fdfcfb] p-4 text-[14px] leading-relaxed text-[#405777] outline-none focus:border-[hsl(var(--brand-pink))] focus:bg-white transition-all shadow-inner"
             />
            
            <div className="mt-8 lg:mt-auto pt-6 border-t border-[#cbd3e1] border-dashed">
-             <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491] mb-3">Caveats & Constraints</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491] mb-3">{editorial.caveatsAndConstraints}</label>
              <textarea 
                value={uc.caveats} 
                onChange={e => updateUseCase(uc.id, { caveats: e.target.value })}
                data-testid={`textarea-caveats-${uc.id}`}
-               placeholder="Record specific risks, data privacy concerns, or dependencies..."
+                placeholder={editorial.caveatsPlaceholder}
                className="w-full text-[13px] leading-relaxed text-[#536887] bg-[#f3f5f8] p-4 rounded-sm border border-transparent focus:border-[#cbd3e1] focus:bg-white outline-none resize-none transition-all h-24"
              />
-              <label className="mt-6 block text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491]" htmlFor={`dependencies-${uc.id}`}>Dependencies</label>
+               <label className="mt-6 block text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491]" htmlFor={`dependencies-${uc.id}`}>{editorial.dependencies}</label>
               <textarea
                 id={`dependencies-${uc.id}`}
                 value={uc.dependencies}
                 onChange={e => updateUseCase(uc.id, { dependencies: e.target.value })}
                 data-testid={`textarea-dependencies-${uc.id}`}
-                placeholder="Name prerequisite data, access, policy, platform or owner decisions."
+                placeholder={editorial.dependenciesPlaceholder}
                 className="mt-3 h-24 w-full resize-none rounded-sm border border-transparent bg-[#f3f5f8] p-4 text-[13px] leading-relaxed text-[#536887] outline-none transition-all focus:border-[#cbd3e1] focus:bg-white"
               />
            </div>
@@ -189,8 +205,8 @@ function UseCaseCard({ uc, index, updateUseCase, removeUseCase }: { uc: UseCase;
         {/* Right Col: Scoring Grid */}
         <div className="flex-[1.1]">
            <div className="flex items-center justify-between mb-8">
-             <h3 className="font-display text-xl font-semibold tracking-[-0.03em] text-[#102957]">Evaluation Criteria</h3>
-             <span className="text-[12px] font-medium text-[#647491] bg-[#f3f5f8] px-3 py-1 rounded-sm border border-[#cbd3e1]">1–5 Scale</span>
+              <h3 className="font-display text-xl font-semibold tracking-[-0.03em] text-[#102957]">{editorial.evaluationCriteria}</h3>
+              <span className="text-[12px] font-medium text-[#647491] bg-[#f3f5f8] px-3 py-1 rounded-sm border border-[#cbd3e1]">{editorial.scale}</span>
            </div>
            
            <div className="grid sm:grid-cols-2 gap-x-10 gap-y-8">
@@ -225,7 +241,7 @@ function UseCaseCard({ uc, index, updateUseCase, removeUseCase }: { uc: UseCase;
         </div>
         {rec.link && (
            <Link href={rec.link} data-testid={`link-idao-stage-${uc.id}`} className={`shrink-0 text-[13px] font-bold flex items-center gap-2 ${rec.color} hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]`}>
-            View stage <ArrowRight size={16} />
+             {editorial.viewStage} <ArrowRight size={16} />
           </Link>
         )}
       </div>
@@ -239,7 +255,7 @@ function UseCaseCard({ uc, index, updateUseCase, removeUseCase }: { uc: UseCase;
          </div>
          <div className="flex-[0.6] sm:border-l sm:border-[#cbd3e1] sm:pl-6">
            <p className="text-[11px] leading-relaxed text-[#405777]">
-             <strong>Note on Control Burden:</strong> Reflects exposure and required oversight. It can change priority, scope, or IDAO entry point. <Link href="/methodologies/agent-authority-model" className="underline font-bold text-[hsl(var(--brand-pink))] hover:text-[#102957]">Use Agent Authority</Link> separately when a consequential handover exists.
+              <strong>{editorial.controlBurdenNote.heading}</strong>{" "}{editorial.controlBurdenNote.beforeAuthorityLink}{" "}<Link href={editorial.controlBurdenNote.authorityLink.href} className="underline font-bold text-[hsl(var(--brand-pink))] hover:text-[#102957]">{editorial.controlBurdenNote.authorityLink.label}</Link>{" "}{editorial.controlBurdenNote.afterAuthorityLink}
            </p>
          </div>
        </div>
@@ -247,7 +263,12 @@ function UseCaseCard({ uc, index, updateUseCase, removeUseCase }: { uc: UseCase;
   );
 }
 
-function AnalysisGroup({ title, description, items }: { title: string; description: string; items: { uc: UseCase; rec: ReturnType<typeof getRecommendation> }[] }) {
+function AnalysisGroup({ title, description, items, editorial }: {
+  title: string;
+  description: string;
+  items: { uc: UseCase; rec: ReturnType<typeof getRecommendation> }[];
+  editorial: typeof aiUseCasePrioritizationEditorial.seed.analysis;
+}) {
   if (items.length === 0) return null;
   const reducedMotion = useReducedMotion();
   
@@ -266,20 +287,20 @@ function AnalysisGroup({ title, description, items }: { title: string; descripti
           return (
             <div key={uc.id} className="bg-white border border-[#cbd3e1] p-5 md:p-6 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm hover:border-[#a0afc0] transition-colors" data-testid={`card-analysis-${uc.id}`}>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491]">Sequence {String(itemIndex + 1).padStart(2, "0")}</span>
-                <h4 className="font-display text-[22px] font-semibold text-[#102957] mt-1 mb-3">{uc.name || "Unnamed Opportunity"}</h4>
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491]">{editorial.sequencePrefix} {String(itemIndex + 1).padStart(2, "0")}</span>
+                <h4 className="font-display text-[22px] font-semibold text-[#102957] mt-1 mb-3">{uc.name || editorial.unnamedOpportunity}</h4>
                 <div className="flex flex-wrap gap-2">
                   <span className={`text-[10px] font-bold uppercase tracking-[0.15em] px-2 py-1 border border-current ${rec.bg} ${rec.color}`}>{rec.stage}</span>
                   {tags.map(tag => (
                     <span key={tag} className="text-[10px] font-bold uppercase tracking-[0.15em] px-2 py-1 bg-[#102957] text-white">{tag}</span>
                   ))}
                 </div>
-                {uc.dependencies && <p className="mt-4 text-[13px] leading-relaxed text-[#536887] bg-[#f3f5f8] p-3 border-l-2 border-[#cbd3e1]"><strong className="text-[#102957]">Resolve before entry:</strong> {uc.dependencies}</p>}
-                {uc.caveats && <p className="mt-2 text-[13px] leading-relaxed text-[#536887] bg-[#f3f5f8] p-3 border-l-2 border-[#cbd3e1]"><strong className="text-[#102957]">Caveat:</strong> {uc.caveats}</p>}
+                {uc.dependencies && <p className="mt-4 text-[13px] leading-relaxed text-[#536887] bg-[#f3f5f8] p-3 border-l-2 border-[#cbd3e1]"><strong className="text-[#102957]">{editorial.resolveBeforeEntry}</strong> {uc.dependencies}</p>}
+                {uc.caveats && <p className="mt-2 text-[13px] leading-relaxed text-[#536887] bg-[#f3f5f8] p-3 border-l-2 border-[#cbd3e1]"><strong className="text-[#102957]">{editorial.caveat}</strong> {uc.caveats}</p>}
               </div>
               <div className="sm:text-right shrink-0 border-t sm:border-t-0 border-[#cbd3e1] pt-4 sm:pt-0">
                 <span className="block text-[32px] font-display font-bold text-[#102957] leading-none mb-1">{rec.score} <span className="text-[16px] font-sans text-[#a0afc0] font-normal">/ 30</span></span>
-                <span className="text-[10px] uppercase tracking-[0.15em] font-bold text-[#647491]">Total Score</span>
+                 <span className="text-[10px] uppercase tracking-[0.15em] font-bold text-[#647491]">{editorial.totalScore}</span>
               </div>
             </div>
           )
@@ -289,16 +310,25 @@ function AnalysisGroup({ title, description, items }: { title: string; descripti
   )
 }
 
-export default function AIUseCasePrioritization() {
+function AIUseCasePrioritizationContent() {
+  const cms = useMethodologyCmsContent("ai-use-case-prioritization");
+  useMethodologyCmsSeo(cms, methodologySeoSeed("ai-use-case-prioritization"));
+  const editorial = methodologyEditorial<"ai-use-case-prioritization", typeof aiUseCasePrioritizationEditorial>(
+    "ai-use-case-prioritization",
+    cms,
+    aiUseCasePrioritizationEditorial.seed,
+  );
+  const hero = methodologyHero(cms, aiUseCasePrioritizationHeroSeed);
+  const defaultCases = defaultUseCases(editorial.sampleOpportunities);
   const [useCases, setUseCases] = useMethodSessionState<UseCase[]>(
     "cognirise:method:ai-use-case-prioritization:opportunities",
-    DEFAULT_USE_CASES,
+    defaultCases,
     { validate: isUseCaseSessionState },
   );
   const [downloadError, setDownloadError] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
   const downloadLock = useRef(false);
-  const cleanBaseline = useRef(JSON.stringify(DEFAULT_USE_CASES));
+  const cleanBaseline = useRef(JSON.stringify(defaultCases));
   const completeUseCases = useCases.length > 0 && useCases.every((useCase) => useCase.name.trim() && useCase.description.trim());
   const answeredUseCases = useCases.filter((useCase) => useCase.name.trim() && useCase.description.trim()).length;
   useUnsavedWorkWarning(JSON.stringify(useCases) !== cleanBaseline.current);
@@ -324,7 +354,7 @@ export default function AIUseCasePrioritization() {
   };
 
   const resetAssessment = () => {
-    setUseCases(DEFAULT_USE_CASES.map((useCase) => ({ ...useCase, scores: { ...useCase.scores } })));
+    setUseCases(defaultCases.map((useCase) => ({ ...useCase, scores: { ...useCase.scores } })));
     setDownloadError("");
   };
 
@@ -336,7 +366,7 @@ export default function AIUseCasePrioritization() {
     try {
       await downloadPrioritizationResultsPdf(useCases);
     } catch (error) {
-      setDownloadError(error instanceof Error ? error.message : "Your results PDF could not be created. Please try again.");
+      setDownloadError(error instanceof Error ? error.message : editorial.nextSteps.downloadFailure);
     } finally {
       downloadLock.current = false;
       setIsDownloading(false);
@@ -358,46 +388,36 @@ export default function AIUseCasePrioritization() {
   return (
     <main className="bg-[#fdfcfb] text-[#102957] min-h-screen selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       <MethodPageHero
-        breadcrumb="Methodologies / 03"
-        title="AI Use-Case Portfolio Prioritization."
-        description="A serious working instrument for transformation leaders to transparently evaluate AI opportunities against value, feasibility, and risk—before committing funding."
-        supportingText={
-          <p>
-            This framework aligns decisions to your specific operational context, intentionally avoiding generic statistical benchmarks. The output connects directly to the IDAO delivery methodology.
-          </p>
-        }
-        imageSrc="/images/cognirise/method-ucp-governed-ai-v3.jpg"
-        imageAlt="Architectural gateways and transparent panels crossed by a flowing stream of violet, pink, and coral light."
-        imageCaptionSubtitle="Portfolio Strategy"
-        imageCaptionTitle="Directing energy where it earns value."
+        {...hero}
+        imageResolved={"imageResolved" in hero && hero.imageResolved}
+        supportingText={<p>{hero.supportingText}</p>}
       />
 
       <MethodologyRelationship
-        startHereWhen={<>You have multiple opportunities or a defined use case, and need to decide which should advance, how they sequence, and where they enter delivery.</>}
-        decision={<>Which opportunities should advance, sequence or stop?</>}
-        output={<>A transparent comparative scorecard and a clear recommendation to enter Innovate, Demonstrate, Activate, or to Stop.</>}
-        connectsToIdao={<>Recommends whether an opportunity should stop, be investigated in <strong>Innovate</strong>, proved through <strong>Demonstrate</strong>, or moved into <strong>Activate</strong>.</>}
-        connectsToAuthority={<>Examines exposure and required oversight (Control Burden dimension) to inform sequence and IDAO entry. Agent Authority will later govern the specific handovers inside the delivered workflow.</>}
-        reassessWhen={<>Business value changes, new platform capabilities alter feasibility, or a previously stopped opportunity resolves its blocking dependency.</>}
-        doesNotDecide={<>The systemic readiness of the organization (use AI Value-to-Scale) or the operational conditions of a detailed workflow (use Agentic Operations Readiness).</>}
+        startHereWhen={editorial.relationship.startHereWhen}
+        decision={editorial.relationship.decision}
+        output={editorial.relationship.output}
+        connectsToIdao={<>{editorial.relationship.connectsToIdaoBefore}{" "}<strong>{editorial.relationship.innovate}</strong>{editorial.relationship.connectsToIdaoBetweenInnovateAndDemonstrate}{" "}<strong>{editorial.relationship.demonstrate}</strong>{editorial.relationship.connectsToIdaoBetweenDemonstrateAndActivate}{" "}<strong>{editorial.relationship.activate}</strong>{editorial.relationship.connectsToIdaoAfter}</>}
+        connectsToAuthority={editorial.relationship.connectsToAuthority}
+        reassessWhen={editorial.relationship.reassessWhen}
+        doesNotDecide={editorial.relationship.doesNotDecide}
       />
-
       <section className="px-6 py-20 md:px-[4.8vw] lg:py-28 bg-[#f3f5f8] border-y border-[#cbd3e1]">
          <div className="max-w-[1200px] mx-auto">
            <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#102957] mb-5">
              <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-             The Portfolio
+              {editorial.portfolio.kicker}
            </div>
            <div className="grid lg:grid-cols-[1fr_0.8fr] gap-12 lg:gap-20 mb-16">
              <div>
-               <h2 className="font-display text-[clamp(36px,5vw,60px)] font-semibold tracking-[-.05em] leading-[0.95]">Score opportunities across six dimensions.</h2>
+              <h2 className="font-display text-[clamp(36px,5vw,60px)] font-semibold tracking-[-.05em] leading-[0.95]">{editorial.portfolio.heading}</h2>
                <p className="mt-6 text-[17px] leading-relaxed text-[#405777]">
-                 Reveal the responsible path to production. Each criterion uses your evidence and judgement on a 1–5 planning scale. The sum helps sequence comparable opportunities; specific thresholds determine the entry stage or stop decision.
+                {editorial.portfolio.introduction}
                </p>
              </div>
              <div className="bg-white p-6 border-l-4 border-[hsl(var(--brand-coral))] shadow-sm h-fit">
                <p className="text-[14px] leading-relaxed text-[#536887]">
-                 These are not market benchmarks, probabilities or a certification. Compare opportunities scored by the same decision group, record uncertainty as a caveat, and revisit scores when evidence changes.
+                {editorial.portfolio.boundary}
                </p>
              </div>
            </div>
@@ -419,7 +439,7 @@ export default function AIUseCasePrioritization() {
 
            <div className="space-y-12">
               {useCases.map((uc, index) => (
-                 <UseCaseCard key={uc.id} uc={uc} index={index} updateUseCase={updateUseCase} removeUseCase={removeUseCase} />
+                  <UseCaseCard key={uc.id} uc={uc} index={index} updateUseCase={updateUseCase} removeUseCase={removeUseCase} editorial={editorial.assessmentCard} />
               ))}
            </div>
            
@@ -428,16 +448,16 @@ export default function AIUseCasePrioritization() {
              data-testid="button-add-use-case"
              className="mt-12 mx-auto flex items-center justify-center gap-3 text-[14px] font-bold text-[#102957] bg-white border border-[#cbd3e1] py-4 px-8 shadow-sm hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]"
            >
-             <Plus size={18} /> Add another opportunity
+              <Plus size={18} /> {editorial.portfolio.addOpportunity}
            </button>
             <div className="mt-8 border border-[#cbd3e1] bg-white p-5" aria-live="polite">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491]">Assessment progress</p>
-                  <p className="mt-2 text-sm font-semibold text-[#102957]">{answeredUseCases} of {useCases.length} opportunities have a name and outcome.</p>
-                  <p className="mt-1 text-xs leading-relaxed text-[#647491]">Answers remain in this page only. Reloading or leaving clears unsaved work.</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491]">{editorial.portfolio.progressHeading}</p>
+                  <p className="mt-2 text-sm font-semibold text-[#102957]">{answeredUseCases} {editorial.portfolio.progressBetweenCounts} {useCases.length} {editorial.portfolio.progressAfterCounts}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-[#647491]">{editorial.portfolio.progressNotice}</p>
                 </div>
-                <button type="button" onClick={resetAssessment} className="inline-flex items-center gap-2 text-xs font-bold text-[#102957] underline underline-offset-4"><RotateCcw size={14} /> Reset assessment</button>
+                <button type="button" onClick={resetAssessment} className="inline-flex items-center gap-2 text-xs font-bold text-[#102957] underline underline-offset-4"><RotateCcw size={14} /> {editorial.portfolio.resetAssessment}</button>
               </div>
             </div>
          </div>
@@ -450,35 +470,38 @@ export default function AIUseCasePrioritization() {
            <div className="max-w-3xl">
              <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#102957] mb-5">
                <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-               Analysis
+                {editorial.analysis.kicker}
              </div>
-             <h2 className="font-display text-[clamp(42px,6vw,80px)] font-semibold tracking-[-.05em] leading-[0.95]">Portfolio Outcome</h2>
+              <h2 className="font-display text-[clamp(42px,6vw,80px)] font-semibold tracking-[-.05em] leading-[0.95]">{editorial.analysis.heading}</h2>
              <p className="mt-6 text-[19px] leading-relaxed text-[#405777]">
-                Transparent sequencing and dependency recommendations based on the scored dimensions.
+                 {editorial.analysis.introduction}
              </p>
            </div>
            
            <div className="mt-16 grid lg:grid-cols-[1fr_360px] gap-12 lg:gap-20">
               <div className="space-y-20">
                 <AnalysisGroup 
-                  title="Ready for Production (Activate)" 
-                  description="High feasibility and low adoption friction. These opportunities are ready for immediate technical integration and scaling without requiring bounded discovery."
+                  title={editorial.analysis.groups[0].title}
+                  description={editorial.analysis.groups[0].description}
                   items={analysis.active.filter(r => r.rec.stage === "Activate")} 
+                  editorial={editorial.analysis}
                 />
                 <AnalysisGroup 
-                  title="Requires Evidence (Demonstrate & Innovate)" 
-                  description="High strategic value but constrained by feasibility, adoption friction, or lack of evidence. Sequence these into bounded proving grounds to earn the right to scale."
+                  title={editorial.analysis.groups[1].title}
+                  description={editorial.analysis.groups[1].description}
                   items={analysis.active.filter(r => r.rec.stage === "Demonstrate" || r.rec.stage === "Innovate")} 
+                  editorial={editorial.analysis}
                 />
                 <AnalysisGroup 
-                  title="Do Not Fund (Stop)" 
-                  description="Low value or an unacceptable delivery risk profile. Stop these initiatives before investing resources."
+                  title={editorial.analysis.groups[2].title}
+                  description={editorial.analysis.groups[2].description}
                   items={analysis.stops} 
+                  editorial={editorial.analysis}
                 />
                 
                 {useCases.length === 0 && (
                   <div className="text-center py-20 border border-dashed border-[#cbd3e1] bg-[#f3f5f8] rounded-sm">
-                    <p className="text-[#536887] text-[15px]">Add opportunities to view the portfolio analysis.</p>
+                    <p className="text-[#536887] text-[15px]">{editorial.analysis.empty}</p>
                   </div>
                 )}
               </div>
@@ -486,31 +509,31 @@ export default function AIUseCasePrioritization() {
               <div className="space-y-6">
                  <div className="bg-[#102957] p-8 lg:p-10 text-white shadow-xl lg:sticky lg:top-[120px] relative overflow-hidden">
                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-                   <h3 className="font-display text-[26px] font-semibold mb-4 tracking-[-0.04em]">Next Steps</h3>
+                   <h3 className="font-display text-[26px] font-semibold mb-4 tracking-[-0.04em]">{editorial.nextSteps.heading}</h3>
                    <p className="text-[14px] text-[#d6deed] mb-8 leading-relaxed">
-                     Bring your prioritized portfolio to a Value Scan. We will test the highest-scoring opportunity and map the exact route to production with your team.
+                     {editorial.nextSteps.body}
                    </p>
-                    <BrandButton href="/value-scan" variant="inverse" className="w-full justify-center" data-testid="link-value-scan">Book a Value Scan</BrandButton>
+                    <BrandButton href={editorial.nextSteps.valueScan.href} variant="inverse" className="w-full justify-center" data-testid="link-value-scan">{editorial.nextSteps.valueScan.label}</BrandButton>
                    
                    <hr className="border-white/10 my-10" />
                    
-                   <h3 className="font-display text-xl font-semibold mb-4 tracking-[-0.03em]">The IDAO Canon</h3>
+                   <h3 className="font-display text-xl font-semibold mb-4 tracking-[-0.03em]">{editorial.nextSteps.idaoHeading}</h3>
                    <p className="text-[13px] text-[#d6deed] mb-6 leading-relaxed">
-                     See how approved opportunities move through Innovate, Demonstrate, Activate, and Operate with governed controls.
+                     {editorial.nextSteps.idaoBody}
                    </p>
-                    <Link href="/methodologies/idao" data-testid="link-idao-methodology" className="text-[13px] font-bold text-[hsl(var(--brand-pink))] hover:text-white transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] w-fit">
-                     Explore the methodology <ArrowRight size={16} />
+                    <Link href={editorial.nextSteps.idaoLink.href} data-testid="link-idao-methodology" className="text-[13px] font-bold text-[hsl(var(--brand-pink))] hover:text-white transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] w-fit">
+                      {editorial.nextSteps.idaoLink.label} <ArrowRight size={16} />
                    </Link>
                     <div className="mt-8 border-t border-white/10 pt-6">
                       <div className="flex flex-wrap gap-3">
                         <button type="button" onClick={downloadResults} disabled={!completeUseCases || isDownloading} className="inline-flex items-center gap-2 bg-white px-4 py-2.5 text-xs font-bold text-[#102957] disabled:cursor-not-allowed disabled:opacity-45">
-                          <Download size={14} /> {isDownloading ? "Creating report…" : "Download results (PDF)"}
+                          <Download size={14} /> {isDownloading ? editorial.nextSteps.creatingReport : editorial.nextSteps.downloadResults}
                         </button>
-                        <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 px-2 py-2.5 text-xs font-bold text-white underline underline-offset-4"><Printer size={14} /> Print</button>
+                        <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 px-2 py-2.5 text-xs font-bold text-white underline underline-offset-4"><Printer size={14} /> {editorial.nextSteps.print}</button>
                       </div>
-                      {!completeUseCases && <p className="mt-3 text-xs leading-relaxed text-[#b9c7db]">Add a name and outcome to every opportunity before exporting a complete result.</p>}
+                      {!completeUseCases && <p className="mt-3 text-xs leading-relaxed text-[#b9c7db]">{editorial.nextSteps.incompleteExport}</p>}
                       {downloadError && <p role="alert" className="mt-3 border-l-2 border-[#ff9fcf] pl-3 text-xs leading-relaxed text-white">{downloadError}</p>}
-                      <p className="mt-3 text-xs leading-relaxed text-[#b9c7db]">The designed Pulse PDF is generated locally. Opportunity notes are never sent to Cognirise.</p>
+                      <p className="mt-3 text-xs leading-relaxed text-[#b9c7db]">{editorial.nextSteps.localPdfNotice}</p>
                     </div>
                  </div>
               </div>
@@ -519,4 +542,8 @@ export default function AIUseCasePrioritization() {
       </section>
     </main>
   );
+}
+
+export default function AIUseCasePrioritization() {
+  return <MethodologyCmsDelivery slug="ai-use-case-prioritization"><AIUseCasePrioritizationContent /></MethodologyCmsDelivery>;
 }

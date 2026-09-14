@@ -2277,7 +2277,77 @@ export interface CmsGuardrailsFrameworkContent {
   relatedLink: CmsGuardrailsRelatedLink;
 }
 
-export type CmsFrameworkContent = CmsAgentAuthorityFrameworkContent | CmsGuardrailsFrameworkContent;
+export type CmsMethodologyFrameworkContentSchemaVersion = typeof CmsMethodologyFrameworkContentSchemaVersion[keyof typeof CmsMethodologyFrameworkContentSchemaVersion];
+
+
+export const CmsMethodologyFrameworkContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export type CmsMethodologyFrameworkContentTemplate = typeof CmsMethodologyFrameworkContentTemplate[keyof typeof CmsMethodologyFrameworkContentTemplate];
+
+
+export const CmsMethodologyFrameworkContentTemplate = {
+  idao: 'idao',
+  'ai-use-case-prioritization': 'ai-use-case-prioritization',
+  'ai-value-to-scale': 'ai-value-to-scale',
+  'agentic-operations-readiness': 'agentic-operations-readiness',
+  'human-agent-operating-model': 'human-agent-operating-model',
+} as const;
+
+export type CmsMethodologyFrameworkContentHero = {
+  breadcrumb: string;
+  title: string;
+  description: string;
+  supportingText?: string;
+  media?: CmsImmutableMediaReference;
+  /** @deprecated */
+  mediaId?: string;
+  imagePosition?: string;
+  imageCaptionSubtitle?: string;
+  imageCaptionTitle?: string;
+};
+
+/**
+ * Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer.
+ */
+export type CmsMethodologyFrameworkContentEditorial = { [key: string]: unknown };
+
+export type CmsMethodologyFrameworkContentCanonicalItem = {
+  id: string;
+};
+
+/**
+ * Fixed reviewed IDs and order; identifiers differ by template.
+ */
+export type CmsMethodologyFrameworkContentCanonical = {[key: string]: CmsMethodologyFrameworkContentCanonicalItem[]};
+
+/**
+ * Editorial composition for the IDAO, AI Use-Case Prioritization, AI Value-to-Scale, Agentic Operations Readiness and Human-Agent Operating Model routes. Canonical identifiers are validated in the shared Zod contract; assessment calculation remains application-owned. The `editorial` value is a strict, template-specific fixed slot map defined by the shared methodology-editorial contract; consumers must not add arbitrary regions, rows or fields.
+ */
+export interface CmsMethodologyFrameworkContent {
+  schemaVersion: CmsMethodologyFrameworkContentSchemaVersion;
+  template: CmsMethodologyFrameworkContentTemplate;
+  hero: CmsMethodologyFrameworkContentHero;
+  /** Strict template-specific editorial slots. The exact shape is enforced by the shared CMS contract rather than a generic page-section renderer. */
+  editorial: CmsMethodologyFrameworkContentEditorial;
+  /** Fixed reviewed IDs and order; identifiers differ by template. */
+  canonical: CmsMethodologyFrameworkContentCanonical;
+  visibility?: CmsVisibility;
+  /**
+     * @minimum 0
+     * @maximum 10000
+     */
+  order?: number;
+  /** @maxItems 30 */
+  sources?: CmsSource[];
+  verificationDate?: string;
+  reviewDate?: string;
+  /** @maxItems 50 */
+  relatedIds?: string[];
+}
+
+export type CmsFrameworkContent = CmsAgentAuthorityFrameworkContent | CmsGuardrailsFrameworkContent | CmsMethodologyFrameworkContent;
 
 export type CmsOfficeContentSchemaVersion = typeof CmsOfficeContentSchemaVersion[keyof typeof CmsOfficeContentSchemaVersion];
 
@@ -3980,4 +4050,3 @@ export type GetPublicSitemapParams = {
 market?: string;
 locale?: string;
 };
-

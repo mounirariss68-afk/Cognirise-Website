@@ -7,5 +7,6 @@
  */
 import type { CmsAgentAuthorityFrameworkContent } from './cmsAgentAuthorityFrameworkContent';
 import type { CmsGuardrailsFrameworkContent } from './cmsGuardrailsFrameworkContent';
+import type { CmsMethodologyFrameworkContent } from './cmsMethodologyFrameworkContent';
 
-export type CmsFrameworkContent = CmsAgentAuthorityFrameworkContent | CmsGuardrailsFrameworkContent;
+export type CmsFrameworkContent = CmsAgentAuthorityFrameworkContent | CmsGuardrailsFrameworkContent | CmsMethodologyFrameworkContent;

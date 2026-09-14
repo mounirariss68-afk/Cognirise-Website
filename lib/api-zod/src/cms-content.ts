@@ -15,6 +15,11 @@ import {
   type GovernedLandingSlotType,
 } from "./landing-page-slots.generated";
 import { projectIndustrySnapshotForMarket } from "./industry-market-projection";
+import {
+  methodologyEditorialDefinition,
+  methodologyEditorialMediaValues,
+  missingMethodologyMediaPins,
+} from "./methodology-editorial";
 
 export const CMS_CONTRACT_VERSION = 1 as const;
 export const cmsDocumentKinds = ["person", "partner", "platform", "publication", "case-study", "industry", "framework", "office", "site-configuration", "landing-page"] as const;
@@ -918,10 +923,23 @@ export const guardrailsFrameworkContentSchema = z.object({
   relatedLink: z.object({ title: guardedText, body: guardedText, href: z.literal("/methodologies/guardrails-framework") }).strict(),
 }).strict();
 
-const frameworkContentDiscriminatedUnion = z.discriminatedUnion("template", [
+/**
+ * The assessment engines and the IDAO delivery canon remain application-owned.
+ * These records deliberately carry only their reviewed identifiers, in their
+ * fixed order, plus the editorial presentation around them.  Editors may
+ * change an explanation, citation, image, or CTA; they cannot silently change
+ * an assessment dimension, decision rule, or delivery stage.
+ */
+const methodologyText = z.string().trim().min(1).max(8_000);
+const frameworkContentDiscriminatedUnion = z.lazy(() => z.discriminatedUnion("template", [
   agentAuthorityFrameworkContentSchema,
   guardrailsFrameworkContentSchema,
-]);
+  idaoFrameworkContentSchema,
+  aiUseCasePrioritizationFrameworkContentSchema,
+  aiValueToScaleFrameworkContentSchema,
+  agenticOperationsReadinessFrameworkContentSchema,
+  humanAgentOperatingModelFrameworkContentSchema,
+]));
 
 /** Legacy Agent Authority revisions predate the template discriminator.  Only
  * its absence selects that legacy contract; explicit unknown values remain
@@ -1166,12 +1184,21 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   }
   if (kind === "framework") {
     const framework = value as FrameworkContent;
-    // Legacy Guardrails revisions intentionally remain publish-compatible.
-    // The optional redesign presentation, however, is image-led and must
-    // carry a page-owned immutable hero reference before publication.
     if (framework.template === "guardrails") {
       if (framework.presentation && !framework.heroMedia && !framework.heroMediaId) {
         errors.push("The Guardrails redesign presentation requires immutable hero media.");
+      }
+      return errors;
+    }
+    if (framework.template !== "agent-authority") {
+      if (!framework.hero.media && !framework.hero.mediaId) {
+        errors.push("A methodology framework requires approved hero media.");
+      }
+      const definition = methodologyEditorialDefinition(framework.template);
+      if (!definition) {
+        errors.push(`Methodology template "${framework.template}" has no registered editorial slot definition.`);
+      } else {
+        errors.push(...missingMethodologyMediaPins(definition.slots, framework.editorial));
       }
       return errors;
     }
@@ -1308,15 +1335,25 @@ export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: 
   const hasExplicitFrameworkTemplate = frameworkDraftContent
     ? Object.prototype.hasOwnProperty.call(frameworkDraftContent, "template")
     : false;
-  const isGuardrailsDraft = kind === "framework"
+  const explicitFrameworkTemplate = kind === "framework"
     && input
     && typeof input === "object"
     && !Array.isArray(input)
-    && frameworkDraftContent?.template === "guardrails";
+    ? frameworkDraftContent?.template
+    : undefined;
+  const methodologyFrameworkSchemas: Record<string, z.AnyZodObject> = {
+    idao: idaoFrameworkContentSchema,
+    "ai-use-case-prioritization": aiUseCasePrioritizationFrameworkContentSchema,
+    "ai-value-to-scale": aiValueToScaleFrameworkContentSchema,
+    "agentic-operations-readiness": agenticOperationsReadinessFrameworkContentSchema,
+    "human-agent-operating-model": humanAgentOperatingModelFrameworkContentSchema,
+  };
   const frameworkDraftSchema = kind === "framework" && input && typeof input === "object" && !Array.isArray(input)
-    ? (isGuardrailsDraft
+    ? (explicitFrameworkTemplate === "guardrails"
       ? z.preprocess((value) => normalizeGuardrailsDraftText(value), guardrailsFrameworkContentSchema.deepPartial())
-      : hasExplicitFrameworkTemplate && frameworkDraftContent?.template !== "agent-authority"
+      : typeof explicitFrameworkTemplate === "string" && methodologyFrameworkSchemas[explicitFrameworkTemplate]
+        ? methodologyFrameworkSchemas[explicitFrameworkTemplate].deepPartial()
+      : hasExplicitFrameworkTemplate && explicitFrameworkTemplate !== "agent-authority"
         ? z.never()
       : agentAuthorityFrameworkContentSchema.deepPartial())
     : null;
@@ -1343,7 +1380,7 @@ export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: 
       success: true as const,
       // Blank Guardrails prose is normalized only while checking a draft. Keep
       // the editor's original empty fields in the save payload.
-      data: mode === "draft" && isGuardrailsDraft
+        data: mode === "draft" && explicitFrameworkTemplate === "guardrails"
         ? input as CmsContent
         : parsed.data as CmsContent,
     };
@@ -1646,6 +1683,39 @@ export function collectCmsMediaReferences(
     const seoRecord = seo as Record<string, unknown>;
     add(seoRecord.ogImageMedia, "seo.ogImageMedia", "og-image");
   }
+  // New methodology templates keep the hero image and its presentation
+  // metadata together.  This remains separate from hero films, which use a
+  // posterMediaVersionId and are handled below.
+  if (
+    kind === "framework"
+    && record.hero
+    && typeof record.hero === "object"
+    && !Array.isArray(record.hero)
+  ) {
+    const hero = record.hero as Record<string, unknown>;
+    add(hero.media ?? hero.mediaId, "content.hero.media", "hero");
+  }
+  if (
+    kind === "framework"
+    && typeof record.template === "string"
+    && record.editorial
+  ) {
+    const definition = methodologyEditorialDefinition(record.template);
+    if (definition) {
+      for (const reference of methodologyEditorialMediaValues(definition.slots, record.editorial)) {
+        add(
+          {
+            mediaId: reference.media.mediaId,
+            mediaVersionId: reference.media.mediaVersionId,
+            role: reference.media.role,
+            altText: reference.altText,
+          },
+          `content.${reference.path}`,
+          reference.media.role,
+        );
+      }
+    }
+  }
   if (Array.isArray(record.supportingMedia)) {
     for (const [index, reference] of record.supportingMedia.entries()) {
       add(reference, `content.supportingMedia.${index}`, "supporting");
@@ -1911,3 +1981,83 @@ const bankingSourceSchema = z.object({
   qualification: z.string().trim().min(1).max(1_000),
 }).strict();
 
+
+const methodologyHeroSchema = z.object({
+  breadcrumb: z.string().trim().min(1).max(160),
+  title: methodologyText,
+  description: methodologyText,
+  supportingText: z.string().trim().max(4_000).optional(),
+  media: optionalMediaReference,
+  mediaId: legacyMediaId,
+  imagePosition: z.string().trim().max(120).optional(),
+  imageCaptionSubtitle: z.string().trim().max(240).optional(),
+  imageCaptionTitle: z.string().trim().max(1_000).optional(),
+}).strict();
+
+const methodologyCanonicalIds = {
+  idao: {
+    stages: ["innovate", "demonstrate", "activate", "operate"],
+    layers: ["01", "02", "03", "04", "05"],
+  },
+  "ai-use-case-prioritization": {
+    dimensions: ["value", "feasibility", "timeToEvidence", "adoptionFriction", "controlBurden", "reusePotential"],
+    decisionRules: ["stop", "innovate", "demonstrate", "activate"],
+  },
+  "ai-value-to-scale": {
+    dimensions: ["value", "portfolio", "platform", "operating", "workforce", "governance", "outcomes"],
+    stages: ["1", "2", "3", "4", "5"],
+  },
+  "agentic-operations-readiness": {
+    conditions: ["stability", "access", "observability", "fallback", "exceptions", "economics"],
+    decisions: ["proceed", "prepare", "stop"],
+  },
+  "human-agent-operating-model": {
+    designSteps: ["01", "02", "03", "04", "05"],
+    decisionRights: ["frame", "recommend", "approve", "act", "intervene"],
+    measures: ["use", "control", "capability", "outcome"],
+  },
+} as const;
+
+const methodologyCanonicalSchema = (groups: Record<string, readonly string[]>) =>
+  z.object(Object.fromEntries(Object.entries(groups).map(([key, ids]) => [
+    key,
+    fixedMethodologyIds(ids, `canonical.${key}`),
+  ])) as Record<string, z.ZodTypeAny>).strict();
+
+/** The only migration-safe representation of application-owned methodology
+ * identifiers. Editorial code may consume these values but cannot redefine
+ * their membership or order. */
+export function methodologyCanonicalSeed(template: keyof typeof methodologyCanonicalIds) {
+  return Object.fromEntries(
+    Object.entries(methodologyCanonicalIds[template]).map(([key, ids]) => [
+      key,
+      (ids as readonly string[]).map((id: string) => ({ id })),
+    ]),
+  );
+}
+
+const fixedMethodologyIds = (expected: readonly string[], path: string) =>
+  z.array(z.object({ id: z.string() }).strict()).length(expected.length).superRefine(requiresFixedOrder(expected, path));
+
+const methodologyFrameworkSchema = <T extends string>(
+  template: T,
+  canonical: z.ZodTypeAny,
+) => z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
+  template: z.literal(template),
+  hero: methodologyHeroSchema,
+  editorial: z.lazy(() => {
+    const definition = methodologyEditorialDefinition(template);
+    return definition
+      ? definition.editorialSchema as z.ZodTypeAny
+      : z.never({ message: `Methodology template "${template}" has no registered editorial slot definition.` });
+  }),
+  canonical,
+  ...governance,
+}).strict();
+
+export const idaoFrameworkContentSchema = methodologyFrameworkSchema("idao", methodologyCanonicalSchema(methodologyCanonicalIds.idao));
+export const aiUseCasePrioritizationFrameworkContentSchema = methodologyFrameworkSchema("ai-use-case-prioritization", methodologyCanonicalSchema(methodologyCanonicalIds["ai-use-case-prioritization"]));
+export const aiValueToScaleFrameworkContentSchema = methodologyFrameworkSchema("ai-value-to-scale", methodologyCanonicalSchema(methodologyCanonicalIds["ai-value-to-scale"]));
+export const agenticOperationsReadinessFrameworkContentSchema = methodologyFrameworkSchema("agentic-operations-readiness", methodologyCanonicalSchema(methodologyCanonicalIds["agentic-operations-readiness"]));
+export const humanAgentOperatingModelFrameworkContentSchema = methodologyFrameworkSchema("human-agent-operating-model", methodologyCanonicalSchema(methodologyCanonicalIds["human-agent-operating-model"]));

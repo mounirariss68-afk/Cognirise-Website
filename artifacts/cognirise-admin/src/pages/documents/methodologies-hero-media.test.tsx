@@ -36,7 +36,7 @@ Object.defineProperties(globalThis, {
   .IS_REACT_ACT_ENVIRONMENT = true;
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 const { createRoot } = await import("react-dom/client");
-const { ContentEditor } = await import("./ContentEditor");
+const { ContentEditor, methodologyFrameworkDraft } = await import("./ContentEditor");
 
 const approvedHero = {
   id: "00000000-0000-4000-8000-000000000101",
@@ -86,13 +86,15 @@ const methodologiesDraft = {
 function ControlledEditor({
   initial,
   onContent,
+  kind = "landing-page",
 }: {
   initial: Record<string, any>;
   onContent: (content: Record<string, any>) => void;
+  kind?: "landing-page" | "framework";
 }) {
   const [content, setContent] = React.useState(initial);
   return React.createElement(ContentEditor, {
-    kind: "landing-page",
+    kind,
     value: content,
     errors: [],
     onChange: (next) => {
@@ -105,6 +107,7 @@ function ControlledEditor({
 async function mountEditor(
   queryClient: QueryClient,
   initial: Record<string, any>,
+  kind: "landing-page" | "framework" = "landing-page",
 ) {
   let content = initial;
   const container = document.createElement("div");
@@ -118,6 +121,7 @@ async function mountEditor(
         { client: queryClient },
         React.createElement(ControlledEditor, {
           initial,
+          kind,
           onContent: (next) => {
             content = next;
           },
@@ -211,6 +215,77 @@ test("methodologies landing hero selects only approved media and reloads its exa
   } finally {
     if (reloaded) await reloaded.unmount();
     else if (editor.container.isConnected) await editor.unmount();
+    queryClient.clear();
+  }
+});
+
+test("a methodology supporting-media slot saves its declared supporting role and revision-local alt text", {
+  concurrency: false,
+}, async () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: Infinity }, mutations: { retry: false } },
+  });
+  queryClient.setQueryData(getListMediaQueryKey(mediaParams), {
+    items: [approvedHero],
+    page: 1,
+    pageSize: 100,
+    total: 1,
+  });
+  queryClient.setQueryData(getGetMediaQueryKey(approvedHero.id), approvedHero);
+  const draft = methodologyFrameworkDraft("idao") as Record<string, any>;
+  draft.hero = {
+    breadcrumb: "Frameworks & methodologies / 01",
+    title: "IDAO.",
+    description: "A governed route from opportunity to evidence.",
+    media: {
+      mediaId: approvedHero.id,
+      mediaVersionId: approvedHero.versionId,
+      role: "hero",
+    },
+  };
+  const editor = await mountEditor(queryClient, draft, "framework");
+  try {
+    const teamAlt = editor.container.querySelector<HTMLTextAreaElement>(
+      '[data-field-path="content.editorial.delivery.teamImage.altText"]',
+    );
+    assert.ok(teamAlt, "the declared supporting image must expose its revision-local alt field");
+    const setValue = Object.getOwnPropertyDescriptor(dom.window.HTMLTextAreaElement.prototype, "value")!.set!;
+    await React.act(async () => {
+      setValue.call(teamAlt, "Edited revision-local supporting description");
+      teamAlt.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+    });
+
+    const choose = [...editor.container.querySelectorAll<HTMLButtonElement>('[data-testid^="button-choose-"]')]
+      .find((button) => button.dataset.testid?.includes("idao-delivery-system"));
+    assert.ok(choose, "the declared supporting image must expose the approved-media picker");
+    await React.act(async () => {
+      choose.click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    const approved = document.querySelector<HTMLButtonElement>(
+      `[data-testid="button-select-media-${approvedHero.id}"]`,
+    );
+    assert.ok(approved);
+    await React.act(async () => approved.click());
+
+    const saved = editor.content();
+    assert.deepEqual(saved.editorial.delivery.teamImage.media, {
+      mediaId: approvedHero.id,
+      mediaVersionId: approvedHero.versionId,
+      role: "supporting",
+    });
+    assert.equal(
+      saved.editorial.delivery.teamImage.altText,
+      "Edited revision-local supporting description",
+    );
+    const validated = validateCmsContent("framework", saved, "draft");
+    assert.equal(
+      validated.success,
+      true,
+      validated.success ? "" : `the selected supporting pin must satisfy the strict framework schema: ${validated.errors.join("; ")}`,
+    );
+  } finally {
+    await editor.unmount();
     queryClient.clear();
   }
 });

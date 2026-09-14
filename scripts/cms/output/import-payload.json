@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-11T17:33:44.189Z",
-  "manifestDigest": "3c012b7a28b8ef767024778fc7b18297d157cc0f9e74411c651bae169442cf2e",
+  "generatedAt": "2026-09-14T12:44:27.691Z",
+  "manifestDigest": "223c31d2a30149232bdca96b425262b6779687ce3dfa13b18de1840e33c69cc3",
   "dryRun": true,
   "mode": "payload-only",
-  "note": "No storage or database call was made. Use --apply-db --target=development to import governed drafts.",
+  "note": "No storage or database call was made. Use --apply-db --target=development to import governed drafts; use cms:reconcile-methodology-editorial for its five isolated methodology routes.",
   "operations": [
     {
       "externalId": "person:8a0e78e95b87db8e0acd",
@@ -27,7 +27,7 @@
           "order": 0,
           "sources": [
             {
-              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "label": "Last compiled public About roster before CMS collection ownership (git 9a7c7b0140f36310bfc0019cbb9e6ff236062caf) (src/pages/AboutPeople.tsx)",
               "accessedAt": "2026-09-06"
             }
           ],
@@ -43,7 +43,7 @@
       },
       "mediaPaths": [],
       "idempotencyKey": "cms-inventory-v2:person:8a0e78e95b87db8e0acd",
-      "requestDigest": "bf67bf6ba4e527cd43ea12670040f9d52b2889684fd12b0a946431b5d26947f2"
+      "requestDigest": "9756a2ae961aca9a5daf8c1867d4a4ff3bc6a25c8899f1b09160bdc06b809278"
     },
     {
       "externalId": "person:0af0924910a556b5f374",
@@ -66,7 +66,7 @@
           "order": 1,
           "sources": [
             {
-              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "label": "Last compiled public About roster before CMS collection ownership (git 9a7c7b0140f36310bfc0019cbb9e6ff236062caf) (src/pages/AboutPeople.tsx)",
               "accessedAt": "2026-09-06"
             }
           ],
@@ -82,7 +82,7 @@
       },
       "mediaPaths": [],
       "idempotencyKey": "cms-inventory-v2:person:0af0924910a556b5f374",
-      "requestDigest": "98dcc2706c52c837f2cc7a69451019e11fec6dd83d22ba12f9d6195e6dacc87c"
+      "requestDigest": "4165ce94501a13c299981518085b2afc4a063ac1a9cb144017028f13b360b013"
     },
     {
       "externalId": "person:4b66d17219fef61bc32d",
@@ -105,7 +105,7 @@
           "order": 2,
           "sources": [
             {
-              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "label": "Last compiled public About roster before CMS collection ownership (git 9a7c7b0140f36310bfc0019cbb9e6ff236062caf) (src/pages/AboutPeople.tsx)",
               "accessedAt": "2026-09-06"
             }
           ],
@@ -121,7 +121,7 @@
       },
       "mediaPaths": [],
       "idempotencyKey": "cms-inventory-v2:person:4b66d17219fef61bc32d",
-      "requestDigest": "c1f356ab1ac8fab37860ce59db05994552085382e8a11d6c6ca09526782c59da"
+      "requestDigest": "044624a27d5265ed6e5c201bf32c6a6aabaa077e5cba71a7e7200b1036c4d51d"
     },
     {
       "externalId": "person:5a04a9ee3d62e4e602d8",
@@ -144,7 +144,7 @@
           "order": 3,
           "sources": [
             {
-              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "label": "Last compiled public About roster before CMS collection ownership (git 9a7c7b0140f36310bfc0019cbb9e6ff236062caf) (src/pages/AboutPeople.tsx)",
               "accessedAt": "2026-09-06"
             }
           ],
@@ -160,7 +160,7 @@
       },
       "mediaPaths": [],
       "idempotencyKey": "cms-inventory-v2:person:5a04a9ee3d62e4e602d8",
-      "requestDigest": "d5ad351c0b93d36bd990e243f053da36a7337c4553287913e4a0c9e403d8ae05"
+      "requestDigest": "455ebb3ebfb4fbe5f3e0fb58663c8ec7a17a25e98a591bd55cfe2a2922eddaa7"
     },
     {
       "externalId": "person:8a26fa2024db762f831e",
@@ -183,7 +183,7 @@
           "order": 4,
           "sources": [
             {
-              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "label": "Last compiled public About roster before CMS collection ownership (git 9a7c7b0140f36310bfc0019cbb9e6ff236062caf) (src/pages/AboutPeople.tsx)",
               "accessedAt": "2026-09-06"
             }
           ],
@@ -199,7 +199,7 @@
       },
       "mediaPaths": [],
       "idempotencyKey": "cms-inventory-v2:person:8a26fa2024db762f831e",
-      "requestDigest": "7578a29ddd03a9cb30504adf430fecff549bc976e7a7abf1fecfd2727bf908a7"
+      "requestDigest": "ff01a9fe024314dca58bfbaf79539dcba3bd1e4dfa8d3942006254d86fb37928"
     },
     {
       "externalId": "person:f62fafba1d69ec9281e2",
@@ -222,7 +222,7 @@
           "order": 5,
           "sources": [
             {
-              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "label": "Last compiled public About roster before CMS collection ownership (git 9a7c7b0140f36310bfc0019cbb9e6ff236062caf) (src/pages/AboutPeople.tsx)",
               "accessedAt": "2026-09-06"
             }
           ],
@@ -238,7 +238,7 @@
       },
       "mediaPaths": [],
       "idempotencyKey": "cms-inventory-v2:person:f62fafba1d69ec9281e2",
-      "requestDigest": "4ae926e2be3a447840f98e534d7fab56cb8c191813033984305451105223d415"
+      "requestDigest": "cd52bc0f667867b4cf9b12285c6b70ec5b09847fae94db333e5bacbb50051841"
     },
     {
       "externalId": "person:66893d0003c5bb956534",
@@ -261,7 +261,7 @@
           "order": 6,
           "sources": [
             {
-              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "label": "Last compiled public About roster before CMS collection ownership (git 9a7c7b0140f36310bfc0019cbb9e6ff236062caf) (src/pages/AboutPeople.tsx)",
               "accessedAt": "2026-09-06"
             }
           ],
@@ -277,7 +277,7 @@
       },
       "mediaPaths": [],
       "idempotencyKey": "cms-inventory-v2:person:66893d0003c5bb956534",
-      "requestDigest": "eed32f4758d52afae49caba5b54d200f3e05d637988d9a021f457f719996bf94"
+      "requestDigest": "1416e6875a8121545ff26fc297c2ba54ca3e673cd5230d469faa6acc521bbf95"
     },
     {
       "externalId": "person:869b2b63e38d11b890d4",
@@ -300,7 +300,7 @@
           "order": 7,
           "sources": [
             {
-              "label": "Compiled Cognirise public website (src/pages/AboutPeople.tsx)",
+              "label": "Last compiled public About roster before CMS collection ownership (git 9a7c7b0140f36310bfc0019cbb9e6ff236062caf) (src/pages/AboutPeople.tsx)",
               "accessedAt": "2026-09-06"
             }
           ],
@@ -316,7 +316,7 @@
       },
       "mediaPaths": [],
       "idempotencyKey": "cms-inventory-v2:person:869b2b63e38d11b890d4",
-      "requestDigest": "7bf34d452818ac978175bf1e9c9210be5cbbfc0899cb5caca571acae548e31af"
+      "requestDigest": "060536ed1b6c127c1c2b42851c1de0f613239e764ba782db357d4e92c56a8e40"
     },
     {
       "externalId": "partner:1979d23ae4b0180a8730",
@@ -4301,7 +4301,7 @@
       "mediaPaths": [
         "/images/cognirise/cognirise-pulse-governance.jpg"
       ],
-      "idempotencyKey": "cms-inventory-v2:framework:agent-authority-model-v1",
+      "idempotencyKey": "cms-framework-methodology-baseline-v1:framework:agent-authority-model-v1",
       "requestDigest": "6e3a5a0eff155430af14392d7baa04dce2c0237ea96de80d6b2beae8afd96d72"
     }
   ],
@@ -5608,9 +5608,7 @@
       "width": 528,
       "height": 512,
       "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/pages/IDAOMethodology.tsx"
-      ],
+      "usages": [],
       "collection": "website",
       "linkedinAssetKind": null,
       "campaignMetadata": null,
@@ -5633,6 +5631,7 @@
       ],
       "acceptedPriorRequestDigests": [
         "e91f8f7551d6728451bf5133308ee9ee1a85debf037afbcc9b66d5a2b94eabbe",
+        "b578a9185bc5752bbe4a265f1df39639fc2fae1ad15bbcd79f5565edb5e4035a",
         "197f9544544edf152911612a1264a27a20868ea1462b8832821f79776bb27f38"
       ]
     },
@@ -6296,7 +6295,7 @@
       "height": 1024,
       "cmsOwnership": "cms-candidate",
       "usages": [
-        "artifacts/cognirise-website/src/pages/AgenticOperationsReadiness.tsx"
+        "artifacts/cognirise-website/src/lib/pulse-assessment-reports.ts"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
@@ -6323,7 +6322,8 @@
       "height": 1024,
       "cmsOwnership": "cms-candidate",
       "usages": [
-        "artifacts/cognirise-website/src/pages/HumanAgentOperatingModel.tsx"
+        "artifacts/cognirise-website/src/lib/pulse-assessment-reports.ts",
+        "artifacts/cognirise-website/src/pages/HumanAgentOperatingModel.test.ts"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
@@ -6427,7 +6427,8 @@
       "height": 3072,
       "cmsOwnership": "cms-candidate",
       "usages": [
-        "artifacts/cognirise-website/src/pages/AIUseCasePrioritization.tsx"
+        "artifacts/cognirise-website/src/lib/pulse-assessment-reports.ts",
+        "artifacts/cognirise-website/src/pages/AIUseCasePrioritization.test.ts"
       ],
       "collection": "website",
       "linkedinAssetKind": null,
@@ -6529,7 +6530,8 @@
       "height": 3072,
       "cmsOwnership": "code-owned",
       "usages": [
-        "artifacts/cognirise-website/src/pages/AIValueToScale.tsx"
+        "artifacts/cognirise-website/src/lib/vts-results-pdf.ts",
+        "artifacts/cognirise-website/src/pages/AIValueToScale.editorial.test.ts"
       ],
       "collection": "website",
       "linkedinAssetKind": null,

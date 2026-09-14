@@ -1,6 +1,5 @@
 import { ArrowDown, ArrowRight, Check, Download, Printer, RotateCcw, Trash2 } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
-import { useDynamicMetadata } from "@/lib/metadata";
 import { MethodologyRelationship } from "@/components/MethodologyRelationship";
 import { MethodPageHero } from "@/components/MethodPageHero";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -18,6 +17,12 @@ import {
 } from "@/lib/readiness-assessment";
 import { useMethodSessionState, useUnsavedWorkWarning } from "@/lib/use-method-session-state";
 import { downloadReadinessResultsPdf } from "@/lib/pulse-assessment-reports";
+import { MethodologyCmsDelivery, methodologyEditorial, methodologyHero, useMethodologyCmsContent, useMethodologyCmsSeo } from "@/components/MethodologyCmsLayout";
+import {
+  agenticOperationsReadinessEditorial,
+  agenticOperationsReadinessHeroSeed,
+  methodologySeoSeed,
+} from "@workspace/api-zod";
 
 type Answer = ReadinessAnswers[keyof ReadinessAnswers];
 
@@ -111,24 +116,6 @@ export const isConditionRecordsSessionState = (
 
 const isSessionString = (value: unknown): value is string => typeof value === "string";
 
-const SOURCES = [
-  {
-    label: "NIST AI Risk Management Framework 1.0 (January 2023)",
-    href: "https://www.nist.gov/itl/ai-risk-management-framework",
-    use: "Govern, Map, Measure and Manage functions informed the evidence and monitoring questions.",
-  },
-  {
-    label: "NIST AI 600-1, Generative AI Profile (July 2024)",
-    href: "https://doi.org/10.6028/NIST.AI.600-1",
-    use: "Risk identification, measurement, incident handling and third-party dependency considerations informed the operating-condition prompts.",
-  },
-  {
-    label: "EU AI Act, Regulation (EU) 2024/1689 (13 June 2024)",
-    href: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
-    use: "Human oversight, logging, accuracy, robustness and cybersecurity obligations informed the control questions where applicable.",
-  },
-] as const;
-
 function Kicker({ children, inverse = false }: { children: React.ReactNode; inverse?: boolean }) {
   return (
     <div className={`flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] ${inverse ? "text-white/70" : "text-[#102957]"}`}>
@@ -138,7 +125,14 @@ function Kicker({ children, inverse = false }: { children: React.ReactNode; inve
   );
 }
 
-export default function AgenticOperationsReadiness() {
+function AgenticOperationsReadinessContent() {
+  const cms = useMethodologyCmsContent("agentic-operations-readiness");
+  useMethodologyCmsSeo(cms, methodologySeoSeed("agentic-operations-readiness"));
+  const editorial = methodologyEditorial<
+    "agentic-operations-readiness",
+    typeof agenticOperationsReadinessEditorial
+  >("agentic-operations-readiness", cms, agenticOperationsReadinessEditorial.seed);
+  const hero = methodologyHero(cms, agenticOperationsReadinessHeroSeed);
   const [requestedSavedId] = useState(() => getSavedReadinessId(window.location.search));
   const [saved, setSaved] = useState<SavedState | null>(null);
   const [sessionNamespace, setSessionNamespace] = useState(requestedSavedId ?? "draft");
@@ -196,12 +190,6 @@ export default function AgenticOperationsReadiness() {
       });
     return () => controller.abort();
   }, [requestedSavedId]);
-
-  useDynamicMetadata({
-    title: "Agentic Operations Readiness Framework | Cognirise",
-    description: "Decide whether one workflow should proceed to agent delivery, needs preparation, or must stop—and identify the operating conditions to resolve.",
-    canonicalUrl: `${window.location.origin}/methodologies/agentic-operations-readiness`,
-  });
 
   const result = useMemo(() => {
     const values = Object.values(answers);
@@ -316,25 +304,19 @@ export default function AgenticOperationsReadiness() {
   return (
     <article className="readiness-page overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       <MethodPageHero
-        breadcrumb="Methodologies / 02"
-        title="Ready for agents?"
-        description="Test one workflow—not an organisation, platform or agent—against the conditions it needs to operate. Leave with a clear Proceed, Prepare or Stop decision and the specific work still unresolved."
-        imageSrc="/images/cognirise/method-aor-v2.jpg"
-        imageAlt="Cinematic raster composition showing a bounded operational workflow"
-        imageCaptionSubtitle="Workflow Decision"
-        imageCaptionTitle="Evidence before authority."
+        {...hero}
+        imageResolved={"imageResolved" in hero && hero.imageResolved}
       />
 
       <MethodologyRelationship
-        startHereWhen={<>You have a specific, bounded workflow and need to confirm it has the necessary stability, observability, and economic conditions before agent delivery begins.</>}
-        decision={<>Is this workflow ready for agents, and what must change first?</>}
-        output={<>A Proceed, Prepare or Stop decision accompanied by a register of unresolved operating conditions, their owners, and evidence gaps.</>}
-        connectsToIdao={<>Produces Proceed, Prepare or Stop for one bounded workflow. Missing conditions become work within the appropriate IDAO stage, and the readiness test repeats when scope changes.</>}
-        connectsToAuthority={<>Establishes whether the workflow can operate at all. Agent Authority separately determines how independently each consequential handover inside the workflow may act.</>}
-        reassessWhen={<>The workflow scope changes, the underlying tool access permissions change, or unresolved conditions pass their reassessment date.</>}
-        doesNotDecide={<>Which workflow is most valuable (use AI Use-Case Prioritization) or the specific rights of a human supervisor (use Human-Agent Operating Model).</>}
+        startHereWhen={<>{editorial.relationship.startHereWhen}</>}
+        decision={<>{editorial.relationship.decision}</>}
+        output={<>{editorial.relationship.output}</>}
+        connectsToIdao={<>{editorial.relationship.connectsToIdao}</>}
+        connectsToAuthority={<>{editorial.relationship.connectsToAuthority}</>}
+        reassessWhen={<>{editorial.relationship.reassessWhen}</>}
+        doesNotDecide={<>{editorial.relationship.doesNotDecide}</>}
       />
-
       <section className="border-y border-[#cbd3e1] bg-[#f3f5f8] px-6 py-20 md:px-[4.8vw] lg:py-28 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-[40vw] h-[40vw] bg-[radial-gradient(circle_at_top_left,rgba(154,99,218,0.1),transparent_70%)] pointer-events-none" />
         
@@ -343,19 +325,19 @@ export default function AgenticOperationsReadiness() {
             <div>
               <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#102957] mb-5">
                 <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-                The Boundary
+                {editorial.boundary.kicker}
               </div>
-              <h2 className="font-display text-[clamp(42px,5vw,72px)] font-semibold leading-[.97] tracking-[-.05em]">Readiness before authority.</h2>
+              <h2 className="font-display text-[clamp(42px,5vw,72px)] font-semibold leading-[.97] tracking-[-.05em]">{editorial.boundary.heading}</h2>
             </div>
             <div className="border-l border-[#cbd3e1] pl-8 lg:pl-12">
               <p className="text-[19px] leading-[1.6] text-[#405777]">
-                This framework decides whether the workflow has viable operating conditions. It does not decide how independently an agent may act.
+                {editorial.boundary.body}
               </p>
               
               <div className="mt-12 bg-white border border-[#cbd3e1] shadow-sm relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
                 <div className="p-8 lg:p-10">
-                  <strong className="block text-[11px] uppercase tracking-[0.15em] text-[#102957] mb-8">6 Conditions feed into:</strong>
+                  <strong className="block text-[11px] uppercase tracking-[0.15em] text-[#102957] mb-8">{editorial.boundary.decisionsLabel}</strong>
                   <div className="grid gap-6 md:grid-cols-3">
                     <div className="border-t-4 border-[#16805f] bg-[#16805f]/5 p-5">
                       <strong className="text-[13px] font-bold uppercase tracking-wider text-[#16805f]">Proceed</strong>
@@ -376,8 +358,8 @@ export default function AgenticOperationsReadiness() {
                   </div>
                   
                   <div className="border border-[hsl(var(--brand-coral))] bg-[hsl(var(--brand-coral))]/5 p-6 text-center">
-                    <strong className="block text-[12px] uppercase tracking-[0.15em] text-[#102957]">Separate Agent Authority decision</strong>
-                    <p className="mt-2 text-[14px] text-[#536887]">For any selected consequential handover, set how independently it may act.</p>
+                    <strong className="block text-[12px] uppercase tracking-[0.15em] text-[#102957]">{editorial.boundary.separateAuthorityHeading}</strong>
+                    <p className="mt-2 text-[14px] text-[#536887]">{editorial.boundary.separateAuthorityBody}</p>
                   </div>
                 </div>
               </div>
@@ -392,9 +374,9 @@ export default function AgenticOperationsReadiness() {
             <div>
               <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#102957] mb-5">
                 <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-                Six operating conditions
+                {editorial.assessment.kicker}
               </div>
-              <h2 id="assessment-title" className="font-display text-[clamp(42px,5.5vw,78px)] font-semibold leading-[.96] tracking-[-.05em]">Evidence, not optimism.</h2>
+              <h2 id="assessment-title" className="font-display text-[clamp(42px,5.5vw,78px)] font-semibold leading-[.96] tracking-[-.05em]">{editorial.assessment.heading}</h2>
             </div>
             <p className="lg:border-l border-[#cbd3e1] lg:pl-10 text-[18px] leading-[1.65] text-[#405777]">
               Choose the statement that best matches current evidence. “Ready” must be demonstrable. One Stop condition stops the current scope; any Prepare condition names work to complete.
@@ -403,15 +385,15 @@ export default function AgenticOperationsReadiness() {
 
           <div className="mt-16 border border-[#cbd3e1] bg-white shadow-[0_2px_10px_rgba(16,41,87,0.02)] p-8 lg:p-10 relative">
             <div className="absolute top-0 left-0 w-1 h-full bg-[#102957]" />
-            <label htmlFor="workflow-scope" className="text-[12px] font-bold uppercase tracking-[0.15em] text-[#102957]">Workflow scope</label>
-            <p className="mt-3 max-w-3xl text-[14px] leading-relaxed text-[#536887]">Name the bounded workflow, trigger, start and end point, business area and material exclusions. This stays in page memory and is included only in the local results PDF or optional print.</p>
+            <label htmlFor="workflow-scope" className="text-[12px] font-bold uppercase tracking-[0.15em] text-[#102957]">{editorial.workflowScope.label}</label>
+            <p className="mt-3 max-w-3xl text-[14px] leading-relaxed text-[#536887]">{editorial.workflowScope.description}</p>
             <textarea
               id="workflow-scope"
               data-testid="input-workflow-scope"
               value={workflowScope}
               onChange={(event) => setWorkflowScope(event.target.value)}
               rows={3}
-              placeholder="Example: Customer refund requests from approved intake through payment instruction; excludes suspected fraud and refunds above the delegated limit."
+              placeholder={editorial.workflowScope.placeholder}
               className="mt-6 w-full resize-y border border-[#cbd3e1] bg-[#fdfcfb] p-4 text-[15px] leading-relaxed text-[#102957] outline-none focus:border-[hsl(var(--brand-pink))] focus:bg-white transition-all shadow-inner"
             />
           </div>
@@ -527,9 +509,9 @@ export default function AgenticOperationsReadiness() {
       <section className="bg-[#f0effa] px-6 py-20 md:px-[4.8vw] lg:py-28" aria-labelledby="conditions-title">
         <div className="grid gap-10 lg:grid-cols-[.72fr_1.28fr] lg:gap-[8vw]">
           <div>
-            <Kicker>Readiness output</Kicker>
-            <h2 id="conditions-title" className="mt-5 font-display text-[clamp(40px,5vw,72px)] font-semibold leading-[.97] tracking-[-.08em]">Resolve the conditions, not the score.</h2>
-            <p className="mt-6 text-sm leading-[1.65] text-[#536887]">The output is an operating-condition register. It records the gap, evidence required, accountable owner and reassessment date.</p>
+            <Kicker>{editorial.readinessOutput.kicker}</Kicker>
+            <h2 id="conditions-title" className="mt-5 font-display text-[clamp(40px,5vw,72px)] font-semibold leading-[.97] tracking-[-.08em]">{editorial.readinessOutput.heading}</h2>
+            <p className="mt-6 text-sm leading-[1.65] text-[#536887]">{editorial.readinessOutput.body}</p>
           </div>
           <div className="border-t border-[#9eabc0]">
             {unresolved.map((condition) => {
@@ -568,13 +550,13 @@ export default function AgenticOperationsReadiness() {
         </div>
         {assessmentComplete && (
           <div className="mt-10 border-t border-[#9eabc0] pt-7">
-            <label htmlFor="governance-review" className="text-[10px] font-bold uppercase tracking-[.12em] text-[#102957]">Overall governance review</label>
-            <textarea id="governance-review" data-testid="input-governance-review" value={governanceReview} onChange={(event) => setGovernanceReview(event.target.value)} rows={3} className="mt-3 block w-full resize-y border border-[#b9c4d5] bg-white p-3 text-sm text-[#102957] outline-none focus:border-[#102957]" placeholder="Decision forum, reviewers, evidence location, approval constraints or next review point" />
+            <label htmlFor="governance-review" className="text-[10px] font-bold uppercase tracking-[.12em] text-[#102957]">{editorial.readinessOutput.governanceReviewLabel}</label>
+            <textarea id="governance-review" data-testid="input-governance-review" value={governanceReview} onChange={(event) => setGovernanceReview(event.target.value)} rows={3} className="mt-3 block w-full resize-y border border-[#b9c4d5] bg-white p-3 text-sm text-[#102957] outline-none focus:border-[#102957]" placeholder={editorial.readinessOutput.governanceReviewPlaceholder} />
             <div className="mt-5 flex flex-wrap items-center gap-4">
               <button data-testid="button-print-readiness-record" type="button" onClick={printReadinessRecord} className="inline-flex items-center gap-2 bg-[#102957] px-5 py-3 text-sm font-bold text-white hover:bg-[hsl(var(--brand-pink))]">
-                <Printer size={16} /> Print or save record
+                <Printer size={16} /> {editorial.readinessOutput.printRecordLabel}
               </button>
-              <p className="max-w-xl text-xs leading-[1.55] text-[#647491]">Your browser’s print dialog can print the full record or save it as a PDF. Workflow scope, evidence notes, owners and dates remain local even when the fixed-choice decision is shared.</p>
+              <p className="max-w-xl text-xs leading-[1.55] text-[#647491]">{editorial.readinessOutput.printRecordNote}</p>
             </div>
           </div>
         )}
@@ -609,18 +591,18 @@ export default function AgenticOperationsReadiness() {
       <section className="px-6 py-20 md:px-[4.8vw] lg:py-24" aria-labelledby="basis-title">
         <div className="grid gap-10 lg:grid-cols-[.72fr_1.28fr] lg:gap-[8vw]">
           <div>
-            <Kicker>Method basis</Kicker>
-            <h2 id="basis-title" className="mt-5 font-display text-[clamp(38px,4.8vw,68px)] font-semibold leading-[.97] tracking-[-.08em]">Proprietary method. Public evidence.</h2>
+            <Kicker>{editorial.basis.kicker}</Kicker>
+            <h2 id="basis-title" className="mt-5 font-display text-[clamp(38px,4.8vw,68px)] font-semibold leading-[.97] tracking-[-.08em]">{editorial.basis.heading}</h2>
           </div>
           <div>
             <div className="border-l-4 border-[hsl(var(--brand-pink))] bg-[#f3f5f8] p-5 text-sm leading-[1.65] text-[#405777]">
-              <strong className="text-[#102957]">Cognirise proprietary content:</strong> the six-condition structure, answer definitions, blocking logic, Proceed / Prepare / Stop decisions and operating-condition register are the Cognirise Agentic Operations Readiness Framework. They are not presented as requirements of the sources below.
+              <strong className="text-[#102957]">{editorial.basis.proprietaryLabel}</strong> {editorial.basis.proprietaryBody}
             </div>
-            <p className="mt-6 text-xs leading-[1.6] text-[#647491]">External source review: 10 September 2026. Applicability depends on jurisdiction, sector, system classification and intended use.</p>
+            <p className="mt-6 text-xs leading-[1.6] text-[#647491]">{editorial.basis.sourceReview}</p>
             <ul className="mt-5 border-t border-[#cbd3e1]">
-              {SOURCES.map((source) => (
-                <li key={source.href} className="border-b border-[#cbd3e1] py-5">
-                  <a href={source.href} target="_blank" rel="noreferrer" className="text-sm font-bold underline underline-offset-4">{source.label}</a>
+              {editorial.basis.sources.map((source) => (
+                <li key={source.reference.href} className="border-b border-[#cbd3e1] py-5">
+                  <a href={source.reference.href} target="_blank" rel="noreferrer" className="text-sm font-bold underline underline-offset-4">{source.reference.label}</a>
                   <p className="mt-2 text-xs leading-[1.55] text-[#647491]">{source.use}</p>
                 </li>
               ))}
@@ -630,14 +612,19 @@ export default function AgenticOperationsReadiness() {
       </section>
 
       <section className="bg-[#102957] px-6 py-20 text-white md:px-[4.8vw] lg:py-28">
-        <Kicker inverse>From decision to delivery</Kicker>
-        <h2 className="mt-6 max-w-[1000px] font-display text-[clamp(44px,6.5vw,96px)] font-semibold leading-[.92] tracking-[-.09em]">Prepare what is missing. Then earn the right to operate.</h2>
-        <p className="mt-7 max-w-[680px] text-[17px] leading-[1.6] text-[#d6deed]">A readiness decision defines whether the workflow should enter delivery. IDAO builds and proves the capability; Agent Authority governs each live handover.</p>
+        <Kicker inverse>{editorial.delivery.kicker}</Kicker>
+        <h2 className="mt-6 max-w-[1000px] font-display text-[clamp(44px,6.5vw,96px)] font-semibold leading-[.92] tracking-[-.09em]">{editorial.delivery.heading}</h2>
+        <p className="mt-7 max-w-[680px] text-[17px] leading-[1.6] text-[#d6deed]">{editorial.delivery.body}</p>
         <div className="mt-9 flex flex-wrap gap-4">
-          <BrandButton href="/methodologies/idao" variant="inverse">Explore IDAO</BrandButton>
-          <BrandButton href="/methodologies/agent-authority-model" variant="inverse">Set Agent Authority</BrandButton>
+          {editorial.delivery.actions.map(({ action }) => (
+            <BrandButton key={action.href} href={action.href} variant="inverse">{action.label}</BrandButton>
+          ))}
         </div>
       </section>
     </article>
   );
+}
+
+export default function AgenticOperationsReadiness() {
+  return <MethodologyCmsDelivery slug="agentic-operations-readiness"><AgenticOperationsReadinessContent /></MethodologyCmsDelivery>;
 }

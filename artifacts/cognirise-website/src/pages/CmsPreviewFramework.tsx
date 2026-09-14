@@ -2,12 +2,21 @@ import type { FrameworkContent } from "@workspace/api-zod";
 import { AgentAuthorityLayout } from "@/pages/AgentAuthorityModel";
 import { GuardrailsLayout } from "@/pages/GuardrailsFramework";
 import {
+  MethodologyCmsPreviewBoundary,
+  type MethodologyFramework,
+} from "@/components/MethodologyCmsLayout";
+import {
   frameworkPreviewWarnings,
-  normalizeFrameworkPreviewContent,
+  composeFrameworkPreviewRecord,
 } from "@/lib/framework-preview";
 import { type CmsRecord } from "@/lib/cms";
 import { Shell } from "@/components/layout/Shell";
 import type { Preview } from "./CmsPreview";
+import IDAOMethodology from "@/pages/IDAOMethodology";
+import AIUseCasePrioritization from "@/pages/AIUseCasePrioritization";
+import AIValueToScale from "@/pages/AIValueToScale";
+import AgenticOperationsReadiness from "@/pages/AgenticOperationsReadiness";
+import HumanAgentOperatingModel from "@/pages/HumanAgentOperatingModel";
 
 function PreviewBanner({ preview }: { preview: Preview }) {
   return (
@@ -101,7 +110,21 @@ export function CmsPreviewFramework({
         <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />
         {framework.template === "agent-authority"
           ? <AgentAuthorityLayout framework={framework} preview />
-          : <GuardrailsLayout framework={framework} preview />}
+          : framework.template === "guardrails"
+            ? <GuardrailsLayout framework={framework} preview />
+            : (
+              <MethodologyCmsPreviewBoundary framework={framework as CmsRecord<MethodologyFramework>}>
+                {framework.template === "idao"
+                  ? <IDAOMethodology />
+                  : framework.template === "ai-use-case-prioritization"
+                    ? <AIUseCasePrioritization />
+                    : framework.template === "ai-value-to-scale"
+                      ? <AIValueToScale />
+                      : framework.template === "agentic-operations-readiness"
+                        ? <AgenticOperationsReadiness />
+                        : <HumanAgentOperatingModel />}
+              </MethodologyCmsPreviewBoundary>
+            )}
       </main>
     </Shell>
   );
@@ -113,20 +136,7 @@ export function normalizeCmsPreviewFramework(preview: Preview): {
   framework: CmsRecord<FrameworkContent> | null;
   warnings: string[];
 } {
-  const frameworkContent = normalizeFrameworkPreviewContent(preview.document.content);
-  const framework = frameworkContent
-    ? {
-        ...frameworkContent,
-        id: preview.revisionId,
-        slug: typeof preview.document.slug === "string" ? preview.document.slug : "agent-authority-model",
-        title: typeof preview.document.title === "string" ? preview.document.title : "",
-        summary: typeof preview.document.summary === "string" ? preview.document.summary : null,
-        media: preview.media,
-        seo: undefined,
-        publishedAt: "",
-        updatedAt: "",
-      } as CmsRecord<FrameworkContent>
-    : null;
+  const framework = composeFrameworkPreviewRecord(preview.document, preview);
   return {
     framework,
     warnings: frameworkPreviewWarnings(preview.document.content),

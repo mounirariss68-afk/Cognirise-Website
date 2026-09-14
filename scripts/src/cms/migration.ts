@@ -1,5 +1,16 @@
 import { createHash } from "node:crypto";
-import { type CmsDocumentKind, validateCmsSnapshot } from "@workspace/api-zod";
+import {
+  type CmsDocumentKind,
+  validateCmsSnapshot,
+  methodologyCanonicalSeed,
+  methodologyEditorialDefinition,
+  methodologySeoSeed,
+  idaoHeroSeed,
+  aiUseCasePrioritizationHeroSeed,
+  aiValueToScaleHeroSeed,
+  agenticOperationsReadinessHeroSeed,
+  humanAgentOperatingModelHeroSeed,
+} from "@workspace/api-zod";
 import { InventoryRecord } from "./common.js";
 import { acceptedLegacyMediaReceiptDigests } from "./media-receipt-history.js";
 import { caseStudyRecords } from "./case-studies.js";
@@ -399,6 +410,34 @@ function slugify(value: string) {
   return slug || "migration";
 }
 
+const strictMethodologyHeroSeeds = {
+  idao: idaoHeroSeed,
+  "ai-use-case-prioritization": aiUseCasePrioritizationHeroSeed,
+  "ai-value-to-scale": aiValueToScaleHeroSeed,
+  "agentic-operations-readiness": agenticOperationsReadinessHeroSeed,
+  "human-agent-operating-model": humanAgentOperatingModelHeroSeed,
+} as const;
+
+function strictMethodologyContent(slug: string, source: unknown) {
+  if (!(slug in strictMethodologyHeroSeeds)) return source;
+  const definition = methodologyEditorialDefinition(slug);
+  if (!definition) throw new Error(`${slug}: the exact methodology editorial definition is unavailable.`);
+  const heroSeed = strictMethodologyHeroSeeds[slug as keyof typeof strictMethodologyHeroSeeds] as Record<string, unknown>;
+  const { imageSrc: _imageSrc, imageAlt: _imageAlt, media: _media, ...hero } = heroSeed;
+  const prior = source && typeof source === "object" ? source as Record<string, unknown> : {};
+  return {
+    schemaVersion: 1,
+    template: slug,
+    hero,
+    editorial: definition.seed,
+    canonical: methodologyCanonicalSeed(slug as keyof typeof strictMethodologyHeroSeeds),
+    visibility: prior.visibility ?? "public",
+    order: prior.order ?? 1,
+    sources: prior.sources ?? [],
+    relatedIds: prior.relatedIds ?? [],
+  };
+}
+
 export function migrationOperation(record: MigratableRecord): MigrationOperation {
   const fieldSlug = typeof record.fields.slug === "string" ? record.fields.slug : undefined;
   const slug = fieldSlug ?? `${slugify(record.name)}-${record.externalId.split(":")[1].slice(0, 8)}`;
@@ -411,10 +450,14 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
     slug,
     title: record.name,
     summary: typeof record.fields.summary === "string" ? record.fields.summary : null,
-    content: record.fields.content,
+    content: record.type === "framework"
+      ? strictMethodologyContent(slug, record.fields.content)
+      : record.fields.content,
     seo: record.type === "industry" && record.fields.slug === "education"
       ? { ...EDUCATION_SUCCESSOR_SEO, noIndex: false }
-      : { noIndex: false },
+      : record.type === "framework" && slug in strictMethodologyHeroSeeds
+        ? methodologySeoSeed(slug as keyof typeof strictMethodologyHeroSeeds)
+        : { noIndex: false },
     mediaIds: [],
     markets: ["uae"],
   };
@@ -434,7 +477,9 @@ export function migrationOperation(record: MigratableRecord): MigrationOperation
         : `cms-industry-contract-v8:${record.externalId}`
       : record.type === "case-study"
         ? `cms-case-study-baseline-v2:${record.externalId}`
-        : `cms-inventory-v2:${record.externalId}`,
+        : record.type === "framework"
+          ? `cms-framework-methodology-baseline-v1:${record.externalId}`
+          : `cms-inventory-v2:${record.externalId}`,
     requestDigest: digest(request),
   };
 }
@@ -494,7 +539,11 @@ export function personGovernanceOperations(records: InventoryRecord[]): PersonGo
     });
 }
 
-export function resolveMigrationMedia(operation: MigrationOperation, mediaByPath: Map<string, string>) {
+export function resolveMigrationMedia(
+  operation: MigrationOperation,
+  mediaByPath: Map<string, string>,
+  mediaVersionByPath = new Map<string, string>(),
+) {
   const mediaIds = operation.mediaPaths.map((mediaPath) => {
     const id = mediaByPath.get(mediaPath);
     if (!id) throw new Error(`No imported CMS media record for ${mediaPath}.`);
@@ -502,7 +551,25 @@ export function resolveMigrationMedia(operation: MigrationOperation, mediaByPath
   });
   const content = structuredClone(operation.payload.content) as Record<string, unknown>;
   if (mediaIds[0] && (operation.kind === "platform" || operation.kind === "publication" || operation.kind === "industry" || operation.kind === "framework")) {
-    content.heroMediaId = mediaIds[0];
+    const methodologyTemplate = operation.kind === "framework"
+      && ["idao", "ai-use-case-prioritization", "ai-value-to-scale", "agentic-operations-readiness", "human-agent-operating-model"].includes(String(content.template));
+    if (methodologyTemplate && content.hero && typeof content.hero === "object" && !Array.isArray(content.hero)) {
+      const mediaVersionId = mediaVersionByPath.get(operation.mediaPaths[0]);
+      if (!mediaVersionId) {
+        throw new Error(`${operation.externalId}: methodology hero requires its exact immutable media version.`);
+      }
+      // Methodology editions never receive the deprecated mutable hero.mediaId.
+      // A revision must name the environment-local asset *and* immutable
+      // version that was reconciled for this specific import.
+      const hero = { ...(content.hero as Record<string, unknown>) };
+      delete hero.mediaId;
+      content.hero = {
+        ...hero,
+        media: { mediaId: mediaIds[0], mediaVersionId, role: "hero" },
+      };
+    } else {
+      content.heroMediaId = mediaIds[0];
+    }
   }
   const payload = { ...operation.payload, content, mediaIds };
   const validation = validateCmsSnapshot(operation.kind as CmsDocumentKind, payload, "draft");
