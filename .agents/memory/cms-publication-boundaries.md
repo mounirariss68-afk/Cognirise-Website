@@ -31,6 +31,12 @@ Keep the currently approved revision public while a successor draft moves throug
 
 ## Incremental policy releases
 
+Keep a legacy diagram renderer when approved captions and accessible descriptions describe its old geometry; activate a redesigned composition only with its governed replacement metadata.
+
+**Why:** Swapping the visual alone can leave an approved left/right description attached to a single shared rail. Substituting new static captions would instead bypass editorial approval.
+
+**How to apply:** Couple the new presentation to an optional complete governed summary/caption bundle. Preserve older revision copy and rendering until that bundle is approved.
+
 Build partial navigation or availability releases by overlaying reviewed changes on the exact live policy snapshot, never by rebuilding from only the reviewed subset or mutable defaults.
 
 **Why:** Reconstructing a release from a partial review can silently erase unrelated live restrictions, labels, hierarchy, or visibility decisions.

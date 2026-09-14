@@ -608,6 +608,26 @@ const frameworkGuardrailsFigureSchema = z.object({
   captionBody: z.string().trim().min(1).max(1_000),
 }).strict();
 
+const frameworkGuardrailsFirstFigureSchema = frameworkGuardrailsFigureSchema.extend({
+  asset: z.literal("aam-guardrails-vs-authority.svg"),
+}).strict();
+/** Optional summary-first copy for the Guardrails and authority subsection.
+ * The object is deliberately all-required when present: an incomplete
+ * summary must not silently become public copy. */
+export const frameworkGuardrailsSummarySchema = z.object({
+  lead: z.string().trim().min(1).max(2_000),
+  handover: z.string().trim().min(1).max(2_000),
+  rules: z.array(z.object({
+    title: z.string().trim().min(1).max(240),
+    body: z.string().trim().min(1).max(2_000),
+  }).strict()).length(4),
+  caveat: z.string().trim().min(1).max(2_000),
+  disclosureLabel: z.string().trim().min(1).max(240),
+  firstFigure: frameworkGuardrailsFirstFigureSchema,
+}).strict();
+
+export type FrameworkGuardrailsSummary = z.infer<typeof frameworkGuardrailsSummarySchema>;
+
 export const frameworkGuardrailsSubsectionSchema = z.object({
   heading: z.string().trim().min(1).max(240),
   opening: z.string().trim().min(1).max(2_000),
@@ -634,9 +654,7 @@ export const frameworkGuardrailsSubsectionSchema = z.object({
     paragraphs: z.array(z.string().trim().min(1).max(4_000)).length(2),
     emphasis: z.string().trim().min(1).max(1_000),
   }).strict(),
-  firstFigure: frameworkGuardrailsFigureSchema.extend({
-    asset: z.literal("aam-guardrails-vs-authority.svg"),
-  }).strict(),
+  firstFigure: frameworkGuardrailsFirstFigureSchema,
   interaction: z.object({
     heading: z.string().trim().min(1).max(240),
     introduction: z.string().trim().min(1).max(1_000),
@@ -664,6 +682,8 @@ export const frameworkGuardrailsSubsectionSchema = z.object({
       bodyAfterContent: z.string().trim().min(1).max(4_000),
     }).strict(),
   }).strict(),
+  /** Optional summary-first copy. Legacy revisions without it remain valid. */
+  summary: frameworkGuardrailsSummarySchema.optional(),
   secondFigure: frameworkGuardrailsFigureSchema.extend({
     asset: z.literal("aam-how-they-interact.svg"),
   }).strict(),
@@ -1890,3 +1910,4 @@ const bankingSourceSchema = z.object({
   statement: z.string().trim().min(1).max(1_000),
   qualification: z.string().trim().min(1).max(1_000),
 }).strict();
+

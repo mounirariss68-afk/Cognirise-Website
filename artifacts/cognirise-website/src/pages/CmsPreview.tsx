@@ -16,8 +16,6 @@ import {
 } from "@workspace/api-zod";
 import NotFound from "@/pages/not-found";
 import { applyMetadata } from "@/lib/metadata";
-import { AgentAuthorityLayout } from "@/pages/AgentAuthorityModel";
-import { GuardrailsLayout } from "@/pages/GuardrailsFramework";
 import {
   isIndustryPreviewFocusMessage,
   resolvePreviewIndustryMedia,
@@ -25,7 +23,8 @@ import {
   CmsPreviewRequestBoundary,
   type CmsRecord,
 } from "@/lib/cms";
-import { normalizeFrameworkPreviewContent } from "@/lib/framework-preview";
+import { frameworkPreviewWarnings } from "@/lib/framework-preview";
+import { CmsPreviewFramework, normalizeCmsPreviewFramework } from "@/pages/CmsPreviewFramework";
 import { OfficeContactCard } from "@/components/OfficeContactCard";
 import { BankingEditorial } from "@/components/industries/BankingEditorial";
 import { Shell, type PreviewNavigationSnapshot } from "@/components/layout/Shell";
@@ -45,7 +44,7 @@ import {
 } from "@/components/cms/PublicCmsPresentations";
 import { CaseStudyLayout } from "@/components/work/case-study-ui";
 
-type Preview = {
+export type Preview = {
   kind: CmsDocumentKind;
   document: Record<string, unknown>;
   market: string;
@@ -491,6 +490,77 @@ function DraftPreviewContent({ preview, warnings }: { preview: Preview; warnings
   return <ProtectedPreviewError error={{ kind: "invalid-response", message: "This saved revision has no public presentation." }} />;
 }
 
+export function CmsPreviewContent({
+  preview,
+  error,
+}: {
+  preview?: Preview;
+  error?: PreviewError;
+}) {
+  if (error) return <ProtectedPreviewError error={error} />;
+  if (!preview) return null;
+
+  const validation = validateCmsSnapshot(preview.kind, preview.document, "draft");
+  const warnings = [...new Set([
+    ...preview.validationWarnings,
+    ...(validation.success ? [] : validation.errors),
+    ...(preview.kind === "framework" ? frameworkPreviewWarnings(preview.document.content) : []),
+  ])];
+
+  if (preview.kind === "industry") {
+    if (!validation.success) {
+      return (
+        <Shell navigationOverride={preview.navigation}>
+          <PreviewBanner preview={preview} />
+          <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />
+          <ProtectedPreviewError error={{
+            kind: "invalid-response",
+            message: "This saved industry revision has validation errors and cannot be completed from public content.",
+          }} />
+        </Shell>
+      );
+    }
+    return (
+      <Shell navigationOverride={preview.navigation}>
+        <PreviewBanner preview={preview} />
+        <IndustryPreview preview={preview} content={validation.data.content as IndustryContent} />
+      </Shell>
+    );
+  }
+
+  if (preview.kind === "framework") {
+    const normalized = normalizeCmsPreviewFramework(preview);
+    if (normalized.framework) {
+      return <CmsPreviewFramework preview={preview} framework={normalized.framework} warnings={[
+        ...new Set([...warnings, ...normalized.warnings]),
+      ]} />;
+    }
+  }
+
+  if (preview.kind === "office" && validation.success) {
+    const office = validation.data.content as OfficeContent;
+    return (
+      <main className="min-h-screen bg-background">
+        <PreviewBanner preview={preview} />
+        <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />
+        <section className="px-6 py-24">
+          <div className="mx-auto max-w-[720px] border border-border bg-[hsl(var(--secondary))] p-12">
+            <h3 className="mb-6 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-pink))]">Global Offices</h3>
+            <OfficeContactCard city={office.city} address={office.address} phone={office.phone} />
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <Shell navigationOverride={preview.navigation}>
+      <PreviewBanner preview={preview} />
+      <DraftPreviewContent preview={preview} warnings={warnings} />
+    </Shell>
+  );
+}
+
 export default function CmsPreview() {
   const [match, params] = useRoute("/preview/:token");
   const [preview, setPreview] = useState<Preview>();
@@ -594,102 +664,5 @@ export default function CmsPreview() {
   }, []);
 
   if (!match) return <NotFound />;
-  if (error) return <ProtectedPreviewError error={error} />;
-  if (!preview) return null;
-
-  const validation = validateCmsSnapshot(preview.kind, preview.document, "draft");
-  const warnings = [...preview.validationWarnings, ...(validation.success ? [] : validation.errors)];
-
-  if (preview.kind === "industry") {
-    if (!validation.success) {
-      return (
-        <Shell navigationOverride={preview.navigation}>
-          <PreviewBanner preview={preview} />
-          <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />
-          <ProtectedPreviewError error={{
-            kind: "invalid-response",
-            message: "This saved industry revision has validation errors and cannot be completed from public content.",
-          }} />
-        </Shell>
-      );
-    }
-    return (
-      <Shell navigationOverride={preview.navigation}>
-        <PreviewBanner preview={preview} />
-        <IndustryPreview preview={preview} content={validation.data.content as IndustryContent} />
-      </Shell>
-    );
-  }
-
-  const frameworkContent = preview.kind === "framework"
-    ? normalizeFrameworkPreviewContent(preview.document.content)
-    : null;
-  const framework = frameworkContent
-    ? {
-        ...frameworkContent,
-        id: preview.revisionId,
-        slug: typeof preview.document.slug === "string" ? preview.document.slug : "agent-authority-model",
-        title: typeof preview.document.title === "string" ? preview.document.title : "",
-        summary: typeof preview.document.summary === "string" ? preview.document.summary : null,
-        media: preview.media,
-        seo: undefined,
-        publishedAt: "",
-        updatedAt: "",
-      } as CmsRecord<FrameworkContent>
-    : null;
-
-  if (preview.kind === "framework" && framework) {
-    const missingFrameworkMedia = [
-      ...new Set([
-        ...preview.missingMediaIds,
-        ...unresolvedPinnedMedia(preview.document.content, preview.media ?? []),
-      ]),
-    ];
-    if (missingFrameworkMedia.length) {
-      return (
-        <Shell navigationOverride={preview.navigation}>
-          <PreviewBanner preview={preview} />
-          <PreviewWarningPanel warnings={warnings} missingMedia={missingFrameworkMedia} />
-          <ProtectedPreviewError error={{
-            kind: "invalid-response",
-            message: "This saved framework revision references draft media that is unavailable. It has not been completed with public media.",
-          }} />
-        </Shell>
-      );
-    }
-    return (
-      <Shell navigationOverride={preview.navigation}>
-        <main className="min-h-screen bg-background">
-          <PreviewBanner preview={preview} />
-          <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />
-          {framework.template === "agent-authority"
-            ? <AgentAuthorityLayout framework={framework} preview />
-            : <GuardrailsLayout framework={framework} preview />}
-        </main>
-      </Shell>
-    );
-  }
-
-  if (preview.kind === "office" && validation.success) {
-    const office = validation.data.content as OfficeContent;
-    return (
-      <main className="min-h-screen bg-background">
-        <PreviewBanner preview={preview} />
-        <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />
-        <section className="px-6 py-24">
-          <div className="mx-auto max-w-[720px] border border-border bg-[hsl(var(--secondary))] p-12">
-            <h3 className="mb-6 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-pink))]">Global Offices</h3>
-            <OfficeContactCard city={office.city} address={office.address} phone={office.phone} />
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  return (
-    <Shell navigationOverride={preview.navigation}>
-      <PreviewBanner preview={preview} />
-      <DraftPreviewContent preview={preview} warnings={warnings} />
-    </Shell>
-  );
+  return <CmsPreviewContent preview={preview} error={error} />;
 }

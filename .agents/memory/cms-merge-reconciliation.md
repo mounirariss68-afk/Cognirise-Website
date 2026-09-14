@@ -56,3 +56,9 @@ Generated landing inventory is a seed for absent authority, not a replacement fo
 **Why:** Approved source-copy changes can legitimately differ from the immutable baseline used by an earlier media reconciliation. Treating that difference as corruption blocks unrelated merges.
 
 **How to apply:** Validate and preserve the stored baseline, report generated-copy drift, and use the stored payload if its initial draft needs reconstructing. Keep publication and editorial-history conflict checks intact.
+
+Do not install a draft-only one-shot reconciler as a permanent fail-fast merge hook.
+
+**Why:** Normal review, publication, or later editing can invalidate its draft-only replay preconditions and then break every unrelated merge.
+
+**How to apply:** Keep such operations explicit, or first implement terminal reviewed/published-state recognition and non-destructive handling of newer editorial work.

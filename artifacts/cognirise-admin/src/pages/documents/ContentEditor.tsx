@@ -575,12 +575,31 @@ export function guardrailsDraft(): Content {
     visibility: "hidden", order: 0, sources: [], relatedIds: [],
   };
 }
+
+export function authoritySummaryDraft(): Content {
+  const text = "";
+  return {
+    lead: text,
+    handover: text,
+    rules: [1, 2, 3, 4].map(() => ({ title: text, body: text })),
+    caveat: text,
+    disclosureLabel: text,
+    firstFigure: {
+      asset: "aam-guardrails-vs-authority.svg",
+      altText: text,
+      captionLabel: text,
+      captionLead: text,
+      captionBody: text,
+    },
+  };
+}
 function GuardrailsAuthorityEditor({ value, onChange }: { value: Content | undefined; onChange: (value: Content | undefined) => void }) {
   const section = value ?? {};
   const set = (key: string, next: unknown) => onChange({ ...section, [key]: next });
   const interaction = section.interaction ?? {};
   const requiredControls = interaction.requiredControls ?? {};
   const compensatingControls = interaction.compensatingControls ?? {};
+  const summary = section.summary ?? {};
   const figure = (key: "firstFigure" | "secondFigure", asset: string, label: string) => {
     const current = section[key] ?? { asset, altText: "", captionLabel: "", captionLead: "", captionBody: "" };
     return <section className="space-y-3 border-t pt-4">
@@ -592,6 +611,8 @@ function GuardrailsAuthorityEditor({ value, onChange }: { value: Content | undef
       <Area label={`${label} caption remainder`} value={current.captionBody ?? ""} onChange={(captionBody) => set(key, { ...current, asset, captionBody })} rows={3} />
     </section>;
   };
+  const summaryFigure = summary.firstFigure ?? authoritySummaryDraft().firstFigure;
+  const setSummary = (patch: Content) => set("summary", { ...summary, ...patch });
   return (
     <section className="space-y-4 border-t pt-6">
       <div className="flex items-center justify-between gap-4">
@@ -613,6 +634,36 @@ function GuardrailsAuthorityEditor({ value, onChange }: { value: Content | undef
         <Area label="Unit paragraph 1" value={section.unit?.paragraphs?.[0] ?? ""} onChange={(paragraph) => set("unit", { ...section.unit, paragraphs: [paragraph, section.unit?.paragraphs?.[1] ?? ""] })} rows={6} />
         <Area label="Unit paragraph 2" value={section.unit?.paragraphs?.[1] ?? ""} onChange={(paragraph) => set("unit", { ...section.unit, paragraphs: [section.unit?.paragraphs?.[0] ?? "", paragraph] })} rows={6} />
         <Field label="Unit closing emphasis" value={section.unit?.emphasis} onChange={(emphasis) => set("unit", { ...section.unit, emphasis })} />
+        <section className="space-y-4 rounded-md border bg-muted/20 p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div><h4 className="font-semibold">Summary-first narrative</h4><p className="mt-1 text-xs text-muted-foreground">Optional governed copy for the compact summary. When present, all fields and exactly four rules are required.</p></div>
+            {section.summary
+              ? <Button type="button" variant="outline" onClick={() => set("summary", undefined)}>Remove summary</Button>
+              : <Button type="button" variant="outline" onClick={() => set("summary", authoritySummaryDraft())}>Add summary</Button>}
+          </div>
+          {section.summary && <>
+            <Area label="Summary lead" required value={summary.lead ?? ""} onChange={(lead) => setSummary({ lead })} rows={3} />
+            <Area label="Handover explanation" required value={summary.handover ?? ""} onChange={(handover) => setSummary({ handover })} rows={3} />
+            <RecordList
+              label="Four summary rules"
+              value={summary.rules}
+              minimum={4}
+              maximum={4}
+              columns={[{ key: "title", label: "Rule title" }, { key: "body", label: "Rule body", type: "textarea" }]}
+              onChange={(rules) => setSummary({ rules })}
+            />
+            <Area label="Essential compensating-control caveat" required value={summary.caveat ?? ""} onChange={(caveat) => setSummary({ caveat })} rows={3} />
+            <Field label="Full explanation disclosure label" required value={summary.disclosureLabel} onChange={(disclosureLabel) => setSummary({ disclosureLabel })} />
+            <section className="space-y-3 border-t pt-4">
+              <p className="text-sm font-medium">Summary first figure</p>
+              <p className="text-xs text-muted-foreground">Fixed local asset: aam-guardrails-vs-authority.svg. Its alternative text and caption segments are governed separately from the detailed figure.</p>
+              <Area label="Summary first figure alternative text" required value={summaryFigure.altText ?? ""} onChange={(altText) => setSummary({ firstFigure: { ...summaryFigure, asset: "aam-guardrails-vs-authority.svg", altText } })} rows={3} />
+              <Field label="Summary first figure caption label" required value={summaryFigure.captionLabel} onChange={(captionLabel) => setSummary({ firstFigure: { ...summaryFigure, asset: "aam-guardrails-vs-authority.svg", captionLabel } })} />
+              <Area label="Summary first figure caption opening" required value={summaryFigure.captionLead ?? ""} onChange={(captionLead) => setSummary({ firstFigure: { ...summaryFigure, asset: "aam-guardrails-vs-authority.svg", captionLead } })} rows={3} />
+              <Area label="Summary first figure caption remainder" required value={summaryFigure.captionBody ?? ""} onChange={(captionBody) => setSummary({ firstFigure: { ...summaryFigure, asset: "aam-guardrails-vs-authority.svg", captionBody } })} rows={3} />
+            </section>
+          </>}
+        </section>
         {figure("firstFigure", "aam-guardrails-vs-authority.svg", "Illustration 1")}
         <Field label="Interaction heading" value={interaction.heading} onChange={(heading) => set("interaction", { ...interaction, heading })} />
         <Area label="Interaction introduction" value={interaction.introduction ?? ""} onChange={(introduction) => set("interaction", { ...interaction, introduction })} />

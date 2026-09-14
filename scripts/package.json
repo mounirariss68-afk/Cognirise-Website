@@ -35,6 +35,7 @@
     "cms:reconcile-methodologies-hero": "tsx ./src/cms/methodologies-reconciliation.ts",
     "cms:reconcile-homepage": "tsx ./src/cms/homepage-reconciliation.ts",
     "cms:stage-agent-authority-guardrails": "tsx ./src/cms/agent-authority-guardrails.ts",
+    "cms:stage-task-335-agent-authority-summary": "tsx ./src/cms/task-335-agent-authority-summary.ts",
     "cms:reconcile-value-to-scale-hero": "tsx ./src/cms/value-to-scale-hero-reconciliation.ts",
     "cms:reconcile-offices": "tsx ./src/cms/office-reconciliation.ts",
     "cms:backup": "tsx ./src/cms/backup.ts",

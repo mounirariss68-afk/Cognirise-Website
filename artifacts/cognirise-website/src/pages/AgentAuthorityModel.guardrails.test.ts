@@ -7,6 +7,10 @@ const comparisonDiagram = readFileSync(
   new URL("../components/agent-authority/ComparisonDiagram.tsx", import.meta.url),
   "utf8",
 );
+const legacyComparisonDiagram = readFileSync(
+  new URL("../components/agent-authority/LegacyComparisonDiagram.tsx", import.meta.url),
+  "utf8",
+);
 const interactionChart = readFileSync(
   new URL("../components/agent-authority/InteractionChart.tsx", import.meta.url),
   "utf8",
@@ -51,14 +55,19 @@ test("Guardrails markup keeps CMS table labels, emphasis, captions, and alt desc
   assert.match(source, /\{guardrails\.comparisonColumns\.authorityModel\}/);
   assert.match(source, /row\.guardrailsEmphasis/);
   assert.match(source, /row\.authorityModelEmphasis/);
-  assert.match(source, /<ComparisonDiagram\s+figure=\{guardrails\.firstFigure\}/);
+  assert.match(source, /<ComparisonDiagram\s+figure=\{guardrails\.summary\.firstFigure\}/);
+  assert.match(source, /<LegacyComparisonDiagram\s+figure=\{guardrails\.firstFigure\}/);
   assert.match(source, /<InteractionChart\s+figure=\{guardrails\.secondFigure\}/);
-  for (const component of [comparisonDiagram, interactionChart]) {
+  for (const component of [comparisonDiagram, legacyComparisonDiagram, interactionChart]) {
     assert.match(component, /aria-label=\{figure\.altText\}/);
     assert.match(component, /figure\.captionLabel/);
     assert.match(component, /figure\.captionLead/);
     assert.match(component, /figure\.captionBody/);
   }
+  assert.match(comparisonDiagram, /plainOversight: "automatic"/);
+  assert.match(comparisonDiagram, /plainOversight: "monitored"/);
+  assert.match(comparisonDiagram, /plainOversight: "intervention window"/);
+  assert.match(comparisonDiagram, /plainOversight: "human approval"/);
 });
 
 test("Interaction chart keeps the native canonical permitted grid", () => {
@@ -81,4 +90,23 @@ test("Existing ceiling explorer and control specification precede the worked exa
   assert.match(comparisonDiagram, /name: "Book an appointment", profile: "Action · R2 \/ H2", oversight: "on the loop"/);
   assert.match(interactionChart, /onKeyDown=/);
   assert.match(interactionChart, /region\.scrollLeft \+=/);
+});
+
+test("Legacy guardrails keep the original figure order and mobile table treatment", () => {
+  const legacyStart = source.indexOf("{!guardrails.summary && (");
+  const legacyEnd = source.indexOf("</section>", legacyStart);
+  assert.ok(legacyStart >= 0 && legacyEnd > legacyStart);
+  const legacy = source.slice(legacyStart, legacyEnd);
+  const table = legacy.indexOf('<table className="mt-7 w-full border-collapse');
+  const unit = legacy.indexOf("guardrails.unit.heading");
+  const diagram = legacy.indexOf("<LegacyComparisonDiagram");
+  const interaction = legacy.indexOf("guardrails.interaction.heading");
+  const chart = legacy.indexOf("<InteractionChart");
+  assert.ok(table >= 0 && table < unit && unit < diagram && diagram < interaction && interaction < chart);
+  assert.match(legacy, /<tbody className="max-sm:grid max-sm:gap-5">/);
+  assert.match(legacy, /max-sm:grid max-sm:border max-sm:border-\[#cbd3e1\]/);
+  assert.doesNotMatch(legacy, /min-w-\[42rem\]/);
+  assert.doesNotMatch(legacy, /<div className="mt-16">\s*<InteractionChart/);
+  assert.match(legacyComparisonDiagram, /xl:grid-cols-2/);
+  assert.match(legacyComparisonDiagram, /The common pattern/);
 });

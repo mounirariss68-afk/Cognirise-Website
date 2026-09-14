@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { normalizeFrameworkPreviewContent } from "./framework-preview";
+import {
+  FRAMEWORK_GUARDRAILS_SUMMARY_WARNING,
+  frameworkPreviewWarnings,
+  normalizeFrameworkPreviewContent,
+} from "./framework-preview";
 
 const guardrails = {
   heading: "Guardrails are not an authority model",
@@ -80,4 +84,46 @@ test("framework preview accepts only a complete fixed-asset guardrails subsectio
 
   const legacy = normalizeFrameworkPreviewContent({ template: "agent-authority" });
   assert.equal(legacy?.guardrails, undefined);
+});
+
+test("framework preview preserves only complete summaries and warns before falling back to legacy copy", () => {
+  const summary = {
+    lead: "Compact lead.",
+    handover: "A governed handover becomes consequential.",
+    rules: [
+      { title: "Rule one", body: "Body one." },
+      { title: "Rule two", body: "Body two." },
+      { title: "Rule three", body: "Body three." },
+      { title: "Rule four", body: "Body four." },
+    ],
+    caveat: "A constrained control carries the authority.",
+    disclosureLabel: "Read the full explanation",
+    firstFigure: {
+      asset: "aam-guardrails-vs-authority.svg",
+      altText: "Summary figure description.",
+      captionLabel: "Illustration 1 —",
+      captionLead: "Summary figure lead.",
+      captionBody: "Summary figure body.",
+    },
+  };
+  const valid = normalizeFrameworkPreviewContent({
+    template: "agent-authority",
+    guardrails: { ...guardrails, summary },
+  });
+  assert.deepEqual(valid?.guardrails?.summary, summary);
+  assert.deepEqual(frameworkPreviewWarnings({
+    template: "agent-authority",
+    guardrails: { ...guardrails, summary },
+  }), []);
+
+  const incomplete = {
+    template: "agent-authority",
+    guardrails: { ...guardrails, summary: { ...summary, rules: summary.rules.slice(0, 3) } },
+  };
+  const normalized = normalizeFrameworkPreviewContent(incomplete);
+  assert.equal(normalized?.guardrails?.summary, undefined);
+  assert.deepEqual(frameworkPreviewWarnings(incomplete), [FRAMEWORK_GUARDRAILS_SUMMARY_WARNING]);
+
+  const legacy = { template: "agent-authority", guardrails };
+  assert.deepEqual(frameworkPreviewWarnings(legacy), []);
 });

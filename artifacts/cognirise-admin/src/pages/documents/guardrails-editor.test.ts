@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { validateCmsContent } from "@workspace/api-zod";
 import {
+  authoritySummaryDraft,
   guardrailsDraft,
   guardrailsEditableTextPaths,
 } from "./ContentEditor.tsx";
@@ -31,6 +32,16 @@ test("Guardrails editor exposes prose, never structural or governance slots", ()
     ...guardrailsDraft(),
     relatedIds: ["6c1e0194-3c88-4f5b-97b2-fca2d45ad787"],
     sources: [{ title: "Evidence", url: "https://example.com/evidence" }],
+    heroMedia: {
+      mediaId: "6c1e0194-3c88-4f5b-97b2-fca2d45ad787",
+      mediaVersionId: "953e240a-3dcf-47fc-98ec-ddb8e5158d3e",
+      role: "hero",
+      altText: "Governed hero",
+    },
+    presentation: {
+      version: "guardrails-redesign-v1",
+      distinction: { summary: "Concise distinction." },
+    },
   });
   const structuralKeys = new Set([
     "template", "id", "href", "enforcementLayer", "destination", "additionId",
@@ -61,4 +72,17 @@ test("Guardrails editor keeps an optional immutable hero selection out of prose 
   assert.equal(paths.some((path) => path[0] === "heroMedia"), false);
   assert.equal(paths.some((path) => path.join(".") === "presentation.version"), false);
   assert.equal(paths.some((path) => path.join(".") === "presentation.distinction.summary"), true);
+});
+test("Agent Authority summary authoring keeps four rules and a fixed first figure", () => {
+  const draft = authoritySummaryDraft();
+  assert.equal(draft.rules.length, 4);
+  assert.equal(draft.firstFigure.asset, "aam-guardrails-vs-authority.svg");
+  assert.deepEqual(Object.keys(draft).sort(), [
+    "caveat",
+    "disclosureLabel",
+    "firstFigure",
+    "handover",
+    "lead",
+    "rules",
+  ]);
 });

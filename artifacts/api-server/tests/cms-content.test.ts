@@ -6,6 +6,7 @@ import {
   cmsDocumentKinds,
   cmsDraftMetadataSchema,
   cmsMediaReferenceSchema,
+  frameworkGuardrailsSummarySchema,
   collectCmsMediaReferences,
   CreateDocumentEditionOverrideBody,
   cmsPublicRoute,
@@ -840,4 +841,52 @@ test("the admin framework initializer survives request parsing and draft validat
     true,
   );
   assert.equal(validateCmsContent("framework", initialContent, "publish").success, false);
+});
+
+test("legacy authority revisions remain valid and summary copy is all-required with four rules", () => {
+  const legacy = {
+    schemaVersion: 1,
+    template: "agent-authority",
+    teaser: "Govern each handover according to its exposure.",
+    handoverExplanation: "A handover is governed on its own terms.",
+    methodology: [{ type: "paragraph", text: "Evidence earns the climb." }],
+    workedExample: {
+      sector: "Travel",
+      title: "Re-accommodation",
+      handover: "action",
+      reversibility: "R3",
+      reach: "H2",
+      exposureBand: "E2",
+      oversight: "On the loop",
+      detail: "A duty manager owns the handover.",
+      requestedAuthority: "on-loop",
+      accountableRole: "Duty manager",
+      promotionEvidence: "Measured clean rebookings.",
+      automaticDemotion: "Any incident.",
+    },
+    sectorExamples: [],
+  };
+  assert.equal(validateCmsContent("framework", legacy, "draft").success, true);
+
+  const summary = {
+    lead: "Guardrails enforce limits.",
+    handover: "A handover is the moment an output becomes consequential.",
+    rules: [1, 2, 3, 4].map((index) => ({ title: `Rule ${index}`, body: `Body ${index}.` })),
+    caveat: "Only constrained content can carry authority above the ceiling.",
+    disclosureLabel: "Read the full explanation",
+    firstFigure: {
+      asset: "aam-guardrails-vs-authority.svg",
+      altText: "A shared rail with four governed handovers.",
+      captionLabel: "Illustration 1 —",
+      captionLead: "The model governs each handover.",
+      captionBody: "The handovers are illustrative.",
+    },
+  };
+  assert.equal(frameworkGuardrailsSummarySchema.safeParse(summary).success, true);
+  assert.equal(frameworkGuardrailsSummarySchema.safeParse({ ...summary, rules: summary.rules.slice(0, 3) }).success, false);
+  assert.equal(frameworkGuardrailsSummarySchema.safeParse({ ...summary, caveat: undefined }).success, false);
+  assert.equal(frameworkGuardrailsSummarySchema.safeParse({
+    ...summary,
+    firstFigure: { ...summary.firstFigure, asset: "aam-how-they-interact.svg" },
+  }).success, false);
 });

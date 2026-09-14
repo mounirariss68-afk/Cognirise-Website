@@ -1,0 +1,1568 @@
+{
+  "task": 335,
+  "status": "passed",
+  "method": {
+    "baseUrl": "http://127.0.0.1:80",
+    "beforeSource": "artifacts/cognirise-website/src/components/agent-authority/LegacyComparisonDiagram.tsx",
+    "beforeRenderer": "Temporary tsx SSR markup from the committed LegacyComparisonDiagram component, installed only into the public page figure slot.",
+    "publicPayload": "http://127.0.0.1:80/api/public/content/uae/en/framework/agent-authority-model",
+    "publicPayloadRevision": 4,
+    "publicPayloadDigest": "7291089aace748b74e2410dd652ef2c66ba1fa320f1c4643bb470d65dab66f36",
+    "afterRenderer": "Current website route with approved public payload and task335Summary fixture fulfilled at the browser CDP boundary.",
+    "summarySource": "scripts/src/cms/task-335-agent-authority-summary.ts :: task335Summary",
+    "publication": "No CMS write, approval, publication, or preview capability was performed.",
+    "stabilization": "prefers-reduced-motion plus injected transition/animation suppression before each snapshot.",
+    "textScale": "Visible text descendants in the #guardrails-and-authority section were snapshotted, then each was set once to 2x its computed pixel size.",
+    "browser": "/repl/tools/bin/chromium"
+  },
+  "payload": {
+    "legacyRevision": 4,
+    "legacyDigest": "7291089aace748b74e2410dd652ef2c66ba1fa320f1c4643bb470d65dab66f36",
+    "summaryDigest": "8eb7bbeebf8b886e41669460c793bae885f903014337e45b88678fa872ca717f",
+    "afterFixtureDigest": "39e37c76d798bc7e3750cd7cbb8354142987ecc0c980c549815be5efd1f48fd3",
+    "afterRequestCount": 4
+  },
+  "figureHeight": {
+    "viewport": "1440x1000",
+    "before": {
+      "heightIncludingCaption": 1179.40625,
+      "captionHeight": 69.78125,
+      "width": 1286.78125
+    },
+    "after": {
+      "heightIncludingCaption": 403.609375,
+      "captionHeight": 66.59375,
+      "width": 1286.78125
+    },
+    "shorterPercent": 65.78
+  },
+  "mobileFigureHeight": {
+    "viewport": "390x844",
+    "before": {
+      "heightIncludingCaption": 2566.890625,
+      "captionHeight": 175.34375,
+      "width": 342
+    },
+    "after": {
+      "heightIncludingCaption": 1094.96875,
+      "captionHeight": 215.375,
+      "width": 342
+    },
+    "shorterPercent": 57.34
+  },
+  "views": {
+    "beforeDesktop": {
+      "label": "before-desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "devicePixelRatio": 1
+      },
+      "pageFits": true,
+      "documentScrollWidth": 1425,
+      "bodyScrollWidth": 1425,
+      "comparisonFits": true,
+      "guardrailsFits": true,
+      "outside": [],
+      "figure": {
+        "x": 69.109375,
+        "y": 8256.890625,
+        "width": 1286.78125,
+        "height": 1179.40625,
+        "right": 1355.890625,
+        "bottom": 9436.296875
+      },
+      "caption": {
+        "x": 69.109375,
+        "y": 9366.515625,
+        "width": 1286.78125,
+        "height": 69.78125,
+        "right": 1355.890625,
+        "bottom": 9436.296875
+      },
+      "assessmentPresent": true,
+      "interactionChartPresent": true,
+      "summaryDetailsPresent": false,
+      "fonts": {
+        "body": 16,
+        "comparison": 16,
+        "comparisonCaption": 16,
+        "interactionChart": 16,
+        "interactionTitle": 34,
+        "assessmentTitle": 68
+      },
+      "openDetails": []
+    },
+    "beforeMobile": {
+      "label": "before-mobile-390",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "devicePixelRatio": 1
+      },
+      "pageFits": true,
+      "documentScrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "comparisonFits": true,
+      "guardrailsFits": true,
+      "outside": [],
+      "figure": {
+        "x": 24,
+        "y": 12358.515625,
+        "width": 342,
+        "height": 2566.890625,
+        "right": 366,
+        "bottom": 14925.40625
+      },
+      "caption": {
+        "x": 24,
+        "y": 14750.0625,
+        "width": 342,
+        "height": 175.34375,
+        "right": 366,
+        "bottom": 14925.40625
+      },
+      "assessmentPresent": true,
+      "interactionChartPresent": true,
+      "summaryDetailsPresent": false,
+      "fonts": {
+        "body": 16,
+        "comparison": 16,
+        "comparisonCaption": 16,
+        "interactionChart": 16,
+        "interactionTitle": 24,
+        "assessmentTitle": 38
+      },
+      "openDetails": []
+    },
+    "afterDesktop": {
+      "label": "after-desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "devicePixelRatio": 1
+      },
+      "pageFits": true,
+      "documentScrollWidth": 1425,
+      "bodyScrollWidth": 1425,
+      "comparisonFits": true,
+      "guardrailsFits": true,
+      "outside": [],
+      "figure": {
+        "x": 69.109375,
+        "y": 7693.375,
+        "width": 1286.78125,
+        "height": 403.609375,
+        "right": 1355.890625,
+        "bottom": 8096.984375
+      },
+      "caption": {
+        "x": 69.109375,
+        "y": 8030.390625,
+        "width": 1286.78125,
+        "height": 66.59375,
+        "right": 1355.890625,
+        "bottom": 8096.984375
+      },
+      "assessmentPresent": true,
+      "interactionChartPresent": true,
+      "summaryDetailsPresent": true,
+      "fonts": {
+        "body": 16,
+        "comparison": 16,
+        "comparisonCaption": 16,
+        "interactionChart": 16,
+        "interactionTitle": 34,
+        "assessmentTitle": 68
+      },
+      "openDetails": [
+        false
+      ]
+    },
+    "afterTablet": {
+      "label": "after-tablet-768",
+      "viewport": {
+        "width": 768,
+        "height": 1024,
+        "devicePixelRatio": 1
+      },
+      "pageFits": true,
+      "documentScrollWidth": 753,
+      "bodyScrollWidth": 753,
+      "comparisonFits": true,
+      "guardrailsFits": true,
+      "outside": [],
+      "figure": {
+        "x": 36.859375,
+        "y": 8417.609375,
+        "width": 679.28125,
+        "height": 590.421875,
+        "right": 716.140625,
+        "bottom": 9008.03125
+      },
+      "caption": {
+        "x": 36.859375,
+        "y": 8891.84375,
+        "width": 679.28125,
+        "height": 116.1875,
+        "right": 716.140625,
+        "bottom": 9008.03125
+      },
+      "assessmentPresent": true,
+      "interactionChartPresent": true,
+      "summaryDetailsPresent": true,
+      "fonts": {
+        "body": 16,
+        "comparison": 16,
+        "comparisonCaption": 16,
+        "interactionChart": 16,
+        "interactionTitle": 24,
+        "assessmentTitle": 38.4
+      },
+      "openDetails": [
+        false
+      ]
+    },
+    "afterMobile": {
+      "label": "after-mobile-390",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "devicePixelRatio": 1
+      },
+      "pageFits": true,
+      "documentScrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "comparisonFits": true,
+      "guardrailsFits": true,
+      "outside": [],
+      "figure": {
+        "x": 24,
+        "y": 10754.265625,
+        "width": 342,
+        "height": 1094.96875,
+        "right": 366,
+        "bottom": 11849.234375
+      },
+      "caption": {
+        "x": 24,
+        "y": 11633.859375,
+        "width": 342,
+        "height": 215.375,
+        "right": 366,
+        "bottom": 11849.234375
+      },
+      "assessmentPresent": true,
+      "interactionChartPresent": true,
+      "summaryDetailsPresent": true,
+      "fonts": {
+        "body": 16,
+        "comparison": 16,
+        "comparisonCaption": 16,
+        "interactionChart": 16,
+        "interactionTitle": 24,
+        "assessmentTitle": 38
+      },
+      "openDetails": [
+        false
+      ]
+    },
+    "afterText200": {
+      "label": "after-text-200-desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000,
+        "devicePixelRatio": 1
+      },
+      "pageFits": true,
+      "documentScrollWidth": 1425,
+      "bodyScrollWidth": 1425,
+      "comparisonFits": true,
+      "guardrailsFits": true,
+      "outside": [],
+      "figure": {
+        "x": 69.109375,
+        "y": 9084.53125,
+        "width": 1286.78125,
+        "height": 1034.3125,
+        "right": 1355.890625,
+        "bottom": 10118.84375
+      },
+      "caption": {
+        "x": 69.109375,
+        "y": 9903.46875,
+        "width": 1286.78125,
+        "height": 215.375,
+        "right": 1355.890625,
+        "bottom": 10118.84375
+      },
+      "assessmentPresent": true,
+      "interactionChartPresent": true,
+      "summaryDetailsPresent": true,
+      "fonts": {
+        "body": 16,
+        "comparison": 16,
+        "comparisonCaption": 32,
+        "interactionChart": 16,
+        "interactionTitle": 68,
+        "assessmentTitle": 68
+      },
+      "openDetails": [
+        true
+      ]
+    }
+  },
+  "textScale": {
+    "mode": "fixed-pixel-descendant-snapshot",
+    "subsection": "#guardrails-and-authority closest section",
+    "descendantCount": 151,
+    "snapshots": [
+      {
+        "index": 0,
+        "tag": "DIV",
+        "text": "Guardrails and authority",
+        "fontSize": 10,
+        "afterFontSize": 20,
+        "ratio": 2
+      },
+      {
+        "index": 1,
+        "tag": "H2",
+        "text": "Guardrails are not an authority model",
+        "fontSize": 72,
+        "afterFontSize": 144,
+        "ratio": 2
+      },
+      {
+        "index": 2,
+        "tag": "P",
+        "text": "Guardrails enforce limits. The authority model decides who can do what, under which controls, and who is accountable.",
+        "fontSize": 19,
+        "afterFontSize": 38,
+        "ratio": 2
+      },
+      {
+        "index": 3,
+        "tag": "P",
+        "text": "A handover is the moment an agent's output becomes consequential for someone else.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 4,
+        "tag": "SPAN",
+        "text": "01",
+        "fontSize": 10,
+        "afterFontSize": 20,
+        "ratio": 2
+      },
+      {
+        "index": 5,
+        "tag": "STRONG",
+        "text": "Exposure sets the maximum autonomy",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 6,
+        "tag": "SPAN",
+        "text": "Exposure sets the maximum autonomy. A more capable model or a generic safety filter cannot raise that ceiling.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 7,
+        "tag": "SPAN",
+        "text": "02",
+        "fontSize": 10,
+        "afterFontSize": 20,
+        "ratio": 2
+      },
+      {
+        "index": 8,
+        "tag": "STRONG",
+        "text": "Measured evidence supports promotion",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 9,
+        "tag": "SPAN",
+        "text": "Every handover launches one level below its target authority and moves up only on measured evidence within its exposure ",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 10,
+        "tag": "SPAN",
+        "text": "03",
+        "fontSize": 10,
+        "afterFontSize": 20,
+        "ratio": 2
+      },
+      {
+        "index": 11,
+        "tag": "STRONG",
+        "text": "Required controls must be testable",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 12,
+        "tag": "SPAN",
+        "text": "Required controls must be provable by a test, query or artefact—not an assurance—before the handover operates.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 13,
+        "tag": "SPAN",
+        "text": "04",
+        "fontSize": 10,
+        "afterFontSize": 20,
+        "ratio": 2
+      },
+      {
+        "index": 14,
+        "tag": "STRONG",
+        "text": "Approved artefacts can carry authority",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 15,
+        "tag": "SPAN",
+        "text": "An approved template, deterministic rule, whitelisted parameter range or blocking gate can carry authority instead of un",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 16,
+        "tag": "DIV",
+        "text": "A compensating control raises the ceiling only when consequential content is constrained by construction. It does not ma",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 17,
+        "tag": "P",
+        "text": "Illustrative pattern · not a universal prescription · Front-Desk Agent",
+        "fontSize": 11,
+        "afterFontSize": 22,
+        "ratio": 2
+      },
+      {
+        "index": 18,
+        "tag": "SPAN",
+        "text": "Illustrative pattern",
+        "fontSize": 11,
+        "afterFontSize": 22,
+        "ratio": 2
+      },
+      {
+        "index": 19,
+        "tag": "SPAN",
+        "text": "·",
+        "fontSize": 11,
+        "afterFontSize": 22,
+        "ratio": 2
+      },
+      {
+        "index": 20,
+        "tag": "SPAN",
+        "text": "·",
+        "fontSize": 11,
+        "afterFontSize": 22,
+        "ratio": 2
+      },
+      {
+        "index": 21,
+        "tag": "P",
+        "text": "Common setting → individually governed handovers",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 22,
+        "tag": "P",
+        "text": "Common setting: One filter. One prompt. One limit. Applied to everything it does. Warning: the riskiest act inherits the",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 23,
+        "tag": "STRONG",
+        "text": "Common setting:",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 24,
+        "tag": "SPAN",
+        "text": "Warning:",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 25,
+        "tag": "STRONG",
+        "text": "Individually governed:",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 26,
+        "tag": "SPAN",
+        "text": "01 · handover",
+        "fontSize": 11,
+        "afterFontSize": 22,
+        "ratio": 2
+      },
+      {
+        "index": 27,
+        "tag": "STRONG",
+        "text": "Answer a clinic question",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 28,
+        "tag": "SPAN",
+        "text": "Knowledge · R1 / H1",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 29,
+        "tag": "SPAN",
+        "text": "automatic",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 30,
+        "tag": "SPAN",
+        "text": "02 · handover",
+        "fontSize": 11,
+        "afterFontSize": 22,
+        "ratio": 2
+      },
+      {
+        "index": 31,
+        "tag": "STRONG",
+        "text": "Book an appointment",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 32,
+        "tag": "SPAN",
+        "text": "Action · R2 / H2",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 33,
+        "tag": "SPAN",
+        "text": "monitored",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 34,
+        "tag": "SPAN",
+        "text": "03 · handover",
+        "fontSize": 11,
+        "afterFontSize": 22,
+        "ratio": 2
+      },
+      {
+        "index": 35,
+        "tag": "STRONG",
+        "text": "Cancel an appointment",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 36,
+        "tag": "SPAN",
+        "text": "Action · R3 / H2 · defined intervention window",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 37,
+        "tag": "SPAN",
+        "text": "intervention window",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 38,
+        "tag": "SPAN",
+        "text": "04 · handover",
+        "fontSize": 11,
+        "afterFontSize": 22,
+        "ratio": 2
+      },
+      {
+        "index": 39,
+        "tag": "STRONG",
+        "text": "Issue a refund",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 40,
+        "tag": "SPAN",
+        "text": "Action · R4 / H3",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 41,
+        "tag": "SPAN",
+        "text": "human approval",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 42,
+        "tag": "FIGCAPTION",
+        "text": "Illustration 1 — One common setting, or individually governed handovers—the Agent Authority Model governs each handover.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 43,
+        "tag": "STRONG",
+        "text": "Illustration 1 —",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 44,
+        "tag": "EM",
+        "text": "One common setting, or individually governed handovers—the Agent Authority Model governs each handover.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 45,
+        "tag": "SPAN",
+        "text": "+Read the full explanation",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 46,
+        "tag": "SPAN",
+        "text": "+",
+        "fontSize": 18,
+        "afterFontSize": 36,
+        "ratio": 2
+      },
+      {
+        "index": 47,
+        "tag": "P",
+        "text": "Most teams that have built guardrails believe they have governance. They have not, and the gap is expensive.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 48,
+        "tag": "P",
+        "text": "A guardrail is a mechanism: an output filter, a rate limit, a system prompt, an approval step. An authority model is the",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 49,
+        "tag": "P",
+        "text": "Every bank already runs this distinction without thinking about it. Its delegation of authority says a relationship mana",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 50,
+        "tag": "EM",
+        "text": "\"we have four-eyes checks, therefore we have a delegation of authority.\"",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 51,
+        "tag": "H3",
+        "text": "Why the unit is the whole argument",
+        "fontSize": 24,
+        "afterFontSize": 48,
+        "ratio": 2
+      },
+      {
+        "index": 52,
+        "tag": "P",
+        "text": "A single agent does several things of very different consequence. A front-desk agent answers questions, books appointmen",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 53,
+        "tag": "P",
+        "text": "Govern the handover instead and each of the four is rated on its own: what kind of thing is being handed over, who is st",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 54,
+        "tag": "P",
+        "text": "In engineering terms: authority attaches to the tool, not the agent.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 55,
+        "tag": "H3",
+        "text": "Three differences that matter",
+        "fontSize": 24,
+        "afterFontSize": 48,
+        "ratio": 2
+      },
+      {
+        "index": 56,
+        "tag": "TH",
+        "text": "Guardrails",
+        "fontSize": 10,
+        "afterFontSize": 20,
+        "ratio": 2
+      },
+      {
+        "index": 57,
+        "tag": "TH",
+        "text": "The Agent Authority Model",
+        "fontSize": 10,
+        "afterFontSize": 20,
+        "ratio": 2
+      },
+      {
+        "index": 58,
+        "tag": "TH",
+        "text": "What it attaches to",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 59,
+        "tag": "TD",
+        "text": "The agent or the model — one filter, one prompt, one limit, applied to everything it does",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 60,
+        "tag": "TD",
+        "text": "The handover — the moment an output leaves the agent and becomes consequential for someone else",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 61,
+        "tag": "TH",
+        "text": "Where it comes from",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 62,
+        "tag": "TD",
+        "text": "Chosen, usually from a vendor's feature list or from whatever has already gone wrong",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 63,
+        "tag": "TD",
+        "text": "Derived from the handover's profile: what is handed over, who is present, and what is at stake",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 64,
+        "tag": "TH",
+        "text": "What it answers",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 65,
+        "tag": "EM",
+        "text": "What stops it doing something bad?",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 66,
+        "tag": "EM",
+        "text": "Who authorised it to do this — and what must it prove before it is allowed to do more?",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 67,
+        "tag": "H3",
+        "text": "How the two interact",
+        "fontSize": 24,
+        "afterFontSize": 48,
+        "ratio": 2
+      },
+      {
+        "index": 68,
+        "tag": "P",
+        "text": "Two rules bind them.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 69,
+        "tag": "P",
+        "text": "Exposure sets the ceiling. How hard an output is to undo, and how far its effects reach, determine the maximum authority",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 70,
+        "tag": "STRONG",
+        "text": "Exposure sets the ceiling.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 71,
+        "tag": "P",
+        "text": "Evidence earns the climb. Every handover launches one level below its target authority and is promoted only on measured ",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 72,
+        "tag": "STRONG",
+        "text": "Evidence earns the climb.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 73,
+        "tag": "P",
+        "text": "Guardrails then enter in two distinct ways, and keeping them apart is the whole of the discipline.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 74,
+        "tag": "P",
+        "text": "As required controls. Once a handover has a profile, its control set follows from that profile rather than from preferen",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 75,
+        "tag": "STRONG",
+        "text": "As required controls.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 76,
+        "tag": "EM",
+        "text": "\"The team ensures the agent does not give medical advice\" is not a control.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 77,
+        "tag": "EM",
+        "text": "\"An output filter independent of the model blocks each prohibited class, and a test suite attempts every one of them\" is",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 78,
+        "tag": "P",
+        "text": "As compensating controls that raise the ceiling. This is the mechanism that makes the model workable rather than merely ",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 79,
+        "tag": "STRONG",
+        "text": "As compensating controls that raise the ceiling.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 80,
+        "tag": "STRONG",
+        "text": "content",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 81,
+        "tag": "H3",
+        "text": "The design rule this produces",
+        "fontSize": 24,
+        "afterFontSize": 48,
+        "ratio": 2
+      },
+      {
+        "index": 82,
+        "tag": "BLOCKQUOTE",
+        "text": "Where an agent operates above its exposure ceiling, the design must name the artefact that carries the authority instead",
+        "fontSize": 24,
+        "afterFontSize": 48,
+        "ratio": 2
+      },
+      {
+        "index": 83,
+        "tag": "P",
+        "text": "That is the cleanest test of the relationship between the two. A guardrail that merely constrains the agent does not mov",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 84,
+        "tag": "P",
+        "text": "The failure runs in both directions. An authority model with unenforceable controls is a register of good intentions. Co",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 85,
+        "tag": "P",
+        "text": "Authority is earned, not configured.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 86,
+        "tag": "SPAN",
+        "text": "How the two interact",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 87,
+        "tag": "H3",
+        "text": "Exposure sets the ceiling. Evidence earns the climb. Guardrails do both jobs.",
+        "fontSize": 34,
+        "afterFontSize": 68,
+        "ratio": 2
+      },
+      {
+        "index": 88,
+        "tag": "P",
+        "text": "The five canonical exposure bands run left to right. Authority is shown in three human-oversight rows; the pink staircas",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 89,
+        "tag": "P",
+        "text": "Read the plot from the profile, not from the agent's confidence. A handover can climb on evidence, while an approved com",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 90,
+        "tag": "DIV",
+        "text": "Authority ↑",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 91,
+        "tag": "DIV",
+        "text": "Exposure — how hard to undo, and who is exposed →",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 92,
+        "tag": "STRONG",
+        "text": "out of the loop",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 93,
+        "tag": "SPAN",
+        "text": "fully automatic",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 94,
+        "tag": "STRONG",
+        "text": "on the loop",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 95,
+        "tag": "SPAN",
+        "text": "auto, sampled review",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 96,
+        "tag": "STRONG",
+        "text": "in the loop",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 97,
+        "tag": "SPAN",
+        "text": "a person approves",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 98,
+        "tag": "DIV",
+        "text": "The ceiling set by exposure",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 99,
+        "tag": "DIV",
+        "text": "not permitted by exposure",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 100,
+        "tag": "STRONG",
+        "text": "A · Required Controls",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 101,
+        "tag": "SPAN",
+        "text": "universal",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 102,
+        "tag": "SPAN",
+        "text": "by type",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 103,
+        "tag": "SPAN",
+        "text": "by authority",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 104,
+        "tag": "SPAN",
+        "text": "by exposure",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 105,
+        "tag": "STRONG",
+        "text": "B · Promotion",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 106,
+        "tag": "STRONG",
+        "text": "C · Compensation",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 107,
+        "tag": "DIV",
+        "text": "A better model does not raise the ceiling.",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 108,
+        "tag": "STRONG",
+        "text": "E1",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 109,
+        "tag": "SPAN",
+        "text": "R1–R2 and H1",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 110,
+        "tag": "SPAN",
+        "text": "Internal, reversible",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 111,
+        "tag": "SPAN",
+        "text": "Canonical ceiling: Out of the loop",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 112,
+        "tag": "STRONG",
+        "text": "E2",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 113,
+        "tag": "SPAN",
+        "text": "R3, or H2",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 114,
+        "tag": "SPAN",
+        "text": "One person is affected",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 115,
+        "tag": "SPAN",
+        "text": "Canonical ceiling: On the loop, with a stated intervention window",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 116,
+        "tag": "STRONG",
+        "text": "E3",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 117,
+        "tag": "SPAN",
+        "text": "R4, or H3",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 118,
+        "tag": "SPAN",
+        "text": "A regulator can see it",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 119,
+        "tag": "SPAN",
+        "text": "Canonical ceiling: In the loop",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 120,
+        "tag": "STRONG",
+        "text": "E4",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 121,
+        "tag": "SPAN",
+        "text": "H4",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 122,
+        "tag": "SPAN",
+        "text": "Public reach",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 123,
+        "tag": "SPAN",
+        "text": "Canonical ceiling: In the loop + independent second control",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 124,
+        "tag": "STRONG",
+        "text": "E5",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 125,
+        "tag": "SPAN",
+        "text": "H5",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 126,
+        "tag": "SPAN",
+        "text": "Safety, health, or essential service",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 127,
+        "tag": "SPAN",
+        "text": "Canonical ceiling: In the loop + external safety sign-off",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 128,
+        "tag": "H4",
+        "text": "Illustrative exposure buckets — annotations, not axes",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 129,
+        "tag": "P",
+        "text": "Five canonical bands; illustrative buckets below are examples, not alternative axes.",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 130,
+        "tag": "STRONG",
+        "text": "R1–R2 · H1",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 131,
+        "tag": "SPAN",
+        "text": "undone at will, internal only",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 132,
+        "tag": "STRONG",
+        "text": "R2–R3 · H2",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 133,
+        "tag": "SPAN",
+        "text": "undone at a cost, one customer",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 134,
+        "tag": "STRONG",
+        "text": "R4 · H2",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 135,
+        "tag": "SPAN",
+        "text": "irreversible, one customer",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 136,
+        "tag": "STRONG",
+        "text": "R3–R4 · H3+",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 137,
+        "tag": "SPAN",
+        "text": "regulator-visible, public or safety",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 138,
+        "tag": "H4",
+        "text": "A Permitted",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 139,
+        "tag": "SPAN",
+        "text": "Permitted",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 140,
+        "tag": "P",
+        "text": "Everything under the staircase is permitted. The controls required here are read off the profile, not chosen. Required c",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 141,
+        "tag": "H4",
+        "text": "B Promotion",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 142,
+        "tag": "SPAN",
+        "text": "Promotion",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 143,
+        "tag": "P",
+        "text": "Evidence earns the climb. Guardrails as required controls: meet them, hold the evidence, and the handover climbs one lev",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 144,
+        "tag": "H4",
+        "text": "C Compensation",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 145,
+        "tag": "SPAN",
+        "text": "Compensation",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 146,
+        "tag": "P",
+        "text": "A compensating control raises the ceiling. Guardrails that carry the authority themselves. Only these move the ceiling: ",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 147,
+        "tag": "P",
+        "text": "Reversibility R1–R4 and reach H1–H5 as defined in the Agent Authority Model. Handovers shown are illustrative.",
+        "fontSize": 14,
+        "afterFontSize": 28,
+        "ratio": 2
+      },
+      {
+        "index": 148,
+        "tag": "FIGCAPTION",
+        "text": "Illustration 2 — Exposure sets the ceiling; evidence earns the climb. Everything under the staircase is permitted, and t",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 149,
+        "tag": "STRONG",
+        "text": "Illustration 2 —",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      },
+      {
+        "index": 150,
+        "tag": "EM",
+        "text": "Exposure sets the ceiling; evidence earns the climb.",
+        "fontSize": 16,
+        "afterFontSize": 32,
+        "ratio": 2
+      }
+    ],
+    "minimumRatio": 2,
+    "maximumRatio": 2
+  },
+  "nativeDetails": {
+    "initial": false,
+    "opened": true,
+    "closed": true
+  },
+  "screenshots": [
+    "screenshots/task-335/task335-before-desktop.png",
+    "screenshots/task-335/task335-before-desktop-page.png",
+    "screenshots/task-335/task335-before-mobile-390.png",
+    "screenshots/task-335/task335-before-mobile-390-page.png",
+    "screenshots/task-335/task335-after-desktop.png",
+    "screenshots/task-335/task335-after-desktop-page.png",
+    "screenshots/task-335/task335-after-tablet-768.png",
+    "screenshots/task-335/task335-after-tablet-768-page.png",
+    "screenshots/task-335/task335-after-mobile-390.png",
+    "screenshots/task-335/task335-after-mobile-390-page.png",
+    "screenshots/task-335/task335-after-text-200-desktop.png",
+    "screenshots/task-335/task335-after-text-200-desktop-page.png"
+  ],
+  "browserDiagnostics": {
+    "unexpectedErrors": [],
+    "expectedErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  }
+}

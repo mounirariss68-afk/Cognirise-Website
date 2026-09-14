@@ -305,6 +305,26 @@ test("public and governed preview render native figures with governed copy intac
       assert.ok(html.includes(label), `missing native diagram label: ${label}`);
     }
   }
+  const legacyFigure = figureContainingCaption(publicHtml, governedFixtureGuardrails.firstFigure.captionLabel);
+  assert.match(legacyFigure, /The common pattern/);
+  assert.match(legacyFigure, /The Agent Authority Model/);
+  const legacySection = publicHtml.slice(publicGuardrailsStart, publicStandardsStart);
+  const comparisonHeadingIndex = legacySection.indexOf(governedFixtureGuardrails.comparisonHeading);
+  const unitHeadingIndex = legacySection.indexOf(governedFixtureGuardrails.unit.heading);
+  const legacyFigureIndex = legacySection.indexOf("The common pattern");
+  const interactionHeadingIndex = legacySection.indexOf(governedFixtureGuardrails.interaction.heading);
+  const interactionChartIndex = legacySection.indexOf("Exposure sets the ceiling");
+  assert.ok(
+    comparisonHeadingIndex < unitHeadingIndex
+      && unitHeadingIndex < legacyFigureIndex
+      && legacyFigureIndex < interactionHeadingIndex
+      && interactionHeadingIndex < interactionChartIndex,
+    "legacy guardrails order must remain comparison, unit, figure, interaction, chart",
+  );
+  assert.match(legacySection, /max-sm:grid max-sm:gap-5/);
+  assert.match(legacySection, /max-sm:grid max-sm:border max-sm:border-\[#cbd3e1\]/);
+  assert.doesNotMatch(legacySection, /min-w-\[42rem\]/);
+  assert.doesNotMatch(legacySection, /<div class="mt-16"><figure[^>]*aria-label="CMS governed second figure/);
 });
 
 test("public and preview omit the complete guardrails section when a revision has no guardrails", () => {
@@ -314,4 +334,45 @@ test("public and preview omit the complete guardrails section when a revision ha
     assert.doesNotMatch(html, /CMS governed guardrails heading/);
     assert.doesNotMatch(html, /aam-guardrails-vs-authority\.svg|aam-how-they-interact\.svg/);
   }
+});
+
+test("summary editions use governed concise copy and retain every detailed source in one disclosure", () => {
+  const summary = {
+    lead: "Governed concise lead",
+    handover: "Governed concise handover",
+    rules: Array.from({ length: 4 }, (_, index) => ({ title: `Governed rule ${index}`, body: `Governed rule body ${index}` })),
+    caveat: "Governed compensating-control caveat",
+    disclosureLabel: "Governed full explanation label",
+    firstFigure: { ...governedFixtureGuardrails.firstFigure, altText: "Governed shared rail description", captionBody: "Governed shared rail caption" },
+  };
+  const framework = { ...governedFixtureFramework, guardrails: { ...governedFixtureGuardrails, summary } };
+  for (const preview of [false, true]) {
+    const html = renderToStaticMarkup(<AgentAuthorityLayout framework={framework} renderPolicy="cms" preview={preview} />);
+    const section = html.slice(html.indexOf('id="guardrails-and-authority"'), html.indexOf("Standards provenance"));
+    assert.equal((section.match(/<details\b/g) ?? []).length, 1);
+    assert.doesNotMatch(section, /<details[^>]*\sopen(?:=|>)/);
+    for (const value of [summary.lead, summary.handover, summary.caveat, summary.disclosureLabel, summary.firstFigure.altText, summary.firstFigure.captionBody]) {
+      assert.ok(section.includes(value), `missing governed summary field: ${value}`);
+    }
+    const disclosure = section.slice(section.indexOf("<details"), section.indexOf("</details>"));
+    for (const value of [
+      governedFixtureGuardrails.opening, governedFixtureGuardrails.definition,
+      governedFixtureGuardrails.bankExample.beforeQuote,
+      governedFixtureGuardrails.unit.paragraphs[0], governedFixtureGuardrails.unit.paragraphs[1],
+      governedFixtureGuardrails.interaction.evidence.body,
+      governedFixtureGuardrails.interaction.requiredControls.controlExample,
+      governedFixtureGuardrails.interaction.compensatingControls.bodyAfterContent,
+      governedFixtureGuardrails.designRule.conclusion,
+      governedFixtureGuardrails.designRule.failure,
+    ]) assert.ok(disclosure.includes(value), `full explanation lost: ${value}`);
+    assert.equal((section.match(/Front-Desk Agent/g) ?? []).length, 1);
+    assert.equal((section.match(/Answer a clinic question/g) ?? []).length, 1);
+    assert.equal((section.match(/Book an appointment/g) ?? []).length, 1);
+    assert.equal((section.match(/Cancel an appointment/g) ?? []).length, 1);
+    assert.equal((section.match(/Issue a refund/g) ?? []).length, 1);
+    assert.doesNotMatch(section, /CMS governed first figure accessible description/);
+    assert.doesNotMatch(section, /CMS figure one caption body\./);
+    assert.ok(section.indexOf("Exposure sets the ceiling") > section.indexOf("</details>"), "canonical chart remains outside disclosure");
+  }
+  assert.doesNotMatch(renderFixture(false), /<details\b|Governed concise lead/);
 });

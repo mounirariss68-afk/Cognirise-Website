@@ -1,7 +1,9 @@
 import {
   FRAMEWORK_GUARDRAILS_FIGURE_ASSETS,
+  frameworkGuardrailsSummarySchema,
   guardrailsFrameworkContentSchema,
   type FrameworkContent,
+  type FrameworkGuardrailsSummary,
   type FrameworkGuardrailsSubsection,
 } from "@workspace/api-zod";
 
@@ -123,6 +125,22 @@ function exactStrings(value: unknown, length: number, maximum: number): string[]
   return values.every((item): item is string => item !== null) ? values : null;
 }
 
+export const FRAMEWORK_GUARDRAILS_SUMMARY_WARNING =
+  "The saved Guardrails summary is incomplete and was omitted; the legacy Guardrails content remains visible.";
+
+/** Return diagnostics for optional preview fields which are present but not
+ * complete enough to enter the buyer-facing composition. Legacy revisions
+ * without a summary intentionally produce no warning. */
+export function frameworkPreviewWarnings(value: unknown): string[] {
+  const source = record(value);
+  if (source?.template !== "agent-authority") return [];
+  const guardrails = record(source.guardrails);
+  if (!guardrails || !Object.hasOwn(guardrails, "summary")) return [];
+  return frameworkGuardrailsSummarySchema.safeParse(guardrails.summary).success
+    ? []
+    : [FRAMEWORK_GUARDRAILS_SUMMARY_WARNING];
+}
+
 function normalizeGuardrails(value: unknown): FrameworkGuardrailsSubsection | undefined {
   const source = record(value);
   const bankExample = record(source?.bankExample);
@@ -188,6 +206,9 @@ function normalizeGuardrails(value: unknown): FrameworkGuardrailsSubsection | un
   }));
   if (!normalizedFirstFigure || !normalizedSecondFigure || !columnGuardrails || !columnAuthorityModel || bridgeText === null || strings.some((item) => item === null)
     || rows.some((row) => !row.label || !row.guardrails || !row.authorityModel || !row.guardrailsEmphasis || !row.authorityModelEmphasis)) return undefined;
+  const summary = !Object.hasOwn(source, "summary")
+    ? undefined
+    : frameworkGuardrailsSummarySchema.safeParse(source.summary);
   return {
     heading: strings[0]!, opening: strings[1]!, definition: strings[2]!,
     bankExample: { beforeQuote: strings[3]!, quote: strings[4]!, afterQuote: strings[5]! },
@@ -210,6 +231,7 @@ function normalizeGuardrails(value: unknown): FrameworkGuardrailsSubsection | un
         lead: strings[21]!, bodyBeforeContent: strings[22]!, content: strings[23]!, bodyAfterContent: strings[24]!,
       },
     },
+    ...(summary?.success ? { summary: summary.data as FrameworkGuardrailsSummary } : {}),
     secondFigure: normalizedSecondFigure,
     designRule: {
       heading: strings[25]!, quote: strings[26]!, conclusion: strings[27]!, failure: strings[28]!, closingEmphasis: strings[29]!,
