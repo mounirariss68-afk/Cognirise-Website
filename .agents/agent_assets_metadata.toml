@@ -309,3 +309,59 @@ mtime_ms = 1789302675080
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/8703612c-f926-4a4a-87be-781d023a1600/ad7ca5f3-d4b1-4461-bda1-a567429d4c66"
 storage_version_token = "1789302840671827"
 content_type = "image/png"
+
+[[outputs]]
+id = "BKkNMIbI1TjMXkMgkH4Jn"
+uri = "file://research/notes.md"
+type = "text"
+title = "AI starting situations — research notes"
+description = "Scope, evidence coverage and research progress. Recommendations only; no site changes."
+logical_id = "b00d5bab-97b7-41f5-a767-0554e6b5deeb"
+content_hash = "sha256:6ad9049ca403ce4acb7e8a4bc556c659e3f798cc1b7af62f41e7077002c2f41d"
+size = 2706
+mtime_ms = 1789358037596
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b00d5bab-97b7-41f5-a767-0554e6b5deeb/39c0cfe1-4242-413a-bf49-e7b2ecfaa184"
+storage_version_token = "1789358062462927"
+content_type = "text/markdown"
+
+[[outputs]]
+id = "AqUKuqCQ-ri5c8RvX7bcz"
+uri = "file://research/decision-brief.md"
+type = "text"
+title = "Recommended AI starting situations — decision brief"
+description = "The seven proposed situations, the main research findings and decisions for your review."
+logical_id = "50e0d200-b90a-48f6-95ac-94ac24050e9d"
+content_hash = "sha256:46a7e138b9617b53881ab2cfa812d578ac289d7fec1182771b3b724483ee2e6e"
+size = 7772
+mtime_ms = 1789359231248
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/50e0d200-b90a-48f6-95ac-94ac24050e9d/bc63837b-d856-45e5-8c2f-492e6afa02fb"
+storage_version_token = "1789359288311137"
+content_type = "text/markdown"
+
+[[outputs]]
+id = "_S32La2JhcMGHy4fxK_fs"
+uri = "file://research/ai-starting-situations.md"
+type = "text"
+title = "AI starting situations — full research report"
+description = "25 cited sources, detailed situation definitions, method and IDAO mappings, existing-roadmap handoff and 14 constructed scenario checks."
+logical_id = "aac5f804-29dd-4e1a-bb12-b4d4c6a5384f"
+content_hash = "sha256:ea4cf7b3957f7608e5bb7e9a3703dde0d77ee190dd24b7f12d0288414a94a3eb"
+size = 51034
+mtime_ms = 1789359230932
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/aac5f804-29dd-4e1a-bb12-b4d4c6a5384f/cdaa2464-e00e-44a2-b905-8f5cab2b3856"
+storage_version_token = "1789359289706779"
+content_type = "text/markdown"
+
+[[outputs]]
+id = "0quVFNEjhDLTYaRRtol_4"
+uri = "file://research/cited-sources.json"
+type = "unspecified"
+title = "Reviewed research source register"
+description = "All 25 cited sources with dates, evidence paths, source classifications and limitations; 39 sources screened."
+logical_id = "810d4920-64a3-4c64-b310-b4b60f54400d"
+content_hash = "sha256:d83fb7b25dee5183a7da7b7681b1e9fbf86f6df944daca1a0263085cdbda0db4"
+size = 32390
+mtime_ms = 1789359231428
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/810d4920-64a3-4c64-b310-b4b60f54400d/31f5ae2b-6337-4d63-92b5-46b9d54299ca"
+storage_version_token = "1789359291053470"
+content_type = "application/octet-stream"

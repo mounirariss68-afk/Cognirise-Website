@@ -1,0 +1,283 @@
+{
+  "researchDate": "2026-09-14",
+  "screenedSourceCount": 39,
+  "citedSourceCount": 25,
+  "notes": "Citation numbers match the full report. Evidence paths contain saved page text. Claims are source-reported; see limitations, not guarantees. Original collection registers are working material; this reviewed register supersedes their metadata.",
+  "sources": [
+    {
+      "citationNumber": 1,
+      "key": "oecd-ai-adoption-barriers",
+      "title": "Comparisons among recent AI surveys: The Adoption of Artificial Intelligence in Firms",
+      "url": "https://www.oecd.org/en/publications/the-adoption-of-artificial-intelligence-in-firms_f9ef33c3-en/full-report/comparisons-among-recent-ai-surveys_6577dea3.html",
+      "date": "2025-05-02",
+      "tier": "Tier 1 — government/academic",
+      "evidencePath": "research/sources/ai-business-case-01-oecd.md",
+      "claim": "The OECD report’s survey-comparison annex shows that prior firm surveys asked about difficulty finding appropriate AI use cases, proving added value over alternative methods, skills, integration, data, costs, security, and funding. The publication itself is dated 2 May 2025.",
+      "limitations": "The annex is desk research and reproduces selected survey questions/data from mostly 2020–2021 surveys; it does not provide a 2025 prevalence estimate, causal evidence, or a named buyer case. Use it as evidence of decision questions/barrier categories, not as current market incidence."
+    },
+    {
+      "citationNumber": 2,
+      "key": "gap-sme-uk-dsit-2026",
+      "title": "AI Adoption Research",
+      "url": "https://www.gov.uk/government/publications/ai-adoption-research/ai-adoption-research",
+      "date": "2026-02-13",
+      "tier": "Tier 1 — UK government-commissioned primary survey and qualitative interviews",
+      "evidencePath": "research/sources/gap-sme-02-uk-dsit-2026.md",
+      "claim": "The UK DSIT study (3,500 business interviews in February-May 2025 plus 100 follow-up interviews) finds that lack of identified need and limited AI skills are the commonest adoption blockers. Among businesses with no plans, 81% reported no identified need and 59% limited skills; high costs were rated a significant barrier by 76% of respondents who rated barriers. Qualitative evidence describes the need for a compelling business case, bounded low-cost tests and ROI evidence.",
+      "limitations": "UK private-sector scope, businesses with at least five employees, weighted by size/sector with selected-sector oversampling. Findings include self-reported adoption, spending, productivity and revenue; interviews and individual ROI quotes are illustrative. The respondent approach cannot capture shadow AI, and the study does not run a causal AI/non-AI comparison."
+    },
+    {
+      "citationNumber": 3,
+      "key": "csiro-ai-project-selection",
+      "title": "Evaluating and prioritising artificial intelligence projects: A guide for better decision making and investment outcomes",
+      "url": "https://www.csiro.au/-/media/D61/Investing-in-AI-projects-guide/2025-Evaluating-and-prioritising-AI-projects-.pdf",
+      "date": "2025-06",
+      "tier": "Tier 1 — government/academic",
+      "evidencePath": "research/sources/ai-business-case-02-csiro.md",
+      "claim": "CSIRO’s June 2025 guide describes AI projects as problem-focused investments and asks decision-makers to test strategic fit, measurable value, full costs, data quality/governance, integration, risks, and whether a non-AI option is better. It recommends iterative portfolio review with decisions to continue, pivot, or stop.",
+      "limitations": "This is practical guidance, not an observed buyer-interview study. Its failure-rate and spending references are attributed to other sources and should not be treated as independently established by the guide. The checklist indicates what to examine; it does not show that organizations actually do so."
+    },
+    {
+      "citationNumber": 4,
+      "key": "gap-sme-oecd-2025",
+      "title": "AI adoption by small and medium-sized enterprises: OECD discussion paper for the G7",
+      "url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2025/12/ai-adoption-by-small-and-medium-sized-enterprises_9c48eae6/426399c1-en.pdf",
+      "date": "2025-12-09",
+      "tier": "Tier 1 — intergovernmental official evidence and synthesis",
+      "evidencePath": "research/sources/gap-sme-01-oecd-2025.md",
+      "claim": "OECD 2025 evidence shows a persistent SME/large-firm adoption gap; among surveyed SMEs, skills/knowledge and training are recurring constraints, reported benefits are more often employee performance, cost savings and new tasks than revenue growth, and non-users in Canada and the United Kingdom most often identified generative AI as not suited to their work. Finance is also identified as an enabler for software, skills and organisational change.",
+      "limitations": "This is an official synthesis using mixed official statistics, selected surveys and cases, not a representative 2025/2026 global SME buyer study. D4SME survey evidence is non-representative and spans selected G7 countries; adoption observations have different country years/definitions; productivity associations are not causal ROI; the country table does not test an AI versus non-AI alternative."
+    },
+    {
+      "citationNumber": 5,
+      "key": "gap-sme-eurostat-2025",
+      "title": "Use of artificial intelligence in enterprises",
+      "url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Use_of_artificial_intelligence_in_enterprises",
+      "date": "2025-12-11",
+      "tier": "Tier 1 — official European statistical agency and harmonised enterprise survey",
+      "evidencePath": "research/sources/gap-sme-03-eurostat-2025.md",
+      "claim": "Eurostat's 2025 enterprise survey reports AI use of 17.00% among small, 30.36% among medium and 55.03% among large EU enterprises. Among enterprises that had considered AI but did not use it, lack of relevant expertise was reported by 70.89%, unclear legal consequences by 52.52%, privacy/data-protection concerns by 48.83%, and lack of usefulness by 20.68%.",
+      "limitations": "The population covers enterprises with at least 10 employees/self-employed persons, so smaller micro businesses are excluded. Barrier percentages are conditional on having considered AI, not all non-adopters; results are descriptive EU aggregates and do not establish causality, ROI, willingness to pay or a tested non-AI alternative."
+    },
+    {
+      "citationNumber": 6,
+      "key": "g2-procurement-survey-cio-dive-2025",
+      "title": "Businesses revamp procurement amid AI adoption swell",
+      "url": "https://www.ciodive.com/news/AI-enterprise-procurement-purchasing-data-G2/748369/",
+      "date": "May 16, 2025",
+      "tier": "Tier2 credible industry news",
+      "evidencePath": "research/sources/ai-operations-needs-05-page.md",
+      "claim": "CIO Dive reports G2's April 2025 survey of 1,169 business decision-makers: most companies use stricter requirements for AI software, nearly 30% rely on LLMs more often than Google for research, more than two-thirds would pay a premium only when vendors demonstrate value or productivity gains, and nearly half of enterprise buyers switched providers for better AI features.",
+      "limitations": "This is a news account of a G2 survey rather than the underlying instrument or dataset. The article does not establish response rates, sampling representativeness, or causal effects; willingness to pay, provider switching, and reported requirements are buyer statements rather than realized operational outcomes."
+    },
+    {
+      "citationNumber": 7,
+      "key": "london-civ-ai-automation-implementation-partner",
+      "title": "AI and Automation Implementation Partner - Find a Tender",
+      "url": "https://www.find-tender.service.gov.uk/Notice/057908-2026",
+      "date": "2026-06-19 (tender notice published; page last edited 2026-07-21; estimated award decision 2026-08-22)",
+      "tier": "Tier1",
+      "evidencePath": "research/sources/gap-roadmap-01.md",
+      "claim": "London LGPS CIV Limited (London CIV) says it initiated an AI Strategy programme under a separate procurement to produce a prioritised portfolio of AI and automation use cases, then issued this tender for an AI and Automation Implementation Partner to implement that portfolio. The implementation scope includes feasibility refinement, design/build/testing/deployment to production-ready standard, integration, governance and regulatory support, training, post-implementation support, and documentation. The notice is the clearest public buyer record found of a deliberate strategy-to-delivery handoff.",
+      "limitations": "The strategy programme is described as recently initiated and intended to produce the portfolio, so this notice does not prove that a completed strategy was already delivered before the implementation tender. It does not identify the supplier or consultant that originated the strategy, and it is a tender notice rather than evidence of award, delivery, or outcomes. The fetched page is an older notice version."
+    },
+    {
+      "citationNumber": 8,
+      "key": "dbt-ai3-delivery-partners",
+      "title": "AI³ Delivery Partners Project - Find a Tender",
+      "url": "https://www.find-tender.service.gov.uk/procurement/ocds-h6vhtk-0589f1",
+      "date": "2026-07-31 (award notice; tender notice published 2025-10-16)",
+      "tier": "Tier1",
+      "evidencePath": "research/sources/ai-roadmap-delivery-06-page.md",
+      "claim": "The UK Department for Business and Trade describes an AI³ model with an AI Lab for rapid exploration, an AI Factory for developing and operationalising experiments into production-ready tools, and AI Operations for maintenance and scaling; it procured specialist teams and individuals to join internal teams across those stages.",
+      "limitations": "The notice establishes one buyer’s delivery model and resourcing need, not general prevalence; it does not list the specific use cases or detailed success measures."
+    },
+    {
+      "citationNumber": 9,
+      "key": "home-office-ai-infrastructure-delivery-partner",
+      "title": "Home Office Artificial Intelligence (AI) Infrastructure Delivery Partner - Contracts Finder",
+      "url": "https://www.contractsfinder.service.gov.uk/notice/3fd991c0-ad8e-4982-9eed-067274197845",
+      "date": "2025-09-03 (notice published; contract awarded 2025-09-01; contract starts 2025-09-01)",
+      "tier": "Tier1",
+      "evidencePath": "research/sources/gap-roadmap-02.md",
+      "claim": "The Home Office awarded Faculty Science Limited a delivery-partner contract, published 3 September 2025, for central AI infrastructure supporting departmental demand and ambitions in the Prime Minister's AI Action Plan. The notice records a £600,000 award and a 1 September 2025–31 August 2027 contract period.",
+      "limitations": "This is a real AI delivery procurement, but it does not say the Home Office had an internal AI strategy or roadmap produced by an earlier consultant. The notice links the requirement to the Prime Minister's AI Action Plan and departmental demand, not to a completed buyer-owned strategy. It therefore is contextual delivery evidence, not an exact strategy-to-delivery handoff."
+    },
+    {
+      "citationNumber": 10,
+      "key": "govuk-ai-procurement-guidelines",
+      "title": "Guidelines for AI procurement - GOV.UK",
+      "url": "https://www.gov.uk/government/publications/guidelines-for-ai-procurement/guidelines-for-ai-procurement",
+      "date": "unknown (page shows © Crown copyright 2020; exact publication date not shown)",
+      "tier": "Tier1",
+      "evidencePath": "research/sources/ai-roadmap-delivery-01-page.md",
+      "claim": "UK government guidance says buyers should form a multidisciplinary team, conduct data discovery and iterative impact assessment before market engagement, frame output-based requirements around the problem, and require lifecycle governance, knowledge transfer, training, and ongoing support.",
+      "limitations": "Official guidance rather than an outcome study; it targets UK public procurement and is likely older than 18 months if the 2020 copyright date reflects publication."
+    },
+    {
+      "citationNumber": 11,
+      "key": "nber-generative-ai-at-work-2023",
+      "title": "Generative AI at Work",
+      "url": "https://www.nber.org/system/files/working_papers/w31161/w31161.pdf?ck=1745495794",
+      "date": "November 2023 (revised)",
+      "tier": "Tier1 academic",
+      "evidencePath": "research/sources/ai-operations-needs-03-page.md",
+      "claim": "A staggered workplace deployment covering 5,179 customer-support agents found a 14% average increase in issues resolved per hour and a 34% increase for novice or low-skilled agents, with minimal impact for experienced or highly skilled agents. The authors also report improved customer sentiment, lower supervisor-escalation requests, and lower attrition among newer workers; they connect real-world effects to organizational investments, skill development, and business-process redesign.",
+      "limitations": "This is an NBER working paper explicitly described as not peer-reviewed. It studies one Fortune 500 software firm and its support operation, with most agents outside the United States, so industry and process transfer is uncertain. It is older than 18 months as of 2026-09-14; the result is useful as established field evidence, not current market prevalence."
+    },
+    {
+      "citationNumber": 12,
+      "key": "alibaba-customer-service-field-experiment-2025",
+      "title": "Generative AI in Action: Field Experimental Evidence from Alibaba’s Customer Service Operations",
+      "url": "https://arxiv.org/pdf/2603.29888v1",
+      "date": "November 2025 manuscript; 2026 arXiv identifier; exact posting date not established",
+      "tier": "Tier1 academic",
+      "evidencePath": "research/sources/ai-operations-needs-02-page.md",
+      "claim": "A randomized four-week Alibaba Taobao experiment gave 5,940 new after-sales agents access to an assistant that diagnosed customer issues and proposed solutions while leaving agents discretion to use, edit, or reject suggestions. Access reduced issue-identification time by 8.2% and chat duration by 1.1%, improved ratings and dissatisfaction rates, but did not significantly change three-day retrials. Benefits were concentrated among lower-performing agents; top performers experienced quality declines associated with longer shift-away time across concurrent chats.",
+      "limitations": "The paper reports short-term effects from one company, platform, customer-service process, and primarily new-agent sample; it is an arXiv working paper rather than a peer-reviewed journal article. Actual use was heterogeneous and lower than access, so the usage effects should not be generalized to every deployment."
+    },
+    {
+      "citationNumber": 13,
+      "key": "mbs-ai-redesign-of-work-2026",
+      "title": "AI and the Redesign of Work",
+      "url": "https://mbs.edu/-/media/PDF/Centres/IDIA/AI--the-Redesign-of-Work-IDIA-Whitepaper-June-2026.pdf?rev=e44d8f5537b34a3d9f3af6af74c81d31",
+      "date": "June 2026",
+      "tier": "Tier2 credible institutional whitepaper",
+      "evidencePath": "research/sources/ai-operations-needs-06-page.md",
+      "claim": "The Melbourne Business School/IDIA whitepaper, based on an Australian leadership roundtable and cited research, argues that AI value depends on task-level workflow and organizational redesign rather than technology alone. It highlights measurement risk (output volume can look productive without substantive quality), the loss of developmental work or “human-capital debt,” and the need to define decision rights, capability pathways, and outcome measures before scaling.",
+      "limitations": "This is a roundtable whitepaper, not a probability sample or peer-reviewed field study. Its Australian leadership perspective and normative recommendations may not transfer to all sectors or regions, and several outcomes are conceptual rather than measured in a common dataset."
+    },
+    {
+      "citationNumber": 14,
+      "key": "rand-ai-failure-roots-2024",
+      "title": "The Root Causes of Failure for Artificial Intelligence Projects and How They Can Succeed: Avoiding the Anti-Patterns of AI",
+      "url": "https://www.rand.org/pubs/research_reports/RRA2680-1.html",
+      "date": "2024-08-13",
+      "tier": "Tier 1 — research-institute report; peer-review status not established from saved evidence",
+      "evidencePath": "research/sources/evidence/ai-production-results-01-rand.md",
+      "claim": "RAND interviewed 65 experienced AI practitioners (50 industry, 15 academic; interviews Aug-Dec 2023). In the industry interviews, leadership-driven failures were cited by 84% of interviewees; data quality was discussed by 30 of 50. The report also documents incompatible test/production environments, missing deployment automation, weak monitoring, and rapid priority changes as failure mechanisms.",
+      "limitations": "Older than 18 months as of 2026-09-14. Exploratory qualitative sample; mostly nonmanagerial technical participants, not a prevalence estimate. Scope excludes projects using only pretrained LLM prompt engineering. Findings are perceptions of failure, not audited outcomes."
+    },
+    {
+      "citationNumber": 15,
+      "key": "cisco-ai-readiness-index-2025",
+      "title": "Cisco AI Readiness Index 2025: Realizing the Value of AI",
+      "url": "https://www.cisco.com/c/dam/m/en_us/solutions/ai/readiness-index/2025-m10/documents/cisco-ai-readiness-index-2025-realizing-the-value-of-ai.pdf",
+      "date": "2025 (survey August 2025; exact publication day unknown)",
+      "tier": "Tier 2 (credible industry survey; vendor-sponsored)",
+      "evidencePath": "research/sources/evidence/ai-production-results-02-cisco.md",
+      "claim": "The double-blind online survey covered 8,039 senior leaders responsible for AI integration/deployment at organizations with 500+ employees across 30 markets, including Saudi Arabia and the UAE. Only 32% report a process to measure AI impact, 34% say infrastructure is fully adaptable/scalable, and 31% feel fully equipped to secure agentic AI; 83% plan to develop/deploy agents.",
+      "limitations": "Cisco-sponsored self-report survey; readiness categories and ‘Pacesetter’ comparisons are Cisco’s constructed measures. Respondents are senior leaders, so operational staff and audited deployment records may be underrepresented. Do not treat reported ROI or readiness as independently verified."
+    },
+    {
+      "citationNumber": 16,
+      "key": "mckinsey-gcc-state-ai-2025",
+      "title": "The state of AI in GCC countries: In pursuit of scale and value",
+      "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai-in-gcc-countries-in-pursuit-of-scale-and-value",
+      "date": "2025-11-13",
+      "tier": "Tier 3 (consulting survey/analysis; label as consulting claim)",
+      "evidencePath": "research/sources/evidence/ai-production-results-04-mckinsey-gcc.md",
+      "claim": "McKinsey and the GCC Board Directors Institute surveyed 139 GCC senior executives/board directors across all six GCC countries in Aug-Sep 2025 and interviewed 14 executives. 84% reported AI adoption to some extent, but only 31% said AI was scaled or fully deployed across the organization and 11% met McKinsey’s ‘value realizer’ definition. The article identifies output inaccuracy, technology/data foundations, operating model, change management, and workflow redesign as practical constraints.",
+      "limitations": "Consulting-produced, self-reported survey with a small sample and only 13 value-realizer respondents for one comparison; no probability sampling or audited value data disclosed. Interview quotations are anonymous. Treat recommendations and causal language as consulting claims, not independent evidence."
+    },
+    {
+      "citationNumber": 17,
+      "key": "deloitte-middle-east-state-ai-2026",
+      "title": "Deloitte unveils new era of enterprise AI as Middle East organizations shift from pilots to large-scale deployment",
+      "url": "https://www.deloitte.com/middle-east/en/about/press-room/deloitte-unveils-new-era-of-enterprise-ai-as-middle-east-organizations-shift-from-pilots-to-large-scale-deployment.html",
+      "date": "2026-06-04",
+      "tier": "Tier 3 (consulting press release/report summary; label as consulting claim)",
+      "evidencePath": "research/sources/evidence/ai-production-results-05-deloitte-me.md",
+      "claim": "Deloitte’s Middle East press release says its 2026 report draws on more than 3,200 business and IT leaders in 24 countries. It reports 66% of Middle East organizations seeing efficiency gains, 34% using AI to deeply transform products/processes/business models, 84% not yet redesigning roles/workflows, and only 21% reporting mature autonomous-AI governance; 54% expect at least 40% of experiments in production within 3-6 months.",
+      "limitations": "Press-release summary rather than the full methodology; regional sample size, country mix, question wording, and validation are not provided in the fetched page. Vendor/consultancy-sponsored self-report; expectations are not evidence that deployment occurred."
+    },
+    {
+      "citationNumber": 18,
+      "key": "ibm-enterprise-ai-stall-2026",
+      "title": "Why most enterprise AI projects stall before they scale",
+      "url": "https://www.ibm.com/think/insights/why-most-enterprise-ai-projects-stall-before-scale",
+      "date": "2026-04-08 (updated 2026-04-09)",
+      "tier": "Tier 3 (vendor analysis/marketing content)",
+      "evidencePath": "research/sources/evidence/ai-production-results-06-ibm.md",
+      "claim": "IBM’s analysis distinguishes a promising pilot from a usable production system: pilots use curated data and manual review, while scale exposes distributed data, inconsistent definitions, governance controls, and the need to write results into systems of record. It names fragmented data, continuous governance, and workflow/system action as the three combined production constraints.",
+      "limitations": "IBM product-marketing content by an IBM product marketing manager; no independent sample or methodology. The ‘global bank’ vignette is unnamed and should not be treated as a verified case. IBM cites Gartner for an abandonment statistic; that secondary citation was not used as direct evidence here."
+    },
+    {
+      "citationNumber": 19,
+      "key": "redhat-uae-2025",
+      "title": "Red Hat Survey: UAE Organisations Prepare for Widespread AI Adoption and Upskilling",
+      "url": "https://www.redhat.com/en/about/press-releases/red-hat-survey-uae-organisations-prepare-for-widespread-ai-adoption-corrections-skills-gaps",
+      "date": "2025-10-12",
+      "tier": "Tier 2 — vendor-sponsored survey, self-reported",
+      "evidencePath": "research/sources/ai-gcc-adoption-01-redhat.md",
+      "claim": "Red Hat’s Censuswide survey reports UAE organizations’ adoption stage, investment intent, barriers, and operational priorities: 21% were exploring AI use cases, 20% maximizing investment, and 4% driving customer value; 98% reported barriers, led by existing-system integration (36%), privacy/security (32%), and stakeholder buy-in (32%). 70% reported shadow AI. The survey also lists operationalizing AI (85%) and employee adoption (86%) as priorities.",
+      "limitations": "Vendor-sponsored survey; UAE n=100, drawn from organizations with 500+ employees and respondents who were IT managers/directors or AI engineers. It measures reported perceptions, not verified deployment or financial outcomes. The page’s 72% unclear-ROI figure is presented as a cloud-adoption barrier, not necessarily AI-specific. Flag: not older than 18 months as of 2026-09-14."
+    },
+    {
+      "citationNumber": 20,
+      "key": "pwc-uae-workforce-2025",
+      "title": "Confidence, trust and talent upskilling – how the UAE workforce is navigating the AI era",
+      "url": "https://www.pwc.com/m1/en/issues/pdf/hopes-and-fears-uae-2025.pdf",
+      "date": "2025 (month/day not stated)",
+      "tier": "Tier 2 — consulting-sponsored employee survey, self-reported",
+      "evidencePath": "research/sources/ai-gcc-adoption-02-pwc-uae-workforce.md",
+      "claim": "PwC’s UAE findings from the Middle East Workforce Hopes and Fears Survey 2025 report 72% of respondents used AI at work in the previous 12 months, 44% used GenAI at least monthly, and 24% used AI daily. Respondents report increased productivity (83%), work-quality improvement (82%), and creativity improvement (80%). The source frames the next challenge as effective integration, with role-level guidance, governance, tools, and skills needed.",
+      "limitations": "The fetched UAE findings do not state the UAE sample size or fieldwork dates; demographic mix is disclosed (54% millennials, 48% managers, 88% full-time). Results are self-reported employee perceptions and should not be treated as representative prevalence without the missing sampling details. Flag: 2025 but exact publication date unknown; age relative to 18 months cannot be calculated precisely."
+    },
+    {
+      "citationNumber": 21,
+      "key": "kpmg-uae-future-of-work-2024",
+      "title": "Future of work: United Arab Emirates — The intersection of technology and talent management",
+      "url": "https://assets-launch.kpmg.com/content/dam/kpmgsites/ae/pdf/future-of-work.pdf.coredownload.inline.pdf",
+      "date": "2024-06 (report cover)",
+      "tier": "Tier 2 — professional-services survey/report; unaudited accounts, undisclosed sampling",
+      "evidencePath": "research/sources/ai-gcc-adoption-07-kpmg-uae.md",
+      "claim": "KPMG’s UAE report combines a global employee survey with interviews from Al Ghurair, Etihad Airways, and Ports, Customs and Free Zone Corporation. The source reports employee uncertainty about employer technology strategy (54% said employers adopted new technologies in the prior three years), and named organizational examples: Al Ghurair examining HR tasks for automation while addressing data security; Etihad enhancing an employee service center with a chatbot, using predictive HR analytics and an AI safety-training program, and stressing process alignment and clear policies.",
+      "limitations": "The report does not disclose the employee survey sample or UAE-specific sampling frame in the fetched text; many statistics are global. Named company examples are interview accounts, not independently audited case studies. Flag: older than 18 months as of 2026-09-14."
+    },
+    {
+      "citationNumber": 22,
+      "key": "wharton-genai-adoption-2025",
+      "title": "Accountable Acceleration: Gen AI Fast-Tracks Into the Enterprise (Year Three Full Report)",
+      "url": "https://ai.wharton.upenn.edu/wp-content/uploads/2025/10/2025-Wharton-GBK-AI-Adoption-Report_Full-Report.pdf",
+      "date": "2025-10 (report; exact publication day unknown)",
+      "tier": "Tier 2 — sponsored academic-affiliated commercial survey, self-reported and noncausal",
+      "evidencePath": "research/sources/evidence/ai-production-results-03-wharton.md",
+      "claim": "A repeated cross-sectional 15-minute survey of about 801 U.S. enterprise decision-makers (1000+ employees and >$50m revenue), fielded June 26-July 11, 2025, reports 72% formal ROI tracking and 74% positive ROI. It ranks security risk, operational complexity, output inaccuracy, privacy, and regulation among barriers; IT respondents rank ease of operations (integration, scaling, ongoing maintenance) fifth in platform selection.",
+      "limitations": "Self-reported U.S. sample; sponsored/produced with GBK Collective, a strategy and insights consultancy. It measures perceptions rather than audited financial results and does not establish that the listed barriers caused outcomes. Some PDF chart labels/text extraction are imperfect."
+    },
+    {
+      "citationNumber": 23,
+      "key": "servicenow-oxford-economics-maturity-index-2025",
+      "title": "Enterprise AI Maturity Index 2025",
+      "url": "https://www.servicenow.com/content/dam/servicenow-assets/public/en-us/doc-type/resource-center/white-paper/wp-enterprise-ai-maturity-index-2025.pdf",
+      "date": "2025",
+      "tier": "Tier3 promotional",
+      "evidencePath": "research/sources/ai-operations-needs-04-page.md",
+      "claim": "ServiceNow and Oxford Economics report a survey of 4,473 organizations in 16 countries across strategy, workflow integration, talent, governance, and value realization. The report says only 19% are operationalizing AI impact against business goals; data security is the leading barrier, and UAE respondents are among those reporting strong data-security concern while also expecting to increase investment. This supports a buyer situation in which strategy or spend exists but execution and guardrails remain unresolved.",
+      "limitations": "The study is vendor-sponsored and the report's authors and contributors are ServiceNow staff; its maturity score, economic correlations, and Pacesetter comparisons are not causal evidence. It does not provide enough UAE sample detail to infer UAE-wide prevalence, and regional findings are self-reported."
+    },
+    {
+      "citationNumber": 24,
+      "key": "pwc-saudi-ai-value-2026",
+      "title": "Saudi Arabia’s AI maturity is rising. Now comes the real test of value.",
+      "url": "https://www.pwc.com/m1/en/publications/saudi-arabia-ai-maturity-value.html",
+      "date": "2026-05-13",
+      "tier": "Tier 3 — consulting-firm proprietary self-report survey; small Saudi subsample",
+      "evidencePath": "research/sources/ai-gcc-adoption-03-pwc-saudi.md",
+      "claim": "PwC’s AI Performance Study reports Saudi findings from 35 director-level-or-above respondents at organizations with revenue above US$100m, within a 1,217-person global survey. Saudi organizations report strategy/roadmap assets (78% AI vision aligned to business objectives; 64% roadmap; 67% leadership accountability), but the source identifies execution gaps: reusable AI components (27% versus 51% among AI leaders), trusted records (44% versus 59%), and cross-functional governance boards (51% versus 64%). Saudi respondents report seven months time-to-value from pilots versus six globally, while 71% report pilots that delivered value. PwC’s recommended next step is to prioritize three to five outcomes, redesign workflows, make explicit stop/refine/scale decisions, and measure benefits.",
+      "limitations": "Consulting-firm proprietary survey; Saudi n=35 and restricted to senior respondents at large organizations, so it cannot establish GCC-wide prevalence. The next-step recommendations are PwC’s interpretation, not independently verified buyer behavior. Some page chart text renders as duplicated or zero values; claims here use readable narrative/chart sections. Flag: not older than 18 months as of 2026-09-14."
+    },
+    {
+      "citationNumber": 25,
+      "key": "bcg-gcc-ai-pulse-2025",
+      "title": "The GCC AI Pulse: Mapping the Region’s Readiness for an AI-Driven Future",
+      "url": "https://www.bcg.com/publications/2025/the-gcc-ai-pulse-mapping-the-regions-readiness-for-an-ai-driven-future",
+      "date": "2025-04-22",
+      "tier": "Tier 3 — consulting country-readiness analysis",
+      "evidencePath": "research/sources/ai-gcc-adoption-05-bcg.md",
+      "claim": "BCG’s 2025 AI Maturity Matrix uses its ASPIRE framework across 30+ indicators to assess the six GCC countries. It classifies UAE and Saudi Arabia as AI Contenders, reports high ambition but regional gaps in skills, investment, and research/innovation, and identifies talent constraints. This supports an institutional readiness context, not a direct enterprise buyer-demand rate.",
+      "limitations": "Consulting analysis at country-readiness level; the article does not provide a transparent enterprise sample or causal evidence of purchasing behavior. It should not be used to claim that a given share of UAE/GCC companies is at a particular implementation stage without the underlying matrix. Flag: not older than 18 months as of 2026-09-14."
+    }
+  ]
+}

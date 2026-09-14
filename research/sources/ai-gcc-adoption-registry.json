@@ -1,0 +1,72 @@
+[
+  {
+    "key": "redhat-uae-2025",
+    "title": "Red Hat Survey: UAE Organisations Prepare for Widespread AI Adoption and Upskilling",
+    "url": "https://www.redhat.com/en/about/press-releases/red-hat-survey-uae-organisations-prepare-for-widespread-ai-adoption-corrections-skills-gaps",
+    "date": "2025-10-12",
+    "tier": "Tier2",
+    "evidencePath": "research/sources/ai-gcc-adoption-01-redhat.md",
+    "claim": "Red Hat’s Censuswide survey reports UAE organizations’ adoption stage, investment intent, barriers, and operational priorities: 21% were exploring AI use cases, 20% maximizing investment, and 4% driving customer value; 98% reported barriers, led by existing-system integration (36%), privacy/security (32%), and stakeholder buy-in (32%). 70% reported shadow AI. The survey also lists operationalizing AI (85%) and employee adoption (86%) as priorities.",
+    "limitations": "Vendor-sponsored survey; UAE n=100, drawn from organizations with 500+ employees and respondents who were IT managers/directors or AI engineers. It measures reported perceptions, not verified deployment or financial outcomes. The page’s 72% unclear-ROI figure is presented as a cloud-adoption barrier, not necessarily AI-specific. Flag: not older than 18 months as of 2026-09-14."
+  },
+  {
+    "key": "pwc-uae-workforce-2025",
+    "title": "Confidence, trust and talent upskilling – how the UAE workforce is navigating the AI era",
+    "url": "https://www.pwc.com/m1/en/issues/pdf/hopes-and-fears-uae-2025.pdf",
+    "date": "2025 (month/day not stated)",
+    "tier": "Tier2",
+    "evidencePath": "research/sources/ai-gcc-adoption-02-pwc-uae-workforce.md",
+    "claim": "PwC’s UAE findings from the Middle East Workforce Hopes and Fears Survey 2025 report 72% of respondents used AI at work in the previous 12 months, 44% used GenAI at least monthly, and 24% used AI daily. Respondents report increased productivity (83%), work-quality improvement (82%), and creativity improvement (80%). The source frames the next challenge as effective integration, with role-level guidance, governance, tools, and skills needed.",
+    "limitations": "The fetched UAE findings do not state the UAE sample size or fieldwork dates; demographic mix is disclosed (54% millennials, 48% managers, 88% full-time). Results are self-reported employee perceptions and should not be treated as representative prevalence without the missing sampling details. Flag: 2025 but exact publication date unknown; age relative to 18 months cannot be calculated precisely."
+  },
+  {
+    "key": "pwc-saudi-ai-value-2026",
+    "title": "Saudi Arabia’s AI maturity is rising. Now comes the real test of value.",
+    "url": "https://www.pwc.com/m1/en/publications/saudi-arabia-ai-maturity-value.html",
+    "date": "2026-05-13",
+    "tier": "Tier2",
+    "evidencePath": "research/sources/ai-gcc-adoption-03-pwc-saudi.md",
+    "claim": "PwC’s AI Performance Study reports Saudi findings from 35 director-level-or-above respondents at organizations with revenue above US$100m, within a 1,217-person global survey. Saudi organizations report strategy/roadmap assets (78% AI vision aligned to business objectives; 64% roadmap; 67% leadership accountability), but the source identifies execution gaps: reusable AI components (27% versus 51% among AI leaders), trusted records (44% versus 59%), and cross-functional governance boards (51% versus 64%). Saudi respondents report seven months time-to-value from pilots versus six globally, while 71% report pilots that delivered value. PwC’s recommended next step is to prioritize three to five outcomes, redesign workflows, make explicit stop/refine/scale decisions, and measure benefits.",
+    "limitations": "Consulting-firm proprietary survey; Saudi n=35 and restricted to senior respondents at large organizations, so it cannot establish GCC-wide prevalence. The next-step recommendations are PwC’s interpretation, not independently verified buyer behavior. Some page chart text renders as duplicated or zero values; claims here use readable narrative/chart sections. Flag: not older than 18 months as of 2026-09-14."
+  },
+  {
+    "key": "academic-gcc-governance",
+    "title": "AI Governance in the GCC States: A Comparative Analysis of National AI Strategies",
+    "url": "https://dl.acm.org/doi/pdf/10.1613/jair.1.17619",
+    "date": "unknown (search indexing indicates 2025; fetched paper does not state publication date)",
+    "tier": "Tier1",
+    "evidencePath": "research/sources/ai-gcc-adoption-04-academic-governance.md",
+    "claim": "This academic paper analyzes six GCC National AI Strategies and related policies published from 2018–2024. It finds a soft-regulation approach centered on national strategies and ethical principles, and identifies data limitations, talent shortages, cultural-value alignment, weak enforceability, and stakeholder-engagement gaps as governance challenges.",
+    "limitations": "Document analysis of public policy material, not a survey of enterprise buyers or employee adoption; it cannot show organizational prevalence, procurement triggers, or realized outcomes. Publication date is not stated in the fetched copy and must remain unknown."
+  },
+  {
+    "key": "bcg-gcc-ai-pulse-2025",
+    "title": "The GCC AI Pulse: Mapping the Region’s Readiness for an AI-Driven Future",
+    "url": "https://www.bcg.com/publications/2025/the-gcc-ai-pulse-mapping-the-regions-readiness-for-an-ai-driven-future",
+    "date": "2025-04-22",
+    "tier": "Tier2",
+    "evidencePath": "research/sources/ai-gcc-adoption-05-bcg.md",
+    "claim": "BCG’s 2025 AI Maturity Matrix uses its ASPIRE framework across 30+ indicators to assess the six GCC countries. It classifies UAE and Saudi Arabia as AI Contenders, reports high ambition but regional gaps in skills, investment, and research/innovation, and identifies talent constraints. This supports an institutional readiness context, not a direct enterprise buyer-demand rate.",
+    "limitations": "Consulting analysis at country-readiness level; the article does not provide a transparent enterprise sample or causal evidence of purchasing behavior. It should not be used to claim that a given share of UAE/GCC companies is at a particular implementation stage without the underlying matrix. Flag: not older than 18 months as of 2026-09-14."
+  },
+  {
+    "key": "stc-shaffra-saudi-2025",
+    "title": "stc partners with Shaffra to introduce AI Employees for Saudi enterprises",
+    "url": "https://www.intelligentcio.com/me/2025/02/13/stc-partners-with-shaffra-to-introduce-ai-employees-for-saudi-enterprises",
+    "date": "2025-02-13",
+    "tier": "Tier3",
+    "evidencePath": "research/sources/ai-gcc-adoption-06-stc-shaffra.md",
+    "claim": "An Intelligent CIO Middle East announcement reports stc and Shaffra introduced AI-powered agentic solutions at LEAP 2025 for Saudi enterprises. The stated buyer situation is complex workflow automation across internal systems and customer touchpoints; the described asset bundle includes LLM hosting, structured AI knowledge management, and AI Employees tailored to corporate culture, industry expertise, and operational workflows.",
+    "limitations": "Partner/industry announcement and vendor claims; no named customer deployment, procurement award, measured result, or independent validation is provided. Treat the operational demand and outcomes as stated intent, not proof of adoption. Flag: older than 18 months as of 2026-09-14 (by approximately one month)."
+  },
+  {
+    "key": "kpmg-uae-future-of-work-2024",
+    "title": "Future of work: United Arab Emirates — The intersection of technology and talent management",
+    "url": "https://assets-launch.kpmg.com/content/dam/kpmgsites/ae/pdf/future-of-work.pdf.coredownload.inline.pdf",
+    "date": "2024-06 (report cover)",
+    "tier": "Tier2",
+    "evidencePath": "research/sources/ai-gcc-adoption-07-kpmg-uae.md",
+    "claim": "KPMG’s UAE report combines a global employee survey with interviews from Al Ghurair, Etihad Airways, and Ports, Customs and Free Zone Corporation. The source reports employee uncertainty about employer technology strategy (54% said employers adopted new technologies in the prior three years), and named organizational examples: Al Ghurair examining HR tasks for automation while addressing data security; Etihad enhancing an employee service center with a chatbot, using predictive HR analytics and an AI safety-training program, and stressing process alignment and clear policies.",
+    "limitations": "The report does not disclose the employee survey sample or UAE-specific sampling frame in the fetched text; many statistics are global. Named company examples are interview accounts, not independently audited case studies. Flag: older than 18 months as of 2026-09-14."
+  }
+]

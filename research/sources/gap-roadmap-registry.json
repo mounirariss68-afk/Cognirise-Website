@@ -1,0 +1,22 @@
+[
+  {
+    "key": "london-civ-ai-automation-implementation-partner",
+    "title": "AI and Automation Implementation Partner - Find a Tender",
+    "url": "https://www.find-tender.service.gov.uk/Notice/057908-2026",
+    "date": "2026-06-19 (tender notice published; page last edited 2026-07-21; estimated award decision 2026-08-22)",
+    "tier": "Tier1",
+    "evidencePath": "research/sources/gap-roadmap-01.md",
+    "claim": "London LGPS CIV Limited (London CIV) says it initiated an AI Strategy programme under a separate procurement to produce a prioritised portfolio of AI and automation use cases, then issued this tender for an AI and Automation Implementation Partner to implement that portfolio. The implementation scope includes feasibility refinement, design/build/testing/deployment to production-ready standard, integration, governance and regulatory support, training, post-implementation support, and documentation. The notice is the clearest public buyer record found of a deliberate strategy-to-delivery handoff.",
+    "limitations": "The strategy programme is described as recently initiated and intended to produce the portfolio, so this notice does not prove that a completed strategy was already delivered before the implementation tender. It does not identify the supplier or consultant that originated the strategy, and it is a tender notice rather than evidence of award, delivery, or outcomes. The fetched page is an older notice version."
+  },
+  {
+    "key": "home-office-ai-infrastructure-delivery-partner",
+    "title": "Home Office Artificial Intelligence (AI) Infrastructure Delivery Partner - Contracts Finder",
+    "url": "https://www.contractsfinder.service.gov.uk/notice/3fd991c0-ad8e-4982-9eed-067274197845",
+    "date": "2025-09-03 (notice published; contract awarded 2025-09-01; contract starts 2025-09-01)",
+    "tier": "Tier1",
+    "evidencePath": "research/sources/gap-roadmap-02.md",
+    "claim": "The Home Office awarded Faculty Science Limited a delivery-partner contract, published 3 September 2025, for central AI infrastructure supporting departmental demand and ambitions in the Prime Minister's AI Action Plan. The notice records a £600,000 award and a 1 September 2025–31 August 2027 contract period.",
+    "limitations": "This is a real AI delivery procurement, but it does not say the Home Office had an internal AI strategy or roadmap produced by an earlier consultant. The notice links the requirement to the Prime Minister's AI Action Plan and departmental demand, not to a completed buyer-owned strategy. It therefore is contextual delivery evidence, not an exact strategy-to-delivery handoff."
+  }
+]

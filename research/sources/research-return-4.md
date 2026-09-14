@@ -1,0 +1,34 @@
+## Key Facts
+- **UAE exploration without a business case:** Red Hat’s 2025 Censuswide survey of 100 UAE respondents at 500+ employee organizations found 21% in “exploring AI use cases,” only 4% “driving customer value,” and 96% not yet driving customer value. Reported blockers were existing-system integration (36%), privacy/security (32%), and stakeholder buy-in (32%); 86% prioritized employee adoption and 85% operationalization. This is the concrete trigger: “we are exploring, but cannot connect a use case to customer/business value.” Existing assets are enterprise systems, planned AI investment, and employee experimentation (70% reported “shadow AI”); the blocked decision is which use case can clear integration, security, sponsorship, and value-proof hurdles. Evidence: `ai-gcc-adoption-01-redhat.md`, lines 326–359, 373–391.
+- **Strategy/roadmap purchased, next step unclear (closest empirical proxy):** PwC’s Saudi study (Saudi n=35, director+ respondents at organizations above US$100m) reports existing strategy assets—78% alignment to business objectives, 64% roadmap, 67% leadership accountability—but execution gaps in reusable AI components (27% vs 51% among AI leaders), trusted records (44% vs 59%), governance boards (51% vs 64%), and role-based learning (49% vs 62%). Time-to-value from pilots was seven months vs six globally; 71% reported pilots that delivered value. The blocked decision is how to select 3–5 outcomes, redesign workflows, integrate core systems, and make stop/refine/scale decisions—not whether AI is strategic. This distinguishes it from the first situation: strategy exists; delivery portfolio, measurement, and scale do not yet. The source does **not** prove a consulting purchase; “already bought a roadmap” is an inference from the documented roadmap/strategy state. Evidence: `ai-gcc-adoption-03-pwc-saudi.md`, lines 102–116, 144–156, 260–279, 405–483, 779–789.
+- **Workforce adoption is already ahead of formal integration:** PwC’s UAE 2025 findings report 72% used AI at work in the previous 12 months, 44% used GenAI monthly, and 24% daily; 83% reported productivity improvement. The buyer trigger is therefore often governance, role guidance, skills, and workflow integration—not basic awareness. Evidence: `ai-gcc-adoption-02-pwc-uae-workforce.md`, lines 130–155, 208–221.
+- **Operational workflow buyer:** The stc/Shaffra Saudi announcement describes demand for AI Employees integrated across internal systems and customer touchpoints, with LLM hosting and structured AI knowledge management. Desired outcome is workflow automation/efficiency; no customer result is verified. Evidence: `ai-gcc-adoption-06-stc-shaffra.md`, lines 16–30.
+- **Named UAE organizational accounts:** KPMG’s UAE report says Al Ghurair was examining HR processes/tasks for automation while addressing data security; Etihad described an employee-service chatbot, predictive HR analytics, and AI safety training, while stressing process assessment, alignment, policy, and ethics. Evidence: `ai-gcc-adoption-07-kpmg-uae.md`, lines 544–571, 1067–1120. This source is older than 18 months.
+
+## Notable Claims Requiring Cross-Reference
+- Arabic search-only material says “التنفيذ هو العائق” (“execution is the obstacle”) and attributes an “under one-third” operating-model/governance figure to Roland Berger; this remains a search snippet, not a verified fetched finding.
+- BCG’s GCC AI Pulse is a country-readiness matrix, not a transparent enterprise buyer survey; use it for context (UAE/KSA “AI Contenders,” skills/investment/R&D gaps), not organizational prevalence.
+- PwC’s Saudi results are unusually specific but small (n=35) and consulting-produced; cross-check before generalizing to GCC demand.
+- No fetched source independently verifies ROI, procurement spend, a consulting-roadmap purchase, or a named customer’s production outcome.
+
+## Source Quality Assessment
+- **Tier 1:** Academic GCC governance paper: strong policy-document analysis, but not buyer/workforce evidence and publication date is unknown.
+- **Tier 2:** Red Hat, PwC UAE, PwC Saudi, BCG, and KPMG: credible industry surveys/analyses, but vendor/consulting sponsorship, self-reporting, incomplete sampling details, or country-level rather than enterprise evidence apply. KPMG is older than 18 months; PwC UAE exact date is unknown.
+- **Tier 3:** stc/Shaffra partner announcement: useful operational demand signal, promotional and not independently validated; older than 18 months.
+
+## Gaps & Unanswered Questions
+- Which UAE/GCC organizations have actually purchased strategy/roadmap work, and what handoff deliverables remain unfunded?
+- What business-case evidence (baseline, owner, benefit metric, security approval) unlocks procurement after “exploring use cases”?
+- How often do employee “shadow AI” users become governed, supported users, and which tools/workflows are involved?
+- What are verified production outcomes, procurement values, adoption rates by function, and Arabic-language/sovereignty requirements?
+
+## Sources
+1. Red Hat Survey: UAE Organisations Prepare for Widespread AI Adoption and Upskilling — https://www.redhat.com/en/about/press-releases/red-hat-survey-uae-organisations-prepare-for-widespread-ai-adoption-corrections-skills-gaps — 2025-10-12 — Tier2 — `research/sources/ai-gcc-adoption-01-redhat.md`
+2. Confidence, trust and talent upskilling – UAE workforce — https://www.pwc.com/m1/en/issues/pdf/hopes-and-fears-uae-2025.pdf — 2025, exact date unknown — Tier2 — `research/sources/ai-gcc-adoption-02-pwc-uae-workforce.md`
+3. Saudi Arabia’s AI maturity is rising. Now comes the real test of value. — https://www.pwc.com/m1/en/publications/saudi-arabia-ai-maturity-value.html — 2026-05-13 — Tier2 — `research/sources/ai-gcc-adoption-03-pwc-saudi.md`
+4. AI Governance in the GCC States — https://dl.acm.org/doi/pdf/10.1613/jair.1.17619 — date unknown — Tier1 — `research/sources/ai-gcc-adoption-04-academic-governance.md`
+5. The GCC AI Pulse — https://www.bcg.com/publications/2025/the-gcc-ai-pulse-mapping-the-regions-readiness-for-an-ai-driven-future — 2025-04-22 — Tier2 — `research/sources/ai-gcc-adoption-05-bcg.md`
+6. stc partners with Shaffra to introduce AI Employees — https://www.intelligentcio.com/me/2025/02/13/stc-partners-with-shaffra-to-introduce-ai-employees-for-saudi-enterprises — 2025-02-13 — Tier3 — `research/sources/ai-gcc-adoption-06-stc-shaffra.md`
+7. Future of work: United Arab Emirates — https://assets-launch.kpmg.com/content/dam/kpmgsites/ae/pdf/future-of-work.pdf.coredownload.inline.pdf — 2024-06 — Tier2 — `research/sources/ai-gcc-adoption-07-kpmg-uae.md`
+
+Saved required files: `research/sources/ai-gcc-adoption-snippets.md` and `research/sources/ai-gcc-adoption-registry.json` (7 entries).

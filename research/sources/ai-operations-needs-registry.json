@@ -1,0 +1,62 @@
+[
+  {
+    "key": "mit-nanda-genai-divide-2025",
+    "title": "The GenAI Divide: State of AI in Business 2025",
+    "url": "https://cdn.prod.website-files.com/68c7c6fc5d08d3aa30556cf2/69142ec4ddc4626ac32d1515_v0.1_State_of_AI_in_Business_2025_Report%20%281%29.pdf",
+    "date": "July 2025",
+    "tier": "Tier1 academic",
+    "evidencePath": "research/sources/ai-operations-needs-01-page.md",
+    "claim": "The MIT NANDA report combines a systematic review of 300+ publicly disclosed AI initiatives, 52 structured interviews, and a survey of 153 senior leaders. In its sample, more than 80% of organizations explored or piloted general tools, but only 5% of task-specific enterprise tools reached production; interview evidence points to brittle workflow fit, weak contextual learning, and unclear operational alignment as blockers. A procurement leader also describes difficulty justifying productivity gains that do not directly move revenue or measurable cost.",
+    "limitations": "The report is not presented as peer-reviewed research; company data and quotations are anonymized, success definitions vary, and the report says its implementation rates are directional and based partly on self-report and public disclosures. The sample may overrepresent organizations willing to discuss AI. Its reported percentages should not be treated as population prevalence or causal estimates."
+  },
+  {
+    "key": "alibaba-customer-service-field-experiment-2025",
+    "title": "Generative AI in Action: Field Experimental Evidence from Alibaba’s Customer Service Operations",
+    "url": "https://arxiv.org/pdf/2603.29888v1",
+    "date": "November 2025",
+    "tier": "Tier1 academic",
+    "evidencePath": "research/sources/ai-operations-needs-02-page.md",
+    "claim": "A randomized four-week Alibaba Taobao experiment gave 5,940 new after-sales agents access to an assistant that diagnosed customer issues and proposed solutions while leaving agents discretion to use, edit, or reject suggestions. Access reduced issue-identification time by 8.2% and chat duration by 1.1%, improved ratings and dissatisfaction rates, but did not significantly change three-day retrials. Benefits were concentrated among lower-performing agents; top performers experienced quality declines associated with longer shift-away time across concurrent chats.",
+    "limitations": "The paper reports short-term effects from one company, platform, customer-service process, and primarily new-agent sample; it is an arXiv working paper rather than a peer-reviewed journal article. Actual use was heterogeneous and lower than access, so the usage effects should not be generalized to every deployment."
+  },
+  {
+    "key": "nber-generative-ai-at-work-2023",
+    "title": "Generative AI at Work",
+    "url": "https://www.nber.org/system/files/working_papers/w31161/w31161.pdf?ck=1745495794",
+    "date": "November 2023 (revised)",
+    "tier": "Tier1 academic",
+    "evidencePath": "research/sources/ai-operations-needs-03-page.md",
+    "claim": "A staggered workplace deployment covering 5,179 customer-support agents found a 14% average increase in issues resolved per hour and a 34% increase for novice or low-skilled agents, with minimal impact for experienced or highly skilled agents. The authors also report improved customer sentiment, lower supervisor-escalation requests, and lower attrition among newer workers; they connect real-world effects to organizational investments, skill development, and business-process redesign.",
+    "limitations": "This is an NBER working paper explicitly described as not peer-reviewed. It studies one Fortune 500 software firm and its support operation, with most agents outside the United States, so industry and process transfer is uncertain. It is older than 18 months as of 2026-09-14; the result is useful as established field evidence, not current market prevalence."
+  },
+  {
+    "key": "servicenow-oxford-economics-maturity-index-2025",
+    "title": "Enterprise AI Maturity Index 2025",
+    "url": "https://www.servicenow.com/content/dam/servicenow-assets/public/en-us/doc-type/resource-center/white-paper/wp-enterprise-ai-maturity-index-2025.pdf",
+    "date": "2025",
+    "tier": "Tier3 promotional",
+    "evidencePath": "research/sources/ai-operations-needs-04-page.md",
+    "claim": "ServiceNow and Oxford Economics report a survey of 4,473 organizations in 16 countries across strategy, workflow integration, talent, governance, and value realization. The report says only 19% are operationalizing AI impact against business goals; data security is the leading barrier, and UAE respondents are among those reporting strong data-security concern while also expecting to increase investment. This supports a buyer situation in which strategy or spend exists but execution and guardrails remain unresolved.",
+    "limitations": "The study is vendor-sponsored and the report's authors and contributors are ServiceNow staff; its maturity score, economic correlations, and Pacesetter comparisons are not causal evidence. It does not provide enough UAE sample detail to infer UAE-wide prevalence, and regional findings are self-reported."
+  },
+  {
+    "key": "g2-procurement-survey-cio-dive-2025",
+    "title": "Businesses revamp procurement amid AI adoption swell",
+    "url": "https://www.ciodive.com/news/AI-enterprise-procurement-purchasing-data-G2/748369/",
+    "date": "May 16, 2025",
+    "tier": "Tier2 credible industry news",
+    "evidencePath": "research/sources/ai-operations-needs-05-page.md",
+    "claim": "CIO Dive reports G2's April 2025 survey of 1,169 business decision-makers: most companies use stricter requirements for AI software, nearly 30% rely on LLMs more often than Google for research, more than two-thirds would pay a premium only when vendors demonstrate value or productivity gains, and nearly half of enterprise buyers switched providers for better AI features.",
+    "limitations": "This is a news account of a G2 survey rather than the underlying instrument or dataset. The article does not establish response rates, sampling representativeness, or causal effects; willingness to pay, provider switching, and reported requirements are buyer statements rather than realized operational outcomes."
+  },
+  {
+    "key": "mbs-ai-redesign-of-work-2026",
+    "title": "AI and the Redesign of Work",
+    "url": "https://mbs.edu/-/media/PDF/Centres/IDIA/AI--the-Redesign-of-Work-IDIA-Whitepaper-June-2026.pdf?rev=e44d8f5537b34a3d9f3af6af74c81d31",
+    "date": "June 2026",
+    "tier": "Tier2 credible institutional whitepaper",
+    "evidencePath": "research/sources/ai-operations-needs-06-page.md",
+    "claim": "The Melbourne Business School/IDIA whitepaper, based on an Australian leadership roundtable and cited research, argues that AI value depends on task-level workflow and organizational redesign rather than technology alone. It highlights measurement risk (output volume can look productive without substantive quality), the loss of developmental work or “human-capital debt,” and the need to define decision rights, capability pathways, and outcome measures before scaling.",
+    "limitations": "This is a roundtable whitepaper, not a probability sample or peer-reviewed field study. Its Australian leadership perspective and normative recommendations may not transfer to all sectors or regions, and several outcomes are conceptual rather than measured in a common dataset."
+  }
+]

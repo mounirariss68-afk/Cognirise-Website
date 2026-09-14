@@ -1,0 +1,32 @@
+[
+  {
+    "key": "gap-sme-oecd-2025",
+    "title": "AI adoption by small and medium-sized enterprises: OECD discussion paper for the G7",
+    "url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2025/12/ai-adoption-by-small-and-medium-sized-enterprises_9c48eae6/426399c1-en.pdf",
+    "date": "2025-12-09",
+    "tier": "Tier 1 — intergovernmental official evidence and synthesis",
+    "evidencePath": "research/sources/gap-sme-01-oecd-2025.md",
+    "claim": "OECD 2025 evidence shows a persistent SME/large-firm adoption gap; among surveyed SMEs, skills/knowledge and training are recurring constraints, reported benefits are more often employee performance, cost savings and new tasks than revenue growth, and non-users in Canada and the United Kingdom most often identified generative AI as not suited to their work. Finance is also identified as an enabler for software, skills and organisational change.",
+    "limitations": "This is an official synthesis using mixed official statistics, selected surveys and cases, not a representative 2025/2026 global SME buyer study. D4SME survey evidence is non-representative and spans selected G7 countries; adoption observations have different country years/definitions; productivity associations are not causal ROI; the country table does not test an AI versus non-AI alternative."
+  },
+  {
+    "key": "gap-sme-uk-dsit-2026",
+    "title": "AI Adoption Research",
+    "url": "https://www.gov.uk/government/publications/ai-adoption-research/ai-adoption-research",
+    "date": "2026-02-13",
+    "tier": "Tier 1 — UK government-commissioned primary survey and qualitative interviews",
+    "evidencePath": "research/sources/gap-sme-02-uk-dsit-2026.md",
+    "claim": "The UK DSIT study (3,500 business interviews in February-May 2025 plus 100 follow-up interviews) finds that lack of identified need and limited AI skills are the commonest adoption blockers. Among businesses with no plans, 81% reported no identified need and 59% limited skills; high costs were rated a significant barrier by 76% of respondents who rated barriers. Qualitative evidence describes the need for a compelling business case, bounded low-cost tests and ROI evidence.",
+    "limitations": "UK private-sector scope, businesses with at least five employees, weighted by size/sector with selected-sector oversampling. Findings include self-reported adoption, spending, productivity and revenue; interviews and individual ROI quotes are illustrative. The respondent approach cannot capture shadow AI, and the study does not run a causal AI/non-AI comparison."
+  },
+  {
+    "key": "gap-sme-eurostat-2025",
+    "title": "Use of artificial intelligence in enterprises",
+    "url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Use_of_artificial_intelligence_in_enterprises",
+    "date": "2025-12-11",
+    "tier": "Tier 1 — official European statistical agency and harmonised enterprise survey",
+    "evidencePath": "research/sources/gap-sme-03-eurostat-2025.md",
+    "claim": "Eurostat's 2025 enterprise survey reports AI use of 17.00% among small, 30.36% among medium and 55.03% among large EU enterprises. Among enterprises that had considered AI but did not use it, lack of relevant expertise was reported by 70.89%, unclear legal consequences by 52.52%, privacy/data-protection concerns by 48.83%, and lack of usefulness by 20.68%.",
+    "limitations": "The population covers enterprises with at least 10 employees/self-employed persons, so smaller micro businesses are excluded. Barrier percentages are conditional on having considered AI, not all non-adopters; results are descriptive EU aggregates and do not establish causality, ROI, willingness to pay or a tested non-AI alternative."
+  }
+]

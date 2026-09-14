@@ -1,0 +1,72 @@
+[
+  {
+    "key": "oecd-ai-adoption-barriers",
+    "title": "Comparisons among recent AI surveys: The Adoption of Artificial Intelligence in Firms",
+    "url": "https://www.oecd.org/en/publications/the-adoption-of-artificial-intelligence-in-firms_f9ef33c3-en/full-report/comparisons-among-recent-ai-surveys_6577dea3.html",
+    "date": "2025-05-02",
+    "tier": "Tier 1 — government/academic",
+    "evidencePath": "research/sources/ai-business-case-01-oecd.md",
+    "claim": "The OECD report’s survey-comparison annex shows that prior firm surveys asked about difficulty finding appropriate AI use cases, proving added value over alternative methods, skills, integration, data, costs, security, and funding. The publication itself is dated 2 May 2025.",
+    "limitations": "The annex is desk research and reproduces selected survey questions/data from mostly 2020–2021 surveys; it does not provide a 2025 prevalence estimate, causal evidence, or a named buyer case. Use it as evidence of decision questions/barrier categories, not as current market incidence."
+  },
+  {
+    "key": "csiro-ai-project-selection",
+    "title": "Evaluating and prioritising artificial intelligence projects: A guide for better decision making and investment outcomes",
+    "url": "https://www.csiro.au/-/media/D61/Investing-in-AI-projects-guide/2025-Evaluating-and-prioritising-AI-projects-.pdf",
+    "date": "2025-06",
+    "tier": "Tier 1 — government/academic",
+    "evidencePath": "research/sources/ai-business-case-02-csiro.md",
+    "claim": "CSIRO’s June 2025 guide describes AI projects as problem-focused investments and asks decision-makers to test strategic fit, measurable value, full costs, data quality/governance, integration, risks, and whether a non-AI option is better. It recommends iterative portfolio review with decisions to continue, pivot, or stop.",
+    "limitations": "This is practical guidance, not an observed buyer-interview study. Its failure-rate and spending references are attributed to other sources and should not be treated as independently established by the guide. The checklist indicates what to examine; it does not show that organizations actually do so."
+  },
+  {
+    "key": "nz-mbie-responsible-ai-guidance",
+    "title": "Artificial Intelligence strategy and business guidance now available",
+    "url": "https://www.mbie.govt.nz/about/news/artificial-intelligence-strategy-and-business-guidance-now-available",
+    "date": "2025-07-08",
+    "tier": "Tier 1 — government/academic",
+    "evidencePath": "research/sources/ai-business-case-03-nz-mbie.md",
+    "claim": "New Zealand’s Ministry of Business, Innovation & Employment announced on 8 July 2025 that the government had released an AI strategy alongside voluntary responsible-AI guidance for businesses, described as practical good practices and actions to support successful adoption.",
+    "limitations": "The fetched announcement links to the separate guidance but does not itself provide a business-case template, investment outcomes, buyer account, or adoption statistics. It establishes the existence, date, voluntary status, and stated purpose of the guidance only."
+  },
+  {
+    "key": "wef-ai-investment-pathways",
+    "title": "Why AI needs smart investment pathways to ensure a sustainable impact",
+    "url": "https://www.weforum.org/stories/2025/06/why-ai-needs-smart-investment-pathways-to-ensure-a-sustainable-impact",
+    "date": "unknown (search result URL path indicates 2025-06; exact date not established)",
+    "tier": "Tier 2 — credible industry survey/news",
+    "evidencePath": "research/sources/ai-business-case-snippets.md",
+    "claim": "The search snippet states that 30% of enterprise generative-AI projects were expected to stall in 2025 because of poor data quality, inadequate risk controls, escalating costs, or unclear business value.",
+    "limitations": "Search-only snippet; the claim is an expectation, not an observed rate. Underlying methodology and the referenced Deloitte evidence were not fetched. Exact publication date is unknown, so the 18-month freshness check is unverified."
+  },
+  {
+    "key": "wam-middle-east-ai-investment-intent",
+    "title": "Latest Deloitte research shows over 65% of organisations in Middle East plan to increase investment in AI",
+    "url": "https://www.wam.ae/en/article/bi5dfn0-latest-deloitte-research-shows-over-65",
+    "date": "unknown",
+    "tier": "Tier 2 — credible industry survey/news",
+    "evidencePath": "research/sources/ai-business-case-snippets.md",
+    "claim": "The search result title reports that over 65% of Middle East organisations plan to increase AI investment; its snippet says the underlying perspective drew on more than 150 business and technology leaders across UAE, Saudi Arabia, and Qatar, plus interviews.",
+    "limitations": "Search-only snippet/title; no fieldwork date, question wording, respondent selection, or evidence of approved/spent investment. The exact date is unknown, so the 18-month freshness check is unverified."
+  },
+  {
+    "key": "khaleej-times-uae-ai-cost-value",
+    "title": "UAE firms face rising AI costs as adoption moves beyond pilot stage",
+    "url": "https://www.khaleejtimes.com/business/uae-firms-face-rising-ai-costs-as-adoption-moves-beyond-pilot-stage",
+    "date": "unknown",
+    "tier": "Tier 2 — credible industry survey/news",
+    "evidencePath": "research/sources/ai-business-case-snippets.md",
+    "claim": "The search snippet frames the UAE/Gulf challenge beyond adoption as controlling AI cost and proving business value.",
+    "limitations": "Search-only snippet; it provides no named organization, sample, amount, method, or decision outcome. The exact date is unknown, so the 18-month freshness check is unverified."
+  },
+  {
+    "key": "ibm-arabic-ai-readiness-roi",
+    "title": "جاهزية الذكاء الاصطناعي - التغلب على عوائق الذكاء الاصطناعي",
+    "url": "https://www.ibm.com/sa-ar/think/insights/ai-readiness-overcoming-ai-barriers",
+    "date": "unknown",
+    "tier": "Tier 3 — promotional/vendor",
+    "evidencePath": "research/sources/ai-business-case-snippets.md",
+    "claim": "An Arabic IBM search snippet says two-thirds of respondents across functions and readiness levels viewed proving ROI as not a top priority by 2026 and instead focused on adoption and use cases.",
+    "limitations": "Search-only vendor snippet; the survey, sample, fieldwork date, and meaning of “by 2026” are unspecified. It should not be used as independent prevalence evidence. The exact date is unknown, so the 18-month freshness check is unverified."
+  }
+]

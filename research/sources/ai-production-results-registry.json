@@ -1,0 +1,72 @@
+[
+  {
+    "key": "rand-ai-failure-roots-2024",
+    "title": "The Root Causes of Failure for Artificial Intelligence Projects and How They Can Succeed: Avoiding the Anti-Patterns of AI",
+    "url": "https://www.rand.org/pubs/research_reports/RRA2680-1.html",
+    "date": "2024-08-13",
+    "tier": "Tier 1 (research institute; peer-reviewed RAND research report)",
+    "evidencePath": "research/sources/evidence/ai-production-results-01-rand.md",
+    "claim": "RAND interviewed 65 experienced AI practitioners (50 industry, 15 academic; interviews Aug-Dec 2023). In the industry interviews, leadership-driven failures were cited by 84% of interviewees; data quality was discussed by 30 of 50. The report also documents incompatible test/production environments, missing deployment automation, weak monitoring, and rapid priority changes as failure mechanisms.",
+    "limitations": "Older than 18 months as of 2026-09-14. Exploratory qualitative sample; mostly nonmanagerial technical participants, not a prevalence estimate. Scope excludes projects using only pretrained LLM prompt engineering. Findings are perceptions of failure, not audited outcomes."
+  },
+  {
+    "key": "wharton-genai-adoption-2025",
+    "title": "Accountable Acceleration: Gen AI Fast-Tracks Into the Enterprise (Year Three Full Report)",
+    "url": "https://ai.wharton.upenn.edu/wp-content/uploads/2025/10/2025-Wharton-GBK-AI-Adoption-Report_Full-Report.pdf",
+    "date": "2025-10 (report; exact publication day unknown)",
+    "tier": "Tier 1 (academic survey; Wharton Human-AI Research with GBK Collective)",
+    "evidencePath": "research/sources/evidence/ai-production-results-03-wharton.md",
+    "claim": "A repeated cross-sectional 15-minute survey of about 801 U.S. enterprise decision-makers (1000+ employees and >$50m revenue), fielded June 26-July 11, 2025, reports 72% formal ROI tracking and 74% positive ROI. It ranks security risk, operational complexity, output inaccuracy, privacy, and regulation among barriers; IT respondents rank ease of operations (integration, scaling, ongoing maintenance) fifth in platform selection.",
+    "limitations": "Self-reported U.S. sample; sponsored/produced with GBK Collective, a strategy and insights consultancy. It measures perceptions rather than audited financial results and does not establish that the listed barriers caused outcomes. Some PDF chart labels/text extraction are imperfect."
+  },
+  {
+    "key": "cisco-ai-readiness-index-2025",
+    "title": "Cisco AI Readiness Index 2025: Realizing the Value of AI",
+    "url": "https://www.cisco.com/c/dam/m/en_us/solutions/ai/readiness-index/2025-m10/documents/cisco-ai-readiness-index-2025-realizing-the-value-of-ai.pdf",
+    "date": "2025 (survey August 2025; exact publication day unknown)",
+    "tier": "Tier 2 (credible industry survey; vendor-sponsored)",
+    "evidencePath": "research/sources/evidence/ai-production-results-02-cisco.md",
+    "claim": "The double-blind online survey covered 8,039 senior leaders responsible for AI integration/deployment at organizations with 500+ employees across 30 markets, including Saudi Arabia and the UAE. Only 32% report a process to measure AI impact, 34% say infrastructure is fully adaptable/scalable, and 31% feel fully equipped to secure agentic AI; 83% plan to develop/deploy agents.",
+    "limitations": "Cisco-sponsored self-report survey; readiness categories and ‘Pacesetter’ comparisons are Cisco’s constructed measures. Respondents are senior leaders, so operational staff and audited deployment records may be underrepresented. Do not treat reported ROI or readiness as independently verified."
+  },
+  {
+    "key": "mckinsey-gcc-state-ai-2025",
+    "title": "The state of AI in GCC countries: In pursuit of scale and value",
+    "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai-in-gcc-countries-in-pursuit-of-scale-and-value",
+    "date": "2025-11-13",
+    "tier": "Tier 3 (consulting survey/analysis; label as consulting claim)",
+    "evidencePath": "research/sources/evidence/ai-production-results-04-mckinsey-gcc.md",
+    "claim": "McKinsey and the GCC Board Directors Institute surveyed 139 GCC senior executives/board directors across all six GCC countries in Aug-Sep 2025 and interviewed 14 executives. 84% reported AI adoption to some extent, but only 31% said AI was scaled or fully deployed across the organization and 11% met McKinsey’s ‘value realizer’ definition. The article identifies output inaccuracy, technology/data foundations, operating model, change management, and workflow redesign as practical constraints.",
+    "limitations": "Consulting-produced, self-reported survey with a small sample and only 13 value-realizer respondents for one comparison; no probability sampling or audited value data disclosed. Interview quotations are anonymous. Treat recommendations and causal language as consulting claims, not independent evidence."
+  },
+  {
+    "key": "deloitte-middle-east-state-ai-2026",
+    "title": "Deloitte unveils new era of enterprise AI as Middle East organizations shift from pilots to large-scale deployment",
+    "url": "https://www.deloitte.com/middle-east/en/about/press-room/deloitte-unveils-new-era-of-enterprise-ai-as-middle-east-organizations-shift-from-pilots-to-large-scale-deployment.html",
+    "date": "2026-06-04",
+    "tier": "Tier 3 (consulting press release/report summary; label as consulting claim)",
+    "evidencePath": "research/sources/evidence/ai-production-results-05-deloitte-me.md",
+    "claim": "Deloitte’s Middle East press release says its 2026 report draws on more than 3,200 business and IT leaders in 24 countries. It reports 66% of Middle East organizations seeing efficiency gains, 34% using AI to deeply transform products/processes/business models, 84% not yet redesigning roles/workflows, and only 21% reporting mature autonomous-AI governance; 54% expect at least 40% of experiments in production within 3-6 months.",
+    "limitations": "Press-release summary rather than the full methodology; regional sample size, country mix, question wording, and validation are not provided in the fetched page. Vendor/consultancy-sponsored self-report; expectations are not evidence that deployment occurred."
+  },
+  {
+    "key": "ibm-enterprise-ai-stall-2026",
+    "title": "Why most enterprise AI projects stall before they scale",
+    "url": "https://www.ibm.com/think/insights/why-most-enterprise-ai-projects-stall-before-scale",
+    "date": "2026-04-08 (updated 2026-04-09)",
+    "tier": "Tier 3 (vendor analysis/marketing content)",
+    "evidencePath": "research/sources/evidence/ai-production-results-06-ibm.md",
+    "claim": "IBM’s analysis distinguishes a promising pilot from a usable production system: pilots use curated data and manual review, while scale exposes distributed data, inconsistent definitions, governance controls, and the need to write results into systems of record. It names fragmented data, continuous governance, and workflow/system action as the three combined production constraints.",
+    "limitations": "IBM product-marketing content by an IBM product marketing manager; no independent sample or methodology. The ‘global bank’ vignette is unnamed and should not be treated as a verified case. IBM cites Gartner for an abandonment statistic; that secondary citation was not used as direct evidence here."
+  },
+  {
+    "key": "techtarget-ai-deployments-wrong-2026",
+    "title": "AI deployments gone wrong: The fallout and lessons learned",
+    "url": "https://www.techtarget.com/searchenterpriseai/feature/AI-deployments-gone-wrong-The-fallout-and-lessons-learned",
+    "date": "2026-02-12",
+    "tier": "Tier 2 (credible industry news/reporting)",
+    "evidencePath": "research/sources/evidence/ai-production-results-08-techtarget.md",
+    "claim": "TechTarget reports documented cases: Yum/Taco Bell voice ordering misinterpreted orders in noisy drive-thrus and McDonald’s ended its IBM AOT restaurant testing in July 2024 after dialect and accuracy problems; it also describes Amazon’s biased recruiting system (abandoned 2018) and Zillow’s pricing-model losses/exit (2021). The article says MIT’s 2025 review of 300+ public implementations found only 5% generated millions in value, but that MIT figure is secondary reporting here.",
+    "limitations": "Secondary journalism, not primary postmortems. The McDonald’s, Amazon, and Zillow cases are older than 18 months as of 2026-09-14. Cases span different technologies and business models; do not generalize them into a prevalence rate. The cited MIT report was not directly fetched successfully, so its figures remain attributed to TechTarget only."
+  }
+]

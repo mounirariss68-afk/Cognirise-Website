@@ -1,0 +1,72 @@
+[
+  {
+    "key": "govuk-ai-procurement-guidelines",
+    "title": "Guidelines for AI procurement - GOV.UK",
+    "url": "https://www.gov.uk/government/publications/guidelines-for-ai-procurement/guidelines-for-ai-procurement",
+    "date": "unknown (page shows © Crown copyright 2020; exact publication date not shown)",
+    "tier": "Tier1",
+    "evidencePath": "research/sources/ai-roadmap-delivery-01-page.md",
+    "claim": "UK government guidance says buyers should form a multidisciplinary team, conduct data discovery and iterative impact assessment before market engagement, frame output-based requirements around the problem, and require lifecycle governance, knowledge transfer, training, and ongoing support.",
+    "limitations": "Official guidance rather than an outcome study; it targets UK public procurement and is likely older than 18 months if the 2020 copyright date reflects publication."
+  },
+  {
+    "key": "coditas-ai-strategy-readiness",
+    "title": "Enterprise AI Strategy & Readiness Consulting | Coditas",
+    "url": "https://coditas.com/ai-solutions/ai-strategy-readiness",
+    "date": "unknown (page has no publication date)",
+    "tier": "Tier3",
+    "evidencePath": "research/sources/ai-roadmap-delivery-02-page.md",
+    "claim": "Coditas describes a strategy/readiness engagement that reviews current AI activity and constraints, scores readiness, prioritizes use cases, builds a 12–18 month execution roadmap, and defines a first-pilot pack with scope, metrics, data, delivery model, and handover plan; it says artifacts can be taken forward by internal teams, existing partners, or Coditas.",
+    "limitations": "Supplier marketing and self-description; no independently verified client evidence or outcomes, and the page date is unknown."
+  },
+  {
+    "key": "forvismazars-ai-roadmap-readiness-implementation",
+    "title": "AI Strategy: A Roadmap From Readiness to Implementation | Forvis Mazars US",
+    "url": "https://www.forvismazars.us/forsights/2026/03/ai-strategy-a-road-map-from-readiness-to-implementation",
+    "date": "March 2026 (URL gives month; exact publication day not shown)",
+    "tier": "Tier3",
+    "evidencePath": "research/sources/ai-roadmap-delivery-03-page.md",
+    "claim": "Forvis Mazars distinguishes strategy (what/why, readiness, operating model, governance) from implementation (delivery roadmap, workflow integration, change, measurement, improvement), then proposes governance, outcomes, readiness-matched use cases, people/process/technology/data foundations, ownership and decision rights, and implementation in waves.",
+    "limitations": "Consulting thought leadership and not independent causal evidence; cited survey figures are reported by the source and should be cross-checked against the underlying reports."
+  },
+  {
+    "key": "dataiku-enterprise-ai-transformation",
+    "title": "Enterprise AI transformation: how leading organizations are redesigning operations around AI",
+    "url": "http://dataiku.com/blog/enterprise-ai-transformation",
+    "date": "2026-06-09",
+    "tier": "Tier3",
+    "evidencePath": "research/sources/ai-roadmap-delivery-04-page.md",
+    "claim": "Dataiku argues that pilots stall when people, systems, and governance are disconnected; it recommends one accountable pilot owner, outcome-linked metrics rather than model accuracy alone, an MLOps baseline, governance from day one, and sequencing two or three high-impact workflows that share infrastructure.",
+    "limitations": "Vendor-authored promotional guide; survey, customer, time-to-delivery, and benefit claims are not independently validated here."
+  },
+  {
+    "key": "gulfnews-uae-data-readiness",
+    "title": "What UAE enterprises with AI plans must do – put data first",
+    "url": "https://gulfnews.com/story/business/analysis/what-uae-enterprises-with-ai-plans-must-do--put-data-first-1.1733122481392",
+    "date": "2024-12-02",
+    "tier": "Tier2",
+    "evidencePath": "research/sources/ai-roadmap-delivery-05-page.md",
+    "claim": "A UAE-focused Gulf News commentary by HPE’s UAE/Africa managing director says enterprises can have abundant but fragmented, unstructured, siloed data; it recommends a single source of truth, data governance, security, cleansing, and an AI-ready storage foundation before implementation.",
+    "limitations": "Expert commentary, not a representative study or procurement record; older than 18 months as of 2026-09-14 and should be read as a UAE-relevant perspective rather than prevalence evidence."
+  },
+  {
+    "key": "dbt-ai3-delivery-partners",
+    "title": "AI³ Delivery Partners Project - Find a Tender",
+    "url": "https://www.find-tender.service.gov.uk/procurement/ocds-h6vhtk-0589f1",
+    "date": "2026-07-31 (award notice; tender notice published 2025-10-16)",
+    "tier": "Tier1",
+    "evidencePath": "research/sources/ai-roadmap-delivery-06-page.md",
+    "claim": "The UK Department for Business and Trade describes an AI³ model with an AI Lab for rapid exploration, an AI Factory for developing and operationalising experiments into production-ready tools, and AI Operations for maintenance and scaling; it procured specialist teams and individuals to join internal teams across those stages.",
+    "limitations": "The notice establishes one buyer’s delivery model and resourcing need, not general prevalence; it does not list the specific use cases or detailed success measures."
+  },
+  {
+    "key": "uk-ai-knowledge-hub-procuring-ai",
+    "title": "Procuring AI - AI Knowledge Hub",
+    "url": "https://ai.gov.uk/knowledge-hub/how-to/procurement",
+    "date": "unknown (page is marked draft; examples refer to 2025)",
+    "tier": "Tier1",
+    "evidencePath": "research/sources/ai-roadmap-delivery-07-page.md",
+    "claim": "The UK AI Knowledge Hub draft says AI procurement still requires competition, value-for-money, data protection, security, and documented decisions; it presents a competitive-flexible route using short working prototypes and cites a planning-decision procurement targeting a reduction from 8+ weeks to 4 weeks before full deployment.",
+    "limitations": "The page explicitly says it is a draft, not comprehensive, and not legal advice; the planning example is an illustrative government procurement route, not evidence that the target was achieved."
+  }
+]
