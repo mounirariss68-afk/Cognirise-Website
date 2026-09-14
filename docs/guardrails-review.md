@@ -1,5 +1,24 @@
 # Guardrails Framework — development review
 
+## Content-owner approval — 2026-09-14
+
+The content owner explicitly approved the supplied Guardrails page copy and both
+diagrams in response to the content-only approval question. This approval applies
+to the following source files, identified by SHA-256:
+
+| Source | SHA-256 |
+| --- | --- |
+| `attached_assets/guardrails-page-copy_1789364808531.md` | `46396a6aebafa1eef724a46206dbdf27b11993ce2e0bfb44097840cf216ec302` |
+| `attached_assets/illustration-A-four-layers_1789364808532.svg` | `b2392d8870420089b3136bda249adf66a12e04b7943dc4f11410cca11926bcd8` |
+| `attached_assets/illustration-B-sufficiency_1789364808532.svg` | `19e7b91de600075df27128ea4e3fab1bcfc3569308e32507e6fdc544bedadbc4` |
+
+This is source-content approval only, not a CMS workflow approval, independent
+factual/legal verification, approval of subsequent content changes, or permission
+to publish/deploy. The approval date is not a substitute for verification or
+scheduled review dates. The authenticated preview and remaining release checks
+below still require evidence. No CMS revision or publication pointer was changed
+to record this approval.
+
 ## Delivery
 
 - Canonical website route: `/methodologies/guardrails-framework`.
@@ -88,9 +107,10 @@ retain the same geometry and content, with a small image-rendering difference
 (normalized RMSE approximately 0.026).
 
 **The real MFA-authorized preview journey remains unverified.** Fixture screenshots
-prove rendering and interaction behavior, not authorization. Source review, factual/legal
-approval, evidence links where appropriate, actual verification/review dates, and
-publication approval remain editorial gates. None was fabricated.
+prove rendering and interaction behavior, not authorization. Content-owner approval
+of the exact supplied sources is recorded above. Independent factual/legal checks,
+evidence links where appropriate, actual verification/review dates, and publication
+approval remain editorial gates. None was fabricated.
 
 ## Scoped diff inventory
 
