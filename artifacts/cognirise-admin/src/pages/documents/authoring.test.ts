@@ -21,7 +21,10 @@ test("guided editor uses a shared-content destination checklist", async () => {
   assert.match(detail, /useCreateDocumentCustomization/);
   assert.match(detail, /revision\.market === selectedMarket && revision\.locale === selectedLocale/);
   assert.match(detail, /useGetDocument\(id!, documentParams/);
-  assert.match(detail, /window\.open\(result\.data\.previewUrl/);
+  assert.match(detail, /window\.open\("about:blank", "_blank"\)/);
+  assert.match(detail, /previewResponseMatchesTarget\(result, target\)/);
+  assert.match(detail, /navigateReservedPreview\(operation\.placeholder, result\.previewUrl\)/);
+  assert.doesNotMatch(detail, /window\.open\(result\.data\.previewUrl/);
   assert.doesNotMatch(detail, /\/cognirise-website/);
   assert.doesNotMatch(detail, /Market \+ locale matrix/);
 });

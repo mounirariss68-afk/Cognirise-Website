@@ -20,3 +20,9 @@ Preview metadata must bypass draft SEO entirely, force `noindex,nofollow` on rer
 **Why:** Shared metadata helpers can otherwise reapply draft indexing settings or turn an omitted canonical into the sensitive preview path after interactive rerenders.
 
 **How to apply:** Treat an explicit null canonical as removal and construct preview metadata independently from editor-controlled SEO fields.
+
+Reserve asynchronous preview tabs synchronously, then isolate the blank tab before issuing or navigating to a capability.
+
+**Why:** Browsers can block a new tab after save/issuance loses user activation. Passing `noopener` to `window.open` can also return null even when a tab was created, leaving an uncontrollable blank tab. Test doubles that always return a window conceal this distinction.
+
+**How to apply:** Retain the blank WindowProxy, immediately sever and verify its opener, and install a verified no-referrer policy. Navigate through a noreferrer link owned by the placeholder: assigning its location from the editor still sent the editor's referrer in Chromium despite the placeholder's meta policy. If isolation fails, close it and use an explicit `noopener noreferrer` fallback link. Test with normal popup protections, not Chromium automation's disabled blocker.

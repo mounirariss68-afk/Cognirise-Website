@@ -7,6 +7,16 @@ const layoutUrl = new URL("./AgentAuthorityModel.tsx", import.meta.url);
 const cmsUrl = new URL("../lib/cms.ts", import.meta.url);
 const presentationsUrl = new URL("../components/cms/PublicCmsPresentations.tsx", import.meta.url);
 
+test("sparse saved people show exact identity and summary without published collection fallback", async () => {
+  const preview = await readFile(pageUrl, "utf8");
+  const person = preview.slice(preview.indexOf('if (preview.kind === "person")'), preview.indexOf('if (preview.kind === "partner")'));
+  assert.match(person, /data-testid="saved-person-preview"/);
+  assert.match(person, /<h1[^>]*>\{personRecord\.title\}<\/h1>/);
+  assert.match(person, /\{personRecord\.summary\}/);
+  assert.match(person, /This saved draft has no leadership or advisor placement yet/);
+  assert.match(person, /\["founder", "leader", "advisor"\]\.includes\(person\.role\) && \(\s*<CmsPreviewRequestBoundary>/);
+});
+
 test("framework previews use the buyer layout without a public CMS request", async () => {
   const [preview, layout] = await Promise.all([
     readFile(pageUrl, "utf8"),

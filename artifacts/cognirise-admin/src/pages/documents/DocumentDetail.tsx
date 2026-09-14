@@ -10,10 +10,9 @@ import {
   useDeleteDocument,
   useListDocumentRevisions,
   useRollbackDocument,
-  usePreviewDocument,
+  previewDocument,
   useGetSession,
   getGetDocumentQueryKey,
-  getPreviewDocumentQueryKey,
   getListDocumentRevisionsQueryKey,
   DocumentStatus,
 } from "@workspace/api-client-react";
@@ -60,7 +59,7 @@ import { SharedEditionPanel } from "./SharedEditionPanel";
 import { SharedBaselineEditor } from "./SharedBaselineEditor";
 
 // hint: Logic changed on both sides. Requires understanding intent of each change.
-import { applyLocalSuccessorToEditionMatrix, previewPinForEditionRevision } from "./preview-revision-lifecycle";
+import { applyLocalSuccessorToEditionMatrix, previewPinForEditionRevision, previewResponseMatchesTarget, type PreviewTarget } from "./preview-revision-lifecycle";
 import { createDraftRecoveryExport, downloadDraftRecovery } from "./draft-operation-safety";
 import { EditionAssignmentControl } from "./EditionAssignmentControl";
 
@@ -76,6 +75,144 @@ function documentListPath(kind: CmsDocumentKind): string {
     case "office": return "/offices";
     case "site-configuration": return "/contact-settings";
     case "landing-page": return "/dashboard";
+  }
+}
+
+const PREVIEW_SAVE_PENDING = "__save-preview-pending__";
+
+type PreviewFallback = {
+  previewUrl: string;
+  target: PreviewTarget;
+  revisionNumber: number;
+};
+
+type PreviewFailure = {
+  target: PreviewTarget;
+  wasSaved: boolean;
+  detail: string;
+  sharedDestinationAuthority: boolean;
+};
+
+type PreviewOperation = {
+  sequence: number;
+  placeholder: Window | null;
+  wasSaved: boolean;
+  target: {
+    market: string;
+    locale: string;
+    revisionId?: string;
+  };
+};
+
+function isClosedPreviewWindow(target: Window | null | undefined) {
+  if (!target) return true;
+  try {
+    return target.closed;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Reserve the tab while the click still has a user gesture. The API request
+ * can take long enough for a normal async window.open call to be blocked.
+ */
+function reservePreviewWindow(): Window | null {
+  try {
+    // Do not pass `noopener` here. Chromium/WebKit may return null for a
+    // successful popup when that feature is requested, leaving us unable to
+    // navigate the reserved tab. Isolate the real WindowProxy immediately
+    // instead, while this click still owns the user gesture.
+    const target = window.open("about:blank", "_blank");
+    if (!target) return null;
+    try {
+      // This must happen before a capability URL is assigned.
+      target.opener = null;
+      if (target.opener !== null) {
+        closePreviewPlaceholder(target);
+        return null;
+      }
+    } catch {
+      // A hostile/browser-managed WindowProxy can reject the assignment. Do
+      // not leave an opener-bearing placeholder behind.
+      closePreviewPlaceholder(target);
+      return null;
+    }
+    try {
+      const head = target.document.head || target.document.documentElement;
+      if (!head) throw new Error("The preview placeholder has no document head.");
+      const referrer = target.document.createElement("meta");
+      referrer.name = "referrer";
+      referrer.content = "no-referrer";
+      head.appendChild(referrer);
+      const installed = target.document.querySelector(
+        'meta[name="referrer"][content="no-referrer"]',
+      );
+      if (installed !== referrer && (
+        !installed
+        || installed.getAttribute("name") !== "referrer"
+        || installed.getAttribute("content") !== "no-referrer"
+      )) {
+        throw new Error("The preview placeholder could not install its referrer policy.");
+      }
+      if (!target.document.body) throw new Error("The preview placeholder has no document body.");
+      target.document.body.textContent = "Preparing the protected preview…";
+    } catch {
+      // Fail closed: a placeholder without a verified policy must not receive
+      // a capability URL. The caller will retain the URL as a safe fallback
+      // link after issuance.
+      closePreviewPlaceholder(target);
+      return null;
+    }
+    return target;
+  } catch {
+    // Popup blocking is recoverable: the issued capability is retained as a
+    // regular link once the API responds.
+    return null;
+  }
+}
+
+function closePreviewPlaceholder(target: Window | null | undefined) {
+  if (!target) return;
+  try {
+    if (target.closed) return;
+    target.close();
+  } catch {
+    // A cross-window proxy can reject reading `closed`; still attempt a close
+    // so an opener-bearing or otherwise unsafe placeholder is not abandoned.
+    try {
+      target.close();
+    } catch {
+      // Closing is best effort; a blocked or already navigated tab is harmless.
+    }
+  }
+}
+
+function navigateReservedPreview(target: Window | null, previewUrl: string) {
+  if (!target || isClosedPreviewWindow(target)) return false;
+  try {
+    const body = target.document.body;
+    if (!body) throw new Error("The preview placeholder has no document body.");
+    const anchor = target.document.createElement("a");
+    anchor.href = previewUrl;
+    anchor.target = "_self";
+    anchor.rel = "noreferrer";
+    anchor.referrerPolicy = "no-referrer";
+    anchor.setAttribute("referrerpolicy", "no-referrer");
+    anchor.textContent = "Open protected preview";
+    if (
+      anchor.target !== "_self"
+      || anchor.getAttribute("rel") !== "noreferrer"
+      || anchor.getAttribute("referrerpolicy") !== "no-referrer"
+    ) {
+      throw new Error("The preview navigation could not verify its no-referrer policy.");
+    }
+    body.replaceChildren(anchor);
+    anchor.click();
+    return !isClosedPreviewWindow(target);
+  } catch {
+    closePreviewPlaceholder(target);
+    return false;
   }
 }
 
@@ -164,63 +301,15 @@ export default function DocumentDetail() {
     isAdministrator || Boolean(session?.user?.marketCodes?.includes(selectedMarket))
   );
   const [previewRevisionId, setPreviewRevisionId] = useState<string | undefined>();
-  const [previewToOpenRevisionId, setPreviewToOpenRevisionId] = useState<string | null>(null);
+  const [previewFallback, setPreviewFallback] = useState<PreviewFallback | null>(null);
+  const [previewFailure, setPreviewFailure] = useState<PreviewFailure | null>(null);
   const [reviewComment, setReviewComment] = useState("");
-  const previewParams = { market: selectedMarket, locale: selectedLocale, revisionId: previewRevisionId };
-  const { refetch: createPreview } = usePreviewDocument(id!, previewParams, {
-    query: { enabled: false, queryKey: getPreviewDocumentQueryKey(id!, previewParams) },
-  });
   const reviewCommentsParams = { revisionId: previewRevisionId };
   const { data: reviewComments } = useListDocumentReviewComments(id!, reviewCommentsParams, {
     query: { enabled: Boolean(previewRevisionId), queryKey: getListDocumentReviewCommentsQueryKey(id!, reviewCommentsParams) },
   });
   const addReviewComment = useAddDocumentReviewComment();
   const rejectRevision = useRejectDocumentRevision();
-  // Preview issuance always targets the already-saved exact revision. The
-  // visual workspace never receives local draft state.
-  const requestIndustryPreview = useCallback(async () => {
-    const result = await createPreview();
-    if (result.isError || !result.data?.previewUrl) {
-      throw result.error ?? new Error("The protected preview capability could not be issued.");
-    }
-    return result.data;
-  }, [createPreview]);
-  useEffect(() => {
-    const revisionId = previewToOpenRevisionId;
-    if (!revisionId || previewRevisionId !== revisionId) return;
-    let active = true;
-    setPreviewingRevisionId(revisionId);
-    void createPreview()
-      .then((result) => {
-        if (!active || result.isError || !result.data?.previewUrl) {
-          throw result.error ?? new Error("The protected preview capability could not be issued.");
-        }
-        if (result.data.revisionId !== revisionId) {
-          throw new Error("The protected preview did not return the requested saved revision.");
-        }
-        window.open(result.data.previewUrl, "_blank", "noopener,noreferrer");
-        toast({
-          title: "Saved revision preview opened",
-          description: `Revision ${result.data.revisionNumber} · ${result.data.requestedMarket.toUpperCase()} · ${result.data.requestedLocale}`,
-        });
-      })
-      .catch((error: unknown) => {
-        if (!active) return;
-        toast({
-          title: "Saved, but preview could not be opened",
-          description: error instanceof Error ? error.message : "The exact saved revision remains available in Preview.",
-          variant: "destructive",
-        });
-      })
-      .finally(() => {
-        if (!active) return;
-        setPreviewingRevisionId(null);
-        setPreviewToOpenRevisionId(null);
-      });
-    return () => {
-      active = false;
-    };
-  }, [createPreview, previewRevisionId, previewToOpenRevisionId, toast]);
 
   const hydratedEditionKey = useRef("");
   const hydratedRevision = useRef<number | undefined>(undefined);
@@ -230,6 +319,8 @@ export default function DocumentDetail() {
   const preserveAfterFailedSave = useRef(false);
   const mountedRef = useRef(true);
   const saveSequence = useRef(0);
+  const previewSequence = useRef(0);
+  const previewOperationRef = useRef<PreviewOperation | null>(null);
 
   const [hasUnsaved, setHasUnsaved] = useState(false);
   const [availabilitySelectionDraft, setAvailabilitySelectionDraft] = useState<AvailabilitySelectionDraft>({
@@ -245,7 +336,60 @@ export default function DocumentDetail() {
     return () => {
       mountedRef.current = false;
       saveSequence.current += 1;
+      const pendingPreview = previewOperationRef.current;
+      if (pendingPreview) {
+        closePreviewPlaceholder(pendingPreview.placeholder);
+        previewOperationRef.current = null;
+      }
     };
+  }, []);
+
+  const capturePreviewTarget = useCallback((): PreviewTarget | undefined => {
+    const revisionId = previewRevisionId ?? matrixSelectedEdition?.revisionId ?? doc?.currentRevisionId;
+    if (!revisionId || !selectedMarket || !selectedLocale) return undefined;
+    return { market: selectedMarket, locale: selectedLocale, revisionId };
+  }, [doc?.currentRevisionId, matrixSelectedEdition?.revisionId, previewRevisionId, selectedLocale, selectedMarket]);
+
+  const beginPreviewOperation = useCallback((
+    target: { market: string; locale: string; revisionId?: string },
+    placeholder: Window | null,
+    wasSaved = false,
+  ) => {
+    // This ref is the synchronous guard. React state alone would allow two
+    // rapid clicks before the disabled button is rendered.
+    if (previewOperationRef.current || previewingRevisionId !== null) {
+      closePreviewPlaceholder(placeholder);
+      return undefined;
+    }
+    const operation: PreviewOperation = {
+      sequence: ++previewSequence.current,
+      placeholder,
+      wasSaved,
+      target: { ...target },
+    };
+    previewOperationRef.current = operation;
+    setPreviewFallback(null);
+    setPreviewFailure(null);
+    setPreviewingRevisionId(target.revisionId ?? PREVIEW_SAVE_PENDING);
+    return operation;
+  }, [previewingRevisionId]);
+
+  const finishPreviewOperation = useCallback((operation: PreviewOperation) => {
+    if (previewOperationRef.current !== operation) {
+      closePreviewPlaceholder(operation.placeholder);
+      return;
+    }
+    previewOperationRef.current = null;
+    setPreviewingRevisionId(null);
+  }, []);
+
+  const abortPreviewOperation = useCallback((operation: PreviewOperation | undefined) => {
+    if (!operation) return;
+    closePreviewPlaceholder(operation.placeholder);
+    if (previewOperationRef.current === operation) {
+      previewOperationRef.current = null;
+      if (mountedRef.current) setPreviewingRevisionId(null);
+    }
   }, []);
 
   // Dialog states
@@ -433,6 +577,91 @@ export default function DocumentDetail() {
     && selectedLocale === sharedSource.locale
     && !selectedIsManagedMaterializedEdition,
   );
+  const issuePreviewForOperation = useCallback((operation: PreviewOperation, target: PreviewTarget) => {
+    if (previewOperationRef.current !== operation || !mountedRef.current) {
+      closePreviewPlaceholder(operation.placeholder);
+      return;
+    }
+    operation.target = { ...target };
+    setPreviewingRevisionId(target.revisionId);
+    let request: ReturnType<typeof previewDocument>;
+    try {
+      request = previewDocument(id!, target);
+    } catch (error) {
+      request = Promise.reject(error);
+    }
+    void request
+      .then((result) => {
+        if (previewOperationRef.current !== operation || !mountedRef.current) {
+          closePreviewPlaceholder(operation.placeholder);
+          return;
+        }
+        if (!result?.previewUrl) {
+          throw new Error("The protected preview capability did not include a preview URL.");
+        }
+        if (!previewResponseMatchesTarget(result, target)) {
+          throw new Error("The protected preview did not return the requested saved market, locale, and revision.");
+        }
+        setPreviewFailure(null);
+        const opened = navigateReservedPreview(operation.placeholder, result.previewUrl);
+        if (!opened) {
+          setPreviewFallback({
+            previewUrl: result.previewUrl,
+            target,
+            revisionNumber: result.revisionNumber,
+          });
+          toast({
+            title: "Preview is ready",
+            description: "The preview tab was blocked or closed. Use the persistent link below to open this saved revision.",
+          });
+        } else {
+          toast({
+            title: "Saved revision preview opened",
+            description: `Revision ${result.revisionNumber} · ${target.market.toUpperCase()} · ${target.locale}`,
+          });
+        }
+      })
+      .catch((error: unknown) => {
+        if (previewOperationRef.current !== operation || !mountedRef.current) {
+          closePreviewPlaceholder(operation.placeholder);
+          return;
+        }
+        closePreviewPlaceholder(operation.placeholder);
+        setPreviewFallback(null);
+        const actionFailure = describeActionError(error);
+        const status = error && typeof error === "object" && typeof (error as { status?: unknown }).status === "number"
+          ? (error as { status: number }).status
+          : undefined;
+        const detail = error instanceof Error ? error.message : actionFailure.message;
+        setPreviewFailure({
+          target,
+          wasSaved: operation.wasSaved,
+          detail,
+          sharedDestinationAuthority: status === 403
+            && selectedIsSharedSource
+            && selectedBindingMode === "unbound",
+        });
+        toast({
+          title: "Preview could not be issued",
+          description: detail,
+          variant: "destructive",
+        });
+      })
+      .finally(() => finishPreviewOperation(operation));
+  }, [finishPreviewOperation, id, selectedBindingMode, selectedIsSharedSource, toast]);
+
+  // The visual workspace previews the same immutable saved target, but does
+  // not need a second popup reservation because it renders into its iframe.
+  const requestIndustryPreview = useCallback(async () => {
+    const target = capturePreviewTarget();
+    if (!target) throw new Error("Save a valid exact edition revision before previewing.");
+    const result = await previewDocument(id!, target);
+    if (!result?.previewUrl || !previewResponseMatchesTarget(result, target)) {
+      throw new Error("The protected preview did not return the requested saved market, locale, and revision.");
+    }
+    return result;
+  }, [capturePreviewTarget, id]);
+
   const selectedEditionBase = matrixSelectedEdition ?? (selectedIsSharedSource ? {
     market: sharedSource!.market,
     locale: sharedSource!.locale,
@@ -616,7 +845,7 @@ export default function DocumentDetail() {
     || !canEditSelectedEdition;
 
   const handleSave = (intent: "save" | "save-preview" = "save") => {
-    if (!doc || editorLocked || !editorHydrated || saveBlocked) return;
+    if (!doc || editorLocked || !editorHydrated || saveBlocked || previewOperationRef.current || previewingRevisionId !== null) return;
     if (intent === "save-preview" && !hasUnsaved) {
       void openPreview();
       return;
@@ -633,6 +862,14 @@ export default function DocumentDetail() {
       return;
     }
     setSaveIssues([]);
+    setPreviewFallback(null);
+    setPreviewFailure(null);
+    let pendingPreviewOperation: PreviewOperation | undefined;
+    if (intent === "save-preview") {
+      const placeholder = reservePreviewWindow();
+      pendingPreviewOperation = beginPreviewOperation({ market: selectedMarket, locale: selectedLocale }, placeholder);
+    }
+    if (intent === "save-preview" && !pendingPreviewOperation) return;
     const operation = ++saveSequence.current;
     preserveAfterFailedSave.current = true;
     const submittedRevision = hydratedRevision.current;
@@ -654,7 +891,10 @@ export default function DocumentDetail() {
       }
     }, {
       onSuccess: (updated) => {
-        if (!mountedRef.current || operation !== saveSequence.current || editorKey !== currentEditorKey.current || hydratedRevision.current !== submittedRevision) return;
+        if (!mountedRef.current || operation !== saveSequence.current || editorKey !== currentEditorKey.current || hydratedRevision.current !== submittedRevision) {
+          abortPreviewOperation(pendingPreviewOperation);
+          return;
+        }
         if (!isDraftSaveResponse(updated, {
           documentId: id!,
           kind: doc.kind as CmsDocumentKind,
@@ -668,6 +908,7 @@ export default function DocumentDetail() {
           setSaveRecovery("uncertain");
           setSaveBlocked(true);
           setBlockedRecovery("uncertain");
+          abortPreviewOperation(pendingPreviewOperation);
           toast({ title: failure.title, description: failure.description, variant: "destructive" });
           queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
           queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
@@ -699,13 +940,20 @@ export default function DocumentDetail() {
         queryClient.invalidateQueries({ queryKey: getGetSharedMarketEditionMatrixQueryKey(id!) });
         queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("documents") || String(query.queryKey[0]).includes("published") });
         toast({ title: `${selectedMarket.toUpperCase()} edition saved successfully` });
-          if (intent === "save-preview" && updated.currentRevisionId) {
-            setPreviewingRevisionId(updated.currentRevisionId);
-            setPreviewRevisionId(updated.currentRevisionId);
-            setPreviewToOpenRevisionId(updated.currentRevisionId);
-          }
+         if (intent === "save-preview" && updated.currentRevisionId && pendingPreviewOperation) {
+           pendingPreviewOperation.wasSaved = true;
+           setPreviewRevisionId(updated.currentRevisionId);
+           issuePreviewForOperation(pendingPreviewOperation, {
+             market: targetParams.market,
+             locale: targetParams.locale,
+             revisionId: updated.currentRevisionId,
+           });
+         } else {
+           abortPreviewOperation(pendingPreviewOperation);
+         }
       },
       onError: (err) => {
+        abortPreviewOperation(pendingPreviewOperation);
         if (!mountedRef.current || operation !== saveSequence.current || editorKey !== currentEditorKey.current) return;
         const failure = describeSaveFailure(err);
         const serverIssues = serverValidationIssues(err);
@@ -852,7 +1100,8 @@ export default function DocumentDetail() {
     setSelectedMarket(market);
     setSelectedLocale(locale);
     setPreviewingRevisionId(null);
-    setPreviewToOpenRevisionId(null);
+    setPreviewFallback(null);
+    setPreviewFailure(null);
     // Wait for the newly selected exact document response to establish the
     // latest saved revision. Reusing the matrix/source pointer here can pin a
     // just-opened editor to the prior draft when either cache is stale.
@@ -994,8 +1243,10 @@ export default function DocumentDetail() {
     setBlockedRecovery(null);
     setHasUnsaved(false);
     setPendingOverridePaths([]);
+    abortPreviewOperation(previewOperationRef.current ?? undefined);
     setPreviewingRevisionId(null);
-    setPreviewToOpenRevisionId(null);
+    setPreviewFallback(null);
+    setPreviewFailure(null);
     queryClient.resetQueries({ queryKey: getGetDocumentQueryKey(id!, documentParams), exact: true });
   };
 
@@ -1165,6 +1416,8 @@ export default function DocumentDetail() {
 
   const handleAction = (action: "submit" | "publish" | "archive" | "restore") => {
     if (updateDoc.isPending || previewingRevisionId !== null || reviewAvailability.isPending || submittingSharedReview || availabilitySelectionActive) return;
+    setPreviewFallback(null);
+    setPreviewFailure(null);
     setActionError(null);
     const targetParams = { market: selectedMarket, locale: selectedLocale };
     const opts = {
@@ -1305,6 +1558,8 @@ export default function DocumentDetail() {
 
   const handleRollback = (revisionId: string) => {
     if (updateDoc.isPending) return;
+    setPreviewFallback(null);
+    setPreviewFailure(null);
     rollbackDoc.mutate({ documentId: id!, data: { revisionId } }, {
       onSuccess: (updated) => {
         queryClient.setQueryData(getGetDocumentQueryKey(id!, documentParams), updated);
@@ -1401,14 +1656,25 @@ export default function DocumentDetail() {
   };
 
   const openPreview = () => {
-    const revisionId = previewRevisionId ?? selectedEdition?.revisionId ?? doc.currentRevisionId ?? undefined;
-    if (!revisionId) {
+    if (previewOperationRef.current || previewingRevisionId !== null) return;
+    const target = capturePreviewTarget();
+    if (!target) {
       toast({ title: "Preview unavailable", description: "Save a valid edition revision first.", variant: "destructive" });
       return;
     }
-    setPreviewingRevisionId(revisionId);
-    setPreviewRevisionId(revisionId);
-    setPreviewToOpenRevisionId(revisionId);
+    const operation = beginPreviewOperation(target, reservePreviewWindow());
+    if (!operation) return;
+    setPreviewRevisionId(target.revisionId);
+    issuePreviewForOperation(operation, target);
+  };
+
+  const retrySavedPreview = () => {
+    const failure = previewFailure;
+    if (!failure || saveBlocked || updateDoc.isPending || previewOperationRef.current || previewingRevisionId !== null) return;
+    const target = { ...failure.target };
+    const operation = beginPreviewOperation(target, reservePreviewWindow(), failure.wasSaved);
+    if (!operation) return;
+    issuePreviewForOperation(operation, target);
   };
 
   // Data for comparison
@@ -1521,6 +1787,61 @@ export default function DocumentDetail() {
                </Button>
           ) : null}
         </div>
+         {previewFallback && (
+           <div
+             role="status"
+             aria-live="polite"
+             data-testid="preview-fallback"
+             className="basis-full rounded border border-amber-400/50 bg-amber-50 px-3 py-2 text-xs text-amber-900 sm:basis-auto"
+           >
+             <span>
+               Preview ready for revision {previewFallback.revisionNumber} · {previewFallback.target.market.toUpperCase()} · {previewFallback.target.locale}.
+             </span>{" "}
+             <a
+               href={previewFallback.previewUrl}
+               target="_blank"
+               rel="noopener noreferrer"
+               referrerPolicy="no-referrer"
+               data-testid="preview-fallback-link"
+               className="font-medium underline"
+             >
+               Open saved revision preview
+             </a>
+           </div>
+         )}
+         {previewFailure && (
+           <div
+             role="alert"
+             aria-live="assertive"
+             data-testid="preview-failure"
+             className="basis-full rounded border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive sm:basis-auto"
+           >
+             <p className="font-semibold">
+               {previewFailure.wasSaved
+                 ? "Saved successfully, but preview could not be issued."
+                 : "Saved revision preview unavailable."}
+             </p>
+             <p className="mt-1">
+               Target: {previewFailure.target.market.toUpperCase()} · {previewFailure.target.locale} · revision {previewFailure.target.revisionId}
+             </p>
+             <p className="mt-1">{previewFailure.detail}</p>
+             {previewFailure.sharedDestinationAuthority && (
+               <p className="mt-1">
+                 This unbound shared source requires access to every enabled destination; individual market access cannot widen that authority.
+               </p>
+             )}
+             <Button
+               type="button"
+               size="sm"
+               variant="outline"
+               className="mt-2 border-destructive/40 text-destructive hover:text-destructive"
+               disabled={previewOperationRef.current !== null || previewingRevisionId !== null || saveBlocked || updateDoc.isPending}
+               onClick={retrySavedPreview}
+             >
+               Retry saved revision preview
+             </Button>
+           </div>
+         )}
       </header>
 
       {/* Main Content Area */}

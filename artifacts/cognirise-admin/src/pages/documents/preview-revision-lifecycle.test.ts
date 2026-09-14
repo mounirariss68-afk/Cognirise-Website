@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { applyLocalSuccessorToEditionMatrix, previewPinForEditionRevision } from "./preview-revision-lifecycle.ts";
+import {
+  applyLocalSuccessorToEditionMatrix,
+  previewPinForEditionRevision,
+  previewResponseMatchesTarget,
+} from "./preview-revision-lifecycle.ts";
 
 test("a confirmed local rollback or restore replaces the iframe pin and exact edition authority", () => {
   const matrix = {
@@ -47,4 +51,32 @@ test("initial preview follows the loaded latest revision even when an edition ma
     "revision-2",
     "an already-open intentional history pin remains exact",
   );
+});
+
+test("preview issuance must identify the exact saved market, locale, and revision", () => {
+  const target = { market: "uae", locale: "en-US", revisionId: "revision-3" };
+  const response = {
+    requestedMarket: "uae",
+    requestedLocale: "en-US",
+    market: "uae",
+    locale: "en-US",
+    revisionId: "revision-3",
+  };
+  assert.equal(previewResponseMatchesTarget(response, target), true);
+  assert.equal(
+    previewResponseMatchesTarget({ ...response, revisionId: "revision-2" }, target),
+    false,
+    "a stale capability must never open for a newly saved revision",
+  );
+  assert.equal(
+    previewResponseMatchesTarget({ ...response, requestedMarket: "ksa" }, target),
+    false,
+    "a capability requested for a different market is not interchangeable",
+  );
+  assert.equal(
+    previewResponseMatchesTarget({ ...response, locale: "ar" }, target),
+    false,
+    "a resolved locale mismatch is treated as a failed issuance",
+  );
+  assert.equal(previewResponseMatchesTarget(undefined, target), false);
 });

@@ -335,9 +335,23 @@ function DraftPreviewContent({ preview, warnings }: { preview: Preview; warnings
     return (
       <>
         <PreviewWarningPanel warnings={warnings} missingMedia={missingMedia} />
-        <CmsPreviewRequestBoundary>
-          <AboutPeople previewPerson={personRecord} />
-        </CmsPreviewRequestBoundary>
+        <section className="mx-auto max-w-[1440px] px-6 py-8 md:px-12" data-testid="saved-person-preview">
+          <h1 className="text-3xl font-semibold">{personRecord.title}</h1>
+          {personRecord.summary && <p className="mt-4 leading-7">{personRecord.summary}</p>}
+          {!["founder", "leader", "advisor"].includes(person.role) && (
+            <>
+              <p className="mt-4 text-sm text-muted-foreground">This saved draft has no leadership or advisor placement yet. Its saved fields are shown below; it has not been published.</p>
+              {person.title && <p className="mt-4 font-semibold">{person.title}</p>}
+              {person.biography && <p className="mt-4 whitespace-pre-wrap leading-7">{person.biography}</p>}
+              {person.contribution && <p className="mt-4 whitespace-pre-wrap leading-7">{person.contribution}</p>}
+            </>
+          )}
+        </section>
+        {["founder", "leader", "advisor"].includes(person.role) && (
+          <CmsPreviewRequestBoundary>
+            <AboutPeople previewPerson={personRecord} />
+          </CmsPreviewRequestBoundary>
+        )}
         <aside className="border-y border-amber-300 bg-amber-50 px-6 py-8 text-amber-950" data-testid="draft-person-editorial-fields">
           <div className="mx-auto max-w-[1440px]">
             <h2 className="text-sm font-semibold">Draft-only editorial fields</h2>

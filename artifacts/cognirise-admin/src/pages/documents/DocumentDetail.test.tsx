@@ -75,6 +75,9 @@ let resolveSharedInput: any;
 let bindSharedInput: any;
 let pendingRestore: { input: any; options: any } | undefined;
 let mutationPending = false;
+let previewResponse: any;
+let previewError: unknown;
+let previewCalls: Array<{ documentId: string; params: any }> = [];
 let onSharedAvailabilityMutation: ((input: any, options: any) => void) | undefined;
 let onPersonAvailabilityMutation: ((input: any, options: any) => void) | undefined;
 const notify = () => listeners.forEach((listener) => listener());
@@ -183,6 +186,19 @@ mock.module("@workspace/api-client-react", {
     getListDocumentsQueryKey: (params: unknown) => ["documents", params],
     getGetDocumentQueryKey: (_id: string, params: unknown) => ["document", _id, params],
     getPreviewDocumentQueryKey: () => ["preview"],
+    previewDocument: async (documentId: string, params: any) => {
+      previewCalls.push({ documentId, params });
+      if (previewError) throw previewError;
+      return previewResponse ?? {
+        previewUrl: "",
+        revisionId: "",
+        requestedMarket: "",
+        requestedLocale: "",
+        market: "",
+        locale: "",
+        revisionNumber: 0,
+      };
+    },
     getListDocumentRevisionsQueryKey: () => ["revisions"],
     getListMarketEditionsQueryKey: () => ["markets"],
     getListDocumentEditionsQueryKey: () => ["editions"],
@@ -299,6 +315,9 @@ const { createRoot } = await import("react-dom/client");
 async function renderDetail(initialDocument: any = documentBase) {
   currentDocument = initialDocument ? { ...initialDocument } : undefined;
   mutationPending = false;
+  previewResponse = undefined;
+  previewError = undefined;
+  previewCalls = [];
   pendingSave = undefined;
   pendingSubmit = undefined;
   pendingPublish = undefined;
@@ -360,6 +379,322 @@ function button(container: ParentNode, text: string) {
   assert.ok(found, `Expected button containing ${text}`);
   return found;
 }
+
+function fakePreviewWindow(initiallyClosed = false, previewDocument = new JSDOM("<!doctype html><html><head></head><body></body></html>").window.document) {
+  const state = { closed: initiallyClosed, navigatedTo: undefined as string | undefined };
+  if (typeof previewDocument.createElement === "function") {
+    const createElement = previewDocument.createElement.bind(previewDocument);
+    previewDocument.createElement = ((tagName: string) => {
+      const element = createElement(tagName);
+      if (tagName.toLowerCase() === "a") {
+        const click = element.click.bind(element);
+        Object.defineProperty(element, "click", {
+          configurable: true,
+          value: () => {
+            state.navigatedTo = element.getAttribute("href") ?? undefined;
+            click();
+          },
+        });
+      }
+      return element;
+    }) as typeof previewDocument.createElement;
+  }
+  return {
+    state,
+    value: {
+      closed: initiallyClosed,
+      opener: {},
+      location: {
+        replace(url: string) {
+          state.navigatedTo = url;
+        },
+      },
+      document: previewDocument,
+      close() {
+        state.closed = true;
+        (this as { closed: boolean }).closed = true;
+      },
+    } as unknown as Window,
+  };
+}
+
+test("changed Save and preview reserves the gesture tab and previews the returned exact revision", async () => {
+  const originalOpen = window.open;
+  const reserved = fakePreviewWindow();
+  let openArgs: unknown[] | undefined;
+  window.open = ((...args: unknown[]) => {
+    openArgs = args;
+    return reserved.value;
+  }) as typeof window.open;
+  const view = await renderDetail();
+  try {
+    previewResponse = {
+      previewUrl: "/preview/exact-revision-2",
+      revisionId: "revision-2",
+      requestedMarket: "uae",
+      requestedLocale: "en-US",
+      market: "uae",
+      locale: "en-US",
+      revisionNumber: 2,
+    };
+    await change(view.container.querySelector<HTMLInputElement>("#document-title")!, "Changed title");
+    await React.act(async () => button(view.container, "Save and preview").click());
+    assert.ok(pendingSave, "Save and preview must save before issuing a capability");
+    assert.equal(previewCalls.length, 0, "preview issuance waits for save confirmation");
+
+    const saved = {
+      ...documentBase,
+      title: "Changed title",
+      revisionNumber: 2,
+      currentRevisionId: "revision-2",
+    };
+    await React.act(async () => {
+      currentDocument = saved;
+      mutationPending = false;
+      pendingSave!.options.onSuccess(saved);
+      notify();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    assert.deepEqual(previewCalls, [{
+      documentId: "document-1",
+      params: { market: "uae", locale: "en-US", revisionId: "revision-2" },
+    }]);
+    assert.deepEqual(openArgs, ["about:blank", "_blank"], "reserve the popup without a feature that makes browsers return null");
+    assert.equal(reserved.value.opener, null, "the reserved tab is isolated before navigation");
+    const navigation = reserved.value.document.querySelector("a");
+    assert.equal(navigation?.getAttribute("href"), "/preview/exact-revision-2");
+    assert.equal(navigation?.target, "_self");
+    assert.equal(navigation?.rel, "noreferrer");
+    assert.equal(navigation?.getAttribute("referrerpolicy"), "no-referrer");
+    assert.equal(view.container.querySelector('[data-testid="preview-fallback"]'), null);
+  } finally {
+    window.open = originalOpen;
+    await view.unmount();
+    currentDocument = documentBase;
+    mutationPending = false;
+  }
+});
+
+test("unchanged preview retains a fallback link when the popup is blocked", async () => {
+  const originalOpen = window.open;
+  window.open = (() => null) as typeof window.open;
+  const view = await renderDetail();
+  try {
+    previewResponse = {
+      previewUrl: "/preview/unchanged",
+      revisionId: "revision-1",
+      requestedMarket: "uae",
+      requestedLocale: "en-US",
+      market: "uae",
+      locale: "en-US",
+      revisionNumber: 1,
+    };
+    await React.act(async () => {
+      button(view.container, "Preview").click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    assert.deepEqual(previewCalls, [{
+      documentId: "document-1",
+      params: { market: "uae", locale: "en-US", revisionId: "revision-1" },
+    }]);
+    const fallback = view.container.querySelector<HTMLAnchorElement>('[data-testid="preview-fallback-link"]');
+    assert.ok(fallback, "blocked popup users retain a clickable preview affordance");
+    assert.equal(fallback.getAttribute("href"), "/preview/unchanged");
+    assert.equal(fallback.getAttribute("rel"), "noopener noreferrer");
+    assert.equal(fallback.getAttribute("referrerpolicy"), "no-referrer");
+    assert.equal(pendingSave, undefined, "unchanged preview must not save again");
+  } finally {
+    window.open = originalOpen;
+    await view.unmount();
+    currentDocument = documentBase;
+  }
+});
+
+test("Save and preview closes its reserved tab when the draft save fails", async () => {
+  const originalOpen = window.open;
+  const reserved = fakePreviewWindow();
+  window.open = (() => reserved.value) as typeof window.open;
+  const view = await renderDetail();
+  try {
+    await change(view.container.querySelector<HTMLInputElement>("#document-title")!, "Save failure");
+    await React.act(async () => button(view.container, "Save and preview").click());
+    assert.ok(pendingSave);
+    await React.act(async () => {
+      mutationPending = false;
+      pendingSave!.options.onError({ status: 500, data: { error: "Save service unavailable" } });
+      notify();
+      await Promise.resolve();
+    });
+    assert.equal(previewCalls.length, 0, "preview issuance must not run after a failed save");
+    assert.equal(reserved.state.closed, true, "the reserved placeholder is cleaned up on save failure");
+    assert.equal(view.container.querySelector('[data-testid="preview-fallback-link"]'), null);
+  } finally {
+    window.open = originalOpen;
+    await view.unmount();
+    currentDocument = documentBase;
+    mutationPending = false;
+  }
+});
+
+test("an unverified referrer policy closes the placeholder and keeps a fallback link", async () => {
+  const originalOpen = window.open;
+  const unsafeDocument = { head: null, documentElement: null } as unknown as Document;
+  const reserved = fakePreviewWindow(false, unsafeDocument);
+  window.open = (() => reserved.value) as typeof window.open;
+  const view = await renderDetail();
+  try {
+    previewResponse = {
+      previewUrl: "/preview/policy-fallback",
+      revisionId: "revision-1",
+      requestedMarket: "uae",
+      requestedLocale: "en-US",
+      market: "uae",
+      locale: "en-US",
+      revisionNumber: 1,
+    };
+    await React.act(async () => {
+      button(view.container, "Preview").click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    assert.equal(reserved.state.closed, true, "an unsafe placeholder is closed before capability navigation");
+    assert.ok(view.container.querySelector('[data-testid="preview-fallback-link"]'));
+  } finally {
+    window.open = originalOpen;
+    await view.unmount();
+    currentDocument = documentBase;
+  }
+});
+
+test("a saved preview failure persists the exact target and retries without another save", async () => {
+  const originalOpen = window.open;
+  window.open = (() => null) as typeof window.open;
+  const view = await renderDetail();
+  try {
+    previewError = { status: 503, data: { error: "Preview issuer is unavailable" } };
+    await change(view.container.querySelector<HTMLInputElement>("#document-title")!, "Saved before preview failure");
+    await React.act(async () => button(view.container, "Save and preview").click());
+    const saved = {
+      ...documentBase,
+      title: "Saved before preview failure",
+      revisionNumber: 2,
+      currentRevisionId: "revision-2",
+    };
+    await React.act(async () => {
+      currentDocument = saved;
+      mutationPending = false;
+      pendingSave!.options.onSuccess(saved);
+      notify();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    const failure = view.container.querySelector('[data-testid="preview-failure"]')!;
+    assert.match(failure.textContent ?? "", /Saved successfully, but preview could not be issued/i);
+    assert.match(failure.textContent ?? "", /revision-2/);
+    assert.match(failure.textContent ?? "", /Preview issuer is unavailable/);
+
+    previewError = undefined;
+    previewResponse = {
+      previewUrl: "/preview/retried-saved-revision",
+      revisionId: "revision-2",
+      requestedMarket: "uae",
+      requestedLocale: "en-US",
+      market: "uae",
+      locale: "en-US",
+      revisionNumber: 2,
+    };
+    pendingSave = undefined;
+    await React.act(async () => {
+      button(view.container, "Retry saved revision preview").click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    assert.deepEqual(previewCalls.at(-1), {
+      documentId: "document-1",
+      params: { market: "uae", locale: "en-US", revisionId: "revision-2" },
+    });
+    assert.equal(pendingSave, undefined, "retrying a saved revision must not PATCH the edited draft");
+    assert.equal(view.container.querySelector('[data-testid="preview-failure"]'), null);
+  } finally {
+    window.open = originalOpen;
+    await view.unmount();
+    currentDocument = documentBase;
+    mutationPending = false;
+    previewError = undefined;
+  }
+});
+
+test("closed preview tabs and issuance failures release the lock without leaving a stale fallback", async () => {
+  const originalOpen = window.open;
+  const closed = fakePreviewWindow(true);
+  window.open = (() => closed.value) as typeof window.open;
+  const view = await renderDetail();
+  try {
+    previewResponse = {
+      previewUrl: "/preview/closed",
+      revisionId: "revision-1",
+      requestedMarket: "uae",
+      requestedLocale: "en-US",
+      market: "uae",
+      locale: "en-US",
+      revisionNumber: 1,
+    };
+    await React.act(async () => {
+      button(view.container, "Preview").click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    assert.ok(view.container.querySelector('[data-testid="preview-fallback-link"]'));
+    assert.equal(button(view.container, "Preview").disabled, false, "a closed tab must not leave Preview locked");
+
+    previewError = new Error("Preview service unavailable");
+    await React.act(async () => {
+      button(view.container, "Preview").click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    assert.equal(view.container.querySelector('[data-testid="preview-fallback-link"]'), null);
+    assert.equal(button(view.container, "Preview").disabled, false, "issuance errors must release the synchronous guard");
+  } finally {
+    window.open = originalOpen;
+    await view.unmount();
+    currentDocument = documentBase;
+    previewError = undefined;
+  }
+});
+
+test("a mismatched preview response is rejected instead of opening a stale target", async () => {
+  const originalOpen = window.open;
+  const reserved = fakePreviewWindow();
+  window.open = (() => reserved.value) as typeof window.open;
+  const view = await renderDetail();
+  try {
+    previewResponse = {
+      previewUrl: "/preview/wrong-revision",
+      revisionId: "revision-0",
+      requestedMarket: "uae",
+      requestedLocale: "en-US",
+      market: "uae",
+      locale: "en-US",
+      revisionNumber: 0,
+    };
+    await React.act(async () => {
+      button(view.container, "Preview").click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    assert.equal(reserved.state.navigatedTo, undefined);
+    assert.equal(reserved.state.closed, true, "a mismatched capability closes the placeholder");
+    assert.equal(view.container.querySelector('[data-testid="preview-fallback-link"]'), null);
+    assert.equal(button(view.container, "Preview").disabled, false, "a mismatched capability must release the preview lock");
+  } finally {
+    window.open = originalOpen;
+    await view.unmount();
+    currentDocument = documentBase;
+  }
+});
 
 test("rendered detail locks a deferred save, protects dirty refetch, advances revision, and preserves conflict input", async () => {
   const view = await renderDetail();
