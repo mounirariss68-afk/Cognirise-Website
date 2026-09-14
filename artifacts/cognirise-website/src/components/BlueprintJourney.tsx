@@ -103,12 +103,21 @@ export function BlueprintJourney() {
           }
           .blueprint-trigger:focus-visible { outline: 3px solid hsl(var(--brand-coral)); outline-offset: -4px; }
 
-          .blueprint-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
-          .blueprint-num { font: 700 12px/1 Inter, sans-serif; letter-spacing: 0.12em; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
-          .blueprint-time { font: 600 11px/1 Inter, sans-serif; letter-spacing: 0.05em; color: rgba(255,255,255,0.75); text-transform: uppercase; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+          .blueprint-meta { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px; min-width: 0; margin-bottom: 2px; }
+          .blueprint-num { flex: 0 0 auto; font: 700 12px/1 Inter, sans-serif; letter-spacing: 0.12em; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+          .blueprint-time {
+            display: inline-flex; flex: 0 1 auto; align-items: center; justify-content: center;
+            min-width: 0; max-width: 100%; min-height: 34px; padding: 8px 12px;
+            border: 2px solid rgba(255,255,255,0.9); border-radius: 999px;
+            background: #fdfcfb; color: #102957;
+            font: 700 clamp(20px,1.8vw,26px)/1.2 Inter, sans-serif; letter-spacing: 0.04em;
+            text-align: center; text-transform: uppercase; white-space: normal; text-wrap: balance;
+            overflow-wrap: anywhere; word-break: normal; text-shadow: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.28);
+          }
 
-          .blueprint-title { font: 600 clamp(24px, 2.5vw, 32px)/1.02 Comfortaa, sans-serif; letter-spacing: -0.05em; margin: 0; text-shadow: 0 2px 12px rgba(0,0,0,0.6); transition: color 0.3s; }
-          .blueprint-subtitle { font-size: 14px; color: rgba(255,255,255,0.85); margin: 0; text-shadow: 0 1px 8px rgba(0,0,0,0.6); font-weight: 500; transition: color 0.3s; }
+          .blueprint-title { min-width: 0; font: 600 clamp(24px, 2.5vw, 32px)/1.02 Comfortaa, sans-serif; letter-spacing: -0.05em; margin: 0; overflow-wrap: anywhere; text-shadow: 0 2px 12px rgba(0,0,0,0.6); transition: color 0.3s; }
+          .blueprint-subtitle { min-width: 0; font-size: 14px; color: rgba(255,255,255,0.85); margin: 0; overflow-wrap: anywhere; text-shadow: 0 1px 8px rgba(0,0,0,0.6); font-weight: 500; transition: color 0.3s; }
 
           .blueprint-item.active .blueprint-title { color: white; text-shadow: 0 2px 16px rgba(0,0,0,0.9); }
           .blueprint-item.active .blueprint-subtitle { color: rgba(255,255,255,0.95); }
@@ -135,7 +144,7 @@ export function BlueprintJourney() {
             .blueprint-tagline { font-size: 21px; }
             .blueprint-description { font-size: 14.5px; }
             .blueprint-outcome { font-size: 13.5px; }
-            .blueprint-trigger { padding: 30px 28px 24px; }
+             .blueprint-trigger { padding: 30px 28px 24px; }
             .blueprint-trigger > * { width: 100%; }
             .blueprint-panel-content { width: calc(var(--blueprint-active-width) - 56px); padding: 0 28px 28px; }
           }

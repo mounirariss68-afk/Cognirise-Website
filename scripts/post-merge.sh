@@ -33,8 +33,10 @@ pnpm --filter @workspace/scripts cms:reconcile-document-availability -- --target
 pnpm --filter @workspace/scripts cms:setup-public-sector-postmerge
 pnpm --filter @workspace/scripts cms:reconcile-value-to-scale-hero -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-offices -- --apply-db --target=development
-# Task 330 stages only the generated homepage draft. It never changes the
-# published pointer or touches custom regional editions.
+# Task 338 performs a read-only homepage preflight, then stages only the
+# targeted generated homepage draft. It never changes the published pointer or
+# touches custom regional editions; normal editorial publication remains
+# required.
 pnpm --filter @workspace/scripts cms:reconcile-homepage -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-methodologies-hero -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-methodologies-hero -- --verify-db --target=development

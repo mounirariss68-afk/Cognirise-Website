@@ -88,13 +88,6 @@ export default function Home() {
     }
   };
 
-  const outcomes = [
-    ["01", landingText(governedLanding, "home-clarity-outcome-architecture", "Architecture")],
-    ["02", landingText(governedLanding, "home-clarity-outcome-engineering", "Engineering")],
-    ["03", landingText(governedLanding, "home-clarity-outcome-assurance", "Assurance")],
-    ["04", landingText(governedLanding, "home-clarity-outcome-risk", "Risk")]
-  ];
-
   return (
     <div className="bg-[#fdfcfb] text-[#102957] font-sans overflow-x-hidden selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       
@@ -111,12 +104,12 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-[0.94fr_1.06fr] gap-10 lg:gap-[4vw] items-end min-h-[auto] lg:min-h-[680px] pb-10 lg:pb-[34px] mt-8 lg:mt-0">
           <motion.div className="max-w-[600px] lg:max-w-none">
             <motion.h1
-              className="font-display font-semibold text-[clamp(50px,6.3vw,100px)] leading-[0.94] tracking-[-0.08em] mt-8 mb-7"
+              className="font-display font-semibold text-[clamp(40px,4.8vw,76px)] leading-[0.94] tracking-[-0.08em] mt-8 mb-7 [overflow-wrap:anywhere]"
               initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              {heroNarrative?.heading ?? <>Intelligence becomes <em className="not-italic text-[hsl(var(--brand-pink))]">momentum.</em></>}
+              {heroNarrative?.heading ?? <>Professional services built for the age of <em className="not-italic text-[hsl(var(--brand-pink))]">agents.</em></>}
             </motion.h1>
             
             <motion.p
@@ -217,32 +210,11 @@ export default function Home() {
         ))}
       </section>
 
-      {/* STATEMENT */}
-      <section className="px-6 md:px-[4.8vw] py-[86px] lg:py-[150px] grid grid-cols-1 lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-[7vw]">
-        <motion.div {...mConfig}>
-          <Kicker>{landingText(governedLanding, "home-firm-label", "The firm")}</Kicker>
-          <SectionHeading>
-             {landingText(governedLanding, "home-firm-heading", "We don't sell experimentation. We sell operational reality.")}
-          </SectionHeading>
-        </motion.div>
-        
-        <motion.div 
-          className="self-end border-t border-[#cbd3e1] pt-6 text-[18px] lg:text-[21px] leading-[1.44] text-[#30486d] max-w-[520px]"
-          initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.2 }}
-        >
-          <p className="mb-0">{landingText(governedLanding, "home-firm-body", "Most AI programmes fail because they treat intelligence as software to be deployed rather than a capability to be governed. We bridge the gap between algorithmic potential and enterprise authority.")}</p>
-          <small className="block text-[12px] leading-[1.55] mt-6 text-[#647491]">{landingText(governedLanding, "home-firm-supporting", "We work with leaders who hold accountability for results, providing the advisory clarity to move and the engineering certainty to hold ground.")}</small>
-        </motion.div>
-      </section>
-
       {/* MODEL */}
       <section id="service-lines" className="px-6 md:px-[4.8vw] py-[82px] lg:py-[125px]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-end">
           <motion.div {...mConfig}>
-            <Kicker>{landingText(governedLanding, "home-service-label", "How we work")}</Kicker>
+            <Kicker>{landingText(governedLanding, "home-service-label", "What we do")}</Kicker>
             <h2 className="font-display font-semibold text-[clamp(43px,5vw,72px)] leading-[0.97] tracking-[-0.08em] mt-5 max-w-[700px]">
                {landingText(governedLanding, "home-service-heading", "We combine strategy, engineering and platform.")}
             </h2>
@@ -268,47 +240,6 @@ export default function Home() {
 
       {/* BLUEPRINT */}
       <BlueprintJourney />
-
-      {/* CLARITY */}
-      <section className="mx-6 md:mx-[4.8vw] mb-[82px] lg:mb-[122px] border-t border-[#102957] pt-7 grid grid-cols-1 lg:grid-cols-[1.08fr_0.92fr] gap-10 lg:gap-[7vw]">
-        <motion.div {...mConfig}>
-          <Kicker>{landingText(governedLanding, "home-clarity-label", "Operating conviction")}</Kicker>
-          <h2 className="font-display font-semibold text-[40px] lg:text-[clamp(37px,4.4vw,65px)] leading-[0.98] tracking-[-0.075em] mt-4 mb-6 max-w-[720px]">
-             {landingText(governedLanding, "home-clarity-heading", "We leave organisations more capable than we found them.")}
-          </h2>
-          <div className="text-[15px] lg:text-[16px] leading-[1.65] text-[#405777] max-w-[590px]">
-            {landingText(governedLanding, "home-clarity-body", "We don't create dependencies. Every engagement is designed to transfer capability to your team. Whether we're advising the board or committing code alongside your engineers, our goal is to build an environment you can operate and scale yourselves.")}
-          </div>
-        </motion.div>
-        
-        <motion.div 
-          className="self-end border-t border-[#cbd3e1] pt-6 mt-2 lg:mt-0"
-          initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: prefersReducedMotion ? 0 : 0.3 }}
-        >
-          <div className="text-[14px] leading-[1.55] text-[#536887] mb-6">{landingText(governedLanding, "home-clarity-outcomes-label", "We embed our practices into your firm:")}</div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 border-b border-[#cbd3e1]">
-            {outcomes.map(([num, text], i) => (
-              <motion.div 
-                key={text}
-                className={`p-[16px_8px] font-display font-semibold text-[15px] border-[#cbd3e1]
-                  ${i % 2 === 0 ? 'border-r' : ''} 
-                  ${i < 2 ? 'border-b lg:border-b-0' : ''} 
-                  lg:border-r lg:last:border-r-0`}
-                initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.4, delay: prefersReducedMotion ? 0 : 0.4 + (i * 0.1) }}
-              >
-                <span className="block font-sans text-[10px] text-[hsl(var(--brand-pink))] tracking-[0.1em] mb-2">{num}</span>
-                {text}
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
 
       {/* IMAGE LEDGER */}
       <section className="px-6 md:px-[4.8vw] pb-[82px] lg:pb-[122px]" aria-label="Cognirise outcomes in motion">

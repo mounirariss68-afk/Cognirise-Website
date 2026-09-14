@@ -46,6 +46,17 @@ media asset without associating it to a CMS page or changing any published pin.
 Rights and accessibility remain in the normal `needs-review` gates until an
 authorized publisher reviews the asset.
 
+Post-merge setup also runs the Task 338 homepage reconciliation after the
+homepage-only parity inventory is merged. It performs a read-only inspection
+of the current UAE/English published pointer and latest revision before the
+write transaction, overlays only the approved headline/service-label delta,
+retires legacy `home-firm-*` and `home-clarity-*` slots, and preserves
+unrelated copy, media pins, and revision history. A prior Task 330 receipt is
+validated and preserved rather than reused or rewritten. The command stages a
+draft only; editorial review and the normal authorized publication operation
+remain required, and the post-merge read-only check proves the published
+pointer did not move.
+
 Generated payload writing is restricted to `scripts/cms/output/`. Database mutation is restricted to the explicit `cms:import -- --apply-db` path and requires `DATABASE_URL`. Review every `needs-review` item before approval or publication. Never treat this inventory as approval for claims, image rights, sources, or market visibility.
 
 See [governance](governance.md), [content cutover](content-cutover.md), [operations](operations.md), [security](security.md), [backup and restore](backup-restore.md), and [retention and privacy](retention-privacy.md).

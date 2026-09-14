@@ -4,6 +4,29 @@ import { readFileSync } from "node:fs";
 
 const source = readFileSync(new URL("./Home.tsx", import.meta.url), "utf8");
 
+test("uses the exact agent-era professional services hero positioning", () => {
+  assert.match(source, /heroNarrative\?\.heading \?\? <>Professional services built for the age of <em[^>]*>agents\.<\/em><\/>/);
+});
+
+test("keeps the What we do anchor and service content in the original homepage order", () => {
+  const serviceIndex = source.indexOf('<section id="service-lines"');
+  const blueprintIndex = source.indexOf("<BlueprintJourney />");
+  const imageLedgerIndex = source.indexOf('aria-label="Cognirise outcomes in motion"');
+
+  assert.ok(serviceIndex >= 0);
+  assert.ok(blueprintIndex > serviceIndex);
+  assert.ok(imageLedgerIndex > blueprintIndex);
+  assert.match(source, /<Kicker>\{landingText\(governedLanding, "home-service-label", "What we do"\)\}<\/Kicker>/);
+  assert.match(source, /home-service-heading", "We combine strategy, engineering and platform\."/);
+  assert.match(source, /home-service-body", "We don't hand over a presentation and wish you luck\./);
+});
+
+test("removes retired homepage sections and their outcomes data", () => {
+  assert.doesNotMatch(source, /home-firm-|home-clarity-|The firm|Operating conviction/);
+  assert.doesNotMatch(source, /const outcomes/);
+  assert.match(source, /!section\.id\.startsWith\("home-"\)/);
+});
+
 test("uses the shared Pulse action family for prominent homepage CTAs", () => {
   assert.match(source, /<BrandButton href="\/#service-lines">Explore our practice<\/BrandButton>/);
   assert.match(source, /"home-convergence-cta", \{ label: "Meet the team", href: "\/about" \}/);

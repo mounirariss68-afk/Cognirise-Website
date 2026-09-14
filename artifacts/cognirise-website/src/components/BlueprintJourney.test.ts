@@ -35,6 +35,15 @@ test("BlueprintJourney makes the full image card a hover and click target", () =
   assert.match(source, /\.blueprint-panel\s*\{[\s\S]*pointer-events: none;/);
 });
 
+test("BlueprintJourney uses readable duration badges that wrap inside every card width", () => {
+  assert.match(source, /\.blueprint-meta \{[\s\S]*flex-wrap: wrap;[\s\S]*min-width: 0;/);
+  assert.match(source, /\.blueprint-time \{[\s\S]*min-height: 34px;[\s\S]*padding: 8px 12px;/);
+  assert.match(source, /\.blueprint-time \{[\s\S]*border: 2px solid rgba\(255,255,255,0\.9\);[\s\S]*background: #fdfcfb; color: #102957;/);
+  assert.match(source, /\.blueprint-time \{[\s\S]*font: 700 clamp\(20px,1\.8vw,26px\)\/1\.2 Inter, sans-serif;/);
+  assert.match(source, /\.blueprint-time \{[\s\S]*max-width: 100%;[\s\S]*white-space: normal;[\s\S]*overflow-wrap: anywhere;/);
+  assert.match(source, /\.blueprint-title \{[\s\S]*min-width: 0;[\s\S]*overflow-wrap: anywhere;/);
+});
+
 test("BlueprintJourney keeps image crop and text measure stable while cards expand", () => {
   assert.match(source, /\.blueprint-visual img\s*\{[\s\S]*width: clamp\(560px, 46vw, 720px\)/);
   assert.match(source, /transform: translateX\(-50%\)/);

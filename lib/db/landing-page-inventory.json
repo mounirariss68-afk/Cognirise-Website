@@ -16,12 +16,12 @@
         "schemaVersion": 1,
         "pagePath": "/",
         "template": "landing",
-        "narrative": "Intelligence becomes momentum.",
+        "narrative": "Professional services built for the age of agents.",
         "sections": [
           {
             "type": "narrative",
             "id": "hero",
-            "heading": "Intelligence becomes momentum.",
+            "heading": "Professional services built for the age of agents.",
             "body": [
               {
                 "type": "paragraph",
@@ -32,94 +32,6 @@
           },
           {
             "type": "narrative",
-            "id": "home-clarity-body",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "We don't create dependencies. Every engagement is designed to transfer capability to your team. Whether we're advising the board or committing code alongside your engineers, our goal is to build an environment you can operate and scale yourselves."
-              }
-            ],
-            "order": 1
-          },
-          {
-            "type": "narrative",
-            "id": "home-clarity-heading",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "We leave organisations more capable than we found them."
-              }
-            ],
-            "order": 2
-          },
-          {
-            "type": "narrative",
-            "id": "home-clarity-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Operating conviction"
-              }
-            ],
-            "order": 3
-          },
-          {
-            "type": "narrative",
-            "id": "home-clarity-outcome-architecture",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Architecture"
-              }
-            ],
-            "order": 4
-          },
-          {
-            "type": "narrative",
-            "id": "home-clarity-outcome-assurance",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Assurance"
-              }
-            ],
-            "order": 5
-          },
-          {
-            "type": "narrative",
-            "id": "home-clarity-outcome-engineering",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Engineering"
-              }
-            ],
-            "order": 6
-          },
-          {
-            "type": "narrative",
-            "id": "home-clarity-outcome-risk",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Risk"
-              }
-            ],
-            "order": 7
-          },
-          {
-            "type": "narrative",
-            "id": "home-clarity-outcomes-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "We embed our practices into your firm:"
-              }
-            ],
-            "order": 8
-          },
-          {
-            "type": "narrative",
             "id": "home-convergence-body",
             "body": [
               {
@@ -127,7 +39,7 @@
                 "text": "You don't need a strategy firm that can't code, or an engineering shop that doesn't understand governance. You need a team that takes the work all the way through."
               }
             ],
-            "order": 9
+            "order": 1
           },
           {
             "type": "cta",
@@ -135,7 +47,7 @@
             "label": "Meet the team",
             "href": "/about",
             "style": "primary",
-            "order": 10
+            "order": 2
           },
           {
             "type": "narrative",
@@ -146,7 +58,7 @@
                 "text": "We deploy teams who bridge the entire operating gap."
               }
             ],
-            "order": 11
+            "order": 3
           },
           {
             "type": "narrative",
@@ -157,7 +69,7 @@
                 "text": "people + agents"
               }
             ],
-            "order": 12
+            "order": 4
           },
           {
             "type": "narrative",
@@ -168,7 +80,7 @@
                 "text": "Our capability"
               }
             ],
-            "order": 13
+            "order": 5
           },
           {
             "type": "narrative",
@@ -179,7 +91,7 @@
                 "text": "Strategy & operating model advisory"
               }
             ],
-            "order": 14
+            "order": 6
           },
           {
             "type": "narrative",
@@ -190,7 +102,7 @@
                 "text": "Forward-deployed enterprise engineering"
               }
             ],
-            "order": 15
+            "order": 7
           },
           {
             "type": "narrative",
@@ -201,7 +113,7 @@
                 "text": "Proprietary CogniOS operating system"
               }
             ],
-            "order": 16
+            "order": 8
           },
           {
             "type": "migration-media",
@@ -210,51 +122,7 @@
             "altText": "Depiction of convergence",
             "ownership": "compiled-landing",
             "resolution": "unresolved",
-            "order": 17
-          },
-          {
-            "type": "narrative",
-            "id": "home-firm-body",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Most AI programmes fail because they treat intelligence as software to be deployed rather than a capability to be governed. We bridge the gap between algorithmic potential and enterprise authority."
-              }
-            ],
-            "order": 18
-          },
-          {
-            "type": "narrative",
-            "id": "home-firm-heading",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "We don't sell experimentation. We sell operational reality."
-              }
-            ],
-            "order": 19
-          },
-          {
-            "type": "narrative",
-            "id": "home-firm-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "The firm"
-              }
-            ],
-            "order": 20
-          },
-          {
-            "type": "narrative",
-            "id": "home-firm-supporting",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "We work with leaders who hold accountability for results, providing the advisory clarity to move and the engineering certainty to hold ground."
-              }
-            ],
-            "order": 21
+            "order": 9
           },
           {
             "type": "cta",
@@ -262,7 +130,7 @@
             "label": "Agent Authority Model",
             "href": "/methodologies/agent-authority-model",
             "style": "primary",
-            "order": 22
+            "order": 10
           },
           {
             "type": "cta",
@@ -270,7 +138,7 @@
             "label": "Explore IDAO",
             "href": "/methodologies/idao",
             "style": "primary",
-            "order": 23
+            "order": 11
           },
           {
             "type": "cta",
@@ -278,7 +146,7 @@
             "label": "View methodology portfolio",
             "href": "/methodologies",
             "style": "primary",
-            "order": 24
+            "order": 12
           },
           {
             "type": "migration-media",
@@ -287,7 +155,7 @@
             "altText": "Visual representation of operational boundaries.",
             "ownership": "compiled-landing",
             "resolution": "unresolved",
-            "order": 25
+            "order": 13
           },
           {
             "type": "narrative",
@@ -298,7 +166,7 @@
                 "text": "We build the path, the controls and the capacity to keep the work moving after the first release."
               }
             ],
-            "order": 26
+            "order": 14
           },
           {
             "type": "narrative",
@@ -309,7 +177,7 @@
                 "text": "Boundaries you control."
               }
             ],
-            "order": 27
+            "order": 15
           },
           {
             "type": "cta",
@@ -317,7 +185,7 @@
             "label": "Agent Authority Model",
             "href": "/methodologies/agent-authority-model",
             "style": "primary",
-            "order": 28
+            "order": 16
           },
           {
             "type": "narrative",
@@ -328,7 +196,7 @@
                 "text": "First condition"
               }
             ],
-            "order": 29
+            "order": 17
           },
           {
             "type": "narrative",
@@ -339,7 +207,7 @@
                 "text": "Three conditions for change that holds."
               }
             ],
-            "order": 30
+            "order": 18
           },
           {
             "type": "narrative",
@@ -350,7 +218,7 @@
                 "text": "The system in motion"
               }
             ],
-            "order": 31
+            "order": 19
           },
           {
             "type": "narrative",
@@ -361,7 +229,7 @@
                 "text": "Work that flows."
               }
             ],
-            "order": 32
+            "order": 20
           },
           {
             "type": "cta",
@@ -369,7 +237,7 @@
             "label": "Human–Agent Operating Model",
             "href": "/methodologies/human-agent-operating-model",
             "style": "primary",
-            "order": 33
+            "order": 21
           },
           {
             "type": "narrative",
@@ -380,7 +248,7 @@
                 "text": "Second condition"
               }
             ],
-            "order": 34
+            "order": 22
           },
           {
             "type": "narrative",
@@ -391,7 +259,7 @@
                 "text": "A platform that remembers."
               }
             ],
-            "order": 35
+            "order": 23
           },
           {
             "type": "cta",
@@ -399,7 +267,7 @@
             "label": "CogniOS architecture",
             "href": "/platforms/cognios#architecture",
             "style": "primary",
-            "order": 36
+            "order": 24
           },
           {
             "type": "narrative",
@@ -410,7 +278,7 @@
                 "text": "Third condition"
               }
             ],
-            "order": 37
+            "order": 25
           },
           {
             "type": "migration-media",
@@ -419,7 +287,7 @@
             "altText": "Visual representation of people and agents in a shared architecture.",
             "ownership": "compiled-landing",
             "resolution": "unresolved",
-            "order": 38
+            "order": 26
           },
           {
             "type": "migration-media",
@@ -428,7 +296,7 @@
             "altText": "Visual representation of a durable system.",
             "ownership": "compiled-landing",
             "resolution": "unresolved",
-            "order": 39
+            "order": 27
           },
           {
             "type": "narrative",
@@ -439,7 +307,7 @@
                 "text": "Complex enterprise & government"
               }
             ],
-            "order": 40
+            "order": 28
           },
           {
             "type": "narrative",
@@ -450,7 +318,7 @@
                 "text": "Focus"
               }
             ],
-            "order": 41
+            "order": 29
           },
           {
             "type": "narrative",
@@ -461,7 +329,7 @@
                 "text": "Advisory + Engineering"
               }
             ],
-            "order": 42
+            "order": 30
           },
           {
             "type": "narrative",
@@ -472,7 +340,7 @@
                 "text": "Model"
               }
             ],
-            "order": 43
+            "order": 31
           },
           {
             "type": "narrative",
@@ -483,7 +351,7 @@
                 "text": "CogniOS (Four native engines)"
               }
             ],
-            "order": 44
+            "order": 32
           },
           {
             "type": "narrative",
@@ -494,7 +362,7 @@
                 "text": "Platform"
               }
             ],
-            "order": 45
+            "order": 33
           },
           {
             "type": "narrative",
@@ -505,7 +373,7 @@
                 "text": "Middle East & Europe"
               }
             ],
-            "order": 46
+            "order": 34
           },
           {
             "type": "narrative",
@@ -516,7 +384,7 @@
                 "text": "Presence"
               }
             ],
-            "order": 47
+            "order": 35
           },
           {
             "type": "narrative",
@@ -527,7 +395,7 @@
                 "text": "We don't hand over a presentation and wish you luck. We deploy senior teams who take accountability for the architecture, the code and the outcome."
               }
             ],
-            "order": 48
+            "order": 36
           },
           {
             "type": "narrative",
@@ -538,7 +406,7 @@
                 "text": "We combine strategy, engineering and platform."
               }
             ],
-            "order": 49
+            "order": 37
           },
           {
             "type": "narrative",
@@ -546,10 +414,10 @@
             "body": [
               {
                 "type": "paragraph",
-                "text": "How we work"
+                "text": "What we do"
               }
             ],
-            "order": 50
+            "order": 38
           },
           {
             "type": "narrative",
@@ -560,7 +428,7 @@
                 "text": "Speak with a partner about deploying governed intelligence into your core workflows."
               }
             ],
-            "order": 51
+            "order": 39
           },
           {
             "type": "cta",
@@ -568,7 +436,7 @@
             "label": "Book a consultation",
             "href": "/contact",
             "style": "primary",
-            "order": 52
+            "order": 40
           },
           {
             "type": "narrative",
@@ -579,7 +447,7 @@
                 "text": "Ready for operational reality?"
               }
             ],
-            "order": 53
+            "order": 41
           },
           {
             "type": "narrative",
@@ -590,7 +458,7 @@
                 "text": "Start"
               }
             ],
-            "order": 54
+            "order": 42
           },
           {
             "type": "cta",
@@ -598,7 +466,7 @@
             "label": "Explore our practice",
             "href": "/#service-lines",
             "style": "primary",
-            "order": 55
+            "order": 43
           }
         ],
         "cta": {

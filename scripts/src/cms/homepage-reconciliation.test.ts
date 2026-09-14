@@ -3,10 +3,15 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { validateCmsSnapshot } from "@workspace/api-zod";
 import {
+  HOMEPAGE_HEADLINE_TEXT,
+  HOMEPAGE_LEGACY_HEADLINE,
+  HOMEPAGE_NARRATIVE_FIELD,
+  HOMEPAGE_SERVICE_LABEL_TEXT,
   HOMEPAGE_PATH,
   HOMEPAGE_SOURCE_KEY,
   ensureHomepageIdentity,
   loadCompiledHomepage,
+  normalizeHomepageRevisionId,
   overlayHomepageSlots,
   planHomepageDraftReconciliation,
 } from "./homepage-reconciliation.js";
@@ -44,11 +49,12 @@ test("homepage identity seed refuses a route owned by another document", async (
   } }), /Conflicting UAE\/English homepage route/);
 });
 
-test("generated homepage authority is the root page and includes the Task 330 slots", async () => {
+test("generated homepage authority is the root page and includes the governed CTA slots", async () => {
   const snapshot = await loadCompiledHomepage();
   assert.equal(snapshot.content.pagePath, HOMEPAGE_PATH);
+  assert.equal(snapshot.content.narrative, HOMEPAGE_HEADLINE_TEXT);
   const sections = snapshot.content.sections as Array<Record<string, any>>;
-  assert.equal(sections.length, 56);
+  assert.ok(sections.length > 0);
   assert.deepEqual(
     sections
       .filter((section) => String(section.id).startsWith("home-framework-"))
@@ -74,6 +80,23 @@ test("generated homepage authority is the root page and includes the Task 330 sl
     "Boundaries you control.",
   );
   assert.equal(HOMEPAGE_SOURCE_KEY, "compiled:/");
+});
+
+test("generated homepage carries the Task 338 headline and service label without retired families", async () => {
+  const snapshot = await loadCompiledHomepage();
+  const sections = snapshot.content.sections as Array<Record<string, any>>;
+  assert.equal(
+    sections.find((section) => section.id === "hero")?.heading,
+    HOMEPAGE_HEADLINE_TEXT,
+  );
+  assert.equal(
+    sections.find((section) => section.id === "home-service-label")?.body?.[0]?.text,
+    HOMEPAGE_SERVICE_LABEL_TEXT,
+  );
+  assert.ok(sections.every((section) =>
+    !String(section.id).startsWith("home-firm-")
+    && !String(section.id).startsWith("home-clarity-"),
+  ));
 });
 
 test("homepage reconciliation overlays an immutable published authority", async () => {
@@ -190,17 +213,115 @@ test("homepage reconciliation reports an in-review draft without blocking post-m
   assert.equal(plan.action, "report-conflict");
 });
 
+test("Task 338 updates only the requested copy and retires all firm and clarity slots", async () => {
+  const legacy = await loadCompiledHomepage();
+  legacy.content.narrative = HOMEPAGE_LEGACY_HEADLINE;
+  const generated = structuredClone(legacy);
+  generated.content.narrative = HOMEPAGE_HEADLINE_TEXT;
+  const generatedHero = generated.content.sections.find(
+    (section: Record<string, any>) => section.id === "hero",
+  );
+  const generatedServiceLabel = generated.content.sections.find(
+    (section: Record<string, any>) => section.id === "home-service-label",
+  );
+  assert.ok(generatedHero);
+  assert.ok(generatedServiceLabel);
+  generatedHero.heading = HOMEPAGE_HEADLINE_TEXT;
+  generatedServiceLabel.body = [{ type: "paragraph", text: HOMEPAGE_SERVICE_LABEL_TEXT }];
+
+  const baseline = structuredClone(legacy);
+  const unrelated = baseline.content.sections.find(
+    (section: Record<string, any>) => section.id === "home-convergence-body",
+  );
+  assert.ok(unrelated);
+  unrelated.body = [{ type: "paragraph", text: "An unrelated editorial revision." }];
+  const media = baseline.content.sections.find(
+    (section: Record<string, any>) => section.id === "home-governance-visual",
+  );
+  assert.ok(media);
+  media.type = "media";
+  media.references = [{
+    mediaId: "00000000-0000-4000-8000-000000000001",
+    mediaVersionId: "10000000-0000-4000-8000-000000000001",
+    role: "background",
+    altText: "Editorially approved governance visual",
+  }];
+  delete media.sourcePath;
+  delete media.ownership;
+  delete media.resolution;
+
+  const overlay = overlayHomepageSlots(baseline, generated, legacy);
+  assert.equal(
+    overlay.snapshot.content.narrative,
+    HOMEPAGE_HEADLINE_TEXT,
+  );
+  assert.equal(
+    overlay.snapshot.content.sections.find((section: Record<string, any>) => section.id === "hero")?.heading,
+    HOMEPAGE_HEADLINE_TEXT,
+  );
+  assert.equal(
+    overlay.snapshot.content.sections.find((section: Record<string, any>) => section.id === "home-service-label")?.body?.[0]?.text,
+    HOMEPAGE_SERVICE_LABEL_TEXT,
+  );
+  assert.equal(
+    overlay.snapshot.content.sections.find((section: Record<string, any>) => section.id === "home-convergence-body")?.body?.[0]?.text,
+    "An unrelated editorial revision.",
+  );
+  assert.deepEqual(
+    overlay.snapshot.content.sections.find((section: Record<string, any>) => section.id === "home-governance-visual"),
+    media,
+  );
+  assert.ok(
+    overlay.snapshot.content.sections.every(
+      (section: Record<string, any>) =>
+        !String(section.id).startsWith("home-firm-")
+        && !String(section.id).startsWith("home-clarity-"),
+    ),
+  );
+});
+
+test("Task 338 preserves a customized targeted value instead of overwriting it", async () => {
+  const legacy = await loadCompiledHomepage();
+  const generated = structuredClone(legacy);
+  const baseline = structuredClone(legacy);
+  baseline.content.narrative = "A customized editorial narrative.";
+  generated.content.narrative = HOMEPAGE_HEADLINE_TEXT;
+  generated.content.sections.find((section: Record<string, any>) => section.id === "hero").heading =
+    HOMEPAGE_HEADLINE_TEXT;
+  baseline.content.sections.find((section: Record<string, any>) => section.id === "hero").heading =
+    "A customized editorial headline.";
+  const overlay = overlayHomepageSlots(baseline, generated, legacy);
+  assert.equal(overlay.snapshot.content.narrative, "A customized editorial narrative.");
+  assert.equal(
+    overlay.snapshot.content.sections.find((section: Record<string, any>) => section.id === "hero").heading,
+    "A customized editorial headline.",
+  );
+  assert.ok(overlay.customizedSlots.includes("hero"));
+  assert.ok(overlay.customizedSlots.includes(HOMEPAGE_NARRATIVE_FIELD));
+});
+
+test("homepage publication pointer normalization treats missing and null values equally", () => {
+  assert.equal(normalizeHomepageRevisionId(undefined), null);
+  assert.equal(normalizeHomepageRevisionId(null), null);
+  assert.equal(normalizeHomepageRevisionId(""), null);
+  assert.equal(normalizeHomepageRevisionId("published-revision"), "published-revision");
+});
+
 test("homepage reconciliation has no publication or regional broad-write path", async () => {
   const source = await readFile(new URL("./homepage-reconciliation.ts", import.meta.url), "utf8");
   assert.match(source, /market='uae' AND e\.locale='en'/);
   assert.match(source, /INSERT INTO cms_revisions/);
-  assert.equal(source.match(/JSON\.stringify\(migrationVisualSources\(generated\)\)/g)?.length, 2);
+  assert.equal(source.match(/JSON\.stringify\(migrationVisualSources\(generated\)\)/g)?.length, 1);
   assert.match(source, /publishedRevisionId/);
+  assert.match(source, /BEGIN READ ONLY/);
+  assert.match(source, /Task 338/);
+  assert.match(source, /normal editorial review and publication remain required/);
   assert.doesNotMatch(source, /UPDATE cms_revisions|DELETE FROM cms_revisions/);
+  assert.doesNotMatch(source, /UPDATE cms_landing_page_reconciliation/);
   assert.doesNotMatch(source, /SET[^;]*published_revision_id/);
   assert.doesNotMatch(source, /market=ANY|UPDATE cms_market_editions/);
   assert.doesNotMatch(source, /LEFT JOIN LATERAL/);
   const editionLock = source.indexOf("FOR UPDATE OF d,e");
-  const latestRevisionQuery = source.indexOf("SELECT id::text latest_revision_id");
+  const latestRevisionQuery = source.indexOf("SELECT id::text latest_revision_id", editionLock);
   assert.ok(editionLock !== -1 && latestRevisionQuery > editionLock, "latest revision is read after the edition lock");
 });

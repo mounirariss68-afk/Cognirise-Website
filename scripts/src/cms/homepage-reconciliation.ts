@@ -9,10 +9,21 @@ const target = args.find((argument) => argument.startsWith("--target="))?.slice(
 
 export const HOMEPAGE_PATH = "/";
 export const HOMEPAGE_SOURCE_KEY = "compiled:/";
-export const HOMEPAGE_RECEIPT = "cms-homepage-task-330-v1:draft";
+export const HOMEPAGE_RECEIPT = "cms-homepage-task-338-v2:draft";
+export const LEGACY_HOMEPAGE_RECEIPTS = [
+  "cms-homepage-task-330-v1:draft",
+  "cms-homepage-task-338-v1:draft",
+] as const;
 export const HOMEPAGE_REASON =
-  "Task 330: reconciled the generated homepage parity draft without replacing published or regional editorial authority.";
+  "Task 338 correction: staged the governed homepage copy delta without replacing published or regional editorial authority; normal editorial review and publication remain required.";
 const SERVICE_EMAIL = "cms-reconciliation@system.invalid";
+export const HOMEPAGE_HEADLINE_SLOT = "hero";
+export const HOMEPAGE_SERVICE_LABEL_SLOT = "home-service-label";
+export const HOMEPAGE_HEADLINE_TEXT = "Professional services built for the age of agents.";
+export const HOMEPAGE_SERVICE_LABEL_TEXT = "What we do";
+export const HOMEPAGE_LEGACY_HEADLINE = "Intelligence becomes momentum.";
+export const HOMEPAGE_LEGACY_SERVICE_LABEL = "How we work";
+export const HOMEPAGE_NARRATIVE_FIELD = "content.narrative";
 export const RETIRED_HOMEPAGE_TEXT_SLOTS = [
   "home-framework-applications-label",
   "home-framework-authority-body",
@@ -24,6 +35,22 @@ export const RETIRED_HOMEPAGE_TEXT_SLOTS = [
   "home-framework-promotion-title",
   "home-framework-teaser",
   "home-framework-title",
+  "home-firm-body",
+  "home-firm-heading",
+  "home-firm-label",
+  "home-firm-supporting",
+  "home-clarity-body",
+  "home-clarity-heading",
+  "home-clarity-label",
+  "home-clarity-outcome-architecture",
+  "home-clarity-outcome-assurance",
+  "home-clarity-outcome-engineering",
+  "home-clarity-outcome-risk",
+  "home-clarity-outcomes-label",
+] as const;
+export const RETIRED_HOMEPAGE_TEXT_PREFIXES = [
+  "home-firm-",
+  "home-clarity-",
 ] as const;
 export const HOMEPAGE_OVERLAY_CTA_SLOTS = [
   "home-framework-authority-cta",
@@ -83,14 +110,18 @@ export type HomepageSlotOverlay = {
 };
 
 /**
- * Apply only the Task 330 slot delta to an approved/current homepage
+ * Apply only the Task 338 slot delta to an approved/current homepage
  * baseline. The baseline remains the authority for metadata, unrelated copy,
  * and immutable media references. A generated fallback is used only for a
- * missing governed slot or the exact retired caption default.
+ * missing governed slot or an exact legacy generated value. A prior generated
+ * snapshot is optional for callers that have already persisted the compiled
+ * authority; known legacy values keep the post-merge path safe when that
+ * authority predates this receipt namespace.
  */
 export function overlayHomepageSlots(
   baseline: HomepageSnapshot,
   generated: HomepageSnapshot,
+  previousGenerated?: HomepageSnapshot,
 ): HomepageSlotOverlay {
   if (baseline.content?.pagePath !== HOMEPAGE_PATH || generated.content?.pagePath !== HOMEPAGE_PATH) {
     throw new Error("Homepage slot overlay requires two root-page snapshots.");
@@ -103,9 +134,29 @@ export function overlayHomepageSlots(
   );
   const customizedSlots: string[] = [];
   const addedSlots: string[] = [];
+  const generatedNarrative = generated.content.narrative;
+  if (generatedNarrative !== HOMEPAGE_HEADLINE_TEXT) {
+    throw new Error("Generated homepage content.narrative does not match the Task 338 copy authority.");
+  }
+  const baselineNarrative = baseline.content.narrative;
+  const previousNarrative = previousGenerated?.content?.narrative;
+  let updateNarrative = false;
+  if (baselineNarrative !== generatedNarrative) {
+    if (
+      (baselineNarrative !== undefined && baselineNarrative === previousNarrative)
+      || baselineNarrative === HOMEPAGE_LEGACY_HEADLINE
+    ) {
+      updateNarrative = true;
+    } else {
+      customizedSlots.push(HOMEPAGE_NARRATIVE_FIELD);
+    }
+  }
   const retired = new Set<string>(RETIRED_HOMEPAGE_TEXT_SLOTS);
   const sections = baseline.content.sections
-    .filter((section: Record<string, any>) => !retired.has(section.id))
+    .filter((section: Record<string, any>) =>
+      !retired.has(section.id)
+      && !RETIRED_HOMEPAGE_TEXT_PREFIXES.some((prefix) => String(section.id).startsWith(prefix)),
+    )
     .map((section: Record<string, any>) => structuredClone(section));
   const sectionById = new Map<string, Record<string, any>>(
     sections.map((section: Record<string, any>) => [section.id, section] as const),
@@ -134,6 +185,73 @@ export function overlayHomepageSlots(
     sectionById.set(added.id, added);
     addedSlots.push(added.id);
   };
+
+  const generatedPreviousById = new Map<string, Record<string, any>>(
+    previousGenerated && Array.isArray(previousGenerated.content?.sections)
+      ? previousGenerated.content.sections.map((section: Record<string, any>) => [section.id, section] as const)
+      : [],
+  );
+  const targetedTextSlots = [
+    {
+      id: HOMEPAGE_HEADLINE_SLOT,
+      field: "heading",
+      requestedText: HOMEPAGE_HEADLINE_TEXT,
+      legacyText: HOMEPAGE_LEGACY_HEADLINE,
+    },
+    {
+      id: HOMEPAGE_SERVICE_LABEL_SLOT,
+      field: "body",
+      requestedText: HOMEPAGE_SERVICE_LABEL_TEXT,
+      legacyText: HOMEPAGE_LEGACY_SERVICE_LABEL,
+    },
+  ] as const;
+  for (const slot of targetedTextSlots) {
+    const generatedSection = generatedById.get(slot.id);
+    if (!generatedSection || generatedSection.type !== "narrative") {
+      throw new Error(`Generated homepage is missing required narrative slot "${slot.id}".`);
+    }
+    const generatedText = slot.field === "heading"
+      ? generatedSection.heading
+      : sectionText(generatedSection);
+    if (typeof generatedText !== "string") {
+      throw new Error(`Generated homepage narrative slot "${slot.id}" has no targeted text.`);
+    }
+    if (generatedText !== slot.requestedText) {
+      throw new Error(
+        `Generated homepage narrative slot "${slot.id}" does not match the Task 338 copy authority.`,
+      );
+    }
+    const existing = sectionById.get(slot.id);
+    if (!existing) {
+      addGeneratedSection(generatedSection);
+      continue;
+    }
+    const existingText = slot.field === "heading" ? existing.heading : sectionText(existing);
+    if (existingText === generatedText) continue;
+    const previousSection = generatedPreviousById.get(slot.id);
+    const previousText = previousSection
+      ? slot.field === "heading" ? previousSection.heading : sectionText(previousSection)
+      : undefined;
+    // A value equal to the prior generated authority (or the known pre-Task
+    // 338 fallback) is not an editorial customization and may receive the
+    // requested copy. Any other value remains authoritative.
+    if (
+      (existingText !== undefined && existingText === previousText)
+      || existingText === slot.legacyText
+    ) {
+      if (slot.field === "heading") {
+        existing.heading = generatedText;
+      } else {
+        existing.body = existing.body.map((block: Record<string, any>) =>
+          block.type === "paragraph"
+            ? { ...block, text: generatedText }
+            : block,
+        );
+      }
+    } else {
+      customizedSlots.push(slot.id);
+    }
+  }
 
   for (const slotId of HOMEPAGE_OVERLAY_CTA_SLOTS) {
     const generatedSection = generatedById.get(slotId);
@@ -170,6 +288,7 @@ export function overlayHomepageSlots(
     ...baseline.content,
     sections,
   };
+  if (updateNarrative) result.content.narrative = generatedNarrative;
   return { snapshot: result, customizedSlots, addedSlots };
 }
 
@@ -201,12 +320,31 @@ export async function loadCompiledHomepage() {
   if ((validation.data.content as { pagePath?: unknown }).pagePath !== HOMEPAGE_PATH) {
     throw new Error("Generated homepage authority does not identify the root page path.");
   }
+  const sections = (validation.data.content as {
+    sections: Array<Record<string, any>>;
+  }).sections;
+  const headline = sections.find((section) => section.id === HOMEPAGE_HEADLINE_SLOT);
+  const serviceLabel = sections.find((section) => section.id === HOMEPAGE_SERVICE_LABEL_SLOT);
+  if (
+    (validation.data.content as { narrative?: unknown }).narrative !== HOMEPAGE_HEADLINE_TEXT
+    ||
+    headline?.type !== "narrative"
+    || headline.heading !== HOMEPAGE_HEADLINE_TEXT
+    || serviceLabel?.type !== "narrative"
+    || sectionText(serviceLabel) !== HOMEPAGE_SERVICE_LABEL_TEXT
+  ) {
+    throw new Error("Generated homepage authority does not contain the Task 338 headline and service label.");
+  }
   return snapshot;
+}
+
+export function normalizeHomepageRevisionId(value: unknown): string | null {
+  return value === undefined || value === null || value === "" ? null : String(value);
 }
 
 export function assertDevelopmentTarget(environment = process.env) {
   if (environment.NODE_ENV === "production" || environment.REPLIT_DEPLOYMENT === "1") {
-    throw new Error("Task 330 homepage reconciliation is disabled in production.");
+    throw new Error("Task 338 homepage reconciliation is disabled in production.");
   }
   if (target !== "development") {
     throw new Error("Homepage database work requires the explicit --target=development safeguard.");
@@ -232,6 +370,7 @@ export function planHomepageDraftReconciliation({
   latestWorkflowState,
   publishedRevisionId,
   receiptExists,
+  previousGeneratedPayload,
 }: {
   compiledPayload?: unknown;
   generatedPayload: unknown;
@@ -240,6 +379,7 @@ export function planHomepageDraftReconciliation({
   latestWorkflowState?: string;
   publishedRevisionId?: string | null;
   receiptExists?: boolean;
+  previousGeneratedPayload?: unknown;
 }): HomepageReconciliationPlan {
   if (receiptExists) {
     return {
@@ -268,6 +408,7 @@ export function planHomepageDraftReconciliation({
   const overlay = overlayHomepageSlots(
     latestPayload as HomepageSnapshot,
     generatedPayload as HomepageSnapshot,
+    (previousGeneratedPayload ?? compiledPayload) as HomepageSnapshot | undefined,
   );
   if (canonicalJson(overlay.snapshot) === canonicalJson(latestPayload)) {
     return {
@@ -294,6 +435,104 @@ function assertHomepageAuthority(row: Record<string, any>) {
   ) {
     throw new Error("Expected one active UAE/English compiled homepage landing authority.");
   }
+}
+
+export type HomepageDeliveryInspection = {
+  documentId: string;
+  editionId: string;
+  publishedRevisionId?: string | null;
+  latestRevisionId?: string;
+  latestRevisionNumber?: number;
+  latestPayload?: HomepageSnapshot;
+  latestWorkflowState?: string;
+};
+
+/**
+ * Read the exact UAE/English homepage delivery boundary without taking a
+ * write lock. This is used as the preflight and post-merge evidence boundary;
+ * the apply transaction re-reads it under the edition lock before staging.
+ */
+export async function inspectHomepageDelivery(client: SqlClient): Promise<HomepageDeliveryInspection | null> {
+  const authority = await client.query(
+    `SELECT d.id::text document_id,d.kind,d.canonical_slug,d.status document_status,
+            e.id::text edition_id,e.market,e.locale,e.localized_slug,
+            e.publication_state,e.published_revision_id::text
+       FROM cms_documents d
+       JOIN cms_market_editions e ON e.document_id=d.id
+        AND e.market='uae' AND e.locale='en'
+      WHERE d.canonical_slug='homepage'`,
+  );
+  if (!authority.rowCount) return null;
+  if (authority.rowCount !== 1) {
+    throw new Error("Expected exactly one UAE/English homepage landing edition during read-only inspection.");
+  }
+  const row = authority.rows[0];
+  assertHomepageAuthority(row);
+  const latest = await client.query(
+    `SELECT id::text latest_revision_id,revision_number latest_revision_number,
+            payload latest_payload,workflow_state latest_workflow_state
+       FROM cms_revisions
+      WHERE edition_id=$1
+      ORDER BY revision_number DESC,created_at DESC,id DESC
+      LIMIT 1`,
+    [row.edition_id],
+  );
+  const latestRow = latest.rows[0];
+  return {
+    documentId: String(row.document_id),
+    editionId: String(row.edition_id),
+    publishedRevisionId: normalizeHomepageRevisionId(row.published_revision_id),
+    latestRevisionId: latestRow?.latest_revision_id
+      ? String(latestRow.latest_revision_id)
+      : undefined,
+    latestRevisionNumber: latestRow?.latest_revision_number === undefined
+      ? undefined
+      : Number(latestRow.latest_revision_number),
+    latestPayload: latestRow?.latest_payload,
+    latestWorkflowState: latestRow?.latest_workflow_state,
+  };
+}
+
+async function preserveLegacyHomepageReceipt(
+  client: SqlClient,
+  receiptKey: string,
+  authority: { documentId: string; editionId: string },
+) {
+  const receipt = await client.query(
+    `SELECT operation,subject_id::text,request_digest,result_digest
+       FROM cms_operation_receipts WHERE idempotency_key=$1`,
+    [receiptKey],
+  );
+  if (!receipt.rowCount) return false;
+  if (receipt.rowCount !== 1 || receipt.rows[0].operation !== "cms.homepage.draft-reconciled") {
+    throw new Error(`Legacy homepage receipt "${receiptKey}" has an unsupported operation.`);
+  }
+  const revision = await client.query(
+    `SELECT r.id::text,r.edition_id::text,r.payload,e.document_id::text
+       FROM cms_revisions r
+       JOIN cms_market_editions e ON e.id=r.edition_id
+      WHERE r.id=$1`,
+    [receipt.rows[0].subject_id],
+  );
+  if (revision.rowCount !== 1) {
+    throw new Error(`Legacy homepage receipt "${receiptKey}" points to a missing revision.`);
+  }
+  const revisionPayloadDigest = digest(revision.rows[0].payload);
+  const expectedResultDigest = digest({
+    documentId: authority.documentId,
+    editionId: authority.editionId,
+    revisionId: receipt.rows[0].subject_id,
+    payloadDigest: revisionPayloadDigest,
+  });
+  if (
+    revision.rows[0].edition_id !== authority.editionId
+    || revision.rows[0].document_id !== authority.documentId
+    || receipt.rows[0].request_digest !== revisionPayloadDigest
+    || receipt.rows[0].result_digest !== expectedResultDigest
+  ) {
+    throw new Error(`Legacy homepage receipt "${receiptKey}" no longer proves its immutable draft.`);
+  }
+  return true;
 }
 
 async function ensureServiceAccount(client: SqlClient, allowCreate: boolean) {
@@ -408,6 +647,10 @@ async function reconcileHomepage(
     throw new Error("Homepage compiled authority has duplicate reconciliation rows.");
   }
   const compiledPayload = reconciliation.rows[0]?.compiled_payload as HomepageSnapshot | undefined;
+  const generatedAuthorityDrift = Boolean(
+    reconciliation.rowCount
+    && canonicalJson(compiledPayload) !== canonicalJson(generated),
+  );
   const receipt = await client.query(
     `SELECT operation,subject_id::text,request_digest,result_digest
        FROM cms_operation_receipts WHERE idempotency_key=$1`,
@@ -415,6 +658,15 @@ async function reconcileHomepage(
   );
   if (receipt.rowCount && receipt.rowCount !== 1) {
     throw new Error("Homepage reconciliation receipt is duplicated.");
+  }
+  const preservedLegacyReceipts: string[] = [];
+  for (const legacyReceiptKey of LEGACY_HOMEPAGE_RECEIPTS) {
+    if (await preserveLegacyHomepageReceipt(client, legacyReceiptKey, {
+      documentId: String(row.document_id),
+      editionId: String(row.edition_id),
+    })) {
+      preservedLegacyReceipts.push(legacyReceiptKey);
+    }
   }
   const requestDigest = digest(generated);
 
@@ -455,6 +707,7 @@ async function reconcileHomepage(
     latestRevisionId: row.latest_revision_id,
     latestWorkflowState: row.latest_workflow_state,
     publishedRevisionId: row.published_revision_id,
+    previousGeneratedPayload: compiledPayload,
   });
   if (plan.action === "replay") {
     throw new Error("Unexpected homepage replay plan without a receipt.");
@@ -481,28 +734,24 @@ async function reconcileHomepage(
         JSON.stringify(migrationVisualSources(generated)),
       ],
     );
-  } else if (canonicalJson(compiledPayload) !== canonicalJson(generated)) {
-    if (!allowCreate) {
-      throw new Error("Generated homepage authority differs from the stored compiled baseline.");
-    }
-    await client.query(
-      `UPDATE cms_landing_page_reconciliation
-          SET compiled_digest=$3,compiled_payload=$4,compiled_visual_sources=$5,reconciled_at=now()
-        WHERE document_id=$1 AND source_key=$2`,
-      [
-        row.document_id,
-        HOMEPAGE_SOURCE_KEY,
-        requestDigest,
-        generated,
-        JSON.stringify(migrationVisualSources(generated)),
-      ],
+  } else if (generatedAuthorityDrift) {
+    // The generated inventory is a source delta, not permission to replace a
+    // stored compiled baseline. Preserve the old authority and its history;
+    // the staged revision below carries only the governed slot overlay.
+    console.warn(
+      "Generated homepage authority differs from the stored compiled baseline; preserving the stored baseline and editorial history.",
     );
   }
 
-  const overlay = row.latest_payload
-    ? overlayHomepageSlots(row.latest_payload, generated)
+  const editorialBaseline = row.latest_payload ?? compiledPayload;
+  const overlay = editorialBaseline
+    ? overlayHomepageSlots(editorialBaseline, generated, compiledPayload)
     : { snapshot: generated, customizedSlots: [], addedSlots: [] };
   const resulting = overlay.snapshot;
+  const validation = validateCmsSnapshot("landing-page", resulting, "draft");
+  if (!validation.success) {
+    throw new Error(`Reconciled homepage draft is invalid: ${validation.errors.join("; ")}`);
+  }
   const resultingDigest = digest(resulting);
   const currentAlreadyMatches = Boolean(
     row.latest_payload
@@ -547,11 +796,13 @@ async function reconcileHomepage(
       (actor_user_id,actor_label,action,target_type,target_id,request_id,metadata)
      VALUES ($1,$2,'document.draft-reconciled','document',$3,$4,$5)`,
     [actor.id, actor.email, row.document_id, HOMEPAGE_RECEIPT, {
-      task: 330,
+      task: 338,
       sourceKey: HOMEPAGE_SOURCE_KEY,
       revisionId,
       publishedRevisionId: row.published_revision_id ?? null,
       regionalEditionsUntouched: true,
+      preservedLegacyReceipts,
+      generatedAuthorityDrift,
       resultingDigest,
       generatedDigest: requestDigest,
       customizedSlots: overlay.customizedSlots,
@@ -563,7 +814,62 @@ async function reconcileHomepage(
     action: currentAlreadyMatches ? "update-authority" : plan.action,
     revisionId,
     customizedSlots: overlay.customizedSlots,
+    preservedLegacyReceipts,
+    generatedAuthorityDrift,
   };
+}
+
+async function inspectHomepageReadOnly(client: SqlClient) {
+  await client.query("BEGIN READ ONLY");
+  try {
+    const inspection = await inspectHomepageDelivery(client);
+    await client.query("ROLLBACK");
+    return inspection;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  }
+}
+
+async function verifyHomepagePostMerge(
+  client: SqlClient,
+  before: HomepageDeliveryInspection | null,
+  outcome: { action: string; revisionId?: string },
+) {
+  await client.query("BEGIN READ ONLY");
+  try {
+    const after = await inspectHomepageDelivery(client);
+    if (!after) throw new Error("Homepage delivery disappeared during post-merge reconciliation.");
+    if (
+      normalizeHomepageRevisionId(before?.publishedRevisionId)
+      !== normalizeHomepageRevisionId(after.publishedRevisionId)
+    ) {
+      throw new Error("Homepage publication pointer changed during draft reconciliation.");
+    }
+    if (outcome.action === "append-draft" && outcome.revisionId) {
+      const revision = await client.query(
+        `SELECT id::text,edition_id::text,payload,workflow_state
+           FROM cms_revisions WHERE id=$1`,
+        [outcome.revisionId],
+      );
+      if (
+        revision.rowCount !== 1
+        || revision.rows[0].edition_id !== after.editionId
+        || revision.rows[0].workflow_state !== "draft"
+      ) {
+        throw new Error("Post-merge homepage reconciliation did not leave the staged revision as a draft.");
+      }
+      const validation = validateCmsSnapshot("landing-page", revision.rows[0].payload, "draft");
+      if (!validation.success) {
+        throw new Error(`Post-merge homepage draft is invalid: ${validation.errors.join("; ")}`);
+      }
+    }
+    await client.query("ROLLBACK");
+    return after;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  }
 }
 
 async function run() {
@@ -583,17 +889,25 @@ async function run() {
   const { pool } = await import("@workspace/db");
   const client = await pool.connect();
   try {
+    const before = await inspectHomepageReadOnly(client);
+    console.error(
+      before
+        ? `Read-only homepage preflight: published=${before.publishedRevisionId ?? "none"} current=${before.latestRevisionId ?? "none"}${before.latestWorkflowState ? ` (${before.latestWorkflowState})` : ""}.`
+        : "Read-only homepage preflight: development homepage authority is not initialized; apply may create only its draft identity.",
+    );
     await client.query("BEGIN");
     const actor = await ensureServiceAccount(client, true);
     const outcome = await reconcileHomepage(client, actor, generated, true);
     await client.query("COMMIT");
+    await verifyHomepagePostMerge(client, before, outcome);
     console.log(
-      `Task 330 homepage draft reconciliation: ${outcome.action}`
+      `Task 338 homepage draft reconciliation: ${outcome.action}`
       + `${outcome.revisionId ? ` revision=${outcome.revisionId}` : ""}.`
       + `${"reason" in outcome ? ` ${outcome.reason}` : ""}`
       + `${"customizedSlots" in outcome && outcome.customizedSlots?.length
         ? ` Preserved customized slots: ${outcome.customizedSlots.join(", ")}.`
-        : ""}`,
+        : ""}`
+      + " Editorial review and authorized publication are still required; no published pointer was changed.",
     );
   } catch (error) {
     await client.query("ROLLBACK");
