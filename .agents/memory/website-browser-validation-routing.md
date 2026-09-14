@@ -14,3 +14,9 @@ Finish API generation checks before starting a browser pass.
 **Why:** The code-generation check regenerates shared sources, temporarily deleting files that running Vite clients import. Running it during authentication caused transient missing-module overlays and page reloads even though the check succeeded.
 
 **How to apply:** Treat code-generation checks as source-writing operations when scheduling integrated verification; complete them before workflow restart and browser testing.
+
+Compare mobile overflow against `document.documentElement.clientWidth` and the requested viewport, not `window.innerWidth` alone.
+
+**Why:** An overflowing decorative element expanded a 390px mobile layout to 494px; both scrollWidth and innerWidth became 494, falsely reporting no overflow while the screenshot showed shrunken content.
+
+**How to apply:** Record clientWidth, scrollWidth and requested viewport width together. Distinguish intentionally scrollable tables from unbounded decorative elements before changing layout.

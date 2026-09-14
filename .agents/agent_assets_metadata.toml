@@ -449,3 +449,17 @@ mtime_ms = 1789403900295
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/90589bc8-63a8-4b79-ab4e-5199df06307f/2d7ac581-4ad8-46e4-a2f4-d3fef5da0c11"
 storage_version_token = "1789404154875419"
 content_type = "image/png"
+
+[[outputs]]
+id = "bKYWNx0Tl0_PTsuZFTDdi"
+uri = "file://screenshots/guardrails-pulse-correction/hero-desktop-1440x1000.png"
+type = "image"
+title = "Guardrails — corrected methodology layout"
+description = "CMS draft preview using the shared Cognirise methodology hero, with independent copy and artwork columns."
+logical_id = "2ef9f119-6836-4759-b80b-cd04f4fa96de"
+content_hash = "sha256:bbc7aa0d3c552db76f81413334449e6c6985b20f41c33a9c3e62e6aaa450a87f"
+size = 556775
+mtime_ms = 1789407854275
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/2ef9f119-6836-4759-b80b-cd04f4fa96de/5f5dbe34-8101-4e02-92a6-a3fd50d4b875"
+storage_version_token = "1789407970651657"
+content_type = "image/png"

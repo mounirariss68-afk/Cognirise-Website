@@ -1,0 +1,232 @@
+{
+  "captureMode": "authenticated-mfa-cms-preview",
+  "capturedAt": "2026-09-14T17:44:17.085Z",
+  "revisionId": "10d71f70-4775-453c-8ff7-33977dd2f3ae",
+  "revisionNumber": null,
+  "viewports": [
+    {
+      "label": "desktop",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "label": "mobile",
+      "width": 390,
+      "height": 1000
+    }
+  ],
+  "sections": [
+    "hero",
+    "action-map",
+    "layers",
+    "lifecycle"
+  ],
+  "layoutMetrics": {
+    "desktop": {
+      "innerWidth": 1440,
+      "scrollWidth": 1440,
+      "offenders": [
+        {
+          "tag": "section",
+          "id": null,
+          "className": "px-6 py-20 md:px-[var(--gf-page-gutter)] lg:py-32 bg-[var(--gf-surface)] border-b border-[var(--gf-border)] relative",
+          "left": -16,
+          "right": 1424,
+          "width": 1440
+        },
+        {
+          "tag": "section",
+          "id": null,
+          "className": "px-6 py-20 md:px-[var(--gf-page-gutter)] lg:py-32 bg-[var(--gf-surface)] border-b border-[var(--gf-border)]",
+          "left": -16,
+          "right": 1424,
+          "width": 1440
+        },
+        {
+          "tag": "div",
+          "id": null,
+          "className": "absolute right-[-10%] top-[-20%] text-[25vw] leading-[0.7] font-display font-semibold tracking-tighter text-white/5 pointer-events-none select-none",
+          "left": -366,
+          "right": 1584,
+          "width": 1950
+        }
+      ]
+    },
+    "mobile": {
+      "innerWidth": 390,
+      "scrollWidth": 494,
+      "offenders": [
+        {
+          "tag": "header",
+          "id": null,
+          "className": "fixed top-0 z-50 flex h-[72px] w-full items-center border-b border-border bg-white/95 backdrop-blur transition-colors duration-300 md:h-[82px]",
+          "left": 0,
+          "right": 494,
+          "width": 494
+        },
+        {
+          "tag": "div",
+          "id": null,
+          "className": "mx-auto flex w-full max-w-[1440px] min-w-0 items-center justify-between px-6 md:px-12",
+          "left": 0,
+          "right": 494,
+          "width": 494
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "2xl:hidden p-2 -mr-2 relative z-50 rounded-sm text-[hsl(var(--brand-deep))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-",
+          "left": 438,
+          "right": 478,
+          "width": 40
+        },
+        {
+          "tag": "svg",
+          "id": null,
+          "className": null,
+          "left": 446,
+          "right": 470,
+          "width": 24
+        },
+        {
+          "tag": "path",
+          "id": null,
+          "className": null,
+          "left": 450,
+          "right": 466,
+          "width": 16
+        },
+        {
+          "tag": "path",
+          "id": null,
+          "className": null,
+          "left": 450,
+          "right": 466,
+          "width": 16
+        },
+        {
+          "tag": "path",
+          "id": null,
+          "className": null,
+          "left": 450,
+          "right": 466,
+          "width": 16
+        },
+        {
+          "tag": "div",
+          "id": null,
+          "className": "absolute top-0 right-0 w-64 h-64 opacity-[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none",
+          "left": 238,
+          "right": 494,
+          "width": 256
+        },
+        {
+          "tag": "table",
+          "id": null,
+          "className": "w-full min-w-[45rem] table-fixed border-collapse text-left",
+          "left": 25,
+          "right": 745,
+          "width": 720
+        },
+        {
+          "tag": "thead",
+          "id": null,
+          "className": "",
+          "left": 25,
+          "right": 745,
+          "width": 720
+        },
+        {
+          "tag": "tr",
+          "id": null,
+          "className": "border-b border-[var(--gf-border)] bg-[var(--gf-surface)]",
+          "left": 25,
+          "right": 745,
+          "width": 720
+        },
+        {
+          "tag": "th",
+          "id": null,
+          "className": "p-4 align-bottom text-[11px] font-bold uppercase tracking-[0.16em] whitespace-nowrap",
+          "left": 385,
+          "right": 565,
+          "width": 180
+        },
+        {
+          "tag": "th",
+          "id": null,
+          "className": "p-4 align-bottom text-[11px] font-bold uppercase tracking-[0.16em] whitespace-nowrap",
+          "left": 565,
+          "right": 745,
+          "width": 180
+        },
+        {
+          "tag": "tbody",
+          "id": null,
+          "className": "",
+          "left": 25,
+          "right": 745,
+          "width": 720
+        },
+        {
+          "tag": "tr",
+          "id": null,
+          "className": "border-b border-[var(--gf-border)] last:border-0 group bg-[var(--gf-bg)]",
+          "left": 25,
+          "right": 745,
+          "width": 720
+        },
+        {
+          "tag": "td",
+          "id": null,
+          "className": "p-0 align-top transition-colors",
+          "left": 385,
+          "right": 565,
+          "width": 180
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "relative h-full min-h-[5.5rem] w-full p-4 text-left text-[14px] leading-[1.5] transition-all hover:bg-[var(--gf-border)]/20 focus-visible:outline focus-visible:",
+          "left": 385,
+          "right": 565,
+          "width": 180
+        },
+        {
+          "tag": "span",
+          "id": null,
+          "className": "relative z-10 block line-clamp-3",
+          "left": 401,
+          "right": 549,
+          "width": 148
+        },
+        {
+          "tag": "td",
+          "id": null,
+          "className": "p-0 align-top transition-colors",
+          "left": 565,
+          "right": 745,
+          "width": 180
+        },
+        {
+          "tag": "button",
+          "id": null,
+          "className": "relative h-full min-h-[5.5rem] w-full p-4 text-left text-[14px] leading-[1.5] transition-all hover:bg-[var(--gf-border)]/20 focus-visible:outline focus-visible:",
+          "left": 565,
+          "right": 745,
+          "width": 180
+        }
+      ]
+    }
+  },
+  "files": [
+    "hero-desktop-1440x1000.png",
+    "action-map-desktop-1440x1000.png",
+    "layers-desktop-1440x1000.png",
+    "lifecycle-desktop-1440x1000.png",
+    "hero-mobile-390x1000.png",
+    "action-map-mobile-390x1000.png",
+    "layers-mobile-390x1000.png",
+    "lifecycle-mobile-390x1000.png"
+  ]
+}

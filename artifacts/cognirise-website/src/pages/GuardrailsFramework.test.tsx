@@ -103,7 +103,7 @@ describe('GuardrailsFramework Layout', () => {
     assert.match(html, /data-guardrails-layer="policy"/);
     assert.match(html, /data-guardrails-layer="architecture"/);
     assert.match(html, /data-guardrails-matrix-cell="architecture-hold"/);
-    assert.match(html, /Selected action detail/);
+    assert.match(html, /id="guardrails-action-detail"/);
     assert.match(html, /Failure condition/);
     assert.match(html, /What reaches AI/);
     assert.match(html, /AI model/);

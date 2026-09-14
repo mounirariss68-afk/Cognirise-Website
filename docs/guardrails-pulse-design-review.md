@@ -1,5 +1,26 @@
 # Guardrails Pulse presentation review
 
+## Correction after visual rejection
+
+The first repair used brand colours and typography without adopting the actual
+methodology-page composition. Its floating frosted hero panel, nested card
+containers and monospace labels were rejected as inconsistent with Pulse.
+
+The correction uses the existing `MethodPageHero` component and IDAO as the
+reference rather than a new hero treatment. Copy and artwork have independent
+columns, action groups use open space and rules, and layer selection retains
+the enforcement-flow explanation with readable labels and keyboard controls.
+The original twelve actions, CMS content and unpublished hero draft are preserved.
+
+Seven focused rendering/accessibility checks passed. Desktop and mobile protected
+preview screenshots were inspected. Inspection identified decorative overflow on
+mobile; the out-of-bounds decorative elements were removed. The final capture
+attempt after that last removal was blocked by the login rate limit (HTTP 429),
+so the stored mobile screenshots precede that final overflow fix.
+
+Fresh screenshots are in `screenshots/guardrails-pulse-correction/`; the earlier
+`screenshots/guardrails-pulse/` images document the rejected treatment.
+
 ## Scope
 
 The Set, Prove & Hold replacement reached the CMS without a hero pin. The

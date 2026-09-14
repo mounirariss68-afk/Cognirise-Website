@@ -11,6 +11,12 @@ Use Cognirise Pulse as the shared design language: an off-white architectural ca
 
 For industry detail pages, the established shared editorial family takes priority over bespoke domain compositions. Keep Education's broad schools, universities, networks and authorities narrative within that family rather than making it a separate microsite.
 
+Guardrails must also use the established methodology-page family, not a separate dashboard aesthetic. Compare against IDAO and the shared methodology hero before calling a design Pulse-compliant.
+
+**Why:** The user rejected a Guardrails revision that used Pulse colours and fonts but overlaid the hero with a frosted floating card, repeated bordered panels and tiny monospace diagram labels. Brand tokens alone did not satisfy the visual direction.
+
+**How to apply:** Keep hero copy and artwork in independent editorial columns; use whitespace and rules rather than nested card containers. Express diagram relationships clearly with readable labels, while preserving genuine matrix semantics. Follow the current shared button component rather than restoring superseded striped buttons from older brand notes.
+
 **Why:** The user explicitly rejected Education's floating hero card, local section menu, table-group artwork, scene-description captions and independent section organization, while retaining its approved narrative.
 
 **How to apply:** Use Public Sector, Telecoms and Energy as presentation references. Map richer material into shared editorial sections; do not treat the rejected Education renderer or screenshots as design targets.

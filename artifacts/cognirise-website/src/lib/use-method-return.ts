@@ -26,7 +26,9 @@ function readVisit(): Visit | null {
 /** Scoped to supporting pages: canonical pages never mount this behavior. */
 export function useMethodReturn(title: string) {
   const [visit] = useState(readVisit);
-  const current = window.location.pathname + window.location.search;
+  const current = typeof window === "undefined"
+    ? ""
+    : window.location.pathname + window.location.search;
   const incoming = visit && new URL(visit.to, window.location.origin).pathname +
     new URL(visit.to, window.location.origin).search === current ? visit : null;
   const originSlug = incoming?.from.split("?")[0].split("#")[0].split("/").pop();

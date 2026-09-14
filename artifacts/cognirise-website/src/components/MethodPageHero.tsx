@@ -1,3 +1,4 @@
+import React from "react";
 import { ArrowLeft, ArrowDown } from "lucide-react";
 import { Link } from "wouter";
 import { motion, useReducedMotion } from "framer-motion";
@@ -10,13 +11,14 @@ interface MethodPageHeroProps {
   title: string;
   description: string;
   supportingText?: React.ReactNode;
-  imageSrc: string;
+  imageSrc?: string;
   /** CMS media URLs are already resolved and must not be rewritten as assets. */
   imageResolved?: boolean;
-  imageAlt: string;
+  imageAlt?: string;
   imagePosition?: string;
   imageCaptionSubtitle?: string;
   imageCaptionTitle?: string;
+  actions?: React.ReactNode;
 }
 
 export function MethodPageHero({
@@ -30,6 +32,7 @@ export function MethodPageHero({
   imagePosition,
   imageCaptionSubtitle,
   imageCaptionTitle,
+  actions,
 }: MethodPageHeroProps) {
   const reducedMotion = useReducedMotion();
   const returnTo = useMethodReturn(title);
@@ -51,13 +54,13 @@ export function MethodPageHero({
         {breadcrumb}
       </div>
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+      <div className={`mt-8 grid gap-10 ${imageSrc ? "lg:grid-cols-[0.9fr_1.1fr] lg:items-end" : "max-w-4xl"}`}>
         <motion.div 
           initial={reducedMotion ? false : { opacity: 0, x: -24 }} 
           animate={{ opacity: 1, x: 0 }} 
           transition={{ duration: reducedMotion ? 0 : 0.65 }}
         >
-          <h1 className="mt-5 font-display text-[clamp(45px,7vw,100px)] font-semibold leading-[0.88] tracking-[-0.08em] max-w-4xl">
+          <h1 className={`mt-5 font-display ${imageSrc ? "text-[clamp(45px,7vw,100px)]" : "text-[clamp(45px,6vw,80px)]"} font-semibold leading-[0.88] tracking-[-0.08em]`}>
             {title}
           </h1>
           <p className="mt-8 max-w-[620px] text-[19px] leading-[1.58] text-[#405777]">
@@ -68,32 +71,39 @@ export function MethodPageHero({
               {supportingText}
             </div>
           )}
+          {actions && (
+            <div className="mt-8">
+              {actions}
+            </div>
+          )}
         </motion.div>
 
-        <motion.figure
-          initial={reducedMotion ? false : { opacity: 0, x: 28 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: reducedMotion ? 0 : 1, ease: [0.2, 0.7, 0.2, 1] }}
-          data-methodology-hero-frame
-          className="clip-diagonal relative h-[430px] overflow-hidden bg-[#071936] md:h-[520px] lg:h-[620px]"
-        >
-          <PulseImage
-            src={imageResolved ? imageSrc : assetUrl(imageSrc)}
-            alt={imageAlt}
-            className="h-full w-full object-cover"
-            style={imagePosition ? { objectPosition: imagePosition } : undefined}
-            eager
-          />
-          {(imageCaptionSubtitle || imageCaptionTitle) && (
-            <>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/90 via-[#071936]/10 to-transparent" />
-              <figcaption className="absolute bottom-[11%] left-6 right-7 text-white md:left-10 md:right-[12%] lg:left-12">
-                {imageCaptionSubtitle && <span className="text-[10px] font-bold uppercase tracking-[0.13em] text-white/70">{imageCaptionSubtitle}</span>}
-                {imageCaptionTitle && <strong className="mt-2 block max-w-[540px] font-display text-[clamp(24px,3vw,40px)] leading-[1.04] tracking-[-0.06em]">{imageCaptionTitle}</strong>}
-              </figcaption>
-            </>
-          )}
-        </motion.figure>
+        {imageSrc && (
+          <motion.figure
+            initial={reducedMotion ? false : { opacity: 0, x: 28 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: reducedMotion ? 0 : 1, ease: [0.2, 0.7, 0.2, 1] }}
+            data-methodology-hero-frame
+            className="clip-diagonal relative h-[430px] overflow-hidden bg-[#071936] md:h-[520px] lg:h-[620px]"
+          >
+            <PulseImage
+              src={imageResolved ? imageSrc : assetUrl(imageSrc)}
+              alt={imageAlt || ""}
+              className="h-full w-full object-cover"
+              style={imagePosition ? { objectPosition: imagePosition } : undefined}
+              eager
+            />
+            {(imageCaptionSubtitle || imageCaptionTitle) && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/90 via-[#071936]/10 to-transparent" />
+                <figcaption className="absolute bottom-[11%] left-6 right-7 text-white md:left-10 md:right-[12%] lg:left-12">
+                  {imageCaptionSubtitle && <span className="text-[10px] font-bold uppercase tracking-[0.13em] text-white/70">{imageCaptionSubtitle}</span>}
+                  {imageCaptionTitle && <strong className="mt-2 block max-w-[540px] font-display text-[clamp(24px,3vw,40px)] leading-[1.04] tracking-[-0.06em]">{imageCaptionTitle}</strong>}
+                </figcaption>
+              </>
+            )}
+          </motion.figure>
+        )}
       </div>
     </header>
   );

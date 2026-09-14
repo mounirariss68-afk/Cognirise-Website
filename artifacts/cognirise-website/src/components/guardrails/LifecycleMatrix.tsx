@@ -43,11 +43,11 @@ export function LifecycleMatrix({ matrix }: { matrix: Matrix }) {
   };
 
   return (
-    <div className="space-y-6" data-guardrails-tool="lifecycle-matrix">
-      <div className="overflow-x-auto border border-[var(--gf-border)] bg-[var(--gf-surface)] shadow-sm relative z-10" aria-label="Lifecycle matrix. Select a layer and lifecycle stage to read its build, test, or re-test explanation.">
-        <table className="w-full min-w-[50rem] table-fixed border-collapse text-left text-[length:var(--gf-text-sm)] sm:min-w-0">
+    <div className="space-y-12" data-guardrails-tool="lifecycle-matrix">
+      <div className="overflow-x-auto border border-[var(--gf-border)]" aria-label="Lifecycle matrix. Select a layer and lifecycle stage to read its build, test, or re-test explanation.">
+        <table className="w-full min-w-[45rem] table-fixed border-collapse text-left">
           <thead>
-            <tr className="border-b-2 border-[var(--gf-border)] bg-[var(--gf-bg)]">
+            <tr className="border-b border-[var(--gf-border)] bg-[var(--gf-surface)]">
               {matrix.columnHeaders.map((header, index) => {
                 const stage = index > 0 ? stages[index - 1] : null;
                 const columnSelected = stage === selected.stage;
@@ -55,15 +55,13 @@ export function LifecycleMatrix({ matrix }: { matrix: Matrix }) {
                   <th
                     key={header}
                     scope="col"
-                    className="p-4 md:p-5 align-bottom font-mono text-[10px] font-bold uppercase tracking-[0.15em] whitespace-nowrap transition-colors duration-300"
+                    className="p-4 align-bottom text-[11px] font-bold uppercase tracking-[0.16em] whitespace-nowrap"
                     style={{
                       color: stage ? stageAccent[stage] : "var(--gf-ink-muted)",
-                      backgroundColor: columnSelected ? "var(--gf-surface)" : "transparent",
-                      boxShadow: columnSelected ? `inset 0 -3px 0 ${stageAccent[stage!]}` : undefined,
+                      backgroundColor: columnSelected ? "var(--gf-bg)" : "transparent",
                     }}
                   >
                     <MarkdownInline text={header} />
-                    {columnSelected && <span className="mt-2 block text-[9px] tracking-widest text-[var(--gf-ink-muted)]">Selected column</span>}
                   </th>
                 );
               })}
@@ -73,19 +71,17 @@ export function LifecycleMatrix({ matrix }: { matrix: Matrix }) {
             {matrix.rows.map((row, rowIndex) => {
               const rowSelected = rowIndex === selected.row;
               return (
-                <tr key={row.layerId} className="border-b border-[var(--gf-border)] last:border-0 group">
+                <tr key={row.layerId} className="border-b border-[var(--gf-border)] last:border-0 group bg-[var(--gf-bg)]">
                   <th
                     scope="row"
-                    className="p-4 md:p-5 align-top text-[length:var(--gf-text-base)] font-display tracking-tight font-bold transition-colors duration-300 relative"
+                    className="p-4 align-top text-[16px] font-display font-semibold transition-colors"
                     style={{
                       color: layerAccent[row.layerId],
-                      backgroundColor: rowSelected ? "var(--gf-surface)" : "var(--gf-bg)",
+                      backgroundColor: rowSelected ? "var(--gf-surface)" : "transparent",
                     }}
                   >
-                    {rowSelected && <div className="absolute inset-y-0 left-0 w-1 shadow-sm" style={{ backgroundColor: layerAccent[row.layerId] }} aria-hidden="true" />}
                     <div className="relative z-10">
                       <MarkdownInline text={row.layer} />
-                      {rowSelected && <span className="mt-2 block font-mono text-[9px] uppercase tracking-wider text-[var(--gf-ink-muted)]">Selected row</span>}
                     </div>
                   </th>
                   {stages.map((stage, stageIndex) => {
@@ -93,8 +89,8 @@ export function LifecycleMatrix({ matrix }: { matrix: Matrix }) {
                     return (
                       <td
                         key={stage}
-                        className="p-2 md:p-3 align-top transition-colors duration-300"
-                        style={{ backgroundColor: rowSelected || stage === selected.stage ? "var(--gf-surface)" : "var(--gf-bg)" }}
+                        className="p-0 align-top transition-colors"
+                        style={{ backgroundColor: rowSelected || stage === selected.stage ? "var(--gf-surface)" : "transparent" }}
                       >
                         <button
                           ref={(element) => { controls.current[rowIndex * stages.length + stageIndex] = element; }}
@@ -104,19 +100,17 @@ export function LifecycleMatrix({ matrix }: { matrix: Matrix }) {
                           aria-controls="guardrails-matrix-detail"
                           onClick={() => setSelected({ row: rowIndex, stage })}
                           onKeyDown={(event) => onKeyDown(event, rowIndex, stageIndex)}
-                          className="relative h-full min-h-[5.5rem] w-full border p-4 text-left text-[length:var(--gf-text-sm)] leading-relaxed transition-all duration-300 motion-reduce:transition-none hover:border-[var(--gf-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gf-focus)] group-hover:bg-[var(--gf-surface)] overflow-hidden"
+                          className="relative h-full min-h-[5.5rem] w-full p-4 text-left text-[14px] leading-[1.5] transition-all hover:bg-[var(--gf-border)]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--gf-accent)] focus-visible:outline-offset-[-2px] overflow-hidden"
                           style={{
                             color: cellSelected ? "var(--gf-ink)" : "var(--gf-ink-muted)",
                             fontWeight: cellSelected ? 600 : 400,
-                            borderColor: cellSelected ? stageAccent[stage] : "transparent",
                             backgroundColor: cellSelected ? "var(--gf-bg)" : "transparent",
                           }}
                         >
-                          {cellSelected && <div className="absolute inset-y-0 left-0 w-1" style={{ backgroundColor: stageAccent[stage] }} aria-hidden="true" />}
+                          {cellSelected && <div className="absolute inset-y-0 left-0 w-[3px]" style={{ backgroundColor: stageAccent[stage] }} aria-hidden="true" />}
                           <span className="relative z-10 block line-clamp-3">
                             <MarkdownInline text={row[stage]} />
                           </span>
-                          {cellSelected && <span className="mt-3 block font-mono text-[9px] uppercase tracking-widest relative z-10" style={{ color: stageAccent[stage] }}>Selected cell</span>}
                         </button>
                       </td>
                     );
@@ -131,21 +125,20 @@ export function LifecycleMatrix({ matrix }: { matrix: Matrix }) {
       <section
         id="guardrails-matrix-detail"
         aria-live="polite"
-        className="grid gap-6 lg:gap-10 border border-[var(--gf-border)] bg-[var(--gf-surface)] p-6 md:p-10 shadow-sm md:grid-cols-[14rem_minmax(0,1fr)] relative overflow-hidden"
+        className="grid gap-6 border-t border-[var(--gf-border)] pt-8 md:grid-cols-[14rem_minmax(0,1fr)]"
       >
-        <div className="absolute top-0 left-0 bottom-0 w-1" style={{ backgroundColor: stageAccent[selected.stage] }} aria-hidden="true" />
-        <div className="absolute top-0 right-0 w-48 h-48 opacity-[0.03] rounded-full blur-2xl -translate-y-1/2 translate-x-1/3 pointer-events-none" style={{ backgroundColor: stageAccent[selected.stage] }} aria-hidden="true" />
-        
         <div className="relative z-10">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--gf-ink-muted)] mb-4">Selected detail</p>
-          <h3 className="font-display text-[length:var(--gf-h4)] font-bold text-[var(--gf-ink)] mb-2 tracking-tight"><MarkdownInline text={selectedRow.layer} /></h3>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-[var(--gf-border)] bg-[var(--gf-bg)] shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: stageAccent[selected.stage] }} />
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest" style={{ color: stageAccent[selected.stage] }}><MarkdownInline text={selectedHeader} /></p>
-          </div>
+          <h3 className="font-display text-[24px] font-semibold text-[var(--gf-ink)] mb-1 tracking-tight">
+            <MarkdownInline text={selectedRow.layer} />
+          </h3>
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: stageAccent[selected.stage] }}>
+            <MarkdownInline text={selectedHeader} />
+          </p>
         </div>
-        <div className="relative z-10 border-l-[3px] border-[var(--gf-border)] pl-6 py-2 bg-gradient-to-r from-[var(--gf-bg)] to-transparent">
-          <p className="text-[length:var(--gf-text-lg)] leading-relaxed text-[var(--gf-ink)] font-medium max-w-[45ch]"><MarkdownInline text={selectedText} /></p>
+        <div className="relative z-10 pl-6 border-l-2" style={{ borderColor: stageAccent[selected.stage] }}>
+          <p className="text-[16px] leading-[1.65] text-[var(--gf-ink)] font-medium max-w-[45ch]">
+            <MarkdownInline text={selectedText} />
+          </p>
         </div>
       </section>
     </div>

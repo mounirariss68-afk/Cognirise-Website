@@ -1,5 +1,4 @@
 import React from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { cmsEntryRenderPolicy, contentRecord, useCmsEntry, type CmsRecord, resolveCmsMedia, cmsMediaObjectPosition } from "@/lib/cms";
@@ -10,6 +9,7 @@ import { Kicker } from "@/components/guardrails/Kicker";
 import { MarkdownInline } from "@/components/guardrails/MarkdownInline";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { LegacyGuardrailsLayout } from "./LegacyGuardrailsLayout";
+import { MethodPageHero } from "@/components/MethodPageHero";
 
 import { SetProveHoldActionMap } from "@/components/guardrails/SetProveHoldActionMap";
 import { FourLayerComparison } from "@/components/guardrails/FourLayerComparison";
@@ -61,7 +61,6 @@ export function GuardrailsLayout({
   renderPolicy?: "cms" | "compiled-fallback" | "loading" | "unavailable";
   preview?: boolean;
 }) {
-  const reducedMotion = useReducedMotion();
   useDynamicMetadata(guardrailsMetadata(framework, renderPolicy, preview));
 
   if (renderPolicy === "loading") {
@@ -100,47 +99,22 @@ export function GuardrailsLayout({
   return (
     <article data-guardrails-page className="guardrails-page [overflow-wrap:anywhere] bg-background font-sans text-foreground selection:bg-[var(--gf-accent)] selection:text-white pb-24">
       {/* 1. Header (Hero) */}
-      <header className={`relative ${heroImage ? "min-h-[85vh] lg:min-h-[90vh] flex flex-col justify-center" : "min-h-[75vh]"} border-b border-[var(--gf-border)] overflow-hidden`}>
-        {heroImage && (
-          <div className="absolute top-0 right-0 w-full h-[55vh] lg:h-full lg:w-[65%] z-0 overflow-hidden bg-[var(--gf-surface)] clip-diagonal-bottom lg:clip-diagonal-left">
-            <div className="absolute inset-0 bg-[var(--gf-ink)] opacity-[0.03] mix-blend-multiply pointer-events-none z-10" />
-            <PulseImage
-              src={heroImage}
-              alt={heroMedia?.altText || "Cognirise Guardrails Framework"}
-              className="w-full h-full object-cover"
-              style={{ objectPosition: cmsMediaObjectPosition(heroMedia) }}
-              data-pulse-image
-              eager
-            />
+      <MethodPageHero
+        breadcrumb={content.hero.eyebrow}
+        title={content.hero.headline}
+        description={content.hero.subheadline}
+        supportingText={content.hero.strapline}
+        imageSrc={heroImage || ""}
+        imageResolved={true}
+        imageAlt={heroMedia?.altText || "Cognirise Guardrails Framework"}
+        imagePosition={cmsMediaObjectPosition(heroMedia) || "center"}
+        actions={
+          <div className="flex flex-wrap items-center gap-6">
+            <BrandButton href={content.hero.primaryAction.href} variant="primary">{content.hero.primaryAction.label}</BrandButton>
+            <BrandButton href={content.hero.secondaryAction.href} variant="editorial">{content.hero.secondaryAction.label}</BrandButton>
           </div>
-        )}
-        <div className={`relative z-10 w-full px-6 py-20 md:px-[var(--gf-page-gutter)] lg:py-32 ${heroImage ? "mt-[20vh] lg:mt-0" : ""}`}>
-          <div className={`max-w-[var(--gf-content-wide)] ${heroImage ? "bg-[var(--gf-bg)]/90 backdrop-blur-md p-8 lg:p-14 border border-[var(--gf-border)] shadow-xl max-w-[650px] lg:max-w-[750px]" : "mx-auto"}`}>
-            <Kicker>{content.hero.eyebrow}</Kicker>
-            <motion.div
-              initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: reducedMotion ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <h1 className="mt-8 font-display text-[length:var(--gf-h1)] font-semibold leading-[0.92] tracking-[-0.04em] text-[var(--gf-ink)]">
-                <MarkdownInline text={content.hero.headline} />
-              </h1>
-              <p className="mt-8 text-[length:var(--gf-text-xl)] leading-[var(--gf-leading-copy)] text-[var(--gf-ink)] font-medium max-w-[var(--gf-content-standard)]">
-                <MarkdownInline text={content.hero.subheadline} />
-              </p>
-              <div className="mt-8 border-l-[3px] border-[var(--gf-accent-coral)] pl-5 py-1">
-                <p className="font-display text-[length:var(--gf-text-lg)] font-bold text-[var(--gf-ink-muted)] max-w-[34ch] leading-tight">
-                  <MarkdownInline text={content.hero.strapline} />
-                </p>
-              </div>
-              <div className="mt-12 flex flex-wrap items-center gap-6">
-                <BrandButton href={content.hero.primaryAction.href} variant="primary">{content.hero.primaryAction.label}</BrandButton>
-                <BrandButton href={content.hero.secondaryAction.href} variant="editorial">{content.hero.secondaryAction.label}</BrandButton>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* 2. Overview (Set, Prove, Hold Map) */}
       <section data-guardrails-section="overview" className="px-6 py-20 md:px-[var(--gf-page-gutter)] lg:py-32 bg-[var(--gf-surface)] border-b border-[var(--gf-border)] relative">
@@ -173,8 +147,8 @@ export function GuardrailsLayout({
               </p>
             </div>
             
-            <div className="border border-[var(--gf-border)] bg-[var(--gf-surface)] p-6 shadow-sm self-start">
-              <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-[var(--gf-ink-muted)] mb-3">
+            <div className="border-l-2 border-[var(--gf-accent-coral)] pl-6 py-2 self-start">
+              <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--gf-ink-muted)] mb-3">
                 <span className="w-2 h-2 rounded-full bg-[var(--gf-accent-coral)]" />
                 One rule, four ways
               </span>
@@ -215,13 +189,13 @@ export function GuardrailsLayout({
 
           <div className="mt-16 grid md:grid-cols-2 gap-8 lg:gap-12 max-w-[var(--gf-content-wide)]">
             <div className="border-t-2 border-[var(--gf-border)] pt-6">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--gf-ink-muted)] mb-3 block">Context</span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--gf-ink-muted)] mb-3 block">Context</span>
               <p className="text-[length:var(--gf-text-base)] text-[var(--gf-ink-muted)] leading-relaxed max-w-[40ch]">
                 <MarkdownInline text={content.lifecycleMatrix.callout} />
               </p>
             </div>
             <div className="border-t-2 border-[var(--gf-accent-coral)] pt-6">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--gf-accent-coral)] mb-3 block">Measurement standard</span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--gf-accent-coral)] mb-3 block">Measurement standard</span>
               <p className="text-[length:var(--gf-text-lg)] text-[var(--gf-ink)] font-semibold leading-relaxed max-w-[36ch]">
                 <MarkdownInline text={content.lifecycleMatrix.measure} />
               </p>
@@ -232,7 +206,6 @@ export function GuardrailsLayout({
 
       {/* 5. Next Steps & Sources */}
       <section data-guardrails-section="next-steps" className="px-6 py-16 md:px-[var(--gf-page-gutter)] lg:py-28 bg-[var(--gf-surface)] relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-[var(--gf-accent-violet)] opacity-[0.02] rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" aria-hidden="true" />
         
         <div className="max-w-[var(--gf-content-wide)] mx-auto relative z-10">
           <div className="grid lg:grid-cols-[1.2fr_1fr] gap-16 lg:gap-24">
@@ -268,7 +241,6 @@ export function GuardrailsLayout({
               </ul>
 
               <div className="bg-[var(--gf-bg)] p-8 md:p-10 border border-[var(--gf-border)] text-left shadow-lg shadow-[var(--gf-ink)]/5 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--gf-accent-coral)] opacity-[0.03] rounded-full blur-2xl translate-x-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
                 <h3 className="font-display text-[length:var(--gf-h4)] font-bold mb-4 text-[var(--gf-ink)] relative z-10">
                   <MarkdownInline text={content.moves.cta.heading} />
                 </h3>
@@ -286,7 +258,7 @@ export function GuardrailsLayout({
                   <ArrowUpRight size={64} strokeWidth={1} />
                 </div>
                 <div className="relative z-10">
-                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[var(--gf-tracking-label)] text-[var(--gf-accent)] mb-4">
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--gf-accent)] mb-4">
                     Related Methodology <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </div>
                   <h3 className="font-display text-[length:var(--gf-h4)] font-bold text-[var(--gf-ink)] group-hover:text-[var(--gf-accent)] transition-colors pr-12 mb-4 leading-tight">
@@ -308,11 +280,11 @@ export function GuardrailsLayout({
 
                 <div className="space-y-6 mb-8">
                   {content.references.items.map((ref) => (
-                    <div key={ref.id} className="border-l-[3px] border-[var(--gf-border)] pl-4 hover:border-[var(--gf-accent)] transition-colors">
+                     <div key={ref.id} className="border-l-[3px] border-[var(--gf-border)] pl-4 hover:border-[var(--gf-accent)] transition-colors">
                       <a href={ref.url} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-1 font-bold text-[length:var(--gf-text-sm)] text-[var(--gf-ink)] hover:text-[var(--gf-accent)] transition-colors">
                         <MarkdownInline text={ref.title} /> <ArrowUpRight size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
                       </a>
-                      <div className="font-mono text-[9px] uppercase tracking-widest text-[var(--gf-ink-faint)] mt-1.5 mb-2.5">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--gf-ink-faint)] mt-1.5 mb-2.5">
                         {ref.version}
                       </div>
                       <p className="text-[length:var(--gf-text-sm)] text-[var(--gf-ink-muted)] leading-relaxed">
