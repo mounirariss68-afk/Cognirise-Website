@@ -39,6 +39,7 @@
     "cms:reconcile-guardrails-set-prove-hold": "tsx ./src/cms/guardrails-set-prove-hold-reconciliation.ts",
     "cms:setup-guardrails-set-prove-hold-postmerge": "tsx ./src/cms/guardrails-set-prove-hold-reconciliation.ts --apply-db --target=development",
     "cms:release-guardrails-set-prove-hold": "tsx ./src/cms/guardrails-set-prove-hold-reconciliation.ts --apply-db --publish --verify-public --target=development",
+    "cms:stage-guardrails-set-prove-hold-hero": "tsx ./src/cms/guardrails-set-prove-hold-hero-draft.ts",
     "cms:stage-task-335-agent-authority-summary": "tsx ./src/cms/task-335-agent-authority-summary.ts",
     "cms:reconcile-value-to-scale-hero": "tsx ./src/cms/value-to-scale-hero-reconciliation.ts",
     "cms:reconcile-offices": "tsx ./src/cms/office-reconciliation.ts",
