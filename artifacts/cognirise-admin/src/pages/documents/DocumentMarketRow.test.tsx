@@ -26,7 +26,11 @@ function renderMarket(options: {
 }) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const document = { id: "page", title: "Test page", slug: "test", markets: [], kind: "publication" } as unknown as Document;
-  const market = { id: "market-id", code: "ksa", displayName: "Saudi Arabia", defaultLocale: "en", enabled: true } as MarketEdition;
+  const markets = [
+    { id: "uae-edition", code: "uae", displayName: "United Arab Emirates", defaultLocale: "en", enabled: true },
+    { id: "europe-edition", code: "europe", displayName: "Europe", defaultLocale: "en", enabled: true },
+    { id: "market-id", code: "ksa", displayName: "Saudi Arabia", defaultLocale: "en", enabled: true },
+  ] as MarketEdition[];
   queryClient.setQueryData(getGetSharedMarketEditionMatrixQueryKey("page"), {
     baselines: [{ id: "baseline", locale: "en", revisionId: "new" }],
     bindings: options.binding === false ? [] : [{ marketEditionId: "market-id", locale: "en", mode: "adapted", baselineId: "baseline",
@@ -35,22 +39,50 @@ function renderMarket(options: {
   queryClient.setQueryData(getGetDocumentAvailabilityQueryKey("page"), {
     documentId: "page", canEditShared: false, draftVersion: 1, publishedVersion: 1, reviewedVersion: null,
     sharedSource: null, affectedEditions: [],
-    items: [{ marketEditionId: "market-id", market: "ksa", locale: "en", displayName: "Saudi Arabia",
-      stagedDecision: "show", publishedDecision: "show", publishedEffectiveAvailable: options.live, pending: false }],
+    items: [
+      { marketEditionId: "uae-edition", market: "uae", locale: "en", displayName: "United Arab Emirates",
+        stagedDecision: "show", publishedDecision: "show", publishedEffectiveAvailable: false, pending: false },
+      { marketEditionId: "europe-edition", market: "europe", locale: "en", displayName: "Europe",
+        stagedDecision: "show", publishedDecision: "show", publishedEffectiveAvailable: false, pending: false },
+      { marketEditionId: "market-id", market: "ksa", locale: "en", displayName: "Saudi Arabia",
+        stagedDecision: "show", publishedDecision: "show", publishedEffectiveAvailable: options.live, pending: false },
+    ],
   });
   queryClient.setQueryData(getListDocumentEditionsQueryKey("page"), {
-    documentId: "page", items: [{
-      market: "ksa", locale: "en", exact: options.exact ?? true, usedFallback: options.usedFallback ?? false,
-      fallbackReason: options.fallbackReason ?? null, revisionNumber: 7, workflowState: "draft", publicationState: "published",
-      hasEffectivePublishedRevision: options.hasEffectivePublishedRevision ?? true,
-      readinessErrors: options.readinessErrors ?? [], readinessIssues: options.readinessIssues ?? [],
-    }],
+    documentId: "page", items: [
+      {
+        market: "uae", locale: "en", exact: true, usedFallback: false, fallbackReason: null, revisionNumber: 4,
+        workflowState: "approved", publicationState: "published", hasEffectivePublishedRevision: true,
+        readinessErrors: [], readinessIssues: [],
+      },
+      {
+        market: "europe", locale: "en", exact: true, usedFallback: false, fallbackReason: null, revisionNumber: 5,
+        workflowState: "approved", publicationState: "published", hasEffectivePublishedRevision: true,
+        readinessErrors: [], readinessIssues: [],
+      },
+      {
+        market: "ksa", locale: "en", exact: options.exact ?? true, usedFallback: options.usedFallback ?? false,
+        fallbackReason: options.fallbackReason ?? null, revisionNumber: 7, workflowState: "draft", publicationState: "published",
+        hasEffectivePublishedRevision: options.hasEffectivePublishedRevision ?? true,
+        readinessErrors: options.readinessErrors ?? [], readinessIssues: options.readinessIssues ?? [],
+      },
+    ],
   });
   return renderToStaticMarkup(<QueryClientProvider client={queryClient}><table><tbody>
-    <DocumentMarketRow document={document} markets={[market]} locale="en"
+    <DocumentMarketRow document={document} markets={markets} locale="en"
       canManageMarket={() => options.canManage ?? false} isAdministrator={false} onDraftChange={() => {}} onOpen={() => {}} />
   </tbody></table></QueryClientProvider>);
 }
+
+test("matrix keeps the full catalog names visible in separate destination cells", () => {
+  const markup = renderMarket({ live: true });
+  assert.match(markup, /United Arab Emirates/);
+  assert.match(markup, /Europe/);
+  assert.match(markup, /Saudi Arabia/);
+  assert.match(markup, /aria-label="United Arab Emirates publication status"/);
+  assert.match(markup, /aria-label="Europe publication status"/);
+  assert.match(markup, /aria-label="Saudi Arabia publication status"/);
+});
 
 test("matrix reads live availability independently of document market labels", () => {
   const markup = renderMarket({ live: true, operations: [{ op: "set", path: "content.hero.mediaId", value: "local" }] });

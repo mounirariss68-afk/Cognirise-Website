@@ -106,6 +106,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
   const documentId = randomUUID();
   const independentDocumentId = randomUUID();
   const foreignDocumentId = randomUUID();
+  const task337DocumentId = randomUUID();
 
   const personDocumentId = randomUUID();
   const uaeMarketId = randomUUID();
@@ -113,6 +114,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
   const qatarMarketId = randomUUID();
   const omanMarketId = randomUUID();
   const bahrainMarketId = randomUUID();
+  const europeMarketId = randomUUID();
 
   const guardMarketId = randomUUID();
   const disabledMarketId = randomUUID();
@@ -128,6 +130,9 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
   const sourceRevisionId = randomUUID();
   const arabicSourceRevisionId = randomUUID();
   const sharedSourceRevisionId = randomUUID();
+  const task337UaePublishedRevisionId = randomUUID();
+  const task337UaeSavedRevisionId = randomUUID();
+  const task337UaeEditionId = randomUUID();
   const independentRevisionId = randomUUID();
   const foreignRevisionId = randomUUID();
 
@@ -188,6 +193,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       [qatarMarketId, "qatar", true, false, "uae"],
       [omanMarketId, "oman", true, false, "uae"],
       [bahrainMarketId, "bahrain", true, false, "uae"],
+      [europeMarketId, "europe", true, false, "uae"],
        [guardMarketId, "guard", true, false, "uae"],
       [disabledMarketId, "disabled", false, false, "uae"],
     ] as const) {
@@ -237,6 +243,15 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       ...commonSnapshot,
       slug: `task-321-ar-${documentId.slice(0, 8)}`,
       title: "النشرة المشتركة",
+    };
+    const task337PublishedSnapshot = {
+      ...commonSnapshot,
+      slug: `task-337-${task337DocumentId.slice(0, 8)}`,
+      title: "UAE published source",
+    };
+    const task337SavedSnapshot = {
+      ...task337PublishedSnapshot,
+      title: "UAE saved successor",
     };
 
     const personSnapshot = {
@@ -338,6 +353,49 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
        VALUES ($1,$2,$3,$4)`,
       [commonImageId, commonImageVersionId, documentId, `revision:${sourceRevisionId}`],
+    );
+    await admin.query(
+      `INSERT INTO cms_documents(id,kind,canonical_slug,title,owner_id,status)
+       VALUES ($1,'publication',$2,$3,$4,'active')`,
+      [task337DocumentId, task337PublishedSnapshot.slug, task337PublishedSnapshot.title, administratorId],
+    );
+    await admin.query(
+      `INSERT INTO cms_market_editions
+         (id,document_id,market,locale,localized_slug,publication_state,content_mode)
+       VALUES ($1,$2,'uae','en',$3,'published','custom')`,
+      [task337UaeEditionId, task337DocumentId, task337PublishedSnapshot.slug],
+    );
+    await admin.query(
+      `INSERT INTO cms_revisions
+         (id,edition_id,revision_number,payload,content_digest,workflow_state,created_by_user_id,reason)
+       VALUES
+         ($1,$3,1,$4,'task337-uae-published','approved',$5,'Task 337 published UAE source'),
+         ($2,$3,2,$6,'task337-uae-saved','draft',$5,'Task 337 saved UAE successor')`,
+      [
+        task337UaePublishedRevisionId,
+        task337UaeSavedRevisionId,
+        task337UaeEditionId,
+        task337PublishedSnapshot,
+        administratorId,
+        task337SavedSnapshot,
+      ],
+    );
+    await admin.query(
+      `UPDATE cms_market_editions
+          SET published_revision_id=$1,published_at=now()
+        WHERE id=$2`,
+      [task337UaePublishedRevisionId, task337UaeEditionId],
+    );
+    await admin.query(
+      `INSERT INTO cms_media_references(asset_id,media_version_id,document_id,field_path)
+       VALUES ($1,$2,$3,$4),($1,$2,$3,$5)`,
+      [
+        commonImageId,
+        commonImageVersionId,
+        task337DocumentId,
+        `revision:${task337UaePublishedRevisionId}`,
+        `revision:${task337UaeSavedRevisionId}`,
+      ],
     );
     await admin.query(
       `INSERT INTO cms_document_market_availability
@@ -1752,6 +1810,280 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     assert.ok(
       !publishedSourceCandidates.candidates.some((candidate) => candidate.revisionId === sharedSourceRevisionId),
       "legacy shared-source storage is never offered as a geo copy candidate",
+    );
+    // Task 337 regression: each missing destination gets its own candidate
+    // context, while source authority and unpublished-copy boundaries remain
+    // explicit for both saved and published UAE revisions.
+    const task337UnauthorizedEurope = await request(
+      `/api/documents/${task337DocumentId}/market-copy-candidates/europe/en`,
+      "GET",
+      undefined,
+      headersFor(editorToken),
+    );
+    assert.equal(
+      task337UnauthorizedEurope.status,
+      403,
+      "candidate discovery still requires destination-market permission for missing Europe",
+    );
+    const task337SourceUnauthorized = await json<{
+      targetMarket: string;
+      targetLocale: string;
+      candidates: Array<{ market: string; revisionId: string }>;
+    }>(
+      await request(
+        `/api/documents/${task337DocumentId}/market-copy-candidates/ksa/en`,
+        "GET",
+        undefined,
+        headersFor(editorToken),
+      ),
+      200,
+      "a Saudi-assigned editor without UAE authority can open the candidate boundary",
+    );
+    assert.deepEqual(
+      {
+        targetMarket: task337SourceUnauthorized.targetMarket,
+        targetLocale: task337SourceUnauthorized.targetLocale,
+        candidates: task337SourceUnauthorized.candidates,
+      },
+      { targetMarket: "ksa", targetLocale: "en", candidates: [] },
+      "candidate discovery does not leak either UAE saved or published revision without source permission",
+    );
+    await admin.query("UPDATE cms_users SET role='editor' WHERE id=$1", [editorId]);
+    await admin.query("DELETE FROM cms_user_market_assignments WHERE user_id=$1", [editorId]);
+    await admin.query(
+      `INSERT INTO cms_user_market_assignments(user_id,market_code)
+       VALUES ($1,'uae'),($1,'ksa'),($1,'europe')`,
+      [editorId],
+    );
+    const task337Candidate = async (targetMarket: string) => json<{
+      documentId: string;
+      targetMarket: string;
+      targetLocale: string;
+      candidates: Array<{
+        market: string;
+        locale: string;
+        revisionId: string;
+        revisionNumber: number;
+        workflowState: string;
+        publicationState: string;
+        publishedRevisionId: string | null;
+        ready: boolean;
+        readinessIssues: Array<{ category: string }>;
+      }>;
+    }>(
+      await request(
+        `/api/documents/${task337DocumentId}/market-copy-candidates/${targetMarket}/en`,
+        "GET",
+        undefined,
+        headersFor(editorToken),
+      ),
+      200,
+      `authorized ${targetMarket} candidate discovery`,
+    );
+    const task337EuropeCandidates = await task337Candidate("europe");
+    const task337SaudiCandidates = await task337Candidate("ksa");
+    for (const [targetMarket, result] of [
+      ["europe", task337EuropeCandidates],
+      ["ksa", task337SaudiCandidates],
+    ] as const) {
+      assert.equal(result.documentId, task337DocumentId);
+      assert.equal(result.targetMarket, targetMarket);
+      assert.equal(result.targetLocale, "en");
+      assert.equal(result.candidates.length, 2);
+      assert.ok(
+        result.candidates.every((candidate) => candidate.market === "uae" && candidate.locale === "en"),
+        `${targetMarket} candidates remain same-locale UAE sources and exclude the destination`,
+      );
+      assert.ok(
+        !result.candidates.some((candidate) => candidate.market === targetMarket),
+        `${targetMarket} is excluded from its own source candidates`,
+      );
+      const published = result.candidates.find((candidate) => candidate.revisionId === task337UaePublishedRevisionId);
+      const saved = result.candidates.find((candidate) => candidate.revisionId === task337UaeSavedRevisionId);
+      assert.deepEqual(
+        {
+          revisionId: published?.revisionId,
+          revisionNumber: published?.revisionNumber,
+          workflowState: published?.workflowState,
+          publicationState: published?.publicationState,
+          publishedRevisionId: published?.publishedRevisionId,
+        },
+        {
+          revisionId: task337UaePublishedRevisionId,
+          revisionNumber: 1,
+          workflowState: "approved",
+          publicationState: "published",
+          publishedRevisionId: task337UaePublishedRevisionId,
+        },
+        `${targetMarket} retains the UAE published revision as an explicit candidate`,
+      );
+      assert.deepEqual(
+        {
+          revisionId: saved?.revisionId,
+          revisionNumber: saved?.revisionNumber,
+          workflowState: saved?.workflowState,
+          publicationState: saved?.publicationState,
+          publishedRevisionId: saved?.publishedRevisionId,
+        },
+        {
+          revisionId: task337UaeSavedRevisionId,
+          revisionNumber: 2,
+          workflowState: "draft",
+          publicationState: "saved",
+          publishedRevisionId: task337UaePublishedRevisionId,
+        },
+        `${targetMarket} labels the newer UAE revision saved rather than published`,
+      );
+      assert.ok(
+        saved?.readinessIssues.some((issue) => issue.category === "workflow"),
+        `${targetMarket} preserves the saved-only review boundary`,
+      );
+    }
+    const task337SourceBeforeCopies = await admin.query<{
+      publication_state: string;
+      published_revision_id: string | null;
+      revision_count: string;
+    }>(
+      `SELECT edition.publication_state,edition.published_revision_id::text,
+              count(revision.*)::text revision_count
+         FROM cms_market_editions edition
+         JOIN cms_revisions revision ON revision.edition_id=edition.id
+        WHERE edition.id=$1
+        GROUP BY edition.id`,
+      [task337UaeEditionId],
+    );
+    const task337EuropeCopy = await json<{
+      market: string;
+      locale: string;
+      sourceRevisionId: string;
+      sourceWorkflowState: string;
+      sourcePublicationState: string;
+      replayed: boolean;
+    }>(
+      await request(`/api/documents/${task337DocumentId}/market-edition-copies`, "POST", {
+        destinationMarketEditionId: europeMarketId,
+        destinationLocale: "en",
+        sourceRevisionId: task337UaeSavedRevisionId,
+        expectedSourceRevisionId: task337UaeSavedRevisionId,
+      }, headersFor(editorToken)),
+      201,
+      "copy the UAE saved revision into missing Europe as a draft",
+    );
+    assert.deepEqual(
+      {
+        market: task337EuropeCopy.market,
+        locale: task337EuropeCopy.locale,
+        sourceRevisionId: task337EuropeCopy.sourceRevisionId,
+        sourceWorkflowState: task337EuropeCopy.sourceWorkflowState,
+        sourcePublicationState: task337EuropeCopy.sourcePublicationState,
+        replayed: task337EuropeCopy.replayed,
+      },
+      {
+        market: "europe",
+        locale: "en",
+        sourceRevisionId: task337UaeSavedRevisionId,
+        sourceWorkflowState: "draft",
+        sourcePublicationState: "saved",
+        replayed: false,
+      },
+      "Europe records the exact UAE saved source without promoting it",
+    );
+    const task337SaudiCopy = await json<{
+      market: string;
+      locale: string;
+      sourceRevisionId: string;
+      sourceWorkflowState: string;
+      sourcePublicationState: string;
+      replayed: boolean;
+    }>(
+      await request(`/api/documents/${task337DocumentId}/market-edition-copies`, "POST", {
+        destinationMarketEditionId: ksaMarketId,
+        destinationLocale: "en",
+        sourceRevisionId: task337UaePublishedRevisionId,
+        expectedSourceRevisionId: task337UaePublishedRevisionId,
+      }, headersFor(editorToken)),
+      201,
+      "copy the UAE published revision into missing Saudi as a draft",
+    );
+    assert.deepEqual(
+      {
+        market: task337SaudiCopy.market,
+        locale: task337SaudiCopy.locale,
+        sourceRevisionId: task337SaudiCopy.sourceRevisionId,
+        sourceWorkflowState: task337SaudiCopy.sourceWorkflowState,
+        sourcePublicationState: task337SaudiCopy.sourcePublicationState,
+        replayed: task337SaudiCopy.replayed,
+      },
+      {
+        market: "ksa",
+        locale: "en",
+        sourceRevisionId: task337UaePublishedRevisionId,
+        sourceWorkflowState: "approved",
+        sourcePublicationState: "published",
+        replayed: false,
+      },
+      "Saudi records the exact UAE published source while remaining an unpublished draft",
+    );
+    const task337CopiedState = await admin.query<{
+      market: string;
+      publication_state: string;
+      published_revision_id: string | null;
+      workflow_state: string;
+    }>(
+      `SELECT edition.market,edition.publication_state,edition.published_revision_id::text,
+              revision.workflow_state
+         FROM cms_market_editions edition
+         JOIN cms_revisions revision ON revision.edition_id=edition.id
+        WHERE edition.document_id=$1 AND edition.market IN ('europe','ksa')
+          AND edition.locale='en'
+        ORDER BY edition.market`,
+      [task337DocumentId],
+    );
+    assert.deepEqual(
+      task337CopiedState.rows,
+      [
+        { market: "europe", publication_state: "draft", published_revision_id: null, workflow_state: "draft" },
+        { market: "ksa", publication_state: "draft", published_revision_id: null, workflow_state: "draft" },
+      ],
+      "both missing destinations remain editable unpublished drafts",
+    );
+    const task337SourceAfterCopies = await admin.query<{
+      publication_state: string;
+      published_revision_id: string | null;
+      revision_count: string;
+    }>(
+      `SELECT edition.publication_state,edition.published_revision_id::text,
+              count(revision.*)::text revision_count
+         FROM cms_market_editions edition
+         JOIN cms_revisions revision ON revision.edition_id=edition.id
+        WHERE edition.id=$1
+        GROUP BY edition.id`,
+      [task337UaeEditionId],
+    );
+    assert.deepEqual(
+      task337SourceAfterCopies.rows,
+      task337SourceBeforeCopies.rows,
+      "copying Europe and Saudi leaves the UAE source publication and revision history unchanged",
+    );
+    assert.equal(
+      (await request(
+        `/api/documents/${task337DocumentId}/market-copy-candidates/europe/en`,
+        "GET",
+        undefined,
+        headersFor(editorToken),
+      )).status,
+      409,
+      "candidate discovery closes the missing-destination boundary after Europe is created",
+    );
+    assert.equal(
+      (await request(
+        `/api/documents/${task337DocumentId}/market-copy-candidates/ksa/en`,
+        "GET",
+        undefined,
+        headersFor(editorToken),
+      )).status,
+      409,
+      "candidate discovery closes the missing-destination boundary after Saudi is created",
     );
     await admin.query("DELETE FROM cms_user_market_assignments WHERE user_id=$1", [editorId]);
     await admin.query(

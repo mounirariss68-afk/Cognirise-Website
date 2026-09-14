@@ -44,3 +44,4 @@
 - [Reuse confirmation identity](reuse-confirmation-identity.md) — Replacement consent pins both compared revisions and binding version; refetch must invalidate rather than refresh consent.
 - [Guardrails source authority](guardrails-source-authority.md) — Keep supplied diagram wording distinct from fuller prose; selections explain enforcement, not authority scores.
 - [Generated-contract validation](openapi-union-generation.md) — Validate regenerated output independently of incremental compiler caches.
+- [Matrix browser fixture safety](matrix-browser-fixtures.md) — Never substitute another document’s controls when a fixture row is missing; refresh and search before mutation.

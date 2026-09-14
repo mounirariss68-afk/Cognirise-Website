@@ -62,6 +62,7 @@ function MissingMarketCopyAction({
   destinationMarket,
   destinationName,
   destinationLocale,
+  markets,
   canStart,
   expandRequest,
   onOpen,
@@ -71,6 +72,7 @@ function MissingMarketCopyAction({
   destinationMarket: string;
   destinationName: string;
   destinationLocale: string;
+  markets: Array<Pick<MarketEdition, "code" | "displayName">>;
   canStart: boolean;
   expandRequest: number;
   onOpen: (market: string, locale: string, focus?: "editor" | "review" | "editions") => void;
@@ -87,7 +89,13 @@ function MissingMarketCopyAction({
     },
   });
   const copy = useCopyDocumentMarketEdition();
-  const selected = candidates.data?.candidates.find((candidate) => candidate.revisionId === sourceRevisionId);
+  const marketName = (code: string) => markets.find((market) => market.code === code)?.displayName
+    ?? code.toUpperCase();
+  const sources = !candidates.isError && candidates.data?.targetMarket === destinationMarket
+    && candidates.data.targetLocale === destinationLocale
+    ? candidates.data.candidates.filter((candidate) => candidate.market !== destinationMarket && candidate.locale === destinationLocale)
+    : [];
+  const selected = sources.find((candidate) => candidate.revisionId === sourceRevisionId);
   const sourcePublication = selected?.publicationState === "published"
     ? "published"
     : "saved draft";
@@ -148,15 +156,18 @@ function MissingMarketCopyAction({
     return <p className="mt-2 text-[10px] text-muted-foreground">You do not have permission to create a market draft for this missing edition.</p>;
   }
   return (
-    <div className="mt-2" data-testid={`market-copy-${documentId}-${destinationMarketEditionId}-${destinationLocale}`}>
-      <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => {
+    <div className="my-3 rounded-md border border-primary/20 bg-primary/5 p-3" data-testid={`market-copy-${documentId}-${destinationMarketEditionId}-${destinationLocale}`}>
+      <p className="mb-2 text-xs font-medium">Create content for {destinationName}</p>
+      <Button type="button" variant="outline" size="sm" className="h-auto whitespace-normal text-left text-xs" aria-expanded={open} disabled={copy.isPending} onClick={() => {
         setOpen((value) => !value);
         reset();
       }} data-testid={`button-copy-from-market-${documentId}-${destinationMarketEditionId}-${destinationLocale}`}>
         Copy from another market
       </Button>
-      {open && <div className="mt-2 space-y-2 rounded border bg-muted/10 p-2 text-xs">
-        <p><strong>New target:</strong> {destinationName} · {destinationLocale.toUpperCase()}</p>
+      {!open && <p className="mt-2 text-[11px] text-muted-foreground">Choose a saved edition from a different market.</p>}
+      {open && <div role="region" aria-label={`Copy source selection for ${destinationName}`} className="mt-3 space-y-2 border-t pt-3 text-xs">
+        <p className="font-semibold">Source selection</p>
+        <p><strong>Destination:</strong> {destinationName} · {destinationLocale.toUpperCase()}</p>
         {candidates.isLoading && <p role="status">Loading compatible saved source revisions…</p>}
         {candidates.isError && <div role="alert" className="text-destructive">
           {errorMessage(candidates.error).status === 403
@@ -164,32 +175,34 @@ function MissingMarketCopyAction({
             : "Compatible source editions could not be loaded. The target remains missing."}
           <Button type="button" variant="link" size="sm" className="ml-1 h-auto p-0 text-xs" onClick={() => void candidates.refetch()} data-testid={`button-retry-copy-sources-${documentId}-${destinationMarketEditionId}-${destinationLocale}`}>Retry</Button>
         </div>}
-        {!candidates.isLoading && !candidates.isError && candidates.data?.candidates.length === 0 && (
-          <p className="text-muted-foreground">No compatible authorized saved source revision is available. This server does not offer blank-draft creation from this matrix.</p>
+        {!candidates.isLoading && !candidates.isError && candidates.data && sources.length === 0 && (
+          <div><p className="text-muted-foreground">No compatible authorized saved source revision is available. Save content in another market in this language, or ask an editor with access to both markets.</p>
+            <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => void candidates.refetch()}>Refresh sources</Button>
+          </div>
         )}
-        {candidates.data?.candidates.length ? <>
-          <label className="block font-medium" htmlFor={`copy-source-${destinationMarketEditionId}-${destinationLocale}`}>Saved source revision</label>
-          <select id={`copy-source-${destinationMarketEditionId}-${destinationLocale}`} value={sourceRevisionId}
+        {sources.length ? <>
+          <label className="block font-medium" htmlFor={`copy-source-${documentId}-${destinationMarketEditionId}-${destinationLocale}`}>Saved source revision</label>
+          <select id={`copy-source-${documentId}-${destinationMarketEditionId}-${destinationLocale}`} value={selected ? sourceRevisionId : ""} disabled={copy.isPending}
             onChange={(event) => { setSourceRevisionId(event.target.value); setConfirming(false); setRecovery(null); }}
             className="w-full rounded border bg-background p-2" data-testid={`select-copy-source-${documentId}-${destinationMarketEditionId}-${destinationLocale}`}>
             <option value="">Choose an explicit source…</option>
-            {candidates.data.candidates.map((candidate) => (
+            {sources.map((candidate) => (
               <option key={candidate.revisionId} value={candidate.revisionId}>
-                {candidate.market.toUpperCase()} · {candidate.locale.toUpperCase()} · revision {candidate.revisionNumber} · {candidate.publicationState === "published" ? "published" : "saved draft"}
+                {marketName(candidate.market)} · {candidate.locale.toUpperCase()} · revision {candidate.revisionNumber} · {candidate.publicationState === "published" ? "published" : "saved draft"}
               </option>
             ))}
           </select>
           {selected && <p className="text-[10px] text-muted-foreground">
-            Selected: {selected.market.toUpperCase()} · {selected.locale.toUpperCase()} · saved revision {selected.revisionNumber} · {sourcePublication} · workflow {selected.workflowState}.
+            Selected: {marketName(selected.market)} · {selected.locale.toUpperCase()} · saved revision {selected.revisionNumber} · {sourcePublication} · workflow {selected.workflowState}.
             {!selected.ready && " This source has saved-revision blockers; the new target will remain an unpublished draft."}
           </p>}
-          {!confirming ? <Button type="button" size="sm" variant="outline" disabled={!selected || copy.isPending} onClick={() => setConfirming(true)} data-testid={`button-confirm-copy-${documentId}-${destinationMarketEditionId}-${destinationLocale}`}>
+          {!confirming || !selected ? <Button type="button" size="sm" variant="outline" disabled={!selected || copy.isPending || candidates.isFetching} onClick={() => setConfirming(true)} data-testid={`button-confirm-copy-${documentId}-${destinationMarketEditionId}-${destinationLocale}`}>
             Continue to confirmation
           </Button> : <div className="rounded border border-amber-400/60 bg-amber-50 p-2 text-amber-950">
-            <p>Copy saved revision {selected!.revisionNumber} from {selected!.market.toUpperCase()} · {selected!.locale.toUpperCase()} into {destinationName} · {destinationLocale.toUpperCase()}?</p>
+            <p>Copy saved revision {selected.revisionNumber} from {marketName(selected.market)} · {selected.locale.toUpperCase()} into {destinationName} · {destinationLocale.toUpperCase()}?</p>
             <p className="mt-1 text-[10px]">This creates an editable unpublished draft. It preserves the source, immutable media pins, and audit lineage; it does not copy approval, publish content, or overwrite an existing target.</p>
             <div className="mt-2 flex gap-2">
-              <Button type="button" size="sm" disabled={copy.isPending} onClick={create} data-testid={`button-create-market-copy-${documentId}-${destinationMarketEditionId}-${destinationLocale}`}>
+              <Button type="button" size="sm" disabled={copy.isPending || candidates.isFetching} onClick={create} data-testid={`button-create-market-copy-${documentId}-${destinationMarketEditionId}-${destinationLocale}`}>
                 {copy.isPending ? "Creating draft…" : "Create unpublished draft"}
               </Button>
               <Button type="button" size="sm" variant="outline" disabled={copy.isPending} onClick={() => setConfirming(false)} data-testid={`button-cancel-market-copy-${documentId}-${destinationMarketEditionId}-${destinationLocale}`}>Cancel</Button>
@@ -329,11 +342,15 @@ export function DocumentMarketRow({ document, markets, locale, canManageMarket, 
             destinationMarket={market.code}
             destinationName={market.displayName}
             destinationLocale={locale}
+            markets={[...markets, ...(availability.data?.items ?? []).map((item) => ({ code: item.market, displayName: item.displayName }))]}
             canStart={canManage}
             expandRequest={copyRequests[copyRequestKey] ?? 0}
             onOpen={onOpen}
           />}
-          {destination && <MarketAvailabilityChecklist
+          {destination && <section aria-label={`${market.displayName} destination availability`} className="mt-4 space-y-2 border-t pt-3">
+            <p className="text-xs font-semibold">Destination availability</p>
+            <p className="text-[11px] text-muted-foreground">Visibility only. This does not select a copy source or create content.</p>
+            <MarketAvailabilityChecklist
             documentId={document.id}
             destinations={[{ market: market.code, displayName: market.displayName, locale }]}
             canManageMarket={() => canManage && Boolean(availability.data?.canEditShared)}
@@ -342,7 +359,7 @@ export function DocumentMarketRow({ document, markets, locale, canManageMarket, 
             onSelectionDraftChange={onDraftChange}
             onOpenSharedContent={() => onOpen(market.code, locale)}
             compact
-          />}
+          /></section>}
           {edition?.exact && <Button variant="link" size="sm" className="mt-1 h-auto p-0" onClick={() => onOpen(market.code, locale)}>
             Open {market.displayName} · {locale.toUpperCase()}
           </Button>}
