@@ -18,6 +18,11 @@ test("sitemap integration includes the public methodologies once across static a
   assert.equal(merged.some((item) => item.url.endsWith("/advisors")), false);
   assert.equal(merged.some((item) => item.url.endsWith("/what-we-do")), false);
   assert.equal(merged.some((item) => item.url.endsWith("/services")), false);
+  assert.equal(
+    STATIC_SITEMAP_PATHS.includes("/methodologies/guardrails-framework"),
+    false,
+    "a CMS-governed framework must not enter the static sitemap before publication",
+  );
 });
 
 test("the canonical methodology route is present in the static XML sitemap", async () => {
@@ -25,6 +30,7 @@ test("the canonical methodology route is present in the static XML sitemap", asy
   assert.match(xml, /https:\/\/cognirise\.ai\/methodologies\/agent-authority-model/);
   assert.match(xml, /https:\/\/cognirise\.ai\/methodologies\/idao/);
   assert.match(xml, /https:\/\/cognirise\.ai\/methodologies\/ai-use-case-prioritization/);
+  assert.doesNotMatch(xml, /https:\/\/cognirise\.ai\/methodologies\/guardrails-framework/);
   assert.doesNotMatch(xml, /https:\/\/cognirise\.ai\/what-we-do<\/loc>/);
   assert.doesNotMatch(xml, /https:\/\/cognirise\.ai\/work\/?<\/loc>/);
 });

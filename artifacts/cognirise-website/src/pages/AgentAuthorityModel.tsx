@@ -8,6 +8,7 @@ import { PulseImage } from "@/components/ui/pulse-image";
 import { assetUrl } from "@/lib/assets";
 import { cmsMediaObjectPosition, type CmsRecord, cmsEntryRenderPolicy, contentRecord, resolveCmsMedia, text, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
+import { useMarketStore } from "@/store/market";
 import {
   type HScore,
   type RScore,
@@ -24,6 +25,36 @@ const COMPILED = {
   handoverExplanation:
     "Govern the handover, not the agent. Knowledge, Decision, and Action describe individual moments when an agent passes something to a person, another agent, or a system. One agent can make several handovers, and each can carry a different exposure and authority ceiling.",
 };
+
+type AgentAuthorityFrameworkContent = Extract<FrameworkContent, { template: "agent-authority" }>;
+type GuardrailsFrameworkContent = Extract<FrameworkContent, { template: "guardrails" }>;
+type GuardrailsRelatedLink = {
+  title: string;
+  body: string;
+  href: "/methodologies/guardrails-framework";
+};
+
+export function marketAwareDestination(href: string, market: string, locale: string) {
+  const destination = new URL(href, "https://cognirise.ai");
+  destination.searchParams.set("market", market);
+  destination.searchParams.set("locale", locale);
+  return `${destination.pathname}${destination.search}${destination.hash}`;
+}
+
+/** A related framework is rendered only from a separately delivered public
+ * edition. This prevents an Agent Authority page from revealing a draft,
+ * hidden, or unavailable Guardrails destination. */
+export function guardrailsRelatedLink(
+  framework: CmsRecord<GuardrailsFrameworkContent> | null,
+): GuardrailsRelatedLink | null {
+  const link = framework?.relatedLink;
+  return link
+    && typeof link.title === "string" && link.title.trim()
+    && typeof link.body === "string" && link.body.trim()
+    && link.href === "/methodologies/guardrails-framework"
+    ? { title: link.title, body: link.body, href: link.href }
+    : null;
+}
 
 const HANDOVERS = [
   {
@@ -106,7 +137,7 @@ function Kicker({ children, inverse = false }: { children: React.ReactNode; inve
   );
 }
 
-function GovernedNarrative({ blocks }: { blocks: FrameworkContent["methodology"] }) {
+function GovernedNarrative({ blocks }: { blocks: AgentAuthorityFrameworkContent["methodology"] }) {
   return (
     <div className="mt-10 border-l-2 border-[hsl(var(--brand-pink))] pl-6">
       {blocks.map((block, index) => {
@@ -355,17 +386,20 @@ function MatrixExplorer() {
 }
 
 type AgentAuthorityLayoutProps = {
-  framework: CmsRecord<FrameworkContent> | null;
+  framework: CmsRecord<AgentAuthorityFrameworkContent> | null;
+  guardrailsRelatedLink?: GuardrailsRelatedLink | null;
   renderPolicy?: "cms" | "compiled-fallback" | "loading" | "unavailable";
   preview?: boolean;
 };
 
 export function AgentAuthorityLayout({
   framework,
+  guardrailsRelatedLink: relatedLink = null,
   renderPolicy = "cms",
   preview = false,
 }: AgentAuthorityLayoutProps) {
   const reducedMotion = useReducedMotion();
+  const { market, locale } = useMarketStore();
   const heroMedia = framework
     ? resolveCmsMedia(framework.media, framework.heroMedia, framework.heroMediaId)
     : undefined;
@@ -757,6 +791,23 @@ export function AgentAuthorityLayout({
         </div>
       </section>
 
+      {relatedLink ? (
+        <section className="border-t border-[#cbd3e1] bg-[#f0effa] px-6 py-16 md:px-[4.8vw] lg:py-20">
+          <a
+            href={marketAwareDestination(relatedLink.href, market, locale)}
+            className="group block max-w-[800px] border border-[#b9c4d5] bg-white p-7 transition-colors hover:border-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]"
+          >
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--brand-pink))]">
+              Related methodology <ArrowRight size={14} aria-hidden="true" />
+            </div>
+            <h2 className="mt-4 font-display text-[clamp(30px,3vw,42px)] font-semibold leading-[1] tracking-[-0.06em]">
+              {relatedLink.title}
+            </h2>
+            <p className="mt-4 max-w-[650px] text-[16px] leading-[1.65] text-[#405777]">{relatedLink.body}</p>
+          </a>
+        </section>
+      ) : null}
+
       <section className="bg-[#102957] px-6 py-20 text-white md:px-[4.8vw] lg:py-28">
         <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
@@ -778,9 +829,14 @@ export function AgentAuthorityLayout({
 
 export default function AgentAuthorityModel() {
   const query = useCmsEntry("framework", "agent-authority-model");
+  const guardrailsQuery = useCmsEntry("framework", "guardrails-framework");
   const renderPolicy = cmsEntryRenderPolicy(query.isAuthoritative, query.delivery);
   const cmsRecord = query.data ? contentRecord(query.data, "framework") : null;
   const framework = cmsRecord?.template === "agent-authority" ? cmsRecord : null;
+  const guardrailsRecord = guardrailsQuery.data ? contentRecord(guardrailsQuery.data, "framework") : null;
+  const relatedLink = guardrailsRecord?.template === "guardrails"
+    ? guardrailsRelatedLink(guardrailsRecord)
+    : null;
 
-  return <AgentAuthorityLayout framework={framework} renderPolicy={renderPolicy} />;
+  return <AgentAuthorityLayout framework={framework} guardrailsRelatedLink={relatedLink} renderPolicy={renderPolicy} />;
 }

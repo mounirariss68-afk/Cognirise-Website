@@ -42,3 +42,6 @@ pnpm --filter @workspace/scripts cms:reconcile-methodologies-hero -- --verify-db
 # replays only an exact candidate; a later editorial/published state is
 # explicitly receipted as preserved rather than retried or overwritten.
 pnpm --filter @workspace/scripts cms:setup-banking-postmerge -- --report-conflict
+# Carry the reviewed Guardrails source into development as a hidden draft.
+# The receipt replays without publication and conflicts preserve editorial work.
+pnpm --filter @workspace/scripts exec tsx src/cms/guardrails-reconciliation.ts --apply-db --target=development

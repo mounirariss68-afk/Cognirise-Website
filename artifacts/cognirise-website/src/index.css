@@ -131,6 +131,115 @@
   --radius: 0; 
 }
 
+/* Guardrails Page Scoped Tokens */
+.guardrails-page {
+  --gf-bg: hsl(var(--background));
+  --gf-surface: hsl(var(--card));
+  --gf-ink: hsl(var(--foreground));
+  --gf-ink-muted: hsl(var(--muted-foreground));
+  --gf-border: hsl(var(--border));
+  --gf-focus: hsl(var(--brand-pink));
+  --gf-accent: hsl(var(--brand-pink));
+  --gf-accent-violet: hsl(var(--brand-violet));
+  --gf-accent-violet-soft: hsl(var(--brand-violet) / 0.1);
+  --gf-accent-coral: hsl(var(--brand-coral));
+  --gf-accent-ink: hsl(var(--accent-foreground));
+
+  --gf-layer-policy: hsl(var(--border));
+  --gf-layer-prompt: hsl(var(--brand-coral));
+  --gf-layer-runtime: hsl(var(--brand-violet));
+  --gf-layer-arch: hsl(var(--brand-pink));
+
+  /* Shared Method Frame (Light theme per prompt) */
+  --gf-rail-bg: hsl(var(--card));
+  --gf-rail-ink: hsl(var(--foreground));
+  --gf-rail-ink-muted: hsl(var(--muted-foreground));
+  --gf-rail-border: hsl(var(--border));
+
+  /* Typography Scales matched to Agent Authority */
+  --gf-text-kicker: 10px;
+  --gf-text-xs: 11px;
+  --gf-text-sm: 14px;
+  --gf-text-base: 16px;
+  --gf-text-lg: 18px;
+  --gf-text-xl: 20px;
+
+  --gf-h1: clamp(50px, 7vw, 98px);
+  --gf-h2: clamp(40px, 5vw, 72px);
+  --gf-h3: clamp(36px, 4.5vw, 62px);
+  --gf-h4: clamp(28px, 3vw, 40px);
+
+  --gf-display: clamp(32px, 4vw, 52px);
+  --gf-table-h: 22px;
+  --gf-page-gutter: 4.8vw;
+  --gf-content-narrow: 620px;
+  --gf-content-compact: 650px;
+  --gf-content-status: 780px;
+  --gf-content-copy: 700px;
+  --gf-content-quote: 760px;
+  --gf-content-standard: 800px;
+  --gf-content-wide: 850px;
+  --gf-content-hero: 980px;
+  --gf-content-measure: 900px;
+  --gf-content-footer: 600px;
+  --gf-exposure-connector-min: 100px;
+  --gf-exposure-min-height: 500px;
+  --gf-selection-summary-min-height: 40px;
+  --gf-kicker-line-height: 2px;
+  --gf-kicker-line-width: 23px;
+  --gf-leading-heading: 0.98;
+  --gf-leading-body: 1.65;
+  --gf-leading-copy: 1.6;
+  --gf-leading-measure: 1.1;
+  --gf-tracking-heading: -0.05em;
+  --gf-tracking-kicker: 0.13em;
+  --gf-tracking-label: 0.1em;
+  --gf-tracking-wide: 0.15em;
+  --gf-tracking-measure: 0.2em;
+}
+
+/* Tailwind treats an untyped custom property arbitrary value as a color.
+   Keep the legacy Guardrails utility spellings typographic until all CMS
+   templates have migrated to text-[length:var(...)]. */
+.guardrails-page .text-\[var\(--gf-h1\)\] { font-size: var(--gf-h1); }
+.guardrails-page .text-\[var\(--gf-h2\)\] { font-size: var(--gf-h2); }
+.guardrails-page .text-\[var\(--gf-h3\)\] { font-size: var(--gf-h3); }
+.guardrails-page .text-\[var\(--gf-h4\)\] { font-size: var(--gf-h4); }
+.guardrails-page .text-\[var\(--gf-display\)\] { font-size: var(--gf-display); }
+.guardrails-page .text-\[var\(--gf-table-h\)\] { font-size: var(--gf-table-h); }
+.guardrails-page .text-\[var\(--gf-text-kicker\)\] { font-size: var(--gf-text-kicker); }
+.guardrails-page .text-\[var\(--gf-text-xs\)\] { font-size: var(--gf-text-xs); }
+.guardrails-page .text-\[var\(--gf-text-sm\)\] { font-size: var(--gf-text-sm); }
+.guardrails-page .text-\[var\(--gf-text-base\)\] { font-size: var(--gf-text-base); }
+.guardrails-page .text-\[var\(--gf-text-lg\)\] { font-size: var(--gf-text-lg); }
+.guardrails-page .text-\[var\(--gf-text-xl\)\] { font-size: var(--gf-text-xl); }
+
+@media print {
+  .guardrails-page,
+  .guardrails-page * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .guardrails-page button,
+  .guardrails-page [role="region"],
+  .guardrails-page tr,
+  .guardrails-page > section {
+    break-inside: avoid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guardrails-page *,
+  .guardrails-page *::before,
+  .guardrails-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 .dark {
   /* Deep */
   --background: 217 76% 12%; 

@@ -13,6 +13,7 @@
     "test:button-orbit-browser": "node scripts/button-orbit.browser-test.mjs",
     "test:autodata-browser": "node scripts/autodata.browser-test.mjs",
     "test:authority-browser": "node scripts/authority-ceiling.browser-test.mjs",
+    "test:guardrails-browser": "node scripts/guardrails.browser-test.mjs",
     "test:case-studies-browser": "node scripts/case-study-rail.browser-test.mjs",
     "test:case-study-full-record-browser": "node scripts/case-study-full-record.browser-test.mjs",
     "test:industry-images-browser": "node scripts/industry-images.browser-test.mjs",

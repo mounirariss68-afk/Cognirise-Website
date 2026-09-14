@@ -8,6 +8,7 @@ export const NAVIGATION_ITEM_REGISTRY = [
   { id: "methodologies.use-case-prioritization", label: "Use-Case Prioritization", parentId: "methodologies", destination: "/methodologies/ai-use-case-prioritization" },
   { id: "methodologies.idao", label: "IDAO", parentId: "methodologies", destination: "/methodologies/idao" },
   { id: "methodologies.agent-authority", label: "Agent Authority Model", parentId: "methodologies", destination: "/methodologies/agent-authority-model" },
+  { id: "methodologies.guardrails", label: "Guardrails Framework", parentId: "methodologies", destination: "/methodologies/guardrails-framework" },
   { id: "platforms", label: "Platforms", destination: "/platforms" },
   { id: "platforms.overview", label: "Platform Overview", parentId: "platforms", destination: "/platforms" },
   { id: "platforms.cognios", label: "CogniOS", parentId: "platforms", destination: "/platforms/cognios" },

@@ -2520,7 +2520,7 @@ export default function DocumentDetail() {
                   placeholder="Meta description for search engines..."
                   className="font-mono text-xs resize-none min-h-[80px]"
                 />
-                <p id="seo-description-help" className="text-[10px] text-muted-foreground">{typeof seo.description === "string" ? seo.description.length : 0}/180 characters</p>
+                <p id="seo-description-help" className="text-[10px] text-muted-foreground">{typeof seo.description === "string" ? seo.description.length : 0}/300 characters</p>
                 {fieldIssue("seo.description") && <p id="seo-description-error" className="text-xs text-destructive">{fieldIssue("seo.description")}</p>}
               </div>
 

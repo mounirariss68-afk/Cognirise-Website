@@ -310,7 +310,10 @@ const CUTOVER: Record<WebsiteCmsDocumentKind, boolean> = {
  * route authoritative.
  */
 const ENTRY_CUTOVER: Partial<Record<WebsiteCmsDocumentKind, readonly string[]>> = {
-  framework: ["agent-authority-model"],
+  // Framework detail routes are CMS-authoritative individually. In particular,
+  // do not substitute compiled Guardrails copy while its source edition is
+  // absent, unpublished, or unavailable.
+  framework: ["agent-authority-model", "guardrails-framework"],
 };
 
 export function cmsEntryIsCutOver(kind: WebsiteCmsDocumentKind, slug: string): boolean {

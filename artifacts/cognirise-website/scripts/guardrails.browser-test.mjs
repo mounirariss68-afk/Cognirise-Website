@@ -2,299 +2,528 @@ import assert from "node:assert/strict";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 
+// This test deliberately uses the authorized, short-lived CMS preview supplied
+// by the runner. It never reconstructs a payload, intercepts preview requests,
+// or writes the capability path to disk or stdout.
+const previewPath = process.env.PULSE_GUARDRAILS_PREVIEW_PATH;
+const fixtureMode = process.argv.includes("--fixture-render");
+const connectorsOnly = process.argv.includes("--connectors-only");
+const fixturePath = process.env.PULSE_GUARDRAILS_FIXTURE_PATH;
 const baseUrl = process.env.PULSE_BROWSER_BASE_URL || "http://127.0.0.1:80";
 const browserPath = process.env.CHROMIUM_PATH || "/repl/tools/bin/chromium";
-const fixturePath = process.env.GUARDRAILS_FIXTURE;
-const previewRoute = "/preview/guardrails-visual-fixture";
-const navigationPath = "/api/public/navigation?market=uae&locale=en";
-const evidenceDirectory = new URL("../evidence/guardrails/", import.meta.url);
-const profilePath = `/tmp/cognirise-guardrails-browser-test-${process.pid}`;
-const debugPort = 9346;
-const WAIT = 45_000;
-const viewports = [
-  { label: "390", width: 390, height: 844, mobile: true },
-  { label: "1440", width: 1440, height: 1000, mobile: false },
-];
-const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
-if (!fixturePath) throw new Error("GUARDRAILS_FIXTURE must point to the saved draft payload JSON.");
-const clone = (value) => JSON.parse(JSON.stringify(value));
-async function fetchJson(path) {
-  const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), WAIT);
-  try {
-    const response = await fetch(`${baseUrl}${path}`, { signal: controller.signal }); const body = await response.json().catch(() => null);
-    assert.equal(response.status, 200, `${path} returned HTTP ${response.status}: ${JSON.stringify(body)}`); assert.ok(body && typeof body === "object" && !Array.isArray(body), `${path} did not return a JSON object.`);
-    return body;
-  } finally {
-    clearTimeout(timer);
-  }
+const outputDirectory = new URL("../../../screenshots/guardrails/", import.meta.url);
+const profilePath = `/tmp/cognirise-guardrails-browser-smoke-${process.pid}`;
+const debuggingPort = 9351;
+const timeout = 45_000;
+const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+const fixtureToken = "guardrails-fixture-render";
+const fixtureRoute = `/preview/${fixtureToken}`;
+const fixtureEndpoint = `/api/preview/${fixtureToken}`;
+const fixtureNavigation = Object.freeze({
+  market: "uae",
+  locale: "en",
+  items: Object.freeze([]),
+  pages: Object.freeze([]),
+});
+
+if (!fixtureMode && (!previewPath || !previewPath.startsWith("/") || previewPath.includes("://"))) {
+  throw new Error("An authorized Guardrails preview path is required.");
+}
+if (fixtureMode && (!fixturePath || !fixturePath.startsWith("/"))) {
+  throw new Error("Fixture-render mode requires a final Guardrails fixture JSON path.");
 }
 
-const fixture = JSON.parse(await readFile(fixturePath, "utf8"));
-const payload = fixture?.payload && typeof fixture.payload === "object" ? fixture.payload
-  : fixture?.document && typeof fixture.document === "object" ? fixture.document : fixture;
-assert.ok(payload && typeof payload === "object" && !Array.isArray(payload), "Fixture must be a saved cms_revisions.payload object.");
-assert.equal(payload.slug, "agent-authority-model", "Fixture payload.slug must be agent-authority-model.");
-assert.equal(payload.content?.template, "agent-authority", "Fixture payload.content.template must be agent-authority.");
-assert.ok(payload.content && typeof payload.content === "object" && !Array.isArray(payload.content), "Fixture payload.content is required.");
-assert.ok(payload.content.guardrails && typeof payload.content.guardrails === "object", "The after fixture must contain content.guardrails.");
-assert.equal(payload.content.guardrails.firstFigure?.asset, "aam-guardrails-vs-authority.svg");
-assert.equal(payload.content.guardrails.secondFigure?.asset, "aam-how-they-interact.svg");
-const afterPayload = clone(payload);
-const baselinePayload = clone(payload);
-delete baselinePayload.content.guardrails;
-assert.equal(Object.hasOwn(baselinePayload.content, "guardrails"), false);
-const navigation = await fetchJson(navigationPath);
-const fixtureMedia = Array.isArray(fixture?.media) ? fixture.media : [];
-const revisionId = typeof fixture?.revisionId === "string" ? fixture.revisionId : "guardrails-visual-fixture";
-const revisionNumber = Number.isFinite(Number(fixture?.revisionNumber)) ? Number(fixture.revisionNumber) : 1;
-function envelope(document) {
-  return { kind: "framework", document, market: "uae", locale: "en", requestedMarket: "uae",
-    requestedLocale: "en", revisionId, revisionNumber, usedFallback: false, media: fixtureMedia,
-    missingMediaIds: [], validationWarnings: [], navigation };
+const fixtureDocument = fixtureMode ? JSON.parse(await readFile(fixturePath, "utf8")) : null;
+if (fixtureMode && (
+  !fixtureDocument || typeof fixtureDocument !== "object" || Array.isArray(fixtureDocument)
+  || fixtureDocument.slug !== "guardrails-framework"
+  || fixtureDocument.content?.template !== "guardrails"
+)) {
+  throw new Error("Fixture-render mode requires the final Guardrails framework snapshot.");
 }
+const fixtureEnvelope = fixtureMode ? Object.freeze({
+  kind: "framework",
+  document: fixtureDocument,
+  market: "uae",
+  locale: "en",
+  requestedMarket: "uae",
+  requestedLocale: "en",
+  revisionId: "fixture-guardrails-review-stage",
+  revisionNumber: 1,
+  usedFallback: false,
+  media: [],
+  missingMediaIds: [],
+  validationWarnings: [],
+  navigation: fixtureNavigation,
+}) : null;
 
 await rm(profilePath, { recursive: true, force: true });
-await mkdir(evidenceDirectory, { recursive: true });
+await mkdir(outputDirectory, { recursive: true });
+
 const browser = spawn(browserPath, [
-  "--headless=new", "--no-sandbox", "--disable-gpu", "--window-size=1440,1000",
-  `--remote-debugging-port=${debugPort}`, `--user-data-dir=${profilePath}`, "about:blank",
+  "--headless=new",
+  "--no-sandbox",
+  "--disable-gpu",
+  "--window-size=1440,1000",
+  `--remote-debugging-port=${debuggingPort}`,
+  `--user-data-dir=${profilePath}`,
+  "about:blank",
 ], { stdio: "ignore" });
 const browserExited = new Promise((resolve) => browser.once("exit", resolve));
-async function debugTarget() {
-  const deadline = Date.now() + WAIT;
+
+async function getTarget() {
+  const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
-    try { const targets = await fetch(`http://127.0.0.1:${debugPort}/json/list`).then((response) => response.json());
-      const page = targets.find((target) => target.type === "page"); if (page) return page; } catch {}
-    await sleep(100);
+    try {
+      const targets = await fetch(`http://127.0.0.1:${debuggingPort}/json/list`).then((response) => response.json());
+      const target = targets.find((item) => item.type === "page");
+      if (target) return target;
+    } catch {
+      // Chromium has not opened its CDP endpoint yet.
+    }
+    await delay(100);
   }
-  throw new Error("Chromium did not expose a page target within 45 seconds.");
+  throw new Error("Chromium did not expose a page target.");
 }
-const target = await debugTarget();
+
+const target = await getTarget();
 const socket = new WebSocket(target.webSocketDebuggerUrl);
 const pending = new Map();
 let commandId = 0;
-let opened = false;
-let fatalError;
-let mode = "baseline";
-let previewRequestCount = 0;
-let previewEndpointSeen;
-let previewWaiter;
-const imageResponses = new Map();
-const imageRequests = new Map();
-function rejectPending(error) {
-  for (const item of pending.values()) { clearTimeout(item.timer); item.reject(error); }
-  pending.clear();
-}
+let browserError;
+let fixtureRequestCount = 0;
+
 socket.onmessage = ({ data }) => {
   const message = JSON.parse(data);
-  if (message.method === "Runtime.exceptionThrown") fatalError = new Error(message.params.exceptionDetails.text || "Runtime exception");
+  if (message.method === "Runtime.exceptionThrown") {
+    browserError = new Error(message.params.exceptionDetails.text || "Page runtime exception.");
+  }
   if (message.method === "Log.entryAdded" && message.params.entry.level === "error") {
-    fatalError = new Error(message.params.entry.text);
+    browserError = new Error(message.params.entry.text);
   }
-  if (message.method === "Network.responseReceived") {
-    const response = message.params.response;
-    if (message.params.type === "Image" || /\.svg(?:\?|$)/.test(response.url)) {
-      imageResponses.set(response.url, { status: response.status });
-    }
+  if (message.method === "Fetch.requestPaused") {
+    void (async () => {
+      const pathname = new URL(message.params.request.url).pathname;
+      if (!fixtureMode || pathname !== fixtureEndpoint) {
+        await send("Fetch.continueRequest", { requestId: message.params.requestId }).catch(() => {});
+        return;
+      }
+      try {
+        assert.equal(message.params.request.method, "GET", "Fixture render must exercise the CMS preview GET request.");
+        const body = JSON.stringify(fixtureEnvelope);
+        await send("Fetch.fulfillRequest", {
+          requestId: message.params.requestId,
+          responseCode: 200,
+          responseHeaders: [
+            { name: "Content-Type", value: "application/json; charset=utf-8" },
+            { name: "Content-Length", value: String(Buffer.byteLength(body)) },
+            { name: "Cache-Control", value: "no-store" },
+          ],
+          body: Buffer.from(body).toString("base64"),
+        });
+        fixtureRequestCount += 1;
+      } catch (error) {
+        browserError = error instanceof Error ? error : new Error(String(error));
+        await send("Fetch.continueRequest", { requestId: message.params.requestId }).catch(() => {});
+      }
+    })();
   }
-  if (message.method === "Network.requestWillBeSent" && message.params.type === "Image") {
-    imageRequests.set(message.params.requestId, message.params.request.url);
-  }
-  if (message.method === "Network.loadingFailed" && message.params.type === "Image") {
-    imageResponses.set(imageRequests.get(message.params.requestId) || message.params.requestId, { status: 0, error: message.params.error });
-  }
-  if (message.method === "Fetch.requestPaused") { void pauseRequest(message.params); return; }
   if (!message.id || !pending.has(message.id)) return;
-  const item = pending.get(message.id);
+  const request = pending.get(message.id);
   pending.delete(message.id);
-  clearTimeout(item.timer);
-  if (message.error) item.reject(new Error(message.error.message));
-  else item.resolve(message.result);
+  clearTimeout(request.timer);
+  if (message.error) request.reject(new Error(message.error.message));
+  else request.resolve(message.result);
 };
-socket.onerror = (error) => {
-  const failure = new Error(`CDP websocket error: ${String(error)}`);
-  if (!opened) fatalError = failure;
-  rejectPending(failure);
-};
+
 await new Promise((resolve, reject) => {
-  const timer = setTimeout(() => reject(new Error("CDP websocket did not open within 45 seconds.")), WAIT);
-  socket.onopen = () => { clearTimeout(timer); opened = true; resolve(); };
+  const timer = setTimeout(() => reject(new Error("CDP websocket did not open.")), timeout);
+  socket.onopen = () => { clearTimeout(timer); resolve(); };
+  socket.onerror = reject;
 });
+
 function send(method, params = {}) {
   const id = ++commandId;
-  return new Promise((resolve, reject) => { const timer = setTimeout(() => { pending.delete(id); reject(new Error(`CDP ${method} timed out after 45 seconds.`)); }, WAIT);
-    pending.set(id, { resolve, reject, timer }); socket.send(JSON.stringify({ id, method, params })); });
-}
-async function evaluate(expression) {
-  const result = await send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true });
-  if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text);
-  return result.result.value;
-}
-function responseHeaders(body) { return [{ name: "Content-Type", value: "application/json; charset=utf-8" },
-  { name: "Content-Length", value: String(Buffer.byteLength(body)) }, { name: "Cache-Control", value: "no-store" }]; }
-function isPreviewPath(pathname) { return /^\/api\/(?:cms\/)?preview\/guardrails-visual-fixture$/.test(pathname); }
-async function pauseRequest(paused) {
-  const pathname = new URL(paused.request.url).pathname;
-  if (!isPreviewPath(pathname)) { await send("Fetch.continueRequest", { requestId: paused.requestId }).catch(() => {}); return; }
-  try {
-    assert.equal(paused.request.method, "GET", "CmsPreview must fetch the protected preview with GET.");
-    previewEndpointSeen = pathname;
-    const document = mode === "baseline" ? baselinePayload : afterPayload;
-    const body = JSON.stringify(envelope(clone(document)));
-    await send("Fetch.fulfillRequest", {
-      requestId: paused.requestId, responseCode: 200, responseHeaders: responseHeaders(body),
-      body: Buffer.from(body).toString("base64"),
-    });
-    previewRequestCount += 1;
-    if (previewWaiter?.mode === mode) {
-      const waiter = previewWaiter; previewWaiter = undefined; clearTimeout(waiter.timer); waiter.resolve();
-    }
-  } catch (error) {
-    fatalError = error;
-    if (previewWaiter) { const waiter = previewWaiter; previewWaiter = undefined; clearTimeout(waiter.timer); waiter.reject(error); }
-    await send("Fetch.continueRequest", { requestId: paused.requestId }).catch(() => {});
-  }
-}
-function waitForPreview(requestMode) {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => { previewWaiter = undefined; reject(new Error(`CmsPreview request did not arrive within 45 seconds (${requestMode}).`)); }, WAIT);
-    previewWaiter = { mode: requestMode, resolve, reject, timer };
+    const timer = setTimeout(() => {
+      pending.delete(id);
+      reject(new Error(`CDP command timed out: ${method}`));
+    }, timeout);
+    pending.set(id, { resolve, reject, timer });
+    socket.send(JSON.stringify({ id, method, params }));
   });
 }
-const sectionCode = `function key(e){const id=e.getAttribute("id");if(id)return"id:"+id;const h=e.querySelector("h1,h2,h3");const t=h?.textContent?.trim().replace(/\\\\s+/g," ");return t?"heading:"+t:e.tagName.toLowerCase()+":"+[...e.parentElement.children].indexOf(e)}`;
-async function setViewport(viewport) { await send("Emulation.setDeviceMetricsOverride", { width: viewport.width, height: viewport.height, deviceScaleFactor: 1, mobile: viewport.mobile }); }
-async function waitForArticle() {
-  const deadline = Date.now() + WAIT;
+
+async function evaluate(expression) {
+  const result = await send("Runtime.evaluate", {
+    expression,
+    awaitPromise: true,
+    returnByValue: true,
+  });
+  if (result.exceptionDetails) {
+    throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text);
+  }
+  return result.result.value;
+}
+
+async function setViewport(width, height, mobile) {
+  await send("Emulation.setDeviceMetricsOverride", {
+    width, height, mobile, deviceScaleFactor: 1,
+  });
+}
+
+async function waitForPage() {
+  const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
-    if (fatalError) throw fatalError;
-    const ready = await evaluate(`Boolean(location.pathname==="/preview/guardrails-visual-fixture"&&document.querySelector("article h1")&&document.querySelector("#authority-ceiling"))`);
+    if (browserError) throw browserError;
+    const ready = await evaluate(
+      `document.readyState === "complete" && Boolean(document.querySelector(".guardrails-page h1"))`,
+    );
     if (ready) return;
-    await sleep(100);
+    await delay(100);
   }
-  throw new Error("Protected Agent Authority preview did not become ready within 45 seconds.");
+  throw new Error("The authorized Guardrails preview did not become ready.");
 }
-async function waitForAssets() {
-  await evaluate(`(async()=>{await document.fonts.ready;await Promise.all([...document.images].map(async i=>{i.loading="eager";if(!i.complete)await Promise.race([new Promise(r=>{i.addEventListener("load",r,{once:true});i.addEventListener("error",r,{once:true})}),new Promise(r=>setTimeout(r,12000))]);try{await i.decode()}catch{}}));await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));scrollTo(0,0);return true})()`);
+
+async function waitForLayout() {
+  await evaluate(`(async () => {
+    await document.fonts.ready;
+    await Promise.all([...document.images].map(async (image) => {
+      if (!image.complete) await new Promise((resolve) => {
+        image.addEventListener("load", resolve, { once: true });
+        image.addEventListener("error", resolve, { once: true });
+        setTimeout(resolve, 12000);
+      });
+      try { await image.decode(); } catch {}
+    }));
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return true;
+  })()`);
 }
-async function navigate(viewport, nextMode) {
-  mode = nextMode; imageResponses.clear(); imageRequests.clear();
-  await setViewport(viewport);
-  await send("Page.navigate", { url: "about:blank" }); await sleep(50);
-  const before = previewRequestCount;
-  const request = waitForPreview(nextMode);
-  await send("Page.navigate", { url: `${baseUrl}${previewRoute}` });
-  await request; await waitForArticle(); await waitForAssets();
-  assert.equal(previewRequestCount, before + 1, `${nextMode} ${viewport.label}px made an unexpected number of preview requests.`);
+
+async function screenshot(name) {
+  const { contentSize } = await send("Page.getLayoutMetrics");
+  const image = await send("Page.captureScreenshot", {
+    format: "png",
+    captureBeyondViewport: true,
+    clip: {
+      x: 0,
+      y: 0,
+      width: Math.ceil(contentSize.width),
+      height: Math.ceil(contentSize.height),
+      scale: 1,
+    },
+  });
+  await writeFile(new URL(`${name}.png`, outputDirectory), Buffer.from(image.data, "base64"));
 }
-async function sectionList() {
-  return evaluate(`(()=>{${sectionCode}return[...document.querySelectorAll("article>header,article>section")].map(e=>{const r=e.getBoundingClientRect();return{key:key(e),top:r.top+scrollY,bottom:r.bottom+scrollY,height:r.height,guardrails:Boolean(e.querySelector("#guardrails-and-authority"))}})})()`);
+
+async function navigate(viewport) {
+  await setViewport(viewport.width, viewport.height, viewport.mobile);
+  // Keep the opaque capability out of diagnostics. The page itself receives it
+  // only as the supplied browser navigation target.
+  await send("Page.navigate", { url: `${baseUrl}${fixtureMode ? fixtureRoute : previewPath}` });
+  await waitForPage();
+  await waitForLayout();
 }
-async function sectionClip(sectionKey) {
-  return evaluate(`(()=>{${sectionCode}const e=[...document.querySelectorAll("article>header,article>section")].find(x=>key(x)===${JSON.stringify(sectionKey)});if(!e)return null;const r=e.getBoundingClientRect();return{x:Math.max(0,r.left+scrollX),y:Math.max(0,r.top+scrollY),width:Math.ceil(r.width),height:Math.ceil(r.height),scale:1}})()`);
-}
-function slug(value) { return value.replace(/^(?:id|heading):/,"").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").toLowerCase().slice(0,70)||"section"; }
-async function screenshot(name, clip) {
-  const params = { format: "png", captureBeyondViewport: true };
-  if (clip) params.clip = clip;
-  else {
-    const { contentSize } = await send("Page.getLayoutMetrics");
-    params.clip = { x: 0, y: 0, width: Math.ceil(contentSize.width), height: Math.ceil(contentSize.height), scale: 1 };
+
+async function assertViewport(viewport) {
+  const result = await evaluate(`(() => {
+    const root = document.querySelector(".guardrails-page");
+    const headings = [...root.querySelectorAll("h1,h2,h3,h4")]
+      .map((heading) => heading.textContent.replace(/\\s+/g, " ").trim())
+      .filter(Boolean);
+    const outside = [...root.querySelectorAll("h1,h2,h3,h4,p,li,button,a,th,td")]
+      .filter((node) => {
+        if (!node.getClientRects().length || node.closest(".sr-only")) return false;
+        const rect = node.getBoundingClientRect();
+        return rect.left < -1 || rect.right > innerWidth + 1 || node.scrollWidth > node.clientWidth + 2;
+      })
+      .map((node) => ({ tag: node.tagName, text: node.textContent.slice(0, 100), width: node.clientWidth, scrollWidth: node.scrollWidth }));
+    return {
+      pageFits: document.documentElement.scrollWidth <= innerWidth + 1
+        && document.body.scrollWidth <= innerWidth + 1,
+      outside,
+      headings,
+      text: root.innerText.replace(/\\s+/g, " ").trim(),
+    };
+  })()`);
+  assert.equal(result.pageFits, true, `${viewport.label}: page has horizontal overflow.`);
+  assert.deepEqual(result.outside, [], `${viewport.label}: visible content overflows its viewport.`);
+  assert.ok(result.headings.length >= 8, `${viewport.label}: required heading structure is missing.`);
+  assert.ok(result.headings.some((value) => value.includes("guardrail")), `${viewport.label}: Guardrails heading is absent.`);
+  assert.ok(result.text.includes("Agent Authority"), `${viewport.label}: required related methodology content is absent.`);
+  const typeMetrics = await evaluate(`(() => {
+    const root = document.querySelector(".guardrails-page");
+    return {
+      h1: Number.parseFloat(getComputedStyle(root.querySelector("h1")).fontSize),
+      h2: Number.parseFloat(getComputedStyle(root.querySelector("h2")).fontSize),
+    };
+  })()`);
+  if (viewport.label === "desktop") {
+    assert.ok(Math.abs(typeMetrics.h1 - 98) <= 1, `desktop: h1 must render at approximately 98px, received ${typeMetrics.h1}px.`);
   }
-  const image = await send("Page.captureScreenshot", params);
-  await writeFile(new URL(`${name}.png`, evidenceDirectory), Buffer.from(image.data, "base64"));
-}
-async function inspect(viewport) {
-  const result = await evaluate(`(()=>{const s=document.querySelector("#guardrails-and-authority")?.closest("section"),h=document.querySelector("#guardrails-and-authority"),t=s?.querySelector("table"),b=t?.querySelector("tbody"),rows=[...(b?.rows||[])],sr=s?.getBoundingClientRect(),nodes=[...(s?.querySelectorAll("h3,h4,p,th,td,figcaption")||[])],overflow=nodes.filter(n=>{const r=n.getBoundingClientRect();return r.left<(sr?.left??0)-1||r.right>(sr?.right??innerWidth)+1||(getComputedStyle(n).display!=="inline"&&n.scrollWidth>n.clientWidth+2)}).map(n=>({tag:n.tagName,text:n.textContent?.trim().slice(0,100)}));const imgs=[...(s?.querySelectorAll("figure img")||[])].map(i=>{const r=i.getBoundingClientRect(),f=i.closest("figure").getBoundingClientRect();return{src:i.currentSrc||i.src,alt:i.alt,complete:i.complete,naturalWidth:i.naturalWidth,naturalHeight:i.naturalHeight,width:r.width,height:r.height,figureLeft:f.left,figureRight:f.right,marginTop:parseFloat(getComputedStyle(i.closest("figure")).marginTop)||0,caption:i.closest("figure").querySelector("figcaption")?.textContent?.trim()||""}});return{sections:[...document.querySelectorAll("article>header,article>section")].map(e=>{${sectionCode};const r=e.getBoundingClientRect();return{key:key(e),top:r.top+scrollY,bottom:r.bottom+scrollY,height:r.height,guardrails:Boolean(e.querySelector("#guardrails-and-authority"))}}),guardrails:Boolean(s),headingTag:h?.tagName||"",headingId:h?.id||"",h4:[...(s?.querySelectorAll("h4")||[])].map(e=>e.textContent?.trim()),local:[...(s?.querySelectorAll("h3,h4")||[])].map(e=>e.tagName),table:t&&{width:t.getBoundingClientRect().width,scrollWidth:t.scrollWidth,clientWidth:t.clientWidth,head:getComputedStyle(t.querySelector("thead")).display,body:getComputedStyle(b).display,rows:rows.map(r=>getComputedStyle(r).display)},images:imgs,overflow,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,viewportWidth:document.documentElement.clientWidth,sectionBounds:sr&&{left:sr.left,right:sr.right,width:sr.width}}})()`);
-  assert.ok(result.documentWidth <= result.viewportWidth + 1 && result.bodyWidth <= result.viewportWidth + 1, `${viewport.label}px: body has horizontal overflow.`);
-  if (!result.guardrails) return result;
-  const g = afterPayload.content.guardrails;
-  assert.equal(result.headingTag, "H3", `${viewport.label}px: guardrails anchor must be an h3.`);
-  assert.equal(result.headingId, "guardrails-and-authority", `${viewport.label}px: guardrails h3 anchor changed.`);
-  assert.deepEqual(result.h4, [g.comparisonHeading, g.unit.heading, g.interaction.heading, g.designRule.heading], `${viewport.label}px: expected four h4 headings.`);
-  assert.deepEqual(result.local, ["H3","H4","H4","H4","H4"], `${viewport.label}px: guardrails heading hierarchy changed.`);
-  assert.deepEqual(result.overflow, [], `${viewport.label}px: guardrails text overflows or is clipped.`);
-  assert.equal(result.images.length, 2, `${viewport.label}px: expected two guardrails figures.`);
-  const expected = [g.firstFigure, g.secondFigure];
-  for (const [index, image] of result.images.entries()) {
-    const figure = expected[index];
-    assert.ok(image.complete && image.naturalWidth > 0 && image.naturalHeight > 0, `${viewport.label}px: figure ${index + 1} did not load.`);
-    assert.equal(image.alt, figure.altText, `${viewport.label}px: figure ${index + 1} alt text changed.`);
-    assert.equal(new URL(image.src).pathname, `/images/cognirise/${figure.asset}`, `${viewport.label}px: wrong figure asset.`);
-    assert.ok(Math.abs(image.naturalWidth / image.naturalHeight - (index ? 1200 / 760 : 1200 / 700)) < 0.002, `${viewport.label}px: figure ${index + 1} aspect ratio changed.`);
-    assert.ok(image.width > 0 && image.height > 0 && image.marginTop >= 32, `${viewport.label}px: figure ${index + 1} has invalid bounds or margin.`);
-    assert.ok(image.figureLeft >= result.sectionBounds.left - 1 && image.figureRight <= result.sectionBounds.right + 1, `${viewport.label}px: figure ${index + 1} escapes section bounds.`);
-    assert.ok(image.caption.includes(figure.captionLabel) && image.caption.includes(figure.captionLead) && image.caption.includes(figure.captionBody), `${viewport.label}px: figure ${index + 1} caption changed.`);
-    assert.equal(imageResponses.get(image.src)?.status, 200, `${viewport.label}px: ${figure.asset} did not return HTTP 200.`);
+  if (viewport.label === "mobile-390") {
+    assert.ok(Math.abs(typeMetrics.h1 - 50) <= 1, `mobile: h1 must render at approximately 50px, received ${typeMetrics.h1}px.`);
   }
-  assert.ok(result.table && result.table.width <= result.sectionBounds.width + 1 && result.table.scrollWidth <= result.table.clientWidth + 1, `${viewport.label}px: comparison table overflows.`);
-  if (viewport.mobile) {
-    assert.equal(result.table.head, "none", `${viewport.label}px: mobile table header is not hidden.`);
-    assert.equal(result.table.body, "grid", `${viewport.label}px: mobile table body did not stack.`);
-    assert.ok(result.table.rows.every((display) => display === "grid"), `${viewport.label}px: mobile table rows did not stack.`);
-  } else assert.notEqual(result.table.head, "none", `${viewport.label}px: desktop table header is hidden.`);
-  return result;
+  assert.ok(typeMetrics.h2 >= 32, `${viewport.label}: primary section heading is unexpectedly small (${typeMetrics.h2}px).`);
+  await screenshot(`guardrails-preview-${viewport.label}`);
+  const sections = await evaluate(`(() => [...document.querySelectorAll(".guardrails-page > header, .guardrails-page > section")].map((node) => {
+    const rect = node.getBoundingClientRect();
+    return { title: node.querySelector("h1,h2")?.textContent, x: rect.left, y: rect.top + scrollY, width: rect.width, height: rect.height };
+  }))()`);
+  await writeFile(new URL(`guardrails-sections-${viewport.label}.json`, outputDirectory), JSON.stringify(sections, null, 2));
 }
-async function hashCheck(viewport) {
-  await evaluate(`history.replaceState(history.state,"",location.pathname+location.search);location.hash="guardrails-and-authority";true`);
-  await sleep(200);
-  const result = await evaluate(`(()=>{const r=document.querySelector("#guardrails-and-authority")?.getBoundingClientRect();return{hash:location.hash,visible:Boolean(r&&r.top<innerHeight&&r.bottom>0)}})()`);
-  assert.equal(result.hash, "#guardrails-and-authority", `${viewport.label}px: hash navigation failed.`);
-  assert.equal(result.visible, true, `${viewport.label}px: hash target is not visible.`);
+
+async function assertConnectorAlignment(viewport) {
+  const routes = await evaluate(`(() => {
+    const svg = document.querySelector('svg[viewBox="0 0 100 100"]');
+    if (!svg) return { error: "B connector SVG is missing.", routes: [] };
+    const map = svg.parentElement?.parentElement;
+    if (!map) return { error: "B connector map is missing.", routes: [] };
+    const toScreen = (point) => {
+      const svgPoint = svg.createSVGPoint();
+      svgPoint.x = point.x;
+      svgPoint.y = point.y;
+      const matrix = svg.getScreenCTM();
+      return matrix ? svgPoint.matrixTransform(matrix) : null;
+    };
+    const routes = [...svg.querySelectorAll("[data-guardrails-connector]")].map((path) => {
+      const id = path.getAttribute("data-guardrails-connector");
+      const source = map.querySelector('[data-guardrails-band="' + id + '"]');
+      const destinationId = {
+        "internal-reversible": "prompt",
+        "reversible-cost": "runtime",
+        "irreversible-customer": "runtime",
+        "regulator-public-safety": "architecture",
+        "above-ceiling": "architecture",
+      }[id];
+      const destination = map.querySelector('[data-guardrails-destination="' + destinationId + '"]');
+      const start = toScreen(path.getPointAtLength(0));
+      const end = toScreen(path.getPointAtLength(path.getTotalLength()));
+      const sourceRect = source?.getBoundingClientRect();
+      const destinationRect = destination?.getBoundingClientRect();
+      return {
+        id,
+        startDelta: start && sourceRect ? Math.abs(start.y - (sourceRect.top + sourceRect.height / 2)) : Infinity,
+        endDelta: end && destinationRect ? Math.abs(end.y - (destinationRect.top + destinationRect.height / 2)) : Infinity,
+      };
+    });
+    return { error: null, routes };
+  })()`);
+  assert.equal(routes.error, null, `${viewport.label}: ${routes.error}`);
+  assert.equal(routes.routes.length, 5, `${viewport.label}: B must render five connector paths.`);
+  for (const route of routes.routes) {
+    assert.ok(route.startDelta <= 2, `${viewport.label}: ${route.id} source endpoint is ${route.startDelta}px from its band centre.`);
+    assert.ok(route.endDelta <= 2, `${viewport.label}: ${route.id} destination endpoint is ${route.endDelta}px from its destination centre.`);
+  }
 }
-const evidence = {
-  route: previewRoute, previewEndpoint: "CmsPreview protected fetch (Request-stage browser mock)",
-  navigationEndpoint: navigationPath, fixture: fixturePath,
-  baselineLabel: "reconstructed baseline: same saved draft payload with content.guardrails removed; not an original screenshot",
-  afterLabel: "exact saved draft payload from GUARDRAILS_FIXTURE",
-  visualComparison: "browser Fetch interception only; no CMS/database mutation",
-  viewports: {},
-};
-const baselineKeys = [];
+
+async function pointFor(expression) {
+  return evaluate(`(() => {
+    const element = (${expression});
+    if (!element) return null;
+    element.scrollIntoView({ block: "center", inline: "center" });
+    const rect = element.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + Math.min(rect.height / 2, 24) };
+  })()`);
+}
+
+async function hover(expression) {
+  const point = await pointFor(expression);
+  assert.ok(point, "Required Guardrails interaction control is missing.");
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: point.x, y: point.y });
+  await delay(80);
+}
+
+async function click(expression) {
+  const point = await pointFor(expression);
+  assert.ok(point, "Required Guardrails interaction control is missing.");
+  await send("Input.dispatchMouseEvent", { type: "mousePressed", x: point.x, y: point.y, button: "left", clickCount: 1 });
+  await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: point.x, y: point.y, button: "left", clickCount: 1 });
+  await delay(80);
+}
+
+async function touch(expression) {
+  const point = await pointFor(expression);
+  assert.ok(point, "Required Guardrails touch control is missing.");
+  await send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [{ x: point.x, y: point.y, radiusX: 1, radiusY: 1, force: 1, id: 1 }],
+  });
+  await send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await delay(80);
+}
+
+async function key(key, code, keyCode) {
+  await send("Input.dispatchKeyEvent", { type: "keyDown", key, code, windowsVirtualKeyCode: keyCode, nativeVirtualKeyCode: keyCode });
+  await send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: keyCode, nativeVirtualKeyCode: keyCode });
+  await delay(80);
+}
+
+const visibleControl = (selector) => `[...document.querySelectorAll(${JSON.stringify(selector)})].find((node) => node.checkVisibility())`;
+
+async function assertInteractions() {
+  // A — enforcement layers: hover, click-to-pin, keyboard reset.
+  const runtimeLayer = visibleControl("[data-guardrails-layer='runtime']");
+  const runtimeInitial = await evaluate(`(${runtimeLayer})?.className`);
+  await hover(runtimeLayer);
+  assert.notEqual(await evaluate(`(${runtimeLayer})?.className`), runtimeInitial, "A: hover did not expose the Runtime layer.");
+  await click(runtimeLayer);
+  assert.equal(await evaluate(`(${runtimeLayer})?.getAttribute("aria-pressed")`), "true", "A: click did not pin the Runtime layer.");
+  assert.ok((await evaluate(`(${runtimeLayer})?.innerText`)).includes("Reliable against opportunistic misuse"), "A: exact Runtime addition is missing.");
+  await evaluate(`(${runtimeLayer})?.focus(); true`);
+  await key(" ", "Space", 32);
+  assert.equal(await evaluate(`(${runtimeLayer})?.getAttribute("aria-pressed")`), "false", "A: keyboard reset did not restore the overview.");
+
+  // B — exposure sufficiency: hover, pin E3, then use the explicit reset.
+  const staticRelationships = await evaluate(`(() => [...document.querySelectorAll("[data-guardrails-relationship]")].map((node) => node.innerText.replace(/\\s+/g, " ").trim()))()`);
+  assert.deepEqual(staticRelationships, [
+    "Undone at will, internal only → Prompt, with monitoring",
+    "Reversible at a cost, one customer → Runtime",
+    "Irreversible, one customer → Runtime, + architectural scoping of the data and tools reached",
+    "Regulator-visible, public, or safety → Architecture, + an independent second control",
+    "Running above its exposure ceiling → Architecture, + a named artefact that carries the authority",
+  ], "B: all five reviewed exposure relationships and additions must remain visible before selection.");
+  const e3 = visibleControl("[data-guardrails-band='irreversible-customer']");
+  const e3Initial = await evaluate(`(${e3})?.className`);
+  await hover(e3);
+  assert.notEqual(await evaluate(`(${e3})?.className`), e3Initial, "B: hover did not expose E3.");
+  await click(e3);
+  assert.equal(await evaluate(`(${e3})?.getAttribute("aria-pressed")`), "true", "B: click did not pin E3.");
+  const expectedE3Addition = "+ architectural scoping of the data and tools reached";
+  assert.equal(
+    await evaluate(`document.querySelector("[data-guardrails-live-summary]")?.innerText.trim()`),
+    "Irreversible, one customer → Runtime, + architectural scoping of the data and tools reached",
+    "B: pin did not update the exact live relationship summary.",
+  );
+  assert.ok(staticRelationships[2].includes(expectedE3Addition), "B: reviewed E3 addition changed.");
+  await click(visibleControl("[data-guardrails-reset='exposure']"));
+  assert.equal(await evaluate(`document.querySelector("[data-guardrails-live-summary]")?.innerText.trim()`), "", "B: reset did not clear the live selection summary.");
+  assert.deepEqual(
+    await evaluate(`(() => [...document.querySelectorAll("[data-guardrails-relationship]")].map((node) => node.innerText.replace(/\\s+/g, " ").trim()))()`),
+    staticRelationships,
+    "B: reset must preserve every static relationship and addition.",
+  );
+
+  // C — control questions: hover, pin, keyboard reset. The body remains
+  // readable while the card's selected visual state changes.
+  const evidence = visibleControl("[data-guardrails-question='afterwards']");
+  const questionInitial = await evaluate(`(${evidence})?.className`);
+  await hover(evidence);
+  assert.notEqual(await evaluate(`(${evidence})?.className`), questionInitial, "C: hover did not focus the evidence question.");
+  await click(evidence);
+  assert.equal(await evaluate(`(${evidence})?.getAttribute("aria-pressed")`), "true", "C: click did not pin the evidence question.");
+  assert.ok((await evaluate(`(${evidence})?.closest("[role=listitem]")?.innerText`)).includes("What is logged, what is monitored"), "C: exact evidence explanation is missing.");
+  await evaluate(`(${evidence})?.focus(); true`);
+  await key(" ", "Space", 32);
+  assert.equal(await evaluate(`(${evidence})?.getAttribute("aria-pressed")`), "false", "C: keyboard reset did not restore the question overview.");
+
+  // D — method rail: it is a keyboard-operable pinned interaction, not only a
+  // mouse-hover affordance. A regression here must fail the smoke test.
+  const prove = visibleControl("[data-guardrails-method='prove']");
+  const methodInitial = await evaluate(`(${prove})?.closest("h3")?.className`);
+  await hover(prove);
+  assert.notEqual(await evaluate(`(${prove})?.closest("h3")?.className`), methodInitial, "D: hover did not focus the PROVE phase.");
+  await click(prove);
+  assert.equal(await evaluate(`(${prove})?.getAttribute("aria-pressed")`), "true", "D: click did not pin the PROVE phase.");
+  assert.ok((await evaluate(`(${prove})?.parentElement?.parentElement?.innerText`)).includes("Attack each control directly"), "D: exact PROVE method addition is missing.");
+  await evaluate(`(${prove})?.focus(); true`);
+  await key(" ", "Space", 32);
+  assert.equal(await evaluate(`(${prove})?.getAttribute("aria-pressed")`), "false", "D: keyboard reset did not restore the pinned method phase.");
+}
+
+async function assertMobileTouchInteractions() {
+  const runtimeLayer = visibleControl("[data-guardrails-layer='runtime']");
+  await touch(runtimeLayer);
+  assert.equal(await evaluate(`(${runtimeLayer})?.getAttribute("aria-pressed")`), "true", "A mobile: touch did not pin Runtime.");
+  await touch(runtimeLayer);
+  assert.equal(await evaluate(`(${runtimeLayer})?.getAttribute("aria-pressed")`), "false", "A mobile: second touch did not reset Runtime.");
+
+  const e3 = visibleControl("[data-guardrails-band='irreversible-customer']");
+  await touch(e3);
+  assert.equal(await evaluate(`(${e3})?.getAttribute("aria-pressed")`), "true", "B mobile: touch did not pin E3.");
+  assert.equal(
+    await evaluate(`document.querySelector("[data-guardrails-live-summary]")?.innerText.trim()`),
+    "Irreversible, one customer → Runtime, + architectural scoping of the data and tools reached",
+    "B mobile: touch did not retain the exact E3 relationship addition.",
+  );
+  await touch(visibleControl("[data-guardrails-reset='exposure']"));
+  assert.equal(await evaluate(`document.querySelector("[data-guardrails-live-summary]")?.innerText.trim()`), "", "B mobile: reset did not clear the summary.");
+
+  const evidence = visibleControl("[data-guardrails-question='afterwards']");
+  await touch(evidence);
+  assert.equal(await evaluate(`(${evidence})?.getAttribute("aria-pressed")`), "true", "C mobile: touch did not pin the evidence question.");
+  await touch(evidence);
+  assert.equal(await evaluate(`(${evidence})?.getAttribute("aria-pressed")`), "false", "C mobile: second touch did not reset the evidence question.");
+
+  const prove = visibleControl("[data-guardrails-method='prove']");
+  await touch(prove);
+  assert.equal(await evaluate(`(${prove})?.getAttribute("aria-pressed")`), "true", "D mobile: touch did not pin PROVE.");
+  await touch(prove);
+  assert.equal(await evaluate(`(${prove})?.getAttribute("aria-pressed")`), "false", "D mobile: second touch did not reset PROVE.");
+}
+
+async function assertMobilePrint() {
+  await setViewport(390, 844, true);
+  await send("Emulation.setEmulatedMedia", { media: "print" });
+  try {
+    const print = await evaluate(`(() => ({
+      print: matchMedia("print").matches,
+      fits: document.documentElement.scrollWidth <= innerWidth + 1,
+      headings: [...document.querySelectorAll(".guardrails-page h1,h2,h3,h4")].filter((node) => node.checkVisibility()).length,
+    }))()`);
+    assert.equal(print.print, true, "Mobile print emulation was not enabled.");
+    assert.equal(print.fits, true, "Mobile print layout overflows.");
+    assert.ok(print.headings >= 8, "Mobile print drops Guardrails headings.");
+    const pdf = await send("Page.printToPDF", { preferCSSPageSize: true, printBackground: true, displayHeaderFooter: false });
+    await writeFile(new URL("guardrails-preview-mobile-print.pdf", outputDirectory), Buffer.from(pdf.data, "base64"));
+  } finally {
+    await send("Emulation.setEmulatedMedia", { media: "screen" });
+  }
+}
+
 try {
-  await send("Page.enable"); await send("Runtime.enable"); await send("Log.enable"); await send("Network.enable");
+  await send("Page.enable");
+  await send("Runtime.enable");
+  await send("Log.enable");
+  await send("Network.enable");
   await send("Network.setCacheDisabled", { cacheDisabled: true });
-  await send("Fetch.enable", { patterns: [{ urlPattern: "*preview/guardrails-visual-fixture*", requestStage: "Request" }] });
-  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  await send("Page.addScriptToEvaluateOnNewDocument", { source: `(()=>{const s=()=>{const e=document.createElement("style");e.textContent="html,body,*{animation:none!important;transition:none!important;scroll-behavior:auto!important;caret-color:transparent!important}";document.head?.append(e)};document.head?s():document.addEventListener("DOMContentLoaded",s,{once:true})})();` });
-  for (const viewport of viewports) {
-    const before = await (async () => { await navigate(viewport, "baseline"); const inspection = await inspect(viewport); await evaluate("scrollTo(0,0);true"); await screenshot(`baseline-${viewport.label}-fullpage`); const sections = await sectionList(); for (const section of sections) { const clip = await sectionClip(section.key); await screenshot(`baseline-${viewport.label}-section-${slug(section.key)}`, clip); } return { inspection, sections }; })();
-    if (!baselineKeys.length) baselineKeys.push(...before.sections.map((section) => section.key));
-    assert.deepEqual(before.sections.map((section) => section.key), baselineKeys, `${viewport.label}px: reconstructed baseline section order changed.`);
-    assert.equal(before.inspection.guardrails, false, `${viewport.label}px: reconstructed baseline contains guardrails.`);
-    evidence.viewports[viewport.label] = { baselineSections: before.sections };
-  }
-  for (const viewport of viewports) {
-    const after = await navigate(viewport, "after");
-    const inspection = await inspect(viewport);
-    const sections = inspection.sections;
-    assert.deepEqual(sections.filter((section) => baselineKeys.includes(section.key)).map((section) => section.key), baselineKeys, `${viewport.label}px: existing section order changed.`);
-    const newIndex = sections.findIndex((section) => section.guardrails);
-    const authorityIndex = sections.findIndex((section) => section.key === "id:authority-ceiling");
-    assert.ok(newIndex > 0 && newIndex < authorityIndex, `${viewport.label}px: guardrails section is not before authority ceiling.`);
-    assert.equal(inspection.guardrails, true, `${viewport.label}px: exact preview payload did not render guardrails.`);
-    await evaluate("scrollTo(0,0);true"); await screenshot(`after-${viewport.label}-fullpage`);
-    for (const section of sections.filter((item) => baselineKeys.includes(item.key) || item.guardrails)) {
-      const clip = await sectionClip(section.key); assert.ok(clip?.height > 0, `${viewport.label}px: section capture has no bounds.`);
-      await screenshot(`after-${viewport.label}-section-${slug(section.key)}`, clip);
-    }
-    await hashCheck(viewport);
-    const before = evidence.viewports[viewport.label].baselineSections;
-    evidence.viewports[viewport.label].afterSections = sections;
-    evidence.viewports[viewport.label].sectionDisplacements = before.map((item) => {
-      const current = sections.find((section) => section.key === item.key);
-      return { key: item.key, beforeY: item.top, afterY: current?.top ?? null, displacement: current ? current.top - item.top : null };
+  if (fixtureMode) {
+    await send("Fetch.enable", {
+      patterns: [{ urlPattern: `*${fixtureEndpoint}`, requestStage: "Request" }],
     });
   }
-  assert.equal(previewRequestCount, 4, "Expected one intercepted protected preview request per mode and viewport.");
-  assert.ok(previewEndpointSeen, "No CmsPreview endpoint was intercepted.");
-  assert.deepEqual(fatalError, undefined, `Browser console/runtime error: ${fatalError?.message}`);
-  evidence.previewEndpoint = previewEndpointSeen; evidence.previewRequestCount = previewRequestCount;
-  evidence.consoleErrors = []; evidence.fixturePayloadKeys = Object.keys(payload).sort();
-  await writeFile(new URL("run.json", evidenceDirectory), `${JSON.stringify(evidence, null, 2)}\n`);
-  console.log(`Guardrails protected-preview validation passed; evidence saved in ${evidenceDirectory.pathname}`);
+  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+
+  for (const viewport of (connectorsOnly ? [
+    { label: "desktop", width: 1440, height: 1000, mobile: false },
+    { label: "tablet-768", width: 768, height: 1024, mobile: false },
+  ] : [
+    { label: "desktop", width: 1440, height: 1000, mobile: false },
+    { label: "tablet-768", width: 768, height: 1024, mobile: false },
+    { label: "mobile-390", width: 390, height: 844, mobile: true },
+  ])) {
+    await navigate(viewport);
+    await assertViewport(viewport);
+    if (connectorsOnly) await assertConnectorAlignment(viewport);
+  }
+
+  if (!connectorsOnly) {
+    await navigate({ label: "desktop", width: 1440, height: 1000, mobile: false });
+    await assertInteractions();
+    await navigate({ label: "mobile-390", width: 390, height: 844, mobile: true });
+    await assertMobileTouchInteractions();
+    await assertMobilePrint();
+  }
+  if (fixtureMode) assert.ok(fixtureRequestCount >= 1, "Fixture render did not reach the fixed preview endpoint.");
+  assert.equal(browserError, undefined, `Browser error: ${browserError?.message}`);
+  console.log(fixtureMode
+    ? "Guardrails fixture-render browser smoke test passed."
+    : "Guardrails authorized-preview browser smoke test passed.");
 } finally {
-  if (previewWaiter) { clearTimeout(previewWaiter.timer); previewWaiter.reject(new Error("Browser test ended.")); }
-  socket.close(); if (browser.exitCode === null) browser.kill("SIGTERM");
-  await Promise.race([browserExited, sleep(2000)]); if (browser.exitCode === null) browser.kill("SIGKILL");
+  socket.close();
+  if (browser.exitCode === null) browser.kill("SIGTERM");
+  await Promise.race([browserExited, delay(2000)]);
+  if (browser.exitCode === null) browser.kill("SIGKILL");
   await rm(profilePath, { recursive: true, force: true }).catch(() => {});
 }

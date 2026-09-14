@@ -1,10 +1,12 @@
 import {
   FRAMEWORK_GUARDRAILS_FIGURE_ASSETS,
+  guardrailsFrameworkContentSchema,
   type FrameworkContent,
   type FrameworkGuardrailsSubsection,
 } from "@workspace/api-zod";
 
 type UnknownRecord = Record<string, unknown>;
+type AgentAuthorityFrameworkContent = Extract<FrameworkContent, { template: "agent-authority" }>;
 
 function record(value: unknown): UnknownRecord | null {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -51,7 +53,7 @@ function normalizeExample(value: unknown) {
   };
 }
 
-function normalizeWorkedExample(value: unknown): FrameworkContent["workedExample"] | undefined {
+function normalizeWorkedExample(value: unknown): AgentAuthorityFrameworkContent["workedExample"] | undefined {
   const source = record(value);
   const example = normalizeExample(value);
   if (!source || !example) return undefined;
@@ -70,9 +72,9 @@ function normalizeWorkedExample(value: unknown): FrameworkContent["workedExample
   };
 }
 
-function normalizeMethodology(value: unknown): FrameworkContent["methodology"] {
+function normalizeMethodology(value: unknown): AgentAuthorityFrameworkContent["methodology"] {
   if (!Array.isArray(value)) return [];
-  const blocks: FrameworkContent["methodology"] = [];
+  const blocks: AgentAuthorityFrameworkContent["methodology"] = [];
   for (const item of value) {
     const block = record(item);
     if (!block) continue;
@@ -217,6 +219,13 @@ function normalizeGuardrails(value: unknown): FrameworkGuardrailsSubsection | un
 
 export function normalizeFrameworkPreviewContent(value: unknown): FrameworkContent | null {
   const source = record(value);
+  if (source?.template === "guardrails") {
+    // Unlike public delivery, an issued preview may only render the exact
+    // guarded revision. Parse the dedicated template instead of coercing it
+    // into the authority shape or filling it from compiled content.
+    const parsed = guardrailsFrameworkContentSchema.safeParse(value);
+    return parsed.success ? parsed.data : null;
+  }
   if (source?.template !== "agent-authority") return null;
   const sectorExamples = Array.isArray(source.sectorExamples)
     ? source.sectorExamples.map(normalizeExample).filter((item): item is NonNullable<typeof item> => item !== null)
@@ -245,7 +254,7 @@ export function normalizeFrameworkPreviewContent(value: unknown): FrameworkConte
     heroMedia: record(source.heroMedia)
       && typeof record(source.heroMedia)?.mediaId === "string"
       && typeof record(source.heroMedia)?.mediaVersionId === "string"
-      ? source.heroMedia as FrameworkContent["heroMedia"]
+      ? source.heroMedia as AgentAuthorityFrameworkContent["heroMedia"]
       : undefined,
     heroMediaId: typeof source.heroMediaId === "string" ? source.heroMediaId : undefined,
     cta: record(source.cta) && typeof record(source.cta)?.label === "string" && safeLink(record(source.cta)?.href)
@@ -259,5 +268,5 @@ export function normalizeFrameworkPreviewContent(value: unknown): FrameworkConte
     relatedIds: Array.isArray(source.relatedIds)
       ? source.relatedIds.filter((item): item is string => typeof item === "string")
       : [],
-  } as FrameworkContent;
+  } as AgentAuthorityFrameworkContent;
 }

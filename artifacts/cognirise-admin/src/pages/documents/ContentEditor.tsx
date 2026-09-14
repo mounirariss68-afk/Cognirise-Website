@@ -1,5 +1,6 @@
 import type { CmsDocumentKind } from "@workspace/api-zod";
 import * as React from "react";
+import type { ReactNode } from "react";
 import { belongsToIndustrySection, isIndustrySectionId } from "@workspace/api-zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -474,30 +475,40 @@ export function ContentEditor({ kind, value, onChange, errors, readinessPaths = 
 
       {kind === "framework" && <>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Choice label="Framework template" value={value.template ?? ""} options={["agent-authority"]} onChange={(next) => set("template", next)} />
-          <Field label="CTA label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan" } : undefined)} />
-          <SafeDestinationField label="CTA destination" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Start a Value Scan", href: next } : undefined)} />
-        </div>
-        <MediaField label="Framework hero image" required value={value.heroMedia} overridePath="content.heroMedia" onChange={(next) => set("heroMedia", next)} />
-        <Area label="Teaser" value={value.teaser ?? ""} onChange={(next) => set("teaser", next)} />
-        <Area label="Handover explanation" value={value.handoverExplanation ?? ""} onChange={(next) => set("handoverExplanation", next)} rows={6} />
-        <RichBlockEditor label="Methodology narrative" value={value.methodology} onChange={(next) => set("methodology", next)} required />
-        <GuardrailsAuthorityEditor value={value.guardrails} onChange={(next) => set("guardrails", next)} />
-        <RecordList label="Worked example" value={value.workedExample ? [value.workedExample] : []} minimum={1} columns={[{ key: "sector", label: "Sector" }, { key: "title", label: "Title" }, { key: "handover", label: "Handover type" }, { key: "reversibility", label: "Reversibility (R1–R4)" }, { key: "reach", label: "Reach (H1–H5)" }, { key: "exposureBand", label: "Exposure band" }, { key: "oversight", label: "Oversight" }, { key: "detail", label: "Explanation" }]} onChange={(next) => set("workedExample", { ...value.workedExample, ...(next[0] ?? {}) })} />
-        <div className="grid gap-4 sm:grid-cols-2">
           <Choice
-            label="Worked example requested authority"
-            value={value.workedExample?.requestedAuthority ?? "out-of-loop"}
-            options={["out-of-loop", "on-loop", "in-loop", "in-loop-second", "in-loop-external"]}
-            onChange={(next) => set("workedExample", { ...value.workedExample, requestedAuthority: next })}
+            label="Framework template"
+            value={value.template ?? ""}
+            options={["agent-authority", "guardrails"]}
+            onChange={(next) => {
+              if (next === "guardrails" && value.template !== "guardrails") {
+                onChange({ ...guardrailsDraft(), visibility: value.visibility ?? "hidden", order: value.order ?? 0, sources: value.sources ?? [], relatedIds: value.relatedIds ?? [] });
+                return;
+              }
+              set("template", next);
+            }}
           />
-          <Field label="Intervention window" value={value.workedExample?.interventionWindow} onChange={(next) => set("workedExample", { ...value.workedExample, interventionWindow: next || undefined })} />
-          <Field label="Accountable operating role" value={value.workedExample?.accountableRole} onChange={(next) => set("workedExample", { ...value.workedExample, accountableRole: next })} />
-          <Field label="Approved authority artefact (if above ceiling)" value={value.workedExample?.authorityArtefact} onChange={(next) => set("workedExample", { ...value.workedExample, authorityArtefact: next || undefined })} />
         </div>
-        <Area label="Promotion evidence" value={value.workedExample?.promotionEvidence ?? ""} onChange={(next) => set("workedExample", { ...value.workedExample, promotionEvidence: next })} rows={4} />
-        <Area label="Automatic-demotion condition" value={value.workedExample?.automaticDemotion ?? ""} onChange={(next) => set("workedExample", { ...value.workedExample, automaticDemotion: next })} rows={4} />
-        <RecordList label="Sector examples" value={value.sectorExamples} columns={[{ key: "sector", label: "Sector" }, { key: "title", label: "Title" }, { key: "handover", label: "Handover type" }, { key: "reversibility", label: "Reversibility" }, { key: "reach", label: "Reach" }, { key: "exposureBand", label: "Exposure band" }, { key: "oversight", label: "Oversight" }, { key: "detail", label: "Explanation" }]} onChange={(next) => set("sectorExamples", next)} />
+        {value.template === "guardrails" ? <GuardrailsFrameworkEditor value={value} onChange={onChange} /> : <>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="CTA label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan" } : undefined)} />
+            <SafeDestinationField label="CTA destination" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Start a Value Scan", href: next } : undefined)} />
+          </div>
+          <MediaField label="Framework hero image" required value={value.heroMedia} overridePath="content.heroMedia" onChange={(next) => set("heroMedia", next)} />
+          <Area label="Teaser" value={value.teaser ?? ""} onChange={(next) => set("teaser", next)} />
+          <Area label="Handover explanation" value={value.handoverExplanation ?? ""} onChange={(next) => set("handoverExplanation", next)} rows={6} />
+          <RichBlockEditor label="Methodology narrative" value={value.methodology} onChange={(next) => set("methodology", next)} required />
+          <GuardrailsAuthorityEditor value={value.guardrails} onChange={(next) => set("guardrails", next)} />
+          <RecordList label="Worked example" value={value.workedExample ? [value.workedExample] : []} minimum={1} columns={[{ key: "sector", label: "Sector" }, { key: "title", label: "Title" }, { key: "handover", label: "Handover type" }, { key: "reversibility", label: "Reversibility (R1–R4)" }, { key: "reach", label: "Reach (H1–H5)" }, { key: "exposureBand", label: "Exposure band" }, { key: "oversight", label: "Oversight" }, { key: "detail", label: "Explanation" }]} onChange={(next) => set("workedExample", { ...value.workedExample, ...(next[0] ?? {}) })} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Choice label="Worked example requested authority" value={value.workedExample?.requestedAuthority ?? "out-of-loop"} options={["out-of-loop", "on-loop", "in-loop", "in-loop-second", "in-loop-external"]} onChange={(next) => set("workedExample", { ...value.workedExample, requestedAuthority: next })} />
+            <Field label="Intervention window" value={value.workedExample?.interventionWindow} onChange={(next) => set("workedExample", { ...value.workedExample, interventionWindow: next || undefined })} />
+            <Field label="Accountable operating role" value={value.workedExample?.accountableRole} onChange={(next) => set("workedExample", { ...value.workedExample, accountableRole: next })} />
+            <Field label="Approved authority artefact (if above ceiling)" value={value.workedExample?.authorityArtefact} onChange={(next) => set("workedExample", { ...value.workedExample, authorityArtefact: next || undefined })} />
+          </div>
+          <Area label="Promotion evidence" value={value.workedExample?.promotionEvidence ?? ""} onChange={(next) => set("workedExample", { ...value.workedExample, promotionEvidence: next })} rows={4} />
+          <Area label="Automatic-demotion condition" value={value.workedExample?.automaticDemotion ?? ""} onChange={(next) => set("workedExample", { ...value.workedExample, automaticDemotion: next })} rows={4} />
+          <RecordList label="Sector examples" value={value.sectorExamples} columns={[{ key: "sector", label: "Sector" }, { key: "title", label: "Title" }, { key: "handover", label: "Handover type" }, { key: "reversibility", label: "Reversibility" }, { key: "reach", label: "Reach" }, { key: "exposureBand", label: "Exposure band" }, { key: "oversight", label: "Oversight" }, { key: "detail", label: "Explanation" }]} onChange={(next) => set("sectorExamples", next)} />
+        </>}
       </>}
 
       {kind === "landing-page" && <>
@@ -522,6 +533,48 @@ export function ContentEditor({ kind, value, onChange, errors, readinessPaths = 
   );
 }
 
+export function guardrailsDraft(): Content {
+  const text = "";
+  const layerIds = ["policy", "prompt", "runtime", "architecture"];
+  const bandIds = ["internal-reversible", "reversible-cost", "irreversible-customer", "regulator-public-safety", "above-ceiling"];
+  const destinations = ["prompt", "runtime", "runtime", "architecture", "architecture"];
+  const additions = ["monitoring", "none", "architectural-scoping", "independent-control", "authority-artefact"];
+  return {
+    schemaVersion: 1,
+    template: "guardrails",
+    hero: { eyebrow: text, headline: text, subheadline: text, primaryAction: { label: text, href: "/contact" }, secondaryAction: { label: text, href: "/methodologies/agent-authority-model" } },
+    distinction: { heading: text, body: [text, text, text] },
+    layers: {
+      heading: text, intro: text, exampleText: text, tableHeaders: [text, text, text, text, text],
+      table: layerIds.map((id, index) => ({ id, layer: text, whatItIs: text, inThisExample: text, whatGetsPastIt: text, strength: index + 1, strengthLabel: `${index + 1} of 4` })),
+      pullOut: text, closingLine: text, aside: { heading: text, body: text },
+      diagram: {
+        title: text, description: text, kicker: text, rule: text, thresholdAfter: "prompt", thresholdLabel: text, footer: text,
+        rows: layerIds.map((id, index) => ({ id, label: text, description: text, example: text, bypassLabel: text, bypass: text, strength: index + 1, strengthLabel: `${index + 1} of 4` })),
+      },
+    },
+    stoppingRule: {
+      heading: text, intro: text, tableHeaders: [text, text],
+      exposures: bandIds.map((id, index) => ({ id, handover: text, requirement: text, enforcementLayer: destinations[index], additionId: additions[index] })),
+      pullOut: text,
+      diagram: {
+        title: text, description: text, kicker: text, heading: text, bandHeading: text, destinationHeading: text, footer: text, note: text,
+        bands: bandIds.map((id, index) => ({ id, label: text, description: text, destination: destinations[index], additionId: additions[index] })),
+        destinations: ["prompt", "runtime", "architecture"].map((id) => ({ id, label: text, description: text })),
+        additions: ["monitoring", "architectural-scoping", "independent-control", "authority-artefact"].map((id) => ({ id, label: text })),
+      },
+    },
+    questions: { heading: text, intro: text, panels: ["enforcement", "presence", "afterwards"].map((id) => ({ id, title: text, body: text })) },
+    method: { heading: text, intro: text, phases: ["set", "prove", "hold"].map((id) => ({ id, name: text, caption: text, steps: [text, text, text, text] })) },
+    maintenance: { heading: text, tableHeaders: [text, text, text, text], table: layerIds.map((id) => ({ id, layer: text, set: text, prove: text, hold: text })), closingParagraph: text },
+    measurement: { heading: text, statement: text, supportingLine: text },
+    authority: { heading: text, body: [text, text, text, text, text], linkCard: { title: text, description: text, href: "/methodologies/agent-authority-model" } },
+    references: { heading: text, intro: [text, text], groups: ["forbid", "bypass", "measured"].map((id) => ({ id, title: text, items: text })) },
+    moves: { heading: text, moves: [1, 2, 3].map((number) => ({ number, title: text, body: text })), cta: { heading: text, body: text, button: { label: text, href: "/contact" } }, footerNote: text },
+    relatedLink: { title: text, body: text, href: "/methodologies/guardrails-framework" },
+    visibility: "hidden", order: 0, sources: [], relatedIds: [],
+  };
+}
 function GuardrailsAuthorityEditor({ value, onChange }: { value: Content | undefined; onChange: (value: Content | undefined) => void }) {
   const section = value ?? {};
   const set = (key: string, next: unknown) => onChange({ ...section, [key]: next });
@@ -1022,3 +1075,59 @@ function BankingLevels({ value, onChange }: { value: Content[]; onChange: (value
   const update = (index: number, patch: Content) => onChange(levels.map((item, current) => current === index ? { ...item, ...patch } : item));
   return <section className="space-y-3"><Label>Three accountable adoption levels <Requirement required /></Label>{levels.map((item, index) => <fieldset key={item.level ?? index} className="space-y-3 rounded-md border p-3"><legend>Level {item.level ?? index + 1}</legend><Field label={`Level ${index + 1} title`} required value={item.title} onChange={(title) => update(index, { title })} /><Area label={`Level ${index + 1} value`} required value={item.value ?? ""} onChange={(value) => update(index, { value })} /><Field label={`Level ${index + 1} accountable owner`} required value={item.owner} onChange={(owner) => update(index, { owner })} /><StringList label={`Level ${index + 1} illustrative work`} required value={item.illustrativeWork} onChange={(illustrativeWork) => update(index, { illustrativeWork })} /><StringList label={`Level ${index + 1} readiness conditions`} required value={item.readiness} onChange={(readiness) => update(index, { readiness })} /><StringList label={`Level ${index + 1} measures`} required value={item.measures} onChange={(measures) => update(index, { measures })} /><Area label={`Level ${index + 1} decision boundary`} required value={item.decisionBoundary ?? ""} onChange={(decisionBoundary) => update(index, { decisionBoundary })} /></fieldset>)}</section>;
 }
+
+/** The template deliberately exposes prose only. Fixed card IDs, E1–E5
+ * sequence, method step count, and link destinations stay contract-owned. */
+function GuardrailsFrameworkEditor({ value, onChange }: { value: Content; onChange: (value: Content) => void }) {
+  const update = (path: string[], next: unknown) => {
+    const copy = JSON.parse(JSON.stringify(value)) as Content;
+    let target = copy;
+    path.slice(0, -1).forEach((key) => { target = target[key]; });
+    target[path[path.length - 1]] = next;
+    onChange({ ...copy, schemaVersion: 1 });
+  };
+  const area = (label: string, path: string[], rows = 4) => (
+    <Area label={label} value={String(path.reduce((item, key) => item?.[key], value) ?? "")} onChange={(next) => update(path, next)} rows={rows} required />
+  );
+  const section = (title: string, children: ReactNode) => (
+    <section className="space-y-4 rounded-md border p-4"><h3 className="font-semibold">{title}</h3>{children}</section>
+  );
+  const groups = guardrailsEditableTextPaths(value).reduce<Record<string, string[][]>>((all, path) => {
+    const key = path[0] ?? "other";
+    (all[key] ??= []).push(path);
+    return all;
+  }, {});
+  return <div className="space-y-5">
+    <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">This is a separate Guardrails page. Its reviewed structure and destinations are locked; every displayed prose, figure label, accessible text, source list, CTA label, and legal note below is editable.</p>
+    {Object.entries(groups).map(([name, paths]) => section(name.replace(/([A-Z])/g, " $1"), <div className="space-y-4">{paths.map((path) => area(path.slice(1).join(" · ") || name, path, 4))}</div>))}
+  </div>;
+}
+
+/** Returns only editable prose paths. Structural IDs, control placement, and
+ * governance fields are deliberately excluded from the Guardrails editor. */
+export function guardrailsEditableTextPaths(item: unknown, path: string[] = []): string[][] {
+  if (path[0] === "sources" || path[0] === "relatedIds") return [];
+  if (typeof item === "string") return guardrailsStructuralKeys.has(path.at(-1) ?? "") ? [] : [path];
+  if (Array.isArray(item)) return item.flatMap((entry, index) => guardrailsEditableTextPaths(entry, [...path, String(index)]));
+  if (item && typeof item === "object") return Object.entries(item).flatMap(([key, entry]) => guardrailsEditableTextPaths(entry, [...path, key]));
+  return [];
+}
+
+const guardrailsStructuralKeys = new Set([
+  "template",
+  "id",
+  "href",
+  "enforcementLayer",
+  "destination",
+  "additionId",
+  "thresholdAfter",
+  "strength",
+  "strengthLabel",
+  "number",
+  "schemaVersion",
+  "visibility",
+  "order",
+  "verificationDate",
+  "reviewDate",
+  "relatedIds",
+]);

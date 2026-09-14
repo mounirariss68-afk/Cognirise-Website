@@ -5,31 +5,7 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
-import type { CmsFrameworkContentSchemaVersion } from './cmsFrameworkContentSchemaVersion';
-import type { CmsFrameworkContentTemplate } from './cmsFrameworkContentTemplate';
-import type { CmsFrameworkExample } from './cmsFrameworkExample';
-import type { CmsFrameworkWorkedExample } from './cmsFrameworkWorkedExample';
-import type { CmsImmutableMediaReference } from './cmsImmutableMediaReference';
-import type { CmsLink } from './cmsLink';
-import type { CmsRichBlock } from './cmsRichBlock';
-import type { CmsSource } from './cmsSource';
-import type { CmsVisibility } from './cmsVisibility';
+import type { CmsAgentAuthorityFrameworkContent } from './cmsAgentAuthorityFrameworkContent';
+import type { CmsGuardrailsFrameworkContent } from './cmsGuardrailsFrameworkContent';
 
-export interface CmsFrameworkContent {
-  schemaVersion: CmsFrameworkContentSchemaVersion;
-  template: CmsFrameworkContentTemplate;
-  teaser: string;
-  handoverExplanation: string;
-  methodology: CmsRichBlock[];
-  workedExample: CmsFrameworkWorkedExample;
-  sectorExamples?: CmsFrameworkExample[];
-  heroMediaId?: string;
-  heroMedia?: CmsImmutableMediaReference;
-  cta?: CmsLink;
-  visibility?: CmsVisibility;
-  order?: number;
-  sources?: CmsSource[];
-  verificationDate?: Date;
-  reviewDate?: Date;
-  relatedIds?: string[];
-}
+export type CmsFrameworkContent = CmsAgentAuthorityFrameworkContent | CmsGuardrailsFrameworkContent;

@@ -365,3 +365,45 @@ mtime_ms = 1789359231428
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/810d4920-64a3-4c64-b310-b4b60f54400d/31f5ae2b-6337-4d63-92b5-46b9d54299ca"
 storage_version_token = "1789359291053470"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "Qh3G8lJXEAOZEoC0YG7N6"
+uri = "file://screenshots/guardrails/guardrails-review-desktop-exposure.png"
+type = "image"
+title = "Guardrails — desktop exposure diagram"
+description = "Fixture-backed development rendering of the five exact exposure relationships; not evidence of an authenticated preview."
+logical_id = "472add3f-b17b-495b-a49e-f875ce279c2b"
+content_hash = "sha256:cc110935f6399becc207d0db2f5faa92ca07c9e252eb993dc48a2d543dd33d3c"
+size = 226584
+mtime_ms = 1789372817536
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/472add3f-b17b-495b-a49e-f875ce279c2b/58acdef1-9771-4441-bf47-8b9ec8001188"
+storage_version_token = "1789372909533914"
+content_type = "image/png"
+
+[[outputs]]
+id = "m83HV-stgPP4nBoh5u-nd"
+uri = "file://screenshots/guardrails/guardrails-review-mobile-390-method.png"
+type = "image"
+title = "Guardrails — mobile Set, Prove & Hold"
+description = "390px development rendering with all twelve method steps visible."
+logical_id = "7980ccf4-61a5-44cd-aac0-c04c6085b09d"
+content_hash = "sha256:6b53c99836be99d43c247c475e14ef262ae848210859d15da95a00996183e6bc"
+size = 180740
+mtime_ms = 1789372581424
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/7980ccf4-61a5-44cd-aac0-c04c6085b09d/a21c128a-b086-4102-af79-453d3d843f9a"
+storage_version_token = "1789372910849669"
+content_type = "image/png"
+
+[[outputs]]
+id = "4w-QlkCau1teKpU2zyqgL"
+uri = "file://docs/guardrails-review.md"
+type = "text"
+title = "Guardrails final review report"
+description = "Updated with clean post-merge workspace validation, 222 passing API tests, source/editor checks, screenshots, diff inventory and explicit editorial preview gates."
+logical_id = "ba5936aa-26be-44c0-a708-3ce1c8f9844e"
+content_hash = "sha256:7abeb1aeb361dc9a87f9d203f502b5a4a25c25435f8203562226bdf209deee14"
+size = 6994
+mtime_ms = 1789373766509
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/ba5936aa-26be-44c0-a708-3ce1c8f9844e/782faeaf-a4be-4eba-9782-ff1343a6d704"
+storage_version_token = "1789373808639995"
+content_type = "text/markdown"

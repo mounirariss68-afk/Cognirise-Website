@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import test from "node:test";
 import {
+  NAVIGATION_ITEM_REGISTRY,
   NAVIGATION_ITEM_IDS,
   NavigationPolicySnapshotSchema,
   UpdateNavigationSettingsSchema,
@@ -25,6 +26,65 @@ test("the active navigation registry retires Work without accepting new writes",
       visible: true,
     }],
   }).success, false);
+});
+
+test("Guardrails is registered once directly after Agent Authority", () => {
+  const authorityIndex = NAVIGATION_ITEM_IDS.indexOf("methodologies.agent-authority");
+  assert.equal(NAVIGATION_ITEM_IDS[authorityIndex + 1], "methodologies.guardrails");
+  assert.deepEqual(NAVIGATION_ITEM_REGISTRY[authorityIndex + 1], {
+    id: "methodologies.guardrails",
+    label: "Guardrails Framework",
+    parentId: "methodologies",
+    destination: "/methodologies/guardrails-framework",
+  });
+});
+
+test("published navigation does not expose Guardrails before its framework edition is available", async (t) => {
+  t.mock.method(pool, "query", async (sql: unknown) => {
+    const statement = String(sql);
+    if (statement.includes("FROM market_editions WHERE enabled=true")) {
+      return {
+        rowCount: 1,
+        rows: [{
+          code: "uae", default_locale: "en", fallback_market_code: null,
+          fallback_locale: null, is_canonical: true,
+        }],
+      };
+    }
+    if (statement.includes("cms_navigation_published_policies")) {
+      return {
+        rowCount: 1,
+        rows: [{
+          items: [
+            {
+              id: "methodologies",
+              label: "How we do it",
+              parentId: null,
+              order: 0,
+              destination: "/methodologies",
+              visible: true,
+            },
+            {
+              id: "methodologies.guardrails",
+              label: "Guardrails Framework",
+              parentId: "methodologies",
+              order: 6,
+              destination: "/methodologies/guardrails-framework",
+              visible: true,
+            },
+          ],
+          pages: [{ path: "/methodologies/guardrails-framework", enabled: true }],
+          published_at: new Date(),
+        }],
+      };
+    }
+    if (statement.includes("WITH represented_sources")) return { rowCount: 0, rows: [] };
+    return { rowCount: 0, rows: [] };
+  });
+
+  const policy = await publishedNavigationPolicy("uae", "en");
+  assert.equal(policy?.items.find((item) => item.id === "methodologies.guardrails")?.visible, false);
+  assert.equal(await isPublishedPageAvailable("/methodologies/guardrails-framework", "uae", "en"), false);
 });
 
 test("a locale supported only by a fallback market is not a valid requested destination", async (t) => {

@@ -18,6 +18,10 @@ import {
 
 export type PolicyCandidate = { market: string; locale: string };
 type PublishedDocumentRoutes = { known: Set<string>; available: Set<string> };
+// This route is CMS-owned from its first release. Treat it as known before a
+// source edition exists, so an older published navigation snapshot cannot make
+// an unpublished framework discoverable.
+const GOVERNED_FRAMEWORK_ROUTES = ["/methodologies/guardrails-framework"] as const;
 
 function publicPath(value: string) {
   return value.split(/[?#]/)[0]!.replace(/\/+$/, "") || "/";
@@ -108,7 +112,7 @@ async function publishedDocumentRoutes(
         WHERE NOT public_eligible`,
     [market, locale, candidates.map((candidate) => `${candidate.market}|${candidate.locale}`)],
   );
-  const known = new Set<string>();
+  const known = new Set<string>(GOVERNED_FRAMEWORK_ROUTES);
   const available = new Set<string>();
   for (const row of result.rows) {
     if (typeof row.kind !== "string" || !row.payload || typeof row.payload !== "object") continue;

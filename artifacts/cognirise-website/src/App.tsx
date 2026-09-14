@@ -86,6 +86,7 @@ import ValueScan from "@/pages/ValueScan";
 import CmsPreview from "@/pages/CmsPreview";
 
 import AgentAuthorityModel from "@/pages/AgentAuthorityModel";
+import GuardrailsFramework from "@/pages/GuardrailsFramework";
 import IDAOMethodology from "@/pages/IDAOMethodology";
 import MethodologiesPortfolio from "@/pages/MethodologiesPortfolio";
 import AIValueToScale from "@/pages/AIValueToScale";
@@ -137,6 +138,7 @@ export function Router() {
         <Route path="/methodologies/agentic-operations-readiness" component={AgenticOperationsReadiness} />
         <Route path="/methodologies/idao" component={IDAOMethodology} />
         <Route path="/methodologies/agent-authority-model" component={AgentAuthorityModel} />
+        <Route path="/methodologies/guardrails-framework" component={GuardrailsFramework} />
         <Route path="/methodologies/human-agent-operating-model" component={HumanAgentOperatingModel} />
 
         {/* Services */}

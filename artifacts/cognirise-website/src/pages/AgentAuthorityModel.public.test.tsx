@@ -65,6 +65,7 @@ test("the actual published Agent Authority payload normalizes into visible guard
   assert.equal(content.guardrails?.secondFigure.asset, "aam-how-they-interact.svg");
 
   const framework = contentRecord(payload, "framework");
+  if (framework.template !== "agent-authority") throw new Error("Expected the Agent Authority framework template.");
   const html = renderToStaticMarkup(
     <AgentAuthorityLayout framework={framework} renderPolicy="cms" />,
   );

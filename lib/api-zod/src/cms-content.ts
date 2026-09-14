@@ -678,9 +678,11 @@ export const frameworkGuardrailsSubsectionSchema = z.object({
 
 export type FrameworkGuardrailsSubsection = z.infer<typeof frameworkGuardrailsSubsectionSchema>;
 
-export const frameworkContentSchema = z.object({
+/** The original methodology contract. Keep this independently discriminated:
+ * Guardrails is a different public page, not an optional section of AAM. */
+export const agentAuthorityFrameworkContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
-  template: z.literal("agent-authority"),
+  template: z.literal("agent-authority").default("agent-authority"),
   teaser: z.string().trim().min(1).max(1_000),
   handoverExplanation: z.string().trim().min(1).max(4_000),
   methodology: z.array(cmsRichBlockSchema).min(1).max(100),
@@ -693,6 +695,194 @@ export const frameworkContentSchema = z.object({
   cta: z.object({ label: z.string().trim().min(1).max(120), href: safeLink }).strict().optional(),
   ...governance,
 }).strict();
+
+const guardedText = z.string().trim().min(1).max(4_000);
+const fixedId = <T extends z.ZodRawShape>(id: string, shape: T) =>
+  z.object({ id: z.literal(id), ...shape }).strict();
+
+const guardrailsLayerSchema = z.discriminatedUnion("id", [
+  fixedId("policy", { title: guardedText, description: guardedText, example: guardedText, bypass: guardedText, strengthLabel: guardedText }),
+  fixedId("prompt", { title: guardedText, description: guardedText, example: guardedText, bypass: guardedText, strengthLabel: guardedText }),
+  fixedId("runtime", { title: guardedText, description: guardedText, example: guardedText, bypass: guardedText, strengthLabel: guardedText }),
+  fixedId("architecture", { title: guardedText, description: guardedText, example: guardedText, bypass: guardedText, strengthLabel: guardedText }),
+]);
+const guardrailsStoppingRuleSchema = z.discriminatedUnion("id", [
+  fixedId("windowed-reversible", { band: guardedText, minimumLayer: z.literal("prompt"), addition: guardedText }),
+  fixedId("reversible-cost", { band: guardedText, minimumLayer: z.literal("runtime"), addition: z.string().trim().max(2_000) }),
+  fixedId("irreversible-customer", { band: guardedText, minimumLayer: z.literal("runtime"), addition: guardedText }),
+  fixedId("regulator-visible", { band: guardedText, minimumLayer: z.literal("architecture"), addition: guardedText }),
+  fixedId("above-ceiling", { band: guardedText, minimumLayer: z.literal("architecture"), addition: guardedText }),
+]);
+const guardrailsQuestionSchema = z.discriminatedUnion("id", [
+  fixedId("enforcement", { prompt: guardedText, description: guardedText }),
+  fixedId("presence", { prompt: guardedText, description: guardedText }),
+  fixedId("afterwards", { prompt: guardedText, description: guardedText }),
+]);
+const guardrailsMethodPhaseSchema = z.discriminatedUnion("id", [
+  fixedId("set", { title: guardedText, caption: guardedText, steps: z.array(guardedText).length(4) }),
+  fixedId("prove", { title: guardedText, caption: guardedText, steps: z.array(guardedText).length(4) }),
+  fixedId("hold", { title: guardedText, caption: guardedText, steps: z.array(guardedText).length(4) }),
+]);
+const guardrailsMaintenanceSchema = z.discriminatedUnion("id", [
+  fixedId("policy", { layer: guardedText, set: guardedText, prove: guardedText, hold: guardedText }),
+  fixedId("prompt", { layer: guardedText, set: guardedText, prove: guardedText, hold: guardedText }),
+  fixedId("runtime", { layer: guardedText, set: guardedText, prove: guardedText, hold: guardedText }),
+  fixedId("architecture", { layer: guardedText, set: guardedText, prove: guardedText, hold: guardedText }),
+]);
+const guardrailsSourceGroupSchema = z.discriminatedUnion("id", [
+  fixedId("forbid", { heading: guardedText, references: z.array(guardedText).min(1).max(12) }),
+  fixedId("bypass-test", { heading: guardedText, references: z.array(guardedText).min(1).max(12) }),
+  fixedId("measured-against", { heading: guardedText, references: z.array(guardedText).min(1).max(12) }),
+]);
+const guardrailsMoveSchema = z.discriminatedUnion("id", [
+  fixedId("one", { heading: guardedText, body: guardedText }),
+  fixedId("two", { heading: guardedText, body: guardedText }),
+  fixedId("three", { heading: guardedText, body: guardedText }),
+]);
+
+function requiresFixedOrder(
+  expected: readonly string[],
+  path: string,
+) {
+  return (items: Array<{ id: string }>, context: z.RefinementCtx) => {
+    if (items.some((item, index) => item.id !== expected[index])) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [path],
+        message: `${path} must retain its reviewed identifiers and order.`,
+      });
+    }
+  };
+}
+
+/** Dedicated CMS composition for /methodologies/guardrails. The IDs, counts,
+ * E1–E5 mapping, and control placement are contract-owned; prose is edited
+ * only inside those fixed slots. */
+export const guardrailsFrameworkContentSchema = z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
+  template: z.literal("guardrails"),
+  hero: z.object({
+    eyebrow: guardedText,
+    headline: guardedText,
+    subheadline: guardedText,
+    primaryAction: z.object({ label: guardedText, href: z.literal("/contact") }).strict(),
+    secondaryAction: z.object({ label: guardedText, href: z.literal("/methodologies/agent-authority-model") }).strict(),
+  }).strict(),
+  distinction: z.object({
+    heading: guardedText,
+    body: z.array(guardedText).length(3),
+  }).strict(),
+  layers: z.object({
+    heading: guardedText, intro: guardedText, exampleText: guardedText, tableHeaders: z.array(guardedText).length(5),
+    table: z.array(z.object({ id: z.enum(["policy", "prompt", "runtime", "architecture"]), layer: guardedText, whatItIs: guardedText, inThisExample: guardedText, whatGetsPastIt: guardedText, strength: z.number().int().min(1).max(4), strengthLabel: guardedText }).strict()).length(4).superRefine((rows, ctx) => {
+      requiresFixedOrder(["policy", "prompt", "runtime", "architecture"], "layers.table")(rows, ctx);
+      if (rows.some((row, index) => row.strength !== index + 1 || row.strengthLabel !== `${index + 1} of 4`)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "layers.table strength must match its fixed row." });
+    }),
+    pullOut: guardedText, closingLine: guardedText,
+    aside: z.object({ heading: guardedText, body: guardedText }).strict(),
+    diagram: z.object({
+      title: guardedText, description: guardedText, kicker: guardedText, rule: guardedText, thresholdAfter: z.literal("prompt"), thresholdLabel: guardedText, footer: guardedText,
+      rows: z.array(z.object({
+        id: z.enum(["policy", "prompt", "runtime", "architecture"]),
+        label: guardedText, description: guardedText, example: guardedText, bypassLabel: guardedText,
+        bypass: guardedText, strength: z.number().int().min(1).max(4), strengthLabel: guardedText,
+      }).strict()).length(4).superRefine((rows, ctx) => {
+        requiresFixedOrder(["policy", "prompt", "runtime", "architecture"], "layers.diagram.rows")(rows, ctx);
+        if (rows.some((row, index) => row.strength !== index + 1 || row.strengthLabel !== `${index + 1} of 4`)) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: "layers.diagram.rows strength must match its fixed row." });
+        }
+      }),
+    }).strict(),
+  }).strict(),
+  stoppingRule: z.object({
+    heading: guardedText,
+    intro: guardedText, tableHeaders: z.array(guardedText).length(2),
+    exposures: z.array(z.object({ id: z.enum(["internal-reversible", "reversible-cost", "irreversible-customer", "regulator-public-safety", "above-ceiling"]), handover: guardedText, requirement: guardedText, enforcementLayer: z.enum(["prompt", "runtime", "architecture"]), additionId: z.enum(["monitoring", "none", "architectural-scoping", "independent-control", "authority-artefact"]) }).strict()).length(5).superRefine((rows, ctx) => {
+      requiresFixedOrder(["internal-reversible", "reversible-cost", "irreversible-customer", "regulator-public-safety", "above-ceiling"], "stoppingRule.exposures")(rows, ctx);
+      const expected = [["prompt", "monitoring"], ["runtime", "none"], ["runtime", "architectural-scoping"], ["architecture", "independent-control"], ["architecture", "authority-artefact"]] as const;
+      if (rows.some((row, index) => row.enforcementLayer !== expected[index][0] || row.additionId !== expected[index][1])) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Each exposure must retain its fixed enforcement destination and addition." });
+    }),
+    pullOut: guardedText,
+    diagram: z.object({
+      title: guardedText, description: guardedText, kicker: guardedText, heading: guardedText, bandHeading: guardedText, destinationHeading: guardedText, footer: guardedText, note: guardedText,
+      bands: z.array(z.object({ id: z.enum(["internal-reversible", "reversible-cost", "irreversible-customer", "regulator-public-safety", "above-ceiling"]), label: guardedText, description: guardedText, destination: z.enum(["prompt", "runtime", "architecture"]), additionId: z.enum(["monitoring", "none", "architectural-scoping", "independent-control", "authority-artefact"]) }).strict()).length(5).superRefine((bands, ctx) => {
+        requiresFixedOrder(["internal-reversible", "reversible-cost", "irreversible-customer", "regulator-public-safety", "above-ceiling"], "stoppingRule.diagram.bands")(bands, ctx);
+        const expected = [["prompt", "monitoring"], ["runtime", "none"], ["runtime", "architectural-scoping"], ["architecture", "independent-control"], ["architecture", "authority-artefact"]] as const;
+        if (bands.some((band, index) => band.destination !== expected[index][0] || band.additionId !== expected[index][1])) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Each diagram band must retain its fixed enforcement destination and addition." });
+        }
+      }),
+      destinations: z.array(z.object({ id: z.enum(["prompt", "runtime", "architecture"]), label: guardedText, description: guardedText }).strict()).length(3).superRefine(requiresFixedOrder(["prompt", "runtime", "architecture"], "stoppingRule.diagram.destinations")),
+      additions: z.array(z.object({ id: z.enum(["monitoring", "architectural-scoping", "independent-control", "authority-artefact"]), label: guardedText }).strict()).length(4).superRefine(requiresFixedOrder(["monitoring", "architectural-scoping", "independent-control", "authority-artefact"], "stoppingRule.diagram.additions")),
+    }).strict(),
+  }).strict(),
+  questions: z.object({
+    heading: guardedText,
+    intro: guardedText,
+    panels: z.array(z.object({ id: z.enum(["enforcement", "presence", "afterwards"]), title: guardedText, body: guardedText }).strict()).length(3).superRefine(requiresFixedOrder(["enforcement", "presence", "afterwards"], "questions.panels")),
+  }).strict(),
+  method: z.object({
+    heading: guardedText,
+    intro: guardedText,
+    phases: z.array(z.object({ id: z.enum(["set", "prove", "hold"]), name: guardedText, caption: guardedText, steps: z.array(guardedText).length(4) }).strict()).length(3).superRefine(requiresFixedOrder(["set", "prove", "hold"], "method.phases")),
+  }).strict(),
+  maintenance: z.object({
+    heading: guardedText, tableHeaders: z.array(guardedText).length(4),
+    table: z.array(z.object({ id: z.enum(["policy", "prompt", "runtime", "architecture"]), layer: guardedText, set: guardedText, prove: guardedText, hold: guardedText }).strict()).length(4).superRefine(requiresFixedOrder(["policy", "prompt", "runtime", "architecture"], "maintenance.table")),
+    closingParagraph: guardedText,
+  }).strict(),
+  measurement: z.object({ heading: guardedText, statement: guardedText, supportingLine: guardedText }).strict(),
+  authority: z.object({
+    heading: guardedText,
+    body: z.array(guardedText).length(5),
+    linkCard: z.object({ title: guardedText, description: guardedText, href: z.literal("/methodologies/agent-authority-model") }).strict(),
+  }).strict(),
+  references: z.object({
+    heading: guardedText,
+    intro: z.array(guardedText).length(2),
+    groups: z.array(z.object({ id: z.enum(["forbid", "bypass", "measured"]), title: guardedText, items: guardedText }).strict()).length(3).superRefine(requiresFixedOrder(["forbid", "bypass", "measured"], "references.groups")),
+  }).strict(),
+  moves: z.object({
+    heading: guardedText,
+    moves: z.array(z.object({ number: z.number().int().min(1).max(3), title: guardedText, body: guardedText }).strict()).length(3).superRefine((moves, ctx) => {
+      if (moves.some((move, index) => move.number !== index + 1)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "moves.moves must retain numeric order." });
+    }),
+    cta: z.object({ heading: guardedText, body: guardedText, button: z.object({ label: guardedText, href: z.literal("/contact") }).strict() }).strict(),
+    footerNote: guardedText,
+  }).strict(),
+  visibility: z.enum(["public", "hidden", "restricted"]).default("public"),
+  order: z.number().int().min(0).max(10_000).default(0),
+  sources: z.array(cmsSourceSchema).default([]),
+  verificationDate: optionalDate,
+  reviewDate: optionalDate,
+  relatedIds: idList,
+  relatedLink: z.object({ title: guardedText, body: guardedText, href: z.literal("/methodologies/guardrails-framework") }).strict(),
+}).strict();
+
+const frameworkContentDiscriminatedUnion = z.discriminatedUnion("template", [
+  agentAuthorityFrameworkContentSchema,
+  guardrailsFrameworkContentSchema,
+]);
+
+/** Legacy Agent Authority revisions predate the template discriminator.  Only
+ * its absence selects that legacy contract; explicit unknown values remain
+ * invalid rather than being silently reclassified. */
+export const frameworkContentSchema = z.preprocess((value) => {
+  if (
+    value
+    && typeof value === "object"
+    && !Array.isArray(value)
+  ) {
+    const content = value as Record<string, unknown>;
+    if (!Object.prototype.hasOwnProperty.call(content, "template")) {
+      return { ...content, template: "agent-authority" };
+    }
+    // An explicitly supplied discriminator must be valid; Zod's default on
+    // the legacy arm would otherwise treat an explicit undefined as absent.
+    if (content.template === undefined) return { ...content, template: "__invalid__" };
+  }
+  return value;
+}, frameworkContentDiscriminatedUnion);
 
 const heroMediaReferenceSchema = z.object({
   mediaId: z.string().uuid(),
@@ -779,7 +969,7 @@ const blankOrHttpUrl = z.preprocess(
 );
 export const cmsSeoSchema = z.object({
   title: z.string().trim().max(70).optional(),
-  description: z.string().trim().max(180).optional(),
+  description: z.string().trim().max(300).optional(),
   canonicalUrl: blankOrHttpUrl,
   noIndex: z.boolean().default(false),
 }).strict();
@@ -788,7 +978,7 @@ export const CMS_DRAFT_METADATA_LIMITS = {
   title: 240,
   summary: 2_000,
   seoTitle: 70,
-  seoDescription: 180,
+  seoDescription: 300,
 } as const;
 
 export const cmsDraftMetadataSchema = z.object({
@@ -914,6 +1104,9 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   }
   if (kind === "framework") {
     const framework = value as FrameworkContent;
+    // Guardrails has its own fixed composition and intentionally has no
+    // authority-model hero media or calculated worked example.
+    if (framework.template === "guardrails") return errors;
     if (!framework.heroMedia && !framework.heroMediaId) errors.push("A framework requires approved hero media.");
     for (const [index, example] of [framework.workedExample, ...framework.sectorExamples].entries()) {
       const rScore = Number(example.reversibility.slice(1)) as RScore;
@@ -994,6 +1187,43 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   return errors;
 }
 
+const guardrailsDraftStructuralKeys = new Set([
+  "template",
+  "id",
+  "href",
+  "enforcementLayer",
+  "destination",
+  "additionId",
+  "thresholdAfter",
+  "strength",
+  "strengthLabel",
+  "number",
+  "schemaVersion",
+  "visibility",
+  "order",
+  "verificationDate",
+  "reviewDate",
+  "relatedIds",
+]);
+
+function normalizeGuardrailsDraftText(value: unknown, key?: string): unknown {
+  if (typeof value === "string") {
+    return value.trim() === "" && !guardrailsDraftStructuralKeys.has(key ?? "")
+      ? "__CMS_DRAFT_BLANK__"
+      : value;
+  }
+  if (Array.isArray(value)) return value.map((item) => normalizeGuardrailsDraftText(item));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([entryKey, entryValue]) => [
+        entryKey,
+        normalizeGuardrailsDraftText(entryValue, entryKey),
+      ]),
+    );
+  }
+  return value;
+}
+
 export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: CmsValidationMode = "draft") {
   if (mode === "draft" && isInitialCmsDraft(kind, input)) {
     return { success: true as const, data: input as CmsContent };
@@ -1001,7 +1231,30 @@ export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: 
   // Editorial drafts intentionally remain saveable while incomplete. Fields that
   // are present still receive their normal type, length, URL, and enum checks;
   // publication always evaluates the complete authoritative schema below.
-  const schema = mode === "draft" && kind === "landing-page"
+  const frameworkDraftContent = kind === "framework"
+    && input
+    && typeof input === "object"
+    && !Array.isArray(input)
+    ? input as Record<string, unknown>
+    : null;
+  const hasExplicitFrameworkTemplate = frameworkDraftContent
+    ? Object.prototype.hasOwnProperty.call(frameworkDraftContent, "template")
+    : false;
+  const isGuardrailsDraft = kind === "framework"
+    && input
+    && typeof input === "object"
+    && !Array.isArray(input)
+    && frameworkDraftContent?.template === "guardrails";
+  const frameworkDraftSchema = kind === "framework" && input && typeof input === "object" && !Array.isArray(input)
+    ? (isGuardrailsDraft
+      ? z.preprocess((value) => normalizeGuardrailsDraftText(value), guardrailsFrameworkContentSchema.deepPartial())
+      : hasExplicitFrameworkTemplate && frameworkDraftContent?.template !== "agent-authority"
+        ? z.never()
+      : agentAuthorityFrameworkContentSchema.deepPartial())
+    : null;
+  const schema = mode === "draft" && kind === "framework"
+    ? frameworkDraftSchema!
+    : mode === "draft" && kind === "landing-page"
     ? cmsLandingPageContentBaseSchema.deepPartial()
     : mode === "draft" && kind !== "site-configuration"
       ? ((cmsContentSchemas[kind] instanceof z.ZodEffects
@@ -1018,7 +1271,14 @@ export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: 
   const errors = mode === "publish" ? publishErrors(kind, parsed.data as CmsContent) : [];
   return errors.length
     ? { success: false as const, errors }
-    : { success: true as const, data: parsed.data as CmsContent };
+    : {
+      success: true as const,
+      // Blank Guardrails prose is normalized only while checking a draft. Keep
+      // the editor's original empty fields in the save payload.
+      data: mode === "draft" && isGuardrailsDraft
+        ? input as CmsContent
+        : parsed.data as CmsContent,
+    };
 }
 export const cmsSnapshotSchema = cmsDraftMetadataSchema.extend({
   content: z.unknown(),

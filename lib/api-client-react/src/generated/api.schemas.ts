@@ -1547,17 +1547,17 @@ export interface CmsCaseStudyContent {
   relatedIds?: string[];
 }
 
-export type CmsFrameworkContentSchemaVersion = typeof CmsFrameworkContentSchemaVersion[keyof typeof CmsFrameworkContentSchemaVersion];
+export type CmsAgentAuthorityFrameworkContentSchemaVersion = typeof CmsAgentAuthorityFrameworkContentSchemaVersion[keyof typeof CmsAgentAuthorityFrameworkContentSchemaVersion];
 
 
-export const CmsFrameworkContentSchemaVersion = {
+export const CmsAgentAuthorityFrameworkContentSchemaVersion = {
   NUMBER_1: 1,
 } as const;
 
-export type CmsFrameworkContentTemplate = typeof CmsFrameworkContentTemplate[keyof typeof CmsFrameworkContentTemplate];
+export type CmsAgentAuthorityFrameworkContentTemplate = typeof CmsAgentAuthorityFrameworkContentTemplate[keyof typeof CmsAgentAuthorityFrameworkContentTemplate];
 
 
-export const CmsFrameworkContentTemplate = {
+export const CmsAgentAuthorityFrameworkContentTemplate = {
   'agent-authority': 'agent-authority',
 } as const;
 
@@ -1682,9 +1682,9 @@ export interface CmsFrameworkExample {
   detail: string;
 }
 
-export interface CmsFrameworkContent {
-  schemaVersion: CmsFrameworkContentSchemaVersion;
-  template: CmsFrameworkContentTemplate;
+export interface CmsAgentAuthorityFrameworkContent {
+  schemaVersion: CmsAgentAuthorityFrameworkContentSchemaVersion;
+  template: CmsAgentAuthorityFrameworkContentTemplate;
   teaser: string;
   handoverExplanation: string;
   methodology: CmsRichBlock[];
@@ -1700,6 +1700,531 @@ export interface CmsFrameworkContent {
   reviewDate?: string;
   relatedIds?: string[];
 }
+
+export type CmsGuardrailsFrameworkContentSchemaVersion = typeof CmsGuardrailsFrameworkContentSchemaVersion[keyof typeof CmsGuardrailsFrameworkContentSchemaVersion];
+
+
+export const CmsGuardrailsFrameworkContentSchemaVersion = {
+  NUMBER_1: 1,
+} as const;
+
+export type CmsGuardrailsFrameworkContentTemplate = typeof CmsGuardrailsFrameworkContentTemplate[keyof typeof CmsGuardrailsFrameworkContentTemplate];
+
+
+export const CmsGuardrailsFrameworkContentTemplate = {
+  guardrails: 'guardrails',
+} as const;
+
+/**
+ * @minLength 1
+ * @maxLength 4000
+ */
+export type CmsGuardrailsText = string;
+
+export type CmsGuardrailsContactActionHref = typeof CmsGuardrailsContactActionHref[keyof typeof CmsGuardrailsContactActionHref];
+
+
+export const CmsGuardrailsContactActionHref = {
+  '/contact': '/contact',
+} as const;
+
+export interface CmsGuardrailsContactAction {
+  label: CmsGuardrailsText;
+  href: CmsGuardrailsContactActionHref;
+}
+
+export type CmsGuardrailsAuthorityActionHref = typeof CmsGuardrailsAuthorityActionHref[keyof typeof CmsGuardrailsAuthorityActionHref];
+
+
+export const CmsGuardrailsAuthorityActionHref = {
+  '/methodologies/agent-authority-model': '/methodologies/agent-authority-model',
+} as const;
+
+export interface CmsGuardrailsAuthorityAction {
+  label: CmsGuardrailsText;
+  href: CmsGuardrailsAuthorityActionHref;
+}
+
+export interface CmsGuardrailsHero {
+  eyebrow: CmsGuardrailsText;
+  headline: CmsGuardrailsText;
+  subheadline: CmsGuardrailsText;
+  primaryAction: CmsGuardrailsContactAction;
+  secondaryAction: CmsGuardrailsAuthorityAction;
+}
+
+export interface CmsGuardrailsDistinction {
+  heading: CmsGuardrailsText;
+  /**
+     * @minItems 3
+     * @maxItems 3
+     */
+  body: CmsGuardrailsText[];
+}
+
+export type CmsGuardrailsLayerTableRowId = typeof CmsGuardrailsLayerTableRowId[keyof typeof CmsGuardrailsLayerTableRowId];
+
+
+export const CmsGuardrailsLayerTableRowId = {
+  policy: 'policy',
+  prompt: 'prompt',
+  runtime: 'runtime',
+  architecture: 'architecture',
+} as const;
+
+export interface CmsGuardrailsLayerTableRow {
+  id: CmsGuardrailsLayerTableRowId;
+  layer: CmsGuardrailsText;
+  whatItIs: CmsGuardrailsText;
+  inThisExample: CmsGuardrailsText;
+  whatGetsPastIt: CmsGuardrailsText;
+  /**
+     * @minimum 1
+     * @maximum 4
+     */
+  strength: number;
+  strengthLabel: CmsGuardrailsText;
+}
+
+export interface CmsGuardrailsAside {
+  heading: CmsGuardrailsText;
+  body: CmsGuardrailsText;
+}
+
+export type CmsGuardrailsLayerDiagramThresholdAfter = typeof CmsGuardrailsLayerDiagramThresholdAfter[keyof typeof CmsGuardrailsLayerDiagramThresholdAfter];
+
+
+export const CmsGuardrailsLayerDiagramThresholdAfter = {
+  prompt: 'prompt',
+} as const;
+
+export type CmsGuardrailsLayerDiagramRowId = typeof CmsGuardrailsLayerDiagramRowId[keyof typeof CmsGuardrailsLayerDiagramRowId];
+
+
+export const CmsGuardrailsLayerDiagramRowId = {
+  policy: 'policy',
+  prompt: 'prompt',
+  runtime: 'runtime',
+  architecture: 'architecture',
+} as const;
+
+export interface CmsGuardrailsLayerDiagramRow {
+  id: CmsGuardrailsLayerDiagramRowId;
+  label: CmsGuardrailsText;
+  description: CmsGuardrailsText;
+  example: CmsGuardrailsText;
+  bypassLabel: CmsGuardrailsText;
+  bypass: CmsGuardrailsText;
+  /**
+     * @minimum 1
+     * @maximum 4
+     */
+  strength: number;
+  strengthLabel: CmsGuardrailsText;
+}
+
+export interface CmsGuardrailsLayerDiagram {
+  title: CmsGuardrailsText;
+  description: CmsGuardrailsText;
+  kicker: CmsGuardrailsText;
+  rule: CmsGuardrailsText;
+  thresholdAfter: CmsGuardrailsLayerDiagramThresholdAfter;
+  thresholdLabel: CmsGuardrailsText;
+  footer: CmsGuardrailsText;
+  /**
+     * @minItems 4
+     * @maxItems 4
+     */
+  rows: CmsGuardrailsLayerDiagramRow[];
+}
+
+export interface CmsGuardrailsLayers {
+  heading: CmsGuardrailsText;
+  intro: CmsGuardrailsText;
+  exampleText: CmsGuardrailsText;
+  /**
+     * @minItems 5
+     * @maxItems 5
+     */
+  tableHeaders: CmsGuardrailsText[];
+  /**
+     * @minItems 4
+     * @maxItems 4
+     */
+  table: CmsGuardrailsLayerTableRow[];
+  pullOut: CmsGuardrailsText;
+  closingLine: CmsGuardrailsText;
+  aside: CmsGuardrailsAside;
+  diagram: CmsGuardrailsLayerDiagram;
+}
+
+export type CmsGuardrailsExposureId = typeof CmsGuardrailsExposureId[keyof typeof CmsGuardrailsExposureId];
+
+
+export const CmsGuardrailsExposureId = {
+  'internal-reversible': 'internal-reversible',
+  'reversible-cost': 'reversible-cost',
+  'irreversible-customer': 'irreversible-customer',
+  'regulator-public-safety': 'regulator-public-safety',
+  'above-ceiling': 'above-ceiling',
+} as const;
+
+export type CmsGuardrailsExposureEnforcementLayer = typeof CmsGuardrailsExposureEnforcementLayer[keyof typeof CmsGuardrailsExposureEnforcementLayer];
+
+
+export const CmsGuardrailsExposureEnforcementLayer = {
+  prompt: 'prompt',
+  runtime: 'runtime',
+  architecture: 'architecture',
+} as const;
+
+export type CmsGuardrailsExposureAdditionId = typeof CmsGuardrailsExposureAdditionId[keyof typeof CmsGuardrailsExposureAdditionId];
+
+
+export const CmsGuardrailsExposureAdditionId = {
+  monitoring: 'monitoring',
+  none: 'none',
+  'architectural-scoping': 'architectural-scoping',
+  'independent-control': 'independent-control',
+  'authority-artefact': 'authority-artefact',
+} as const;
+
+export interface CmsGuardrailsExposure {
+  id: CmsGuardrailsExposureId;
+  handover: CmsGuardrailsText;
+  requirement: CmsGuardrailsText;
+  enforcementLayer: CmsGuardrailsExposureEnforcementLayer;
+  additionId: CmsGuardrailsExposureAdditionId;
+}
+
+export type CmsGuardrailsStoppingRuleBandId = typeof CmsGuardrailsStoppingRuleBandId[keyof typeof CmsGuardrailsStoppingRuleBandId];
+
+
+export const CmsGuardrailsStoppingRuleBandId = {
+  'internal-reversible': 'internal-reversible',
+  'reversible-cost': 'reversible-cost',
+  'irreversible-customer': 'irreversible-customer',
+  'regulator-public-safety': 'regulator-public-safety',
+  'above-ceiling': 'above-ceiling',
+} as const;
+
+export type CmsGuardrailsStoppingRuleBandDestination = typeof CmsGuardrailsStoppingRuleBandDestination[keyof typeof CmsGuardrailsStoppingRuleBandDestination];
+
+
+export const CmsGuardrailsStoppingRuleBandDestination = {
+  prompt: 'prompt',
+  runtime: 'runtime',
+  architecture: 'architecture',
+} as const;
+
+export type CmsGuardrailsStoppingRuleBandAdditionId = typeof CmsGuardrailsStoppingRuleBandAdditionId[keyof typeof CmsGuardrailsStoppingRuleBandAdditionId];
+
+
+export const CmsGuardrailsStoppingRuleBandAdditionId = {
+  monitoring: 'monitoring',
+  none: 'none',
+  'architectural-scoping': 'architectural-scoping',
+  'independent-control': 'independent-control',
+  'authority-artefact': 'authority-artefact',
+} as const;
+
+export interface CmsGuardrailsStoppingRuleBand {
+  id: CmsGuardrailsStoppingRuleBandId;
+  label: CmsGuardrailsText;
+  description: CmsGuardrailsText;
+  destination: CmsGuardrailsStoppingRuleBandDestination;
+  additionId: CmsGuardrailsStoppingRuleBandAdditionId;
+}
+
+export type CmsGuardrailsStoppingRuleDestinationId = typeof CmsGuardrailsStoppingRuleDestinationId[keyof typeof CmsGuardrailsStoppingRuleDestinationId];
+
+
+export const CmsGuardrailsStoppingRuleDestinationId = {
+  prompt: 'prompt',
+  runtime: 'runtime',
+  architecture: 'architecture',
+} as const;
+
+export interface CmsGuardrailsStoppingRuleDestination {
+  id: CmsGuardrailsStoppingRuleDestinationId;
+  label: CmsGuardrailsText;
+  description: CmsGuardrailsText;
+}
+
+export type CmsGuardrailsStoppingRuleAdditionId = typeof CmsGuardrailsStoppingRuleAdditionId[keyof typeof CmsGuardrailsStoppingRuleAdditionId];
+
+
+export const CmsGuardrailsStoppingRuleAdditionId = {
+  monitoring: 'monitoring',
+  'architectural-scoping': 'architectural-scoping',
+  'independent-control': 'independent-control',
+  'authority-artefact': 'authority-artefact',
+} as const;
+
+export interface CmsGuardrailsStoppingRuleAddition {
+  id: CmsGuardrailsStoppingRuleAdditionId;
+  label: CmsGuardrailsText;
+}
+
+export interface CmsGuardrailsStoppingRuleDiagram {
+  title: CmsGuardrailsText;
+  description: CmsGuardrailsText;
+  kicker: CmsGuardrailsText;
+  heading: CmsGuardrailsText;
+  bandHeading: CmsGuardrailsText;
+  destinationHeading: CmsGuardrailsText;
+  footer: CmsGuardrailsText;
+  note: CmsGuardrailsText;
+  /**
+     * @minItems 5
+     * @maxItems 5
+     */
+  bands: CmsGuardrailsStoppingRuleBand[];
+  /**
+     * @minItems 3
+     * @maxItems 3
+     */
+  destinations: CmsGuardrailsStoppingRuleDestination[];
+  /**
+     * @minItems 4
+     * @maxItems 4
+     */
+  additions: CmsGuardrailsStoppingRuleAddition[];
+}
+
+export interface CmsGuardrailsStoppingRule {
+  heading: CmsGuardrailsText;
+  intro: CmsGuardrailsText;
+  /**
+     * @minItems 2
+     * @maxItems 2
+     */
+  tableHeaders: CmsGuardrailsText[];
+  /**
+     * @minItems 5
+     * @maxItems 5
+     */
+  exposures: CmsGuardrailsExposure[];
+  pullOut: CmsGuardrailsText;
+  diagram: CmsGuardrailsStoppingRuleDiagram;
+}
+
+export type CmsGuardrailsQuestionPanelId = typeof CmsGuardrailsQuestionPanelId[keyof typeof CmsGuardrailsQuestionPanelId];
+
+
+export const CmsGuardrailsQuestionPanelId = {
+  enforcement: 'enforcement',
+  presence: 'presence',
+  afterwards: 'afterwards',
+} as const;
+
+export interface CmsGuardrailsQuestionPanel {
+  id: CmsGuardrailsQuestionPanelId;
+  title: CmsGuardrailsText;
+  body: CmsGuardrailsText;
+}
+
+export interface CmsGuardrailsQuestions {
+  heading: CmsGuardrailsText;
+  intro: CmsGuardrailsText;
+  /**
+     * @minItems 3
+     * @maxItems 3
+     */
+  panels: CmsGuardrailsQuestionPanel[];
+}
+
+export type CmsGuardrailsMethodPhaseId = typeof CmsGuardrailsMethodPhaseId[keyof typeof CmsGuardrailsMethodPhaseId];
+
+
+export const CmsGuardrailsMethodPhaseId = {
+  set: 'set',
+  prove: 'prove',
+  hold: 'hold',
+} as const;
+
+export interface CmsGuardrailsMethodPhase {
+  id: CmsGuardrailsMethodPhaseId;
+  name: CmsGuardrailsText;
+  caption: CmsGuardrailsText;
+  /**
+     * @minItems 4
+     * @maxItems 4
+     */
+  steps: CmsGuardrailsText[];
+}
+
+export interface CmsGuardrailsMethod {
+  heading: CmsGuardrailsText;
+  intro: CmsGuardrailsText;
+  /**
+     * @minItems 3
+     * @maxItems 3
+     */
+  phases: CmsGuardrailsMethodPhase[];
+}
+
+export type CmsGuardrailsMaintenanceRowId = typeof CmsGuardrailsMaintenanceRowId[keyof typeof CmsGuardrailsMaintenanceRowId];
+
+
+export const CmsGuardrailsMaintenanceRowId = {
+  policy: 'policy',
+  prompt: 'prompt',
+  runtime: 'runtime',
+  architecture: 'architecture',
+} as const;
+
+export interface CmsGuardrailsMaintenanceRow {
+  id: CmsGuardrailsMaintenanceRowId;
+  layer: CmsGuardrailsText;
+  set: CmsGuardrailsText;
+  prove: CmsGuardrailsText;
+  hold: CmsGuardrailsText;
+}
+
+export interface CmsGuardrailsMaintenance {
+  heading: CmsGuardrailsText;
+  /**
+     * @minItems 4
+     * @maxItems 4
+     */
+  tableHeaders: CmsGuardrailsText[];
+  /**
+     * @minItems 4
+     * @maxItems 4
+     */
+  table: CmsGuardrailsMaintenanceRow[];
+  closingParagraph: CmsGuardrailsText;
+}
+
+export interface CmsGuardrailsMeasurement {
+  heading: CmsGuardrailsText;
+  statement: CmsGuardrailsText;
+  supportingLine: CmsGuardrailsText;
+}
+
+export type CmsGuardrailsAuthorityLinkCardHref = typeof CmsGuardrailsAuthorityLinkCardHref[keyof typeof CmsGuardrailsAuthorityLinkCardHref];
+
+
+export const CmsGuardrailsAuthorityLinkCardHref = {
+  '/methodologies/agent-authority-model': '/methodologies/agent-authority-model',
+} as const;
+
+export interface CmsGuardrailsAuthorityLinkCard {
+  title: CmsGuardrailsText;
+  description: CmsGuardrailsText;
+  href: CmsGuardrailsAuthorityLinkCardHref;
+}
+
+export interface CmsGuardrailsAuthority {
+  heading: CmsGuardrailsText;
+  /**
+     * @minItems 5
+     * @maxItems 5
+     */
+  body: CmsGuardrailsText[];
+  linkCard: CmsGuardrailsAuthorityLinkCard;
+}
+
+export type CmsGuardrailsReferenceGroupId = typeof CmsGuardrailsReferenceGroupId[keyof typeof CmsGuardrailsReferenceGroupId];
+
+
+export const CmsGuardrailsReferenceGroupId = {
+  forbid: 'forbid',
+  bypass: 'bypass',
+  measured: 'measured',
+} as const;
+
+export interface CmsGuardrailsReferenceGroup {
+  id: CmsGuardrailsReferenceGroupId;
+  title: CmsGuardrailsText;
+  items: CmsGuardrailsText;
+}
+
+export interface CmsGuardrailsReferences {
+  heading: CmsGuardrailsText;
+  /**
+     * @minItems 2
+     * @maxItems 2
+     */
+  intro: CmsGuardrailsText[];
+  /**
+     * @minItems 3
+     * @maxItems 3
+     */
+  groups: CmsGuardrailsReferenceGroup[];
+}
+
+export interface CmsGuardrailsMove {
+  /**
+     * @minimum 1
+     * @maximum 3
+     */
+  number: number;
+  title: CmsGuardrailsText;
+  body: CmsGuardrailsText;
+}
+
+export interface CmsGuardrailsCta {
+  heading: CmsGuardrailsText;
+  body: CmsGuardrailsText;
+  button: CmsGuardrailsContactAction;
+}
+
+export interface CmsGuardrailsMoves {
+  heading: CmsGuardrailsText;
+  /**
+     * @minItems 3
+     * @maxItems 3
+     */
+  moves: CmsGuardrailsMove[];
+  cta: CmsGuardrailsCta;
+  footerNote: CmsGuardrailsText;
+}
+
+export type CmsGuardrailsRelatedLinkHref = typeof CmsGuardrailsRelatedLinkHref[keyof typeof CmsGuardrailsRelatedLinkHref];
+
+
+export const CmsGuardrailsRelatedLinkHref = {
+  '/methodologies/guardrails-framework': '/methodologies/guardrails-framework',
+} as const;
+
+export interface CmsGuardrailsRelatedLink {
+  title: CmsGuardrailsText;
+  body: CmsGuardrailsText;
+  href: CmsGuardrailsRelatedLinkHref;
+}
+
+export interface CmsGuardrailsFrameworkContent {
+  schemaVersion?: CmsGuardrailsFrameworkContentSchemaVersion;
+  template: CmsGuardrailsFrameworkContentTemplate;
+  hero: CmsGuardrailsHero;
+  distinction: CmsGuardrailsDistinction;
+  layers: CmsGuardrailsLayers;
+  stoppingRule: CmsGuardrailsStoppingRule;
+  questions: CmsGuardrailsQuestions;
+  method: CmsGuardrailsMethod;
+  maintenance: CmsGuardrailsMaintenance;
+  measurement: CmsGuardrailsMeasurement;
+  authority: CmsGuardrailsAuthority;
+  references: CmsGuardrailsReferences;
+  moves: CmsGuardrailsMoves;
+  visibility?: CmsVisibility;
+  /**
+     * @minimum 0
+     * @maximum 10000
+     */
+  order?: number;
+  /** @maxItems 30 */
+  sources?: CmsSource[];
+  verificationDate?: string;
+  reviewDate?: string;
+  /** @maxItems 50 */
+  relatedIds?: string[];
+  relatedLink: CmsGuardrailsRelatedLink;
+}
+
+export type CmsFrameworkContent = CmsAgentAuthorityFrameworkContent | CmsGuardrailsFrameworkContent;
 
 export type CmsOfficeContentSchemaVersion = typeof CmsOfficeContentSchemaVersion[keyof typeof CmsOfficeContentSchemaVersion];
 

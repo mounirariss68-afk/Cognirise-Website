@@ -1015,11 +1015,258 @@ export const listDocumentsResponseTwoItemsItemContentFiveHeroMediaAltTextMax = 5
 export const listDocumentsResponseTwoItemsItemContentFiveOrderMultipleOf = 1;
 
 export const listDocumentsResponseTwoItemsItemContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const listDocumentsResponseTwoItemsItemContentSixHeroMediaAltTextMax = 500;
+export const listDocumentsResponseTwoItemsItemContentSixOneHeroMediaAltTextMax = 500;
 
-export const listDocumentsResponseTwoItemsItemContentSixOrderMultipleOf = 1;
+export const listDocumentsResponseTwoItemsItemContentSixOneOrderMultipleOf = 1;
 
-export const listDocumentsResponseTwoItemsItemContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentSixTwoSchemaVersionDefault = 1;
+export const listDocumentsResponseTwoItemsItemContentSixTwoHeroEyebrowMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoHeroHeadlineMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoHeroSubheadlineMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoDistinctionHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoDistinctionBodyMin = 3;
+export const listDocumentsResponseTwoItemsItemContentSixTwoDistinctionBodyMax = 3;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersIntroMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersExampleTextMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersTableHeadersMin = 5;
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersTableHeadersMax = 5;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersTableMin = 4;
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersTableMax = 4;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersPullOutMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersClosingLineMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersAsideBodyMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsMin = 4;
+export const listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsMax = 4;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleExposuresMin = 5;
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoQuestionsHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoQuestionsIntroMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoQuestionsPanelsMin = 3;
+export const listDocumentsResponseTwoItemsItemContentSixTwoQuestionsPanelsMax = 3;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMethodHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMethodIntroMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesItemStepsMin = 4;
+export const listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesMin = 3;
+export const listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesMax = 3;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableHeadersMin = 4;
+export const listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableMin = 4;
+export const listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableMax = 4;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMeasurementHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMeasurementStatementMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoAuthorityHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoAuthorityBodyMin = 5;
+export const listDocumentsResponseTwoItemsItemContentSixTwoAuthorityBodyMax = 5;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoReferencesHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoReferencesIntroItemMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoReferencesIntroMin = 2;
+export const listDocumentsResponseTwoItemsItemContentSixTwoReferencesIntroMax = 2;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoReferencesGroupsMin = 3;
+export const listDocumentsResponseTwoItemsItemContentSixTwoReferencesGroupsMax = 3;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMovesHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMovesMovesMin = 3;
+export const listDocumentsResponseTwoItemsItemContentSixTwoMovesMovesMax = 3;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMovesCtaBodyMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoMovesFooterNoteMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoVisibilityDefault = `public`;
+export const listDocumentsResponseTwoItemsItemContentSixTwoOrderDefault = 0;
+export const listDocumentsResponseTwoItemsItemContentSixTwoOrderMin = 0;
+export const listDocumentsResponseTwoItemsItemContentSixTwoOrderMax = 10000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentsResponseTwoItemsItemContentSixTwoSourcesDefault = [];
+export const listDocumentsResponseTwoItemsItemContentSixTwoSourcesMax = 30;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoRelatedIdsDefault = [];
+export const listDocumentsResponseTwoItemsItemContentSixTwoRelatedIdsMax = 50;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const listDocumentsResponseTwoItemsItemContentSevenCityMax = 160;
 
 export const listDocumentsResponseTwoItemsItemContentSevenAddressMax = 1000;
@@ -1268,7 +1515,7 @@ export const ListDocumentsResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -1311,23 +1558,208 @@ export const ListDocumentsResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(listDocumentsResponseTwoItemsItemContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(listDocumentsResponseTwoItemsItemContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(listDocumentsResponseTwoItemsItemContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(listDocumentsResponseTwoItemsItemContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(listDocumentsResponseTwoItemsItemContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoDistinctionBodyItemMax)).min(listDocumentsResponseTwoItemsItemContentSixTwoDistinctionBodyMin).max(listDocumentsResponseTwoItemsItemContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersTableHeadersItemMax)).min(listDocumentsResponseTwoItemsItemContentSixTwoLayersTableHeadersMin).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(listDocumentsResponseTwoItemsItemContentSixTwoLayersTableMin).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsMin).max(listDocumentsResponseTwoItemsItemContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleTableHeadersItemMax)).min(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleTableHeadersMin).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleExposuresMin).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramBandsMin).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDestinationsMin).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramAdditionsMin).max(listDocumentsResponseTwoItemsItemContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(listDocumentsResponseTwoItemsItemContentSixTwoQuestionsPanelsMin).max(listDocumentsResponseTwoItemsItemContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesItemStepsItemMax)).min(listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesItemStepsMin).max(listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesItemStepsMax)
+})).min(listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesMin).max(listDocumentsResponseTwoItemsItemContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableHeadersItemMax)).min(listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableHeadersMin).max(listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableItemHoldMax)
+})).min(listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableMin).max(listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoAuthorityBodyItemMax)).min(listDocumentsResponseTwoItemsItemContentSixTwoAuthorityBodyMin).max(listDocumentsResponseTwoItemsItemContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoReferencesIntroItemMax)).min(listDocumentsResponseTwoItemsItemContentSixTwoReferencesIntroMin).max(listDocumentsResponseTwoItemsItemContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoReferencesGroupsItemItemsMax)
+})).min(listDocumentsResponseTwoItemsItemContentSixTwoReferencesGroupsMin).max(listDocumentsResponseTwoItemsItemContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMovesMovesItemBodyMax)
+})).min(listDocumentsResponseTwoItemsItemContentSixTwoMovesMovesMin).max(listDocumentsResponseTwoItemsItemContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(listDocumentsResponseTwoItemsItemContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(listDocumentsResponseTwoItemsItemContentSixTwoOrderMin).max(listDocumentsResponseTwoItemsItemContentSixTwoOrderMax).default(listDocumentsResponseTwoItemsItemContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(listDocumentsResponseTwoItemsItemContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(listDocumentsResponseTwoItemsItemContentSixTwoSourcesMax).default(listDocumentsResponseTwoItemsItemContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(listDocumentsResponseTwoItemsItemContentSixTwoRelatedIdsMax).default(listDocumentsResponseTwoItemsItemContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSevenCityMax),
   "address": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSevenAddressMax),
@@ -1469,11 +1901,258 @@ export const createDocumentResponseContentFiveHeroMediaAltTextMax = 500;
 export const createDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const createDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const createDocumentResponseContentSixHeroMediaAltTextMax = 500;
+export const createDocumentResponseContentSixOneHeroMediaAltTextMax = 500;
 
-export const createDocumentResponseContentSixOrderMultipleOf = 1;
+export const createDocumentResponseContentSixOneOrderMultipleOf = 1;
 
-export const createDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentSixTwoSchemaVersionDefault = 1;
+export const createDocumentResponseContentSixTwoHeroEyebrowMax = 4000;
+
+export const createDocumentResponseContentSixTwoHeroHeadlineMax = 4000;
+
+export const createDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
+
+export const createDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const createDocumentResponseContentSixTwoDistinctionBodyMin = 3;
+export const createDocumentResponseContentSixTwoDistinctionBodyMax = 3;
+
+export const createDocumentResponseContentSixTwoLayersHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersIntroMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersExampleTextMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersTableHeadersMin = 5;
+export const createDocumentResponseContentSixTwoLayersTableHeadersMax = 5;
+
+export const createDocumentResponseContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const createDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersTableMin = 4;
+export const createDocumentResponseContentSixTwoLayersTableMax = 4;
+
+export const createDocumentResponseContentSixTwoLayersPullOutMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersClosingLineMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersAsideBodyMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const createDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoLayersDiagramRowsMin = 4;
+export const createDocumentResponseContentSixTwoLayersDiagramRowsMax = 4;
+
+export const createDocumentResponseContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const createDocumentResponseContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const createDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleExposuresMin = 5;
+export const createDocumentResponseContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const createDocumentResponseContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const createDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const createDocumentResponseContentSixTwoQuestionsHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoQuestionsIntroMax = 4000;
+
+export const createDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const createDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const createDocumentResponseContentSixTwoQuestionsPanelsMin = 3;
+export const createDocumentResponseContentSixTwoQuestionsPanelsMax = 3;
+
+export const createDocumentResponseContentSixTwoMethodHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoMethodIntroMax = 4000;
+
+export const createDocumentResponseContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const createDocumentResponseContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const createDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const createDocumentResponseContentSixTwoMethodPhasesItemStepsMin = 4;
+export const createDocumentResponseContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const createDocumentResponseContentSixTwoMethodPhasesMin = 3;
+export const createDocumentResponseContentSixTwoMethodPhasesMax = 3;
+
+export const createDocumentResponseContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const createDocumentResponseContentSixTwoMaintenanceTableHeadersMin = 4;
+export const createDocumentResponseContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const createDocumentResponseContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const createDocumentResponseContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const createDocumentResponseContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const createDocumentResponseContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const createDocumentResponseContentSixTwoMaintenanceTableMin = 4;
+export const createDocumentResponseContentSixTwoMaintenanceTableMax = 4;
+
+export const createDocumentResponseContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const createDocumentResponseContentSixTwoMeasurementHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoMeasurementStatementMax = 4000;
+
+export const createDocumentResponseContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const createDocumentResponseContentSixTwoAuthorityHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const createDocumentResponseContentSixTwoAuthorityBodyMin = 5;
+export const createDocumentResponseContentSixTwoAuthorityBodyMax = 5;
+
+export const createDocumentResponseContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const createDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const createDocumentResponseContentSixTwoReferencesHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoReferencesIntroItemMax = 4000;
+
+export const createDocumentResponseContentSixTwoReferencesIntroMin = 2;
+export const createDocumentResponseContentSixTwoReferencesIntroMax = 2;
+
+export const createDocumentResponseContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const createDocumentResponseContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const createDocumentResponseContentSixTwoReferencesGroupsMin = 3;
+export const createDocumentResponseContentSixTwoReferencesGroupsMax = 3;
+
+export const createDocumentResponseContentSixTwoMovesHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const createDocumentResponseContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const createDocumentResponseContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const createDocumentResponseContentSixTwoMovesMovesMin = 3;
+export const createDocumentResponseContentSixTwoMovesMovesMax = 3;
+
+export const createDocumentResponseContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const createDocumentResponseContentSixTwoMovesCtaBodyMax = 4000;
+
+export const createDocumentResponseContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoMovesFooterNoteMax = 4000;
+
+export const createDocumentResponseContentSixTwoVisibilityDefault = `public`;
+export const createDocumentResponseContentSixTwoOrderDefault = 0;
+export const createDocumentResponseContentSixTwoOrderMin = 0;
+export const createDocumentResponseContentSixTwoOrderMax = 10000;
+
+export const createDocumentResponseContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentResponseContentSixTwoSourcesDefault = [];
+export const createDocumentResponseContentSixTwoSourcesMax = 30;
+
+export const createDocumentResponseContentSixTwoRelatedIdsDefault = [];
+export const createDocumentResponseContentSixTwoRelatedIdsMax = 50;
+
+export const createDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const createDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const createDocumentResponseContentSevenCityMax = 160;
 
 export const createDocumentResponseContentSevenAddressMax = 1000;
@@ -1716,7 +2395,7 @@ export const CreateDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -1759,23 +2438,208 @@ export const CreateDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(createDocumentResponseContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(createDocumentResponseContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(createDocumentResponseContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(createDocumentResponseContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(createDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(createDocumentResponseContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(createDocumentResponseContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(createDocumentResponseContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(createDocumentResponseContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(createDocumentResponseContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(createDocumentResponseContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(createDocumentResponseContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(createDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(createDocumentResponseContentSixTwoDistinctionBodyMin).max(createDocumentResponseContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(createDocumentResponseContentSixTwoLayersTableHeadersItemMax)).min(createDocumentResponseContentSixTwoLayersTableHeadersMin).max(createDocumentResponseContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(createDocumentResponseContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(createDocumentResponseContentSixTwoLayersTableMin).max(createDocumentResponseContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(createDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(createDocumentResponseContentSixTwoLayersDiagramRowsMin).max(createDocumentResponseContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax)).min(createDocumentResponseContentSixTwoStoppingRuleTableHeadersMin).max(createDocumentResponseContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(createDocumentResponseContentSixTwoStoppingRuleExposuresMin).max(createDocumentResponseContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(createDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin).max(createDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(createDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin).max(createDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(createDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(createDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin).max(createDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(createDocumentResponseContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(createDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(createDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(createDocumentResponseContentSixTwoQuestionsPanelsMin).max(createDocumentResponseContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(createDocumentResponseContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(createDocumentResponseContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(createDocumentResponseContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(createDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax)).min(createDocumentResponseContentSixTwoMethodPhasesItemStepsMin).max(createDocumentResponseContentSixTwoMethodPhasesItemStepsMax)
+})).min(createDocumentResponseContentSixTwoMethodPhasesMin).max(createDocumentResponseContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(createDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax)).min(createDocumentResponseContentSixTwoMaintenanceTableHeadersMin).max(createDocumentResponseContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(createDocumentResponseContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(createDocumentResponseContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(createDocumentResponseContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(createDocumentResponseContentSixTwoMaintenanceTableItemHoldMax)
+})).min(createDocumentResponseContentSixTwoMaintenanceTableMin).max(createDocumentResponseContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(createDocumentResponseContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(createDocumentResponseContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(createDocumentResponseContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(createDocumentResponseContentSixTwoAuthorityBodyItemMax)).min(createDocumentResponseContentSixTwoAuthorityBodyMin).max(createDocumentResponseContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(createDocumentResponseContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(createDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(createDocumentResponseContentSixTwoReferencesIntroItemMax)).min(createDocumentResponseContentSixTwoReferencesIntroMin).max(createDocumentResponseContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(createDocumentResponseContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(createDocumentResponseContentSixTwoReferencesGroupsItemItemsMax)
+})).min(createDocumentResponseContentSixTwoReferencesGroupsMin).max(createDocumentResponseContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(createDocumentResponseContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(createDocumentResponseContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(createDocumentResponseContentSixTwoMovesMovesItemBodyMax)
+})).min(createDocumentResponseContentSixTwoMovesMovesMin).max(createDocumentResponseContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(createDocumentResponseContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(createDocumentResponseContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(createDocumentResponseContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(createDocumentResponseContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(createDocumentResponseContentSixTwoOrderMin).max(createDocumentResponseContentSixTwoOrderMax).default(createDocumentResponseContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentResponseContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(createDocumentResponseContentSixTwoSourcesMax).default(createDocumentResponseContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(createDocumentResponseContentSixTwoRelatedIdsMax).default(createDocumentResponseContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(createDocumentResponseContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(createDocumentResponseContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(createDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(createDocumentResponseContentSevenAddressMax),
@@ -1893,11 +2757,258 @@ export const getDocumentResponseContentFiveHeroMediaAltTextMax = 500;
 export const getDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const getDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const getDocumentResponseContentSixHeroMediaAltTextMax = 500;
+export const getDocumentResponseContentSixOneHeroMediaAltTextMax = 500;
 
-export const getDocumentResponseContentSixOrderMultipleOf = 1;
+export const getDocumentResponseContentSixOneOrderMultipleOf = 1;
 
-export const getDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentSixTwoSchemaVersionDefault = 1;
+export const getDocumentResponseContentSixTwoHeroEyebrowMax = 4000;
+
+export const getDocumentResponseContentSixTwoHeroHeadlineMax = 4000;
+
+export const getDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
+
+export const getDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const getDocumentResponseContentSixTwoDistinctionBodyMin = 3;
+export const getDocumentResponseContentSixTwoDistinctionBodyMax = 3;
+
+export const getDocumentResponseContentSixTwoLayersHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersIntroMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersExampleTextMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersTableHeadersMin = 5;
+export const getDocumentResponseContentSixTwoLayersTableHeadersMax = 5;
+
+export const getDocumentResponseContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const getDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersTableMin = 4;
+export const getDocumentResponseContentSixTwoLayersTableMax = 4;
+
+export const getDocumentResponseContentSixTwoLayersPullOutMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersClosingLineMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersAsideBodyMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const getDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoLayersDiagramRowsMin = 4;
+export const getDocumentResponseContentSixTwoLayersDiagramRowsMax = 4;
+
+export const getDocumentResponseContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const getDocumentResponseContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const getDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleExposuresMin = 5;
+export const getDocumentResponseContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const getDocumentResponseContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const getDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const getDocumentResponseContentSixTwoQuestionsHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoQuestionsIntroMax = 4000;
+
+export const getDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const getDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const getDocumentResponseContentSixTwoQuestionsPanelsMin = 3;
+export const getDocumentResponseContentSixTwoQuestionsPanelsMax = 3;
+
+export const getDocumentResponseContentSixTwoMethodHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoMethodIntroMax = 4000;
+
+export const getDocumentResponseContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const getDocumentResponseContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const getDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const getDocumentResponseContentSixTwoMethodPhasesItemStepsMin = 4;
+export const getDocumentResponseContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const getDocumentResponseContentSixTwoMethodPhasesMin = 3;
+export const getDocumentResponseContentSixTwoMethodPhasesMax = 3;
+
+export const getDocumentResponseContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const getDocumentResponseContentSixTwoMaintenanceTableHeadersMin = 4;
+export const getDocumentResponseContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const getDocumentResponseContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const getDocumentResponseContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const getDocumentResponseContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const getDocumentResponseContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const getDocumentResponseContentSixTwoMaintenanceTableMin = 4;
+export const getDocumentResponseContentSixTwoMaintenanceTableMax = 4;
+
+export const getDocumentResponseContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const getDocumentResponseContentSixTwoMeasurementHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoMeasurementStatementMax = 4000;
+
+export const getDocumentResponseContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const getDocumentResponseContentSixTwoAuthorityHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const getDocumentResponseContentSixTwoAuthorityBodyMin = 5;
+export const getDocumentResponseContentSixTwoAuthorityBodyMax = 5;
+
+export const getDocumentResponseContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const getDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const getDocumentResponseContentSixTwoReferencesHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoReferencesIntroItemMax = 4000;
+
+export const getDocumentResponseContentSixTwoReferencesIntroMin = 2;
+export const getDocumentResponseContentSixTwoReferencesIntroMax = 2;
+
+export const getDocumentResponseContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const getDocumentResponseContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const getDocumentResponseContentSixTwoReferencesGroupsMin = 3;
+export const getDocumentResponseContentSixTwoReferencesGroupsMax = 3;
+
+export const getDocumentResponseContentSixTwoMovesHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const getDocumentResponseContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const getDocumentResponseContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const getDocumentResponseContentSixTwoMovesMovesMin = 3;
+export const getDocumentResponseContentSixTwoMovesMovesMax = 3;
+
+export const getDocumentResponseContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const getDocumentResponseContentSixTwoMovesCtaBodyMax = 4000;
+
+export const getDocumentResponseContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoMovesFooterNoteMax = 4000;
+
+export const getDocumentResponseContentSixTwoVisibilityDefault = `public`;
+export const getDocumentResponseContentSixTwoOrderDefault = 0;
+export const getDocumentResponseContentSixTwoOrderMin = 0;
+export const getDocumentResponseContentSixTwoOrderMax = 10000;
+
+export const getDocumentResponseContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentResponseContentSixTwoSourcesDefault = [];
+export const getDocumentResponseContentSixTwoSourcesMax = 30;
+
+export const getDocumentResponseContentSixTwoRelatedIdsDefault = [];
+export const getDocumentResponseContentSixTwoRelatedIdsMax = 50;
+
+export const getDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const getDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const getDocumentResponseContentSevenCityMax = 160;
 
 export const getDocumentResponseContentSevenAddressMax = 1000;
@@ -2140,7 +3251,7 @@ export const GetDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -2183,23 +3294,208 @@ export const GetDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(getDocumentResponseContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(getDocumentResponseContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(getDocumentResponseContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(getDocumentResponseContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(getDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(getDocumentResponseContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(getDocumentResponseContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(getDocumentResponseContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(getDocumentResponseContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(getDocumentResponseContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(getDocumentResponseContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(getDocumentResponseContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(getDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(getDocumentResponseContentSixTwoDistinctionBodyMin).max(getDocumentResponseContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(getDocumentResponseContentSixTwoLayersTableHeadersItemMax)).min(getDocumentResponseContentSixTwoLayersTableHeadersMin).max(getDocumentResponseContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(getDocumentResponseContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(getDocumentResponseContentSixTwoLayersTableMin).max(getDocumentResponseContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(getDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(getDocumentResponseContentSixTwoLayersDiagramRowsMin).max(getDocumentResponseContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax)).min(getDocumentResponseContentSixTwoStoppingRuleTableHeadersMin).max(getDocumentResponseContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(getDocumentResponseContentSixTwoStoppingRuleExposuresMin).max(getDocumentResponseContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(getDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin).max(getDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(getDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin).max(getDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(getDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(getDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin).max(getDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(getDocumentResponseContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(getDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(getDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(getDocumentResponseContentSixTwoQuestionsPanelsMin).max(getDocumentResponseContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(getDocumentResponseContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(getDocumentResponseContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(getDocumentResponseContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(getDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax)).min(getDocumentResponseContentSixTwoMethodPhasesItemStepsMin).max(getDocumentResponseContentSixTwoMethodPhasesItemStepsMax)
+})).min(getDocumentResponseContentSixTwoMethodPhasesMin).max(getDocumentResponseContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(getDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax)).min(getDocumentResponseContentSixTwoMaintenanceTableHeadersMin).max(getDocumentResponseContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(getDocumentResponseContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(getDocumentResponseContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(getDocumentResponseContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(getDocumentResponseContentSixTwoMaintenanceTableItemHoldMax)
+})).min(getDocumentResponseContentSixTwoMaintenanceTableMin).max(getDocumentResponseContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(getDocumentResponseContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(getDocumentResponseContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(getDocumentResponseContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(getDocumentResponseContentSixTwoAuthorityBodyItemMax)).min(getDocumentResponseContentSixTwoAuthorityBodyMin).max(getDocumentResponseContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(getDocumentResponseContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(getDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(getDocumentResponseContentSixTwoReferencesIntroItemMax)).min(getDocumentResponseContentSixTwoReferencesIntroMin).max(getDocumentResponseContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(getDocumentResponseContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(getDocumentResponseContentSixTwoReferencesGroupsItemItemsMax)
+})).min(getDocumentResponseContentSixTwoReferencesGroupsMin).max(getDocumentResponseContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(getDocumentResponseContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(getDocumentResponseContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(getDocumentResponseContentSixTwoMovesMovesItemBodyMax)
+})).min(getDocumentResponseContentSixTwoMovesMovesMin).max(getDocumentResponseContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(getDocumentResponseContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(getDocumentResponseContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(getDocumentResponseContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(getDocumentResponseContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(getDocumentResponseContentSixTwoOrderMin).max(getDocumentResponseContentSixTwoOrderMax).default(getDocumentResponseContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(getDocumentResponseContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(getDocumentResponseContentSixTwoSourcesMax).default(getDocumentResponseContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(getDocumentResponseContentSixTwoRelatedIdsMax).default(getDocumentResponseContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(getDocumentResponseContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(getDocumentResponseContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(getDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(getDocumentResponseContentSevenAddressMax),
@@ -2350,11 +3646,258 @@ export const updateDocumentResponseContentFiveHeroMediaAltTextMax = 500;
 export const updateDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const updateDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const updateDocumentResponseContentSixHeroMediaAltTextMax = 500;
+export const updateDocumentResponseContentSixOneHeroMediaAltTextMax = 500;
 
-export const updateDocumentResponseContentSixOrderMultipleOf = 1;
+export const updateDocumentResponseContentSixOneOrderMultipleOf = 1;
 
-export const updateDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentSixTwoSchemaVersionDefault = 1;
+export const updateDocumentResponseContentSixTwoHeroEyebrowMax = 4000;
+
+export const updateDocumentResponseContentSixTwoHeroHeadlineMax = 4000;
+
+export const updateDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
+
+export const updateDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const updateDocumentResponseContentSixTwoDistinctionBodyMin = 3;
+export const updateDocumentResponseContentSixTwoDistinctionBodyMax = 3;
+
+export const updateDocumentResponseContentSixTwoLayersHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersIntroMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersExampleTextMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersTableHeadersMin = 5;
+export const updateDocumentResponseContentSixTwoLayersTableHeadersMax = 5;
+
+export const updateDocumentResponseContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const updateDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersTableMin = 4;
+export const updateDocumentResponseContentSixTwoLayersTableMax = 4;
+
+export const updateDocumentResponseContentSixTwoLayersPullOutMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersClosingLineMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersAsideBodyMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoLayersDiagramRowsMin = 4;
+export const updateDocumentResponseContentSixTwoLayersDiagramRowsMax = 4;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const updateDocumentResponseContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleExposuresMin = 5;
+export const updateDocumentResponseContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const updateDocumentResponseContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const updateDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const updateDocumentResponseContentSixTwoQuestionsHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoQuestionsIntroMax = 4000;
+
+export const updateDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const updateDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const updateDocumentResponseContentSixTwoQuestionsPanelsMin = 3;
+export const updateDocumentResponseContentSixTwoQuestionsPanelsMax = 3;
+
+export const updateDocumentResponseContentSixTwoMethodHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMethodIntroMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMethodPhasesItemStepsMin = 4;
+export const updateDocumentResponseContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const updateDocumentResponseContentSixTwoMethodPhasesMin = 3;
+export const updateDocumentResponseContentSixTwoMethodPhasesMax = 3;
+
+export const updateDocumentResponseContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMaintenanceTableHeadersMin = 4;
+export const updateDocumentResponseContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const updateDocumentResponseContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMaintenanceTableMin = 4;
+export const updateDocumentResponseContentSixTwoMaintenanceTableMax = 4;
+
+export const updateDocumentResponseContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMeasurementHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMeasurementStatementMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const updateDocumentResponseContentSixTwoAuthorityHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const updateDocumentResponseContentSixTwoAuthorityBodyMin = 5;
+export const updateDocumentResponseContentSixTwoAuthorityBodyMax = 5;
+
+export const updateDocumentResponseContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const updateDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const updateDocumentResponseContentSixTwoReferencesHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoReferencesIntroItemMax = 4000;
+
+export const updateDocumentResponseContentSixTwoReferencesIntroMin = 2;
+export const updateDocumentResponseContentSixTwoReferencesIntroMax = 2;
+
+export const updateDocumentResponseContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const updateDocumentResponseContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const updateDocumentResponseContentSixTwoReferencesGroupsMin = 3;
+export const updateDocumentResponseContentSixTwoReferencesGroupsMax = 3;
+
+export const updateDocumentResponseContentSixTwoMovesHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const updateDocumentResponseContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMovesMovesMin = 3;
+export const updateDocumentResponseContentSixTwoMovesMovesMax = 3;
+
+export const updateDocumentResponseContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMovesCtaBodyMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoMovesFooterNoteMax = 4000;
+
+export const updateDocumentResponseContentSixTwoVisibilityDefault = `public`;
+export const updateDocumentResponseContentSixTwoOrderDefault = 0;
+export const updateDocumentResponseContentSixTwoOrderMin = 0;
+export const updateDocumentResponseContentSixTwoOrderMax = 10000;
+
+export const updateDocumentResponseContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const updateDocumentResponseContentSixTwoSourcesDefault = [];
+export const updateDocumentResponseContentSixTwoSourcesMax = 30;
+
+export const updateDocumentResponseContentSixTwoRelatedIdsDefault = [];
+export const updateDocumentResponseContentSixTwoRelatedIdsMax = 50;
+
+export const updateDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const updateDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const updateDocumentResponseContentSevenCityMax = 160;
 
 export const updateDocumentResponseContentSevenAddressMax = 1000;
@@ -2597,7 +4140,7 @@ export const UpdateDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -2640,23 +4183,208 @@ export const UpdateDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(updateDocumentResponseContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(updateDocumentResponseContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(updateDocumentResponseContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(updateDocumentResponseContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(updateDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(updateDocumentResponseContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(updateDocumentResponseContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(updateDocumentResponseContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(updateDocumentResponseContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(updateDocumentResponseContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(updateDocumentResponseContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(updateDocumentResponseContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(updateDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(updateDocumentResponseContentSixTwoDistinctionBodyMin).max(updateDocumentResponseContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersTableHeadersItemMax)).min(updateDocumentResponseContentSixTwoLayersTableHeadersMin).max(updateDocumentResponseContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(updateDocumentResponseContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(updateDocumentResponseContentSixTwoLayersTableMin).max(updateDocumentResponseContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(updateDocumentResponseContentSixTwoLayersDiagramRowsMin).max(updateDocumentResponseContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax)).min(updateDocumentResponseContentSixTwoStoppingRuleTableHeadersMin).max(updateDocumentResponseContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(updateDocumentResponseContentSixTwoStoppingRuleExposuresMin).max(updateDocumentResponseContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(updateDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(updateDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(updateDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin).max(updateDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(updateDocumentResponseContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(updateDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(updateDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(updateDocumentResponseContentSixTwoQuestionsPanelsMin).max(updateDocumentResponseContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(updateDocumentResponseContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(updateDocumentResponseContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(updateDocumentResponseContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(updateDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax)).min(updateDocumentResponseContentSixTwoMethodPhasesItemStepsMin).max(updateDocumentResponseContentSixTwoMethodPhasesItemStepsMax)
+})).min(updateDocumentResponseContentSixTwoMethodPhasesMin).max(updateDocumentResponseContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(updateDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax)).min(updateDocumentResponseContentSixTwoMaintenanceTableHeadersMin).max(updateDocumentResponseContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(updateDocumentResponseContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(updateDocumentResponseContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(updateDocumentResponseContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(updateDocumentResponseContentSixTwoMaintenanceTableItemHoldMax)
+})).min(updateDocumentResponseContentSixTwoMaintenanceTableMin).max(updateDocumentResponseContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(updateDocumentResponseContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(updateDocumentResponseContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(updateDocumentResponseContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(updateDocumentResponseContentSixTwoAuthorityBodyItemMax)).min(updateDocumentResponseContentSixTwoAuthorityBodyMin).max(updateDocumentResponseContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(updateDocumentResponseContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(updateDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(updateDocumentResponseContentSixTwoReferencesIntroItemMax)).min(updateDocumentResponseContentSixTwoReferencesIntroMin).max(updateDocumentResponseContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(updateDocumentResponseContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(updateDocumentResponseContentSixTwoReferencesGroupsItemItemsMax)
+})).min(updateDocumentResponseContentSixTwoReferencesGroupsMin).max(updateDocumentResponseContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(updateDocumentResponseContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(updateDocumentResponseContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(updateDocumentResponseContentSixTwoMovesMovesItemBodyMax)
+})).min(updateDocumentResponseContentSixTwoMovesMovesMin).max(updateDocumentResponseContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(updateDocumentResponseContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(updateDocumentResponseContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(updateDocumentResponseContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(updateDocumentResponseContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(updateDocumentResponseContentSixTwoOrderMin).max(updateDocumentResponseContentSixTwoOrderMax).default(updateDocumentResponseContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(updateDocumentResponseContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(updateDocumentResponseContentSixTwoSourcesMax).default(updateDocumentResponseContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(updateDocumentResponseContentSixTwoRelatedIdsMax).default(updateDocumentResponseContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(updateDocumentResponseContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(updateDocumentResponseContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(updateDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(updateDocumentResponseContentSevenAddressMax),
@@ -2790,11 +4518,258 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveHeroMed
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveOrderMultipleOf = 1;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixHeroMediaAltTextMax = 500;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOneHeroMediaAltTextMax = 500;
 
-export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOrderMultipleOf = 1;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOneOrderMultipleOf = 1;
 
-export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoSchemaVersionDefault = 1;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroEyebrowMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroHeadlineMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroSubheadlineMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionBodyMin = 3;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionBodyMax = 3;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersIntroMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersExampleTextMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableHeadersMin = 5;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableHeadersMax = 5;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableMin = 4;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableMax = 4;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersPullOutMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersClosingLineMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersAsideBodyMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsMin = 4;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsMax = 4;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleExposuresMin = 5;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsIntroMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsPanelsMin = 3;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsPanelsMax = 3;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodIntroMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesItemStepsMin = 4;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesMin = 3;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesMax = 3;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableHeadersMin = 4;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableMin = 4;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableMax = 4;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMeasurementHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMeasurementStatementMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityBodyMin = 5;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityBodyMax = 5;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesIntroItemMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesIntroMin = 2;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesIntroMax = 2;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesGroupsMin = 3;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesGroupsMax = 3;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesMovesMin = 3;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesMovesMax = 3;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesCtaBodyMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesFooterNoteMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoVisibilityDefault = `public`;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoOrderDefault = 0;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoOrderMin = 0;
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoOrderMax = 10000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoSourcesDefault = [];
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoSourcesMax = 30;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelatedIdsDefault = [];
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelatedIdsMax = 50;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenCityMax = 160;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenAddressMax = 1000;
@@ -3046,7 +5021,7 @@ export const ListDocumentRevisionsResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -3089,23 +5064,208 @@ export const ListDocumentRevisionsResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionBodyItemMax)).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionBodyMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableHeadersItemMax)).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableHeadersMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleTableHeadersItemMax)).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleTableHeadersMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleExposuresMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramBandsMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDestinationsMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramAdditionsMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsPanelsMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesItemStepsItemMax)).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesItemStepsMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesItemStepsMax)
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableHeadersItemMax)).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableHeadersMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableItemHoldMax)
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityBodyItemMax)).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityBodyMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesIntroItemMax)).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesIntroMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesGroupsItemItemsMax)
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesGroupsMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesMovesItemBodyMax)
+})).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesMovesMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoOrderMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoOrderMax).default(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoSourcesMax).default(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelatedIdsMax).default(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenCityMax),
   "address": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSevenAddressMax),
@@ -3259,11 +5419,258 @@ export const createDocumentEditionOverrideResponseSnapshotContentFiveHeroMediaAl
 export const createDocumentEditionOverrideResponseSnapshotContentFiveOrderMultipleOf = 1;
 
 export const createDocumentEditionOverrideResponseSnapshotContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const createDocumentEditionOverrideResponseSnapshotContentSixHeroMediaAltTextMax = 500;
+export const createDocumentEditionOverrideResponseSnapshotContentSixOneHeroMediaAltTextMax = 500;
 
-export const createDocumentEditionOverrideResponseSnapshotContentSixOrderMultipleOf = 1;
+export const createDocumentEditionOverrideResponseSnapshotContentSixOneOrderMultipleOf = 1;
 
-export const createDocumentEditionOverrideResponseSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoSchemaVersionDefault = 1;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroEyebrowMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroHeadlineMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroSubheadlineMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionBodyMin = 3;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionBodyMax = 3;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersIntroMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersExampleTextMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableHeadersMin = 5;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableHeadersMax = 5;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableMin = 4;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableMax = 4;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersPullOutMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersClosingLineMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersAsideBodyMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsMin = 4;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsMax = 4;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleExposuresMin = 5;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsIntroMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsPanelsMin = 3;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsPanelsMax = 3;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodIntroMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesItemStepsMin = 4;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesMin = 3;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesMax = 3;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableHeadersMin = 4;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableMin = 4;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableMax = 4;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMeasurementHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMeasurementStatementMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityBodyMin = 5;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityBodyMax = 5;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesIntroItemMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesIntroMin = 2;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesIntroMax = 2;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesGroupsMin = 3;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesGroupsMax = 3;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesMovesMin = 3;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesMovesMax = 3;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesCtaBodyMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesFooterNoteMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoVisibilityDefault = `public`;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoOrderDefault = 0;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoOrderMin = 0;
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoOrderMax = 10000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoSourcesDefault = [];
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoSourcesMax = 30;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedIdsDefault = [];
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedIdsMax = 50;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const createDocumentEditionOverrideResponseSnapshotContentSevenCityMax = 160;
 
 export const createDocumentEditionOverrideResponseSnapshotContentSevenAddressMax = 1000;
@@ -3509,7 +5916,7 @@ export const CreateDocumentEditionOverrideResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -3552,23 +5959,208 @@ export const CreateDocumentEditionOverrideResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(createDocumentEditionOverrideResponseSnapshotContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(createDocumentEditionOverrideResponseSnapshotContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(createDocumentEditionOverrideResponseSnapshotContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionBodyItemMax)).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionBodyMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableHeadersItemMax)).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableHeadersMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleTableHeadersItemMax)).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleTableHeadersMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleExposuresMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramBandsMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsPanelsMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesItemStepsItemMax)).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesItemStepsMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesItemStepsMax)
+})).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableHeadersItemMax)).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableHeadersMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableItemHoldMax)
+})).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityBodyItemMax)).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityBodyMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesIntroItemMax)).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesIntroMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesGroupsItemItemsMax)
+})).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesGroupsMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesMovesItemBodyMax)
+})).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesMovesMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(createDocumentEditionOverrideResponseSnapshotContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(createDocumentEditionOverrideResponseSnapshotContentSixTwoOrderMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoOrderMax).default(createDocumentEditionOverrideResponseSnapshotContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(createDocumentEditionOverrideResponseSnapshotContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoSourcesMax).default(createDocumentEditionOverrideResponseSnapshotContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedIdsMax).default(createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSevenCityMax),
   "address": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSevenAddressMax),
@@ -5088,11 +7680,258 @@ export const getDocumentRevisionResponseSnapshotContentFiveHeroMediaAltTextMax =
 export const getDocumentRevisionResponseSnapshotContentFiveOrderMultipleOf = 1;
 
 export const getDocumentRevisionResponseSnapshotContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const getDocumentRevisionResponseSnapshotContentSixHeroMediaAltTextMax = 500;
+export const getDocumentRevisionResponseSnapshotContentSixOneHeroMediaAltTextMax = 500;
 
-export const getDocumentRevisionResponseSnapshotContentSixOrderMultipleOf = 1;
+export const getDocumentRevisionResponseSnapshotContentSixOneOrderMultipleOf = 1;
 
-export const getDocumentRevisionResponseSnapshotContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentSixTwoSchemaVersionDefault = 1;
+export const getDocumentRevisionResponseSnapshotContentSixTwoHeroEyebrowMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoHeroHeadlineMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoHeroSubheadlineMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoDistinctionHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoDistinctionBodyMin = 3;
+export const getDocumentRevisionResponseSnapshotContentSixTwoDistinctionBodyMax = 3;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersIntroMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersExampleTextMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersTableHeadersMin = 5;
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersTableHeadersMax = 5;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersTableMin = 4;
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersTableMax = 4;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersPullOutMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersClosingLineMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersAsideBodyMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsMin = 4;
+export const getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsMax = 4;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleExposuresMin = 5;
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoQuestionsHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoQuestionsIntroMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoQuestionsPanelsMin = 3;
+export const getDocumentRevisionResponseSnapshotContentSixTwoQuestionsPanelsMax = 3;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMethodHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMethodIntroMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesItemStepsMin = 4;
+export const getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesMin = 3;
+export const getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesMax = 3;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableHeadersMin = 4;
+export const getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableMin = 4;
+export const getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableMax = 4;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMeasurementHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMeasurementStatementMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoAuthorityHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoAuthorityBodyMin = 5;
+export const getDocumentRevisionResponseSnapshotContentSixTwoAuthorityBodyMax = 5;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoReferencesHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoReferencesIntroItemMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoReferencesIntroMin = 2;
+export const getDocumentRevisionResponseSnapshotContentSixTwoReferencesIntroMax = 2;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoReferencesGroupsMin = 3;
+export const getDocumentRevisionResponseSnapshotContentSixTwoReferencesGroupsMax = 3;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMovesHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMovesMovesMin = 3;
+export const getDocumentRevisionResponseSnapshotContentSixTwoMovesMovesMax = 3;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMovesCtaBodyMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoMovesFooterNoteMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoVisibilityDefault = `public`;
+export const getDocumentRevisionResponseSnapshotContentSixTwoOrderDefault = 0;
+export const getDocumentRevisionResponseSnapshotContentSixTwoOrderMin = 0;
+export const getDocumentRevisionResponseSnapshotContentSixTwoOrderMax = 10000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const getDocumentRevisionResponseSnapshotContentSixTwoSourcesDefault = [];
+export const getDocumentRevisionResponseSnapshotContentSixTwoSourcesMax = 30;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoRelatedIdsDefault = [];
+export const getDocumentRevisionResponseSnapshotContentSixTwoRelatedIdsMax = 50;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const getDocumentRevisionResponseSnapshotContentSevenCityMax = 160;
 
 export const getDocumentRevisionResponseSnapshotContentSevenAddressMax = 1000;
@@ -5338,7 +8177,7 @@ export const GetDocumentRevisionResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -5381,23 +8220,208 @@ export const GetDocumentRevisionResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(getDocumentRevisionResponseSnapshotContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(getDocumentRevisionResponseSnapshotContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(getDocumentRevisionResponseSnapshotContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(getDocumentRevisionResponseSnapshotContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(getDocumentRevisionResponseSnapshotContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoDistinctionBodyItemMax)).min(getDocumentRevisionResponseSnapshotContentSixTwoDistinctionBodyMin).max(getDocumentRevisionResponseSnapshotContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersTableHeadersItemMax)).min(getDocumentRevisionResponseSnapshotContentSixTwoLayersTableHeadersMin).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(getDocumentRevisionResponseSnapshotContentSixTwoLayersTableMin).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsMin).max(getDocumentRevisionResponseSnapshotContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleTableHeadersItemMax)).min(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleTableHeadersMin).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleExposuresMin).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramBandsMin).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsMin).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsMin).max(getDocumentRevisionResponseSnapshotContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(getDocumentRevisionResponseSnapshotContentSixTwoQuestionsPanelsMin).max(getDocumentRevisionResponseSnapshotContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesItemStepsItemMax)).min(getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesItemStepsMin).max(getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesItemStepsMax)
+})).min(getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesMin).max(getDocumentRevisionResponseSnapshotContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableHeadersItemMax)).min(getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableHeadersMin).max(getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableItemHoldMax)
+})).min(getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableMin).max(getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoAuthorityBodyItemMax)).min(getDocumentRevisionResponseSnapshotContentSixTwoAuthorityBodyMin).max(getDocumentRevisionResponseSnapshotContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoReferencesIntroItemMax)).min(getDocumentRevisionResponseSnapshotContentSixTwoReferencesIntroMin).max(getDocumentRevisionResponseSnapshotContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoReferencesGroupsItemItemsMax)
+})).min(getDocumentRevisionResponseSnapshotContentSixTwoReferencesGroupsMin).max(getDocumentRevisionResponseSnapshotContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMovesMovesItemBodyMax)
+})).min(getDocumentRevisionResponseSnapshotContentSixTwoMovesMovesMin).max(getDocumentRevisionResponseSnapshotContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(getDocumentRevisionResponseSnapshotContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(getDocumentRevisionResponseSnapshotContentSixTwoOrderMin).max(getDocumentRevisionResponseSnapshotContentSixTwoOrderMax).default(getDocumentRevisionResponseSnapshotContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(getDocumentRevisionResponseSnapshotContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(getDocumentRevisionResponseSnapshotContentSixTwoSourcesMax).default(getDocumentRevisionResponseSnapshotContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(getDocumentRevisionResponseSnapshotContentSixTwoRelatedIdsMax).default(getDocumentRevisionResponseSnapshotContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSevenCityMax),
   "address": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSevenAddressMax),
@@ -5511,11 +8535,258 @@ export const submitDocumentResponseContentFiveHeroMediaAltTextMax = 500;
 export const submitDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const submitDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const submitDocumentResponseContentSixHeroMediaAltTextMax = 500;
+export const submitDocumentResponseContentSixOneHeroMediaAltTextMax = 500;
 
-export const submitDocumentResponseContentSixOrderMultipleOf = 1;
+export const submitDocumentResponseContentSixOneOrderMultipleOf = 1;
 
-export const submitDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentSixTwoSchemaVersionDefault = 1;
+export const submitDocumentResponseContentSixTwoHeroEyebrowMax = 4000;
+
+export const submitDocumentResponseContentSixTwoHeroHeadlineMax = 4000;
+
+export const submitDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
+
+export const submitDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const submitDocumentResponseContentSixTwoDistinctionBodyMin = 3;
+export const submitDocumentResponseContentSixTwoDistinctionBodyMax = 3;
+
+export const submitDocumentResponseContentSixTwoLayersHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersIntroMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersExampleTextMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersTableHeadersMin = 5;
+export const submitDocumentResponseContentSixTwoLayersTableHeadersMax = 5;
+
+export const submitDocumentResponseContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const submitDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersTableMin = 4;
+export const submitDocumentResponseContentSixTwoLayersTableMax = 4;
+
+export const submitDocumentResponseContentSixTwoLayersPullOutMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersClosingLineMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersAsideBodyMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoLayersDiagramRowsMin = 4;
+export const submitDocumentResponseContentSixTwoLayersDiagramRowsMax = 4;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const submitDocumentResponseContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleExposuresMin = 5;
+export const submitDocumentResponseContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const submitDocumentResponseContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const submitDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const submitDocumentResponseContentSixTwoQuestionsHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoQuestionsIntroMax = 4000;
+
+export const submitDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const submitDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const submitDocumentResponseContentSixTwoQuestionsPanelsMin = 3;
+export const submitDocumentResponseContentSixTwoQuestionsPanelsMax = 3;
+
+export const submitDocumentResponseContentSixTwoMethodHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMethodIntroMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMethodPhasesItemStepsMin = 4;
+export const submitDocumentResponseContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const submitDocumentResponseContentSixTwoMethodPhasesMin = 3;
+export const submitDocumentResponseContentSixTwoMethodPhasesMax = 3;
+
+export const submitDocumentResponseContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMaintenanceTableHeadersMin = 4;
+export const submitDocumentResponseContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const submitDocumentResponseContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMaintenanceTableMin = 4;
+export const submitDocumentResponseContentSixTwoMaintenanceTableMax = 4;
+
+export const submitDocumentResponseContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMeasurementHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMeasurementStatementMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const submitDocumentResponseContentSixTwoAuthorityHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const submitDocumentResponseContentSixTwoAuthorityBodyMin = 5;
+export const submitDocumentResponseContentSixTwoAuthorityBodyMax = 5;
+
+export const submitDocumentResponseContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const submitDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const submitDocumentResponseContentSixTwoReferencesHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoReferencesIntroItemMax = 4000;
+
+export const submitDocumentResponseContentSixTwoReferencesIntroMin = 2;
+export const submitDocumentResponseContentSixTwoReferencesIntroMax = 2;
+
+export const submitDocumentResponseContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const submitDocumentResponseContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const submitDocumentResponseContentSixTwoReferencesGroupsMin = 3;
+export const submitDocumentResponseContentSixTwoReferencesGroupsMax = 3;
+
+export const submitDocumentResponseContentSixTwoMovesHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const submitDocumentResponseContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMovesMovesMin = 3;
+export const submitDocumentResponseContentSixTwoMovesMovesMax = 3;
+
+export const submitDocumentResponseContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMovesCtaBodyMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoMovesFooterNoteMax = 4000;
+
+export const submitDocumentResponseContentSixTwoVisibilityDefault = `public`;
+export const submitDocumentResponseContentSixTwoOrderDefault = 0;
+export const submitDocumentResponseContentSixTwoOrderMin = 0;
+export const submitDocumentResponseContentSixTwoOrderMax = 10000;
+
+export const submitDocumentResponseContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const submitDocumentResponseContentSixTwoSourcesDefault = [];
+export const submitDocumentResponseContentSixTwoSourcesMax = 30;
+
+export const submitDocumentResponseContentSixTwoRelatedIdsDefault = [];
+export const submitDocumentResponseContentSixTwoRelatedIdsMax = 50;
+
+export const submitDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const submitDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const submitDocumentResponseContentSevenCityMax = 160;
 
 export const submitDocumentResponseContentSevenAddressMax = 1000;
@@ -5758,7 +9029,7 @@ export const SubmitDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -5801,23 +9072,208 @@ export const SubmitDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(submitDocumentResponseContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(submitDocumentResponseContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(submitDocumentResponseContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(submitDocumentResponseContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(submitDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(submitDocumentResponseContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(submitDocumentResponseContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(submitDocumentResponseContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(submitDocumentResponseContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(submitDocumentResponseContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(submitDocumentResponseContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(submitDocumentResponseContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(submitDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(submitDocumentResponseContentSixTwoDistinctionBodyMin).max(submitDocumentResponseContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersTableHeadersItemMax)).min(submitDocumentResponseContentSixTwoLayersTableHeadersMin).max(submitDocumentResponseContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(submitDocumentResponseContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(submitDocumentResponseContentSixTwoLayersTableMin).max(submitDocumentResponseContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(submitDocumentResponseContentSixTwoLayersDiagramRowsMin).max(submitDocumentResponseContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax)).min(submitDocumentResponseContentSixTwoStoppingRuleTableHeadersMin).max(submitDocumentResponseContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(submitDocumentResponseContentSixTwoStoppingRuleExposuresMin).max(submitDocumentResponseContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(submitDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(submitDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(submitDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin).max(submitDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(submitDocumentResponseContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(submitDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(submitDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(submitDocumentResponseContentSixTwoQuestionsPanelsMin).max(submitDocumentResponseContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(submitDocumentResponseContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(submitDocumentResponseContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(submitDocumentResponseContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(submitDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax)).min(submitDocumentResponseContentSixTwoMethodPhasesItemStepsMin).max(submitDocumentResponseContentSixTwoMethodPhasesItemStepsMax)
+})).min(submitDocumentResponseContentSixTwoMethodPhasesMin).max(submitDocumentResponseContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(submitDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax)).min(submitDocumentResponseContentSixTwoMaintenanceTableHeadersMin).max(submitDocumentResponseContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(submitDocumentResponseContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(submitDocumentResponseContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(submitDocumentResponseContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(submitDocumentResponseContentSixTwoMaintenanceTableItemHoldMax)
+})).min(submitDocumentResponseContentSixTwoMaintenanceTableMin).max(submitDocumentResponseContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(submitDocumentResponseContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(submitDocumentResponseContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(submitDocumentResponseContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(submitDocumentResponseContentSixTwoAuthorityBodyItemMax)).min(submitDocumentResponseContentSixTwoAuthorityBodyMin).max(submitDocumentResponseContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(submitDocumentResponseContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(submitDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(submitDocumentResponseContentSixTwoReferencesIntroItemMax)).min(submitDocumentResponseContentSixTwoReferencesIntroMin).max(submitDocumentResponseContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(submitDocumentResponseContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(submitDocumentResponseContentSixTwoReferencesGroupsItemItemsMax)
+})).min(submitDocumentResponseContentSixTwoReferencesGroupsMin).max(submitDocumentResponseContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(submitDocumentResponseContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(submitDocumentResponseContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(submitDocumentResponseContentSixTwoMovesMovesItemBodyMax)
+})).min(submitDocumentResponseContentSixTwoMovesMovesMin).max(submitDocumentResponseContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(submitDocumentResponseContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(submitDocumentResponseContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(submitDocumentResponseContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(submitDocumentResponseContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(submitDocumentResponseContentSixTwoOrderMin).max(submitDocumentResponseContentSixTwoOrderMax).default(submitDocumentResponseContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(submitDocumentResponseContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(submitDocumentResponseContentSixTwoSourcesMax).default(submitDocumentResponseContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(submitDocumentResponseContentSixTwoRelatedIdsMax).default(submitDocumentResponseContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(submitDocumentResponseContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(submitDocumentResponseContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(submitDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(submitDocumentResponseContentSevenAddressMax),
@@ -5985,11 +9441,258 @@ export const rejectDocumentRevisionResponseContentFiveHeroMediaAltTextMax = 500;
 export const rejectDocumentRevisionResponseContentFiveOrderMultipleOf = 1;
 
 export const rejectDocumentRevisionResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const rejectDocumentRevisionResponseContentSixHeroMediaAltTextMax = 500;
+export const rejectDocumentRevisionResponseContentSixOneHeroMediaAltTextMax = 500;
 
-export const rejectDocumentRevisionResponseContentSixOrderMultipleOf = 1;
+export const rejectDocumentRevisionResponseContentSixOneOrderMultipleOf = 1;
 
-export const rejectDocumentRevisionResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentSixTwoSchemaVersionDefault = 1;
+export const rejectDocumentRevisionResponseContentSixTwoHeroEyebrowMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoHeroHeadlineMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoHeroSubheadlineMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoDistinctionHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoDistinctionBodyMin = 3;
+export const rejectDocumentRevisionResponseContentSixTwoDistinctionBodyMax = 3;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersIntroMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersExampleTextMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersTableHeadersMin = 5;
+export const rejectDocumentRevisionResponseContentSixTwoLayersTableHeadersMax = 5;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersTableMin = 4;
+export const rejectDocumentRevisionResponseContentSixTwoLayersTableMax = 4;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersPullOutMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersClosingLineMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersAsideBodyMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsMin = 4;
+export const rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsMax = 4;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleExposuresMin = 5;
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const rejectDocumentRevisionResponseContentSixTwoQuestionsHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoQuestionsIntroMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoQuestionsPanelsMin = 3;
+export const rejectDocumentRevisionResponseContentSixTwoQuestionsPanelsMax = 3;
+
+export const rejectDocumentRevisionResponseContentSixTwoMethodHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMethodIntroMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMethodPhasesItemStepsMin = 4;
+export const rejectDocumentRevisionResponseContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const rejectDocumentRevisionResponseContentSixTwoMethodPhasesMin = 3;
+export const rejectDocumentRevisionResponseContentSixTwoMethodPhasesMax = 3;
+
+export const rejectDocumentRevisionResponseContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMaintenanceTableHeadersMin = 4;
+export const rejectDocumentRevisionResponseContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const rejectDocumentRevisionResponseContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMaintenanceTableMin = 4;
+export const rejectDocumentRevisionResponseContentSixTwoMaintenanceTableMax = 4;
+
+export const rejectDocumentRevisionResponseContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMeasurementHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMeasurementStatementMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoAuthorityHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoAuthorityBodyMin = 5;
+export const rejectDocumentRevisionResponseContentSixTwoAuthorityBodyMax = 5;
+
+export const rejectDocumentRevisionResponseContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoReferencesHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoReferencesIntroItemMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoReferencesIntroMin = 2;
+export const rejectDocumentRevisionResponseContentSixTwoReferencesIntroMax = 2;
+
+export const rejectDocumentRevisionResponseContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoReferencesGroupsMin = 3;
+export const rejectDocumentRevisionResponseContentSixTwoReferencesGroupsMax = 3;
+
+export const rejectDocumentRevisionResponseContentSixTwoMovesHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const rejectDocumentRevisionResponseContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMovesMovesMin = 3;
+export const rejectDocumentRevisionResponseContentSixTwoMovesMovesMax = 3;
+
+export const rejectDocumentRevisionResponseContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMovesCtaBodyMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoMovesFooterNoteMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoVisibilityDefault = `public`;
+export const rejectDocumentRevisionResponseContentSixTwoOrderDefault = 0;
+export const rejectDocumentRevisionResponseContentSixTwoOrderMin = 0;
+export const rejectDocumentRevisionResponseContentSixTwoOrderMax = 10000;
+
+export const rejectDocumentRevisionResponseContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rejectDocumentRevisionResponseContentSixTwoSourcesDefault = [];
+export const rejectDocumentRevisionResponseContentSixTwoSourcesMax = 30;
+
+export const rejectDocumentRevisionResponseContentSixTwoRelatedIdsDefault = [];
+export const rejectDocumentRevisionResponseContentSixTwoRelatedIdsMax = 50;
+
+export const rejectDocumentRevisionResponseContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const rejectDocumentRevisionResponseContentSevenCityMax = 160;
 
 export const rejectDocumentRevisionResponseContentSevenAddressMax = 1000;
@@ -6232,7 +9935,7 @@ export const RejectDocumentRevisionResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -6275,23 +9978,208 @@ export const RejectDocumentRevisionResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(rejectDocumentRevisionResponseContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(rejectDocumentRevisionResponseContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(rejectDocumentRevisionResponseContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(rejectDocumentRevisionResponseContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoDistinctionBodyItemMax)).min(rejectDocumentRevisionResponseContentSixTwoDistinctionBodyMin).max(rejectDocumentRevisionResponseContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersTableHeadersItemMax)).min(rejectDocumentRevisionResponseContentSixTwoLayersTableHeadersMin).max(rejectDocumentRevisionResponseContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(rejectDocumentRevisionResponseContentSixTwoLayersTableMin).max(rejectDocumentRevisionResponseContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsMin).max(rejectDocumentRevisionResponseContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleTableHeadersItemMax)).min(rejectDocumentRevisionResponseContentSixTwoStoppingRuleTableHeadersMin).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(rejectDocumentRevisionResponseContentSixTwoStoppingRuleExposuresMin).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramBandsMin).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDestinationsMin).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramAdditionsMin).max(rejectDocumentRevisionResponseContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(rejectDocumentRevisionResponseContentSixTwoQuestionsPanelsMin).max(rejectDocumentRevisionResponseContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMethodPhasesItemStepsItemMax)).min(rejectDocumentRevisionResponseContentSixTwoMethodPhasesItemStepsMin).max(rejectDocumentRevisionResponseContentSixTwoMethodPhasesItemStepsMax)
+})).min(rejectDocumentRevisionResponseContentSixTwoMethodPhasesMin).max(rejectDocumentRevisionResponseContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMaintenanceTableHeadersItemMax)).min(rejectDocumentRevisionResponseContentSixTwoMaintenanceTableHeadersMin).max(rejectDocumentRevisionResponseContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMaintenanceTableItemHoldMax)
+})).min(rejectDocumentRevisionResponseContentSixTwoMaintenanceTableMin).max(rejectDocumentRevisionResponseContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoAuthorityBodyItemMax)).min(rejectDocumentRevisionResponseContentSixTwoAuthorityBodyMin).max(rejectDocumentRevisionResponseContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoReferencesIntroItemMax)).min(rejectDocumentRevisionResponseContentSixTwoReferencesIntroMin).max(rejectDocumentRevisionResponseContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoReferencesGroupsItemItemsMax)
+})).min(rejectDocumentRevisionResponseContentSixTwoReferencesGroupsMin).max(rejectDocumentRevisionResponseContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(rejectDocumentRevisionResponseContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMovesMovesItemBodyMax)
+})).min(rejectDocumentRevisionResponseContentSixTwoMovesMovesMin).max(rejectDocumentRevisionResponseContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(rejectDocumentRevisionResponseContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(rejectDocumentRevisionResponseContentSixTwoOrderMin).max(rejectDocumentRevisionResponseContentSixTwoOrderMax).default(rejectDocumentRevisionResponseContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rejectDocumentRevisionResponseContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(rejectDocumentRevisionResponseContentSixTwoSourcesMax).default(rejectDocumentRevisionResponseContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(rejectDocumentRevisionResponseContentSixTwoRelatedIdsMax).default(rejectDocumentRevisionResponseContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(rejectDocumentRevisionResponseContentSevenCityMax),
   "address": zod.string().min(1).max(rejectDocumentRevisionResponseContentSevenAddressMax),
@@ -6418,11 +10306,258 @@ export const publishDocumentResponseContentFiveHeroMediaAltTextMax = 500;
 export const publishDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const publishDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const publishDocumentResponseContentSixHeroMediaAltTextMax = 500;
+export const publishDocumentResponseContentSixOneHeroMediaAltTextMax = 500;
 
-export const publishDocumentResponseContentSixOrderMultipleOf = 1;
+export const publishDocumentResponseContentSixOneOrderMultipleOf = 1;
 
-export const publishDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentSixTwoSchemaVersionDefault = 1;
+export const publishDocumentResponseContentSixTwoHeroEyebrowMax = 4000;
+
+export const publishDocumentResponseContentSixTwoHeroHeadlineMax = 4000;
+
+export const publishDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
+
+export const publishDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const publishDocumentResponseContentSixTwoDistinctionBodyMin = 3;
+export const publishDocumentResponseContentSixTwoDistinctionBodyMax = 3;
+
+export const publishDocumentResponseContentSixTwoLayersHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersIntroMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersExampleTextMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersTableHeadersMin = 5;
+export const publishDocumentResponseContentSixTwoLayersTableHeadersMax = 5;
+
+export const publishDocumentResponseContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const publishDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersTableMin = 4;
+export const publishDocumentResponseContentSixTwoLayersTableMax = 4;
+
+export const publishDocumentResponseContentSixTwoLayersPullOutMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersClosingLineMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersAsideBodyMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoLayersDiagramRowsMin = 4;
+export const publishDocumentResponseContentSixTwoLayersDiagramRowsMax = 4;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const publishDocumentResponseContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleExposuresMin = 5;
+export const publishDocumentResponseContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const publishDocumentResponseContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const publishDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const publishDocumentResponseContentSixTwoQuestionsHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoQuestionsIntroMax = 4000;
+
+export const publishDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const publishDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const publishDocumentResponseContentSixTwoQuestionsPanelsMin = 3;
+export const publishDocumentResponseContentSixTwoQuestionsPanelsMax = 3;
+
+export const publishDocumentResponseContentSixTwoMethodHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMethodIntroMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMethodPhasesItemStepsMin = 4;
+export const publishDocumentResponseContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const publishDocumentResponseContentSixTwoMethodPhasesMin = 3;
+export const publishDocumentResponseContentSixTwoMethodPhasesMax = 3;
+
+export const publishDocumentResponseContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMaintenanceTableHeadersMin = 4;
+export const publishDocumentResponseContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const publishDocumentResponseContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMaintenanceTableMin = 4;
+export const publishDocumentResponseContentSixTwoMaintenanceTableMax = 4;
+
+export const publishDocumentResponseContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMeasurementHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMeasurementStatementMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const publishDocumentResponseContentSixTwoAuthorityHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const publishDocumentResponseContentSixTwoAuthorityBodyMin = 5;
+export const publishDocumentResponseContentSixTwoAuthorityBodyMax = 5;
+
+export const publishDocumentResponseContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const publishDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const publishDocumentResponseContentSixTwoReferencesHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoReferencesIntroItemMax = 4000;
+
+export const publishDocumentResponseContentSixTwoReferencesIntroMin = 2;
+export const publishDocumentResponseContentSixTwoReferencesIntroMax = 2;
+
+export const publishDocumentResponseContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const publishDocumentResponseContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const publishDocumentResponseContentSixTwoReferencesGroupsMin = 3;
+export const publishDocumentResponseContentSixTwoReferencesGroupsMax = 3;
+
+export const publishDocumentResponseContentSixTwoMovesHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const publishDocumentResponseContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMovesMovesMin = 3;
+export const publishDocumentResponseContentSixTwoMovesMovesMax = 3;
+
+export const publishDocumentResponseContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMovesCtaBodyMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoMovesFooterNoteMax = 4000;
+
+export const publishDocumentResponseContentSixTwoVisibilityDefault = `public`;
+export const publishDocumentResponseContentSixTwoOrderDefault = 0;
+export const publishDocumentResponseContentSixTwoOrderMin = 0;
+export const publishDocumentResponseContentSixTwoOrderMax = 10000;
+
+export const publishDocumentResponseContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const publishDocumentResponseContentSixTwoSourcesDefault = [];
+export const publishDocumentResponseContentSixTwoSourcesMax = 30;
+
+export const publishDocumentResponseContentSixTwoRelatedIdsDefault = [];
+export const publishDocumentResponseContentSixTwoRelatedIdsMax = 50;
+
+export const publishDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const publishDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const publishDocumentResponseContentSevenCityMax = 160;
 
 export const publishDocumentResponseContentSevenAddressMax = 1000;
@@ -6665,7 +10800,7 @@ export const PublishDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -6708,23 +10843,208 @@ export const PublishDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(publishDocumentResponseContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(publishDocumentResponseContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(publishDocumentResponseContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(publishDocumentResponseContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(publishDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(publishDocumentResponseContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(publishDocumentResponseContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(publishDocumentResponseContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(publishDocumentResponseContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(publishDocumentResponseContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(publishDocumentResponseContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(publishDocumentResponseContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(publishDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(publishDocumentResponseContentSixTwoDistinctionBodyMin).max(publishDocumentResponseContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersTableHeadersItemMax)).min(publishDocumentResponseContentSixTwoLayersTableHeadersMin).max(publishDocumentResponseContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(publishDocumentResponseContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(publishDocumentResponseContentSixTwoLayersTableMin).max(publishDocumentResponseContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(publishDocumentResponseContentSixTwoLayersDiagramRowsMin).max(publishDocumentResponseContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax)).min(publishDocumentResponseContentSixTwoStoppingRuleTableHeadersMin).max(publishDocumentResponseContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(publishDocumentResponseContentSixTwoStoppingRuleExposuresMin).max(publishDocumentResponseContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(publishDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(publishDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(publishDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin).max(publishDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(publishDocumentResponseContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(publishDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(publishDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(publishDocumentResponseContentSixTwoQuestionsPanelsMin).max(publishDocumentResponseContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(publishDocumentResponseContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(publishDocumentResponseContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(publishDocumentResponseContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(publishDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax)).min(publishDocumentResponseContentSixTwoMethodPhasesItemStepsMin).max(publishDocumentResponseContentSixTwoMethodPhasesItemStepsMax)
+})).min(publishDocumentResponseContentSixTwoMethodPhasesMin).max(publishDocumentResponseContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(publishDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax)).min(publishDocumentResponseContentSixTwoMaintenanceTableHeadersMin).max(publishDocumentResponseContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(publishDocumentResponseContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(publishDocumentResponseContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(publishDocumentResponseContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(publishDocumentResponseContentSixTwoMaintenanceTableItemHoldMax)
+})).min(publishDocumentResponseContentSixTwoMaintenanceTableMin).max(publishDocumentResponseContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(publishDocumentResponseContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(publishDocumentResponseContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(publishDocumentResponseContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(publishDocumentResponseContentSixTwoAuthorityBodyItemMax)).min(publishDocumentResponseContentSixTwoAuthorityBodyMin).max(publishDocumentResponseContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(publishDocumentResponseContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(publishDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(publishDocumentResponseContentSixTwoReferencesIntroItemMax)).min(publishDocumentResponseContentSixTwoReferencesIntroMin).max(publishDocumentResponseContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(publishDocumentResponseContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(publishDocumentResponseContentSixTwoReferencesGroupsItemItemsMax)
+})).min(publishDocumentResponseContentSixTwoReferencesGroupsMin).max(publishDocumentResponseContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(publishDocumentResponseContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(publishDocumentResponseContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(publishDocumentResponseContentSixTwoMovesMovesItemBodyMax)
+})).min(publishDocumentResponseContentSixTwoMovesMovesMin).max(publishDocumentResponseContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(publishDocumentResponseContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(publishDocumentResponseContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(publishDocumentResponseContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(publishDocumentResponseContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(publishDocumentResponseContentSixTwoOrderMin).max(publishDocumentResponseContentSixTwoOrderMax).default(publishDocumentResponseContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(publishDocumentResponseContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(publishDocumentResponseContentSixTwoSourcesMax).default(publishDocumentResponseContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(publishDocumentResponseContentSixTwoRelatedIdsMax).default(publishDocumentResponseContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(publishDocumentResponseContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(publishDocumentResponseContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(publishDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(publishDocumentResponseContentSevenAddressMax),
@@ -6846,11 +11166,258 @@ export const rollbackDocumentResponseContentFiveHeroMediaAltTextMax = 500;
 export const rollbackDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const rollbackDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const rollbackDocumentResponseContentSixHeroMediaAltTextMax = 500;
+export const rollbackDocumentResponseContentSixOneHeroMediaAltTextMax = 500;
 
-export const rollbackDocumentResponseContentSixOrderMultipleOf = 1;
+export const rollbackDocumentResponseContentSixOneOrderMultipleOf = 1;
 
-export const rollbackDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentSixTwoSchemaVersionDefault = 1;
+export const rollbackDocumentResponseContentSixTwoHeroEyebrowMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoHeroHeadlineMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoDistinctionBodyMin = 3;
+export const rollbackDocumentResponseContentSixTwoDistinctionBodyMax = 3;
+
+export const rollbackDocumentResponseContentSixTwoLayersHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersIntroMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersExampleTextMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersTableHeadersMin = 5;
+export const rollbackDocumentResponseContentSixTwoLayersTableHeadersMax = 5;
+
+export const rollbackDocumentResponseContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const rollbackDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersTableMin = 4;
+export const rollbackDocumentResponseContentSixTwoLayersTableMax = 4;
+
+export const rollbackDocumentResponseContentSixTwoLayersPullOutMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersClosingLineMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersAsideBodyMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoLayersDiagramRowsMin = 4;
+export const rollbackDocumentResponseContentSixTwoLayersDiagramRowsMax = 4;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const rollbackDocumentResponseContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleExposuresMin = 5;
+export const rollbackDocumentResponseContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const rollbackDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const rollbackDocumentResponseContentSixTwoQuestionsHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoQuestionsIntroMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoQuestionsPanelsMin = 3;
+export const rollbackDocumentResponseContentSixTwoQuestionsPanelsMax = 3;
+
+export const rollbackDocumentResponseContentSixTwoMethodHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMethodIntroMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMethodPhasesItemStepsMin = 4;
+export const rollbackDocumentResponseContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const rollbackDocumentResponseContentSixTwoMethodPhasesMin = 3;
+export const rollbackDocumentResponseContentSixTwoMethodPhasesMax = 3;
+
+export const rollbackDocumentResponseContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMaintenanceTableHeadersMin = 4;
+export const rollbackDocumentResponseContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const rollbackDocumentResponseContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMaintenanceTableMin = 4;
+export const rollbackDocumentResponseContentSixTwoMaintenanceTableMax = 4;
+
+export const rollbackDocumentResponseContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMeasurementHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMeasurementStatementMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoAuthorityHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoAuthorityBodyMin = 5;
+export const rollbackDocumentResponseContentSixTwoAuthorityBodyMax = 5;
+
+export const rollbackDocumentResponseContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoReferencesHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoReferencesIntroItemMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoReferencesIntroMin = 2;
+export const rollbackDocumentResponseContentSixTwoReferencesIntroMax = 2;
+
+export const rollbackDocumentResponseContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoReferencesGroupsMin = 3;
+export const rollbackDocumentResponseContentSixTwoReferencesGroupsMax = 3;
+
+export const rollbackDocumentResponseContentSixTwoMovesHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const rollbackDocumentResponseContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMovesMovesMin = 3;
+export const rollbackDocumentResponseContentSixTwoMovesMovesMax = 3;
+
+export const rollbackDocumentResponseContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMovesCtaBodyMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoMovesFooterNoteMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoVisibilityDefault = `public`;
+export const rollbackDocumentResponseContentSixTwoOrderDefault = 0;
+export const rollbackDocumentResponseContentSixTwoOrderMin = 0;
+export const rollbackDocumentResponseContentSixTwoOrderMax = 10000;
+
+export const rollbackDocumentResponseContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const rollbackDocumentResponseContentSixTwoSourcesDefault = [];
+export const rollbackDocumentResponseContentSixTwoSourcesMax = 30;
+
+export const rollbackDocumentResponseContentSixTwoRelatedIdsDefault = [];
+export const rollbackDocumentResponseContentSixTwoRelatedIdsMax = 50;
+
+export const rollbackDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const rollbackDocumentResponseContentSevenCityMax = 160;
 
 export const rollbackDocumentResponseContentSevenAddressMax = 1000;
@@ -7093,7 +11660,7 @@ export const RollbackDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -7136,23 +11703,208 @@ export const RollbackDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(rollbackDocumentResponseContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(rollbackDocumentResponseContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(rollbackDocumentResponseContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(rollbackDocumentResponseContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(rollbackDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(rollbackDocumentResponseContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(rollbackDocumentResponseContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(rollbackDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(rollbackDocumentResponseContentSixTwoDistinctionBodyMin).max(rollbackDocumentResponseContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersTableHeadersItemMax)).min(rollbackDocumentResponseContentSixTwoLayersTableHeadersMin).max(rollbackDocumentResponseContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(rollbackDocumentResponseContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(rollbackDocumentResponseContentSixTwoLayersTableMin).max(rollbackDocumentResponseContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(rollbackDocumentResponseContentSixTwoLayersDiagramRowsMin).max(rollbackDocumentResponseContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax)).min(rollbackDocumentResponseContentSixTwoStoppingRuleTableHeadersMin).max(rollbackDocumentResponseContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(rollbackDocumentResponseContentSixTwoStoppingRuleExposuresMin).max(rollbackDocumentResponseContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin).max(rollbackDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(rollbackDocumentResponseContentSixTwoQuestionsPanelsMin).max(rollbackDocumentResponseContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax)).min(rollbackDocumentResponseContentSixTwoMethodPhasesItemStepsMin).max(rollbackDocumentResponseContentSixTwoMethodPhasesItemStepsMax)
+})).min(rollbackDocumentResponseContentSixTwoMethodPhasesMin).max(rollbackDocumentResponseContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax)).min(rollbackDocumentResponseContentSixTwoMaintenanceTableHeadersMin).max(rollbackDocumentResponseContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMaintenanceTableItemHoldMax)
+})).min(rollbackDocumentResponseContentSixTwoMaintenanceTableMin).max(rollbackDocumentResponseContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(rollbackDocumentResponseContentSixTwoAuthorityBodyItemMax)).min(rollbackDocumentResponseContentSixTwoAuthorityBodyMin).max(rollbackDocumentResponseContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(rollbackDocumentResponseContentSixTwoReferencesIntroItemMax)).min(rollbackDocumentResponseContentSixTwoReferencesIntroMin).max(rollbackDocumentResponseContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoReferencesGroupsItemItemsMax)
+})).min(rollbackDocumentResponseContentSixTwoReferencesGroupsMin).max(rollbackDocumentResponseContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(rollbackDocumentResponseContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMovesMovesItemBodyMax)
+})).min(rollbackDocumentResponseContentSixTwoMovesMovesMin).max(rollbackDocumentResponseContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(rollbackDocumentResponseContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(rollbackDocumentResponseContentSixTwoOrderMin).max(rollbackDocumentResponseContentSixTwoOrderMax).default(rollbackDocumentResponseContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(rollbackDocumentResponseContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(rollbackDocumentResponseContentSixTwoSourcesMax).default(rollbackDocumentResponseContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(rollbackDocumentResponseContentSixTwoRelatedIdsMax).default(rollbackDocumentResponseContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(rollbackDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(rollbackDocumentResponseContentSevenAddressMax),
@@ -7275,11 +12027,258 @@ export const archiveDocumentResponseContentFiveHeroMediaAltTextMax = 500;
 export const archiveDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const archiveDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const archiveDocumentResponseContentSixHeroMediaAltTextMax = 500;
+export const archiveDocumentResponseContentSixOneHeroMediaAltTextMax = 500;
 
-export const archiveDocumentResponseContentSixOrderMultipleOf = 1;
+export const archiveDocumentResponseContentSixOneOrderMultipleOf = 1;
 
-export const archiveDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentSixTwoSchemaVersionDefault = 1;
+export const archiveDocumentResponseContentSixTwoHeroEyebrowMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoHeroHeadlineMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoDistinctionBodyMin = 3;
+export const archiveDocumentResponseContentSixTwoDistinctionBodyMax = 3;
+
+export const archiveDocumentResponseContentSixTwoLayersHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersIntroMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersExampleTextMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersTableHeadersMin = 5;
+export const archiveDocumentResponseContentSixTwoLayersTableHeadersMax = 5;
+
+export const archiveDocumentResponseContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const archiveDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersTableMin = 4;
+export const archiveDocumentResponseContentSixTwoLayersTableMax = 4;
+
+export const archiveDocumentResponseContentSixTwoLayersPullOutMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersClosingLineMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersAsideBodyMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoLayersDiagramRowsMin = 4;
+export const archiveDocumentResponseContentSixTwoLayersDiagramRowsMax = 4;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const archiveDocumentResponseContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleExposuresMin = 5;
+export const archiveDocumentResponseContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const archiveDocumentResponseContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const archiveDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const archiveDocumentResponseContentSixTwoQuestionsHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoQuestionsIntroMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoQuestionsPanelsMin = 3;
+export const archiveDocumentResponseContentSixTwoQuestionsPanelsMax = 3;
+
+export const archiveDocumentResponseContentSixTwoMethodHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMethodIntroMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMethodPhasesItemStepsMin = 4;
+export const archiveDocumentResponseContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const archiveDocumentResponseContentSixTwoMethodPhasesMin = 3;
+export const archiveDocumentResponseContentSixTwoMethodPhasesMax = 3;
+
+export const archiveDocumentResponseContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMaintenanceTableHeadersMin = 4;
+export const archiveDocumentResponseContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const archiveDocumentResponseContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMaintenanceTableMin = 4;
+export const archiveDocumentResponseContentSixTwoMaintenanceTableMax = 4;
+
+export const archiveDocumentResponseContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMeasurementHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMeasurementStatementMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoAuthorityHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoAuthorityBodyMin = 5;
+export const archiveDocumentResponseContentSixTwoAuthorityBodyMax = 5;
+
+export const archiveDocumentResponseContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoReferencesHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoReferencesIntroItemMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoReferencesIntroMin = 2;
+export const archiveDocumentResponseContentSixTwoReferencesIntroMax = 2;
+
+export const archiveDocumentResponseContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoReferencesGroupsMin = 3;
+export const archiveDocumentResponseContentSixTwoReferencesGroupsMax = 3;
+
+export const archiveDocumentResponseContentSixTwoMovesHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const archiveDocumentResponseContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMovesMovesMin = 3;
+export const archiveDocumentResponseContentSixTwoMovesMovesMax = 3;
+
+export const archiveDocumentResponseContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMovesCtaBodyMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoMovesFooterNoteMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoVisibilityDefault = `public`;
+export const archiveDocumentResponseContentSixTwoOrderDefault = 0;
+export const archiveDocumentResponseContentSixTwoOrderMin = 0;
+export const archiveDocumentResponseContentSixTwoOrderMax = 10000;
+
+export const archiveDocumentResponseContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const archiveDocumentResponseContentSixTwoSourcesDefault = [];
+export const archiveDocumentResponseContentSixTwoSourcesMax = 30;
+
+export const archiveDocumentResponseContentSixTwoRelatedIdsDefault = [];
+export const archiveDocumentResponseContentSixTwoRelatedIdsMax = 50;
+
+export const archiveDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const archiveDocumentResponseContentSevenCityMax = 160;
 
 export const archiveDocumentResponseContentSevenAddressMax = 1000;
@@ -7522,7 +12521,7 @@ export const ArchiveDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -7565,23 +12564,208 @@ export const ArchiveDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(archiveDocumentResponseContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(archiveDocumentResponseContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(archiveDocumentResponseContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(archiveDocumentResponseContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(archiveDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(archiveDocumentResponseContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(archiveDocumentResponseContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(archiveDocumentResponseContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(archiveDocumentResponseContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(archiveDocumentResponseContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(archiveDocumentResponseContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(archiveDocumentResponseContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(archiveDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(archiveDocumentResponseContentSixTwoDistinctionBodyMin).max(archiveDocumentResponseContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersTableHeadersItemMax)).min(archiveDocumentResponseContentSixTwoLayersTableHeadersMin).max(archiveDocumentResponseContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(archiveDocumentResponseContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(archiveDocumentResponseContentSixTwoLayersTableMin).max(archiveDocumentResponseContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(archiveDocumentResponseContentSixTwoLayersDiagramRowsMin).max(archiveDocumentResponseContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax)).min(archiveDocumentResponseContentSixTwoStoppingRuleTableHeadersMin).max(archiveDocumentResponseContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(archiveDocumentResponseContentSixTwoStoppingRuleExposuresMin).max(archiveDocumentResponseContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(archiveDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(archiveDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(archiveDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin).max(archiveDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(archiveDocumentResponseContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(archiveDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(archiveDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(archiveDocumentResponseContentSixTwoQuestionsPanelsMin).max(archiveDocumentResponseContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(archiveDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax)).min(archiveDocumentResponseContentSixTwoMethodPhasesItemStepsMin).max(archiveDocumentResponseContentSixTwoMethodPhasesItemStepsMax)
+})).min(archiveDocumentResponseContentSixTwoMethodPhasesMin).max(archiveDocumentResponseContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(archiveDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax)).min(archiveDocumentResponseContentSixTwoMaintenanceTableHeadersMin).max(archiveDocumentResponseContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMaintenanceTableItemHoldMax)
+})).min(archiveDocumentResponseContentSixTwoMaintenanceTableMin).max(archiveDocumentResponseContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(archiveDocumentResponseContentSixTwoAuthorityBodyItemMax)).min(archiveDocumentResponseContentSixTwoAuthorityBodyMin).max(archiveDocumentResponseContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(archiveDocumentResponseContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(archiveDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(archiveDocumentResponseContentSixTwoReferencesIntroItemMax)).min(archiveDocumentResponseContentSixTwoReferencesIntroMin).max(archiveDocumentResponseContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(archiveDocumentResponseContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(archiveDocumentResponseContentSixTwoReferencesGroupsItemItemsMax)
+})).min(archiveDocumentResponseContentSixTwoReferencesGroupsMin).max(archiveDocumentResponseContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(archiveDocumentResponseContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMovesMovesItemBodyMax)
+})).min(archiveDocumentResponseContentSixTwoMovesMovesMin).max(archiveDocumentResponseContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(archiveDocumentResponseContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(archiveDocumentResponseContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(archiveDocumentResponseContentSixTwoOrderMin).max(archiveDocumentResponseContentSixTwoOrderMax).default(archiveDocumentResponseContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(archiveDocumentResponseContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(archiveDocumentResponseContentSixTwoSourcesMax).default(archiveDocumentResponseContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(archiveDocumentResponseContentSixTwoRelatedIdsMax).default(archiveDocumentResponseContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(archiveDocumentResponseContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(archiveDocumentResponseContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(archiveDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(archiveDocumentResponseContentSevenAddressMax),
@@ -7704,11 +12888,258 @@ export const restoreDocumentResponseContentFiveHeroMediaAltTextMax = 500;
 export const restoreDocumentResponseContentFiveOrderMultipleOf = 1;
 
 export const restoreDocumentResponseContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const restoreDocumentResponseContentSixHeroMediaAltTextMax = 500;
+export const restoreDocumentResponseContentSixOneHeroMediaAltTextMax = 500;
 
-export const restoreDocumentResponseContentSixOrderMultipleOf = 1;
+export const restoreDocumentResponseContentSixOneOrderMultipleOf = 1;
 
-export const restoreDocumentResponseContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentSixTwoSchemaVersionDefault = 1;
+export const restoreDocumentResponseContentSixTwoHeroEyebrowMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoHeroHeadlineMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoDistinctionBodyMin = 3;
+export const restoreDocumentResponseContentSixTwoDistinctionBodyMax = 3;
+
+export const restoreDocumentResponseContentSixTwoLayersHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersIntroMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersExampleTextMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersTableHeadersMin = 5;
+export const restoreDocumentResponseContentSixTwoLayersTableHeadersMax = 5;
+
+export const restoreDocumentResponseContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const restoreDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersTableMin = 4;
+export const restoreDocumentResponseContentSixTwoLayersTableMax = 4;
+
+export const restoreDocumentResponseContentSixTwoLayersPullOutMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersClosingLineMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersAsideBodyMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoLayersDiagramRowsMin = 4;
+export const restoreDocumentResponseContentSixTwoLayersDiagramRowsMax = 4;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const restoreDocumentResponseContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleExposuresMin = 5;
+export const restoreDocumentResponseContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const restoreDocumentResponseContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const restoreDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const restoreDocumentResponseContentSixTwoQuestionsHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoQuestionsIntroMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoQuestionsPanelsMin = 3;
+export const restoreDocumentResponseContentSixTwoQuestionsPanelsMax = 3;
+
+export const restoreDocumentResponseContentSixTwoMethodHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMethodIntroMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMethodPhasesItemStepsMin = 4;
+export const restoreDocumentResponseContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const restoreDocumentResponseContentSixTwoMethodPhasesMin = 3;
+export const restoreDocumentResponseContentSixTwoMethodPhasesMax = 3;
+
+export const restoreDocumentResponseContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMaintenanceTableHeadersMin = 4;
+export const restoreDocumentResponseContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const restoreDocumentResponseContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMaintenanceTableMin = 4;
+export const restoreDocumentResponseContentSixTwoMaintenanceTableMax = 4;
+
+export const restoreDocumentResponseContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMeasurementHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMeasurementStatementMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoAuthorityHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoAuthorityBodyMin = 5;
+export const restoreDocumentResponseContentSixTwoAuthorityBodyMax = 5;
+
+export const restoreDocumentResponseContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoReferencesHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoReferencesIntroItemMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoReferencesIntroMin = 2;
+export const restoreDocumentResponseContentSixTwoReferencesIntroMax = 2;
+
+export const restoreDocumentResponseContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoReferencesGroupsMin = 3;
+export const restoreDocumentResponseContentSixTwoReferencesGroupsMax = 3;
+
+export const restoreDocumentResponseContentSixTwoMovesHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const restoreDocumentResponseContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMovesMovesMin = 3;
+export const restoreDocumentResponseContentSixTwoMovesMovesMax = 3;
+
+export const restoreDocumentResponseContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMovesCtaBodyMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoMovesFooterNoteMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoVisibilityDefault = `public`;
+export const restoreDocumentResponseContentSixTwoOrderDefault = 0;
+export const restoreDocumentResponseContentSixTwoOrderMin = 0;
+export const restoreDocumentResponseContentSixTwoOrderMax = 10000;
+
+export const restoreDocumentResponseContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const restoreDocumentResponseContentSixTwoSourcesDefault = [];
+export const restoreDocumentResponseContentSixTwoSourcesMax = 30;
+
+export const restoreDocumentResponseContentSixTwoRelatedIdsDefault = [];
+export const restoreDocumentResponseContentSixTwoRelatedIdsMax = 50;
+
+export const restoreDocumentResponseContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const restoreDocumentResponseContentSevenCityMax = 160;
 
 export const restoreDocumentResponseContentSevenAddressMax = 1000;
@@ -7951,7 +13382,7 @@ export const RestoreDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -7994,23 +13425,208 @@ export const RestoreDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(restoreDocumentResponseContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(restoreDocumentResponseContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(restoreDocumentResponseContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(restoreDocumentResponseContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(restoreDocumentResponseContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(restoreDocumentResponseContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(restoreDocumentResponseContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(restoreDocumentResponseContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(restoreDocumentResponseContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(restoreDocumentResponseContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(restoreDocumentResponseContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(restoreDocumentResponseContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(restoreDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(restoreDocumentResponseContentSixTwoDistinctionBodyMin).max(restoreDocumentResponseContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersTableHeadersItemMax)).min(restoreDocumentResponseContentSixTwoLayersTableHeadersMin).max(restoreDocumentResponseContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(restoreDocumentResponseContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(restoreDocumentResponseContentSixTwoLayersTableMin).max(restoreDocumentResponseContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(restoreDocumentResponseContentSixTwoLayersDiagramRowsMin).max(restoreDocumentResponseContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleTableHeadersItemMax)).min(restoreDocumentResponseContentSixTwoStoppingRuleTableHeadersMin).max(restoreDocumentResponseContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(restoreDocumentResponseContentSixTwoStoppingRuleExposuresMin).max(restoreDocumentResponseContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(restoreDocumentResponseContentSixTwoStoppingRuleDiagramBandsMin).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(restoreDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMin).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(restoreDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMin).max(restoreDocumentResponseContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(restoreDocumentResponseContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(restoreDocumentResponseContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(restoreDocumentResponseContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(restoreDocumentResponseContentSixTwoQuestionsPanelsMin).max(restoreDocumentResponseContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(restoreDocumentResponseContentSixTwoMethodPhasesItemStepsItemMax)).min(restoreDocumentResponseContentSixTwoMethodPhasesItemStepsMin).max(restoreDocumentResponseContentSixTwoMethodPhasesItemStepsMax)
+})).min(restoreDocumentResponseContentSixTwoMethodPhasesMin).max(restoreDocumentResponseContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(restoreDocumentResponseContentSixTwoMaintenanceTableHeadersItemMax)).min(restoreDocumentResponseContentSixTwoMaintenanceTableHeadersMin).max(restoreDocumentResponseContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMaintenanceTableItemHoldMax)
+})).min(restoreDocumentResponseContentSixTwoMaintenanceTableMin).max(restoreDocumentResponseContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(restoreDocumentResponseContentSixTwoAuthorityBodyItemMax)).min(restoreDocumentResponseContentSixTwoAuthorityBodyMin).max(restoreDocumentResponseContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(restoreDocumentResponseContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(restoreDocumentResponseContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(restoreDocumentResponseContentSixTwoReferencesIntroItemMax)).min(restoreDocumentResponseContentSixTwoReferencesIntroMin).max(restoreDocumentResponseContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(restoreDocumentResponseContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(restoreDocumentResponseContentSixTwoReferencesGroupsItemItemsMax)
+})).min(restoreDocumentResponseContentSixTwoReferencesGroupsMin).max(restoreDocumentResponseContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(restoreDocumentResponseContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMovesMovesItemBodyMax)
+})).min(restoreDocumentResponseContentSixTwoMovesMovesMin).max(restoreDocumentResponseContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(restoreDocumentResponseContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(restoreDocumentResponseContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(restoreDocumentResponseContentSixTwoOrderMin).max(restoreDocumentResponseContentSixTwoOrderMax).default(restoreDocumentResponseContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(restoreDocumentResponseContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(restoreDocumentResponseContentSixTwoSourcesMax).default(restoreDocumentResponseContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(restoreDocumentResponseContentSixTwoRelatedIdsMax).default(restoreDocumentResponseContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(restoreDocumentResponseContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(restoreDocumentResponseContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(restoreDocumentResponseContentSevenCityMax),
   "address": zod.string().min(1).max(restoreDocumentResponseContentSevenAddressMax),
@@ -8128,11 +13744,258 @@ export const previewDocumentResponseDocumentContentFiveHeroMediaAltTextMax = 500
 export const previewDocumentResponseDocumentContentFiveOrderMultipleOf = 1;
 
 export const previewDocumentResponseDocumentContentFiveSourcesItemUrlRegExp = new RegExp('^https?://.+');
-export const previewDocumentResponseDocumentContentSixHeroMediaAltTextMax = 500;
+export const previewDocumentResponseDocumentContentSixOneHeroMediaAltTextMax = 500;
 
-export const previewDocumentResponseDocumentContentSixOrderMultipleOf = 1;
+export const previewDocumentResponseDocumentContentSixOneOrderMultipleOf = 1;
 
-export const previewDocumentResponseDocumentContentSixSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentSixOneSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentSixTwoSchemaVersionDefault = 1;
+export const previewDocumentResponseDocumentContentSixTwoHeroEyebrowMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoHeroHeadlineMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoHeroSubheadlineMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoHeroPrimaryActionLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoDistinctionHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoDistinctionBodyItemMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoDistinctionBodyMin = 3;
+export const previewDocumentResponseDocumentContentSixTwoDistinctionBodyMax = 3;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersIntroMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersExampleTextMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersTableHeadersItemMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersTableHeadersMin = 5;
+export const previewDocumentResponseDocumentContentSixTwoLayersTableHeadersMax = 5;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersTableItemLayerMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersTableItemWhatItIsMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersTableItemInThisExampleMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersTableItemWhatGetsPastItMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersTableItemStrengthMax = 4;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersTableItemStrengthLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersTableMin = 4;
+export const previewDocumentResponseDocumentContentSixTwoLayersTableMax = 4;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersPullOutMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersClosingLineMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersAsideHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersAsideBodyMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramTitleMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramDescriptionMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramKickerMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramRuleMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramThresholdLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramFooterMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemDescriptionMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemExampleMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemBypassLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemBypassMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemStrengthMax = 4;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemStrengthLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsMin = 4;
+export const previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsMax = 4;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleIntroMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleTableHeadersItemMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleTableHeadersMin = 2;
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleTableHeadersMax = 2;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleExposuresItemHandoverMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleExposuresItemRequirementMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleExposuresMin = 5;
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleExposuresMax = 5;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRulePullOutMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramTitleMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDescriptionMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramKickerMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramBandHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDestinationHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramFooterMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramNoteMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramBandsItemLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramBandsMin = 5;
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramBandsMax = 5;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDestinationsMin = 3;
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDestinationsMax = 3;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramAdditionsMin = 4;
+export const previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramAdditionsMax = 4;
+
+export const previewDocumentResponseDocumentContentSixTwoQuestionsHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoQuestionsIntroMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoQuestionsPanelsItemTitleMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoQuestionsPanelsItemBodyMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoQuestionsPanelsMin = 3;
+export const previewDocumentResponseDocumentContentSixTwoQuestionsPanelsMax = 3;
+
+export const previewDocumentResponseDocumentContentSixTwoMethodHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMethodIntroMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMethodPhasesItemNameMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMethodPhasesItemCaptionMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMethodPhasesItemStepsItemMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMethodPhasesItemStepsMin = 4;
+export const previewDocumentResponseDocumentContentSixTwoMethodPhasesItemStepsMax = 4;
+
+export const previewDocumentResponseDocumentContentSixTwoMethodPhasesMin = 3;
+export const previewDocumentResponseDocumentContentSixTwoMethodPhasesMax = 3;
+
+export const previewDocumentResponseDocumentContentSixTwoMaintenanceHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMaintenanceTableHeadersItemMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMaintenanceTableHeadersMin = 4;
+export const previewDocumentResponseDocumentContentSixTwoMaintenanceTableHeadersMax = 4;
+
+export const previewDocumentResponseDocumentContentSixTwoMaintenanceTableItemLayerMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMaintenanceTableItemSetMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMaintenanceTableItemProveMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMaintenanceTableItemHoldMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMaintenanceTableMin = 4;
+export const previewDocumentResponseDocumentContentSixTwoMaintenanceTableMax = 4;
+
+export const previewDocumentResponseDocumentContentSixTwoMaintenanceClosingParagraphMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMeasurementHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMeasurementStatementMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMeasurementSupportingLineMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoAuthorityHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoAuthorityBodyItemMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoAuthorityBodyMin = 5;
+export const previewDocumentResponseDocumentContentSixTwoAuthorityBodyMax = 5;
+
+export const previewDocumentResponseDocumentContentSixTwoAuthorityLinkCardTitleMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoAuthorityLinkCardDescriptionMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoReferencesHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoReferencesIntroItemMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoReferencesIntroMin = 2;
+export const previewDocumentResponseDocumentContentSixTwoReferencesIntroMax = 2;
+
+export const previewDocumentResponseDocumentContentSixTwoReferencesGroupsItemTitleMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoReferencesGroupsItemItemsMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoReferencesGroupsMin = 3;
+export const previewDocumentResponseDocumentContentSixTwoReferencesGroupsMax = 3;
+
+export const previewDocumentResponseDocumentContentSixTwoMovesHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMovesMovesItemNumberMax = 3;
+
+export const previewDocumentResponseDocumentContentSixTwoMovesMovesItemTitleMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMovesMovesItemBodyMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMovesMovesMin = 3;
+export const previewDocumentResponseDocumentContentSixTwoMovesMovesMax = 3;
+
+export const previewDocumentResponseDocumentContentSixTwoMovesCtaHeadingMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMovesCtaBodyMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMovesCtaButtonLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoMovesFooterNoteMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoVisibilityDefault = `public`;
+export const previewDocumentResponseDocumentContentSixTwoOrderDefault = 0;
+export const previewDocumentResponseDocumentContentSixTwoOrderMin = 0;
+export const previewDocumentResponseDocumentContentSixTwoOrderMax = 10000;
+
+export const previewDocumentResponseDocumentContentSixTwoSourcesItemUrlRegExp = new RegExp('^https?://.+');
+export const previewDocumentResponseDocumentContentSixTwoSourcesDefault = [];
+export const previewDocumentResponseDocumentContentSixTwoSourcesMax = 30;
+
+export const previewDocumentResponseDocumentContentSixTwoRelatedIdsDefault = [];
+export const previewDocumentResponseDocumentContentSixTwoRelatedIdsMax = 50;
+
+export const previewDocumentResponseDocumentContentSixTwoRelatedLinkTitleMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoRelatedLinkBodyMax = 4000;
+
 export const previewDocumentResponseDocumentContentSevenCityMax = 160;
 
 export const previewDocumentResponseDocumentContentSevenAddressMax = 1000;
@@ -8373,7 +14236,7 @@ export const PreviewDocumentResponse = zod.object({
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
-}),zod.object({
+}),zod.union([zod.object({
   "schemaVersion": zod.literal(1),
   "template": zod.enum(['agent-authority']),
   "teaser": zod.string(),
@@ -8416,23 +14279,208 @@ export const PreviewDocumentResponse = zod.object({
   "mediaId": zod.string(),
   "mediaVersionId": zod.string(),
   "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
-  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentSixHeroMediaAltTextMax).optional()
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentSixOneHeroMediaAltTextMax).optional()
 }).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
   "cta": zod.object({
   "label": zod.string(),
   "url": zod.string()
 }).optional(),
   "visibility": zod.enum(['public', 'hidden', 'restricted']).optional(),
-  "order": zod.number().multipleOf(previewDocumentResponseDocumentContentSixOrderMultipleOf).optional(),
+  "order": zod.number().multipleOf(previewDocumentResponseDocumentContentSixOneOrderMultipleOf).optional(),
   "sources": zod.array(zod.object({
   "label": zod.string(),
-  "url": zod.string().regex(previewDocumentResponseDocumentContentSixSourcesItemUrlRegExp).optional(),
+  "url": zod.string().regex(previewDocumentResponseDocumentContentSixOneSourcesItemUrlRegExp).optional(),
   "accessedAt": zod.coerce.date().optional()
 })).optional(),
   "verificationDate": zod.coerce.date().optional(),
   "reviewDate": zod.coerce.date().optional(),
   "relatedIds": zod.array(zod.string()).optional()
 }),zod.object({
+  "schemaVersion": zod.literal(1).default(previewDocumentResponseDocumentContentSixTwoSchemaVersionDefault),
+  "template": zod.enum(['guardrails']),
+  "hero": zod.object({
+  "eyebrow": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoHeroEyebrowMax),
+  "headline": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoHeroSubheadlineMax),
+  "primaryAction": zod.object({
+  "label": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoHeroPrimaryActionLabelMax),
+  "href": zod.enum(['/contact'])
+}),
+  "secondaryAction": zod.object({
+  "label": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoHeroSecondaryActionLabelMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "distinction": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoDistinctionHeadingMax),
+  "body": zod.array(zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoDistinctionBodyItemMax)).min(previewDocumentResponseDocumentContentSixTwoDistinctionBodyMin).max(previewDocumentResponseDocumentContentSixTwoDistinctionBodyMax)
+}),
+  "layers": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersHeadingMax),
+  "intro": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersIntroMax),
+  "exampleText": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersExampleTextMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersTableHeadersItemMax)).min(previewDocumentResponseDocumentContentSixTwoLayersTableHeadersMin).max(previewDocumentResponseDocumentContentSixTwoLayersTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersTableItemLayerMax),
+  "whatItIs": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersTableItemWhatItIsMax),
+  "inThisExample": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersTableItemInThisExampleMax),
+  "whatGetsPastIt": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersTableItemWhatGetsPastItMax),
+  "strength": zod.number().int().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersTableItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersTableItemStrengthLabelMax)
+})).min(previewDocumentResponseDocumentContentSixTwoLayersTableMin).max(previewDocumentResponseDocumentContentSixTwoLayersTableMax),
+  "pullOut": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersPullOutMax),
+  "closingLine": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersClosingLineMax),
+  "aside": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersAsideHeadingMax),
+  "body": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersAsideBodyMax)
+}),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramTitleMax),
+  "description": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramKickerMax),
+  "rule": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramRuleMax),
+  "thresholdAfter": zod.enum(['prompt']),
+  "thresholdLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramThresholdLabelMax),
+  "footer": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramFooterMax),
+  "rows": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemLabelMax),
+  "description": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemDescriptionMax),
+  "example": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemExampleMax),
+  "bypassLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemBypassLabelMax),
+  "bypass": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemBypassMax),
+  "strength": zod.number().int().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemStrengthMax),
+  "strengthLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsItemStrengthLabelMax)
+})).min(previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsMin).max(previewDocumentResponseDocumentContentSixTwoLayersDiagramRowsMax)
+})
+}),
+  "stoppingRule": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleHeadingMax),
+  "intro": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleIntroMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleTableHeadersItemMax)).min(previewDocumentResponseDocumentContentSixTwoStoppingRuleTableHeadersMin).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleTableHeadersMax),
+  "exposures": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "handover": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleExposuresItemHandoverMax),
+  "requirement": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleExposuresItemRequirementMax),
+  "enforcementLayer": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(previewDocumentResponseDocumentContentSixTwoStoppingRuleExposuresMin).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleExposuresMax),
+  "pullOut": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRulePullOutMax),
+  "diagram": zod.object({
+  "title": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramTitleMax),
+  "description": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDescriptionMax),
+  "kicker": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramKickerMax),
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramHeadingMax),
+  "bandHeading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramBandHeadingMax),
+  "destinationHeading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDestinationHeadingMax),
+  "footer": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramFooterMax),
+  "note": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramNoteMax),
+  "bands": zod.array(zod.object({
+  "id": zod.enum(['internal-reversible', 'reversible-cost', 'irreversible-customer', 'regulator-public-safety', 'above-ceiling']),
+  "label": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramBandsItemLabelMax),
+  "description": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramBandsItemDescriptionMax),
+  "destination": zod.enum(['prompt', 'runtime', 'architecture']),
+  "additionId": zod.enum(['monitoring', 'none', 'architectural-scoping', 'independent-control', 'authority-artefact'])
+})).min(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramBandsMin).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramBandsMax),
+  "destinations": zod.array(zod.object({
+  "id": zod.enum(['prompt', 'runtime', 'architecture']),
+  "label": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDestinationsItemLabelMax),
+  "description": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDestinationsItemDescriptionMax)
+})).min(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDestinationsMin).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramDestinationsMax),
+  "additions": zod.array(zod.object({
+  "id": zod.enum(['monitoring', 'architectural-scoping', 'independent-control', 'authority-artefact']),
+  "label": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramAdditionsItemLabelMax)
+})).min(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramAdditionsMin).max(previewDocumentResponseDocumentContentSixTwoStoppingRuleDiagramAdditionsMax)
+})
+}),
+  "questions": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoQuestionsHeadingMax),
+  "intro": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoQuestionsIntroMax),
+  "panels": zod.array(zod.object({
+  "id": zod.enum(['enforcement', 'presence', 'afterwards']),
+  "title": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoQuestionsPanelsItemTitleMax),
+  "body": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoQuestionsPanelsItemBodyMax)
+})).min(previewDocumentResponseDocumentContentSixTwoQuestionsPanelsMin).max(previewDocumentResponseDocumentContentSixTwoQuestionsPanelsMax)
+}),
+  "method": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMethodHeadingMax),
+  "intro": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMethodIntroMax),
+  "phases": zod.array(zod.object({
+  "id": zod.enum(['set', 'prove', 'hold']),
+  "name": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMethodPhasesItemNameMax),
+  "caption": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMethodPhasesItemCaptionMax),
+  "steps": zod.array(zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMethodPhasesItemStepsItemMax)).min(previewDocumentResponseDocumentContentSixTwoMethodPhasesItemStepsMin).max(previewDocumentResponseDocumentContentSixTwoMethodPhasesItemStepsMax)
+})).min(previewDocumentResponseDocumentContentSixTwoMethodPhasesMin).max(previewDocumentResponseDocumentContentSixTwoMethodPhasesMax)
+}),
+  "maintenance": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMaintenanceHeadingMax),
+  "tableHeaders": zod.array(zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMaintenanceTableHeadersItemMax)).min(previewDocumentResponseDocumentContentSixTwoMaintenanceTableHeadersMin).max(previewDocumentResponseDocumentContentSixTwoMaintenanceTableHeadersMax),
+  "table": zod.array(zod.object({
+  "id": zod.enum(['policy', 'prompt', 'runtime', 'architecture']),
+  "layer": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMaintenanceTableItemLayerMax),
+  "set": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMaintenanceTableItemSetMax),
+  "prove": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMaintenanceTableItemProveMax),
+  "hold": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMaintenanceTableItemHoldMax)
+})).min(previewDocumentResponseDocumentContentSixTwoMaintenanceTableMin).max(previewDocumentResponseDocumentContentSixTwoMaintenanceTableMax),
+  "closingParagraph": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMaintenanceClosingParagraphMax)
+}),
+  "measurement": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMeasurementHeadingMax),
+  "statement": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMeasurementStatementMax),
+  "supportingLine": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMeasurementSupportingLineMax)
+}),
+  "authority": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoAuthorityHeadingMax),
+  "body": zod.array(zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoAuthorityBodyItemMax)).min(previewDocumentResponseDocumentContentSixTwoAuthorityBodyMin).max(previewDocumentResponseDocumentContentSixTwoAuthorityBodyMax),
+  "linkCard": zod.object({
+  "title": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoAuthorityLinkCardTitleMax),
+  "description": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoAuthorityLinkCardDescriptionMax),
+  "href": zod.enum(['/methodologies/agent-authority-model'])
+})
+}),
+  "references": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoReferencesHeadingMax),
+  "intro": zod.array(zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoReferencesIntroItemMax)).min(previewDocumentResponseDocumentContentSixTwoReferencesIntroMin).max(previewDocumentResponseDocumentContentSixTwoReferencesIntroMax),
+  "groups": zod.array(zod.object({
+  "id": zod.enum(['forbid', 'bypass', 'measured']),
+  "title": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoReferencesGroupsItemTitleMax),
+  "items": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoReferencesGroupsItemItemsMax)
+})).min(previewDocumentResponseDocumentContentSixTwoReferencesGroupsMin).max(previewDocumentResponseDocumentContentSixTwoReferencesGroupsMax)
+}),
+  "moves": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMovesHeadingMax),
+  "moves": zod.array(zod.object({
+  "number": zod.number().int().min(1).max(previewDocumentResponseDocumentContentSixTwoMovesMovesItemNumberMax),
+  "title": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMovesMovesItemTitleMax),
+  "body": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMovesMovesItemBodyMax)
+})).min(previewDocumentResponseDocumentContentSixTwoMovesMovesMin).max(previewDocumentResponseDocumentContentSixTwoMovesMovesMax),
+  "cta": zod.object({
+  "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMovesCtaHeadingMax),
+  "body": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMovesCtaBodyMax),
+  "button": zod.object({
+  "label": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMovesCtaButtonLabelMax),
+  "href": zod.enum(['/contact'])
+})
+}),
+  "footerNote": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoMovesFooterNoteMax)
+}),
+  "visibility": zod.enum(['public', 'hidden', 'restricted']).default(previewDocumentResponseDocumentContentSixTwoVisibilityDefault),
+  "order": zod.number().int().min(previewDocumentResponseDocumentContentSixTwoOrderMin).max(previewDocumentResponseDocumentContentSixTwoOrderMax).default(previewDocumentResponseDocumentContentSixTwoOrderDefault),
+  "sources": zod.array(zod.object({
+  "label": zod.string(),
+  "url": zod.string().regex(previewDocumentResponseDocumentContentSixTwoSourcesItemUrlRegExp).optional(),
+  "accessedAt": zod.coerce.date().optional()
+})).max(previewDocumentResponseDocumentContentSixTwoSourcesMax).default(previewDocumentResponseDocumentContentSixTwoSourcesDefault),
+  "verificationDate": zod.coerce.date().optional(),
+  "reviewDate": zod.coerce.date().optional(),
+  "relatedIds": zod.array(zod.string().uuid()).max(previewDocumentResponseDocumentContentSixTwoRelatedIdsMax).default(previewDocumentResponseDocumentContentSixTwoRelatedIdsDefault),
+  "relatedLink": zod.object({
+  "title": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoRelatedLinkTitleMax),
+  "body": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoRelatedLinkBodyMax),
+  "href": zod.enum(['/methodologies/guardrails-framework'])
+})
+})]),zod.object({
   "schemaVersion": zod.literal(1),
   "city": zod.string().min(1).max(previewDocumentResponseDocumentContentSevenCityMax),
   "address": zod.string().min(1).max(previewDocumentResponseDocumentContentSevenAddressMax),

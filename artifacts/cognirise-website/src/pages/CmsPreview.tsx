@@ -17,6 +17,7 @@ import {
 import NotFound from "@/pages/not-found";
 import { applyMetadata } from "@/lib/metadata";
 import { AgentAuthorityLayout } from "@/pages/AgentAuthorityModel";
+import { GuardrailsLayout } from "@/pages/GuardrailsFramework";
 import {
   isIndustryPreviewFocusMessage,
   resolvePreviewIndustryMedia,
@@ -661,7 +662,9 @@ export default function CmsPreview() {
         <main className="min-h-screen bg-background">
           <PreviewBanner preview={preview} />
           <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />
-          <AgentAuthorityLayout framework={framework} preview />
+          {framework.template === "agent-authority"
+            ? <AgentAuthorityLayout framework={framework} preview />
+            : <GuardrailsLayout framework={framework} preview />}
         </main>
       </Shell>
     );

@@ -42,3 +42,5 @@
 - [Editorial notification authority](editorial-notification-authority.md) — Reuse exact-target access, freeze digest event sets across retries, and test new queues against PostgreSQL.
 - [Assessment PDF verification](assessment-pdf-verification.md) — Validate actual browser downloads, font extraction and single-field overflow rather than relying on fallback fixtures.
 - [Reuse confirmation identity](reuse-confirmation-identity.md) — Replacement consent pins both compared revisions and binding version; refetch must invalidate rather than refresh consent.
+- [Guardrails source authority](guardrails-source-authority.md) — Keep supplied diagram wording distinct from fuller prose; selections explain enforcement, not authority scores.
+- [Generated-contract validation](openapi-union-generation.md) — Validate regenerated output independently of incremental compiler caches.

@@ -14,9 +14,3 @@ Finish API generation checks before starting a browser pass.
 **Why:** The code-generation check regenerates shared sources, temporarily deleting files that running Vite clients import. Running it during authentication caused transient missing-module overlays and page reloads even though the check succeeded.
 
 **How to apply:** Treat code-generation checks as source-writing operations when scheduling integrated verification; complete them before workflow restart and browser testing.
-
-CDP keyboard checks must send Enter with carriage-return text and verify persistent selection separately from focus preview.
-
-**Why:** Focusing a disclosure can expand a preview even when a synthetic Enter failed to activate the button, making a later Escape assertion incorrectly look like an application bug.
-
-**How to apply:** Include Enter text/unmodifiedText in the key-down event and assert selected state before testing explicit close behavior.

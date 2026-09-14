@@ -3933,6 +3933,10 @@ components:
         template: { type: string, enum: [knowledge-assistant, analytics-dashboard, workflow-console, commerce-experience, governance-console, operations-console] }
         fixtureLabels: { type: array, minItems: 1, items: { type: string } }
     CmsFrameworkContent:
+      oneOf:
+        - $ref: "#/components/schemas/CmsAgentAuthorityFrameworkContent"
+        - $ref: "#/components/schemas/CmsGuardrailsFrameworkContent"
+    CmsAgentAuthorityFrameworkContent:
       type: object
       additionalProperties: false
       required: [schemaVersion, template, teaser, handoverExplanation, methodology, workedExample]
@@ -3953,6 +3957,312 @@ components:
         verificationDate: { type: string, format: date }
         reviewDate: { type: string, format: date }
         relatedIds: { type: array, items: { type: string } }
+    CmsGuardrailsFrameworkContent:
+      type: object
+      additionalProperties: false
+      required: [template, hero, distinction, layers, stoppingRule, questions, method, maintenance, measurement, authority, references, moves, relatedLink]
+      properties:
+        schemaVersion: { type: number, enum: [1], default: 1 }
+        template: { type: string, enum: [guardrails] }
+        hero: { $ref: "#/components/schemas/CmsGuardrailsHero" }
+        distinction: { $ref: "#/components/schemas/CmsGuardrailsDistinction" }
+        layers: { $ref: "#/components/schemas/CmsGuardrailsLayers" }
+        stoppingRule: { $ref: "#/components/schemas/CmsGuardrailsStoppingRule" }
+        questions: { $ref: "#/components/schemas/CmsGuardrailsQuestions" }
+        method: { $ref: "#/components/schemas/CmsGuardrailsMethod" }
+        maintenance: { $ref: "#/components/schemas/CmsGuardrailsMaintenance" }
+        measurement: { $ref: "#/components/schemas/CmsGuardrailsMeasurement" }
+        authority: { $ref: "#/components/schemas/CmsGuardrailsAuthority" }
+        references: { $ref: "#/components/schemas/CmsGuardrailsReferences" }
+        moves: { $ref: "#/components/schemas/CmsGuardrailsMoves" }
+        visibility: { $ref: "#/components/schemas/CmsVisibility", default: public }
+        order: { type: integer, minimum: 0, maximum: 10000, default: 0 }
+        sources: { type: array, maxItems: 30, default: [], items: { $ref: "#/components/schemas/CmsSource" } }
+        verificationDate: { type: string, format: date }
+        reviewDate: { type: string, format: date }
+        relatedIds: { type: array, maxItems: 50, default: [], items: { type: string, format: uuid } }
+        relatedLink: { $ref: "#/components/schemas/CmsGuardrailsRelatedLink" }
+    CmsGuardrailsText:
+      type: string
+      minLength: 1
+      maxLength: 4000
+    CmsGuardrailsContactAction:
+      type: object
+      additionalProperties: false
+      required: [label, href]
+      properties:
+        label: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        href: { type: string, enum: [/contact] }
+    CmsGuardrailsAuthorityAction:
+      type: object
+      additionalProperties: false
+      required: [label, href]
+      properties:
+        label: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        href: { type: string, enum: [/methodologies/agent-authority-model] }
+    CmsGuardrailsHero:
+      type: object
+      additionalProperties: false
+      required: [eyebrow, headline, subheadline, primaryAction, secondaryAction]
+      properties:
+        eyebrow: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        headline: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        subheadline: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        primaryAction: { $ref: "#/components/schemas/CmsGuardrailsContactAction" }
+        secondaryAction: { $ref: "#/components/schemas/CmsGuardrailsAuthorityAction" }
+    CmsGuardrailsDistinction:
+      type: object
+      additionalProperties: false
+      required: [heading, body]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        body: { type: array, minItems: 3, maxItems: 3, items: { $ref: "#/components/schemas/CmsGuardrailsText" } }
+    CmsGuardrailsLayers:
+      type: object
+      additionalProperties: false
+      required: [heading, intro, exampleText, tableHeaders, table, pullOut, closingLine, aside, diagram]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        intro: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        exampleText: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        tableHeaders: { type: array, minItems: 5, maxItems: 5, items: { $ref: "#/components/schemas/CmsGuardrailsText" } }
+        table: { type: array, minItems: 4, maxItems: 4, items: { $ref: "#/components/schemas/CmsGuardrailsLayerTableRow" } }
+        pullOut: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        closingLine: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        aside: { $ref: "#/components/schemas/CmsGuardrailsAside" }
+        diagram: { $ref: "#/components/schemas/CmsGuardrailsLayerDiagram" }
+    CmsGuardrailsLayerTableRow:
+      type: object
+      additionalProperties: false
+      required: [id, layer, whatItIs, inThisExample, whatGetsPastIt, strength, strengthLabel]
+      properties:
+        id: { type: string, enum: [policy, prompt, runtime, architecture] }
+        layer: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        whatItIs: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        inThisExample: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        whatGetsPastIt: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        strength: { type: integer, minimum: 1, maximum: 4 }
+        strengthLabel: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsAside:
+      type: object
+      additionalProperties: false
+      required: [heading, body]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        body: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsLayerDiagram:
+      type: object
+      additionalProperties: false
+      required: [title, description, kicker, rule, thresholdAfter, thresholdLabel, footer, rows]
+      properties:
+        title: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        description: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        kicker: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        rule: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        thresholdAfter: { type: string, enum: [prompt] }
+        thresholdLabel: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        footer: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        rows: { type: array, minItems: 4, maxItems: 4, items: { $ref: "#/components/schemas/CmsGuardrailsLayerDiagramRow" } }
+    CmsGuardrailsLayerDiagramRow:
+      type: object
+      additionalProperties: false
+      required: [id, label, description, example, bypassLabel, bypass, strength, strengthLabel]
+      properties:
+        id: { type: string, enum: [policy, prompt, runtime, architecture] }
+        label: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        description: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        example: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        bypassLabel: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        bypass: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        strength: { type: integer, minimum: 1, maximum: 4 }
+        strengthLabel: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsStoppingRule:
+      type: object
+      additionalProperties: false
+      required: [heading, intro, tableHeaders, exposures, pullOut, diagram]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        intro: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        tableHeaders: { type: array, minItems: 2, maxItems: 2, items: { $ref: "#/components/schemas/CmsGuardrailsText" } }
+        exposures: { type: array, minItems: 5, maxItems: 5, items: { $ref: "#/components/schemas/CmsGuardrailsExposure" } }
+        pullOut: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        diagram: { $ref: "#/components/schemas/CmsGuardrailsStoppingRuleDiagram" }
+    CmsGuardrailsExposure:
+      type: object
+      additionalProperties: false
+      required: [id, handover, requirement, enforcementLayer, additionId]
+      properties:
+        id: { type: string, enum: [internal-reversible, reversible-cost, irreversible-customer, regulator-public-safety, above-ceiling] }
+        handover: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        requirement: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        enforcementLayer: { type: string, enum: [prompt, runtime, architecture] }
+        additionId: { type: string, enum: [monitoring, none, architectural-scoping, independent-control, authority-artefact] }
+    CmsGuardrailsStoppingRuleDiagram:
+      type: object
+      additionalProperties: false
+      required: [title, description, kicker, heading, bandHeading, destinationHeading, footer, note, bands, destinations, additions]
+      properties:
+        title: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        description: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        kicker: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        bandHeading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        destinationHeading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        footer: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        note: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        bands: { type: array, minItems: 5, maxItems: 5, items: { $ref: "#/components/schemas/CmsGuardrailsStoppingRuleBand" } }
+        destinations: { type: array, minItems: 3, maxItems: 3, items: { $ref: "#/components/schemas/CmsGuardrailsStoppingRuleDestination" } }
+        additions: { type: array, minItems: 4, maxItems: 4, items: { $ref: "#/components/schemas/CmsGuardrailsStoppingRuleAddition" } }
+    CmsGuardrailsStoppingRuleBand:
+      type: object
+      additionalProperties: false
+      required: [id, label, description, destination, additionId]
+      properties:
+        id: { type: string, enum: [internal-reversible, reversible-cost, irreversible-customer, regulator-public-safety, above-ceiling] }
+        label: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        description: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        destination: { type: string, enum: [prompt, runtime, architecture] }
+        additionId: { type: string, enum: [monitoring, none, architectural-scoping, independent-control, authority-artefact] }
+    CmsGuardrailsStoppingRuleDestination:
+      type: object
+      additionalProperties: false
+      required: [id, label, description]
+      properties:
+        id: { type: string, enum: [prompt, runtime, architecture] }
+        label: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        description: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsStoppingRuleAddition:
+      type: object
+      additionalProperties: false
+      required: [id, label]
+      properties:
+        id: { type: string, enum: [monitoring, architectural-scoping, independent-control, authority-artefact] }
+        label: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsQuestions:
+      type: object
+      additionalProperties: false
+      required: [heading, intro, panels]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        intro: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        panels: { type: array, minItems: 3, maxItems: 3, items: { $ref: "#/components/schemas/CmsGuardrailsQuestionPanel" } }
+    CmsGuardrailsQuestionPanel:
+      type: object
+      additionalProperties: false
+      required: [id, title, body]
+      properties:
+        id: { type: string, enum: [enforcement, presence, afterwards] }
+        title: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        body: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsMethod:
+      type: object
+      additionalProperties: false
+      required: [heading, intro, phases]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        intro: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        phases: { type: array, minItems: 3, maxItems: 3, items: { $ref: "#/components/schemas/CmsGuardrailsMethodPhase" } }
+    CmsGuardrailsMethodPhase:
+      type: object
+      additionalProperties: false
+      required: [id, name, caption, steps]
+      properties:
+        id: { type: string, enum: [set, prove, hold] }
+        name: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        caption: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        steps: { type: array, minItems: 4, maxItems: 4, items: { $ref: "#/components/schemas/CmsGuardrailsText" } }
+    CmsGuardrailsMaintenance:
+      type: object
+      additionalProperties: false
+      required: [heading, tableHeaders, table, closingParagraph]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        tableHeaders: { type: array, minItems: 4, maxItems: 4, items: { $ref: "#/components/schemas/CmsGuardrailsText" } }
+        table: { type: array, minItems: 4, maxItems: 4, items: { $ref: "#/components/schemas/CmsGuardrailsMaintenanceRow" } }
+        closingParagraph: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsMaintenanceRow:
+      type: object
+      additionalProperties: false
+      required: [id, layer, set, prove, hold]
+      properties:
+        id: { type: string, enum: [policy, prompt, runtime, architecture] }
+        layer: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        set: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        prove: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        hold: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsMeasurement:
+      type: object
+      additionalProperties: false
+      required: [heading, statement, supportingLine]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        statement: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        supportingLine: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsAuthority:
+      type: object
+      additionalProperties: false
+      required: [heading, body, linkCard]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        body: { type: array, minItems: 5, maxItems: 5, items: { $ref: "#/components/schemas/CmsGuardrailsText" } }
+        linkCard: { $ref: "#/components/schemas/CmsGuardrailsAuthorityLinkCard" }
+    CmsGuardrailsAuthorityLinkCard:
+      type: object
+      additionalProperties: false
+      required: [title, description, href]
+      properties:
+        title: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        description: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        href: { type: string, enum: [/methodologies/agent-authority-model] }
+    CmsGuardrailsReferences:
+      type: object
+      additionalProperties: false
+      required: [heading, intro, groups]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        intro: { type: array, minItems: 2, maxItems: 2, items: { $ref: "#/components/schemas/CmsGuardrailsText" } }
+        groups: { type: array, minItems: 3, maxItems: 3, items: { $ref: "#/components/schemas/CmsGuardrailsReferenceGroup" } }
+    CmsGuardrailsReferenceGroup:
+      type: object
+      additionalProperties: false
+      required: [id, title, items]
+      properties:
+        id: { type: string, enum: [forbid, bypass, measured] }
+        title: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        items: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsMoves:
+      type: object
+      additionalProperties: false
+      required: [heading, moves, cta, footerNote]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        moves: { type: array, minItems: 3, maxItems: 3, items: { $ref: "#/components/schemas/CmsGuardrailsMove" } }
+        cta: { $ref: "#/components/schemas/CmsGuardrailsCta" }
+        footerNote: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsMove:
+      type: object
+      additionalProperties: false
+      required: [number, title, body]
+      properties:
+        number: { type: integer, minimum: 1, maximum: 3 }
+        title: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        body: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsCta:
+      type: object
+      additionalProperties: false
+      required: [heading, body, button]
+      properties:
+        heading: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        body: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        button: { $ref: "#/components/schemas/CmsGuardrailsContactAction" }
+    CmsGuardrailsRelatedLink:
+      type: object
+      additionalProperties: false
+      required: [title, body, href]
+      properties:
+        title: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        body: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        href: { type: string, enum: [/methodologies/guardrails-framework] }
     CmsSiteConfigurationContent:
       oneOf:
         - type: object

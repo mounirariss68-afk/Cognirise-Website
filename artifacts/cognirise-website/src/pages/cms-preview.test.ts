@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 
 const pageUrl = new URL("./CmsPreview.tsx", import.meta.url);
 const layoutUrl = new URL("./AgentAuthorityModel.tsx", import.meta.url);
+const guardrailsLayoutUrl = new URL("./GuardrailsFramework.tsx", import.meta.url);
 const cmsUrl = new URL("../lib/cms.ts", import.meta.url);
 const presentationsUrl = new URL("../components/cms/PublicCmsPresentations.tsx", import.meta.url);
 
@@ -18,13 +19,16 @@ test("sparse saved people show exact identity and summary without published coll
 });
 
 test("framework previews use the buyer layout without a public CMS request", async () => {
-  const [preview, layout] = await Promise.all([
+  const [preview, layout, guardrails] = await Promise.all([
     readFile(pageUrl, "utf8"),
     readFile(layoutUrl, "utf8"),
+    readFile(guardrailsLayoutUrl, "utf8"),
   ]);
 
   assert.match(preview, /<AgentAuthorityLayout framework=\{framework\} preview \/>/);
+  assert.match(preview, /<GuardrailsLayout framework=\{framework\} preview \/>/);
   assert.match(layout, /export function AgentAuthorityLayout/);
+  assert.match(guardrails, /export function GuardrailsLayout/);
   assert.match(layout, /canonicalUrl: null/);
   assert.match(layout, /noIndex: true/);
   assert.match(layout, /preview \? \{/);
