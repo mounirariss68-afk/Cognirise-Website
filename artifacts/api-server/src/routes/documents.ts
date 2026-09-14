@@ -101,6 +101,7 @@ export function previewMediaIds(payload: unknown, documentKind?: CmsDocumentKind
     kind as CmsDocumentKind,
     content,
     Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds.filter((value): value is string => typeof value === "string") : [],
+    snapshot.seo,
   ).map((reference) => reference.mediaId);
   return [...new Set(candidates.filter((value): value is string => typeof value === "string" && UUID.test(value)))].slice(0, 50);
 }
@@ -186,6 +187,7 @@ async function syncMediaReferences(
     documentKind ?? snapshot.kind as CmsDocumentKind,
     snapshot.content,
     Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds : [],
+    snapshot.seo,
   );
   // A governed reference can live inside content (for example heroMedia or
   // educationPov imagery), not only in the legacy top-level mediaIds list.
@@ -203,18 +205,38 @@ async function syncMediaReferences(
        SELECT asset.id,COALESCE(requested.id,prior.media_version_id,latest.id),$3,$4
          FROM cms_media_assets asset
           LEFT JOIN cms_media_versions requested
-            ON requested.asset_id=asset.id AND requested.id=$2
+            ON requested.asset_id=asset.id AND requested.id=$2::uuid
           LEFT JOIN cms_media_references prior
-            ON prior.asset_id=asset.id AND prior.document_id=$3
+            ON prior.asset_id=asset.id AND prior.document_id=$3::uuid
            AND prior.field_path=CASE WHEN $5::text IS NULL THEN '' ELSE 'revision:'||$5 END
           LEFT JOIN LATERAL (SELECT id FROM cms_media_versions
              WHERE asset_id=asset.id ORDER BY version_number DESC LIMIT 1) latest
              ON requested.id IS NULL AND prior.asset_id IS NULL
-         WHERE asset.id=$1 AND asset.status IN ('active','ready')
+          WHERE asset.id=$1::uuid AND (
+            asset.status IN ('active','ready')
+            OR (
+              asset.status='pending-review'
+              AND requested.id IS NOT NULL
+              AND $5::uuid IS NOT NULL
+              AND EXISTS (
+                SELECT 1
+                  FROM cms_media_references carried
+                  JOIN cms_revisions predecessor
+                    ON predecessor.id=$5::uuid
+                  JOIN cms_revisions successor
+                    ON successor.id=$6::uuid
+                 WHERE carried.document_id=$3::uuid
+                   AND carried.field_path='revision:'||$5::text
+                   AND carried.asset_id=asset.id
+                   AND carried.media_version_id=requested.id
+                   AND predecessor.edition_id=successor.edition_id
+              )
+            )
+          )
             AND ($2::uuid IS NULL OR requested.id IS NOT NULL)
             AND COALESCE(requested.id,prior.media_version_id,latest.id) IS NOT NULL
        ON CONFLICT DO NOTHING`,
-      [assetId, exactVersionId, documentId, `revision:${revisionId}`, sourceRevisionId ?? null],
+      [assetId, exactVersionId, documentId, `revision:${revisionId}`, sourceRevisionId ?? null, revisionId],
     );
   }
 }
@@ -228,7 +250,53 @@ function expectedMedia(kind: CmsDocumentKind, snapshot: Record<string, any>) {
     kind,
     snapshot.content,
     Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds : [],
+    snapshot.seo,
   );
+}
+
+/** A pending-review asset is never a new draft-time selection. The one narrow
+ * exception is a normal successor save retaining an exact version already
+ * pinned by the immediately preceding revision of the same locked edition. */
+async function pendingMediaCarryForwardErrors(
+  client: { query: (sql: string, values?: unknown[]) => Promise<any> },
+  documentId: string,
+  editionId: string,
+  predecessorRevisionId: string,
+  kind: CmsDocumentKind,
+  snapshot: Record<string, any>,
+): Promise<string[]> {
+  const references = expectedMedia(kind, snapshot);
+  const exactReferences = references.filter((reference) => reference.mediaVersionId);
+  if (!exactReferences.length) return [];
+  const assetIds = [...new Set(exactReferences.map((reference) => reference.mediaId))];
+  const selected = await client.query(
+    `SELECT asset.id::text asset_id,asset.status,version.id::text version_id
+       FROM cms_media_assets asset
+       JOIN cms_media_versions version ON version.asset_id=asset.id
+      WHERE asset.id::text=ANY($1::text[])
+        AND version.id::text=ANY($2::text[])`,
+    [assetIds, [...new Set(exactReferences.map((reference) => reference.mediaVersionId!))]],
+  );
+  const pending = new Set(
+    selected.rows
+      .filter((row: Record<string, unknown>) => row.status === "pending-review")
+      .map((row: Record<string, unknown>) => `${row.asset_id}:${row.version_id}`),
+  );
+  if (!pending.size) return [];
+  const carried = await client.query(
+    `SELECT reference.asset_id::text asset_id,reference.media_version_id::text version_id
+       FROM cms_media_references reference
+       JOIN cms_revisions predecessor
+         ON predecessor.id=$2 AND predecessor.edition_id=$3
+      WHERE reference.document_id=$1
+        AND reference.field_path='revision:'||$2::text`,
+    [documentId, predecessorRevisionId, editionId],
+  );
+  const carriedPins = new Set(carried.rows.map((row: Record<string, unknown>) => `${row.asset_id}:${row.version_id}`));
+  return exactReferences
+    .filter((reference) => pending.has(`${reference.mediaId}:${reference.mediaVersionId}`))
+    .filter((reference) => !carriedPins.has(`${reference.mediaId}:${reference.mediaVersionId}`))
+    .map((reference) => `${reference.fieldPath}: pending-review media must retain the exact version pinned by the preceding revision of this edition.`);
 }
 
 export function mediaGovernanceErrors(
@@ -2329,6 +2397,22 @@ router.patch(
         return;
       }
       const snapshot = validated.data;
+      const pendingCarryErrors = await pendingMediaCarryForwardErrors(
+        client,
+        id,
+        String(edition.rows[0].id),
+        String(edition.rows[0].revision_id),
+        current.kind as CmsDocumentKind,
+        snapshot,
+      );
+      if (pendingCarryErrors.length) {
+        await client.query("ROLLBACK");
+        res.status(422).json({
+          error: "Pending-review media can only be carried forward from the exact preceding pin.",
+          details: pendingCarryErrors,
+        });
+        return;
+      }
       const revision = await client.query(
         `INSERT INTO cms_revisions
          (edition_id,revision_number,payload,content_digest,workflow_state,

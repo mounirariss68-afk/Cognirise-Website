@@ -1031,6 +1031,42 @@ export const listDocumentsResponseTwoItemsItemContentSixTwoHeroPrimaryActionLabe
 
 export const listDocumentsResponseTwoItemsItemContentSixTwoHeroSecondaryActionLabelMax = 4000;
 
+export const listDocumentsResponseTwoItemsItemContentSixTwoHeroMediaAltTextMax = 500;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const listDocumentsResponseTwoItemsItemContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
+
 export const listDocumentsResponseTwoItemsItemContentSixTwoDistinctionHeadingMax = 4000;
 
 export const listDocumentsResponseTwoItemsItemContentSixTwoDistinctionBodyItemMax = 4000;
@@ -1288,6 +1324,8 @@ export const listDocumentsResponseTwoItemsItemContentNineVisualReferencesItemAlt
 export const listDocumentsResponseTwoItemsItemSeoTitleMax = 70;
 
 export const listDocumentsResponseTwoItemsItemSeoDescriptionMax = 180;
+
+export const listDocumentsResponseTwoItemsItemSeoOgImageMediaOneAltTextMax = 500;
 
 export const listDocumentsResponseTwoItemsItemRevisionNumberMultipleOf = 1;
 
@@ -1590,6 +1628,47 @@ export const ListDocumentsResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(listDocumentsResponseTwoItemsItemContentSixTwoDistinctionBodyItemMax)).min(listDocumentsResponseTwoItemsItemContentSixTwoDistinctionBodyMin).max(listDocumentsResponseTwoItemsItemContentSixTwoDistinctionBodyMax)
@@ -1810,7 +1889,13 @@ export const ListDocumentsResponse = zod.object({
   "title": zod.string().max(listDocumentsResponseTwoItemsItemSeoTitleMax).optional(),
   "description": zod.string().max(listDocumentsResponseTwoItemsItemSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentsResponseTwoItemsItemSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
@@ -1849,6 +1934,9 @@ export const createDocumentBodySeoDescriptionMax = 180;
 
 export const createDocumentBodySeoCanonicalUrlRegExp = new RegExp('^(?:$|[hH][tT][tT][pP][sS]?://.+)');
 export const createDocumentBodySeoNoIndexDefault = false;
+export const createDocumentBodySeoOgImageMediaOneAltTextMax = 500;
+
+
 
 
 export const CreateDocumentBody = zod.object({
@@ -1861,7 +1949,13 @@ export const CreateDocumentBody = zod.object({
   "title": zod.string().max(createDocumentBodySeoTitleMax).optional(),
   "description": zod.string().max(createDocumentBodySeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().regex(createDocumentBodySeoCanonicalUrlRegExp).optional().describe('Blank clears the optional canonical URL; nonblank values must use HTTP(S).'),
-  "noIndex": zod.boolean().default(createDocumentBodySeoNoIndexDefault)
+  "noIndex": zod.boolean().default(createDocumentBodySeoNoIndexDefault),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentBodySeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()).min(1)
@@ -1916,6 +2010,42 @@ export const createDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
 export const createDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const createDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoHeroMediaAltTextMax = 500;
+
+export const createDocumentResponseContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const createDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const createDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -2174,6 +2304,8 @@ export const createDocumentResponseContentNineVisualReferencesItemAltTextMax = 5
 export const createDocumentResponseSeoTitleMax = 70;
 
 export const createDocumentResponseSeoDescriptionMax = 180;
+
+export const createDocumentResponseSeoOgImageMediaOneAltTextMax = 500;
 
 export const createDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -2470,6 +2602,47 @@ export const CreateDocumentResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentResponseContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(createDocumentResponseContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(createDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(createDocumentResponseContentSixTwoDistinctionBodyMin).max(createDocumentResponseContentSixTwoDistinctionBodyMax)
@@ -2690,7 +2863,13 @@ export const CreateDocumentResponse = zod.object({
   "title": zod.string().max(createDocumentResponseSeoTitleMax).optional(),
   "description": zod.string().max(createDocumentResponseSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentResponseSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
@@ -2772,6 +2951,42 @@ export const getDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
 export const getDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const getDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoHeroMediaAltTextMax = 500;
+
+export const getDocumentResponseContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const getDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const getDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -3030,6 +3245,8 @@ export const getDocumentResponseContentNineVisualReferencesItemAltTextMax = 500;
 export const getDocumentResponseSeoTitleMax = 70;
 
 export const getDocumentResponseSeoDescriptionMax = 180;
+
+export const getDocumentResponseSeoOgImageMediaOneAltTextMax = 500;
 
 export const getDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -3326,6 +3543,47 @@ export const GetDocumentResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentResponseContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(getDocumentResponseContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(getDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(getDocumentResponseContentSixTwoDistinctionBodyMin).max(getDocumentResponseContentSixTwoDistinctionBodyMax)
@@ -3546,7 +3804,13 @@ export const GetDocumentResponse = zod.object({
   "title": zod.string().max(getDocumentResponseSeoTitleMax).optional(),
   "description": zod.string().max(getDocumentResponseSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentResponseSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
@@ -3588,6 +3852,8 @@ export const updateDocumentBodySeoOneDescriptionMax = 180;
 
 export const updateDocumentBodySeoOneCanonicalUrlRegExp = new RegExp('^(?:$|[hH][tT][tT][pP][sS]?://.+)');
 export const updateDocumentBodySeoOneNoIndexDefault = false;
+export const updateDocumentBodySeoOneOgImageMediaOneAltTextMax = 500;
+
 export const updateDocumentBodyMarketRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 export const updateDocumentBodyLocaleRegExp = new RegExp('^(?:und|[a-z]{2}(?:-[A-Z]{2})?)$');
 export const updateDocumentBodyRevisionNumberMultipleOf = 1;
@@ -3603,7 +3869,13 @@ export const UpdateDocumentBody = zod.object({
   "title": zod.string().max(updateDocumentBodySeoOneTitleMax).optional(),
   "description": zod.string().max(updateDocumentBodySeoOneDescriptionMax).optional(),
   "canonicalUrl": zod.string().regex(updateDocumentBodySeoOneCanonicalUrlRegExp).optional().describe('Blank clears the optional canonical URL; nonblank values must use HTTP(S).'),
-  "noIndex": zod.boolean().default(updateDocumentBodySeoOneNoIndexDefault)
+  "noIndex": zod.boolean().default(updateDocumentBodySeoOneNoIndexDefault),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentBodySeoOneOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }),zod.null()]).optional().describe('Null explicitly clears SEO metadata from the successor draft.'),
   "mediaIds": zod.array(zod.string()).optional(),
   "market": zod.string().regex(updateDocumentBodyMarketRegExp),
@@ -3661,6 +3933,42 @@ export const updateDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
 export const updateDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const updateDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoHeroMediaAltTextMax = 500;
+
+export const updateDocumentResponseContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const updateDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const updateDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -3919,6 +4227,8 @@ export const updateDocumentResponseContentNineVisualReferencesItemAltTextMax = 5
 export const updateDocumentResponseSeoTitleMax = 70;
 
 export const updateDocumentResponseSeoDescriptionMax = 180;
+
+export const updateDocumentResponseSeoOgImageMediaOneAltTextMax = 500;
 
 export const updateDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -4215,6 +4525,47 @@ export const UpdateDocumentResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentResponseContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(updateDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(updateDocumentResponseContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(updateDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(updateDocumentResponseContentSixTwoDistinctionBodyMin).max(updateDocumentResponseContentSixTwoDistinctionBodyMax)
@@ -4435,7 +4786,13 @@ export const UpdateDocumentResponse = zod.object({
   "title": zod.string().max(updateDocumentResponseSeoTitleMax).optional(),
   "description": zod.string().max(updateDocumentResponseSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(updateDocumentResponseSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
@@ -4533,6 +4890,42 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroS
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroMediaAltTextMax = 500;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -4791,6 +5184,8 @@ export const listDocumentRevisionsResponseTwoItemsItemSnapshotContentNineVisualR
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotSeoTitleMax = 70;
 
 export const listDocumentRevisionsResponseTwoItemsItemSnapshotSeoDescriptionMax = 180;
+
+export const listDocumentRevisionsResponseTwoItemsItemSnapshotSeoOgImageMediaOneAltTextMax = 500;
 
 
 
@@ -5096,6 +5491,47 @@ export const ListDocumentRevisionsResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionBodyItemMax)).min(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionBodyMin).max(listDocumentRevisionsResponseTwoItemsItemSnapshotContentSixTwoDistinctionBodyMax)
@@ -5316,7 +5752,13 @@ export const ListDocumentRevisionsResponse = zod.object({
   "title": zod.string().max(listDocumentRevisionsResponseTwoItemsItemSnapshotSeoTitleMax).optional(),
   "description": zod.string().max(listDocumentRevisionsResponseTwoItemsItemSnapshotSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listDocumentRevisionsResponseTwoItemsItemSnapshotSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string())
@@ -5434,6 +5876,42 @@ export const createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroSubhe
 export const createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroMediaAltTextMax = 500;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -5692,6 +6170,8 @@ export const createDocumentEditionOverrideResponseSnapshotContentNineVisualRefer
 export const createDocumentEditionOverrideResponseSnapshotSeoTitleMax = 70;
 
 export const createDocumentEditionOverrideResponseSnapshotSeoDescriptionMax = 180;
+
+export const createDocumentEditionOverrideResponseSnapshotSeoOgImageMediaOneAltTextMax = 500;
 
 
 
@@ -5991,6 +6471,47 @@ export const CreateDocumentEditionOverrideResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionBodyItemMax)).min(createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionBodyMin).max(createDocumentEditionOverrideResponseSnapshotContentSixTwoDistinctionBodyMax)
@@ -6211,7 +6732,13 @@ export const CreateDocumentEditionOverrideResponse = zod.object({
   "title": zod.string().max(createDocumentEditionOverrideResponseSnapshotSeoTitleMax).optional(),
   "description": zod.string().max(createDocumentEditionOverrideResponseSnapshotSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(createDocumentEditionOverrideResponseSnapshotSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string())
@@ -7696,6 +8223,42 @@ export const getDocumentRevisionResponseSnapshotContentSixTwoHeroPrimaryActionLa
 
 export const getDocumentRevisionResponseSnapshotContentSixTwoHeroSecondaryActionLabelMax = 4000;
 
+export const getDocumentRevisionResponseSnapshotContentSixTwoHeroMediaAltTextMax = 500;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const getDocumentRevisionResponseSnapshotContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
+
 export const getDocumentRevisionResponseSnapshotContentSixTwoDistinctionHeadingMax = 4000;
 
 export const getDocumentRevisionResponseSnapshotContentSixTwoDistinctionBodyItemMax = 4000;
@@ -7953,6 +8516,8 @@ export const getDocumentRevisionResponseSnapshotContentNineVisualReferencesItemA
 export const getDocumentRevisionResponseSnapshotSeoTitleMax = 70;
 
 export const getDocumentRevisionResponseSnapshotSeoDescriptionMax = 180;
+
+export const getDocumentRevisionResponseSnapshotSeoOgImageMediaOneAltTextMax = 500;
 
 
 
@@ -8252,6 +8817,47 @@ export const GetDocumentRevisionResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(getDocumentRevisionResponseSnapshotContentSixTwoDistinctionBodyItemMax)).min(getDocumentRevisionResponseSnapshotContentSixTwoDistinctionBodyMin).max(getDocumentRevisionResponseSnapshotContentSixTwoDistinctionBodyMax)
@@ -8472,7 +9078,13 @@ export const GetDocumentRevisionResponse = zod.object({
   "title": zod.string().max(getDocumentRevisionResponseSnapshotSeoTitleMax).optional(),
   "description": zod.string().max(getDocumentRevisionResponseSnapshotSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getDocumentRevisionResponseSnapshotSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string())
@@ -8550,6 +9162,42 @@ export const submitDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
 export const submitDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const submitDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoHeroMediaAltTextMax = 500;
+
+export const submitDocumentResponseContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const submitDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const submitDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -8808,6 +9456,8 @@ export const submitDocumentResponseContentNineVisualReferencesItemAltTextMax = 5
 export const submitDocumentResponseSeoTitleMax = 70;
 
 export const submitDocumentResponseSeoDescriptionMax = 180;
+
+export const submitDocumentResponseSeoOgImageMediaOneAltTextMax = 500;
 
 export const submitDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -9104,6 +9754,47 @@ export const SubmitDocumentResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(submitDocumentResponseContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(submitDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(submitDocumentResponseContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(submitDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(submitDocumentResponseContentSixTwoDistinctionBodyMin).max(submitDocumentResponseContentSixTwoDistinctionBodyMax)
@@ -9324,7 +10015,13 @@ export const SubmitDocumentResponse = zod.object({
   "title": zod.string().max(submitDocumentResponseSeoTitleMax).optional(),
   "description": zod.string().max(submitDocumentResponseSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(submitDocumentResponseSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
@@ -9456,6 +10153,42 @@ export const rejectDocumentRevisionResponseContentSixTwoHeroSubheadlineMax = 400
 export const rejectDocumentRevisionResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const rejectDocumentRevisionResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoHeroMediaAltTextMax = 500;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const rejectDocumentRevisionResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const rejectDocumentRevisionResponseContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -9714,6 +10447,8 @@ export const rejectDocumentRevisionResponseContentNineVisualReferencesItemAltTex
 export const rejectDocumentRevisionResponseSeoTitleMax = 70;
 
 export const rejectDocumentRevisionResponseSeoDescriptionMax = 180;
+
+export const rejectDocumentRevisionResponseSeoOgImageMediaOneAltTextMax = 500;
 
 export const rejectDocumentRevisionResponseRevisionNumberMultipleOf = 1;
 
@@ -10010,6 +10745,47 @@ export const RejectDocumentRevisionResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(rejectDocumentRevisionResponseContentSixTwoDistinctionBodyItemMax)).min(rejectDocumentRevisionResponseContentSixTwoDistinctionBodyMin).max(rejectDocumentRevisionResponseContentSixTwoDistinctionBodyMax)
@@ -10230,7 +11006,13 @@ export const RejectDocumentRevisionResponse = zod.object({
   "title": zod.string().max(rejectDocumentRevisionResponseSeoTitleMax).optional(),
   "description": zod.string().max(rejectDocumentRevisionResponseSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rejectDocumentRevisionResponseSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
@@ -10321,6 +11103,42 @@ export const publishDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
 export const publishDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const publishDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoHeroMediaAltTextMax = 500;
+
+export const publishDocumentResponseContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const publishDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const publishDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -10579,6 +11397,8 @@ export const publishDocumentResponseContentNineVisualReferencesItemAltTextMax = 
 export const publishDocumentResponseSeoTitleMax = 70;
 
 export const publishDocumentResponseSeoDescriptionMax = 180;
+
+export const publishDocumentResponseSeoOgImageMediaOneAltTextMax = 500;
 
 export const publishDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -10875,6 +11695,47 @@ export const PublishDocumentResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(publishDocumentResponseContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(publishDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(publishDocumentResponseContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(publishDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(publishDocumentResponseContentSixTwoDistinctionBodyMin).max(publishDocumentResponseContentSixTwoDistinctionBodyMax)
@@ -11095,7 +11956,13 @@ export const PublishDocumentResponse = zod.object({
   "title": zod.string().max(publishDocumentResponseSeoTitleMax).optional(),
   "description": zod.string().max(publishDocumentResponseSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(publishDocumentResponseSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
@@ -11181,6 +12048,42 @@ export const rollbackDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
 export const rollbackDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const rollbackDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoHeroMediaAltTextMax = 500;
+
+export const rollbackDocumentResponseContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const rollbackDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const rollbackDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -11439,6 +12342,8 @@ export const rollbackDocumentResponseContentNineVisualReferencesItemAltTextMax =
 export const rollbackDocumentResponseSeoTitleMax = 70;
 
 export const rollbackDocumentResponseSeoDescriptionMax = 180;
+
+export const rollbackDocumentResponseSeoOgImageMediaOneAltTextMax = 500;
 
 export const rollbackDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -11735,6 +12640,47 @@ export const RollbackDocumentResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(rollbackDocumentResponseContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(rollbackDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(rollbackDocumentResponseContentSixTwoDistinctionBodyMin).max(rollbackDocumentResponseContentSixTwoDistinctionBodyMax)
@@ -11955,7 +12901,13 @@ export const RollbackDocumentResponse = zod.object({
   "title": zod.string().max(rollbackDocumentResponseSeoTitleMax).optional(),
   "description": zod.string().max(rollbackDocumentResponseSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(rollbackDocumentResponseSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
@@ -12042,6 +12994,42 @@ export const archiveDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
 export const archiveDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const archiveDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoHeroMediaAltTextMax = 500;
+
+export const archiveDocumentResponseContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const archiveDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const archiveDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -12300,6 +13288,8 @@ export const archiveDocumentResponseContentNineVisualReferencesItemAltTextMax = 
 export const archiveDocumentResponseSeoTitleMax = 70;
 
 export const archiveDocumentResponseSeoDescriptionMax = 180;
+
+export const archiveDocumentResponseSeoOgImageMediaOneAltTextMax = 500;
 
 export const archiveDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -12596,6 +13586,47 @@ export const ArchiveDocumentResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(archiveDocumentResponseContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(archiveDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(archiveDocumentResponseContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(archiveDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(archiveDocumentResponseContentSixTwoDistinctionBodyMin).max(archiveDocumentResponseContentSixTwoDistinctionBodyMax)
@@ -12816,7 +13847,13 @@ export const ArchiveDocumentResponse = zod.object({
   "title": zod.string().max(archiveDocumentResponseSeoTitleMax).optional(),
   "description": zod.string().max(archiveDocumentResponseSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(archiveDocumentResponseSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
@@ -12903,6 +13940,42 @@ export const restoreDocumentResponseContentSixTwoHeroSubheadlineMax = 4000;
 export const restoreDocumentResponseContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const restoreDocumentResponseContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoHeroMediaAltTextMax = 500;
+
+export const restoreDocumentResponseContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const restoreDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const restoreDocumentResponseContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -13161,6 +14234,8 @@ export const restoreDocumentResponseContentNineVisualReferencesItemAltTextMax = 
 export const restoreDocumentResponseSeoTitleMax = 70;
 
 export const restoreDocumentResponseSeoDescriptionMax = 180;
+
+export const restoreDocumentResponseSeoOgImageMediaOneAltTextMax = 500;
 
 export const restoreDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -13457,6 +14532,47 @@ export const RestoreDocumentResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(restoreDocumentResponseContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(restoreDocumentResponseContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(restoreDocumentResponseContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(restoreDocumentResponseContentSixTwoDistinctionBodyItemMax)).min(restoreDocumentResponseContentSixTwoDistinctionBodyMin).max(restoreDocumentResponseContentSixTwoDistinctionBodyMax)
@@ -13677,7 +14793,13 @@ export const RestoreDocumentResponse = zod.object({
   "title": zod.string().max(restoreDocumentResponseSeoTitleMax).optional(),
   "description": zod.string().max(restoreDocumentResponseSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(restoreDocumentResponseSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string()),
@@ -13759,6 +14881,42 @@ export const previewDocumentResponseDocumentContentSixTwoHeroSubheadlineMax = 40
 export const previewDocumentResponseDocumentContentSixTwoHeroPrimaryActionLabelMax = 4000;
 
 export const previewDocumentResponseDocumentContentSixTwoHeroSecondaryActionLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoHeroMediaAltTextMax = 500;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationHeroHeadlineMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationHeroSubheadlineMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationHeroDetailsLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationDistinctionSummaryMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationDistinctionDetailsLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationLayersSummaryMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationLayersDetailsLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationExposureSummaryMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationExposureDetailsLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationSetProveHoldSummaryMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationAuthoritySummaryMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationAuthorityDetailsLabelMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationSourcesNextStepSummaryMax = 4000;
+
+export const previewDocumentResponseDocumentContentSixTwoPresentationSourcesNextStepDetailsLabelMax = 4000;
 
 export const previewDocumentResponseDocumentContentSixTwoDistinctionHeadingMax = 4000;
 
@@ -14017,6 +15175,8 @@ export const previewDocumentResponseDocumentContentNineVisualReferencesItemAltTe
 export const previewDocumentResponseDocumentSeoTitleMax = 70;
 
 export const previewDocumentResponseDocumentSeoDescriptionMax = 180;
+
+export const previewDocumentResponseDocumentSeoOgImageMediaOneAltTextMax = 500;
 
 export const previewDocumentResponseRevisionNumberMultipleOf = 1;
 
@@ -14311,6 +15471,47 @@ export const PreviewDocumentResponse = zod.object({
   "href": zod.enum(['/methodologies/agent-authority-model'])
 })
 }),
+  "heroMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoHeroMediaAltTextMax).optional()
+}).optional().describe('Immutable reference to the exact governed media version selected by an editor.'),
+  "heroMediaId": zod.string().optional(),
+  "presentation": zod.object({
+  "version": zod.enum(['guardrails-redesign-v1']),
+  "hero": zod.object({
+  "headline": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationHeroHeadlineMax),
+  "subheadline": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationHeroSubheadlineMax),
+  "detailsLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationHeroDetailsLabelMax).optional()
+}),
+  "distinction": zod.object({
+  "summary": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationDistinctionSummaryMax),
+  "detailsLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationDistinctionDetailsLabelMax).optional()
+}),
+  "layers": zod.object({
+  "summary": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationLayersSummaryMax),
+  "detailsLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationLayersDetailsLabelMax).optional()
+}),
+  "exposure": zod.object({
+  "summary": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationExposureSummaryMax),
+  "detailsLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationExposureDetailsLabelMax).optional()
+}),
+  "setProveHold": zod.object({
+  "summary": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationSetProveHoldSummaryMax),
+  "questionsDetailsLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationSetProveHoldQuestionsDetailsLabelMax).optional(),
+  "maintenanceDetailsLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationSetProveHoldMaintenanceDetailsLabelMax).optional(),
+  "measurementDetailsLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationSetProveHoldMeasurementDetailsLabelMax).optional()
+}),
+  "authority": zod.object({
+  "summary": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationAuthoritySummaryMax),
+  "detailsLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationAuthorityDetailsLabelMax).optional()
+}),
+  "sourcesNextStep": zod.object({
+  "summary": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationSourcesNextStepSummaryMax),
+  "detailsLabel": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoPresentationSourcesNextStepDetailsLabelMax).optional()
+})
+}).optional().describe('Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.'),
   "distinction": zod.object({
   "heading": zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoDistinctionHeadingMax),
   "body": zod.array(zod.string().min(1).max(previewDocumentResponseDocumentContentSixTwoDistinctionBodyItemMax)).min(previewDocumentResponseDocumentContentSixTwoDistinctionBodyMin).max(previewDocumentResponseDocumentContentSixTwoDistinctionBodyMax)
@@ -14531,7 +15732,13 @@ export const PreviewDocumentResponse = zod.object({
   "title": zod.string().max(previewDocumentResponseDocumentSeoTitleMax).optional(),
   "description": zod.string().max(previewDocumentResponseDocumentSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(previewDocumentResponseDocumentSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
   "markets": zod.array(zod.string())
@@ -16401,6 +17608,8 @@ export const listPublishedContentResponseTwoItemsItemSeoTitleMax = 70;
 
 export const listPublishedContentResponseTwoItemsItemSeoDescriptionMax = 180;
 
+export const listPublishedContentResponseTwoItemsItemSeoOgImageMediaOneAltTextMax = 500;
+
 export const listPublishedContentResponseTwoItemsItemMediaItemWidthMultipleOf = 1;
 
 export const listPublishedContentResponseTwoItemsItemMediaItemHeightMultipleOf = 1;
@@ -16432,7 +17641,13 @@ export const ListPublishedContentResponse = zod.object({
   "title": zod.string().max(listPublishedContentResponseTwoItemsItemSeoTitleMax).optional(),
   "description": zod.string().max(listPublishedContentResponseTwoItemsItemSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(listPublishedContentResponseTwoItemsItemSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "media": zod.array(zod.object({
   "id": zod.string(),
@@ -16480,6 +17695,8 @@ export const getPublishedContentResponseSeoTitleMax = 70;
 
 export const getPublishedContentResponseSeoDescriptionMax = 180;
 
+export const getPublishedContentResponseSeoOgImageMediaOneAltTextMax = 500;
+
 export const getPublishedContentResponseMediaItemWidthMultipleOf = 1;
 
 export const getPublishedContentResponseMediaItemHeightMultipleOf = 1;
@@ -16505,7 +17722,13 @@ export const GetPublishedContentResponse = zod.object({
   "title": zod.string().max(getPublishedContentResponseSeoTitleMax).optional(),
   "description": zod.string().max(getPublishedContentResponseSeoDescriptionMax).optional(),
   "canonicalUrl": zod.string().optional(),
-  "noIndex": zod.boolean().optional()
+  "noIndex": zod.boolean().optional(),
+  "ogImageMedia": zod.object({
+  "mediaId": zod.string(),
+  "mediaVersionId": zod.string(),
+  "role": zod.enum(['identity', 'logo', 'hero', 'supporting', 'background', 'icon', 'og-image', 'document']),
+  "altText": zod.string().min(1).max(getPublishedContentResponseSeoOgImageMediaOneAltTextMax).optional()
+}).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "media": zod.array(zod.object({
   "id": zod.string(),

@@ -1,0 +1,1454 @@
+{
+  "task": "336 Guardrails redesign",
+  "deliveryMode": "fixture",
+  "fixture": true,
+  "syntheticInterception": {
+    "previewPath": "/api/preview/guardrails-redesign-fixture",
+    "mediaPath": "/__guardrails-redesign-fixture__/hero",
+    "rule": "Only the synthetic preview JSON and synthetic hero-media URL are fulfilled by this harness."
+  },
+  "authenticPreview": false,
+  "hero": {
+    "source": "local bytes supplied to explicit fixture mode",
+    "sha256": "58854df17fc2aada590e03f5a2cd168677eb737a0d97cbe51b9e1a4b34b249fe",
+    "mimeType": "image/jpeg",
+    "bytes": 146953
+  },
+  "rendererSource": {
+    "path": "artifacts/cognirise-website/src/pages/GuardrailsFramework.tsx",
+    "before": {
+      "source": "git HEAD",
+      "revision": "1d934870424f316d98547ece39d0abc8ef7324e7",
+      "sha256": "216e649fe8dbd2bea42c30328ee6da53af93fc9c507175774dab66248cd090f9",
+      "captured": true
+    },
+    "after": {
+      "source": "working tree at browser run",
+      "sha256": "0411cb4f96a2eee4a674ca69a8d18f64c60ccab14c9cb2dc94ad3f1ed63972b9",
+      "captured": true
+    },
+    "note": "These files are source captures only; the harness never edits application source."
+  },
+  "beforeEvidence": {
+    "status": "browser-captured",
+    "renderer": "git HEAD GuardrailsFramework.tsx rendered through a temporary SSR entry",
+    "note": "Baseline uses the supplied old snapshot without hero media; no app source was modified."
+  },
+  "wordCount": {
+    "scope": "Same DOM scope for every capture: article text excluding header/nav/footer, hidden nodes, and closed details; selected default panels included.",
+    "before": {
+      "390": {
+        "words": 2882,
+        "scope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included"
+      },
+      "768": {
+        "words": 2882,
+        "scope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included"
+      },
+      "1440": {
+        "words": 2882,
+        "scope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included"
+      }
+    },
+    "after": {
+      "390": {
+        "words": 502,
+        "scope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included"
+      },
+      "768": {
+        "words": 502,
+        "scope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included"
+      },
+      "1440": {
+        "words": 502,
+        "scope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included"
+      }
+    }
+  },
+  "failures": [
+    {
+      "capture": "after",
+      "viewport": "768",
+      "kind": "horizontal-overflow",
+      "message": "after/768: page has horizontal overflow (963/963 > 768).",
+      "visibleTextOverflow": [
+        {
+          "tag": "BUTTON",
+          "text": "Runtime",
+          "left": 666,
+          "right": 788,
+          "clientWidth": 123,
+          "scrollWidth": 123
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Architecture",
+          "left": 788,
+          "right": 963,
+          "clientWidth": 175,
+          "scrollWidth": 175
+        }
+      ]
+    },
+    {
+      "capture": "after",
+      "viewport": "768",
+      "kind": "visible-content-overflow",
+      "message": "after/768: visible text leaves its viewport.",
+      "visibleTextOverflow": [
+        {
+          "tag": "BUTTON",
+          "text": "Runtime",
+          "left": 666,
+          "right": 788,
+          "clientWidth": 123,
+          "scrollWidth": 123
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Architecture",
+          "left": 788,
+          "right": 963,
+          "clientWidth": 175,
+          "scrollWidth": 175
+        }
+      ]
+    }
+  ],
+  "viewports": {
+    "before-390": {
+      "sections": [
+        {
+          "index": 0,
+          "label": "A guardrail is only as strong as the layer it is built into.",
+          "heading": "A guardrail is only as strong as the layer it is built into.",
+          "top": 8,
+          "bottom": 185.875,
+          "height": 177.875,
+          "width": 964
+        },
+        {
+          "index": 1,
+          "label": "Asked, or unable",
+          "heading": "Asked, or unable",
+          "top": 205.78125,
+          "bottom": 392.6875,
+          "height": 186.90625,
+          "width": 964
+        },
+        {
+          "index": 2,
+          "label": "One rule, four different ways",
+          "heading": "One rule, four different ways",
+          "top": 412.59375,
+          "bottom": 2742.375,
+          "height": 2329.78125,
+          "width": 964
+        },
+        {
+          "index": 3,
+          "label": "The stopping rule",
+          "heading": "The stopping rule",
+          "top": 2762.28125,
+          "bottom": 5451.140625,
+          "height": 2688.859375,
+          "width": 964
+        },
+        {
+          "index": 4,
+          "label": "What you need to know about a control",
+          "heading": "What you need to know about a control",
+          "top": 5471.046875,
+          "bottom": 5819.265625,
+          "height": 348.21875,
+          "width": 964
+        },
+        {
+          "index": 5,
+          "label": "Set, Prove & Hold",
+          "heading": "Set, Prove & Hold",
+          "top": 5839.171875,
+          "bottom": 7003.390625,
+          "height": 1164.21875,
+          "width": 964
+        },
+        {
+          "index": 6,
+          "label": "What it costs to keep it true",
+          "heading": "What it costs to keep it true",
+          "top": 7023.296875,
+          "bottom": 7918.203125,
+          "height": 894.90625,
+          "width": 964
+        },
+        {
+          "index": 7,
+          "label": "What to measure",
+          "heading": "What to measure",
+          "top": 7938.109375,
+          "bottom": 8055.015625,
+          "height": 116.90625,
+          "width": 964
+        },
+        {
+          "index": 8,
+          "label": "Authority and enforcement",
+          "heading": "Authority and enforcement",
+          "top": 8074.921875,
+          "bottom": 8441.265625,
+          "height": 366.34375,
+          "width": 964
+        },
+        {
+          "index": 9,
+          "label": "What this is built from",
+          "heading": "What this is built from",
+          "top": 8461.171875,
+          "bottom": 8882.390625,
+          "height": 421.21875,
+          "width": 964
+        },
+        {
+          "index": 10,
+          "label": "Three moves",
+          "heading": "Three moves",
+          "top": 8902.296875,
+          "bottom": 9336.015625,
+          "height": 433.71875,
+          "width": 964
+        }
+      ],
+      "inspection": {
+        "sectionCount": 11,
+        "sections": [
+          {
+            "marker": "",
+            "heading": "A guardrail is only as strong as the layer it is built into."
+          },
+          {
+            "marker": "",
+            "heading": "Asked, or unable"
+          },
+          {
+            "marker": "",
+            "heading": "One rule, four different ways"
+          },
+          {
+            "marker": "",
+            "heading": "The stopping rule"
+          },
+          {
+            "marker": "",
+            "heading": "What you need to know about a control"
+          },
+          {
+            "marker": "",
+            "heading": "Set, Prove & Hold"
+          },
+          {
+            "marker": "",
+            "heading": "What it costs to keep it true"
+          },
+          {
+            "marker": "",
+            "heading": "What to measure"
+          },
+          {
+            "marker": "",
+            "heading": "Authority and enforcement"
+          },
+          {
+            "marker": "",
+            "heading": "What this is built from"
+          },
+          {
+            "marker": "",
+            "heading": "Three moves"
+          }
+        ],
+        "bodyWordScope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included",
+        "visibleBodyWords": 2882,
+        "visibleBodyText": "Asked, or unable Almost every guardrail in production today is a sentence in a system prompt. It reads like a control, it is reported like a control, and under any determined attempt it behaves like a request. The distinction is not academic. A rule the model has been asked to follow fails probabilistically — most of the time it holds, and the times it does not are the times someone was trying. A rule the model cannot break fails only if the thing enforcing it fails, and that thing can be tested like any other piece of software. Everything below follows from one question: where is the rule actually enforced? One rule, four different ways The same rule can be written in any of four places. The choice decides whether someone determined can get past it — and how much work it takes to keep it true. ONE RULE, FOUR DIFFERENT WAYS “Never reveal another customer’s data.” Policy A rule in a document A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything 1 of 4 Prompt A line in the AI’s instructions The AI is told not to. The data is still in front of it. WHAT GETS PAST IT An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. 2 of 4 ABOVE THIS LINE YOU ARE ASKING · BELOW IT YOU ARE NOT Runtime Software outside the AI that checks what goes in and out Any answer containing another customer’s record is blocked before it leaves. WHAT GETS PAST IT Reliable against opportunistic misuse. Unreliable against a motivated attacker: character and encoding evasion has reached complete bypass, and unsafe responses rise sharply in lower-resourced languages. 3 of 4 Architecture The AI is given only the data and tools the task needs The search returns only the signed-in customer’s own records. WHAT GETS PAST IT Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. 4 of 4 Architecture is not about withholding. The AI still gets everything it needs to do the job — it just never gets more than that. \"Never reveal another customer's data.\" Layer What it is In this example What gets past it Strength Policy A rule in a document A line in the AI usage policy. The system never sees it. Anyone who has not read it — and every automated path, which has nobody in it to read anything 1 of 4 Prompt A line in the AI's instructions The AI is told not to. The other customer's data is still in front of it. An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. 2 of 4 Runtime Software outside the AI that checks what goes in and out Any answer containing another customer's record is blocked before it leaves. Reliable against opportunistic misuse; unreliable against a motivated attacker. Character and encoding evasion has reached complete bypass against commercial guardrails, and unsafe-response rates rise sharply in lower-resourced languages. 3 of 4 Architecture The AI is given only the data and tools the task needs The search returns only the signed-in customer's own records. Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. 4 of 4 Layer Policy What it is A rule in a document In this example A line in the AI usage policy. The system never sees it. What gets past it Anyone who has not read it — and every automated path, which has nobody in it to read anything Strength 1 of 4 Layer Prompt What it is A line in the AI's instructions In this example The AI is told not to. The other customer's data is still in front of it. What gets past it An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. Strength 2 of 4 Layer Runtime What it is Software outside the AI that checks what goes in and out In this example Any answer containing another customer's record is blocked before it leaves. What gets past it Reliable against opportunistic misuse; unreliable against a motivated attacker. Character and encoding evasion has reached complete bypass against commercial guardrails, and unsafe-response rates rise sharply in lower-resourced languages. Strength 3 of 4 Layer Architecture What it is The AI is given only the data and tools the task needs In this example The search returns only the signed-in customer's own records. What gets past it Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. Strength 4 of 4 Architecture is not about withholding. The AI still gets everything it needs to do the job — it just never gets more than that. Layers one and two ask the AI to behave. Layers three and four do not ask. Stop at the prompt and your guardrails are requests, not controls. 5 The fifth thing, which is not a layer The model's own safety training is a real control, and it is the one you inherit rather than hold. That makes model selection a guardrail decision, and it is the reason two systems with identical guardrails do not carry identical risk. The stopping rule \"Build it into the strongest layer you can\" is advice. It never says enough , so it cannot close a design review, and it sends budget to the wrong places. The required strength follows from what it would cost to be wrong — the same exposure rating used in the Agent Authority Model. THE STOPPING RULE Exposure decides how strong is strong enough IF THE HANDOVER IS… …ENFORCE AT LEAST HERE Undone at will, internal only Nobody outside the organisation is affected Prompt with monitoring Reversible at a cost, one customer Undoing it involves another party Runtime a check outside the model, on the way in or out Irreversible, one customer Sent, paid, published or acted upon Runtime + architectural scoping of the data and tools reached Regulator-visible, public, or safety A supervisor can inspect it, or anyone can see it Architecture + an independent second control Running above its exposure ceiling More authority than the exposure alone permits Architecture + a named artefact that carries the authority Undone at will, internal only Nobody outside the organisation is affected Reversible at a cost, one customer Undoing it involves another party Irreversible, one customer Sent, paid, published or acted upon Regulator-visible, public, or safety A supervisor can inspect it, or anyone can see it Running above its exposure ceiling More authority than the exposure alone permits Prompt with monitoring Runtime a check outside the model, on the way in or out Architecture the model is given only what the task needs Undone at will, internal only → Prompt, with monitoring Reversible at a cost, one customer → Runtime Irreversible, one customer → Runtime, + architectural scoping of the data and tools reached Regulator-visible, public, or safety → Architecture, + an independent second control Running above its exposure ceiling → Architecture, + a named artefact that carries the authority “The strongest layer you can” is advice. This is a decision — so a design review can close. Exposure is rated exactly as it is in the Agent Authority Model: how hard the output is to undo, and who is exposed if it is wrong. If the handover is… Its controls must be enforced at least at… Trivially or windowed-reversible, internal only Prompt , with monitoring Reversible at a cost, one customer affected Runtime Irreversible, one customer affected Runtime , plus architectural scoping of the data and tools it can reach Regulator-visible, public, or safety-implicating Architecture , plus an independent second control Running above its exposure ceiling Architecture , and the design must name the artefact that carries the authority If the handover is… Trivially or windowed-reversible, internal only Its controls must be enforced at least at… Prompt , with monitoring If the handover is… Reversible at a cost, one customer affected Its controls must be enforced at least at… Runtime If the handover is… Irreversible, one customer affected Its controls must be enforced at least at… Runtime , plus architectural scoping of the data and tools it can reach If the handover is… Regulator-visible, public, or safety-implicating Its controls must be enforced at least at… Architecture , plus an independent second control If the handover is… Running above its exposure ceiling Its controls must be enforced at least at… Architecture , and the design must name the artefact that carries the authority Now a design review can close. A client can be told they are done. What you need to know about a control The layer answers only one of the three things that matter. A framework that stops there has no place to put human approval, identity, or anything you would only discover afterwards. Where is it enforced? Policy, prompt, runtime, architecture. This decides whether it can be broken, and how often it has to be re-tested. Who is present when it runs? In the loop, on the loop, out of the loop. Human approval is not a layer; it is an authority state. It is also a control with a capacity limit rather than an unlimited backstop — past the point where reviewers can attend properly, escalating more makes a system less safe, not more. What would we know afterwards? What is logged, what is monitored, what trips a circuit breaker, and how the output is undone. A blocking layer that produces no record fails silently. The most consequential documented AI exfiltration incident to date generated no logs, no alerts and no signatures. Set, Prove & Hold Three things happen to every guardrail. Four steps in each. SET before you build 01 Name the handovers, not the rules. Every moment the AI passes something to a person or another system. A \"single agent\" is usually four to seven of them. 02 Read the minimum enforcement layer off the exposure. Build at or above that line. 03 Say what each control does — restrict, or carry the authority. Most controls make a risky thing less risky. A few carry the authority themselves, and only those let a handover run above its ceiling. 04 Every control inherits the owner of the handover it defends. No orphaned rules, no second register. PROVE before you launch 01 Attack each control directly , using a published corpus rather than imagination. 02 Widen the attack to the whole system — including encoding and character-level evasion, and every language you operate in. 03 Count what it blocks wrongly, with a denominator. What it catches and what it wrongly stops are two numbers, reported separately. 04 Record the result with a date, a version and a name. Above the reversible-at-a-cost band, that name is not the person who built it. HOLD every day after 01 Watch the blocked attempts — and the unblocked ones. What nothing fired on is the more interesting number. 02 Re-test on every change to the model, the instructions, the scanner, the languages or the scope — and whenever a new attack class is published. 03 Add new controls, retire old ones, and move the authority. Promotion on evidence; demotion automatic on incident. 04 Report enforcement strength weighted by exposure , not a count. What it costs to keep it true Layer Set — how you build it Prove — how you test it Hold — when you re-test Policy Write it in a document Nothing to test Never — it is not connected to anything Prompt Put it in the AI's instructions Attack it. Expect it to fail some of the time. Every model or instruction change — so, constantly Runtime Add a check outside the AI, on the way in or out Attack it in every language you serve, with encoding evasion, and count what it blocks wrongly When the scanner, the model or the languages change — and when a new attack class is published Architecture Give the AI only the data and tools the task needs Check the scoping is in place, then try to misuse what is inside the scope Whenever the scope changes — every tool, integration, credential or allowlist entry — and patch it like any other software Layer Policy Set — how you build it Write it in a document Prove — how you test it Nothing to test Hold — when you re-test Never — it is not connected to anything Layer Prompt Set — how you build it Put it in the AI's instructions Prove — how you test it Attack it. Expect it to fail some of the time. Hold — when you re-test Every model or instruction change — so, constantly Layer Runtime Set — how you build it Add a check outside the AI, on the way in or out Prove — how you test it Attack it in every language you serve, with encoding evasion, and count what it blocks wrongly Hold — when you re-test When the scanner, the model or the languages change — and when a new attack class is published Layer Architecture Set — how you build it Give the AI only the data and tools the task needs Prove — how you test it Check the scoping is in place, then try to misuse what is inside the scope Hold — when you re-test Whenever the scope changes — every tool, integration, credential or allowlist entry — and patch it like any other software Read the last two columns together. A rule in the AI's instructions is quick to write and then needs re-testing every time anything moves. The same rule built into the architecture is real work once, and then holds until the scope drifts — which it does, quietly, every time someone adds a tool. Layer choice is a maintenance decision as much as a security one, and the maintenance never reaches zero. What to measure Of the handovers that are irreversible, or visible to a regulator or the public — what share have their controls enforced at runtime or architecture? Not how many guardrails you have. Not even how many sit at each layer: forty low-consequence rules moved to runtime make a beautiful chart and change nothing. Set assigns the layer. Prove tells you whether the claimed layer is real. Hold reports it over time. Authority and enforcement These are two halves of one instrument, and neither works alone. The Agent Authority Model decides what a handover is allowed to do — capped by what it would cost to be wrong, raised only on measured evidence. This framework decides how strongly that is enforced, and how you know it still holds. Authority is the how much . Guardrails are the how . That is why a guardrail here is never a free-standing object with its own owner and its own register. It is a control attached to a handover, and it inherits that handover's owner — one register, one set of owners, one artefact a supervisor can inspect. An authority model with unenforceable controls is a register of good intentions. Controls without an authority model are a pile of features nobody can justify to a regulator. Each is load-bearing for the other. Related Methodology The Agent Authority Model → Who authorised the agent to do that, and what must it prove to do more. What this is built from Nothing invented here, including the layering — it compresses a consensus already published by the major labs, the standards bodies and the academic literature. Two things are ours: making the re-test cadence a function of the layer, and binding required enforcement strength to exposure. The ethics frameworks tell you what to forbid. The security ones tell you how it gets bypassed. A policy built on the first alone will name the right rules and miss every way around them. What to forbid OWASP GenAI LLM Top 10 2026 · OWASP Top 10 for Agentic Applications · EU AI Act Article 5, as amended · national law on unlawful and manipulated content in the markets you serve How it gets bypassed, and how to test MITRE ATLAS v2026.08 · NIST AI 100-2 E2025, Adversarial Machine Learning · OWASP AI Testing Guide v1.0 · UK AI Security Institute, Principles for Evaluating Misuse Safeguards What you will be measured against ISO/IEC 42001:2023 with ISO/IEC 42006:2025 · NIST AI RMF 1.0 and AI 600-1 · CSA AI Controls Matrix v1.1 · the data protection and sector regulation of the jurisdiction you operate in · the UAE Charter for AI Three moves 1 Move 1 — an afternoon. List every handover — every moment the AI passes something to a person or another system — and mark which layer each one's controls are enforced at. Then look only at the irreversible and the regulator-visible. That number is the finding. 2 Move 2 — an afternoon, two people. Take the three that matter most and try to break them, in every language the service operates in. Whatever survives is worth keeping; whatever does not was never a control. 3 Move 3. Move one guardrail to a stronger layer. Start with the least technical option: narrow what the AI is given to what the task actually needs. Most guardrail reviews find the same thing. That the controls protecting the highest-consequence handovers are the ones nobody can test. Finding out takes an afternoon. Book a guardrail review Mappings are indicative and require confirmation against source text before adoption. Not legal advice.",
+        "pageFits": true,
+        "documentWidth": 980,
+        "bodyWidth": 980,
+        "viewportWidth": 980,
+        "outside": [],
+        "reducedMotion": true,
+        "activeAnimations": 0,
+        "tools": {
+          "layers": true,
+          "exposure": true
+        },
+        "detailsCount": 0,
+        "capture": "before",
+        "failures": []
+      }
+    },
+    "before-768": {
+      "sections": [
+        {
+          "index": 0,
+          "label": "A guardrail is only as strong as the layer it is built into.",
+          "heading": "A guardrail is only as strong as the layer it is built into.",
+          "top": 8,
+          "bottom": 222.875,
+          "height": 214.875,
+          "width": 737
+        },
+        {
+          "index": 1,
+          "label": "Asked, or unable",
+          "heading": "Asked, or unable",
+          "top": 242.78125,
+          "bottom": 429.6875,
+          "height": 186.90625,
+          "width": 737
+        },
+        {
+          "index": 2,
+          "label": "One rule, four different ways",
+          "heading": "One rule, four different ways",
+          "top": 449.59375,
+          "bottom": 2959.375,
+          "height": 2509.78125,
+          "width": 737
+        },
+        {
+          "index": 3,
+          "label": "The stopping rule",
+          "heading": "The stopping rule",
+          "top": 2979.28125,
+          "bottom": 5549.140625,
+          "height": 2569.859375,
+          "width": 737
+        },
+        {
+          "index": 4,
+          "label": "What you need to know about a control",
+          "heading": "What you need to know about a control",
+          "top": 5569.046875,
+          "bottom": 5953.265625,
+          "height": 384.21875,
+          "width": 737
+        },
+        {
+          "index": 5,
+          "label": "Set, Prove & Hold",
+          "heading": "Set, Prove & Hold",
+          "top": 5973.171875,
+          "bottom": 7227.390625,
+          "height": 1254.21875,
+          "width": 737
+        },
+        {
+          "index": 6,
+          "label": "What it costs to keep it true",
+          "heading": "What it costs to keep it true",
+          "top": 7247.296875,
+          "bottom": 8232.203125,
+          "height": 984.90625,
+          "width": 737
+        },
+        {
+          "index": 7,
+          "label": "What to measure",
+          "heading": "What to measure",
+          "top": 8252.109375,
+          "bottom": 8405.015625,
+          "height": 152.90625,
+          "width": 737
+        },
+        {
+          "index": 8,
+          "label": "Authority and enforcement",
+          "heading": "Authority and enforcement",
+          "top": 8424.921875,
+          "bottom": 8827.265625,
+          "height": 402.34375,
+          "width": 737
+        },
+        {
+          "index": 9,
+          "label": "What this is built from",
+          "heading": "What this is built from",
+          "top": 8847.171875,
+          "bottom": 9286.390625,
+          "height": 439.21875,
+          "width": 737
+        },
+        {
+          "index": 10,
+          "label": "Three moves",
+          "heading": "Three moves",
+          "top": 9306.296875,
+          "bottom": 9794.015625,
+          "height": 487.71875,
+          "width": 737
+        }
+      ],
+      "inspection": {
+        "sectionCount": 11,
+        "sections": [
+          {
+            "marker": "",
+            "heading": "A guardrail is only as strong as the layer it is built into."
+          },
+          {
+            "marker": "",
+            "heading": "Asked, or unable"
+          },
+          {
+            "marker": "",
+            "heading": "One rule, four different ways"
+          },
+          {
+            "marker": "",
+            "heading": "The stopping rule"
+          },
+          {
+            "marker": "",
+            "heading": "What you need to know about a control"
+          },
+          {
+            "marker": "",
+            "heading": "Set, Prove & Hold"
+          },
+          {
+            "marker": "",
+            "heading": "What it costs to keep it true"
+          },
+          {
+            "marker": "",
+            "heading": "What to measure"
+          },
+          {
+            "marker": "",
+            "heading": "Authority and enforcement"
+          },
+          {
+            "marker": "",
+            "heading": "What this is built from"
+          },
+          {
+            "marker": "",
+            "heading": "Three moves"
+          }
+        ],
+        "bodyWordScope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included",
+        "visibleBodyWords": 2882,
+        "visibleBodyText": "Asked, or unable Almost every guardrail in production today is a sentence in a system prompt. It reads like a control, it is reported like a control, and under any determined attempt it behaves like a request. The distinction is not academic. A rule the model has been asked to follow fails probabilistically — most of the time it holds, and the times it does not are the times someone was trying. A rule the model cannot break fails only if the thing enforcing it fails, and that thing can be tested like any other piece of software. Everything below follows from one question: where is the rule actually enforced? One rule, four different ways The same rule can be written in any of four places. The choice decides whether someone determined can get past it — and how much work it takes to keep it true. ONE RULE, FOUR DIFFERENT WAYS “Never reveal another customer’s data.” Policy A rule in a document A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything 1 of 4 Prompt A line in the AI’s instructions The AI is told not to. The data is still in front of it. WHAT GETS PAST IT An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. 2 of 4 ABOVE THIS LINE YOU ARE ASKING · BELOW IT YOU ARE NOT Runtime Software outside the AI that checks what goes in and out Any answer containing another customer’s record is blocked before it leaves. WHAT GETS PAST IT Reliable against opportunistic misuse. Unreliable against a motivated attacker: character and encoding evasion has reached complete bypass, and unsafe responses rise sharply in lower-resourced languages. 3 of 4 Architecture The AI is given only the data and tools the task needs The search returns only the signed-in customer’s own records. WHAT GETS PAST IT Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. 4 of 4 Architecture is not about withholding. The AI still gets everything it needs to do the job — it just never gets more than that. \"Never reveal another customer's data.\" Layer What it is In this example What gets past it Strength Policy A rule in a document A line in the AI usage policy. The system never sees it. Anyone who has not read it — and every automated path, which has nobody in it to read anything 1 of 4 Prompt A line in the AI's instructions The AI is told not to. The other customer's data is still in front of it. An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. 2 of 4 Runtime Software outside the AI that checks what goes in and out Any answer containing another customer's record is blocked before it leaves. Reliable against opportunistic misuse; unreliable against a motivated attacker. Character and encoding evasion has reached complete bypass against commercial guardrails, and unsafe-response rates rise sharply in lower-resourced languages. 3 of 4 Architecture The AI is given only the data and tools the task needs The search returns only the signed-in customer's own records. Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. 4 of 4 Layer Policy What it is A rule in a document In this example A line in the AI usage policy. The system never sees it. What gets past it Anyone who has not read it — and every automated path, which has nobody in it to read anything Strength 1 of 4 Layer Prompt What it is A line in the AI's instructions In this example The AI is told not to. The other customer's data is still in front of it. What gets past it An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. Strength 2 of 4 Layer Runtime What it is Software outside the AI that checks what goes in and out In this example Any answer containing another customer's record is blocked before it leaves. What gets past it Reliable against opportunistic misuse; unreliable against a motivated attacker. Character and encoding evasion has reached complete bypass against commercial guardrails, and unsafe-response rates rise sharply in lower-resourced languages. Strength 3 of 4 Layer Architecture What it is The AI is given only the data and tools the task needs In this example The search returns only the signed-in customer's own records. What gets past it Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. Strength 4 of 4 Architecture is not about withholding. The AI still gets everything it needs to do the job — it just never gets more than that. Layers one and two ask the AI to behave. Layers three and four do not ask. Stop at the prompt and your guardrails are requests, not controls. 5 The fifth thing, which is not a layer The model's own safety training is a real control, and it is the one you inherit rather than hold. That makes model selection a guardrail decision, and it is the reason two systems with identical guardrails do not carry identical risk. The stopping rule \"Build it into the strongest layer you can\" is advice. It never says enough , so it cannot close a design review, and it sends budget to the wrong places. The required strength follows from what it would cost to be wrong — the same exposure rating used in the Agent Authority Model. THE STOPPING RULE Exposure decides how strong is strong enough IF THE HANDOVER IS… …ENFORCE AT LEAST HERE Undone at will, internal only Nobody outside the organisation is affected Prompt with monitoring Reversible at a cost, one customer Undoing it involves another party Runtime a check outside the model, on the way in or out Irreversible, one customer Sent, paid, published or acted upon Runtime + architectural scoping of the data and tools reached Regulator-visible, public, or safety A supervisor can inspect it, or anyone can see it Architecture + an independent second control Running above its exposure ceiling More authority than the exposure alone permits Architecture + a named artefact that carries the authority Undone at will, internal only Nobody outside the organisation is affected Reversible at a cost, one customer Undoing it involves another party Irreversible, one customer Sent, paid, published or acted upon Regulator-visible, public, or safety A supervisor can inspect it, or anyone can see it Running above its exposure ceiling More authority than the exposure alone permits Prompt with monitoring Runtime a check outside the model, on the way in or out Architecture the model is given only what the task needs Undone at will, internal only → Prompt, with monitoring Reversible at a cost, one customer → Runtime Irreversible, one customer → Runtime, + architectural scoping of the data and tools reached Regulator-visible, public, or safety → Architecture, + an independent second control Running above its exposure ceiling → Architecture, + a named artefact that carries the authority “The strongest layer you can” is advice. This is a decision — so a design review can close. Exposure is rated exactly as it is in the Agent Authority Model: how hard the output is to undo, and who is exposed if it is wrong. If the handover is… Its controls must be enforced at least at… Trivially or windowed-reversible, internal only Prompt , with monitoring Reversible at a cost, one customer affected Runtime Irreversible, one customer affected Runtime , plus architectural scoping of the data and tools it can reach Regulator-visible, public, or safety-implicating Architecture , plus an independent second control Running above its exposure ceiling Architecture , and the design must name the artefact that carries the authority If the handover is… Trivially or windowed-reversible, internal only Its controls must be enforced at least at… Prompt , with monitoring If the handover is… Reversible at a cost, one customer affected Its controls must be enforced at least at… Runtime If the handover is… Irreversible, one customer affected Its controls must be enforced at least at… Runtime , plus architectural scoping of the data and tools it can reach If the handover is… Regulator-visible, public, or safety-implicating Its controls must be enforced at least at… Architecture , plus an independent second control If the handover is… Running above its exposure ceiling Its controls must be enforced at least at… Architecture , and the design must name the artefact that carries the authority Now a design review can close. A client can be told they are done. What you need to know about a control The layer answers only one of the three things that matter. A framework that stops there has no place to put human approval, identity, or anything you would only discover afterwards. Where is it enforced? Policy, prompt, runtime, architecture. This decides whether it can be broken, and how often it has to be re-tested. Who is present when it runs? In the loop, on the loop, out of the loop. Human approval is not a layer; it is an authority state. It is also a control with a capacity limit rather than an unlimited backstop — past the point where reviewers can attend properly, escalating more makes a system less safe, not more. What would we know afterwards? What is logged, what is monitored, what trips a circuit breaker, and how the output is undone. A blocking layer that produces no record fails silently. The most consequential documented AI exfiltration incident to date generated no logs, no alerts and no signatures. Set, Prove & Hold Three things happen to every guardrail. Four steps in each. SET before you build 01 Name the handovers, not the rules. Every moment the AI passes something to a person or another system. A \"single agent\" is usually four to seven of them. 02 Read the minimum enforcement layer off the exposure. Build at or above that line. 03 Say what each control does — restrict, or carry the authority. Most controls make a risky thing less risky. A few carry the authority themselves, and only those let a handover run above its ceiling. 04 Every control inherits the owner of the handover it defends. No orphaned rules, no second register. PROVE before you launch 01 Attack each control directly , using a published corpus rather than imagination. 02 Widen the attack to the whole system — including encoding and character-level evasion, and every language you operate in. 03 Count what it blocks wrongly, with a denominator. What it catches and what it wrongly stops are two numbers, reported separately. 04 Record the result with a date, a version and a name. Above the reversible-at-a-cost band, that name is not the person who built it. HOLD every day after 01 Watch the blocked attempts — and the unblocked ones. What nothing fired on is the more interesting number. 02 Re-test on every change to the model, the instructions, the scanner, the languages or the scope — and whenever a new attack class is published. 03 Add new controls, retire old ones, and move the authority. Promotion on evidence; demotion automatic on incident. 04 Report enforcement strength weighted by exposure , not a count. What it costs to keep it true Layer Set — how you build it Prove — how you test it Hold — when you re-test Policy Write it in a document Nothing to test Never — it is not connected to anything Prompt Put it in the AI's instructions Attack it. Expect it to fail some of the time. Every model or instruction change — so, constantly Runtime Add a check outside the AI, on the way in or out Attack it in every language you serve, with encoding evasion, and count what it blocks wrongly When the scanner, the model or the languages change — and when a new attack class is published Architecture Give the AI only the data and tools the task needs Check the scoping is in place, then try to misuse what is inside the scope Whenever the scope changes — every tool, integration, credential or allowlist entry — and patch it like any other software Layer Policy Set — how you build it Write it in a document Prove — how you test it Nothing to test Hold — when you re-test Never — it is not connected to anything Layer Prompt Set — how you build it Put it in the AI's instructions Prove — how you test it Attack it. Expect it to fail some of the time. Hold — when you re-test Every model or instruction change — so, constantly Layer Runtime Set — how you build it Add a check outside the AI, on the way in or out Prove — how you test it Attack it in every language you serve, with encoding evasion, and count what it blocks wrongly Hold — when you re-test When the scanner, the model or the languages change — and when a new attack class is published Layer Architecture Set — how you build it Give the AI only the data and tools the task needs Prove — how you test it Check the scoping is in place, then try to misuse what is inside the scope Hold — when you re-test Whenever the scope changes — every tool, integration, credential or allowlist entry — and patch it like any other software Read the last two columns together. A rule in the AI's instructions is quick to write and then needs re-testing every time anything moves. The same rule built into the architecture is real work once, and then holds until the scope drifts — which it does, quietly, every time someone adds a tool. Layer choice is a maintenance decision as much as a security one, and the maintenance never reaches zero. What to measure Of the handovers that are irreversible, or visible to a regulator or the public — what share have their controls enforced at runtime or architecture? Not how many guardrails you have. Not even how many sit at each layer: forty low-consequence rules moved to runtime make a beautiful chart and change nothing. Set assigns the layer. Prove tells you whether the claimed layer is real. Hold reports it over time. Authority and enforcement These are two halves of one instrument, and neither works alone. The Agent Authority Model decides what a handover is allowed to do — capped by what it would cost to be wrong, raised only on measured evidence. This framework decides how strongly that is enforced, and how you know it still holds. Authority is the how much . Guardrails are the how . That is why a guardrail here is never a free-standing object with its own owner and its own register. It is a control attached to a handover, and it inherits that handover's owner — one register, one set of owners, one artefact a supervisor can inspect. An authority model with unenforceable controls is a register of good intentions. Controls without an authority model are a pile of features nobody can justify to a regulator. Each is load-bearing for the other. Related Methodology The Agent Authority Model → Who authorised the agent to do that, and what must it prove to do more. What this is built from Nothing invented here, including the layering — it compresses a consensus already published by the major labs, the standards bodies and the academic literature. Two things are ours: making the re-test cadence a function of the layer, and binding required enforcement strength to exposure. The ethics frameworks tell you what to forbid. The security ones tell you how it gets bypassed. A policy built on the first alone will name the right rules and miss every way around them. What to forbid OWASP GenAI LLM Top 10 2026 · OWASP Top 10 for Agentic Applications · EU AI Act Article 5, as amended · national law on unlawful and manipulated content in the markets you serve How it gets bypassed, and how to test MITRE ATLAS v2026.08 · NIST AI 100-2 E2025, Adversarial Machine Learning · OWASP AI Testing Guide v1.0 · UK AI Security Institute, Principles for Evaluating Misuse Safeguards What you will be measured against ISO/IEC 42001:2023 with ISO/IEC 42006:2025 · NIST AI RMF 1.0 and AI 600-1 · CSA AI Controls Matrix v1.1 · the data protection and sector regulation of the jurisdiction you operate in · the UAE Charter for AI Three moves 1 Move 1 — an afternoon. List every handover — every moment the AI passes something to a person or another system — and mark which layer each one's controls are enforced at. Then look only at the irreversible and the regulator-visible. That number is the finding. 2 Move 2 — an afternoon, two people. Take the three that matter most and try to break them, in every language the service operates in. Whatever survives is worth keeping; whatever does not was never a control. 3 Move 3. Move one guardrail to a stronger layer. Start with the least technical option: narrow what the AI is given to what the task actually needs. Most guardrail reviews find the same thing. That the controls protecting the highest-consequence handovers are the ones nobody can test. Finding out takes an afternoon. Book a guardrail review Mappings are indicative and require confirmation against source text before adoption. Not legal advice.",
+        "pageFits": true,
+        "documentWidth": 753,
+        "bodyWidth": 753,
+        "viewportWidth": 768,
+        "outside": [],
+        "reducedMotion": true,
+        "activeAnimations": 0,
+        "tools": {
+          "layers": true,
+          "exposure": true
+        },
+        "detailsCount": 0,
+        "capture": "before",
+        "failures": []
+      }
+    },
+    "before-1440": {
+      "sections": [
+        {
+          "index": 0,
+          "label": "A guardrail is only as strong as the layer it is built into.",
+          "heading": "A guardrail is only as strong as the layer it is built into.",
+          "top": 8,
+          "bottom": 185.875,
+          "height": 177.875,
+          "width": 1409
+        },
+        {
+          "index": 1,
+          "label": "Asked, or unable",
+          "heading": "Asked, or unable",
+          "top": 205.78125,
+          "bottom": 356.6875,
+          "height": 150.90625,
+          "width": 1409
+        },
+        {
+          "index": 2,
+          "label": "One rule, four different ways",
+          "heading": "One rule, four different ways",
+          "top": 376.59375,
+          "bottom": 2583.375,
+          "height": 2206.78125,
+          "width": 1409
+        },
+        {
+          "index": 3,
+          "label": "The stopping rule",
+          "heading": "The stopping rule",
+          "top": 2603.28125,
+          "bottom": 5552.171875,
+          "height": 2948.890625,
+          "width": 1409
+        },
+        {
+          "index": 4,
+          "label": "What you need to know about a control",
+          "heading": "What you need to know about a control",
+          "top": 5572.078125,
+          "bottom": 5902.296875,
+          "height": 330.21875,
+          "width": 1409
+        },
+        {
+          "index": 5,
+          "label": "Set, Prove & Hold",
+          "heading": "Set, Prove & Hold",
+          "top": 5922.203125,
+          "bottom": 7032.421875,
+          "height": 1110.21875,
+          "width": 1409
+        },
+        {
+          "index": 6,
+          "label": "What it costs to keep it true",
+          "heading": "What it costs to keep it true",
+          "top": 7052.328125,
+          "bottom": 7875.234375,
+          "height": 822.90625,
+          "width": 1409
+        },
+        {
+          "index": 7,
+          "label": "What to measure",
+          "heading": "What to measure",
+          "top": 7895.140625,
+          "bottom": 8012.046875,
+          "height": 116.90625,
+          "width": 1409
+        },
+        {
+          "index": 8,
+          "label": "Authority and enforcement",
+          "heading": "Authority and enforcement",
+          "top": 8031.953125,
+          "bottom": 8380.296875,
+          "height": 348.34375,
+          "width": 1409
+        },
+        {
+          "index": 9,
+          "label": "What this is built from",
+          "heading": "What this is built from",
+          "top": 8400.203125,
+          "bottom": 8749.421875,
+          "height": 349.21875,
+          "width": 1409
+        },
+        {
+          "index": 10,
+          "label": "Three moves",
+          "heading": "Three moves",
+          "top": 8769.328125,
+          "bottom": 9185.046875,
+          "height": 415.71875,
+          "width": 1409
+        }
+      ],
+      "inspection": {
+        "sectionCount": 11,
+        "sections": [
+          {
+            "marker": "",
+            "heading": "A guardrail is only as strong as the layer it is built into."
+          },
+          {
+            "marker": "",
+            "heading": "Asked, or unable"
+          },
+          {
+            "marker": "",
+            "heading": "One rule, four different ways"
+          },
+          {
+            "marker": "",
+            "heading": "The stopping rule"
+          },
+          {
+            "marker": "",
+            "heading": "What you need to know about a control"
+          },
+          {
+            "marker": "",
+            "heading": "Set, Prove & Hold"
+          },
+          {
+            "marker": "",
+            "heading": "What it costs to keep it true"
+          },
+          {
+            "marker": "",
+            "heading": "What to measure"
+          },
+          {
+            "marker": "",
+            "heading": "Authority and enforcement"
+          },
+          {
+            "marker": "",
+            "heading": "What this is built from"
+          },
+          {
+            "marker": "",
+            "heading": "Three moves"
+          }
+        ],
+        "bodyWordScope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included",
+        "visibleBodyWords": 2882,
+        "visibleBodyText": "Asked, or unable Almost every guardrail in production today is a sentence in a system prompt. It reads like a control, it is reported like a control, and under any determined attempt it behaves like a request. The distinction is not academic. A rule the model has been asked to follow fails probabilistically — most of the time it holds, and the times it does not are the times someone was trying. A rule the model cannot break fails only if the thing enforcing it fails, and that thing can be tested like any other piece of software. Everything below follows from one question: where is the rule actually enforced? One rule, four different ways The same rule can be written in any of four places. The choice decides whether someone determined can get past it — and how much work it takes to keep it true. ONE RULE, FOUR DIFFERENT WAYS “Never reveal another customer’s data.” Policy A rule in a document A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything 1 of 4 Prompt A line in the AI’s instructions The AI is told not to. The data is still in front of it. WHAT GETS PAST IT An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. 2 of 4 ABOVE THIS LINE YOU ARE ASKING · BELOW IT YOU ARE NOT Runtime Software outside the AI that checks what goes in and out Any answer containing another customer’s record is blocked before it leaves. WHAT GETS PAST IT Reliable against opportunistic misuse. Unreliable against a motivated attacker: character and encoding evasion has reached complete bypass, and unsafe responses rise sharply in lower-resourced languages. 3 of 4 Architecture The AI is given only the data and tools the task needs The search returns only the signed-in customer’s own records. WHAT GETS PAST IT Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. 4 of 4 Architecture is not about withholding. The AI still gets everything it needs to do the job — it just never gets more than that. \"Never reveal another customer's data.\" Layer What it is In this example What gets past it Strength Policy A rule in a document A line in the AI usage policy. The system never sees it. Anyone who has not read it — and every automated path, which has nobody in it to read anything 1 of 4 Prompt A line in the AI's instructions The AI is told not to. The other customer's data is still in front of it. An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. 2 of 4 Runtime Software outside the AI that checks what goes in and out Any answer containing another customer's record is blocked before it leaves. Reliable against opportunistic misuse; unreliable against a motivated attacker. Character and encoding evasion has reached complete bypass against commercial guardrails, and unsafe-response rates rise sharply in lower-resourced languages. 3 of 4 Architecture The AI is given only the data and tools the task needs The search returns only the signed-in customer's own records. Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. 4 of 4 Layer Policy What it is A rule in a document In this example A line in the AI usage policy. The system never sees it. What gets past it Anyone who has not read it — and every automated path, which has nobody in it to read anything Strength 1 of 4 Layer Prompt What it is A line in the AI's instructions In this example The AI is told not to. The other customer's data is still in front of it. What gets past it An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. Strength 2 of 4 Layer Runtime What it is Software outside the AI that checks what goes in and out In this example Any answer containing another customer's record is blocked before it leaves. What gets past it Reliable against opportunistic misuse; unreliable against a motivated attacker. Character and encoding evasion has reached complete bypass against commercial guardrails, and unsafe-response rates rise sharply in lower-resourced languages. Strength 3 of 4 Layer Architecture What it is The AI is given only the data and tools the task needs In this example The search returns only the signed-in customer's own records. What gets past it Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. Strength 4 of 4 Architecture is not about withholding. The AI still gets everything it needs to do the job — it just never gets more than that. Layers one and two ask the AI to behave. Layers three and four do not ask. Stop at the prompt and your guardrails are requests, not controls. 5 The fifth thing, which is not a layer The model's own safety training is a real control, and it is the one you inherit rather than hold. That makes model selection a guardrail decision, and it is the reason two systems with identical guardrails do not carry identical risk. The stopping rule \"Build it into the strongest layer you can\" is advice. It never says enough , so it cannot close a design review, and it sends budget to the wrong places. The required strength follows from what it would cost to be wrong — the same exposure rating used in the Agent Authority Model. THE STOPPING RULE Exposure decides how strong is strong enough IF THE HANDOVER IS… …ENFORCE AT LEAST HERE Undone at will, internal only Nobody outside the organisation is affected Prompt with monitoring Reversible at a cost, one customer Undoing it involves another party Runtime a check outside the model, on the way in or out Irreversible, one customer Sent, paid, published or acted upon Runtime + architectural scoping of the data and tools reached Regulator-visible, public, or safety A supervisor can inspect it, or anyone can see it Architecture + an independent second control Running above its exposure ceiling More authority than the exposure alone permits Architecture + a named artefact that carries the authority Undone at will, internal only Nobody outside the organisation is affected Reversible at a cost, one customer Undoing it involves another party Irreversible, one customer Sent, paid, published or acted upon Regulator-visible, public, or safety A supervisor can inspect it, or anyone can see it Running above its exposure ceiling More authority than the exposure alone permits Prompt with monitoring Runtime a check outside the model, on the way in or out Architecture the model is given only what the task needs Undone at will, internal only → Prompt, with monitoring Reversible at a cost, one customer → Runtime Irreversible, one customer → Runtime, + architectural scoping of the data and tools reached Regulator-visible, public, or safety → Architecture, + an independent second control Running above its exposure ceiling → Architecture, + a named artefact that carries the authority “The strongest layer you can” is advice. This is a decision — so a design review can close. Exposure is rated exactly as it is in the Agent Authority Model: how hard the output is to undo, and who is exposed if it is wrong. If the handover is… Its controls must be enforced at least at… Trivially or windowed-reversible, internal only Prompt , with monitoring Reversible at a cost, one customer affected Runtime Irreversible, one customer affected Runtime , plus architectural scoping of the data and tools it can reach Regulator-visible, public, or safety-implicating Architecture , plus an independent second control Running above its exposure ceiling Architecture , and the design must name the artefact that carries the authority If the handover is… Trivially or windowed-reversible, internal only Its controls must be enforced at least at… Prompt , with monitoring If the handover is… Reversible at a cost, one customer affected Its controls must be enforced at least at… Runtime If the handover is… Irreversible, one customer affected Its controls must be enforced at least at… Runtime , plus architectural scoping of the data and tools it can reach If the handover is… Regulator-visible, public, or safety-implicating Its controls must be enforced at least at… Architecture , plus an independent second control If the handover is… Running above its exposure ceiling Its controls must be enforced at least at… Architecture , and the design must name the artefact that carries the authority Now a design review can close. A client can be told they are done. What you need to know about a control The layer answers only one of the three things that matter. A framework that stops there has no place to put human approval, identity, or anything you would only discover afterwards. Where is it enforced? Policy, prompt, runtime, architecture. This decides whether it can be broken, and how often it has to be re-tested. Who is present when it runs? In the loop, on the loop, out of the loop. Human approval is not a layer; it is an authority state. It is also a control with a capacity limit rather than an unlimited backstop — past the point where reviewers can attend properly, escalating more makes a system less safe, not more. What would we know afterwards? What is logged, what is monitored, what trips a circuit breaker, and how the output is undone. A blocking layer that produces no record fails silently. The most consequential documented AI exfiltration incident to date generated no logs, no alerts and no signatures. Set, Prove & Hold Three things happen to every guardrail. Four steps in each. SET before you build 01 Name the handovers, not the rules. Every moment the AI passes something to a person or another system. A \"single agent\" is usually four to seven of them. 02 Read the minimum enforcement layer off the exposure. Build at or above that line. 03 Say what each control does — restrict, or carry the authority. Most controls make a risky thing less risky. A few carry the authority themselves, and only those let a handover run above its ceiling. 04 Every control inherits the owner of the handover it defends. No orphaned rules, no second register. PROVE before you launch 01 Attack each control directly , using a published corpus rather than imagination. 02 Widen the attack to the whole system — including encoding and character-level evasion, and every language you operate in. 03 Count what it blocks wrongly, with a denominator. What it catches and what it wrongly stops are two numbers, reported separately. 04 Record the result with a date, a version and a name. Above the reversible-at-a-cost band, that name is not the person who built it. HOLD every day after 01 Watch the blocked attempts — and the unblocked ones. What nothing fired on is the more interesting number. 02 Re-test on every change to the model, the instructions, the scanner, the languages or the scope — and whenever a new attack class is published. 03 Add new controls, retire old ones, and move the authority. Promotion on evidence; demotion automatic on incident. 04 Report enforcement strength weighted by exposure , not a count. What it costs to keep it true Layer Set — how you build it Prove — how you test it Hold — when you re-test Policy Write it in a document Nothing to test Never — it is not connected to anything Prompt Put it in the AI's instructions Attack it. Expect it to fail some of the time. Every model or instruction change — so, constantly Runtime Add a check outside the AI, on the way in or out Attack it in every language you serve, with encoding evasion, and count what it blocks wrongly When the scanner, the model or the languages change — and when a new attack class is published Architecture Give the AI only the data and tools the task needs Check the scoping is in place, then try to misuse what is inside the scope Whenever the scope changes — every tool, integration, credential or allowlist entry — and patch it like any other software Layer Policy Set — how you build it Write it in a document Prove — how you test it Nothing to test Hold — when you re-test Never — it is not connected to anything Layer Prompt Set — how you build it Put it in the AI's instructions Prove — how you test it Attack it. Expect it to fail some of the time. Hold — when you re-test Every model or instruction change — so, constantly Layer Runtime Set — how you build it Add a check outside the AI, on the way in or out Prove — how you test it Attack it in every language you serve, with encoding evasion, and count what it blocks wrongly Hold — when you re-test When the scanner, the model or the languages change — and when a new attack class is published Layer Architecture Set — how you build it Give the AI only the data and tools the task needs Prove — how you test it Check the scoping is in place, then try to misuse what is inside the scope Hold — when you re-test Whenever the scope changes — every tool, integration, credential or allowlist entry — and patch it like any other software Read the last two columns together. A rule in the AI's instructions is quick to write and then needs re-testing every time anything moves. The same rule built into the architecture is real work once, and then holds until the scope drifts — which it does, quietly, every time someone adds a tool. Layer choice is a maintenance decision as much as a security one, and the maintenance never reaches zero. What to measure Of the handovers that are irreversible, or visible to a regulator or the public — what share have their controls enforced at runtime or architecture? Not how many guardrails you have. Not even how many sit at each layer: forty low-consequence rules moved to runtime make a beautiful chart and change nothing. Set assigns the layer. Prove tells you whether the claimed layer is real. Hold reports it over time. Authority and enforcement These are two halves of one instrument, and neither works alone. The Agent Authority Model decides what a handover is allowed to do — capped by what it would cost to be wrong, raised only on measured evidence. This framework decides how strongly that is enforced, and how you know it still holds. Authority is the how much . Guardrails are the how . That is why a guardrail here is never a free-standing object with its own owner and its own register. It is a control attached to a handover, and it inherits that handover's owner — one register, one set of owners, one artefact a supervisor can inspect. An authority model with unenforceable controls is a register of good intentions. Controls without an authority model are a pile of features nobody can justify to a regulator. Each is load-bearing for the other. Related Methodology The Agent Authority Model → Who authorised the agent to do that, and what must it prove to do more. What this is built from Nothing invented here, including the layering — it compresses a consensus already published by the major labs, the standards bodies and the academic literature. Two things are ours: making the re-test cadence a function of the layer, and binding required enforcement strength to exposure. The ethics frameworks tell you what to forbid. The security ones tell you how it gets bypassed. A policy built on the first alone will name the right rules and miss every way around them. What to forbid OWASP GenAI LLM Top 10 2026 · OWASP Top 10 for Agentic Applications · EU AI Act Article 5, as amended · national law on unlawful and manipulated content in the markets you serve How it gets bypassed, and how to test MITRE ATLAS v2026.08 · NIST AI 100-2 E2025, Adversarial Machine Learning · OWASP AI Testing Guide v1.0 · UK AI Security Institute, Principles for Evaluating Misuse Safeguards What you will be measured against ISO/IEC 42001:2023 with ISO/IEC 42006:2025 · NIST AI RMF 1.0 and AI 600-1 · CSA AI Controls Matrix v1.1 · the data protection and sector regulation of the jurisdiction you operate in · the UAE Charter for AI Three moves 1 Move 1 — an afternoon. List every handover — every moment the AI passes something to a person or another system — and mark which layer each one's controls are enforced at. Then look only at the irreversible and the regulator-visible. That number is the finding. 2 Move 2 — an afternoon, two people. Take the three that matter most and try to break them, in every language the service operates in. Whatever survives is worth keeping; whatever does not was never a control. 3 Move 3. Move one guardrail to a stronger layer. Start with the least technical option: narrow what the AI is given to what the task actually needs. Most guardrail reviews find the same thing. That the controls protecting the highest-consequence handovers are the ones nobody can test. Finding out takes an afternoon. Book a guardrail review Mappings are indicative and require confirmation against source text before adoption. Not legal advice.",
+        "pageFits": true,
+        "documentWidth": 1425,
+        "bodyWidth": 1425,
+        "viewportWidth": 1440,
+        "outside": [],
+        "reducedMotion": true,
+        "activeAnimations": 0,
+        "tools": {
+          "layers": true,
+          "exposure": true
+        },
+        "detailsCount": 0,
+        "capture": "before",
+        "failures": []
+      }
+    },
+    "after-390": {
+      "sections": [
+        {
+          "index": 0,
+          "label": "Guardrails that hold.",
+          "heading": "Guardrails that hold.",
+          "top": 140,
+          "bottom": 959.59375,
+          "height": 819.59375,
+          "width": 390
+        },
+        {
+          "index": 1,
+          "label": "Asked, or unable",
+          "heading": "Asked, or unable",
+          "top": 959.59375,
+          "bottom": 1333.921875,
+          "height": 374.328125,
+          "width": 390
+        },
+        {
+          "index": 2,
+          "label": "One rule, four different ways",
+          "heading": "One rule, four different ways",
+          "top": 1333.921875,
+          "bottom": 2670.078125,
+          "height": 1336.15625,
+          "width": 390
+        },
+        {
+          "index": 3,
+          "label": "The stopping rule",
+          "heading": "The stopping rule",
+          "top": 2670.078125,
+          "bottom": 3752.90625,
+          "height": 1082.828125,
+          "width": 390
+        },
+        {
+          "index": 4,
+          "label": "Set, Prove & Hold",
+          "heading": "Set, Prove & Hold",
+          "top": 3752.90625,
+          "bottom": 6358.984375,
+          "height": 2606.078125,
+          "width": 390
+        },
+        {
+          "index": 5,
+          "label": "Authority and enforcement",
+          "heading": "Authority and enforcement",
+          "top": 6358.984375,
+          "bottom": 6827.953125,
+          "height": 468.96875,
+          "width": 390
+        },
+        {
+          "index": 6,
+          "label": "Three moves",
+          "heading": "Three moves",
+          "top": 6827.953125,
+          "bottom": 7249.953125,
+          "height": 422,
+          "width": 390
+        }
+      ],
+      "inspection": {
+        "sectionCount": 7,
+        "sections": [
+          {
+            "marker": "",
+            "heading": "Guardrails that hold."
+          },
+          {
+            "marker": "",
+            "heading": "Asked, or unable"
+          },
+          {
+            "marker": "",
+            "heading": "One rule, four different ways"
+          },
+          {
+            "marker": "",
+            "heading": "The stopping rule"
+          },
+          {
+            "marker": "",
+            "heading": "Set, Prove & Hold"
+          },
+          {
+            "marker": "",
+            "heading": "Authority and enforcement"
+          },
+          {
+            "marker": "",
+            "heading": "Three moves"
+          }
+        ],
+        "bodyWordScope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included",
+        "visibleBodyWords": 502,
+        "visibleBodyText": "Asked, or unable Asked, or unable A rule is not a control until the system has no path around it. ONE RULE, FOUR DIFFERENT WAYS One rule, four different ways The same rule gets stronger only when it moves into a stronger enforcement layer. Policy Prompt ABOVE THIS LINE YOU ARE ASKING · BELOW IT YOU ARE NOT Runtime Architecture Policy What it is A rule in a document In this example A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything Strength 1 of 4 THE STOPPING RULE The stopping rule Exposure sets the minimum layer. Each band carries its own requirement. Undone at will, internal only Reversible at a cost, one customer Irreversible, one customer Regulator-visible, public, or safety Running above its exposure ceiling Nobody outside the organisation is affected …ENFORCE AT LEAST HERE Prompt with monitoring + with monitoring Set, Prove & Hold Set, Prove & Hold Set what matters. Prove it survives attack. Hold it as the system changes. 0 1 before you build SET 0 1 Name the handovers, not the rules. Every moment the AI passes something to a person or another system. A \"single agent\" is usually four to seven of them. 0 2 Read the minimum enforcement layer off the exposure. Build at or above that line. 0 3 Say what each control does — restrict, or carry the authority. Most controls make a risky thing less risky. A few carry the authority themselves, and only those let a handover run above its ceiling. 0 4 Every control inherits the owner of the handover it defends. No orphaned rules, no second register. 0 2 before you launch PROVE 0 1 Attack each control directly , using a published corpus rather than imagination. 0 2 Widen the attack to the whole system — including encoding and character-level evasion, and every language you operate in. 0 3 Count what it blocks wrongly, with a denominator. What it catches and what it wrongly stops are two numbers, reported separately. 0 4 Record the result with a date, a version and a name. Above the reversible-at-a-cost band, that name is not the person who built it. 0 3 every day after HOLD 0 1 Watch the blocked attempts — and the unblocked ones. What nothing fired on is the more interesting number. 0 2 Re-test on every change to the model, the instructions, the scanner, the languages or the scope — and whenever a new attack class is published. 0 3 Add new controls, retire old ones, and move the authority. Promotion on evidence; demotion automatic on incident. 0 4 Report enforcement strength weighted by exposure , not a count. The Agent Authority Model → Authority and enforcement Authority decides what a handover may do. Guardrails decide how strongly it is enforced. What this is built from Three moves Start with the handovers that are hardest to undo, then test the controls that protect them.",
+        "pageFits": true,
+        "documentWidth": 390,
+        "bodyWidth": 390,
+        "viewportWidth": 390,
+        "outside": [],
+        "reducedMotion": true,
+        "activeAnimations": 0,
+        "tools": {
+          "layers": true,
+          "exposure": true
+        },
+        "detailsCount": 8,
+        "capture": "after",
+        "failures": []
+      },
+      "interactions": {
+        "layers": {
+          "count": 4,
+          "mappings": [
+            {
+              "control": "POLICY",
+              "selectedIndex": 0,
+              "targetId": "layer-panel-policy",
+              "mapping": "Policy WHAT IT IS A rule in a document IN THIS EXAMPLE A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything STRENGTH 1 of 4"
+            },
+            {
+              "control": "PROMPT",
+              "selectedIndex": 1,
+              "targetId": "layer-panel-prompt",
+              "mapping": "Prompt WHAT IT IS A line in the AI’s instructions IN THIS EXAMPLE The AI is told not to. The data is still in front of it. WHAT GETS PAST IT An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. STRENGTH 2 of 4"
+            },
+            {
+              "control": "RUNTIME",
+              "selectedIndex": 2,
+              "targetId": "layer-panel-runtime",
+              "mapping": "Runtime WHAT IT IS Software outside the AI that checks what goes in and out IN THIS EXAMPLE Any answer containing another customer’s record is blocked before it leaves. WHAT GETS PAST IT Reliable against opportunistic misuse. Unreliable against a motivated attacker: character and encoding evasion has reached complete bypass, and unsafe responses rise sharply in lower-resourced languages. STRENGTH 3 of 4"
+            },
+            {
+              "control": "ARCHITECTURE",
+              "selectedIndex": 3,
+              "targetId": "layer-panel-architecture",
+              "mapping": "Architecture WHAT IT IS The AI is given only the data and tools the task needs IN THIS EXAMPLE The search returns only the signed-in customer’s own records. WHAT GETS PAST IT Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. STRENGTH 4 of 4"
+            }
+          ],
+          "keyboard": {
+            "arrow": {
+              "selected": 1,
+              "selectedCount": 1,
+              "controlText": "PROMPT",
+              "mappingText": "Prompt WHAT IT IS A line in the AI’s instructions IN THIS EXAMPLE The AI is told not to. The data is still in front of it. WHAT GETS PAST IT An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. STRENGTH 2 of 4",
+              "targetId": "layer-panel-prompt",
+              "targetVisible": true
+            },
+            "home": {
+              "selected": 0,
+              "selectedCount": 1,
+              "controlText": "POLICY",
+              "mappingText": "Policy WHAT IT IS A rule in a document IN THIS EXAMPLE A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything STRENGTH 1 of 4",
+              "targetId": "layer-panel-policy",
+              "targetVisible": true
+            },
+            "end": {
+              "selected": 3,
+              "selectedCount": 1,
+              "controlText": "ARCHITECTURE",
+              "mappingText": "Architecture WHAT IT IS The AI is given only the data and tools the task needs IN THIS EXAMPLE The search returns only the signed-in customer’s own records. WHAT GETS PAST IT Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. STRENGTH 4 of 4",
+              "targetId": "layer-panel-architecture",
+              "targetVisible": true
+            }
+          }
+        },
+        "exposure": {
+          "count": 5,
+          "mappings": [
+            {
+              "control": "Undone at will, internal only",
+              "selectedIndex": 0,
+              "targetId": "exposure-panel-internal-reversible",
+              "mapping": "Nobody outside the organisation is affected …ENFORCE AT LEAST HERE Prompt with monitoring + with monitoring"
+            },
+            {
+              "control": "Reversible at a cost, one customer",
+              "selectedIndex": 1,
+              "targetId": "exposure-panel-reversible-cost",
+              "mapping": "Undoing it involves another party …ENFORCE AT LEAST HERE Runtime a check outside the model, on the way in or out"
+            },
+            {
+              "control": "Irreversible, one customer",
+              "selectedIndex": 2,
+              "targetId": "exposure-panel-irreversible-customer",
+              "mapping": "Sent, paid, published or acted upon …ENFORCE AT LEAST HERE Runtime a check outside the model, on the way in or out + + architectural scoping of the data and tools reached"
+            },
+            {
+              "control": "Regulator-visible, public, or safety",
+              "selectedIndex": 3,
+              "targetId": "exposure-panel-regulator-public-safety",
+              "mapping": "A supervisor can inspect it, or anyone can see it …ENFORCE AT LEAST HERE Architecture the model is given only what the task needs + + an independent second control"
+            },
+            {
+              "control": "Running above its exposure ceiling",
+              "selectedIndex": 4,
+              "targetId": "exposure-panel-above-ceiling",
+              "mapping": "More authority than the exposure alone permits …ENFORCE AT LEAST HERE Architecture the model is given only what the task needs + + a named artefact that carries the authority"
+            }
+          ],
+          "keyboard": {
+            "arrow": {
+              "selected": 1,
+              "selectedCount": 1,
+              "controlText": "Reversible at a cost, one customer",
+              "mappingText": "Undoing it involves another party …ENFORCE AT LEAST HERE Runtime a check outside the model, on the way in or out",
+              "targetId": "exposure-panel-reversible-cost",
+              "targetVisible": true
+            },
+            "home": {
+              "selected": 0,
+              "selectedCount": 1,
+              "controlText": "Undone at will, internal only",
+              "mappingText": "Nobody outside the organisation is affected …ENFORCE AT LEAST HERE Prompt with monitoring + with monitoring",
+              "targetId": "exposure-panel-internal-reversible",
+              "targetVisible": true
+            },
+            "end": {
+              "selected": 4,
+              "selectedCount": 1,
+              "controlText": "Running above its exposure ceiling",
+              "mappingText": "More authority than the exposure alone permits …ENFORCE AT LEAST HERE Architecture the model is given only what the task needs + + a named artefact that carries the authority",
+              "targetId": "exposure-panel-above-ceiling",
+              "targetVisible": true
+            }
+          }
+        },
+        "threshold": {
+          "found": true,
+          "text": "PolicyPromptABOVE THIS LINE YOU ARE ASKING · BELOW IT YOU ARE NOTRuntimeArchitecturePolicyWhat it isA rule in a documentIn this exampleA line in the AI usage policy. The system never sees it.WHAT GETS PAST ITAnyone who has not read it — and every automated path, which has nobody in it to read anythingStrength1 of 4See all four layers and the worked exampleArchitecture is not about withholding. The AI still gets everything it needs to do the job — it just never gets more than that.Layers one and two ask the AI to behave. Layers three and four do not ask. Stop at the prompt and your guardrails are requests, not controls.5The fifth thing, which is not a layerThe model's own safety training is a real control, and it is the one you inherit rather than hold. That makes model selection a guardrail decision, and it is the reason two systems with identical guardrails do not carry identical risk.Full Layer Comparison TableLayerWhat it isIn this exampleWhat gets past itStrengthPolicyA rule in a documentA line in the AI usage policy. The system never sees it.Anyone who has not read it — and every automated path, which has nobody in it to read anything1 of 4PromptA line in the AI's instructionsThe AI is told not to. The other customer's data is still in front of it.An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold.2 of 4RuntimeSoftware outside the AI that checks what goes in and outAny answer containing another customer's record is blocked before it leaves.Reliable against opportunistic misuse; unreliable against a motivated attacker. Character and encoding evasion has reached complete bypass against commercial guardrails, and unsafe-response rates rise sharply in lower-resourced languages.3 of 4ArchitectureThe AI is given only the data and tools the task needsThe search returns only the signed-in customer's own records.Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review.4 of 4LayerPolicyWhat it isA rule in a documentIn this exampleA line in the AI usage policy. The system never sees it.What gets past itAnyone who has not read it — and every automated path, which has nobody in it to read anythingStrength1 of 4LayerPromptWhat it isA line in the AI's instructionsIn this exampleThe AI is told not to. The other customer's data is still in front of it.What gets past itAn attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold.Strength2 of 4LayerRuntimeWhat it isSoftware outside the AI that checks what goes in and outIn this exampleAny answer containing another customer's record is blocked before it leaves.What gets past itReliable against opportunistic misuse; unreliable against a motivated attacker. Character and encoding evasion has reached complete bypass against commercial guardrails, and unsafe-response rates rise sharply in lower-resourced languages.Strength3 of 4LayerArchitectureWhat it isThe AI is given only the data and tools the task needsIn this exampleThe search returns only the signed-in customer's own records.What gets past itOnly what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review.Strength4 of 4"
+        }
+      },
+      "print": {
+        "print": true,
+        "pageFits": true,
+        "details": [
+          {
+            "open": true,
+            "text": "Almost every guardrail in production today is a sentence in a system prompt. It reads like a control, it is reported like a control, and under any determined attempt it behaves like a request. The distinction is not academic. A rule the model has been asked to follow fails probabilistically — most of the time it holds, and the times it does not are the times someone was trying. A rule the model cannot break fails only if the thing enforcing it fails, and that thing can be tested like any other piece of software. Everything below follows from one question: where is the rule actually enforced?",
+            "visible": true
+          },
+          {
+            "open": true,
+            "text": "Architecture is not about withholding. The AI still gets everything it needs to do the job — it just never gets more than that. Layers one and two ask the AI to behave. Layers three and four do not ask. Stop at the prompt and your guardrails are requests, not controls. 5 THE FIFTH THING, WHICH IS NOT A LAYER The model's own safety training is a real control, and it is the one you inherit rather than hold. That makes model selection a guardrail decision, and it is the reason two systems with identical guardrails do not carry identical risk. FULL LAYER COMPARISON TABLE LAYER Policy WHAT IT IS A rule in a document IN THIS EXAMPLE A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything STRENGTH 1 of 4 LAYER Prompt WHAT IT IS A line in the AI's instructions IN THIS EXAMPLE The AI is told not to. The other customer's data is still in front of it. WHAT GETS PAST IT An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. STRENGTH 2 of 4 LAYER Runtime WHAT IT IS Software outside the AI that checks what goes in and out IN THIS EXAMPLE Any answer containing another customer's record is blocked before it leaves. WHAT GETS PAST IT Reliable against opportunistic misuse; unreliable against a motivated attacker. Character and encoding evasion has reached complete bypass against commercial guardrails, and unsafe-response rates rise sharply in lower-resourced languages. STRENGTH 3 of 4 LAYER Architecture WHAT IT IS The AI is given only the data and tools the task needs IN THIS EXAMPLE The search returns only the signed-in customer's own records. WHAT GETS PAST IT Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. STRENGTH 4 of 4",
+            "visible": true
+          },
+          {
+            "open": true,
+            "text": "Now a design review can close. A client can be told they are done. FULL EXPOSURE MAPPING TABLE IF THE HANDOVER IS… Trivially or windowed-reversible, internal only ITS CONTROLS MUST BE ENFORCED AT LEAST AT… Prompt, with monitoring IF THE HANDOVER IS… Reversible at a cost, one customer affected ITS CONTROLS MUST BE ENFORCED AT LEAST AT… Runtime IF THE HANDOVER IS… Irreversible, one customer affected ITS CONTROLS MUST BE ENFORCED AT LEAST AT… Runtime, plus architectural scoping of the data and tools it can reach IF THE HANDOVER IS… Regulator-visible, public, or safety-implicating ITS CONTROLS MUST BE ENFORCED AT LEAST AT… Architecture, plus an independent second control IF THE HANDOVER IS… Running above its exposure ceiling ITS CONTROLS MUST BE ENFORCED AT LEAST AT… Architecture, and the design must name the artefact that carries the authority",
+            "visible": true
+          },
+          {
+            "open": true,
+            "text": "LAYER Policy SET — HOW YOU BUILD IT Write it in a document PROVE — HOW YOU TEST IT Nothing to test HOLD — WHEN YOU RE-TEST Never — it is not connected to anything LAYER Prompt SET — HOW YOU BUILD IT Put it in the AI's instructions PROVE — HOW YOU TEST IT Attack it. Expect it to fail some of the time. HOLD — WHEN YOU RE-TEST Every model or instruction change — so, constantly LAYER Runtime SET — HOW YOU BUILD IT Add a check outside the AI, on the way in or out PROVE — HOW YOU TEST IT Attack it in every language you serve, with encoding evasion, and count what it blocks wrongly HOLD — WHEN YOU RE-TEST When the scanner, the model or the languages change — and when a new attack class is published LAYER Architecture SET — HOW YOU BUILD IT Give the AI only the data and tools the task needs PROVE — HOW YOU TEST IT Check the scoping is in place, then try to misuse what is inside the scope HOLD — WHEN YOU RE-TEST Whenever the scope changes — every tool, integration, credential or allowlist entry — and patch it like any other software Read the last two columns together. A rule in the AI's instructions is quick to write and then needs re-testing every time anything moves. The same rule built into the architecture is real work once, and then holds until the scope drifts — which it does, quietly, every time someone adds a tool. Layer choice is a maintenance decision as much as a security one, and the maintenance never reaches zero.",
+            "visible": true
+          },
+          {
+            "open": true,
+            "text": "The layer answers only one of the three things that matter. A framework that stops there has no place to put human approval, identity, or anything you would only discover afterwards. Where is it enforced? Policy, prompt, runtime, architecture. This decides whether it can be broken, and how often it has to be re-tested. Who is present when it runs? In the loop, on the loop, out of the loop. Human approval is not a layer; it is an authority state. It is also a control with a capacity limit rather than an unlimited backstop — past the point where reviewers can attend properly, escalating more makes a system less safe, not more. What would we know afterwards? What is logged, what is monitored, what trips a circuit breaker, and how the output is undone. A blocking layer that produces no record fails silently. The most consequential documented AI exfiltration incident to date generated no logs, no alerts and no signatures.",
+            "visible": true
+          },
+          {
+            "open": true,
+            "text": "Of the handovers that are irreversible, or visible to a regulator or the public — what share have their controls enforced at runtime or architecture? Not how many guardrails you have. Not even how many sit at each layer: forty low-consequence rules moved to runtime make a beautiful chart and change nothing. Set assigns the layer. Prove tells you whether the claimed layer is real. Hold reports it over time.",
+            "visible": true
+          },
+          {
+            "open": true,
+            "text": "These are two halves of one instrument, and neither works alone. The Agent Authority Model decides what a handover is allowed to do — capped by what it would cost to be wrong, raised only on measured evidence. This framework decides how strongly that is enforced, and how you know it still holds. Authority is the how much. Guardrails are the how. That is why a guardrail here is never a free-standing object with its own owner and its own register. It is a control attached to a handover, and it inherits that handover's owner — one register, one set of owners, one artefact a supervisor can inspect. An authority model with unenforceable controls is a register of good intentions. Controls without an authority model are a pile of features nobody can justify to a regulator. Each is load-bearing for the other. RELATED METHODOLOGY The Agent Authority Model → Who authorised the agent to do that, and what must it prove to do more.",
+            "visible": true
+          },
+          {
+            "open": true,
+            "text": "1 Move 1 — an afternoon. List every handover — every moment the AI passes something to a person or another system — and mark which layer each one's controls are enforced at. Then look only at the irreversible and the regulator-visible. That number is the finding. 2 Move 2 — an afternoon, two people. Take the three that matter most and try to break them, in every language the service operates in. Whatever survives is worth keeping; whatever does not was never a control. 3 Move 3. Move one guardrail to a stronger layer. Start with the least technical option: narrow what the AI is given to what the task actually needs. Most guardrail reviews find the same thing. That the controls protecting the highest-consequence handovers are the ones nobody can test. Finding out takes an afternoon. Book a guardrail review Mappings are indicative and require confirmation against source text before adoption. Not legal advice. What this is built from Nothing invented here, including the layering — it compresses a consensus already published by the major labs, the standards bodies and the academic literature. Two things are ours: making the re-test cadence a function of the layer, and binding required enforcement strength to exposure. The ethics frameworks tell you what to forbid. The security ones tell you how it gets bypassed. A policy built on the first alone will name the right rules and miss every way around them. WHAT TO FORBID OWASP GenAI LLM Top 10 2026 · OWASP Top 10 for Agentic Applications · EU AI Act Article 5, as amended · national law on unlawful and manipulated content in the markets you serve HOW IT GETS BYPASSED, AND HOW TO TEST MITRE ATLAS v2026.08 · NIST AI 100-2 E2025, Adversarial Machine Learning · OWASP AI Testing Guide v1.0 · UK AI Security Institute, Principles for Evaluating Misuse Safeguards WHAT YOU WILL BE MEASURED AGAINST ISO/IEC 42001:2023 with ISO/IEC 42006:2025 · NIST AI RMF 1.0 and AI 600-1 · CSA AI Controls Matrix v1.1 · the data protection and sector regulation of the jurisdiction you operate in · the UAE Charter for AI",
+            "visible": true
+          }
+        ]
+      }
+    },
+    "after-768": {
+      "sections": [
+        {
+          "index": 0,
+          "label": "Guardrails that hold.",
+          "heading": "Guardrails that hold.",
+          "top": 139,
+          "bottom": 937.25,
+          "height": 798.25,
+          "width": 753
+        },
+        {
+          "index": 1,
+          "label": "Asked, or unable",
+          "heading": "Asked, or unable",
+          "top": 937.25,
+          "bottom": 1281.890625,
+          "height": 344.640625,
+          "width": 753
+        },
+        {
+          "index": 2,
+          "label": "One rule, four different ways",
+          "heading": "One rule, four different ways",
+          "top": 1281.890625,
+          "bottom": 2156.5,
+          "height": 874.609375,
+          "width": 753
+        },
+        {
+          "index": 3,
+          "label": "The stopping rule",
+          "heading": "The stopping rule",
+          "top": 2156.5,
+          "bottom": 2975.640625,
+          "height": 819.140625,
+          "width": 753
+        },
+        {
+          "index": 4,
+          "label": "Set, Prove & Hold",
+          "heading": "Set, Prove & Hold",
+          "top": 2975.640625,
+          "bottom": 4848.59375,
+          "height": 1872.953125,
+          "width": 753
+        },
+        {
+          "index": 5,
+          "label": "Authority and enforcement",
+          "heading": "Authority and enforcement",
+          "top": 4848.59375,
+          "bottom": 5222.921875,
+          "height": 374.328125,
+          "width": 753
+        },
+        {
+          "index": 6,
+          "label": "Three moves",
+          "heading": "Three moves",
+          "top": 5222.921875,
+          "bottom": 5590.921875,
+          "height": 368,
+          "width": 753
+        }
+      ],
+      "inspection": {
+        "sectionCount": 7,
+        "sections": [
+          {
+            "marker": "",
+            "heading": "Guardrails that hold."
+          },
+          {
+            "marker": "",
+            "heading": "Asked, or unable"
+          },
+          {
+            "marker": "",
+            "heading": "One rule, four different ways"
+          },
+          {
+            "marker": "",
+            "heading": "The stopping rule"
+          },
+          {
+            "marker": "",
+            "heading": "Set, Prove & Hold"
+          },
+          {
+            "marker": "",
+            "heading": "Authority and enforcement"
+          },
+          {
+            "marker": "",
+            "heading": "Three moves"
+          }
+        ],
+        "bodyWordScope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included",
+        "visibleBodyWords": 502,
+        "visibleBodyText": "Asked, or unable Asked, or unable A rule is not a control until the system has no path around it. ONE RULE, FOUR DIFFERENT WAYS One rule, four different ways The same rule gets stronger only when it moves into a stronger enforcement layer. Policy Prompt ABOVE THIS LINE YOU ARE ASKING · BELOW IT YOU ARE NOT Runtime Architecture Policy What it is A rule in a document In this example A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything Strength 1 of 4 THE STOPPING RULE The stopping rule Exposure sets the minimum layer. Each band carries its own requirement. Undone at will, internal only Reversible at a cost, one customer Irreversible, one customer Regulator-visible, public, or safety Running above its exposure ceiling Nobody outside the organisation is affected …ENFORCE AT LEAST HERE Prompt with monitoring + with monitoring Set, Prove & Hold Set, Prove & Hold Set what matters. Prove it survives attack. Hold it as the system changes. 0 1 before you build SET 0 1 Name the handovers, not the rules. Every moment the AI passes something to a person or another system. A \"single agent\" is usually four to seven of them. 0 2 Read the minimum enforcement layer off the exposure. Build at or above that line. 0 3 Say what each control does — restrict, or carry the authority. Most controls make a risky thing less risky. A few carry the authority themselves, and only those let a handover run above its ceiling. 0 4 Every control inherits the owner of the handover it defends. No orphaned rules, no second register. 0 2 before you launch PROVE 0 1 Attack each control directly , using a published corpus rather than imagination. 0 2 Widen the attack to the whole system — including encoding and character-level evasion, and every language you operate in. 0 3 Count what it blocks wrongly, with a denominator. What it catches and what it wrongly stops are two numbers, reported separately. 0 4 Record the result with a date, a version and a name. Above the reversible-at-a-cost band, that name is not the person who built it. 0 3 every day after HOLD 0 1 Watch the blocked attempts — and the unblocked ones. What nothing fired on is the more interesting number. 0 2 Re-test on every change to the model, the instructions, the scanner, the languages or the scope — and whenever a new attack class is published. 0 3 Add new controls, retire old ones, and move the authority. Promotion on evidence; demotion automatic on incident. 0 4 Report enforcement strength weighted by exposure , not a count. The Agent Authority Model → Authority and enforcement Authority decides what a handover may do. Guardrails decide how strongly it is enforced. What this is built from Three moves Start with the handovers that are hardest to undo, then test the controls that protect them.",
+        "pageFits": false,
+        "documentWidth": 963,
+        "bodyWidth": 963,
+        "viewportWidth": 768,
+        "outside": [
+          {
+            "tag": "BUTTON",
+            "text": "Runtime",
+            "left": 666,
+            "right": 788,
+            "clientWidth": 123,
+            "scrollWidth": 123
+          },
+          {
+            "tag": "BUTTON",
+            "text": "Architecture",
+            "left": 788,
+            "right": 963,
+            "clientWidth": 175,
+            "scrollWidth": 175
+          }
+        ],
+        "reducedMotion": true,
+        "activeAnimations": 0,
+        "tools": {
+          "layers": true,
+          "exposure": true
+        },
+        "detailsCount": 8,
+        "capture": "after",
+        "failures": [
+          {
+            "kind": "horizontal-overflow",
+            "message": "after/768: page has horizontal overflow (963/963 > 768).",
+            "visibleTextOverflow": [
+              {
+                "tag": "BUTTON",
+                "text": "Runtime",
+                "left": 666,
+                "right": 788,
+                "clientWidth": 123,
+                "scrollWidth": 123
+              },
+              {
+                "tag": "BUTTON",
+                "text": "Architecture",
+                "left": 788,
+                "right": 963,
+                "clientWidth": 175,
+                "scrollWidth": 175
+              }
+            ]
+          },
+          {
+            "kind": "visible-content-overflow",
+            "message": "after/768: visible text leaves its viewport.",
+            "visibleTextOverflow": [
+              {
+                "tag": "BUTTON",
+                "text": "Runtime",
+                "left": 666,
+                "right": 788,
+                "clientWidth": 123,
+                "scrollWidth": 123
+              },
+              {
+                "tag": "BUTTON",
+                "text": "Architecture",
+                "left": 788,
+                "right": 963,
+                "clientWidth": 175,
+                "scrollWidth": 175
+              }
+            ]
+          }
+        ]
+      },
+      "interactions": {
+        "layers": {
+          "count": 4,
+          "mappings": [
+            {
+              "control": "POLICY",
+              "selectedIndex": 0,
+              "targetId": "layer-panel-policy",
+              "mapping": "Policy WHAT IT IS A rule in a document IN THIS EXAMPLE A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything STRENGTH 1 of 4"
+            },
+            {
+              "control": "PROMPT",
+              "selectedIndex": 1,
+              "targetId": "layer-panel-prompt",
+              "mapping": "Prompt WHAT IT IS A line in the AI’s instructions IN THIS EXAMPLE The AI is told not to. The data is still in front of it. WHAT GETS PAST IT An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. STRENGTH 2 of 4"
+            },
+            {
+              "control": "RUNTIME",
+              "selectedIndex": 2,
+              "targetId": "layer-panel-runtime",
+              "mapping": "Runtime WHAT IT IS Software outside the AI that checks what goes in and out IN THIS EXAMPLE Any answer containing another customer’s record is blocked before it leaves. WHAT GETS PAST IT Reliable against opportunistic misuse. Unreliable against a motivated attacker: character and encoding evasion has reached complete bypass, and unsafe responses rise sharply in lower-resourced languages. STRENGTH 3 of 4"
+            },
+            {
+              "control": "ARCHITECTURE",
+              "selectedIndex": 3,
+              "targetId": "layer-panel-architecture",
+              "mapping": "Architecture WHAT IT IS The AI is given only the data and tools the task needs IN THIS EXAMPLE The search returns only the signed-in customer’s own records. WHAT GETS PAST IT Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. STRENGTH 4 of 4"
+            }
+          ],
+          "keyboard": {
+            "arrow": {
+              "selected": 1,
+              "selectedCount": 1,
+              "controlText": "PROMPT",
+              "mappingText": "Prompt WHAT IT IS A line in the AI’s instructions IN THIS EXAMPLE The AI is told not to. The data is still in front of it. WHAT GETS PAST IT An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. STRENGTH 2 of 4",
+              "targetId": "layer-panel-prompt",
+              "targetVisible": true
+            },
+            "home": {
+              "selected": 0,
+              "selectedCount": 1,
+              "controlText": "POLICY",
+              "mappingText": "Policy WHAT IT IS A rule in a document IN THIS EXAMPLE A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything STRENGTH 1 of 4",
+              "targetId": "layer-panel-policy",
+              "targetVisible": true
+            },
+            "end": {
+              "selected": 3,
+              "selectedCount": 1,
+              "controlText": "ARCHITECTURE",
+              "mappingText": "Architecture WHAT IT IS The AI is given only the data and tools the task needs IN THIS EXAMPLE The search returns only the signed-in customer’s own records. WHAT GETS PAST IT Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. STRENGTH 4 of 4",
+              "targetId": "layer-panel-architecture",
+              "targetVisible": true
+            }
+          }
+        },
+        "exposure": {
+          "count": 5,
+          "mappings": [
+            {
+              "control": "Undone at will, internal only",
+              "selectedIndex": 0,
+              "targetId": "exposure-panel-internal-reversible",
+              "mapping": "Nobody outside the organisation is affected …ENFORCE AT LEAST HERE Prompt with monitoring + with monitoring"
+            },
+            {
+              "control": "Reversible at a cost, one customer",
+              "selectedIndex": 1,
+              "targetId": "exposure-panel-reversible-cost",
+              "mapping": "Undoing it involves another party …ENFORCE AT LEAST HERE Runtime a check outside the model, on the way in or out"
+            },
+            {
+              "control": "Irreversible, one customer",
+              "selectedIndex": 2,
+              "targetId": "exposure-panel-irreversible-customer",
+              "mapping": "Sent, paid, published or acted upon …ENFORCE AT LEAST HERE Runtime a check outside the model, on the way in or out + + architectural scoping of the data and tools reached"
+            },
+            {
+              "control": "Regulator-visible, public, or safety",
+              "selectedIndex": 3,
+              "targetId": "exposure-panel-regulator-public-safety",
+              "mapping": "A supervisor can inspect it, or anyone can see it …ENFORCE AT LEAST HERE Architecture the model is given only what the task needs + + an independent second control"
+            },
+            {
+              "control": "Running above its exposure ceiling",
+              "selectedIndex": 4,
+              "targetId": "exposure-panel-above-ceiling",
+              "mapping": "More authority than the exposure alone permits …ENFORCE AT LEAST HERE Architecture the model is given only what the task needs + + a named artefact that carries the authority"
+            }
+          ],
+          "keyboard": {
+            "arrow": {
+              "selected": 1,
+              "selectedCount": 1,
+              "controlText": "Reversible at a cost, one customer",
+              "mappingText": "Undoing it involves another party …ENFORCE AT LEAST HERE Runtime a check outside the model, on the way in or out",
+              "targetId": "exposure-panel-reversible-cost",
+              "targetVisible": true
+            },
+            "home": {
+              "selected": 0,
+              "selectedCount": 1,
+              "controlText": "Undone at will, internal only",
+              "mappingText": "Nobody outside the organisation is affected …ENFORCE AT LEAST HERE Prompt with monitoring + with monitoring",
+              "targetId": "exposure-panel-internal-reversible",
+              "targetVisible": true
+            },
+            "end": {
+              "selected": 4,
+              "selectedCount": 1,
+              "controlText": "Running above its exposure ceiling",
+              "mappingText": "More authority than the exposure alone permits …ENFORCE AT LEAST HERE Architecture the model is given only what the task needs + + a named artefact that carries the authority",
+              "targetId": "exposure-panel-above-ceiling",
+              "targetVisible": true
+            }
+          }
+        },
+        "threshold": null
+      }
+    },
+    "after-1440": {
+      "sections": [
+        {
+          "index": 0,
+          "label": "Guardrails that hold.",
+          "heading": "Guardrails that hold.",
+          "top": 139,
+          "bottom": 889,
+          "height": 750,
+          "width": 1425
+        },
+        {
+          "index": 1,
+          "label": "Asked, or unable",
+          "heading": "Asked, or unable",
+          "top": 889,
+          "bottom": 1213.0625,
+          "height": 324.0625,
+          "width": 1425
+        },
+        {
+          "index": 2,
+          "label": "One rule, four different ways",
+          "heading": "One rule, four different ways",
+          "top": 1213.0625,
+          "bottom": 2247.21875,
+          "height": 1034.15625,
+          "width": 1425
+        },
+        {
+          "index": 3,
+          "label": "The stopping rule",
+          "heading": "The stopping rule",
+          "top": 2247.21875,
+          "bottom": 3199.84375,
+          "height": 952.625,
+          "width": 1425
+        },
+        {
+          "index": 4,
+          "label": "Set, Prove & Hold",
+          "heading": "Set, Prove & Hold",
+          "top": 3199.84375,
+          "bottom": 4977.234375,
+          "height": 1777.390625,
+          "width": 1425
+        },
+        {
+          "index": 5,
+          "label": "Authority and enforcement",
+          "heading": "Authority and enforcement",
+          "top": 4977.234375,
+          "bottom": 5360.671875,
+          "height": 383.4375,
+          "width": 1425
+        },
+        {
+          "index": 6,
+          "label": "Three moves",
+          "heading": "Three moves",
+          "top": 5360.671875,
+          "bottom": 5804.671875,
+          "height": 444,
+          "width": 1425
+        }
+      ],
+      "inspection": {
+        "sectionCount": 7,
+        "sections": [
+          {
+            "marker": "",
+            "heading": "Guardrails that hold."
+          },
+          {
+            "marker": "",
+            "heading": "Asked, or unable"
+          },
+          {
+            "marker": "",
+            "heading": "One rule, four different ways"
+          },
+          {
+            "marker": "",
+            "heading": "The stopping rule"
+          },
+          {
+            "marker": "",
+            "heading": "Set, Prove & Hold"
+          },
+          {
+            "marker": "",
+            "heading": "Authority and enforcement"
+          },
+          {
+            "marker": "",
+            "heading": "Three moves"
+          }
+        ],
+        "bodyWordScope": "article excluding header/nav/footer, hidden nodes, and closed details; selected default panels included",
+        "visibleBodyWords": 502,
+        "visibleBodyText": "Asked, or unable Asked, or unable A rule is not a control until the system has no path around it. ONE RULE, FOUR DIFFERENT WAYS One rule, four different ways The same rule gets stronger only when it moves into a stronger enforcement layer. Policy Prompt ABOVE THIS LINE YOU ARE ASKING · BELOW IT YOU ARE NOT Runtime Architecture Policy What it is A rule in a document In this example A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything Strength 1 of 4 THE STOPPING RULE The stopping rule Exposure sets the minimum layer. Each band carries its own requirement. Undone at will, internal only Reversible at a cost, one customer Irreversible, one customer Regulator-visible, public, or safety Running above its exposure ceiling Nobody outside the organisation is affected …ENFORCE AT LEAST HERE Prompt with monitoring + with monitoring Set, Prove & Hold Set, Prove & Hold Set what matters. Prove it survives attack. Hold it as the system changes. 0 1 before you build SET 0 1 Name the handovers, not the rules. Every moment the AI passes something to a person or another system. A \"single agent\" is usually four to seven of them. 0 2 Read the minimum enforcement layer off the exposure. Build at or above that line. 0 3 Say what each control does — restrict, or carry the authority. Most controls make a risky thing less risky. A few carry the authority themselves, and only those let a handover run above its ceiling. 0 4 Every control inherits the owner of the handover it defends. No orphaned rules, no second register. 0 2 before you launch PROVE 0 1 Attack each control directly , using a published corpus rather than imagination. 0 2 Widen the attack to the whole system — including encoding and character-level evasion, and every language you operate in. 0 3 Count what it blocks wrongly, with a denominator. What it catches and what it wrongly stops are two numbers, reported separately. 0 4 Record the result with a date, a version and a name. Above the reversible-at-a-cost band, that name is not the person who built it. 0 3 every day after HOLD 0 1 Watch the blocked attempts — and the unblocked ones. What nothing fired on is the more interesting number. 0 2 Re-test on every change to the model, the instructions, the scanner, the languages or the scope — and whenever a new attack class is published. 0 3 Add new controls, retire old ones, and move the authority. Promotion on evidence; demotion automatic on incident. 0 4 Report enforcement strength weighted by exposure , not a count. The Agent Authority Model → Authority and enforcement Authority decides what a handover may do. Guardrails decide how strongly it is enforced. What this is built from Three moves Start with the handovers that are hardest to undo, then test the controls that protect them.",
+        "pageFits": true,
+        "documentWidth": 1425,
+        "bodyWidth": 1425,
+        "viewportWidth": 1440,
+        "outside": [],
+        "reducedMotion": true,
+        "activeAnimations": 0,
+        "tools": {
+          "layers": true,
+          "exposure": true
+        },
+        "detailsCount": 8,
+        "capture": "after",
+        "failures": []
+      },
+      "interactions": {
+        "layers": {
+          "count": 4,
+          "mappings": [
+            {
+              "control": "POLICY",
+              "selectedIndex": 0,
+              "targetId": "layer-panel-policy",
+              "mapping": "Policy WHAT IT IS A rule in a document IN THIS EXAMPLE A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything STRENGTH 1 of 4"
+            },
+            {
+              "control": "PROMPT",
+              "selectedIndex": 1,
+              "targetId": "layer-panel-prompt",
+              "mapping": "Prompt WHAT IT IS A line in the AI’s instructions IN THIS EXAMPLE The AI is told not to. The data is still in front of it. WHAT GETS PAST IT An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. STRENGTH 2 of 4"
+            },
+            {
+              "control": "RUNTIME",
+              "selectedIndex": 2,
+              "targetId": "layer-panel-runtime",
+              "mapping": "Runtime WHAT IT IS Software outside the AI that checks what goes in and out IN THIS EXAMPLE Any answer containing another customer’s record is blocked before it leaves. WHAT GETS PAST IT Reliable against opportunistic misuse. Unreliable against a motivated attacker: character and encoding evasion has reached complete bypass, and unsafe responses rise sharply in lower-resourced languages. STRENGTH 3 of 4"
+            },
+            {
+              "control": "ARCHITECTURE",
+              "selectedIndex": 3,
+              "targetId": "layer-panel-architecture",
+              "mapping": "Architecture WHAT IT IS The AI is given only the data and tools the task needs IN THIS EXAMPLE The search returns only the signed-in customer’s own records. WHAT GETS PAST IT Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. STRENGTH 4 of 4"
+            }
+          ],
+          "keyboard": {
+            "arrow": {
+              "selected": 1,
+              "selectedCount": 1,
+              "controlText": "PROMPT",
+              "mappingText": "Prompt WHAT IT IS A line in the AI’s instructions IN THIS EXAMPLE The AI is told not to. The data is still in front of it. WHAT GETS PAST IT An attacker who can iterate. Against adaptive attack, instruction-level defences fail more often than they hold. STRENGTH 2 of 4",
+              "targetId": "layer-panel-prompt",
+              "targetVisible": true
+            },
+            "home": {
+              "selected": 0,
+              "selectedCount": 1,
+              "controlText": "POLICY",
+              "mappingText": "Policy WHAT IT IS A rule in a document IN THIS EXAMPLE A line in the AI usage policy. The system never sees it. WHAT GETS PAST IT Anyone who has not read it — and every automated path, which has nobody in it to read anything STRENGTH 1 of 4",
+              "targetId": "layer-panel-policy",
+              "targetVisible": true
+            },
+            "end": {
+              "selected": 3,
+              "selectedCount": 1,
+              "controlText": "ARCHITECTURE",
+              "mappingText": "Architecture WHAT IT IS The AI is given only the data and tools the task needs IN THIS EXAMPLE The search returns only the signed-in customer’s own records. WHAT GETS PAST IT Only what the scope itself permits — which is why the scope, not the guardrail, becomes the thing to review. STRENGTH 4 of 4",
+              "targetId": "layer-panel-architecture",
+              "targetVisible": true
+            }
+          }
+        },
+        "exposure": {
+          "count": 5,
+          "mappings": [
+            {
+              "control": "Undone at will, internal only",
+              "selectedIndex": 0,
+              "targetId": "exposure-panel-internal-reversible",
+              "mapping": "Nobody outside the organisation is affected …ENFORCE AT LEAST HERE Prompt with monitoring + with monitoring"
+            },
+            {
+              "control": "Reversible at a cost, one customer",
+              "selectedIndex": 1,
+              "targetId": "exposure-panel-reversible-cost",
+              "mapping": "Undoing it involves another party …ENFORCE AT LEAST HERE Runtime a check outside the model, on the way in or out"
+            },
+            {
+              "control": "Irreversible, one customer",
+              "selectedIndex": 2,
+              "targetId": "exposure-panel-irreversible-customer",
+              "mapping": "Sent, paid, published or acted upon …ENFORCE AT LEAST HERE Runtime a check outside the model, on the way in or out + + architectural scoping of the data and tools reached"
+            },
+            {
+              "control": "Regulator-visible, public, or safety",
+              "selectedIndex": 3,
+              "targetId": "exposure-panel-regulator-public-safety",
+              "mapping": "A supervisor can inspect it, or anyone can see it …ENFORCE AT LEAST HERE Architecture the model is given only what the task needs + + an independent second control"
+            },
+            {
+              "control": "Running above its exposure ceiling",
+              "selectedIndex": 4,
+              "targetId": "exposure-panel-above-ceiling",
+              "mapping": "More authority than the exposure alone permits …ENFORCE AT LEAST HERE Architecture the model is given only what the task needs + + a named artefact that carries the authority"
+            }
+          ],
+          "keyboard": {
+            "arrow": {
+              "selected": 1,
+              "selectedCount": 1,
+              "controlText": "Reversible at a cost, one customer",
+              "mappingText": "Undoing it involves another party …ENFORCE AT LEAST HERE Runtime a check outside the model, on the way in or out",
+              "targetId": "exposure-panel-reversible-cost",
+              "targetVisible": true
+            },
+            "home": {
+              "selected": 0,
+              "selectedCount": 1,
+              "controlText": "Undone at will, internal only",
+              "mappingText": "Nobody outside the organisation is affected …ENFORCE AT LEAST HERE Prompt with monitoring + with monitoring",
+              "targetId": "exposure-panel-internal-reversible",
+              "targetVisible": true
+            },
+            "end": {
+              "selected": 4,
+              "selectedCount": 1,
+              "controlText": "Running above its exposure ceiling",
+              "mappingText": "More authority than the exposure alone permits …ENFORCE AT LEAST HERE Architecture the model is given only what the task needs + + a named artefact that carries the authority",
+              "targetId": "exposure-panel-above-ceiling",
+              "targetVisible": true
+            }
+          }
+        },
+        "threshold": null
+      }
+    }
+  },
+  "fixtureRequestCount": 7,
+  "fixtureMediaRequestCount": 7,
+  "interceptedPaths": [
+    "/api/preview/guardrails-redesign-fixture",
+    "/__guardrails-redesign-fixture__/hero"
+  ],
+  "passed": false,
+  "completed": true
+}

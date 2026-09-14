@@ -1,0 +1,101 @@
+[
+  {
+    "index": 0,
+    "label": "A guardrail is only as strong as the layer it is built into.",
+    "heading": "A guardrail is only as strong as the layer it is built into.",
+    "top": 8,
+    "bottom": 185.875,
+    "height": 177.875,
+    "width": 964
+  },
+  {
+    "index": 1,
+    "label": "Asked, or unable",
+    "heading": "Asked, or unable",
+    "top": 205.78125,
+    "bottom": 392.6875,
+    "height": 186.90625,
+    "width": 964
+  },
+  {
+    "index": 2,
+    "label": "One rule, four different ways",
+    "heading": "One rule, four different ways",
+    "top": 412.59375,
+    "bottom": 2742.375,
+    "height": 2329.78125,
+    "width": 964
+  },
+  {
+    "index": 3,
+    "label": "The stopping rule",
+    "heading": "The stopping rule",
+    "top": 2762.28125,
+    "bottom": 5451.140625,
+    "height": 2688.859375,
+    "width": 964
+  },
+  {
+    "index": 4,
+    "label": "What you need to know about a control",
+    "heading": "What you need to know about a control",
+    "top": 5471.046875,
+    "bottom": 5819.265625,
+    "height": 348.21875,
+    "width": 964
+  },
+  {
+    "index": 5,
+    "label": "Set, Prove & Hold",
+    "heading": "Set, Prove & Hold",
+    "top": 5839.171875,
+    "bottom": 7003.390625,
+    "height": 1164.21875,
+    "width": 964
+  },
+  {
+    "index": 6,
+    "label": "What it costs to keep it true",
+    "heading": "What it costs to keep it true",
+    "top": 7023.296875,
+    "bottom": 7918.203125,
+    "height": 894.90625,
+    "width": 964
+  },
+  {
+    "index": 7,
+    "label": "What to measure",
+    "heading": "What to measure",
+    "top": 7938.109375,
+    "bottom": 8055.015625,
+    "height": 116.90625,
+    "width": 964
+  },
+  {
+    "index": 8,
+    "label": "Authority and enforcement",
+    "heading": "Authority and enforcement",
+    "top": 8074.921875,
+    "bottom": 8441.265625,
+    "height": 366.34375,
+    "width": 964
+  },
+  {
+    "index": 9,
+    "label": "What this is built from",
+    "heading": "What this is built from",
+    "top": 8461.171875,
+    "bottom": 8882.390625,
+    "height": 421.21875,
+    "width": 964
+  },
+  {
+    "index": 10,
+    "label": "Three moves",
+    "heading": "Three moves",
+    "top": 8902.296875,
+    "bottom": 9336.015625,
+    "height": 433.71875,
+    "width": 964
+  }
+]

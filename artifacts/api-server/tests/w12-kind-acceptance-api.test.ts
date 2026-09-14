@@ -786,6 +786,16 @@ test("W12 prioritized kinds save and reload through the actual document route", 
       if (statement.includes("SELECT content_mode FROM cms_market_editions")) {
         return { rowCount: 1, rows: [{ content_mode: "custom" }] };
       }
+      // The save route preflights exact media pins before deciding whether a
+      // pending-review asset is being carried forward. This fixture has no
+      // media rows, so an empty selection exercises the guard without
+      // short-circuiting it or treating pending media as approved.
+      if (
+        statement.includes("FROM cms_media_assets asset")
+        && statement.includes("JOIN cms_media_versions version")
+      ) {
+        return { rowCount: 0, rows: [] };
+      }
       if (statement.includes("INSERT INTO cms_revisions")) {
         currentPayload = values[1] as Record<string, unknown>;
         currentRevisionNumber += 1;

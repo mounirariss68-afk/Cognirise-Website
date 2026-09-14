@@ -26,6 +26,10 @@ function setMeta(selector: string, key: string, value: string) {
   element.setAttribute(key, value);
 }
 
+function removeMeta(selector: string) {
+  document.head.querySelector<HTMLMetaElement>(selector)?.remove();
+}
+
 export function applyMetadata(metadata: PageMetadata) {
   document.title = metadata.title;
   setMeta('meta[name="description"]', "content", metadata.description);
@@ -33,7 +37,13 @@ export function applyMetadata(metadata: PageMetadata) {
   setMeta('meta[property="og:description"]', "content", metadata.description);
   setMeta('meta[name="twitter:title"]', "content", metadata.title);
   setMeta('meta[name="twitter:description"]', "content", metadata.description);
-  if (metadata.imageUrl) setMeta('meta[property="og:image"]', "content", metadata.imageUrl);
+  if (metadata.imageUrl) {
+    setMeta('meta[property="og:image"]', "content", metadata.imageUrl);
+    setMeta('meta[name="twitter:image"]', "content", metadata.imageUrl);
+  } else {
+    removeMeta('meta[property="og:image"]');
+    removeMeta('meta[name="twitter:image"]');
+  }
   setMeta('meta[name="robots"]', "content", metadata.noIndex ? "noindex,nofollow" : "index,follow");
 
   let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');

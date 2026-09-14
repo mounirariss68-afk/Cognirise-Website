@@ -60,6 +60,7 @@ import { applyLocalSuccessorToEditionMatrix, previewPinForEditionRevision, previ
 import { createDraftRecoveryExport, downloadDraftRecovery } from "./draft-operation-safety";
 import { EditionAssignmentControl } from "./EditionAssignmentControl";
 import { ContentEditor, contentFieldId } from "./ContentEditor";
+import { MediaField } from "./MediaField";
 import { buildDocumentReadiness as documentReadiness, collectContentMediaIds, CONTENT_GUIDANCE, editionAuthoringActions, readinessCounts, type ReadinessIssue } from "./authoring";
 import { reuseFailureOutcome } from "./edition-reuse";
 import { ReadinessPanel } from "./ReadinessPanel";
@@ -2539,6 +2540,14 @@ export default function DocumentDetail() {
                 {fieldIssue("seo.canonicalUrl") && <p id="seo-canonical-error" className="text-xs text-destructive">{fieldIssue("seo.canonicalUrl")}</p>}
                 {fieldIssue("seo") && <p className="text-xs text-destructive">{fieldIssue("seo")}</p>}
               </div>
+
+              <MediaField
+                label="Social sharing image"
+                role="og-image"
+                value={seo.ogImageMedia as any}
+                onChange={(ogImageMedia) => handleSeoChange("ogImageMedia", ogImageMedia)}
+                disabled={editorLocked}
+              />
 
               <div className="flex items-center space-x-2 pt-2">
                 <Switch

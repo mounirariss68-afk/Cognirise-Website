@@ -739,6 +739,40 @@ const guardrailsMoveSchema = z.discriminatedUnion("id", [
   fixedId("two", { heading: guardedText, body: guardedText }),
   fixedId("three", { heading: guardedText, body: guardedText }),
 ]);
+const guardrailsPresentationCopySchema = z.object({
+  summary: guardedText,
+  detailsLabel: guardedText.optional(),
+}).strict().superRefine((copy, context) => {
+  if (copy.detailsLabel === undefined) return;
+  if (!copy.detailsLabel.trim()) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["detailsLabel"],
+      message: "A presentation detail label cannot be blank.",
+    });
+  }
+});
+/** Optional summary-first reading aids. Full reviewed detail remains in the
+ * existing Guardrails fields rather than being copied into a second envelope. */
+const guardrailsPresentationSchema = z.object({
+  version: z.literal("guardrails-redesign-v1"),
+  hero: z.object({
+    headline: guardedText,
+    subheadline: guardedText,
+    detailsLabel: guardedText.optional(),
+  }).strict(),
+  distinction: guardrailsPresentationCopySchema,
+  layers: guardrailsPresentationCopySchema,
+  exposure: guardrailsPresentationCopySchema,
+  setProveHold: z.object({
+    summary: guardedText,
+    questionsDetailsLabel: guardedText.optional(),
+    maintenanceDetailsLabel: guardedText.optional(),
+    measurementDetailsLabel: guardedText.optional(),
+  }).strict(),
+  authority: guardrailsPresentationCopySchema,
+  sourcesNextStep: guardrailsPresentationCopySchema,
+}).strict();
 
 function requiresFixedOrder(
   expected: readonly string[],
@@ -768,6 +802,11 @@ export const guardrailsFrameworkContentSchema = z.object({
     primaryAction: z.object({ label: guardedText, href: z.literal("/contact") }).strict(),
     secondaryAction: z.object({ label: guardedText, href: z.literal("/methodologies/agent-authority-model") }).strict(),
   }).strict(),
+  /** A page-owned immutable image. Draft media may still be pending review;
+   * normal publish validation remains the release gate. */
+  heroMedia: optionalMediaReference,
+  heroMediaId: legacyMediaId,
+  presentation: guardrailsPresentationSchema.optional(),
   distinction: z.object({
     heading: guardedText,
     body: z.array(guardedText).length(3),
@@ -972,6 +1011,9 @@ export const cmsSeoSchema = z.object({
   description: z.string().trim().max(300).optional(),
   canonicalUrl: blankOrHttpUrl,
   noIndex: z.boolean().default(false),
+  // The social image is a second, semantic use of the same immutable asset as
+  // a page hero when applicable. It must remain separately role-labelled.
+  ogImageMedia: cmsMediaReferenceSchema.extend({ role: z.literal("og-image") }).optional(),
 }).strict();
 
 export const CMS_DRAFT_METADATA_LIMITS = {
@@ -1104,9 +1146,15 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
   }
   if (kind === "framework") {
     const framework = value as FrameworkContent;
-    // Guardrails has its own fixed composition and intentionally has no
-    // authority-model hero media or calculated worked example.
-    if (framework.template === "guardrails") return errors;
+    // Legacy Guardrails revisions intentionally remain publish-compatible.
+    // The optional redesign presentation, however, is image-led and must
+    // carry a page-owned immutable hero reference before publication.
+    if (framework.template === "guardrails") {
+      if (framework.presentation && !framework.heroMedia && !framework.heroMediaId) {
+        errors.push("The Guardrails redesign presentation requires immutable hero media.");
+      }
+      return errors;
+    }
     if (!framework.heroMedia && !framework.heroMediaId) errors.push("A framework requires approved hero media.");
     for (const [index, example] of [framework.workedExample, ...framework.sectorExamples].entries()) {
       const rScore = Number(example.reversibility.slice(1)) as RScore;
@@ -1313,7 +1361,7 @@ function validateCmsSnapshotStructure(
       return { success: false as const, errors: ["A public case-study summary is required and must be anonymized."] };
     }
   }
-  const references = collectCmsMediaReferences(kind, content.data, snapshot.data.mediaIds);
+  const references = collectCmsMediaReferences(kind, content.data, snapshot.data.mediaIds, snapshot.data.seo);
   const mediaIds = new Set(references.map((reference) => reference.mediaId));
   const exactVersions = new Map<string, string>();
   for (const reference of references) {
@@ -1365,7 +1413,7 @@ export function validateCmsSnapshotForDelivery(
       // A legacy source revision was fully validated before publication. Its
       // leak-safe derivative can have historical cardinalities reduced by
       // filtering; keep that already-published content readable.
-      const references = collectCmsMediaReferences(kind, content, snapshotData.mediaIds);
+        const references = collectCmsMediaReferences(kind, content, snapshotData.mediaIds, snapshotData.seo);
       return {
         success: true as const,
         data: {
@@ -1541,6 +1589,7 @@ export function collectCmsMediaReferences(
   kind: CmsDocumentKind,
   content: unknown,
   legacyMediaIds: readonly string[] = [],
+  seo?: unknown,
 ): CmsCollectedMediaReference[] {
   const result: CmsCollectedMediaReference[] = legacyMediaIds.map((mediaId, index) => ({
     mediaId,
@@ -1572,6 +1621,10 @@ export function collectCmsMediaReferences(
   ] as const;
   for (const [referenceField, legacyField, role] of locations) {
     add(record[referenceField] ?? record[legacyField], `content.${referenceField}`, role);
+  }
+  if (seo && typeof seo === "object" && !Array.isArray(seo)) {
+    const seoRecord = seo as Record<string, unknown>;
+    add(seoRecord.ogImageMedia, "seo.ogImageMedia", "og-image");
   }
   if (Array.isArray(record.supportingMedia)) {
     for (const [index, reference] of record.supportingMedia.entries()) {

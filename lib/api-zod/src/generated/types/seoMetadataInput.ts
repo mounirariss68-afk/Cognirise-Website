@@ -5,6 +5,7 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { CmsImmutableMediaReference } from './cmsImmutableMediaReference';
 
 export interface SeoMetadataInput {
   /** @maxLength 70 */
@@ -17,4 +18,6 @@ export interface SeoMetadataInput {
      */
   canonicalUrl?: string;
   noIndex?: boolean;
+  /** Immutable social-sharing image; role must be og-image. */
+  ogImageMedia?: CmsImmutableMediaReference;
 }

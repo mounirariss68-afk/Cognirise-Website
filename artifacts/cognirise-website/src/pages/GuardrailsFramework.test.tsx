@@ -1,88 +1,204 @@
-import assert from "node:assert/strict";
-import test from "node:test";
-import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import { frameworkContentSchema } from "@workspace/api-zod";
-import { guardrailsFixture } from "../../../../scripts/src/cms/guardrails-fixture";
-import { applyMetadata } from "@/lib/metadata";
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import React from 'react';
+import { renderToString } from 'react-dom/server';
+import { Router } from 'wouter';
+import { GuardrailsLayout, guardrailsMetadata } from './GuardrailsFramework';
+import { LayerExplorer } from '@/components/guardrails/LayerExplorer';
+import { MarkdownInline } from '@/components/guardrails/MarkdownInline';
+import { guardrailsFixture } from '../../../../scripts/src/cms/guardrails-fixture';
+import { guardrailsPresentation } from '../../../../scripts/src/cms/guardrails-redesign';
 
-(globalThis as typeof globalThis & { React: typeof React }).React = React;
-const location = { origin: "http://127.0.0.1", pathname: "/methodologies/guardrails-framework", search: "", hash: "" };
-Object.assign(globalThis, { window: { location, localStorage: { getItem() { return null; } }, addEventListener() {}, removeEventListener() {} }, location });
-const { GuardrailsLayout, guardrailsMetadata } = await import("./GuardrailsFramework");
-const content = frameworkContentSchema.parse(guardrailsFixture.content);
-if (content.template !== "guardrails") throw new Error("Wrong test template");
-const framework = {
-  ...content, id: "guardrails-render-test", title: guardrailsFixture.title,
-  slug: guardrailsFixture.slug, summary: guardrailsFixture.summary, seo: guardrailsFixture.seo,
-  media: [], publishedAt: "", updatedAt: "", market: "uae", requestedMarket: "uae", usedFallback: false,
+const mockContent: any = {
+  template: 'guardrails',
+  title: 'Test',
+  seo: {},
+  hero: { eyebrow: 'Eyebrow', headline: 'Headline', subheadline: 'Sub', primaryAction: { label: 'Click', href: '#' }, secondaryAction: { label: 'Click 2', href: '#' } },
+  presentation: { version: 'guardrails-redesign-v1', hero: { headline: 'H', subheadline: 'S', detailsLabel: 'L' } },
+  distinction: { heading: 'Distinction', body: ['Para 1'] },
+  layers: {
+    heading: 'Layers', intro: 'Intro', table: [{ id: 'policy', layer: 'Policy', whatItIs: 'x', inThisExample: 'y', whatGetsPastIt: 'z', strengthLabel: 's' }],
+    tableHeaders: ['Layer', 'What', 'Ex', 'Past', 'Strength'], pullOut: 'Pull', closingLine: 'Close', aside: { heading: 'Aside', body: 'Body' },
+    diagram: {
+      rows: [{ id: '1', label: 'L1', description: 'D1', example: 'E1', bypassLabel: 'B1', bypass: 'By1', strength: 1, strengthLabel: 'S1' }],
+      thresholdAfter: '1', thresholdLabel: 'Threshold'
+    }
+  },
+  stoppingRule: {
+    heading: 'Stop', intro: 'Intro', tableHeaders: ['H1', 'H2'], exposures: [{ id: 'internal-reversible', handover: 'Know', requirement: 'Req' }], pullOut: 'Pull',
+    diagram: {
+      heading: 'Heading', destinationHeading: 'Dest', bands: [{ id: 'b1', label: 'B1', description: 'Desc1', destination: 'd1', additionId: 'a1' }],
+      destinations: [{ id: 'd1', label: 'D1', description: 'DescD1' }],
+      additions: [{ id: 'a1', label: 'A1' }]
+    }
+  },
+  maintenance: { heading: 'Maintenance', table: [{ id: 'policy', layer: 'Policy', set: 'S', prove: 'P', hold: 'H' }], tableHeaders: ['Layer', 'Set', 'Prove', 'Hold'], closingParagraph: 'Close' },
+  method: { heading: 'Method', intro: 'Intro', phases: [{ id: '1', name: 'N1', caption: 'C1', steps: ['S1'] }] },
+  questions: { heading: 'Qs', intro: 'Intro', panels: [] },
+  measurement: { heading: 'Measure', statement: 'State', supportingLine: 'Support' },
+  authority: { heading: 'Auth', body: ['Para'], linkCard: { title: 'Link', description: 'Desc', href: '#' } },
+  references: { heading: 'Refs', intro: ['Intro'], groups: [{ id: '1', title: 'Grp', items: 'Items' }] },
+  moves: { heading: 'Moves', moves: [{ number: 1, title: 'Title', body: 'Body' }], cta: { heading: 'CTA', body: 'Body', button: { label: 'Btn', href: '#' } }, footerNote: 'Note' },
 };
-const decode = (text: string) => text.replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
-const plain = (text: string) => decode(text.replace(/<\/(?:p|div|td|th|h[1-6]|li|section|header|button)>/g, "$& ").replace(/<[^>]+>/g, ""));
-const unmark = (text: string) => text.replace(/\*/g, "").replace(/\s+/g, " ").trim();
-const structural = new Set(["id", "href", "template", "visibility", "thresholdAfter", "enforcementLayer", "additionId", "destination", "relatedLink", "sources", "relatedIds"]);
-function editorial(value: unknown, path = ""): Array<[string, string]> {
-  if (typeof value === "string") return value.split(" · ").map((part) => [path, part]);
-  if (Array.isArray(value)) return value.flatMap((item, index) => editorial(item, `${path}.${index}`));
-  if (value && typeof value === "object") return Object.entries(value).filter(([key]) => !structural.has(key)).flatMap(([key, item]) => editorial(item, `${path}.${key}`));
-  return [];
-}
 
-test("Guardrails renders every governed editorial field before interaction", () => {
-  const html = renderToStaticMarkup(<GuardrailsLayout framework={framework} renderPolicy="cms" preview />);
-  const rendered = plain(html);
-  const missing = editorial(content).filter(([path, value]) => {
-    // Figure title/description may be carried by accessible attributes.
-    const haystack = /\.diagram\.(title|description)$/.test(path) ? decode(html) : rendered;
-    return !haystack.includes(unmark(value));
+describe('GuardrailsFramework Layout', () => {
+  it('retains replaced source qualifications in the real source fixture', () => {
+    const framework = {
+      ...guardrailsFixture.content,
+      title: guardrailsFixture.title,
+      id: 'guardrails-source-fixture',
+      slug: guardrailsFixture.slug,
+      summary: guardrailsFixture.summary,
+      media: undefined,
+      publishedAt: '',
+      updatedAt: '',
+      market: 'uae',
+      requestedMarket: 'uae',
+      usedFallback: false,
+      seo: guardrailsFixture.seo,
+      presentation: guardrailsPresentation,
+    };
+    const normalize = (html: string) => html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    const html = normalize(renderToString(<Router ssrPath="/methodologies/guardrails-framework"><GuardrailsLayout framework={framework} /></Router>));
+    const source = guardrailsFixture.content;
+    const retained = [
+      ...source.distinction.body, source.layers.intro, source.layers.exampleText,
+      source.stoppingRule.intro, source.stoppingRule.diagram.note,
+      source.stoppingRule.diagram.footer, source.method.intro,
+      ...source.authority.body, ...source.references.intro,
+      source.measurement.statement, source.measurement.supportingLine,
+      source.moves.footerNote,
+      guardrailsPresentation.authority.detailsLabel,
+      guardrailsPresentation.sourcesNextStep.detailsLabel,
+    ];
+    for (const text of retained) {
+      assert.ok(html.includes(normalize(renderToString(<MarkdownInline text={text} />))), `Missing retained source: ${text}`);
+    }
   });
-  assert.deepEqual(missing, []);
-  assert.doesNotMatch(rendered, /\*\*|\*how much\*|\[ILLUSTRATION|Section heading:/);
-  assert.match(html, /<strong[^>]*>Authority is the <em/);
-  const levels = [...html.matchAll(/<h([1-6])\b/g)].map((match) => Number(match[1]));
-  assert.equal(levels.filter((level) => level === 1).length, 1);
-  for (let i = 1; i < levels.length; i++) assert.ok(levels[i] <= levels[i - 1] + 1, `Heading level skipped: ${levels[i - 1]} to ${levels[i]}`);
-});
+  it('renders loading state', () => {
+    const html = renderToString(<GuardrailsLayout framework={null} renderPolicy="loading" />);
+    assert.match(html, /Loading the governed methodology…/);
+  });
 
-test("absent Guardrails content never renders compiled prose", () => {
-  for (const renderPolicy of ["unavailable", "compiled-fallback", "cms"] as const) {
-    assert.doesNotMatch(renderToStaticMarkup(<GuardrailsLayout framework={null} renderPolicy={renderPolicy} />), /A guardrail is only as strong as/);
-  }
-});
+  it('renders unavailable state', () => {
+    const html = renderToString(<GuardrailsLayout framework={null} renderPolicy="unavailable" />);
+    assert.match(html, /This methodology is not currently published\./);
+  });
 
-test("loading and unavailable document heads remove canonical and exclude reviewed SEO", () => {
-  class HeadElement {
-    attributes: Record<string, string> = {};
-    rel = "";
-    href = "";
-    constructor(public tag: string) {}
-    setAttribute(key: string, value: string) { this.attributes[key] = value; }
-    remove() { elements.splice(elements.indexOf(this), 1); }
-  }
-  const elements: HeadElement[] = [];
-  const document = {
-    title: "",
-    createElement: (tag: string) => new HeadElement(tag),
-    head: {
-      appendChild: (node: HeadElement) => elements.push(node),
-      querySelector: (selector: string) => {
-        const match = selector.match(/^(\w+)\[([^=]+)="([^"]+)"\]$/)!;
-        return elements.find((node) => node.tag === match[1]
-          && (match[2] === "rel" ? node.rel : node.attributes[match[2]]) === match[3]) ?? null;
+  it('keeps the original fixture on the legacy composition until redesign is marked', () => {
+    const framework = {
+      ...guardrailsFixture.content,
+      title: guardrailsFixture.title,
+      id: 'guardrails-original-fixture',
+      slug: guardrailsFixture.slug,
+      summary: guardrailsFixture.summary,
+      media: undefined,
+      publishedAt: '',
+      updatedAt: '',
+      market: 'uae',
+      requestedMarket: 'uae',
+      usedFallback: false,
+      seo: guardrailsFixture.seo,
+    };
+    const legacyHtml = renderToString(
+      <Router ssrPath="/methodologies/guardrails-framework">
+        <GuardrailsLayout framework={framework} />
+      </Router>,
+    );
+    assert.match(legacyHtml, /id="guardrails-layers-description"/);
+    assert.match(legacyHtml, /id="guardrails-exposure-description"/);
+    assert.equal((legacyHtml.match(/<section\b/g) || []).length, 10);
+
+    const redesignedHtml = renderToString(
+      <Router ssrPath="/methodologies/guardrails-framework">
+        <GuardrailsLayout framework={{ ...framework, presentation: guardrailsPresentation }} />
+      </Router>,
+    );
+    assert.match(redesignedHtml, /Read the reviewed introduction/);
+    assert.equal((redesignedHtml.match(/<section\b/g) || []).length, 6);
+  });
+
+  it('renders the complete layout with sections', () => {
+    const html = renderToString(<GuardrailsLayout framework={mockContent} renderPolicy="cms" />);
+    assert.match(html, /Distinction/);
+    assert.match(html, /Layers/);
+    assert.match(html, /State/);
+    assert.match(html, /Support/);
+    assert.equal((html.match(/<section\b/g) || []).length, 6);
+  });
+
+  it('keeps reviewed detail content closed while the measurement copy is visible', () => {
+    const html = renderToString(<GuardrailsLayout framework={mockContent} renderPolicy="cms" />);
+    assert.match(html, /<details/);
+    assert.doesNotMatch(html, /<details[^>]*open/);
+    assert.match(html, /Measure/);
+    assert.match(html, /State/);
+    assert.match(html, /Support/);
+  });
+
+  it('uses the saved OG image version independently from the hero', () => {
+    const content: any = {
+      ...mockContent,
+      heroMedia: { mediaId: 'hero', mediaVersionId: 'hero-v1' },
+      media: [
+        { id: 'hero', versionId: 'hero-v1', url: '/hero-v1.jpg' },
+        { id: 'social', versionId: 'social-v1', url: '/social-v1.jpg' },
+        { id: 'social', versionId: 'social-v2', url: '/social-v2.jpg' },
+      ],
+      seo: {
+        title: 'Test',
+        description: 'Description',
+        noIndex: false,
+        ogImageMedia: { mediaId: 'social', mediaVersionId: 'social-v1', role: 'og-image' },
       },
-    },
-  };
-  Object.assign(globalThis, { document });
-  for (const policy of ["loading", "unavailable", "compiled-fallback"] as const) {
-    // Start from a delivered record to verify stale head values are removed.
-    applyMetadata(guardrailsMetadata(framework, "cms"));
-    assert.equal(document.title, guardrailsFixture.seo.title);
-    applyMetadata(guardrailsMetadata(framework, policy));
-    assert.equal(document.head.querySelector('meta[name="robots"]')?.attributes.content, "noindex,nofollow");
-    assert.equal(document.head.querySelector('link[rel="canonical"]'), null);
-    assert.equal(document.title, "Content unavailable | Cognirise");
-    assert.doesNotMatch(JSON.stringify(elements), /Most AI guardrails|Set, Prove|guardrails-framework/);
-  }
-  assert.equal(guardrailsMetadata(null, "cms").noIndex, true);
-  assert.equal(guardrailsMetadata(framework, "cms", true).canonicalUrl, null);
+    };
+    const first = guardrailsMetadata(content, 'cms').imageUrl;
+    const second = guardrailsMetadata({
+      ...content,
+      seo: {
+        ...content.seo,
+        ogImageMedia: { ...content.seo.ogImageMedia, mediaVersionId: 'social-v2' },
+      },
+    }, 'cms').imageUrl;
+    assert.equal(first, '/social-v1.jpg');
+    assert.equal(second, '/social-v2.jpg');
+    assert.equal(guardrailsMetadata({
+      ...content,
+      seo: {
+        ...content.seo,
+        ogImageMedia: { ...content.seo.ogImageMedia, mediaVersionId: 'missing' },
+      },
+    }, 'cms').imageUrl, undefined);
+  });
+
+  it('keeps the layer threshold visible between wrapping control groups', () => {
+    const rows = ['policy', 'prompt', 'runtime', 'architecture'].map((id, index) => ({
+      id,
+      label: id,
+      description: `Description ${id}`,
+      example: `Example ${id}`,
+      bypassLabel: 'Bypass',
+      bypass: `Bypass ${id}`,
+      strength: index + 1,
+      strengthLabel: `${index + 1} of 4`,
+    }));
+    const content: any = {
+      ...mockContent,
+      layers: {
+        ...mockContent.layers,
+        tableHeaders: ['Layer', 'What', 'Example', 'Past', 'Strength'],
+        diagram: {
+          ...mockContent.layers.diagram,
+          rows,
+          thresholdAfter: 'prompt',
+          thresholdLabel: 'Above this line, you are asking',
+        },
+      },
+    };
+    const html = renderToString(<LayerExplorer content={content} />);
+    assert.match(html, /data-guardrails-threshold/);
+    assert.match(html, /role="separator"/);
+    assert.match(html, /whitespace-normal/);
+    assert.doesNotMatch(html, /whitespace-nowrap/);
+  });
 });

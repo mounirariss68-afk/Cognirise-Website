@@ -43,3 +43,22 @@ test("Guardrails editor exposes prose, never structural or governance slots", ()
   assert.equal(paths.some((path) => path[0] === "sources"), false);
   assert.equal(paths.some((path) => path[0] === "relatedIds"), false);
 });
+
+test("Guardrails editor keeps an optional immutable hero selection out of prose fields", () => {
+  const paths = guardrailsEditableTextPaths({
+    ...guardrailsDraft(),
+    heroMedia: {
+      mediaId: "6c1e0194-3c88-4f5b-97b2-fca2d45ad787",
+      mediaVersionId: "953e240a-3dcf-47fc-98ec-ddb8e5158d3e",
+      role: "hero",
+      altText: "Governed hero",
+    },
+    presentation: {
+      version: "guardrails-redesign-v1",
+      distinction: { summary: "Concise distinction." },
+    },
+  });
+  assert.equal(paths.some((path) => path[0] === "heroMedia"), false);
+  assert.equal(paths.some((path) => path.join(".") === "presentation.version"), false);
+  assert.equal(paths.some((path) => path.join(".") === "presentation.distinction.summary"), true);
+});

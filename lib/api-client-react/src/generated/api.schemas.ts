@@ -1161,6 +1161,17 @@ export interface CmsImmutableMediaReference {
   altText?: string;
 }
 
+export interface CmsSeo {
+  /** @maxLength 70 */
+  title?: string;
+  /** @maxLength 300 */
+  description?: string;
+  canonicalUrl?: string;
+  noIndex?: boolean;
+  /** Immutable social-sharing image; role must be og-image. */
+  ogImageMedia?: CmsImmutableMediaReference;
+}
+
 export type CmsPersonContentSchemaVersion = typeof CmsPersonContentSchemaVersion[keyof typeof CmsPersonContentSchemaVersion];
 
 
@@ -1753,6 +1764,45 @@ export interface CmsGuardrailsHero {
   secondaryAction: CmsGuardrailsAuthorityAction;
 }
 
+export type CmsGuardrailsPresentationVersion = typeof CmsGuardrailsPresentationVersion[keyof typeof CmsGuardrailsPresentationVersion];
+
+
+export const CmsGuardrailsPresentationVersion = {
+  'guardrails-redesign-v1': 'guardrails-redesign-v1',
+} as const;
+
+export interface CmsGuardrailsPresentationHero {
+  headline: CmsGuardrailsText;
+  subheadline: CmsGuardrailsText;
+  detailsLabel?: CmsGuardrailsText;
+}
+
+export interface CmsGuardrailsPresentationCopy {
+  summary: CmsGuardrailsText;
+  detailsLabel?: CmsGuardrailsText;
+}
+
+export interface CmsGuardrailsSetProveHoldPresentation {
+  summary: CmsGuardrailsText;
+  questionsDetailsLabel?: CmsGuardrailsText;
+  maintenanceDetailsLabel?: CmsGuardrailsText;
+  measurementDetailsLabel?: CmsGuardrailsText;
+}
+
+/**
+ * Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.
+ */
+export interface CmsGuardrailsPresentation {
+  version: CmsGuardrailsPresentationVersion;
+  hero: CmsGuardrailsPresentationHero;
+  distinction: CmsGuardrailsPresentationCopy;
+  layers: CmsGuardrailsPresentationCopy;
+  exposure: CmsGuardrailsPresentationCopy;
+  setProveHold: CmsGuardrailsSetProveHoldPresentation;
+  authority: CmsGuardrailsPresentationCopy;
+  sourcesNextStep: CmsGuardrailsPresentationCopy;
+}
+
 export interface CmsGuardrailsDistinction {
   heading: CmsGuardrailsText;
   /**
@@ -2199,6 +2249,9 @@ export interface CmsGuardrailsFrameworkContent {
   schemaVersion?: CmsGuardrailsFrameworkContentSchemaVersion;
   template: CmsGuardrailsFrameworkContentTemplate;
   hero: CmsGuardrailsHero;
+  heroMedia?: CmsImmutableMediaReference;
+  heroMediaId?: string;
+  presentation?: CmsGuardrailsPresentation;
   distinction: CmsGuardrailsDistinction;
   layers: CmsGuardrailsLayers;
   stoppingRule: CmsGuardrailsStoppingRule;
@@ -2338,6 +2391,8 @@ export interface SeoMetadata {
   description?: string;
   canonicalUrl?: string;
   noIndex?: boolean;
+  /** Immutable social-sharing image; role must be og-image. */
+  ogImageMedia?: CmsImmutableMediaReference;
 }
 
 export interface Document {
@@ -2398,6 +2453,8 @@ export interface SeoMetadataInput {
      */
   canonicalUrl?: string;
   noIndex?: boolean;
+  /** Immutable social-sharing image; role must be og-image. */
+  ogImageMedia?: CmsImmutableMediaReference;
 }
 
 export interface DocumentInput {

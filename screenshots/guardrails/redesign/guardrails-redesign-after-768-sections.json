@@ -1,0 +1,65 @@
+[
+  {
+    "index": 0,
+    "label": "Guardrails that hold.",
+    "heading": "Guardrails that hold.",
+    "top": 139,
+    "bottom": 1038.25,
+    "height": 899.25,
+    "width": 753
+  },
+  {
+    "index": 1,
+    "label": "Asked, or unable",
+    "heading": "Asked, or unable",
+    "top": 1038.25,
+    "bottom": 1533.640625,
+    "height": 495.390625,
+    "width": 753
+  },
+  {
+    "index": 2,
+    "label": "One rule, four different ways",
+    "heading": "One rule, four different ways",
+    "top": 1533.640625,
+    "bottom": 2920.34375,
+    "height": 1386.703125,
+    "width": 753
+  },
+  {
+    "index": 3,
+    "label": "The stopping rule",
+    "heading": "The stopping rule",
+    "top": 2920.34375,
+    "bottom": 3765.6875,
+    "height": 845.34375,
+    "width": 753
+  },
+  {
+    "index": 4,
+    "label": "Set, Prove & Hold",
+    "heading": "Set, Prove & Hold",
+    "top": 3765.6875,
+    "bottom": 6158.609375,
+    "height": 2392.921875,
+    "width": 753
+  },
+  {
+    "index": 5,
+    "label": "Authority and enforcement",
+    "heading": "Authority and enforcement",
+    "top": 6158.609375,
+    "bottom": 7200.96875,
+    "height": 1042.359375,
+    "width": 753
+  },
+  {
+    "index": 6,
+    "label": "Three moves",
+    "heading": "Three moves",
+    "top": 7200.96875,
+    "bottom": 8739.484375,
+    "height": 1538.515625,
+    "width": 753
+  }
+]

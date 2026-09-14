@@ -1,5 +1,11 @@
 # Guardrails Framework — development review
 
+> Historical implementation record. The current unpublished redesign and
+> database-resolved Admin location are documented in
+> [guardrails-redesign.md](guardrails-redesign.md), with separately labelled
+> [browser evidence](guardrails-redesign-browser.md). Approval below covers only
+> the original source files, not the redesigned revision.
+
 ## Content-owner approval — 2026-09-14
 
 The content owner explicitly approved the supplied Guardrails page copy and both

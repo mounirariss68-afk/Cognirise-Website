@@ -125,6 +125,7 @@ function mediaPinsForSnapshot(
     kind as any,
     snapshot.content,
     Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds.filter((id): id is string => typeof id === "string") : [],
+    snapshot.seo,
   );
   const explicitVersions = new Map<string, string>();
   const inheritedVersions = new Map<string, string>();

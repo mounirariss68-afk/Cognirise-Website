@@ -27,7 +27,7 @@ export type MediaSelection = {
   altText?: string;
 };
 
-export function MediaField({ label, value, legacyMediaId, onChange, accept = "image", required = false, role = "hero", overridePath }: {
+export function MediaField({ label, value, legacyMediaId, onChange, accept = "image", required = false, role = "hero", overridePath, disabled = false }: {
   label: string;
   value?: MediaSelection;
   legacyMediaId?: string;
@@ -37,6 +37,7 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
   role?: MediaSelection["role"];
   /** Stable snapshot path, for example content.heroMedia. */
   overridePath?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -102,11 +103,11 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
               {value?.mediaVersionId ? `Pinned version ${value.mediaVersionId.slice(0, 8)}` : "Saved legacy asset"}
             </p>
           </div>
-          <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => setOpen(true)} data-testid={`button-replace-${label.toLowerCase().replaceAll(" ", "-")}`}>Replace</Button>
-          <Button type="button" size="icon" variant="ghost" onClick={() => change(undefined)} aria-label={`Remove ${label}`} data-testid={`button-remove-${label.toLowerCase().replaceAll(" ", "-")}`}><X className="h-4 w-4" /></Button>
+          <Button type="button" size="sm" variant="outline" className="shrink-0" disabled={disabled} onClick={() => setOpen(true)} data-testid={`button-replace-${label.toLowerCase().replaceAll(" ", "-")}`}>Replace</Button>
+          <Button type="button" size="icon" variant="ghost" disabled={disabled} onClick={() => change(undefined)} aria-label={`Remove ${label}`} data-testid={`button-remove-${label.toLowerCase().replaceAll(" ", "-")}`}><X className="h-4 w-4" /></Button>
         </div>
       ) : (
-        <Button type="button" variant="outline" onClick={() => setOpen(true)} data-testid={`button-choose-${label.toLowerCase().replaceAll(" ", "-")}`}>
+        <Button type="button" variant="outline" disabled={disabled} onClick={() => setOpen(true)} data-testid={`button-choose-${label.toLowerCase().replaceAll(" ", "-")}`}>
           <ImageIcon className="mr-2 h-4 w-4" /> Choose approved {accept}
         </Button>
       )}

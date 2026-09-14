@@ -15,10 +15,12 @@ import type { CmsGuardrailsMaintenance } from './cmsGuardrailsMaintenance';
 import type { CmsGuardrailsMeasurement } from './cmsGuardrailsMeasurement';
 import type { CmsGuardrailsMethod } from './cmsGuardrailsMethod';
 import type { CmsGuardrailsMoves } from './cmsGuardrailsMoves';
+import type { CmsGuardrailsPresentation } from './cmsGuardrailsPresentation';
 import type { CmsGuardrailsQuestions } from './cmsGuardrailsQuestions';
 import type { CmsGuardrailsReferences } from './cmsGuardrailsReferences';
 import type { CmsGuardrailsRelatedLink } from './cmsGuardrailsRelatedLink';
 import type { CmsGuardrailsStoppingRule } from './cmsGuardrailsStoppingRule';
+import type { CmsImmutableMediaReference } from './cmsImmutableMediaReference';
 import type { CmsSource } from './cmsSource';
 import type { CmsVisibility } from './cmsVisibility';
 
@@ -26,6 +28,9 @@ export interface CmsGuardrailsFrameworkContent {
   schemaVersion?: CmsGuardrailsFrameworkContentSchemaVersion;
   template: CmsGuardrailsFrameworkContentTemplate;
   hero: CmsGuardrailsHero;
+  heroMedia?: CmsImmutableMediaReference;
+  heroMediaId?: string;
+  presentation?: CmsGuardrailsPresentation;
   distinction: CmsGuardrailsDistinction;
   layers: CmsGuardrailsLayers;
   stoppingRule: CmsGuardrailsStoppingRule;

@@ -1099,6 +1099,7 @@ function GuardrailsFrameworkEditor({ value, onChange }: { value: Content; onChan
   }, {});
   return <div className="space-y-5">
     <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">This is a separate Guardrails page. Its reviewed structure and destinations are locked; every displayed prose, figure label, accessible text, source list, CTA label, and legal note below is editable.</p>
+    <MediaField label="Guardrails hero image" value={value.heroMedia} overridePath="content.heroMedia" onChange={(heroMedia) => onChange({ ...value, heroMedia })} />
     {Object.entries(groups).map(([name, paths]) => section(name.replace(/([A-Z])/g, " $1"), <div className="space-y-4">{paths.map((path) => area(path.slice(1).join(" · ") || name, path, 4))}</div>))}
   </div>;
 }
@@ -1106,7 +1107,7 @@ function GuardrailsFrameworkEditor({ value, onChange }: { value: Content; onChan
 /** Returns only editable prose paths. Structural IDs, control placement, and
  * governance fields are deliberately excluded from the Guardrails editor. */
 export function guardrailsEditableTextPaths(item: unknown, path: string[] = []): string[][] {
-  if (path[0] === "sources" || path[0] === "relatedIds") return [];
+  if (path[0] === "sources" || path[0] === "relatedIds" || path[0] === "heroMedia" || path[0] === "heroMediaId") return [];
   if (typeof item === "string") return guardrailsStructuralKeys.has(path.at(-1) ?? "") ? [] : [path];
   if (Array.isArray(item)) return item.flatMap((entry, index) => guardrailsEditableTextPaths(entry, [...path, String(index)]));
   if (item && typeof item === "object") return Object.entries(item).flatMap(([key, entry]) => guardrailsEditableTextPaths(entry, [...path, key]));
@@ -1124,6 +1125,7 @@ const guardrailsStructuralKeys = new Set([
   "strength",
   "strengthLabel",
   "number",
+  "version",
   "schemaVersion",
   "visibility",
   "order",

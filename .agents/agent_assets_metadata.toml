@@ -407,3 +407,31 @@ mtime_ms = 1789373766509
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/ba5936aa-26be-44c0-a708-3ce1c8f9844e/782faeaf-a4be-4eba-9782-ff1343a6d704"
 storage_version_token = "1789373808639995"
 content_type = "text/markdown"
+
+[[outputs]]
+id = "rBsJZpF5G6_0rzjzEJ38y"
+uri = "file://screenshots/guardrails/redesign/guardrails-redesign-after-1440-fullpage.png"
+type = "image"
+title = "Guardrails redesign — desktop review"
+description = "Saved development revision rendered in an explicit fixture. Seven sections; not an authenticated CMS preview."
+logical_id = "57d96c13-35d9-4c39-9e9f-f68c34693011"
+content_hash = "sha256:f0dd268bcafbe95e2f9c1e23f1e843771de5ae2a0206a7fdd24f55da0b893a92"
+size = 1757493
+mtime_ms = 1789383817088
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/57d96c13-35d9-4c39-9e9f-f68c34693011/e2467d35-3ff8-410e-a7a8-08556cce29a4"
+storage_version_token = "1789383902653584"
+content_type = "image/png"
+
+[[outputs]]
+id = "HHcH3N9b4HG18wceY500B"
+uri = "file://screenshots/guardrails/redesign/guardrails-redesign-after-390-fullpage.png"
+type = "image"
+title = "Guardrails redesign — mobile review"
+description = "390px fixture rendering of the saved development revision, including both compact tools."
+logical_id = "d9bbf200-5681-4701-878b-416c50669189"
+content_hash = "sha256:c1c978abe4980b58c3d66fa9ce09057915089f4ebd320d731fa1c5122f2ad4a8"
+size = 1126781
+mtime_ms = 1789383804684
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/d9bbf200-5681-4701-878b-416c50669189/1d428333-faf0-4156-832d-a2bf3a353447"
+storage_version_token = "1789383904031045"
+content_type = "image/png"

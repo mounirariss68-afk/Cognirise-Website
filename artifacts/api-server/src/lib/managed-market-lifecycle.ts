@@ -251,6 +251,7 @@ export async function assertManagedMarketPublication(
     resolved.rows[0].kind as CmsDocumentKind,
     snapshot.content,
     Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds : [],
+    snapshot.seo,
   );
   const explicitPins = new Map<string, string>();
   for (const reference of expected) {

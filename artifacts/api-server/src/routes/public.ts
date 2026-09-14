@@ -419,6 +419,7 @@ async function published(row: Record<string, any>, snapshot = publicSnapshot(row
     row.kind as CmsDocumentKind,
     snapshot.content,
     Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds : [],
+    snapshot.seo,
   ).map((reference) => reference.mediaId))];
   const assets = await pool.query(
     `SELECT a.*,v.id version_id,v.width,v.height,v.metadata

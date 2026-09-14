@@ -3759,6 +3759,18 @@ components:
           type: string
           enum: [identity, logo, hero, supporting, background, icon, og-image, document]
         altText: { type: string, minLength: 1, maxLength: 500 }
+    CmsSeo:
+      type: object
+      additionalProperties: false
+      properties:
+        title: { type: string, maxLength: 70 }
+        description: { type: string, maxLength: 300 }
+        canonicalUrl: { type: string, format: uri }
+        noIndex: { type: boolean }
+        ogImageMedia:
+          allOf:
+            - $ref: "#/components/schemas/CmsImmutableMediaReference"
+          description: Immutable social-sharing image; role must be og-image.
     CmsStructuredContent:
       description: Version 1 governed CMS content. The API applies the stricter shared runtime contract for the selected document kind.
       oneOf:
@@ -3965,6 +3977,9 @@ components:
         schemaVersion: { type: number, enum: [1], default: 1 }
         template: { type: string, enum: [guardrails] }
         hero: { $ref: "#/components/schemas/CmsGuardrailsHero" }
+        heroMedia: { $ref: "#/components/schemas/CmsImmutableMediaReference" }
+        heroMediaId: { type: string }
+        presentation: { $ref: "#/components/schemas/CmsGuardrailsPresentation" }
         distinction: { $ref: "#/components/schemas/CmsGuardrailsDistinction" }
         layers: { $ref: "#/components/schemas/CmsGuardrailsLayers" }
         stoppingRule: { $ref: "#/components/schemas/CmsGuardrailsStoppingRule" }
@@ -4010,6 +4025,44 @@ components:
         subheadline: { $ref: "#/components/schemas/CmsGuardrailsText" }
         primaryAction: { $ref: "#/components/schemas/CmsGuardrailsContactAction" }
         secondaryAction: { $ref: "#/components/schemas/CmsGuardrailsAuthorityAction" }
+    CmsGuardrailsPresentation:
+      type: object
+      additionalProperties: false
+      required: [version, hero, distinction, layers, exposure, setProveHold, authority, sourcesNextStep]
+      description: Optional concise default-view copy. Detailed reviewed content remains in the existing Guardrails fields.
+      properties:
+        version: { type: string, enum: [guardrails-redesign-v1] }
+        hero: { $ref: "#/components/schemas/CmsGuardrailsPresentationHero" }
+        distinction: { $ref: "#/components/schemas/CmsGuardrailsPresentationCopy" }
+        layers: { $ref: "#/components/schemas/CmsGuardrailsPresentationCopy" }
+        exposure: { $ref: "#/components/schemas/CmsGuardrailsPresentationCopy" }
+        setProveHold: { $ref: "#/components/schemas/CmsGuardrailsSetProveHoldPresentation" }
+        authority: { $ref: "#/components/schemas/CmsGuardrailsPresentationCopy" }
+        sourcesNextStep: { $ref: "#/components/schemas/CmsGuardrailsPresentationCopy" }
+    CmsGuardrailsPresentationHero:
+      type: object
+      additionalProperties: false
+      required: [headline, subheadline]
+      properties:
+        headline: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        subheadline: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        detailsLabel: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsPresentationCopy:
+      type: object
+      additionalProperties: false
+      required: [summary]
+      properties:
+        summary: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        detailsLabel: { $ref: "#/components/schemas/CmsGuardrailsText" }
+    CmsGuardrailsSetProveHoldPresentation:
+      type: object
+      additionalProperties: false
+      required: [summary]
+      properties:
+        summary: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        questionsDetailsLabel: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        maintenanceDetailsLabel: { $ref: "#/components/schemas/CmsGuardrailsText" }
+        measurementDetailsLabel: { $ref: "#/components/schemas/CmsGuardrailsText" }
     CmsGuardrailsDistinction:
       type: object
       additionalProperties: false
@@ -4603,6 +4656,10 @@ components:
         description: { type: string, maxLength: 180 }
         canonicalUrl: { type: string }
         noIndex: { type: boolean }
+        ogImageMedia:
+          allOf:
+            - $ref: "#/components/schemas/CmsImmutableMediaReference"
+          description: Immutable social-sharing image; role must be og-image.
     SeoMetadataInput:
       type: object
       additionalProperties: false
@@ -4614,6 +4671,10 @@ components:
           pattern: '^(?:$|[hH][tT][tT][pP][sS]?://.+)'
           description: Blank clears the optional canonical URL; nonblank values must use HTTP(S).
         noIndex: { type: boolean, default: false }
+        ogImageMedia:
+          allOf:
+            - $ref: "#/components/schemas/CmsImmutableMediaReference"
+          description: Immutable social-sharing image; role must be og-image.
     DocumentRevision:
       type: object
       required: [id, documentId, number, market, locale, snapshot, createdBy, createdAt]

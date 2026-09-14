@@ -122,7 +122,10 @@ test("navigation maps CMS routes before exposing policy destinations", async () 
   assert.match(source, /r\.id=e\.published_revision_id/);
   assert.doesNotMatch(source, /e\.published_revision_id=delivery\.shared_source_revision_id/);
   assert.match(source, /e\.published_revision_id=delivery\.published_source_revision_id/);
-  assert.match(source, /routes\.known\.has\(destination\) && !routes\.available\.has\(destination\)/);
+  // Navigation policy publication delegates route suppression to the shared
+  // semantic helper so query-string and trailing-slash normalization cannot
+  // drift between policy and page availability.
+  assert.match(source, /isNavigationDestinationAvailable\(routes, item\.destination\)/);
 });
 
 test("relocating a shared industry delivery address retains its editorial market", async () => {

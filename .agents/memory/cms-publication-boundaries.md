@@ -11,6 +11,18 @@ Public visibility and media access must be derived from the exact approved revis
 
 ## Successor review continuity
 
+An exact pending-review media pin may continue into a successor draft of the
+same edition without becoming an approved new selection.
+
+**Why:** Requiring cleared media for every successor save can silently remove
+an already staged hero when an editor changes unrelated prose. Preservation of
+an existing immutable pin and permission to choose unreviewed media are different
+authorities.
+
+**How to apply:** Carry only the immediate predecessor's exact version under
+the edition save lock; reject unrelated pending assets or swapped versions.
+Do not relax publication, rights, accessibility, or public-delivery gates.
+
 Keep the currently approved revision public while a successor draft moves through review or rejection. Restoration is different: a restored edition stays non-public until its current successor completes fresh review.
 
 **Why:** Editorial work on a replacement must not withdraw live content, while archive recovery must not silently republish historical content or leave an older review eligible for release.
