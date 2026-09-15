@@ -10,6 +10,7 @@ import { SpatialDisclosure, SpatialDisclosureItem, SpatialDisclosureTrigger, Spa
 import { PlatformsHeroMedia } from "@/components/platforms/platforms-hero-media";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } from "@/lib/cms";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 
 const platformFallback = [
   { name: "CogniOS", description: "The core operating system for governed enterprise intelligence.", link: "/platforms/cognios", category: "Foundation & Orchestration" },
@@ -46,6 +47,10 @@ export default function PlatformsOverview() {
   }) : undefined);
   
   const marketLocation = getMarketLocationLabel(market);
+  const heroEyebrow = cleanHeroIdentifier(
+    landingText(governedLanding, "platforms-hero-eyebrow", `Platforms / ${marketLocation}`),
+    { marketLocation },
+  );
 
   const categories = ["Foundation & Orchestration", "Specialist Engines"];
   const matrix = categories.map((category) => ({
@@ -58,7 +63,7 @@ export default function PlatformsOverview() {
       <section className="px-6 md:px-12 pt-8 md:pt-12 max-w-[1440px] mx-auto w-full">
         <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
           <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-          {landingText(governedLanding, "platforms-hero-eyebrow", `Platforms / ${marketLocation}`)}
+          {heroEyebrow}
         </div>
         
         <div className="grid grid-cols-1 items-end gap-12 pb-12 lg:grid-cols-[0.86fr_1.14fr] lg:gap-16">

@@ -45,3 +45,4 @@
 - [Guardrails source authority](guardrails-source-authority.md) — Replacement HTML supersedes earlier attachments; exclude its UAE module and preserve Agent Authority.
 - [Generated-contract validation](openapi-union-generation.md) — Validate regenerated output independently of incremental compiler caches.
 - [Matrix browser fixture safety](matrix-browser-fixtures.md) — Never substitute another document’s controls when a fixture row is missing; refresh and search before mutation.
+- [Navigation provenance](navigation-provenance.md) — Observe history traversal before dirty-work guards; physical offsets must stay aligned through cancellation and native anchors.

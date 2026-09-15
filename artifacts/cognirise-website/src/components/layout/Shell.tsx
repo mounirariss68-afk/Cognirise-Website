@@ -10,6 +10,7 @@ import { ALLIANCE_PLATFORMS } from "@/lib/alliancePlatforms";
 import { useGetPublicConfiguration, useGetPublicNavigationSettings } from "@workspace/api-client-react";
 import { handleSamePageHashNavigation } from "@/lib/hashNavigation";
 import { isCurrentRouteDestination, routePath } from "@/lib/routeState";
+import { ReviewVersionSelect } from "./ReviewVersionSelect";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/": {
@@ -553,21 +554,9 @@ export function Shell({
           </nav>
 
           <div className="relative z-50 hidden shrink-0 items-center gap-4 2xl:gap-6 2xl:flex">
-            <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-              {marketOptions.map((option, index) => (
-                <div key={option.code} className="flex items-center gap-2">
-                  <button 
-                    onClick={() => setMarket(option.code, option.defaultLocale)}
-                    aria-label={`View ${option.displayName} market content`}
-                    aria-pressed={market === option.code}
-                    className={`transition-colors hover:text-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:text-[hsl(var(--brand-pink))] ${market === option.code ? "text-[hsl(var(--brand-deep))]" : ""}`}
-                  >
-                    {option.code.toUpperCase()}
-                  </button>
-                  {index < marketOptions.length - 1 && <span className="opacity-30">/</span>}
-                </div>
-              ))}
-            </div>
+            {import.meta.env?.DEV && marketOptions.length > 0 && (
+              <ReviewVersionSelect markets={marketOptions} market={market} onSelect={setMarket} />
+            )}
             <BrandButton href="/value-scan" className="shrink-0">Bring us one process</BrandButton>
           </div>
 
@@ -646,23 +635,11 @@ export function Shell({
             </div>
           </nav>
           
-          <div className="pb-12 border-t border-border pt-8">
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-4">Select market</span>
-            <div className="flex flex-wrap gap-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              {marketOptions.map((option) => (
-                <button 
-                  key={option.code}
-                  onClick={() => {
-                    if (setMarket(option.code, option.defaultLocale)) setIsOpen(false);
-                  }}
-                  aria-pressed={market === option.code}
-                  className={`transition-colors focus-visible:outline-none ${market === option.code ? "text-[hsl(var(--brand-pink))]" : "hover:text-[hsl(var(--brand-deep))]"}`}
-                >
-                  {option.displayName}
-                </button>
-              ))}
+          {import.meta.env?.DEV && marketOptions.length > 0 && (
+            <div className="pb-12 border-t border-border pt-8">
+              <ReviewVersionSelect markets={marketOptions} market={market} onSelect={setMarket} />
             </div>
-          </div>
+          )}
         </div>
       )}
 

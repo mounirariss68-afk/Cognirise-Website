@@ -6,6 +6,7 @@ import { PulseImage } from "@/components/ui/pulse-image";
 import { IDAO_CANON_LAYERS, IDAO_STAGES } from "@/content/idao";
 import { assetUrl } from "@/lib/assets";
 import { idaoEditorial, idaoHeroSeed, methodologySeoSeed } from "@workspace/api-zod";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import {
   MethodologyCmsDelivery,
   methodologyEditorial,
@@ -57,7 +58,7 @@ function IDAOMethodologyContent() {
   return (
     <article className="overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       <header className="px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24">
-        <Kicker>{hero.breadcrumb}</Kicker>
+        <Kicker>{cleanHeroIdentifier(hero.breadcrumb)}</Kicker>
         <div className="mt-8 grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <motion.div initial={reducedMotion ? false : { opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: reducedMotion ? 0 : 0.65 }}>
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[hsl(var(--brand-pink))]">{hero.supportingText}</p>

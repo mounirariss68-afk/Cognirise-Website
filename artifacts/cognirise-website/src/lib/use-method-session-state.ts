@@ -1,4 +1,5 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { registerNavigationTraversalGuard } from "@/store/navigation";
 
 export type MethodSessionStateOptions<T> = {
   validate?: (value: unknown) => value is T;
@@ -142,12 +143,12 @@ export function useUnsavedWorkWarning(isDirty: boolean): void {
     window.history.pushState = guardedPushState;
     window.history.replaceState = guardedReplaceState;
     window.addEventListener("beforeunload", warn);
-    window.addEventListener("popstate", cancelBackNavigation, true);
+    const unregisterTraversalGuard = registerNavigationTraversalGuard(cancelBackNavigation);
     return () => {
       if (window.history.pushState === guardedPushState) window.history.pushState = originalPushState;
       if (window.history.replaceState === guardedReplaceState) window.history.replaceState = originalReplaceState;
       window.removeEventListener("beforeunload", warn);
-      window.removeEventListener("popstate", cancelBackNavigation, true);
+      unregisterTraversalGuard();
     };
   }, [isDirty]);
 }

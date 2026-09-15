@@ -9,6 +9,7 @@ import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } from "@/lib/cms";
 import { contentRecord, useCmsCollection } from "@/lib/cms";
 import { useDynamicMetadata } from "@/lib/metadata";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 
 const articlesFallback = [
   { number: "01", title: "AI should move the business—not just assist it.", copy: "Redesigning priority work around people, data, controls and intelligent execution.", topics: ["strategy"], url: "/insights/ai-should-move-the-business" },
@@ -53,6 +54,7 @@ export default function InsightsEditorial() {
   const activeTopic = searchParams.get("topic") || "all";
   
   const marketLocation = getMarketLocationLabel(market);
+  const heroKicker = cleanHeroIdentifier(`${marketLocation} / points of view`, { marketLocation });
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -274,7 +276,7 @@ export default function InsightsEditorial() {
       <section className="ie-hero" id="insights">
         <div className="ie-hero-top">
           <div>
-            <div className="ie-kicker">{marketLocation} / points of view</div>
+            <div className="ie-kicker">{heroKicker}</div>
             <h1 data-governed-landing={governedLanding?.pagePath}>{governedHero?.heading ?? <>Work, made <em>visible.</em></>}</h1>
           </div>
           <p className="ie-intro">{governedHero?.text ?? "A reading room for leaders building AI-native organisations: the operating questions behind the strategy, architecture and deployment."}</p>

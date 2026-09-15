@@ -7,6 +7,7 @@ import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
 import { SERVICE_LINE_LABELS } from "@/lib/serviceLines";
 import { BrandButton } from "@/components/ui/brand-button";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 
 export default function ValueScan() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -29,6 +30,7 @@ export default function ValueScan() {
   const { market } = useMarketStore();
   
   const marketLocation = getMarketLocationLabel(market);
+  const heroKicker = cleanHeroIdentifier(`${marketLocation} / Value Scan`, { marketLocation });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData(prev => ({
@@ -118,7 +120,7 @@ export default function ValueScan() {
       `}</style>
 
       <section className="vs-hero">
-        <div className="vs-kicker">{marketLocation} / Value Scan</div>
+        <div className="vs-kicker">{heroKicker}</div>
         <div className="vs-hero-grid"><div className="vs-hero-copy"><h1>Start with one day.<br />Leave with a <em>business case.</em></h1><p className="vs-lead">Bring us one process where urgency, complexity and value have already collided. We will make the practical route visible.</p><BrandButton variant="primary" onClick={() => goTo("start")} icon={<ArrowDown size={15} />}>Explore the session</BrandButton></div><div className="vs-hero-image"><img src={assetUrl("/images/cognirise/site-services.jpg")} alt="A violet and coral current moving through a bright architectural environment." /><div className="vs-word">one day</div><div className="vs-caption"><span>01 / value scan</span>Bring the operating pressure</div></div></div>
       </section>
       <section className="vs-strip" aria-label="Value Scan details"><div><b>Format</b><strong>One focused working session</strong></div><div><b>Starting point</b><strong>One priority process</strong></div><div><b>Location</b><strong>UAE-first, in the room with your team</strong></div></section>

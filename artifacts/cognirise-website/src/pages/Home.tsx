@@ -10,6 +10,7 @@ import { BrandButton } from "@/components/ui/brand-button";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { contentRecord, governedLandingDelivery, landingCta, landingMedia, landingNarrative, landingSections, landingText, landingVisualReferences, useCmsCollection } from "@/lib/cms";
 import { IndustryPicker } from "@/components/IndustryPicker";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 
 const Kicker = ({ children, className = "text-[#102957]" }: { children: React.ReactNode, className?: string }) => (
   <div className={`flex items-center gap-3 text-[10px] tracking-[0.12em] uppercase font-semibold ${className}`}>
@@ -61,6 +62,10 @@ export default function Home() {
     homepage?.media?.find((media) => media.id === mediaId &&
       (!mediaVersionId || media.versionId === mediaVersionId))?.url;
   const marketLocation = getMarketLocationLabel(market);
+  const heroKicker = cleanHeroIdentifier(
+    `${marketLocation} / AI-native advisory & engineering`,
+    { marketLocation },
+  );
 
   const { scrollYProgress: heroScrollProgress } = useScroll({
     target: heroRef,
@@ -98,7 +103,7 @@ export default function Home() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Kicker>{marketLocation} / AI-native advisory & engineering</Kicker>
+          <Kicker>{heroKicker}</Kicker>
         </motion.div>
         
         <div className="grid grid-cols-1 lg:grid-cols-[0.94fr_1.06fr] gap-10 lg:gap-[4vw] items-end min-h-[auto] lg:min-h-[680px] pb-10 lg:pb-[34px] mt-8 lg:mt-0">

@@ -6,6 +6,7 @@ import { contentRecord, useCmsCollection, usePublishedHeroFilm } from "@/lib/cms
 import { CaseStudyRail, type PublicCaseStudy } from "@/components/work/case-study-ui";
 import { approvedPublishedCases } from "@/components/work/case-study-model";
 import { BrandButton } from "@/components/ui/brand-button";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 
 function IndustriesHeroFilm() {
   const [videoReady, setVideoReady] = useState(false);
@@ -89,6 +90,7 @@ function IndustriesHeroFilm() {
 export default function IndustriesOverview() {
   const { market } = useMarketStore();
   const marketLocation = getMarketLocationLabel(market);
+  const heroKicker = cleanHeroIdentifier(`${marketLocation} / Industries`, { marketLocation });
   const caseStudies = useCmsCollection<PublicCaseStudy>("case-study", [], (item) => {
     const record = contentRecord(item, "case-study") as PublicCaseStudy;
     return record;
@@ -110,7 +112,7 @@ export default function IndustriesOverview() {
       `}</style>
 
       <section className="io-hero">
-        <div className="io-kicker">{marketLocation} / Industries</div>
+        <div className="io-kicker">{heroKicker}</div>
         <div className="io-hero-grid">
           <div className="io-hero-copy">
             <h1>Pressure reveals where intelligence <em>belongs.</em></h1>

@@ -11,20 +11,21 @@ import { GovernedLandingRoute } from "@/components/GovernedLandingRoute";
 import { useMarketStore } from "@/store/market";
 import { ServiceError } from "@/components/error-boundary";
 import { cmsRequestIsUnavailable } from "@/lib/cms";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 
 function RedirectWithSearch({ to }: { to: string }) {
   const search = useSearch();
-  return <Redirect to={search ? `${to}?${search}#architecture` : `${to}#architecture`} />;
+  return <Redirect replace to={search ? `${to}?${search}#architecture` : `${to}#architecture`} />;
 }
 
 function CanonicalRedirect({ to }: { to: string }) {
   const search = useSearch();
-  return <Redirect to={search ? `${to}?${search}` : to} />;
+  return <Redirect replace to={search ? `${to}?${search}` : to} />;
 }
 
 function AnchoredRedirect({ to, anchor }: { to: string; anchor: string }) {
   const search = useSearch();
-  return <Redirect to={`${to}${search ? `?${search}` : ""}#${anchor}`} />;
+  return <Redirect replace to={`${to}${search ? `?${search}` : ""}#${anchor}`} />;
 }
 
 const legacyIndustryPaths = new Set([
@@ -116,17 +117,19 @@ export function Router() {
   ) return <AnchoredRedirect to="/industries" anchor="selected-work" />;
   const unavailable = policy.data?.isConfigured === true
     && policy.data.pages.some((page) => page.path === path && !page.enabled);
-  if (policy.isPending) return <Shell><div aria-busy="true" className="min-h-[60vh]" /></Shell>;
+  if (policy.isPending) return <Shell><NavigationBackControl /><div aria-busy="true" className="min-h-[60vh]" /></Shell>;
   if (policy.isError && cmsRequestIsUnavailable(policy.error)) {
     return (
       <Shell>
+        <NavigationBackControl />
         <ServiceError onRetry={() => { void policy.refetch(); }} />
       </Shell>
     );
   }
-  if (policy.isError) return <Shell><NotFound /></Shell>;
+  if (policy.isError) return <Shell><NavigationBackControl /><NotFound /></Shell>;
   return (
     <Shell>
+      <NavigationBackControl />
       {unavailable ? <NotFound /> :
       <Switch>
         <Route path="/" component={Home} />
@@ -181,13 +184,13 @@ export function Router() {
         <Route path="/sectors"><CanonicalRedirect to="/industries" /></Route>
 
         {/* Legacy aliases */}
-        <Route path="/who"><Redirect to="/about" /></Route>
+        <Route path="/who"><Redirect replace to="/about" /></Route>
         <Route path="/platforms/cognios/architecture"><RedirectWithSearch to="/platforms/cognios" /></Route>
         <Route path="/architecture"><RedirectWithSearch to="/platforms/cognios" /></Route>
         <Route path="/cognidocs"><CanonicalRedirect to="/platforms/cognidocs" /></Route>
-        <Route path="/cogniagents"><Redirect to="/platforms/cogniagents" /></Route>
-        <Route path="/cognitalk"><Redirect to="/platforms/cognitalk" /></Route>
-        <Route path="/cogniware"><Redirect to="/platforms/cogniware" /></Route>
+        <Route path="/cogniagents"><Redirect replace to="/platforms/cogniagents" /></Route>
+        <Route path="/cognitalk"><Redirect replace to="/platforms/cognitalk" /></Route>
+        <Route path="/cogniware"><Redirect replace to="/platforms/cogniware" /></Route>
         
         <Route path="/pov-banking"><CanonicalRedirect to="/industries/financial-services" /></Route>
         <Route path="/pov-government"><CanonicalRedirect to="/industries/public-sector" /></Route>

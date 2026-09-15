@@ -4,12 +4,14 @@ import { useState } from "react";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { scrollToSection } from "@/lib/motion";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 
 export default function AgenticTransformation() {
   const [openStep, setOpenStep] = useState<number>(0);
   const { market } = useMarketStore();
   
   const marketLocation = getMarketLocationLabel(market);
+  const heroKicker = cleanHeroIdentifier(`What we do / ${marketLocation}`, { marketLocation });
 
   const journey = [
     ["01", "Frame the work", "Bring one process under pressure. We find where time, risk, hand-offs and decisions are constraining the outcome."],
@@ -169,7 +171,7 @@ export default function AgenticTransformation() {
       `}</style>
       
       <section className="at-hero">
-        <div className="at-kicker">What we do / {marketLocation}</div>
+        <div className="at-kicker">{heroKicker}</div>
         <div className="at-hero-grid">
           <div className="at-hero-copy">
             <h1>Make AI change the <em>work.</em></h1>

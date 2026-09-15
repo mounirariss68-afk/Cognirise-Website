@@ -7,6 +7,7 @@ import { useMarketStore, type Market } from "@/store/market";
 import { projectIndustrySnapshotForMarket, type IndustrySectionId, type PublicSectorPov } from "@workspace/api-zod";
 import type { IndustryContent } from "@/content/industries";
 import { contentRecord, useCmsEntry } from "@/lib/cms";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import {
   SpatialDisclosure,
   SpatialDisclosureItem,
@@ -81,13 +82,16 @@ export function IndustryEditorialView({ view: baseView, marketOverride }: { view
   const pov = view.educationPov as EducationPov | undefined;
   const publicSectorPov = view.publicSectorPov as PublicSectorPov | undefined;
   const marketLabel = publicSectorPov?.marketLabel || market.toUpperCase();
+  const heroKicker = cleanHeroIdentifier(`${marketLabel} / ${view.name}`, {
+    marketLocation: marketLabel,
+  });
 
   return (
     <main className={`industry industry--${view.variant}`} data-education-editorial={pov ? "" : undefined}>
       <style>{industryStyles}</style>
       <IndustrySection id="hero" className="ind-hero" aria-labelledby="industry-title">
         <div className="ind-copy">
-          <div className="ind-kicker">{marketLabel} / {view.name}</div>
+          <div className="ind-kicker">{heroKicker}</div>
           <h1 id="industry-title">{thesisParts.map((part, index) => <React.Fragment key={`${part}-${index}`}>{index > 0 && <> <span className="ind-thesis-dash">—</span> </>}{part}</React.Fragment>)}</h1>
           <p>{view.dek}</p>
         </div>

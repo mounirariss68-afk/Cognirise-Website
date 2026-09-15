@@ -6,6 +6,7 @@ import type { IndustryContent } from "@/content/industries";
 import { cmsMediaObjectPosition, resolveCmsMedia, type CmsRecord } from "@/lib/cms";
 import { assetUrl } from "@/lib/assets";
 import type { BankingPov, CmsMediaReferenceContract, IndustryContent as CmsIndustryContent } from "@workspace/api-zod";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import {
   SpatialDisclosure,
   SpatialDisclosureItem,
@@ -23,6 +24,9 @@ export function BankingEditorial({ view }: { view: BankingView }) {
   if (!pov) return null;
 
   const marketLabel = { uae: "UAE", ksa: "Saudi Arabia", turkiye: "Türkiye", europe: "Europe" }[pov.market];
+  const heroKicker = cleanHeroIdentifier(`${marketLabel} / ${pov.hero.eyebrow}`, {
+    marketLocation: marketLabel,
+  });
   const media = view.media;
   const hero = resolveCmsMedia(media, view.heroMedia, view.heroMediaId);
   const heroUrl = hero?.url ?? assetUrl(view.image);
@@ -85,7 +89,7 @@ export function BankingEditorial({ view }: { view: BankingView }) {
 
       <section className="b-hero" data-industry-section="hero" aria-labelledby="banking-hero-title">
         <div className="b-copy">
-          <div className="b-kicker">{marketLabel} / {pov.hero.eyebrow}</div>
+          <div className="b-kicker">{heroKicker}</div>
           <h1 id="banking-hero-title">{pov.hero.heading}</h1>
           <span className="b-hero-descriptor">{pov.descriptor}</span>
           <p>{pov.hero.body}</p>

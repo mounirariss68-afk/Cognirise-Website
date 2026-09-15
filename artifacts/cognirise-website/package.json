@@ -20,6 +20,7 @@
     "test:industry-images-browser": "node scripts/industry-images.browser-test.mjs",
     "test:education-browser": "node scripts/education-editorial.browser-test.mjs",
     "test:navigation-browser": "node scripts/navigation-idao.browser-test.mjs",
+    "test:navigation-release-browser": "node scripts/navigation-release.browser-test.mjs",
     "test:architecture-browser": "node scripts/architecture-platforms.browser-test.mjs",
     "test:readiness-browser": "node scripts/readiness-decision.browser-test.mjs",
     "test:methodology-browser": "node scripts/methodology-relationships.browser-test.mjs",

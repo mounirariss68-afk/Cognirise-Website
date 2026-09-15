@@ -5,6 +5,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { assetUrl } from "@/lib/assets";
 import { useMethodReturn } from "@/lib/use-method-return";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 
 interface MethodPageHeroProps {
   breadcrumb: string;
@@ -36,6 +38,8 @@ export function MethodPageHero({
 }: MethodPageHeroProps) {
   const reducedMotion = useReducedMotion();
   const returnTo = useMethodReturn(title);
+  const { market } = useMarketStore();
+  const marketLocation = getMarketLocationLabel(market);
 
   return (
     <header className="px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24 border-b border-[#cbd3e1]">
@@ -51,7 +55,7 @@ export function MethodPageHero({
 
       <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#102957]">
         <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-        {breadcrumb}
+        {cleanHeroIdentifier(breadcrumb, { marketLocation })}
       </div>
 
       <div className={`mt-8 grid gap-10 ${imageSrc ? "lg:grid-cols-[0.9fr_1.1fr] lg:items-end" : "max-w-4xl"}`}>

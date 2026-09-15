@@ -13,6 +13,8 @@ import {
   type CmsDeliveryState,
   useCmsCollection,
 } from "@/lib/cms";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 
 type TeamProfile = {
   initials: string;
@@ -69,8 +71,13 @@ function PeopleDeliveryStatus({ delivery }: { delivery: CmsDeliveryState }) {
 }
 
 export default function AboutPeople({ previewPerson }: { previewPerson?: PreviewPersonRecord } = {}) {
+  const { market } = useMarketStore();
+  const marketLocation = getMarketLocationLabel(market);
   const governedLanding = useGovernedLanding();
-  const heroEyebrow = landingText(governedLanding, "about-hero-eyebrow", "Our Team");
+  const heroEyebrow = cleanHeroIdentifier(
+    landingText(governedLanding, "about-hero-eyebrow", "Our Team"),
+    { marketLocation },
+  );
   const heroHeading = landingText(governedLanding, "about-hero-heading", "Judgment stays close to the work.");
   const heroBody = landingText(governedLanding, "about-hero-body", "The people who frame the decision stay close enough to make it real. Leadership, engineering and accountability belong in the same room.");
   const leadershipVisual = landingMedia(governedLanding, "about-hero-visual", { src: assetUrl("/images/cognirise/site-leadership.jpg"), alt: "Senior colleagues working together around a detailed physical model." });

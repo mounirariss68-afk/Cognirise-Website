@@ -5,6 +5,8 @@ import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } from "@/lib/cms";
 import { PartnerProfilePresentation } from "@/components/cms/PublicCmsPresentations";
 import type { PartnerContent } from "@workspace/api-zod";
+import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 
 type PartnerCard = {
   category: string;
@@ -84,9 +86,14 @@ const allianceGroups = [
 ];
 
 export default function Partners() {
+  const { market } = useMarketStore();
+  const marketLocation = getMarketLocationLabel(market);
   const governedLanding = useGovernedLanding();
   const governedHero = governedLanding ? landingNarrative(governedLanding, "hero") : null;
-  const heroEyebrow = landingText(governedLanding, "partners-hero-eyebrow", "Our partners / one accountable ecosystem");
+  const heroEyebrow = cleanHeroIdentifier(
+    landingText(governedLanding, "partners-hero-eyebrow", "Our partners / one accountable ecosystem"),
+    { marketLocation },
+  );
   const heroHeading = governedHero?.heading || landingText(governedLanding, "partners-hero-heading", "Senior-led. Partner-amplified.");
   const heroBody = governedHero?.text || landingText(governedLanding, "partners-hero-body", "Cognirise stays deliberately senior and small — and delivers at enterprise scale through two complementary alliance types: engineering partners who extend delivery capacity, and platform partners who bring specialist products into the solution.");
   const heroMedia = landingMedia(governedLanding, "partners-hero-media", {
