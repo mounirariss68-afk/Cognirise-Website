@@ -491,16 +491,16 @@ try {
     const editionsScreenshot = await captureScreenshot(`cognidocs-${viewport.label}-editions`);
 
     const initialPanel = initialLayout.panels.find((panel) => !panel.hidden);
-    assert.match(initialPanel?.text || "", /CRM\*CAREEM RIDES DXB 8842/);
+    assert.match(initialPanel?.text || "", /UBER\*TRIP NYC 8842/);
     assert.match(initialPanel?.text || "", /Row 2, Description Column \(Page 1\)/);
-    assert.match(initialPanel?.text || "", /Careem Rides/);
+    assert.match(initialPanel?.text || "", /Uber/);
     assert.match(initialPanel?.text || "", /Pattern match against known transport providers\./);
     assert.match(initialPanel?.text || "", /Reviewer Note/i);
     const initialSourceState = await evaluate(`(() => {
       const source = (text) => [...document.querySelectorAll("span")].find((node) => node.textContent.trim() === text);
       const highlighted = (node) => Boolean(node && node.className.includes("ring-1"));
       return {
-        merchant: highlighted(source("CRM*CAREEM RIDES DXB 8842")),
+        merchant: highlighted(source("UBER*TRIP NYC 8842")),
         amount: highlighted(source("45.50 CR")),
       };
     })()`);
@@ -511,14 +511,14 @@ try {
     assertNoHorizontalOverflow(amount, `${viewport.label} after finance source switch`);
     assert.equal(amount.fieldTabs.find((tab) => /Credit Amount/i.test(tab.text))?.selected, "true");
     const amountPanel = amount.panels.find((panel) => !panel.hidden);
-    assert.match(amountPanel?.text || "", /45\.50 \(AED\)/);
+    assert.match(amountPanel?.text || "", /45\.50 \(USD\)/);
     assert.match(amountPanel?.text || "", /Row 2, Credit Column \(Page 1\)/);
     assert.match(amountPanel?.text || "", /Value identified in 'CR' \/ Credit proximity with valid currency locale\./);
     const amountSourceState = await evaluate(`(() => {
       const source = (text) => [...document.querySelectorAll("span")].find((node) => node.textContent.trim() === text);
       const highlighted = (node) => Boolean(node && node.className.includes("ring-1"));
       return {
-        merchant: highlighted(source("CRM*CAREEM RIDES DXB 8842")),
+        merchant: highlighted(source("UBER*TRIP NYC 8842")),
         amount: highlighted(source("45.50 CR")),
       };
     })()`);
@@ -565,7 +565,7 @@ try {
     const keyboard = await getLayout();
     assert.equal(keyboard.scenarioTabs.find((tab) => /Financial/i.test(tab.text))?.selected, "true");
     assert.equal(keyboard.fieldTabs.find((tab) => /Merchant Classification/i.test(tab.text))?.selected, "true");
-    assert.match(keyboard.panels.find((panel) => !panel.hidden)?.text || "", /CRM\*CAREEM RIDES DXB 8842/);
+    assert.match(keyboard.panels.find((panel) => !panel.hidden)?.text || "", /UBER\*TRIP NYC 8842/);
     assert.match(keyboard.panels.find((panel) => !panel.hidden)?.text || "", /Reviewer Note/i);
 
     // Keep the core captures and concrete bounds together. Reference captures

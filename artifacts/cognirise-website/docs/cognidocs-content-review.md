@@ -31,7 +31,7 @@ This document tracks the disposition of claims, evidence, and demonstrations fro
 - Included Reviewer Notes and clear confidence ratings to illustrate the validation process.
 - Added explicit labeling that the data is illustrative and does not represent live processing or actual customer evidence.
 - Repurposed AI-generated raster artwork as secondary conceptual visuals to complement the native facsimiles.
-- Legacy supporting bank-demo merchant/category mapping is retained as a fictional Careem example. The floor-plan demonstration is adapted to a fictional engineering detail/title-block example; its live counters, pass/fail compliance verdicts and timing stamps are omitted. Neither invented illustration is product proof.
+- The supporting bank-demo merchant mapping uses a fictional Uber transaction descriptor, `UBER*TRIP NYC 8842`, with USD currency and an unchanged 45.50 credit amount. The floor-plan demonstration is adapted to a fictional engineering detail/title-block example; its live counters, pass/fail compliance verdicts and timing stamps are omitted. Neither invented illustration is product proof.
 
 ## 4. Visual & UX Hygiene
 - Restored to Pulse design system: off-white canvas, navy structure, Comfortaa/Inter, violet/magenta/coral accents.

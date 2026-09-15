@@ -72,7 +72,12 @@ test("CogniDocs renders the approved extraction story and both illustrative demo
   assert.match(pageSource, /illustrative/i);
   assert.match(pageSource, /No document is processed here/i);
   assert.match(pageSource, /Reviewer Note/);
-  assert.match(contentSource, /CRM\*CAREEM RIDES DXB 8842/);
+  assert.match(contentSource, /UBER\*TRIP NYC 8842/);
+  assert.match(pageSource, /Currency: USD/);
+  assert.match(pageSource, /UBER\*TRIP NYC 8842/);
+  assert.equal(DEMO_SCENARIOS[0].fields[0].extractedValue, "Uber");
+  assert.equal(DEMO_SCENARIOS[0].fields[1].extractedValue, "45.50 (USD)");
+  assert.doesNotMatch(pageOutput, /Careem|CAREEM|\bDXB\b|\bAED\b/);
   assert.match(contentSource, /Row 2, Description Column \(Page 1\)/);
   assert.match(contentSource, /Pattern match against known transport providers\./);
 });
@@ -188,7 +193,7 @@ test("CogniDocs uses the honest contact enquiry destination", () => {
 test("the legacy CogniDocs route keeps every query parameter while canonicalising", () => {
   assert.match(
     appSource,
-    /function CanonicalRedirect\(\{ to \}: \{ to: string \}\) \{[\s\S]*?const search = useSearch\(\);[\s\S]*?return <Redirect to=\{search \? `\$\{to\}\?\$\{search\}` : to\} \/>;[\s\S]*?\}/,
+    /function CanonicalRedirect\(\{ to \}: \{ to: string \}\) \{[\s\S]*?const search = useSearch\(\);[\s\S]*?return <Redirect(?: replace)? to=\{search \? `\$\{to\}\?\$\{search\}` : to\} \/>;[\s\S]*?\}/,
   );
   assert.match(
     appSource,

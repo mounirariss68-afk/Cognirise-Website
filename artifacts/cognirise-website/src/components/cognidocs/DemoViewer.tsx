@@ -8,7 +8,7 @@ function FinanceFacsimile({ activeFieldId }: { activeFieldId: string }) {
     <div className="font-mono text-xs border border-border p-6 bg-white shadow-sm h-full flex flex-col min-h-[300px]">
       <div className="text-right text-muted-foreground mb-6 leading-relaxed">
         Statement Date: 2024-10-15<br />
-        Currency: AED
+        Currency: USD
       </div>
       <div className="overflow-x-auto pb-4" tabIndex={0} role="region" aria-label="Illustrative statement table, scroll horizontally on small screens">
         <table className="w-full text-left border-collapse min-w-[400px]">
@@ -31,7 +31,7 @@ function FinanceFacsimile({ activeFieldId }: { activeFieldId: string }) {
               <td className="py-4">10-12</td>
               <td>
                 <span className={`px-1.5 py-0.5 rounded transition-colors inline-block ${activeFieldId === 'merchant' ? 'bg-[hsl(var(--brand-pink))]/10 text-[hsl(var(--brand-pink))] ring-1 ring-[hsl(var(--brand-pink))] font-bold' : ''}`}>
-                  CRM*CAREEM RIDES DXB 8842
+                  UBER*TRIP NYC 8842
                 </span>
               </td>
               <td className="text-right"></td>

@@ -140,8 +140,8 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
       {
         id: "merchant",
         label: "Merchant Classification",
-        sourceText: "CRM*CAREEM RIDES DXB 8842",
-        extractedValue: "Careem Rides",
+        sourceText: "UBER*TRIP NYC 8842",
+        extractedValue: "Uber",
         confidence: "High",
         evidence: "Row 2, Description Column (Page 1)",
         reviewerNote: "Pattern match against known transport providers."
@@ -150,7 +150,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
         id: "amount",
         label: "Credit Amount",
         sourceText: "45.50 CR",
-        extractedValue: "45.50 (AED)",
+        extractedValue: "45.50 (USD)",
         confidence: "High",
         evidence: "Row 2, Credit Column (Page 1)",
         reviewerNote: "Value identified in 'CR' / Credit proximity with valid currency locale."
