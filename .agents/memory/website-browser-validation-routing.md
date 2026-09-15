@@ -20,3 +20,9 @@ Compare mobile overflow against `document.documentElement.clientWidth` and the r
 **Why:** An overflowing decorative element expanded a 390px mobile layout to 494px; both scrollWidth and innerWidth became 494, falsely reporting no overflow while the screenshot showed shrunken content.
 
 **How to apply:** Record clientWidth, scrollWidth and requested viewport width together. Distinguish intentionally scrollable tables from unbounded decorative elements before changing layout.
+
+Keep comparison-page captures separate from the product's functional browser checks, and support resuming only the unchecked flows.
+
+**Why:** Repeated cross-page reference captures were followed by blank-document reloads despite passing product checks. A fresh, scoped check completed the remaining flows; the blank reload's underlying cause was not established.
+
+**How to apply:** Complete product interactions before navigating to visual references, retain completed evidence, and include console errors and DOM readiness in timeout diagnostics rather than repeatedly rerunning the entire suite.

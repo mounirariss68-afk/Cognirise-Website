@@ -26,6 +26,92 @@ export const EXTRACTION_LAYERS: ExtractionLayer[] = [
   }
 ];
 
+export type EditionFeature = {
+  title: string;
+  description: string;
+};
+
+export type CogniDocsEdition = {
+  id: "finance" | "engineering";
+  name: string;
+  headline: string;
+  description: string;
+  features: EditionFeature[];
+  applications: string[];
+};
+
+export const COGNIDOCS_EDITIONS: CogniDocsEdition[] = [
+  {
+    id: "finance",
+    name: "CogniDocs Finance",
+    headline: "Statements become structured, categorized data.",
+    description: "Bank and card statements itemized line by line — with merchant names normalized and categorized by industry.",
+    features: [
+      {
+        title: "Merchant intelligence",
+        description: "“AMZN MKTP US*2K4” resolves to Amazon, e-commerce. A matcher proposes the right brand even in abbreviated descriptors."
+      },
+      {
+        title: "Format adaptation",
+        description: "The engine adapts to new statement formats to extract fields without manual template mapping, validated with representative statements."
+      },
+      {
+        title: "Every line auditable",
+        description: "Amount, date, merchant, category, and the exact spot on the page it came from."
+      }
+    ],
+    applications: [
+      "Reconciliation",
+      "Lending & underwriting",
+      "Expense management",
+      "Accounting data entry",
+      "Spend analytics",
+      "Audit tie-outs",
+      "Fraud & tampering checks",
+      "VAT recovery",
+      "Dispute resolution",
+      "Wealth & mortgage onboarding"
+    ]
+  },
+  {
+    id: "engineering",
+    name: "CogniDocs Engineering",
+    headline: "Drawings become itemized, checkable bills of fact.",
+    description: "Work across architectural, structural, mechanical, electrical, energy efficiency, pipeline and oil-installation drawings, plus BIM models — itemized and pinned to location. Native inputs such as DWG, DXF, vector PDF and IFC are assessed for compatibility within the agreed scope.",
+    features: [
+      {
+        title: "Multidisciplinary packs",
+        description: "A real submission spans architectural, structural, mechanical and electrical sheets; CogniDocs reads them together."
+      },
+      {
+        title: "Native CAD compatibility",
+        description: "Dimensions and layers read straight out of files as data, subject to format compatibility, revision, and scale checks."
+      },
+      {
+        title: "Evidence-pinned findings",
+        description: "Every quantity and verdict points to the exact sheet and spot a reviewer should look."
+      },
+      {
+        title: "Deployment options",
+        description: "Deployment environments, including on-premise, are assessed against infrastructure, security, and connectivity requirements."
+      }
+    ],
+    applications: [
+      "BOQ & quantity takeoff",
+      "Code-compliance review",
+      "Tender & bid evaluation",
+      "Tender writing support",
+      "Procurement & SKU matching",
+      "Technical query drafting",
+      "As-built asset registers",
+      "P&ID digitization",
+      "Permit review",
+      "Progress verification",
+      "FM handover"
+    ]
+  }
+];
+
 export type DemoField = {
   id: string;
   label: string;
