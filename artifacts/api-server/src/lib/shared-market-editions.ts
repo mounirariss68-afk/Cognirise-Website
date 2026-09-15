@@ -98,6 +98,7 @@ async function canAccessCopiedRevisionLineage(
   const resolved = await client.query(
     `SELECT resolved.baseline_revision_id,
             binding.mode,
+            baseline.source_revision_id baseline_source_revision_id,
             source_edition.market source_market
        FROM cms_resolved_market_revisions resolved
        JOIN cms_market_edition_bindings binding ON binding.id=resolved.binding_id
@@ -111,7 +112,11 @@ async function canAccessCopiedRevisionLineage(
   );
   if (!resolved.rows[0]) return true;
   const lineage = resolved.rows[0];
+  // A null source revision identifies a deliberately neutral baseline. Its
+  // destination authority is checked by the exact binding target; there is no
+  // legacy source market to inherit.
   if (!lineage.baseline_revision_id) return lineage.mode === "independent";
+  if (lineage.source_market == null) return true;
   return typeof lineage.source_market === "string"
     && canAccessMarket(auth, String(lineage.source_market));
 }
@@ -159,7 +164,39 @@ function mediaPinsForSnapshot(
   return [...pins.values()];
 }
 
+/**
+ * Resolve legacy media IDs to the latest immutable version when a neutral
+ * source is created directly. Existing baseline successors inherit pins from
+ * their exact source revision; this helper is only for the opt-in create
+ * path, where no CMS revision exists yet to carry those pins.
+ */
+export async function mediaPinsForNewSharedSnapshot(
+  client: Queryable,
+  snapshot: Record<string, unknown>,
+  kind: string,
+) {
+  const references = collectCmsMediaReferences(
+    kind as any,
+    snapshot.content,
+    Array.isArray(snapshot.mediaIds) ? snapshot.mediaIds.filter((id): id is string => typeof id === "string") : [],
+    snapshot.seo,
+  );
+  const assetIds = [...new Set(references.map((reference) => reference.mediaId))];
+  const inherited = assetIds.length
+    ? await client.query(
+      `SELECT DISTINCT ON (version.asset_id)
+              version.asset_id::text "assetId",version.id::text "mediaVersionId"
+         FROM cms_media_versions version
+        WHERE version.asset_id::text=ANY($1::text[])
+        ORDER BY version.asset_id,version.version_number DESC,version.id DESC`,
+      [assetIds],
+    )
+    : { rows: [] as Array<Record<string, unknown>> };
+  return mediaPinsForSnapshot(snapshot, kind, inherited.rows);
+}
+
 function sourceMarketAllowed(auth: AuthContext, row: Record<string, any>, canAccessMarket: (auth: AuthContext, market: string) => boolean) {
+  if (row.source_market == null && row.baseline_source_revision_id == null) return true;
   return typeof row.source_market === "string"
     && row.source_market.length > 0
     && canAccessMarket(auth, row.source_market);
@@ -254,7 +291,7 @@ async function lockManagedExactEdition(
   return edition.rows[0] ?? null;
 }
 
-async function materialize(
+export async function materializeSharedMarketRevision(
   client: Queryable,
   input: {
     documentId: string;
@@ -720,8 +757,26 @@ export function registerSharedMarketEditionRoutes(
             LEFT JOIN cms_revisions source_revision ON source_revision.id=r.source_revision_id
             LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
            WHERE b.document_id=$1
-             AND source_edition.market IS NOT NULL
-             AND ($2::text[] IS NULL OR source_edition.market=ANY($2::text[]))
+             AND (
+               (
+                 source_revision.id IS NOT NULL
+                 AND source_edition.market IS NOT NULL
+                 AND ($2::text[] IS NULL OR source_edition.market=ANY($2::text[]))
+               )
+               OR (
+                 source_revision.id IS NULL
+                 AND EXISTS (
+                   SELECT 1
+                     FROM cms_market_edition_bindings neutral_binding
+                     JOIN market_editions neutral_target
+                       ON neutral_target.id=neutral_binding.market_edition_id
+                    WHERE neutral_binding.document_id=b.document_id
+                      AND neutral_binding.baseline_id=b.id
+                      AND neutral_binding.mode IN ('shared','adapted')
+                      AND ($2::text[] IS NULL OR neutral_target.code=ANY($2::text[]))
+                 )
+               )
+             )
            ORDER BY b.locale`,
         [documentId, permittedMarkets],
       ),
@@ -734,8 +789,19 @@ export function registerSharedMarketEditionRoutes(
            LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
           WHERE binding.document_id=$1
              AND ($2::text[] IS NULL OR target.code=ANY($2::text[]))
-             AND (binding.mode='independent' OR (source_edition.market IS NOT NULL
-               AND ($2::text[] IS NULL OR source_edition.market=ANY($2::text[]))))
+             AND (
+               binding.mode='independent'
+               OR (
+                 adopted.id IS NOT NULL
+                 AND (
+                   adopted.source_revision_id IS NULL
+                   OR (
+                     source_edition.market IS NOT NULL
+                     AND ($2::text[] IS NULL OR source_edition.market=ANY($2::text[]))
+                   )
+                 )
+               )
+             )
           ORDER BY binding.locale,binding.market_edition_id`,
         [documentId, permittedMarkets],
       ),
@@ -775,22 +841,55 @@ export function registerSharedMarketEditionRoutes(
           res.status(403).json({ error: "Authentication is no longer valid." });
           return;
         }
-        // A neutral baseline is a copy of an explicitly named real-market
-        // historical revision. No legacy source is inferred or relocated.
-        const source = await client.query(
-         `SELECT d.kind,r.id,r.revision_number,r.payload,e.market
-              FROM cms_revisions r
-              JOIN cms_market_editions e ON e.id=r.edition_id
-              JOIN cms_documents d ON d.id=e.document_id
-            WHERE e.document_id=$1 AND r.id=$2 AND e.locale=$3
-               AND e.market<>'shared-source' AND e.locale<>'und'
-             FOR KEY SHARE OF r,e`,
-          [documentId, body.sourceRevisionId, body.locale],
+        const existing = await client.query(
+          `SELECT b.id,b.created_at,b.active_revision_id,
+                  r.revision_number,r.snapshot,r.media_references,r.source_revision_id,
+                  d.kind
+             FROM cms_shared_baselines b
+             JOIN cms_documents d ON d.id=b.document_id
+             LEFT JOIN cms_shared_baseline_revisions r ON r.id=b.active_revision_id
+            WHERE b.document_id=$1 AND b.locale=$2
+            FOR UPDATE OF b`,
+          [documentId, body.locale],
         );
-        if (!source.rows[0]) {
-          await client.query("ROLLBACK");
-          res.status(404).json({ error: "The selected revision is not an exact source in this locale." });
-          return;
+        const sourceRevisionId = body.sourceRevisionId ? String(body.sourceRevisionId) : null;
+        let source: { rows: Array<Record<string, any>> };
+        if (sourceRevisionId) {
+          // A baseline may still be established from an explicitly named
+          // real-market historical revision. No legacy source is inferred or
+          // relocated.
+          source = await client.query(
+            `SELECT d.kind,r.id,r.revision_number,r.payload,e.market
+                 FROM cms_revisions r
+                 JOIN cms_market_editions e ON e.id=r.edition_id
+                 JOIN cms_documents d ON d.id=e.document_id
+               WHERE e.document_id=$1 AND r.id=$2 AND e.locale=$3
+                  AND e.market<>'shared-source' AND e.locale<>'und'
+                FOR KEY SHARE OF r,e`,
+            [documentId, sourceRevisionId, body.locale],
+          );
+          if (!source.rows[0]) {
+            await client.query("ROLLBACK");
+            res.status(404).json({ error: "The selected revision is not an exact source in this locale." });
+            return;
+          }
+        } else {
+          if (!existing.rows[0]?.active_revision_id || !existing.rows[0]?.kind) {
+            await client.query("ROLLBACK");
+            res.status(409).json({
+              error: "A neutral baseline must already exist when no real-market source revision is supplied.",
+            });
+            return;
+          }
+          source = {
+            rows: [{
+              kind: existing.rows[0].kind,
+              id: null,
+              revision_number: existing.rows[0].revision_number,
+              payload: existing.rows[0].snapshot,
+              market: null,
+            }],
+          };
         }
         const validation = validateCmsSnapshot(source.rows[0].kind, body.snapshot, "draft");
         if (!validation.success) {
@@ -798,30 +897,25 @@ export function registerSharedMarketEditionRoutes(
           res.status(422).json({ error: "The shared baseline does not satisfy this document's content contract.", details: validation.errors });
           return;
         }
-        const exists = await client.query(
-          `SELECT b.id,b.created_at,b.active_revision_id,r.revision_number
-             FROM cms_shared_baselines b
-             LEFT JOIN cms_shared_baseline_revisions r ON r.id=b.active_revision_id
-             WHERE b.document_id=$1 AND b.locale=$2 FOR UPDATE OF b`,
-          [documentId, body.locale],
-        );
-        if (exists.rows[0] && (body.expectedRevisionNumber === undefined ||
-          Number(exists.rows[0].revision_number) !== body.expectedRevisionNumber)) {
+        if (existing.rows[0] && (body.expectedRevisionNumber === undefined ||
+          Number(existing.rows[0].revision_number) !== body.expectedRevisionNumber)) {
           await client.query("ROLLBACK");
           res.status(409).json({ error: "The neutral baseline changed; reopen before saving a successor." });
           return;
         }
-        const baseline = exists.rows[0] ? { rows: [exists.rows[0]] } : await client.query(
+        const baseline = existing.rows[0] ? { rows: [existing.rows[0]] } : await client.query(
             `INSERT INTO cms_shared_baselines(document_id,locale,created_by_user_id)
              VALUES ($1,$2,$3) RETURNING id,created_at`,
             [documentId, body.locale, auth.user.id],
           );
-        const pins = await client.query(
-          `SELECT asset_id "assetId",media_version_id "mediaVersionId"
-             FROM cms_media_references
-            WHERE document_id=$1 AND field_path=$2 AND media_version_id IS NOT NULL`,
-          [documentId, `revision:${body.sourceRevisionId}`],
-        );
+        const pins = sourceRevisionId
+          ? await client.query(
+            `SELECT asset_id "assetId",media_version_id "mediaVersionId"
+               FROM cms_media_references
+              WHERE document_id=$1 AND field_path=$2 AND media_version_id IS NOT NULL`,
+            [documentId, `revision:${sourceRevisionId}`],
+          )
+          : { rows: (existing.rows[0]?.media_references ?? []) as Array<Record<string, unknown>> };
         const baselineMediaReferences = mediaPinsForSnapshot(
           validation.data,
           String(source.rows[0].kind),
@@ -835,7 +929,7 @@ export function registerSharedMarketEditionRoutes(
                    $2,$3,$4,$5,$6) RETURNING id,revision_number`,
             [baseline.rows[0]!.id, validation.data,
                JSON.stringify(baselineMediaReferences), digest(validation.data),
-             body.sourceRevisionId, auth.user.id],
+              sourceRevisionId, auth.user.id],
         );
         await client.query("UPDATE cms_shared_baselines SET active_revision_id=$2,updated_at=now() WHERE id=$1",
           [baseline.rows[0]!.id, revision.rows[0]!.id]);
@@ -850,15 +944,15 @@ export function registerSharedMarketEditionRoutes(
             WHERE document_id=$1 AND baseline_id=$2
               AND mode IN ('shared','adapted')
               AND based_on_baseline_revision_id=$3`,
-          [documentId, baseline.rows[0]!.id, exists.rows[0]?.active_revision_id ?? null],
+          [documentId, baseline.rows[0]!.id, existing.rows[0]?.active_revision_id ?? null],
         );
         await audit(auth, "shared-baseline-established", "document", documentId,
-          { locale: body.locale, sourceRevisionId: body.sourceRevisionId }, client);
+          { locale: body.locale, sourceRevisionId }, client);
         await client.query("COMMIT");
         res.status(201).json({
           id: String(baseline.rows[0]!.id), documentId, locale: body.locale,
           revisionId: String(revision.rows[0]!.id), revisionNumber: Number(revision.rows[0]!.revision_number),
-          sourceRevisionId: body.sourceRevisionId, snapshot: validation.data,
+          sourceRevisionId, snapshot: validation.data,
            mediaReferences: baselineMediaReferences,
           createdAt: baseline.rows[0]!.created_at,
         });
@@ -978,7 +1072,8 @@ export function registerSharedMarketEditionRoutes(
           return;
         }
         const existing = await client.query(
-          `SELECT binding.*,source_edition.market source_market
+          `SELECT binding.*,adopted.source_revision_id baseline_source_revision_id,
+                  source_edition.market source_market
              FROM cms_market_edition_bindings binding
              LEFT JOIN cms_shared_baseline_revisions adopted
                ON adopted.id=binding.based_on_baseline_revision_id
@@ -1005,7 +1100,17 @@ export function registerSharedMarketEditionRoutes(
           res.status(403).json({ error: "You are not assigned to the current shared baseline source market." });
           return;
         }
-        if (existingBinding && existingBinding.mode !== "independent" && (
+        // A saved shared destination can enter Adapted mode through the
+        // explicit Customize action. It keeps the same frozen neutral
+        // baseline and starts with an empty override set; subsequent field
+        // saves use the sparse-overrides endpoint. All other generic mode or
+        // baseline changes remain Compare/Resolve-only.
+        const startingAdaptedCustomization = existingBinding
+          && existingBinding.mode === "shared"
+          && body.mode === "adapted"
+          && body.baselineId === String(existingBinding.baseline_id)
+          && body.baselineRevisionId === String(existingBinding.based_on_baseline_revision_id);
+        if (existingBinding && existingBinding.mode !== "independent" && !startingAdaptedCustomization && (
           body.mode === "independent"
           || body.mode !== existingBinding.mode
           || body.baselineId !== String(existingBinding.baseline_id)
@@ -1058,6 +1163,7 @@ export function registerSharedMarketEditionRoutes(
           const baselineId = body.baselineId ?? existingBinding?.baseline_id;
           const result = await client.query(
           `SELECT b.id,b.active_revision_id,r.id revision_id,r.snapshot,r.media_references,
+                 r.source_revision_id baseline_source_revision_id,
                  source_edition.market source_market
                FROM cms_shared_baselines b
                 JOIN cms_shared_baseline_revisions r ON r.id=$4
@@ -1093,7 +1199,8 @@ export function registerSharedMarketEditionRoutes(
         let translationSourceRevisionId: string | null = null;
         if (body.mode !== "independent" && body.translationSourceRevisionId) {
           const translationSource = await client.query(
-            `SELECT revision.id,source_edition.market source_market
+            `SELECT revision.id,revision.source_revision_id baseline_source_revision_id,
+                    source_edition.market source_market
                FROM cms_shared_baseline_revisions revision
                JOIN cms_shared_baselines source_baseline ON source_baseline.id=revision.baseline_id
                LEFT JOIN cms_revisions source_revision ON source_revision.id=revision.source_revision_id
@@ -1173,7 +1280,7 @@ export function registerSharedMarketEditionRoutes(
             res.status(422).json({ error: "The baseline does not satisfy this document's content contract.", details: validation.errors });
             return;
           }
-          const revisionId = await materialize(client, {
+          const revisionId = await materializeSharedMarketRevision(client, {
             documentId, market: lockedMarket, locale: body.locale, snapshot: validation.data, baselineRevisionId: String(baseline.revision_id),
             bindingId: String(saved.id), userId: transactionAuth.user.id,
             mediaReferences: mediaPinsForSnapshot(snapshot, String(document.rows[0].kind), baseline.media_references ?? []),
@@ -1286,6 +1393,7 @@ export function registerSharedMarketEditionRoutes(
         }
         const bindingResult = await client.query(
          `SELECT binding.*,market.code market,document.kind document_kind,
+                 adopted_revision.source_revision_id baseline_source_revision_id,
                  source_edition.market source_market
              FROM cms_market_edition_bindings binding
              JOIN market_editions market ON market.id=binding.market_edition_id
@@ -1352,7 +1460,7 @@ export function registerSharedMarketEditionRoutes(
           res.status(422).json({ error: "Resolved adaptations fail the content contract.", details: validation.errors });
           return;
         }
-        const revisionId = await materialize(client, {
+        const revisionId = await materializeSharedMarketRevision(client, {
           documentId, market: String(binding.market), locale: String(binding.locale), snapshot: validation.data,
           baselineRevisionId: String(baseline.rows[0].id), bindingId, userId: auth.user.id,
           mediaReferences: mediaPinsForSnapshot(
@@ -1494,6 +1602,7 @@ export function registerSharedMarketEditionRoutes(
           `SELECT binding.*,target.code market,document.kind document_kind,
                   adopted.snapshot adopted_snapshot,adopted.media_references adopted_media_references,
                   resolved.snapshot local_snapshot,resolved.media_references local_media_references,
+                  adopted.source_revision_id baseline_source_revision_id,
                   source_edition.market source_market
              FROM cms_market_edition_bindings binding
              JOIN market_editions target ON target.id=binding.market_edition_id
@@ -1521,6 +1630,7 @@ export function registerSharedMarketEditionRoutes(
         }
         const targetResult = await client.query(
           `SELECT revision.id,revision.snapshot,revision.media_references,
+                  revision.source_revision_id baseline_source_revision_id,
                   source_edition.market source_market
              FROM cms_shared_baselines baseline
              JOIN cms_shared_baseline_revisions revision ON revision.id=$3
@@ -1615,7 +1725,7 @@ export function registerSharedMarketEditionRoutes(
           res.status(422).json({ error: "Resolved binding fails the content contract.", details: validation.errors });
           return;
         }
-        const revisionId = await materialize(client, {
+        const revisionId = await materializeSharedMarketRevision(client, {
           documentId,
           market: String(binding.market),
           locale: String(binding.locale),

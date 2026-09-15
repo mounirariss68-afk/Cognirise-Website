@@ -32,4 +32,11 @@ export interface DocumentInput {
   mediaIds?: string[];
   /** @minItems 1 */
   markets: string[];
+  /**
+     * Opt in to a neutral locale-specific shared source. Omit to retain legacy first-market shared creation behavior.
+     * @minLength 2
+     * @maxLength 16
+     * @pattern ^[a-z]{2}(?:-[A-Z]{2})?$
+     */
+  sharedLocale?: string;
 }

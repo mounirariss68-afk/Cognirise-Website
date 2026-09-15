@@ -2262,6 +2262,11 @@ export const createDocumentBodySeoNoIndexDefault = false;
 export const createDocumentBodySeoOgImageMediaOneAltTextMax = 500;
 
 
+export const createDocumentBodySharedLocaleMin = 2;
+export const createDocumentBodySharedLocaleMax = 16;
+
+
+export const createDocumentBodySharedLocaleRegExp = new RegExp('^[a-z]{2}(?:-[A-Z]{2})?$');
 
 
 export const CreateDocumentBody = zod.object({
@@ -2283,7 +2288,8 @@ export const CreateDocumentBody = zod.object({
 }).describe('Immutable reference to the exact governed media version selected by an editor.').optional().describe('Immutable social-sharing image; role must be og-image.')
 }).optional(),
   "mediaIds": zod.array(zod.string()).optional(),
-  "markets": zod.array(zod.string()).min(1)
+  "markets": zod.array(zod.string()).min(1),
+  "sharedLocale": zod.string().min(createDocumentBodySharedLocaleMin).max(createDocumentBodySharedLocaleMax).regex(createDocumentBodySharedLocaleRegExp).optional().describe('Opt in to a neutral locale-specific shared source. Omit to retain legacy first-market shared creation behavior.')
 })
 
 export const createDocumentResponseSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
@@ -9306,13 +9312,15 @@ export const EstablishSharedMarketBaselineParams = zod.object({
 export const establishSharedMarketBaselineBodyLocaleMin = 2;
 export const establishSharedMarketBaselineBodyLocaleMax = 16;
 
+
+export const establishSharedMarketBaselineBodyLocaleRegExp = new RegExp('^[a-z]{2}(?:-[A-Z]{2})?$');
 export const establishSharedMarketBaselineBodyExpectedRevisionNumberMultipleOf = 1;
 
 
 
 export const EstablishSharedMarketBaselineBody = zod.object({
-  "locale": zod.string().min(establishSharedMarketBaselineBodyLocaleMin).max(establishSharedMarketBaselineBodyLocaleMax),
-  "sourceRevisionId": zod.string(),
+  "locale": zod.string().min(establishSharedMarketBaselineBodyLocaleMin).max(establishSharedMarketBaselineBodyLocaleMax).regex(establishSharedMarketBaselineBodyLocaleRegExp),
+  "sourceRevisionId": zod.string().nullish().describe('Exact real-market source revision for legacy baseline establishment; omit for a successor of an existing neutral baseline.'),
   "snapshot": zod.record(zod.string(), zod.unknown()),
   "expectedRevisionNumber": zod.number().min(1).multipleOf(establishSharedMarketBaselineBodyExpectedRevisionNumberMultipleOf).optional()
 })

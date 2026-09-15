@@ -23,6 +23,7 @@ import {
   isCmsRetiredLandingPagePath,
   validateCmsContent,
   validateCmsSnapshot,
+  EstablishSharedMarketBaselineBody,
 } from "@workspace/api-zod";
 
 const governance = {
@@ -111,6 +112,31 @@ test("draft request and snapshot metadata rules stay aligned for every document 
     title: "Metadata",
     seo: { imageId: heroIds.poster },
   }).success, false, "unknown legacy SEO properties must be rejected, not stripped");
+  assert.equal(CreateDocumentBody.safeParse({
+    kind: "publication",
+    slug: "neutral-source-contract",
+    title: "Neutral source",
+    content: initialCmsContent("publication"),
+    markets: ["uae", "ksa"],
+    sharedLocale: "en",
+  }).success, true, "neutral shared creation must be opt-in and locale-addressed");
+  assert.equal(CreateDocumentBody.safeParse({
+    kind: "publication",
+    slug: "neutral-source-invalid-locale",
+    title: "Neutral source",
+    content: initialCmsContent("publication"),
+    markets: ["uae"],
+    sharedLocale: "und",
+  }).success, false, "neutral shared creation must reject the internal und locale");
+  assert.equal(EstablishSharedMarketBaselineBody.safeParse({
+    locale: "en",
+    snapshot: { slug: "neutral-source", title: "Neutral source", content: {} },
+  }).success, true, "neutral successor saves omit legacy source lineage");
+  assert.equal(EstablishSharedMarketBaselineBody.safeParse({
+    locale: "en",
+    sourceRevisionId: null,
+    snapshot: { slug: "neutral-source", title: "Neutral source", content: {} },
+  }).success, true, "neutral successor saves may explicitly send null source lineage");
 });
 
 test("immutable media references require and collect exact versions from every landing location", () => {

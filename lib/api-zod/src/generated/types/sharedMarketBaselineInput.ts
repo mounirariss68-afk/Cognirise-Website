@@ -11,9 +11,14 @@ export interface SharedMarketBaselineInput {
   /**
      * @minLength 2
      * @maxLength 16
+     * @pattern ^[a-z]{2}(?:-[A-Z]{2})?$
      */
   locale: string;
-  sourceRevisionId: string;
+  /**
+     * Exact real-market source revision for legacy baseline establishment; omit for a successor of an existing neutral baseline.
+     * @nullable
+     */
+  sourceRevisionId?: string | null;
   snapshot: SharedMarketBaselineInputSnapshot;
   /** @minimum 1 */
   expectedRevisionNumber?: number;

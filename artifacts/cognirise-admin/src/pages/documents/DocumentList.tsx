@@ -24,6 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,6 +32,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useGetSession } from "@workspace/api-client-react";
 import { PeopleMarketMatrix } from "./PeopleMarketMatrix";
 import { DocumentMarketMatrix } from "./DocumentMarketMatrix";
+import { DocumentCompactList } from "./DocumentCompactList";
 import { officeCreationContent, officeSlug } from "./office-creation";
 import { initialCmsContent, validateCmsContent } from "@workspace/api-zod";
 import { CONTENT_GUIDANCE, collectContentMediaIds } from "./authoring";
@@ -40,7 +42,8 @@ import { normalizeCmsDraftContent } from "./draft-save";
 const createDocSchema = z.object({
   title: z.string().trim().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required").regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid slug format (e.g. my-post-name)"),
-  market: z.string().min(1, "Market is required"),
+  markets: z.array(z.string()).min(1, "At least one market is required"),
+  locale: z.string().min(1, "Locale is required"),
   address: z.string().trim().optional(),
   phone: z.string().trim().max(80, "Phone number must be 80 characters or fewer").optional(),
 });
@@ -49,6 +52,8 @@ const officeCreateDocSchema = createDocSchema.extend({
   title: z.string().trim().min(1, "Office name or city is required"),
   address: z.string().trim().min(1, "Full postal address is required"),
 });
+
+const COMPACT_KINDS = ["partner", "platform", "industry", "framework", "office", "case-study", "publication"];
 
 export default function DocumentList({ kind }: { kind: DocumentKind }) {
   const [, setLocation] = useLocation();
@@ -66,12 +71,13 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     () => normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>),
   );
 
-  const canCreate = session?.user?.role !== "viewer";
+  const canCreate = ["editor", "publisher", "administrator"].includes(session?.user?.role ?? "");
+  const isAdministrator = session?.user?.role === "administrator";
   const canManageAvailability = session?.user?.role === "editor"
     || session?.user?.role === "publisher"
     || session?.user?.role === "administrator";
 
-  const { data: pageData, isLoading } = useListDocuments({
+  const { data: pageData, isLoading, isError: listFailed, refetch: reloadList } = useListDocuments({
     kind,
     page,
     pageSize: 20,
@@ -88,7 +94,8 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     () => (marketData?.items ?? []).filter((market) => market.enabled),
     [marketData?.items],
   );
-  const primaryMarket = enabledMarkets.find((market) => market.isCanonical) ?? enabledMarkets[0];
+  const permittedMarkets = enabledMarkets.filter((market) => session?.user?.role === "administrator" || session?.user?.marketCodes?.includes(market.code));
+  const primaryMarket = permittedMarkets.find((market) => market.isCanonical) ?? permittedMarkets[0];
   const createContentValidation = useMemo(
     () => validateCmsContent(kind, createContent, "draft"),
     [kind, createContent],
@@ -101,15 +108,23 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     defaultValues: {
       title: "",
       slug: "",
-      market: "",
+      markets: [],
+      locale: "en",
       address: "",
       phone: "",
     }
   });
 
+  const selectedCreationMarkets = form.watch("markets");
+  const creationLocales = [...new Set(enabledMarkets
+    .filter((market) => selectedCreationMarkets.includes(market.code))
+    .flatMap((market) => [market.defaultLocale, market.fallbackLocale])
+    .filter((locale): locale is string => Boolean(locale)))];
+
   useEffect(() => {
-    if (!form.getValues("market") && primaryMarket) {
-      form.setValue("market", primaryMarket.code, { shouldValidate: true });
+    if (form.getValues("markets").length === 0 && primaryMarket) {
+      form.setValue("markets", [primaryMarket.code], { shouldValidate: true });
+      form.setValue("locale", primaryMarket.defaultLocale || "en");
     }
   }, [form, primaryMarket]);
 
@@ -138,6 +153,11 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   };
 
   const onSubmitCreate = (values: z.infer<typeof createDocSchema>) => {
+    if (!canCreate || createDocument.isPending) return;
+    if (COMPACT_KINDS.includes(kind) && enabledMarkets.some((market) => values.markets.includes(market.code) && ![market.defaultLocale, market.fallbackLocale].includes(values.locale))) {
+      form.setError("locale", { message: "Choose a language configured for every selected market, or change the market selection." });
+      return;
+    }
     if (kind !== "office" && !createContentValidation.success) {
       toast({
         title: "Complete the required content fields",
@@ -149,24 +169,38 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     const contentToCreate = kind === "office"
       ? officeCreationContent(values)
       : normalizeCmsDraftContent(kind, createContent);
+
+    const isCompact = COMPACT_KINDS.includes(kind);
+    const createData = {
+      kind,
+      title: values.title,
+      slug: values.slug,
+      markets: values.markets,
+      content: contentToCreate,
+      mediaIds: collectContentMediaIds(contentToCreate),
+      ...(isCompact ? { sharedLocale: values.locale } : {}),
+    };
+
     createDocument.mutate({
-      data: {
-        kind,
-        title: values.title,
-        slug: values.slug,
-        markets: [values.market],
-        content: contentToCreate,
-        mediaIds: collectContentMediaIds(contentToCreate),
-      }
+      data: createData,
     }, {
       onSuccess: (newDoc) => {
         queryClient.invalidateQueries({ queryKey: getListDocumentsQueryKey({ kind, page, pageSize: 20, search: search || undefined, status }) });
         toast({ title: "Created successfully" });
         setIsCreateOpen(false);
-        form.reset({ title: "", slug: "", market: primaryMarket?.code ?? "", address: "", phone: "" });
+        form.reset({ title: "", slug: "", markets: primaryMarket ? [primaryMarket.code] : [], locale: primaryMarket?.defaultLocale || "en", address: "", phone: "" });
         setSlugWasEdited(false);
         setCreateContent(normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>));
-        setLocation(`/content/${newDoc.id}`);
+
+        // Neutral source editing is administrator-only. Restricted creators
+        // must reopen the bare document link so DocumentDetail can resolve an
+        // assigned regional edition (and its customization path) instead of
+        // landing in a read-only shared-source context.
+        if (isCompact && isAdministrator) {
+          setLocation(`/content/${newDoc.id}?context=shared&locale=${encodeURIComponent(values.locale)}`);
+        } else {
+          setLocation(`/content/${newDoc.id}`);
+        }
       },
       onError: (error) => {
         const apiError = error as any;
@@ -182,11 +216,13 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     });
   };
 
+  const pluralLabel = kind === "industry" ? "Industries" : kind === "case-study" ? "Case Studies" : kind === "person" ? "People" : `${getKindLabel(kind)}s`;
+
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-full flex flex-col">
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto min-h-full flex flex-col">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight capitalize text-foreground">{getKindLabel(kind)}s</h1>
+          <h1 className="text-2xl font-bold tracking-tight capitalize text-foreground">{pluralLabel}</h1>
           <p className="text-sm text-muted-foreground font-mono mt-1">Manage {kind} content and versions</p>
         </div>
         {canCreate && (
@@ -201,8 +237,8 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
          <div className="relative min-w-[14rem] max-w-md flex-1">
            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
            <Input
-             placeholder={`Search ${getKindLabel(kind)}s...`}
-             aria-label={`Search ${getKindLabel(kind)}s`}
+             placeholder={`Search ${pluralLabel}...`}
+             aria-label={`Search ${pluralLabel}`}
              className="bg-background pl-9"
              value={search}
              onChange={(e) => {
@@ -233,29 +269,31 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
            </SelectContent>
          </Select>
 
-         <Select
-           value={readiness || "all"}
-           onValueChange={(v) => {
-             setReadiness(v === "all" ? undefined : v as SharedEditionReadiness);
-             setPage(1);
-           }}
-         >
-           <SelectTrigger className="w-[180px] bg-background" aria-label="Filter documents by readiness">
-             <Filter className="mr-2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
-             <SelectValue placeholder="All Readiness" />
-           </SelectTrigger>
-           <SelectContent>
-             <SelectItem value="all">All Readiness</SelectItem>
-             <SelectItem value="missing">Missing market content</SelectItem>
-             <SelectItem value="pending">Pending changes</SelectItem>
-             <SelectItem value="blocker">Review blockers</SelectItem>
-             <SelectItem value="updates">Shared updates available</SelectItem>
-             <SelectItem value="needs-baseline">No Shared baseline</SelectItem>
-             <SelectItem value="needs-resolution">Needs Resolution</SelectItem>
-             <SelectItem value="translation-stale">Translation Stale</SelectItem>
-             <SelectItem value="ready">Ready</SelectItem>
-           </SelectContent>
-         </Select>
+         {!COMPACT_KINDS.includes(kind) && (
+           <Select
+             value={readiness || "all"}
+             onValueChange={(v) => {
+               setReadiness(v === "all" ? undefined : v as SharedEditionReadiness);
+               setPage(1);
+             }}
+           >
+             <SelectTrigger className="w-[180px] bg-background" aria-label="Filter documents by readiness">
+               <Filter className="mr-2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+               <SelectValue placeholder="All Readiness" />
+             </SelectTrigger>
+             <SelectContent>
+               <SelectItem value="all">All Readiness</SelectItem>
+               <SelectItem value="missing">Missing market content</SelectItem>
+               <SelectItem value="pending">Pending changes</SelectItem>
+               <SelectItem value="blocker">Review blockers</SelectItem>
+               <SelectItem value="updates">Shared updates available</SelectItem>
+               <SelectItem value="needs-baseline">No Shared baseline</SelectItem>
+               <SelectItem value="needs-resolution">Needs Resolution</SelectItem>
+               <SelectItem value="translation-stale">Translation Stale</SelectItem>
+               <SelectItem value="ready">Ready</SelectItem>
+             </SelectContent>
+           </Select>
+         )}
        </div>
 
        {kind === "person" && (
@@ -273,7 +311,21 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
          />
        )}
 
-       {kind !== "person" && (
+       {listFailed && <div role="alert" className="mb-4 rounded border border-destructive/30 p-3 text-sm">Content could not be loaded. <Button variant="link" onClick={() => void reloadList()}>Retry</Button></div>}
+       {!listFailed && COMPACT_KINDS.includes(kind) && (
+         <DocumentCompactList
+           kind={kind}
+           documents={pageData?.items ?? []}
+           isLoading={isLoading}
+           page={page}
+           pageSize={20}
+           total={pageData?.total ?? 0}
+           totalPages={pageData?.totalPages ?? 0}
+           onPageChange={setPage}
+         />
+       )}
+
+       {kind !== "person" && !COMPACT_KINDS.includes(kind) && (
          <DocumentMarketMatrix
            kind={kind}
            documents={pageData?.items ?? []}
@@ -388,15 +440,16 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
       <Dialog
         open={isCreateOpen}
         onOpenChange={(open) => {
+          if (createDocument.isPending) return;
           setIsCreateOpen(open);
           if (!open && !createDocument.isPending) {
-            form.reset({ title: "", slug: "", market: primaryMarket?.code ?? "", address: "", phone: "" });
+            form.reset({ title: "", slug: "", markets: primaryMarket ? [primaryMarket.code] : [], locale: primaryMarket?.defaultLocale || "en", address: "", phone: "" });
             setSlugWasEdited(false);
             setCreateContent(normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>));
           }
         }}
       >
-        <DialogContent className={kind === "office" ? "sm:max-w-[425px]" : "max-h-[90vh] overflow-y-auto sm:max-w-[760px]"}>
+        <DialogContent className={kind === "office" ? "max-h-[90vh] overflow-y-auto sm:max-w-[425px]" : "max-h-[90vh] overflow-y-auto sm:max-w-[760px]"}>
           <DialogHeader>
             <DialogTitle>Create {getKindLabel(kind)}</DialogTitle>
             <DialogDescription className="font-mono text-xs">
@@ -409,7 +462,8 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
           </DialogHeader>
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmitCreate)} className="space-y-4 pt-4">
+            <form onSubmit={form.handleSubmit(onSubmitCreate)} className="pt-4">
+              <fieldset disabled={createDocument.isPending} className="space-y-4">
               <FormField
                 control={form.control}
                 name="title"
@@ -507,38 +561,72 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
 
               <FormField
                 control={form.control}
-                name="market"
+                name="markets"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-mono text-xs uppercase tracking-wider">Primary Market</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={areMarketsLoading || enabledMarkets.length === 0}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select market" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {enabledMarkets.map((market) => (
-                          <SelectItem key={market.id} value={market.code}>
-                            {market.displayName}{market.isCanonical ? " (canonical)" : ""}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel className="font-mono text-xs uppercase tracking-wider">Show in</FormLabel>
+                    {kind === "person" ? <Select value={field.value[0] || ""} onValueChange={(value) => field.onChange([value])}>
+                      <SelectTrigger aria-label="Primary Market"><SelectValue placeholder="Choose a market" /></SelectTrigger>
+                      <SelectContent>{permittedMarkets.map((market) => <SelectItem key={market.id} value={market.code}>{market.displayName}</SelectItem>)}</SelectContent>
+                    </Select> : <div className="grid grid-cols-2 gap-3 mt-2">
+                      {enabledMarkets.map((market) => (
+                        <div key={market.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`market-${market.id}`}
+                            checked={field.value?.includes(market.code)}
+                            onCheckedChange={(checked) => {
+                              const newValue = checked
+                                ? [...(field.value || []), market.code]
+                                : (field.value || []).filter((v) => v !== market.code);
+                              field.onChange(newValue);
+                            }}
+                            disabled={areMarketsLoading || createDocument.isPending || !permittedMarkets.some((item) => item.code === market.code)}
+                          />
+                          <label
+                            htmlFor={`market-${market.id}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {market.displayName}
+                          </label>
+                        </div>
+                      ))}
+                    </div>}
                     {marketsFailed ? (
-                      <p className="text-xs text-destructive">Markets could not be loaded. Try again before creating this document.</p>
+                      <p className="text-xs text-destructive mt-2">Markets could not be loaded. Try again before creating this document.</p>
                     ) : !areMarketsLoading && enabledMarkets.length === 0 ? (
-                      <p className="text-xs text-destructive">No enabled market is available. Ask an administrator to enable one.</p>
-                    ) : primaryMarket ? (
-                      <p className="text-xs text-muted-foreground">
-                        Shared content starts in {primaryMarket.defaultLocale}. Choose additional destinations from the editor when needed.
-                      </p>
+                      <p className="text-xs text-destructive mt-2">No enabled market is available. Ask an administrator to enable one.</p>
                     ) : null}
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
+              {COMPACT_KINDS.includes(kind) && <FormField
+                control={form.control}
+                name="locale"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-mono text-xs uppercase tracking-wider">Language</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select locale" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {creationLocales.map(loc => (
+                          <SelectItem key={loc} value={loc}>{loc.toUpperCase()}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Shared content is written in this language. Nothing goes live when you save.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />}
+
               <DialogFooter className="pt-4">
                 <Button type="button" variant="ghost" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
                 <Button type="submit" disabled={createDocument.isPending || areMarketsLoading || enabledMarkets.length === 0}>
@@ -546,6 +634,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                   Create & Edit
                 </Button>
               </DialogFooter>
+              </fieldset>
             </form>
           </Form>
         </DialogContent>

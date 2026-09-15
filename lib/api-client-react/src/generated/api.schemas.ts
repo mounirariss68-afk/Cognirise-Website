@@ -903,9 +903,14 @@ export interface SharedMarketBaselineInput {
   /**
      * @minLength 2
      * @maxLength 16
+     * @pattern ^[a-z]{2}(?:-[A-Z]{2})?$
      */
   locale: string;
-  sourceRevisionId: string;
+  /**
+     * Exact real-market source revision for legacy baseline establishment; omit for a successor of an existing neutral baseline.
+     * @nullable
+     */
+  sourceRevisionId?: string | null;
   snapshot: SharedMarketBaselineInputSnapshot;
   /** @minimum 1 */
   expectedRevisionNumber?: number;
@@ -2894,6 +2899,13 @@ export interface DocumentInput {
   mediaIds?: string[];
   /** @minItems 1 */
   markets: string[];
+  /**
+     * Opt in to a neutral locale-specific shared source. Omit to retain legacy first-market shared creation behavior.
+     * @minLength 2
+     * @maxLength 16
+     * @pattern ^[a-z]{2}(?:-[A-Z]{2})?$
+     */
+  sharedLocale?: string;
 }
 
 /**

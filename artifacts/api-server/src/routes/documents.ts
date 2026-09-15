@@ -54,8 +54,11 @@ import {
   managedMarketPublicDeliveryClause,
   publicPayloadEligibilityClause,
   type AvailabilityDecision,
+  isAvailabilityDecision,
 } from "../lib/availability";
 import {
+  materializeSharedMarketRevision,
+  mediaPinsForNewSharedSnapshot,
   registerSharedMarketEditionRoutes,
   savedRevisionReadiness,
 } from "../lib/shared-market-editions";
@@ -456,7 +459,9 @@ export async function canAccessEditionTarget(
   const isLegacySharedSource = edition.rows[0]?.content_mode === "shared";
   if (!isLegacySharedSource && !canAccessMarket(auth, market)) return false;
   const managedBinding = await client.query(
-    `SELECT binding.mode,source_edition.market source_market
+    `SELECT binding.mode,adopted.id baseline_id,
+            adopted.source_revision_id baseline_source_revision_id,
+            source_edition.market source_market
        FROM cms_market_edition_bindings binding
        JOIN market_editions destination ON destination.id=binding.market_edition_id
        LEFT JOIN cms_shared_baseline_revisions adopted
@@ -488,6 +493,8 @@ export async function canAccessEditionTarget(
   // A managed shared/adapted binding without a recoverable adopted baseline
   // source is fail-closed rather than silently destination-only.
   if (!managedBinding.rowCount) return true;
+  if (managedBinding.rows[0]?.baseline_id
+    && managedBinding.rows[0]?.baseline_source_revision_id == null) return true;
   const sourceMarket = managedBinding.rows[0]?.source_market;
   return typeof sourceMarket === "string" && canAccessMarket(auth, sourceMarket);
 }
@@ -506,6 +513,7 @@ async function canAccessManagedPublishedRevisionSource(
 ): Promise<boolean> {
   const source = await client.query(
     `SELECT resolved.baseline_revision_id::text baseline_revision_id,
+            baseline.source_revision_id baseline_source_revision_id,
             source_edition.market source_market,
             EXISTS (
               SELECT 1 FROM cms_audit_events publication
@@ -529,6 +537,7 @@ async function canAccessManagedPublishedRevisionSource(
   // Its immutable publication receipt records that fact at publication time;
   // mutable binding.mode is deliberately never used as historical evidence.
   if (!lineage.baseline_revision_id) return lineage.independently_published === true;
+  if (lineage.baseline_source_revision_id == null) return true;
   return typeof lineage.source_market === "string"
     && canAccessMarket(auth, String(lineage.source_market));
 }
@@ -543,6 +552,23 @@ function availabilitySelections(value: unknown): Array<{ marketEditionId: string
       ? [{ marketEditionId: row.marketEditionId, locale: row.locale, decision: row.decision as AvailabilityDecision }]
       : [];
   });
+}
+
+/**
+ * Market authority is required for every newly visible destination and for
+ * every destination whose released decision changes. An absent or malformed
+ * published row is deliberately treated as unknown rather than as `off`, so
+ * a scoped actor cannot use an all-off review/publish to bypass authorization.
+ * Explicit, unchanged published-off rows are the only rows that may remain
+ * outside the actor's market scope.
+ */
+function availabilityDestinationRequiresMarketAuthority(
+  decision: unknown,
+  publishedDecision: unknown,
+  hasPublishedRow: boolean,
+): boolean {
+  const publishedStateKnown = hasPublishedRow && isAvailabilityDecision(publishedDecision);
+  return decision !== "off" || !publishedStateKnown || decision !== publishedDecision;
 }
 
 export function reviewedAvailabilityDiffersFromPublished(
@@ -608,7 +634,7 @@ export function industryDeliveryErrors(
             market: destination.market,
             locale: destination.locale,
             error,
-          }));
+       }));
     } catch (error) {
       return [{
         market: destination.market,
@@ -1100,10 +1126,159 @@ router.post(
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
+      const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+      if (!transactionAuth) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "Authentication is no longer valid." });
+        return;
+      }
+      // Freeze destination configuration while the selected-market authority
+      // snapshot is checked and all dependent rows are inserted.
+      await client.query("LOCK TABLE market_editions IN SHARE MODE");
       const configuredMarkets = await client.query(
         "SELECT code FROM market_editions WHERE enabled=true FOR UPDATE",
       );
-      if (configuredMarkets.rows.some((row) => !canAccessMarket(auth, String(row.code)))) {
+      if (parsed.data.sharedLocale !== undefined) {
+        if (parsed.data.kind === "person") {
+          await client.query("ROLLBACK");
+          res.status(409).json({
+            error: "Person documents retain their independent market lifecycle and cannot opt into a neutral shared source.",
+          });
+          return;
+        }
+        const selectedMarkets = await client.query(
+          `SELECT id,code,default_locale,fallback_locale
+             FROM market_editions
+            WHERE enabled=true AND code=ANY($1::text[])
+            FOR UPDATE`,
+          [parsed.data.markets],
+        );
+        if (selectedMarkets.rows.length !== parsed.data.markets.length) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "Every requested shared destination market must be enabled and configured." });
+          return;
+        }
+        if (parsed.data.markets.some((market) => !canAccessMarket(transactionAuth, market))) {
+          await client.query("ROLLBACK");
+          res.status(403).json({ error: "You are not assigned to every requested market." });
+          return;
+        }
+        if (selectedMarkets.rows.some((market) =>
+          ![market.default_locale, market.fallback_locale].includes(parsed.data.sharedLocale),
+        )) {
+          await client.query("ROLLBACK");
+          res.status(409).json({
+            error: "The neutral shared locale must be configured as the default or fallback locale of every selected destination, and every destination must remain assigned.",
+          });
+          return;
+        }
+        const root = await client.query(
+          `INSERT INTO cms_documents(kind,canonical_slug,title,owner_id,status)
+           VALUES ($1,$2,$3,$4,'active') RETURNING id`,
+          [parsed.data.kind, parsed.data.slug, parsed.data.title, transactionAuth.user.id],
+        );
+        const documentId = String(root.rows[0].id);
+        const snapshot = validated.data;
+        const baseline = await client.query(
+          `INSERT INTO cms_shared_baselines(document_id,locale,created_by_user_id)
+           VALUES ($1,$2,$3) RETURNING id,created_at`,
+          [documentId, parsed.data.sharedLocale, transactionAuth.user.id],
+        );
+        const mediaReferences = await mediaPinsForNewSharedSnapshot(
+          client,
+          snapshot,
+          parsed.data.kind,
+        );
+        const baselineRevision = await client.query(
+          `INSERT INTO cms_shared_baseline_revisions
+             (baseline_id,revision_number,snapshot,media_references,content_digest,
+              source_revision_id,created_by_user_id)
+           VALUES ($1,1,$2,$3,$4,NULL,$5)
+           RETURNING id,revision_number`,
+          [
+            baseline.rows[0].id,
+            snapshot,
+            JSON.stringify(mediaReferences),
+            digest(snapshot),
+            transactionAuth.user.id,
+          ],
+        );
+        await client.query(
+          `UPDATE cms_shared_baselines
+              SET active_revision_id=$2,updated_at=now()
+            WHERE id=$1`,
+          [baseline.rows[0].id, baselineRevision.rows[0].id],
+        );
+        for (const market of selectedMarkets.rows) {
+          const binding = await client.query(
+            `INSERT INTO cms_market_edition_bindings
+               (document_id,market_edition_id,locale,mode,baseline_id,
+                based_on_baseline_revision_id,override_operations,version,
+                translation_state,updated_by_user_id)
+             VALUES ($1,$2,$3,'shared',$4,$5,'[]'::jsonb,1,'current',$6)
+             RETURNING id`,
+            [
+              documentId,
+              market.id,
+              parsed.data.sharedLocale,
+              baseline.rows[0].id,
+              baselineRevision.rows[0].id,
+              transactionAuth.user.id,
+            ],
+          );
+          const revisionId = await materializeSharedMarketRevision(client, {
+            documentId,
+            market: String(market.code),
+            locale: String(parsed.data.sharedLocale),
+            snapshot,
+            baselineRevisionId: String(baselineRevision.rows[0].id),
+            bindingId: String(binding.rows[0].id),
+            userId: transactionAuth.user.id,
+            mediaReferences,
+          });
+          await client.query(
+            `UPDATE cms_market_edition_bindings
+                SET materialized_revision_id=$2
+              WHERE id=$1`,
+            [binding.rows[0].id, revisionId],
+          );
+        }
+        await client.query(
+          `INSERT INTO cms_document_market_availability
+             (document_id,market_edition_id,locale,published_decision,draft_decision,updated_by_user_id)
+           SELECT $1,m.id,configured_locale.locale,'off',
+                  CASE WHEN m.code=ANY($2::text[]) AND configured_locale.locale=$3
+                       THEN 'show' ELSE 'off' END,$4
+             FROM market_editions m
+             CROSS JOIN LATERAL (
+               SELECT DISTINCT locale FROM unnest(ARRAY[m.default_locale,m.fallback_locale]) locale
+                WHERE locale IS NOT NULL
+             ) configured_locale
+            WHERE m.enabled=true`,
+          [documentId, parsed.data.markets, parsed.data.sharedLocale, transactionAuth.user.id],
+        );
+        await client.query(
+          `INSERT INTO cms_document_availability_states
+             (document_id,draft_version,shared_source_edition_id,shared_source_revision_id,updated_by_user_id)
+           VALUES ($1,1,NULL,NULL,$2)`,
+          [documentId, transactionAuth.user.id],
+        );
+        await client.query("COMMIT");
+        const selectedMarket = String(parsed.data.markets[0]);
+        await audit(transactionAuth, "document.created", "document", documentId, {
+          sharedLocale: parsed.data.sharedLocale,
+          destinationMarkets: parsed.data.markets,
+        });
+        const document = await getDocument(
+          documentId,
+          transactionAuth,
+          selectedMarket,
+          parsed.data.sharedLocale,
+        );
+        res.status(201).json(document);
+        return;
+      }
+      if (configuredMarkets.rows.some((row) => !canAccessMarket(transactionAuth, String(row.code)))) {
         await client.query("ROLLBACK");
         res.status(403).json({ error: "Creating shared content requires authority for every enabled destination market." });
         return;
@@ -1111,7 +1286,7 @@ router.post(
       const root = await client.query(
         `INSERT INTO cms_documents(kind,canonical_slug,title,owner_id,status)
          VALUES ($1,$2,$3,$4,'active') RETURNING id`,
-        [parsed.data.kind, parsed.data.slug, parsed.data.title, auth.user.id],
+        [parsed.data.kind, parsed.data.slug, parsed.data.title, transactionAuth.user.id],
       );
       const snapshot = validated.data;
       const sourceMarket = parsed.data.markets[0];
@@ -1128,7 +1303,7 @@ router.post(
         `INSERT INTO cms_revisions
           (edition_id,revision_number,payload,content_digest,workflow_state,created_by_user_id,reason)
          VALUES ($1,1,$2,$3,'draft',$4,'Initial shared draft') RETURNING id`,
-        [edition.rows[0].id, snapshot, digest(snapshot), auth.user.id],
+        [edition.rows[0].id, snapshot, digest(snapshot), transactionAuth.user.id],
       );
       await syncMediaReferences(
         client,
@@ -1149,13 +1324,13 @@ router.post(
               WHERE locale IS NOT NULL
            ) configured_locale
           WHERE m.enabled=true`,
-        [root.rows[0].id, parsed.data.markets, auth.user.id],
+        [root.rows[0].id, parsed.data.markets, transactionAuth.user.id],
       );
       await client.query(
         `INSERT INTO cms_document_availability_states
           (document_id,draft_version,shared_source_edition_id,shared_source_revision_id,updated_by_user_id)
          VALUES ($1,1,$2,$3,$4)`,
-        [root.rows[0].id, edition.rows[0].id, revision.rows[0].id, auth.user.id],
+        [root.rows[0].id, edition.rows[0].id, revision.rows[0].id, transactionAuth.user.id],
       );
       await client.query("COMMIT");
       const selectedMarket = sourceMarket;
@@ -1165,14 +1340,21 @@ router.post(
       );
       const document = await getDocument(
         String(root.rows[0].id),
-        auth,
+        transactionAuth,
         selectedMarket,
         selectedConfig.rows[0]?.default_locale,
       );
-      await audit(auth, "document.created", "document", String(root.rows[0].id));
+      await audit(transactionAuth, "document.created", "document", String(root.rows[0].id));
       res.status(201).json(document);
     } catch (error) {
       await client.query("ROLLBACK");
+      if (error instanceof Error && (
+        error.message.includes("Snapshot media asset")
+        || error.message.includes("immutable media version")
+      )) {
+        res.status(422).json({ error: error.message });
+        return;
+      }
       if (typeof error === "object" && error !== null && "code" in error && error.code === "23505") {
         res.status(409).json({ error: "That URL slug is already in use. Choose a different slug and try again." });
         return;
@@ -1586,6 +1768,15 @@ router.post(
       await ensureAvailabilityState(client, documentId);
       const state = await client.query(
         `SELECT state.draft_version,state.shared_source_revision_id,
+                EXISTS (
+                  SELECT 1
+                    FROM cms_market_edition_bindings neutral_binding
+                    JOIN cms_shared_baseline_revisions neutral_baseline
+                      ON neutral_baseline.id=neutral_binding.based_on_baseline_revision_id
+                   WHERE neutral_binding.document_id=state.document_id
+                     AND neutral_binding.mode IN ('shared','adapted')
+                     AND neutral_baseline.source_revision_id IS NULL
+                ) neutral_managed,
                 source_edition.editorial_market shared_source_market
            FROM cms_document_availability_states state
            LEFT JOIN cms_revisions source_revision ON source_revision.id=state.shared_source_revision_id
@@ -1603,7 +1794,9 @@ router.post(
         res.status(409).json({ error: "Destination selection has changed. Reload before sending for review." });
         return;
       }
-      if (kind.rows[0].kind !== "person" && !state.rows[0].shared_source_revision_id) {
+      if (kind.rows[0].kind !== "person"
+        && !state.rows[0].shared_source_revision_id
+        && !state.rows[0].neutral_managed) {
         await client.query("ROLLBACK");
         res.status(409).json({
           error: "Choose and save a shared source before sending destinations for review.",
@@ -1618,6 +1811,7 @@ router.post(
       }
       const rows = await client.query(
         `SELECT m.id,m.code,configured_locale.locale,
+                a.market_edition_id availability_id,a.published_decision,
                 CASE WHEN a.market_edition_id IS NULL THEN 'off'
                      ELSE COALESCE(a.draft_decision,a.published_decision,'inherit') END decision
            FROM market_editions m
@@ -1630,7 +1824,14 @@ router.post(
           WHERE m.enabled=true FOR UPDATE OF m`,
         [documentId],
       );
-      if (rows.rows.some((row) => !canAccessMarket(transactionAuth, String(row.code)))) {
+      if (rows.rows.some((row) => (
+        availabilityDestinationRequiresMarketAuthority(
+          row.decision,
+          row.published_decision,
+          row.availability_id != null,
+        )
+        && !canAccessMarket(transactionAuth, String(row.code))
+      ))) {
         await client.query("ROLLBACK");
         res.status(403).json({ error: "Reviewing shared destinations requires authority for every affected market." });
         return;
@@ -1827,14 +2028,18 @@ router.post(
       // Row locks alone cannot prevent that phantom configuration change.
       await client.query("LOCK TABLE market_editions IN SHARE MODE");
       const markets = await client.query(
-        `SELECT m.id,m.code,configured_locale.locale
+        `SELECT m.id,m.code,configured_locale.locale,
+                a.market_edition_id availability_id,a.published_decision
            FROM market_editions m
            CROSS JOIN LATERAL (
              SELECT DISTINCT locale FROM unnest(ARRAY[m.default_locale,m.fallback_locale]) locale
               WHERE locale IS NOT NULL
            ) configured_locale
-          WHERE m.enabled=true
-          FOR UPDATE OF m`,
+           LEFT JOIN cms_document_market_availability a
+             ON a.document_id=$1 AND a.market_edition_id=m.id AND a.locale=configured_locale.locale
+           WHERE m.enabled=true
+           FOR UPDATE OF m`,
+        [documentId],
       );
       if (!availabilitySelectionKeysMatchDestinations(selections, markets.rows)) {
         await client.query("ROLLBACK");
@@ -1843,7 +2048,19 @@ router.post(
         });
         return;
       }
-      if (markets.rows.some((market) => !canAccessMarket(transactionAuth, String(market.code)))) {
+      if (markets.rows.some((market) => {
+        const selection = selections.find((candidate) =>
+          candidate.marketEditionId === String(market.id)
+          && candidate.locale === String(market.locale)
+        );
+        return selection
+          && availabilityDestinationRequiresMarketAuthority(
+            selection.decision,
+            market.published_decision,
+            market.availability_id != null,
+          )
+          && !canAccessMarket(transactionAuth, String(market.code));
+      })) {
         await client.query("ROLLBACK");
         res.status(403).json({ error: "Publishing shared destinations requires authority for every affected market." });
         return;

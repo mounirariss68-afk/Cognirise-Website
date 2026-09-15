@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import {
   getGetDocumentAvailabilityQueryKey,
   getGetDocumentMarketAvailabilityQueryKey,
@@ -37,7 +37,6 @@ type Props = {
   /** Shared people release with their shared content; this opens that normal
    * content workflow instead of calling the legacy per-market release API. */
   onOpenSharedContent?: () => void;
-  onDestinationSelected?: (destination: AvailabilityDestination) => ReactNode;
   /** Documents own this state so a failed checkbox mutation survives tab
    * switches and is protected by the editor's navigation/unload guard. */
   selectionDraft?: AvailabilitySelectionDraft;
@@ -73,7 +72,6 @@ export function MarketAvailabilityChecklist({
   isAdministrator,
   releaseIndividually = false,
   onOpenSharedContent,
-  onDestinationSelected,
   selectionDraft,
   onSelectionDraftChange,
   compact = false,
@@ -290,8 +288,21 @@ export function MarketAvailabilityChecklist({
       return destinations.some((destination) => destination.market === item.market) && marketItems.length > 1;
     });
 
+    const shownCount = compactItems.filter((item) => item.item && item.pendingChecked).length;
+    const pendingCount = compactItems.filter((item) => item.item && item.pending).length;
     return (
-      <div className="space-y-1">
+      <section className="space-y-2" aria-label="Show in" data-testid="market-availability-compact">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div>
+            <h3 className="text-xs font-semibold">Show in</h3>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              {shownCount} of {compactItems.length} configured market{compactItems.length === 1 ? "" : "s"} staged to show
+              {pendingCount > 0 ? ` · ${pendingCount} pending review` : ""}
+            </p>
+          </div>
+          <span className="text-[10px] text-muted-foreground">Live and staged visibility</span>
+        </div>
+        <div className="space-y-1">
         <span className="sr-only">✓ Live shown; * Pending change</span>
         <div className="flex flex-wrap gap-1" role="list" aria-label="Live and pending availability by market">
           {compactItems.map(({ configured, item, extraLocales, pending, liveChecked, pendingChecked }) => {
@@ -343,6 +354,7 @@ export function MarketAvailabilityChecklist({
             );
           })}
         </div>
+        </div>
         {hasLocaleExceptions && (
           <details className="group">
             <summary className="flex cursor-pointer list-none items-center gap-1 rounded-sm text-[10px] font-medium text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -359,14 +371,14 @@ export function MarketAvailabilityChecklist({
                 isAdministrator={isAdministrator}
                 releaseIndividually={releaseIndividually}
                 onOpenSharedContent={onOpenSharedContent}
-                onDestinationSelected={onDestinationSelected}
                 selectionDraft={selectionDraft}
                 onSelectionDraftChange={onSelectionDraftChange}
+                compact={false}
               />
             </div>
           </details>
         )}
-      </div>
+      </section>
     );
   }
 
@@ -445,7 +457,6 @@ export function MarketAvailabilityChecklist({
                 </div>
               </div>
             </div>
-            {onDestinationSelected?.(destination)}
             {useLegacyPersonAvailability && isAdministrator && pending && (
               <Button type="button" variant="outline" size="sm" className="ml-7 mt-3 h-7 gap-1 text-[10px]" disabled={!hasCurrentPublishSelection || publishPerson.isPending || updatePerson.isPending} onClick={() => setPersonReleaseConfirmation({ marketEditionId: item.marketEditionId, destination })}>
                 {publishPerson.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}

@@ -34,6 +34,7 @@ if (typeof (mock as typeof mock & { module?: unknown }).module !== "function") {
     MouseEvent: { value: dom.window.MouseEvent, configurable: true },
     KeyboardEvent: { value: dom.window.KeyboardEvent, configurable: true },
     MutationObserver: { value: dom.window.MutationObserver, configurable: true },
+    ResizeObserver: { value: class { observe() {} unobserve() {} disconnect() {} }, configurable: true },
     getComputedStyle: { value: dom.window.getComputedStyle.bind(dom.window), configurable: true },
   });
   (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -50,6 +51,7 @@ if (typeof (mock as typeof mock & { module?: unknown }).module !== "function") {
   mock.module("wouter", {
     namedExports: {
       useLocation: () => ["/publications", () => {}],
+      Link: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
     },
   });
   mock.module("@tanstack/react-query", {
@@ -64,6 +66,10 @@ if (typeof (mock as typeof mock & { module?: unknown }).module !== "function") {
       SharedEditionReadiness: {},
       getListDocumentsQueryKey: (params: unknown) => ["documents", params],
       getListMarketEditionsQueryKey: (params: unknown) => ["markets", params],
+      getGetDocumentAvailabilityQueryKey: (id: string) => ["availability", id],
+      getListDocumentEditionsQueryKey: (id: string) => ["editions", id],
+      useGetDocumentAvailability: () => ({ data: undefined, isLoading: false }),
+      useListDocumentEditions: () => ({ data: undefined, isLoading: false }),
       useGetSession: () => ({
         data: { user: { role: "administrator", marketCodes: ["uae"] } },
       }),
@@ -161,6 +167,8 @@ if (typeof (mock as typeof mock & { module?: unknown }).module !== "function") {
       await React.act(async () => submit.click());
       if (!pendingCreate) console.error(document.body.textContent);
       assert.equal(pendingCreate?.input.data.content.variant, "article");
+      assert.deepEqual(pendingCreate?.input.data.markets, ["uae"]);
+      assert.equal(pendingCreate?.input.data.sharedLocale, "en-US");
     } finally {
       await view.unmount();
     }

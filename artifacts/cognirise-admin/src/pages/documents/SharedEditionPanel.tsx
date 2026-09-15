@@ -68,6 +68,15 @@ export type SharedEditionPanelProps = {
   ) => Promise<ReuseDestinationOutcome[]>;
   /** Destination-specific UI permission. The server still verifies each call. */
   canEditDestination?: (market: string) => boolean;
+  /**
+   * Compact content-first summary used beside the primary editor. Full
+   * lineage/reuse controls remain available in the secondary details panel.
+   */
+  compact?: boolean;
+  /** Start a saved, effective-market customization without changing source ownership. */
+  onCustomize?: () => void;
+  /** The selected exact edition is the canonical shared source. */
+  isSharedSource?: boolean;
 };
 
 function overrideLabel(path: string) {
@@ -104,6 +113,9 @@ export function SharedEditionPanel({
   onResetOverride,
   onApplyReuse,
   canEditDestination,
+  compact = false,
+  onCustomize,
+  isSharedSource: isSharedSourceProp = false,
 }: SharedEditionPanelProps) {
   const market = markets.find((item) => item.code === selectedMarket);
   const binding = matrix?.bindings.find((item) => item.marketEditionId === market?.id && item.locale === selectedLocale);
@@ -137,8 +149,119 @@ export function SharedEditionPanel({
   const destinationPermission = canEditDestination
     ?? ((marketCode: string) => canEdit && marketCode === selectedMarket);
 
+  const operationPaths = binding?.operations ?? [];
+  const hasLocalOverrides = binding?.mode === "adapted" && operationPaths.length > 0;
+  const isSharedSource = isSharedSourceProp || selectedMarket === "shared-source";
+  const compactSourceLabel = isSharedSource
+    ? "Neutral shared content"
+    : binding?.mode === "independent"
+      ? "Independent local content"
+      : binding?.mode === "adapted"
+        ? "Shared content with local differences"
+        : binding?.mode === "shared" ? "Shared content for this market" : "Independent local content";
+  const compactSourceDetail = isSharedSource
+    ? "Changes here create a new neutral source revision. Regional editions stay unchanged until you explicitly adopt it."
+    : binding?.mode === "shared"
+      ? "This market inherits the frozen shared source."
+      : binding?.mode === "adapted"
+        ? "This market inherits shared content and keeps only the listed field differences."
+        : "This market keeps its own local revision. It is not forced to choose a shared source.";
+
+  if (compact) {
+    return (
+      <section
+        className="space-y-3 rounded-lg border bg-card p-3 sm:p-4"
+        aria-label="Content source"
+        data-testid="shared-edition-compact"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.12em]">Content source</h3>
+            <p className="mt-1 text-sm font-semibold">{compactSourceLabel}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{compactSourceDetail}</p>
+          </div>
+          <Badge variant="outline" className="shrink-0 uppercase">{binding?.mode ?? (isSharedSource ? "shared" : "independent")}</Badge>
+        </div>
+        {isSharedSource && localeBaselines[0] && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded border bg-muted/20 p-2">
+            <div>
+              <p className="text-[11px] font-medium">Neutral source · {localeBaselines[0].locale}</p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">Baseline revision {localeBaselines[0].revisionNumber} · regional editions remain independently governed.</p>
+            </div>
+            {canManageBaselines && (
+              <Button type="button" size="sm" variant="outline" disabled={busy || hasUnsaved} onClick={() => onEditBaseline(localeBaselines[0]!)}>
+                Edit shared content
+              </Button>
+            )}
+          </div>
+        )}
+        {!isSharedSource && binding?.mode !== "independent" && destinationPermission(selectedMarket) && onCustomize && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded border bg-muted/20 p-2">
+            <p className="text-[11px] text-muted-foreground">
+              Need a regional difference? Customize only this market; the shared source and other markets remain unchanged.
+            </p>
+             <Button type="button" size="sm" variant="outline" disabled={busy || hasUnsaved || !destinationPermission(selectedMarket)} onClick={onCustomize}>
+              Customize this market
+            </Button>
+          </div>
+        )}
+        {hasLocalOverrides && (
+          <div className="space-y-2 rounded border border-primary/20 bg-primary/[0.025] p-2">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-xs font-medium">Market-specific fields</p>
+              <span className="text-[10px] text-muted-foreground">{operationPaths.length} local difference{operationPaths.length === 1 ? "" : "s"}</span>
+            </div>
+            <div className="grid gap-1.5">
+              {operationPaths.slice(0, 3).map((operation, index) => (
+                <div key={`${operation.op}:${operation.path}:${index}`} className="flex flex-wrap items-center justify-between gap-2 rounded border bg-background px-2 py-1">
+                  <div className="min-w-0">
+                    <p className="truncate text-[11px] font-medium">{overrideLabel(operation.path)}</p>
+                    <p className="font-mono text-[9px] text-muted-foreground">{operation.op} · {operation.path}</p>
+                  </div>
+                  <FieldOverrideIndicator
+                    label={`Restore ${overrideLabel(operation.path)}`}
+                    isOverride
+                     canEdit={destinationPermission(selectedMarket) && !busy && !hasUnsaved}
+                    onResetToShared={() => onResetOverride(operation.path)}
+                  />
+                </div>
+              ))}
+            </div>
+            {operationPaths.length > 3 && (
+              <details className="rounded border bg-background p-2">
+                <summary className="cursor-pointer text-[10px] font-medium">Show all {operationPaths.length} local fields</summary>
+                <div className="mt-2 grid gap-1.5">
+                  {operationPaths.slice(3).map((operation, index) => (
+                    <div key={`${operation.op}:${operation.path}:${index + 3}`} className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className="truncate">{overrideLabel(operation.path)}</span>
+                       <Button type="button" size="sm" variant="ghost" disabled={!destinationPermission(selectedMarket) || busy || hasUnsaved} onClick={() => onResetOverride(operation.path)}>
+                        Restore
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
+          </div>
+        )}
+        <details className="rounded border bg-muted/10 p-2">
+          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider">Source and lineage details</summary>
+          <div className="mt-2 space-y-2 text-[11px] text-muted-foreground">
+            <p>{isSharedSource ? "Neutral source" : "Market"} · {selectedLocale}</p>
+            {binding && <p>Binding {binding.mode} · frozen baseline {binding.baselineRevisionId ?? "none"} · translation {binding.translationState}</p>}
+            {binding && binding.mode !== "independent" && (
+              <Button type="button" size="sm" variant="outline" onClick={() => onCompare(binding)}>
+                <GitCompare className="mr-1 h-3 w-3" /> Compare shared update
+              </Button>
+            )}
+          </div>
+        </details>
+      </section>
+    );
+  }
+
   const requestBind = () => {
-    if (!market || !currentRevisionId) return;
+    if (!market || !currentRevisionId || !destinationPermission(selectedMarket)) return;
     if (mode !== "independent" && !baseline) return;
     // Shared/Adapted binding materializes a draft. A saved destination must
     // instead use the inspected guided path below.
@@ -146,7 +269,7 @@ export function SharedEditionPanel({
     setConfirming(true);
   };
   const confirmBind = () => {
-    if (!market || !currentRevisionId || (mode !== "independent" && !baseline)) return;
+    if (!market || !currentRevisionId || !destinationPermission(selectedMarket) || (mode !== "independent" && !baseline)) return;
     if (mode !== "independent" && currentExactEdition?.revisionId) return;
     onBind({
       marketEditionId: market.id,
@@ -214,7 +337,7 @@ export function SharedEditionPanel({
         </p>
       )}
 
-      {canEdit && market && (
+      {destinationPermission(selectedMarket) && market && (
         <details className="rounded border bg-muted/10 p-3">
           <summary className="cursor-pointer text-xs font-semibold">Advanced lineage details</summary>
           <div className="mt-3 space-y-3">
@@ -275,7 +398,7 @@ export function SharedEditionPanel({
           </div>
           </>}
            {localeBaselines.length > 0 && <div className="flex flex-wrap items-center justify-between gap-2 rounded border bg-muted/20 p-2 text-xs">
-             <span className="min-w-0 flex-1">Active neutral baseline revision {localeBaselines[0]!.revisionNumber}; source revision remains pinned in lineage.</span>
+             <span className="min-w-0 flex-1">Active neutral baseline revision {localeBaselines[0]!.revisionNumber}; regional drafts remain unchanged until explicit adoption.</span>
              {canManageBaselines && <Button type="button" size="sm" variant="outline" className="shrink-0" disabled={busy || hasUnsaved} onClick={() => onEditBaseline(localeBaselines[0]!)}>Edit Shared</Button>}
           </div>}
           {binding && <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -298,7 +421,7 @@ export function SharedEditionPanel({
                 type="button"
                 size="sm"
                   className="max-w-full whitespace-normal leading-tight"
-                disabled={busy || hasUnsaved || !translationBaseline || translationBaseline.revisionId === binding?.translationSourceRevisionId}
+                 disabled={!destinationPermission(selectedMarket) || busy || hasUnsaved || !translationBaseline || translationBaseline.revisionId === binding?.translationSourceRevisionId}
                 onClick={() => onBind({
                   marketEditionId: market.id,
                   locale: selectedLocale,
@@ -318,7 +441,7 @@ export function SharedEditionPanel({
             </div>
             {!translationBaseline && <p className="text-xs text-muted-foreground">Choose a shared baseline revision to acknowledge translation lineage; the adopted baseline remains unchanged.</p>}
           </div>}
-           {!frozenBinding && <Button type="button" size="sm" disabled={busy || hasUnsaved || !currentRevisionId || (mode !== "independent" && (!baseline || Boolean(currentExactEdition?.revisionId)))} onClick={requestBind}>
+           {!frozenBinding && <Button type="button" size="sm" disabled={!destinationPermission(selectedMarket) || busy || hasUnsaved || !currentRevisionId || (mode !== "independent" && (!baseline || Boolean(currentExactEdition?.revisionId)))} onClick={requestBind}>
             <Link2 className="mr-1 h-3.5 w-3.5" /> Bind selected exact edition
           </Button>}
           </div>
@@ -336,7 +459,7 @@ export function SharedEditionPanel({
                 <FieldOverrideIndicator
                   label={overrideLabel(operation.path)}
                   isOverride
-                  canEdit={canEdit && !busy && !hasUnsaved}
+                   canEdit={destinationPermission(selectedMarket) && !busy && !hasUnsaved}
                   onResetToShared={() => onResetOverride(operation.path)}
                 />
                 <p className="font-mono text-[10px] text-muted-foreground">{operation.op} · {operation.path}</p>
@@ -350,7 +473,7 @@ export function SharedEditionPanel({
         <div className="flex gap-2"><AlertTriangle className="h-4 w-4 shrink-0" /><p>Confirm {mode} mode for this exact {selectedMarket.toUpperCase()} · {selectedLocale} revision. The selected baseline revision is frozen; later shared changes require a separate compare and resolution.</p></div>
         <div className="mt-3 flex gap-2"><Button type="button" size="sm" onClick={confirmBind}>Confirm binding</Button><Button type="button" size="sm" variant="outline" onClick={() => setConfirming(false)}>Cancel</Button></div>
       </div>}
-      {!canEdit && <p className="text-xs text-muted-foreground">You can inspect lineage, but do not have permission to change this market binding.</p>}
+       {!destinationPermission(selectedMarket) && <p className="text-xs text-muted-foreground">You can inspect lineage, but do not have permission to change this market binding.</p>}
       {hasUnsaved && <p className="text-xs text-amber-700">Save or discard this exact market draft before changing shared lineage. This prevents a baseline from claiming an older source revision.</p>}
       {binding?.translationState === "stale" && <p className="flex items-center gap-1 text-xs text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> Translation lineage is stale; compare the frozen and current baseline before publishing.</p>}
       {binding?.translationState === "current" && <p className="flex items-center gap-1 text-xs text-emerald-700"><Check className="h-3.5 w-3.5" /> Translation lineage acknowledged.</p>}

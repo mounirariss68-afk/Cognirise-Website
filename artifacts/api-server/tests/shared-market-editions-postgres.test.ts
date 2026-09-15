@@ -437,6 +437,359 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       return JSON.parse(text) as T;
     };
 
+    const neutralCreateSnapshot = {
+      ...commonSnapshot,
+      slug: "task321-neutral-create",
+      title: "Neutral create baseline",
+    };
+    const neutralCreate = await json<{
+      id: string;
+      title: string;
+      currentRevisionId: string | null;
+    }>(
+      await request("/api/documents", "POST", {
+        kind: "publication",
+        slug: neutralCreateSnapshot.slug,
+        title: neutralCreateSnapshot.title,
+        content: neutralCreateSnapshot.content,
+        mediaIds: neutralCreateSnapshot.mediaIds,
+        markets: ["uae", "ksa"],
+        sharedLocale: "en",
+      }),
+      201,
+      "opt-in neutral creation",
+    );
+    assert.equal(neutralCreate.title, neutralCreateSnapshot.title);
+    assert.ok(neutralCreate.currentRevisionId);
+    const neutralMatrix = await json<{
+      baselines: Array<{
+        id: string;
+        locale: string;
+        revisionId: string;
+        revisionNumber: number;
+        sourceRevisionId: string | null;
+        snapshot: Record<string, unknown>;
+      }>;
+      bindings: Array<{
+        marketEditionId: string;
+        mode: string;
+        baselineId: string | null;
+        baselineRevisionId: string | null;
+        materializedRevisionId: string | null;
+        translationState: string;
+      }>;
+    }>(
+      await request(`/api/documents/${neutralCreate.id}/shared-market`, "GET", undefined),
+      200,
+      "neutral matrix after creation",
+    );
+    assert.equal(neutralMatrix.baselines.length, 1);
+    const neutralBaseline = neutralMatrix.baselines[0]!;
+    assert.equal(neutralBaseline.locale, "en");
+    assert.equal(neutralBaseline.sourceRevisionId, null);
+    assert.equal(neutralBaseline.revisionNumber, 1);
+    assert.equal(neutralMatrix.bindings.length, 2);
+    assert.ok(neutralMatrix.bindings.every((binding) =>
+      binding.mode === "shared"
+      && binding.baselineId === neutralBaseline.id
+      && binding.baselineRevisionId === neutralBaseline.revisionId
+      && binding.materializedRevisionId,
+    ));
+    const neutralDestinationsBefore = await admin.query<{
+      market: string;
+      revision_id: string;
+      title: string;
+      published_revision_id: string | null;
+    }>(
+      `SELECT e.market,latest.id revision_id,latest.payload->>'title' title,e.published_revision_id
+         FROM cms_market_editions e
+         JOIN LATERAL (
+           SELECT id,payload FROM cms_revisions
+            WHERE edition_id=e.id
+            ORDER BY revision_number DESC,created_at DESC,id DESC LIMIT 1
+         ) latest ON true
+        WHERE e.document_id=$1
+        ORDER BY e.market`,
+      [neutralCreate.id],
+    );
+    assert.deepEqual(neutralDestinationsBefore.rows.map((row) => row.market), ["ksa", "uae"]);
+    assert.ok(neutralDestinationsBefore.rows.every((row) =>
+      row.title === neutralCreateSnapshot.title && row.published_revision_id === null,
+    ));
+    const neutralReleaseSnapshot = {
+      ...commonSnapshot,
+      slug: "task321-neutral-targeted-release",
+      title: "Neutral targeted release",
+    };
+    const neutralRelease = await json<{ id: string }>(
+      await request("/api/documents", "POST", {
+        kind: "publication",
+        slug: neutralReleaseSnapshot.slug,
+        title: neutralReleaseSnapshot.title,
+        content: neutralReleaseSnapshot.content,
+        mediaIds: neutralReleaseSnapshot.mediaIds,
+        markets: ["uae", "ksa"],
+        sharedLocale: "en",
+      }),
+      201,
+      "create a neutral document with one staged destination",
+    );
+    const neutralReleaseMatrix = await json<{
+      bindings: Array<{ marketEditionId: string; materializedRevisionId: string | null }>;
+    }>(
+      await request(`/api/documents/${neutralRelease.id}/shared-market`, "GET", undefined),
+      200,
+      "read the targeted neutral destination",
+    );
+    const neutralReleaseBinding = neutralReleaseMatrix.bindings.find(
+      (binding) => binding.marketEditionId === uaeMarketId,
+    );
+    assert.ok(neutralReleaseBinding?.materializedRevisionId);
+    const neutralReleaseRevisionId = neutralReleaseBinding.materializedRevisionId;
+    const neutralReleaseInitialAvailability = await json<{
+      draftVersion: number;
+      items: Array<{ marketEditionId: string; market: string; locale: string }>;
+    }>(
+      await request(`/api/documents/${neutralRelease.id}/availability`, "GET", undefined),
+      200,
+      "read the neutral release staging matrix",
+    );
+    await json(
+      await request(`/api/documents/${neutralRelease.id}/availability`, "PUT", {
+        version: neutralReleaseInitialAvailability.draftVersion,
+        destinations: neutralReleaseInitialAvailability.items.map((item) => ({
+          marketEditionId: item.marketEditionId,
+          locale: item.locale,
+          decision: item.market === "uae" ? "show" : "off",
+        })),
+      }),
+      200,
+      "stage only the targeted neutral destination",
+    );
+    await json(
+      await request(`/api/documents/${neutralRelease.id}/submit`, "POST", {
+        revisionId: neutralReleaseRevisionId,
+      }),
+      200,
+      "submit the exact neutral destination",
+    );
+    // The exact editorial review flow is covered by the editorial-work route
+    // suite; approve this fixture directly so this test isolates the release
+    // boundary after exact publication.
+    await admin.query(
+      `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,approved_at=now()
+        WHERE id=$1`,
+      [neutralReleaseRevisionId, administratorId],
+    );
+    await json(
+      await request(`/api/documents/${neutralRelease.id}/publish`, "POST", {
+        revisionId: neutralReleaseRevisionId,
+      }),
+      200,
+      "publish the exact neutral destination without a legacy source pointer",
+    );
+    const neutralReleaseKsaRevisionId = neutralReleaseMatrix.bindings.find(
+      (binding) => binding.marketEditionId === ksaMarketId,
+    )?.materializedRevisionId;
+    assert.ok(neutralReleaseKsaRevisionId);
+    await json(
+      await request(`/api/documents/${neutralRelease.id}/submit`, "POST", {
+        revisionId: neutralReleaseKsaRevisionId,
+      }),
+      200,
+      "submit the second exact neutral destination",
+    );
+    await admin.query(
+      `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,approved_at=now()
+        WHERE id=$1`,
+      [neutralReleaseKsaRevisionId, administratorId],
+    );
+    await json(
+      await request(`/api/documents/${neutralRelease.id}/publish`, "POST", {
+        revisionId: neutralReleaseKsaRevisionId,
+      }),
+      200,
+      "publish the second exact neutral destination",
+    );
+    const neutralReleaseBeforeAvailability = await admin.query<{
+      published_revision_id: string | null;
+      media_version_id: string | null;
+    }>(
+      `SELECT edition.published_revision_id::text,reference.media_version_id::text
+         FROM cms_market_editions edition
+         LEFT JOIN cms_media_references reference
+           ON reference.document_id=edition.document_id
+          AND reference.field_path=$2
+        WHERE edition.document_id=$1 AND edition.market='uae' AND edition.locale='en'`,
+      [neutralRelease.id, `revision:${neutralReleaseRevisionId}`],
+    );
+    assert.equal(neutralReleaseBeforeAvailability.rows[0]?.published_revision_id, neutralReleaseRevisionId);
+    const neutralReleaseAvailability = await json<{ draftVersion: number; sharedSource: unknown | null }>(
+      await request(`/api/documents/${neutralRelease.id}/availability`, "GET", undefined),
+      200,
+      "read neutral availability before targeted release",
+    );
+    assert.equal(neutralReleaseAvailability.draftVersion, 2);
+    assert.equal(neutralReleaseAvailability.sharedSource, null);
+    const neutralReleaseStagedRows = await admin.query<{
+      market: string;
+      locale: string;
+      published_decision: string;
+      draft_decision: string;
+    }>(
+      `SELECT market.code market,availability.locale,availability.published_decision,
+              availability.draft_decision
+         FROM cms_document_market_availability availability
+         JOIN market_editions market ON market.id=availability.market_edition_id
+        WHERE availability.document_id=$1
+        ORDER BY market.code,availability.locale`,
+      [neutralRelease.id],
+    );
+    assert.equal(
+      neutralReleaseStagedRows.rows.find((row) => row.market === "uae" && row.locale === "en")?.draft_decision,
+      "show",
+    );
+    assert.ok(
+      neutralReleaseStagedRows.rows
+        .filter((row) => row.market !== "uae" || row.locale !== "en")
+        .every((row) => row.draft_decision === "off" && row.published_decision === "off"),
+      "unselected locales are staged off and cannot be released accidentally",
+    );
+    const neutralReleaseState = await admin.query<{
+      draft_version: number;
+      reviewed_version: number | null;
+      published_version: number | null;
+      shared_source_revision_id: string | null;
+      published_source_revision_id: string | null;
+    }>(
+      `SELECT draft_version,reviewed_version,published_version,
+              shared_source_revision_id::text,published_source_revision_id::text
+         FROM cms_document_availability_states WHERE document_id=$1`,
+      [neutralRelease.id],
+    );
+    assert.deepEqual(neutralReleaseState.rows[0], {
+      draft_version: 2,
+      reviewed_version: null,
+      published_version: 0,
+      shared_source_revision_id: null,
+      published_source_revision_id: null,
+    });
+    const beforeNeutralRelease = await json<{ items: Array<{ title: string }> }>(
+      await fetch(`${origin}/api/public/content?market=uae&locale=en&kind=publication`),
+      200,
+      "neutral exact publication stays private before availability release",
+    );
+    assert.ok(!beforeNeutralRelease.items.some((item) => item.title === neutralReleaseSnapshot.title));
+    const neutralReviewed = await json<{ reviewedVersion: number | null }>(
+      await request(`/api/documents/${neutralRelease.id}/availability/review`, "POST", {
+        version: neutralReleaseAvailability.draftVersion,
+      }),
+      200,
+      "review neutral destination availability without a legacy source",
+    );
+    assert.equal(neutralReviewed.reviewedVersion, neutralReleaseAvailability.draftVersion);
+    await json(
+      await request(`/api/documents/${neutralRelease.id}/availability/publish`, "POST", {
+        version: neutralReviewed.reviewedVersion,
+      }),
+      200,
+      "release only the reviewed neutral destination",
+    );
+    const neutralReleaseAfterAvailability = await admin.query<{
+      published_revision_id: string | null;
+      media_version_id: string | null;
+    }>(
+      `SELECT edition.published_revision_id::text,reference.media_version_id::text
+         FROM cms_market_editions edition
+         LEFT JOIN cms_media_references reference
+           ON reference.document_id=edition.document_id
+          AND reference.field_path=$2
+        WHERE edition.document_id=$1 AND edition.market='uae' AND edition.locale='en'`,
+      [neutralRelease.id, `revision:${neutralReleaseRevisionId}`],
+    );
+    assert.deepEqual(
+      neutralReleaseAfterAvailability.rows[0],
+      neutralReleaseBeforeAvailability.rows[0],
+      "availability release preserves the exact published revision and pinned media version",
+    );
+    const afterNeutralRelease = await json<{ items: Array<{ title: string }> }>(
+      await fetch(`${origin}/api/public/content?market=uae&locale=en&kind=publication`),
+      200,
+      "reviewed neutral destination becomes public only at availability release",
+    );
+    assert.ok(afterNeutralRelease.items.some((item) => item.title === neutralReleaseSnapshot.title));
+    const unrelatedNeutralDestination = await json<{ items: Array<{ title: string }> }>(
+      await fetch(`${origin}/api/public/content?market=ksa&locale=en&kind=publication`),
+      200,
+      "unselected neutral destination remains unrelated to targeted release",
+    );
+    assert.ok(!unrelatedNeutralDestination.items.some((item) => item.title === neutralReleaseSnapshot.title));
+    const neutralSuccessorSnapshot = {
+      ...neutralBaseline.snapshot,
+      title: "Neutral successor only",
+    };
+    const neutralSuccessor = await json<{
+      sourceRevisionId: string | null;
+      revisionNumber: number;
+      snapshot: Record<string, unknown>;
+    }>(
+      await request(`/api/documents/${neutralCreate.id}/shared-market`, "POST", {
+        locale: "en",
+        snapshot: neutralSuccessorSnapshot,
+        expectedRevisionNumber: neutralBaseline.revisionNumber,
+      }),
+      201,
+      "neutral successor save without a legacy source",
+    );
+    assert.equal(neutralSuccessor.sourceRevisionId, null);
+    assert.equal(neutralSuccessor.revisionNumber, 2);
+    assert.equal(neutralSuccessor.snapshot.title, neutralSuccessorSnapshot.title);
+    const neutralDestinationsAfter = await admin.query<{
+      market: string;
+      revision_id: string;
+      title: string;
+      published_revision_id: string | null;
+    }>(
+      `SELECT e.market,latest.id revision_id,latest.payload->>'title' title,e.published_revision_id
+         FROM cms_market_editions e
+         JOIN LATERAL (
+           SELECT id,payload FROM cms_revisions
+            WHERE edition_id=e.id
+            ORDER BY revision_number DESC,created_at DESC,id DESC LIMIT 1
+         ) latest ON true
+        WHERE e.document_id=$1
+        ORDER BY e.market`,
+      [neutralCreate.id],
+    );
+    assert.deepEqual(
+      neutralDestinationsAfter.rows.map((row) => [row.market, row.revision_id, row.title, row.published_revision_id]),
+      neutralDestinationsBefore.rows.map((row) => [row.market, row.revision_id, row.title, row.published_revision_id]),
+      "saving a neutral successor leaves regional drafts and live pointers untouched",
+    );
+    const neutralBindingState = await admin.query<{ translation_state: string }>(
+      `SELECT translation_state FROM cms_market_edition_bindings
+        WHERE document_id=$1 ORDER BY market_edition_id`,
+      [neutralCreate.id],
+    );
+    assert.ok(neutralBindingState.rows.every((row) => row.translation_state === "stale"));
+    assert.equal(
+      (await request("/api/documents", "POST", {
+        kind: "publication",
+        slug: "task321-neutral-denied",
+        title: "Denied neutral create",
+        content: neutralCreateSnapshot.content,
+        markets: ["uae", "ksa"],
+        sharedLocale: "en",
+      }, headersFor(editorToken))).status,
+      403,
+      "neutral creation still requires authority for every selected destination",
+    );
+    assert.equal(
+      (await request(`/api/documents/${neutralCreate.id}?market=ksa&locale=en`, "GET", undefined, headersFor(editorToken, false))).status,
+      403,
+      "regional access remains destination-scoped for neutral bindings",
+    );
+
     const publicBeforeBinding = await fetch(
       `${origin}/api/public/content?market=ksa&locale=en&kind=publication`,
     );
@@ -769,7 +1122,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       409,
       "an absent binding cannot be created with an existing-binding version token",
     );
-    const qatar = await json<{ id: string; version: number }>(
+    const qatar = await json<{ id: string; version: number; baselineId: string; baselineRevisionId: string; materializedRevisionId: string }>(
       await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
         marketEditionId: qatarMarketId, locale: "en", mode: "shared", baselineId: englishBaseline.id,
         baselineRevisionId: englishBaseline.revisionId, expectedDestinationRevisionId: null,
@@ -778,6 +1131,22 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       200,
       "create shared binding to adopt",
     );
+    const customizedQatar = await json<{ mode: string; version: number; materializedRevisionId: string }>(
+      await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
+        marketEditionId: qatarMarketId,
+        locale: "en",
+        mode: "adapted",
+        baselineId: qatar.baselineId,
+        baselineRevisionId: qatar.baselineRevisionId,
+        expectedDestinationRevisionId: qatar.materializedRevisionId,
+        expectedActiveBaselineRevisionId: qatar.baselineRevisionId,
+        version: qatar.version,
+      }),
+      200,
+      "Customize an existing neutral shared destination through its binding",
+    );
+    assert.equal(customizedQatar.mode, "adapted");
+    assert.ok(customizedQatar.materializedRevisionId);
     assert.equal(
       (await request(`/api/documents/${documentId}/shared-market/bindings`, "PUT", {
         marketEditionId: qatarMarketId, locale: "en", mode: "shared", baselineId: englishBaseline.id,
@@ -1046,7 +1415,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     );
     const adopted = await json<{ version: number; baselineRevisionId: string }>(
       await request(`/api/documents/${documentId}/shared-market/bindings/${qatar.id}/resolve`, "POST", {
-        version: qatar.version, baselineRevisionId: updatedBaseline.revisionId, action: "adopt",
+        version: customizedQatar.version, baselineRevisionId: updatedBaseline.revisionId, action: "adopt",
       }),
       200,
       "adopt non-conflicting baseline",
@@ -1488,6 +1857,76 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
        ON CONFLICT DO NOTHING`,
       [editorId],
     );
+    const revokedCreateSlug = `task321-revoked-create-${randomUUID().slice(0, 8)}`;
+    const revokedCreatePool = new PoolConstructor({
+      connectionString: withSearchPath(originalDatabaseUrl, schema),
+    });
+    const revokedCreateLock = await revokedCreatePool.connect();
+    const revokedCreateIdentity = await admin.connect();
+    try {
+      await revokedCreateLock.query("BEGIN");
+      await revokedCreateLock.query("LOCK TABLE cms_user_market_assignments IN ACCESS EXCLUSIVE MODE");
+      await revokedCreateIdentity.query("BEGIN");
+      const revokeAssignment = (async () => {
+        await revokedCreateIdentity.query(
+          "DELETE FROM cms_user_market_assignments WHERE user_id=$1 AND market_code='uae'",
+          [editorId],
+        );
+        await revokedCreateIdentity.query("COMMIT");
+      })();
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      const revokedCreate = request(
+        "/api/documents",
+        "POST",
+        {
+          kind: "publication",
+          slug: revokedCreateSlug,
+          title: "Revoked create must not commit",
+          content: { ...commonSnapshot.content },
+          mediaIds: commonSnapshot.mediaIds,
+          markets: ["uae"],
+          sharedLocale: "en",
+        },
+        headersFor(editorToken),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      await revokedCreateLock.query("COMMIT");
+      await revokeAssignment;
+      assert.equal(
+        (await revokedCreate).status,
+        403,
+        "neutral creation revalidates a destination assignment revoked while authentication waits",
+      );
+      assert.equal(
+        (await admin.query(
+          "SELECT count(*)::text count FROM cms_documents WHERE canonical_slug=$1",
+          [revokedCreateSlug],
+        )).rows[0]?.count,
+        "0",
+        "a revoked neutral create leaves no document root",
+      );
+      assert.equal(
+        (await admin.query(
+          `SELECT count(*)::text count
+             FROM cms_document_market_availability availability
+             JOIN cms_documents document ON document.id=availability.document_id
+            WHERE document.canonical_slug=$1`,
+          [revokedCreateSlug],
+        )).rows[0]?.count,
+        "0",
+        "a revoked neutral create leaves no availability rows",
+      );
+    } finally {
+      await revokedCreateIdentity.query("ROLLBACK").catch(() => undefined);
+      revokedCreateIdentity.release();
+      await revokedCreateLock.query("ROLLBACK").catch(() => undefined);
+      revokedCreateLock.release();
+      await revokedCreatePool.end();
+      await admin.query(
+        "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,'uae') ON CONFLICT DO NOTHING",
+        [editorId],
+      );
+    }
     const availabilityRacePool = new PoolConstructor({
       connectionString: withSearchPath(originalDatabaseUrl, schema),
     });
@@ -1552,6 +1991,150 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       decision_count: "0",
       success_audit_count: "0",
     });
+    await admin.query("UPDATE cms_users SET role='editor' WHERE id=$1", [editorId]);
+    await admin.query("DELETE FROM cms_user_market_assignments WHERE user_id=$1", [editorId]);
+    await admin.query(
+      "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,'uae')",
+      [editorId],
+    );
+    const neutralReleaseAvailabilityResponse = async () => json<{
+      draftVersion: number;
+      reviewedVersion: number | null;
+      publishedVersion: number;
+      items: Array<{ marketEditionId: string; market: string; locale: string }>;
+    }>(
+      await request(`/api/documents/${neutralRelease.id}/availability`, "GET", undefined),
+      200,
+      "read neutral release authorization matrix",
+    );
+    const neutralAvailabilityDbState = async () => ({
+      state: (await admin.query(
+        `SELECT draft_version,reviewed_version,published_version,reviewed_selections,
+                shared_source_revision_id::text,published_source_revision_id::text
+           FROM cms_document_availability_states WHERE document_id=$1`,
+        [neutralRelease.id],
+      )).rows,
+      destinations: (await admin.query(
+        `SELECT market_edition_id::text,locale,published_decision,draft_decision
+           FROM cms_document_market_availability
+          WHERE document_id=$1 ORDER BY market_edition_id,locale`,
+        [neutralRelease.id],
+      )).rows,
+    });
+    const stageNeutralAvailability = async (
+      version: number,
+      decisionFor: (market: string) => "show" | "off",
+    ) => {
+      const current = await neutralReleaseAvailabilityResponse();
+      return json<{ draftVersion: number }>(
+        await request(`/api/documents/${neutralRelease.id}/availability`, "PUT", {
+          version,
+          destinations: current.items.map((item) => ({
+            marketEditionId: item.marketEditionId,
+            locale: item.locale,
+            decision: decisionFor(item.market),
+          })),
+        }),
+        200,
+        "stage the complete neutral authorization matrix",
+      );
+    };
+    const currentNeutralAvailability = await neutralReleaseAvailabilityResponse();
+    const stagedNeutralShow = await stageNeutralAvailability(
+      currentNeutralAvailability.draftVersion,
+      (market) => market === "uae" || market === "ksa" ? "show" : "off",
+    );
+    await json(
+      await request(`/api/documents/${neutralRelease.id}/availability/review`, "POST", {
+        version: stagedNeutralShow.draftVersion,
+      }),
+      200,
+      "review a neutral matrix that shows UAE and KSA",
+    );
+    await json(
+      await request(`/api/documents/${neutralRelease.id}/availability/publish`, "POST", {
+        version: stagedNeutralShow.draftVersion,
+      }),
+      200,
+      "publish the neutral UAE and KSA baseline availability",
+    );
+    const mixedNeutral = await stageNeutralAvailability(
+      (await neutralReleaseAvailabilityResponse()).draftVersion,
+      (market) => market === "uae" ? "show" : "off",
+    );
+    const mixedReviewBeforeDeny = await neutralAvailabilityDbState();
+    assert.equal(
+      (await request(`/api/documents/${neutralRelease.id}/availability/review`, "POST", {
+        version: mixedNeutral.draftVersion,
+      }, headersFor(editorToken))).status,
+      403,
+      "a scoped editor cannot review an unauthorized KSA show-to-off takedown",
+    );
+    assert.deepEqual(
+      await neutralAvailabilityDbState(),
+      mixedReviewBeforeDeny,
+      "denied mixed review leaves availability state and decisions unchanged",
+    );
+    await json(
+      await request(`/api/documents/${neutralRelease.id}/availability/review`, "POST", {
+        version: mixedNeutral.draftVersion,
+      }),
+      200,
+      "review the mixed neutral matrix as an administrator",
+    );
+    await admin.query("UPDATE cms_users SET role='publisher' WHERE id=$1", [editorId]);
+    const mixedPublishBeforeDeny = await neutralAvailabilityDbState();
+    assert.equal(
+      (await request(`/api/documents/${neutralRelease.id}/availability/publish`, "POST", {
+        version: mixedNeutral.draftVersion,
+      }, headersFor(editorToken))).status,
+      403,
+      "a scoped publisher cannot release an unauthorized KSA show-to-off takedown",
+    );
+    assert.deepEqual(
+      await neutralAvailabilityDbState(),
+      mixedPublishBeforeDeny,
+      "denied mixed publish leaves reviewed and published availability unchanged",
+    );
+    await admin.query("UPDATE cms_users SET role='editor' WHERE id=$1", [editorId]);
+    const allOffNeutral = await stageNeutralAvailability(
+      (await neutralReleaseAvailabilityResponse()).draftVersion,
+      () => "off",
+    );
+    const allOffReviewBeforeDeny = await neutralAvailabilityDbState();
+    assert.equal(
+      (await request(`/api/documents/${neutralRelease.id}/availability/review`, "POST", {
+        version: allOffNeutral.draftVersion,
+      }, headersFor(editorToken))).status,
+      403,
+      "an all-off review still requires authority for every changed destination",
+    );
+    assert.deepEqual(
+      await neutralAvailabilityDbState(),
+      allOffReviewBeforeDeny,
+      "denied all-off review leaves availability state and decisions unchanged",
+    );
+    await json(
+      await request(`/api/documents/${neutralRelease.id}/availability/review`, "POST", {
+        version: allOffNeutral.draftVersion,
+      }),
+      200,
+      "review the all-off neutral matrix as an administrator",
+    );
+    await admin.query("UPDATE cms_users SET role='publisher' WHERE id=$1", [editorId]);
+    const allOffPublishBeforeDeny = await neutralAvailabilityDbState();
+    assert.equal(
+      (await request(`/api/documents/${neutralRelease.id}/availability/publish`, "POST", {
+        version: allOffNeutral.draftVersion,
+      }, headersFor(editorToken))).status,
+      403,
+      "a scoped publisher cannot release an unauthorized all-off takedown",
+    );
+    assert.deepEqual(
+      await neutralAvailabilityDbState(),
+      allOffPublishBeforeDeny,
+      "denied all-off publish leaves reviewed and published availability unchanged",
+    );
     const crossSourceFixture = await admin.query<{
       materialized_revision_id: string;
       revision_count: string;

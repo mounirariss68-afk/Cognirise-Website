@@ -13,13 +13,32 @@ export function ReadinessPanel({
   id,
   issues,
   onAction,
+  compact = false,
 }: {
   id: string;
   issues: ReadinessIssue[];
   onAction: (issue: ReadinessIssue) => void;
+  compact?: boolean;
 }) {
   const blockers = issues.filter((issue) => issue.severity === "blocker").length;
   const warnings = issues.filter((issue) => issue.severity === "warning").length;
+  if (compact) {
+    const corrections = issues.filter((issue) => issue.scope !== "workflow" && !issue.path.startsWith("permissions.") && !issue.path.startsWith("edition.availability"));
+    const workflow = issues.filter((issue) => issue.scope === "workflow");
+    return <section id={id} tabIndex={-1} aria-label="Publication checks" className="scroll-mt-24 space-y-2 text-sm" data-testid="publication-readiness">
+      {workflow.length > 0 && <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground" aria-label="Workflow state">
+        {workflow.map((issue) => <button key={issue.id} type="button" className="text-left underline underline-offset-2" onClick={() => onAction(issue)}>{issue.label}</button>)}
+      </div>}
+      {corrections.length === 0 ? <p className="text-xs text-emerald-700">Content checks passed.</p> : <details className="rounded border p-3">
+        <summary className="cursor-pointer text-xs font-medium">{corrections.length} content check{corrections.length === 1 ? "" : "s"} to review</summary>
+        <ul className="mt-2 space-y-2" aria-label="Actionable readiness issues">
+          {corrections.map((issue) => <li id={`${id}-${issue.id}`} key={issue.id} tabIndex={-1} data-readiness-issue={issue.id}>
+            <button type="button" className="text-left text-xs underline underline-offset-2" onClick={() => onAction(issue)}>{issue.label}: {issue.detail}</button>
+          </li>)}
+        </ul>
+      </details>}
+    </section>;
+  }
 
   return (
     <section id={id} tabIndex={-1} aria-labelledby={`${id}-title`} className="scroll-mt-24 rounded-lg border bg-card p-4" data-testid="publication-readiness">

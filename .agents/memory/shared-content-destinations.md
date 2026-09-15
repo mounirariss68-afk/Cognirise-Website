@@ -45,6 +45,22 @@ Use a neutral, locale-specific Shared editorial baseline, never a permanent UAE 
 
 **How to apply:** Keep unchanged fields inherited, record intentional field overrides, and require explicit comparison/adoption of shared successors. Creating a managed draft must preserve the previous live source; only reviewed publication transfers delivery authority. Source-market permissions remain relevant to inherited content even when an exact destination revision exists.
 
+Do not interpret absent geographical source lineage as an unresolved legacy source for a neutral baseline.
+
+**Why:** Neutral shared authoring deliberately has no originating country. Requiring the legacy source pointer during review can strand otherwise valid, approved regional content with its availability permanently unpublished.
+
+**How to apply:** Distinguish neutral managed content from ambiguous legacy history throughout creation, review, preview, and release. Neutral destination release must still verify each shown destination's approved exact content and pinned media; never manufacture a master-market source to satisfy an old gate.
+
+Authorize removals as well as additions when reviewing or releasing availability.
+
+**Why:** An `off` selection can remove previously live content. Skipping every off
+row grants an unauthorized cross-market takedown even though showing content
+remains protected.
+
+**How to apply:** Compare proposed decisions with published state under the
+transaction lock. Require authority for changed destinations, including all-off
+matrices; only demonstrably unchanged off destinations can be omitted.
+
 Classify managed materializations separately from their legacy storage address, and authorize published history from immutable lineage.
 
 **Why:** A real-market edition formerly used as the Shared source can become an adaptation. Treating it as the global source causes false stale errors and an unreachable visibility-release action. Conversely, a newer Independent draft does not remove source restrictions from an older Adapted publication.

@@ -18,7 +18,7 @@ test("guided editor uses a shared-content destination checklist", async () => {
   assert.match(detail, /locale: selectedLocale/);
   assert.match(detail, /revisionId: previewRevisionId/);
   assert.match(detail, /useListDocumentEditions/);
-  assert.match(detail, /useCreateDocumentCustomization/);
+  assert.match(detail, /useBindSharedMarketEdition/);
   assert.match(detail, /revision\.market === selectedMarket && revision\.locale === selectedLocale/);
   assert.match(detail, /useGetDocument\(id!, documentParams/);
   assert.match(detail, /window\.open\("about:blank", "_blank"\)/);
@@ -125,10 +125,12 @@ test("detail rehydrates form state whenever the exact edition response changes",
   assert.doesNotMatch(detail, /if \(doc && !initialized\.current\)/);
 });
 
-test("customizations and initial selection use the explicit saved shared source", async () => {
+test("customizations use the neutral binding and sparse override contract", async () => {
   const detail = await readFile(new URL("src/pages/documents/DocumentDetail.tsx", adminRoot), "utf8");
-  assert.match(detail, /const sharedSource = availabilityForReview\?\.sharedSource/);
-  assert.match(detail, /sourceRevisionId,/);
+  assert.match(detail, /mode: "adapted"/);
+  assert.match(detail, /expectedDestinationRevisionId:/);
+  assert.match(detail, /expectedActiveBaselineRevisionId:/);
+  assert.match(detail, /useSaveSharedMarketOverrides/);
   assert.match(detail, /useSelectDocumentAvailabilitySource/);
   assert.match(detail, /Create a shared source from an exact historical revision/);
   assert.match(detail, /const canEditSelectedEdition = selectedIsSharedSource/);
@@ -137,8 +139,8 @@ test("customizations and initial selection use the explicit saved shared source"
   assert.match(detail, /A source save advances availability's version/);
   assert.match(detail, /if \(!sharedSource\)/);
   assert.match(detail, /if \(canManageSharedDestinations\)/);
-  assert.match(detail, /Save shared content before creating a customization/);
-  assert.doesNotMatch(detail, /Create editable override/);
+  assert.match(detail, /The shared binding is now adapted/);
+  assert.doesNotMatch(detail, /useCreateDocumentCustomization/);
 });
 
 test("publish options and response cache stay scoped to the selected exact edition", async () => {
@@ -147,7 +149,7 @@ test("publish options and response cache stay scoped to the selected exact editi
   assert.doesNotMatch(detail, /\{sortedRevisions\.map\(rev => \(\s*<option/);
   assert.match(detail, /const targetParams = \{ market: selectedMarket, locale: selectedLocale \};/);
   assert.match(detail, /setQueryData\(getGetDocumentQueryKey\(id!, targetParams\), updated\)/);
-  assert.match(detail, /if \(market === selectedMarket && locale === selectedLocale\) return/);
+  assert.match(detail, /if \(market === selectedMarket && locale === selectedLocale\) \{/);
   assert.match(detail, /Destination impact/);
   assert.match(detail, /pendingDestinationChanges/);
 });

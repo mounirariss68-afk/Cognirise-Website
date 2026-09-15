@@ -74,23 +74,29 @@ function isDirectContentField(path: string) {
 function Requirement({ required }: { required?: boolean }) {
   return <span className={required ? "text-destructive" : "text-muted-foreground"}>{required ? "(required)" : "(optional)"}</span>;
 }
+
+function RestoreField({ path, label }: { path?: string; label: string }) {
+  const overrides = useOverrides();
+  if (!path || !overrides.isAdapted || !overrides.operations.some((operation) => operation.path === path || operation.path.startsWith(`${path}.`) || operation.path.startsWith(`${path}[`))) return null;
+  return <Button type="button" size="sm" variant="link" className="h-auto px-0 text-xs" disabled={!overrides.canEdit} onClick={() => overrides.onReset?.(path)} aria-label={`Restore ${label} to shared content`}>Restore to shared content</Button>;
+}
 function Field({ label, value, onChange, placeholder, type = "text", required, error, path }: {
   label: string; value: unknown; onChange: (value: string) => void; placeholder?: string; type?: string; required?: boolean; error?: string; path?: string;
 }) {
   const id = path ? contentFieldId(path) : undefined;
-  return <div className="space-y-2"><Label htmlFor={id}>{label} <Requirement required={required} /></Label><Input id={id} data-field-path={path} aria-label={label} aria-invalid={Boolean(error)} type={type} value={typeof value === "string" || typeof value === "number" ? value : ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
+  return <div className="space-y-2"><Label htmlFor={id}>{label} <Requirement required={required} /></Label><Input id={id} data-field-path={path} aria-label={label} aria-invalid={Boolean(error)} type={type} value={typeof value === "string" || typeof value === "number" ? value : ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}<RestoreField path={path} label={label} /></div>;
 }
 function Area({ label, value, onChange, placeholder, rows = 4, required, error, path }: {
   label: string; value: string; onChange: (value: string) => void; placeholder?: string; rows?: number; required?: boolean; error?: string; path?: string;
 }) {
   const id = path ? contentFieldId(path) : undefined;
-  return <div className="space-y-2"><Label htmlFor={id}>{label} <Requirement required={required} /></Label><Textarea id={id} data-field-path={path} aria-label={label} aria-invalid={Boolean(error)} rows={rows} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
+  return <div className="space-y-2"><Label htmlFor={id}>{label} <Requirement required={required} /></Label><Textarea id={id} data-field-path={path} aria-label={label} aria-invalid={Boolean(error)} rows={rows} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{error && <p role="alert" className="text-xs text-destructive">{error}</p>}<RestoreField path={path} label={label} /></div>;
 }
 function Choice({ label, value, options, onChange, required, error, path }: {
   label: string; value: string; options: string[]; onChange: (value: string) => void; required?: boolean; error?: string; path?: string;
 }) {
   const id = path ? contentFieldId(path) : undefined;
-  return <div className="space-y-2"><Label htmlFor={id}>{label} <Requirement required={required} /></Label><Select value={value || undefined} onValueChange={onChange}><SelectTrigger id={id} data-field-path={path} aria-label={label} aria-invalid={Boolean(error)}><SelectValue placeholder={`Select ${label.toLowerCase()}`} /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem value={option} key={option}>{option.replaceAll("-", " ")}</SelectItem>)}</SelectContent></Select>{error && <p role="alert" className="text-xs text-destructive">{error}</p>}</div>;
+  return <div className="space-y-2"><Label htmlFor={id}>{label} <Requirement required={required} /></Label><Select value={value || undefined} onValueChange={onChange}><SelectTrigger id={id} data-field-path={path} aria-label={label} aria-invalid={Boolean(error)}><SelectValue placeholder={`Select ${label.toLowerCase()}`} /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem value={option} key={option}>{option.replaceAll("-", " ")}</SelectItem>)}</SelectContent></Select>{error && <p role="alert" className="text-xs text-destructive">{error}</p>}<RestoreField path={path} label={label} /></div>;
 }
 
 function StringList({ label, value, onChange, required = false, maximum }: {
@@ -99,11 +105,12 @@ function StringList({ label, value, onChange, required = false, maximum }: {
   const items = stringListItems(value);
   return <section className="space-y-3"><div className="flex items-center justify-between"><Label>{label} <Requirement required={required} /></Label><Button type="button" size="sm" variant="outline" disabled={maximum !== undefined && items.length >= maximum} onClick={() => onChange(addStringListItem(items))}>Add item</Button></div>{items.map((item, index) => <div key={index} className="flex gap-2"><Input value={item} onChange={(event) => onChange(changeStringListItem(items, index, event.target.value))} aria-label={`${label} ${index + 1}`} /><Button type="button" variant="ghost" onClick={() => onChange(removeStringListItem(items, index))}>Remove</Button></div>)}{items.length === 0 && <p className="text-xs text-muted-foreground">No items added.</p>}</section>;
 }
-export function ContentEditor({ kind, value, onChange, errors, readinessPaths = [], industrySection }: {
+export function ContentEditor({ kind, value, onChange, errors, publicationErrors = [], readinessPaths = [], industrySection }: {
   kind: CmsDocumentKind;
   value: Content;
   onChange: (content: Content) => void;
   errors: string[];
+  publicationErrors?: string[];
   /** Canonical publish/edition paths used only to register direct focus targets. */
   readinessPaths?: string[];
   /** Industry documents are edited through the fixed visual workspace. */
@@ -111,13 +118,14 @@ export function ContentEditor({ kind, value, onChange, errors, readinessPaths = 
 }) {
   const overrides = useOverrides();
   const editorRef = React.useRef<HTMLDivElement>(null);
+  const compactValidation = ["partner", "platform", "industry", "framework", "office", "case-study", "publication"].includes(kind);
   // The regular document PATCH remains the persistence path.  This only keeps
   // the field indicator truthful while that PATCH is pending.
   const set = (key: string, next: unknown) => {
     overrides.onOverride?.(`content.${key}`, next);
     onChange({ ...value, schemaVersion: 1, [key]: next });
   };
-  const fieldErrors = contentErrorMap(errors);
+  const fieldErrors = contentErrorMap([...errors, ...publicationErrors.map((error) => error.replace(/^content\./, ""))]);
   React.useLayoutEffect(() => {
     const root = editorRef.current;
     if (!root) return;
@@ -169,7 +177,9 @@ export function ContentEditor({ kind, value, onChange, errors, readinessPaths = 
 
   return (
     <div ref={editorRef} className="space-y-6">
-      {errors.length > 0 && <div role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-4"><p className="font-semibold text-destructive">Fix these content-field issues before saving this draft:</p><p className="mt-1 text-xs text-muted-foreground">Drafts may remain incomplete; publication readiness is checked separately. These errors identify values that cannot be saved under the current contract.</p><ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}
+      {errors.length > 0 && (compactValidation
+        ? <details className="rounded-md border border-destructive/30 p-3"><summary className="cursor-pointer text-xs text-destructive">{errors.length} field{errors.length === 1 ? "" : "s"} need attention before saving</summary><ul className="mt-2 space-y-1 text-xs">{errors.map((error) => <li key={error}><button type="button" className="text-left underline" onClick={() => { const target = document.getElementById(contentFieldId(readinessPath(error))); target?.scrollIntoView({ block: "center" }); target?.focus(); }}>{error}</button></li>)}</ul></details>
+        : <div role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-4"><p className="font-semibold text-destructive">Fix these content-field issues before saving this draft:</p><p className="mt-1 text-xs text-muted-foreground">Drafts may remain incomplete; publication readiness is checked separately. These errors identify values that cannot be saved under the current contract.</p><ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>)}
 
       {kind === "person" && <>
         <div className="grid gap-4 sm:grid-cols-2">

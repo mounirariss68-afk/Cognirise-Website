@@ -37,6 +37,7 @@ Object.defineProperty(dom.window.HTMLElement.prototype, "scrollIntoView", { valu
 const listeners = new Set<() => void>();
 let currentLocation = "/content/document-1";
 let currentSearch = "";
+let navigateLocation: (next: string) => void = () => {};
 const documentBase = {
   id: "document-1",
   kind: "site-configuration",
@@ -176,7 +177,7 @@ if (typeof (mock as typeof mock & { module?: unknown }).module !== "function") {
 mock.module("wouter", {
   namedExports: {
     useRoute: () => [true, { id: "document-1" }],
-    useLocation: () => [currentLocation, () => {}],
+    useLocation: () => [currentLocation, navigateLocation],
     useSearch: () => currentSearch,
   },
 });
@@ -286,7 +287,6 @@ mock.module("@workspace/api-client-react", {
     useRestoreDocument: () => restoreMutation,
     useDeleteDocument: () => inertMutation,
     useRollbackDocument: () => inertMutation,
-    useCreateDocumentEditionOverride: () => inertMutation,
     useReviewDocumentAvailability: () => inertMutation,
     useSelectDocumentAvailabilitySource: () => inertMutation,
     usePublishDocumentAvailability: () => publishAvailabilityMutation,
@@ -296,6 +296,7 @@ mock.module("@workspace/api-client-react", {
     usePublishDocumentMarketAvailability: () => inertMutation,
     useAddDocumentReviewComment: () => inertMutation,
     useRejectDocumentRevision: () => inertMutation,
+    useCreateDocumentEditionOverride: () => inertMutation,
     useEstablishSharedMarketBaseline: () => baselineMutation,
     useBindSharedMarketEdition: () => bindSharedMutation,
     useSaveSharedMarketOverrides: () => sharedOverrideMutation,
@@ -879,7 +880,7 @@ test("managed adapted publication omits legacy availability version and presents
   };
   const view = await renderDetail(adaptedDocument);
   try {
-    assert.match(view.container.textContent ?? "", /Market adaptation/);
+    assert.match(view.container.textContent ?? "", /Content source/);
     await React.act(async () => button(view.container, "Publish...").click());
     const dialog = document.body.textContent ?? "";
     assert.match(dialog, /Publish Customization/);
@@ -1151,7 +1152,37 @@ test("rendered detail preserves evidence for malformed success and known committ
 
 test("restricted editor can create a target customization without loading shared content", async () => {
   currentSession = { user: { role: "editor", marketCodes: ["ksa"] } };
-  currentEditions = [];
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en", enabled: true },
+  ];
+  currentEditions = [{ ...edition, market: "ksa", locale: "en", revisionId: "ksa-revision" }];
+  currentSharedMatrix = {
+    baselines: [{
+      id: "baseline-en",
+      documentId: "document-1",
+      locale: "en",
+      revisionId: "baseline-revision-en",
+      revisionNumber: 2,
+      sourceRevisionId: null,
+      snapshot: { ...documentBase, seo: undefined },
+      mediaReferences: [],
+      createdAt: new Date("2026-01-01"),
+    }],
+    bindings: [{
+      id: "ksa-binding",
+      documentId: "document-1",
+      marketEditionId: "ksa-edition",
+      locale: "en",
+      mode: "shared",
+      baselineId: "baseline-en",
+      baselineRevisionId: "baseline-revision-en",
+      version: 1,
+      operations: [],
+      materializedRevisionId: null,
+      translationState: "current",
+    }],
+  };
   currentAvailability = {
     documentId: "document-1",
     draftVersion: 1,
@@ -1184,11 +1215,200 @@ test("restricted editor can create a target customization without loading shared
     const customize = button(view.container, "Customize for this edition");
     assert.equal(customize.disabled, false, "target-market authority must be sufficient to start a customization");
     assert.equal(view.container.querySelector("#document-title"), null, "restricted editors never load shared source content");
+    await React.act(async () => customize.click());
+    assert.equal(bindSharedInput?.data.mode, "adapted");
+    assert.equal(bindSharedInput?.data.baselineId, "baseline-en");
+    assert.equal(bindSharedInput?.data.baselineRevisionId, "baseline-revision-en");
+    assert.equal(bindSharedInput?.data.expectedDestinationRevisionId, "ksa-revision");
+    assert.equal(bindSharedInput?.data.version, 1);
   } finally {
     await view.unmount();
     currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
     currentEditions = [edition];
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
     currentAvailability = undefined;
+  }
+});
+
+test("restricted bare links react to the neutral matrix without opening an editable shared baseline", async () => {
+  currentSession = { user: { role: "editor", marketCodes: ["ksa"] } };
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en", enabled: true },
+  ];
+  currentEditions = [{ ...edition, market: "ksa", locale: "en", revisionId: "ksa-revision" }];
+  currentAvailability = {
+    documentId: "document-1",
+    draftVersion: 1,
+    reviewedVersion: null,
+    publishedVersion: 0,
+    sharedSource: {
+      editionId: "internal-source",
+      revisionId: "shared-revision",
+      market: "shared-source",
+      locale: "und",
+    },
+    affectedEditions: [],
+    items: [{
+      marketEditionId: "ksa-edition",
+      market: "ksa",
+      locale: "en",
+      displayName: "KSA",
+      stagedDecision: "inherit",
+      reviewedDecision: null,
+      publishedDecision: "inherit",
+      publishedEffectiveAvailable: true,
+      pending: false,
+      customized: false,
+    }],
+  };
+  currentSharedMatrix = {
+    baselines: [{
+      id: "bare-link-baseline",
+      documentId: "document-1",
+      locale: "en",
+      revisionId: "bare-link-baseline-revision",
+      revisionNumber: 2,
+      sourceRevisionId: null,
+      snapshot: {
+        slug: "contact-email",
+        title: "Neutral title",
+        summary: "Neutral summary",
+        content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "neutral@example.com" },
+        mediaIds: [],
+      },
+      mediaReferences: [],
+    }],
+    bindings: [{
+      id: "bare-link-binding",
+      documentId: "document-1",
+      marketEditionId: "ksa-edition",
+      locale: "en",
+      mode: "shared",
+      baselineId: "bare-link-baseline",
+      baselineRevisionId: "bare-link-baseline-revision",
+      version: 3,
+      operations: [],
+      materializedRevisionId: null,
+      translationState: "current",
+    }],
+  };
+  currentSearch = "";
+  currentLocation = "/content/document-1";
+  navigateLocation = (next) => {
+    currentLocation = next;
+    currentSearch = next.includes("?") ? `?${next.split("?")[1]}` : "";
+    notify();
+  };
+  const view = await renderDetail({ ...documentBase, title: "Regional title" });
+  try {
+    // The matrix and selected edition settle through the mounted query
+    // subscriptions, rather than relying on a precomputed URL mock.
+    await React.act(async () => {
+      notify();
+      await Promise.resolve();
+    });
+    assert.equal(currentSearch, "", "restricted bare links must not redirect to context=shared");
+    assert.ok(view.container.querySelector("#document-title"), "the assigned regional editor remains usable");
+    assert.equal(view.container.querySelector("#shared-baseline-title"), null, "restricted editors never receive an editable neutral form");
+    assert.ok(button(view.container, "Customize this market"), "the assigned destination keeps its customization path");
+    await React.act(async () => button(view.container, "Customize this market").click());
+    assert.equal(bindSharedInput?.data.mode, "adapted");
+    assert.equal(bindSharedInput?.data.marketEditionId, "ksa-edition");
+    assert.equal(bindSharedInput?.data.expectedDestinationRevisionId, "ksa-revision");
+  } finally {
+    navigateLocation = () => {};
+    currentSearch = "";
+    currentLocation = "/content/document-1";
+    await view.unmount();
+    currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
+    currentDocument = documentBase;
+    currentEditions = [edition];
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentAvailability = undefined;
+    bindSharedInput = undefined;
+  }
+});
+
+test("restricted explicit shared context is read-only and cannot invoke baseline save", async () => {
+  currentSession = { user: { role: "editor", marketCodes: ["ksa"] } };
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en", enabled: true },
+  ];
+  currentEditions = [{ ...edition, market: "ksa", locale: "en", revisionId: "ksa-revision" }];
+  currentAvailability = {
+    documentId: "document-1",
+    draftVersion: 1,
+    reviewedVersion: null,
+    publishedVersion: 0,
+    sharedSource: {
+      editionId: "internal-source",
+      revisionId: "shared-revision",
+      market: "shared-source",
+      locale: "und",
+    },
+    affectedEditions: [],
+    items: [],
+  };
+  currentSharedMatrix = {
+    baselines: [{
+      id: "explicit-shared-baseline",
+      documentId: "document-1",
+      locale: "en",
+      revisionId: "explicit-shared-revision",
+      revisionNumber: 2,
+      sourceRevisionId: null,
+      snapshot: {
+        slug: "contact-email",
+        title: "Neutral title",
+        summary: null,
+        content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "neutral@example.com" },
+        mediaIds: [],
+      },
+      mediaReferences: [],
+    }],
+    bindings: [{
+      id: "explicit-shared-binding",
+      documentId: "document-1",
+      marketEditionId: "ksa-edition",
+      locale: "en",
+      mode: "shared",
+      baselineId: "explicit-shared-baseline",
+      baselineRevisionId: "explicit-shared-revision",
+      version: 1,
+      operations: [],
+      materializedRevisionId: null,
+      translationState: "current",
+    }],
+  };
+  currentSearch = "?context=shared&locale=en";
+  currentLocation = `/content/document-1${currentSearch}`;
+  const view = await renderDetail({ ...documentBase, title: "Regional title" });
+  try {
+    assert.equal(currentSearch, "?context=shared&locale=en");
+    const title = view.container.querySelector<HTMLInputElement>("#shared-baseline-title");
+    assert.ok(title, "explicit shared context still offers a read-only neutral preview");
+    assert.equal(title.disabled, true);
+    const save = button(view.container, "Save shared content");
+    assert.equal(save.disabled, true, "the shared toolbar save stays disabled without administrator authority");
+    assert.equal(view.container.querySelector('[data-testid="shared-baseline-save"]'), null);
+    await React.act(async () => save.click());
+    assert.equal(pendingBaselineSave, undefined, "restricted shared context never invokes the administrator-only save endpoint");
+    assert.equal(view.container.querySelector('[data-testid="preview-failure"]'), null);
+  } finally {
+    currentSearch = "";
+    currentLocation = "/content/document-1";
+    await view.unmount();
+    currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
+    currentDocument = documentBase;
+    currentEditions = [edition];
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentAvailability = undefined;
+    pendingBaselineSave = undefined;
   }
 });
 
@@ -1292,6 +1512,19 @@ test("a full-authority editor defaults to shared content before an existing cust
 });
 
 test("the source destination can start a customization", async () => {
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentSharedMatrix = {
+    baselines: [{
+      id: "source-baseline", documentId: "document-1", locale: "en-US",
+      revisionId: "source-baseline-revision", revisionNumber: 1, sourceRevisionId: null,
+      snapshot: {}, mediaReferences: [],
+    }],
+    bindings: [{
+      id: "source-binding", documentId: "document-1", marketEditionId: "uae-edition", locale: "en-US",
+      mode: "shared", baselineId: "source-baseline", baselineRevisionId: "source-baseline-revision",
+      version: 1, operations: [], materializedRevisionId: "revision-1", translationState: "current",
+    }],
+  };
   const view = await renderDetail();
   try {
     const editionsTab = [...view.container.querySelectorAll<HTMLButtonElement>('[role="tab"]')]
@@ -1305,6 +1538,8 @@ test("the source destination can start a customization", async () => {
     assert.equal(customize.disabled, false);
   } finally {
     await view.unmount();
+    currentMarkets = [{ code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
   }
 });
 
@@ -1659,12 +1894,53 @@ test("shared edition panel renders real unbound exact context without inventing 
   }
 });
 
+test("compact shared controls hide customization and disable restores outside the destination permission", async () => {
+  currentSession = { user: { role: "editor", marketCodes: ["ksa"] } };
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentAvailability = {
+    documentId: "document-1", draftVersion: 1, reviewedVersion: null, publishedVersion: 1,
+    sharedSource: null, affectedEditions: [], items: [{
+      marketEditionId: "uae-edition", market: "uae", locale: "en-US", displayName: "UAE",
+      stagedDecision: "show", reviewedDecision: null, publishedDecision: "show",
+      publishedEffectiveAvailable: true, pending: false, customized: true,
+    }],
+  };
+  currentSharedMatrix = {
+    baselines: [{
+      id: "compact-baseline", documentId: "document-1", locale: "en-US", revisionId: "compact-revision",
+      revisionNumber: 2, sourceRevisionId: null, snapshot: {}, mediaReferences: [],
+    }],
+    bindings: [{
+      id: "compact-binding", documentId: "document-1", marketEditionId: "uae-edition", locale: "en-US",
+      mode: "adapted", baselineId: "compact-baseline", baselineRevisionId: "compact-revision", version: 2,
+      operations: [{ op: "replace", path: "title", value: "local title" }], materializedRevisionId: "revision-1",
+      translationState: "current",
+    }],
+  };
+  const view = await renderDetail({ ...documentBase, kind: "platform" });
+  try {
+    assert.equal(
+      [...view.container.querySelectorAll<HTMLButtonElement>("button")].some((item) => item.textContent?.includes("Customize this market")),
+      false,
+    );
+    assert.match(view.container.textContent ?? "", /Market-specific fields/);
+    const restore = view.container.querySelector<HTMLButtonElement>('[aria-label*="Restore"]');
+    assert.equal(restore, null, "restore is not exposed without destination permission");
+  } finally {
+    await view.unmount();
+    currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
+    currentMarkets = [{ code: "uae", displayName: "UAE", defaultLocale: "en-US" }];
+    currentAvailability = undefined;
+    currentSharedMatrix = { baselines: [], bindings: [] };
+  }
+});
+
 test("shared baseline editor saves an edited neutral successor without submitting the regional draft", async () => {
   currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
   currentSharedMatrix = {
     baselines: [{
       id: "baseline-1", documentId: "document-1", locale: "en-US",
-      revisionId: "baseline-revision-1", revisionNumber: 3, sourceRevisionId: "revision-1",
+       revisionId: "baseline-revision-1", revisionNumber: 3, sourceRevisionId: null,
       snapshot: { slug: "contact-email", title: "Neutral title", summary: null, content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "neutral@example.com" }, mediaIds: [], seo: null },
       mediaReferences: [], createdAt: new Date("2026-01-01"),
     }],
@@ -1677,7 +1953,7 @@ test("shared baseline editor saves an edited neutral successor without submittin
     assert.equal(title.value, "Neutral title");
     await change(title, "Changed neutral title");
     await React.act(async () => button(document.body, "Save shared baseline").click());
-    assert.equal(pendingBaselineSave?.input.data.sourceRevisionId, "revision-1");
+     assert.equal(pendingBaselineSave?.input.data.sourceRevisionId, undefined, "neutral baseline successors omit real-market source lineage");
     assert.equal(pendingBaselineSave?.input.data.expectedRevisionNumber, 3);
     assert.equal(pendingBaselineSave?.input.data.snapshot.title, "Changed neutral title");
     assert.equal(pendingSave, undefined, "shared editing never submits the regional draft PATCH");
@@ -1685,6 +1961,160 @@ test("shared baseline editor saves an edited neutral successor without submittin
     await view.unmount();
     pendingBaselineSave = undefined;
     currentMarkets = [{ code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+  }
+});
+
+test("saved neutral content is the bare-link default while the regional revision remains intact", async () => {
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentEditions = [{ ...edition, revisionId: "regional-revision", revisionNumber: 7 }];
+  currentAvailability = {
+    documentId: "document-1",
+    draftVersion: 7,
+    reviewedVersion: null,
+    publishedVersion: 1,
+    sharedSource: { editionId: "uae-edition", revisionId: "regional-revision", market: "uae", locale: "en-US" },
+    affectedEditions: [],
+    items: [{
+      marketEditionId: "uae-edition", market: "uae", locale: "en-US", displayName: "UAE",
+      stagedDecision: "show", reviewedDecision: null, publishedDecision: "show",
+      publishedEffectiveAvailable: true, pending: false, customized: false,
+    }],
+  };
+  const neutralSnapshot = {
+    slug: "contact-email", title: "Neutral title", summary: "Neutral summary",
+    content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "neutral@example.com" },
+    mediaIds: [], seo: null,
+  };
+  currentSharedMatrix = {
+    baselines: [{
+      id: "baseline-1", documentId: "document-1", locale: "en-US",
+      revisionId: "baseline-revision-1", revisionNumber: 3, sourceRevisionId: null,
+      snapshot: neutralSnapshot, mediaReferences: [],
+    }],
+    bindings: [{
+      id: "binding-1", documentId: "document-1", marketEditionId: "uae-edition", locale: "en-US",
+      mode: "adapted", baselineId: "baseline-1", baselineRevisionId: "baseline-revision-1",
+      version: 2, operations: [], materializedRevisionId: "regional-revision",
+    }],
+  };
+  currentDocument = { ...documentBase, revisionNumber: 7, currentRevisionId: "regional-revision", summary: "Regional summary" };
+  currentSearch = "";
+  currentLocation = "/content/document-1";
+  navigateLocation = (next) => {
+    currentLocation = next;
+    currentSearch = next.includes("?") ? `?${next.split("?")[1]}` : "";
+    notify();
+  };
+  const view = await renderDetail(currentDocument);
+  try {
+    await React.act(async () => {});
+    assert.match(view.container.textContent ?? "", /Neutral summary/);
+    const sharedTitle = document.body.querySelector<HTMLInputElement>("#shared-baseline-title");
+    assert.ok(sharedTitle);
+    await change(sharedTitle, "Saved neutral title");
+    await React.act(async () => button(document.body, "Save shared content").click());
+    assert.equal(pendingSave, undefined);
+    assert.equal(pendingBaselineSave?.input.data.sourceRevisionId, undefined);
+    currentSharedMatrix = {
+      ...currentSharedMatrix,
+      baselines: [{
+        ...currentSharedMatrix.baselines[0],
+        revisionId: "baseline-revision-2",
+        revisionNumber: 4,
+        snapshot: { ...neutralSnapshot, title: "Saved neutral title" },
+      }],
+    };
+    await React.act(async () => {
+      pendingBaselineSave?.options.onSuccess();
+      pendingBaselineSave = undefined;
+      notify();
+    });
+    await view.unmount();
+    currentSearch = "";
+    currentLocation = "/content/document-1";
+    const reopened = await renderDetail(currentDocument);
+    try {
+      await React.act(async () => {});
+      assert.match(reopened.container.textContent ?? "", /Neutral summary/);
+      assert.equal(
+        reopened.container.querySelector<HTMLInputElement>("#shared-baseline-title")?.value,
+        "Saved neutral title",
+      );
+    } finally {
+      await reopened.unmount();
+    }
+    assert.equal(currentDocument.currentRevisionId, "regional-revision");
+  } finally {
+    if (view.container.isConnected) await view.unmount();
+    navigateLocation = () => {};
+    currentSearch = "";
+    currentLocation = "/content/document-1";
+    currentAvailability = undefined;
+    currentMarkets = [{ code: "uae", displayName: "UAE", defaultLocale: "en-US" }];
+    currentEditions = [edition];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    currentDocument = documentBase;
+  }
+});
+
+test("shared baseline editor surfaces title and content validation before saving", async () => {
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentSharedMatrix = {
+    baselines: [{
+      id: "invalid-baseline", documentId: "document-1", locale: "en-US",
+      revisionId: "invalid-baseline-revision", revisionNumber: 2, sourceRevisionId: null,
+      snapshot: {
+        slug: "contact-email", title: "", summary: null,
+        content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "not-an-email" },
+        mediaIds: [],
+      },
+      mediaReferences: [],
+    }],
+    bindings: [],
+  };
+  const view = await renderDetail({ ...documentBase, kind: "site-configuration" });
+  try {
+    await React.act(async () => button(view.container, "Edit Shared").click());
+    assert.match(document.body.textContent ?? "", /Add a display title before saving this shared baseline/);
+    assert.match(document.body.textContent ?? "", /Enter a valid email address/);
+    assert.equal(button(document.body, "Save shared baseline").disabled, true);
+  } finally {
+    await view.unmount();
+    currentMarkets = [{ code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+  }
+});
+
+test("discarding shared baseline edits resets the draft before reopening the same revision", async () => {
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentSharedMatrix = {
+    baselines: [{
+      id: "discard-baseline", documentId: "document-1", locale: "en-US",
+      revisionId: "discard-baseline-revision", revisionNumber: 2, sourceRevisionId: null,
+      snapshot: {
+        slug: "contact-email", title: "Original neutral title", summary: null,
+        content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "neutral@example.com" },
+        mediaIds: [],
+      },
+      mediaReferences: [],
+    }],
+    bindings: [],
+  };
+  const originalConfirm = window.confirm;
+  window.confirm = () => true;
+  const view = await renderDetail({ ...documentBase, kind: "site-configuration" });
+  try {
+    await React.act(async () => button(view.container, "Edit Shared").click());
+    const title = document.body.querySelector<HTMLInputElement>("#shared-baseline-title")!;
+    await change(title, "Abandoned neutral title");
+    await React.act(async () => button(document.body, "Cancel").click());
+    await React.act(async () => button(view.container, "Edit Shared").click());
+    assert.equal(document.body.querySelector<HTMLInputElement>("#shared-baseline-title")?.value, "Original neutral title");
+  } finally {
+    window.confirm = originalConfirm;
+    await view.unmount();
+    currentMarkets = [{ code: "uae", displayName: "UAE", defaultLocale: "en-US" }];
     currentSharedMatrix = { baselines: [], bindings: [] };
   }
 });
@@ -1702,6 +2132,66 @@ test("shared baseline payload omits null SEO and retains legacy root media pins"
   assert.equal("seo" in payload, false, "cms snapshot metadata permits omitted SEO but rejects seo: null");
   assert.deepEqual(payload.mediaIds, ["11111111-1111-4111-8111-111111111111"]);
   assert.equal(validateCmsSnapshot("site-configuration", payload, "draft").success, true);
+});
+
+test("inline neutral editing keeps dirty input through a failed save and protects context navigation", async () => {
+  currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
+  currentSearch = "?context=shared&locale=en-US";
+  currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+  currentEditions = [{ ...edition, market: "uae", locale: "en-US", revisionId: "revision-1" }];
+  currentSharedMatrix = {
+    baselines: [{
+      id: "baseline-inline",
+      documentId: "document-1",
+      locale: "en-US",
+      revisionId: "baseline-inline-revision-1",
+      revisionNumber: 3,
+      sourceRevisionId: null,
+      snapshot: {
+        slug: "contact-email",
+        title: "Neutral title",
+        summary: null,
+        content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "neutral@example.com" },
+        mediaIds: [],
+      },
+      mediaReferences: [],
+      createdAt: new Date("2026-01-01"),
+    }],
+    bindings: [],
+  };
+  const originalConfirm = window.confirm;
+  window.confirm = () => false;
+  const view = await renderDetail({ ...documentBase, title: "Regional title" });
+  try {
+    const title = view.container.querySelector<HTMLInputElement>("#shared-baseline-title")!;
+    await change(title, "Unsaved neutral title");
+    await React.act(async () => {});
+    assert.equal(button(view.container, "Save shared content").disabled, false);
+    await React.act(async () => button(view.container, "Save shared content").click());
+    assert.ok(pendingBaselineSave, "the top-bar save action invokes the inline shared baseline save");
+    assert.equal(pendingBaselineSave?.input.data.sourceRevisionId, undefined);
+    await React.act(async () => pendingBaselineSave?.options.onError({ status: 409, data: { error: "The neutral baseline changed" } }));
+    assert.equal(title.value, "Unsaved neutral title", "a failed neutral save keeps the inline draft");
+
+    const link = document.createElement("a");
+    link.href = "/dashboard";
+    document.body.append(link);
+    const navigation = new dom.window.MouseEvent("click", { bubbles: true, cancelable: true });
+    link.dispatchEvent(navigation);
+    link.remove();
+    assert.equal(navigation.defaultPrevented, true, "dirty shared context blocks internal navigation");
+    const beforeUnload = new dom.window.Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(beforeUnload);
+    assert.equal(beforeUnload.defaultPrevented, true, "dirty shared context blocks tab navigation");
+  } finally {
+    window.confirm = originalConfirm;
+    currentSearch = "";
+    currentEditions = [edition];
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    pendingBaselineSave = undefined;
+    await view.unmount();
+  }
 });
 
 test("resetting a persisted shared field cannot discard a dirty local title or its navigation guard", async () => {
@@ -1795,7 +2285,10 @@ test("changing the exact edition clears pending field markers rather than carryi
     });
     const ksa = [...document.body.querySelectorAll<HTMLElement>('[role="option"]')].find((option) => option.textContent?.includes("KSA"));
     assert.ok(ksa);
-    await React.act(async () => ksa.click());
+    await React.act(async () => {
+      ksa.click();
+      notify();
+    });
     assert.equal(view.container.querySelector('[aria-label="Reset Display Title (required) to Shared"]'), null);
   } finally {
     window.confirm = originalConfirm;
@@ -1851,7 +2344,7 @@ test("edition header uses exact workflow and availability state rather than a fi
   };
   const view = await renderDetail();
   try {
-    assert.match(view.container.textContent ?? "", /Not available/);
+    assert.match(view.container.textContent ?? "", /not available/i);
     assert.doesNotMatch(view.container.textContent ?? "", /\bLive\b/);
   } finally {
     await view.unmount();
@@ -1884,7 +2377,7 @@ test("stable-array conflicts use unique decision identities while showing select
   };
   const view = await renderDetail();
   try {
-    await React.act(async () => button(view.container, "Compare to Shared").click());
+    await React.act(async () => button(view.container, "Compare shared update").click());
     const rendered = document.body.textContent ?? "";
     assert.equal((rendered.match(/content\.sections\[id=hero\]\.title/g) ?? []).length, 3, "same display path retains one choice per distinct operation");
     assert.match(rendered, /Old hero/);
@@ -2047,6 +2540,65 @@ test("explicit market reload waits for both catalogues and never briefly selects
   }
 });
 
+test("missing geography previews the neutral baseline and binds only the empty destination", async () => {
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en-US", enabled: true },
+  ];
+  currentSession = { user: { role: "administrator", marketCodes: ["uae", "ksa"] } };
+  currentEditions = [edition];
+  currentSharedMatrix = {
+    baselines: [{
+      id: "neutral-baseline", documentId: "document-1", locale: "en-US", revisionId: "neutral-revision",
+      revisionNumber: 4, sourceRevisionId: null, snapshot: {
+        title: "Neutral contact", summary: "Shared summary",
+        content: { schemaVersion: 1, configuration: "contact-email", contactEmail: "shared@example.com" },
+      }, mediaReferences: [],
+    }],
+    bindings: [{
+      id: "ksa-binding", documentId: "document-1", marketEditionId: "ksa-edition", locale: "en-US",
+      mode: "shared", baselineId: "neutral-baseline", baselineRevisionId: "neutral-revision",
+      version: 8, operations: [], materializedRevisionId: null, translationState: "current",
+    }],
+  };
+  const view = await renderDetail();
+  try {
+    const market = view.container.querySelector<HTMLButtonElement>('[aria-label="Market"]')!;
+    await React.act(async () => {
+      market.dispatchEvent(new dom.window.MouseEvent("mousedown", { bubbles: true, button: 0 }));
+      market.click();
+    });
+    const ksa = [...document.body.querySelectorAll<HTMLElement>('[role="option"]')].find((option) => option.textContent?.includes("KSA"));
+    assert.ok(ksa);
+    await React.act(async () => {
+      ksa.click();
+      // The mock document endpoint normally returns the currently open exact
+      // edition. Once the geography changes, make that endpoint represent
+      // the real missing-destination response.
+      currentDocument = undefined;
+      notify();
+    });
+    assert.match(view.container.textContent ?? "", /No exact KSA · en-US edition exists yet/);
+    assert.equal(view.container.querySelector<HTMLInputElement>("#shared-baseline-title")?.value, "Neutral contact");
+    assert.ok(button(view.container, "Use shared content"));
+    assert.ok(button(view.container, "Customize for this market"));
+    await React.act(async () => button(view.container, "Customize for this market").click());
+    assert.equal(bindSharedInput?.data.expectedDestinationRevisionId, null);
+    assert.equal(bindSharedInput?.data.expectedActiveBaselineRevisionId, "neutral-revision");
+    assert.equal(bindSharedInput?.data.version, 8);
+    assert.equal(bindSharedInput?.data.mode, "adapted");
+    assert.equal(bindSharedInput?.data.marketEditionId, "ksa-edition");
+  } finally {
+    await view.unmount();
+    currentDocument = documentBase;
+    currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentEditions = [edition];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+    bindSharedInput = undefined;
+  }
+});
+
 test("frozen adapted bindings expose comparison and lineage acknowledgement, never a forbidden rebind", async () => {
   currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
   currentSharedMatrix = {
@@ -2204,8 +2756,10 @@ test("frozen adapted bindings expose comparison and lineage acknowledgement, nev
 });
 
 async function activateReadinessAction(container: ParentNode, path: string) {
+  const normalizedPath = path.replace(/\[(\d+)\]/g, ".$1");
   const issue = [...container.querySelectorAll<HTMLElement>("[data-readiness-issue]")]
-    .find((item) => item.textContent?.includes(`Path: ${path}`));
+    .find((item) => item.dataset.readinessIssue?.includes(normalizedPath)
+      || item.textContent?.includes(`Path: ${path}`));
   assert.ok(issue, `Expected actionable readiness issue for ${path}`);
   const action = issue.querySelector<HTMLButtonElement>("button");
   assert.ok(action, `Expected an action for ${path}`);
@@ -2279,6 +2833,32 @@ test("case-study publish readiness focuses its required organization descriptor 
   }
 });
 
+test("office editor uses compact readiness beside its fields rather than the full workflow card", async () => {
+  currentEditions = [{
+    ...edition,
+    readinessIssues: [{
+      category: "validation",
+      action: "edit",
+      message: "content.city: Add the public city.",
+    }],
+  }];
+  const view = await renderDetail({
+    ...documentBase,
+    kind: "office",
+    content: { schemaVersion: 1, city: "", address: "" },
+  });
+  try {
+    const readiness = view.container.querySelector<HTMLElement>('[data-testid="publication-readiness"]')!;
+    assert.ok(readiness.querySelector("details"), "office readiness stays compact");
+    assert.doesNotMatch(readiness.textContent ?? "", /Each issue applies to this selected exact edition/);
+    assert.match(view.container.textContent ?? "", /Add the public city/);
+  } finally {
+    await view.unmount();
+    currentDocument = documentBase;
+    currentEditions = [edition];
+  }
+});
+
 test("same-leaf nested readiness paths keep their own scoped fallback rather than focusing the first matching control", async () => {
   currentEditions = [{
     ...edition,
@@ -2299,18 +2879,18 @@ test("same-leaf nested readiness paths keep their own scoped fallback rather tha
   });
   try {
     const heroIssue = [...view.container.querySelectorAll<HTMLElement>("[data-readiness-issue]")]
-      .find((item) => item.textContent?.includes("Path: content.hero.heading"));
+      .find((item) => item.dataset.readinessIssue?.includes("content.hero.heading"));
     const sectionIssue = [...view.container.querySelectorAll<HTMLElement>("[data-readiness-issue]")]
-      .find((item) => item.textContent?.includes("Path: content.sections[0].heading"));
+      .find((item) => item.dataset.readinessIssue?.includes("content.sections.0.heading"));
     assert.ok(heroIssue);
     assert.ok(sectionIssue);
     await React.act(async () => {
-      button(heroIssue, "Find content correction").click();
+      heroIssue.querySelector<HTMLButtonElement>("button")!.click();
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
     assert.equal(document.activeElement, heroIssue);
     await React.act(async () => {
-      button(sectionIssue, "Find content correction").click();
+      sectionIssue.querySelector<HTMLButtonElement>("button")!.click();
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
     assert.equal(document.activeElement, sectionIssue);
