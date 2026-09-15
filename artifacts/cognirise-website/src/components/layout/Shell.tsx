@@ -10,6 +10,7 @@ import { ALLIANCE_PLATFORMS } from "@/lib/alliancePlatforms";
 import { useGetPublicConfiguration, useGetPublicNavigationSettings } from "@workspace/api-client-react";
 import { handleSamePageHashNavigation } from "@/lib/hashNavigation";
 import { isCurrentRouteDestination, routePath } from "@/lib/routeState";
+import { marketAwareDestination } from "@/lib/marketDestination";
 import { ReviewVersionSelect } from "./ReviewVersionSelect";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
@@ -130,6 +131,7 @@ const pageMeta: Record<string, { title: string; description: string }> = {
 /** These route components apply either their compiled baseline or the exact
  * authoritative CMS revision SEO after client navigation. */
 export const ROUTE_OWNED_METADATA_PATHS = new Set([
+  "/methodologies/guardrails-framework",
   "/methodologies/idao",
   "/methodologies/ai-use-case-prioritization",
   "/methodologies/ai-value-to-scale",
@@ -179,6 +181,7 @@ const compiledNavigation: NavigationItem[] = [
       { id: "methodologies.use-case-prioritization", label: "Use-Case Prioritization", href: "/methodologies/ai-use-case-prioritization" },
       { id: "methodologies.idao", label: "IDAO", href: "/methodologies/idao" },
       { id: "methodologies.agent-authority", label: "Agent Authority Model", href: "/methodologies/agent-authority-model" },
+      { id: "methodologies.guardrails", label: "Guardrails Framework", href: "/methodologies/guardrails-framework" },
     ]
   },
   {
@@ -484,7 +487,7 @@ export function Shell({
                 >
                   <Link
                     id={`desktop-nav-${item.id}`}
-                    href={item.href}
+                    href={marketAwareDestination(item.href, market, locale)}
                     className="group flex items-center gap-1.5 py-2 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-4"
                     aria-expanded={item.items ? activeDropdown === item.label : undefined}
                     aria-controls={item.items ? `desktop-menu-${item.id}` : undefined}
@@ -524,7 +527,7 @@ export function Shell({
                               )}
                             <li>
                               <Link 
-                                href={subItem.href}
+                                href={marketAwareDestination(subItem.href, market, locale)}
                                 aria-current={isCurrentDestination(subItem.href) ? "page" : undefined}
                                 className={`group flex items-center gap-3 rounded-sm text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2 ${
                                    isCurrentDestination(subItem.href) ? "text-[hsl(var(--brand-pink))]" : "text-[hsl(var(--brand-deep))] hover:text-[hsl(var(--brand-pink))]"
@@ -581,7 +584,7 @@ export function Shell({
               <div key={item.id} className="flex flex-col border-b border-border last:border-0">
                 <div className="flex items-center justify-between py-4">
                   <Link
-                    href={item.href}
+                    href={marketAwareDestination(item.href, market, locale)}
                     aria-current={!item.items && isCurrentDestination(item.href) ? "page" : undefined}
                     className={`rounded-sm text-xl font-display font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2 ${isCurrentSection(item.href) ? 'text-[hsl(var(--brand-pink))]' : 'text-[hsl(var(--brand-deep))]'}`}
                   >
@@ -615,7 +618,7 @@ export function Shell({
                         )}
                       <li>
                         <Link 
-                          href={subItem.href}
+                          href={marketAwareDestination(subItem.href, market, locale)}
                           aria-current={isCurrentDestination(subItem.href) ? "page" : undefined}
                           className={`rounded-sm text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2 ${
                              isCurrentDestination(subItem.href) ? "text-[hsl(var(--brand-pink))]" : "text-muted-foreground hover:text-[hsl(var(--brand-deep))]"

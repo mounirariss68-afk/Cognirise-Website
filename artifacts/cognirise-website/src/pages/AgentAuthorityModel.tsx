@@ -9,6 +9,7 @@ import { assetUrl } from "@/lib/assets";
 import { cmsMediaObjectPosition, type CmsRecord, cmsEntryRenderPolicy, contentRecord, resolveCmsMedia, text, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { marketAwareDestination } from "@/lib/marketDestination";
 import { useMarketStore } from "@/store/market";
 import {
   type HScore,
@@ -37,13 +38,6 @@ type GuardrailsRelatedLink = {
   body: string;
   href: "/methodologies/guardrails-framework";
 };
-
-export function marketAwareDestination(href: string, market: string, locale: string) {
-  const destination = new URL(href, "https://cognirise.ai");
-  destination.searchParams.set("market", market);
-  destination.searchParams.set("locale", locale);
-  return `${destination.pathname}${destination.search}${destination.hash}`;
-}
 
 /** A related framework is rendered only from a separately delivered public
  * edition. This prevents an Agent Authority page from revealing a draft,

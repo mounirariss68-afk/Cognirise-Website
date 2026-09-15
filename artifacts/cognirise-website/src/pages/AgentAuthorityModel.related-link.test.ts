@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { CmsRecord } from "@/lib/cms";
 import type { FrameworkContent } from "@workspace/api-zod";
-import { guardrailsRelatedLink, marketAwareDestination } from "./AgentAuthorityModel";
+import { guardrailsRelatedLink } from "./AgentAuthorityModel";
+import { marketAwareDestination } from "@/lib/marketDestination";
 
 type GuardrailsFrameworkContent = Extract<FrameworkContent, { template: "guardrails" }>;
 type GuardrailsRecord = CmsRecord<GuardrailsFrameworkContent>;
