@@ -165,30 +165,30 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     fields: [
       {
         id: "dimension",
-        label: "Dimensional Measurement",
-        sourceText: "|<-- 4500mm -->|",
-        extractedValue: "4500mm",
+        label: "Grid Spacing",
+        sourceText: "4500",
+        extractedValue: "4500 mm",
         confidence: "High",
-        evidence: "Detail A: Pump Assembly",
-        reviewerNote: "Printed dimension extracted directly; geometry marked 'Not to Scale'."
+        evidence: "Plan View: Grid 2 to 3 spacing",
+        reviewerNote: "Extracted from primary architectural dimension chain."
       },
       {
         id: "material",
         label: "Material Specification",
-        sourceText: "[Hatch] REINF. CONCRETE",
+        sourceText: "REINFORCED CONCRETE SLAB",
         extractedValue: "Reinforced Concrete",
         confidence: "High",
-        evidence: "Title Block: Material",
-        reviewerNote: "Extracted from text block. No hatch legend present for visual cross-check."
+        evidence: "General Notes & Hatching Legend",
+        reviewerNote: "Visual hatch pattern matched with legend description."
       },
       {
         id: "quantity",
-        label: "Quantity Revision",
-        sourceText: "Cloud Rev B (14 units)",
-        extractedValue: "14 units",
+        label: "Equipment Count",
+        sourceText: "P-101A, P-101B, P-101C",
+        extractedValue: "3 units (Rev B)",
         confidence: "Requires Review",
-        evidence: "Title Block: Revision",
-        reviewerNote: "Extracted '14 units' from revision note. Requires manual cross-check with original Revision B sheet."
+        evidence: "Plan View: Pump Skids & Revision Cloud",
+        reviewerNote: "Detected P-101C enclosed in Rev B cloud. Counted exactly three units. Verify design change."
       }
     ]
   }

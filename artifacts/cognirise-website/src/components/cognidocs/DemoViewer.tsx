@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { type DemoScenario } from "@/lib/cognidocs-content";
+import { EngineeringPlan } from "./EngineeringPlan";
 import engineeringImg from "@/assets/generated_images/cognidocs-engineering.jpg";
 import financeImg from "@/assets/generated_images/cognidocs-pulse-document-intelligence.jpg";
 
@@ -58,51 +59,6 @@ function FinanceFacsimile({ activeFieldId }: { activeFieldId: string }) {
   );
 }
 
-function EngineeringFacsimile({ activeFieldId }: { activeFieldId: string }) {
-  return (
-    <div className="border border-border p-4 sm:p-6 bg-[#f8f9fb] h-full flex flex-col font-mono text-xs shadow-inner relative z-0">
-      <div className="absolute inset-0 opacity-10 pointer-events-none -z-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #000 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-      
-      <div className="flex flex-col md:flex-row gap-6 justify-between h-full">
-        {/* Detail A Assembly */}
-        <div className="border-2 border-slate-300 p-4 bg-white shadow-sm flex-1 md:max-w-[260px]">
-           <div className="font-bold border-b border-slate-200 pb-2 mb-2 text-slate-500 uppercase tracking-widest text-[10px]">Detail A: Pump Assembly</div>
-           <div className="py-8 flex items-center justify-center border border-dashed border-slate-300 my-2">
-              <span className={`px-2 py-1 rounded transition-colors text-center inline-block ${activeFieldId === 'dimension' ? 'bg-[hsl(var(--brand-violet))]/10 text-[hsl(var(--brand-violet))] ring-1 ring-[hsl(var(--brand-violet))] font-bold' : 'text-slate-400'}`}>
-                |&lt;-- 4500mm --&gt;|
-              </span>
-           </div>
-           <div className="text-[9px] text-slate-400 text-center uppercase tracking-widest mt-2">Not to Scale</div>
-        </div>
-
-        {/* Title Block */}
-        <div className="border-2 border-slate-800 p-4 bg-white shadow-md flex-1 md:max-w-[280px] self-end md:self-auto flex flex-col justify-end">
-           <div className="border-b-2 border-slate-800 pb-2 mb-3 font-bold text-sm tracking-widest uppercase">Title Block</div>
-           <div className="grid grid-cols-[80px_1fr] gap-2 text-[10px] mb-2 border-b border-slate-100 pb-2">
-              <div className="text-slate-500 uppercase tracking-wider">Dwg No:</div>
-              <div className="font-bold">M-104</div>
-           </div>
-           <div className="grid grid-cols-[80px_1fr] gap-2 text-[10px] mb-2 border-b border-slate-100 pb-2">
-              <div className="text-slate-500 uppercase tracking-wider">Material:</div>
-              <div>
-                <span className={`px-1 py-0.5 rounded transition-colors inline-block ${activeFieldId === 'material' ? 'bg-[hsl(var(--brand-violet))]/10 text-[hsl(var(--brand-violet))] ring-1 ring-[hsl(var(--brand-violet))] font-bold' : 'font-bold'}`}>
-                  [Hatch] REINF. CONCRETE
-                </span>
-              </div>
-           </div>
-           <div className="grid grid-cols-[80px_1fr] gap-2 text-[10px]">
-              <div className="text-slate-500 uppercase tracking-wider">Revision:</div>
-              <div>
-                <span className={`px-1 py-0.5 rounded transition-colors inline-block ${activeFieldId === 'quantity' ? 'bg-amber-100 text-amber-900 ring-1 ring-amber-400 font-bold' : 'font-bold'}`}>
-                  Cloud Rev B (14 units)
-                </span>
-              </div>
-           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function DemoViewer({ scenario }: { scenario: DemoScenario }) {
   const [activeFieldId, setActiveFieldId] = useState(scenario.fields[0].id);
@@ -166,7 +122,7 @@ export function DemoViewer({ scenario }: { scenario: DemoScenario }) {
 
         <div className="flex min-w-0 flex-col gap-6 h-full">
           <div className="flex-1 min-w-0 min-h-[400px]">
-            {scenario.id === 'finance' ? <FinanceFacsimile activeFieldId={activeFieldId} /> : <EngineeringFacsimile activeFieldId={activeFieldId} />}
+            {scenario.id === 'finance' ? <FinanceFacsimile activeFieldId={activeFieldId} /> : <EngineeringPlan activeFieldId={activeFieldId} />}
           </div>
           
           <div className="flex items-center gap-6 border-t border-border pt-6">

@@ -158,6 +158,7 @@ async function pressKey(key, code, keyCode) {
       code,
       windowsVirtualKeyCode: keyCode,
       nativeVirtualKeyCode: keyCode,
+      ...(key === "Enter" && type === "keyDown" ? { text: "\r" } : {}),
     });
   }
   await delay(50);
@@ -530,30 +531,50 @@ try {
     assert.equal(engineering.scenarioTabs.find((tab) => /Engineering/i.test(tab.text))?.selected, "true");
     assert.equal(engineering.fieldTabs.length, 3, `${viewport.label}: expected three engineering source fields`);
     const engineeringPanel = engineering.panels.find((panel) => !panel.hidden);
-    assert.match(engineeringPanel?.text || "", /\|<-- 4500mm -->\|/);
-    assert.match(engineeringPanel?.text || "", /Detail A: Pump Assembly/);
-    assert.match(engineeringPanel?.text || "", /Printed dimension extracted directly; geometry marked 'Not to Scale'\./);
+    assert.match(engineeringPanel?.text || "", /4500 mm/);
+    assert.match(engineeringPanel?.text || "", /Plan View: Grid 2 to 3 spacing/);
+    assert.match(engineeringPanel?.text || "", /Extracted from primary architectural dimension chain/);
     assert.match(engineeringPanel?.text || "", /Reviewer Note/i);
     const engineeringSourceState = await evaluate(`(() => {
-      const source = [...document.querySelectorAll("span")].find((node) => node.textContent.trim() === "|<-- 4500mm -->|");
-      return Boolean(source && source.className.includes("ring-1"));
+      return Boolean(document.querySelector('[data-engineering-evidence="dimension"][data-active="true"]'));
     })()`);
     assert.equal(engineeringSourceState, true, `${viewport.label}: engineering source is not highlighted`);
 
-    await clickTab("/Quantity Revision/i", fieldTabSelector);
+    await clickTab("/Material Specification/i", fieldTabSelector);
+    assert.equal(await evaluate(`Boolean(document.querySelector('[data-engineering-evidence="material"][data-active="true"]'))`), true);
+    assert.match((await getLayout()).panels.find(panel => !panel.hidden)?.text || "", /Reinforced Concrete/);
+    await clickTab("/Equipment Count/i", fieldTabSelector);
     const quantity = await getLayout();
     assertNoHorizontalOverflow(quantity, `${viewport.label} after engineering source switch`);
-    assert.equal(quantity.fieldTabs.find((tab) => /Quantity Revision/i.test(tab.text))?.selected, "true");
+    assert.equal(quantity.fieldTabs.find((tab) => /Equipment Count/i.test(tab.text))?.selected, "true");
     const quantityPanel = quantity.panels.find((panel) => !panel.hidden);
-    assert.match(quantityPanel?.text || "", /14 units/);
+    assert.match(quantityPanel?.text || "", /3 units \(Rev B\)/);
     assert.match(quantityPanel?.text || "", /Requires Review/i);
-    assert.match(quantityPanel?.text || "", /Title Block: Revision/);
-    assert.match(quantityPanel?.text || "", /Requires manual cross-check with original Revision B sheet\./);
+    assert.match(quantityPanel?.text || "", /Plan View: Pump Skids & Revision Cloud/);
+    assert.match(quantityPanel?.text || "", /Counted exactly three units\. Verify design change\./);
     const quantitySourceState = await evaluate(`(() => {
-      const source = [...document.querySelectorAll("span")].find((node) => node.textContent.trim() === "Cloud Rev B (14 units)");
-      return Boolean(source && source.className.includes("ring-1"));
+      return Boolean(document.querySelector('[data-engineering-evidence="quantity"][data-active="true"]'));
     })()`);
     assert.equal(quantitySourceState, true, `${viewport.label}: engineering review source is not highlighted`);
+    assert.equal(await evaluate(`document.querySelectorAll('[data-equipment-tag]').length`), 3);
+    await evaluate(`document.querySelector('[data-engineering-plan]').scrollIntoView({block:'start'}); window.scrollBy(0,-90)`);
+    await delay(300);
+    await captureScreenshot(`engineering-${viewport.label}-plan`);
+    const initialZoom = await evaluate(`Number(document.querySelector('[data-engineering-plan]').dataset.zoom)`);
+    await evaluate(`document.querySelector('[data-testid="button-zoom-in"]').focus()`);
+    assert.equal(await evaluate(`document.activeElement?.getAttribute('data-testid')`), "button-zoom-in");
+    await send("Page.bringToFront");
+    await pressKey("Enter", "Enter", 13);
+    await delay(150);
+    const zoomed = await evaluate(`Number(document.querySelector('[data-engineering-plan]').dataset.zoom)`);
+    assert.ok(zoomed > initialZoom, "Keyboard zoom must enlarge the drawing");
+    assertNoHorizontalOverflow(await getLayout(), `${viewport.label} engineering zoom`);
+    await evaluate(`document.querySelector('[data-testid="button-zoom-out"]').click()`);
+    await delay(60);
+    assert.ok(await evaluate(`Number(document.querySelector('[data-engineering-plan]').dataset.zoom)`) < zoomed);
+    await evaluate(`document.querySelector('[data-testid="button-zoom-reset"]').click()`);
+    await delay(60);
+    assert.equal(await evaluate(`Number(document.querySelector('[data-engineering-plan]').dataset.zoom)`), initialZoom);
 
     await evaluate(`(() => {
       const tab = [...document.querySelectorAll(${JSON.stringify(scenarioTabSelector)})]

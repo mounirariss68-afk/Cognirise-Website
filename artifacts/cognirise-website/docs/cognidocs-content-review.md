@@ -31,7 +31,7 @@ This document tracks the disposition of claims, evidence, and demonstrations fro
 - Included Reviewer Notes and clear confidence ratings to illustrate the validation process.
 - Added explicit labeling that the data is illustrative and does not represent live processing or actual customer evidence.
 - Repurposed AI-generated raster artwork as secondary conceptual visuals to complement the native facsimiles.
-- The supporting bank-demo merchant mapping uses a fictional Uber transaction descriptor, `UBER*TRIP NYC 8842`, with USD currency and an unchanged 45.50 credit amount. The floor-plan demonstration is adapted to a fictional engineering detail/title-block example; its live counters, pass/fail compliance verdicts and timing stamps are omitted. Neither invented illustration is product proof.
+- The supporting bank-demo merchant mapping uses a fictional Uber transaction descriptor, `UBER*TRIP NYC 8842`, with USD currency and an unchanged 45.50 credit amount. The engineering example is a fictional pump-house general-arrangement sheet: three tagged pump sets, connected piping, dimension chains, concrete hatching and a revision cloud identifying P-101C. Findings cite its actual drawing regions rather than the old empty detail boxes. Neither illustration is product proof or live processing; the engineering sheet is explicitly not for construction.
 
 ## 4. Visual & UX Hygiene
 - Restored to Pulse design system: off-white canvas, navy structure, Comfortaa/Inter, violet/magenta/coral accents.

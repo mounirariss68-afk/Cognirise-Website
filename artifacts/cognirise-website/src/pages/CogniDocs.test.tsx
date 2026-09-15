@@ -5,7 +5,8 @@ import { COGNIDOCS_EDITIONS, DEMO_SCENARIOS, EXTRACTION_LAYERS } from "../lib/co
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const pageSource = readFileSync(new URL("./CogniDocs.tsx", import.meta.url), "utf8")
-  + readFileSync(new URL("../components/cognidocs/DemoViewer.tsx", import.meta.url), "utf8");
+  + readFileSync(new URL("../components/cognidocs/DemoViewer.tsx", import.meta.url), "utf8")
+  + readFileSync(new URL("../components/cognidocs/EngineeringPlan.tsx", import.meta.url), "utf8");
 const contentSource = readFileSync(new URL("../lib/cognidocs-content.ts", import.meta.url), "utf8");
 const appSource = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 const sourceMaterial = readFileSync(new URL("../../../../source-material/cognirise-current.html", import.meta.url), "utf8");

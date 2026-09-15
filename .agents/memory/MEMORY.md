@@ -46,3 +46,4 @@
 - [Generated-contract validation](openapi-union-generation.md) — Validate regenerated output independently of incremental compiler caches.
 - [Matrix browser fixture safety](matrix-browser-fixtures.md) — Never substitute another document’s controls when a fixture row is missing; refresh and search before mutation.
 - [Navigation provenance](navigation-provenance.md) — Observe history traversal before dirty-work guards; physical offsets must stay aligned through cancellation and native anchors.
+- [Native keyboard verification](native-keyboard-verification.md) — CDP key codes alone can produce false failures for native button activation; preserve character semantics.
