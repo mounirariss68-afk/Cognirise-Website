@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { type DemoScenario } from "@/lib/cognidocs-content";
 import engineeringImg from "@/assets/generated_images/cognidocs-engineering.jpg";
-import financeImg from "@/assets/generated_images/cognidocs-finance.jpg";
+import financeImg from "@/assets/generated_images/cognidocs-pulse-document-intelligence.jpg";
 
 function FinanceFacsimile({ activeFieldId }: { activeFieldId: string }) {
   return (

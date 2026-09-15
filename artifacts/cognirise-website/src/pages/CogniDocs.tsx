@@ -1,10 +1,11 @@
 import { useState, useRef } from "react";
-import { ArrowRight, Layers, ShieldCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { EXTRACTION_LAYERS, DEMO_SCENARIOS } from "@/lib/cognidocs-content";
 import { DemoViewer } from "@/components/cognidocs/DemoViewer";
 
-import heroImg from "@/assets/generated_images/cognidocs-finance.jpg";
+import heroImg from "@/assets/generated_images/cognidocs-pulse-document-intelligence.jpg";
+import layersImg from "@/assets/generated_images/cognidocs-pulse-extraction-layers.jpg";
 
 export default function CogniDocs() {
   const [activeScenarioIdx, setActiveScenarioIdx] = useState(0);
@@ -50,7 +51,7 @@ export default function CogniDocs() {
           </div>
           
           <div className="relative min-h-[400px] lg:h-full w-full clip-diagonal-left bg-slate-100">
-            <img src={heroImg} alt="Conceptual representation of technical document extraction" className="absolute inset-0 w-full h-full object-cover" data-pulse-image-resilient="true" />
+            <img src={heroImg} alt="Sculptural engineering and financial document planes with aligned evidence fragments connected by a violet-to-coral light trail." className="absolute inset-0 w-full h-full object-cover" fetchPriority="high" data-pulse-image-resilient="true" />
             <div className="absolute inset-0 bg-gradient-to-tr from-[hsl(var(--brand-deep))]/10 to-transparent" />
           </div>
         </div>
@@ -96,8 +97,8 @@ export default function CogniDocs() {
       </section>
 
       {/* The IP / Extraction Layers */}
-      <section className="px-6 py-20 md:px-12 md:py-32">
-        <div className="max-w-[1440px] mx-auto grid lg:grid-cols-[1fr_1.2fr] gap-16 items-center">
+      <section id="extraction-layers" className="px-6 py-20 md:px-12 md:py-32">
+        <div className="max-w-[1440px] mx-auto grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-12 lg:gap-16 items-start">
           <div>
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--brand-violet))] mb-6">The Architecture</div>
             <h2 className="text-3xl md:text-5xl font-semibold leading-tight mb-8">
@@ -115,21 +116,23 @@ export default function CogniDocs() {
             </div>
           </div>
           
-          <div className="grid gap-4">
-            {EXTRACTION_LAYERS.map((layer) => (
-              <div key={layer.id} className="bg-slate-50 border border-border p-6 flex items-start gap-6 hover:border-[hsl(var(--brand-pink))] transition-colors group">
-                <div className="flex-shrink-0 w-12 h-12 bg-white border border-border flex items-center justify-center text-[hsl(var(--brand-deep))] group-hover:bg-[hsl(var(--brand-deep))] group-hover:text-white transition-colors">
-                  <Layers className="w-5 h-5" aria-hidden="true" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-bold mb-2 flex items-center gap-2">
-                    {layer.name}
-                  </h4>
+          <figure className="min-w-0" aria-label="Three independent extraction layers">
+            <img
+              src={layersImg}
+              alt="Three separated, spatially aligned document planes: vector geometry above positioned text regions above pixel-based visual evidence, sharing the same document coordinates."
+              className="block w-full h-auto"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption className="mt-8 grid gap-6">
+              {EXTRACTION_LAYERS.map((layer) => (
+                <div key={layer.id} id={layer.id} className="pl-5 border-l-2" style={{ borderColor: `hsl(var(--brand-${layer.color}))` }}>
+                  <h3 className="text-lg font-bold mb-1">{layer.name}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{layer.description}</p>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </figcaption>
+          </figure>
         </div>
       </section>
 

@@ -463,3 +463,45 @@ mtime_ms = 1789407854275
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/2ef9f119-6836-4759-b80b-cd04f4fa96de/5f5dbe34-8101-4e02-92a6-a3fd50d4b875"
 storage_version_token = "1789407970651657"
 content_type = "image/png"
+
+[[outputs]]
+id = "qEoXy8OUDeQ0CDVpxt-aV"
+uri = "file://attached_assets/generated_images/cognidocs-pulse-document-intelligence.jpg"
+type = "image"
+title = "CogniDocs — new Pulse hero"
+description = "Original cinematic document planes in warm architectural light."
+logical_id = "42543ba9-53d6-44ff-966f-6cf523272e54"
+content_hash = "sha256:fb78c705434de8b39251025ebb1d0c4a0b8b0511384654145adec508d50d97ee"
+size = 128248
+mtime_ms = 1789450968309
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/42543ba9-53d6-44ff-966f-6cf523272e54/ebfffda5-0241-46cb-9942-2ff6b7480a2a"
+storage_version_token = "1789451165561089"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "_lFPL8yc-PIn5gaIcF4LV"
+uri = "file://attached_assets/generated_images/cognidocs-pulse-extraction-layers.jpg"
+type = "image"
+title = "CogniDocs — three extraction layers"
+description = "Spatially aligned geometry, positioned text and visual evidence in three dimensions."
+logical_id = "f3d4c255-d131-46a3-9ff6-a163213ff9d8"
+content_hash = "sha256:9ba77ca88a22530226854537c8649029aaa19dd365caf776826b357c01a6d32b"
+size = 145161
+mtime_ms = 1789450965885
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/f3d4c255-d131-46a3-9ff6-a163213ff9d8/cec7a087-1ced-4d56-9f1c-db973ed6198f"
+storage_version_token = "1789451166877743"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "xNaK1a9jFs9qHfTiNmF7i"
+uri = "file://screenshots/cognidocs-pulse/layers-1440.jpg"
+type = "image"
+title = "Updated CogniDocs page"
+description = "Integrated artwork and native-text layer explanations on desktop."
+logical_id = "edf6bd3f-ee34-45c0-8f05-ed0423471154"
+content_hash = "sha256:b2ca3adb38e1045d10ba2a26803c78f986a3b113da667fc4f3aaebd4beced53d"
+size = 230142
+mtime_ms = 1789451137734
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/edf6bd3f-ee34-45c0-8f05-ed0423471154/da86ecd4-e235-4ea2-8f3d-a2a91deae228"
+storage_version_token = "1789451168160659"
+content_type = "image/jpeg"
