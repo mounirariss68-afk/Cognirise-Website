@@ -53,8 +53,8 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     description: "Interactive layered architecture for enterprise intelligence.",
   },
   "/platforms/cognidocs": {
-    title: "CogniDocs | Cognirise",
-    description: "Knowledge made available with the context, access and control the work requires.",
+    title: "CogniDocs Document Intelligence | Cognirise",
+    description: "Turn complex financial statements and engineering drawings into structured, source-linked findings for human review.",
   },
   "/platforms/cogniagents": {
     title: "CogniAgents | Cognirise",

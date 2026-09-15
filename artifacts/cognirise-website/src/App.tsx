@@ -184,7 +184,7 @@ export function Router() {
         <Route path="/who"><Redirect to="/about" /></Route>
         <Route path="/platforms/cognios/architecture"><RedirectWithSearch to="/platforms/cognios" /></Route>
         <Route path="/architecture"><RedirectWithSearch to="/platforms/cognios" /></Route>
-        <Route path="/cognidocs"><Redirect to="/platforms/cognidocs" /></Route>
+        <Route path="/cognidocs"><CanonicalRedirect to="/platforms/cognidocs" /></Route>
         <Route path="/cogniagents"><Redirect to="/platforms/cogniagents" /></Route>
         <Route path="/cognitalk"><Redirect to="/platforms/cognitalk" /></Route>
         <Route path="/cogniware"><Redirect to="/platforms/cogniware" /></Route>
