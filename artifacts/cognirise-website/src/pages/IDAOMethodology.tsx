@@ -8,6 +8,7 @@ import { assetUrl } from "@/lib/assets";
 import { idaoEditorial, idaoHeroSeed, methodologySeoSeed } from "@workspace/api-zod";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
+import { useMarketStore } from "@/store/market";
 import {
   MethodologyCmsDelivery,
   methodologyEditorial,
@@ -26,6 +27,19 @@ const DELIVERY_TEAM_PRESENTATION = {
 
 type DeliveryTeamId = keyof typeof DELIVERY_TEAM_PRESENTATION;
 
+const REGIONAL_IDAO_MARKET_LABELS = {
+  ksa: "Saudi Arabia",
+  turkiye: "Türkiye",
+  europe: "Europe",
+} as const;
+
+type RegionalIdaoMarket = keyof typeof REGIONAL_IDAO_MARKET_LABELS;
+
+function regionalIdaoStageImage(market: string, stage: string) {
+  if (!(market in REGIONAL_IDAO_MARKET_LABELS)) return null;
+  return `/images/cognirise/idao/${market}/${stage.toLowerCase()}.jpg`;
+}
+
 function Kicker({ children, inverse = false }: { children: React.ReactNode; inverse?: boolean }) {
   return (
     <div className={`flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] ${inverse ? "text-white/70" : "text-[#102957]"}`}>
@@ -36,6 +50,7 @@ function Kicker({ children, inverse = false }: { children: React.ReactNode; inve
 }
 
 function IDAOMethodologyContent() {
+  const { market } = useMarketStore();
   const cms = useMethodologyCmsContent("idao");
   useMethodologyCmsSeo(cms, methodologySeoSeed("idao"));
   const editorial = methodologyEditorial<"idao", typeof idaoEditorial>("idao", cms, idaoEditorial.seed);
@@ -50,6 +65,10 @@ function IDAOMethodologyContent() {
     imageCaptionSubtitle: idaoHeroSeed.imageCaptionSubtitle,
     imageCaptionTitle: idaoHeroSeed.imageCaptionTitle,
   });
+  const regionalHeroSrc = regionalIdaoStageImage(market, "demonstrate");
+  const regionalMarketLabel = market in REGIONAL_IDAO_MARKET_LABELS
+    ? REGIONAL_IDAO_MARKET_LABELS[market as RegionalIdaoMarket]
+    : null;
   const teamImage = methodologyEditorialMedia(cms, editorial.delivery.teamImage);
   const reducedMotion = useReducedMotion();
   const [activeTeamMember, setActiveTeamMember] = useState<DeliveryTeamId>("senior-leaders");
@@ -85,8 +104,10 @@ function IDAOMethodologyContent() {
             className="clip-diagonal relative h-[430px] overflow-hidden bg-[#071936] md:h-[520px] lg:h-[620px]"
           >
             <PulseImage
-              src={"imageResolved" in hero && hero.imageResolved ? hero.imageSrc : assetUrl(hero.imageSrc)}
-              alt={hero.imageAlt}
+              src={regionalHeroSrc
+                ? assetUrl(regionalHeroSrc)
+                : ("imageResolved" in hero && hero.imageResolved ? hero.imageSrc : assetUrl(hero.imageSrc))}
+              alt={regionalMarketLabel ? `${hero.imageAlt} Approved ${regionalMarketLabel} market edition.` : hero.imageAlt}
               className="h-full w-full object-cover"
               style={{ objectPosition: hero.imagePosition }}
               eager
@@ -232,7 +253,14 @@ function IDAOMethodologyContent() {
 
         <ol className="mt-16 space-y-16 lg:space-y-28">
           {IDAO_STAGES.map((stage, index) => {
-            const stageImage = methodologyEditorialMedia(cms, editorial.stageMedia[index].image);
+            const governedStageImage = methodologyEditorialMedia(cms, editorial.stageMedia[index].image);
+            const regionalStageSrc = regionalIdaoStageImage(market, stage.title);
+            const stageImage = regionalStageSrc && regionalMarketLabel
+              ? {
+                  src: assetUrl(regionalStageSrc),
+                  altText: `${governedStageImage.altText} Approved ${regionalMarketLabel} market edition.`,
+                }
+              : governedStageImage;
             return (
               <motion.li
               key={stage.title}
@@ -243,8 +271,16 @@ function IDAOMethodologyContent() {
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: reducedMotion ? 0 : 0.65 }}
             >
-              <figure className={`relative min-h-[380px] overflow-hidden bg-[#071936] lg:min-h-[720px] ${index % 2 ? "lg:order-2" : ""}`}>
-                <PulseImage src={stageImage.src} alt={stageImage.altText} className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: stage.imagePosition }} />
+              <figure
+                data-idao-stage-image={stage.title.toLowerCase()}
+                className={`relative min-h-[380px] overflow-hidden bg-[#071936] lg:min-h-[720px] ${index % 2 ? "lg:order-2" : ""}`}
+              >
+                <PulseImage
+                  src={stageImage.src}
+                  alt={stageImage.altText}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  style={{ objectPosition: stage.imagePosition }}
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/85 via-transparent to-transparent" />
                 <figcaption className="absolute bottom-6 left-6 right-6 text-white">
                   <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/70">{stage.num} / {stage.time}</span>

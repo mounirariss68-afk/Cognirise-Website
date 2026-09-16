@@ -129,6 +129,54 @@ try {
     await writeFile(`${outputDir}/idao-canon-${width}.jpg`, Buffer.from(shot.data, "base64"));
     console.log(`PASS IDAO canon at ${width}px`);
   }
+
+  await send("Emulation.setDeviceMetricsOverride", {
+    width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false,
+  });
+  for (const market of ["uae", "ksa", "turkiye", "europe"]) {
+    await send("Page.navigate", { url: `${baseUrl}/methodologies/idao?market=${market}` });
+    let ready = false;
+    for (let attempt = 0; attempt < 120; attempt += 1) {
+      ready = await evaluate(`document.readyState === "complete" && document.querySelectorAll("[data-idao-stage-image]").length === 4`);
+      if (ready) break;
+      await delay(100);
+    }
+    assert.ok(ready, `${market} lifecycle media must render`);
+    const lifecycle = await evaluate(`(async () => {
+      const frames = [...document.querySelectorAll("[data-idao-stage-image]")];
+      return Promise.all(frames.map((frame) => {
+        const source = frame.querySelector("img").src;
+        return new Promise((resolve) => {
+          const image = new Image();
+          image.onload = () => resolve({
+            stage: frame.getAttribute("data-idao-stage-image"),
+            source,
+            width: image.naturalWidth,
+            height: image.naturalHeight,
+          });
+          image.onerror = () => resolve({
+            stage: frame.getAttribute("data-idao-stage-image"),
+            source,
+            width: 0,
+            height: 0,
+          });
+          image.src = source;
+        });
+      }));
+    })()`);
+    const expectedPrefix = market === "uae"
+      ? "/images/cognirise/blueprint-"
+      : `/images/cognirise/idao/${market}/`;
+    assert.ok(
+      lifecycle.every(({ source }) => new URL(source).pathname.includes(expectedPrefix)),
+      `${market} must use its own lifecycle image family`,
+    );
+    assert.ok(
+      lifecycle.every(({ width: imageWidth, height }) => imageWidth > 0 && height > 0),
+      `${market} lifecycle images must load`,
+    );
+    console.log(`PASS IDAO lifecycle media for ${market}`);
+  }
 } finally {
   socket?.close();
   browser.kill("SIGTERM");

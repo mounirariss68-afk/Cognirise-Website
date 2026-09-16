@@ -23,6 +23,12 @@ IDAO delivery-canon imagery is one shared read-only authority across market edit
 
 **How to apply:** Render canon cards from the current canonical inventory and keep their approved alt text paired with those assets. Continue resolving hero, lifecycle stages, and editable narrative through the governed market snapshot.
 
+IDAO hero and lifecycle-stage imagery has approved market-specific families for Saudi Arabia, Türkiye, and Europe; UAE alone uses the blueprint image family.
+
+**Why:** Market selection previously reused the UAE snapshot and made every regional version visually identical despite approved localized assets existing.
+
+**How to apply:** Select the hero and four lifecycle images from the active Review Version. Verify loaded URLs for all four markets, not only that the selector label changes.
+
 **Why:** Consistent assessment exports are an approved exception to the protection boundary, not permission to redesign or reinterpret the canonical framework.
 
 **How to apply:** Maintain this distinction in later export work. The planned AI Guardrails framework is complementary to Agent Authority; do not merge their logic or invent Guardrails content before it is supplied and approved.

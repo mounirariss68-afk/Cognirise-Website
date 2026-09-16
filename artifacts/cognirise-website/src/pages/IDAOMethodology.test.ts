@@ -63,6 +63,17 @@ test("IDAO keeps approved imagery, order and milestone commitments", () => {
   assert.match(editorial, /governed MVP within[\s\S]*2–4 weeks/i);
 });
 
+test("IDAO uses the approved lifecycle imagery for each selected market", () => {
+  assert.match(page, /useMarketStore\(\)/);
+  assert.match(page, /ksa: "Saudi Arabia"/);
+  assert.match(page, /turkiye: "Türkiye"/);
+  assert.match(page, /europe: "Europe"/);
+  assert.match(page, /`\/images\/cognirise\/idao\/\$\{market\}\/\$\{stage\.toLowerCase\(\)\}\.jpg`/);
+  assert.match(page, /regionalIdaoStageImage\(market, "demonstrate"\)/);
+  assert.match(page, /regionalIdaoStageImage\(market, stage\.title\)/);
+  assert.match(page, /Approved \$\{regionalMarketLabel\} market edition/);
+});
+
 test("IDAO hero keeps the shared five-point silhouette and accessible reveal", () => {
   assert.match(page, /data-idao-hero-frame/);
   assert.match(page, /className="clip-diagonal relative h-\[430px\][^"]*md:h-\[520px\] lg:h-\[620px\]"/);
