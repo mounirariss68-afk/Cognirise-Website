@@ -22,8 +22,11 @@ test("supports a compact overview-only layout without changing the shared homepa
   assert.match(source, /compact\?: boolean/);
   assert.match(source, /compact = false/);
   assert.match(source, /home-industry-disclosure--compact/);
-  assert.match(source, /home-industry-disclosure--compact[\s\S]*home-industry-row\{height:196px\}/);
-  assert.match(source, /home-industry-disclosure--compact \.home-industry-row:has\(\.home-industry-item\.active\) \.home-industry-item\.active\{grid-template-rows:130px minmax\(0,1fr\)\}/);
+  assert.match(source, /\.home-industry-row\{display:flex;height:420px/);
+  assert.match(source, /home-industry-disclosure--compact[\s\S]*home-industry-row\{height:224px\}/);
+  assert.match(source, /home-industry-disclosure--compact \.home-industry-row:has\(\.home-industry-item\.active\)\{height:326px\}/);
+  assert.match(source, /home-industry-disclosure--compact \.home-industry-row:has\(\.home-industry-item\.active\) \.home-industry-item\.active\{grid-template-rows:148px minmax\(0,1fr\)\}/);
+  assert.match(source, /@media\(min-width:768px\) and \(max-width:1100px\)[\s\S]*home-industry-disclosure--compact \.home-industry-row\{height:218px\}[\s\S]*height:318px/);
   assert.match(source, /home-industry-disclosure--compact \.home-industry-orientation\{font-size:12px/);
   assert.match(source, /home-industry-disclosure--compact \.home-industry-detail\{font-size:12px/);
   assert.match(source, /@media\(max-width:767px\)[\s\S]*home-industry-disclosure--compact \.home-industry-row:has\(\.home-industry-item\.active\)\{height:auto\}/);
@@ -34,4 +37,11 @@ test("preserves responsive visuals and reduced-motion behavior", () => {
   assert.match(source, /@media\(prefers-reduced-motion:reduce\)/);
   assert.match(source, /\.home-industry-item\.active \.home-industry-visual:after/);
   assert.match(source, /\.home-industry-item\.active \.home-industry-orientation,.home-industry-item\.active \.home-industry-detail/);
+});
+
+test("uses a localized copy scrim instead of a broad white image wash", () => {
+  assert.match(source, /\.home-industry-visual:after[\s\S]*linear-gradient\(180deg,transparent 42%/);
+  assert.match(source, /\.home-industry-item\.active \.home-industry-visual:after\{background:radial-gradient\(ellipse 70% 88% at 0% 64%/);
+  assert.match(source, /filter:saturate\(1\.09\) contrast\(1\.02\) brightness\(1\.01\)/);
+  assert.match(source, /\.home-industry-orientation[\s\S]*text-shadow:0 1px 8px rgba\(255,255,255,.9\)/);
 });
