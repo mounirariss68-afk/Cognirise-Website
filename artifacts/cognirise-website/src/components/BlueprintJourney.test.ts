@@ -89,6 +89,19 @@ test("homepage blueprint starts equally collapsed while retaining previews and e
   assert.doesNotMatch(source, /defaultValue="2"/);
 });
 
+test("governed homepage blueprint resolves all four exact stage slots and fails closed", () => {
+  assert.match(source, /resolveBlueprintStageMedia/);
+  assert.match(source, /\["innovate", 1\]/);
+  assert.match(source, /\["demonstrate", 2\]/);
+  assert.match(source, /\["activate", 3\]/);
+  assert.match(source, /\["operate", 4\]/);
+  assert.match(source, /`home-idao-stage-\$\{stage\}`/);
+  assert.match(source, /references\.length !== 1/);
+  assert.match(source, /return null/);
+  assert.match(source, /landingMedia\(page,/);
+  assert.match(source, /governedMedia\?\.alt/);
+});
+
 test("each IDAO stage explains the client role and tangible outcome", () => {
   assert.equal((content.match(/clientRole:/g) ?? []).length, 4);
   assert.equal((content.match(/outcome:/g) ?? []).length, 4);

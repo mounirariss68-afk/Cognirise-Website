@@ -10,7 +10,7 @@ test("uses the exact agent-era professional services hero positioning", () => {
 
 test("keeps the What we do anchor and service content in the original homepage order", () => {
   const serviceIndex = source.indexOf('<section id="service-lines"');
-  const blueprintIndex = source.indexOf("<BlueprintJourney />");
+   const blueprintIndex = source.indexOf("<BlueprintJourney stageMedia=");
   const imageLedgerIndex = source.indexOf('aria-label="Cognirise outcomes in motion"');
 
   assert.ok(serviceIndex >= 0);

@@ -505,3 +505,45 @@ mtime_ms = 1789451137734
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/edf6bd3f-ee34-45c0-8f05-ed0423471154/da86ecd4-e235-4ea2-8f3d-a2a91deae228"
 storage_version_token = "1789451168160659"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "0-0SPOrxM6EFt02nJxgAB"
+uri = "file://attached_assets/approval_sheets/idao-saudi-approval-sheet.jpg"
+type = "image"
+title = "Saudi Arabia IDAO approval sheet"
+description = "UAE references on the left; Saudi Arabia candidates on the right. Rows: Innovate, Demonstrate, Activate, Operate."
+logical_id = "faeed050-5042-44ff-8a25-50156cbc6df7"
+content_hash = "sha256:8aaa61b93057c1fa02aabede98035b66a69b0417f7732f925e1e7bd8ca4194aa"
+size = 507819
+mtime_ms = 1789559308206
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/faeed050-5042-44ff-8a25-50156cbc6df7/ca7af7b6-3b9a-4ca3-b53c-72a97ccfc541"
+storage_version_token = "1789559323876501"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "-v3fWdaDn3XShlgSE4-qD"
+uri = "file://attached_assets/approval_sheets/idao-turkiye-approval-sheet.jpg"
+type = "image"
+title = "Türkiye IDAO approval sheet"
+description = "UAE references on the left; Türkiye candidates on the right. Rows: Innovate, Demonstrate, Activate, Operate."
+logical_id = "6d66b62f-9737-4562-8b1e-d91e6c8eac5b"
+content_hash = "sha256:28ca9bc4e70d9444dbb912fd0b94dc314962870f1c4ebf4339fd44c50c412ce0"
+size = 528490
+mtime_ms = 1789559310110
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/6d66b62f-9737-4562-8b1e-d91e6c8eac5b/ad800573-ea6c-4084-8847-ba8a778e16b5"
+storage_version_token = "1789559325339681"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "JNRHYCEmd9JGem19BZxFv"
+uri = "file://attached_assets/approval_sheets/idao-europe-approval-sheet.jpg"
+type = "image"
+title = "Europe IDAO approval sheet"
+description = "UAE references on the left; Europe candidates on the right. Rows: Innovate, Demonstrate, Activate, Operate."
+logical_id = "6ddfa4ed-3815-4662-99b3-762aced2731b"
+content_hash = "sha256:4320ed9e3e5c4d1eec01c3fafcdfb091b2d17fec675cac3945dcf741359a0d0d"
+size = 509827
+mtime_ms = 1789559311918
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/6ddfa4ed-3815-4662-99b3-762aced2731b/cf7b06ee-3fce-4129-b5f0-0abf053ea5ee"
+storage_version_token = "1789559326741022"
+content_type = "image/jpeg"

@@ -7,8 +7,55 @@ import {
   SpatialDisclosurePanel,
   SpatialDisclosureTrigger,
 } from "@/components/ui/spatial-disclosure";
+import { landingMedia, type CmsRecord } from "@/lib/cms";
+import type { LandingPageContent } from "@workspace/api-zod";
 
-export function BlueprintJourney() {
+export type BlueprintStageMedia = {
+  src: string;
+  alt: string;
+  objectPosition?: string;
+};
+
+export type BlueprintStageMediaSet = Record<number, BlueprintStageMedia>;
+
+const blueprintStageSlots = [
+  ["innovate", 1],
+  ["demonstrate", 2],
+  ["activate", 3],
+  ["operate", 4],
+] as const;
+
+/**
+ * Resolve the four stage images from one exact landing-page revision.  A
+ * partial set is deliberately rejected: callers must not mix governed media
+ * with compiled or cross-market artwork.
+ */
+export function resolveBlueprintStageMedia(
+  page: CmsRecord<LandingPageContent> | null | undefined,
+): BlueprintStageMediaSet | null {
+  if (!page) return null;
+  try {
+    for (const [stage] of blueprintStageSlots) {
+      const section = page.sections.find(
+        (candidate) => candidate.id === `home-idao-stage-${stage}`,
+      );
+      if (!section || section.type !== "media" || section.references.length !== 1) {
+        return null;
+      }
+    }
+    const resolved = Object.fromEntries(
+      blueprintStageSlots.map(([stage, id]) => [
+        id,
+        landingMedia(page, `home-idao-stage-${stage}`, { src: "", alt: "" }),
+      ]),
+    ) as BlueprintStageMediaSet;
+    return Object.values(resolved).every((media) => Boolean(media)) ? resolved : null;
+  } catch {
+    return null;
+  }
+}
+
+export function BlueprintJourney({ stageMedia }: { stageMedia?: BlueprintStageMediaSet }) {
   return (
     <section
       id="delivery-blueprint"
@@ -185,7 +232,9 @@ export function BlueprintJourney() {
           defaultValue={null}
           className="blueprint-disclosure blueprint-row"
         >
-          {IDAO_STAGES.map((stage) => (
+          {IDAO_STAGES.map((stage) => {
+            const governedMedia = stageMedia?.[stage.id];
+            return (
             <SpatialDisclosureItem
               key={stage.id}
               id={String(stage.id)}
@@ -200,10 +249,10 @@ export function BlueprintJourney() {
                 <>
                   <figure className="blueprint-visual">
                     <img
-                      src={assetUrl(stage.image)}
-                      alt={stage.imageAlt}
+                      src={governedMedia?.src ?? assetUrl(stage.image)}
+                      alt={governedMedia?.alt ?? stage.imageAlt}
                       className="w-full h-full object-cover"
-                      style={{ objectPosition: stage.imagePosition }}
+                      style={{ objectPosition: governedMedia?.objectPosition ?? stage.imagePosition }}
                       loading="lazy"
                       decoding="async"
                     />
@@ -260,7 +309,8 @@ export function BlueprintJourney() {
                 </>
               )}
             </SpatialDisclosureItem>
-          ))}
+            );
+          })}
         </SpatialDisclosure>
       </div>
 

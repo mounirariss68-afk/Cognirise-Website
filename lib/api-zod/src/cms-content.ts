@@ -1352,12 +1352,15 @@ export type CmsContent = PersonContent | PartnerContent | PlatformContent | Publ
  * using it here would make a path depend on wording again.
  */
 function missingMethodologyMediaPinPaths(slot: unknown, value: unknown, path = "content.editorial"): string[] {
-  if (!value || typeof value !== "object") return [path];
   const definition = slot as {
     kind?: string;
     fields?: Record<string, unknown>;
     items?: unknown[];
   };
+  // Text, link, and fixed slots intentionally store primitive values. Only
+  // structural and media slots require an object before traversal.
+  if (!["media", "group", "fixed-list"].includes(String(definition.kind))) return [];
+  if (!value || typeof value !== "object") return [path];
   if (definition.kind === "media") {
     return !(value as { media?: unknown }).media ? [`${path}.media`] : [];
   }

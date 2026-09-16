@@ -2,7 +2,6 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { useRef } from "react";
-import { BlueprintJourney } from "@/components/BlueprintJourney";
 import { HeroFilm } from "@/components/HeroFilm";
 import { ServiceLineTiles } from "@/components/ServiceLineTiles";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
@@ -12,6 +11,7 @@ import { contentRecord, governedLandingDelivery, landingCta, landingMedia, landi
 import { IndustryPicker } from "@/components/IndustryPicker";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
+import { BlueprintJourney, resolveBlueprintStageMedia } from "@/components/BlueprintJourney";
 
 const Kicker = ({ children, className = "text-[#102957]" }: { children: React.ReactNode, className?: string }) => (
   <div className={`flex items-center gap-3 text-[10px] tracking-[0.12em] uppercase font-semibold ${className}`}>
@@ -39,6 +39,9 @@ export default function Home() {
     "/",
     Boolean(homepage),
   );
+  const blueprintStageMedia = homepageDelivery === "cms" && homepage
+    ? resolveBlueprintStageMedia(homepage)
+    : null;
   const governedLanding = routeLanding ?? homepage;
   const heroNarrative = homepage ? landingNarrative(homepage, "hero") : null;
   const heroCta = homepage?.cta ?? homepage?.sections
@@ -82,6 +85,9 @@ export default function Home() {
   }
   if (homepageDelivery === "cms" && !homepage) {
     return <main className="min-h-[70vh] bg-[#fdfcfb] px-6 py-24 text-[#102957]"><h1 className="font-display text-5xl">Homepage unavailable</h1><p className="mt-4">No published homepage edition is available for this market and locale.</p></main>;
+  }
+  if (homepageDelivery === "cms" && !blueprintStageMedia) {
+    return <main className="min-h-[70vh] bg-[#fdfcfb] px-6 py-24 text-[#102957]"><h1 className="font-display text-5xl">Homepage unavailable</h1><p className="mt-4">The published homepage blueprint media could not be safely delivered.</p></main>;
   }
 
   const mConfig = {
@@ -250,7 +256,7 @@ export default function Home() {
       </section>
 
       {/* BLUEPRINT */}
-      <BlueprintJourney />
+      <BlueprintJourney stageMedia={blueprintStageMedia ?? undefined} />
 
       {/* IMAGE LEDGER */}
       <section className="px-6 md:px-[4.8vw] pb-[82px] lg:pb-[122px]" aria-label="Cognirise outcomes in motion">

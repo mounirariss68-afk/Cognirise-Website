@@ -35,6 +35,7 @@
     "cms:reconcile-methodologies-hero": "tsx ./src/cms/methodologies-reconciliation.ts",
     "cms:reconcile-methodology-editorial": "tsx ./src/cms/methodology-editorial-reconciliation.ts",
     "cms:reconcile-homepage": "tsx ./src/cms/homepage-reconciliation.ts",
+    "cms:task-377-idao-localization": "tsx ./src/cms/task-377-idao-localization.ts",
     "cms:stage-agent-authority-guardrails": "tsx ./src/cms/agent-authority-guardrails.ts",
     "cms:reconcile-guardrails-set-prove-hold": "tsx ./src/cms/guardrails-set-prove-hold-reconciliation.ts",
     "cms:setup-guardrails-set-prove-hold-postmerge": "tsx ./src/cms/guardrails-set-prove-hold-reconciliation.ts --apply-db --target=development",
