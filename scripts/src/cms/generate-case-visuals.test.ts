@@ -8,7 +8,7 @@ test("the case visual verifier is limited to commissioned cinematic artwork", as
   const directory = new URL("../../../artifacts/cognirise-website/public/images/cognirise/cases/cinematic/", import.meta.url);
   const files = (await readdir(directory)).filter((file) => file.endsWith(".jpg")).sort();
 
-  assert.equal(files.length, 21);
+  assert.equal(files.length, 22);
   assert.deepEqual(files, CASE_CINEMATIC_VISUALS.map((visual) => visual.filename).sort());
   assert.doesNotMatch(source, /renderUI|interface-screenshot|diagram-/);
 });

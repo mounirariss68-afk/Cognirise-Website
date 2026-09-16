@@ -12,11 +12,11 @@ import {
 import { websiteRoot } from "./common.js";
 import { migrationOperations } from "./migration.js";
 
-test("the source-owned case-study baseline has exactly 21 governed records", () => {
+test("the source-owned case-study baseline has exactly 22 governed records", () => {
   const records = caseStudyRecords();
-  assert.equal(records.length, 21);
-  assert.equal(new Set(records.map((record) => record.externalId)).size, 21);
-  assert.equal(new Set(records.map((record) => record.fields.slug)).size, 21);
+  assert.equal(records.length, 22);
+  assert.equal(new Set(records.map((record) => record.externalId)).size, 22);
+  assert.equal(new Set(records.map((record) => record.fields.slug)).size, 22);
   assert.deepEqual(
     Object.fromEntries(Object.keys(CASE_STUDY_TAXONOMY_COUNTS).map((sector) => [
       sector,
@@ -28,7 +28,7 @@ test("the source-owned case-study baseline has exactly 21 governed records", () 
 
 test("the market inventory reports configured UAE fallback delivery per case", () => {
   const report = caseStudyMarketInventory();
-  assert.equal(report.length, 21);
+  assert.equal(report.length, 22);
   assert.ok(report.every((entry) =>
     entry.directPublishedMarket === "uae"
     && entry.fallbackDelivery.length === 3
@@ -43,13 +43,18 @@ test("the market inventory reports configured UAE fallback delivery per case", (
   ));
 });
 
-test("every baseline summary satisfies the public contract and carries slide-only provenance", () => {
+test("every baseline case satisfies the public contract and carries governed provenance", () => {
   for (const record of caseStudyRecords()) {
-    assert.match(record.sourceFile, /Cognirise-Case-Studies-Azure-Deployments.*\.pptx$/);
-    assert.match(
-      JSON.stringify((record.fields.content as Record<string, any>).sources),
-      /slide (?:[1-9]|1\d|2[01])/,
-    );
+    if (record.externalId === "case-study:slide-22") {
+      assert.equal(record.sourceFile, "attached_assets/clinic-network-case-study-brief.md");
+      assert.match(JSON.stringify((record.fields.content as Record<string, any>).sources), /Clinic Network editorial brief/);
+    } else {
+      assert.match(record.sourceFile, /Cognirise-Case-Studies-Azure-Deployments.*\.pptx$/);
+      assert.match(
+        JSON.stringify((record.fields.content as Record<string, any>).sources),
+        /slide (?:[1-9]|1\d|2[01])/,
+      );
+    }
     assert.equal(record.route, undefined);
     const result = validateCmsSnapshot("case-study", {
       slug: record.fields.slug,
@@ -89,8 +94,8 @@ function jpegDimensions(bytes: Buffer) {
 test("case studies carry distinct approved cinematic artwork and creative briefs", async () => {
   const records = caseStudyRecords();
   const mediaPaths = records.map((record) => (record.fields.mediaPaths as string[])[0]);
-  assert.equal(new Set(mediaPaths).size, 21);
-  assert.equal(CASE_CINEMATIC_VISUALS.length, 21);
+  assert.equal(new Set(mediaPaths).size, 22);
+  assert.equal(CASE_CINEMATIC_VISUALS.length, 22);
   for (const record of records) {
     const visual = (record.fields.content as Record<string, any>).visual;
     assert.ok(visual.altText.length > 20);
@@ -114,7 +119,7 @@ test("case-study migrations use a versioned receipt and remain idempotent", () =
   const first = migrationOperations(caseStudyRecords());
   const second = migrationOperations(caseStudyRecords());
   assert.deepEqual(first, second);
-  assert.equal(first.length, 21);
+  assert.equal(first.length, 22);
   assert.ok(first.every((operation) => operation.kind === "case-study"));
   assert.ok(first.every((operation) => operation.idempotencyKey.startsWith("cms-case-study-baseline-v2:")));
 });

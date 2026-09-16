@@ -748,7 +748,7 @@ async function applyDatabase(
         const publishedPayload = validation?.success ? validation.data : null;
         const content = publishedPayload?.content as Record<string, unknown> | undefined;
         const evidence = content?.evidence;
-        const evidenceApproved = content?.variant === "summary"
+        const evidenceApproved = (content?.variant === "summary" || content?.variant === "full")
           && content.disclosure === "anonymized"
           && content.publicEvidenceStatus === "approved"
           && Array.isArray(evidence)
@@ -1913,7 +1913,7 @@ async function applyDatabase(
           && caseMediaOperation.accessibilityStatus !== "needs-review"
           && Boolean((resolvedPayload.content as Record<string, unknown>).disclosure === "anonymized")
           && Boolean((resolvedPayload.content as Record<string, unknown>).publicEvidenceStatus === "approved")
-          && (resolvedPayload.content as Record<string, unknown>).variant === "summary"
+          && ["summary", "full"].includes(String((resolvedPayload.content as Record<string, unknown>).variant))
           && !operation.slug.includes("detail");
         const caseReadiness = publishCase
           ? validateCmsSnapshot("case-study", resolvedPayload, "publish")
@@ -1977,7 +1977,7 @@ async function applyDatabase(
             workflowState: "approved",
             approvedByUserId: serviceAccount.id,
             approvedAt: new Date(),
-            reason: "Source-reviewed public summary baseline; immutable visual pin approved.",
+            reason: "Source-reviewed public case-study baseline; immutable visual pin approved.",
           }).where(eq(cmsRevisionsTable.id, revision.id));
           await tx.update(cmsMarketEditionsTable).set({
             publicationState: "published",
@@ -2306,7 +2306,7 @@ async function main() {
     dryRun: !shouldApplyDatabase,
     mode: shouldApplyDatabase ? "development-db-apply" : "payload-only",
     note: shouldApplyDatabase
-      ? "Applied the governed UAE/English inventory excluding the five methodology-editorial routes, which have their own draft-only reconciler. Eligible case-study summaries publish only after evidence, source review, rights, accessibility, durable-storage, and immutable-version gates pass; all other content retains its governed state."
+      ? "Applied the governed UAE/English inventory excluding the five methodology-editorial routes, which have their own draft-only reconciler. Eligible case studies publish only after evidence, source review, rights, accessibility, durable-storage, and immutable-version gates pass; all other content retains its governed state."
       : "No storage or database call was made. Use --apply-db --target=development to import governed drafts; use cms:reconcile-methodology-editorial for its five isolated methodology routes.",
     operations,
     availabilityOperations,

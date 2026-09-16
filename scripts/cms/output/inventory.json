@@ -9,23 +9,23 @@
     "partners": 5,
     "platforms": 5,
     "articles": 3,
-    "caseStudies": 21,
+    "caseStudies": 22,
     "caseStudyTaxonomy": {
       "Financial Services": 8,
       "Telecoms": 1,
       "Travel & Hospitality": 1,
       "Public Sector": 1,
       "Manufacturing & Industrial": 3,
-      "Life Sciences": 2,
+      "Life Sciences": 3,
       "Retail & Consumer": 2,
       "Professional Services": 1,
       "Security & AI Infrastructure": 2
     },
     "industries": 6,
     "frameworks": 1,
-    "websiteAssets": 77,
+    "websiteAssets": 78,
     "linkedinAssets": 9,
-    "assets": 86
+    "assets": 87
   },
   "explicitOmissions": {
     "povDocuments": "No genuine public POV documents are present in the current website.",
@@ -684,6 +684,37 @@
       ],
       "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
       "approvedMediaPath": "/images/cognirise/cases/cinematic/21-provision-movements.jpg"
+    },
+    {
+      "externalId": "case-study:slide-22",
+      "slug": "clinic-network",
+      "title": "Clinic Network",
+      "directPublishedMarket": "uae",
+      "fallbackDelivery": [
+        {
+          "requestedMarket": "ksa",
+          "effectiveMarket": "uae",
+          "effectiveLocale": "en",
+          "usedFallback": true,
+          "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+        },
+        {
+          "requestedMarket": "turkiye",
+          "effectiveMarket": "uae",
+          "effectiveLocale": "en",
+          "usedFallback": true,
+          "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+        },
+        {
+          "requestedMarket": "europe",
+          "effectiveMarket": "uae",
+          "effectiveLocale": "en",
+          "usedFallback": true,
+          "restriction": "No local case-study edition exists; public delivery is the configured UAE/en fallback."
+        }
+      ],
+      "unavailableRequests": "Only disabled or unconfigured markets/locales are unavailable; configured KSA, Türkiye, and Europe requests must not be reported as excluded.",
+      "approvedMediaPath": "/images/cognirise/cases/cinematic/22-clinic-network.jpg"
     }
   ],
   "records": [
@@ -3630,6 +3661,96 @@
       }
     },
     {
+      "externalId": "case-study:slide-22",
+      "type": "case-study",
+      "name": "Clinic Network",
+      "sourceFile": "attached_assets/clinic-network-case-study-brief.md",
+      "fields": {
+        "slug": "clinic-network",
+        "summary": "Bringing patient engagement under consent-aware control. Connect patient enquiries, care follow-up and campaign planning in one bilingual workspace. The platform enables a clinic network to coordinate engagement while keeping consent checks, clinical-data boundaries and human oversight visible.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "full",
+          "disclosure": "anonymized",
+          "sector": "Life Sciences",
+          "organizationDescriptor": "Bringing patient engagement under consent-aware control",
+          "engagementType": "concept",
+          "deliveryStage": "concept",
+          "impactClassification": "projected",
+          "impactStatement": "The platform makes engagement workflows and governance controls tangible for review and measures the impact it has on intended KPIs.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Patient engagement channels held within visible consent boundaries.",
+            "altText": "A clinic network lead oversees violet and coral communication paths passing through a consent checkpoint toward human care coordinators.",
+            "textEquivalent": "App, web, messaging and voice channels converge at an illuminated consent checkpoint while a clinic network lead and human coordinators oversee the engagement route; clinical space remains separated behind glass.",
+            "template": "governance-console",
+            "fixtureLabels": [
+              "Consent-aware patient engagement channels converging at a visible control gate before human follow-up.",
+              "Human review",
+              "Controlled outcome"
+            ]
+          },
+          "mandate": "Create a consistent approach to patient engagement across the clinic network, from initial enquiry to follow-up, without allowing marketing access to clinical records.",
+          "context": "Connect patient enquiries, care follow-up and campaign planning in one bilingual workspace. The platform enables a clinic network to coordinate engagement while keeping consent checks, clinical-data boundaries and human oversight visible.",
+          "constraints": [
+            "Marketing workflows cannot access clinical records.",
+            "Consent scope and restricted targeting fields define the permitted campaign audience."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "Built an Arabic–English platform combining enquiry handling, care follow-up and campaign management. Insurance-benefit campaigns use consent-scoped audiences, with oversight in a shared command centre."
+            }
+          ],
+          "controls": [
+            "Consent checks and restricted targeting fields define campaign boundaries.",
+            "A compliance ledger makes permissions visible.",
+            "App, web app, WhatsApp and voice channels use an omni-channel approach with context transfer to human agents."
+          ],
+          "outcomes": [
+            "The platform makes engagement workflows and governance controls tangible for review and measures the impact it has on intended KPIs."
+          ],
+          "evidence": [
+            {
+              "statement": "The platform makes engagement workflows and governance controls tangible for review and measures the impact it has on intended KPIs.",
+              "source": {
+                "label": "Approved Clinic Network editorial brief",
+                "accessedAt": "2026-09-16"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 21,
+          "sources": [
+            {
+              "label": "Approved Clinic Network editorial brief",
+              "accessedAt": "2026-09-16"
+            }
+          ],
+          "verificationDate": "2026-09-16",
+          "reviewDate": "2027-03-16",
+          "relatedIds": []
+        },
+        "mediaPaths": [
+          "/images/cognirise/cases/cinematic/22-clinic-network.jpg"
+        ]
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: anonymization, public evidence, accessibility, and Cognirise fixture rights gates passed."
+        ]
+      }
+    },
+    {
       "externalId": "industry:b60f973e571d3059824d",
       "type": "industry",
       "name": "Financial Services",
@@ -6038,6 +6159,42 @@
       "digest": "b132a8d4365d6173364ed6c1416dc3a610ca6d02ef9310d4f82c02369dbd6eea"
     },
     {
+      "externalId": "asset:929cd3a4ea6536d03025",
+      "type": "asset",
+      "name": "22-clinic-network.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/22-clinic-network.jpg",
+      "fields": {
+        "publicPath": "/images/cognirise/cases/cinematic/22-clinic-network.jpg",
+        "bytes": 236211,
+        "extension": ".jpg",
+        "mimeType": "image/jpeg",
+        "checksum": "c72cfb1b6608b3c5fcbc87108d4f99f99c550a7d9e3dde38d3bf72b2d172225a",
+        "width": 1600,
+        "height": 1000,
+        "usages": [],
+        "cmsOwnership": "cms-candidate",
+        "collection": "website",
+        "linkedinAssetKind": null,
+        "campaignMetadata": null,
+        "accessibility": {
+          "altText": "A clinic network lead oversees violet and coral communication paths passing through a consent checkpoint toward human care coordinators.",
+          "decorative": false
+        },
+        "rights": {
+          "status": "approved-use",
+          "owner": "Cognirise",
+          "source": "Original commissioned Cognirise Pulse cinematic artwork"
+        }
+      },
+      "review": {
+        "status": "approved",
+        "reasons": [
+          "Source review approved: original commissioned cinematic artwork, rights, and accessibility gates passed."
+        ]
+      },
+      "digest": "c72cfb1b6608b3c5fcbc87108d4f99f99c550a7d9e3dde38d3bf72b2d172225a"
+    },
+    {
       "externalId": "asset:f6a19919d1de6e4dd655",
       "type": "asset",
       "name": "cognirise-pulse-governance.jpg",
@@ -8105,7 +8262,7 @@
       "digest": "35585c80ce73bcaa5eaee718c6f4b1b07b32060aa43c0d61690ac0fd0c2f75f3"
     }
   ],
-  "manifestDigest": "223c31d2a30149232bdca96b425262b6779687ce3dfa13b18de1840e33c69cc3",
-  "generatedAt": "2026-09-14T12:44:26.108Z",
+  "manifestDigest": "e40bba029e4e4d7d16f59ae0327daea35c1c54100ba8a38e41323aa2f12cd969",
+  "generatedAt": "2026-09-16T11:00:08.115Z",
   "dryRun": false
 }

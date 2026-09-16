@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-14T12:44:27.691Z",
-  "manifestDigest": "223c31d2a30149232bdca96b425262b6779687ce3dfa13b18de1840e33c69cc3",
-  "dryRun": true,
-  "mode": "payload-only",
-  "note": "No storage or database call was made. Use --apply-db --target=development to import governed drafts; use cms:reconcile-methodology-editorial for its five isolated methodology routes.",
+  "generatedAt": "2026-09-16T11:01:14.136Z",
+  "manifestDigest": "e40bba029e4e4d7d16f59ae0327daea35c1c54100ba8a38e41323aa2f12cd969",
+  "dryRun": false,
+  "mode": "development-db-apply",
+  "note": "Applied the governed UAE/English inventory excluding the five methodology-editorial routes, which have their own draft-only reconciler. Eligible case studies publish only after evidence, source review, rights, accessibility, durable-storage, and immutable-version gates pass; all other content retains its governed state.",
   "operations": [
     {
       "externalId": "person:8a0e78e95b87db8e0acd",
@@ -3088,6 +3088,100 @@
       "requestDigest": "0ca02736b77aea086c5ebb27b209828cda9268821b4ed6aba06d6281aba46c7d"
     },
     {
+      "externalId": "case-study:slide-22",
+      "kind": "case-study",
+      "slug": "clinic-network",
+      "title": "Clinic Network",
+      "payload": {
+        "slug": "clinic-network",
+        "title": "Clinic Network",
+        "summary": "Bringing patient engagement under consent-aware control. Connect patient enquiries, care follow-up and campaign planning in one bilingual workspace. The platform enables a clinic network to coordinate engagement while keeping consent checks, clinical-data boundaries and human oversight visible.",
+        "content": {
+          "schemaVersion": 1,
+          "variant": "full",
+          "disclosure": "anonymized",
+          "sector": "Life Sciences",
+          "organizationDescriptor": "Bringing patient engagement under consent-aware control",
+          "engagementType": "concept",
+          "deliveryStage": "concept",
+          "impactClassification": "projected",
+          "impactStatement": "The platform makes engagement workflows and governance controls tangible for review and measures the impact it has on intended KPIs.",
+          "disclosureNote": "Organization identity, geography, commercial values and identifying interface data are withheld or generalized for public use.",
+          "publicEvidenceStatus": "approved",
+          "relatedIndustries": [],
+          "visual": {
+            "kind": "illustrative-interface-reconstruction",
+            "caption": "Patient engagement channels held within visible consent boundaries.",
+            "altText": "A clinic network lead oversees violet and coral communication paths passing through a consent checkpoint toward human care coordinators.",
+            "textEquivalent": "App, web, messaging and voice channels converge at an illuminated consent checkpoint while a clinic network lead and human coordinators oversee the engagement route; clinical space remains separated behind glass.",
+            "template": "governance-console",
+            "fixtureLabels": [
+              "Consent-aware patient engagement channels converging at a visible control gate before human follow-up.",
+              "Human review",
+              "Controlled outcome"
+            ]
+          },
+          "mandate": "Create a consistent approach to patient engagement across the clinic network, from initial enquiry to follow-up, without allowing marketing access to clinical records.",
+          "context": "Connect patient enquiries, care follow-up and campaign planning in one bilingual workspace. The platform enables a clinic network to coordinate engagement while keeping consent checks, clinical-data boundaries and human oversight visible.",
+          "constraints": [
+            "Marketing workflows cannot access clinical records.",
+            "Consent scope and restricted targeting fields define the permitted campaign audience."
+          ],
+          "work": [
+            {
+              "type": "paragraph",
+              "text": "Built an Arabic–English platform combining enquiry handling, care follow-up and campaign management. Insurance-benefit campaigns use consent-scoped audiences, with oversight in a shared command centre."
+            }
+          ],
+          "controls": [
+            "Consent checks and restricted targeting fields define campaign boundaries.",
+            "A compliance ledger makes permissions visible.",
+            "App, web app, WhatsApp and voice channels use an omni-channel approach with context transfer to human agents."
+          ],
+          "outcomes": [
+            "The platform makes engagement workflows and governance controls tangible for review and measures the impact it has on intended KPIs."
+          ],
+          "evidence": [
+            {
+              "statement": "The platform makes engagement workflows and governance controls tangible for review and measures the impact it has on intended KPIs.",
+              "source": {
+                "label": "Approved Clinic Network editorial brief",
+                "accessedAt": "2026-09-16"
+              },
+              "approved": true
+            }
+          ],
+          "cta": {
+            "label": "Discuss a similar mandate",
+            "href": "/value-scan"
+          },
+          "visibility": "public",
+          "order": 21,
+          "sources": [
+            {
+              "label": "Approved Clinic Network editorial brief",
+              "accessedAt": "2026-09-16"
+            }
+          ],
+          "verificationDate": "2026-09-16",
+          "reviewDate": "2027-03-16",
+          "relatedIds": []
+        },
+        "seo": {
+          "noIndex": false
+        },
+        "mediaIds": [],
+        "markets": [
+          "uae"
+        ]
+      },
+      "mediaPaths": [
+        "/images/cognirise/cases/cinematic/22-clinic-network.jpg"
+      ],
+      "idempotencyKey": "cms-case-study-baseline-v2:case-study:slide-22",
+      "requestDigest": "ee92f539584ecfe2cfa63626eab41cbb69e48f3f45410fe532533e21a5f4688e"
+    },
+    {
       "externalId": "industry:b60f973e571d3059824d",
       "kind": "industry",
       "slug": "financial-services",
@@ -5433,6 +5527,31 @@
       "acceptedPriorRequestDigests": []
     },
     {
+      "externalId": "asset:929cd3a4ea6536d03025",
+      "idempotencyKey": "cms-media-binary-v1:asset:929cd3a4ea6536d03025:c72cfb1b6608b3c5fcbc87108d4f99f99c550a7d9e3dde38d3bf72b2d172225a",
+      "filename": "22-clinic-network.jpg",
+      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/cases/cinematic/22-clinic-network.jpg",
+      "publicPath": "/images/cognirise/cases/cinematic/22-clinic-network.jpg",
+      "checksum": "c72cfb1b6608b3c5fcbc87108d4f99f99c550a7d9e3dde38d3bf72b2d172225a",
+      "mimeType": "image/jpeg",
+      "byteSize": 236211,
+      "width": 1600,
+      "height": 1000,
+      "cmsOwnership": "cms-candidate",
+      "usages": [],
+      "collection": "website",
+      "linkedinAssetKind": null,
+      "campaignMetadata": null,
+      "altText": "A clinic network lead oversees violet and coral communication paths passing through a consent checkpoint toward human care coordinators.",
+      "credit": "Cognirise",
+      "rightsStatus": "approved-use",
+      "accessibilityStatus": "approved",
+      "sourceReviewApproved": true,
+      "requestDigest": "9b80b7e0d0d2acee282df569c19437a020239df39ae4c262ced7b83077f7fa3f",
+      "historicalReceipts": [],
+      "acceptedPriorRequestDigests": []
+    },
+    {
       "externalId": "asset:f6a19919d1de6e4dd655",
       "idempotencyKey": "cms-media-binary-v1:asset:f6a19919d1de6e4dd655:7f462ae555d626662aa17f0654b0308cf1d869d704bb3032351ccf2ac03d35b7",
       "filename": "cognirise-pulse-governance.jpg",
@@ -7570,5 +7689,26 @@
         "a861c514d1885fddd698a2ccf6fa66769072c3cd3f26ff75cbd61a165292786b"
       ]
     }
-  ]
+  ],
+  "database": {
+    "before": {
+      "documents": 62,
+      "editions": 67,
+      "revisions": 157,
+      "media": 129,
+      "receipts": 480,
+      "audits": 825
+    },
+    "created": 1,
+    "replayed": 49,
+    "mediaCreated": 0,
+    "mediaRepaired": 0,
+    "mediaReplayed": 86,
+    "availabilityCreated": 0,
+    "availabilityReplayed": 8,
+    "availabilityConflicts": [],
+    "governanceCreated": 0,
+    "governanceReplayed": 5,
+    "governanceConflicts": []
+  }
 }

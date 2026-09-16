@@ -321,8 +321,8 @@ async function main() {
     if (count(type) !== expected) errors.push(`Expected ${expected} ${type} records, found ${count(type)}.`);
   }
   const expectedTaxonomy = CASE_STUDY_TAXONOMY_COUNTS;
-  if (inventory.expectedCounts.caseStudies !== 21) {
-    errors.push(`Expected exactly 21 case studies, found ${inventory.expectedCounts.caseStudies ?? "missing"}.`);
+  if (inventory.expectedCounts.caseStudies !== 22) {
+    errors.push(`Expected exactly 22 case studies, found ${inventory.expectedCounts.caseStudies ?? "missing"}.`);
   }
   const actualTaxonomy = Object.fromEntries(Object.keys(expectedTaxonomy).map((sector) => [
     sector,
@@ -373,19 +373,19 @@ async function main() {
     },
     release: {
       approvedRevisionIds: database?.approvedRevisionIds ?? [],
-      cmsAuthoritativeCollections: database?.publishedSummaryExternalIds.length === 21
+      cmsAuthoritativeCollections: database?.publishedSummaryExternalIds.length === 22
         ? ["case-studies"]
         : [],
       compiledFallbackCollections: ["people", "partners", "platforms", "publications", "case-studies", "industries", "frameworks"],
       fallbackRemovalDecisions: database
-        ? database.publishedSummaryExternalIds.length === 21
-          ? "Case-study summary fallbacks are eligible for removal; all other collections remain compiled fallbacks."
-          : "No fallback was removed; published case-study summary coverage is incomplete."
+        ? database.publishedSummaryExternalIds.length === 22
+          ? "Case-study fallbacks are eligible for removal; all other collections remain compiled fallbacks."
+          : "No fallback was removed; published case-study coverage is incomplete."
         : "Dry run only; no fallback was removed and no database publication was verified.",
       mediaReadiness: database
         ? database.publishedSummaryMediaReady && database.durableMediaObjects === database.media
-          ? "Verified durable media and immutable pins are ready for published case-study summaries; editorial rights and accessibility remain governed in CMS."
-          : "Verified database state still has incomplete durable media or immutable summary pins."
+          ? "Verified durable media and immutable pins are ready for published case studies; editorial rights and accessibility remain governed in CMS."
+          : "Verified database state still has incomplete durable media or immutable case-study pins."
         : "Not verified in dry run; durable media, immutable pins, rights, and accessibility require database verification.",
       unresolvedDrafts: database ? database.draftRevisionIds : [],
       candidatePublicUrls: publicUrls,

@@ -128,10 +128,10 @@ test("the generic inventory retains only Agent Authority and all non-methodology
     partner: 5,
     platform: 5,
     article: 3,
-    "case-study": 21,
+    "case-study": 22,
     industry: 6,
     framework: 1,
-    asset: 86,
+    asset: 87,
   });
   assert.deepEqual(
     inventory.records
@@ -146,7 +146,7 @@ test("the generic inventory retains only Agent Authority and all non-methodology
   );
 
   assert.equal(payload.manifestDigest, inventory.manifestDigest);
-  assert.equal(payload.operations.length, 49);
+  assert.equal(payload.operations.length, 50);
   assert.deepEqual(Object.fromEntries([
     "person",
     "partner",
@@ -160,13 +160,13 @@ test("the generic inventory retains only Agent Authority and all non-methodology
     partner: 5,
     platform: 5,
     publication: 3,
-    "case-study": 21,
+    "case-study": 22,
     industry: 6,
     framework: 1,
   });
   assert.equal(payload.availabilityOperations.length, 8);
   assert.equal(payload.governanceOperations.length, 5);
-  assert.equal(payload.mediaOperations.length, 86);
+  assert.equal(payload.mediaOperations.length, 87);
   assert.equal(
     payload.operations.find((operation) => operation.kind === "industry" && operation.slug === "financial-services")
       ?.payload.content?.thesis,

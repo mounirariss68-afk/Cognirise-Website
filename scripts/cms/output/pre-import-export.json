@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "target": "development",
-  "capturedAt": "2026-09-11T12:59:23.434Z",
-  "manifestDigest": "0a8c63c81ed24b289e6a5768c642cfec9b5cd816c8765f563acd53a7c725961c",
+  "capturedAt": "2026-09-16T11:01:14.134Z",
+  "manifestDigest": "e40bba029e4e4d7d16f59ae0327daea35c1c54100ba8a38e41323aa2f12cd969",
   "before": {
-    "documents": 55,
-    "editions": 55,
-    "revisions": 145,
-    "media": 125,
-    "receipts": 483,
-    "audits": 565
+    "documents": 62,
+    "editions": 67,
+    "revisions": 157,
+    "media": 129,
+    "receipts": 480,
+    "audits": 825
   },
   "localAssets": [
     {
@@ -178,6 +178,11 @@
       "ownership": "cms-candidate"
     },
     {
+      "publicPath": "/images/cognirise/cases/cinematic/22-clinic-network.jpg",
+      "checksum": "c72cfb1b6608b3c5fcbc87108d4f99f99c550a7d9e3dde38d3bf72b2d172225a",
+      "ownership": "cms-candidate"
+    },
+    {
       "publicPath": "/images/cognirise/cognirise-pulse-governance.jpg",
       "checksum": "7f462ae555d626662aa17f0654b0308cf1d869d704bb3032351ccf2ac03d35b7",
       "ownership": "cms-candidate"
@@ -203,23 +208,13 @@
       "ownership": "cms-candidate"
     },
     {
-      "publicPath": "/images/cognirise/industries/pulse-industry-education-hero-v2.png",
-      "checksum": "2f8bad8d8cf3e42049836f335b3a63eec99abf00efaa93c8bab2589ce35ceb08",
+      "publicPath": "/images/cognirise/industries/pulse-industry-education-campus-v4.png",
+      "checksum": "46087ebf4530fc1a2cee82571273a4316723b332fb818afff33b39112b404dac",
       "ownership": "cms-candidate"
     },
     {
       "publicPath": "/images/cognirise/industries/pulse-industry-education-learning.png",
       "checksum": "5a162d8e0f96b2cf4ff8773033aa9a4fe67988e478070be4b6449c964d00c5b3",
-      "ownership": "cms-candidate"
-    },
-    {
-      "publicPath": "/images/cognirise/industries/pulse-industry-education-practice-v2.png",
-      "checksum": "feb060d742cfed99df3f468e1e1d8f812ce4a6df59b2f1e7d48fb57fa1f8197c",
-      "ownership": "cms-candidate"
-    },
-    {
-      "publicPath": "/images/cognirise/industries/pulse-industry-education-research-v2.png",
-      "checksum": "d8f7058a92fcd476b46556582bb81b982d76e5c92aa6e8f73f4b9e3a3de49218",
       "ownership": "cms-candidate"
     },
     {
@@ -253,8 +248,8 @@
       "ownership": "cms-candidate"
     },
     {
-      "publicPath": "/images/cognirise/industries/pulse-industry-public-sector-services.png",
-      "checksum": "942dfbcb83fc0264f06f4ba60e7511670973fe75b14ada8d3b144a155918ec4b",
+      "publicPath": "/images/cognirise/industries/pulse-industry-public-sector-civic-review-v1.png",
+      "checksum": "39ea08d936bcb804867695096a863b9d341c61c509f2c519eb7a17274604c2cc",
       "ownership": "cms-candidate"
     },
     {

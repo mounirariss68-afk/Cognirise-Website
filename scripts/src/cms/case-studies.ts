@@ -20,6 +20,14 @@ type Seed = {
   template: "knowledge-assistant" | "analytics-dashboard" | "workflow-console"
     | "commerce-experience" | "governance-console" | "operations-console";
   related: Array<"financial-services" | "telecoms" | "travel-hospitality" | "energy-resources" | "public-sector" | "education">;
+  variant?: "summary" | "full";
+  summary?: string;
+  context?: string;
+  constraints?: string[];
+  controls?: string[];
+  sourceFile?: string;
+  sourceLabel?: string;
+  sourceDate?: string;
 };
 
 export type CaseCinematicVisual = {
@@ -55,6 +63,7 @@ export const CASE_CINEMATIC_VISUALS: readonly CaseCinematicVisual[] = [
   { filename: "19-portfolio-warning.jpg", creativeBrief: "Early-warning exposure signals isolated for an analyst's human review.", caption: "Portfolio warning signals before the decision.", altText: "An analyst places a glowing coral block into a review tray among large abstract exposure forms.", textEquivalent: "An analyst removes a coral early-warning block from grouped exposure forms and places it in a dedicated review tray." },
   { filename: "20-production-faults.jpg", creativeBrief: "Machine telemetry linked to maintenance knowledge and an approved work order.", caption: "Production-fault response with operator approval.", altText: "A factory operator holds an approval token beside a beverage line and a violet machine-signal pulse.", textEquivalent: "A machine signal crosses a beverage line to an operator who holds the approval needed to issue maintenance work." },
   { filename: "21-provision-movements.jpg", creativeBrief: "Exposure drivers moving across a bridge until a threshold routes an exception to review.", caption: "Provision movements surfaced before close.", altText: "A finance reviewer moves glowing violet blocks across a navy bridge toward a coral exception tray.", textEquivalent: "A finance reviewer follows abstract exposure blocks over a bridge while a coral threshold isolates one exception for review." },
+  { filename: "22-clinic-network.jpg", creativeBrief: "Consent-aware patient engagement channels converging at a visible control gate before human follow-up.", caption: "Patient engagement channels held within visible consent boundaries.", altText: "A clinic network lead oversees violet and coral communication paths passing through a consent checkpoint toward human care coordinators.", textEquivalent: "App, web, messaging and voice channels converge at an illuminated consent checkpoint while a clinic network lead and human coordinators oversee the engagement route; clinical space remains separated behind glass." },
 ] as const;
 
 // Public wording is deliberately source-owned here rather than extracted at runtime.
@@ -82,6 +91,34 @@ const seeds: readonly Seed[] = [
   { title: "Monitoring portfolio early-warning signals", sector: "Financial Services", organization: "Regulated commercial lender", engagement: "product-demonstration", stage: "proof-of-concept", classification: "simulated", mandate: "Bring disclosures, concentration and early-warning signals into a human-gated review flow.", approach: "A monitoring workspace combines portfolio exposures, disclosure changes and concentration bands, then queues material signals for analyst review.", impact: "Credit teams can trace an early-warning signal to the exposure and disclosure evidence before recording a decision.", template: "analytics-dashboard", related: ["financial-services"] },
   { title: "Diagnosing production-line faults", sector: "Manufacturing & Industrial", organization: "Beverage manufacturing operator", engagement: "product-demonstration", stage: "proof-of-concept", classification: "simulated", mandate: "Connect telemetry and maintenance knowledge for governed fault response.", approach: "A maintenance flow compares line telemetry with known fault signatures, retrieves the relevant procedure and requires approval before issuing work.", impact: "Operators can move from an equipment signal to a sourced diagnosis and approved work order.", template: "operations-console", related: ["energy-resources"] },
   { title: "Tracing provision movements earlier", sector: "Financial Services", organization: "Regulated commercial lender", engagement: "client-delivery", stage: "proof-of-concept", classification: "pilot-demo", mandate: "Make provision movements and their exposure-level drivers visible before period end.", approach: "An authenticated monitoring view connects portfolio movements to exposure drivers and raises threshold alerts for finance review.", impact: "Finance teams can inspect the accounts driving a provision movement and resolve exceptions before close.", template: "analytics-dashboard", related: ["financial-services"] },
+  {
+    title: "Clinic Network",
+    sector: "Life Sciences",
+    organization: "Bringing patient engagement under consent-aware control",
+    engagement: "concept",
+    stage: "concept",
+    classification: "projected",
+    mandate: "Create a consistent approach to patient engagement across the clinic network, from initial enquiry to follow-up, without allowing marketing access to clinical records.",
+    approach: "Built an Arabic–English platform combining enquiry handling, care follow-up and campaign management. Insurance-benefit campaigns use consent-scoped audiences, with oversight in a shared command centre.",
+    impact: "The platform makes engagement workflows and governance controls tangible for review and measures the impact it has on intended KPIs.",
+    template: "governance-console",
+    related: [],
+    variant: "full",
+    summary: "Bringing patient engagement under consent-aware control. Connect patient enquiries, care follow-up and campaign planning in one bilingual workspace. The platform enables a clinic network to coordinate engagement while keeping consent checks, clinical-data boundaries and human oversight visible.",
+    context: "Connect patient enquiries, care follow-up and campaign planning in one bilingual workspace. The platform enables a clinic network to coordinate engagement while keeping consent checks, clinical-data boundaries and human oversight visible.",
+    constraints: [
+      "Marketing workflows cannot access clinical records.",
+      "Consent scope and restricted targeting fields define the permitted campaign audience.",
+    ],
+    controls: [
+      "Consent checks and restricted targeting fields define campaign boundaries.",
+      "A compliance ledger makes permissions visible.",
+      "App, web app, WhatsApp and voice channels use an omni-channel approach with context transfer to human agents.",
+    ],
+    sourceFile: "attached_assets/clinic-network-case-study-brief.md",
+    sourceLabel: "Approved Clinic Network editorial brief",
+    sourceDate: "2026-09-16",
+  },
 ] as const;
 
 function slugify(value: string) {
@@ -94,7 +131,7 @@ export const CASE_STUDY_TAXONOMY_COUNTS = {
   "Travel & Hospitality": 1,
   "Public Sector": 1,
   "Manufacturing & Industrial": 3,
-  "Life Sciences": 2,
+  "Life Sciences": 3,
   "Retail & Consumer": 2,
   "Professional Services": 1,
   "Security & AI Infrastructure": 2,
@@ -127,12 +164,15 @@ export function caseStudyRecords(): InventoryRecord[] {
     const slug = slugify(seed.title);
     const visual = CASE_CINEMATIC_VISUALS[index];
     if (!visual) throw new Error(`Missing cinematic visual brief for case-study slide ${slide}.`);
-    const sourceFile = SOURCE_DECK;
-    const source = { label: `Approved source presentation, slide ${slide}`, accessedAt: SOURCE_DATE };
-    const summary = `${seed.mandate} ${seed.approach}`;
+    const sourceFile = seed.sourceFile ?? SOURCE_DECK;
+    const source = {
+      label: seed.sourceLabel ?? `Approved source presentation, slide ${slide}`,
+      accessedAt: seed.sourceDate ?? SOURCE_DATE,
+    };
+    const summary = seed.summary ?? `${seed.mandate} ${seed.approach}`;
     const content = {
       schemaVersion: 1 as const,
-      variant: "summary" as const,
+      variant: seed.variant ?? "summary" as const,
       disclosure: "anonymized" as const,
       sector: seed.sector,
       organizationDescriptor: seed.organization,
@@ -152,18 +192,18 @@ export function caseStudyRecords(): InventoryRecord[] {
           fixtureLabels: [visual.creativeBrief, "Human review", "Controlled outcome"],
       },
       mandate: seed.mandate,
-      context: "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
-      constraints: ["Do not infer organization identity from this summary.", "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."],
+      context: seed.context ?? "Public-safe summary reconstructed from an approved internal source; identifying details have been removed.",
+      constraints: seed.constraints ?? ["Do not infer organization identity from this summary.", "The commissioned editorial artwork abstracts the workflow and contains no client interface or source-system data."],
       work: [{ type: "paragraph" as const, text: seed.approach }],
-      controls: ["Human review remains required for consequential actions.", "Public reconstruction contains no source-system data."],
+      controls: seed.controls ?? ["Human review remains required for consequential actions.", "Public reconstruction contains no source-system data."],
       outcomes: [seed.impact],
       evidence: [{ statement: seed.impact, source, approved: true }],
       cta: { label: "Discuss a similar mandate", href: "/value-scan" },
       visibility: "public" as const,
       order: index,
       sources: [source],
-      verificationDate: SOURCE_DATE,
-      reviewDate: "2027-03-06",
+      verificationDate: seed.sourceDate ?? SOURCE_DATE,
+      reviewDate: seed.sourceDate ? "2027-03-16" : "2027-03-06",
       relatedIds: [],
     };
     const snapshot = { slug, title: seed.title, summary, content, mediaIds: [], markets: ["uae"] };

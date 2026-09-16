@@ -551,7 +551,7 @@ async function main() {
       publishCase: Boolean(operation.kind === "case-study"
         && operation.mediaPaths.length === 1
         && operation.payload.content
-        && (operation.payload.content as Record<string, unknown>).variant === "summary"
+        && ["summary", "full"].includes(String((operation.payload.content as Record<string, unknown>).variant))
         && (operation.payload.content as Record<string, unknown>).disclosure === "anonymized"
         && (operation.payload.content as Record<string, unknown>).publicEvidenceStatus === "approved"),
     });
