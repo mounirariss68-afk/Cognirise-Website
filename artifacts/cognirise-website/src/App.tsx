@@ -61,8 +61,7 @@ import PlatformsOverview from "@/pages/PlatformsOverview";
 import CogniOSPlatform from "@/pages/CogniOSPlatform";
 import CogniDocs from "@/pages/CogniDocs";
 import CogniAgents from "@/pages/CogniAgents";
-import CogniTalk from "@/pages/CogniTalk";
-import CogniWare from "@/pages/CogniWare";
+import CogniBase from "@/pages/CogniBase";
 import PlatformDetail from "@/pages/PlatformDetail";
 
 import AlliancePlatformDetail from "@/pages/AlliancePlatformDetail";
@@ -110,6 +109,8 @@ export function Router() {
   // Retirement takes precedence over stale availability or a failed policy fetch.
   // Only the overview is retired; shareable full records keep their routes.
   if (path === "/work" || path === "/work/") return <CanonicalRedirect to="/industries" />;
+  if (path === "/platforms/cognitalk" || path === "/cognitalk") return <CanonicalRedirect to="/platforms/lupitor" />;
+  if (path === "/platforms/cogniware" || path === "/cogniware") return <CanonicalRedirect to="/platforms/cognibase" />;
   if (
     legacyIndustryPaths.has(path)
     && typeof window !== "undefined"
@@ -160,8 +161,9 @@ export function Router() {
         <Route path="/platforms/cognios" component={CogniOSPlatform} />
         <Route path="/platforms/cognidocs" component={CogniDocs} />
         <Route path="/platforms/cogniagents" component={CogniAgents} />
-        <Route path="/platforms/cognitalk" component={CogniTalk} />
-        <Route path="/platforms/cogniware" component={CogniWare} />
+        <Route path="/platforms/cognitalk"><CanonicalRedirect to="/platforms/lupitor" /></Route>
+        <Route path="/platforms/cogniware"><CanonicalRedirect to="/platforms/cognibase" /></Route>
+        <Route path="/platforms/cognibase" component={CogniBase} />
         <Route path="/platforms/lupitor"><AlliancePlatformDetail slug="lupitor" /></Route>
         <Route path="/platforms/datatoolpack" component={DatatoolpackAutoData} />
         <Route path="/platforms/bunjee-ai"><AlliancePlatformDetail slug="bunjee-ai" /></Route>
@@ -189,8 +191,8 @@ export function Router() {
         <Route path="/architecture"><RedirectWithSearch to="/platforms/cognios" /></Route>
         <Route path="/cognidocs"><CanonicalRedirect to="/platforms/cognidocs" /></Route>
         <Route path="/cogniagents"><Redirect replace to="/platforms/cogniagents" /></Route>
-        <Route path="/cognitalk"><Redirect replace to="/platforms/cognitalk" /></Route>
-        <Route path="/cogniware"><Redirect replace to="/platforms/cogniware" /></Route>
+        <Route path="/cognitalk"><CanonicalRedirect to="/platforms/lupitor" /></Route>
+        <Route path="/cogniware"><CanonicalRedirect to="/platforms/cognibase" /></Route>
         
         <Route path="/pov-banking"><CanonicalRedirect to="/industries/financial-services" /></Route>
         <Route path="/pov-government"><CanonicalRedirect to="/industries/public-sector" /></Route>

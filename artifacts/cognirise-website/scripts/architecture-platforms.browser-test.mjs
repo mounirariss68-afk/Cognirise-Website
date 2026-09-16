@@ -81,6 +81,21 @@ async function pressKey(key, code, keyCode) {
 try {
   await send("Page.enable");
   await send("Runtime.enable");
+  await navigate("/platforms", `document.querySelector('[data-testid="link-platform-cognios"]')`);
+  const overview = await evaluate(`(() => ({
+    names: [...document.querySelectorAll('[data-testid^="link-platform-"] h4')].map((node) => node.textContent.trim()),
+    hrefs: [...document.querySelectorAll('[data-testid^="link-platform-"]')].map((node) => node.getAttribute("href")),
+  }))()`);
+  assert.deepEqual(overview.names, ["CogniOS", "CogniAgents", "CogniDocs", "CogniBase", "Lupitor", "Datatoolpack", "bunjee.ai"]);
+  assert.deepEqual(overview.hrefs, ["/platforms/cognios", "/platforms/cogniagents", "/platforms/cognidocs", "/platforms/cognibase", "/platforms/lupitor", "/platforms/datatoolpack", "/platforms/bunjee-ai"]);
+  await evaluate(`document.querySelector('[data-testid="link-platform-cognibase"]').focus(); true`);
+  await pressKey("Enter", "Enter", 13);
+  await delay(100);
+  assert.equal(await evaluate(`location.pathname`), "/platforms/cognibase");
+
+  await navigate("/platforms/cognitalk", `location.pathname === "/platforms/lupitor" && document.querySelector('[data-platform="lupitor"]')`);
+  await navigate("/platforms/cogniware", `location.pathname === "/platforms/cognibase" && document.body.innerText.includes("CogniBase")`);
+
   await navigate(
     "/platforms/cognios?view=platform&platform=lupitor#architecture",
     `document.querySelector('[data-testid="platform-btn-lupitor"]')`,
@@ -110,14 +125,14 @@ try {
   assert.equal(keyboard.matches, 3);
 
   const touchPoint = await evaluate(`(() => {
-    const box = document.querySelector('[data-testid="platform-btn-cogniware"]').getBoundingClientRect();
+    const box = document.querySelector('[data-testid="platform-btn-cognibase"]').getBoundingClientRect();
     return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
   })()`);
   await send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: touchPoint.x, y: touchPoint.y }] });
   await send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
   await delay(80);
   assert.equal(
-    await evaluate(`document.querySelector('[data-testid="platform-btn-cogniware"]').getAttribute("aria-pressed")`),
+    await evaluate(`document.querySelector('[data-testid="platform-btn-cognibase"]').getAttribute("aria-pressed")`),
     "true",
   );
 
@@ -133,7 +148,7 @@ try {
       hrefs: [...study.querySelectorAll("a")].map((link) => link.getAttribute("href")),
     };
   })()`);
-  assert.equal(layerDirection.links, 6);
+  assert.equal(layerDirection.links, 5);
   assert.equal(layerDirection.partners, 3);
   assert.ok(layerDirection.hrefs.includes("/platforms/bunjee-ai"));
 

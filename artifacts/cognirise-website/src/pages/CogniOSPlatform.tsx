@@ -14,10 +14,10 @@ export default function CogniOSPlatform() {
 
 
   const products = [
-    ["01", "CogniTalk", "A conversational layer for meaningful work between people and enterprise intelligence."],
+    ["01", "Lupitor", "Verified conversational agents across languages and channels, operated within defined controls."],
     ["02", "CogniAgents", "Governed agents that coordinate specialist tasks in defined operational environments."],
     ["03", "CogniDocs", "Knowledge made available with the context, access and control the work requires."],
-    ["04", "CogniWare", "Composable intelligence capabilities connected to the systems that run the enterprise."]
+    ["04", "CogniBase", "Composable intelligence capabilities connected to the systems that run the enterprise."]
   ];
 
   const scroll = scrollToSection;

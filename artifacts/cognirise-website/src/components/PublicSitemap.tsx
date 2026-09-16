@@ -3,6 +3,7 @@ import { useGetPublicNavigationSettings, useGetPublicSitemap } from "@workspace/
 import { useMarketStore } from "@/store/market";
 import { ALLIANCE_PLATFORM_LIST } from "@/lib/alliancePlatforms";
 import { useLocation } from "wouter";
+import { PLATFORM_CATALOG } from "@/lib/platformCatalog";
 
 export const STATIC_SITEMAP_PATHS = [
   "/methodologies",
@@ -12,10 +13,14 @@ export const STATIC_SITEMAP_PATHS = [
   "/methodologies/idao",
   "/methodologies/agent-authority-model",
   ...ALLIANCE_PLATFORM_LIST.map(({ slug }) => `/platforms/${slug}`),
+  ...PLATFORM_CATALOG.filter(({ ownership }) => ownership === "cognirise").map(({ href }) => href),
 ];
 
 export function mergeSitemapItems(items: Array<{ url: string }>, origin: string, unavailablePaths = new Set<string>()) {
-   const redirectPaths = new Set(["/services", "/what-we-do", "/work", "/work/"]);
+   const redirectPaths = new Set([
+     "/services", "/what-we-do", "/work", "/work/",
+     "/cognitalk", "/platforms/cognitalk", "/cogniware", "/platforms/cogniware",
+   ]);
   const routableItems = items.filter((entry) => {
     const path = new URL(entry.url, origin).pathname;
     return path !== "/advisors" && !redirectPaths.has(path) && !unavailablePaths.has(path);

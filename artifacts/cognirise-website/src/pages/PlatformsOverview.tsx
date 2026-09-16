@@ -5,20 +5,12 @@ import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { scrollToSection } from "@/lib/motion";
 import { contentRecord, useCmsCollection } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
-import { ALLIANCE_PLATFORM_LIST } from "@/lib/alliancePlatforms";
+import { composePlatformCatalog } from "@/lib/platformCatalog";
 import { SpatialDisclosure, SpatialDisclosureItem, SpatialDisclosureTrigger, SpatialDisclosurePanel } from "@/components/ui/spatial-disclosure";
 import { PlatformsHeroMedia } from "@/components/platforms/platforms-hero-media";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } from "@/lib/cms";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
-
-const platformFallback = [
-  { name: "CogniOS", description: "The core operating system for governed enterprise intelligence.", link: "/platforms/cognios", category: "Foundation & Orchestration" },
-  { name: "CogniDocs", description: "Knowledge made available with context and control.", link: "/platforms/cognidocs", category: "Specialist Engines" },
-  { name: "CogniAgents", description: "Governed agents coordinating operational tasks.", link: "/platforms/cogniagents", category: "Specialist Engines" },
-  { name: "CogniTalk", description: "Conversational layer for human-AI interaction in the flow of work.", link: "/platforms/cognitalk", category: "Specialist Engines" },
-  { name: "CogniWare", description: "Composable intelligence integrations for enterprise systems.", link: "/platforms/cogniware", category: "Specialist Engines" },
-];
 
 export default function PlatformsOverview() {
   const governedLanding = useGovernedLanding();
@@ -26,14 +18,9 @@ export default function PlatformsOverview() {
   const heroVisual = landingMedia(governedLanding, "platforms-hero-visual", { src: "/media/platforms/cognios-rotation-fallback.jpg", alt: "A layered CogniOS ecosystem connected by a luminous central spine." });
   const closingCta = landingCta(governedLanding, "platforms-closing-cta", { label: "Book a value scan", href: "/value-scan" });
   const { market } = useMarketStore();
-  const platformsQuery = useCmsCollection("platform", platformFallback, (item) => {
+  const platformsQuery = useCmsCollection("platform", [], (item) => {
     const content = contentRecord(item, "platform");
-    return {
-      name: item.title,
-      description: content.summary,
-      link: `/platforms/${item.slug}`,
-      category: content.category,
-    };
+    return { slug: item.slug, description: content.summary };
   });
   const governedSeo = governedLanding ? landingSeo(governedLanding) : undefined;
   useDynamicMetadata(governedSeo ? metadataFromSeo({
@@ -52,11 +39,7 @@ export default function PlatformsOverview() {
     { marketLocation },
   );
 
-  const categories = ["Foundation & Orchestration", "Specialist Engines"];
-  const matrix = categories.map((category) => ({
-    category,
-    products: platformsQuery.data.filter((product) => product.category === category),
-  })).filter((section) => section.products.length);
+  const platforms = composePlatformCatalog(platformsQuery.data);
 
   return (
     <div className="flex flex-col" data-governed-landing={governedLanding?.pagePath}>
@@ -112,55 +95,38 @@ export default function PlatformsOverview() {
           </h2>
         </div>
 
-        <SpatialDisclosure orientation="vertical" allowCollapse={true} defaultValue={matrix[0]?.category} className="flex flex-col">
-          {matrix.map((section, idx) => (
-            <SpatialDisclosureItem key={idx} id={section.category} className="border-t border-foreground">
-              <SpatialDisclosureTrigger id={section.category} className="w-full flex items-center justify-between text-left group pt-8 pb-8">
-                <h3 className="text-xl font-bold uppercase tracking-widest text-muted-foreground group-hover:text-[hsl(var(--brand-pink))] transition-colors text-[11px] m-0">{section.category}</h3>
+        <SpatialDisclosure orientation="vertical" allowCollapse={true} defaultValue="platform-ecosystem" className="flex flex-col">
+            <SpatialDisclosureItem id="platform-ecosystem" className="border-t border-foreground">
+              <SpatialDisclosureTrigger id="platform-ecosystem" className="w-full flex items-center justify-between text-left group pt-8 pb-8">
+                <h3 className="text-xl font-bold uppercase tracking-widest text-muted-foreground group-hover:text-[hsl(var(--brand-pink))] transition-colors text-[11px] m-0">Platform ecosystem</h3>
                 <Plus className="h-6 w-6 text-foreground group-hover:text-[hsl(var(--brand-pink))] transition-transform duration-300 group-data-[state=active]:rotate-45 group-data-[state=active]:text-[hsl(var(--brand-pink))]" />
               </SpatialDisclosureTrigger>
-              <SpatialDisclosurePanel id={section.category} className="data-[state=inactive]:hidden pb-12">
+              <SpatialDisclosurePanel id="platform-ecosystem" className="data-[state=inactive]:hidden pb-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                  {section.products.map((product) => (
-                    <Link href={product.link} key={product.name}>
-                      <div className="group block bg-[hsl(var(--secondary))] p-8 hover:bg-[hsl(var(--brand-violet))/5] transition-colors border border-transparent hover:border-[hsl(var(--brand-pink))/20] cursor-pointer relative overflow-hidden h-full">
+                  {platforms.map((platform) => (
+                    <Link
+                      href={platform.href}
+                      key={platform.slug}
+                      data-testid={`link-platform-${platform.slug}`}
+                      aria-label={`Explore ${platform.name}${platform.ownership === "partner" ? ", partner platform" : ""}`}
+                      className="group block h-full bg-[hsl(var(--secondary))] p-8 transition-colors hover:bg-[hsl(var(--brand-violet))/5] border border-transparent hover:border-[hsl(var(--brand-pink))/20] cursor-pointer relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-4"
+                    >
                         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))] transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100" />
                         <div className="flex justify-between items-start mb-6">
-                          <h4 className="text-3xl md:text-4xl font-semibold text-[hsl(var(--brand-deep))] transition-colors group-hover:text-[hsl(var(--brand-pink))]">{product.name}</h4>
+                          <div>
+                            <span className="mb-3 block text-[10px] font-bold uppercase tracking-[.16em] text-muted-foreground">
+                              {platform.ownership === "partner" ? "Partner platform" : "Cognirise platform"}
+                            </span>
+                            <h4 className="text-3xl md:text-4xl font-semibold text-[hsl(var(--brand-deep))] transition-colors group-hover:text-[hsl(var(--brand-pink))]">{platform.name}</h4>
+                          </div>
                           <ArrowRight className="h-6 w-6 text-muted-foreground group-hover:text-[hsl(var(--brand-coral))] transition-transform group-hover:translate-x-1" />
                         </div>
-                        <p className="text-foreground/70 leading-relaxed text-base max-w-[300px]">{product.description}</p>
-                      </div>
+                        <p className="text-foreground/70 leading-relaxed text-base max-w-[420px]">{platform.description}</p>
                     </Link>
                   ))}
                 </div>
               </SpatialDisclosurePanel>
             </SpatialDisclosureItem>
-          ))}
-
-          {/* Alliance Platforms Section */}
-          <SpatialDisclosureItem id="alliances" className="border-t border-foreground">
-            <SpatialDisclosureTrigger id="alliances" className="w-full flex items-center justify-between text-left group pt-8 pb-8">
-              <h3 className="text-xl font-bold uppercase tracking-widest text-muted-foreground group-hover:text-[hsl(var(--brand-pink))] transition-colors text-[11px] m-0">{landingText(governedLanding, "platforms-alliance-heading", "Platform Alliances")}</h3>
-              <Plus className="h-6 w-6 text-foreground group-hover:text-[hsl(var(--brand-pink))] transition-transform duration-300 group-data-[state=active]:rotate-45 group-data-[state=active]:text-[hsl(var(--brand-pink))]" />
-            </SpatialDisclosureTrigger>
-            <SpatialDisclosurePanel id="alliances" className="data-[state=inactive]:hidden pb-12">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
-                {ALLIANCE_PLATFORM_LIST.map((platform) => (
-                  <Link href={`/platforms/${platform.slug}`} key={platform.slug} data-testid={`link-platform-${platform.slug}`}>
-                    <div className="group block bg-[hsl(var(--secondary))] p-8 hover:bg-[hsl(var(--brand-violet))/5] transition-colors border border-transparent hover:border-[hsl(var(--brand-pink))/20] cursor-pointer relative overflow-hidden h-full">
-                      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))] transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100" />
-                      <div className="flex justify-between items-start mb-6">
-                        <h4 className="text-3xl font-semibold text-[hsl(var(--brand-deep))] transition-colors group-hover:text-[hsl(var(--brand-pink))]">{platform.name}</h4>
-                        <ArrowRight className="h-6 w-6 text-muted-foreground group-hover:text-[hsl(var(--brand-coral))] transition-transform group-hover:translate-x-1" />
-                      </div>
-                        <p className="text-foreground/70 leading-relaxed text-sm">{platform.summary}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </SpatialDisclosurePanel>
-          </SpatialDisclosureItem>
         </SpatialDisclosure>
       </section>
 

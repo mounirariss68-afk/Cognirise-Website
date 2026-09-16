@@ -53,14 +53,13 @@ test("registers exact routes before the generic platform route and keeps the unk
   assert.match(app, /<Route component=\{NotFound\} \/>/);
 });
 
-test("links every alliance page from the home AI Platforms card and platform overview", async () => {
+test("links every alliance page from the home AI Platforms card and canonical platform inventory", async () => {
   const [serviceLines, overview] = await Promise.all([
     readFile(new URL("./serviceLines.ts", import.meta.url), "utf8"),
-    readFile(new URL("../pages/PlatformsOverview.tsx", import.meta.url), "utf8"),
+    readFile(new URL("./platformCatalog.ts", import.meta.url), "utf8"),
   ]);
   for (const route of routes) assert.match(serviceLines, new RegExp(route));
-  assert.match(overview, /ALLIANCE_PLATFORM_LIST/);
-  assert.match(overview, /link-platform-/);
+  for (const route of routes) assert.match(overview, new RegExp(route));
 });
 
 test("publishes all canonical routes in static sitemap and route metadata", async () => {

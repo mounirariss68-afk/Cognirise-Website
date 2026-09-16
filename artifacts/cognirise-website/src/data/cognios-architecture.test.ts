@@ -4,8 +4,8 @@ import { architectureLayers, platformRelationships, platformsForLayer } from "./
 
 test("defines one many-to-many platform map across every architecture layer", () => {
   assert.deepEqual(platformRelationships.map(({ name }) => name), [
-    "CogniOS", "CogniDocs", "CogniAgents", "CogniTalk", "CogniWare",
-    "Lupitor", "Datatoolpack AutoData", "bunjee.ai",
+    "CogniOS", "CogniAgents", "CogniDocs", "CogniBase",
+    "Lupitor", "Datatoolpack", "bunjee.ai",
   ]);
   assert.deepEqual(
     platformRelationships.find(({ id }) => id === "cognios")?.layerIds,
@@ -24,10 +24,10 @@ test("keeps partner contributions explicitly outside Cognirise ownership", () =>
 test("supports bidirectional layer lookup without exclusive placement", () => {
   assert.deepEqual(
     platformsForLayer("experience").map(({ id }) => id),
-    ["cognios", "cognitalk", "lupitor", "bunjee-ai"],
+    ["cognios", "lupitor", "bunjee-ai"],
   );
   assert.deepEqual(
     platformsForLayer("integration").map(({ id }) => id),
-    ["cognios", "cogniagents", "cogniware", "lupitor", "datatoolpack"],
+    ["cognios", "cogniagents", "cognibase", "lupitor", "datatoolpack"],
   );
 });

@@ -12,3 +12,11 @@ test("platform navigation removes architecture as a peer and groups ownership in
   assert.match(source, /border-t border-border/);
   assert.match(source, /groupPlatformNavigation/);
 });
+
+test("platform navigation is rebuilt from the canonical inventory", async () => {
+  const source = await readFile(new URL("./Shell.tsx", import.meta.url), "utf8");
+  assert.match(source, /PLATFORM_CATALOG\.map/);
+  assert.match(source, /CogniBase/);
+  assert.doesNotMatch(source, /CogniTalk/);
+  assert.doesNotMatch(source, /CogniWare/);
+});

@@ -8,6 +8,9 @@
   <url><loc>https://cognirise.ai/methodologies/idao</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://cognirise.ai/methodologies/agent-authority-model</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://cognirise.ai/platforms/cognios</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://cognirise.ai/platforms/cogniagents</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://cognirise.ai/platforms/cognidocs</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://cognirise.ai/platforms/cognibase</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://cognirise.ai/platforms/lupitor</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://cognirise.ai/platforms/datatoolpack</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://cognirise.ai/platforms/bunjee-ai</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>

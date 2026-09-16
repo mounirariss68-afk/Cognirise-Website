@@ -12,6 +12,7 @@ import { handleSamePageHashNavigation } from "@/lib/hashNavigation";
 import { isCurrentRouteDestination, routePath } from "@/lib/routeState";
 import { marketAwareDestination } from "@/lib/marketDestination";
 import { ReviewVersionSelect } from "./ReviewVersionSelect";
+import { PLATFORM_CATALOG } from "@/lib/platformCatalog";
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/": {
@@ -62,12 +63,8 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: "CogniAgents | Cognirise",
     description: "Governed agents that coordinate specialist tasks in defined operational environments.",
   },
-  "/platforms/cognitalk": {
-    title: "CogniTalk | Cognirise",
-    description: "A bilingual conversational layer for meaningful work between people and enterprise intelligence.",
-  },
-  "/platforms/cogniware": {
-    title: "CogniWare | Cognirise",
+  "/platforms/cognibase": {
+    title: "CogniBase | Cognirise",
     description: "Composable intelligence capabilities connected to the systems that run the enterprise.",
   },
   "/industries": {
@@ -140,22 +137,22 @@ export const ROUTE_OWNED_METADATA_PATHS = new Set([
 ]);
 
 type NavigationItem = { id: string; label: string; href: string; group?: "own" | "partner"; items?: NavigationItem[] };
-const ownPlatformPaths = new Set(["/platforms/cognios", "/platforms/cognidocs", "/platforms/cogniagents", "/platforms/cognitalk", "/platforms/cogniware"]);
-const partnerPlatformPaths = new Set(["/platforms/lupitor", "/platforms/datatoolpack", "/platforms/bunjee-ai"]);
-
 export const groupPlatformNavigation = (items: NavigationItem[]): NavigationItem[] =>
   items.filter((item) => item.id !== "work" && !/^\/work\/?$/.test(routePath(item.href))).map((item) => item.id !== "platforms" && routePath(item.href) !== "/platforms"
     ? { ...item, items: item.items ? groupPlatformNavigation(item.items) : undefined }
     : {
         ...item,
-        items: (item.items ? groupPlatformNavigation(item.items) : undefined)
-          ?.filter((child) => routePath(child.href) !== "/platforms/cognios/architecture" && !child.href.includes("#architecture"))
-          .map((child) => {
-            const path = routePath(child.href);
-            if (ownPlatformPaths.has(path)) return { ...child, group: "own" as const };
-            if (partnerPlatformPaths.has(path)) return { ...child, group: "partner" as const };
-            return child;
-          }),
+        items: [
+          ...(item.items?.some((child) => routePath(child.href) === "/platforms")
+            ? [{ ...item.items.find((child) => routePath(child.href) === "/platforms")! }]
+            : [{ id: "platforms.overview", label: "Platform Overview", href: "/platforms" }]),
+          ...PLATFORM_CATALOG.map((platform) => ({
+            id: `platforms.${platform.slug}`,
+            label: platform.name,
+            href: platform.href,
+            group: platform.ownership === "cognirise" ? "own" as const : "partner" as const,
+          })),
+        ],
       });
 export type PreviewNavigationSnapshot = {
   market?: string;
@@ -196,12 +193,11 @@ const compiledNavigation: NavigationItem[] = [
     items: [
       { id: "platforms.overview", label: "Platform Overview", href: "/platforms" },
       { id: "platforms.cognios", label: "CogniOS", href: "/platforms/cognios", group: "own" },
-      { id: "platforms.cognidocs", label: "CogniDocs", href: "/platforms/cognidocs", group: "own" },
       { id: "platforms.cogniagents", label: "CogniAgents", href: "/platforms/cogniagents", group: "own" },
-      { id: "platforms.cognitalk", label: "CogniTalk", href: "/platforms/cognitalk", group: "own" },
-      { id: "platforms.cogniware", label: "CogniWare", href: "/platforms/cogniware", group: "own" },
+      { id: "platforms.cognidocs", label: "CogniDocs", href: "/platforms/cognidocs", group: "own" },
+      { id: "platforms.cognibase", label: "CogniBase", href: "/platforms/cognibase", group: "own" },
       { id: "platforms.lupitor", label: "Lupitor", href: "/platforms/lupitor", group: "partner" },
-      { id: "platforms.datatoolpack", label: "Datatoolpack AutoData", href: "/platforms/datatoolpack", group: "partner" },
+      { id: "platforms.datatoolpack", label: "Datatoolpack", href: "/platforms/datatoolpack", group: "partner" },
       { id: "platforms.bunjee-ai", label: "bunjee.ai", href: "/platforms/bunjee-ai", group: "partner" },
     ]
   },
