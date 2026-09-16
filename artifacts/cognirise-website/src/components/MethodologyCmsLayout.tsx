@@ -16,6 +16,7 @@ import {
   useCmsEntry,
 } from "@/lib/cms";
 import { metadataFromSeo, type PageMetadata, useDynamicMetadata } from "@/lib/metadata";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 
 export type MethodologyTemplate = Extract<
   FrameworkContent,
@@ -270,6 +271,7 @@ export function methodologyEditorialMedia<T extends MethodologyTemplate>(
 function MethodologyUnavailable({ message }: { message: string }) {
   return (
     <main className="min-h-screen bg-background px-6 py-24">
+      <NavigationBackControl embedded className="mx-auto mb-7 max-w-[720px]" />
       <section className="mx-auto max-w-[720px] border border-amber-300 bg-amber-50 p-8 text-amber-950" role="alert">
         <h1 className="text-2xl font-semibold">This methodology is unavailable.</h1>
         <p className="mt-3 leading-7">{message}</p>

@@ -51,10 +51,10 @@ export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
     && market !== "uae"
     && !published;
   if (cms.isAuthoritative && cms.delivery === "loading") {
-    return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]" aria-busy="true"><p>Loading industry perspective…</p></main>;
+    return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]" aria-busy="true"><NavigationBackControl embedded className="mb-7" /><p>Loading industry perspective…</p></main>;
   }
   if (publicSectorMarketMismatch || publicSectorMissingExactEdition || (cms.isAuthoritative && (!published || (industry.slug === "education" && !published.educationPov)))) {
-    return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]"><div className="mx-auto max-w-3xl"><h1 className="font-display text-5xl font-semibold">This industry perspective is under review.</h1><p className="mt-6 max-w-xl text-lg text-[#506583]">It will return when an approved edition is published for this market.</p><Link className="mt-8 inline-flex font-bold text-[#db509e]" href="/industries">Explore all industries <ArrowRight size={16} /></Link></div></main>;
+    return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]"><div className="mx-auto max-w-3xl"><NavigationBackControl embedded className="mb-7" /><h1 className="font-display text-5xl font-semibold">This industry perspective is under review.</h1><p className="mt-6 max-w-xl text-lg text-[#506583]">It will return when an approved edition is published for this market.</p><Link className="mt-8 inline-flex font-bold text-[#db509e]" href="/industries">Explore all industries <ArrowRight size={16} /></Link></div></main>;
   }
   return <IndustryEditorialView view={view} />;
 }
@@ -72,7 +72,7 @@ export function IndustryEditorialView({ view: baseView, marketOverride }: { view
     [baseView, market, publicSectorMarketMismatch],
   );
   if (publicSectorMarketMismatch) {
-    return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]"><div className="mx-auto max-w-3xl"><h1 className="font-display text-5xl font-semibold">This industry perspective is under review.</h1><p className="mt-6 max-w-xl text-lg text-[#506583]">It will return when an approved edition is published for this market.</p><Link className="mt-8 inline-flex font-bold text-[#db509e]" href="/industries">Explore all industries <ArrowRight size={16} /></Link></div></main>;
+    return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]"><div className="mx-auto max-w-3xl"><NavigationBackControl embedded className="mb-7" /><h1 className="font-display text-5xl font-semibold">This industry perspective is under review.</h1><p className="mt-6 max-w-xl text-lg text-[#506583]">It will return when an approved edition is published for this market.</p><Link className="mt-8 inline-flex font-bold text-[#db509e]" href="/industries">Explore all industries <ArrowRight size={16} /></Link></div></main>;
   }
   const imageSource = view.image.startsWith("http://") || view.image.startsWith("https://")
     ? view.image
@@ -90,14 +90,16 @@ export function IndustryEditorialView({ view: baseView, marketOverride }: { view
   return (
     <main className={`industry industry--${view.variant}`} data-education-editorial={pov ? "" : undefined}>
       <style>{industryStyles}</style>
-      <IndustrySection id="hero" className="ind-hero public-hero-shell" style={{ alignItems: "start" }} aria-labelledby="industry-title">
-        <div className="ind-copy">
+      <IndustrySection id="hero" className="ind-hero public-hero-shell" style={{ alignItems: "stretch" }} aria-labelledby="industry-title">
+        <div className="ind-copy flex flex-col">
           <div className="flex flex-col gap-7">
             <NavigationBackControl embedded />
             <div className="ind-kicker">{heroKicker}</div>
           </div>
-          <h1 id="industry-title">{thesisParts.map((part, index) => <React.Fragment key={`${part}-${index}`}>{index > 0 && <> <span className="ind-thesis-dash">—</span> </>}{part}</React.Fragment>)}</h1>
-          <p>{view.dek}</p>
+          <div className="mt-14 lg:mt-auto">
+            <h1 id="industry-title">{thesisParts.map((part, index) => <React.Fragment key={`${part}-${index}`}>{index > 0 && <> <span className="ind-thesis-dash">—</span> </>}{part}</React.Fragment>)}</h1>
+            <p>{view.dek}</p>
+          </div>
         </div>
         <figure className="ind-image"><img src={imageSource} alt={view.imageAlt} /><span>01 / industry perspective</span></figure>
       </IndustrySection>

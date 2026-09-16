@@ -24,6 +24,12 @@ test("assessment routes retain their route-owned engines without generic editori
   }
 });
 
+test("fail-closed methodology delivery retains its route-owned Back control", async () => {
+  const source = await readFile(path.resolve(import.meta.dirname, "MethodologyCmsLayout.tsx"), "utf8");
+  const unavailable = source.slice(source.indexOf("function MethodologyUnavailable"));
+  assert.match(unavailable, /<NavigationBackControl embedded/);
+});
+
 test("methodology SEO uses the exact CMS revision and preserves preview noindex", () => {
   const fallback = methodologySeoSeeds["ai-value-to-scale"];
   const authoritative = methodologyCmsSeoMetadata({

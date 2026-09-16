@@ -6,6 +6,8 @@ import { Router } from "wouter";
 import type { PublicSectorPov } from "@workspace/api-zod";
 import { INDUSTRIES, type IndustryContent } from "@/content/industries";
 import { IndustryEditorialView } from "./IndustryEditorial";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 const publicSectorPov = {
   version: 1,
@@ -104,4 +106,13 @@ test("legacy exact Public Sector editions remain renderable without a POV field"
   );
   assert.doesNotMatch(html, /This industry perspective is under review\./);
   assert.match(html, /Make high-friction services easier to complete/);
+});
+
+test("industry loading and under-review boundaries retain their route-owned Back control", async () => {
+  const editorial = await readFile(path.resolve(import.meta.dirname, "IndustryEditorial.tsx"), "utf8");
+  const banking = await readFile(path.resolve(import.meta.dirname, "../../pages/IndustryBanking.tsx"), "utf8");
+  assert.match(editorial, /delivery === "loading"[\s\S]*?<NavigationBackControl embedded/);
+  assert.match(editorial, /This industry perspective is under review\.[\s\S]*?<NavigationBackControl embedded|<NavigationBackControl embedded[\s\S]*?This industry perspective is under review\./);
+  assert.match(banking, /delivery === "loading"[\s\S]*?<NavigationBackControl embedded/);
+  assert.match(banking, /<NavigationBackControl embedded[\s\S]*?This industry perspective is under review\./);
 });

@@ -60,19 +60,21 @@ function IDAOMethodologyContent() {
     <article className="overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       <header className="public-hero-shell px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-          <motion.div className="flex flex-col" initial={reducedMotion ? false : { opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: reducedMotion ? 0 : 0.65 }}>
+          <motion.div className="flex flex-col lg:min-h-[620px]" initial={reducedMotion ? false : { opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: reducedMotion ? 0 : 0.65 }}>
             <div className="flex flex-col gap-7">
               <NavigationBackControl embedded />
               <div data-hero-content-edge><Kicker>{cleanHeroIdentifier(hero.breadcrumb)}</Kicker></div>
             </div>
-            <p className="mt-8 text-[11px] font-bold uppercase tracking-[0.16em] text-[hsl(var(--brand-pink))]">{hero.supportingText}</p>
-            <h1 className="mt-5 font-display text-[clamp(58px,9vw,138px)] font-semibold leading-[0.82] tracking-[-0.095em]">{hero.title}</h1>
-            <p className="mt-8 max-w-[620px] text-[19px] leading-[1.58] text-[#405777]">
-               {hero.description}
-            </p>
-            <a href={editorial.lifecycleCta.href} className="mt-9 inline-flex items-center gap-3 border-b border-[#102957] pb-2 text-sm font-bold hover:text-[hsl(var(--brand-pink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
-              {editorial.lifecycleCta.label} <ArrowDown size={16} />
-            </a>
+            <div className="mt-14 lg:mt-auto">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[hsl(var(--brand-pink))]">{hero.supportingText}</p>
+              <h1 className="mt-5 font-display text-[clamp(58px,9vw,138px)] font-semibold leading-[0.82] tracking-[-0.095em]">{hero.title}</h1>
+              <p className="mt-8 max-w-[620px] text-[19px] leading-[1.58] text-[#405777]">
+                 {hero.description}
+              </p>
+              <a href={editorial.lifecycleCta.href} className="mt-9 inline-flex items-center gap-3 border-b border-[#102957] pb-2 text-sm font-bold hover:text-[hsl(var(--brand-pink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
+                {editorial.lifecycleCta.label} <ArrowDown size={16} />
+              </a>
+            </div>
           </motion.div>
           <motion.figure
             initial={reducedMotion ? false : { opacity: 0, x: 28 }}

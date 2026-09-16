@@ -43,7 +43,7 @@ export function MethodPageHero({
     <header className="public-hero-shell px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24 border-b border-[#cbd3e1]">
       <div className={`grid gap-10 ${imageSrc ? "lg:grid-cols-[0.9fr_1.1fr] lg:items-start" : "max-w-4xl"}`}>
         <motion.div 
-          className="flex flex-col"
+          className={`flex flex-col ${imageSrc ? "lg:min-h-[620px]" : ""}`}
           initial={reducedMotion ? false : { opacity: 0, x: -24 }} 
           animate={{ opacity: 1, x: 0 }} 
           transition={{ duration: reducedMotion ? 0 : 0.65 }}
@@ -55,22 +55,24 @@ export function MethodPageHero({
               {cleanHeroIdentifier(breadcrumb, { marketLocation })}
             </div>
           </div>
-          <h1 className={`mt-5 font-display ${imageSrc ? "text-[clamp(45px,7vw,100px)]" : "text-[clamp(45px,6vw,80px)]"} font-semibold leading-[0.88] tracking-[-0.08em]`}>
-            {title}
-          </h1>
-          <p className="mt-8 max-w-[620px] text-[19px] leading-[1.58] text-[#405777]">
-            {description}
-          </p>
-          {supportingText && (
-            <div className="mt-8 border-t border-[#102957] pt-6 text-[15px] leading-[1.65] text-[#536887] max-w-[620px]">
-              {supportingText}
-            </div>
-          )}
-          {actions && (
-            <div className="mt-8">
-              {actions}
-            </div>
-          )}
+          <div className={`${imageSrc ? "mt-14 lg:mt-auto" : "mt-8"}`}>
+            <h1 className={`font-display ${imageSrc ? "text-[clamp(45px,7vw,100px)]" : "text-[clamp(45px,6vw,80px)]"} font-semibold leading-[0.88] tracking-[-0.08em]`}>
+              {title}
+            </h1>
+            <p className="mt-8 max-w-[620px] text-[19px] leading-[1.58] text-[#405777]">
+              {description}
+            </p>
+            {supportingText && (
+              <div className="mt-8 border-t border-[#102957] pt-6 text-[15px] leading-[1.65] text-[#536887] max-w-[620px]">
+                {supportingText}
+              </div>
+            )}
+            {actions && (
+              <div className="mt-8">
+                {actions}
+              </div>
+            )}
+          </div>
         </motion.div>
 
         {imageSrc && (

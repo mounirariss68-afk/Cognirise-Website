@@ -55,3 +55,4 @@
 - [Chromium CDP target selection](chromium-cdp-target-selection.md) — Attach browser checks to the intended blank page, not extension or browser UI targets.
 - [Migration receipt completeness](migration-receipt-completeness.md) — A recorded migration does not prove its trigger and seed invariants still exist; verify outcomes and repair forward.
 - [Canonical platform identity](canonical-platform-identity.md) — Website platform names, order, ownership and routes come from a fixed inventory; CMS may enrich copy but not redefine identity.
+- [Image-led hero vertical contract](image-led-hero-vertical-contract.md) — Align Back and eyebrow at the image top; anchor the intact narrative group to the image bottom.

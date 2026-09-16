@@ -88,19 +88,21 @@ export function BankingEditorial({ view }: { view: BankingView }) {
         @media (prefers-reduced-motion:reduce) { .banking-editorial *,.banking-editorial *::before,.banking-editorial *::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
       `}</style>
 
-      <section className="b-hero public-hero-shell" data-industry-section="hero" aria-labelledby="banking-hero-title">
-        <div className="b-copy">
+      <section className="b-hero public-hero-shell" style={{ alignItems: "stretch" }} data-industry-section="hero" aria-labelledby="banking-hero-title">
+        <div className="b-copy flex flex-col">
           <div className="flex flex-col gap-7">
             <NavigationBackControl embedded />
             <div className="b-kicker">{heroKicker}</div>
           </div>
-          <h1 id="banking-hero-title">{pov.hero.heading}</h1>
-          <span className="b-hero-descriptor">{pov.descriptor}</span>
-          <p>{pov.hero.body}</p>
-          <nav className="b-hero-anchors" aria-label="Banking page sections">
-            <a href="#starting-points">{pov.hero.startingPointsAnchorLabel} <ChevronDown size={14} /></a>
-            <Link href={consolidatedCaseStudiesHref}>{pov.hero.selectedWorkAnchorLabel} <ChevronDown size={14} /></Link>
-          </nav>
+          <div className="mt-14 lg:mt-auto">
+            <h1 id="banking-hero-title">{pov.hero.heading}</h1>
+            <span className="b-hero-descriptor">{pov.descriptor}</span>
+            <p>{pov.hero.body}</p>
+            <nav className="b-hero-anchors" aria-label="Banking page sections">
+              <a href="#starting-points">{pov.hero.startingPointsAnchorLabel} <ChevronDown size={14} /></a>
+              <Link href={consolidatedCaseStudiesHref}>{pov.hero.selectedWorkAnchorLabel} <ChevronDown size={14} /></Link>
+            </nav>
+          </div>
         </div>
         <figure className="b-hero-image">
           <img src={heroUrl} alt={view.heroMedia?.altText || hero?.altText || view.imageAlt} width={1440} height={1080} style={{ objectPosition: cmsMediaObjectPosition(hero) }} fetchPriority="high" />

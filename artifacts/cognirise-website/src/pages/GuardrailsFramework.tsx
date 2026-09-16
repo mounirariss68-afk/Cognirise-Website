@@ -10,6 +10,7 @@ import { MarkdownInline } from "@/components/guardrails/MarkdownInline";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { LegacyGuardrailsLayout } from "./LegacyGuardrailsLayout";
 import { MethodPageHero } from "@/components/MethodPageHero";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 
 import { SetProveHoldActionMap } from "@/components/guardrails/SetProveHoldActionMap";
 import { FourLayerComparison } from "@/components/guardrails/FourLayerComparison";
@@ -66,6 +67,7 @@ export function GuardrailsLayout({
   if (renderPolicy === "loading") {
     return (
       <main className="guardrails-page min-h-[70vh] bg-[var(--gf-bg)] px-6 py-20 md:px-[var(--gf-page-gutter)]" aria-busy="true">
+        <NavigationBackControl embedded className="mb-7" />
         <Kicker>Methodologies & frameworks</Kicker>
         <p className="mt-8 text-[length:var(--gf-text-lg)] text-[var(--gf-ink-muted)]">Loading the governed methodology…</p>
       </main>
@@ -75,6 +77,7 @@ export function GuardrailsLayout({
   if (renderPolicy === "unavailable" || !framework || framework.template !== "guardrails") {
     return (
       <main className="guardrails-page min-h-[70vh] bg-[var(--gf-bg)] px-6 py-20 md:px-[var(--gf-page-gutter)]">
+        <NavigationBackControl embedded className="mb-7" />
         <Kicker>Methodologies & frameworks</Kicker>
         <h1 className="mt-8 max-w-[var(--gf-content-status)] font-display text-[length:var(--gf-h1)] font-semibold leading-[0.92] tracking-[-0.085em] text-[var(--gf-ink)]">
           This methodology is not currently published.

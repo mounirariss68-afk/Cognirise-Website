@@ -46,7 +46,7 @@ export default function PlatformsOverview() {
     <div className="flex flex-col" data-governed-landing={governedLanding?.pagePath}>
       <section className="public-hero-shell px-6 md:px-12 pt-8 md:pt-12 max-w-[1440px] mx-auto w-full">
         <div className="grid grid-cols-1 items-start gap-12 pb-12 lg:grid-cols-[0.86fr_1.14fr] lg:gap-16">
-          <div className="pb-4 relative z-10">
+          <div className="relative z-10 flex flex-col pb-4 lg:min-h-[640px]">
             <div className="mb-8 flex flex-col gap-7">
               <NavigationBackControl embedded />
               <div data-hero-content-edge className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -54,20 +54,22 @@ export default function PlatformsOverview() {
                 {heroEyebrow}
               </div>
             </div>
-            <h1 className="text-5xl md:text-6xl lg:text-[93px] leading-[0.94] font-semibold mb-8 max-w-[660px]">
-              {landingText(governedLanding, "platforms-hero-heading", governedHero?.heading ?? "Ecosystem for execution.")}
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-[460px] mb-10 leading-relaxed">
-              {landingText(governedLanding, "platforms-hero-body", governedHero?.text ?? "Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production. CogniOS connects enterprise knowledge, specialist agents and human accountability under one governed operating system.")}
-            </p>
-            <div className="flex flex-wrap items-center gap-6">
-              <BrandButton href="/value-scan">{landingText(governedLanding, "platforms-hero-cta", "Bring us one process")}</BrandButton>
-              <button 
-                onClick={() => scrollToSection("matrix")}
-                className="group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]"
-              >
-                {landingText(governedLanding, "platforms-hero-explore-label", "Explore capability matrix")} <ArrowDown className="h-4 w-4" />
-              </button>
+            <div className="mt-10 lg:mt-auto">
+              <h1 className="text-5xl md:text-6xl lg:text-[93px] leading-[0.94] font-semibold mb-8 max-w-[660px]">
+                {landingText(governedLanding, "platforms-hero-heading", governedHero?.heading ?? "Ecosystem for execution.")}
+              </h1>
+              <p className="text-base md:text-lg text-muted-foreground max-w-[460px] mb-10 leading-relaxed">
+                {landingText(governedLanding, "platforms-hero-body", governedHero?.text ?? "Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production. CogniOS connects enterprise knowledge, specialist agents and human accountability under one governed operating system.")}
+              </p>
+              <div className="flex flex-wrap items-center gap-6">
+                <BrandButton href="/value-scan">{landingText(governedLanding, "platforms-hero-cta", "Bring us one process")}</BrandButton>
+                <button
+                  onClick={() => scrollToSection("matrix")}
+                  className="group inline-flex items-center gap-2 border-b border-foreground pb-2 text-sm font-bold transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))]"
+                >
+                  {landingText(governedLanding, "platforms-hero-explore-label", "Explore capability matrix")} <ArrowDown className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
           

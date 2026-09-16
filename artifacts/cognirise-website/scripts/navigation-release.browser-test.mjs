@@ -111,6 +111,11 @@ try {
   await delay(200);
   await evaluate(`{ const a=document.createElement('a'); a.href='/platforms?market=ksa'; a.textContent='Test internal'; document.body.append(a); a.click(); }`);
   await wait(`location.pathname==='/platforms' && Boolean(${back}) && document.querySelector('h1')`);
+  await evaluate(`history.replaceState(history.state, '', '/platforms/?market=ksa'); window.dispatchEvent(new PopStateEvent('popstate'))`);
+  await wait(`location.pathname==='/platforms/' && Boolean(${back})`);
+  assert.equal(await evaluate(`document.querySelectorAll('[data-navigation-back-row]').length`), 1);
+  await evaluate(`history.replaceState(history.state, '', '/platforms?market=ksa'); window.dispatchEvent(new PopStateEvent('popstate'))`);
+  await wait(`location.pathname==='/platforms' && Boolean(${back})`);
   assert.equal(await evaluate(`${back}.className.includes('border')`), false);
   assert.equal(await evaluate(`${back}.getBoundingClientRect().height < 32`), true);
   assert.equal(await evaluate(`${back}.closest('[data-navigation-back-container]').nextElementSibling !== null`), true);
@@ -153,6 +158,12 @@ try {
   await evaluate(`window.confirm=()=>true; ${back}.click()`);
   await wait(`location.pathname==='/methodologies'`);
   console.log("PASS canceled dirty-assessment traversal followed by shared Back");
+  await evaluate(`{ const a=document.createElement('a'); a.href='/methodologies/idao?market=uae'; a.textContent='Test IDAO hero Back'; document.body.append(a); a.click(); }`);
+  await wait(`location.pathname==='/methodologies/idao' && Boolean(${back}) && document.querySelector('[data-idao-hero-frame]')`);
+  await assertEmbeddedBackGeometry("[data-idao-hero-frame]");
+  await evaluate(`{ const a=document.createElement('a'); a.href='/methodologies/guardrails-framework/?market=uae'; a.textContent='Test trailing-slash Guardrails Back'; document.body.append(a); a.click(); }`);
+  await wait(`location.pathname==='/methodologies/guardrails-framework/' && Boolean(${back})`);
+  assert.equal(await evaluate(`document.querySelectorAll('[data-navigation-back-row]').length`), 1);
   await evaluate(`{ const a=document.createElement('a'); a.href='/industries/financial-services?market=uae'; a.textContent='Test banking hero Back'; document.body.append(a); a.click(); }`);
   await wait(`location.pathname==='/industries/financial-services' && Boolean(${back}) && document.querySelector('.b-hero-image')`);
   await assertEmbeddedBackGeometry(".b-hero-image");
@@ -160,6 +171,10 @@ try {
   await wait(`location.pathname==='/industries/telecoms' && Boolean(${back}) && document.querySelector('.ind-image')`);
   await assertEmbeddedBackGeometry(".ind-image");
   console.log("PASS embedded Back aligns with banking and shared industry hero images");
+  await evaluate(`{ const a=document.createElement('a'); a.href='/industries/public-sector?market=ksa'; a.textContent='Test unavailable industry Back'; document.body.append(a); a.click(); }`);
+  await wait(`location.pathname==='/industries/public-sector' && document.body.textContent.includes('under review') && Boolean(${back})`);
+  assert.equal(await evaluate(`document.querySelectorAll('[data-navigation-back-row]').length`), 1);
+  console.log("PASS unavailable industry retains exactly one Back control");
   await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 1000, deviceScaleFactor: 1, mobile: false });
   await evaluate(`{ const a=document.createElement('a'); a.href='/what-we-do/data-ai-foundations'; a.textContent='Test wide service'; document.body.append(a); a.click(); }`);
   await wait(`location.pathname==='/what-we-do/data-ai-foundations' && Boolean(${back}) && Boolean(${heroShell}) && document.querySelector('h1')`);

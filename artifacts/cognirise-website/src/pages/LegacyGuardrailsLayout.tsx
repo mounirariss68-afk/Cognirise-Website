@@ -13,6 +13,7 @@ import { QuestionsInteraction } from "@/components/guardrails/QuestionsInteracti
 import { MethodInteraction } from "@/components/guardrails/MethodInteraction";
 import { ResponsiveTable } from "@/components/guardrails/ResponsiveTable";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 
 const colorMap: Record<string, string> = {
   policy: "var(--gf-ink)",
@@ -33,6 +34,7 @@ export function LegacyGuardrailsLayout({
     <article className="guardrails-page overflow-hidden bg-[var(--gf-bg)] font-sans text-[var(--gf-ink)] selection:bg-[var(--gf-accent)] selection:text-[var(--gf-accent-ink)]">
       {/* 1. Hero */}
       <header className="px-6 pb-16 pt-9 md:px-[var(--gf-page-gutter)] lg:pb-24 border-b border-[var(--gf-border)]">
+        <NavigationBackControl embedded className="mb-7" />
         <Kicker>{cleanHeroIdentifier(content.hero.eyebrow)}</Kicker>
         <div className="mt-8 w-full max-w-[var(--gf-content-hero)]">
           <motion.div

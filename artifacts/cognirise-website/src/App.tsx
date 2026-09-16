@@ -97,7 +97,8 @@ import AIUseCasePrioritization from "@/pages/AIUseCasePrioritization";
 export function Router() {
   const [location] = useLocation();
   const { market, locale } = useMarketStore();
-  const path = location.split(/[?#]/)[0];
+  const rawPath = location.split(/[?#]/)[0];
+  const path = rawPath === "/" ? rawPath : rawPath.replace(/\/+$/, "");
   const embedsBackInHero = path === "/"
     || path === "/platforms"
     || path === "/methodologies/ai-use-case-prioritization"
