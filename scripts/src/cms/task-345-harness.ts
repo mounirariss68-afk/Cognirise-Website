@@ -618,6 +618,7 @@ async function requireCompleteFixtureSchema(pool: QueryClient): Promise<void> {
     "cms_media_versions",
     "cms_media_references",
     "cms_document_market_availability",
+    "cms_editorial_assignments",
     "cms_review_requests",
     "cms_revision_accuracy_confirmations",
     "cms_user_capability_grants",
@@ -1059,6 +1060,12 @@ async function seedDatabase(pool: QueryClient, state: HarnessState, security: Se
       );
       const uaeEdition = editions.rows.find((edition) => edition.market === "uae")!;
       const ksaEdition = editions.rows.find((edition) => edition.market === "ksa")!;
+      await pool.query(
+        `INSERT INTO cms_editorial_assignments
+           (document_id,edition_id,editor_user_id,reviewer_user_id,created_by_user_id,updated_by_user_id)
+         VALUES ($1,$2,$3,$4,$5,$5)`,
+        [fixture.id, ksaEdition.id, author.id, reviewer.id, administrator.id],
+      );
       const now = new Date().toISOString();
       await pool.query(
         `INSERT INTO cms_revisions
@@ -1379,10 +1386,24 @@ async function verify(statePath: string): Promise<void> {
     const assets = await pool.query<{ id: string; storage_key: string; status: string }>(
       "SELECT id::text id,storage_key,status FROM cms_media_assets ORDER BY id",
     );
+    const reviewer = state.users.find((user) => user.label === "reviewer")!;
+    const assignments = await pool.query<{ count: string }>(
+      `SELECT count(*)::text count
+         FROM cms_editorial_assignments assignment
+         JOIN cms_market_editions edition ON edition.id=assignment.edition_id
+        WHERE assignment.document_id=ANY($1::uuid[])
+          AND edition.market='ksa'
+          AND edition.locale='en'
+          AND assignment.reviewer_user_id=$2`,
+      [state.documents.map((document) => document.id), reviewer.id],
+    );
     if (Number(docs.rows[0]?.count) !== cmsDocumentKinds.length) {
       throw new Error("Fixture verification found an unexpected document count.");
     }
     if (!Number(refs.rows[0]?.count)) throw new Error("Fixture verification found no media references.");
+    if (Number(assignments.rows[0]?.count) !== cmsDocumentKinds.length) {
+      throw new Error("Fixture verification found a missing or incorrect KSA reviewer assignment.");
+    }
     const bucket = await storageClient(state.bucketName);
     for (const asset of assets.rows) {
       if (asset.status !== "active" || !isConfiguredMediaKey(state.storageRoot, asset.storage_key)) continue;

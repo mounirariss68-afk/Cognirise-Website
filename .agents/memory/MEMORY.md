@@ -52,3 +52,4 @@
 - [Immutable migration evidence](immutable-migration-evidence.md) — Test populated append-only history and compare effective authority before and after adding metadata.
 - [Fixture relationship evidence](fixture-relationship-evidence.md) — Valid rows and stable hashes do not prove the application can join fixture identities correctly.
 - [Disposable fixture cleanup receipts](disposable-fixture-cleanup-receipts.md) — Keep teardown identity outside restart-ephemeral storage or isolated schemas and objects can be stranded.
+- [Chromium CDP target selection](chromium-cdp-target-selection.md) — Attach browser checks to the intended blank page, not extension or browser UI targets.

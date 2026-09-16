@@ -104,7 +104,12 @@ function AppSidebar() {
       <SidebarFooter className="p-4 mt-auto border-t border-sidebar-border/30">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-full justify-start px-2 py-2 h-auto hover:bg-sidebar-accent group data-[state=open]:bg-sidebar-accent border border-transparent rounded-lg">
+            <Button
+              variant="ghost"
+              aria-label="Open account menu"
+              data-testid="account-menu-trigger"
+              className="w-full justify-start px-2 py-2 h-auto hover:bg-sidebar-accent group data-[state=open]:bg-sidebar-accent border border-transparent rounded-lg"
+            >
               <div className="w-8 h-8 rounded bg-gradient-to-br from-sidebar-primary/80 to-accent/80 text-sidebar-primary-foreground flex items-center justify-center mr-3 shadow-xs border border-sidebar-primary/20 shrink-0">
                 <span className="text-[11px] font-bold uppercase tracking-widest">{session?.user?.name?.substring(0, 2).toUpperCase() || 'U'}</span>
               </div>

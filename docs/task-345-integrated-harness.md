@@ -223,3 +223,24 @@ cannot make an externally hosted frontend reach a loopback API. Those are
 reported prerequisites, not auth or routing bypasses. It also does not perform
 storage cleanup outside objects referenced by the isolated fixture schema.
 No browser tester is launched by setup, serve, verify, or cleanup.
+
+## Task 354 Chromium/CDP smoke journey
+
+The maintained smoke journey is opt-in and must be run only against a ready
+Task 345 state and its disposable proxy. It uses Chromium's CDP websocket
+directly (no Playwright), ordinary login plus TOTP MFA, and rendered admin
+controls for editing, review, publication, and reviewed visibility release:
+
+```sh
+TASK_354_STATE=/tmp/task-345-task-<timestamp>.json \
+TASK_354_ORIGIN=http://127.0.0.1:<proxy-port> \
+pnpm --filter @workspace/scripts cms:task-354-browser-smoke
+```
+
+The journey edits only the fixture KSA edition, records the exact marker,
+keeps the UAE fixture revision as its control, and checks a disabled geography
+is unavailable. Public checks are read-only. It does not send email or mutate
+public-schema pointers. Run `verify` before and `cleanup` after the journey;
+cleanup must retain the private state file and fail loudly if ownership,
+storage, schema, or the public preservation baseline is not exact. This smoke
+command is intentionally excluded from cheap CI tests.

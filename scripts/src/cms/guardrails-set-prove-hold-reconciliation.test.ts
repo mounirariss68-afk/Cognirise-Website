@@ -236,7 +236,7 @@ test("fixture cleanup cannot erase a real document audit merely because a dispos
 test("post-merge runs the credential-bound replacement release, not the obsolete Guardrails manuscript stage", () => {
   const postMerge = readFileSync(new URL("../../post-merge.sh", import.meta.url), "utf8");
   assert.match(postMerge, /cms:owner-browser-fixture/);
-  assert.match(postMerge, /--development setup --credentials/);
+  assert.match(postMerge, /--development setup --with-guardrails-authority --credentials/);
   assert.match(postMerge, /--development cleanup --credentials/);
   assert.match(postMerge, /cms:release-guardrails-set-prove-hold/);
   assert.match(postMerge, /pnpm --filter @workspace\/api-server build/);

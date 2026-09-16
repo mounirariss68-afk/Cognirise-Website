@@ -89,3 +89,19 @@ here; they are not current acceptance status.
 | Visibility approval was blocked by an unauthoritative DTO and a coupled receipt. | **Passed** | Independent visibility approval succeeded after the authoritative DTO and independent receipt fix. Regions evidence: UAE `show/show`; KSA `pending`, `show/live off`; Europe `off`. Ordinary API auth/MFA review returned **200**, followed by visibility-only publish **200**. |
 | Public assertions needed exact destination/version proof without claiming an unobserved UI action. | **Passed** | KSA public detail returned **200** with marker 2 and the exact pinned hero version `047ecfa3...`. UAE public detail returned **200** with its original summary and revision; Europe remained off. Final visibility publication and public assertions are transaction and public-API evidence after the browser uncovered and drove each UI defect; this does **not** claim the final button click or a final browser screenshot. |
 | The previous visibility gate was marked incomplete while its fixture and release path were being repaired. | **Blocked — historical, cleared** | The repaired fixture, independent approval, transaction evidence and public API assertions close that gate. No remaining core journey is Blocked. No production/live content, email, cutover, or bulk publication mutation occurred. |
+
+## Task 354: maintained browser smoke
+
+The maintained-but-not-yet-executed `cms:task-354-browser-smoke` journey uses a
+disposable Task 345 schema/object namespace and Chromium CDP (not Playwright).
+It performs
+ordinary login/MFA, KSA regional edit and exact revision review, content
+publication prerequisite, destination visibility approval, and the reviewed
+visibility release confirmation through rendered UI controls. Its read-only
+public assertions require the KSA marker, the unchanged UAE fixture revision,
+and an unavailable disabled geography. Fixture `verify` and guarded
+`cleanup` remain required gates; no email is sent and public schema pointers
+are preserved. The expensive browser journey is opt-in and is not run by
+cheap type/static checks. No browser evidence is claimed until this opt-in
+journey has completed; the wrapper verifies before starting and guarantees
+verify-then-guarded-cleanup on success or failure.
