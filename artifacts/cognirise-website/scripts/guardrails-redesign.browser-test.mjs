@@ -101,7 +101,8 @@ async function inspect(viewport) {
   await send("Emulation.setDeviceMetricsOverride", {
     width: viewport.width, height: viewport.height, mobile: viewport.mobile, deviceScaleFactor: 1,
   });
-  await send("Page.navigate", { url: `${baseUrl}${route}` });
+  // Verify deep linking hash evaluation
+  await send("Page.navigate", { url: `${baseUrl}${route}#guardrails-phase-prove` });
   await waitForPage();
   await evaluate(`(async () => {
     await document.fonts.ready;
@@ -121,7 +122,7 @@ async function inspect(viewport) {
       layerCount: layers.length,
       matrixCount: cells.length,
       actionSelected: actions.filter((node) => node.getAttribute("aria-pressed") === "true").length,
-      layerSelected: layers.filter((node) => node.getAttribute("aria-pressed") === "true").length,
+      layerSelected: layers.filter((node) => node.getAttribute("aria-selected") === "true").length,
       matrixSelected: cells.filter((node) => node.getAttribute("aria-pressed") === "true").length,
       actionDetail: page.querySelector("#guardrails-action-detail")?.textContent || "",
       matrixDetail: page.querySelector("#guardrails-matrix-detail")?.textContent || "",
@@ -130,23 +131,40 @@ async function inspect(viewport) {
       tables: page.querySelectorAll("table").length,
       reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
       activeAnimations: document.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running" || animation.pending).length,
+      referencesAbsent: !/What this is built from/i.test(text),
+      navLinks: page.querySelectorAll("nav a[href^='#']").length,
+      activeNav: page.querySelector("nav a[href='#guardrails-phase-prove']")?.className || "",
     };
   })()`);
+
   assert.equal(result.publicContent, true, `${viewport.label}: public route did not deliver published content.`);
   assert.equal(result.actionCount, 12, `${viewport.label}: all twelve actions must remain visible.`);
   assert.equal(result.layerCount, 4, `${viewport.label}: four layers must be selectable.`);
   assert.equal(result.matrixCount, 12, `${viewport.label}: matrix must expose 4 × 3 cells.`);
   assert.equal(result.actionSelected, 1, `${viewport.label}: action map needs one persistent selection.`);
   assert.equal(result.layerSelected, 1, `${viewport.label}: layer comparison needs one persistent selection.`);
-  assert.equal(result.matrixSelected, 1, `${viewport.label}: lifecycle matrix needs one persistent selection.`);
+  assert.equal(result.matrixSelected, 0, `${viewport.label}: lifecycle matrix must not have interactive selection.`);
+  assert.equal(result.matrixDetail, "", `${viewport.label}: lifecycle matrix must not duplicate detail.`);
+  assert.equal(result.referencesAbsent, true, `${viewport.label}: references block must be completely absent.`);
+  assert.ok(result.navLinks >= 6, `${viewport.label}: section navigator is missing or incomplete.`);
+  assert.ok(/text-\[var\(--gf-ink\)\]/.test(result.activeNav), `${viewport.label}: initial hash deep link did not correctly set active navigator state.`);
+
   assert.ok(/Owner|Failure condition|Output|Cadence/i.test(result.actionDetail), `${viewport.label}: selected action detail is incomplete.`);
-  assert.ok(/Selected build|test|re-test/i.test(result.matrixDetail), `${viewport.label}: matrix detail is missing.`);
   assert.ok(/AI model|runtime gate|What reaches AI/i.test(result.dataflow), `${viewport.label}: data-flow explanation is missing.`);
-  assert.ok(result.tables >= 2, `${viewport.label}: native comparison tables are missing.`);
+  assert.ok(result.tables >= 1, `${viewport.label}: native comparison tables are missing.`);
   assert.equal(result.pageFits, true, `${viewport.label}: the page has whole-page horizontal overflow.`);
   assert.equal(result.reducedMotion, true, `${viewport.label}: reduced-motion emulation is not active.`);
   assert.equal(result.activeAnimations, 0, `${viewport.label}: animations are running with reduced motion enabled.`);
-  await capture(`guardrails-public-${viewport.label}-default-reduced-motion`);
+
+  // The three phase columns share one vertical row on desktop, so scroll
+  // tracking treats them as Overview while direct phase hashes stay selectable.
+  for (const id of ["layers", "lifecycle", "overview"]) {
+    await evaluate(`document.querySelector("#${id}")?.scrollIntoView({block:"start"})`);
+    await waitForCondition(
+      `document.querySelector("nav a[href='#${id}']")?.getAttribute("aria-current") === "location"`,
+      `${viewport.label} scroll-driven ${id} navigation state`,
+    );
+  }
 
   // Exercise real keyboard activation and pointer/touch hit targets, not only DOM clicks.
   await evaluate(`document.querySelector("[data-guardrails-action='set-name']").focus()`);
@@ -156,7 +174,8 @@ async function inspect(viewport) {
     `document.querySelector("[data-guardrails-action='set-build']")?.getAttribute("aria-pressed") === "true"`,
     `${viewport.label} keyboard action navigation`,
   );
-  for (const selector of ["[data-guardrails-layer='prompt']", "[data-guardrails-matrix-cell='prompt-prove']"]) {
+
+  for (const selector of ["[data-guardrails-layer='prompt']"]) {
     await evaluate(`document.querySelector(${JSON.stringify(selector)}).scrollIntoView({block:"center",inline:"center"})`);
     const point = await evaluate(`(() => {const r=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()`);
     if (viewport.mobile) {
@@ -166,8 +185,9 @@ async function inspect(viewport) {
       await send("Input.dispatchMouseEvent", { type: "mousePressed", ...point, button: "left", clickCount: 1 });
       await send("Input.dispatchMouseEvent", { type: "mouseReleased", ...point, button: "left", clickCount: 1 });
     }
-    await waitForCondition(`document.querySelector(${JSON.stringify(selector)}).getAttribute("aria-pressed")==="true"`, `${viewport.label} pointer selection`);
+    await waitForCondition(`document.querySelector(${JSON.stringify(selector)}).getAttribute("aria-selected")==="true"`, `${viewport.label} pointer selection`);
   }
+
   for (const id of await evaluate(`[...document.querySelectorAll("[data-guardrails-action]")].map(n=>n.dataset.guardrailsAction)`)) {
     await evaluate(`document.querySelector("[data-guardrails-action='${id}']").click()`);
     await waitForCondition(`document.querySelector("[data-guardrails-action-detail='${id}']") !== null`, `${viewport.label} ${id} working detail`);
@@ -175,37 +195,41 @@ async function inspect(viewport) {
 
   await evaluate(`document.querySelector("[data-guardrails-layer='runtime']")?.click(); true`);
   await waitForCondition(
-    `document.querySelector("[data-guardrails-layer='runtime']")?.getAttribute("aria-pressed") === "true"`,
+    `document.querySelector("[data-guardrails-layer='runtime']")?.getAttribute("aria-selected") === "true"`,
     `${viewport.label} runtime-layer selection`,
   );
   const runtimeFlow = await evaluate(`document.querySelector("#guardrails-dataflow-title")?.parentElement?.textContent || ""`);
   assert.match(runtimeFlow, /after the model.*before delivery/i, `${viewport.label}: runtime gate is not shown after the model.`);
 
-  // Select the last action, layer and matrix cell through their public controls.
+  // Select the last action and layer through their public controls.
   await evaluate(`(() => {
     const click = (selector) => document.querySelectorAll(selector).item(document.querySelectorAll(selector).length - 1)?.click();
     click("[data-guardrails-action]");
     click("[data-guardrails-layer]");
-    click("[data-guardrails-matrix-cell]");
   })()`);
   await waitForCondition(
     `document.querySelector("[data-guardrails-action][aria-pressed='true']")?.getAttribute("data-guardrails-action") === "hold-report"
-      && document.querySelector("[data-guardrails-layer][aria-pressed='true']")?.getAttribute("data-guardrails-layer") === "architecture"
-      && document.querySelector("[data-guardrails-matrix-cell][aria-pressed='true']")?.getAttribute("data-guardrails-matrix-cell") === "architecture-hold"`,
+      && document.querySelector("[data-guardrails-layer][aria-selected='true']")?.getAttribute("data-guardrails-layer") === "architecture"`,
     `${viewport.label} selected-detail state`,
   );
+
   const changed = await evaluate(`(() => ({
       action: document.querySelector("[data-guardrails-action][aria-pressed='true']")?.getAttribute("data-guardrails-action"),
-      layer: document.querySelector("[data-guardrails-layer][aria-pressed='true']")?.getAttribute("data-guardrails-layer"),
-      cell: document.querySelector("[data-guardrails-matrix-cell][aria-pressed='true']")?.getAttribute("data-guardrails-matrix-cell"),
+      layer: document.querySelector("[data-guardrails-layer][aria-selected='true']")?.getAttribute("data-guardrails-layer"),
       detail: document.querySelector("#guardrails-action-detail")?.textContent || "",
       flow: document.querySelector("#guardrails-dataflow-title")?.parentElement?.textContent || "",
     }))()`);
   assert.equal(changed.action, "hold-report", `${viewport.label}: action selection did not update.`);
   assert.equal(changed.layer, "architecture", `${viewport.label}: layer selection did not update.`);
-  assert.equal(changed.cell, "architecture-hold", `${viewport.label}: matrix selection did not update.`);
   assert.match(changed.detail, /Report how strong they are/i, `${viewport.label}: selected action detail did not update.`);
   assert.match(changed.flow, /authorised.*task-needed.*records|task-needed.*authorised.*records/i, `${viewport.label}: selected layer data flow did not update.`);
+
+  // Verify manual hash change updates navigator
+  await evaluate(`window.location.hash = '#layers'`);
+  await waitForCondition(
+    `document.querySelector("nav a[href='#layers']")?.className.includes("text-[var(--gf-ink)]")`,
+    `${viewport.label} hash change observation`
+  );
 
   await capture(`guardrails-public-${viewport.label}-selected-reduced-motion`);
   await evaluate(`(() => {

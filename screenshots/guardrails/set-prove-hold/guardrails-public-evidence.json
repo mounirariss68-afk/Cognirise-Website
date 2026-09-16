@@ -10,14 +10,17 @@
       "matrixCount": 12,
       "actionSelected": 1,
       "layerSelected": 1,
-      "matrixSelected": 1,
-      "actionDetail": "SetAction 1 of 4Selected action detailName what must never happenWrite a rule someone could try to break this afternoon.Write a \"never\", not a value: \"be helpful and safe\" cannot be tested.Write it for this system rather than copying a vendor's generic list.Use the applicable law, the damage this system could cause, and known AI failure modes as inputs.OwnerRisk and legal, with the product ownerOutputA numbered, versioned rule listFailure conditionThe list is copied from a generic responsible-AI page, so it can miss the risks of this system.CalloutA guardrail that is not written as a testable rule cannot be evidenced.",
-      "matrixDetail": "Selected build / test / re-test explanation1 · PolicySet — build itWrite it in a document",
-      "dataflow": "Customer-data flow · selected boundaryScoping is before the model: only task-needed, authorised records reach the AI.Customer dataScoped records↓scopeAI modelOnly authorised, task-needed customer records reach the AI.↓responseDeliveryUser or connected systemWhat reaches AIOnly authorised, task-needed customer records reach the AI.LimitationIt depends on correct identity, authorization, and scoping design.",
+      "matrixSelected": 0,
+      "actionDetail": "SetSet action 1 of 4Name what must never happenWrite a rule someone could try to break this afternoon.Write a \"never\", not a value: \"be helpful and safe\" cannot be tested.Write it for this system rather than copying a vendor's generic list.Use the applicable law, the damage this system could cause, and known AI failure modes as inputs.OwnerRisk and legal, with the product ownerOutputA numbered, versioned rule listFailure conditionThe list is copied from a generic responsible-AI page, so it can miss the risks of this system.CalloutA guardrail that is not written as a testable rule cannot be evidenced.",
+      "matrixDetail": "",
+      "dataflow": "Customer-data flow boundaryScoping is before the model: only task-needed, authorised records reach the AI.Customer dataScoped recordsscope →AI modelOnly authorised, task-needed customer records reach the AI.response →DeliveryUser or connected system",
       "pageFits": true,
-      "tables": 2,
+      "tables": 1,
       "reducedMotion": true,
-      "activeAnimations": 0
+      "activeAnimations": 0,
+      "referencesAbsent": true,
+      "navLinks": 6,
+      "activeNav": "whitespace-nowrap py-4 text-[12px] font-bold uppercase tracking-[0.14em] transition-colors border-b-[3px] border-[var(--gf-ink)] text-[var(--gf-ink)]"
     },
     "768": {
       "title": "Set, Prove & Hold: AI Guardrails Framework | Cognirise",
@@ -27,14 +30,17 @@
       "matrixCount": 12,
       "actionSelected": 1,
       "layerSelected": 1,
-      "matrixSelected": 1,
-      "actionDetail": "SetAction 1 of 4Selected action detailName what must never happenWrite a rule someone could try to break this afternoon.Write a \"never\", not a value: \"be helpful and safe\" cannot be tested.Write it for this system rather than copying a vendor's generic list.Use the applicable law, the damage this system could cause, and known AI failure modes as inputs.OwnerRisk and legal, with the product ownerOutputA numbered, versioned rule listFailure conditionThe list is copied from a generic responsible-AI page, so it can miss the risks of this system.CalloutA guardrail that is not written as a testable rule cannot be evidenced.",
-      "matrixDetail": "Selected build / test / re-test explanation1 · PolicySet — build itWrite it in a document",
-      "dataflow": "Customer-data flow · selected boundaryScoping is before the model: only task-needed, authorised records reach the AI.Customer dataScoped records↓scopeAI modelOnly authorised, task-needed customer records reach the AI.↓responseDeliveryUser or connected systemWhat reaches AIOnly authorised, task-needed customer records reach the AI.LimitationIt depends on correct identity, authorization, and scoping design.",
+      "matrixSelected": 0,
+      "actionDetail": "SetSet action 1 of 4Name what must never happenWrite a rule someone could try to break this afternoon.Write a \"never\", not a value: \"be helpful and safe\" cannot be tested.Write it for this system rather than copying a vendor's generic list.Use the applicable law, the damage this system could cause, and known AI failure modes as inputs.OwnerRisk and legal, with the product ownerOutputA numbered, versioned rule listFailure conditionThe list is copied from a generic responsible-AI page, so it can miss the risks of this system.CalloutA guardrail that is not written as a testable rule cannot be evidenced.",
+      "matrixDetail": "",
+      "dataflow": "Customer-data flow boundaryScoping is before the model: only task-needed, authorised records reach the AI.Customer dataScoped recordsscope →AI modelOnly authorised, task-needed customer records reach the AI.response →DeliveryUser or connected system",
       "pageFits": true,
-      "tables": 2,
+      "tables": 1,
       "reducedMotion": true,
-      "activeAnimations": 0
+      "activeAnimations": 0,
+      "referencesAbsent": true,
+      "navLinks": 6,
+      "activeNav": "whitespace-nowrap py-4 text-[12px] font-bold uppercase tracking-[0.14em] transition-colors border-b-[3px] border-[var(--gf-ink)] text-[var(--gf-ink)]"
     },
     "1440": {
       "title": "Set, Prove & Hold: AI Guardrails Framework | Cognirise",
@@ -44,14 +50,17 @@
       "matrixCount": 12,
       "actionSelected": 1,
       "layerSelected": 1,
-      "matrixSelected": 1,
-      "actionDetail": "SetAction 1 of 4Selected action detailName what must never happenWrite a rule someone could try to break this afternoon.Write a \"never\", not a value: \"be helpful and safe\" cannot be tested.Write it for this system rather than copying a vendor's generic list.Use the applicable law, the damage this system could cause, and known AI failure modes as inputs.OwnerRisk and legal, with the product ownerOutputA numbered, versioned rule listFailure conditionThe list is copied from a generic responsible-AI page, so it can miss the risks of this system.CalloutA guardrail that is not written as a testable rule cannot be evidenced.",
-      "matrixDetail": "Selected build / test / re-test explanation1 · PolicySet — build itWrite it in a document",
-      "dataflow": "Customer-data flow · selected boundaryScoping is before the model: only task-needed, authorised records reach the AI.Customer dataScoped records↓scopeAI modelOnly authorised, task-needed customer records reach the AI.↓responseDeliveryUser or connected systemWhat reaches AIOnly authorised, task-needed customer records reach the AI.LimitationIt depends on correct identity, authorization, and scoping design.",
+      "matrixSelected": 0,
+      "actionDetail": "SetSet action 1 of 4Name what must never happenWrite a rule someone could try to break this afternoon.Write a \"never\", not a value: \"be helpful and safe\" cannot be tested.Write it for this system rather than copying a vendor's generic list.Use the applicable law, the damage this system could cause, and known AI failure modes as inputs.OwnerRisk and legal, with the product ownerOutputA numbered, versioned rule listFailure conditionThe list is copied from a generic responsible-AI page, so it can miss the risks of this system.CalloutA guardrail that is not written as a testable rule cannot be evidenced.",
+      "matrixDetail": "",
+      "dataflow": "Customer-data flow boundaryScoping is before the model: only task-needed, authorised records reach the AI.Customer dataScoped recordsscope →AI modelOnly authorised, task-needed customer records reach the AI.response →DeliveryUser or connected system",
       "pageFits": true,
-      "tables": 2,
+      "tables": 1,
       "reducedMotion": true,
-      "activeAnimations": 0
+      "activeAnimations": 0,
+      "referencesAbsent": true,
+      "navLinks": 6,
+      "activeNav": "whitespace-nowrap py-4 text-[12px] font-bold uppercase tracking-[0.14em] transition-colors border-b-[3px] border-[var(--gf-ink)] text-[var(--gf-ink)]"
     }
   }
 }
