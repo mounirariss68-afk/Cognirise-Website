@@ -45,6 +45,12 @@ The state file contains passwords, TOTP seeds, and the fixture session secret.
 It is created mode `600` below `/tmp`; secret values are never printed. Do not
 commit it, paste it into chat, or send it through test logs.
 
+Setup also writes a minimal, mode-600 cleanup receipt below
+`.local/state/cms-task-345-cleanup/`. This restart-durable receipt contains no
+passwords, TOTP seeds, or session secret. It pins the exact random schema,
+  fixture identities, fixture-specific private object namespace and keys, bucket, and public
+preservation baseline. It is removed only after successful cleanup.
+
 An optional read-only baseline can be captured independently:
 
 ```sh
@@ -188,10 +194,29 @@ pnpm --filter @workspace/scripts cms:task-345-harness -- \
 
 Cleanup validates the random schema name, fixture identities, and every
 storage key before deleting the exact keys referenced by the fixture schema.
+It refuses to delete any candidate key referenced by public CMS media tables,
+even when that key otherwise looks like part of the fixture namespace.
 It drops only that schema, then compares the public preservation baseline. The
 state file is removed only after the schema is gone, storage cleanup succeeds,
 and the public baseline matches exactly. A mismatch or ownership uncertainty
 retains the state file and fails loudly.
+
+If a workspace restart removes the `/tmp` state file or interrupts setup, run:
+
+```sh
+export NODE_ENV=development
+pnpm --filter @workspace/scripts cms:task-345-harness -- \
+  --development recover-cleanup
+```
+
+The command discovers every durable pending receipt and applies the same exact
+schema, identity, namespace, public-reference, bucket, and preservation checks
+as normal cleanup. Creating-phase receipts may own a partial schema, so recovery
+drops that exact random schema without requiring setup to have finished seeding
+it. The fixture API uses the receipt's private namespace for staging and
+immutable uploads, allowing recovery to enumerate those objects without
+touching the shared CMS namespace. Recovery is an explicit no-op when no receipts remain. A receipt
+is retained if any check or deletion fails, so the command can be retried.
 
 This harness cannot make a missing central-capabilities migration available and
 cannot make an externally hosted frontend reach a loopback API. Those are

@@ -8,7 +8,7 @@
  */
 
 import { createHash, randomBytes, randomUUID } from "node:crypto";
-import { readFile, chmod, lstat, open, rename, unlink } from "node:fs/promises";
+import { readFile, chmod, lstat, mkdir, open, readdir, rename, unlink } from "node:fs/promises";
 import http from "node:http";
 import https from "node:https";
 import path from "node:path";
@@ -88,11 +88,25 @@ export type HarnessState = {
   media: FixtureMedia[];
   baseline: PreservationBaseline;
 };
+export type CleanupReceipt = {
+  version: 1;
+  phase: "creating" | "ready";
+  prefix: string;
+  schema: string;
+  createdAt: string;
+  storageRoot: string;
+  bucketName: string;
+  users: Array<Pick<FixtureUser, "id" | "label" | "role" | "email">>;
+  documents: Array<Pick<FixtureDocument, "id" | "kind">>;
+  storageKeys: string[];
+  baseline: PreservationBaseline;
+};
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const PREFIX = /^fixture-cms-task-345-[0-9a-f-]+$/;
 const SCHEMA = /^task345_[0-9a-f]{20}$/;
+const cleanupReceiptDirectory = path.join(repositoryRoot, ".local/state/cms-task-345-cleanup");
 const PNG_BYTES = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
   "base64",
@@ -190,6 +204,39 @@ async function replacePrivateJson(filePath: string, value: unknown): Promise<voi
   await rename(temporary, filePath);
   await assertPrivateFile(filePath, true);
 }
+function cleanupReceiptPath(schema: string): string {
+  if (!SCHEMA.test(schema)) throw new Error("Refusing an invalid cleanup receipt schema.");
+  return path.join(cleanupReceiptDirectory, `${schema}.json`);
+}
+export function cleanupReceiptFromState(state: HarnessState): CleanupReceipt {
+  return {
+    version: 1,
+    phase: state.phase,
+    prefix: state.prefix,
+    schema: state.schema,
+    createdAt: state.createdAt,
+    storageRoot: state.storageRoot,
+    bucketName: state.bucketName,
+    users: state.users.map(({ id, label, role, email }) => ({ id, label, role, email })),
+    documents: state.documents.map(({ id, kind }) => ({ id, kind })),
+    storageKeys: state.media.map(({ storageKey }) => storageKey),
+    baseline: state.baseline,
+  };
+}
+async function persistCleanupReceipt(state: HarnessState): Promise<void> {
+  await mkdir(cleanupReceiptDirectory, { recursive: true, mode: 0o700 });
+  const receiptPath = cleanupReceiptPath(state.schema);
+  try {
+    await assertPrivateFile(receiptPath, true);
+    await replacePrivateJson(receiptPath, cleanupReceiptFromState(state));
+  } catch (error) {
+    if ((error as Error).message.includes("does not exist")) {
+      await writePrivateJson(receiptPath, cleanupReceiptFromState(state));
+      return;
+    }
+    throw error;
+  }
+}
 async function readState(filePath: string): Promise<HarnessState> {
   await assertPrivateFile(filePath, true);
   let value: unknown;
@@ -215,6 +262,13 @@ export function isOwnedStorageKey(storageRoot: string, key: string): boolean {
 function isConfiguredMediaKey(storageRoot: string, key: string): boolean {
   const root = storageRoot.replace(/^\/+|\/+$/g, "");
   return Boolean(root) && key.startsWith(`${root}/cms-media/`) && !key.includes("..");
+}
+export function cleanupSchemaValidationMode(
+  phase: CleanupReceipt["phase"],
+  schemaExists: boolean,
+): "absent" | "partial" | "ready" {
+  if (!schemaExists) return "absent";
+  return phase === "ready" ? "ready" : "partial";
 }
 export function preservationMatches(expected: PreservationBaseline, actual: PreservationBaseline): boolean {
   return JSON.stringify({
@@ -317,6 +371,54 @@ export function validateHarnessState(value: unknown): HarnessState {
     users,
     documents,
     media,
+    baseline: value.baseline as PreservationBaseline,
+  };
+}
+export function validateCleanupReceipt(value: unknown): CleanupReceipt {
+  if (!record(value) || value.version !== 1 || (value.phase !== "creating" && value.phase !== "ready")) {
+    throw new Error("Cleanup receipt has an unsupported version or phase.");
+  }
+  const prefix = stringValue(value.prefix, "cleanup prefix");
+  const schema = stringValue(value.schema, "cleanup schema");
+  const storageRoot = stringValue(value.storageRoot, "cleanup storage root").replace(/^\/+|\/+$/g, "");
+  const bucketName = stringValue(value.bucketName, "cleanup bucket");
+  if (!PREFIX.test(prefix) || !SCHEMA.test(schema)) throw new Error("Cleanup receipt has invalid ownership identity.");
+  if (!Array.isArray(value.users) || value.users.length !== 4 ||
+      !Array.isArray(value.documents) || value.documents.length !== cmsDocumentKinds.length ||
+      !Array.isArray(value.storageKeys) || value.storageKeys.length < cmsDocumentKinds.length) {
+    throw new Error("Cleanup receipt has incomplete fixture identities.");
+  }
+  const users = value.users.map((raw) => {
+    if (!record(raw) || !UUID.test(stringValue(raw.id, "cleanup user id")) ||
+        !["author", "reviewer", "publisher", "administrator"].includes(String(raw.label)) ||
+        !["editor", "publisher", "administrator"].includes(String(raw.role))) {
+      throw new Error("Cleanup receipt has an invalid user.");
+    }
+    return {
+      id: String(raw.id),
+      label: raw.label as FixtureUser["label"],
+      role: raw.role as Role,
+      email: stringValue(raw.email, "cleanup user email"),
+    };
+  });
+  if (new Set(users.map((user) => user.id)).size !== users.length ||
+      new Set(users.map((user) => user.label)).size !== users.length) {
+    throw new Error("Cleanup receipt users must be distinct.");
+  }
+  const documents = value.documents.map((raw) => {
+    if (!record(raw) || !UUID.test(stringValue(raw.id, "cleanup document id")) ||
+        !cmsDocumentKinds.includes(raw.kind as CmsDocumentKind)) throw new Error("Cleanup receipt has an invalid document.");
+    return { id: String(raw.id), kind: raw.kind as CmsDocumentKind };
+  });
+  const storageKeys = value.storageKeys.map((key) => stringValue(key, "cleanup storage key"));
+  if (storageKeys.some((key) => !isOwnedStorageKey(storageRoot, key) || !key.includes(`/${prefix}/`))) {
+    throw new Error("Cleanup receipt contains a media object outside its exact fixture namespace.");
+  }
+  if (!record(value.baseline)) throw new Error("Cleanup receipt has no preservation baseline.");
+  return {
+    version: 1, phase: value.phase, prefix, schema,
+    createdAt: stringValue(value.createdAt, "cleanup createdAt"),
+    storageRoot, bucketName, users, documents, storageKeys,
     baseline: value.baseline as PreservationBaseline,
   };
 }
@@ -1036,9 +1138,9 @@ async function setup(statePath: string): Promise<void> {
   await assertPrivateFile(statePath, false);
   const databaseUrl = process.env.DATABASE_URL!;
   const sourcePool = await defaultPool();
-  const storageRoot = process.env.PRIVATE_OBJECT_DIR?.replace(/^\/+|\/+$/g, "");
+  const configuredStorageRoot = process.env.PRIVATE_OBJECT_DIR?.replace(/^\/+|\/+$/g, "");
   const bucketName = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
-  if (!storageRoot || !bucketName) throw new Error("Object Storage is not configured; no fixture was created.");
+  if (!configuredStorageRoot || !bucketName) throw new Error("Object Storage is not configured; no fixture was created.");
   await publicTableRequired(sourcePool, [
     "market_editions", "cms_users", "cms_password_credentials", "cms_totp_credentials",
     "cms_user_market_assignments", "cms_documents", "cms_market_editions",
@@ -1052,6 +1154,7 @@ async function setup(statePath: string): Promise<void> {
   process.env.SESSION_SECRET = sessionSecret;
   const prefix = `fixture-cms-task-345-${randomUUID()}`;
   const schema = `task345_${randomUUID().replaceAll("-", "").slice(0, 20)}`;
+  const storageRoot = `${configuredStorageRoot}/cms-task-345/${prefix}`;
   const users = ([
     ["author", "editor"],
     ["reviewer", "publisher"],
@@ -1064,7 +1167,7 @@ async function setup(statePath: string): Promise<void> {
     const checksum = createHash("sha256").update(PNG_BYTES).digest("hex");
     return {
       assetId, versionId,
-      storageKey: `${storageRoot}/cms-media/objects/${prefix}/${assetId}/sha256/${checksum}`,
+      storageKey: `${storageRoot}/cms-media/objects/${assetId}/sha256/${checksum}`,
       checksum,
     };
   });
@@ -1085,7 +1188,7 @@ async function setup(statePath: string): Promise<void> {
     users, documents, media, baseline,
   };
   await writePrivateJson(statePath, state);
-  let admin: PoolLike | undefined;
+  await persistCleanupReceipt(state);
   let fixture: PoolLike | undefined;
   try {
     await clonePublicTables(sourcePool, schema);
@@ -1106,57 +1209,76 @@ async function setup(statePath: string): Promise<void> {
     await seedDatabase(fixture, state, security);
     state.phase = "ready";
     await replacePrivateJson(statePath, state);
+    await persistCleanupReceipt(state);
     process.stdout.write(
       `Task 345 fixture ready in schema ${schema}. State is ${statePath} (mode 600); secret values were not printed.\n` +
+      `Restart-durable cleanup receipt: ${cleanupReceiptPath(schema)} (mode 600, no credentials).\n` +
       `Fixture integrity installed in isolated schema: ${state.fixtureForeignKeysInstalled} foreign keys, ` +
       `${state.fixtureTriggersInstalled} workflow/media triggers; public definitions were not modified.\n` +
       `Capability matrix: ${state.capabilities}. Run serve with the same DATABASE_URL, then clean up explicitly.\n`,
     );
   } catch (error) {
-    let storageCleanupFailed = false;
-    const bucket = await storageClient(bucketName).catch(() => undefined);
-    if (bucket) {
-      const results = await Promise.all(state.media.map((media) =>
-        bucket.file(media.storageKey).delete({ ignoreNotFound: true })
-          .then(() => true).catch(() => false),
-      ));
-      storageCleanupFailed = results.some((result) => !result);
-    } else {
-      storageCleanupFailed = true;
-    }
-    if (fixture) await fixture.end().catch(() => undefined);
-    admin = await fixturePool(databaseUrl, schema).catch(() => undefined);
-    if (admin) {
-      await admin.query(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`).catch(() => undefined);
-      await admin.end().catch(() => undefined);
-    }
-    if (storageCleanupFailed) {
-      throw new Error("Fixture setup failed and exact storage cleanup could not be confirmed; mode-600 state was retained.");
-    }
-    throw error;
+    throw new Error(
+      `Fixture setup failed; durable cleanup authority was retained. Run recover-cleanup. Cause: ${
+        error instanceof Error ? error.message : "unknown setup failure"
+      }`,
+    );
   } finally {
     if (fixture) await fixture.end().catch(() => undefined);
     await sourcePool.end().catch(() => undefined);
   }
 }
-async function listFixtureStorageKeys(pool: QueryClient, state: HarnessState): Promise<string[]> {
-  const assets = await pool.query<{ storage_key: string }>(
-    "SELECT storage_key FROM cms_media_assets WHERE storage_key IS NOT NULL",
-  );
-  const versions = await pool.query<{ storage_key: string }>(
-    "SELECT storage_key FROM cms_media_versions WHERE storage_key IS NOT NULL",
-  );
-  const keys = [...new Set([...assets.rows, ...versions.rows].map((row) => row.storage_key))];
-  for (const key of keys) {
-    if (!key.startsWith("pending:") && !isConfiguredMediaKey(state.storageRoot, key)) {
-      throw new Error(`Refusing cleanup for media key outside the configured CMS namespace: ${key}`);
-    }
-  }
-  return keys.filter((key) => !key.startsWith("pending:"));
+async function readCleanupReceipt(filePath: string): Promise<CleanupReceipt> {
+  await assertPrivateFile(filePath, true);
+  return validateCleanupReceipt(JSON.parse(await readFile(filePath, "utf8")) as unknown);
 }
-async function cleanup(statePath: string): Promise<void> {
+export function publicStorageReferenceOverlap(candidateKeys: string[], publicKeys: string[]): string[] {
+  const candidates = new Set(candidateKeys);
+  return [...new Set(publicKeys.filter((key) => candidates.has(key)))].sort();
+}
+async function assertNoPublicStorageReferences(sourcePool: QueryClient, keys: string[]): Promise<void> {
+  const references = await sourcePool.query<{ storage_key: string }>(
+    `SELECT storage_key FROM cms_media_assets WHERE storage_key=ANY($1::text[])
+     UNION
+     SELECT storage_key FROM cms_media_versions WHERE storage_key=ANY($1::text[])`,
+    [keys],
+  );
+  if (publicStorageReferenceOverlap(keys, references.rows.map((row) => row.storage_key)).length) {
+    throw new Error("Refusing cleanup because public CMS data references a fixture storage object.");
+  }
+}
+async function listOwnedFixtureObjects(
+  bucket: ReturnType<Storage["bucket"]>,
+  receipt: CleanupReceipt,
+): Promise<string[]> {
+  const [files] = await bucket.getFiles({ prefix: `${receipt.storageRoot}/cms-media/` });
+  const keys = files.map((file) => file.name);
+  if (keys.some((key) => !isConfiguredMediaKey(receipt.storageRoot, key))) {
+    throw new Error("Refusing cleanup because object listing escaped the exact fixture namespace.");
+  }
+  return keys;
+}
+async function validateReceiptIdentities(fixture: QueryClient, receipt: CleanupReceipt): Promise<void> {
+  const users = await fixture.query<{ id: string; email: string; role: Role }>(
+    "SELECT id::text id,email,role FROM cms_users WHERE id=ANY($1::uuid[])",
+    [receipt.users.map((user) => user.id)],
+  );
+  if (users.rows.length !== receipt.users.length || receipt.users.some((expected) =>
+    !users.rows.some((actual) => actual.id === expected.id && actual.email === expected.email && actual.role === expected.role))) {
+    throw new Error("Refusing cleanup because fixture user identities do not match the durable receipt.");
+  }
+  const documents = await fixture.query<{ id: string; kind: CmsDocumentKind }>(
+    "SELECT id::text id,kind FROM cms_documents WHERE id=ANY($1::uuid[])",
+    [receipt.documents.map((document) => document.id)],
+  );
+  if (documents.rows.length !== receipt.documents.length || receipt.documents.some((expected) =>
+    !documents.rows.some((actual) => actual.id === expected.id && actual.kind === expected.kind))) {
+    throw new Error("Refusing cleanup because fixture document identities do not match the durable receipt.");
+  }
+}
+async function cleanupFromReceipt(receipt: CleanupReceipt, statePath?: string): Promise<void> {
   requireDevelopmentTarget();
-  const state = await readState(statePath);
+  const state = receipt;
   if (!SCHEMA.test(state.schema)) throw new Error("Refusing cleanup for an invalid schema name.");
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) throw new Error("DATABASE_URL is required.");
@@ -1166,50 +1288,83 @@ async function cleanup(statePath: string): Promise<void> {
   const sourcePool = await defaultPool();
   const fixture = await fixturePool(databaseUrl, state.schema);
   try {
+    const publicBefore = await captureBaseline(sourcePool);
+    if (!preservationMatches(state.baseline, publicBefore)) {
+      throw new Error("Public preservation baseline changed; cleanup made no changes and retained its receipt.");
+    }
     const schemaExists = await sourcePool.query<{ exists: boolean }>(
       "SELECT to_regnamespace($1) IS NOT NULL AS exists", [state.schema],
     );
-    if (!schemaExists.rows[0]?.exists && state.phase === "creating") {
-      const bucket = await storageClient(state.bucketName);
-      for (const media of state.media) {
-        if (!isOwnedStorageKey(state.storageRoot, media.storageKey)) {
-          throw new Error("Refusing stale setup cleanup for a media key outside its fixture namespace.");
-        }
-        await bucket.file(media.storageKey).delete({ ignoreNotFound: true });
-      }
-      const after = await captureBaseline(sourcePool);
-      if (!preservationMatches(state.baseline, after)) {
-        throw new Error("Public preservation baseline changed; stale setup state was retained.");
-      }
-      await fixture.end();
-      await unlink(statePath);
-      process.stdout.write("Removed failed Task 345 setup state after exact storage cleanup and baseline verification.\n");
-      return;
-    }
-    if (!schemaExists.rows[0]?.exists) throw new Error("Fixture schema is missing.");
-    if (!await hasTable(fixture, "cms_documents")) throw new Error("Fixture schema is missing cms_documents.");
-    const keys = await listFixtureStorageKeys(fixture, state);
+    const schemaMode = cleanupSchemaValidationMode(state.phase, Boolean(schemaExists.rows[0]?.exists));
     const bucket = await storageClient(state.bucketName);
-    for (const key of [...new Set([...keys, ...state.media.map((media) => media.storageKey)])]) {
+    const namespaceKeys = await listOwnedFixtureObjects(bucket, state);
+    let databaseKeys: string[] = [];
+    if (schemaMode === "ready") {
+      if (!await hasTable(fixture, "cms_documents")) throw new Error("Fixture schema is missing cms_documents.");
+      await validateReceiptIdentities(fixture, state);
+      const assets = await fixture.query<{ storage_key: string }>(
+        "SELECT storage_key FROM cms_media_assets WHERE storage_key IS NOT NULL UNION SELECT storage_key FROM cms_media_versions WHERE storage_key IS NOT NULL",
+      );
+      databaseKeys = assets.rows.map((row) => row.storage_key).filter((key) => !key.startsWith("pending:"));
+    }
+    const allKeys = [...new Set([...databaseKeys, ...state.storageKeys, ...namespaceKeys])];
+    if (allKeys.some((key) => !isConfiguredMediaKey(state.storageRoot, key))) {
+      throw new Error("Refusing cleanup for a storage key outside the exact fixture namespace.");
+    }
+    await assertNoPublicStorageReferences(sourcePool, allKeys);
+    for (const key of allKeys) {
       await bucket.file(key).delete({ ignoreNotFound: true });
     }
     await fixture.end();
-    await sourcePool.query(`DROP SCHEMA IF EXISTS "${state.schema}" CASCADE`);
+    if (schemaMode !== "absent") {
+      await sourcePool.query(`DROP SCHEMA IF EXISTS "${state.schema}" CASCADE`);
+    }
     const remains = await sourcePool.query<{ exists: boolean }>(
       "SELECT to_regnamespace($1) IS NOT NULL AS exists", [state.schema],
     );
     if (remains.rows[0]?.exists) throw new Error("Fixture schema still exists after cleanup.");
     const after = await captureBaseline(sourcePool);
     if (!preservationMatches(state.baseline, after)) {
-      throw new Error("Public content/publication/media preservation baseline changed; state was retained.");
+      throw new Error("Public content/publication/media preservation baseline changed during cleanup; receipt was retained.");
     }
-    await unlink(statePath);
+    if (statePath) await unlink(statePath).catch(() => undefined);
+    await unlink(cleanupReceiptPath(state.schema));
     process.stdout.write("Task 345 fixture cleaned up; public preservation baseline matched exactly.\n");
   } catch (error) {
     await fixture.end().catch(() => undefined);
     throw error;
   } finally {
     await sourcePool.end().catch(() => undefined);
+  }
+}
+async function cleanup(statePath: string): Promise<void> {
+  const state = await readState(statePath);
+  const expected = validateCleanupReceipt(cleanupReceiptFromState(state));
+  const durable = await readCleanupReceipt(cleanupReceiptPath(state.schema));
+  if (JSON.stringify(expected) !== JSON.stringify(durable)) {
+    throw new Error("Private state and durable cleanup receipt disagree; refusing cleanup.");
+  }
+  await cleanupFromReceipt(durable, statePath);
+}
+async function recoverCleanup(): Promise<void> {
+  requireDevelopmentTarget();
+  let names: string[];
+  try {
+    names = (await readdir(cleanupReceiptDirectory)).filter((name) => SCHEMA.test(name.replace(/\.json$/, "")) && name.endsWith(".json"));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      process.stdout.write("NO OP: no durable Task 345 cleanup receipts exist.\n");
+      return;
+    }
+    throw error;
+  }
+  if (!names.length) {
+    process.stdout.write("NO OP: no durable Task 345 cleanup receipts exist.\n");
+    return;
+  }
+  for (const name of names.sort()) {
+    const receipt = await readCleanupReceipt(path.join(cleanupReceiptDirectory, name));
+    await cleanupFromReceipt(receipt);
   }
 }
 async function verify(statePath: string): Promise<void> {
@@ -1318,6 +1473,7 @@ async function serve(statePath: string): Promise<void> {
   // guard imports that module, otherwise the API silently retains public.
   process.env.DATABASE_URL = withSearchPath(databaseUrl, state.schema);
   process.env.SESSION_SECRET = state.sessionSecret;
+  process.env.PRIVATE_OBJECT_DIR = state.storageRoot;
   const guard = await fixturePool(databaseUrl, state.schema);
   try {
     await requireCompleteFixtureSchema(guard);
@@ -1859,6 +2015,7 @@ function usage(): void {
        "  pnpm --filter @workspace/scripts cms:task-345-harness -- --development repair-capabilities --apply --state /tmp/task-345.json",
       "  pnpm --filter @workspace/scripts cms:task-345-harness -- --development totp --state /tmp/task-345.json --role author",
       "  pnpm --filter @workspace/scripts cms:task-345-harness -- --development cleanup --state /tmp/task-345.json",
+      "  pnpm --filter @workspace/scripts cms:task-345-harness -- --development recover-cleanup",
       "",
       "State and credentials remain in the mode-600 file; secret values are never printed.",
     ].join("\n") + "\n",
@@ -1867,10 +2024,14 @@ function usage(): void {
 async function main(): Promise<void> {
   const command = args().find((value) => [
     "setup", "baseline", "serve", "verify", "totp", "cleanup", "repair-availability",
-    "repair-availability-state", "repair-capabilities",
+    "repair-availability-state", "repair-capabilities", "recover-cleanup",
   ].includes(value));
   if (!command) {
     usage();
+    return;
+  }
+  if (command === "recover-cleanup") {
+    await recoverCleanup();
     return;
   }
   const statePath = privatePath(flag("--state") ?? flag("--credentials"), "--state");
