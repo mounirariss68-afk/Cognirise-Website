@@ -97,7 +97,7 @@ fi
 # API release and protected preview capability; preview tokens never leave the
 # process. Fixture teardown retains audit evidence for the real document.
 NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture -- \
-  --development setup --credentials "$guardrails_fixture_credentials"
+  --development setup --with-guardrails-authority --credentials "$guardrails_fixture_credentials"
 NODE_ENV=development pnpm --filter @workspace/scripts cms:release-guardrails-set-prove-hold -- \
   --credentials="$guardrails_fixture_credentials" \
   --api-base="http://127.0.0.1:${guardrails_api_port}/api" --verify-preview

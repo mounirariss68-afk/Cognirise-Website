@@ -82,6 +82,7 @@ const developmentFlag = args.includes("--development");
 const credentialsPath = flagValue("--credentials");
 const baselinePath = flagValue("--baseline");
 const withSubmission = args.includes("--with-submission");
+const withGuardrailsAuthority = args.includes("--with-guardrails-authority");
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const PREFIX = /^fixture-cms-owner-[0-9a-f-]+$/;
 
@@ -102,7 +103,7 @@ function usage(): void {
       "",
       "  NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture --",
       "    --development setup --credentials /tmp/cognirise-owner-fixture.json",
-      "    [--with-submission]",
+      "    [--with-submission] [--with-guardrails-authority]",
       "  NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture --",
       "    --development totp --credentials /tmp/cognirise-owner-fixture.json",
       "    --role administrator|editor",
@@ -582,6 +583,27 @@ async function provision(
         );
       }
 
+      // This development release fixture uses explicit, topic/market-bound
+      // authority; do not manufacture a legacy administrator snapshot.
+      if (withGuardrailsAuthority) {
+        if (!markets.rows.some((market) => market.code === "uae")) {
+          throw new Error("Guardrails release fixture requires the enabled UAE market.");
+        }
+        const administratorId = userForRole(state, "administrator").id;
+        await client.query(
+          `INSERT INTO cms_user_capability_configurations(user_id) VALUES ($1)`,
+          [administratorId],
+        );
+        for (const capability of ["view", "edit", "review", "publish"]) {
+          await client.query(
+            `INSERT INTO cms_user_capability_grants
+               (user_id,topic,capability,scope,market_code)
+             VALUES ($1,'framework',$2,'regional','uae')`,
+            [administratorId, capability],
+          );
+        }
+      }
+
       if (state.submissions.length) {
         const submission = state.submissions[0]!;
         const market = markets.rows[0]?.code ?? "uae";
@@ -993,6 +1015,19 @@ async function main(): Promise<void> {
           const client = await pool.connect();
           try {
             if (await verifyExistingReadyFixture(client, existing)) {
+              if (withGuardrailsAuthority) {
+                const authority = await client.query<{ capability: string }>(
+                  `SELECT g.capability FROM cms_user_capability_grants g
+                   JOIN cms_user_capability_configurations c ON c.user_id=g.user_id
+                   WHERE g.user_id=$1 AND g.topic='framework'
+                     AND g.scope='regional' AND g.market_code='uae'`,
+                  [userForRole(existing, "administrator").id],
+                );
+                if (!["view", "edit", "review", "publish"].every((capability) =>
+                  authority.rows.some((grant) => grant.capability === capability))) {
+                  throw new Error("Existing fixture lacks explicit Guardrails authority; clean it up and create it with --with-guardrails-authority.");
+                }
+              }
               process.stdout.write(
                 `CMS browser fixture already ready (${existing.prefix}); credentials were not printed.\n`,
               );
