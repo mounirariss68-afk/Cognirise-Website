@@ -5,7 +5,7 @@ import { BrandButton } from "@/components/ui/brand-button";
 export default function CogniAgents() {
   return (
     <div className="flex flex-col">
-      <section className="px-6 md:px-12 py-24 max-w-[1440px] mx-auto w-full bg-[hsl(var(--brand-deep))] text-white my-12 clip-diagonal-left">
+      <section className="public-hero-shell px-6 md:px-12 py-24 max-w-[1440px] mx-auto w-full bg-[hsl(var(--brand-deep))] text-white my-12 clip-diagonal-left">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="relative z-10">
             <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-white/50 mb-8">

@@ -142,9 +142,9 @@ export function PlatformPresentation({ title, content, summary, heroMedia, previ
   const heroSummary = preview ? content.summary : summary ?? content.summary;
   return (
     <main className="overflow-hidden" data-preview={preview ? "draft" : undefined}>
-      <section className="relative bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12 md:py-32">
+      <section className="relative bg-[hsl(var(--brand-deep))] py-24 text-white md:py-32">
         {heroMedia && <img src={heroMedia.url} alt={content.heroMedia?.altText || heroMedia.altText || ""} className="absolute inset-0 h-full w-full object-cover opacity-25" style={{ objectPosition: cmsMediaObjectPosition(heroMedia) }} />}
-        <div className="relative mx-auto max-w-[1200px]">
+        <div className="public-hero-shell relative">
           <p className="text-xs font-bold uppercase tracking-[.2em] text-white/60">{content.category}</p>
           <h1 className="mt-7 max-w-[900px] text-5xl font-semibold leading-[.94] md:text-7xl">{title}</h1>
           <p className="mt-8 max-w-[680px] text-lg leading-8 text-white/75">{heroSummary}</p>

@@ -60,8 +60,8 @@ export default function MethodologiesPortfolio() {
 
   return (
     <main className="bg-[#fdfcfb] text-[#102957]">
-      <header className="px-6 pb-20 pt-12 md:px-[4.8vw] lg:pb-28 border-b border-[#cbd3e1]">
-        <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[hsl(var(--brand-pink))]" data-testid="portfolio-kicker">
+      <header className="public-hero-shell px-6 pb-20 pt-12 md:px-[4.8vw] lg:pb-28 border-b border-[#cbd3e1]">
+        <p data-hero-content-edge className="text-[10px] font-bold uppercase tracking-[.14em] text-[hsl(var(--brand-pink))]" data-testid="portfolio-kicker">
           How we do it
         </p>
         <div className="mt-7 grid gap-12 lg:gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">

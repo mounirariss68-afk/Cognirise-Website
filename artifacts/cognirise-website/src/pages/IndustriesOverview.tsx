@@ -111,7 +111,7 @@ export default function IndustriesOverview() {
 @media(max-width:760px){.io-hero{padding:33px 21px 0}.io-hero-grid{display:flex;flex-direction:column;min-height:0;align-items:stretch;gap:32px;padding-bottom:25px}.io-hero-copy{padding:0}.io-hero h1{font-size:54px;margin:25px 0 22px}.io-hero p{font-size:15px}.io-hero-image{height:440px;clip-path:polygon(11% 0,100% 0,100% 91%,0 100%,0 12%)}.io-hero-video{object-position:52% center}.io-film-messages,.io-film-static{left:23px;right:25px;bottom:70px}.io-film-message,.io-film-static{font-size:26px;max-width:330px}.io-cap{left:23px;bottom:25px}.io-rail{margin:0 21px;grid-template-columns:1fr 1fr}.io-rail div{padding:16px 12px}.io-rail div:last-child{grid-column:span 2;border-top:1px solid var(--line)}.io-rail div:nth-child(2){border-right:0}.io-intro{padding:86px 21px 73px;display:block}.io-intro h2{font-size:42px}.io-intro-copy{margin-top:43px;font-size:18px}.io-capability{padding:78px 21px}.io-capability-head{display:block}.io-capability h2{font-size:43px}.io-capability-lead{margin-top:28px}.io-capability-grid{grid-template-columns:1fr 1fr;margin-top:40px}.io-capability-card{padding:22px 18px 24px 0;min-height:0;border-bottom:1px solid var(--line)}.io-capability-card+.io-capability-card{padding-left:18px}.io-capability-card:nth-child(2){border-right:0}.io-capability-card:nth-child(n+3){border-bottom:0}.io-start{padding:77px 21px 77px}.io-start h2{font-size:57px}}
       `}</style>
 
-      <section className="io-hero">
+      <section className="io-hero public-hero-shell">
         <div className="io-kicker">{heroKicker}</div>
         <div className="io-hero-grid">
           <div className="io-hero-copy">

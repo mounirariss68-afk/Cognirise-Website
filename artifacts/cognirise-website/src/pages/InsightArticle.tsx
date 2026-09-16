@@ -175,7 +175,8 @@ export default function InsightArticle() {
 
   return (
     <div className="flex flex-col">
-      <article className="px-6 md:px-12 py-12 md:py-20 max-w-[900px] mx-auto w-full">
+      <div className="public-hero-shell">
+      <article className="w-full max-w-[900px] py-12 md:py-20">
         <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
           <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
           Perspective · {article.topic}
@@ -212,6 +213,7 @@ export default function InsightArticle() {
           </div>
         </div>
       </article>
+      </div>
     </div>
   );
 }

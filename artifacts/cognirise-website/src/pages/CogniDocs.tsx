@@ -28,7 +28,7 @@ export default function CogniDocs() {
   return (
     <main className="flex flex-col" data-platform="cognidocs">
       {/* Hero Section */}
-      <section className="px-6 md:px-12 pt-6 md:pt-8 pb-12 max-w-[1440px] mx-auto w-full">
+      <section className="public-hero-shell px-6 md:px-12 pt-6 md:pt-8 pb-12 max-w-[1440px] mx-auto w-full">
         <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-6 md:mb-12">
           <div className="h-[2px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
           Products / CogniDocs

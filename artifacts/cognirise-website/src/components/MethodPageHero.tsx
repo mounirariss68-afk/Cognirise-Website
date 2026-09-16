@@ -1,10 +1,8 @@
 import React from "react";
-import { ArrowLeft, ArrowDown } from "lucide-react";
-import { Link } from "wouter";
+import { ArrowDown } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { assetUrl } from "@/lib/assets";
-import { useMethodReturn } from "@/lib/use-method-return";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 
@@ -37,23 +35,12 @@ export function MethodPageHero({
   actions,
 }: MethodPageHeroProps) {
   const reducedMotion = useReducedMotion();
-  const returnTo = useMethodReturn(title);
   const { market } = useMarketStore();
   const marketLocation = getMarketLocationLabel(market);
 
   return (
-    <header className="px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24 border-b border-[#cbd3e1]">
-      <div className="mb-8">
-        <Link 
-          href={returnTo.href}
-          data-method-return
-          className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#647491] hover:text-[hsl(var(--brand-pink))] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]"
-        >
-          <ArrowLeft size={14} /> {returnTo.label}
-        </Link>
-      </div>
-
-      <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#102957]">
+    <header className="public-hero-shell px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24 border-b border-[#cbd3e1]">
+      <div data-hero-content-edge className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#102957]">
         <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
         {cleanHeroIdentifier(breadcrumb, { marketLocation })}
       </div>

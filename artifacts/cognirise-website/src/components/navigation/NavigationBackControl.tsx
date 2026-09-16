@@ -15,8 +15,9 @@ export function NavigationBackControl({ className = "" }: NavigationBackControlP
 
   return (
     <div
-      className={`mx-auto w-full max-w-[1440px] px-6 pt-3 md:px-[4.8vw] md:pt-4 ${className}`.trim()}
+      className={`public-hero-shell pb-6 pt-6 md:pb-8 md:pt-8 ${className}`.trim()}
       data-navigation-back-container
+      data-navigation-back-row
     >
       <button
         type="button"

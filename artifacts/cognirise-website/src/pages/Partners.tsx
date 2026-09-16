@@ -134,9 +134,9 @@ export default function Partners() {
 
   return (
     <main className="overflow-hidden">
-      <section className="relative bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12 md:py-32">
+      <section className="relative bg-[hsl(var(--brand-deep))] py-24 text-white md:py-32">
         <div className="absolute -left-28 bottom-0 h-96 w-96 rounded-full bg-[hsl(var(--brand-violet))]/25 blur-3xl" />
-          <div className="relative mx-auto max-w-[1440px]">
+          <div className="public-hero-shell relative">
           <p className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/55">{heroEyebrow}</p>
           <h1 data-governed-landing={governedLanding?.pagePath} className="max-w-[1050px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[100px]">{heroHeading}</h1>
           <div className="mt-10 grid gap-8 border-t border-white/20 pt-8 md:grid-cols-[1fr_.6fr]">

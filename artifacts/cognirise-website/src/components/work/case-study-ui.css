@@ -247,3 +247,7 @@
     grid-template-columns: 1fr;
   }
 }
+
+.case-detail__hero-wrap {
+  background: #071936;
+}

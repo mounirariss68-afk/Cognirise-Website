@@ -785,3 +785,18 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Shared public title-area geometry. Full-bleed backgrounds stay on an outer
+   wrapper; this shell owns the content edge used by the contextual Back row. */
+.public-hero-shell {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: 1.5rem !important;
+}
+
+@media (min-width: 768px) {
+  .public-hero-shell {
+    padding-inline: 3rem !important;
+  }
+}

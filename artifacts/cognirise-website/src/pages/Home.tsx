@@ -97,8 +97,9 @@ export default function Home() {
     <div className="bg-[#fdfcfb] text-[#102957] font-sans overflow-x-hidden selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       
       {/* HERO */}
-      <section ref={heroRef} className="px-6 md:px-[4.8vw] pt-8 md:pt-[22px] overflow-hidden">
-        <motion.div 
+      <section ref={heroRef} className="public-hero-shell px-6 md:px-[4.8vw] pt-8 md:pt-[22px] overflow-hidden">
+        <motion.div
+          data-hero-content-edge
           initial={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] }}

@@ -87,7 +87,7 @@ export function BankingEditorial({ view }: { view: BankingView }) {
         @media (prefers-reduced-motion:reduce) { .banking-editorial *,.banking-editorial *::before,.banking-editorial *::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
       `}</style>
 
-      <section className="b-hero" data-industry-section="hero" aria-labelledby="banking-hero-title">
+      <section className="b-hero public-hero-shell" data-industry-section="hero" aria-labelledby="banking-hero-title">
         <div className="b-copy">
           <div className="b-kicker">{heroKicker}</div>
           <h1 id="banking-hero-title">{pov.hero.heading}</h1>

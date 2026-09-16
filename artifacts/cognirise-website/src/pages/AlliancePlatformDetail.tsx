@@ -11,7 +11,7 @@ export default function AlliancePlatformDetail({ slug }: { slug: AlliancePlatfor
 
   return (
     <main className="alliance-page overflow-hidden bg-[#fdfcfb] text-[hsl(var(--brand-deep))]" data-platform={slug}>
-      <section className="mx-auto max-w-[1440px] px-6 pb-16 pt-8 md:px-12 md:pb-24 md:pt-12">
+      <section className="public-hero-shell mx-auto max-w-[1440px] px-6 pb-16 pt-8 md:px-12 md:pb-24 md:pt-12">
         <p className="mb-8 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[.2em] text-muted-foreground">
           <span className="h-px w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
           {platform.eyebrow}

@@ -28,7 +28,7 @@ export default function Contact() {
 
   return (
     <div className="flex flex-col">
-      <section className="px-6 md:px-12 py-24 max-w-[1440px] mx-auto w-full min-h-[70vh] flex flex-col justify-center">
+      <section className="public-hero-shell px-6 md:px-12 py-24 max-w-[1440px] mx-auto w-full min-h-[70vh] flex flex-col justify-center">
         <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
           <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
           {heroKicker}

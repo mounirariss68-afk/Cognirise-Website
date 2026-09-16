@@ -89,7 +89,7 @@ export function IndustryEditorialView({ view: baseView, marketOverride }: { view
   return (
     <main className={`industry industry--${view.variant}`} data-education-editorial={pov ? "" : undefined}>
       <style>{industryStyles}</style>
-      <IndustrySection id="hero" className="ind-hero" aria-labelledby="industry-title">
+      <IndustrySection id="hero" className="ind-hero public-hero-shell" aria-labelledby="industry-title">
         <div className="ind-copy">
           <div className="ind-kicker">{heroKicker}</div>
           <h1 id="industry-title">{thesisParts.map((part, index) => <React.Fragment key={`${part}-${index}`}>{index > 0 && <> <span className="ind-thesis-dash">—</span> </>}{part}</React.Fragment>)}</h1>

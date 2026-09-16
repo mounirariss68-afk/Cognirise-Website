@@ -227,6 +227,8 @@ test("public platform and publication layouts remain the source of preview compo
   assert.match(article, /<PublicationPresentation/);
   assert.match(article, /resolveCmsMedia\(cms\.data\.media, record\.heroMedia, record\.heroMediaId\)/);
   assert.match(article, /heroMedia=\{heroMedia\}/);
+  assert.match(article, /<div className="public-hero-shell">\s*<article className="w-full max-w-\[900px\]/);
+  assert.doesNotMatch(article, /<article className="public-hero-shell/);
   assert.match(presentations, /heroMedia &&/);
   assert.match(presentations, /src=\{heroMedia\.url\}/);
   assert.match(presentations, /data-testid="publication-hero"/);

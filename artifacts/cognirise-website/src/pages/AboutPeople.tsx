@@ -125,11 +125,11 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
 
   return (
     <main className="overflow-hidden bg-background">
-      <section className="relative min-h-[650px] bg-[hsl(var(--brand-deep))] px-6 py-20 text-white md:px-12 md:py-28">
+      <section className="relative min-h-[650px] bg-[hsl(var(--brand-deep))] py-20 text-white md:py-28">
         <div className="absolute -right-32 top-0 h-[520px] w-[520px] rounded-full bg-[hsl(var(--brand-pink))]/25 blur-3xl" />
-        <div className="relative mx-auto grid max-w-[1440px] gap-14 lg:grid-cols-[.92fr_1.08fr] lg:items-end">
+        <div className="public-hero-shell relative grid gap-14 lg:grid-cols-[.92fr_1.08fr] lg:items-end">
           <div>
-            <p className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/60">{heroEyebrow}</p>
+            <p data-hero-content-edge className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/60">{heroEyebrow}</p>
             <h1 data-governed-landing={governedLanding?.pagePath} className="max-w-[760px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[104px]">{heroHeading}</h1>
             <p className="mt-8 max-w-[590px] text-lg leading-8 text-white/70">{heroBody}</p>
           </div>

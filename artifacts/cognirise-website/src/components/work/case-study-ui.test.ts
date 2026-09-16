@@ -69,7 +69,10 @@ test("industry detail and banking preview paths do not fetch or render their own
 });
 
 test("CSS ensures images are fully contained and scale properly", async () => {
-  const css = await readFile(new URL("./case-study-ui.css", import.meta.url), "utf8");
+  const [css, source] = await Promise.all([
+    readFile(new URL("./case-study-ui.css", import.meta.url), "utf8"),
+    readFile(new URL("./case-study-ui.tsx", import.meta.url), "utf8"),
+  ]);
   assert.match(css, /\.case-rendition\{[^}]*overflow:hidden/);
   assert.match(css, /\.case-rendition\.is-compact img\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*100%;[^}]*height:\s*auto;/);
   assert.match(css, /\.case-rendition:not\(\.is-compact\) img\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*100%;[^}]*height:\s*auto;/);
@@ -90,6 +93,8 @@ test("CSS ensures images are fully contained and scale properly", async () => {
     assert.doesNotMatch(declarations, /margin-top:\s*auto/);
   }
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.case-study-rail \.case-rendition figcaption\s*\{[\s\S]*?min-height:\s*45px;[\s\S]*?display:\s*flex;/);
+  assert.match(source, /<section className="case-detail__hero-wrap"><div className="case-detail__hero public-hero-shell">/);
+  assert.match(css, /\.case-detail__hero-wrap\s*\{\s*background:\s*#071936;/);
 });
 
 test("carousel keeps drag enabled and synchronizes both end controls after reinitialization", async () => {

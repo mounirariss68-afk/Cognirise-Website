@@ -170,7 +170,7 @@ export default function AgenticTransformation() {
         }
       `}</style>
       
-      <section className="at-hero">
+      <section className="at-hero public-hero-shell">
         <div className="at-kicker">{heroKicker}</div>
         <div className="at-hero-grid">
           <div className="at-hero-copy">

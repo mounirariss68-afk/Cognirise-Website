@@ -472,7 +472,7 @@ export function AgentAuthorityLayout({
 
   return (
     <article className="overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
-      <header className="px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24">
+      <header className="public-hero-shell px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24">
          <Kicker>{cleanHeroIdentifier("Methodologies & frameworks / 01")}</Kicker>
         <div className="mt-8 grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
           <motion.div

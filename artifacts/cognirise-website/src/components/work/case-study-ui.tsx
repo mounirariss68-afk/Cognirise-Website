@@ -441,7 +441,7 @@ export function CaseStudyLayout({ item }: { item: LooseCase }) {
   }, [item.slug, market]);
   return (
     <main className="case-detail">
-      <section className="case-detail__hero"><div><span>{item.organizationDescriptor || item.descriptor || `${item.disclosure} case study`}</span><h1>{item.title}</h1><p>{item.objective || item.mandate}</p><dl><div><dt>Sector</dt><dd>{item.sector || "Cross-sector"}</dd></div><div><dt>Stage</dt><dd>{value(item, "stage")}</dd></div></dl></div><PulseInterface item={item} /></section>
+      <section className="case-detail__hero-wrap"><div className="case-detail__hero public-hero-shell"><div><span>{item.organizationDescriptor || item.descriptor || `${item.disclosure} case study`}</span><h1>{item.title}</h1><p>{item.objective || item.mandate}</p><dl><div><dt>Sector</dt><dd>{item.sector || "Cross-sector"}</dd></div><div><dt>Stage</dt><dd>{value(item, "stage")}</dd></div></dl></div><PulseInterface item={item} /></div></section>
       <section className="case-detail__story">
         {item.context && <article><span>01 / Context</span><h2>The operating context</h2><p>{item.context}</p></article>}
          <article><span>02 / Work</span><h2>The work in motion</h2>{item.work?.map((block, index) => {

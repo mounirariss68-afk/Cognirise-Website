@@ -273,7 +273,7 @@ export default function InsightsEditorial() {
         }
       `}</style>
       
-      <section className="ie-hero" id="insights">
+      <section className="ie-hero public-hero-shell" id="insights">
         <div className="ie-hero-top">
           <div>
             <div className="ie-kicker">{heroKicker}</div>

@@ -172,7 +172,7 @@ test("shared Education presentation retains every approved narrative field witho
     assert.ok(html.includes(escaped), `Missing approved Education material: ${text}`);
   }
   assert.ok(html.includes(education.selectedWork.description));
-  assert.match(html, /class="ind-hero"/);
+  assert.match(html, /class="[^"]*\bind-hero\b[^"]*"/);
   assert.match(html, /class="ind-image"/);
   assert.match(html, /Operating pressures/);
   assert.doesNotMatch(html, /Education sections|education-hero-caption|Illustration:|id="selected-work"|aria-pressed=/);

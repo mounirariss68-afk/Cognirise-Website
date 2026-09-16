@@ -72,6 +72,20 @@ try {
     throw new Error(`Timed out: ${expression}`);
   };
   const back = `document.querySelector('[data-testid="navigation-back"]')`;
+  const backRow = `document.querySelector('[data-navigation-back-row]')`;
+  const heroShell = `document.querySelector('.public-hero-shell:not([data-navigation-back-row])')`;
+  const assertBackRowGeometry = async () => {
+    const geometry = await evaluate(`({
+      rowLeft:${backRow}.getBoundingClientRect().left + parseFloat(getComputedStyle(${backRow}).paddingLeft),
+      heroLeft:${heroShell}.getBoundingClientRect().left + parseFloat(getComputedStyle(${heroShell}).paddingLeft),
+      rowBottom:${backRow}.getBoundingClientRect().bottom,
+      heroTop:${heroShell}.firstElementChild.getBoundingClientRect().top,
+      rowDisplay:getComputedStyle(${backRow}).display
+    })`);
+    assert.equal(geometry.rowDisplay, "block");
+    assert.ok(Math.abs(geometry.rowLeft - geometry.heroLeft) <= 1, `Back and hero left edges differ: ${JSON.stringify(geometry)}`);
+    assert.ok(geometry.heroTop - geometry.rowBottom >= 20, `Back row does not separate the hero: ${JSON.stringify(geometry)}`);
+  };
   await send("Page.enable");
   await send("Network.enable");
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -91,6 +105,8 @@ try {
   assert.equal(await evaluate(`${back}.className.includes('border')`), false);
   assert.equal(await evaluate(`${back}.getBoundingClientRect().height < 32`), true);
   assert.equal(await evaluate(`${back}.closest('[data-navigation-back-container]').nextElementSibling !== null`), true);
+  await assertBackRowGeometry();
+  assert.equal(await evaluate(`document.querySelectorAll('[data-method-return]').length`), 0);
   await evaluate(`${back}.click()`);
   await wait(`location.pathname==='/' && location.hash==='#service-lines' && document.querySelector('h1')`);
   assert.equal(await evaluate(`Boolean(${back})`), false);
@@ -98,6 +114,7 @@ try {
   // Navigate through Wouter to a real dirty assessment; dismiss then accept.
   await evaluate(`document.querySelector('a[href="/methodologies"]').click()`);
   await wait(`location.pathname==='/methodologies'`);
+  await assertBackRowGeometry();
   await evaluate(`document.querySelector('a[href="/methodologies/ai-value-to-scale"]').click()`);
   await wait(`document.querySelector('input[type="radio"]')`);
   await delay(600);
@@ -110,10 +127,43 @@ try {
   await evaluate(`window.confirm=()=>true; ${back}.click()`);
   await wait(`location.pathname==='/methodologies'`);
   console.log("PASS canceled dirty-assessment traversal followed by shared Back");
+  await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 1000, deviceScaleFactor: 1, mobile: false });
+  await evaluate(`{ const a=document.createElement('a'); a.href='/what-we-do/data-ai-foundations'; a.textContent='Test wide service'; document.body.append(a); a.click(); }`);
+  await wait(`location.pathname==='/what-we-do/data-ai-foundations' && Boolean(${back}) && Boolean(${heroShell}) && document.querySelector('h1')`);
+  await assertBackRowGeometry();
+  console.log("PASS wide-screen shared Back alignment on fixed-gutter service hero");
+  await evaluate(`{ const a=document.createElement('a'); a.href='/work/clinic-network?market=uae'; a.textContent='Test wide case study'; document.body.append(a); a.click(); }`);
+  await wait(`location.pathname==='/work/clinic-network' && Boolean(${back}) && document.querySelector('.case-detail__hero-wrap') && Boolean(${heroShell})`);
+  await assertBackRowGeometry();
+  const caseGeometry = await evaluate(`({
+    wrapperWidth:document.querySelector('.case-detail__hero-wrap').getBoundingClientRect().width,
+    shellWidth:${heroShell}.getBoundingClientRect().width,
+    viewportWidth:document.documentElement.clientWidth
+  })`);
+  assert.ok(caseGeometry.wrapperWidth >= caseGeometry.viewportWidth - 1, `Case-study background is not full bleed: ${JSON.stringify(caseGeometry)}`);
+  assert.ok(caseGeometry.shellWidth <= 1440, `Case-study content exceeds the shared maximum: ${JSON.stringify(caseGeometry)}`);
+  console.log("PASS wide-screen case-study background and inner content shell");
+  const articleGeometry = await evaluate(`{
+    const shell=document.createElement('div');
+    shell.className='public-hero-shell';
+    const article=document.createElement('article');
+    article.className='w-full max-w-[900px] py-12 md:py-20';
+    shell.append(article);
+    document.body.append(shell);
+    const result={shellWidth:shell.getBoundingClientRect().width,articleWidth:article.getBoundingClientRect().width};
+    shell.remove();
+    result;
+  }`);
+  assert.ok(articleGeometry.shellWidth <= 1440, `Article shell exceeds the shared maximum: ${JSON.stringify(articleGeometry)}`);
+  assert.ok(articleGeometry.articleWidth <= 900, `Article reading column exceeds 900px: ${JSON.stringify(articleGeometry)}`);
+  console.log("PASS wide-screen article shell preserves the narrow reading column");
   await send("Emulation.setDeviceMetricsOverride", { width: 1279, height: 844, deviceScaleFactor: 1, mobile: false });
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('header nav')).display === 'none'`), true);
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('button[aria-label="Open menu"]')).display !== 'none'`), true);
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+  await evaluate(`{ const a=document.createElement('a'); a.href='/about'; a.textContent='Test mobile internal'; document.body.append(a); a.click(); }`);
+  await wait(`location.pathname==='/about' && Boolean(${back}) && Boolean(${heroShell})`);
+  await assertBackRowGeometry();
   await evaluate(`document.querySelector('button[aria-label="Open menu"]').click()`);
   await wait(`document.querySelector('button[aria-label="Close menu"]')`);
   assert.equal(await evaluate(`document.querySelectorAll('select[aria-label="Review version"]').length`), 0);
